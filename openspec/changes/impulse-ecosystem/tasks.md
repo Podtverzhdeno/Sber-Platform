@@ -7,7 +7,7 @@
 - [x] 1.3 Создать React/TypeScript/Vite frontend со strict TypeScript и test setup; проверить `npm ci`, `npm run typecheck`, `npm test` и production build.
 - [x] 1.4 Добавить `.gitignore`, `.dockerignore`, `.env.example` без значений, editor/config files и скан секретов; проверить, что `.env`, ключи, build output и IDE state не попадают в `git status`.
 - [x] 1.5 Добавить Ruff, Pyright, ESLint и единые команды quality; проверить локальный запуск всех linters на scaffold.
-- [ ] 1.6 Создать README с локальным запуском, demo boundary, OpenSpec workflow и secret setup без ключа; выполнить документированные команды на чистом checkout.
+- [x] 1.6 Создать README с локальным запуском, demo boundary, OpenSpec workflow и secret setup без ключа; выполнить документированные команды на чистом checkout.
 
 ## 2. Конфигурация, ошибки и API foundation
 
@@ -19,7 +19,7 @@
 
 ## 3. PostgreSQL, миграции, аудит и demo seed
 
-- [ ] 3.1 Настроить async SQLAlchemy, session/transaction boundary и Alembic; проверить upgrade пустой PostgreSQL до head и повторный запуск без изменений.
+- [x] 3.1 Настроить async SQLAlchemy, session/transaction boundary и Alembic; проверить upgrade пустой PostgreSQL до head и повторный запуск без изменений.
 - [ ] 3.2 Создать identity/development/work/reward/recognition/ecosystem/assist/insight tables с версиями, provenance и constraints; migration tests SHALL проверить уникальные бизнес-ключи.
 - [ ] 3.3 Реализовать optimistic concurrency, append-only audit и domain events в одной транзакции; tests SHALL покрыть stale version и rollback без orphan event.
 - [ ] 3.4 Создать идемпотентный versioned demo seed со связанными personas, курсами, событиями, задачами, рейтингом и кейсами; два запуска SHALL давать одинаковые business IDs/counts.
