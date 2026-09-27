@@ -344,6 +344,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/manager/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Manager Overview */
+        get: operations["manager_overview_api_v1_manager_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/marketplace/tasks": {
         parameters: {
             query?: never;
@@ -1927,6 +1944,56 @@ export interface components {
              */
             status: "ok";
         };
+        /** ManagerInitiativeView */
+        ManagerInitiativeView: {
+            /** Accepted Results */
+            accepted_results: components["schemas"]["ManagerResultView"][];
+            /** Deadline At */
+            deadline_at: string | null;
+            /** Project Key */
+            project_key: string;
+            /** Status */
+            status: string;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+            /** Task Title */
+            task_title: string;
+        };
+        /** ManagerOverviewView */
+        ManagerOverviewView: {
+            /** Accepted Result Count */
+            accepted_result_count: number;
+            /** Initiatives */
+            initiatives: components["schemas"]["ManagerInitiativeView"][];
+            /** Reused Result Count */
+            reused_result_count: number;
+            /** Task Count */
+            task_count: number;
+        };
+        /** ManagerResultView */
+        ManagerResultView: {
+            /** Artifact Keys */
+            artifact_keys: string[];
+            /**
+             * Contribution Id
+             * Format: uuid
+             */
+            contribution_id: string;
+            /** Personal Summary */
+            personal_summary: string;
+            /** Reused */
+            reused: boolean;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+            /** Task Title */
+            task_title: string;
+        };
         /** MarketplaceTaskView */
         MarketplaceTaskView: {
             /** Accepted Terms Version */
@@ -3359,6 +3426,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    manager_overview_api_v1_manager_overview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManagerOverviewView"];
                 };
             };
         };

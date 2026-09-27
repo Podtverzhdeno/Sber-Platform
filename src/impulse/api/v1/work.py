@@ -18,6 +18,7 @@ from impulse.application.work import (
     CheckpointRecord,
     ContributionRecord,
     DisputeRecord,
+    ManagerOverview,
     MarketplaceTask,
     TaskRecord,
     TeamArtifactRecord,
@@ -221,6 +222,31 @@ class WorkItemView(BaseModel):
     decisions: list[AcceptanceView]
 
 
+class ManagerResultView(BaseModel):
+    contribution_id: UUID
+    task_id: UUID
+    task_title: str
+    personal_summary: str
+    artifact_keys: list[str]
+    reused: bool
+
+
+class ManagerInitiativeView(BaseModel):
+    project_key: str
+    task_id: UUID
+    task_title: str
+    status: str
+    deadline_at: AwareDatetime | None
+    accepted_results: list[ManagerResultView]
+
+
+class ManagerOverviewView(BaseModel):
+    initiatives: list[ManagerInitiativeView]
+    task_count: int
+    accepted_result_count: int
+    reused_result_count: int
+
+
 def _service(request: Request) -> WorkService:
     return request.app.state.work_service
 
@@ -343,12 +369,49 @@ def _work_item_view(item: WorkItem) -> WorkItemView:
     )
 
 
+def _manager_view(item: ManagerOverview) -> ManagerOverviewView:
+    return ManagerOverviewView(
+        initiatives=[
+            ManagerInitiativeView(
+                project_key=initiative.project_key,
+                task_id=initiative.task_id,
+                task_title=initiative.task_title,
+                status=initiative.status,
+                deadline_at=initiative.deadline_at,
+                accepted_results=[
+                    ManagerResultView(
+                        contribution_id=result.contribution_id,
+                        task_id=result.task_id,
+                        task_title=result.task_title,
+                        personal_summary=result.personal_summary,
+                        artifact_keys=list(result.artifact_keys),
+                        reused=result.reused,
+                    )
+                    for result in initiative.accepted_results
+                ],
+            )
+            for initiative in item.initiatives
+        ],
+        task_count=item.task_count,
+        accepted_result_count=item.accepted_result_count,
+        reused_result_count=item.reused_result_count,
+    )
+
+
 @router.get("/customer/tasks", response_model=list[TaskView])
 async def customer_tasks(
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
     service: Annotated[WorkService, Depends(_service)],
 ) -> list[TaskView]:
     return [_view(item) for item in await service.customer_tasks(authenticated.actor)]
+
+
+@router.get("/manager/overview", response_model=ManagerOverviewView)
+async def manager_overview(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> ManagerOverviewView:
+    return _manager_view(await service.manager_overview(authenticated.actor))
 
 
 @router.post("/customer/projects/{project_key}/tasks", response_model=TaskView)

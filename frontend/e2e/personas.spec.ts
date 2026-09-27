@@ -71,6 +71,9 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/customer/tasks", async (route) => {
     await route.fulfill({ json: [] });
   });
+  await page.route("**/api/v1/manager/overview", async (route) => {
+    await route.fulfill({ json: { initiatives: [], task_count: 0, accepted_result_count: 0, reused_result_count: 0 } });
+  });
 });
 
 for (const [key, displayName, , navigation] of personas) {
@@ -84,6 +87,8 @@ for (const [key, displayName, , navigation] of personas) {
         ? "Проверяйте доказательства, а не вывод AI"
         : key === "customer-roman"
           ? "Управляйте задачами от идеи до результата"
+          : key === "manager-olga"
+            ? "Результаты команд без лишних персональных данных"
         : `Добро пожаловать, ${displayName.split(" ")[0]}!`;
     await expect(page.getByRole("heading", { name: heading })).toBeVisible();
     const links = page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link");

@@ -1764,6 +1764,130 @@
         "title": "LiveResponse",
         "type": "object"
       },
+      "ManagerInitiativeView": {
+        "properties": {
+          "accepted_results": {
+            "items": {
+              "$ref": "#/components/schemas/ManagerResultView"
+            },
+            "title": "Accepted Results",
+            "type": "array"
+          },
+          "deadline_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline At"
+          },
+          "project_key": {
+            "title": "Project Key",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "task_id": {
+            "format": "uuid",
+            "title": "Task Id",
+            "type": "string"
+          },
+          "task_title": {
+            "title": "Task Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_key",
+          "task_id",
+          "task_title",
+          "status",
+          "deadline_at",
+          "accepted_results"
+        ],
+        "title": "ManagerInitiativeView",
+        "type": "object"
+      },
+      "ManagerOverviewView": {
+        "properties": {
+          "accepted_result_count": {
+            "title": "Accepted Result Count",
+            "type": "integer"
+          },
+          "initiatives": {
+            "items": {
+              "$ref": "#/components/schemas/ManagerInitiativeView"
+            },
+            "title": "Initiatives",
+            "type": "array"
+          },
+          "reused_result_count": {
+            "title": "Reused Result Count",
+            "type": "integer"
+          },
+          "task_count": {
+            "title": "Task Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "initiatives",
+          "task_count",
+          "accepted_result_count",
+          "reused_result_count"
+        ],
+        "title": "ManagerOverviewView",
+        "type": "object"
+      },
+      "ManagerResultView": {
+        "properties": {
+          "artifact_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Artifact Keys",
+            "type": "array"
+          },
+          "contribution_id": {
+            "format": "uuid",
+            "title": "Contribution Id",
+            "type": "string"
+          },
+          "personal_summary": {
+            "title": "Personal Summary",
+            "type": "string"
+          },
+          "reused": {
+            "title": "Reused",
+            "type": "boolean"
+          },
+          "task_id": {
+            "format": "uuid",
+            "title": "Task Id",
+            "type": "string"
+          },
+          "task_title": {
+            "title": "Task Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contribution_id",
+          "task_id",
+          "task_title",
+          "personal_summary",
+          "artifact_keys",
+          "reused"
+        ],
+        "title": "ManagerResultView",
+        "type": "object"
+      },
       "MarketplaceTaskView": {
         "properties": {
           "accepted_terms_version": {
@@ -4949,6 +5073,24 @@
           }
         },
         "summary": "Hr Candidate"
+      }
+    },
+    "/api/v1/manager/overview": {
+      "get": {
+        "operationId": "manager_overview_api_v1_manager_overview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagerOverviewView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Manager Overview"
       }
     },
     "/api/v1/marketplace/tasks": {

@@ -355,3 +355,36 @@ def test_incomplete_customer_brief_returns_missing_field_map() -> None:
     assert response.status_code == 409
     assert response.json()["code"] == "INCOMPLETE_TASK_BRIEF"
     assert list(response.json()["field_errors"]) == ["acceptance_criteria"]
+
+
+def test_manager_overview_contains_only_safe_owned_projection() -> None:
+    api = client()
+    with api:
+        csrf = login(api, "manager-olga")
+        switched = api.post(
+            "/api/v1/me/active-role",
+            json={"role": "customer"},
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert switched.status_code == 200
+        draft = api.post(
+            "/api/v1/customer/projects/manager-initiative/tasks",
+            json={**brief(), "task_key": "manager-owned-task"},
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert draft.status_code == 200
+        switched = api.post(
+            "/api/v1/me/active-role",
+            json={"role": "manager"},
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert switched.status_code == 200
+        response = api.get("/api/v1/manager/overview")
+
+    assert response.status_code == 200
+    assert response.json()["task_count"] == 1
+    assert response.json()["initiatives"][0]["project_key"] == "manager-initiative"
+    serialized = response.text.lower()
+    assert "chat" not in serialized
+    assert "review" not in serialized
+    assert "payout" not in serialized

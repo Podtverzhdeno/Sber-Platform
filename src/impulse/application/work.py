@@ -131,6 +131,34 @@ class WorkItem:
     decisions: tuple[AcceptanceRecord, ...]
 
 
+@dataclass(frozen=True, slots=True)
+class ManagerResult:
+    contribution_id: UUID
+    task_id: UUID
+    task_title: str
+    personal_summary: str
+    artifact_keys: tuple[str, ...]
+    reused: bool
+
+
+@dataclass(frozen=True, slots=True)
+class ManagerInitiative:
+    project_key: str
+    task_id: UUID
+    task_title: str
+    status: str
+    deadline_at: datetime | None
+    accepted_results: tuple[ManagerResult, ...]
+
+
+@dataclass(frozen=True, slots=True)
+class ManagerOverview:
+    initiatives: tuple[ManagerInitiative, ...]
+    task_count: int
+    accepted_result_count: int
+    reused_result_count: int
+
+
 class WorkStore(Protocol):
     async def create(self, record: TaskRecord) -> TaskRecord: ...
     async def get(self, task_id: UUID) -> TaskRecord | None: ...
@@ -565,6 +593,42 @@ class WorkService:
     async def customer_tasks(self, actor: ActorContext) -> tuple[TaskRecord, ...]:
         self._role(actor, Role.CUSTOMER)
         return await self.store.customer_tasks(actor.person_id)
+
+    async def manager_overview(self, actor: ActorContext) -> ManagerOverview:
+        self._role(actor, Role.MANAGER)
+        initiatives: list[ManagerInitiative] = []
+        for task in await self.store.customer_tasks(actor.person_id):
+            terms = await self.store.latest_terms(task.aggregate.task_id)
+            results: list[ManagerResult] = []
+            for assignment in await self.store.assignments_for_task(task.aggregate.task_id):
+                for contribution in await self.store.contributions_for_assignment(assignment.id):
+                    if contribution.status is not ContributionStatus.ACCEPTED:
+                        continue
+                    results.append(
+                        ManagerResult(
+                            contribution_id=contribution.id,
+                            task_id=task.aggregate.task_id,
+                            task_title=task.title,
+                            personal_summary=contribution.personal_summary,
+                            artifact_keys=contribution.artifact_keys,
+                            reused=any(
+                                key.startswith("reuse:") for key in contribution.artifact_keys
+                            ),
+                        )
+                    )
+            initiatives.append(
+                ManagerInitiative(
+                    project_key=task.project_key,
+                    task_id=task.aggregate.task_id,
+                    task_title=task.title,
+                    status=task.aggregate.status.value,
+                    deadline_at=terms.deadline_at if terms else task.aggregate.brief.deadline_at,
+                    accepted_results=tuple(results),
+                )
+            )
+        accepted = sum(len(item.accepted_results) for item in initiatives)
+        reused = sum(int(result.reused) for item in initiatives for result in item.accepted_results)
+        return ManagerOverview(tuple(initiatives), len(initiatives), accepted, reused)
 
     async def submit(self, actor: ActorContext, task_id: UUID) -> TaskRecord:
         self._role(actor, Role.CUSTOMER)
