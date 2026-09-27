@@ -11,14 +11,19 @@ from uuid import UUID, uuid4
 from impulse.api.errors import ApiError
 from impulse.domain.identity import ActorContext, Role
 from impulse.domain.work import (
+    AcceptanceDecision,
     ApplicationStatus,
     AssignmentStatus,
+    ContributionStatus,
     SupportAssignment,
     TaskAggregate,
     TaskBrief,
     TaskPolicyError,
     accept_application,
+    decide_contribution,
+    open_authorship_dispute,
     start_assignment,
+    submit_assignment,
     validate_personal_contribution,
 )
 
@@ -88,6 +93,31 @@ class ContributionRecord:
     version: int
     personal_summary: str
     artifact_keys: tuple[str, ...]
+    status: ContributionStatus = ContributionStatus.SUBMITTED
+
+
+@dataclass(frozen=True, slots=True)
+class AcceptanceRecord:
+    id: UUID
+    contribution_id: UUID
+    contribution_version: int
+    decision: AcceptanceDecision
+    reason: str
+    deadline_at: datetime | None
+    owner_id: UUID | None
+
+
+@dataclass(frozen=True, slots=True)
+class DisputeRecord:
+    id: UUID
+    contribution_id: UUID
+    conflicting_contribution_id: UUID | None
+    status: str
+    reason: str
+    deadline_at: datetime
+    owner: str = "operations"
+    review_blocked: bool = True
+    payout_blocked: bool = True
 
 
 class WorkStore(Protocol):
@@ -119,6 +149,25 @@ class WorkStore(Protocol):
     async def submit_contribution(
         self, assignment_id: UUID, summary: str, artifacts: tuple[TeamArtifactRecord, ...]
     ) -> ContributionRecord: ...
+    async def contribution(self, contribution_id: UUID) -> ContributionRecord | None: ...
+    async def decide_contribution(
+        self,
+        contribution_id: UUID,
+        decided_by: UUID,
+        decision: AcceptanceDecision,
+        reason: str,
+        deadline_at: datetime | None,
+        owner_id: UUID | None,
+    ) -> AcceptanceRecord: ...
+    async def open_authorship_dispute(
+        self,
+        person_id: UUID,
+        contribution_id: UUID,
+        conflicting_contribution_id: UUID | None,
+        reason: str,
+        deadline_at: datetime,
+    ) -> DisputeRecord: ...
+    async def dispute(self, dispute_id: UUID) -> DisputeRecord | None: ...
 
 
 class MemoryWorkStore:
@@ -131,6 +180,8 @@ class MemoryWorkStore:
         self._checkpoints: dict[UUID, tuple[CheckpointRecord, ...]] = {}
         self._team_artifacts: dict[UUID, tuple[TeamArtifactRecord, ...]] = {}
         self._contributions: dict[UUID, tuple[ContributionRecord, ...]] = {}
+        self._acceptance_decisions: dict[UUID, AcceptanceRecord] = {}
+        self._disputes: dict[UUID, DisputeRecord] = {}
 
     async def create(self, record: TaskRecord) -> TaskRecord:
         if any(
@@ -279,12 +330,126 @@ class MemoryWorkStore:
     async def submit_contribution(
         self, assignment_id: UUID, summary: str, artifacts: tuple[TeamArtifactRecord, ...]
     ) -> ContributionRecord:
+        assignment = self._assignments[assignment_id]
+        next_status = submit_assignment(assignment.status)
         current = self._contributions.get(assignment_id, ())
         record = ContributionRecord(
             uuid4(), assignment_id, len(current) + 1, summary, tuple(item.key for item in artifacts)
         )
         self._contributions[assignment_id] = (*current, record)
+        self._assignments[assignment_id] = AssignmentRecord(
+            assignment.id,
+            assignment.task_id,
+            assignment.person_id,
+            assignment.application_id,
+            next_status,
+        )
         return record
+
+    async def contribution(self, contribution_id: UUID) -> ContributionRecord | None:
+        return next(
+            (
+                item
+                for versions in self._contributions.values()
+                for item in versions
+                if item.id == contribution_id
+            ),
+            None,
+        )
+
+    async def decide_contribution(
+        self,
+        contribution_id: UUID,
+        decided_by: UUID,
+        decision: AcceptanceDecision,
+        reason: str,
+        deadline_at: datetime | None,
+        owner_id: UUID | None,
+    ) -> AcceptanceRecord:
+        contribution = await self.contribution(contribution_id)
+        if contribution is None:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        contribution_status, assignment_status = decide_contribution(
+            contribution.status, decision, reason=reason, deadline_at=deadline_at
+        )
+        assignment = self._assignments[contribution.assignment_id]
+        updated = ContributionRecord(
+            contribution.id,
+            contribution.assignment_id,
+            contribution.version,
+            contribution.personal_summary,
+            contribution.artifact_keys,
+            contribution_status,
+        )
+        versions = self._contributions[contribution.assignment_id]
+        self._contributions[contribution.assignment_id] = tuple(
+            updated if item.id == contribution_id else item for item in versions
+        )
+        self._assignments[assignment.id] = AssignmentRecord(
+            assignment.id,
+            assignment.task_id,
+            assignment.person_id,
+            assignment.application_id,
+            assignment_status,
+        )
+        record = AcceptanceRecord(
+            uuid4(), contribution.id, contribution.version, decision, reason, deadline_at, owner_id
+        )
+        self._acceptance_decisions[contribution.id] = record
+        return record
+
+    async def open_authorship_dispute(
+        self,
+        person_id: UUID,
+        contribution_id: UUID,
+        conflicting_contribution_id: UUID | None,
+        reason: str,
+        deadline_at: datetime,
+    ) -> DisputeRecord:
+        targets = tuple(
+            item for item in (contribution_id, conflicting_contribution_id) if item is not None
+        )
+        for target_id in targets:
+            contribution = await self.contribution(target_id)
+            if contribution is None:
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            disputed = open_authorship_dispute(
+                contribution.status, reason=reason, deadline_at=deadline_at
+            )
+            versions = self._contributions[contribution.assignment_id]
+            self._contributions[contribution.assignment_id] = tuple(
+                ContributionRecord(
+                    item.id,
+                    item.assignment_id,
+                    item.version,
+                    item.personal_summary,
+                    item.artifact_keys,
+                    disputed,
+                )
+                if item.id == target_id
+                else item
+                for item in versions
+            )
+            assignment = self._assignments[contribution.assignment_id]
+            self._assignments[assignment.id] = AssignmentRecord(
+                assignment.id,
+                assignment.task_id,
+                assignment.person_id,
+                assignment.application_id,
+                AssignmentStatus.DISPUTED,
+            )
+        record = DisputeRecord(
+            uuid4(), contribution_id, conflicting_contribution_id, "open", reason, deadline_at
+        )
+        self._disputes[record.id] = record
+        return record
+
+    async def dispute(self, dispute_id: UUID) -> DisputeRecord | None:
+        return self._disputes.get(dispute_id)
 
 
 class WorkService:
@@ -566,6 +731,125 @@ class WorkService:
                 field_errors={"personal_summary": ["Требуется личное описание вклада."]},
             ) from exc
         return await self.store.submit_contribution(assignment_id, summary, artifacts)
+
+    async def decide_submitted_contribution(
+        self,
+        actor: ActorContext,
+        contribution_id: UUID,
+        *,
+        decision: AcceptanceDecision,
+        reason: str,
+        deadline_at: datetime | None,
+    ) -> AcceptanceRecord:
+        self._role(actor, Role.CUSTOMER)
+        contribution = await self.store.contribution(contribution_id)
+        if contribution is None:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        assignment = await self.store.assignment(contribution.assignment_id)
+        if assignment is None:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        await self._owned(actor, assignment.task_id)
+        self._policy(
+            lambda: decide_contribution(
+                contribution.status,
+                decision,
+                reason=reason,
+                deadline_at=deadline_at,
+            )
+        )
+        owner_id = (
+            assignment.person_id if decision is AcceptanceDecision.REVISION_REQUESTED else None
+        )
+        return await self.store.decide_contribution(
+            contribution_id,
+            actor.person_id,
+            decision,
+            " ".join(reason.split()),
+            deadline_at,
+            owner_id,
+        )
+
+    async def dispute_authorship(
+        self,
+        actor: ActorContext,
+        contribution_id: UUID,
+        *,
+        conflicting_contribution_id: UUID | None,
+        reason: str,
+        deadline_at: datetime,
+    ) -> DisputeRecord:
+        self._role(actor, Role.PARTICIPANT)
+        contribution = await self.store.contribution(contribution_id)
+        if contribution is None:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        assignment = await self.store.assignment(contribution.assignment_id)
+        if assignment is None or assignment.person_id != actor.person_id:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        self._policy(
+            lambda: open_authorship_dispute(
+                contribution.status, reason=reason, deadline_at=deadline_at
+            )
+        )
+        if conflicting_contribution_id is not None:
+            if conflicting_contribution_id == contribution_id:
+                raise ApiError(
+                    code="INVALID_AUTHORSHIP_CONFLICT",
+                    message="Конфликтующий вклад должен отличаться от вашего.",
+                    status_code=409,
+                )
+            conflicting = await self.store.contribution(conflicting_contribution_id)
+            conflicting_assignment = (
+                await self.store.assignment(conflicting.assignment_id)
+                if conflicting is not None
+                else None
+            )
+            if (
+                conflicting is None
+                or conflicting_assignment is None
+                or conflicting_assignment.task_id != assignment.task_id
+            ):
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            self._policy(
+                lambda: open_authorship_dispute(
+                    conflicting.status, reason=reason, deadline_at=deadline_at
+                )
+            )
+        return await self.store.open_authorship_dispute(
+            actor.person_id,
+            contribution_id,
+            conflicting_contribution_id,
+            " ".join(reason.split()),
+            deadline_at,
+        )
+
+    async def participant_dispute(self, actor: ActorContext, dispute_id: UUID) -> DisputeRecord:
+        self._role(actor, Role.PARTICIPANT)
+        dispute = await self.store.dispute(dispute_id)
+        if dispute is None:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        contribution = await self.store.contribution(dispute.contribution_id)
+        assignment = (
+            await self.store.assignment(contribution.assignment_id)
+            if contribution is not None
+            else None
+        )
+        if assignment is None or assignment.person_id != actor.person_id:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        return dispute
 
     async def _required(self, task_id: UUID) -> TaskRecord:
         record = await self.store.get(task_id)

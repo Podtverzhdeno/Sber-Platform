@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+from datetime import UTC, datetime
 from uuid import UUID
 
 import httpx
@@ -21,9 +22,12 @@ from impulse.application.work import (
 from impulse.bootstrap.app import create_app
 from impulse.bootstrap.demo_seed import seed_demo
 from impulse.bootstrap.settings import AppEnvironment, Settings
+from impulse.domain.work import AcceptanceDecision
 from impulse.infrastructure.database import Database, async_database_url
 from impulse.infrastructure.identity_store import SqlIdentityStore
 from impulse.infrastructure.models.work import (
+    acceptances,
+    appeals,
     applications,
     artifacts,
     assignments,
@@ -212,6 +216,65 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
     )
     assert contribution.version == 1
 
+    task_record = await work_store.get(task_id)
+    assert task_record is not None
+    revision = await work_store.decide_contribution(
+        contribution.id,
+        task_record.aggregate.customer_id,
+        AcceptanceDecision.REVISION_REQUESTED,
+        "Нужно приложить воспроизводимый отчёт по метрикам.",
+        datetime(2026, 11, 10, 18, tzinfo=UTC),
+        started.person_id,
+    )
+    assert revision.owner_id == started.person_id
+    restarted = await work_store.start_assignment(started.id)
+    revised_contribution = await work_store.submit_contribution(
+        restarted.id,
+        "Я дополнил API воспроизводимым отчётом и проверил расчёт метрики на фикстурах.",
+        (
+            TeamArtifactRecord(
+                "personal-metric-report", "https://example.test/team/repository/report/43"
+            ),
+        ),
+    )
+    assert revised_contribution.version == 2
+    accepted_result = await work_store.decide_contribution(
+        revised_contribution.id,
+        task_record.aggregate.customer_id,
+        AcceptanceDecision.ACCEPTED,
+        "Результат соответствует критериям и отчёт воспроизводится.",
+        None,
+        None,
+    )
+    assert accepted_result.decision is AcceptanceDecision.ACCEPTED
+    loser = next(item for item in candidates if item["id"] != winner["id"])
+    conflicting_assignment = await work_store.accept_application(
+        UUID(loser["id"]), loser["version"], places=2
+    )
+    conflicting_started = await work_store.start_assignment(conflicting_assignment.id)
+    conflicting_contribution = await work_store.submit_contribution(
+        conflicting_started.id,
+        "Я самостоятельно подготовил тот же отчёт по метрикам и заявляю авторство результата.",
+        (
+            TeamArtifactRecord(
+                "conflicting-report", "https://example.test/team/repository/report/other"
+            ),
+        ),
+    )
+    dispute = await work_store.open_authorship_dispute(
+        started.person_id,
+        revised_contribution.id,
+        conflicting_contribution.id,
+        "Другой участник заявил авторство отчёта; нужна проверка истории изменений.",
+        datetime(2026, 11, 12, 18, tzinfo=UTC),
+    )
+    assert dispute.review_blocked is True
+    assert dispute.payout_blocked is True
+    persisted_dispute = await work_store.dispute(dispute.id)
+    assert persisted_dispute is not None
+    assert persisted_dispute.conflicting_contribution_id == conflicting_contribution.id
+    assert persisted_dispute.owner == "operations"
+
     async with database.sessions() as session:
         row = (
             await session.execute(
@@ -241,11 +304,35 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
         )
         contribution_row = (
             await session.execute(
-                select(contributions.c.summary, contributions.c.contribution_version).where(
-                    contributions.c.assignment_id == started.id
-                )
+                select(
+                    contributions.c.summary,
+                    contributions.c.contribution_version,
+                    contributions.c.status,
+                ).where(contributions.c.id == contribution.id)
             )
         ).one()
+        acceptance_count = int(
+            await session.scalar(
+                select(func.count())
+                .select_from(acceptances)
+                .where(
+                    acceptances.c.contribution_id.in_((contribution.id, revised_contribution.id))
+                )
+            )
+            or 0
+        )
+        appeal_payload = await session.scalar(
+            select(appeals.c.payload).where(appeals.c.id == dispute.id)
+        )
+        assignment_status = await session.scalar(
+            select(assignments.c.status).where(assignments.c.id == started.id)
+        )
+        revised_status = await session.scalar(
+            select(contributions.c.status).where(contributions.c.id == revised_contribution.id)
+        )
+        conflicting_status = await session.scalar(
+            select(contributions.c.status).where(contributions.c.id == conflicting_contribution.id)
+        )
         artifact_count = int(
             await session.scalar(
                 select(func.count())
@@ -260,8 +347,17 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
     assert row.payload["nominated_mentor_id"] is None
     assert terms_count == 3
     assert accepted_terms == 3
-    assert assignment_count == 1
+    assert assignment_count == 2
     assert contribution_row.contribution_version == 1
+    assert contribution_row.status == "revision_requested"
+    assert acceptance_count == 2
+    assert appeal_payload is not None
+    assert appeal_payload["owner"] == "operations"
+    assert appeal_payload["review_blocked"] is True
+    assert appeal_payload["payout_blocked"] is True
+    assert assignment_status == "disputed"
+    assert revised_status == "disputed"
+    assert conflicting_status == "disputed"
     assert contribution_row.summary.startswith("Я реализовал API")
     assert artifact_count == 1
     await database.close()

@@ -89,6 +89,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/contributions/{contribution_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide Contribution */
+        post: operations["decide_contribution_api_v1_customer_contributions__contribution_id__decision_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/projects/{project_key}/tasks": {
         parameters: {
             query?: never;
@@ -378,6 +395,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/contributions/{contribution_id}/authorship-disputes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dispute Authorship */
+        post: operations["dispute_authorship_api_v1_me_contributions__contribution_id__authorship_disputes_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/courses/{course_key}/completion": {
         parameters: {
             query?: never;
@@ -406,6 +440,23 @@ export interface paths {
         put?: never;
         /** Record Learning Day */
         post: operations["record_learning_day_api_v1_me_courses__course_key__learning_days_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/disputes/{dispute_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Participant Dispute */
+        get: operations["participant_dispute_api_v1_me_disputes__dispute_id__get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -667,6 +718,33 @@ export interface components {
             /** Terms Version */
             terms_version: number;
         };
+        /**
+         * AcceptanceDecision
+         * @enum {string}
+         */
+        AcceptanceDecision: "accepted" | "revision_requested";
+        /** AcceptanceView */
+        AcceptanceView: {
+            /**
+             * Contribution Id
+             * Format: uuid
+             */
+            contribution_id: string;
+            /** Contribution Version */
+            contribution_version: number;
+            /** Deadline At */
+            deadline_at: string | null;
+            decision: components["schemas"]["AcceptanceDecision"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Owner Id */
+            owner_id: string | null;
+            /** Reason */
+            reason: string;
+        };
         /** ActorView */
         ActorView: {
             active_role: components["schemas"]["Role"];
@@ -737,7 +815,7 @@ export interface components {
          * AssignmentStatus
          * @enum {string}
          */
-        AssignmentStatus: "staffed" | "in_progress" | "submitted" | "closed";
+        AssignmentStatus: "staffed" | "in_progress" | "submitted" | "revision_requested" | "disputed" | "closed";
         /** AssignmentView */
         AssignmentView: {
             /**
@@ -761,6 +839,18 @@ export interface components {
              * Format: uuid
              */
             task_id: string;
+        };
+        /** AuthorshipDisputeRequest */
+        AuthorshipDisputeRequest: {
+            /** Conflicting Contribution Id */
+            conflicting_contribution_id?: string | null;
+            /**
+             * Deadline At
+             * Format: date-time
+             */
+            deadline_at: string;
+            /** Reason */
+            reason: string;
         };
         /** CheckpointRequest */
         CheckpointRequest: {
@@ -833,6 +923,14 @@ export interface components {
             granted_scopes: components["schemas"]["ConsentScope"][];
             scope: components["schemas"]["ConsentScope"];
         };
+        /** ContributionDecisionRequest */
+        ContributionDecisionRequest: {
+            /** Deadline At */
+            deadline_at?: string | null;
+            decision: components["schemas"]["AcceptanceDecision"];
+            /** Reason */
+            reason: string;
+        };
         /** ContributionRequest */
         ContributionRequest: {
             /** Artifacts */
@@ -840,6 +938,11 @@ export interface components {
             /** Personal Summary */
             personal_summary: string;
         };
+        /**
+         * ContributionStatus
+         * @enum {string}
+         */
+        ContributionStatus: "submitted" | "accepted" | "revision_requested" | "disputed";
         /** ContributionView */
         ContributionView: {
             /** Artifact Keys */
@@ -856,6 +959,7 @@ export interface components {
             id: string;
             /** Personal Summary */
             personal_summary: string;
+            status: components["schemas"]["ContributionStatus"];
             /** Version */
             version: number;
         };
@@ -932,6 +1036,36 @@ export interface components {
         DemoLoginRequest: {
             /** Persona Key */
             persona_key: string;
+        };
+        /** DisputeView */
+        DisputeView: {
+            /** Conflicting Contribution Id */
+            conflicting_contribution_id: string | null;
+            /**
+             * Contribution Id
+             * Format: uuid
+             */
+            contribution_id: string;
+            /**
+             * Deadline At
+             * Format: date-time
+             */
+            deadline_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Owner */
+            owner: string;
+            /** Payout Blocked */
+            payout_blocked: boolean;
+            /** Reason */
+            reason: string;
+            /** Review Blocked */
+            review_blocked: boolean;
+            /** Status */
+            status: string;
         };
         /** EventView */
         EventView: {
@@ -1331,6 +1465,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_contribution_api_v1_customer_contributions__contribution_id__decision_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                contribution_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContributionDecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcceptanceView"];
                 };
             };
             /** @description Validation Error */
@@ -1864,6 +2035,43 @@ export interface operations {
             };
         };
     };
+    dispute_authorship_api_v1_me_contributions__contribution_id__authorship_disputes_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                contribution_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AuthorshipDisputeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputeView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     report_completion_api_v1_me_courses__course_key__completion_post: {
         parameters: {
             query?: never;
@@ -1921,6 +2129,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StreakView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    participant_dispute_api_v1_me_disputes__dispute_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dispute_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DisputeView"];
                 };
             };
             /** @description Validation Error */

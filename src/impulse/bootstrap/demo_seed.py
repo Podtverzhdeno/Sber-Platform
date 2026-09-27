@@ -48,6 +48,7 @@ from impulse.infrastructure.models.recognition import (
 )
 from impulse.infrastructure.models.reward import compensation_terms
 from impulse.infrastructure.models.work import (
+    acceptances,
     appeals,
     applications,
     artifacts,
@@ -487,6 +488,10 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
         )
         await session.execute(
             delete(external_sources).where(external_sources.c.data_origin == "demo_runtime")
+        )
+        await session.execute(delete(appeals).where(appeals.c.data_origin == "demo_runtime"))
+        await session.execute(
+            delete(acceptances).where(acceptances.c.data_origin == "demo_runtime")
         )
         await session.execute(delete(artifacts).where(artifacts.c.data_origin == "demo_runtime"))
         await session.execute(

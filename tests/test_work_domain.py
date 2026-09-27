@@ -6,7 +6,10 @@ from uuid import uuid4
 import pytest
 
 from impulse.domain.work import (
+    AcceptanceDecision,
     ApplicationStatus,
+    AssignmentStatus,
+    ContributionStatus,
     SupportAssignment,
     SupportMode,
     TaskAggregate,
@@ -14,6 +17,8 @@ from impulse.domain.work import (
     TaskPolicyError,
     TaskStatus,
     accept_application,
+    decide_contribution,
+    open_authorship_dispute,
     publication_issues,
     validate_personal_contribution,
 )
@@ -107,3 +112,31 @@ def test_team_artifact_does_not_replace_personal_contribution_description() -> N
         )
         == "Я реализовал API поиска, написал тесты и измерил offline-метрику."
     )
+
+
+@pytest.mark.spec("projects-tasks/Доработка и спор")
+def test_revision_has_reason_deadline_owner_state_and_authorship_dispute_blocks_outcomes() -> None:
+    with pytest.raises(TaskPolicyError) as no_deadline:
+        decide_contribution(
+            ContributionStatus.SUBMITTED,
+            AcceptanceDecision.REVISION_REQUESTED,
+            reason="Нужно дополнить результат.",
+            deadline_at=None,
+        )
+    assert no_deadline.value.code == "REVISION_DEADLINE_REQUIRED"
+
+    contribution_status, assignment_status = decide_contribution(
+        ContributionStatus.SUBMITTED,
+        AcceptanceDecision.REVISION_REQUESTED,
+        reason="Нужно приложить воспроизводимый отчёт.",
+        deadline_at=datetime(2026, 11, 10, tzinfo=UTC),
+    )
+    assert contribution_status is ContributionStatus.REVISION_REQUESTED
+    assert assignment_status is AssignmentStatus.REVISION_REQUESTED
+
+    disputed = open_authorship_dispute(
+        ContributionStatus.ACCEPTED,
+        reason="Другой участник заявил тот же личный вклад и требуется проверка фактов.",
+        deadline_at=datetime(2026, 11, 12, tzinfo=UTC),
+    )
+    assert disputed is ContributionStatus.DISPUTED

@@ -29,6 +29,74 @@
         "title": "AcceptTermsRequest",
         "type": "object"
       },
+      "AcceptanceDecision": {
+        "enum": [
+          "accepted",
+          "revision_requested"
+        ],
+        "title": "AcceptanceDecision",
+        "type": "string"
+      },
+      "AcceptanceView": {
+        "properties": {
+          "contribution_id": {
+            "format": "uuid",
+            "title": "Contribution Id",
+            "type": "string"
+          },
+          "contribution_version": {
+            "title": "Contribution Version",
+            "type": "integer"
+          },
+          "deadline_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline At"
+          },
+          "decision": {
+            "$ref": "#/components/schemas/AcceptanceDecision"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "owner_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Id"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "contribution_id",
+          "contribution_version",
+          "decision",
+          "reason",
+          "deadline_at",
+          "owner_id"
+        ],
+        "title": "AcceptanceView",
+        "type": "object"
+      },
       "ActorView": {
         "properties": {
           "active_role": {
@@ -191,6 +259,8 @@
           "staffed",
           "in_progress",
           "submitted",
+          "revision_requested",
+          "disputed",
           "closed"
         ],
         "title": "AssignmentStatus",
@@ -230,6 +300,39 @@
           "status"
         ],
         "title": "AssignmentView",
+        "type": "object"
+      },
+      "AuthorshipDisputeRequest": {
+        "properties": {
+          "conflicting_contribution_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conflicting Contribution Id"
+          },
+          "deadline_at": {
+            "format": "date-time",
+            "title": "Deadline At",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "deadline_at"
+        ],
+        "title": "AuthorshipDisputeRequest",
         "type": "object"
       },
       "CheckpointRequest": {
@@ -412,6 +515,37 @@
         "title": "ConsentView",
         "type": "object"
       },
+      "ContributionDecisionRequest": {
+        "properties": {
+          "deadline_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline At"
+          },
+          "decision": {
+            "$ref": "#/components/schemas/AcceptanceDecision"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "reason"
+        ],
+        "title": "ContributionDecisionRequest",
+        "type": "object"
+      },
       "ContributionRequest": {
         "properties": {
           "artifacts": {
@@ -433,6 +567,16 @@
         ],
         "title": "ContributionRequest",
         "type": "object"
+      },
+      "ContributionStatus": {
+        "enum": [
+          "submitted",
+          "accepted",
+          "revision_requested",
+          "disputed"
+        ],
+        "title": "ContributionStatus",
+        "type": "string"
       },
       "ContributionView": {
         "properties": {
@@ -457,6 +601,9 @@
             "title": "Personal Summary",
             "type": "string"
           },
+          "status": {
+            "$ref": "#/components/schemas/ContributionStatus"
+          },
           "version": {
             "title": "Version",
             "type": "integer"
@@ -467,7 +614,8 @@
           "assignment_id",
           "version",
           "personal_summary",
-          "artifact_keys"
+          "artifact_keys",
+          "status"
         ],
         "title": "ContributionView",
         "type": "object"
@@ -692,6 +840,70 @@
           "persona_key"
         ],
         "title": "DemoLoginRequest",
+        "type": "object"
+      },
+      "DisputeView": {
+        "properties": {
+          "conflicting_contribution_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conflicting Contribution Id"
+          },
+          "contribution_id": {
+            "format": "uuid",
+            "title": "Contribution Id",
+            "type": "string"
+          },
+          "deadline_at": {
+            "format": "date-time",
+            "title": "Deadline At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "payout_blocked": {
+            "title": "Payout Blocked",
+            "type": "boolean"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "review_blocked": {
+            "title": "Review Blocked",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "contribution_id",
+          "conflicting_contribution_id",
+          "status",
+          "reason",
+          "deadline_at",
+          "owner",
+          "review_blocked",
+          "payout_blocked"
+        ],
+        "title": "DisputeView",
         "type": "object"
       },
       "EventView": {
@@ -1626,6 +1838,72 @@
         "summary": "Accept Candidate"
       }
     },
+    "/api/v1/customer/contributions/{contribution_id}/decision": {
+      "post": {
+        "operationId": "decide_contribution_api_v1_customer_contributions__contribution_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contribution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Contribution Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContributionDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptanceView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide Contribution"
+      }
+    },
     "/api/v1/customer/projects/{project_key}/tasks": {
       "post": {
         "operationId": "create_task_api_v1_customer_projects__project_key__tasks_post",
@@ -2483,6 +2761,72 @@
         "summary": "Set Consent"
       }
     },
+    "/api/v1/me/contributions/{contribution_id}/authorship-disputes": {
+      "post": {
+        "operationId": "dispute_authorship_api_v1_me_contributions__contribution_id__authorship_disputes_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contribution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Contribution Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthorshipDisputeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisputeView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dispute Authorship"
+      }
+    },
     "/api/v1/me/courses/{course_key}/completion": {
       "post": {
         "operationId": "report_completion_api_v1_me_courses__course_key__completion_post",
@@ -2601,6 +2945,46 @@
           }
         },
         "summary": "Record Learning Day"
+      }
+    },
+    "/api/v1/me/disputes/{dispute_id}": {
+      "get": {
+        "operationId": "participant_dispute_api_v1_me_disputes__dispute_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dispute_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Dispute Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisputeView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Participant Dispute"
       }
     },
     "/api/v1/me/event-claims": {

@@ -11,10 +11,12 @@ from pydantic import AnyHttpUrl, AwareDatetime, BaseModel, Field
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.application.work import (
+    AcceptanceRecord,
     ApplicationRecord,
     AssignmentRecord,
     CheckpointRecord,
     ContributionRecord,
+    DisputeRecord,
     MarketplaceTask,
     TaskRecord,
     TeamArtifactRecord,
@@ -22,8 +24,10 @@ from impulse.application.work import (
     WorkService,
 )
 from impulse.domain.work import (
+    AcceptanceDecision,
     ApplicationStatus,
     AssignmentStatus,
+    ContributionStatus,
     SupportAssignment,
     SupportMode,
     TaskBrief,
@@ -82,6 +86,18 @@ class ContributionRequest(BaseModel):
     )
 
 
+class ContributionDecisionRequest(BaseModel):
+    decision: AcceptanceDecision
+    reason: str = Field(min_length=1, max_length=2000)
+    deadline_at: AwareDatetime | None = None
+
+
+class AuthorshipDisputeRequest(BaseModel):
+    conflicting_contribution_id: UUID | None = None
+    reason: str = Field(min_length=1, max_length=2000)
+    deadline_at: AwareDatetime
+
+
 class TaskView(BaseModel):
     id: UUID
     project_key: str
@@ -123,6 +139,29 @@ class ContributionView(BaseModel):
     version: int
     personal_summary: str
     artifact_keys: list[str]
+    status: ContributionStatus
+
+
+class AcceptanceView(BaseModel):
+    id: UUID
+    contribution_id: UUID
+    contribution_version: int
+    decision: AcceptanceDecision
+    reason: str
+    deadline_at: AwareDatetime | None
+    owner_id: UUID | None
+
+
+class DisputeView(BaseModel):
+    id: UUID
+    contribution_id: UUID
+    conflicting_contribution_id: UUID | None
+    status: str
+    reason: str
+    deadline_at: AwareDatetime
+    owner: str
+    review_blocked: bool
+    payout_blocked: bool
 
 
 class ArtifactView(BaseModel):
@@ -191,6 +230,33 @@ def _contribution_view(item: ContributionRecord) -> ContributionView:
         version=item.version,
         personal_summary=item.personal_summary,
         artifact_keys=list(item.artifact_keys),
+        status=item.status,
+    )
+
+
+def _acceptance_view(item: AcceptanceRecord) -> AcceptanceView:
+    return AcceptanceView(
+        id=item.id,
+        contribution_id=item.contribution_id,
+        contribution_version=item.contribution_version,
+        decision=item.decision,
+        reason=item.reason,
+        deadline_at=item.deadline_at,
+        owner_id=item.owner_id,
+    )
+
+
+def _dispute_view(item: DisputeRecord) -> DisputeView:
+    return DisputeView(
+        id=item.id,
+        contribution_id=item.contribution_id,
+        conflicting_contribution_id=item.conflicting_contribution_id,
+        status=item.status,
+        reason=item.reason,
+        deadline_at=item.deadline_at,
+        owner=item.owner,
+        review_blocked=item.review_blocked,
+        payout_blocked=item.payout_blocked,
     )
 
 
@@ -424,3 +490,48 @@ async def submit_contribution(
             tuple(TeamArtifactRecord(item.key, str(item.uri)) for item in command.artifacts),
         )
     )
+
+
+@router.post("/customer/contributions/{contribution_id}/decision", response_model=AcceptanceView)
+async def decide_contribution(
+    contribution_id: UUID,
+    command: ContributionDecisionRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> AcceptanceView:
+    return _acceptance_view(
+        await service.decide_submitted_contribution(
+            authenticated.actor,
+            contribution_id,
+            decision=command.decision,
+            reason=command.reason,
+            deadline_at=command.deadline_at,
+        )
+    )
+
+
+@router.post("/me/contributions/{contribution_id}/authorship-disputes", response_model=DisputeView)
+async def dispute_authorship(
+    contribution_id: UUID,
+    command: AuthorshipDisputeRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> DisputeView:
+    return _dispute_view(
+        await service.dispute_authorship(
+            authenticated.actor,
+            contribution_id,
+            conflicting_contribution_id=command.conflicting_contribution_id,
+            reason=command.reason,
+            deadline_at=command.deadline_at,
+        )
+    )
+
+
+@router.get("/me/disputes/{dispute_id}", response_model=DisputeView)
+async def participant_dispute(
+    dispute_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> DisputeView:
+    return _dispute_view(await service.participant_dispute(authenticated.actor, dispute_id))

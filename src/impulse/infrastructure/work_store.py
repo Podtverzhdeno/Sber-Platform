@@ -11,18 +11,22 @@ from sqlalchemy.dialects.postgresql import insert
 
 from impulse.api.errors import ApiError
 from impulse.application.work import (
+    AcceptanceRecord,
     ApplicationRecord,
     AssignmentRecord,
     CheckpointRecord,
     ContributionRecord,
+    DisputeRecord,
     TaskRecord,
     TeamArtifactRecord,
     TermsRecord,
     WorkStore,
 )
 from impulse.domain.work import (
+    AcceptanceDecision,
     ApplicationStatus,
     AssignmentStatus,
+    ContributionStatus,
     SupportAssignment,
     SupportMode,
     TaskAggregate,
@@ -30,10 +34,15 @@ from impulse.domain.work import (
     TaskPolicyError,
     TaskStatus,
     accept_application,
+    decide_contribution,
+    open_authorship_dispute,
     start_assignment,
+    submit_assignment,
 )
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.work import (
+    acceptances,
+    appeals,
     applications,
     assignments,
     contributions,
@@ -546,6 +555,19 @@ class SqlWorkStore(WorkStore):
         self, assignment_id: UUID, summary: str, artifacts: tuple[TeamArtifactRecord, ...]
     ) -> ContributionRecord:
         async with self.database.session() as session:
+            assignment_row = (
+                await session.execute(
+                    select(assignments).where(assignments.c.id == assignment_id).with_for_update()
+                )
+            ).one_or_none()
+            if assignment_row is None:
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            try:
+                assignment_status = submit_assignment(AssignmentStatus(assignment_row.status))
+            except TaskPolicyError as exc:
+                raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
             next_version = (
                 int(
                     await session.scalar(
@@ -579,10 +601,215 @@ class SqlWorkStore(WorkStore):
                         data_origin="demo_runtime",
                     )
                 )
+            await session.execute(
+                update(assignments)
+                .where(assignments.c.id == assignment_id)
+                .values(status=assignment_status.value, version=assignments.c.version + 1)
+            )
         return ContributionRecord(
             contribution_id,
             assignment_id,
             next_version,
             summary,
             tuple(item.key for item in artifacts),
+        )
+
+    @staticmethod
+    async def _contribution(session: Any, contribution_id: UUID) -> ContributionRecord | None:
+        row = (
+            await session.execute(
+                select(contributions).where(contributions.c.id == contribution_id)
+            )
+        ).one_or_none()
+        if row is None:
+            return None
+        artifact_keys = tuple(
+            await session.scalars(
+                select(artifact_table.c.artifact_key)
+                .where(artifact_table.c.contribution_id == contribution_id)
+                .order_by(artifact_table.c.artifact_key)
+            )
+        )
+        return ContributionRecord(
+            row.id,
+            row.assignment_id,
+            row.contribution_version,
+            row.summary,
+            artifact_keys,
+            ContributionStatus(row.status),
+        )
+
+    async def contribution(self, contribution_id: UUID) -> ContributionRecord | None:
+        async with self.database.sessions() as session:
+            return await self._contribution(session, contribution_id)
+
+    async def decide_contribution(
+        self,
+        contribution_id: UUID,
+        decided_by: UUID,
+        decision: AcceptanceDecision,
+        reason: str,
+        deadline_at: datetime | None,
+        owner_id: UUID | None,
+    ) -> AcceptanceRecord:
+        async with self.database.session() as session:
+            row = (
+                await session.execute(
+                    select(contributions)
+                    .where(contributions.c.id == contribution_id)
+                    .with_for_update()
+                )
+            ).one_or_none()
+            if row is None:
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            try:
+                contribution_status, assignment_status = decide_contribution(
+                    ContributionStatus(row.status),
+                    decision,
+                    reason=reason,
+                    deadline_at=deadline_at,
+                )
+            except TaskPolicyError as exc:
+                raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
+            acceptance_id = uuid4()
+            await session.execute(
+                insert(acceptances).values(
+                    id=acceptance_id,
+                    contribution_id=contribution_id,
+                    decided_by=decided_by,
+                    contribution_version=row.contribution_version,
+                    status=decision.value,
+                    data_origin="demo_runtime",
+                    created_by=decided_by,
+                    payload={
+                        "reason": reason,
+                        "deadline_at": deadline_at.isoformat() if deadline_at else None,
+                        "owner_id": str(owner_id) if owner_id else None,
+                    },
+                )
+            )
+            await session.execute(
+                update(contributions)
+                .where(contributions.c.id == contribution_id)
+                .values(status=contribution_status.value, version=contributions.c.version + 1)
+            )
+            await session.execute(
+                update(assignments)
+                .where(assignments.c.id == row.assignment_id)
+                .values(status=assignment_status.value, version=assignments.c.version + 1)
+            )
+        return AcceptanceRecord(
+            acceptance_id,
+            contribution_id,
+            row.contribution_version,
+            decision,
+            reason,
+            deadline_at,
+            owner_id,
+        )
+
+    async def open_authorship_dispute(
+        self,
+        person_id: UUID,
+        contribution_id: UUID,
+        conflicting_contribution_id: UUID | None,
+        reason: str,
+        deadline_at: datetime,
+    ) -> DisputeRecord:
+        dispute_id = uuid4()
+        target_ids = tuple(
+            item for item in (contribution_id, conflicting_contribution_id) if item is not None
+        )
+        async with self.database.session() as session:
+            rows = (
+                await session.execute(
+                    select(contributions)
+                    .where(contributions.c.id.in_(target_ids))
+                    .order_by(contributions.c.id)
+                    .with_for_update()
+                )
+            ).all()
+            if len(rows) != len(target_ids):
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            for row in rows:
+                try:
+                    status = open_authorship_dispute(
+                        ContributionStatus(row.status), reason=reason, deadline_at=deadline_at
+                    )
+                except TaskPolicyError as exc:
+                    raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
+                await session.execute(
+                    update(contributions)
+                    .where(contributions.c.id == row.id)
+                    .values(status=status.value, version=contributions.c.version + 1)
+                )
+                await session.execute(
+                    update(assignments)
+                    .where(assignments.c.id == row.assignment_id)
+                    .values(
+                        status=AssignmentStatus.DISPUTED.value, version=assignments.c.version + 1
+                    )
+                )
+            primary = next(row for row in rows if row.id == contribution_id)
+            await session.execute(
+                insert(appeals).values(
+                    id=dispute_id,
+                    person_id=person_id,
+                    subject_type="authorship",
+                    subject_id=contribution_id,
+                    subject_version=primary.contribution_version,
+                    status="open",
+                    data_origin="demo_runtime",
+                    created_by=person_id,
+                    payload={
+                        "reason": reason,
+                        "deadline_at": deadline_at.isoformat(),
+                        "owner": "operations",
+                        "conflicting_contribution_id": (
+                            str(conflicting_contribution_id)
+                            if conflicting_contribution_id is not None
+                            else None
+                        ),
+                        "review_blocked": True,
+                        "payout_blocked": True,
+                    },
+                )
+            )
+        return DisputeRecord(
+            dispute_id,
+            contribution_id,
+            conflicting_contribution_id,
+            "open",
+            reason,
+            deadline_at,
+        )
+
+    async def dispute(self, dispute_id: UUID) -> DisputeRecord | None:
+        async with self.database.sessions() as session:
+            row = (
+                await session.execute(
+                    select(appeals).where(
+                        appeals.c.id == dispute_id,
+                        appeals.c.subject_type == "authorship",
+                    )
+                )
+            ).one_or_none()
+        if row is None:
+            return None
+        payload = dict(row.payload)
+        conflicting_id = payload.get("conflicting_contribution_id")
+        return DisputeRecord(
+            row.id,
+            row.subject_id,
+            UUID(str(conflicting_id)) if conflicting_id else None,
+            row.status,
+            str(payload["reason"]),
+            datetime.fromisoformat(str(payload["deadline_at"])),
+            str(payload.get("owner", "operations")),
+            bool(payload.get("review_blocked", True)),
+            bool(payload.get("payout_blocked", True)),
         )

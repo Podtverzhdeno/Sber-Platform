@@ -1,4 +1,5 @@
 """Customer and operator task publication API scenarios."""
+# ruff: noqa: RUF001
 
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
@@ -221,6 +222,82 @@ def test_task_without_nominated_mentor_waits_for_support_before_publish() -> Non
         assert contribution.status_code == 200
         assert contribution.json()["version"] == 1
         assert contribution.json()["artifact_keys"] == ["personal-api-proof"]
+        assert contribution.json()["status"] == "submitted"
+
+        customer_csrf = login(api, "customer-roman")
+        revision = api.post(
+            f"/api/v1/customer/contributions/{contribution.json()['id']}/decision",
+            json={
+                "decision": "revision_requested",
+                "reason": "Нужно приложить воспроизводимый отчёт с результатами метрики.",
+                "deadline_at": "2026-11-10T18:00:00Z",
+            },
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert revision.status_code == 200
+        assert revision.json()["decision"] == "revision_requested"
+        assert revision.json()["owner_id"] == accepted.json()["person_id"]
+
+        participant_csrf = login(api, "participant-alex")
+        restarted = api.post(
+            f"/api/v1/me/assignments/{accepted.json()['id']}/start",
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert restarted.json()["status"] == "in_progress"
+        revised_contribution = api.post(
+            f"/api/v1/me/assignments/{accepted.json()['id']}/contributions",
+            json={
+                "personal_summary": (
+                    "Я дополнил API воспроизводимым отчётом и проверил расчёт метрики на фикстурах."
+                ),
+                "artifacts": [
+                    {
+                        "key": "personal-metric-report",
+                        "uri": "https://example.test/team/repository/report/43",
+                    }
+                ],
+            },
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert revised_contribution.json()["version"] == 2
+
+        customer_csrf = login(api, "customer-roman")
+        accepted_result = api.post(
+            f"/api/v1/customer/contributions/{revised_contribution.json()['id']}/decision",
+            json={
+                "decision": "accepted",
+                "reason": "Результат соответствует критериям и отчёт воспроизводится.",
+            },
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert accepted_result.status_code == 200
+        assert accepted_result.json()["decision"] == "accepted"
+        assert accepted_result.json()["deadline_at"] is None
+
+        participant_csrf = login(api, "participant-alex")
+        dispute = api.post(
+            f"/api/v1/me/contributions/{revised_contribution.json()['id']}/authorship-disputes",
+            json={
+                "reason": (
+                    "Другой участник заявил авторство моего отчёта; прикладываю ссылки на коммиты."
+                ),
+                "deadline_at": "2026-11-12T18:00:00Z",
+            },
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert dispute.status_code == 200
+        assert dispute.json()["status"] == "open"
+        assert dispute.json()["owner"] == "operations"
+        assert dispute.json()["review_blocked"] is True
+        assert dispute.json()["payout_blocked"] is True
+        visible = api.get(f"/api/v1/me/disputes/{dispute.json()['id']}")
+        assert visible.status_code == 200
+        assert visible.json()["deadline_at"] == "2026-11-12T18:00:00Z"
+
+        login(api, "participant-maria")
+        hidden = api.get(f"/api/v1/me/disputes/{dispute.json()['id']}")
+        assert hidden.status_code == 404
+        assert hidden.json()["code"] == "RESOURCE_NOT_FOUND"
 
 
 def test_incomplete_customer_brief_returns_missing_field_map() -> None:
