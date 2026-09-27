@@ -439,6 +439,51 @@
         "title": "ClaimView",
         "type": "object"
       },
+      "CohortRuleModel": {
+        "properties": {
+          "key": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Key",
+            "type": "string"
+          },
+          "minimum_size": {
+            "minimum": 2.0,
+            "title": "Minimum Size",
+            "type": "integer"
+          },
+          "program_key": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Program Key",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          },
+          "track_keys": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Track Keys",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "program_key",
+          "track_keys",
+          "minimum_size"
+        ],
+        "title": "CohortRuleModel",
+        "type": "object"
+      },
       "CompensationRequest": {
         "properties": {
           "a_multiplier": {
@@ -916,6 +961,28 @@
         "title": "CreateReviewRequest",
         "type": "object"
       },
+      "CreateSeasonRequest": {
+        "properties": {
+          "key": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Key",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title"
+        ],
+        "title": "CreateSeasonRequest",
+        "type": "object"
+      },
       "CreateTaskRequest": {
         "properties": {
           "acceptance_criteria": {
@@ -1198,6 +1265,40 @@
           "settlement"
         ],
         "title": "DemoSettlementView",
+        "type": "object"
+      },
+      "DiplomaThresholdModel": {
+        "properties": {
+          "level": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Level",
+            "type": "string"
+          },
+          "place_from": {
+            "minimum": 1.0,
+            "title": "Place From",
+            "type": "integer"
+          },
+          "place_to": {
+            "minimum": 1.0,
+            "title": "Place To",
+            "type": "integer"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "level",
+          "place_from",
+          "place_to",
+          "title"
+        ],
+        "title": "DiplomaThresholdModel",
         "type": "object"
       },
       "DisputeView": {
@@ -1540,6 +1641,20 @@
         "title": "OpenReviewAppealRequest",
         "type": "object"
       },
+      "OpenSeasonRequest": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "OpenSeasonRequest",
+        "type": "object"
+      },
       "PayoutClaimView": {
         "properties": {
           "amount": {
@@ -1669,6 +1784,119 @@
           "roles"
         ],
         "title": "PersonaView",
+        "type": "object"
+      },
+      "PublishPolicyRequest": {
+        "properties": {
+          "appeal_period_days": {
+            "maximum": 365.0,
+            "minimum": 1.0,
+            "title": "Appeal Period Days",
+            "type": "integer"
+          },
+          "cohort": {
+            "$ref": "#/components/schemas/CohortRuleModel"
+          },
+          "diploma_thresholds": {
+            "items": {
+              "$ref": "#/components/schemas/DiplomaThresholdModel"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Diploma Thresholds",
+            "type": "array"
+          },
+          "expected_season_version": {
+            "minimum": 1.0,
+            "title": "Expected Season Version",
+            "type": "integer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreSourceRuleModel-Input"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Sources",
+            "type": "array"
+          },
+          "tie_breakers": {
+            "items": {
+              "$ref": "#/components/schemas/TieBreaker"
+            },
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Tie Breakers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "expected_season_version",
+          "cohort",
+          "sources",
+          "tie_breakers",
+          "diploma_thresholds",
+          "appeal_period_days"
+        ],
+        "title": "PublishPolicyRequest",
+        "type": "object"
+      },
+      "RatingPolicyView": {
+        "properties": {
+          "appeal_period_days": {
+            "title": "Appeal Period Days",
+            "type": "integer"
+          },
+          "cohort": {
+            "$ref": "#/components/schemas/CohortRuleModel"
+          },
+          "diploma_thresholds": {
+            "items": {
+              "$ref": "#/components/schemas/DiplomaThresholdModel"
+            },
+            "title": "Diploma Thresholds",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "season_id": {
+            "format": "uuid",
+            "title": "Season Id",
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreSourceRuleModel-Output"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "tie_breakers": {
+            "items": {
+              "$ref": "#/components/schemas/TieBreaker"
+            },
+            "title": "Tie Breakers",
+            "type": "array"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "season_id",
+          "version",
+          "cohort",
+          "sources",
+          "tie_breakers",
+          "diploma_thresholds",
+          "appeal_period_days"
+        ],
+        "title": "RatingPolicyView",
         "type": "object"
       },
       "ReportClaimRequest": {
@@ -2174,6 +2402,145 @@
         "title": "RubricCriterionView",
         "type": "object"
       },
+      "ScoreSourceRuleModel-Input": {
+        "properties": {
+          "cap": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Cap"
+          },
+          "rule_id": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "source_type": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Source Type",
+            "type": "string"
+          },
+          "weight": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Weight"
+          }
+        },
+        "required": [
+          "rule_id",
+          "source_type",
+          "weight",
+          "cap"
+        ],
+        "title": "ScoreSourceRuleModel",
+        "type": "object"
+      },
+      "ScoreSourceRuleModel-Output": {
+        "properties": {
+          "cap": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Cap",
+            "type": "string"
+          },
+          "rule_id": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "source_type": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Source Type",
+            "type": "string"
+          },
+          "weight": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Weight",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rule_id",
+          "source_type",
+          "weight",
+          "cap"
+        ],
+        "title": "ScoreSourceRuleModel",
+        "type": "object"
+      },
+      "SeasonStatus": {
+        "enum": [
+          "scheduled",
+          "open",
+          "closing",
+          "frozen"
+        ],
+        "title": "SeasonStatus",
+        "type": "string"
+      },
+      "SeasonView": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SeasonStatus"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "title",
+          "status",
+          "version",
+          "policy_version"
+        ],
+        "title": "SeasonView",
+        "type": "object"
+      },
       "SelectTrackRequest": {
         "properties": {
           "freeze_track_key": {
@@ -2470,6 +2837,16 @@
         ],
         "title": "TermsView",
         "type": "object"
+      },
+      "TieBreaker": {
+        "enum": [
+          "successful_projects",
+          "highest_project_score",
+          "earliest_achievement",
+          "person_id"
+        ],
+        "title": "TieBreaker",
+        "type": "string"
       },
       "TrackOverview": {
         "properties": {
@@ -5128,6 +5505,194 @@
           }
         },
         "summary": "Settle Payout Demo"
+      }
+    },
+    "/api/v1/operations/rating-seasons": {
+      "post": {
+        "operationId": "create_season_api_v1_operations_rating_seasons_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSeasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeasonView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Season"
+      }
+    },
+    "/api/v1/operations/rating-seasons/{season_id}/open": {
+      "post": {
+        "operationId": "open_season_api_v1_operations_rating_seasons__season_id__open_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenSeasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeasonView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Open Season"
+      }
+    },
+    "/api/v1/operations/rating-seasons/{season_id}/policies": {
+      "post": {
+        "operationId": "publish_policy_api_v1_operations_rating_seasons__season_id__policies_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishPolicyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RatingPolicyView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Publish Policy"
       }
     },
     "/api/v1/operations/review-appeals/{appeal_id}/resolve": {

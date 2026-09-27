@@ -446,11 +446,43 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
         season_key="demo-autumn-2026",
         title="Демо-сезон: осень 2026",
         status="open",
+        payload={"policy_version": 1},
     )
     policy_row = demo_row(
         "rating-policy:autumn-2026:1",
         season_id=season_row["id"],
         policy_version=1,
+        status="published",
+        payload={
+            "cohort": {
+                "key": "python-demo",
+                "title": "Python demo",
+                "program_key": "impulse-demo",
+                "track_keys": ["python"],
+                "minimum_size": 2,
+            },
+            "sources": [
+                {
+                    "rule_id": "accepted-contribution",
+                    "source_type": "project",
+                    "weight": "1",
+                    "cap": "600",
+                },
+                {"rule_id": "review-5plus", "source_type": "review", "weight": "1", "cap": "300"},
+                {"rule_id": "verified-event", "source_type": "event", "weight": "1", "cap": "100"},
+            ],
+            "tie_breakers": [
+                "successful_projects",
+                "highest_project_score",
+                "earliest_achievement",
+                "person_id",
+            ],
+            "diploma_thresholds": [
+                {"level": "gold", "place_from": 1, "place_to": 3, "title": "I degree"},
+                {"level": "silver", "place_from": 4, "place_to": 10, "title": "II degree"},
+            ],
+            "appeal_period_days": 14,
+        },
     )
     score_rows = [
         demo_row(
@@ -564,9 +596,7 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
         )
         await session.execute(delete(appeals).where(appeals.c.data_origin == "demo_runtime"))
         await session.execute(
-            delete(settlement_attempts).where(
-                settlement_attempts.c.data_origin == "demo_runtime"
-            )
+            delete(settlement_attempts).where(settlement_attempts.c.data_origin == "demo_runtime")
         )
         await session.execute(
             delete(payout_claims).where(payout_claims.c.data_origin == "demo_runtime")

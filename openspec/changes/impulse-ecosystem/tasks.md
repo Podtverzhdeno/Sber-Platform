@@ -81,7 +81,7 @@
 
 ## 10. Рейтинг, дипломы, портфолио и трофеи
 
-- [ ] 10.1 Реализовать versioned season/rating policy с cohort, weights, caps, ties, thresholds и appeal period; opening SHALL блокироваться при неполной policy.
+- [x] 10.1 Реализовать versioned season/rating policy с cohort, weights, caps, ties, thresholds и appeal period; opening SHALL блокироваться при неполной policy.
 - [ ] 10.2 Реализовать append-only ScoreLedger и deterministic standings rebuild; tests SHALL покрыть duplicate source, correction, tie и cohort boundary.
 - [ ] 10.3 Реализовать opt-in leaderboard с place, successful projects, score и consented trophy proof; privacy tests SHALL обезличить non-consenting participant.
 - [ ] 10.4 Реализовать credential issue/verify/revoke/supersede после frozen season; public verification tests SHALL раскрывать только разрешённые поля.

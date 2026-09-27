@@ -12,6 +12,7 @@ from impulse.api.v1 import router as api_v1_router
 from impulse.application.development import DevelopmentService, MemoryDevelopmentStore
 from impulse.application.ecosystem import EcosystemService, MemoryEcosystemStore
 from impulse.application.identity import DemoAuthService, MemoryIdentityStore, demo_personas
+from impulse.application.recognition import MemoryRecognitionStore, RecognitionService
 from impulse.application.reward import (
     MemoryRewardStore,
     RewardService,
@@ -24,6 +25,7 @@ from impulse.infrastructure.database import Database
 from impulse.infrastructure.development_store import SqlDevelopmentStore
 from impulse.infrastructure.ecosystem_store import SqlEcosystemStore
 from impulse.infrastructure.identity_store import SqlIdentityStore
+from impulse.infrastructure.recognition_store import SqlRecognitionStore
 from impulse.infrastructure.reward_store import SqlRewardStore
 from impulse.infrastructure.work_store import SqlWorkStore
 
@@ -36,6 +38,7 @@ def create_app(
     ecosystem_service: EcosystemService | None = None,
     work_service: WorkService | None = None,
     reward_service: RewardService | None = None,
+    recognition_service: RecognitionService | None = None,
 ) -> FastAPI:
     """Build the HTTP application without import-time side effects."""
     runtime_settings = settings or Settings()
@@ -82,6 +85,13 @@ def create_app(
             WorkReviewEvidenceProvider(work_service.store),
             work_service.store,
         )
+    if recognition_service is None:
+        recognition_store = (
+            SqlRecognitionStore(owned_database)
+            if owned_database is not None
+            else MemoryRecognitionStore()
+        )
+        recognition_service = RecognitionService(recognition_store)
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
@@ -103,6 +113,7 @@ def create_app(
     app.state.ecosystem_service = ecosystem_service
     app.state.work_service = work_service
     app.state.reward_service = reward_service
+    app.state.recognition_service = recognition_service
     app.add_middleware(RequestContextMiddleware)
     install_error_handlers(app)
     app.include_router(health_router)

@@ -854,6 +854,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/rating-seasons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Season */
+        post: operations["create_season_api_v1_operations_rating_seasons_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/rating-seasons/{season_id}/open": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Open Season */
+        post: operations["open_season_api_v1_operations_rating_seasons__season_id__open_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/rating-seasons/{season_id}/policies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Policy */
+        post: operations["publish_policy_api_v1_operations_rating_seasons__season_id__policies_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/operations/review-appeals/{appeal_id}/resolve": {
         parameters: {
             query?: never;
@@ -1150,6 +1201,19 @@ export interface components {
             /** Verification Explanation */
             verification_explanation: string;
         };
+        /** CohortRuleModel */
+        CohortRuleModel: {
+            /** Key */
+            key: string;
+            /** Minimum Size */
+            minimum_size: number;
+            /** Program Key */
+            program_key: string;
+            /** Title */
+            title: string;
+            /** Track Keys */
+            track_keys: string[];
+        };
         /** CompensationRequest */
         CompensationRequest: {
             /** A Multiplier */
@@ -1309,6 +1373,13 @@ export interface components {
              */
             rubric_id: string;
         };
+        /** CreateSeasonRequest */
+        CreateSeasonRequest: {
+            /** Key */
+            key: string;
+            /** Title */
+            title: string;
+        };
         /** CreateTaskRequest */
         CreateTaskRequest: {
             /** Acceptance Criteria */
@@ -1404,6 +1475,17 @@ export interface components {
         DemoSettlementView: {
             claim: components["schemas"]["PayoutClaimView"];
             settlement: components["schemas"]["SettlementAttemptView"];
+        };
+        /** DiplomaThresholdModel */
+        DiplomaThresholdModel: {
+            /** Level */
+            level: string;
+            /** Place From */
+            place_from: number;
+            /** Place To */
+            place_to: number;
+            /** Title */
+            title: string;
         };
         /** DisputeView */
         DisputeView: {
@@ -1542,6 +1624,11 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** OpenSeasonRequest */
+        OpenSeasonRequest: {
+            /** Expected Version */
+            expected_version: number;
+        };
         /** PayoutClaimView */
         PayoutClaimView: {
             /** Amount */
@@ -1589,6 +1676,44 @@ export interface components {
             key: string;
             /** Roles */
             roles: components["schemas"]["Role"][];
+        };
+        /** PublishPolicyRequest */
+        PublishPolicyRequest: {
+            /** Appeal Period Days */
+            appeal_period_days: number;
+            cohort: components["schemas"]["CohortRuleModel"];
+            /** Diploma Thresholds */
+            diploma_thresholds: components["schemas"]["DiplomaThresholdModel"][];
+            /** Expected Season Version */
+            expected_season_version: number;
+            /** Sources */
+            sources: components["schemas"]["ScoreSourceRuleModel-Input"][];
+            /** Tie Breakers */
+            tie_breakers: components["schemas"]["TieBreaker"][];
+        };
+        /** RatingPolicyView */
+        RatingPolicyView: {
+            /** Appeal Period Days */
+            appeal_period_days: number;
+            cohort: components["schemas"]["CohortRuleModel"];
+            /** Diploma Thresholds */
+            diploma_thresholds: components["schemas"]["DiplomaThresholdModel"][];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Season Id
+             * Format: uuid
+             */
+            season_id: string;
+            /** Sources */
+            sources: components["schemas"]["ScoreSourceRuleModel-Output"][];
+            /** Tie Breakers */
+            tie_breakers: components["schemas"]["TieBreaker"][];
+            /** Version */
+            version: number;
         };
         /** ReportClaimRequest */
         ReportClaimRequest: {
@@ -1775,6 +1900,50 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** ScoreSourceRuleModel */
+        "ScoreSourceRuleModel-Input": {
+            /** Cap */
+            cap: number | string;
+            /** Rule Id */
+            rule_id: string;
+            /** Source Type */
+            source_type: string;
+            /** Weight */
+            weight: number | string;
+        };
+        /** ScoreSourceRuleModel */
+        "ScoreSourceRuleModel-Output": {
+            /** Cap */
+            cap: string;
+            /** Rule Id */
+            rule_id: string;
+            /** Source Type */
+            source_type: string;
+            /** Weight */
+            weight: string;
+        };
+        /**
+         * SeasonStatus
+         * @enum {string}
+         */
+        SeasonStatus: "scheduled" | "open" | "closing" | "frozen";
+        /** SeasonView */
+        SeasonView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string;
+            /** Policy Version */
+            policy_version: number | null;
+            status: components["schemas"]["SeasonStatus"];
+            /** Title */
+            title: string;
+            /** Version */
+            version: number;
+        };
         /** SelectTrackRequest */
         SelectTrackRequest: {
             /** Freeze Track Key */
@@ -1878,6 +2047,11 @@ export interface components {
             /** Version */
             version: number;
         };
+        /**
+         * TieBreaker
+         * @enum {string}
+         */
+        TieBreaker: "successful_projects" | "highest_project_score" | "earliest_achievement" | "person_id";
         /** TrackOverview */
         TrackOverview: {
             /** Active Count */
@@ -3485,6 +3659,115 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DemoSettlementView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_season_api_v1_operations_rating_seasons_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSeasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SeasonView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    open_season_api_v1_operations_rating_seasons__season_id__open_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                season_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenSeasonRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SeasonView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_policy_api_v1_operations_rating_seasons__season_id__policies_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                season_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublishPolicyRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RatingPolicyView"];
                 };
             };
             /** @description Validation Error */
