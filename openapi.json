@@ -1,6 +1,149 @@
 {
   "components": {
     "schemas": {
+      "ActorView": {
+        "properties": {
+          "active_role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "assigned_roles": {
+            "items": {
+              "$ref": "#/components/schemas/Role"
+            },
+            "title": "Assigned Roles",
+            "type": "array"
+          },
+          "consent_scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentScope"
+            },
+            "title": "Consent Scopes",
+            "type": "array"
+          },
+          "csrf_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Csrf Token"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "navigation": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Navigation",
+            "type": "array"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Scopes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "person_id",
+          "display_name",
+          "active_role",
+          "assigned_roles",
+          "scopes",
+          "consent_scopes",
+          "navigation"
+        ],
+        "title": "ActorView",
+        "type": "object"
+      },
+      "ConsentRequest": {
+        "properties": {
+          "granted": {
+            "title": "Granted",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "granted"
+        ],
+        "title": "ConsentRequest",
+        "type": "object"
+      },
+      "ConsentScope": {
+        "enum": [
+          "public_rating",
+          "public_trophies",
+          "public_profile",
+          "hr_profile",
+          "ai_memory"
+        ],
+        "title": "ConsentScope",
+        "type": "string"
+      },
+      "ConsentView": {
+        "properties": {
+          "granted": {
+            "title": "Granted",
+            "type": "boolean"
+          },
+          "granted_scopes": {
+            "items": {
+              "$ref": "#/components/schemas/ConsentScope"
+            },
+            "title": "Granted Scopes",
+            "type": "array"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/ConsentScope"
+          }
+        },
+        "required": [
+          "scope",
+          "granted",
+          "granted_scopes"
+        ],
+        "title": "ConsentView",
+        "type": "object"
+      },
+      "DemoLoginRequest": {
+        "properties": {
+          "persona_key": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Persona Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "persona_key"
+        ],
+        "title": "DemoLoginRequest",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
       "LiveResponse": {
         "description": "Stable liveness response.",
         "properties": {
@@ -13,6 +156,96 @@
         },
         "title": "LiveResponse",
         "type": "object"
+      },
+      "PersonaView": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/Role"
+            },
+            "title": "Roles",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "display_name",
+          "roles"
+        ],
+        "title": "PersonaView",
+        "type": "object"
+      },
+      "Role": {
+        "enum": [
+          "participant",
+          "mentor",
+          "customer",
+          "manager",
+          "hr",
+          "operator"
+        ],
+        "title": "Role",
+        "type": "string"
+      },
+      "SwitchRoleRequest": {
+        "properties": {
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        },
+        "required": [
+          "role"
+        ],
+        "title": "SwitchRoleRequest",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
       }
     }
   },
@@ -22,6 +255,105 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/auth/demo-login": {
+      "post": {
+        "operationId": "demo_login_api_v1_auth_demo_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActorView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Demo Login"
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "logout_api_v1_auth_logout_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Logout"
+      }
+    },
+    "/api/v1/auth/personas": {
+      "get": {
+        "operationId": "personas_api_v1_auth_personas_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/PersonaView"
+                  },
+                  "title": "Response Personas Api V1 Auth Personas Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Personas"
+      }
+    },
     "/api/v1/config": {
       "get": {
         "operationId": "public_config_api_v1_config_get",
@@ -49,6 +381,144 @@
           }
         },
         "summary": "Public Config"
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "operationId": "me_api_v1_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActorView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Me"
+      }
+    },
+    "/api/v1/me/active-role": {
+      "post": {
+        "operationId": "switch_role_api_v1_me_active_role_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwitchRoleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActorView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Switch Role"
+      }
+    },
+    "/api/v1/me/consents/{scope}": {
+      "put": {
+        "operationId": "set_consent_api_v1_me_consents__scope__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scope",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/ConsentScope"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Consent"
       }
     },
     "/health/live": {

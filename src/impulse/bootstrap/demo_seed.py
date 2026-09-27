@@ -27,7 +27,13 @@ from impulse.infrastructure.models.ecosystem import (
     participation_claims,
     programs,
 )
-from impulse.infrastructure.models.identity import actor_roles, persons
+from impulse.infrastructure.models.identity import (
+    actor_roles,
+    consents,
+    persons,
+    sessions,
+    visibility_settings,
+)
 from impulse.infrastructure.models.recognition import (
     rating_policies,
     score_ledger,
@@ -125,6 +131,14 @@ def build_seed_batches() -> list[SeedBatch]:
         )
         for key, _name, role in PERSONAS
     ]
+    role_rows.append(
+        demo_row(
+            "role:manager-olga:customer",
+            person_id=demo_id("manager-olga"),
+            role="customer",
+            program_key="impulse-demo",
+        )
+    )
     track_rows = [demo_row(f"track:{slug}", slug=slug, title=title) for slug, title in TRACKS]
     roadmap_rows = [
         demo_row(
@@ -374,7 +388,15 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
     if not demo_mode:
         raise RuntimeError("Demo reset is disabled when DEMO_MODE=false")
     batches = build_seed_batches()
+    demo_person_ids = [demo_id(key) for key, _name, _role in PERSONAS]
     async with database.session() as session:
+        for runtime_table in (sessions, visibility_settings, consents):
+            await session.execute(
+                delete(runtime_table).where(
+                    runtime_table.c.person_id.in_(demo_person_ids),
+                    runtime_table.c.data_origin == "demo_runtime",
+                )
+            )
         for batch in reversed(batches):
             await session.execute(
                 delete(batch.table).where(batch.table.c.data_origin == "demo_seed")

@@ -2,9 +2,11 @@
 
 from fastapi import APIRouter, Request
 
+from impulse.api.v1.identity import router as identity_router
 from impulse.bootstrap.settings import Settings
 
 router = APIRouter(prefix="/api/v1")
+router.include_router(identity_router)
 
 
 @router.get("/config", response_model=dict[str, bool | str])

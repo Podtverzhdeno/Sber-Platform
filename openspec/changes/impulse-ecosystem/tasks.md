@@ -28,12 +28,12 @@
 
 ## 4. Demo authentication, роли, согласия и RBAC
 
-- [ ] 4.1 Реализовать DemoAuthProvider, подписанную HttpOnly session cookie, CSRF и logout; auth tests SHALL проверить expiry, tampering и cookie flags.
-- [ ] 4.2 Реализовать `GET /me`, назначенные роли и demo role switch без расширения scopes; scenario `identity-access/Несколько рабочих ролей` SHALL пройти API test.
-- [ ] 4.3 Реализовать ActorContext и object-level policies во всех repository/application entry points; matrix tests SHALL покрыть шесть ролей и чужие объекты.
-- [ ] 4.4 Реализовать единый non-disclosing 404 для unknown/forbidden IDs; negative tests SHALL подтвердить одинаковый body/status до доступа к данным.
-- [ ] 4.5 Реализовать отдельные consent/visibility scopes и отзыв с обновлением public/HR projection; scenarios `identity-access/Согласие на публичность` SHALL пройти.
-- [ ] 4.6 Создать login/persona UI и demo badge; Playwright SHALL войти каждой persona и показать только разрешённую навигацию.
+- [x] 4.1 Реализовать DemoAuthProvider, подписанную HttpOnly session cookie, CSRF и logout; auth tests SHALL проверить expiry, tampering и cookie flags.
+- [x] 4.2 Реализовать `GET /me`, назначенные роли и demo role switch без расширения scopes; scenario `identity-access/Несколько рабочих ролей` SHALL пройти API test.
+- [x] 4.3 Реализовать ActorContext и object-level policies во всех repository/application entry points; matrix tests SHALL покрыть шесть ролей и чужие объекты.
+- [x] 4.4 Реализовать единый non-disclosing 404 для unknown/forbidden IDs; negative tests SHALL подтвердить одинаковый body/status до доступа к данным.
+- [x] 4.5 Реализовать отдельные consent/visibility scopes и отзыв с обновлением public/HR projection; scenarios `identity-access/Согласие на публичность` SHALL пройти.
+- [x] 4.6 Создать login/persona UI и demo badge; Playwright SHALL войти каждой persona и показать только разрешённую навигацию.
 
 ## 5. Frontend shell и доступная design system
 

@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     app_port: int = Field(default=8000, ge=1, le=65535)
     database_url: SecretStr | None = None
     session_secret: SecretStr | None = None
+    session_ttl_seconds: int = Field(default=43_200, ge=300, le=604_800)
     auth_provider_url: AnyHttpUrl | None = None
 
     openrouter_api_key: SecretStr | None = None
@@ -96,3 +97,11 @@ class Settings(BaseSettings):
             "ai_operator_triage_enabled": self.ai_operator_triage_enabled,
             "ai_customer_brief_enabled": self.ai_customer_brief_enabled,
         }
+
+    def session_signing_secret(self) -> str:
+        """Use an explicit secret, with a conspicuous dev-only fallback for zero-config demos."""
+        if self.session_secret is not None:
+            return self.session_secret.get_secret_value()
+        if self.app_env in {AppEnvironment.DEVELOPMENT, AppEnvironment.TEST}:
+            return "impulse-local-development-session-secret-change-me"
+        raise ValueError("SESSION_SECRET is required for authentication")
