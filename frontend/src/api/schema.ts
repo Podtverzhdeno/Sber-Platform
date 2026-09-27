@@ -633,6 +633,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/mentor/contributions/{contribution_id}/reviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Review */
+        post: operations["create_review_api_v1_mentor_contributions__contribution_id__reviews_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentor/review-rubrics/{rubric_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Review Rubric */
+        get: operations["review_rubric_api_v1_mentor_review_rubrics__rubric_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentor/reviews/{review_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Review */
+        post: operations["confirm_review_api_v1_mentor_reviews__review_id__confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentor/reviews/{review_id}/propose": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Propose Review */
+        post: operations["propose_review_api_v1_mentor_reviews__review_id__propose_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentor/reviews/{review_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Review */
+        post: operations["publish_review_api_v1_mentor_reviews__review_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/operations/event-claims/import": {
         parameters: {
             query?: never;
@@ -1064,6 +1149,25 @@ export interface components {
             /** Track Keys */
             track_keys: string[];
         };
+        /** CreateReviewRequest */
+        CreateReviewRequest: {
+            /** Assessments */
+            assessments: components["schemas"]["CriterionAssessmentRequest"][];
+            /**
+             * Draft Origin
+             * @default human
+             * @enum {string}
+             */
+            draft_origin: "human" | "ai_suggestion";
+            /** Explanation */
+            explanation: string;
+            grade: components["schemas"]["ReviewGrade"];
+            /**
+             * Rubric Id
+             * Format: uuid
+             */
+            rubric_id: string;
+        };
         /** CreateTaskRequest */
         CreateTaskRequest: {
             /** Acceptance Criteria */
@@ -1090,6 +1194,24 @@ export interface components {
             task_key: string;
             /** Title */
             title: string;
+        };
+        /** CriterionAssessmentRequest */
+        CriterionAssessmentRequest: {
+            /** Criterion Key */
+            criterion_key: string;
+            /** Evidence Refs */
+            evidence_refs: string[];
+            /** Finding */
+            finding: string;
+        };
+        /** CriterionAssessmentView */
+        CriterionAssessmentView: {
+            /** Criterion Key */
+            criterion_key: string;
+            /** Evidence Refs */
+            evidence_refs: string[];
+            /** Finding */
+            finding: string;
         };
         /** CursorPage[EventView] */
         CursorPage_EventView_: {
@@ -1266,6 +1388,71 @@ export interface components {
              */
             claim_type: "participation" | "winner" | "prize";
         };
+        /**
+         * ReviewGrade
+         * @enum {string}
+         */
+        ReviewGrade: "A" | "B" | "C";
+        /** ReviewRubricView */
+        ReviewRubricView: {
+            /** Criteria */
+            criteria: components["schemas"]["RubricCriterionView"][];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Key */
+            key: string;
+            /** Version */
+            version: number;
+        };
+        /**
+         * ReviewStatus
+         * @enum {string}
+         */
+        ReviewStatus: "draft" | "proposed" | "human_confirmed" | "published" | "disputed" | "corrected" | "upheld" | "frozen";
+        /** ReviewTransitionRequest */
+        ReviewTransitionRequest: {
+            /** Expected Version */
+            expected_version: number;
+        };
+        /** ReviewView */
+        ReviewView: {
+            /** Assessments */
+            assessments: components["schemas"]["CriterionAssessmentView"][];
+            /** Confirmed By */
+            confirmed_by: string | null;
+            /**
+             * Contribution Id
+             * Format: uuid
+             */
+            contribution_id: string;
+            /** Contribution Version */
+            contribution_version: number;
+            /** Draft Origin */
+            draft_origin: string;
+            /** Explanation */
+            explanation: string;
+            grade: components["schemas"]["ReviewGrade"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Published By */
+            published_by: string | null;
+            /**
+             * Rubric Id
+             * Format: uuid
+             */
+            rubric_id: string;
+            /** Rubric Version */
+            rubric_version: number;
+            status: components["schemas"]["ReviewStatus"];
+            /** Version */
+            version: number;
+        };
         /** ReviseTermsRequest */
         ReviseTermsRequest: {
             /** Acceptance Criteria */
@@ -1300,6 +1487,13 @@ export interface components {
          * @enum {string}
          */
         RoundingMode: "half_up" | "half_even" | "down";
+        /** RubricCriterionView */
+        RubricCriterionView: {
+            /** Key */
+            key: string;
+            /** Title */
+            title: string;
+        };
         /** SelectTrackRequest */
         SelectTrackRequest: {
             /** Freeze Track Key */
@@ -2552,6 +2746,185 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WorkItemView"][];
+                };
+            };
+        };
+    };
+    create_review_api_v1_mentor_contributions__contribution_id__reviews_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                contribution_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateReviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    review_rubric_api_v1_mentor_review_rubrics__rubric_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                rubric_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewRubricView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    confirm_review_api_v1_mentor_reviews__review_id__confirm_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                review_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewTransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    propose_review_api_v1_mentor_reviews__review_id__propose_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                review_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewTransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_review_api_v1_mentor_reviews__review_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                review_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewTransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

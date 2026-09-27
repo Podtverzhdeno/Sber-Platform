@@ -863,6 +863,50 @@
         "title": "CourseView",
         "type": "object"
       },
+      "CreateReviewRequest": {
+        "properties": {
+          "assessments": {
+            "items": {
+              "$ref": "#/components/schemas/CriterionAssessmentRequest"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Assessments",
+            "type": "array"
+          },
+          "draft_origin": {
+            "default": "human",
+            "enum": [
+              "human",
+              "ai_suggestion"
+            ],
+            "title": "Draft Origin",
+            "type": "string"
+          },
+          "explanation": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Explanation",
+            "type": "string"
+          },
+          "grade": {
+            "$ref": "#/components/schemas/ReviewGrade"
+          },
+          "rubric_id": {
+            "format": "uuid",
+            "title": "Rubric Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "rubric_id",
+          "grade",
+          "assessments",
+          "explanation"
+        ],
+        "title": "CreateReviewRequest",
+        "type": "object"
+      },
       "CreateTaskRequest": {
         "properties": {
           "acceptance_criteria": {
@@ -951,6 +995,64 @@
           "compensation"
         ],
         "title": "CreateTaskRequest",
+        "type": "object"
+      },
+      "CriterionAssessmentRequest": {
+        "properties": {
+          "criterion_key": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Criterion Key",
+            "type": "string"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Evidence Refs",
+            "type": "array"
+          },
+          "finding": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Finding",
+            "type": "string"
+          }
+        },
+        "required": [
+          "criterion_key",
+          "finding",
+          "evidence_refs"
+        ],
+        "title": "CriterionAssessmentRequest",
+        "type": "object"
+      },
+      "CriterionAssessmentView": {
+        "properties": {
+          "criterion_key": {
+            "title": "Criterion Key",
+            "type": "string"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidence Refs",
+            "type": "array"
+          },
+          "finding": {
+            "title": "Finding",
+            "type": "string"
+          }
+        },
+        "required": [
+          "criterion_key",
+          "finding",
+          "evidence_refs"
+        ],
+        "title": "CriterionAssessmentView",
         "type": "object"
       },
       "CursorPage_EventView_": {
@@ -1387,6 +1489,168 @@
         "title": "ReportClaimRequest",
         "type": "object"
       },
+      "ReviewGrade": {
+        "enum": [
+          "A",
+          "B",
+          "C"
+        ],
+        "title": "ReviewGrade",
+        "type": "string"
+      },
+      "ReviewRubricView": {
+        "properties": {
+          "criteria": {
+            "items": {
+              "$ref": "#/components/schemas/RubricCriterionView"
+            },
+            "title": "Criteria",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "version",
+          "criteria"
+        ],
+        "title": "ReviewRubricView",
+        "type": "object"
+      },
+      "ReviewStatus": {
+        "enum": [
+          "draft",
+          "proposed",
+          "human_confirmed",
+          "published",
+          "disputed",
+          "corrected",
+          "upheld",
+          "frozen"
+        ],
+        "title": "ReviewStatus",
+        "type": "string"
+      },
+      "ReviewTransitionRequest": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "ReviewTransitionRequest",
+        "type": "object"
+      },
+      "ReviewView": {
+        "properties": {
+          "assessments": {
+            "items": {
+              "$ref": "#/components/schemas/CriterionAssessmentView"
+            },
+            "title": "Assessments",
+            "type": "array"
+          },
+          "confirmed_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed By"
+          },
+          "contribution_id": {
+            "format": "uuid",
+            "title": "Contribution Id",
+            "type": "string"
+          },
+          "contribution_version": {
+            "title": "Contribution Version",
+            "type": "integer"
+          },
+          "draft_origin": {
+            "title": "Draft Origin",
+            "type": "string"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "grade": {
+            "$ref": "#/components/schemas/ReviewGrade"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "published_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published By"
+          },
+          "rubric_id": {
+            "format": "uuid",
+            "title": "Rubric Id",
+            "type": "string"
+          },
+          "rubric_version": {
+            "title": "Rubric Version",
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReviewStatus"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "contribution_id",
+          "contribution_version",
+          "rubric_id",
+          "rubric_version",
+          "version",
+          "grade",
+          "assessments",
+          "explanation",
+          "status",
+          "draft_origin",
+          "confirmed_by",
+          "published_by"
+        ],
+        "title": "ReviewView",
+        "type": "object"
+      },
       "ReviseTermsRequest": {
         "properties": {
           "acceptance_criteria": {
@@ -1487,6 +1751,24 @@
         ],
         "title": "RoundingMode",
         "type": "string"
+      },
+      "RubricCriterionView": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title"
+        ],
+        "title": "RubricCriterionView",
+        "type": "object"
       },
       "SelectTrackRequest": {
         "properties": {
@@ -3645,6 +3927,310 @@
           }
         },
         "summary": "Participant Work"
+      }
+    },
+    "/api/v1/mentor/contributions/{contribution_id}/reviews": {
+      "post": {
+        "operationId": "create_review_api_v1_mentor_contributions__contribution_id__reviews_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contribution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Contribution Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Review"
+      }
+    },
+    "/api/v1/mentor/review-rubrics/{rubric_id}": {
+      "get": {
+        "operationId": "review_rubric_api_v1_mentor_review_rubrics__rubric_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "rubric_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Rubric Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewRubricView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Review Rubric"
+      }
+    },
+    "/api/v1/mentor/reviews/{review_id}/confirm": {
+      "post": {
+        "operationId": "confirm_review_api_v1_mentor_reviews__review_id__confirm_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Review Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewTransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Confirm Review"
+      }
+    },
+    "/api/v1/mentor/reviews/{review_id}/propose": {
+      "post": {
+        "operationId": "propose_review_api_v1_mentor_reviews__review_id__propose_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Review Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewTransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Propose Review"
+      }
+    },
+    "/api/v1/mentor/reviews/{review_id}/publish": {
+      "post": {
+        "operationId": "publish_review_api_v1_mentor_reviews__review_id__publish_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Review Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewTransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Publish Review"
       }
     },
     "/api/v1/operations/event-claims/import": {

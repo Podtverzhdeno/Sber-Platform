@@ -16,6 +16,7 @@ from impulse.domain.reward import (
     Review5Plus,
     ReviewGrade,
     ReviewRubric,
+    RubricCriterion,
 )
 from impulse.domain.work import ContributionStatus
 
@@ -26,6 +27,18 @@ class ReviewEvidence:
     contribution_version: int
     accepted: bool
     authorship_conflict_open: bool
+
+
+DEFAULT_REVIEW_RUBRIC = ReviewRubric(
+    rubric_id=UUID("d993683b-a578-54c8-9b87-45190ac59056"),
+    key="impulse-5plus-demo",
+    version=1,
+    criteria=(
+        RubricCriterion("result", "Качество и полнота результата"),
+        RubricCriterion("evidence", "Проверяемость личного вклада"),
+        RubricCriterion("ownership", "Самостоятельность и ответственность"),
+    ),
+)
 
 
 class ReviewStore(Protocol):
@@ -40,8 +53,9 @@ class ReviewEvidenceProvider(Protocol):
 
 
 class MemoryRewardStore:
-    def __init__(self, rubrics: tuple[ReviewRubric, ...] = ()) -> None:
-        self._rubrics = {item.rubric_id: item for item in rubrics}
+    def __init__(self, rubrics: tuple[ReviewRubric, ...] | None = None) -> None:
+        configured = rubrics if rubrics is not None else (DEFAULT_REVIEW_RUBRIC,)
+        self._rubrics = {item.rubric_id: item for item in configured}
         self._reviews: dict[UUID, tuple[Review5Plus, ...]] = {}
 
     async def rubric(self, rubric_id: UUID) -> ReviewRubric | None:
@@ -161,6 +175,13 @@ class RewardService:
             )
         )
         return await self.store.add_review_version(review)
+
+    async def rubric(self, actor: ActorContext, rubric_id: UUID) -> ReviewRubric:
+        self._mentor(actor)
+        rubric = await self.store.rubric(rubric_id)
+        if rubric is None:
+            raise self._not_found()
+        return rubric
 
     async def propose(
         self, actor: ActorContext, review_id: UUID, expected_version: int

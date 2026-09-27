@@ -12,6 +12,7 @@ from sqlalchemy import Table, delete, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from impulse.application.reward import DEFAULT_REVIEW_RUBRIC
 from impulse.bootstrap.settings import Settings
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.development import (
@@ -46,7 +47,11 @@ from impulse.infrastructure.models.recognition import (
     standings,
     trophies,
 )
-from impulse.infrastructure.models.reward import compensation_terms
+from impulse.infrastructure.models.reward import (
+    compensation_terms,
+    review_5plus_versions,
+    review_rubrics,
+)
 from impulse.infrastructure.models.work import (
     acceptances,
     appeals,
@@ -295,6 +300,18 @@ def build_seed_batches() -> list[SeedBatch]:
 
 
 def build_work_and_rating_batches() -> list[SeedBatch]:
+    rubric_row = demo_row(
+        "rubric:5plus",
+        id=DEFAULT_REVIEW_RUBRIC.rubric_id,
+        rubric_key=DEFAULT_REVIEW_RUBRIC.key,
+        rubric_version=DEFAULT_REVIEW_RUBRIC.version,
+        status="published",
+        payload={
+            "criteria": [
+                {"key": item.key, "title": item.title} for item in DEFAULT_REVIEW_RUBRIC.criteria
+            ]
+        },
+    )
     project_row = demo_row(
         "project:rd-lab",
         project_key="demo-rd-lab",
@@ -409,6 +426,7 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
         for index, person_key in enumerate(participant_keys, start=1)
     ]
     return [
+        SeedBatch(review_rubrics, [rubric_row]),
         SeedBatch(projects, [project_row]),
         SeedBatch(tasks, task_rows),
         SeedBatch(task_terms_versions, terms_rows),
@@ -495,6 +513,11 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
         )
         await session.execute(delete(appeals).where(appeals.c.data_origin == "demo_runtime"))
         await session.execute(
+            delete(review_5plus_versions).where(
+                review_5plus_versions.c.data_origin == "demo_runtime"
+            )
+        )
+        await session.execute(
             delete(acceptances).where(acceptances.c.data_origin == "demo_runtime")
         )
         await session.execute(delete(artifacts).where(artifacts.c.data_origin == "demo_runtime"))
@@ -512,6 +535,9 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
                 applications.c.person_id.in_(demo_person_ids),
                 applications.c.data_origin == "demo_runtime",
             )
+        )
+        await session.execute(
+            delete(compensation_terms).where(compensation_terms.c.data_origin == "demo_runtime")
         )
         await session.execute(
             delete(task_terms_versions).where(task_terms_versions.c.data_origin == "demo_runtime")

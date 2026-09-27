@@ -12,6 +12,11 @@ from impulse.api.v1 import router as api_v1_router
 from impulse.application.development import DevelopmentService, MemoryDevelopmentStore
 from impulse.application.ecosystem import EcosystemService, MemoryEcosystemStore
 from impulse.application.identity import DemoAuthService, MemoryIdentityStore, demo_personas
+from impulse.application.reward import (
+    MemoryRewardStore,
+    RewardService,
+    WorkReviewEvidenceProvider,
+)
 from impulse.application.work import MemoryWorkStore, WorkService
 from impulse.bootstrap.logging import configure_logging
 from impulse.bootstrap.settings import Settings
@@ -19,6 +24,7 @@ from impulse.infrastructure.database import Database
 from impulse.infrastructure.development_store import SqlDevelopmentStore
 from impulse.infrastructure.ecosystem_store import SqlEcosystemStore
 from impulse.infrastructure.identity_store import SqlIdentityStore
+from impulse.infrastructure.reward_store import SqlRewardStore
 from impulse.infrastructure.work_store import SqlWorkStore
 
 
@@ -29,6 +35,7 @@ def create_app(
     development_service: DevelopmentService | None = None,
     ecosystem_service: EcosystemService | None = None,
     work_service: WorkService | None = None,
+    reward_service: RewardService | None = None,
 ) -> FastAPI:
     """Build the HTTP application without import-time side effects."""
     runtime_settings = settings or Settings()
@@ -66,6 +73,14 @@ def create_app(
             SqlWorkStore(owned_database) if owned_database is not None else MemoryWorkStore()
         )
         work_service = WorkService(work_store)
+    if reward_service is None:
+        reward_store = (
+            SqlRewardStore(owned_database) if owned_database is not None else MemoryRewardStore()
+        )
+        reward_service = RewardService(
+            reward_store,
+            WorkReviewEvidenceProvider(work_service.store),
+        )
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
@@ -86,6 +101,7 @@ def create_app(
     app.state.development_service = development_service
     app.state.ecosystem_service = ecosystem_service
     app.state.work_service = work_service
+    app.state.reward_service = reward_service
     app.add_middleware(RequestContextMiddleware)
     install_error_handlers(app)
     app.include_router(health_router)

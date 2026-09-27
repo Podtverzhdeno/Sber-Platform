@@ -18,11 +18,12 @@ review_rubrics = domain_table(
 )
 review_5plus_versions = domain_table(
     "review_5plus_versions",
+    uuid_field("review_id"),
     uuid_field("contribution_id", "contributions.id"),
     uuid_field("rubric_id", "review_rubrics.id"),
     integer_field("review_version"),
     string_field("grade", 8, nullable=True),
-    uniques=(("contribution_id", "review_version"),),
+    uniques=(("review_id", "review_version"), ("contribution_id", "review_version")),
 )
 compensation_terms = domain_table(
     "compensation_terms",
