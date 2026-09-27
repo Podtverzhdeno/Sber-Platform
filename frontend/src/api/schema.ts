@@ -72,6 +72,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/projects/{project_key}/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Task */
+        post: operations["create_task_api_v1_customer_projects__project_key__tasks_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/tasks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Customer Tasks */
+        get: operations["customer_tasks_api_v1_customer_tasks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/tasks/{task_id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Task */
+        post: operations["submit_task_api_v1_customer_tasks__task_id__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/development/courses": {
         parameters: {
             query?: never;
@@ -344,6 +395,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/tasks/{task_id}/moderate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Moderate Task */
+        post: operations["moderate_task_api_v1_operations_tasks__task_id__moderate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/tasks/{task_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish Task */
+        post: operations["publish_task_api_v1_operations_tasks__task_id__publish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/tasks/{task_id}/support": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Assign Support */
+        post: operations["assign_support_api_v1_operations_tasks__task_id__support_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health/live": {
         parameters: {
             query?: never;
@@ -464,6 +566,27 @@ export interface components {
             title: string;
             /** Track Keys */
             track_keys: string[];
+        };
+        /** CreateTaskRequest */
+        CreateTaskRequest: {
+            /** Acceptance Criteria */
+            acceptance_criteria: string[];
+            /** Data Constraints */
+            data_constraints: string;
+            /** Deadline At */
+            deadline_at?: string | null;
+            /** Deliverable */
+            deliverable: string;
+            /** Ip Terms */
+            ip_terms: string;
+            /** Nominated Mentor Id */
+            nominated_mentor_id?: string | null;
+            /** Problem */
+            problem: string;
+            /** Task Key */
+            task_key: string;
+            /** Title */
+            title: string;
         };
         /** CursorPage[EventView] */
         CursorPage_EventView_: {
@@ -636,9 +759,45 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /**
+         * SupportMode
+         * @enum {string}
+         */
+        SupportMode: "mentor" | "buddy" | "operator";
+        /** SupportRequest */
+        SupportRequest: {
+            /** Assignee Id */
+            assignee_id?: string | null;
+            mode: components["schemas"]["SupportMode"];
+        };
         /** SwitchRoleRequest */
         SwitchRoleRequest: {
             role: components["schemas"]["Role"];
+        };
+        /**
+         * TaskStatus
+         * @enum {string}
+         */
+        TaskStatus: "draft" | "submitted" | "awaiting_support" | "ready_to_publish" | "published";
+        /** TaskView */
+        TaskView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Nominated Mentor Id */
+            nominated_mentor_id: string | null;
+            /** Project Key */
+            project_key: string;
+            status: components["schemas"]["TaskStatus"];
+            /** Support Assignee Id */
+            support_assignee_id: string | null;
+            support_mode: components["schemas"]["SupportMode"] | null;
+            /** Task Key */
+            task_key: string;
+            /** Title */
+            title: string;
         };
         /** TrackOverview */
         TrackOverview: {
@@ -789,6 +948,96 @@ export interface operations {
                     "application/json": {
                         [key: string]: boolean | string;
                     };
+                };
+            };
+        };
+    };
+    create_task_api_v1_customer_projects__project_key__tasks_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                project_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTaskRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    customer_tasks_api_v1_customer_tasks_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskView"][];
+                };
+            };
+        };
+    };
+    submit_task_api_v1_customer_tasks__task_id__submit_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1254,6 +1503,109 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClaimView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    moderate_task_api_v1_operations_tasks__task_id__moderate_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    publish_task_api_v1_operations_tasks__task_id__publish_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    assign_support_api_v1_operations_tasks__task_id__support_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SupportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskView"];
                 };
             };
             /** @description Validation Error */

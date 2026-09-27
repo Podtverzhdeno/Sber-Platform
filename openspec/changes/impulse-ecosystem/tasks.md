@@ -63,7 +63,7 @@
 ## 8. R&D/MVP-задачи, заявки и вклад
 
 - [x] 8.1 Реализовать task aggregate и publication validator для problem/deliverable/criteria/deadline/data/IP/support; `projects-tasks/Неполный бриф` SHALL пройти.
-- [ ] 8.2 Реализовать customer draft/submit/moderation/publish и optional mentor nomination; task без support SHALL остаться unpublished согласно operations spec.
+- [x] 8.2 Реализовать customer draft/submit/moderation/publish и optional mentor nomination; task без support SHALL остаться unpublished согласно operations spec.
 - [ ] 8.3 Реализовать immutable terms versions и participant task catalog/detail с accepted terms consent; changed-version API test SHALL вернуть `TERMS_CHANGED`.
 - [ ] 8.4 Реализовать applications, staffing и assignment transitions с places/concurrency; tests SHALL исключить двойное назначение и stale acceptance.
 - [ ] 8.5 Реализовать checkpoints, team artifacts и personal contribution evidence; scenario `projects-tasks/Индивидуальный вклад` SHALL требовать личное описание.

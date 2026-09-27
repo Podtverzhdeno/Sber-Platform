@@ -265,6 +265,85 @@
         "title": "CourseView",
         "type": "object"
       },
+      "CreateTaskRequest": {
+        "properties": {
+          "acceptance_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 30,
+            "title": "Acceptance Criteria",
+            "type": "array"
+          },
+          "data_constraints": {
+            "maxLength": 4000,
+            "title": "Data Constraints",
+            "type": "string"
+          },
+          "deadline_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline At"
+          },
+          "deliverable": {
+            "maxLength": 4000,
+            "title": "Deliverable",
+            "type": "string"
+          },
+          "ip_terms": {
+            "maxLength": 4000,
+            "title": "Ip Terms",
+            "type": "string"
+          },
+          "nominated_mentor_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nominated Mentor Id"
+          },
+          "problem": {
+            "maxLength": 4000,
+            "title": "Problem",
+            "type": "string"
+          },
+          "task_key": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Task Key",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_key",
+          "title",
+          "problem",
+          "deliverable",
+          "acceptance_criteria",
+          "data_constraints",
+          "ip_terms"
+        ],
+        "title": "CreateTaskRequest",
+        "type": "object"
+      },
       "CursorPage_EventView_": {
         "additionalProperties": false,
         "properties": {
@@ -723,6 +802,39 @@
         "title": "StreakView",
         "type": "object"
       },
+      "SupportMode": {
+        "enum": [
+          "mentor",
+          "buddy",
+          "operator"
+        ],
+        "title": "SupportMode",
+        "type": "string"
+      },
+      "SupportRequest": {
+        "properties": {
+          "assignee_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignee Id"
+          },
+          "mode": {
+            "$ref": "#/components/schemas/SupportMode"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "title": "SupportRequest",
+        "type": "object"
+      },
       "SwitchRoleRequest": {
         "properties": {
           "role": {
@@ -733,6 +845,87 @@
           "role"
         ],
         "title": "SwitchRoleRequest",
+        "type": "object"
+      },
+      "TaskStatus": {
+        "enum": [
+          "draft",
+          "submitted",
+          "awaiting_support",
+          "ready_to_publish",
+          "published"
+        ],
+        "title": "TaskStatus",
+        "type": "string"
+      },
+      "TaskView": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "nominated_mentor_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nominated Mentor Id"
+          },
+          "project_key": {
+            "title": "Project Key",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/TaskStatus"
+          },
+          "support_assignee_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Support Assignee Id"
+          },
+          "support_mode": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SupportMode"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "task_key": {
+            "title": "Task Key",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "project_key",
+          "task_key",
+          "title",
+          "status",
+          "nominated_mentor_id",
+          "support_mode",
+          "support_assignee_id"
+        ],
+        "title": "TaskView",
         "type": "object"
       },
       "TrackOverview": {
@@ -980,6 +1173,149 @@
           }
         },
         "summary": "Public Config"
+      }
+    },
+    "/api/v1/customer/projects/{project_key}/tasks": {
+      "post": {
+        "operationId": "create_task_api_v1_customer_projects__project_key__tasks_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_key",
+            "required": true,
+            "schema": {
+              "title": "Project Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTaskRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Task"
+      }
+    },
+    "/api/v1/customer/tasks": {
+      "get": {
+        "operationId": "customer_tasks_api_v1_customer_tasks_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TaskView"
+                  },
+                  "title": "Response Customer Tasks Api V1 Customer Tasks Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Customer Tasks"
+      }
+    },
+    "/api/v1/customer/tasks/{task_id}/submit": {
+      "post": {
+        "operationId": "submit_task_api_v1_customer_tasks__task_id__submit_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Task"
       }
     },
     "/api/v1/development/courses": {
@@ -1749,6 +2085,184 @@
           }
         },
         "summary": "Decide Claim"
+      }
+    },
+    "/api/v1/operations/tasks/{task_id}/moderate": {
+      "post": {
+        "operationId": "moderate_task_api_v1_operations_tasks__task_id__moderate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Moderate Task"
+      }
+    },
+    "/api/v1/operations/tasks/{task_id}/publish": {
+      "post": {
+        "operationId": "publish_task_api_v1_operations_tasks__task_id__publish_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Publish Task"
+      }
+    },
+    "/api/v1/operations/tasks/{task_id}/support": {
+      "post": {
+        "operationId": "assign_support_api_v1_operations_tasks__task_id__support_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaskView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Assign Support"
       }
     },
     "/health/live": {
