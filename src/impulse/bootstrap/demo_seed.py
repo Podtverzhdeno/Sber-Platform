@@ -17,8 +17,10 @@ from impulse.infrastructure.models.development import (
     course_track_links,
     courses,
     enrollments,
+    learning_days,
     milestones,
     roadmap_versions,
+    track_attempts,
     tracks,
 )
 from impulse.infrastructure.models.ecosystem import (
@@ -154,11 +156,31 @@ def build_seed_batches() -> list[SeedBatch]:
             roadmap_version_id=demo_id(f"roadmap:{slug}:1"),
             milestone_key="start-bootcamp",
             position=1,
+            payload={
+                "title": "Начать Bootcamp",
+                "purpose": "Освоить основу и перейти к первой реальной задаче.",
+                "skill": "Spec-driven development",
+                "target_kind": "course",
+                "target_key": "demo-course-1",
+            },
         )
         for slug, _title in TRACKS
     ]
     course_rows = [
-        demo_row(f"course:{index}", slug=f"demo-course-{index}", title=title)
+        demo_row(
+            f"course:{index}",
+            slug=f"demo-course-{index}",
+            title=title,
+            payload={
+                "source_url": f"https://example.test/courses/demo-course-{index}",
+                "availability": "unavailable" if index == 5 else "available",
+                "access_note": (
+                    "Внешний курс пока не подключён; доступна исходная ссылка."
+                    if index == 5
+                    else "Доступен в демонстрационном каталоге."
+                ),
+            },
+        )
         for index, title in enumerate(COURSES, start=1)
     ]
     course_link_rows = [
@@ -178,6 +200,24 @@ def build_seed_batches() -> list[SeedBatch]:
             status="verified" if index <= 3 else "in_progress",
         )
         for index in range(1, 5)
+    ]
+    track_attempt_rows = [
+        demo_row(
+            "track-attempt:alex:python:1",
+            person_id=demo_id("participant-alex"),
+            track_id=demo_id("track:python"),
+            attempt_number=1,
+            status="active",
+            payload={"completed_milestones": []},
+        ),
+        demo_row(
+            "track-attempt:maria:data:1",
+            person_id=demo_id("participant-maria"),
+            track_id=demo_id("track:data"),
+            attempt_number=1,
+            status="active",
+            payload={"completed_milestones": ["start-bootcamp"]},
+        ),
     ]
 
     source_row = demo_row(
@@ -217,6 +257,7 @@ def build_seed_batches() -> list[SeedBatch]:
         SeedBatch(persons, person_rows),
         SeedBatch(actor_roles, role_rows),
         SeedBatch(tracks, track_rows),
+        SeedBatch(track_attempts, track_attempt_rows),
         SeedBatch(roadmap_versions, roadmap_rows),
         SeedBatch(milestones, milestone_rows),
         SeedBatch(courses, course_rows),
@@ -390,6 +431,28 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
     batches = build_seed_batches()
     demo_person_ids = [demo_id(key) for key, _name, _role in PERSONAS]
     async with database.session() as session:
+        runtime_enrollments = select(enrollments.c.id).where(
+            enrollments.c.person_id.in_(demo_person_ids),
+            enrollments.c.data_origin == "demo_runtime",
+        )
+        await session.execute(
+            delete(learning_days).where(
+                learning_days.c.enrollment_id.in_(runtime_enrollments),
+                learning_days.c.data_origin == "demo_runtime",
+            )
+        )
+        await session.execute(
+            delete(enrollments).where(
+                enrollments.c.person_id.in_(demo_person_ids),
+                enrollments.c.data_origin == "demo_runtime",
+            )
+        )
+        await session.execute(
+            delete(track_attempts).where(
+                track_attempts.c.person_id.in_(demo_person_ids),
+                track_attempts.c.data_origin == "demo_runtime",
+            )
+        )
         for runtime_table in (sessions, visibility_settings, consents):
             await session.execute(
                 delete(runtime_table).where(

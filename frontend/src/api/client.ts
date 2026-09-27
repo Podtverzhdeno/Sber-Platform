@@ -1,6 +1,10 @@
 import type { paths } from "./schema";
 
 export type ApiPaths = paths;
+export type RuntimeApiPath =
+  | keyof ApiPaths
+  | `/api/v1/me/courses/${string}/completion`
+  | `/api/v1/me/courses/${string}/learning-days`;
 
 export class ApiClientError extends Error {
   readonly status: number;
@@ -31,7 +35,7 @@ async function decodeError(response: Response): Promise<ApiClientError> {
   }
 }
 
-export async function apiRequest<T>(path: keyof ApiPaths, options?: RequestInit): Promise<T> {
+export async function apiRequest<T>(path: RuntimeApiPath, options?: RequestInit): Promise<T> {
   const headers = new Headers(options?.headers);
   headers.set("Content-Type", "application/json");
   const response = await fetch(path, { credentials: "include", ...options, headers });

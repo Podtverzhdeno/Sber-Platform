@@ -22,6 +22,7 @@ class ConsentScope(StrEnum):
     PUBLIC_PROFILE = "public_profile"
     HR_PROFILE = "hr_profile"
     AI_MEMORY = "ai_memory"
+    COURSE_HONOR_BOARD = "course_honor_board"
 
 
 ROLE_SCOPES: dict[Role, frozenset[str]] = {

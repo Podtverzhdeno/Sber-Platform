@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     openrouter_model_structured: str = "openrouter/free"
     ai_max_requests_per_user_day: int = Field(default=5, ge=1, le=100)
     ai_max_tool_calls_per_run: int = Field(default=4, ge=1, le=20)
+    honor_board_enabled: bool = False
 
     langfuse_enabled: bool = False
     langfuse_public_key: SecretStr | None = None
@@ -96,6 +97,7 @@ class Settings(BaseSettings):
             "ai_mentor_draft_enabled": self.ai_mentor_draft_enabled,
             "ai_operator_triage_enabled": self.ai_operator_triage_enabled,
             "ai_customer_brief_enabled": self.ai_customer_brief_enabled,
+            "honor_board_enabled": self.honor_board_enabled,
         }
 
     def session_signing_secret(self) -> str:

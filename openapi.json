@@ -67,6 +67,42 @@
         "title": "ActorView",
         "type": "object"
       },
+      "CompletionStatus": {
+        "enum": [
+          "reported",
+          "verified",
+          "rejected"
+        ],
+        "title": "CompletionStatus",
+        "type": "string"
+      },
+      "CompletionView": {
+        "properties": {
+          "course_key": {
+            "title": "Course Key",
+            "type": "string"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "rating_eligible": {
+            "title": "Rating Eligible",
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CompletionStatus"
+          }
+        },
+        "required": [
+          "course_key",
+          "status",
+          "rating_eligible",
+          "explanation"
+        ],
+        "title": "CompletionView",
+        "type": "object"
+      },
       "ConsentRequest": {
         "properties": {
           "granted": {
@@ -86,7 +122,8 @@
           "public_trophies",
           "public_profile",
           "hr_profile",
-          "ai_memory"
+          "ai_memory",
+          "course_honor_board"
         ],
         "title": "ConsentScope",
         "type": "string"
@@ -114,6 +151,69 @@
           "granted_scopes"
         ],
         "title": "ConsentView",
+        "type": "object"
+      },
+      "CourseView": {
+        "properties": {
+          "access_note": {
+            "title": "Access Note",
+            "type": "string"
+          },
+          "availability": {
+            "title": "Availability",
+            "type": "string"
+          },
+          "completion_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Status"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "rating_eligible": {
+            "title": "Rating Eligible",
+            "type": "boolean"
+          },
+          "recommendation_reason": {
+            "title": "Recommendation Reason",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "track_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Track Keys",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "track_keys",
+          "recommendation_reason",
+          "source_url",
+          "availability",
+          "access_note",
+          "completion_status",
+          "rating_eligible"
+        ],
+        "title": "CourseView",
         "type": "object"
       },
       "DemoLoginRequest": {
@@ -144,6 +244,20 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "LearningDayRequest": {
+        "properties": {
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "occurred_at"
+        ],
+        "title": "LearningDayRequest",
+        "type": "object"
+      },
       "LiveResponse": {
         "description": "Stable liveness response.",
         "properties": {
@@ -155,6 +269,54 @@
           }
         },
         "title": "LiveResponse",
+        "type": "object"
+      },
+      "MilestoneView": {
+        "properties": {
+          "completed": {
+            "title": "Completed",
+            "type": "boolean"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "purpose": {
+            "title": "Purpose",
+            "type": "string"
+          },
+          "skill": {
+            "title": "Skill",
+            "type": "string"
+          },
+          "target_key": {
+            "title": "Target Key",
+            "type": "string"
+          },
+          "target_kind": {
+            "title": "Target Kind",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "position",
+          "title",
+          "purpose",
+          "skill",
+          "target_kind",
+          "target_key",
+          "completed"
+        ],
+        "title": "MilestoneView",
         "type": "object"
       },
       "PersonaView": {
@@ -183,6 +345,55 @@
         "title": "PersonaView",
         "type": "object"
       },
+      "RoadmapView": {
+        "properties": {
+          "milestones": {
+            "items": {
+              "$ref": "#/components/schemas/MilestoneView"
+            },
+            "title": "Milestones",
+            "type": "array"
+          },
+          "next_step": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MilestoneView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "replacement_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replacement Reason"
+          },
+          "track_key": {
+            "title": "Track Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_key",
+          "policy_version",
+          "replacement_reason",
+          "milestones",
+          "next_step"
+        ],
+        "title": "RoadmapView",
+        "type": "object"
+      },
       "Role": {
         "enum": [
           "participant",
@@ -195,6 +406,61 @@
         "title": "Role",
         "type": "string"
       },
+      "SelectTrackRequest": {
+        "properties": {
+          "freeze_track_key": {
+            "anyOf": [
+              {
+                "maxLength": 96,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freeze Track Key"
+          },
+          "track_key": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Track Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_key"
+        ],
+        "title": "SelectTrackRequest",
+        "type": "object"
+      },
+      "StreakView": {
+        "properties": {
+          "current_days": {
+            "title": "Current Days",
+            "type": "integer"
+          },
+          "qualified_dates": {
+            "items": {
+              "format": "date",
+              "type": "string"
+            },
+            "title": "Qualified Dates",
+            "type": "array"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "current_days",
+          "qualified_dates",
+          "reason"
+        ],
+        "title": "StreakView",
+        "type": "object"
+      },
       "SwitchRoleRequest": {
         "properties": {
           "role": {
@@ -205,6 +471,77 @@
           "role"
         ],
         "title": "SwitchRoleRequest",
+        "type": "object"
+      },
+      "TrackOverview": {
+        "properties": {
+          "active_count": {
+            "title": "Active Count",
+            "type": "integer"
+          },
+          "max_active": {
+            "default": 2,
+            "title": "Max Active",
+            "type": "integer"
+          },
+          "tracks": {
+            "items": {
+              "$ref": "#/components/schemas/TrackView"
+            },
+            "title": "Tracks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "active_count",
+          "tracks"
+        ],
+        "title": "TrackOverview",
+        "type": "object"
+      },
+      "TrackStatus": {
+        "enum": [
+          "active",
+          "frozen"
+        ],
+        "title": "TrackStatus",
+        "type": "string"
+      },
+      "TrackView": {
+        "properties": {
+          "completed_milestones": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Completed Milestones",
+            "type": "array"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TrackStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "status",
+          "completed_milestones"
+        ],
+        "title": "TrackView",
         "type": "object"
       },
       "ValidationError": {
@@ -383,6 +720,46 @@
         "summary": "Public Config"
       }
     },
+    "/api/v1/development/courses": {
+      "get": {
+        "operationId": "courses_api_v1_development_courses_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CourseView"
+                  },
+                  "title": "Response Courses Api V1 Development Courses Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Courses"
+      }
+    },
+    "/api/v1/development/tracks": {
+      "get": {
+        "operationId": "tracks_api_v1_development_tracks_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Tracks"
+      }
+    },
     "/api/v1/me": {
       "get": {
         "operationId": "me_api_v1_me_get",
@@ -519,6 +896,222 @@
           }
         },
         "summary": "Set Consent"
+      }
+    },
+    "/api/v1/me/courses/{course_key}/completion": {
+      "post": {
+        "operationId": "report_completion_api_v1_me_courses__course_key__completion_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_key",
+            "required": true,
+            "schema": {
+              "title": "Course Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompletionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report Completion"
+      }
+    },
+    "/api/v1/me/courses/{course_key}/learning-days": {
+      "post": {
+        "operationId": "record_learning_day_api_v1_me_courses__course_key__learning_days_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_key",
+            "required": true,
+            "schema": {
+              "title": "Course Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningDayRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreakView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record Learning Day"
+      }
+    },
+    "/api/v1/me/learning/streak": {
+      "get": {
+        "operationId": "streak_api_v1_me_learning_streak_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreakView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Streak"
+      }
+    },
+    "/api/v1/me/roadmaps": {
+      "get": {
+        "operationId": "roadmaps_api_v1_me_roadmaps_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RoadmapView"
+                  },
+                  "title": "Response Roadmaps Api V1 Me Roadmaps Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Roadmaps"
+      }
+    },
+    "/api/v1/me/tracks": {
+      "post": {
+        "operationId": "select_track_api_v1_me_tracks_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectTrackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Select Track"
       }
     },
     "/health/live": {

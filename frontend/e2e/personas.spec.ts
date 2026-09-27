@@ -10,6 +10,9 @@ const personas = [
 ] as const;
 
 test.beforeEach(async ({ page }) => {
+  await page.route("**/api/v1/config", async (route) => {
+    await route.fulfill({ json: { honor_board_enabled: false } });
+  });
   await page.route("**/api/v1/auth/personas", async (route) => {
     await route.fulfill({
       json: personas.map(([key, display_name, role]) => ({
@@ -43,6 +46,25 @@ test.beforeEach(async ({ page }) => {
       },
     });
   });
+  await page.route("**/api/v1/development/tracks", async (route) => {
+    await route.fulfill({
+      json: {
+        active_count: 1,
+        max_active: 2,
+        tracks: [
+          {
+            key: "python",
+            title: "Python-разработчик",
+            status: "active",
+            completed_milestones: [],
+          },
+        ],
+      },
+    });
+  });
+  await page.route("**/api/v1/me/roadmaps", async (route) => {
+    await route.fulfill({ json: [] });
+  });
 });
 
 for (const [key, displayName, , navigation] of personas) {
@@ -50,7 +72,7 @@ for (const [key, displayName, , navigation] of personas) {
     await page.goto("/");
     await page.locator(`[data-persona="${key}"]`).click();
 
-    await expect(page.getByRole("heading", { name: `Здравствуйте, ${displayName}` })).toBeVisible();
+    await expect(page.getByRole("heading", { name: key === "participant-alex" ? "Найдите своё через практику" : `Здравствуйте, ${displayName}` })).toBeVisible();
     const links = page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link");
     await expect(links).toHaveCount(navigation.length);
     await expect(links).toHaveText([...navigation]);

@@ -5,6 +5,7 @@ import { BrowserRouter, Navigate, NavLink, Route, Routes, useParams } from "reac
 import { apiRequest } from "./api/client";
 import { createQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
+import { Bootcamp, DevelopmentJourney } from "./features/development";
 
 type Role = "participant" | "mentor" | "customer" | "manager" | "hr" | "operator";
 
@@ -19,6 +20,7 @@ type Actor = {
   navigation: string[];
   csrf_token?: string | null;
 };
+type PublicConfig = { honor_board_enabled?: boolean };
 
 const roleLabels: Record<Role, string> = {
   participant: "Участник",
@@ -56,10 +58,11 @@ function LoginScreen({ personas, loading, error, onLogin }: { personas: Persona[
   );
 }
 
-function Workspace({ actor, onSwitchRole }: { actor: Actor; onSwitchRole: (role: Role) => void }) {
+function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; honorBoardEnabled: boolean; onSwitchRole: (role: Role) => void }) {
   const { section = "0" } = useParams();
   const sectionIndex = Number(section);
   const allowed = Number.isInteger(sectionIndex) && sectionIndex >= 0 && sectionIndex < actor.navigation.length;
+  const currentSection = allowed ? actor.navigation[sectionIndex] : null;
   return (
     <section className="workspace" aria-labelledby="workspace-title">
       <aside className="sidebar">
@@ -74,12 +77,16 @@ function Workspace({ actor, onSwitchRole }: { actor: Actor; onSwitchRole: (role:
         </nav>
       </aside>
       <div className="workspace-content">
-        {allowed ? (
+        {allowed && actor.active_role === "participant" && currentSection === "Мой путь" ? (
+          <DevelopmentJourney />
+        ) : allowed && actor.active_role === "participant" && currentSection === "Bootcamp" ? (
+          <Bootcamp honorBoardEnabled={honorBoardEnabled} honorBoardConsent={actor.consent_scopes.includes("course_honor_board")} />
+        ) : allowed ? (
           <>
             <p className="eyebrow">{roleLabels[actor.active_role]} · рабочее пространство</p>
             <h1 id="workspace-title">Здравствуйте, {actor.display_name}</h1>
             <p className="lead">Здесь появятся ваши актуальные действия, понятная цель каждого шага и аналитика продвижения к реальному результату.</p>
-            <article className="next-action"><span>Текущий раздел</span><h2>{actor.navigation[sectionIndex]}</h2><p>Демо-данные позволяют пройти сценарий без риска изменить реальные записи.</p></article>
+            <article className="next-action"><span>Текущий раздел</span><h2>{currentSection}</h2><p>Демо-данные позволяют пройти сценарий без риска изменить реальные записи.</p></article>
           </>
         ) : (
           <StatePanel kind="restricted" action="Вернуться в рабочее пространство" onAction={() => { window.location.assign("/workspace/0"); }} />
@@ -90,6 +97,7 @@ function Workspace({ actor, onSwitchRole }: { actor: Actor; onSwitchRole: (role:
 }
 
 function ImpulseApp() {
+  const configQuery = useQuery({ queryKey: ["public-config"], queryFn: () => apiRequest<PublicConfig>("/api/v1/config") });
   const personasQuery = useQuery({ queryKey: ["demo-personas"], queryFn: () => apiRequest<Persona[]>("/api/v1/auth/personas") });
   const meQuery = useQuery({ queryKey: ["me"], queryFn: () => apiRequest<Actor>("/api/v1/me") });
   const [actor, setActor] = useState<Actor | null>(null);
@@ -126,7 +134,7 @@ function ImpulseApp() {
         ) : (
           <>
             <Route path="/" element={<Navigate replace to="/workspace/0" />} />
-            <Route path="/workspace/:section" element={<Workspace actor={actor} onSwitchRole={(role) => { void switchRole(role); }} />} />
+            <Route path="/workspace/:section" element={<Workspace actor={actor} honorBoardEnabled={configQuery.data?.honor_board_enabled === true} onSwitchRole={(role) => { void switchRole(role); }} />} />
             <Route path="*" element={<StatePanel kind="restricted" action="На главную" onAction={() => { window.location.assign("/workspace/0"); }} />} />
           </>
         )}

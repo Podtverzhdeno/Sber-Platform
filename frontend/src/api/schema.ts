@@ -72,6 +72,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/development/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Courses */
+        get: operations["courses_api_v1_development_courses_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/development/tracks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Tracks */
+        get: operations["tracks_api_v1_development_tracks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me": {
         parameters: {
             query?: never;
@@ -123,6 +157,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/courses/{course_key}/completion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report Completion */
+        post: operations["report_completion_api_v1_me_courses__course_key__completion_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/courses/{course_key}/learning-days": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Learning Day */
+        post: operations["record_learning_day_api_v1_me_courses__course_key__learning_days_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/learning/streak": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Streak */
+        get: operations["streak_api_v1_me_learning_streak_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/roadmaps": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Roadmaps */
+        get: operations["roadmaps_api_v1_me_roadmaps_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/tracks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Select Track */
+        post: operations["select_track_api_v1_me_tracks_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health/live": {
         parameters: {
             query?: never;
@@ -168,6 +287,21 @@ export interface components {
             /** Scopes */
             scopes: string[];
         };
+        /**
+         * CompletionStatus
+         * @enum {string}
+         */
+        CompletionStatus: "reported" | "verified" | "rejected";
+        /** CompletionView */
+        CompletionView: {
+            /** Course Key */
+            course_key: string;
+            /** Explanation */
+            explanation: string;
+            /** Rating Eligible */
+            rating_eligible: boolean;
+            status: components["schemas"]["CompletionStatus"];
+        };
         /** ConsentRequest */
         ConsentRequest: {
             /** Granted */
@@ -177,7 +311,7 @@ export interface components {
          * ConsentScope
          * @enum {string}
          */
-        ConsentScope: "public_rating" | "public_trophies" | "public_profile" | "hr_profile" | "ai_memory";
+        ConsentScope: "public_rating" | "public_trophies" | "public_profile" | "hr_profile" | "ai_memory" | "course_honor_board";
         /** ConsentView */
         ConsentView: {
             /** Granted */
@@ -185,6 +319,27 @@ export interface components {
             /** Granted Scopes */
             granted_scopes: components["schemas"]["ConsentScope"][];
             scope: components["schemas"]["ConsentScope"];
+        };
+        /** CourseView */
+        CourseView: {
+            /** Access Note */
+            access_note: string;
+            /** Availability */
+            availability: string;
+            /** Completion Status */
+            completion_status: string | null;
+            /** Key */
+            key: string;
+            /** Rating Eligible */
+            rating_eligible: boolean;
+            /** Recommendation Reason */
+            recommendation_reason: string;
+            /** Source Url */
+            source_url: string;
+            /** Title */
+            title: string;
+            /** Track Keys */
+            track_keys: string[];
         };
         /** DemoLoginRequest */
         DemoLoginRequest: {
@@ -195,6 +350,14 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** LearningDayRequest */
+        LearningDayRequest: {
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
         };
         /**
          * LiveResponse
@@ -208,6 +371,25 @@ export interface components {
              */
             status: "ok";
         };
+        /** MilestoneView */
+        MilestoneView: {
+            /** Completed */
+            completed: boolean;
+            /** Key */
+            key: string;
+            /** Position */
+            position: number;
+            /** Purpose */
+            purpose: string;
+            /** Skill */
+            skill: string;
+            /** Target Key */
+            target_key: string;
+            /** Target Kind */
+            target_kind: string;
+            /** Title */
+            title: string;
+        };
         /** PersonaView */
         PersonaView: {
             /** Display Name */
@@ -217,14 +399,69 @@ export interface components {
             /** Roles */
             roles: components["schemas"]["Role"][];
         };
+        /** RoadmapView */
+        RoadmapView: {
+            /** Milestones */
+            milestones: components["schemas"]["MilestoneView"][];
+            next_step: components["schemas"]["MilestoneView"] | null;
+            /** Policy Version */
+            policy_version: number;
+            /** Replacement Reason */
+            replacement_reason: string | null;
+            /** Track Key */
+            track_key: string;
+        };
         /**
          * Role
          * @enum {string}
          */
         Role: "participant" | "mentor" | "customer" | "manager" | "hr" | "operator";
+        /** SelectTrackRequest */
+        SelectTrackRequest: {
+            /** Freeze Track Key */
+            freeze_track_key?: string | null;
+            /** Track Key */
+            track_key: string;
+        };
+        /** StreakView */
+        StreakView: {
+            /** Current Days */
+            current_days: number;
+            /** Qualified Dates */
+            qualified_dates: string[];
+            /** Reason */
+            reason: string;
+        };
         /** SwitchRoleRequest */
         SwitchRoleRequest: {
             role: components["schemas"]["Role"];
+        };
+        /** TrackOverview */
+        TrackOverview: {
+            /** Active Count */
+            active_count: number;
+            /**
+             * Max Active
+             * @default 2
+             */
+            max_active: number;
+            /** Tracks */
+            tracks: components["schemas"]["TrackView"][];
+        };
+        /**
+         * TrackStatus
+         * @enum {string}
+         */
+        TrackStatus: "active" | "frozen";
+        /** TrackView */
+        TrackView: {
+            /** Completed Milestones */
+            completed_milestones: string[];
+            /** Key */
+            key: string;
+            status: components["schemas"]["TrackStatus"] | null;
+            /** Title */
+            title: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -352,6 +589,46 @@ export interface operations {
             };
         };
     };
+    courses_api_v1_development_courses_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseView"][];
+                };
+            };
+        };
+    };
+    tracks_api_v1_development_tracks_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrackOverview"];
+                };
+            };
+        };
+    };
     me_api_v1_me_get: {
         parameters: {
             query?: never;
@@ -431,6 +708,151 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ConsentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_completion_api_v1_me_courses__course_key__completion_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                course_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompletionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_learning_day_api_v1_me_courses__course_key__learning_days_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                course_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearningDayRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreakView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    streak_api_v1_me_learning_streak_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StreakView"];
+                };
+            };
+        };
+    };
+    roadmaps_api_v1_me_roadmaps_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoadmapView"][];
+                };
+            };
+        };
+    };
+    select_track_api_v1_me_tracks_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SelectTrackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrackOverview"];
                 };
             };
             /** @description Validation Error */

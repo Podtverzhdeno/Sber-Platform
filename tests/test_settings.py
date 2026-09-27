@@ -18,6 +18,7 @@ def test_development_demo_has_safe_defaults() -> None:
 
     assert settings.demo_mode is True
     assert settings.openrouter_model_buddy == "openrouter/free"
+    assert settings.honor_board_enabled is False
 
 
 def test_non_demo_fails_without_real_auth_provider() -> None:

@@ -45,12 +45,12 @@
 
 ## 6. Направления, roadmap и Bootcamp
 
-- [ ] 6.1 Реализовать track/attempt policies: максимум два active, freeze/reactivate, история без штрафа; domain tests SHALL покрыть все scenarios `career-roadmap`.
-- [ ] 6.2 Реализовать roadmap versions/milestones и объяснимый next step; API tests SHALL сохранить completed milestones при пересчёте версии.
-- [ ] 6.3 Реализовать participant dashboard, tracks и roadmap UI, включая выбор замораживаемого track при третьей роли; Playwright SHALL пройти switch journey без mentor approval.
-- [ ] 6.4 Реализовать course catalog, track links, availability и `reported/verified/rejected` completion; tests SHALL запретить баллы за reported.
-- [ ] 6.5 Реализовать learning-day qualification и streak по timezone с максимум одним днём; property/boundary tests SHALL покрыть полночь и дубликаты.
-- [ ] 6.6 Реализовать Bootcamp UI с filters, reason, progress, verification и feature-flagged honor board; frontend tests SHALL скрыть пользователя без consent.
+- [x] 6.1 Реализовать track/attempt policies: максимум два active, freeze/reactivate, история без штрафа; domain tests SHALL покрыть все scenarios `career-roadmap`.
+- [x] 6.2 Реализовать roadmap versions/milestones и объяснимый next step; API tests SHALL сохранить completed milestones при пересчёте версии.
+- [x] 6.3 Реализовать participant dashboard, tracks и roadmap UI, включая выбор замораживаемого track при третьей роли; Playwright SHALL пройти switch journey без mentor approval.
+- [x] 6.4 Реализовать course catalog, track links, availability и `reported/verified/rejected` completion; tests SHALL запретить баллы за reported.
+- [x] 6.5 Реализовать learning-day qualification и streak по timezone с максимум одним днём; property/boundary tests SHALL покрыть полночь и дубликаты.
+- [x] 6.6 Реализовать Bootcamp UI с filters, reason, progress, verification и feature-flagged honor board; frontend tests SHALL скрыть пользователя без consent.
 
 ## 7. Каталог событий и внешние доказательства
 
