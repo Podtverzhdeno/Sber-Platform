@@ -21,6 +21,9 @@ from impulse.domain.recognition import (
     CredentialStatus,
     DiplomaThreshold,
     LeaderboardCandidate,
+    OfferEvidence,
+    OfferEvidenceStatus,
+    OfferProof,
     RatingPolicy,
     RatingSeason,
     ScoreEntry,
@@ -45,6 +48,9 @@ from impulse.infrastructure.models.recognition import (
     seasons,
     standings,
     trophies,
+)
+from impulse.infrastructure.models.recognition import (
+    offer_evidence as offer_evidence_table,
 )
 
 
@@ -322,6 +328,7 @@ class SqlRecognitionStore(RecognitionStore):
     async def leaderboard_candidates(self, season_id: UUID) -> tuple[LeaderboardCandidate, ...]:
         rating_visibility = visibility_settings.alias("rating_visibility")
         trophy_visibility = visibility_settings.alias("trophy_visibility")
+        offer_visibility = visibility_settings.alias("offer_visibility")
         async with self.database.sessions() as session:
             rows = (
                 (
@@ -331,6 +338,7 @@ class SqlRecognitionStore(RecognitionStore):
                             persons.c.display_name,
                             rating_visibility.c.visible.label("rating_visible"),
                             trophy_visibility.c.visible.label("trophies_visible"),
+                            offer_visibility.c.visible.label("offers_visible"),
                         )
                         .join(persons, persons.c.id == standings.c.person_id)
                         .outerjoin(
@@ -342,6 +350,11 @@ class SqlRecognitionStore(RecognitionStore):
                             trophy_visibility,
                             (trophy_visibility.c.person_id == standings.c.person_id)
                             & (trophy_visibility.c.scope == "public_trophies"),
+                        )
+                        .outerjoin(
+                            offer_visibility,
+                            (offer_visibility.c.person_id == standings.c.person_id)
+                            & (offer_visibility.c.scope == "public_profile"),
                         )
                         .where(standings.c.season_id == season_id)
                         .order_by(standings.c.place)
@@ -356,6 +369,7 @@ class SqlRecognitionStore(RecognitionStore):
                 if bool(row["rating_visible"]) and bool(row["trophies_visible"])
             ]
             trophy_rows: Sequence[RowMapping] = ()
+            offer_rows: Sequence[RowMapping] = ()
             if public_trophy_people:
                 trophy_rows = (
                     (
@@ -386,6 +400,24 @@ class SqlRecognitionStore(RecognitionStore):
                     .mappings()
                     .all()
                 )
+            public_offer_people = [
+                row["person_id"]
+                for row in rows
+                if bool(row["rating_visible"]) and bool(row["offers_visible"])
+            ]
+            if public_offer_people:
+                offer_rows = (
+                    (
+                        await session.execute(
+                            select(offer_evidence_table).where(
+                                offer_evidence_table.c.person_id.in_(public_offer_people),
+                                offer_evidence_table.c.status == OfferEvidenceStatus.VERIFIED.value,
+                            )
+                        )
+                    )
+                    .mappings()
+                    .all()
+                )
         proofs: dict[UUID, list[TrophyProof]] = {}
         for row in trophy_rows:
             person_id = UUID(str(row["person_id"]))
@@ -396,6 +428,17 @@ class SqlRecognitionStore(RecognitionStore):
                     source_url=str(row["source_url"]),
                 )
             )
+        offer_proofs: dict[UUID, list[OfferProof]] = {}
+        for row in offer_rows:
+            payload = dict(row["payload"])
+            person_id = UUID(str(row["person_id"]))
+            offer_proofs.setdefault(person_id, []).append(
+                OfferProof(
+                    event_title=str(payload["event_title"]),
+                    source_url=str(payload["source_url"]),
+                    basis=str(payload["basis"]),
+                )
+            )
         return tuple(
             LeaderboardCandidate(
                 standing=self._standing(row),
@@ -403,6 +446,8 @@ class SqlRecognitionStore(RecognitionStore):
                 rating_visible=bool(row["rating_visible"]),
                 trophies_visible=bool(row["trophies_visible"]),
                 trophies=tuple(proofs.get(row["person_id"], ())),
+                offers_visible=bool(row["offers_visible"]),
+                offers=tuple(offer_proofs.get(row["person_id"], ())),
             )
             for row in rows
         )
@@ -516,6 +561,44 @@ class SqlRecognitionStore(RecognitionStore):
                 raise ApiError("STALE_CREDENTIAL", "Credential status changed.", 409)
         return credential
 
+    async def add_offer_evidence(self, evidence: OfferEvidence) -> OfferEvidence:
+        try:
+            async with self.database.session() as session:
+                await session.execute(
+                    insert(offer_evidence_table).values(**self._offer_values(evidence))
+                )
+        except IntegrityError as exc:
+            raise ApiError("OFFER_EVIDENCE_EXISTS", "Offer evidence already exists.", 409) from exc
+        return evidence
+
+    async def offer_evidence(self, evidence_id: UUID) -> OfferEvidence | None:
+        async with self.database.sessions() as session:
+            row = (
+                (
+                    await session.execute(
+                        select(offer_evidence_table).where(offer_evidence_table.c.id == evidence_id)
+                    )
+                )
+                .mappings()
+                .one_or_none()
+            )
+        return self._offer(row) if row is not None else None
+
+    async def save_offer_evidence(self, evidence: OfferEvidence) -> OfferEvidence:
+        async with self.database.session() as session:
+            changed = await session.execute(
+                update(offer_evidence_table)
+                .where(
+                    offer_evidence_table.c.id == evidence.evidence_id,
+                    offer_evidence_table.c.status == OfferEvidenceStatus.VERIFIED.value,
+                )
+                .values(**self._offer_values(evidence, include_id=False))
+                .returning(offer_evidence_table.c.id)
+            )
+            if changed.scalar_one_or_none() is None:
+                raise ApiError("STALE_OFFER_EVIDENCE", "Offer evidence changed.", 409)
+        return evidence
+
     @staticmethod
     def _score_entry(row: RowMapping) -> ScoreEntry:
         payload = dict(row["payload"])
@@ -609,4 +692,42 @@ class SqlRecognitionStore(RecognitionStore):
             checksum=str(payload["checksum"]),
             status_reason=str(payload["status_reason"]) if payload.get("status_reason") else None,
             supersedes_id=UUID(str(supersedes_id)) if supersedes_id else None,
+        )
+
+    @staticmethod
+    def _offer_values(item: OfferEvidence, *, include_id: bool = True) -> dict[str, object]:
+        values: dict[str, object] = {
+            "person_id": item.person_id,
+            "provider": item.provider,
+            "external_id": item.external_id,
+            "status": item.status.value,
+            "data_origin": "runtime",
+            "payload": {
+                "event_title": item.event_title,
+                "source_url": item.source_url,
+                "basis": item.basis,
+                "verified_at": item.verified_at.isoformat(),
+                "revocation_reason": item.revocation_reason,
+            },
+        }
+        if include_id:
+            values["id"] = item.evidence_id
+        return values
+
+    @staticmethod
+    def _offer(row: RowMapping) -> OfferEvidence:
+        payload = dict(row["payload"])
+        return OfferEvidence(
+            evidence_id=row["id"],
+            person_id=row["person_id"],
+            provider=row["provider"],
+            external_id=row["external_id"],
+            event_title=str(payload["event_title"]),
+            source_url=str(payload["source_url"]),
+            basis=str(payload["basis"]),
+            verified_at=datetime.fromisoformat(str(payload["verified_at"])),
+            status=OfferEvidenceStatus(row["status"]),
+            revocation_reason=str(payload["revocation_reason"])
+            if payload.get("revocation_reason")
+            else None,
         )

@@ -186,7 +186,7 @@ def test_public_leaderboard_anonymizes_without_consent_and_hides_trophies() -> N
             Standing(season_id, visible_id, 2, Decimal("100"), 1, Decimal("100"), None),
             "Visible Person",
             rating_visible=True,
-            trophies_visible=False,
+            trophies_visible=True,
             trophies=(proof,),
         ),
     )
@@ -199,4 +199,5 @@ def test_public_leaderboard_anonymizes_without_consent_and_hides_trophies() -> N
     assert result[0].trophies == ()
     assert result[1].person_id == visible_id
     assert result[1].display_name == "Visible Person"
-    assert result[1].trophies == ()
+    assert result[1].trophies == (proof,)
+    assert result[1].offers == ()

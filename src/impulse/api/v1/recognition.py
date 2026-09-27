@@ -17,6 +17,8 @@ from impulse.domain.recognition import (
     CredentialStatus,
     DiplomaThreshold,
     LeaderboardEntry,
+    OfferEvidence,
+    OfferEvidenceStatus,
     RatingPolicy,
     RatingSeason,
     ScoreEntry,
@@ -100,6 +102,15 @@ class RevokeCredentialRequest(BaseModel):
     reason: str = Field(min_length=1, max_length=2000)
 
 
+class VerifyOfferRequest(BaseModel):
+    person_id: UUID
+    provider: str = Field(min_length=1, max_length=96)
+    external_id: str = Field(min_length=1, max_length=160)
+    event_title: str = Field(min_length=1, max_length=200)
+    source_url: str = Field(min_length=1, max_length=2048)
+    basis: str = Field(min_length=1, max_length=2000)
+
+
 class SeasonView(BaseModel):
     id: UUID
     key: str
@@ -149,6 +160,12 @@ class TrophyProofView(BaseModel):
     source_url: str
 
 
+class OfferProofView(BaseModel):
+    event_title: str
+    source_url: str
+    basis: str
+
+
 class LeaderboardEntryView(BaseModel):
     place: int
     person_id: UUID | None
@@ -156,6 +173,7 @@ class LeaderboardEntryView(BaseModel):
     score: Decimal
     successful_projects: int
     trophies: list[TrophyProofView]
+    offers: list[OfferProofView]
     anonymized: bool
 
 
@@ -181,6 +199,19 @@ class OperationalCredentialView(PublicCredentialView):
     checksum: str
     status_reason: str | None
     supersedes_id: UUID | None
+
+
+class OfferEvidenceView(BaseModel):
+    id: UUID
+    person_id: UUID
+    provider: str
+    external_id: str
+    event_title: str
+    source_url: str
+    basis: str
+    verified_at: datetime
+    status: OfferEvidenceStatus
+    revocation_reason: str | None
 
 
 def _season_view(season: RatingSeason) -> SeasonView:
@@ -263,6 +294,14 @@ def _leaderboard_view(item: LeaderboardEntry) -> LeaderboardEntryView:
             )
             for proof in item.trophies
         ],
+        offers=[
+            OfferProofView(
+                event_title=proof.event_title,
+                source_url=proof.source_url,
+                basis=proof.basis,
+            )
+            for proof in item.offers
+        ],
         anonymized=item.anonymized,
     )
 
@@ -293,6 +332,21 @@ def _operational_credential(item: Credential) -> OperationalCredentialView:
         checksum=item.checksum,
         status_reason=item.status_reason,
         supersedes_id=item.supersedes_id,
+    )
+
+
+def _offer_view(item: OfferEvidence) -> OfferEvidenceView:
+    return OfferEvidenceView(
+        id=item.evidence_id,
+        person_id=item.person_id,
+        provider=item.provider,
+        external_id=item.external_id,
+        event_title=item.event_title,
+        source_url=item.source_url,
+        basis=item.basis,
+        verified_at=item.verified_at,
+        status=item.status,
+        revocation_reason=item.revocation_reason,
     )
 
 
@@ -478,3 +532,37 @@ async def verify_credential(
     service: Annotated[RecognitionService, Depends(_service)],
 ) -> PublicCredentialView:
     return _public_credential(await service.verify_credential(verification_id))
+
+
+@router.post("/operations/offer-evidence", response_model=OfferEvidenceView)
+async def verify_offer_evidence(
+    command: VerifyOfferRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> OfferEvidenceView:
+    return _offer_view(
+        await service.verify_offer_evidence(
+            authenticated.actor,
+            person_id=command.person_id,
+            provider=command.provider,
+            external_id=command.external_id,
+            event_title=command.event_title,
+            source_url=command.source_url,
+            basis=command.basis,
+        )
+    )
+
+
+@router.post(
+    "/operations/offer-evidence/{evidence_id}/revoke",
+    response_model=OfferEvidenceView,
+)
+async def revoke_offer_evidence(
+    evidence_id: UUID,
+    command: RevokeCredentialRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> OfferEvidenceView:
+    return _offer_view(
+        await service.revoke_offer_evidence(authenticated.actor, evidence_id, reason=command.reason)
+    )

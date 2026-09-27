@@ -21,6 +21,8 @@ from impulse.domain.recognition import (
     DiplomaThreshold,
     LeaderboardCandidate,
     LeaderboardEntry,
+    OfferEvidence,
+    OfferEvidenceStatus,
     RatingPolicy,
     RatingPolicyError,
     RatingSeason,
@@ -61,6 +63,9 @@ class RecognitionStore(Protocol):
         self, previous: Credential, replacement: Credential
     ) -> Credential: ...
     async def save_credential(self, credential: Credential) -> Credential: ...
+    async def add_offer_evidence(self, evidence: OfferEvidence) -> OfferEvidence: ...
+    async def offer_evidence(self, evidence_id: UUID) -> OfferEvidence | None: ...
+    async def save_offer_evidence(self, evidence: OfferEvidence) -> OfferEvidence: ...
 
 
 class MemoryRecognitionStore:
@@ -79,6 +84,7 @@ class MemoryRecognitionStore:
         self._leaderboard_candidates = leaderboard_candidates
         self._leaderboard_profiles = leaderboard_profiles or {}
         self._credentials: dict[UUID, Credential] = {}
+        self._offer_evidence: dict[UUID, OfferEvidence] = {}
 
     async def season(self, season_id: UUID) -> RatingSeason | None:
         return self._seasons.get(season_id)
@@ -191,6 +197,22 @@ class MemoryRecognitionStore:
     async def save_credential(self, credential: Credential) -> Credential:
         self._credentials[credential.credential_id] = credential
         return credential
+
+    async def add_offer_evidence(self, evidence: OfferEvidence) -> OfferEvidence:
+        if any(
+            item.provider == evidence.provider and item.external_id == evidence.external_id
+            for item in self._offer_evidence.values()
+        ):
+            raise ApiError("OFFER_EVIDENCE_EXISTS", "Offer evidence already exists.", 409)
+        self._offer_evidence[evidence.evidence_id] = evidence
+        return evidence
+
+    async def offer_evidence(self, evidence_id: UUID) -> OfferEvidence | None:
+        return self._offer_evidence.get(evidence_id)
+
+    async def save_offer_evidence(self, evidence: OfferEvidence) -> OfferEvidence:
+        self._offer_evidence[evidence.evidence_id] = evidence
+        return evidence
 
 
 class RecognitionService:
@@ -441,6 +463,46 @@ class RecognitionService:
         if credential is None:
             raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
         return credential
+
+    async def verify_offer_evidence(
+        self,
+        actor: ActorContext,
+        *,
+        person_id: UUID,
+        provider: str,
+        external_id: str,
+        event_title: str,
+        source_url: str,
+        basis: str,
+    ) -> OfferEvidence:
+        self._operator(actor)
+        if not all(
+            value.strip() for value in (provider, external_id, event_title, source_url, basis)
+        ):
+            raise ApiError("INVALID_OFFER_EVIDENCE", "Complete offer evidence is required.", 422)
+        return await self.store.add_offer_evidence(
+            OfferEvidence(
+                uuid4(),
+                person_id,
+                provider,
+                external_id,
+                event_title,
+                source_url,
+                basis,
+                datetime.now(UTC),
+                OfferEvidenceStatus.VERIFIED,
+            )
+        )
+
+    async def revoke_offer_evidence(
+        self, actor: ActorContext, evidence_id: UUID, *, reason: str
+    ) -> OfferEvidence:
+        self._operator(actor)
+        evidence = await self.store.offer_evidence(evidence_id)
+        if evidence is None:
+            raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
+        revoked = self._policy(lambda: evidence.revoke(reason))
+        return await self.store.save_offer_evidence(revoked)
 
     async def _active_policy(
         self, season_id: UUID, *, allow_frozen: bool = False

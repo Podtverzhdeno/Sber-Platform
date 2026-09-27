@@ -17,6 +17,7 @@ from impulse.domain.recognition import (
     Credential,
     CredentialStatus,
     DiplomaThreshold,
+    OfferEvidence,
     RatingPolicy,
     RatingSeason,
     ScoreEntry,
@@ -27,7 +28,12 @@ from impulse.domain.recognition import (
 )
 from impulse.infrastructure.database import Database, async_database_url
 from impulse.infrastructure.models.identity import visibility_settings
-from impulse.infrastructure.models.recognition import credentials, score_ledger, trophies
+from impulse.infrastructure.models.recognition import (
+    credentials,
+    offer_evidence,
+    score_ledger,
+    trophies,
+)
 from impulse.infrastructure.recognition_store import SqlRecognitionStore
 
 pytestmark = pytest.mark.integration
@@ -120,7 +126,7 @@ async def test_policy_round_trip_and_season_binding() -> None:
     assert first_projection == second_projection
     assert first_projection[0].score == Decimal("105.0")
     async with database.session() as session:
-        for scope in ("public_rating", "public_trophies"):
+        for scope in ("public_rating", "public_trophies", "public_profile"):
             await session.execute(
                 insert(visibility_settings).values(
                     person_id=members[0].person_id,
@@ -142,6 +148,24 @@ async def test_policy_round_trip_and_season_binding() -> None:
     assert public_rows[0].person_id == members[0].person_id
     assert public_rows[0].trophies[0].trophy_type == "winner"
     assert public_rows[0].trophies[0].source_url.startswith("https://")
+    assert public_rows[0].offers == ()
+
+    verified_offer = OfferEvidence(
+        uuid4(),
+        members[0].person_id,
+        "demo-organizer",
+        f"offer-{uuid4().hex}",
+        "Demo Hack",
+        "https://example.test/offer-proof",
+        "Personal offer confirmed by organizer.",
+        datetime.now(UTC),
+    )
+    await store.add_offer_evidence(verified_offer)
+    with_offer = public_leaderboard(await store.leaderboard_candidates(season.season_id))
+    assert with_offer[0].offers[0].basis.startswith("Personal offer")
+    await store.save_offer_evidence(verified_offer.revoke("Organizer correction."))
+    after_revoke = public_leaderboard(await store.leaderboard_candidates(season.season_id))
+    assert after_revoke[0].offers == ()
 
     async with database.session() as session:
         await session.execute(
@@ -210,6 +234,9 @@ async def test_policy_round_trip_and_season_binding() -> None:
     async with database.session() as session:
         await session.execute(
             delete(credentials).where(credentials.c.season_id == season.season_id)
+        )
+        await session.execute(
+            delete(offer_evidence).where(offer_evidence.c.id == verified_offer.evidence_id)
         )
     with pytest.raises(DBAPIError):
         async with database.session() as session:

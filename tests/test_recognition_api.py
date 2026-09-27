@@ -203,6 +203,7 @@ def test_score_api_preserves_source_and_rebuilds_after_correction() -> None:
             "score": "70",
             "successful_projects": 1,
             "trophies": [],
+            "offers": [],
             "anonymized": True,
         }
 
@@ -261,3 +262,23 @@ def test_score_api_preserves_source_and_rebuilds_after_correction() -> None:
             headers=headers,
         )
         assert revoked.json()["status"] == "revoked"
+        offer = api.post(
+            "/api/v1/operations/offer-evidence",
+            json={
+                "person_id": str(participant.person_id),
+                "provider": "demo-organizer",
+                "external_id": "personal-offer-1",
+                "event_title": "Python Hack",
+                "source_url": "https://example.test/events/python-hack",
+                "basis": "Personal internship offer confirmed by organizer.",
+            },
+            headers=headers,
+        )
+        assert offer.status_code == 200
+        assert offer.json()["status"] == "verified"
+        offer_revoked = api.post(
+            f"/api/v1/operations/offer-evidence/{offer.json()['id']}/revoke",
+            json={"reason": "Organizer withdrew the record."},
+            headers=headers,
+        )
+        assert offer_revoked.json()["status"] == "revoked"

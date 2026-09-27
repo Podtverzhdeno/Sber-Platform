@@ -34,6 +34,11 @@ class CredentialStatus(StrEnum):
     SUPERSEDED = "superseded"
 
 
+class OfferEvidenceStatus(StrEnum):
+    VERIFIED = "verified"
+    REVOKED = "revoked"
+
+
 def _decimal(value: object) -> Decimal:
     if not isinstance(value, Decimal):
         raise RatingPolicyError("Weight and cap must use Decimal.")
@@ -267,12 +272,44 @@ class TrophyProof:
 
 
 @dataclass(frozen=True, slots=True)
+class OfferEvidence:
+    evidence_id: UUID
+    person_id: UUID
+    provider: str
+    external_id: str
+    event_title: str
+    source_url: str
+    basis: str
+    verified_at: datetime
+    status: OfferEvidenceStatus = OfferEvidenceStatus.VERIFIED
+    revocation_reason: str | None = None
+
+    def revoke(self, reason: str) -> OfferEvidence:
+        if self.status is not OfferEvidenceStatus.VERIFIED or not reason.strip():
+            raise RatingPolicyError("Only verified offer evidence can be revoked with reason.")
+        return replace(
+            self,
+            status=OfferEvidenceStatus.REVOKED,
+            revocation_reason=reason,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class OfferProof:
+    event_title: str
+    source_url: str
+    basis: str
+
+
+@dataclass(frozen=True, slots=True)
 class LeaderboardCandidate:
     standing: Standing
     display_name: str
     rating_visible: bool
     trophies_visible: bool
     trophies: tuple[TrophyProof, ...] = ()
+    offers_visible: bool = False
+    offers: tuple[OfferProof, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -283,6 +320,7 @@ class LeaderboardEntry:
     score: Decimal
     successful_projects: int
     trophies: tuple[TrophyProof, ...]
+    offers: tuple[OfferProof, ...]
     anonymized: bool
 
 
@@ -298,6 +336,7 @@ def public_leaderboard(
             score=item.standing.score,
             successful_projects=item.standing.successful_projects,
             trophies=(item.trophies if item.rating_visible and item.trophies_visible else ()),
+            offers=(item.offers if item.rating_visible and item.offers_visible else ()),
             anonymized=not item.rating_visible,
         )
         for item in sorted(candidates, key=lambda candidate: candidate.standing.place)

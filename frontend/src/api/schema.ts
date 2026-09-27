@@ -837,6 +837,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/offer-evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify Offer Evidence */
+        post: operations["verify_offer_evidence_api_v1_operations_offer_evidence_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/offer-evidence/{evidence_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke Offer Evidence */
+        post: operations["revoke_offer_evidence_api_v1_operations_offer_evidence__evidence_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/operations/payouts/{claim_id}/approve": {
         parameters: {
             query?: never;
@@ -1776,6 +1810,8 @@ export interface components {
             anonymized: boolean;
             /** Display Name */
             display_name: string;
+            /** Offers */
+            offers: components["schemas"]["OfferProofView"][];
             /** Person Id */
             person_id: string | null;
             /** Place */
@@ -1832,6 +1868,51 @@ export interface components {
             target_kind: string;
             /** Title */
             title: string;
+        };
+        /**
+         * OfferEvidenceStatus
+         * @enum {string}
+         */
+        OfferEvidenceStatus: "verified" | "revoked";
+        /** OfferEvidenceView */
+        OfferEvidenceView: {
+            /** Basis */
+            basis: string;
+            /** Event Title */
+            event_title: string;
+            /** External Id */
+            external_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Provider */
+            provider: string;
+            /** Revocation Reason */
+            revocation_reason: string | null;
+            /** Source Url */
+            source_url: string;
+            status: components["schemas"]["OfferEvidenceStatus"];
+            /**
+             * Verified At
+             * Format: date-time
+             */
+            verified_at: string;
+        };
+        /** OfferProofView */
+        OfferProofView: {
+            /** Basis */
+            basis: string;
+            /** Event Title */
+            event_title: string;
+            /** Source Url */
+            source_url: string;
         };
         /** OpenReviewAppealRequest */
         OpenReviewAppealRequest: {
@@ -2462,6 +2543,24 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** VerifyOfferRequest */
+        VerifyOfferRequest: {
+            /** Basis */
+            basis: string;
+            /** Event Title */
+            event_title: string;
+            /** External Id */
+            external_id: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Provider */
+            provider: string;
+            /** Source Url */
+            source_url: string;
         };
         /** WorkItemView */
         WorkItemView: {
@@ -3987,6 +4086,78 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClaimView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    verify_offer_evidence_api_v1_operations_offer_evidence_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyOfferRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferEvidenceView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_offer_evidence_api_v1_operations_offer_evidence__evidence_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                evidence_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RevokeCredentialRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferEvidenceView"];
                 };
             };
             /** @description Validation Error */

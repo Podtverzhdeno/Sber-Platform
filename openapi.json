@@ -1643,6 +1643,13 @@
             "title": "Display Name",
             "type": "string"
           },
+          "offers": {
+            "items": {
+              "$ref": "#/components/schemas/OfferProofView"
+            },
+            "title": "Offers",
+            "type": "array"
+          },
           "person_id": {
             "anyOf": [
               {
@@ -1683,6 +1690,7 @@
           "score",
           "successful_projects",
           "trophies",
+          "offers",
           "anonymized"
         ],
         "title": "LeaderboardEntryView",
@@ -1789,6 +1797,104 @@
           "completed"
         ],
         "title": "MilestoneView",
+        "type": "object"
+      },
+      "OfferEvidenceStatus": {
+        "enum": [
+          "verified",
+          "revoked"
+        ],
+        "title": "OfferEvidenceStatus",
+        "type": "string"
+      },
+      "OfferEvidenceView": {
+        "properties": {
+          "basis": {
+            "title": "Basis",
+            "type": "string"
+          },
+          "event_title": {
+            "title": "Event Title",
+            "type": "string"
+          },
+          "external_id": {
+            "title": "External Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "revocation_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revocation Reason"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OfferEvidenceStatus"
+          },
+          "verified_at": {
+            "format": "date-time",
+            "title": "Verified At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "person_id",
+          "provider",
+          "external_id",
+          "event_title",
+          "source_url",
+          "basis",
+          "verified_at",
+          "status",
+          "revocation_reason"
+        ],
+        "title": "OfferEvidenceView",
+        "type": "object"
+      },
+      "OfferProofView": {
+        "properties": {
+          "basis": {
+            "title": "Basis",
+            "type": "string"
+          },
+          "event_title": {
+            "title": "Event Title",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "event_title",
+          "source_url",
+          "basis"
+        ],
+        "title": "OfferProofView",
         "type": "object"
       },
       "OpenReviewAppealRequest": {
@@ -3502,6 +3608,55 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "VerifyOfferRequest": {
+        "properties": {
+          "basis": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Basis",
+            "type": "string"
+          },
+          "event_title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Event Title",
+            "type": "string"
+          },
+          "external_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "External Id",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "provider": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Provider",
+            "type": "string"
+          },
+          "source_url": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Source Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "person_id",
+          "provider",
+          "external_id",
+          "event_title",
+          "source_url",
+          "basis"
+        ],
+        "title": "VerifyOfferRequest",
         "type": "object"
       },
       "WorkItemView": {
@@ -5957,6 +6112,128 @@
           }
         },
         "summary": "Decide Claim"
+      }
+    },
+    "/api/v1/operations/offer-evidence": {
+      "post": {
+        "operationId": "verify_offer_evidence_api_v1_operations_offer_evidence_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyOfferRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferEvidenceView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify Offer Evidence"
+      }
+    },
+    "/api/v1/operations/offer-evidence/{evidence_id}/revoke": {
+      "post": {
+        "operationId": "revoke_offer_evidence_api_v1_operations_offer_evidence__evidence_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "evidence_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Evidence Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeCredentialRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferEvidenceView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revoke Offer Evidence"
       }
     },
     "/api/v1/operations/payouts/{claim_id}/approve": {
