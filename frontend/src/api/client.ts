@@ -16,7 +16,11 @@ export type RuntimeApiPath =
   | `/api/v1/me/assignments/${string}/start`
   | `/api/v1/me/assignments/${string}/contributions`
   | `/api/v1/customer/tasks/${string}/participant-preview`
-  | `/api/v1/customer/contributions/${string}/decision`;
+  | `/api/v1/customer/contributions/${string}/decision`
+  | `/api/v1/customer/projects/${string}/tasks`
+  | `/api/v1/customer/tasks/${string}/submit`
+  | `/api/v1/customer/tasks/${string}/applications`
+  | `/api/v1/customer/applications/${string}/accept`;
 
 export class ApiClientError extends Error {
   readonly status: number;

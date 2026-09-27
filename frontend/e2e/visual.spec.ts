@@ -16,6 +16,7 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/auth/personas", async (route) => route.fulfill({ json: [{ key: "customer-roman", display_name: customer.display_name, roles: ["customer"] }] }));
   await page.route("**/api/v1/me", async (route) => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
   await page.route("**/api/v1/auth/demo-login", async (route) => route.fulfill({ json: customer }));
+  await page.route("**/api/v1/customer/tasks", async (route) => route.fulfill({ json: [] }));
 });
 
 for (const viewport of [
@@ -27,7 +28,7 @@ for (const viewport of [
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto("/");
     await page.locator('[data-persona="customer-roman"]').click();
-    await expect(page.getByRole("heading", { name: "Добро пожаловать, Роман!" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Управляйте задачами от идеи до результата" })).toBeVisible();
     await expect(page.locator("body")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     await expect(page.locator(".sidebar")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     await expect(page.locator(".metric-card").first()).toHaveCSS("border-radius", "13px");

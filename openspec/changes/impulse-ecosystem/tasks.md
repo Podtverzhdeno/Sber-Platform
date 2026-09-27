@@ -91,7 +91,7 @@
 
 ## 11. Кабинеты заказчика, ментора, руководителя, HR и оператора
 
-- [ ] 11.1 Реализовать customer dashboard/wizard/queue/acceptance и analytics links; role e2e SHALL создать unpaid и paid draft с participant preview.
+- [x] 11.1 Реализовать customer dashboard/wizard/queue/acceptance и analytics links; role e2e SHALL создать unpaid и paid draft с participant preview.
 - [ ] 11.2 Реализовать mentor queue/workspace с due sorting, evidence, rubric, publish/escalate; permission tests SHALL скрыть неназначенные assignments.
 - [ ] 11.3 Реализовать manager initiatives/accepted artifacts/reuse aggregates; tests SHALL исключить chats, closed reviews и чужие payouts.
 - [ ] 11.4 Реализовать HR candidate search/evidence resume и pipeline invitation→interview→offer→hire; tests SHALL считать каждую стадию только по human event.

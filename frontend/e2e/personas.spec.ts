@@ -68,6 +68,9 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/mentor/review-workspace", async (route) => {
     await route.fulfill({ json: [] });
   });
+  await page.route("**/api/v1/customer/tasks", async (route) => {
+    await route.fulfill({ json: [] });
+  });
 });
 
 for (const [key, displayName, , navigation] of personas) {
@@ -79,6 +82,8 @@ for (const [key, displayName, , navigation] of personas) {
       ? "Найдите своё через практику"
       : key === "mentor-elena"
         ? "Проверяйте доказательства, а не вывод AI"
+        : key === "customer-roman"
+          ? "Управляйте задачами от идеи до результата"
         : `Добро пожаловать, ${displayName.split(" ")[0]}!`;
     await expect(page.getByRole("heading", { name: heading })).toBeVisible();
     const links = page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link");

@@ -1,0 +1,56 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+
+import { apiRequest } from "../api/client";
+import { Badge, StatePanel } from "../components/ui";
+
+type Task = { id: string; project_key: string; task_key: string; title: string; status: string; nominated_mentor_id: string | null; support_mode: string | null; support_assignee_id: string | null; places: number };
+type Application = { id: string; task_id: string; person_id: string; accepted_terms_version: number; status: string; version: number };
+type DraftKind = "paid" | "unpaid";
+type DraftForm = { title: string; problem: string; deliverable: string; criterion: string; deadline: string; dataConstraints: string; ipTerms: string; places: string; baseAmount: string; aMultiplier: string };
+
+const initialForm: DraftForm = { title: "", problem: "", deliverable: "", criterion: "", deadline: "2026-12-20T18:00", dataConstraints: "Только обезличенные демонстрационные данные", ipTerms: "Результат передаётся заказчику, авторство участника сохраняется в портфолио", places: "2", baseAmount: "50000", aMultiplier: "2" };
+const csrfHeaders = (): HeadersInit => ({ "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" });
+
+function taskStatus(status: string) {
+  return ({ draft: "Черновик", submitted: "На модерации", published: "Опубликовано", staffed: "Команда собрана", in_progress: "В работе", accepted: "Принято" } as Record<string, string>)[status] ?? status;
+}
+
+export function CustomerWorkspace() {
+  const queryClient = useQueryClient();
+  const tasks = useQuery({ queryKey: ["customer-tasks"], queryFn: () => apiRequest<Task[]>("/api/v1/customer/tasks"), refetchOnMount: "always" });
+  const [kind, setKind] = useState<DraftKind>("paid");
+  const [form, setForm] = useState<DraftForm>(initialForm);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<string | null>(null);
+  const applications = useQuery({ queryKey: ["customer-applications", selectedTask], enabled: selectedTask !== null, queryFn: () => apiRequest<Application[]>(`/api/v1/customer/tasks/${selectedTask ?? ""}/applications`) });
+  const create = useMutation({
+    mutationFn: () => apiRequest<Task>("/api/v1/customer/projects/impulse-demo/tasks", { method: "POST", headers: csrfHeaders(), body: JSON.stringify({
+      task_key: `task-${String(Date.now())}`, title: form.title, problem: form.problem, deliverable: form.deliverable,
+      acceptance_criteria: [form.criterion], deadline_at: new Date(form.deadline).toISOString(), data_constraints: form.dataConstraints,
+      ip_terms: form.ipTerms, nominated_mentor_id: null, places: Number(form.places), compensation: {
+        paid: kind === "paid", base_amount_per_assignee: kind === "paid" ? form.baseAmount : null,
+        currency: kind === "paid" ? "RUB" : null, a_multiplier: form.aMultiplier, quantum: "0.01",
+        rounding_mode: "half_up", policy_version: 1, payout_condition: "После принятия личного вклада и публикации оценки 5+",
+      },
+    }) }),
+    onSuccess: async (task) => { setWizardOpen(false); setForm(initialForm); setSelectedTask(task.id); await queryClient.invalidateQueries({ queryKey: ["customer-tasks"] }); },
+  });
+  const submit = useMutation({ mutationFn: (taskId: string) => apiRequest<Task>(`/api/v1/customer/tasks/${taskId}/submit`, { method: "POST", headers: csrfHeaders() }), onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["customer-tasks"] }) });
+  const accept = useMutation({ mutationFn: (item: Application) => apiRequest(`/api/v1/customer/applications/${item.id}/accept`, { method: "POST", headers: csrfHeaders(), body: JSON.stringify({ expected_version: item.version }) }), onSuccess: async () => queryClient.invalidateQueries({ queryKey: ["customer-applications", selectedTask] }) });
+
+  if (tasks.isLoading) return <StatePanel kind="loading" />;
+  if (tasks.isError || !tasks.data) return <StatePanel kind="error" action="Повторить" onAction={() => { void tasks.refetch(); }} />;
+  const counts = (status: string) => tasks.data.filter((item) => item.status === status).length;
+  const metrics: [string, number, string][] = [
+    ["Черновики", counts("draft"), "violet"], ["На модерации", counts("submitted"), "blue"],
+    ["В работе", counts("in_progress"), "blue"], ["Принято", counts("accepted"), "teal"],
+  ];
+  return <div className="feature-stack customer-workspace">
+    <header className="dashboard-heading"><div><p className="eyebrow">Заказчик · R&amp;D и MVP</p><h1 id="workspace-title">Управляйте задачами от идеи до результата</h1><p className="lead">Создайте проверяемый бриф, заранее покажите участнику оплату и принимайте личный вклад по фактам.</p></div><div className="dashboard-actions"><a href="/workspace/3">Открыть аналитику</a><button type="button" onClick={() => { setWizardOpen((value) => !value); }}>+ Создать задачу</button></div></header>
+    <section className="metric-grid" aria-label="Сводка задач">{metrics.map(([label, value, tone]) => <article className={`metric-card metric-card--${tone}`} key={label}><span className="metric-icon">◇</span><span>{label}</span><strong>{value}</strong><small>Актуальное состояние</small></article>)}</section>
+    {wizardOpen && <section className="task-wizard" aria-labelledby="wizard-title"><header><div><p className="eyebrow">Новая задача</p><h2 id="wizard-title">Бриф для участника и платформы</h2></div><button className="secondary-button" type="button" onClick={() => { setWizardOpen(false); }}>Закрыть</button></header><div className="kind-switch" role="group" aria-label="Тип оплаты"><button className={kind === "paid" ? "active" : ""} type="button" onClick={() => { setKind("paid"); }}>Оплачиваемая</button><button className={kind === "unpaid" ? "active" : ""} type="button" onClick={() => { setKind("unpaid"); }}>Неоплачиваемая</button></div><form className="wizard-form" onSubmit={(event) => { event.preventDefault(); create.mutate(); }}><label className="span-2">Название<input required value={form.title} onChange={(event) => { setForm({ ...form, title: event.target.value }); }} /></label><label>Проблема<textarea required minLength={10} value={form.problem} onChange={(event) => { setForm({ ...form, problem: event.target.value }); }} /></label><label>Ожидаемый результат<textarea required minLength={10} value={form.deliverable} onChange={(event) => { setForm({ ...form, deliverable: event.target.value }); }} /></label><label className="span-2">Критерий приёмки<input required value={form.criterion} onChange={(event) => { setForm({ ...form, criterion: event.target.value }); }} /></label><label>Дедлайн<input required type="datetime-local" value={form.deadline} onChange={(event) => { setForm({ ...form, deadline: event.target.value }); }} /></label><label>Количество мест<input required type="number" min="1" max="100" value={form.places} onChange={(event) => { setForm({ ...form, places: event.target.value }); }} /></label><label>Ограничения данных<textarea required value={form.dataConstraints} onChange={(event) => { setForm({ ...form, dataConstraints: event.target.value }); }} /></label><label>Права на результат<textarea required value={form.ipTerms} onChange={(event) => { setForm({ ...form, ipTerms: event.target.value }); }} /></label>{kind === "paid" && <><label>База на участника, ₽<input required type="number" min="1" value={form.baseAmount} onChange={(event) => { setForm({ ...form, baseAmount: event.target.value }); }} /></label><label>Коэффициент A<input required type="number" min="2" max="3" step="0.1" value={form.aMultiplier} onChange={(event) => { setForm({ ...form, aMultiplier: event.target.value }); }} /></label><div className="compensation-preview span-2"><span>Участник увидит до отклика</span><strong>База {form.baseAmount || "0"} ₽ · B {Number(form.baseAmount || 0) * 1.5} ₽ · A {Number(form.baseAmount || 0) * Number(form.aMultiplier || 0)} ₽</strong></div></>}<p className="mentor-optional span-2">Ментор не выбран — это допустимо. Платформа назначит сопровождение до начала работы.</p><div className="wizard-actions span-2"><button type="submit" disabled={create.isPending}>{create.isPending ? "Сохраняем…" : "Сохранить черновик"}</button></div></form>{create.isError && <p className="error-message" role="alert">Не удалось сохранить. Проверьте обязательные поля и повторите.</p>}</section>}
+    <section className="customer-task-list" aria-labelledby="customer-tasks-title"><header><div><p className="eyebrow">Портфель задач</p><h2 id="customer-tasks-title">Мои задачи</h2></div><span>{tasks.data.length} всего</span></header>{tasks.data.length ? tasks.data.map((task) => <article className="customer-task-row" key={task.id}><span className="activity-symbol">▤</span><div><strong>{task.title}</strong><small>{task.project_key} · {task.places} мест · сопровождение: {task.support_mode ?? "назначит платформа"}</small></div><Badge tone={task.status === "published" || task.status === "accepted" ? "success" : task.status === "submitted" ? "warning" : "neutral"}>{taskStatus(task.status)}</Badge><div className="row-actions">{task.status === "draft" && <button type="button" onClick={() => { submit.mutate(task.id); }}>Отправить на модерацию</button>}<button className="secondary-button" type="button" onClick={() => { setSelectedTask(task.id); }}>Заявки</button></div></article>) : <StatePanel kind="empty" />}</section>
+    {selectedTask && <section className="application-queue" aria-labelledby="applications-title"><header><h2 id="applications-title">Заявки на выбранную задачу</h2><button className="secondary-button" type="button" onClick={() => { setSelectedTask(null); }}>Закрыть</button></header>{applications.isLoading ? <StatePanel kind="loading" /> : applications.data?.length ? applications.data.map((item) => <article className="application-row" key={item.id}><div><strong>Участник {item.person_id.slice(0, 8)}</strong><small>Принял условия версии {item.accepted_terms_version}</small></div><Badge>{item.status}</Badge>{item.status === "submitted" && <button type="button" onClick={() => { accept.mutate(item); }}>Принять в работу</button>}</article>) : <StatePanel kind="empty" />}</section>}
+  </div>;
+}

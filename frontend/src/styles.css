@@ -429,3 +429,33 @@ tbody tr:hover, tbody tr:focus-within { background: rgb(47 149 255 / 5%); }
 .evidence-row small { color: var(--color-muted); }
 .evidence-icon { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 9px; color: var(--color-primary); background: rgb(34 230 208 / 9%); }
 @media (max-width: 767px) { .portfolio-hero { align-items: stretch; flex-direction: column; } .visibility-panel, .portfolio-columns, .portfolio-grid { grid-template-columns: 1fr; } }
+
+.customer-workspace .dashboard-heading button, .task-wizard button:not(.secondary-button), .row-actions button:not(.secondary-button), .application-row > button { padding: 10px 15px; border: 0; border-radius: 9px; color: #03201c; background: var(--color-primary); cursor: pointer; font-weight: 800; }
+.dashboard-actions { display: flex; gap: 9px; align-items: center; }
+.dashboard-actions a { padding: 9px 12px; border: 1px solid var(--color-border); border-radius: 9px; color: #b9c9dc; background: var(--color-surface); text-decoration: none; }
+.task-wizard, .customer-task-list, .application-queue { padding: 20px; border: 1px solid var(--color-border); border-radius: 14px; background: linear-gradient(145deg, #0b1726, #091522); }
+.task-wizard > header, .customer-task-list > header, .application-queue > header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.task-wizard h2, .customer-task-list h2, .application-queue h2 { margin: 0; font-size: 20px; }
+.kind-switch { display: inline-flex; gap: 4px; margin-bottom: 16px; padding: 4px; border: 1px solid var(--color-border); border-radius: 10px; background: #071321; }
+.kind-switch button { color: var(--color-muted) !important; background: transparent !important; }
+.kind-switch button.active { color: #03201c !important; background: var(--color-primary) !important; }
+.wizard-form { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.wizard-form label { display: grid; gap: 7px; color: #bdcad9; font-size: 13px; font-weight: 700; }
+.wizard-form input, .wizard-form textarea { width: 100%; padding: 11px 12px; border: 1px solid var(--color-border-strong); border-radius: 9px; color: var(--color-text); background: #081421; }
+.wizard-form textarea { min-height: 92px; resize: vertical; }
+.span-2 { grid-column: 1 / -1; }
+.compensation-preview { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 13px; border: 1px solid rgb(34 230 208 / 22%); border-radius: 10px; background: rgb(34 230 208 / 7%); }
+.compensation-preview span, .mentor-optional { color: var(--color-muted); }
+.compensation-preview strong { color: var(--color-primary); font-variant-numeric: tabular-nums; }
+.mentor-optional { margin: 0; padding: 11px; border-left: 3px solid var(--color-info); background: rgb(47 149 255 / 6%); }
+.wizard-actions { display: flex; justify-content: flex-end; }
+.customer-task-list { padding: 0; overflow: hidden; }
+.customer-task-list > header { margin: 0; padding: 16px 18px; border-bottom: 1px solid var(--color-border); }
+.customer-task-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(--color-border); }
+.customer-task-row:last-child { border-bottom: 0; }
+.customer-task-row > div:nth-child(2), .application-row > div { display: grid; gap: 4px; }
+.customer-task-row small, .application-row small { color: var(--color-muted); }
+.row-actions { display: flex; gap: 8px; }
+.application-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px; }
+.application-row + .application-row { margin-top: 8px; }
+@media (max-width: 767px) { .wizard-form { grid-template-columns: 1fr; } .span-2 { grid-column: auto; } .compensation-preview { align-items: flex-start; flex-direction: column; } .customer-task-row { grid-template-columns: 36px minmax(0, 1fr); } .customer-task-row > .ui-badge, .row-actions { grid-column: 2; } .row-actions { flex-wrap: wrap; } }

@@ -7,6 +7,7 @@ import { createQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
 import { Bootcamp, DevelopmentJourney } from "./features/development";
 import { EventCatalog } from "./features/ecosystem";
+import { CustomerWorkspace } from "./features/customer";
 import { ParticipantPortfolio } from "./features/portfolio";
 import { MentorReviewWorkspace, ParticipantRewardEvidence } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
@@ -143,6 +144,8 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
           <ParticipantPortfolio />
         ) : allowed && actor.active_role === "customer" && (currentSection === "Кандидаты" || currentSection === "Приёмка") ? (
           <CustomerParticipantPreview />
+        ) : allowed && actor.active_role === "customer" && currentSection === "Мои задачи" ? (
+          <CustomerWorkspace />
         ) : allowed && actor.active_role === "mentor" && sectionIndex === 0 ? (
           <MentorReviewWorkspace />
         ) : allowed ? (
