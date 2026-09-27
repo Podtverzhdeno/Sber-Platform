@@ -28,6 +28,10 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
     await page.setViewportSize(viewport);
     await page.goto("/");
     await page.locator('[data-persona="participant-alex"]').click();
+    if (viewport.width < 1024) {
+      await page.getByRole("button", { name: "Меню", exact: true }).click();
+      await expect(page.getByRole("button", { name: "Меню", exact: true })).toHaveAttribute("aria-expanded", "true");
+    }
     await page.getByRole("link", { name: "Bootcamp" }).click();
     await expect(page).toHaveURL(/\/workspace\/1$/);
     await expect(page.getByRole("heading", { name: "Учитесь ради следующего результата" })).toBeVisible();

@@ -28,6 +28,9 @@ for (const viewport of [
     await page.goto("/");
     await page.locator('[data-persona="customer-roman"]').click();
     await expect(page.getByRole("heading", { name: "Добро пожаловать, Роман!" })).toBeVisible();
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(page.locator(".sidebar")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(page.locator(".metric-card").first()).toHaveCSS("border-radius", "13px");
     await expect(page).toHaveScreenshot(`customer-dashboard-${viewport.name}.png`, {
       animations: "disabled",
       fullPage: true,
