@@ -6,14 +6,15 @@ from dataclasses import replace
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, Query, Request
+from pydantic import BaseModel, Field
 
 from impulse.api.errors import ApiError
-from impulse.api.v1.identity import current_session
+from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.development import DevelopmentService
 from impulse.application.identity import AuthenticatedSession, DemoAuthService, PersonaRecord
 from impulse.application.reward import RewardService
+from impulse.application.talent import PipelineEvent, PipelineStage, TalentService
 from impulse.application.work import WorkService
 from impulse.domain.development import CompletionStatus
 from impulse.domain.identity import ConsentScope, Role
@@ -70,6 +71,26 @@ class CandidateSummaryView(BaseModel):
     accepted_projects: int
     verified_courses: int
     top_grade: str | None
+
+
+class PipelineEventCommand(BaseModel):
+    stage: PipelineStage
+    note: str = Field(default="", max_length=500)
+
+
+class PipelineEventView(BaseModel):
+    id: UUID
+    candidate_id: UUID
+    candidate_name: str
+    stage: PipelineStage
+    note: str
+    occurred_at: str
+    origin: str
+
+
+class PipelineView(BaseModel):
+    counts: dict[PipelineStage, int]
+    events: list[PipelineEventView]
 
 
 def _services(
@@ -165,7 +186,11 @@ async def my_portfolio(
 
 @router.get("/hr/candidates", response_model=list[CandidateSummaryView])
 async def hr_candidates(
-    request: Request, authenticated: Annotated[AuthenticatedSession, Depends(current_session)]
+    request: Request,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    search: Annotated[str | None, Query(max_length=100)] = None,
+    min_projects: Annotated[int, Query(ge=0, le=100)] = 0,
+    grade: Annotated[str | None, Query(pattern="^[ABC]$")] = None,
 ) -> list[CandidateSummaryView]:
     _require_role(authenticated, Role.HR)
     auth, *_ = _services(request)
@@ -177,15 +202,20 @@ async def hr_candidates(
             continue
         portfolio = await _projection(request, authenticated, persona)
         grades = [item.grade for item in portfolio.contributions if item.grade]
-        result.append(
-            CandidateSummaryView(
-                person_id=persona.person_id,
-                display_name=persona.display_name,
-                accepted_projects=len(portfolio.contributions),
-                verified_courses=len(portfolio.courses),
-                top_grade=min(grades) if grades else None,
-            )
+        candidate = CandidateSummaryView(
+            person_id=persona.person_id,
+            display_name=persona.display_name,
+            accepted_projects=len(portfolio.contributions),
+            verified_courses=len(portfolio.courses),
+            top_grade=min(grades) if grades else None,
         )
+        if search and search.casefold() not in candidate.display_name.casefold():
+            continue
+        if candidate.accepted_projects < min_projects:
+            continue
+        if grade and candidate.top_grade != grade:
+            continue
+        result.append(candidate)
     return result
 
 
@@ -203,3 +233,49 @@ async def hr_candidate(
     ):
         raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
     return await _projection(request, authenticated, persona)
+
+
+def _pipeline_event_view(event: PipelineEvent, names: dict[UUID, str]) -> PipelineEventView:
+    return PipelineEventView(
+        id=event.id,
+        candidate_id=event.candidate_id,
+        candidate_name=names.get(event.candidate_id, "Участник"),
+        stage=event.stage,
+        note=event.note,
+        occurred_at=event.occurred_at.isoformat(),
+        origin=event.origin,
+    )
+
+
+@router.get("/hr/pipeline", response_model=PipelineView)
+async def hr_pipeline(
+    request: Request, authenticated: Annotated[AuthenticatedSession, Depends(current_session)]
+) -> PipelineView:
+    _require_role(authenticated, Role.HR)
+    service: TalentService = request.app.state.talent_service
+    events = await service.events(authenticated.actor)
+    auth, *_ = _services(request)
+    personas = {item.person_id: item.display_name for item in await auth.store.list_personas()}
+    return PipelineView(
+        counts={stage: sum(item.stage is stage for item in events) for stage in PipelineStage},
+        events=[_pipeline_event_view(item, personas) for item in events],
+    )
+
+
+@router.post("/hr/candidates/{person_id}/pipeline-events", response_model=PipelineEventView)
+async def create_pipeline_event(
+    person_id: UUID,
+    command: PipelineEventCommand,
+    request: Request,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+) -> PipelineEventView:
+    _require_role(authenticated, Role.HR)
+    auth, *_ = _services(request)
+    persona = await auth.store.get_persona_by_id(person_id)
+    if persona is None or ConsentScope.HR_PROFILE not in await auth.store.granted_consents(
+        person_id
+    ):
+        raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
+    service: TalentService = request.app.state.talent_service
+    event = await service.record(authenticated.actor, person_id, command.stage, command.note)
+    return _pipeline_event_view(event, {person_id: persona.display_name})

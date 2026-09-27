@@ -67,3 +67,63 @@ def test_non_hr_cannot_enumerate_candidates() -> None:
     login(api, "participant-alex")
     response = api.get("/api/v1/hr/candidates")
     assert response.status_code == 404
+
+
+def test_pipeline_counts_only_explicit_human_events() -> None:
+    api = client()
+    participant_csrf = login(api, "participant-alex")
+    api.put(
+        "/api/v1/me/consents/hr_profile",
+        json={"granted": True},
+        headers={"X-CSRF-Token": participant_csrf},
+    )
+    candidate_id = api.get("/api/v1/me/portfolio").json()["person_id"]
+
+    hr_csrf = login(api, "hr-nina")
+    initial = api.get("/api/v1/hr/pipeline").json()
+    assert initial["counts"] == {"invitation": 0, "interview": 0, "offer": 0, "hire": 0}
+
+    for stage in ("invitation", "interview", "offer", "hire"):
+        created = api.post(
+            f"/api/v1/hr/candidates/{candidate_id}/pipeline-events",
+            json={"stage": stage, "note": f"Human decision: {stage}"},
+            headers={"X-CSRF-Token": hr_csrf},
+        )
+        assert created.status_code == 200
+        assert created.json()["origin"] == "human"
+        counts = api.get("/api/v1/hr/pipeline").json()["counts"]
+        assert counts[stage] == 1
+        assert sum(counts.values()) == ("invitation", "interview", "offer", "hire").index(stage) + 1
+
+
+def test_pipeline_rejects_skipped_or_automatic_stage() -> None:
+    api = client()
+    participant_csrf = login(api, "participant-alex")
+    api.put(
+        "/api/v1/me/consents/hr_profile",
+        json={"granted": True},
+        headers={"X-CSRF-Token": participant_csrf},
+    )
+    candidate_id = api.get("/api/v1/me/portfolio").json()["person_id"]
+    hr_csrf = login(api, "hr-nina")
+    response = api.post(
+        f"/api/v1/hr/candidates/{candidate_id}/pipeline-events",
+        json={"stage": "offer", "note": "Rating must not generate an offer."},
+        headers={"X-CSRF-Token": hr_csrf},
+    )
+    assert response.status_code == 409
+    assert api.get("/api/v1/hr/pipeline").json()["counts"]["offer"] == 0
+
+
+def test_hr_candidate_search_filters_verified_projection() -> None:
+    api = client()
+    participant_csrf = login(api, "participant-alex")
+    api.put(
+        "/api/v1/me/consents/hr_profile",
+        json={"granted": True},
+        headers={"X-CSRF-Token": participant_csrf},
+    )
+    login(api, "hr-nina")
+    assert len(api.get("/api/v1/hr/candidates?search=Алекс&min_projects=0").json()) == 1
+    assert api.get("/api/v1/hr/candidates?search=НетТакого").json() == []
+    assert api.get("/api/v1/hr/candidates?min_projects=1").json() == []

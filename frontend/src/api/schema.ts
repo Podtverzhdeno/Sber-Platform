@@ -344,6 +344,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hr/candidates/{person_id}/pipeline-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Pipeline Event */
+        post: operations["create_pipeline_event_api_v1_hr_candidates__person_id__pipeline_events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hr/pipeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Hr Pipeline */
+        get: operations["hr_pipeline_api_v1_hr_pipeline_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/manager/overview": {
         parameters: {
             query?: never;
@@ -2195,6 +2229,51 @@ export interface components {
             /** Roles */
             roles: components["schemas"]["Role"][];
         };
+        /** PipelineEventCommand */
+        PipelineEventCommand: {
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            stage: components["schemas"]["PipelineStage"];
+        };
+        /** PipelineEventView */
+        PipelineEventView: {
+            /**
+             * Candidate Id
+             * Format: uuid
+             */
+            candidate_id: string;
+            /** Candidate Name */
+            candidate_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Note */
+            note: string;
+            /** Occurred At */
+            occurred_at: string;
+            /** Origin */
+            origin: string;
+            stage: components["schemas"]["PipelineStage"];
+        };
+        /**
+         * PipelineStage
+         * @enum {string}
+         */
+        PipelineStage: "invitation" | "interview" | "offer" | "hire";
+        /** PipelineView */
+        PipelineView: {
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+            /** Events */
+            events: components["schemas"]["PipelineEventView"][];
+        };
         /** PortfolioContributionView */
         PortfolioContributionView: {
             /** Artifact Keys */
@@ -3381,7 +3460,11 @@ export interface operations {
     };
     hr_candidates_api_v1_hr_candidates_get: {
         parameters: {
-            query?: never;
+            query?: {
+                search?: string | null;
+                min_projects?: number;
+                grade?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3395,6 +3478,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CandidateSummaryView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -3426,6 +3518,63 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_pipeline_event_api_v1_hr_candidates__person_id__pipeline_events_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PipelineEventCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineEventView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    hr_pipeline_api_v1_hr_pipeline_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PipelineView"];
                 };
             };
         };

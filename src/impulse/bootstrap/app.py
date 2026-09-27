@@ -18,6 +18,7 @@ from impulse.application.reward import (
     RewardService,
     WorkReviewEvidenceProvider,
 )
+from impulse.application.talent import MemoryTalentStore, TalentService
 from impulse.application.work import MemoryWorkStore, WorkService
 from impulse.bootstrap.logging import configure_logging
 from impulse.bootstrap.settings import Settings
@@ -27,6 +28,7 @@ from impulse.infrastructure.ecosystem_store import SqlEcosystemStore
 from impulse.infrastructure.identity_store import SqlIdentityStore
 from impulse.infrastructure.recognition_store import SqlRecognitionStore
 from impulse.infrastructure.reward_store import SqlRewardStore
+from impulse.infrastructure.talent_store import SqlTalentStore
 from impulse.infrastructure.work_store import SqlWorkStore
 
 
@@ -39,6 +41,7 @@ def create_app(
     work_service: WorkService | None = None,
     reward_service: RewardService | None = None,
     recognition_service: RecognitionService | None = None,
+    talent_service: TalentService | None = None,
 ) -> FastAPI:
     """Build the HTTP application without import-time side effects."""
     runtime_settings = settings or Settings()
@@ -92,6 +95,11 @@ def create_app(
             else MemoryRecognitionStore()
         )
         recognition_service = RecognitionService(recognition_store)
+    if talent_service is None:
+        talent_store = (
+            SqlTalentStore(owned_database) if owned_database is not None else MemoryTalentStore()
+        )
+        talent_service = TalentService(talent_store)
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
@@ -114,6 +122,7 @@ def create_app(
     app.state.work_service = work_service
     app.state.reward_service = reward_service
     app.state.recognition_service = recognition_service
+    app.state.talent_service = talent_service
     app.add_middleware(RequestContextMiddleware)
     install_error_handlers(app)
     app.include_router(health_router)

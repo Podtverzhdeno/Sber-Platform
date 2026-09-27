@@ -2408,6 +2408,105 @@
         "title": "PersonaView",
         "type": "object"
       },
+      "PipelineEventCommand": {
+        "properties": {
+          "note": {
+            "default": "",
+            "maxLength": 500,
+            "title": "Note",
+            "type": "string"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/PipelineStage"
+          }
+        },
+        "required": [
+          "stage"
+        ],
+        "title": "PipelineEventCommand",
+        "type": "object"
+      },
+      "PipelineEventView": {
+        "properties": {
+          "candidate_id": {
+            "format": "uuid",
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "candidate_name": {
+            "title": "Candidate Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          },
+          "occurred_at": {
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "stage": {
+            "$ref": "#/components/schemas/PipelineStage"
+          }
+        },
+        "required": [
+          "id",
+          "candidate_id",
+          "candidate_name",
+          "stage",
+          "note",
+          "occurred_at",
+          "origin"
+        ],
+        "title": "PipelineEventView",
+        "type": "object"
+      },
+      "PipelineStage": {
+        "enum": [
+          "invitation",
+          "interview",
+          "offer",
+          "hire"
+        ],
+        "title": "PipelineStage",
+        "type": "string"
+      },
+      "PipelineView": {
+        "properties": {
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "propertyNames": {
+              "$ref": "#/components/schemas/PipelineStage"
+            },
+            "title": "Counts",
+            "type": "object"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/PipelineEventView"
+            },
+            "title": "Events",
+            "type": "array"
+          }
+        },
+        "required": [
+          "counts",
+          "events"
+        ],
+        "title": "PipelineView",
+        "type": "object"
+      },
       "PortfolioContributionView": {
         "properties": {
           "artifact_keys": {
@@ -5016,6 +5115,54 @@
     "/api/v1/hr/candidates": {
       "get": {
         "operationId": "hr_candidates_api_v1_hr_candidates_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 100,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_projects",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 100,
+              "minimum": 0,
+              "title": "Min Projects",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "grade",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "pattern": "^[ABC]$",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Grade"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -5030,6 +5177,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Hr Candidates"
@@ -5073,6 +5230,90 @@
           }
         },
         "summary": "Hr Candidate"
+      }
+    },
+    "/api/v1/hr/candidates/{person_id}/pipeline-events": {
+      "post": {
+        "operationId": "create_pipeline_event_api_v1_hr_candidates__person_id__pipeline_events_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Person Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PipelineEventCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PipelineEventView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Pipeline Event"
+      }
+    },
+    "/api/v1/hr/pipeline": {
+      "get": {
+        "operationId": "hr_pipeline_api_v1_hr_pipeline_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PipelineView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Hr Pipeline"
       }
     },
     "/api/v1/manager/overview": {

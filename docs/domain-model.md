@@ -28,6 +28,7 @@ flowchart LR
   Score --> Standing[standings]
   Event[events] --> Claim[participation_claims]
   Claim --> Trophy[trophies]
+  Person --> Pipeline[talent_pipeline_events]
   Person --> Thread[agent_threads]
   Thread --> Run[agent_runs]
   Run --> Suggestion[agent_suggestions]
@@ -97,6 +98,7 @@ Seed использует UUIDv5 namespace и `DEMO_SEED_VERSION`. Каждый 
 - `sessions`
 - `settlement_attempts`
 - `standings`
+- `talent_pipeline_events`
 - `task_terms_versions`
 - `tasks`
 - `track_attempts`

@@ -8,6 +8,7 @@ from impulse.infrastructure.models import (
     insight,
     recognition,
     reward,
+    talent,
     work,
 )
 from impulse.infrastructure.models.base import metadata
@@ -21,5 +22,6 @@ __all__ = [
     "metadata",
     "recognition",
     "reward",
+    "talent",
     "work",
 ]

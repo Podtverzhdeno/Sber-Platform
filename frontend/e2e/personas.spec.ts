@@ -74,6 +74,12 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/manager/overview", async (route) => {
     await route.fulfill({ json: { initiatives: [], task_count: 0, accepted_result_count: 0, reused_result_count: 0 } });
   });
+  await page.route("**/api/v1/hr/candidates", async (route) => {
+    await route.fulfill({ json: [] });
+  });
+  await page.route("**/api/v1/hr/pipeline", async (route) => {
+    await route.fulfill({ json: { counts: { invitation: 0, interview: 0, offer: 0, hire: 0 }, events: [] } });
+  });
 });
 
 for (const [key, displayName, , navigation] of personas) {
@@ -89,7 +95,9 @@ for (const [key, displayName, , navigation] of personas) {
           ? "Управляйте задачами от идеи до результата"
           : key === "manager-olga"
             ? "Результаты команд без лишних персональных данных"
-        : `Добро пожаловать, ${displayName.split(" ")[0]}!`;
+          : key === "hr-nina"
+            ? "Кандидаты и evidence-first резюме"
+            : `Добро пожаловать, ${displayName.split(" ")[0]}!`;
     await expect(page.getByRole("heading", { name: heading })).toBeVisible();
     const links = page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link");
     await expect(links).toHaveCount(navigation.length);
