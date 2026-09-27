@@ -1,4 +1,5 @@
 """Deterministic, versioned and idempotent demo dataset."""
+# ruff: noqa: RUF001
 
 from __future__ import annotations
 
@@ -28,6 +29,7 @@ from impulse.infrastructure.models.ecosystem import (
     external_sources,
     participation_claims,
     programs,
+    provider_records,
 )
 from impulse.infrastructure.models.identity import (
     actor_roles,
@@ -37,10 +39,12 @@ from impulse.infrastructure.models.identity import (
     visibility_settings,
 )
 from impulse.infrastructure.models.recognition import (
+    credentials,
     rating_policies,
     score_ledger,
     seasons,
     standings,
+    trophies,
 )
 from impulse.infrastructure.models.reward import compensation_terms
 from impulse.infrastructure.models.work import (
@@ -225,6 +229,7 @@ def build_seed_batches() -> list[SeedBatch]:
         provider="demo-organizer",
         source_key="demo-programs",
         source_url="https://example.test/impulse-demo",
+        payload={"checked_at": DEMO_NOW.isoformat(), "freshness": "current"},
     )
     program_row = demo_row(
         "program:impulse",
@@ -232,17 +237,33 @@ def build_seed_batches() -> list[SeedBatch]:
         title="Экосистема возможностей — демо",
         source_id=source_row["id"],
     )
-    event_rows = [
-        demo_row(
-            f"event:{index}",
-            program_id=program_row["id"],
-            event_key=f"demo-event-{index}",
-            title=title,
-            deadline_at=DEMO_NOW + timedelta(days=index * 7),
-            source_id=source_row["id"],
+    event_types = ("educational_program", "hackathon", "grant")
+    track_groups = (("python", "product"), ("python", "ml"), ("data", "ml"))
+    event_rows: list[dict[str, object]] = []
+    for index, title in enumerate(EVENTS, start=1):
+        event_type = event_types[(index - 1) % len(event_types)]
+        linked_tracks = track_groups[(index - 1) % len(track_groups)]
+        event_rows.append(
+            demo_row(
+                f"event:{index}",
+                program_id=program_row["id"],
+                event_key=f"demo-event-{index}",
+                title=title,
+                deadline_at=DEMO_NOW + timedelta(days=index * 7),
+                source_id=source_row["id"],
+                status="open" if index <= 6 else "closed",
+                payload={
+                    "event_type": event_type,
+                    "organizer": "Сбер · демо",
+                    "conditions": "Ознакомьтесь с условиями и подайте заявку у организатора.",
+                    "starts_at": (DEMO_NOW + timedelta(days=index * 7 + 3)).isoformat(),
+                    "track_keys": list(linked_tracks),
+                    "recommendation_reason": (
+                        f"Связано с направлениями: {', '.join(linked_tracks)}."
+                    ),
+                },
+            )
         )
-        for index, title in enumerate(EVENTS, start=1)
-    ]
     participation_rows = [
         demo_row(
             "participation:alex:1",
@@ -452,6 +473,19 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
                 track_attempts.c.person_id.in_(demo_person_ids),
                 track_attempts.c.data_origin == "demo_runtime",
             )
+        )
+        for runtime_table in (credentials, score_ledger, trophies, provider_records):
+            await session.execute(
+                delete(runtime_table).where(runtime_table.c.data_origin == "demo_runtime")
+            )
+        await session.execute(
+            delete(participation_claims).where(
+                participation_claims.c.person_id.in_(demo_person_ids),
+                participation_claims.c.data_origin == "demo_runtime",
+            )
+        )
+        await session.execute(
+            delete(external_sources).where(external_sources.c.data_origin == "demo_runtime")
         )
         for runtime_table in (sessions, visibility_settings, consents):
             await session.execute(

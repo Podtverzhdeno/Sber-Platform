@@ -54,11 +54,11 @@
 
 ## 7. Каталог событий и внешние доказательства
 
-- [ ] 7.1 Реализовать events/programs catalog API с источником, deadline, status и track relevance; contract tests SHALL покрыть filters/cursor/freshness.
-- [ ] 7.2 Реализовать participation claims `reported→awaiting_verification→verified|rejected|revoked`; state tests SHALL не создавать trophy до verified.
-- [ ] 7.3 Реализовать provider/external ID uniqueness и idempotent import/manual source adapter; duplicate tests SHALL исключить match только по ФИО.
-- [ ] 7.4 Реализовать participant events UI с source links, reason и claim status; accessibility test SHALL обеспечить не-hover доступ к источнику.
-- [ ] 7.5 Реализовать invalidation затронутых trophy/score/credential records при отзыве источника; integration test SHALL создать correction, не rewrite.
+- [x] 7.1 Реализовать events/programs catalog API с источником, deadline, status и track relevance; contract tests SHALL покрыть filters/cursor/freshness.
+- [x] 7.2 Реализовать participation claims `reported→awaiting_verification→verified|rejected|revoked`; state tests SHALL не создавать trophy до verified.
+- [x] 7.3 Реализовать provider/external ID uniqueness и idempotent import/manual source adapter; duplicate tests SHALL исключить match только по ФИО.
+- [x] 7.4 Реализовать participant events UI с source links, reason и claim status; accessibility test SHALL обеспечить не-hover доступ к источнику.
+- [x] 7.5 Реализовать invalidation затронутых trophy/score/credential records при отзыве источника; integration test SHALL создать correction, не rewrite.
 
 ## 8. R&D/MVP-задачи, заявки и вклад
 

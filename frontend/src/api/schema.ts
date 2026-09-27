@@ -106,6 +106,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ecosystem/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Event Catalog */
+        get: operations["event_catalog_api_v1_ecosystem_events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me": {
         parameters: {
             query?: never;
@@ -191,6 +208,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/event-claims": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Participant Claims */
+        get: operations["participant_claims_api_v1_me_event_claims_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/event-claims/{claim_id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Claim */
+        post: operations["submit_claim_api_v1_me_event_claims__claim_id__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/events/{event_key}/claims": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report Claim */
+        post: operations["report_claim_api_v1_me_events__event_key__claims_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/learning/streak": {
         parameters: {
             query?: never;
@@ -242,6 +310,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/event-claims/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Import Claim */
+        post: operations["import_claim_api_v1_operations_event_claims_import_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/event-claims/{claim_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide Claim */
+        post: operations["decide_claim_api_v1_operations_event_claims__claim_id__decision_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health/live": {
         parameters: {
             query?: never;
@@ -286,6 +388,28 @@ export interface components {
             person_id: string;
             /** Scopes */
             scopes: string[];
+        };
+        /**
+         * ClaimStatus
+         * @enum {string}
+         */
+        ClaimStatus: "reported" | "awaiting_verification" | "verified" | "rejected" | "revoked";
+        /** ClaimView */
+        ClaimView: {
+            /** Claim Type */
+            claim_type: string;
+            /** Event Key */
+            event_key: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            status: components["schemas"]["ClaimStatus"];
+            /** Trophy Created */
+            trophy_created: boolean;
+            /** Verification Explanation */
+            verification_explanation: string;
         };
         /**
          * CompletionStatus
@@ -341,15 +465,86 @@ export interface components {
             /** Track Keys */
             track_keys: string[];
         };
+        /** CursorPage[EventView] */
+        CursorPage_EventView_: {
+            /**
+             * Has More
+             * @default false
+             */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["EventView"][];
+            /** Next Cursor */
+            next_cursor?: string | null;
+        };
+        /** DecisionRequest */
+        DecisionRequest: {
+            /** Reason */
+            reason: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "verified" | "rejected" | "revoked";
+        };
         /** DemoLoginRequest */
         DemoLoginRequest: {
             /** Persona Key */
             persona_key: string;
         };
+        /** EventView */
+        EventView: {
+            /** Conditions */
+            conditions: string;
+            /** Deadline At */
+            deadline_at: string | null;
+            /** Event Type */
+            event_type: string;
+            /** Key */
+            key: string;
+            /** Organizer */
+            organizer: string;
+            /** Recommendation Reason */
+            recommendation_reason: string;
+            /**
+             * Source Checked At
+             * Format: date-time
+             */
+            source_checked_at: string;
+            /** Source Status */
+            source_status: string;
+            /** Source Url */
+            source_url: string;
+            /** Starts At */
+            starts_at: string | null;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+            /** Track Keys */
+            track_keys: string[];
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /** ImportClaimRequest */
+        ImportClaimRequest: {
+            /**
+             * Claim Type
+             * @default participation
+             * @enum {string}
+             */
+            claim_type: "participation" | "winner" | "prize";
+            /** Event Key */
+            event_key: string;
+            /** External Id */
+            external_id: string;
+            /** Person External Key */
+            person_external_key: string;
+            /** Provider Id */
+            provider_id: string;
         };
         /** LearningDayRequest */
         LearningDayRequest: {
@@ -398,6 +593,15 @@ export interface components {
             key: string;
             /** Roles */
             roles: components["schemas"]["Role"][];
+        };
+        /** ReportClaimRequest */
+        ReportClaimRequest: {
+            /**
+             * Claim Type
+             * @default participation
+             * @enum {string}
+             */
+            claim_type: "participation" | "winner" | "prize";
         };
         /** RoadmapView */
         RoadmapView: {
@@ -629,6 +833,41 @@ export interface operations {
             };
         };
     };
+    event_catalog_api_v1_ecosystem_events_get: {
+        parameters: {
+            query?: {
+                track?: string | null;
+                event_type?: string | null;
+                status?: string | null;
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CursorPage_EventView_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     me_api_v1_me_get: {
         parameters: {
             query?: never;
@@ -791,6 +1030,96 @@ export interface operations {
             };
         };
     };
+    participant_claims_api_v1_me_event_claims_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimView"][];
+                };
+            };
+        };
+    };
+    submit_claim_api_v1_me_event_claims__claim_id__submit_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                claim_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    report_claim_api_v1_me_events__event_key__claims_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                event_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportClaimRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     streak_api_v1_me_learning_streak_get: {
         parameters: {
             query?: never;
@@ -853,6 +1182,78 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TrackOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    import_claim_api_v1_operations_event_claims_import_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ImportClaimRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_claim_api_v1_operations_event_claims__claim_id__decision_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                claim_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimView"];
                 };
             };
             /** @description Validation Error */

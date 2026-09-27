@@ -10,11 +10,13 @@ from impulse.api.health import router as health_router
 from impulse.api.request_context import RequestContextMiddleware
 from impulse.api.v1 import router as api_v1_router
 from impulse.application.development import DevelopmentService, MemoryDevelopmentStore
+from impulse.application.ecosystem import EcosystemService, MemoryEcosystemStore
 from impulse.application.identity import DemoAuthService, MemoryIdentityStore, demo_personas
 from impulse.bootstrap.logging import configure_logging
 from impulse.bootstrap.settings import Settings
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.development_store import SqlDevelopmentStore
+from impulse.infrastructure.ecosystem_store import SqlEcosystemStore
 from impulse.infrastructure.identity_store import SqlIdentityStore
 
 
@@ -23,6 +25,7 @@ def create_app(
     *,
     auth_service: DemoAuthService | None = None,
     development_service: DevelopmentService | None = None,
+    ecosystem_service: EcosystemService | None = None,
 ) -> FastAPI:
     """Build the HTTP application without import-time side effects."""
     runtime_settings = settings or Settings()
@@ -46,6 +49,15 @@ def create_app(
             else MemoryDevelopmentStore()
         )
         development_service = DevelopmentService(development_store)
+    if ecosystem_service is None:
+        ecosystem_store = (
+            SqlEcosystemStore(owned_database)
+            if owned_database is not None
+            else MemoryEcosystemStore(
+                people={f"demo:{item.key}": item.person_id for item in demo_personas()}
+            )
+        )
+        ecosystem_service = EcosystemService(ecosystem_store)
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
@@ -64,6 +76,7 @@ def create_app(
     app.state.database = owned_database
     app.state.auth_service = auth_service
     app.state.development_service = development_service
+    app.state.ecosystem_service = ecosystem_service
     app.add_middleware(RequestContextMiddleware)
     install_error_handlers(app)
     app.include_router(health_router)

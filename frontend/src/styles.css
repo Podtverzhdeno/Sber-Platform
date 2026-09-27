@@ -140,6 +140,13 @@ th, td { padding: 12px; border-bottom: 1px solid rgb(255 255 255 / 10%); text-al
 .course-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
 .course-grid .ui-card { display: flex; flex-direction: column; }
 .course-grid .ui-card > a { width: fit-content; margin-top: auto; color: #84eaae; }
+.catalog-controls { display: flex; flex-wrap: wrap; gap: 16px; }
+.event-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 18px; }
+.event-facts { display: grid; gap: 8px; margin: 18px 0; }
+.event-facts div { display: grid; grid-template-columns: 120px 1fr; gap: 12px; }
+.event-facts dt { color: var(--color-muted); }
+.event-facts dd { margin: 0; }
+.claim-state { display: grid; gap: 8px; margin-top: 18px; }
 
 @media (max-width: 820px) {
   .login-layout, .workspace { grid-template-columns: 1fr; }

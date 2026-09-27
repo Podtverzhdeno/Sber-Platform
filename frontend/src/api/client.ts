@@ -4,7 +4,8 @@ export type ApiPaths = paths;
 export type RuntimeApiPath =
   | keyof ApiPaths
   | `/api/v1/me/courses/${string}/completion`
-  | `/api/v1/me/courses/${string}/learning-days`;
+  | `/api/v1/me/courses/${string}/learning-days`
+  | `/api/v1/me/events/${string}/claims`;
 
 export class ApiClientError extends Error {
   readonly status: number;

@@ -67,6 +67,55 @@
         "title": "ActorView",
         "type": "object"
       },
+      "ClaimStatus": {
+        "enum": [
+          "reported",
+          "awaiting_verification",
+          "verified",
+          "rejected",
+          "revoked"
+        ],
+        "title": "ClaimStatus",
+        "type": "string"
+      },
+      "ClaimView": {
+        "properties": {
+          "claim_type": {
+            "title": "Claim Type",
+            "type": "string"
+          },
+          "event_key": {
+            "title": "Event Key",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ClaimStatus"
+          },
+          "trophy_created": {
+            "title": "Trophy Created",
+            "type": "boolean"
+          },
+          "verification_explanation": {
+            "title": "Verification Explanation",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "event_key",
+          "claim_type",
+          "status",
+          "trophy_created",
+          "verification_explanation"
+        ],
+        "title": "ClaimView",
+        "type": "object"
+      },
       "CompletionStatus": {
         "enum": [
           "reported",
@@ -216,6 +265,64 @@
         "title": "CourseView",
         "type": "object"
       },
+      "CursorPage_EventView_": {
+        "additionalProperties": false,
+        "properties": {
+          "has_more": {
+            "default": false,
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EventView"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "CursorPage[EventView]",
+        "type": "object"
+      },
+      "DecisionRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "minLength": 3,
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "verified",
+              "rejected",
+              "revoked"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "reason"
+        ],
+        "title": "DecisionRequest",
+        "type": "object"
+      },
       "DemoLoginRequest": {
         "properties": {
           "persona_key": {
@@ -231,6 +338,99 @@
         "title": "DemoLoginRequest",
         "type": "object"
       },
+      "EventView": {
+        "properties": {
+          "conditions": {
+            "title": "Conditions",
+            "type": "string"
+          },
+          "deadline_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline At"
+          },
+          "event_type": {
+            "title": "Event Type",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "organizer": {
+            "title": "Organizer",
+            "type": "string"
+          },
+          "recommendation_reason": {
+            "title": "Recommendation Reason",
+            "type": "string"
+          },
+          "source_checked_at": {
+            "format": "date-time",
+            "title": "Source Checked At",
+            "type": "string"
+          },
+          "source_status": {
+            "title": "Source Status",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "track_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Track Keys",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "event_type",
+          "organizer",
+          "conditions",
+          "source_url",
+          "deadline_at",
+          "starts_at",
+          "status",
+          "track_keys",
+          "recommendation_reason",
+          "source_checked_at",
+          "source_status"
+        ],
+        "title": "EventView",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -242,6 +442,52 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "ImportClaimRequest": {
+        "properties": {
+          "claim_type": {
+            "default": "participation",
+            "enum": [
+              "participation",
+              "winner",
+              "prize"
+            ],
+            "title": "Claim Type",
+            "type": "string"
+          },
+          "event_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Event Key",
+            "type": "string"
+          },
+          "external_id": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "External Id",
+            "type": "string"
+          },
+          "person_external_key": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Person External Key",
+            "type": "string"
+          },
+          "provider_id": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Provider Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider_id",
+          "external_id",
+          "person_external_key",
+          "event_key"
+        ],
+        "title": "ImportClaimRequest",
         "type": "object"
       },
       "LearningDayRequest": {
@@ -343,6 +589,22 @@
           "roles"
         ],
         "title": "PersonaView",
+        "type": "object"
+      },
+      "ReportClaimRequest": {
+        "properties": {
+          "claim_type": {
+            "default": "participation",
+            "enum": [
+              "participation",
+              "winner",
+              "prize"
+            ],
+            "title": "Claim Type",
+            "type": "string"
+          }
+        },
+        "title": "ReportClaimRequest",
         "type": "object"
       },
       "RoadmapView": {
@@ -760,6 +1022,116 @@
         "summary": "Tracks"
       }
     },
+    "/api/v1/ecosystem/events": {
+      "get": {
+        "operationId": "event_catalog_api_v1_ecosystem_events_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "track",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 96,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Track"
+            }
+          },
+          {
+            "in": "query",
+            "name": "event_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Event Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CursorPage_EventView_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Event Catalog"
+      }
+    },
     "/api/v1/me": {
       "get": {
         "operationId": "me_api_v1_me_get",
@@ -1018,6 +1390,149 @@
         "summary": "Record Learning Day"
       }
     },
+    "/api/v1/me/event-claims": {
+      "get": {
+        "operationId": "participant_claims_api_v1_me_event_claims_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ClaimView"
+                  },
+                  "title": "Response Participant Claims Api V1 Me Event Claims Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Participant Claims"
+      }
+    },
+    "/api/v1/me/event-claims/{claim_id}/submit": {
+      "post": {
+        "operationId": "submit_claim_api_v1_me_event_claims__claim_id__submit_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "claim_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Claim Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Claim"
+      }
+    },
+    "/api/v1/me/events/{event_key}/claims": {
+      "post": {
+        "operationId": "report_claim_api_v1_me_events__event_key__claims_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_key",
+            "required": true,
+            "schema": {
+              "title": "Event Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Report Claim"
+      }
+    },
     "/api/v1/me/learning/streak": {
       "get": {
         "operationId": "streak_api_v1_me_learning_streak_get",
@@ -1112,6 +1627,128 @@
           }
         },
         "summary": "Select Track"
+      }
+    },
+    "/api/v1/operations/event-claims/import": {
+      "post": {
+        "operationId": "import_claim_api_v1_operations_event_claims_import_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImportClaimRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Import Claim"
+      }
+    },
+    "/api/v1/operations/event-claims/{claim_id}/decision": {
+      "post": {
+        "operationId": "decide_claim_api_v1_operations_event_claims__claim_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "claim_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Claim Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide Claim"
       }
     },
     "/health/live": {
