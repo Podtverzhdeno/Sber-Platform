@@ -192,6 +192,51 @@ class Standing:
     earliest_achievement: datetime | None
 
 
+@dataclass(frozen=True, slots=True)
+class TrophyProof:
+    trophy_type: str
+    title: str
+    source_url: str
+
+
+@dataclass(frozen=True, slots=True)
+class LeaderboardCandidate:
+    standing: Standing
+    display_name: str
+    rating_visible: bool
+    trophies_visible: bool
+    trophies: tuple[TrophyProof, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class LeaderboardEntry:
+    place: int
+    person_id: UUID | None
+    display_name: str
+    score: Decimal
+    successful_projects: int
+    trophies: tuple[TrophyProof, ...]
+    anonymized: bool
+
+
+def public_leaderboard(
+    candidates: tuple[LeaderboardCandidate, ...],
+) -> tuple[LeaderboardEntry, ...]:
+    """Apply rating and trophy consent without changing competitive places."""
+    return tuple(
+        LeaderboardEntry(
+            place=item.standing.place,
+            person_id=item.standing.person_id if item.rating_visible else None,
+            display_name=item.display_name if item.rating_visible else "Участник рейтинга",
+            score=item.standing.score,
+            successful_projects=item.standing.successful_projects,
+            trophies=(item.trophies if item.rating_visible and item.trophies_visible else ()),
+            anonymized=not item.rating_visible,
+        )
+        for item in sorted(candidates, key=lambda candidate: candidate.standing.place)
+    )
+
+
 def rebuild_standings(
     policy: RatingPolicy,
     members: tuple[CohortMember, ...],

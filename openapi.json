@@ -1605,6 +1605,61 @@
         "title": "ImportClaimRequest",
         "type": "object"
       },
+      "LeaderboardEntryView": {
+        "properties": {
+          "anonymized": {
+            "title": "Anonymized",
+            "type": "boolean"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "person_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Person Id"
+          },
+          "place": {
+            "title": "Place",
+            "type": "integer"
+          },
+          "score": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Score",
+            "type": "string"
+          },
+          "successful_projects": {
+            "title": "Successful Projects",
+            "type": "integer"
+          },
+          "trophies": {
+            "items": {
+              "$ref": "#/components/schemas/TrophyProofView"
+            },
+            "title": "Trophies",
+            "type": "array"
+          }
+        },
+        "required": [
+          "place",
+          "person_id",
+          "display_name",
+          "score",
+          "successful_projects",
+          "trophies",
+          "anonymized"
+        ],
+        "title": "LeaderboardEntryView",
+        "type": "object"
+      },
       "LearningDayRequest": {
         "properties": {
           "occurred_at": {
@@ -3139,6 +3194,29 @@
           "completed_milestones"
         ],
         "title": "TrackView",
+        "type": "object"
+      },
+      "TrophyProofView": {
+        "properties": {
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "trophy_type": {
+            "title": "Trophy Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trophy_type",
+          "title",
+          "source_url"
+        ],
+        "title": "TrophyProofView",
         "type": "object"
       },
       "ValidationError": {
@@ -6407,6 +6485,50 @@
           }
         },
         "summary": "Assign Support"
+      }
+    },
+    "/api/v1/rating-seasons/{season_id}/leaderboard": {
+      "get": {
+        "operationId": "leaderboard_api_v1_rating_seasons__season_id__leaderboard_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LeaderboardEntryView"
+                  },
+                  "title": "Response Leaderboard Api V1 Rating Seasons  Season Id  Leaderboard Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Leaderboard"
       }
     },
     "/health/live": {

@@ -14,6 +14,7 @@ from impulse.application.recognition import RecognitionService
 from impulse.domain.recognition import (
     CohortRule,
     DiplomaThreshold,
+    LeaderboardEntry,
     RatingPolicy,
     RatingSeason,
     ScoreEntry,
@@ -128,6 +129,22 @@ class StandingView(BaseModel):
     earliest_achievement: datetime | None
 
 
+class TrophyProofView(BaseModel):
+    trophy_type: str
+    title: str
+    source_url: str
+
+
+class LeaderboardEntryView(BaseModel):
+    place: int
+    person_id: UUID | None
+    display_name: str
+    score: Decimal
+    successful_projects: int
+    trophies: list[TrophyProofView]
+    anonymized: bool
+
+
 def _season_view(season: RatingSeason) -> SeasonView:
     return SeasonView(
         id=season.season_id,
@@ -191,6 +208,25 @@ def _score_view(entry: ScoreEntry) -> ScoreEntryView:
 
 def _standing_view(row: Standing) -> StandingView:
     return StandingView(**{field: getattr(row, field) for field in StandingView.model_fields})
+
+
+def _leaderboard_view(item: LeaderboardEntry) -> LeaderboardEntryView:
+    return LeaderboardEntryView(
+        place=item.place,
+        person_id=item.person_id,
+        display_name=item.display_name,
+        score=item.score,
+        successful_projects=item.successful_projects,
+        trophies=[
+            TrophyProofView(
+                trophy_type=proof.trophy_type,
+                title=proof.title,
+                source_url=proof.source_url,
+            )
+            for proof in item.trophies
+        ],
+        anonymized=item.anonymized,
+    )
 
 
 @router.post("/operations/rating-seasons", response_model=SeasonView)
@@ -292,3 +328,14 @@ async def rebuild_standings_projection(
     service: Annotated[RecognitionService, Depends(_service)],
 ) -> list[StandingView]:
     return [_standing_view(item) for item in await service.rebuild(authenticated.actor, season_id)]
+
+
+@router.get(
+    "/rating-seasons/{season_id}/leaderboard",
+    response_model=list[LeaderboardEntryView],
+)
+async def leaderboard(
+    season_id: UUID,
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> list[LeaderboardEntryView]:
+    return [_leaderboard_view(item) for item in await service.leaderboard(season_id)]

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
@@ -17,6 +18,7 @@ from impulse.domain.recognition import (
     CohortMember,
     CohortRule,
     DiplomaThreshold,
+    LeaderboardCandidate,
     RatingPolicy,
     RatingSeason,
     ScoreEntry,
@@ -24,15 +26,22 @@ from impulse.domain.recognition import (
     SeasonStatus,
     Standing,
     TieBreaker,
+    TrophyProof,
 )
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.development import track_attempts, tracks
-from impulse.infrastructure.models.identity import actor_roles
+from impulse.infrastructure.models.ecosystem import (
+    events,
+    external_sources,
+    participation_claims,
+)
+from impulse.infrastructure.models.identity import actor_roles, persons, visibility_settings
 from impulse.infrastructure.models.recognition import (
     rating_policies,
     score_ledger,
     seasons,
     standings,
+    trophies,
 )
 
 
@@ -307,6 +316,94 @@ class SqlRecognitionStore(RecognitionStore):
                 )
         return rows
 
+    async def leaderboard_candidates(self, season_id: UUID) -> tuple[LeaderboardCandidate, ...]:
+        rating_visibility = visibility_settings.alias("rating_visibility")
+        trophy_visibility = visibility_settings.alias("trophy_visibility")
+        async with self.database.sessions() as session:
+            rows = (
+                (
+                    await session.execute(
+                        select(
+                            standings,
+                            persons.c.display_name,
+                            rating_visibility.c.visible.label("rating_visible"),
+                            trophy_visibility.c.visible.label("trophies_visible"),
+                        )
+                        .join(persons, persons.c.id == standings.c.person_id)
+                        .outerjoin(
+                            rating_visibility,
+                            (rating_visibility.c.person_id == standings.c.person_id)
+                            & (rating_visibility.c.scope == "public_rating"),
+                        )
+                        .outerjoin(
+                            trophy_visibility,
+                            (trophy_visibility.c.person_id == standings.c.person_id)
+                            & (trophy_visibility.c.scope == "public_trophies"),
+                        )
+                        .where(standings.c.season_id == season_id)
+                        .order_by(standings.c.place)
+                    )
+                )
+                .mappings()
+                .all()
+            )
+            public_trophy_people = [
+                row["person_id"]
+                for row in rows
+                if bool(row["rating_visible"]) and bool(row["trophies_visible"])
+            ]
+            trophy_rows: Sequence[RowMapping] = ()
+            if public_trophy_people:
+                trophy_rows = (
+                    (
+                        await session.execute(
+                            select(
+                                trophies.c.person_id,
+                                trophies.c.trophy_type,
+                                events.c.title,
+                                external_sources.c.source_url,
+                            )
+                            .join(
+                                participation_claims,
+                                participation_claims.c.id == trophies.c.participation_claim_id,
+                            )
+                            .join(events, events.c.id == participation_claims.c.event_id)
+                            .join(
+                                external_sources,
+                                external_sources.c.id == events.c.source_id,
+                            )
+                            .where(
+                                trophies.c.person_id.in_(public_trophy_people),
+                                trophies.c.status != "revoked",
+                                participation_claims.c.status == "verified",
+                            )
+                            .order_by(events.c.title, trophies.c.id)
+                        )
+                    )
+                    .mappings()
+                    .all()
+                )
+        proofs: dict[UUID, list[TrophyProof]] = {}
+        for row in trophy_rows:
+            person_id = UUID(str(row["person_id"]))
+            proofs.setdefault(person_id, []).append(
+                TrophyProof(
+                    trophy_type=str(row["trophy_type"]),
+                    title=str(row["title"]),
+                    source_url=str(row["source_url"]),
+                )
+            )
+        return tuple(
+            LeaderboardCandidate(
+                standing=self._standing(row),
+                display_name=row["display_name"],
+                rating_visible=bool(row["rating_visible"]),
+                trophies_visible=bool(row["trophies_visible"]),
+                trophies=tuple(proofs.get(row["person_id"], ())),
+            )
+            for row in rows
+        )
+
     @staticmethod
     def _score_entry(row: RowMapping) -> ScoreEntry:
         payload = dict(row["payload"])
@@ -326,4 +423,18 @@ class SqlRecognitionStore(RecognitionStore):
                 if payload.get("correction_reason") is not None
                 else None
             ),
+        )
+
+    @staticmethod
+    def _standing(row: RowMapping) -> Standing:
+        payload = dict(row["payload"])
+        earliest = payload.get("earliest_achievement")
+        return Standing(
+            season_id=row["season_id"],
+            person_id=row["person_id"],
+            place=row["place"],
+            score=Decimal(row["score"]),
+            successful_projects=int(payload.get("successful_projects", 0)),
+            highest_project_score=Decimal(str(payload.get("highest_project_score", "0"))),
+            earliest_achievement=(datetime.fromisoformat(str(earliest)) if earliest else None),
         )

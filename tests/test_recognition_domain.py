@@ -11,13 +11,17 @@ from impulse.domain.recognition import (
     CohortMember,
     CohortRule,
     DiplomaThreshold,
+    LeaderboardCandidate,
     RatingPolicy,
     RatingPolicyError,
     RatingSeason,
     ScoreEntry,
     ScoreSourceRule,
     SeasonStatus,
+    Standing,
     TieBreaker,
+    TrophyProof,
+    public_leaderboard,
     rebuild_standings,
 )
 
@@ -164,3 +168,35 @@ def test_score_correction_requires_reason_and_original_must_be_positive() -> Non
             now,
             correction_of=uuid4(),
         )
+
+
+def test_public_leaderboard_anonymizes_without_consent_and_hides_trophies() -> None:
+    season_id = uuid4()
+    visible_id, hidden_id = uuid4(), uuid4()
+    proof = TrophyProof("winner", "Python Hack", "https://example.test/event")
+    candidates = (
+        LeaderboardCandidate(
+            Standing(season_id, hidden_id, 1, Decimal("120"), 2, Decimal("80"), None),
+            "Hidden Person",
+            rating_visible=False,
+            trophies_visible=True,
+            trophies=(proof,),
+        ),
+        LeaderboardCandidate(
+            Standing(season_id, visible_id, 2, Decimal("100"), 1, Decimal("100"), None),
+            "Visible Person",
+            rating_visible=True,
+            trophies_visible=False,
+            trophies=(proof,),
+        ),
+    )
+
+    result = public_leaderboard(candidates)
+
+    assert result[0].place == 1
+    assert result[0].person_id is None
+    assert result[0].display_name == "Участник рейтинга"
+    assert result[0].trophies == ()
+    assert result[1].person_id == visible_id
+    assert result[1].display_name == "Visible Person"
+    assert result[1].trophies == ()

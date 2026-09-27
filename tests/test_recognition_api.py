@@ -13,7 +13,7 @@ from impulse.bootstrap.settings import AppEnvironment, Settings
 from impulse.domain.recognition import CohortMember
 
 
-def client() -> TestClient:
+def client(*, public_rating: bool = False) -> TestClient:
     personas = demo_personas()
     settings = Settings(
         app_env=AppEnvironment.TEST,
@@ -25,6 +25,7 @@ def client() -> TestClient:
         secret=settings.session_signing_secret(),
         ttl_seconds=settings.session_ttl_seconds,
     )
+    participant = next(item for item in personas if item.key == "participant-alex")
     return TestClient(
         create_app(
             settings,
@@ -35,7 +36,15 @@ def client() -> TestClient:
                         CohortMember(item.person_id, "impulse", ("python",))
                         for item in personas
                         if item.key == "participant-alex"
-                    )
+                    ),
+                    leaderboard_profiles={
+                        participant.person_id: (
+                            participant.display_name,
+                            public_rating,
+                            False,
+                            (),
+                        )
+                    },
                 )
             ),
         )
@@ -183,3 +192,16 @@ def test_score_api_preserves_source_and_rebuilds_after_correction() -> None:
         )
         assert rebuilt.status_code == 200
         assert rebuilt.json()[0]["score"] == "70"
+
+        api.cookies.clear()
+        public = api.get(f"/api/v1/rating-seasons/{season_id}/leaderboard")
+        assert public.status_code == 200
+        assert public.json()[0] == {
+            "place": 1,
+            "person_id": None,
+            "display_name": "Участник рейтинга",
+            "score": "70",
+            "successful_projects": 1,
+            "trophies": [],
+            "anonymized": True,
+        }

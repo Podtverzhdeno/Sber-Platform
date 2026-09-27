@@ -14,6 +14,8 @@ from impulse.domain.recognition import (
     CohortMember,
     CohortRule,
     DiplomaThreshold,
+    LeaderboardCandidate,
+    LeaderboardEntry,
     RatingPolicy,
     RatingPolicyError,
     RatingSeason,
@@ -22,6 +24,8 @@ from impulse.domain.recognition import (
     SeasonStatus,
     Standing,
     TieBreaker,
+    TrophyProof,
+    public_leaderboard,
     rebuild_standings,
 )
 
@@ -41,15 +45,24 @@ class RecognitionStore(Protocol):
     async def replace_standings(
         self, season_id: UUID, rows: tuple[Standing, ...]
     ) -> tuple[Standing, ...]: ...
+    async def leaderboard_candidates(self, season_id: UUID) -> tuple[LeaderboardCandidate, ...]: ...
 
 
 class MemoryRecognitionStore:
-    def __init__(self, members: tuple[CohortMember, ...] = ()) -> None:
+    def __init__(
+        self,
+        members: tuple[CohortMember, ...] = (),
+        leaderboard_candidates: tuple[LeaderboardCandidate, ...] = (),
+        leaderboard_profiles: dict[UUID, tuple[str, bool, bool, tuple[TrophyProof, ...]]]
+        | None = None,
+    ) -> None:
         self._seasons: dict[UUID, RatingSeason] = {}
         self._policies: dict[UUID, tuple[RatingPolicy, ...]] = {}
         self._entries: dict[UUID, ScoreEntry] = {}
         self._members = members
         self._standings: dict[UUID, tuple[Standing, ...]] = {}
+        self._leaderboard_candidates = leaderboard_candidates
+        self._leaderboard_profiles = leaderboard_profiles or {}
 
     async def season(self, season_id: UUID) -> RatingSeason | None:
         return self._seasons.get(season_id)
@@ -106,6 +119,18 @@ class MemoryRecognitionStore:
     ) -> tuple[Standing, ...]:
         self._standings[season_id] = rows
         return rows
+
+    async def leaderboard_candidates(self, season_id: UUID) -> tuple[LeaderboardCandidate, ...]:
+        explicit = tuple(
+            item for item in self._leaderboard_candidates if item.standing.season_id == season_id
+        )
+        if explicit:
+            return explicit
+        return tuple(
+            LeaderboardCandidate(row, *self._leaderboard_profiles[row.person_id])
+            for row in self._standings.get(season_id, ())
+            if row.person_id in self._leaderboard_profiles
+        )
 
 
 class RecognitionService:
@@ -249,6 +274,12 @@ class RecognitionService:
         entries = await self.store.score_entries(season_id)
         rows = rebuild_standings(policy, members, entries)
         return await self.store.replace_standings(season_id, rows)
+
+    async def leaderboard(self, season_id: UUID) -> tuple[LeaderboardEntry, ...]:
+        season = await self.store.season(season_id)
+        if season is None or season.status is SeasonStatus.SCHEDULED:
+            raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
+        return public_leaderboard(await self.store.leaderboard_candidates(season_id))
 
     async def _active_policy(
         self, season_id: UUID, *, allow_frozen: bool = False

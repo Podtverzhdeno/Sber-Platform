@@ -582,6 +582,12 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
                 track_attempts.c.data_origin == "demo_runtime",
             )
         )
+        await session.execute(
+            delete(standings).where(
+                standings.c.person_id.in_(demo_person_ids),
+                standings.c.data_origin.in_(("demo_runtime", "derived")),
+            )
+        )
         for runtime_table in (credentials, score_ledger, trophies, provider_records):
             await session.execute(
                 delete(runtime_table).where(runtime_table.c.data_origin == "demo_runtime")

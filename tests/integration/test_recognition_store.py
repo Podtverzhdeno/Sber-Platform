@@ -7,10 +7,11 @@ from uuid import uuid4
 
 import pytest
 from sqlalchemy import func, select, update
+from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import DBAPIError
 
 from impulse.api.errors import ApiError
-from impulse.bootstrap.demo_seed import seed_demo
+from impulse.bootstrap.demo_seed import demo_id, seed_demo
 from impulse.domain.recognition import (
     CohortRule,
     DiplomaThreshold,
@@ -19,10 +20,12 @@ from impulse.domain.recognition import (
     ScoreEntry,
     ScoreSourceRule,
     TieBreaker,
+    public_leaderboard,
     rebuild_standings,
 )
 from impulse.infrastructure.database import Database, async_database_url
-from impulse.infrastructure.models.recognition import score_ledger
+from impulse.infrastructure.models.identity import visibility_settings
+from impulse.infrastructure.models.recognition import score_ledger, trophies
 from impulse.infrastructure.recognition_store import SqlRecognitionStore
 
 pytestmark = pytest.mark.integration
@@ -114,6 +117,46 @@ async def test_policy_round_trip_and_season_binding() -> None:
     assert ledger_count == 2
     assert first_projection == second_projection
     assert first_projection[0].score == Decimal("105.0")
+    async with database.session() as session:
+        for scope in ("public_rating", "public_trophies"):
+            await session.execute(
+                insert(visibility_settings).values(
+                    person_id=members[0].person_id,
+                    scope=scope,
+                    visible=True,
+                    data_origin="demo_runtime",
+                )
+            )
+        await session.execute(
+            insert(trophies).values(
+                person_id=members[0].person_id,
+                participation_claim_id=demo_id("participation:alex:1"),
+                trophy_type="winner",
+                status="active",
+                data_origin="demo_runtime",
+            )
+        )
+    public_rows = public_leaderboard(
+        await store.leaderboard_candidates(season.season_id)
+    )
+    assert public_rows[0].person_id == members[0].person_id
+    assert public_rows[0].trophies[0].trophy_type == "winner"
+    assert public_rows[0].trophies[0].source_url.startswith("https://")
+
+    async with database.session() as session:
+        await session.execute(
+            update(visibility_settings)
+            .where(
+                visibility_settings.c.person_id == members[0].person_id,
+                visibility_settings.c.scope == "public_rating",
+            )
+            .values(visible=False)
+        )
+    hidden_rows = public_leaderboard(
+        await store.leaderboard_candidates(season.season_id)
+    )
+    assert hidden_rows[0].person_id is None
+    assert hidden_rows[0].trophies == ()
     with pytest.raises(DBAPIError):
         async with database.session() as session:
             await session.execute(

@@ -1041,6 +1041,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/rating-seasons/{season_id}/leaderboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Leaderboard */
+        get: operations["leaderboard_api_v1_rating_seasons__season_id__leaderboard_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health/live": {
         parameters: {
             query?: never;
@@ -1658,6 +1675,23 @@ export interface components {
             /** Provider Id */
             provider_id: string;
         };
+        /** LeaderboardEntryView */
+        LeaderboardEntryView: {
+            /** Anonymized */
+            anonymized: boolean;
+            /** Display Name */
+            display_name: string;
+            /** Person Id */
+            person_id: string | null;
+            /** Place */
+            place: number;
+            /** Score */
+            score: string;
+            /** Successful Projects */
+            successful_projects: number;
+            /** Trophies */
+            trophies: components["schemas"]["TrophyProofView"][];
+        };
         /** LearningDayRequest */
         LearningDayRequest: {
             /**
@@ -2226,6 +2260,15 @@ export interface components {
             status: components["schemas"]["TrackStatus"] | null;
             /** Title */
             title: string;
+        };
+        /** TrophyProofView */
+        TrophyProofView: {
+            /** Source Url */
+            source_url: string;
+            /** Title */
+            title: string;
+            /** Trophy Type */
+            trophy_type: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -4196,6 +4239,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    leaderboard_api_v1_rating_seasons__season_id__leaderboard_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                season_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeaderboardEntryView"][];
                 };
             };
             /** @description Validation Error */
