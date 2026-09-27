@@ -19,6 +19,7 @@ from impulse.application.work import (
     ApplicationRecord,
     AssignmentRecord,
     ContributionRecord,
+    TaskRecord,
     TermsRecord,
     WorkStore,
 )
@@ -35,7 +36,13 @@ from impulse.domain.reward import (
     RoundingMode,
     RubricCriterion,
 )
-from impulse.domain.work import ApplicationStatus, AssignmentStatus, ContributionStatus
+from impulse.domain.work import (
+    ApplicationStatus,
+    AssignmentStatus,
+    ContributionStatus,
+    TaskAggregate,
+    TaskBrief,
+)
 
 
 class EvidenceStub:
@@ -109,6 +116,23 @@ class PayoutWorkStub:
                 payout_condition="После принятия личного вклада и оценки 5+.",
             ),
         )
+        self.task_record = TaskRecord(
+            "impulse-demo",
+            "mentor-queue",
+            "MVP для mentor queue",
+            TaskAggregate(
+                self.task_id,
+                uuid4(),
+                TaskBrief(
+                    problem="Проверить гипотезу.",
+                    deliverable="MVP",
+                    acceptance_criteria=("Результат принят",),
+                    deadline_at=self.terms_record.deadline_at,
+                    data_constraints="Демо-данные",
+                    ip_terms="Условия зафиксированы",
+                ),
+            ),
+        )
 
     async def contribution(self, contribution_id: UUID) -> ContributionRecord | None:
         return self.contribution_record if contribution_id == self.contribution_record.id else None
@@ -124,23 +148,19 @@ class PayoutWorkStub:
             return self.terms_record
         return None
 
-    async def assignments_for_person(
-        self, person_id: UUID
-    ) -> tuple[AssignmentRecord, ...]:
-        return (
-            (self.assignment_record,)
-            if person_id == self.assignment_record.person_id
-            else ()
-        )
+    async def get(self, task_id: UUID) -> TaskRecord | None:
+        return self.task_record if task_id == self.task_id else None
+
+    async def latest_terms(self, task_id: UUID) -> TermsRecord | None:
+        return self.terms_record if task_id == self.task_id else None
+
+    async def assignments_for_person(self, person_id: UUID) -> tuple[AssignmentRecord, ...]:
+        return (self.assignment_record,) if person_id == self.assignment_record.person_id else ()
 
     async def contributions_for_assignment(
         self, assignment_id: UUID
     ) -> tuple[ContributionRecord, ...]:
-        return (
-            (self.contribution_record,)
-            if assignment_id == self.assignment_record.id
-            else ()
-        )
+        return (self.contribution_record,) if assignment_id == self.assignment_record.id else ()
 
 
 @pytest.mark.asyncio
@@ -345,9 +365,7 @@ async def test_appeal_blocks_old_payout_and_correction_creates_new_claim() -> No
         outcome=AppealStatus.CORRECTED,
         reason="Дополнительный результат подтверждён артефактом.",
         grade=ReviewGrade.A,
-        assessments=(
-            CriterionAssessment("result", "Превышены ожидания.", ("artifact:mvp-v2",)),
-        ),
+        assessments=(CriterionAssessment("result", "Превышены ожидания.", ("artifact:mvp-v2",)),),
         explanation="Исправленная оценка A основана на дополнительном результате.",
     )
     assert resolved_appeal.status is AppealStatus.CORRECTED
@@ -431,9 +449,7 @@ async def test_reward_workspaces_expose_only_owned_or_assigned_review() -> None:
         published_by=mentor_id,
     )
     await store.add_review_version(review)
-    evidence = EvidenceStub(
-        mentor_id, ReviewEvidence(review.contribution_id, 2, True, False)
-    )
+    evidence = EvidenceStub(mentor_id, ReviewEvidence(review.contribution_id, 2, True, False))
     service = RewardService(store, evidence, cast(WorkStore, work))
 
     participant_items = await service.participant_reward_evidence(
@@ -441,7 +457,12 @@ async def test_reward_workspaces_expose_only_owned_or_assigned_review() -> None:
     )
     mentor_items = await service.mentor_review_workspace(actor(mentor_id, Role.MENTOR))
     foreign_mentor_items = await service.mentor_review_workspace(actor(uuid4(), Role.MENTOR))
+    queue = await service.mentor_review_queue(actor(mentor_id, Role.MENTOR))
+    foreign_queue = await service.mentor_review_queue(actor(uuid4(), Role.MENTOR))
 
     assert participant_items[0].review == review
     assert mentor_items[0].review.draft_origin == "ai_suggestion"
     assert foreign_mentor_items == ()
+    assert queue[0].task_title == "MVP для mentor queue"
+    assert queue[0].deadline_at == work.terms_record.deadline_at
+    assert foreign_queue == ()

@@ -752,6 +752,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/mentor/review-queue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mentor Review Queue */
+        get: operations["mentor_review_queue_api_v1_mentor_review_queue_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/mentor/review-rubrics/{rubric_id}": {
         parameters: {
             query?: never;
@@ -1916,6 +1933,26 @@ export interface components {
             accepted_terms_version: number | null;
             task: components["schemas"]["TaskView"];
             terms: components["schemas"]["TermsView"];
+        };
+        /** MentorQueueItemView */
+        MentorQueueItemView: {
+            /** Artifact Keys */
+            artifact_keys: string[];
+            /** Authorship Conflict Open */
+            authorship_conflict_open: boolean;
+            /** Contribution Accepted */
+            contribution_accepted: boolean;
+            /**
+             * Deadline At
+             * Format: date-time
+             */
+            deadline_at: string;
+            payout: components["schemas"]["PayoutClaimView"] | null;
+            /** Personal Summary */
+            personal_summary: string;
+            review: components["schemas"]["ReviewView"];
+            /** Task Title */
+            task_title: string;
         };
         /** MilestoneView */
         MilestoneView: {
@@ -4042,6 +4079,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mentor_review_queue_api_v1_mentor_review_queue_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MentorQueueItemView"][];
                 };
             };
         };

@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
-from impulse.application.reward import RewardService, RewardWorkspaceItem
+from impulse.application.reward import MentorQueueItem, RewardService, RewardWorkspaceItem
 from impulse.domain.reward import (
     AppealStatus,
     CriterionAssessment,
@@ -161,6 +161,17 @@ class RewardWorkspaceItemView(BaseModel):
     payout: PayoutClaimView | None
 
 
+class MentorQueueItemView(BaseModel):
+    review: ReviewView
+    payout: PayoutClaimView | None
+    task_title: str
+    deadline_at: datetime
+    personal_summary: str
+    artifact_keys: list[str]
+    contribution_accepted: bool
+    authorship_conflict_open: bool
+
+
 def _service(request: Request) -> RewardService:
     return request.app.state.reward_service
 
@@ -253,6 +264,19 @@ def _workspace_view(item: RewardWorkspaceItem) -> RewardWorkspaceItemView:
     )
 
 
+def _queue_view(item: MentorQueueItem) -> MentorQueueItemView:
+    return MentorQueueItemView(
+        review=_review_view(item.workspace.review),
+        payout=(_payout_view(item.workspace.payout) if item.workspace.payout is not None else None),
+        task_title=item.task_title,
+        deadline_at=item.deadline_at,
+        personal_summary=item.personal_summary,
+        artifact_keys=list(item.artifact_keys),
+        contribution_accepted=item.contribution_accepted,
+        authorship_conflict_open=item.authorship_conflict_open,
+    )
+
+
 @router.get("/me/reward-evidence", response_model=list[RewardWorkspaceItemView])
 async def participant_reward_evidence(
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
@@ -270,9 +294,16 @@ async def mentor_review_workspace(
     service: Annotated[RewardService, Depends(_service)],
 ) -> list[RewardWorkspaceItemView]:
     return [
-        _workspace_view(item)
-        for item in await service.mentor_review_workspace(authenticated.actor)
+        _workspace_view(item) for item in await service.mentor_review_workspace(authenticated.actor)
     ]
+
+
+@router.get("/mentor/review-queue", response_model=list[MentorQueueItemView])
+async def mentor_review_queue(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[RewardService, Depends(_service)],
+) -> list[MentorQueueItemView]:
+    return [_queue_view(item) for item in await service.mentor_review_queue(authenticated.actor)]
 
 
 @router.get("/mentor/review-rubrics/{rubric_id}", response_model=ReviewRubricView)
@@ -376,9 +407,7 @@ async def approve_payout(
     service: Annotated[RewardService, Depends(_service)],
 ) -> PayoutClaimView:
     return _payout_view(
-        await service.approve_payout(
-            authenticated.actor, claim_id, command.expected_version
-        )
+        await service.approve_payout(authenticated.actor, claim_id, command.expected_version)
     )
 
 
@@ -399,9 +428,7 @@ async def settle_payout_demo(
         request_key=command.request_key,
         success=command.success,
     )
-    return DemoSettlementView(
-        claim=_payout_view(claim), settlement=_settlement_view(attempt)
-    )
+    return DemoSettlementView(claim=_payout_view(claim), settlement=_settlement_view(attempt))
 
 
 @router.post(
@@ -420,9 +447,7 @@ async def reverse_payout_demo(
         command.expected_version,
         request_key=command.request_key,
     )
-    return DemoSettlementView(
-        claim=_payout_view(claim), settlement=_settlement_view(attempt)
-    )
+    return DemoSettlementView(claim=_payout_view(claim), settlement=_settlement_view(attempt))
 
 
 @router.post(

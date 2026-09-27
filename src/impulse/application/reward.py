@@ -44,6 +44,17 @@ class RewardWorkspaceItem:
     payout: PayoutClaim | None
 
 
+@dataclass(frozen=True, slots=True)
+class MentorQueueItem:
+    workspace: RewardWorkspaceItem
+    task_title: str
+    deadline_at: datetime
+    personal_summary: str
+    artifact_keys: tuple[str, ...]
+    contribution_accepted: bool
+    authorship_conflict_open: bool
+
+
 DEFAULT_REVIEW_RUBRIC = ReviewRubric(
     rubric_id=UUID("d993683b-a578-54c8-9b87-45190ac59056"),
     key="impulse-5plus-demo",
@@ -210,9 +221,7 @@ class MemoryRewardStore:
     async def payout_claim_by_id(self, claim_id: UUID) -> PayoutClaim | None:
         return self._claims.get(claim_id)
 
-    async def payout_for_review(
-        self, review_id: UUID, review_version: int
-    ) -> PayoutClaim | None:
+    async def payout_for_review(self, review_id: UUID, review_version: int) -> PayoutClaim | None:
         return next(
             (
                 item
@@ -251,9 +260,7 @@ class MemoryRewardStore:
         return self._attempts.get((claim_id, request_key))
 
     async def next_settlement_attempt_number(self, claim_id: UUID) -> int:
-        return 1 + sum(
-            item.payout_claim_id == claim_id for item in self._attempts.values()
-        )
+        return 1 + sum(item.payout_claim_id == claim_id for item in self._attempts.values())
 
     async def add_settlement_attempt(self, attempt: SettlementAttempt) -> SettlementAttempt:
         key = (attempt.payout_claim_id, attempt.request_key)
@@ -407,9 +414,7 @@ class RewardService:
             )
         return tuple(items)
 
-    async def mentor_review_workspace(
-        self, actor: ActorContext
-    ) -> tuple[RewardWorkspaceItem, ...]:
+    async def mentor_review_workspace(self, actor: ActorContext) -> tuple[RewardWorkspaceItem, ...]:
         self._mentor(actor)
         items: list[RewardWorkspaceItem] = []
         for review in await self.store.current_reviews():
@@ -425,6 +430,45 @@ class RewardService:
                 )
             )
         return tuple(items)
+
+    async def mentor_review_queue(self, actor: ActorContext) -> tuple[MentorQueueItem, ...]:
+        self._mentor(actor)
+        if self.work_store is None:
+            return ()
+        items: list[MentorQueueItem] = []
+        for review in await self.store.current_reviews():
+            evidence = await self.evidence.for_mentor(actor.person_id, review.contribution_id)
+            if evidence is None:
+                continue
+            contribution = await self.work_store.contribution(review.contribution_id)
+            if contribution is None:
+                continue
+            assignment = await self.work_store.assignment(contribution.assignment_id)
+            if assignment is None:
+                continue
+            task = await self.work_store.get(assignment.task_id)
+            terms = await self.work_store.latest_terms(assignment.task_id)
+            if task is None or terms is None:
+                continue
+            items.append(
+                MentorQueueItem(
+                    workspace=RewardWorkspaceItem(
+                        review=review,
+                        payout=await self.store.payout_for_review(
+                            review.review_id, review.review_version
+                        ),
+                    ),
+                    task_title=task.title,
+                    deadline_at=terms.deadline_at,
+                    personal_summary=contribution.personal_summary,
+                    artifact_keys=contribution.artifact_keys,
+                    contribution_accepted=evidence.accepted,
+                    authorship_conflict_open=evidence.authorship_conflict_open,
+                )
+            )
+        return tuple(
+            sorted(items, key=lambda item: (item.deadline_at, item.workspace.review.review_id))
+        )
 
     async def propose(
         self, actor: ActorContext, review_id: UUID, expected_version: int

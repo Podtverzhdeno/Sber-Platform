@@ -1792,6 +1792,63 @@
         "title": "MarketplaceTaskView",
         "type": "object"
       },
+      "MentorQueueItemView": {
+        "properties": {
+          "artifact_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Artifact Keys",
+            "type": "array"
+          },
+          "authorship_conflict_open": {
+            "title": "Authorship Conflict Open",
+            "type": "boolean"
+          },
+          "contribution_accepted": {
+            "title": "Contribution Accepted",
+            "type": "boolean"
+          },
+          "deadline_at": {
+            "format": "date-time",
+            "title": "Deadline At",
+            "type": "string"
+          },
+          "payout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PayoutClaimView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "personal_summary": {
+            "title": "Personal Summary",
+            "type": "string"
+          },
+          "review": {
+            "$ref": "#/components/schemas/ReviewView"
+          },
+          "task_title": {
+            "title": "Task Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "review",
+          "payout",
+          "task_title",
+          "deadline_at",
+          "personal_summary",
+          "artifact_keys",
+          "contribution_accepted",
+          "authorship_conflict_open"
+        ],
+        "title": "MentorQueueItemView",
+        "type": "object"
+      },
       "MilestoneView": {
         "properties": {
           "completed": {
@@ -5995,6 +6052,28 @@
           }
         },
         "summary": "Create Review"
+      }
+    },
+    "/api/v1/mentor/review-queue": {
+      "get": {
+        "operationId": "mentor_review_queue_api_v1_mentor_review_queue_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MentorQueueItemView"
+                  },
+                  "title": "Response Mentor Review Queue Api V1 Mentor Review Queue Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Mentor Review Queue"
       }
     },
     "/api/v1/mentor/review-rubrics/{rubric_id}": {

@@ -65,7 +65,7 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/me/roadmaps", async (route) => {
     await route.fulfill({ json: [] });
   });
-  await page.route("**/api/v1/mentor/review-workspace", async (route) => {
+  await page.route("**/api/v1/mentor/review-queue", async (route) => {
     await route.fulfill({ json: [] });
   });
   await page.route("**/api/v1/customer/tasks", async (route) => {

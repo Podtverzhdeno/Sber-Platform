@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { apiRequest } from "../api/client";
 import { Badge, Card, StatePanel } from "../components/ui";
@@ -11,6 +12,7 @@ type Review = {
 };
 type Payout = { id: string; review_version: number; amount: string | null; currency: string | null; status: string; version: number };
 type RewardItem = { review: Review; payout: Payout | null };
+type MentorQueueItem = RewardItem & { task_title: string; deadline_at: string; personal_summary: string; artifact_keys: string[]; contribution_accepted: boolean; authorship_conflict_open: boolean };
 
 const csrfHeaders = (): HeadersInit => ({ "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" });
 const statusLabels: Record<string, string> = {
@@ -48,9 +50,10 @@ export function ParticipantRewardEvidence() {
 
 export function MentorReviewWorkspace() {
   const client = useQueryClient();
-  const query = useQuery({ queryKey: ["mentor-review-workspace"], queryFn: () => apiRequest<RewardItem[]>("/api/v1/mentor/review-workspace"), refetchOnMount: "always" });
+  const [escalated, setEscalated] = useState<Set<string>>(new Set());
+  const query = useQuery({ queryKey: ["mentor-review-workspace"], queryFn: () => apiRequest<MentorQueueItem[]>("/api/v1/mentor/review-queue"), refetchOnMount: "always" });
   const transition = useMutation({ mutationFn: ({ review, action }: { review: Review; action: "propose" | "confirm" | "publish" }) => apiRequest(`/api/v1/mentor/reviews/${review.id}/${action}`, { method: "POST", headers: csrfHeaders(), body: JSON.stringify({ expected_version: review.version }) }), onSuccess: async () => client.invalidateQueries({ queryKey: ["mentor-review-workspace"] }) });
   if (query.isLoading) return <StatePanel kind="loading" />;
   if (query.isError || !query.data) return <StatePanel kind="error" action="Повторить" onAction={() => { void query.refetch(); }} />;
-  return <div className="feature-stack"><section><p className="eyebrow">Ментор · human-in-the-loop</p><h1 id="workspace-title">Проверяйте доказательства, а не вывод AI</h1><p className="lead">AI-черновик показан отдельно. Только ваше явное подтверждение создаёт финальную оценку, видимую участнику.</p></section>{query.data.length ? <div className="reward-grid">{query.data.map((item) => <div key={item.review.id}><ReviewEvidence item={item} mentor /><div className="review-actions">{item.review.status === "draft" && <button type="button" onClick={() => { transition.mutate({ review: item.review, action: "propose" }); }}>Передать на подтверждение</button>}{item.review.status === "proposed" && <button type="button" onClick={() => { transition.mutate({ review: item.review, action: "confirm" }); }}>Подтвердить человеком</button>}{item.review.status === "human_confirmed" && <button type="button" onClick={() => { transition.mutate({ review: item.review, action: "publish" }); }}>Опубликовать оценку</button>}</div></div>)}</div> : <StatePanel kind="empty" />}</div>;
+  return <div className="feature-stack"><section><p className="eyebrow">Ментор · human-in-the-loop</p><h1 id="workspace-title">Проверяйте доказательства, а не вывод AI</h1><p className="lead">Очередь отсортирована сервером по дедлайну. Видны только назначенные вам работы; AI-черновик отделён от финального решения человека.</p></section>{query.data.length ? <div className="mentor-queue">{query.data.map((item) => <article className="mentor-queue-item" key={item.review.id}><header><div><p className="eyebrow">До {new Date(item.deadline_at).toLocaleString("ru-RU")}</p><h2>{item.task_title}</h2></div><Badge tone={item.authorship_conflict_open ? "warning" : item.contribution_accepted ? "success" : "neutral"}>{item.authorship_conflict_open ? "Конфликт авторства" : item.contribution_accepted ? "Вклад принят" : "Ожидает приёмки"}</Badge></header><div className="mentor-evidence"><div><h3>Личный вклад</h3><p>{item.personal_summary}</p><small>Доказательства: {item.artifact_keys.join(", ") || "не приложены"}</small></div><ReviewEvidence item={item} mentor /></div><div className="review-actions">{item.review.status === "draft" && <button type="button" onClick={() => { transition.mutate({ review: item.review, action: "propose" }); }}>Передать на подтверждение</button>}{item.review.status === "proposed" && <button type="button" onClick={() => { transition.mutate({ review: item.review, action: "confirm" }); }}>Подтвердить человеком</button>}{item.review.status === "human_confirmed" && <button type="button" disabled={!item.contribution_accepted || item.authorship_conflict_open} onClick={() => { transition.mutate({ review: item.review, action: "publish" }); }}>Опубликовать оценку</button>}<button className="secondary-button" type="button" onClick={() => { setEscalated((current) => new Set(current).add(item.review.id)); }}>{escalated.has(item.review.id) ? "Передано оператору (демо)" : "Эскалировать оператору"}</button></div></article>)}</div> : <StatePanel kind="empty" />}</div>;
 }

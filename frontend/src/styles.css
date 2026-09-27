@@ -459,3 +459,16 @@ tbody tr:hover, tbody tr:focus-within { background: rgb(47 149 255 / 5%); }
 .application-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px; }
 .application-row + .application-row { margin-top: 8px; }
 @media (max-width: 767px) { .wizard-form { grid-template-columns: 1fr; } .span-2 { grid-column: auto; } .compensation-preview { align-items: flex-start; flex-direction: column; } .customer-task-row { grid-template-columns: 36px minmax(0, 1fr); } .customer-task-row > .ui-badge, .row-actions { grid-column: 2; } .row-actions { flex-wrap: wrap; } }
+
+.mentor-queue { display: grid; gap: 16px; }
+.mentor-queue-item { padding: 20px; border: 1px solid var(--color-border); border-radius: 14px; background: linear-gradient(145deg, #0b1726, #091522); }
+.mentor-queue-item > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.mentor-queue-item h2 { margin: 0; font-size: 20px; }
+.mentor-evidence { display: grid; grid-template-columns: minmax(240px, .65fr) minmax(0, 1.35fr); gap: 14px; }
+.mentor-evidence > div:first-child { padding: 16px; border: 1px solid var(--color-border); border-radius: 12px; background: #0d1b2c; }
+.mentor-evidence h3 { margin-top: 0; }
+.mentor-evidence small { color: var(--color-muted); }
+.mentor-evidence .ui-card { padding: 16px; }
+.mentor-queue-item .review-actions { justify-content: flex-end; margin-top: 14px; }
+.mentor-queue-item .review-actions button:disabled { cursor: not-allowed; opacity: .45; transform: none; }
+@media (max-width: 900px) { .mentor-evidence { grid-template-columns: 1fr; } }

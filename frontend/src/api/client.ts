@@ -10,6 +10,7 @@ export type RuntimeApiPath =
   | "/api/v1/me/work"
   | "/api/v1/me/reward-evidence"
   | "/api/v1/mentor/review-workspace"
+  | "/api/v1/mentor/review-queue"
   | `/api/v1/mentor/reviews/${string}/${"propose" | "confirm" | "publish"}`
   | `/api/v1/me/tasks/${string}/terms-consent`
   | `/api/v1/me/tasks/${string}/applications`
