@@ -205,3 +205,59 @@ def test_score_api_preserves_source_and_rebuilds_after_correction() -> None:
             "trophies": [],
             "anonymized": True,
         }
+
+        csrf = login(api, "operator-pavel")
+        headers = {"X-CSRF-Token": csrf}
+        closed = api.post(
+            f"/api/v1/operations/rating-seasons/{season_id}/close",
+            json={"expected_version": 2},
+            headers=headers,
+        )
+        assert closed.json()["status"] == "closing"
+        frozen = api.post(
+            f"/api/v1/operations/rating-seasons/{season_id}/freeze",
+            json={"expected_version": 3},
+            headers=headers,
+        )
+        assert frozen.json()["status"] == "frozen"
+        issued = api.post(
+            f"/api/v1/operations/rating-seasons/{season_id}/participants/"
+            f"{participant.person_id}/credentials",
+            json={},
+            headers=headers,
+        )
+        assert issued.status_code == 200
+        first = issued.json()
+        verification = api.get(f"/api/v1/credentials/{first['verification_id']}")
+        assert verification.status_code == 200
+        assert set(verification.json()) == {
+            "verification_id",
+            "status",
+            "holder_name",
+            "title",
+            "level",
+            "place",
+            "cohort_title",
+            "season_title",
+            "period",
+            "issued_at",
+        }
+        assert verification.json()["status"] == "valid"
+
+        replacement = api.post(
+            f"/api/v1/operations/rating-seasons/{season_id}/participants/"
+            f"{participant.person_id}/credentials",
+            json={"correction_reason": "Late accepted evidence changed the document."},
+            headers=headers,
+        )
+        assert replacement.json()["version"] == 2
+        assert (
+            api.get(f"/api/v1/credentials/{first['verification_id']}").json()["status"]
+            == "superseded"
+        )
+        revoked = api.post(
+            f"/api/v1/operations/credentials/{replacement.json()['id']}/revoke",
+            json={"reason": "Source was revoked."},
+            headers=headers,
+        )
+        assert revoked.json()["status"] == "revoked"

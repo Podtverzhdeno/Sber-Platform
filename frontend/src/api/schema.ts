@@ -72,6 +72,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/credentials/{verification_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Verify Credential */
+        get: operations["verify_credential_api_v1_credentials__verification_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/applications/{application_id}/accept": {
         parameters: {
             query?: never;
@@ -769,6 +786,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/credentials/{credential_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke Credential */
+        post: operations["revoke_credential_api_v1_operations_credentials__credential_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/operations/event-claims/import": {
         parameters: {
             query?: never;
@@ -871,6 +905,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/rating-seasons/{season_id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Close Season */
+        post: operations["close_season_api_v1_operations_rating_seasons__season_id__close_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/rating-seasons/{season_id}/freeze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Freeze Season */
+        post: operations["freeze_season_api_v1_operations_rating_seasons__season_id__freeze_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/operations/rating-seasons/{season_id}/open": {
         parameters: {
             query?: never;
@@ -882,6 +950,23 @@ export interface paths {
         put?: never;
         /** Open Season */
         post: operations["open_season_api_v1_operations_rating_seasons__season_id__open_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/rating-seasons/{season_id}/participants/{person_id}/credentials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Issue Credential */
+        post: operations["issue_credential_api_v1_operations_rating_seasons__season_id__participants__person_id__credentials_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1511,6 +1596,11 @@ export interface components {
             /** Title */
             title: string;
         };
+        /**
+         * CredentialStatus
+         * @enum {string}
+         */
+        CredentialStatus: "valid" | "revoked" | "superseded";
         /** CriterionAssessmentRequest */
         CriterionAssessmentRequest: {
             /** Criterion Key */
@@ -1675,6 +1765,11 @@ export interface components {
             /** Provider Id */
             provider_id: string;
         };
+        /** IssueCredentialRequest */
+        IssueCredentialRequest: {
+            /** Correction Reason */
+            correction_reason?: string | null;
+        };
         /** LeaderboardEntryView */
         LeaderboardEntryView: {
             /** Anonymized */
@@ -1750,6 +1845,56 @@ export interface components {
             /** Expected Version */
             expected_version: number;
         };
+        /** OperationalCredentialView */
+        OperationalCredentialView: {
+            /** Checksum */
+            checksum: string;
+            /** Cohort Title */
+            cohort_title: string;
+            /** Holder Name */
+            holder_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Issued At
+             * Format: date-time
+             */
+            issued_at: string;
+            /** Level */
+            level: string | null;
+            /** Period */
+            period: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Place */
+            place: number;
+            /** Policy Version */
+            policy_version: number;
+            /**
+             * Season Id
+             * Format: uuid
+             */
+            season_id: string;
+            /** Season Title */
+            season_title: string;
+            status: components["schemas"]["CredentialStatus"];
+            /** Status Reason */
+            status_reason: string | null;
+            /** Supersedes Id */
+            supersedes_id: string | null;
+            /** Title */
+            title: string;
+            /** Verification Id */
+            verification_id: string;
+            /** Version */
+            version: number;
+        };
         /** PayoutClaimView */
         PayoutClaimView: {
             /** Amount */
@@ -1797,6 +1942,31 @@ export interface components {
             key: string;
             /** Roles */
             roles: components["schemas"]["Role"][];
+        };
+        /** PublicCredentialView */
+        PublicCredentialView: {
+            /** Cohort Title */
+            cohort_title: string;
+            /** Holder Name */
+            holder_name: string;
+            /**
+             * Issued At
+             * Format: date-time
+             */
+            issued_at: string;
+            /** Level */
+            level: string | null;
+            /** Period */
+            period: string;
+            /** Place */
+            place: number;
+            /** Season Title */
+            season_title: string;
+            status: components["schemas"]["CredentialStatus"];
+            /** Title */
+            title: string;
+            /** Verification Id */
+            verification_id: string;
         };
         /** PublishPolicyRequest */
         PublishPolicyRequest: {
@@ -1987,6 +2157,11 @@ export interface components {
             /** Deliverable */
             deliverable: string;
         };
+        /** RevokeCredentialRequest */
+        RevokeCredentialRequest: {
+            /** Reason */
+            reason: string;
+        };
         /** RewardWorkspaceItemView */
         RewardWorkspaceItemView: {
             payout: components["schemas"]["PayoutClaimView"] | null;
@@ -2086,6 +2261,11 @@ export interface components {
          * @enum {string}
          */
         SeasonStatus: "scheduled" | "open" | "closing" | "frozen";
+        /** SeasonTransitionRequest */
+        SeasonTransitionRequest: {
+            /** Expected Version */
+            expected_version: number;
+        };
         /** SeasonView */
         SeasonView: {
             /**
@@ -2402,6 +2582,37 @@ export interface operations {
                     "application/json": {
                         [key: string]: boolean | string;
                     };
+                };
+            };
+        };
+    };
+    verify_credential_api_v1_credentials__verification_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                verification_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicCredentialView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -3680,6 +3891,43 @@ export interface operations {
             };
         };
     };
+    revoke_credential_api_v1_operations_credentials__credential_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                credential_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RevokeCredentialRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationalCredentialView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     import_claim_api_v1_operations_event_claims_import_post: {
         parameters: {
             query?: never;
@@ -3898,6 +4146,80 @@ export interface operations {
             };
         };
     };
+    close_season_api_v1_operations_rating_seasons__season_id__close_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                season_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SeasonTransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SeasonView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    freeze_season_api_v1_operations_rating_seasons__season_id__freeze_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                season_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SeasonTransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SeasonView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     open_season_api_v1_operations_rating_seasons__season_id__open_post: {
         parameters: {
             query?: never;
@@ -3922,6 +4244,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SeasonView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    issue_credential_api_v1_operations_rating_seasons__season_id__participants__person_id__credentials_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                season_id: string;
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IssueCredentialRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OperationalCredentialView"];
                 };
             };
             /** @description Validation Error */

@@ -1161,6 +1161,15 @@
         "title": "CreateTaskRequest",
         "type": "object"
       },
+      "CredentialStatus": {
+        "enum": [
+          "valid",
+          "revoked",
+          "superseded"
+        ],
+        "title": "CredentialStatus",
+        "type": "string"
+      },
       "CriterionAssessmentRequest": {
         "properties": {
           "criterion_key": {
@@ -1605,6 +1614,25 @@
         "title": "ImportClaimRequest",
         "type": "object"
       },
+      "IssueCredentialRequest": {
+        "properties": {
+          "correction_reason": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correction Reason"
+          }
+        },
+        "title": "IssueCredentialRequest",
+        "type": "object"
+      },
       "LeaderboardEntryView": {
         "properties": {
           "anonymized": {
@@ -1798,6 +1826,129 @@
         "title": "OpenSeasonRequest",
         "type": "object"
       },
+      "OperationalCredentialView": {
+        "properties": {
+          "checksum": {
+            "title": "Checksum",
+            "type": "string"
+          },
+          "cohort_title": {
+            "title": "Cohort Title",
+            "type": "string"
+          },
+          "holder_name": {
+            "title": "Holder Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "issued_at": {
+            "format": "date-time",
+            "title": "Issued At",
+            "type": "string"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "period": {
+            "title": "Period",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "place": {
+            "title": "Place",
+            "type": "integer"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "season_id": {
+            "format": "uuid",
+            "title": "Season Id",
+            "type": "string"
+          },
+          "season_title": {
+            "title": "Season Title",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CredentialStatus"
+          },
+          "status_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status Reason"
+          },
+          "supersedes_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supersedes Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verification_id": {
+            "title": "Verification Id",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "verification_id",
+          "status",
+          "holder_name",
+          "title",
+          "level",
+          "place",
+          "cohort_title",
+          "season_title",
+          "period",
+          "issued_at",
+          "id",
+          "season_id",
+          "person_id",
+          "version",
+          "policy_version",
+          "checksum",
+          "status_reason",
+          "supersedes_id"
+        ],
+        "title": "OperationalCredentialView",
+        "type": "object"
+      },
       "PayoutClaimView": {
         "properties": {
           "amount": {
@@ -1927,6 +2078,71 @@
           "roles"
         ],
         "title": "PersonaView",
+        "type": "object"
+      },
+      "PublicCredentialView": {
+        "properties": {
+          "cohort_title": {
+            "title": "Cohort Title",
+            "type": "string"
+          },
+          "holder_name": {
+            "title": "Holder Name",
+            "type": "string"
+          },
+          "issued_at": {
+            "format": "date-time",
+            "title": "Issued At",
+            "type": "string"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "period": {
+            "title": "Period",
+            "type": "string"
+          },
+          "place": {
+            "title": "Place",
+            "type": "integer"
+          },
+          "season_title": {
+            "title": "Season Title",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/CredentialStatus"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verification_id": {
+            "title": "Verification Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "verification_id",
+          "status",
+          "holder_name",
+          "title",
+          "level",
+          "place",
+          "cohort_title",
+          "season_title",
+          "period",
+          "issued_at"
+        ],
+        "title": "PublicCredentialView",
         "type": "object"
       },
       "PublishPolicyRequest": {
@@ -2434,6 +2650,21 @@
         "title": "ReviseTermsRequest",
         "type": "object"
       },
+      "RevokeCredentialRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "RevokeCredentialRequest",
+        "type": "object"
+      },
       "RewardWorkspaceItemView": {
         "properties": {
           "payout": {
@@ -2717,6 +2948,20 @@
         ],
         "title": "SeasonStatus",
         "type": "string"
+      },
+      "SeasonTransitionRequest": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "SeasonTransitionRequest",
+        "type": "object"
       },
       "SeasonView": {
         "properties": {
@@ -3429,6 +3674,45 @@
           }
         },
         "summary": "Public Config"
+      }
+    },
+    "/api/v1/credentials/{verification_id}": {
+      "get": {
+        "operationId": "verify_credential_api_v1_credentials__verification_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "verification_id",
+            "required": true,
+            "schema": {
+              "title": "Verification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicCredentialView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify Credential"
       }
     },
     "/api/v1/customer/applications/{application_id}/accept": {
@@ -5487,6 +5771,72 @@
         "summary": "Publish Review"
       }
     },
+    "/api/v1/operations/credentials/{credential_id}/revoke": {
+      "post": {
+        "operationId": "revoke_credential_api_v1_operations_credentials__credential_id__revoke_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "credential_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Credential Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevokeCredentialRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationalCredentialView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revoke Credential"
+      }
+    },
     "/api/v1/operations/event-claims/import": {
       "post": {
         "operationId": "import_claim_api_v1_operations_event_claims_import_post",
@@ -5863,6 +6213,138 @@
         "summary": "Create Season"
       }
     },
+    "/api/v1/operations/rating-seasons/{season_id}/close": {
+      "post": {
+        "operationId": "close_season_api_v1_operations_rating_seasons__season_id__close_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeasonTransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeasonView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Close Season"
+      }
+    },
+    "/api/v1/operations/rating-seasons/{season_id}/freeze": {
+      "post": {
+        "operationId": "freeze_season_api_v1_operations_rating_seasons__season_id__freeze_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SeasonTransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SeasonView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Freeze Season"
+      }
+    },
     "/api/v1/operations/rating-seasons/{season_id}/open": {
       "post": {
         "operationId": "open_season_api_v1_operations_rating_seasons__season_id__open_post",
@@ -5927,6 +6409,82 @@
           }
         },
         "summary": "Open Season"
+      }
+    },
+    "/api/v1/operations/rating-seasons/{season_id}/participants/{person_id}/credentials": {
+      "post": {
+        "operationId": "issue_credential_api_v1_operations_rating_seasons__season_id__participants__person_id__credentials_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Person Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IssueCredentialRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationalCredentialView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Issue Credential"
       }
     },
     "/api/v1/operations/rating-seasons/{season_id}/policies": {

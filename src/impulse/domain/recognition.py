@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from decimal import Decimal
 from enum import StrEnum
@@ -26,6 +26,12 @@ class TieBreaker(StrEnum):
     HIGHEST_PROJECT_SCORE = "highest_project_score"
     EARLIEST_ACHIEVEMENT = "earliest_achievement"
     PERSON_ID = "person_id"
+
+
+class CredentialStatus(StrEnum):
+    VALID = "valid"
+    REVOKED = "revoked"
+    SUPERSEDED = "superseded"
 
 
 def _decimal(value: object) -> Decimal:
@@ -141,6 +147,26 @@ class RatingSeason:
             policy_version=policy.version,
         )
 
+    def close(self) -> RatingSeason:
+        if self.status is not SeasonStatus.OPEN:
+            raise RatingPolicyError("Only an open season can enter closing.")
+        return self._with_status(SeasonStatus.CLOSING)
+
+    def freeze(self) -> RatingSeason:
+        if self.status is not SeasonStatus.CLOSING:
+            raise RatingPolicyError("Only a closing season can be frozen.")
+        return self._with_status(SeasonStatus.FROZEN)
+
+    def _with_status(self, status: SeasonStatus) -> RatingSeason:
+        return RatingSeason(
+            self.season_id,
+            self.key,
+            self.title,
+            status,
+            self.version + 1,
+            self.policy_version,
+        )
+
 
 @dataclass(frozen=True, slots=True)
 class CohortMember:
@@ -190,6 +216,47 @@ class Standing:
     successful_projects: int
     highest_project_score: Decimal
     earliest_achievement: datetime | None
+
+
+@dataclass(frozen=True, slots=True)
+class Credential:
+    credential_id: UUID
+    verification_id: str
+    season_id: UUID
+    person_id: UUID
+    holder_name: str
+    credential_version: int
+    policy_version: int
+    status: CredentialStatus
+    title: str
+    level: str | None
+    place: int
+    score: Decimal
+    successful_projects: int
+    cohort_key: str
+    cohort_title: str
+    season_title: str
+    period: str
+    issued_at: datetime
+    checksum: str
+    status_reason: str | None = None
+    supersedes_id: UUID | None = None
+
+    def __post_init__(self) -> None:
+        if self.credential_version < 1 or self.policy_version < 1:
+            raise RatingPolicyError("Credential versions must be positive.")
+        if not self.verification_id.strip() or not self.checksum.strip():
+            raise RatingPolicyError("Credential requires verification ID and checksum.")
+
+    def revoke(self, reason: str) -> Credential:
+        if self.status is not CredentialStatus.VALID or not reason.strip():
+            raise RatingPolicyError("Only a valid credential can be revoked with reason.")
+        return replace(self, status=CredentialStatus.REVOKED, status_reason=reason)
+
+    def supersede(self, reason: str) -> Credential:
+        if self.status is not CredentialStatus.VALID or not reason.strip():
+            raise RatingPolicyError("Only a valid credential can be superseded with reason.")
+        return replace(self, status=CredentialStatus.SUPERSEDED, status_reason=reason)
 
 
 @dataclass(frozen=True, slots=True)

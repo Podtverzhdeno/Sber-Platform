@@ -6,7 +6,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.exc import DBAPIError
 
@@ -14,6 +14,8 @@ from impulse.api.errors import ApiError
 from impulse.bootstrap.demo_seed import demo_id, seed_demo
 from impulse.domain.recognition import (
     CohortRule,
+    Credential,
+    CredentialStatus,
     DiplomaThreshold,
     RatingPolicy,
     RatingSeason,
@@ -25,7 +27,7 @@ from impulse.domain.recognition import (
 )
 from impulse.infrastructure.database import Database, async_database_url
 from impulse.infrastructure.models.identity import visibility_settings
-from impulse.infrastructure.models.recognition import score_ledger, trophies
+from impulse.infrastructure.models.recognition import credentials, score_ledger, trophies
 from impulse.infrastructure.recognition_store import SqlRecognitionStore
 
 pytestmark = pytest.mark.integration
@@ -136,9 +138,7 @@ async def test_policy_round_trip_and_season_binding() -> None:
                 data_origin="demo_runtime",
             )
         )
-    public_rows = public_leaderboard(
-        await store.leaderboard_candidates(season.season_id)
-    )
+    public_rows = public_leaderboard(await store.leaderboard_candidates(season.season_id))
     assert public_rows[0].person_id == members[0].person_id
     assert public_rows[0].trophies[0].trophy_type == "winner"
     assert public_rows[0].trophies[0].source_url.startswith("https://")
@@ -152,11 +152,65 @@ async def test_policy_round_trip_and_season_binding() -> None:
             )
             .values(visible=False)
         )
-    hidden_rows = public_leaderboard(
-        await store.leaderboard_candidates(season.season_id)
-    )
+    hidden_rows = public_leaderboard(await store.leaderboard_candidates(season.season_id))
     assert hidden_rows[0].person_id is None
     assert hidden_rows[0].trophies == ()
+    issued = Credential(
+        uuid4(),
+        "verify-integration",
+        season.season_id,
+        members[0].person_id,
+        "Demo Holder",
+        1,
+        1,
+        CredentialStatus.VALID,
+        "I degree",
+        "gold",
+        1,
+        Decimal("105"),
+        1,
+        "python",
+        "Python",
+        "Test season",
+        "test-period",
+        datetime.now(UTC),
+        "checksum-v1",
+    )
+    await store.add_credential(issued)
+    superseded = issued.supersede("Corrected standing.")
+    replacement = Credential(
+        uuid4(),
+        "verify-integration-v2",
+        season.season_id,
+        members[0].person_id,
+        "Demo Holder",
+        2,
+        1,
+        CredentialStatus.VALID,
+        "I degree",
+        "gold",
+        1,
+        Decimal("105"),
+        1,
+        "python",
+        "Python",
+        "Test season",
+        "test-period",
+        datetime.now(UTC),
+        "checksum-v2",
+        supersedes_id=issued.credential_id,
+    )
+    await store.replace_credential(superseded, replacement)
+    assert (
+        await store.credential_by_verification("verify-integration")
+    ).status is CredentialStatus.SUPERSEDED  # type: ignore[union-attr]
+    revoked = replacement.revoke("Source revoked.")
+    await store.save_credential(revoked)
+    assert (await store.credential(replacement.credential_id)).status is CredentialStatus.REVOKED  # type: ignore[union-attr]
+    async with database.session() as session:
+        await session.execute(
+            delete(credentials).where(credentials.c.season_id == season.season_id)
+        )
     with pytest.raises(DBAPIError):
         async with database.session() as session:
             await session.execute(

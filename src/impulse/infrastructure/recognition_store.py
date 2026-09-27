@@ -17,6 +17,8 @@ from impulse.application.recognition import RecognitionStore
 from impulse.domain.recognition import (
     CohortMember,
     CohortRule,
+    Credential,
+    CredentialStatus,
     DiplomaThreshold,
     LeaderboardCandidate,
     RatingPolicy,
@@ -37,6 +39,7 @@ from impulse.infrastructure.models.ecosystem import (
 )
 from impulse.infrastructure.models.identity import actor_roles, persons, visibility_settings
 from impulse.infrastructure.models.recognition import (
+    credentials,
     rating_policies,
     score_ledger,
     seasons,
@@ -404,6 +407,115 @@ class SqlRecognitionStore(RecognitionStore):
             for row in rows
         )
 
+    async def standing(self, season_id: UUID, person_id: UUID) -> Standing | None:
+        async with self.database.sessions() as session:
+            row = (
+                (
+                    await session.execute(
+                        select(standings).where(
+                            standings.c.season_id == season_id, standings.c.person_id == person_id
+                        )
+                    )
+                )
+                .mappings()
+                .one_or_none()
+            )
+        return self._standing(row) if row is not None else None
+
+    async def person_name(self, person_id: UUID) -> str | None:
+        async with self.database.sessions() as session:
+            return await session.scalar(
+                select(persons.c.display_name).where(persons.c.id == person_id)
+            )
+
+    async def credential(self, credential_id: UUID) -> Credential | None:
+        async with self.database.sessions() as session:
+            row = (
+                (
+                    await session.execute(
+                        select(credentials).where(credentials.c.id == credential_id)
+                    )
+                )
+                .mappings()
+                .one_or_none()
+            )
+        return self._credential(row) if row is not None else None
+
+    async def credential_by_verification(self, verification_id: str) -> Credential | None:
+        async with self.database.sessions() as session:
+            row = (
+                (
+                    await session.execute(
+                        select(credentials).where(credentials.c.verification_id == verification_id)
+                    )
+                )
+                .mappings()
+                .one_or_none()
+            )
+        return self._credential(row) if row is not None else None
+
+    async def latest_credential(self, season_id: UUID, person_id: UUID) -> Credential | None:
+        async with self.database.sessions() as session:
+            row = (
+                (
+                    await session.execute(
+                        select(credentials)
+                        .where(
+                            credentials.c.season_id == season_id,
+                            credentials.c.person_id == person_id,
+                        )
+                        .order_by(credentials.c.credential_version.desc())
+                        .limit(1)
+                    )
+                )
+                .mappings()
+                .one_or_none()
+            )
+        return self._credential(row) if row is not None else None
+
+    async def add_credential(self, credential: Credential) -> Credential:
+        try:
+            async with self.database.session() as session:
+                await session.execute(
+                    insert(credentials).values(**self._credential_values(credential))
+                )
+        except IntegrityError as exc:
+            raise ApiError("CREDENTIAL_ALREADY_ISSUED", "Credential already exists.", 409) from exc
+        return credential
+
+    async def replace_credential(self, previous: Credential, replacement: Credential) -> Credential:
+        async with self.database.session() as session:
+            changed = await session.execute(
+                update(credentials)
+                .where(
+                    credentials.c.id == previous.credential_id,
+                    credentials.c.status == CredentialStatus.VALID.value,
+                )
+                .values(**self._credential_values(previous, include_id=False))
+                .returning(credentials.c.id)
+            )
+            if changed.scalar_one_or_none() is None:
+                raise ApiError("STALE_CREDENTIAL", "Credential status changed.", 409)
+            await session.execute(
+                insert(credentials).values(**self._credential_values(replacement))
+            )
+        return replacement
+
+    async def save_credential(self, credential: Credential) -> Credential:
+        async with self.database.session() as session:
+            changed = await session.execute(
+                update(credentials)
+                .where(
+                    credentials.c.id == credential.credential_id,
+                    credentials.c.status == CredentialStatus.VALID.value,
+                )
+                .values(**self._credential_values(credential, include_id=False))
+                .returning(credentials.c.id)
+            )
+            if changed.scalar_one_or_none() is None:
+                raise ApiError("STALE_CREDENTIAL", "Credential status changed.", 409)
+        return credential
+
     @staticmethod
     def _score_entry(row: RowMapping) -> ScoreEntry:
         payload = dict(row["payload"])
@@ -437,4 +549,64 @@ class SqlRecognitionStore(RecognitionStore):
             successful_projects=int(payload.get("successful_projects", 0)),
             highest_project_score=Decimal(str(payload.get("highest_project_score", "0"))),
             earliest_achievement=(datetime.fromisoformat(str(earliest)) if earliest else None),
+        )
+
+    @staticmethod
+    def _credential_values(item: Credential, *, include_id: bool = True) -> dict[str, object]:
+        values: dict[str, object] = {
+            "season_id": item.season_id,
+            "person_id": item.person_id,
+            "verification_id": item.verification_id,
+            "credential_version": item.credential_version,
+            "version": item.credential_version,
+            "status": item.status.value,
+            "data_origin": "runtime",
+            "payload": {
+                "holder_name": item.holder_name,
+                "policy_version": item.policy_version,
+                "title": item.title,
+                "level": item.level,
+                "place": item.place,
+                "score": str(item.score),
+                "successful_projects": item.successful_projects,
+                "cohort_key": item.cohort_key,
+                "cohort_title": item.cohort_title,
+                "season_title": item.season_title,
+                "period": item.period,
+                "issued_at": item.issued_at.isoformat(),
+                "checksum": item.checksum,
+                "status_reason": item.status_reason,
+                "supersedes_id": str(item.supersedes_id) if item.supersedes_id else None,
+            },
+        }
+        if include_id:
+            values["id"] = item.credential_id
+        return values
+
+    @staticmethod
+    def _credential(row: RowMapping) -> Credential:
+        payload = dict(row["payload"])
+        supersedes_id = payload.get("supersedes_id")
+        return Credential(
+            credential_id=row["id"],
+            verification_id=row["verification_id"],
+            season_id=row["season_id"],
+            person_id=row["person_id"],
+            holder_name=str(payload["holder_name"]),
+            credential_version=row["credential_version"],
+            policy_version=int(payload["policy_version"]),
+            status=CredentialStatus(row["status"]),
+            title=str(payload["title"]),
+            level=str(payload["level"]) if payload.get("level") else None,
+            place=int(payload["place"]),
+            score=Decimal(str(payload["score"])),
+            successful_projects=int(payload["successful_projects"]),
+            cohort_key=str(payload["cohort_key"]),
+            cohort_title=str(payload["cohort_title"]),
+            season_title=str(payload["season_title"]),
+            period=str(payload["period"]),
+            issued_at=datetime.fromisoformat(str(payload["issued_at"])),
+            checksum=str(payload["checksum"]),
+            status_reason=str(payload["status_reason"]) if payload.get("status_reason") else None,
+            supersedes_id=UUID(str(supersedes_id)) if supersedes_id else None,
         )

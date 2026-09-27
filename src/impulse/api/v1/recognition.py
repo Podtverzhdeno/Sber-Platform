@@ -13,6 +13,8 @@ from impulse.application.identity import AuthenticatedSession
 from impulse.application.recognition import RecognitionService
 from impulse.domain.recognition import (
     CohortRule,
+    Credential,
+    CredentialStatus,
     DiplomaThreshold,
     LeaderboardEntry,
     RatingPolicy,
@@ -86,6 +88,18 @@ class CorrectScoreRequest(BaseModel):
     occurred_at: datetime
 
 
+class SeasonTransitionRequest(BaseModel):
+    expected_version: int = Field(ge=1)
+
+
+class IssueCredentialRequest(BaseModel):
+    correction_reason: str | None = Field(default=None, min_length=1, max_length=2000)
+
+
+class RevokeCredentialRequest(BaseModel):
+    reason: str = Field(min_length=1, max_length=2000)
+
+
 class SeasonView(BaseModel):
     id: UUID
     key: str
@@ -143,6 +157,30 @@ class LeaderboardEntryView(BaseModel):
     successful_projects: int
     trophies: list[TrophyProofView]
     anonymized: bool
+
+
+class PublicCredentialView(BaseModel):
+    verification_id: str
+    status: CredentialStatus
+    holder_name: str
+    title: str
+    level: str | None
+    place: int
+    cohort_title: str
+    season_title: str
+    period: str
+    issued_at: datetime
+
+
+class OperationalCredentialView(PublicCredentialView):
+    id: UUID
+    season_id: UUID
+    person_id: UUID
+    version: int
+    policy_version: int
+    checksum: str
+    status_reason: str | None
+    supersedes_id: UUID | None
 
 
 def _season_view(season: RatingSeason) -> SeasonView:
@@ -226,6 +264,35 @@ def _leaderboard_view(item: LeaderboardEntry) -> LeaderboardEntryView:
             for proof in item.trophies
         ],
         anonymized=item.anonymized,
+    )
+
+
+def _public_credential(item: Credential) -> PublicCredentialView:
+    return PublicCredentialView(
+        verification_id=item.verification_id,
+        status=item.status,
+        holder_name=item.holder_name,
+        title=item.title,
+        level=item.level,
+        place=item.place,
+        cohort_title=item.cohort_title,
+        season_title=item.season_title,
+        period=item.period,
+        issued_at=item.issued_at,
+    )
+
+
+def _operational_credential(item: Credential) -> OperationalCredentialView:
+    return OperationalCredentialView(
+        **_public_credential(item).model_dump(),
+        id=item.credential_id,
+        season_id=item.season_id,
+        person_id=item.person_id,
+        version=item.credential_version,
+        policy_version=item.policy_version,
+        checksum=item.checksum,
+        status_reason=item.status_reason,
+        supersedes_id=item.supersedes_id,
     )
 
 
@@ -339,3 +406,75 @@ async def leaderboard(
     service: Annotated[RecognitionService, Depends(_service)],
 ) -> list[LeaderboardEntryView]:
     return [_leaderboard_view(item) for item in await service.leaderboard(season_id)]
+
+
+@router.post("/operations/rating-seasons/{season_id}/close", response_model=SeasonView)
+async def close_season(
+    season_id: UUID,
+    command: SeasonTransitionRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> SeasonView:
+    return _season_view(
+        await service.transition_season(
+            authenticated.actor, season_id, expected_version=command.expected_version, freeze=False
+        )
+    )
+
+
+@router.post("/operations/rating-seasons/{season_id}/freeze", response_model=SeasonView)
+async def freeze_season(
+    season_id: UUID,
+    command: SeasonTransitionRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> SeasonView:
+    return _season_view(
+        await service.transition_season(
+            authenticated.actor, season_id, expected_version=command.expected_version, freeze=True
+        )
+    )
+
+
+@router.post(
+    "/operations/rating-seasons/{season_id}/participants/{person_id}/credentials",
+    response_model=OperationalCredentialView,
+)
+async def issue_credential(
+    season_id: UUID,
+    person_id: UUID,
+    command: IssueCredentialRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> OperationalCredentialView:
+    return _operational_credential(
+        await service.issue_credential(
+            authenticated.actor,
+            season_id,
+            person_id,
+            correction_reason=command.correction_reason,
+        )
+    )
+
+
+@router.post(
+    "/operations/credentials/{credential_id}/revoke",
+    response_model=OperationalCredentialView,
+)
+async def revoke_credential(
+    credential_id: UUID,
+    command: RevokeCredentialRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> OperationalCredentialView:
+    return _operational_credential(
+        await service.revoke_credential(authenticated.actor, credential_id, reason=command.reason)
+    )
+
+
+@router.get("/credentials/{verification_id}", response_model=PublicCredentialView)
+async def verify_credential(
+    verification_id: str,
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> PublicCredentialView:
+    return _public_credential(await service.verify_credential(verification_id))
