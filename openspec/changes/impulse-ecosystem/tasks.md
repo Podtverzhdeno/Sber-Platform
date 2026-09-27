@@ -42,6 +42,7 @@
 - [x] 5.3 Реализовать единые loading/empty/restricted/stale/error/offline states с actionable CTA; Story/test fixtures SHALL покрыть каждое состояние.
 - [x] 5.4 Настроить TanStack Query, typed API client и error mapping; test SHALL подтвердить retry только для безопасных retryable reads.
 - [x] 5.5 Добавить CSP-compatible asset build, external-link safety и reduced-motion; automated accessibility/security check SHALL пройти без critical issues.
+- [x] 5.6 Применить утверждённую navy/teal visual system к role-aware shell, dashboard и общим компонентам; Playwright screenshot regression SHALL покрыть 1440×900, 1024×768 и 390×844.
 
 ## 6. Направления, roadmap и Bootcamp
 

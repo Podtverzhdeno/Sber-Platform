@@ -79,11 +79,13 @@ for (const [key, displayName, , navigation] of personas) {
       ? "Найдите своё через практику"
       : key === "mentor-elena"
         ? "Проверяйте доказательства, а не вывод AI"
-        : `Здравствуйте, ${displayName}`;
+        : `Добро пожаловать, ${displayName.split(" ")[0]}!`;
     await expect(page.getByRole("heading", { name: heading })).toBeVisible();
     const links = page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link");
     await expect(links).toHaveCount(navigation.length);
-    await expect(links).toHaveText([...navigation]);
+    for (const [index, label] of navigation.entries()) {
+      await expect(links.nth(index)).toHaveAccessibleName(label);
+    }
     await expect(page.getByText("Демо-режим · синтетические данные")).toBeVisible();
   });
 }
