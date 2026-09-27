@@ -15,6 +15,7 @@ from impulse.domain.work import (
     TaskStatus,
     accept_application,
     publication_issues,
+    validate_personal_contribution,
 )
 
 
@@ -93,3 +94,16 @@ def test_application_acceptance_rejects_stale_version_and_full_task() -> None:
             places=1,
         )
     assert full.value.code == "TASK_FULL"
+
+
+@pytest.mark.spec("projects-tasks/Командный MVP")
+def test_team_artifact_does_not_replace_personal_contribution_description() -> None:
+    with pytest.raises(TaskPolicyError) as missing:
+        validate_personal_contribution("Общий репозиторий")
+    assert missing.value.code == "PERSONAL_CONTRIBUTION_REQUIRED"
+    assert (
+        validate_personal_contribution(
+            "Я реализовал API поиска, написал тесты и измерил offline-метрику."
+        )
+        == "Я реализовал API поиска, написал тесты и измерил offline-метрику."
+    )

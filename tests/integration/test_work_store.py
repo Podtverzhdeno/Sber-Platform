@@ -13,7 +13,11 @@ from sqlalchemy import func, select
 
 from impulse.api.errors import ApiError
 from impulse.application.identity import DemoAuthService
-from impulse.application.work import WorkService
+from impulse.application.work import (
+    CheckpointRecord,
+    TeamArtifactRecord,
+    WorkService,
+)
 from impulse.bootstrap.app import create_app
 from impulse.bootstrap.demo_seed import seed_demo
 from impulse.bootstrap.settings import AppEnvironment, Settings
@@ -21,7 +25,9 @@ from impulse.infrastructure.database import Database, async_database_url
 from impulse.infrastructure.identity_store import SqlIdentityStore
 from impulse.infrastructure.models.work import (
     applications,
+    artifacts,
     assignments,
+    contributions,
     task_terms_versions,
     tasks,
 )
@@ -187,6 +193,24 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
     assert stale.value.code == "STALE_APPLICATION"
     started = await work_store.start_assignment(assignments_created[0].id)
     assert started.status.value == "in_progress"
+    checkpoint = await work_store.add_checkpoint(
+        task_id, CheckpointRecord("mvp-review", "Проверка командного MVP")
+    )
+    assert checkpoint.status == "planned"
+    await work_store.add_team_artifact(
+        task_id,
+        TeamArtifactRecord("team-repository", "https://example.test/team/repository"),
+    )
+    contribution = await work_store.submit_contribution(
+        started.id,
+        "Я реализовал API поиска и самостоятельно добавил проверку offline-метрики.",
+        (
+            TeamArtifactRecord(
+                "personal-api-proof", "https://example.test/team/repository/commit/42"
+            ),
+        ),
+    )
+    assert contribution.version == 1
 
     async with database.sessions() as session:
         row = (
@@ -215,11 +239,29 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
             )
             or 0
         )
+        contribution_row = (
+            await session.execute(
+                select(contributions.c.summary, contributions.c.contribution_version).where(
+                    contributions.c.assignment_id == started.id
+                )
+            )
+        ).one()
+        artifact_count = int(
+            await session.scalar(
+                select(func.count())
+                .select_from(artifacts)
+                .where(artifacts.c.contribution_id == contribution.id)
+            )
+            or 0
+        )
     assert row.status == "published"
-    assert row.version == 5
+    assert row.version == 7
     assert row.payload["support"]["mode"] == "buddy"
     assert row.payload["nominated_mentor_id"] is None
     assert terms_count == 3
     assert accepted_terms == 3
     assert assignment_count == 1
+    assert contribution_row.contribution_version == 1
+    assert contribution_row.summary.startswith("Я реализовал API")
+    assert artifact_count == 1
     await database.close()

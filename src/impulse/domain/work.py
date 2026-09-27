@@ -61,6 +61,17 @@ def start_assignment(status: AssignmentStatus) -> AssignmentStatus:
     return AssignmentStatus.IN_PROGRESS
 
 
+def validate_personal_contribution(summary: str) -> str:
+    normalized = " ".join(summary.split())
+    if len(normalized) < 20:
+        raise TaskPolicyError(
+            "PERSONAL_CONTRIBUTION_REQUIRED",
+            "Опишите собственную работу и отделите её от командного результата.",
+            missing_fields=("personal_summary",),
+        )
+    return normalized
+
+
 @dataclass(frozen=True, slots=True)
 class TaskBrief:
     problem: str = ""

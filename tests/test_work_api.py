@@ -171,12 +171,56 @@ def test_task_without_nominated_mentor_waits_for_support_before_publish() -> Non
         assert full.status_code == 409
         assert full.json()["code"] == "TASK_FULL"
 
+        checkpoint = api.post(
+            f"/api/v1/customer/tasks/{task_id}/checkpoints",
+            json={"key": "rd-review", "title": "Проверка research document"},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert checkpoint.json()["status"] == "planned"
+        team_artifact = api.post(
+            f"/api/v1/customer/tasks/{task_id}/team-artifacts",
+            json={"key": "team-repository", "uri": "https://example.test/team/repository"},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert team_artifact.status_code == 200
+
         participant_csrf = login(api, "participant-alex")
         started = api.post(
             f"/api/v1/me/assignments/{accepted.json()['id']}/start",
             headers={"X-CSRF-Token": participant_csrf},
         )
         assert started.json()["status"] == "in_progress"
+        missing_personal = api.post(
+            f"/api/v1/me/assignments/{accepted.json()['id']}/contributions",
+            json={
+                "personal_summary": "Сделал MVP",
+                "artifacts": [
+                    {
+                        "key": "team-repository",
+                        "uri": "https://example.test/team/repository",
+                    }
+                ],
+            },
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert missing_personal.status_code == 409
+        assert missing_personal.json()["code"] == "PERSONAL_CONTRIBUTION_REQUIRED"
+        contribution = api.post(
+            f"/api/v1/me/assignments/{accepted.json()['id']}/contributions",
+            json={
+                "personal_summary": "Я реализовал API поиска и добавил измерение offline-метрики.",
+                "artifacts": [
+                    {
+                        "key": "personal-api-proof",
+                        "uri": "https://example.test/team/repository/commit/42",
+                    }
+                ],
+            },
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert contribution.status_code == 200
+        assert contribution.json()["version"] == 1
+        assert contribution.json()["artifact_keys"] == ["personal-api-proof"]
 
 
 def test_incomplete_customer_brief_returns_missing_field_map() -> None:

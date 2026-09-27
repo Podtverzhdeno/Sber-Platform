@@ -19,6 +19,7 @@ from impulse.domain.work import (
     TaskPolicyError,
     accept_application,
     start_assignment,
+    validate_personal_contribution,
 )
 
 
@@ -67,6 +68,28 @@ class AssignmentRecord:
     status: AssignmentStatus
 
 
+@dataclass(frozen=True, slots=True)
+class CheckpointRecord:
+    key: str
+    title: str
+    status: str = "planned"
+
+
+@dataclass(frozen=True, slots=True)
+class TeamArtifactRecord:
+    key: str
+    uri: str
+
+
+@dataclass(frozen=True, slots=True)
+class ContributionRecord:
+    id: UUID
+    assignment_id: UUID
+    version: int
+    personal_summary: str
+    artifact_keys: tuple[str, ...]
+
+
 class WorkStore(Protocol):
     async def create(self, record: TaskRecord) -> TaskRecord: ...
     async def get(self, task_id: UUID) -> TaskRecord | None: ...
@@ -87,6 +110,15 @@ class WorkStore(Protocol):
     ) -> AssignmentRecord: ...
     async def assignment(self, assignment_id: UUID) -> AssignmentRecord | None: ...
     async def start_assignment(self, assignment_id: UUID) -> AssignmentRecord: ...
+    async def add_checkpoint(
+        self, task_id: UUID, checkpoint: CheckpointRecord
+    ) -> CheckpointRecord: ...
+    async def add_team_artifact(
+        self, task_id: UUID, artifact: TeamArtifactRecord
+    ) -> TeamArtifactRecord: ...
+    async def submit_contribution(
+        self, assignment_id: UUID, summary: str, artifacts: tuple[TeamArtifactRecord, ...]
+    ) -> ContributionRecord: ...
 
 
 class MemoryWorkStore:
@@ -96,6 +128,9 @@ class MemoryWorkStore:
         self._acceptances: dict[tuple[UUID, UUID], int] = {}
         self._applications: dict[UUID, ApplicationRecord] = {}
         self._assignments: dict[UUID, AssignmentRecord] = {}
+        self._checkpoints: dict[UUID, tuple[CheckpointRecord, ...]] = {}
+        self._team_artifacts: dict[UUID, tuple[TeamArtifactRecord, ...]] = {}
+        self._contributions: dict[UUID, tuple[ContributionRecord, ...]] = {}
 
     async def create(self, record: TaskRecord) -> TaskRecord:
         if any(
@@ -230,6 +265,26 @@ class MemoryWorkStore:
         )
         self._assignments[assignment_id] = updated
         return updated
+
+    async def add_checkpoint(self, task_id: UUID, checkpoint: CheckpointRecord) -> CheckpointRecord:
+        self._checkpoints[task_id] = (*self._checkpoints.get(task_id, ()), checkpoint)
+        return checkpoint
+
+    async def add_team_artifact(
+        self, task_id: UUID, artifact: TeamArtifactRecord
+    ) -> TeamArtifactRecord:
+        self._team_artifacts[task_id] = (*self._team_artifacts.get(task_id, ()), artifact)
+        return artifact
+
+    async def submit_contribution(
+        self, assignment_id: UUID, summary: str, artifacts: tuple[TeamArtifactRecord, ...]
+    ) -> ContributionRecord:
+        current = self._contributions.get(assignment_id, ())
+        record = ContributionRecord(
+            uuid4(), assignment_id, len(current) + 1, summary, tuple(item.key for item in artifacts)
+        )
+        self._contributions[assignment_id] = (*current, record)
+        return record
 
 
 class WorkService:
@@ -467,6 +522,50 @@ class WorkService:
                 code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
             )
         return await self.store.start_assignment(assignment_id)
+
+    async def add_checkpoint(
+        self, actor: ActorContext, task_id: UUID, checkpoint: CheckpointRecord
+    ) -> CheckpointRecord:
+        self._role(actor, Role.CUSTOMER)
+        await self._owned(actor, task_id)
+        return await self.store.add_checkpoint(task_id, checkpoint)
+
+    async def add_team_artifact(
+        self, actor: ActorContext, task_id: UUID, artifact: TeamArtifactRecord
+    ) -> TeamArtifactRecord:
+        self._role(actor, Role.CUSTOMER)
+        await self._owned(actor, task_id)
+        return await self.store.add_team_artifact(task_id, artifact)
+
+    async def submit_contribution(
+        self,
+        actor: ActorContext,
+        assignment_id: UUID,
+        personal_summary: str,
+        artifacts: tuple[TeamArtifactRecord, ...],
+    ) -> ContributionRecord:
+        self._role(actor, Role.PARTICIPANT)
+        assignment = await self.store.assignment(assignment_id)
+        if assignment is None or assignment.person_id != actor.person_id:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        if assignment.status is not AssignmentStatus.IN_PROGRESS:
+            raise ApiError(
+                code="ASSIGNMENT_NOT_IN_PROGRESS",
+                message="Сначала начните работу над назначением.",
+                status_code=409,
+            )
+        try:
+            summary = validate_personal_contribution(personal_summary)
+        except TaskPolicyError as exc:
+            raise ApiError(
+                code=exc.code,
+                message=str(exc),
+                status_code=409,
+                field_errors={"personal_summary": ["Требуется личное описание вклада."]},
+            ) from exc
+        return await self.store.submit_contribution(assignment_id, summary, artifacts)
 
     async def _required(self, task_id: UUID) -> TaskRecord:
         record = await self.store.get(task_id)

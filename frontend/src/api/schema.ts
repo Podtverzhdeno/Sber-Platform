@@ -140,6 +140,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/tasks/{task_id}/checkpoints": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Checkpoint */
+        post: operations["add_checkpoint_api_v1_customer_tasks__task_id__checkpoints_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/tasks/{task_id}/submit": {
         parameters: {
             query?: never;
@@ -151,6 +168,23 @@ export interface paths {
         put?: never;
         /** Submit Task */
         post: operations["submit_task_api_v1_customer_tasks__task_id__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/tasks/{task_id}/team-artifacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Team Artifact */
+        post: operations["add_team_artifact_api_v1_customer_tasks__task_id__team_artifacts_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -287,6 +321,23 @@ export interface paths {
         put?: never;
         /** Switch Role */
         post: operations["switch_role_api_v1_me_active_role_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/assignments/{assignment_id}/contributions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Contribution */
+        post: operations["submit_contribution_api_v1_me_assignments__assignment_id__contributions_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -665,6 +716,23 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** ArtifactRequest */
+        ArtifactRequest: {
+            /** Key */
+            key: string;
+            /**
+             * Uri
+             * Format: uri
+             */
+            uri: string;
+        };
+        /** ArtifactView */
+        ArtifactView: {
+            /** Key */
+            key: string;
+            /** Uri */
+            uri: string;
+        };
         /**
          * AssignmentStatus
          * @enum {string}
@@ -693,6 +761,22 @@ export interface components {
              * Format: uuid
              */
             task_id: string;
+        };
+        /** CheckpointRequest */
+        CheckpointRequest: {
+            /** Key */
+            key: string;
+            /** Title */
+            title: string;
+        };
+        /** CheckpointView */
+        CheckpointView: {
+            /** Key */
+            key: string;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
         };
         /**
          * ClaimStatus
@@ -748,6 +832,32 @@ export interface components {
             /** Granted Scopes */
             granted_scopes: components["schemas"]["ConsentScope"][];
             scope: components["schemas"]["ConsentScope"];
+        };
+        /** ContributionRequest */
+        ContributionRequest: {
+            /** Artifacts */
+            artifacts?: components["schemas"]["ArtifactRequest"][];
+            /** Personal Summary */
+            personal_summary: string;
+        };
+        /** ContributionView */
+        ContributionView: {
+            /** Artifact Keys */
+            artifact_keys: string[];
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Personal Summary */
+            personal_summary: string;
+            /** Version */
+            version: number;
         };
         /** CourseView */
         CourseView: {
@@ -1322,6 +1432,43 @@ export interface operations {
             };
         };
     };
+    add_checkpoint_api_v1_customer_tasks__task_id__checkpoints_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckpointRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckpointView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     submit_task_api_v1_customer_tasks__task_id__submit_post: {
         parameters: {
             query?: never;
@@ -1342,6 +1489,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_team_artifact_api_v1_customer_tasks__task_id__team_artifacts_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArtifactRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArtifactView"];
                 };
             };
             /** @description Validation Error */
@@ -1560,6 +1744,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ActorView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_contribution_api_v1_me_assignments__assignment_id__contributions_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContributionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContributionView"];
                 };
             };
             /** @description Validation Error */

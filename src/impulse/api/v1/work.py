@@ -6,15 +6,18 @@ from typing import Annotated
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request
-from pydantic import AwareDatetime, BaseModel, Field
+from pydantic import AnyHttpUrl, AwareDatetime, BaseModel, Field
 
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.application.work import (
     ApplicationRecord,
     AssignmentRecord,
+    CheckpointRecord,
+    ContributionRecord,
     MarketplaceTask,
     TaskRecord,
+    TeamArtifactRecord,
     TermsRecord,
     WorkService,
 )
@@ -62,6 +65,23 @@ class AcceptApplicationRequest(BaseModel):
     expected_version: int = Field(ge=1)
 
 
+class CheckpointRequest(BaseModel):
+    key: str = Field(min_length=1, max_length=128)
+    title: str = Field(min_length=1, max_length=300)
+
+
+class ArtifactRequest(BaseModel):
+    key: str = Field(min_length=1, max_length=128)
+    uri: AnyHttpUrl
+
+
+class ContributionRequest(BaseModel):
+    personal_summary: str = Field(max_length=2000)
+    artifacts: list[ArtifactRequest] = Field(
+        default_factory=lambda: list[ArtifactRequest](), max_length=20
+    )
+
+
 class TaskView(BaseModel):
     id: UUID
     project_key: str
@@ -89,6 +109,25 @@ class AssignmentView(BaseModel):
     person_id: UUID
     application_id: UUID
     status: AssignmentStatus
+
+
+class CheckpointView(BaseModel):
+    key: str
+    title: str
+    status: str
+
+
+class ContributionView(BaseModel):
+    id: UUID
+    assignment_id: UUID
+    version: int
+    personal_summary: str
+    artifact_keys: list[str]
+
+
+class ArtifactView(BaseModel):
+    key: str
+    uri: str
 
 
 class TermsView(BaseModel):
@@ -142,6 +181,16 @@ def _assignment_view(item: AssignmentRecord) -> AssignmentView:
         person_id=item.person_id,
         application_id=item.application_id,
         status=item.status,
+    )
+
+
+def _contribution_view(item: ContributionRecord) -> ContributionView:
+    return ContributionView(
+        id=item.id,
+        assignment_id=item.assignment_id,
+        version=item.version,
+        personal_summary=item.personal_summary,
+        artifact_keys=list(item.artifact_keys),
     )
 
 
@@ -330,3 +379,48 @@ async def start_assignment(
     service: Annotated[WorkService, Depends(_service)],
 ) -> AssignmentView:
     return _assignment_view(await service.start_work(authenticated.actor, assignment_id))
+
+
+@router.post("/customer/tasks/{task_id}/checkpoints", response_model=CheckpointView)
+async def add_checkpoint(
+    task_id: UUID,
+    command: CheckpointRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> CheckpointView:
+    item = await service.add_checkpoint(
+        authenticated.actor, task_id, CheckpointRecord(command.key, command.title)
+    )
+    return CheckpointView(key=item.key, title=item.title, status=item.status)
+
+
+@router.post("/customer/tasks/{task_id}/team-artifacts", response_model=ArtifactView)
+async def add_team_artifact(
+    task_id: UUID,
+    command: ArtifactRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> ArtifactView:
+    item = await service.add_team_artifact(
+        authenticated.actor,
+        task_id,
+        TeamArtifactRecord(command.key, str(command.uri)),
+    )
+    return ArtifactView(key=item.key, uri=item.uri)
+
+
+@router.post("/me/assignments/{assignment_id}/contributions", response_model=ContributionView)
+async def submit_contribution(
+    assignment_id: UUID,
+    command: ContributionRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> ContributionView:
+    return _contribution_view(
+        await service.submit_contribution(
+            authenticated.actor,
+            assignment_id,
+            command.personal_summary,
+            tuple(TeamArtifactRecord(item.key, str(item.uri)) for item in command.artifacts),
+        )
+    )

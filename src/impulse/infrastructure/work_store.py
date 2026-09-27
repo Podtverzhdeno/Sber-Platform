@@ -13,7 +13,10 @@ from impulse.api.errors import ApiError
 from impulse.application.work import (
     ApplicationRecord,
     AssignmentRecord,
+    CheckpointRecord,
+    ContributionRecord,
     TaskRecord,
+    TeamArtifactRecord,
     TermsRecord,
     WorkStore,
 )
@@ -33,9 +36,13 @@ from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.work import (
     applications,
     assignments,
+    contributions,
     projects,
     task_terms_versions,
     tasks,
+)
+from impulse.infrastructure.models.work import (
+    artifacts as artifact_table,
 )
 
 
@@ -482,3 +489,100 @@ class SqlWorkStore(WorkStore):
                 current.application_id,
                 status,
             )
+
+    async def add_checkpoint(self, task_id: UUID, checkpoint: CheckpointRecord) -> CheckpointRecord:
+        async with self.database.session() as session:
+            row = (
+                await session.execute(
+                    select(tasks.c.payload, tasks.c.version)
+                    .where(tasks.c.id == task_id)
+                    .with_for_update()
+                )
+            ).one_or_none()
+            if row is None:
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            payload = dict(row.payload)
+            current = [dict(item) for item in payload.get("checkpoints", [])]
+            current = [item for item in current if item.get("key") != checkpoint.key]
+            current.append(
+                {"key": checkpoint.key, "title": checkpoint.title, "status": checkpoint.status}
+            )
+            payload["checkpoints"] = current
+            await session.execute(
+                update(tasks)
+                .where(tasks.c.id == task_id)
+                .values(payload=payload, version=tasks.c.version + 1)
+            )
+        return checkpoint
+
+    async def add_team_artifact(
+        self, task_id: UUID, artifact: TeamArtifactRecord
+    ) -> TeamArtifactRecord:
+        async with self.database.session() as session:
+            row = (
+                await session.execute(
+                    select(tasks.c.payload).where(tasks.c.id == task_id).with_for_update()
+                )
+            ).one_or_none()
+            if row is None:
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            payload = dict(row.payload)
+            current = [dict(item) for item in payload.get("team_artifacts", [])]
+            current = [item for item in current if item.get("key") != artifact.key]
+            current.append({"key": artifact.key, "uri": artifact.uri})
+            payload["team_artifacts"] = current
+            await session.execute(
+                update(tasks)
+                .where(tasks.c.id == task_id)
+                .values(payload=payload, version=tasks.c.version + 1)
+            )
+        return artifact
+
+    async def submit_contribution(
+        self, assignment_id: UUID, summary: str, artifacts: tuple[TeamArtifactRecord, ...]
+    ) -> ContributionRecord:
+        async with self.database.session() as session:
+            next_version = (
+                int(
+                    await session.scalar(
+                        select(func.max(contributions.c.contribution_version)).where(
+                            contributions.c.assignment_id == assignment_id
+                        )
+                    )
+                    or 0
+                )
+                + 1
+            )
+            contribution_id = uuid4()
+            await session.execute(
+                insert(contributions).values(
+                    id=contribution_id,
+                    assignment_id=assignment_id,
+                    contribution_version=next_version,
+                    summary=summary,
+                    status="submitted",
+                    data_origin="demo_runtime",
+                    payload={"personal": True},
+                )
+            )
+            for item in artifacts:
+                await session.execute(
+                    insert(artifact_table).values(
+                        contribution_id=contribution_id,
+                        artifact_key=item.key,
+                        uri=item.uri,
+                        status="submitted",
+                        data_origin="demo_runtime",
+                    )
+                )
+        return ContributionRecord(
+            contribution_id,
+            assignment_id,
+            next_version,
+            summary,
+            tuple(item.key for item in artifacts),
+        )

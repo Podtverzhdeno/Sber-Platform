@@ -146,6 +146,46 @@
         "title": "ApplicationView",
         "type": "object"
       },
+      "ArtifactRequest": {
+        "properties": {
+          "key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Key",
+            "type": "string"
+          },
+          "uri": {
+            "format": "uri",
+            "minLength": 1,
+            "title": "Uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "uri"
+        ],
+        "title": "ArtifactRequest",
+        "type": "object"
+      },
+      "ArtifactView": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "uri": {
+            "title": "Uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "uri"
+        ],
+        "title": "ArtifactView",
+        "type": "object"
+      },
       "AssignmentStatus": {
         "enum": [
           "staffed",
@@ -190,6 +230,51 @@
           "status"
         ],
         "title": "AssignmentView",
+        "type": "object"
+      },
+      "CheckpointRequest": {
+        "properties": {
+          "key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Key",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title"
+        ],
+        "title": "CheckpointRequest",
+        "type": "object"
+      },
+      "CheckpointView": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "status"
+        ],
+        "title": "CheckpointView",
         "type": "object"
       },
       "ClaimStatus": {
@@ -325,6 +410,66 @@
           "granted_scopes"
         ],
         "title": "ConsentView",
+        "type": "object"
+      },
+      "ContributionRequest": {
+        "properties": {
+          "artifacts": {
+            "items": {
+              "$ref": "#/components/schemas/ArtifactRequest"
+            },
+            "maxItems": 20,
+            "title": "Artifacts",
+            "type": "array"
+          },
+          "personal_summary": {
+            "maxLength": 2000,
+            "title": "Personal Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "personal_summary"
+        ],
+        "title": "ContributionRequest",
+        "type": "object"
+      },
+      "ContributionView": {
+        "properties": {
+          "artifact_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Artifact Keys",
+            "type": "array"
+          },
+          "assignment_id": {
+            "format": "uuid",
+            "title": "Assignment Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "personal_summary": {
+            "title": "Personal Summary",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "assignment_id",
+          "version",
+          "personal_summary",
+          "artifact_keys"
+        ],
+        "title": "ContributionView",
         "type": "object"
       },
       "CourseView": {
@@ -1612,6 +1757,72 @@
         "summary": "Task Applications"
       }
     },
+    "/api/v1/customer/tasks/{task_id}/checkpoints": {
+      "post": {
+        "operationId": "add_checkpoint_api_v1_customer_tasks__task_id__checkpoints_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckpointRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckpointView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Checkpoint"
+      }
+    },
     "/api/v1/customer/tasks/{task_id}/submit": {
       "post": {
         "operationId": "submit_task_api_v1_customer_tasks__task_id__submit_post",
@@ -1666,6 +1877,72 @@
           }
         },
         "summary": "Submit Task"
+      }
+    },
+    "/api/v1/customer/tasks/{task_id}/team-artifacts": {
+      "post": {
+        "operationId": "add_team_artifact_api_v1_customer_tasks__task_id__team_artifacts_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArtifactRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtifactView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Team Artifact"
       }
     },
     "/api/v1/customer/tasks/{task_id}/terms": {
@@ -2018,6 +2295,72 @@
           }
         },
         "summary": "Switch Role"
+      }
+    },
+    "/api/v1/me/assignments/{assignment_id}/contributions": {
+      "post": {
+        "operationId": "submit_contribution_api_v1_me_assignments__assignment_id__contributions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContributionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Contribution"
       }
     },
     "/api/v1/me/assignments/{assignment_id}/start": {
