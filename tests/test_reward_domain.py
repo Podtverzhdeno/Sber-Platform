@@ -1,6 +1,7 @@
 """Property and boundary tests for deterministic compensation policy."""
 
 from decimal import ROUND_HALF_UP, Decimal
+from uuid import uuid4
 
 import pytest
 from hypothesis import given
@@ -9,7 +10,13 @@ from hypothesis import strategies as st
 from impulse.domain.reward import (
     CompensationPolicyError,
     CompensationTerms,
+    CriterionAssessment,
+    Review5Plus,
+    ReviewGrade,
+    ReviewRubric,
+    ReviewStatus,
     RoundingMode,
+    RubricCriterion,
 )
 
 
@@ -101,3 +108,102 @@ def test_invalid_policy_is_rejected(field: str, value: object) -> None:
 def test_binary_float_is_rejected() -> None:
     with pytest.raises(CompensationPolicyError):
         paid_terms(a_multiplier=2.5)
+
+
+def rubric() -> ReviewRubric:
+    return ReviewRubric(
+        rubric_id=uuid4(),
+        key="demo-5plus",
+        version=2,
+        criteria=(
+            RubricCriterion("quality", "Качество результата"),
+            RubricCriterion("ownership", "Самостоятельность"),
+        ),
+    )
+
+
+def review_draft(*, origin: str = "ai_suggestion") -> Review5Plus:
+    current_rubric = rubric()
+    return Review5Plus.draft(
+        review_id=uuid4(),
+        contribution_id=uuid4(),
+        contribution_version=3,
+        rubric=current_rubric,
+        grade=ReviewGrade.B,
+        assessments=(
+            CriterionAssessment("quality", "MVP воспроизводится.", ("artifact:mvp",)),
+            CriterionAssessment("ownership", "Авторство подтверждено.", ("commit:42",)),
+        ),
+        explanation="Участник выполнил критерии B и приложил проверяемые факты.",
+        draft_origin=origin,
+    )
+
+
+def test_review_requires_every_rubric_criterion_and_evidence() -> None:
+    current_rubric = rubric()
+    with pytest.raises(CompensationPolicyError, match="каждому критерию"):
+        Review5Plus.draft(
+            review_id=uuid4(),
+            contribution_id=uuid4(),
+            contribution_version=1,
+            rubric=current_rubric,
+            grade=ReviewGrade.A,
+            assessments=(CriterionAssessment("quality", "Результат сильный.", ("artifact:mvp",)),),
+            explanation="Недостаточно полного покрытия рубрики.",
+            draft_origin="human",
+        )
+    with pytest.raises(CompensationPolicyError, match="доказательство"):
+        CriterionAssessment("quality", "Результат сильный.", ())
+
+
+def test_ai_draft_stays_non_final_until_explicit_human_confirmation() -> None:
+    human_id = uuid4()
+    draft = review_draft()
+    assert draft.status is ReviewStatus.DRAFT
+    proposed = draft.propose()
+    assert proposed.status is ReviewStatus.PROPOSED
+    assert proposed.confirmed_by is None
+    with pytest.raises(CompensationPolicyError, match="ожидается human_confirmed"):
+        proposed.publish(
+            human_id,
+            contribution_accepted=True,
+            authorship_conflict_open=False,
+        )
+    confirmed = proposed.confirm(human_id)
+    published = confirmed.publish(
+        human_id,
+        contribution_accepted=True,
+        authorship_conflict_open=False,
+    )
+    assert published.status is ReviewStatus.PUBLISHED
+    assert published.confirmed_by == human_id
+    assert published.published_by == human_id
+    assert published.review_version == 4
+
+
+def test_open_authorship_conflict_blocks_review_publication() -> None:
+    human_id = uuid4()
+    confirmed = review_draft(origin="human").propose().confirm(human_id)
+    with pytest.raises(CompensationPolicyError, match="конфликт авторства"):
+        confirmed.publish(
+            human_id,
+            contribution_accepted=True,
+            authorship_conflict_open=True,
+        )
+
+
+def test_review_cannot_be_published_for_unaccepted_contribution_or_another_human() -> None:
+    confirmer = uuid4()
+    confirmed = review_draft(origin="human").propose().confirm(confirmer)
+    with pytest.raises(CompensationPolicyError, match="принятого личного вклада"):
+        confirmed.publish(
+            confirmer,
+            contribution_accepted=False,
+            authorship_conflict_open=False,
+        )
+    with pytest.raises(CompensationPolicyError, match="подтвердивший"):
+        confirmed.publish(
+            uuid4(),
+            contribution_accepted=True,
+            authorship_conflict_open=False,
+        )

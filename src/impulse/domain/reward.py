@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from decimal import ROUND_DOWN, ROUND_HALF_EVEN, ROUND_HALF_UP, Decimal
 from enum import StrEnum
+from uuid import UUID
 
 
 class CompensationPolicyError(ValueError):
@@ -15,6 +16,177 @@ class RoundingMode(StrEnum):
     HALF_UP = "half_up"
     HALF_EVEN = "half_even"
     DOWN = "down"
+
+
+class ReviewGrade(StrEnum):
+    A = "A"
+    B = "B"
+    C = "C"
+
+
+class ReviewStatus(StrEnum):
+    DRAFT = "draft"
+    PROPOSED = "proposed"
+    HUMAN_CONFIRMED = "human_confirmed"
+    PUBLISHED = "published"
+    DISPUTED = "disputed"
+    CORRECTED = "corrected"
+    UPHELD = "upheld"
+    FROZEN = "frozen"
+
+
+@dataclass(frozen=True, slots=True)
+class RubricCriterion:
+    key: str
+    title: str
+
+    def __post_init__(self) -> None:
+        if not self.key.strip() or not self.title.strip():
+            raise CompensationPolicyError("Ключ и название критерия обязательны.")
+
+
+@dataclass(frozen=True, slots=True)
+class ReviewRubric:
+    rubric_id: UUID
+    key: str
+    version: int
+    criteria: tuple[RubricCriterion, ...]
+
+    def __post_init__(self) -> None:
+        keys = tuple(item.key for item in self.criteria)
+        if not self.key.strip() or self.version < 1 or not keys or len(keys) != len(set(keys)):
+            raise CompensationPolicyError(
+                "Рубрика должна иметь ключ, версию и уникальные критерии."
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class CriterionAssessment:
+    criterion_key: str
+    finding: str
+    evidence_refs: tuple[str, ...]
+
+    def __post_init__(self) -> None:
+        if not self.criterion_key.strip() or not self.finding.strip() or not self.evidence_refs:
+            raise CompensationPolicyError(
+                "По каждому критерию нужны факт и хотя бы одна ссылка на доказательство."
+            )
+        if any(not item.strip() for item in self.evidence_refs):
+            raise CompensationPolicyError("Пустая ссылка на доказательство запрещена.")
+
+
+@dataclass(frozen=True, slots=True)
+class Review5Plus:
+    review_id: UUID
+    contribution_id: UUID
+    contribution_version: int
+    rubric_id: UUID
+    rubric_version: int
+    review_version: int
+    grade: ReviewGrade
+    assessments: tuple[CriterionAssessment, ...]
+    explanation: str
+    status: ReviewStatus = ReviewStatus.DRAFT
+    draft_origin: str = "human"
+    confirmed_by: UUID | None = None
+    published_by: UUID | None = None
+
+    def __post_init__(self) -> None:
+        if self.contribution_version < 1 or self.rubric_version < 1 or self.review_version < 1:
+            raise CompensationPolicyError(
+                "Версии вклада, рубрики и оценки должны быть положительными."
+            )
+        if not self.explanation.strip():
+            raise CompensationPolicyError("Письменное объяснение оценки обязательно.")
+        if self.draft_origin not in {"human", "ai_suggestion"}:
+            raise CompensationPolicyError("Неизвестный источник черновика оценки.")
+
+    @classmethod
+    def draft(
+        cls,
+        *,
+        review_id: UUID,
+        contribution_id: UUID,
+        contribution_version: int,
+        rubric: ReviewRubric,
+        grade: ReviewGrade,
+        assessments: tuple[CriterionAssessment, ...],
+        explanation: str,
+        draft_origin: str,
+    ) -> Review5Plus:
+        expected = {item.key for item in rubric.criteria}
+        actual = {item.criterion_key for item in assessments}
+        if actual != expected or len(actual) != len(assessments):
+            raise CompensationPolicyError(
+                "Черновик должен содержать ровно одну оценку по каждому критерию рубрики."
+            )
+        return cls(
+            review_id=review_id,
+            contribution_id=contribution_id,
+            contribution_version=contribution_version,
+            rubric_id=rubric.rubric_id,
+            rubric_version=rubric.version,
+            review_version=1,
+            grade=grade,
+            assessments=assessments,
+            explanation=explanation,
+            draft_origin=draft_origin,
+        )
+
+    def propose(self) -> Review5Plus:
+        self._require(ReviewStatus.DRAFT)
+        return self._next(status=ReviewStatus.PROPOSED)
+
+    def confirm(self, human_id: UUID) -> Review5Plus:
+        self._require(ReviewStatus.PROPOSED)
+        return self._next(status=ReviewStatus.HUMAN_CONFIRMED, confirmed_by=human_id)
+
+    def publish(
+        self,
+        human_id: UUID,
+        *,
+        contribution_accepted: bool,
+        authorship_conflict_open: bool,
+    ) -> Review5Plus:
+        self._require(ReviewStatus.HUMAN_CONFIRMED)
+        if self.confirmed_by != human_id:
+            raise CompensationPolicyError("Опубликовать оценку может подтвердивший её человек.")
+        if not contribution_accepted:
+            raise CompensationPolicyError("Оценка публикуется только для принятого личного вклада.")
+        if authorship_conflict_open:
+            raise CompensationPolicyError(
+                "Открытый конфликт авторства блокирует публикацию оценки."
+            )
+        return self._next(status=ReviewStatus.PUBLISHED, published_by=human_id)
+
+    def _require(self, expected: ReviewStatus) -> None:
+        if self.status is not expected:
+            raise CompensationPolicyError(
+                f"Недопустимый переход оценки из {self.status.value}; ожидается {expected.value}."
+            )
+
+    def _next(
+        self,
+        *,
+        status: ReviewStatus,
+        confirmed_by: UUID | None = None,
+        published_by: UUID | None = None,
+    ) -> Review5Plus:
+        return Review5Plus(
+            review_id=self.review_id,
+            contribution_id=self.contribution_id,
+            contribution_version=self.contribution_version,
+            rubric_id=self.rubric_id,
+            rubric_version=self.rubric_version,
+            review_version=self.review_version + 1,
+            grade=self.grade,
+            assessments=self.assessments,
+            explanation=self.explanation,
+            status=status,
+            draft_origin=self.draft_origin,
+            confirmed_by=confirmed_by if confirmed_by is not None else self.confirmed_by,
+            published_by=published_by if published_by is not None else self.published_by,
+        )
 
 
 _ROUNDING = {
