@@ -813,3 +813,64 @@ class SqlWorkStore(WorkStore):
             bool(payload.get("review_blocked", True)),
             bool(payload.get("payout_blocked", True)),
         )
+
+    async def assignments_for_person(self, person_id: UUID) -> tuple[AssignmentRecord, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(assignments)
+                    .where(assignments.c.person_id == person_id)
+                    .order_by(assignments.c.created_at.desc(), assignments.c.id)
+                )
+            ).all()
+        return tuple(self._assignment(row) for row in rows)
+
+    async def assignments_for_task(self, task_id: UUID) -> tuple[AssignmentRecord, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(assignments)
+                    .where(assignments.c.task_id == task_id)
+                    .order_by(assignments.c.created_at, assignments.c.id)
+                )
+            ).all()
+        return tuple(self._assignment(row) for row in rows)
+
+    async def contributions_for_assignment(
+        self, assignment_id: UUID
+    ) -> tuple[ContributionRecord, ...]:
+        async with self.database.sessions() as session:
+            contribution_ids = tuple(
+                await session.scalars(
+                    select(contributions.c.id)
+                    .where(contributions.c.assignment_id == assignment_id)
+                    .order_by(contributions.c.contribution_version)
+                )
+            )
+            records = [
+                await self._contribution(session, contribution_id)
+                for contribution_id in contribution_ids
+            ]
+        return tuple(record for record in records if record is not None)
+
+    async def acceptance_for_contribution(self, contribution_id: UUID) -> AcceptanceRecord | None:
+        async with self.database.sessions() as session:
+            row = (
+                await session.execute(
+                    select(acceptances).where(acceptances.c.contribution_id == contribution_id)
+                )
+            ).one_or_none()
+        if row is None:
+            return None
+        payload = dict(row.payload)
+        deadline = payload.get("deadline_at")
+        owner_id = payload.get("owner_id")
+        return AcceptanceRecord(
+            row.id,
+            row.contribution_id,
+            row.contribution_version,
+            AcceptanceDecision(row.status),
+            str(payload["reason"]),
+            datetime.fromisoformat(str(deadline)) if deadline else None,
+            UUID(str(owner_id)) if owner_id else None,
+        )

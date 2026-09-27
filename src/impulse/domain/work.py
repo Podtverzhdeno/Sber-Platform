@@ -37,6 +37,7 @@ class AssignmentStatus(StrEnum):
     SUBMITTED = "submitted"
     REVISION_REQUESTED = "revision_requested"
     DISPUTED = "disputed"
+    ACCEPTED = "accepted"
     CLOSED = "closed"
 
 
@@ -110,7 +111,7 @@ def decide_contribution(
             missing_fields=("deadline_at",),
         )
     if decision is AcceptanceDecision.ACCEPTED:
-        return ContributionStatus.ACCEPTED, AssignmentStatus.CLOSED
+        return ContributionStatus.ACCEPTED, AssignmentStatus.ACCEPTED
     return ContributionStatus.REVISION_REQUESTED, AssignmentStatus.REVISION_REQUESTED
 
 

@@ -293,11 +293,25 @@ def test_task_without_nominated_mentor_waits_for_support_before_publish() -> Non
         visible = api.get(f"/api/v1/me/disputes/{dispute.json()['id']}")
         assert visible.status_code == 200
         assert visible.json()["deadline_at"] == "2026-11-12T18:00:00Z"
+        my_work = api.get("/api/v1/me/work")
+        assert my_work.status_code == 200
+        assert my_work.json()[0]["assignment"]["id"] == accepted.json()["id"]
+        assert [item["version"] for item in my_work.json()[0]["contributions"]] == [1, 2]
+        assert [item["decision"] for item in my_work.json()[0]["decisions"]] == [
+            "revision_requested",
+            "accepted",
+        ]
 
         login(api, "participant-maria")
         hidden = api.get(f"/api/v1/me/disputes/{dispute.json()['id']}")
         assert hidden.status_code == 404
         assert hidden.json()["code"] == "RESOURCE_NOT_FOUND"
+
+        login(api, "customer-roman")
+        preview = api.get(f"/api/v1/customer/tasks/{task_id}/participant-preview")
+        assert preview.status_code == 200
+        assert preview.json()[0]["assignment"]["person_id"] == accepted.json()["person_id"]
+        assert preview.json()[0]["contributions"][-1]["status"] == "disputed"
 
 
 def test_incomplete_customer_brief_returns_missing_field_map() -> None:

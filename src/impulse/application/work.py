@@ -120,6 +120,15 @@ class DisputeRecord:
     payout_blocked: bool = True
 
 
+@dataclass(frozen=True, slots=True)
+class WorkItem:
+    assignment: AssignmentRecord
+    task: TaskRecord
+    terms: TermsRecord
+    contributions: tuple[ContributionRecord, ...]
+    decisions: tuple[AcceptanceRecord, ...]
+
+
 class WorkStore(Protocol):
     async def create(self, record: TaskRecord) -> TaskRecord: ...
     async def get(self, task_id: UUID) -> TaskRecord | None: ...
@@ -168,6 +177,14 @@ class WorkStore(Protocol):
         deadline_at: datetime,
     ) -> DisputeRecord: ...
     async def dispute(self, dispute_id: UUID) -> DisputeRecord | None: ...
+    async def assignments_for_person(self, person_id: UUID) -> tuple[AssignmentRecord, ...]: ...
+    async def assignments_for_task(self, task_id: UUID) -> tuple[AssignmentRecord, ...]: ...
+    async def contributions_for_assignment(
+        self, assignment_id: UUID
+    ) -> tuple[ContributionRecord, ...]: ...
+    async def acceptance_for_contribution(
+        self, contribution_id: UUID
+    ) -> AcceptanceRecord | None: ...
 
 
 class MemoryWorkStore:
@@ -450,6 +467,20 @@ class MemoryWorkStore:
 
     async def dispute(self, dispute_id: UUID) -> DisputeRecord | None:
         return self._disputes.get(dispute_id)
+
+    async def assignments_for_person(self, person_id: UUID) -> tuple[AssignmentRecord, ...]:
+        return tuple(item for item in self._assignments.values() if item.person_id == person_id)
+
+    async def assignments_for_task(self, task_id: UUID) -> tuple[AssignmentRecord, ...]:
+        return tuple(item for item in self._assignments.values() if item.task_id == task_id)
+
+    async def contributions_for_assignment(
+        self, assignment_id: UUID
+    ) -> tuple[ContributionRecord, ...]:
+        return self._contributions.get(assignment_id, ())
+
+    async def acceptance_for_contribution(self, contribution_id: UUID) -> AcceptanceRecord | None:
+        return self._acceptance_decisions.get(contribution_id)
 
 
 class WorkService:
@@ -850,6 +881,39 @@ class WorkService:
                 code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
             )
         return dispute
+
+    async def participant_work(self, actor: ActorContext) -> tuple[WorkItem, ...]:
+        self._role(actor, Role.PARTICIPANT)
+        return await self._work_items(await self.store.assignments_for_person(actor.person_id))
+
+    async def participant_preview(self, actor: ActorContext, task_id: UUID) -> tuple[WorkItem, ...]:
+        self._role(actor, Role.CUSTOMER)
+        await self._owned(actor, task_id)
+        return await self._work_items(await self.store.assignments_for_task(task_id))
+
+    async def _work_items(self, assignments: tuple[AssignmentRecord, ...]) -> tuple[WorkItem, ...]:
+        result: list[WorkItem] = []
+        for assignment in assignments:
+            task = await self._required(assignment.task_id)
+            terms = await self.store.latest_terms(assignment.task_id)
+            if terms is None:
+                continue
+            contributions = await self.store.contributions_for_assignment(assignment.id)
+            decisions: list[AcceptanceRecord] = []
+            for contribution in contributions:
+                decision = await self.store.acceptance_for_contribution(contribution.id)
+                if decision is not None:
+                    decisions.append(decision)
+            result.append(
+                WorkItem(
+                    assignment,
+                    task,
+                    terms,
+                    contributions,
+                    tuple(decisions),
+                )
+            )
+        return tuple(result)
 
     async def _required(self, task_id: UUID) -> TaskRecord:
         record = await self.store.get(task_id)

@@ -261,6 +261,7 @@
           "submitted",
           "revision_requested",
           "disputed",
+          "accepted",
           "closed"
         ],
         "title": "AssignmentStatus",
@@ -1635,6 +1636,42 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "WorkItemView": {
+        "properties": {
+          "assignment": {
+            "$ref": "#/components/schemas/AssignmentView"
+          },
+          "contributions": {
+            "items": {
+              "$ref": "#/components/schemas/ContributionView"
+            },
+            "title": "Contributions",
+            "type": "array"
+          },
+          "decisions": {
+            "items": {
+              "$ref": "#/components/schemas/AcceptanceView"
+            },
+            "title": "Decisions",
+            "type": "array"
+          },
+          "task": {
+            "$ref": "#/components/schemas/TaskView"
+          },
+          "terms": {
+            "$ref": "#/components/schemas/TermsView"
+          }
+        },
+        "required": [
+          "assignment",
+          "task",
+          "terms",
+          "contributions",
+          "decisions"
+        ],
+        "title": "WorkItemView",
+        "type": "object"
       }
     }
   },
@@ -2099,6 +2136,50 @@
           }
         },
         "summary": "Add Checkpoint"
+      }
+    },
+    "/api/v1/customer/tasks/{task_id}/participant-preview": {
+      "get": {
+        "operationId": "participant_preview_api_v1_customer_tasks__task_id__participant_preview_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WorkItemView"
+                  },
+                  "title": "Response Participant Preview Api V1 Customer Tasks  Task Id  Participant Preview Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Participant Preview"
       }
     },
     "/api/v1/customer/tasks/{task_id}/submit": {
@@ -3346,6 +3427,28 @@
           }
         },
         "summary": "Select Track"
+      }
+    },
+    "/api/v1/me/work": {
+      "get": {
+        "operationId": "participant_work_api_v1_me_work_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WorkItemView"
+                  },
+                  "title": "Response Participant Work Api V1 Me Work Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Participant Work"
       }
     },
     "/api/v1/operations/event-claims/import": {

@@ -68,7 +68,7 @@
 - [x] 8.4 Реализовать applications, staffing и assignment transitions с places/concurrency; tests SHALL исключить двойное назначение и stale acceptance.
 - [x] 8.5 Реализовать checkpoints, team artifacts и personal contribution evidence; scenario `projects-tasks/Индивидуальный вклад` SHALL требовать личное описание.
 - [x] 8.6 Реализовать business acceptance, revision request и dispute с reason/deadline/owner; conflicting authorship SHALL приостановить review/payout.
-- [ ] 8.7 Реализовать participant task/my-work UI и customer participant-preview; Playwright SHALL пройти paid application→submission→revision journey.
+- [x] 8.7 Реализовать participant task/my-work UI и customer participant-preview; Playwright SHALL пройти paid application→submission→revision journey.
 
 ## 9. Оплата, оценка 5+ и human decision
 

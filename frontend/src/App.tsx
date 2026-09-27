@@ -7,6 +7,7 @@ import { createQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
 import { Bootcamp, DevelopmentJourney } from "./features/development";
 import { EventCatalog } from "./features/ecosystem";
+import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
 
 type Role = "participant" | "mentor" | "customer" | "manager" | "hr" | "operator";
 
@@ -84,6 +85,10 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
           <Bootcamp honorBoardEnabled={honorBoardEnabled} honorBoardConsent={actor.consent_scopes.includes("course_honor_board")} />
         ) : allowed && actor.active_role === "participant" && currentSection === "События" ? (
           <EventCatalog />
+        ) : allowed && actor.active_role === "participant" && currentSection === "Задачи" ? (
+          <ParticipantTasks />
+        ) : allowed && actor.active_role === "customer" && (currentSection === "Кандидаты" || currentSection === "Приёмка") ? (
+          <CustomerParticipantPreview />
         ) : allowed ? (
           <>
             <p className="eyebrow">{roleLabels[actor.active_role]} · рабочее пространство</p>

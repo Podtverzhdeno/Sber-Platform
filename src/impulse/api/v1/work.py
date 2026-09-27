@@ -21,6 +21,7 @@ from impulse.application.work import (
     TaskRecord,
     TeamArtifactRecord,
     TermsRecord,
+    WorkItem,
     WorkService,
 )
 from impulse.domain.work import (
@@ -183,6 +184,14 @@ class MarketplaceTaskView(BaseModel):
     accepted_terms_version: int | None
 
 
+class WorkItemView(BaseModel):
+    assignment: AssignmentView
+    task: TaskView
+    terms: TermsView
+    contributions: list[ContributionView]
+    decisions: list[AcceptanceView]
+
+
 def _service(request: Request) -> WorkService:
     return request.app.state.work_service
 
@@ -275,6 +284,16 @@ def _marketplace_view(item: MarketplaceTask) -> MarketplaceTaskView:
         task=_view(item.task),
         terms=_terms_view(item.terms),
         accepted_terms_version=item.accepted_terms_version,
+    )
+
+
+def _work_item_view(item: WorkItem) -> WorkItemView:
+    return WorkItemView(
+        assignment=_assignment_view(item.assignment),
+        task=_view(item.task),
+        terms=_terms_view(item.terms),
+        contributions=[_contribution_view(contribution) for contribution in item.contributions],
+        decisions=[_acceptance_view(decision) for decision in item.decisions],
     )
 
 
@@ -535,3 +554,23 @@ async def participant_dispute(
     service: Annotated[WorkService, Depends(_service)],
 ) -> DisputeView:
     return _dispute_view(await service.participant_dispute(authenticated.actor, dispute_id))
+
+
+@router.get("/me/work", response_model=list[WorkItemView])
+async def participant_work(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> list[WorkItemView]:
+    return [_work_item_view(item) for item in await service.participant_work(authenticated.actor)]
+
+
+@router.get("/customer/tasks/{task_id}/participant-preview", response_model=list[WorkItemView])
+async def participant_preview(
+    task_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> list[WorkItemView]:
+    return [
+        _work_item_view(item)
+        for item in await service.participant_preview(authenticated.actor, task_id)
+    ]

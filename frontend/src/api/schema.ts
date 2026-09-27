@@ -174,6 +174,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/tasks/{task_id}/participant-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Participant Preview */
+        get: operations["participant_preview_api_v1_customer_tasks__task_id__participant_preview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/tasks/{task_id}/submit": {
         parameters: {
             query?: never;
@@ -599,6 +616,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/work": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Participant Work */
+        get: operations["participant_work_api_v1_me_work_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/operations/event-claims/import": {
         parameters: {
             query?: never;
@@ -815,7 +849,7 @@ export interface components {
          * AssignmentStatus
          * @enum {string}
          */
-        AssignmentStatus: "staffed" | "in_progress" | "submitted" | "revision_requested" | "disputed" | "closed";
+        AssignmentStatus: "staffed" | "in_progress" | "submitted" | "revision_requested" | "disputed" | "accepted" | "closed";
         /** AssignmentView */
         AssignmentView: {
             /**
@@ -1328,6 +1362,16 @@ export interface components {
             /** Error Type */
             type: string;
         };
+        /** WorkItemView */
+        WorkItemView: {
+            assignment: components["schemas"]["AssignmentView"];
+            /** Contributions */
+            contributions: components["schemas"]["ContributionView"][];
+            /** Decisions */
+            decisions: components["schemas"]["AcceptanceView"][];
+            task: components["schemas"]["TaskView"];
+            terms: components["schemas"]["TermsView"];
+        };
     };
     responses: never;
     parameters: never;
@@ -1627,6 +1671,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CheckpointView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    participant_preview_api_v1_customer_tasks__task_id__participant_preview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkItemView"][];
                 };
             };
             /** @description Validation Error */
@@ -2404,6 +2479,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    participant_work_api_v1_me_work_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkItemView"][];
                 };
             };
         };

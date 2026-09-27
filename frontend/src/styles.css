@@ -120,7 +120,7 @@ th, td { padding: 12px; border-bottom: 1px solid rgb(255 255 255 / 10%); text-al
 .feature-stack { display: grid; gap: 34px; }
 .feature-stack h1 { font-size: clamp(40px, 5vw, 66px); }
 .feature-stack h2 { margin-bottom: 18px; font-size: 28px; }
-.track-grid, .roadmap-grid, .course-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.track-grid, .roadmap-grid, .course-grid, .work-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .track-card { display: flex; min-height: 112px; padding: 20px; flex-direction: column; gap: 14px; align-items: flex-start; justify-content: center; border: 1px solid rgb(255 255 255 / 10%); border-radius: var(--radius-md); color: var(--color-text); background: var(--color-surface); cursor: pointer; text-align: left; }
 .track-card span:first-child { font-size: 18px; font-weight: 800; }
 .track-card--active { border-color: rgb(69 223 145 / 45%); background: rgb(69 223 145 / 8%); }
@@ -147,13 +147,21 @@ th, td { padding: 12px; border-bottom: 1px solid rgb(255 255 255 / 10%); text-al
 .event-facts dt { color: var(--color-muted); }
 .event-facts dd { margin: 0; }
 .claim-state { display: grid; gap: 8px; margin-top: 18px; }
+.work-grid .ui-card { display: flex; flex-direction: column; gap: 14px; }
+.work-grid .ui-card > button, .contribution-form button { width: fit-content; padding: 11px 15px; border: 0; border-radius: 10px; color: #071a11; background: var(--color-accent); cursor: pointer; font-weight: 800; }
+.work-meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: var(--color-muted); font-size: 13px; }
+.revision-note { padding: 16px; border: 1px solid rgb(255 210 122 / 28%); border-radius: 12px; background: rgb(255 210 122 / 8%); }
+.revision-note p, .contribution-summary p { margin-bottom: 8px; }
+.contribution-form, .contribution-form label, .decision-reason { display: grid; gap: 8px; }
+.contribution-form textarea, .contribution-form input, .decision-reason textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid rgb(255 255 255 / 14%); border-radius: 10px; color: var(--color-text); background: #10231b; }
+.contribution-form textarea, .decision-reason textarea { min-height: 100px; resize: vertical; }
 
 @media (max-width: 820px) {
   .login-layout, .workspace { grid-template-columns: 1fr; }
   .workspace { gap: 20px; }
   .sidebar { padding: 0 0 26px; border-right: 0; border-bottom: 1px solid rgb(255 255 255 / 8%); }
   .demo-badge { display: none; }
-  .track-grid, .roadmap-grid, .course-grid { grid-template-columns: 1fr; }
+  .track-grid, .roadmap-grid, .course-grid, .work-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 520px) {

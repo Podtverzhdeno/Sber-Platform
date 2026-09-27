@@ -5,7 +5,14 @@ export type RuntimeApiPath =
   | keyof ApiPaths
   | `/api/v1/me/courses/${string}/completion`
   | `/api/v1/me/courses/${string}/learning-days`
-  | `/api/v1/me/events/${string}/claims`;
+  | `/api/v1/me/events/${string}/claims`
+  | "/api/v1/me/work"
+  | `/api/v1/me/tasks/${string}/terms-consent`
+  | `/api/v1/me/tasks/${string}/applications`
+  | `/api/v1/me/assignments/${string}/start`
+  | `/api/v1/me/assignments/${string}/contributions`
+  | `/api/v1/customer/tasks/${string}/participant-preview`
+  | `/api/v1/customer/contributions/${string}/decision`;
 
 export class ApiClientError extends Error {
   readonly status: number;

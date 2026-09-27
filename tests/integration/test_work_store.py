@@ -274,6 +274,15 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
     assert persisted_dispute is not None
     assert persisted_dispute.conflicting_contribution_id == conflicting_contribution.id
     assert persisted_dispute.owner == "operations"
+    participant_assignments = await work_store.assignments_for_person(started.person_id)
+    assert started.id in {item.id for item in participant_assignments}
+    task_assignments = await work_store.assignments_for_task(task_id)
+    assert {item.id for item in task_assignments} == {started.id, conflicting_started.id}
+    contribution_history = await work_store.contributions_for_assignment(started.id)
+    assert [item.version for item in contribution_history] == [1, 2]
+    persisted_decision = await work_store.acceptance_for_contribution(contribution.id)
+    assert persisted_decision is not None
+    assert persisted_decision.decision is AcceptanceDecision.REVISION_REQUESTED
 
     async with database.sessions() as session:
         row = (
