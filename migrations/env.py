@@ -11,6 +11,7 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from impulse.infrastructure import models as models
 from impulse.infrastructure.database import Base, async_database_url
 
 config = context.config

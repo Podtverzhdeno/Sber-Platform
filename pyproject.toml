@@ -24,6 +24,8 @@ dependencies = [
 
 [project.scripts]
 impulse-api = "impulse.main:run"
+impulse-demo-reset = "impulse.bootstrap.demo_seed:main_reset"
+impulse-demo-seed = "impulse.bootstrap.demo_seed:main_seed"
 impulse-secret-scan = "impulse.quality.secret_scan:main"
 
 [dependency-groups]
@@ -47,7 +49,10 @@ packages = ["src/impulse"]
 addopts = "--strict-config --strict-markers -q"
 testpaths = ["tests"]
 asyncio_mode = "auto"
-markers = ["spec(reference): traceability marker for an OpenSpec scenario"]
+markers = [
+  "spec(reference): traceability marker for an OpenSpec scenario",
+  "integration: requires an external PostgreSQL test database",
+]
 
 [tool.ruff]
 target-version = "py313"

@@ -20,11 +20,11 @@
 ## 3. PostgreSQL, миграции, аудит и demo seed
 
 - [x] 3.1 Настроить async SQLAlchemy, session/transaction boundary и Alembic; проверить upgrade пустой PostgreSQL до head и повторный запуск без изменений.
-- [ ] 3.2 Создать identity/development/work/reward/recognition/ecosystem/assist/insight tables с версиями, provenance и constraints; migration tests SHALL проверить уникальные бизнес-ключи.
-- [ ] 3.3 Реализовать optimistic concurrency, append-only audit и domain events в одной транзакции; tests SHALL покрыть stale version и rollback без orphan event.
-- [ ] 3.4 Создать идемпотентный versioned demo seed со связанными personas, курсами, событиями, задачами, рейтингом и кейсами; два запуска SHALL давать одинаковые business IDs/counts.
-- [ ] 3.5 Добавить `data_origin=demo_seed` во все публичные demo projections и административную reset-команду только для demo; API test SHALL запрещать reset в non-demo.
-- [ ] 3.6 Документировать ER/domain map и seed personas; сверить таблицы документа с Alembic metadata автоматическим check.
+- [x] 3.2 Создать identity/development/work/reward/recognition/ecosystem/assist/insight tables с версиями, provenance и constraints; migration tests SHALL проверить уникальные бизнес-ключи.
+- [x] 3.3 Реализовать optimistic concurrency, append-only audit и domain events в одной транзакции; tests SHALL покрыть stale version и rollback без orphan event.
+- [x] 3.4 Создать идемпотентный versioned demo seed со связанными personas, курсами, событиями, задачами, рейтингом и кейсами; два запуска SHALL давать одинаковые business IDs/counts.
+- [x] 3.5 Добавить `data_origin=demo_seed` во все публичные demo projections и административную reset-команду только для demo; API test SHALL запрещать reset в non-demo.
+- [x] 3.6 Документировать ER/domain map и seed personas; сверить таблицы документа с Alembic metadata автоматическим check.
 
 ## 4. Demo authentication, роли, согласия и RBAC
 
