@@ -50,6 +50,7 @@ test("paid application moves through submission and customer revision", async ({
   await page.route("**/api/v1/me/roadmaps", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/marketplace/tasks", (route) => route.fulfill({ json: [{ task, terms, accepted_terms_version: acceptedTerms ? 2 : null }] }));
   await page.route("**/api/v1/me/work", (route) => route.fulfill({ json: workItems() }));
+  await page.route("**/api/v1/me/reward-evidence", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/me/tasks/*/terms-consent", (route) => { acceptedTerms = true; return route.fulfill({ json: { task, terms, accepted_terms_version: 2 } }); });
   await page.route("**/api/v1/me/tasks/*/applications", (route) => { hasAssignment = true; return route.fulfill({ json: { id: "00000000-0000-0000-0000-000000000704", status: "applied" } }); });
   await page.route("**/api/v1/me/assignments/*/start", (route) => { assignmentStatus = "in_progress"; return route.fulfill({ json: { id: assignmentId, status: assignmentStatus } }); });

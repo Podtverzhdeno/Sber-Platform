@@ -120,7 +120,7 @@ th, td { padding: 12px; border-bottom: 1px solid rgb(255 255 255 / 10%); text-al
 .feature-stack { display: grid; gap: 34px; }
 .feature-stack h1 { font-size: clamp(40px, 5vw, 66px); }
 .feature-stack h2 { margin-bottom: 18px; font-size: 28px; }
-.track-grid, .roadmap-grid, .course-grid, .work-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.track-grid, .roadmap-grid, .course-grid, .work-grid, .reward-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .track-card { display: flex; min-height: 112px; padding: 20px; flex-direction: column; gap: 14px; align-items: flex-start; justify-content: center; border: 1px solid rgb(255 255 255 / 10%); border-radius: var(--radius-md); color: var(--color-text); background: var(--color-surface); cursor: pointer; text-align: left; }
 .track-card span:first-child { font-size: 18px; font-weight: 800; }
 .track-card--active { border-color: rgb(69 223 145 / 45%); background: rgb(69 223 145 / 8%); }
@@ -161,13 +161,30 @@ th, td { padding: 12px; border-bottom: 1px solid rgb(255 255 255 / 10%); text-al
 .contribution-form, .contribution-form label, .decision-reason { display: grid; gap: 8px; }
 .contribution-form textarea, .contribution-form input, .decision-reason textarea { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid rgb(255 255 255 / 14%); border-radius: 10px; color: var(--color-text); background: #10231b; }
 .contribution-form textarea, .decision-reason textarea { min-height: 100px; resize: vertical; }
+.reward-grid .ui-card { display: grid; gap: 18px; height: 100%; }
+.review-statuses, .review-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.ai-draft { padding: 16px; border: 1px dashed rgb(255 210 122 / 45%); border-radius: 12px; background: rgb(255 210 122 / 7%); }
+.ai-draft p { margin-bottom: 0; color: var(--color-muted); }
+.human-decision { padding: 18px; border-left: 4px solid var(--color-accent); border-radius: 0 12px 12px 0; background: rgb(69 223 145 / 6%); }
+.human-decision .eyebrow { margin-bottom: 8px; }
+.review-grade { float: right; margin: 0 0 8px 16px; color: var(--color-accent); font-size: 48px; font-weight: 900; }
+.review-criteria { display: grid; gap: 12px; margin: 0; }
+.review-criteria div { display: grid; grid-template-columns: minmax(90px, .35fr) 1fr; gap: 12px; padding-top: 12px; border-top: 1px solid rgb(255 255 255 / 9%); }
+.review-criteria dt { color: var(--color-muted); font-weight: 800; }
+.review-criteria dd { display: grid; gap: 6px; margin: 0; }
+.review-criteria small { color: var(--color-muted); }
+.payout-explanation { display: grid; gap: 5px; padding: 16px; border-radius: 12px; background: rgb(69 223 145 / 9%); }
+.payout-explanation strong { font-size: 25px; }
+.payout-explanation small { color: var(--color-muted); }
+.review-actions { margin-top: 10px; }
+.review-actions button { padding: 11px 15px; border: 0; border-radius: 10px; color: #071a11; background: var(--color-accent); cursor: pointer; font-weight: 800; }
 
 @media (max-width: 820px) {
   .login-layout, .workspace { grid-template-columns: 1fr; }
   .workspace { gap: 20px; }
   .sidebar { padding: 0 0 26px; border-right: 0; border-bottom: 1px solid rgb(255 255 255 / 8%); }
   .demo-badge { display: none; }
-  .track-grid, .roadmap-grid, .course-grid, .work-grid { grid-template-columns: 1fr; }
+  .track-grid, .roadmap-grid, .course-grid, .work-grid, .reward-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 520px) {

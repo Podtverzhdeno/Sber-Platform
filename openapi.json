@@ -2063,6 +2063,29 @@
         "title": "ReviseTermsRequest",
         "type": "object"
       },
+      "RewardWorkspaceItemView": {
+        "properties": {
+          "payout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PayoutClaimView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "review": {
+            "$ref": "#/components/schemas/ReviewView"
+          }
+        },
+        "required": [
+          "review",
+          "payout"
+        ],
+        "title": "RewardWorkspaceItemView",
+        "type": "object"
+      },
       "RoadmapView": {
         "properties": {
           "milestones": {
@@ -4217,6 +4240,28 @@
         "summary": "Open Review Appeal"
       }
     },
+    "/api/v1/me/reward-evidence": {
+      "get": {
+        "operationId": "participant_reward_evidence_api_v1_me_reward_evidence_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RewardWorkspaceItemView"
+                  },
+                  "title": "Response Participant Reward Evidence Api V1 Me Reward Evidence Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Participant Reward Evidence"
+      }
+    },
     "/api/v1/me/roadmaps": {
       "get": {
         "operationId": "roadmaps_api_v1_me_roadmaps_get",
@@ -4543,6 +4588,28 @@
           }
         },
         "summary": "Review Rubric"
+      }
+    },
+    "/api/v1/mentor/review-workspace": {
+      "get": {
+        "operationId": "mentor_review_workspace_api_v1_mentor_review_workspace_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RewardWorkspaceItemView"
+                  },
+                  "title": "Response Mentor Review Workspace Api V1 Mentor Review Workspace Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Mentor Review Workspace"
       }
     },
     "/api/v1/mentor/reviews/{review_id}/confirm": {

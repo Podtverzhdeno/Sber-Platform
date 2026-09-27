@@ -65,6 +65,9 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/me/roadmaps", async (route) => {
     await route.fulfill({ json: [] });
   });
+  await page.route("**/api/v1/mentor/review-workspace", async (route) => {
+    await route.fulfill({ json: [] });
+  });
 });
 
 for (const [key, displayName, , navigation] of personas) {
@@ -72,7 +75,12 @@ for (const [key, displayName, , navigation] of personas) {
     await page.goto("/");
     await page.locator(`[data-persona="${key}"]`).click();
 
-    await expect(page.getByRole("heading", { name: key === "participant-alex" ? "Найдите своё через практику" : `Здравствуйте, ${displayName}` })).toBeVisible();
+    const heading = key === "participant-alex"
+      ? "Найдите своё через практику"
+      : key === "mentor-elena"
+        ? "Проверяйте доказательства, а не вывод AI"
+        : `Здравствуйте, ${displayName}`;
+    await expect(page.getByRole("heading", { name: heading })).toBeVisible();
     const links = page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link");
     await expect(links).toHaveCount(navigation.length);
     await expect(links).toHaveText([...navigation]);

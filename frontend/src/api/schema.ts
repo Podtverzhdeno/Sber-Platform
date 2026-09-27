@@ -565,6 +565,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/reward-evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Participant Reward Evidence */
+        get: operations["participant_reward_evidence_api_v1_me_reward_evidence_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/roadmaps": {
         parameters: {
             query?: never;
@@ -676,6 +693,23 @@ export interface paths {
         };
         /** Review Rubric */
         get: operations["review_rubric_api_v1_mentor_review_rubrics__rubric_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/mentor/review-workspace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mentor Review Workspace */
+        get: operations["mentor_review_workspace_api_v1_mentor_review_workspace_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1706,6 +1740,11 @@ export interface components {
             deadline_at: string;
             /** Deliverable */
             deliverable: string;
+        };
+        /** RewardWorkspaceItemView */
+        RewardWorkspaceItemView: {
+            payout: components["schemas"]["PayoutClaimView"] | null;
+            review: components["schemas"]["ReviewView"];
         };
         /** RoadmapView */
         RoadmapView: {
@@ -2912,6 +2951,26 @@ export interface operations {
             };
         };
     };
+    participant_reward_evidence_api_v1_me_reward_evidence_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RewardWorkspaceItemView"][];
+                };
+            };
+        };
+    };
     roadmaps_api_v1_me_roadmaps_get: {
         parameters: {
             query?: never;
@@ -3121,6 +3180,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mentor_review_workspace_api_v1_mentor_review_workspace_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RewardWorkspaceItemView"][];
                 };
             };
         };

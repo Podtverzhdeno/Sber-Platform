@@ -124,6 +124,24 @@ class PayoutWorkStub:
             return self.terms_record
         return None
 
+    async def assignments_for_person(
+        self, person_id: UUID
+    ) -> tuple[AssignmentRecord, ...]:
+        return (
+            (self.assignment_record,)
+            if person_id == self.assignment_record.person_id
+            else ()
+        )
+
+    async def contributions_for_assignment(
+        self, assignment_id: UUID
+    ) -> tuple[ContributionRecord, ...]:
+        return (
+            (self.contribution_record,)
+            if assignment_id == self.assignment_record.id
+            else ()
+        )
+
 
 @pytest.mark.asyncio
 async def test_human_b_review_is_versioned_and_published_for_accepted_contribution() -> None:
@@ -390,3 +408,40 @@ async def test_appeal_policy_rejects_foreign_participant_and_closed_window() -> 
             reason="Срок уже завершился.",
         )
     assert expired.value.code == "APPEAL_WINDOW_CLOSED"
+
+
+@pytest.mark.asyncio
+async def test_reward_workspaces_expose_only_owned_or_assigned_review() -> None:
+    work = PayoutWorkStub()
+    mentor_id = uuid4()
+    store = MemoryRewardStore()
+    review = Review5Plus(
+        review_id=uuid4(),
+        contribution_id=work.contribution_record.id,
+        contribution_version=work.contribution_record.version,
+        rubric_id=uuid4(),
+        rubric_version=1,
+        review_version=1,
+        grade=ReviewGrade.B,
+        assessments=(CriterionAssessment("result", "Принято.", ("artifact:mvp",)),),
+        explanation="Финальная оценка человека.",
+        status=ReviewStatus.PUBLISHED,
+        draft_origin="ai_suggestion",
+        confirmed_by=mentor_id,
+        published_by=mentor_id,
+    )
+    await store.add_review_version(review)
+    evidence = EvidenceStub(
+        mentor_id, ReviewEvidence(review.contribution_id, 2, True, False)
+    )
+    service = RewardService(store, evidence, cast(WorkStore, work))
+
+    participant_items = await service.participant_reward_evidence(
+        actor(work.application_record.person_id, Role.PARTICIPANT)
+    )
+    mentor_items = await service.mentor_review_workspace(actor(mentor_id, Role.MENTOR))
+    foreign_mentor_items = await service.mentor_review_workspace(actor(uuid4(), Role.MENTOR))
+
+    assert participant_items[0].review == review
+    assert mentor_items[0].review.draft_origin == "ai_suggestion"
+    assert foreign_mentor_items == ()

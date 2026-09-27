@@ -326,6 +326,13 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
             customer_id=demo_id("customer-roman"),
             task_key=f"demo-task-{index}",
             status="published" if index > 3 else ("accepted" if index == 1 else "in_progress"),
+            payload={
+                "title": f"Демо-задача {index}",
+                "support": {
+                    "mode": "mentor",
+                    "assignee_id": str(demo_id("mentor-elena")),
+                },
+            },
         )
         for index in range(1, 9)
     ]
@@ -385,6 +392,46 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
         )
         for index in range(1, 4)
     ]
+    review_row = demo_row(
+        "review:alex:task-1:v1",
+        review_id=demo_id("review:alex:task-1"),
+        contribution_id=demo_id("contribution:1:1"),
+        rubric_id=DEFAULT_REVIEW_RUBRIC.rubric_id,
+        review_version=1,
+        grade="B",
+        status="published",
+        created_by=demo_id("mentor-elena"),
+        payload={
+            "contribution_version": 1,
+            "rubric_version": 1,
+            "assessments": [
+                {
+                    "criterion_key": item.key,
+                    "finding": f"Подтверждён факт по критерию «{item.title}».",
+                    "evidence_refs": [f"demo:artifact:{item.key}"],
+                }
+                for item in DEFAULT_REVIEW_RUBRIC.criteria
+            ],
+            "explanation": (
+                "Оценка B опубликована ментором после проверки принятого личного вклада."
+            ),
+            "draft_origin": "ai_suggestion",
+            "confirmed_by": str(demo_id("mentor-elena")),
+            "published_by": str(demo_id("mentor-elena")),
+        },
+    )
+    payout_row = demo_row(
+        "payout:alex:task-1:review-1",
+        assignment_id=demo_id("assignment:1"),
+        contribution_version=1,
+        terms_version=1,
+        review_id=demo_id("review:alex:task-1"),
+        review_version=1,
+        grade="B",
+        amount="22500.00",
+        currency="RUB",
+        status="calculated",
+    )
     appeal_row = demo_row(
         "appeal:alex:score",
         person_id=demo_id("participant-alex"),
@@ -436,6 +483,8 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
         SeedBatch(applications, application_rows),
         SeedBatch(assignments, assignment_rows),
         SeedBatch(contributions, contribution_rows),
+        SeedBatch(review_5plus_versions, [review_row]),
+        SeedBatch(payout_claims, [payout_row]),
         SeedBatch(appeals, [appeal_row]),
         SeedBatch(seasons, [season_row]),
         SeedBatch(rating_policies, [policy_row]),

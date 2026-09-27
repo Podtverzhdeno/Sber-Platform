@@ -38,6 +38,12 @@ class ReviewEvidence:
     authorship_conflict_open: bool
 
 
+@dataclass(frozen=True, slots=True)
+class RewardWorkspaceItem:
+    review: Review5Plus
+    payout: PayoutClaim | None
+
+
 DEFAULT_REVIEW_RUBRIC = ReviewRubric(
     rubric_id=UUID("d993683b-a578-54c8-9b87-45190ac59056"),
     key="impulse-5plus-demo",
@@ -54,6 +60,7 @@ class ReviewStore(Protocol):
     async def rubric(self, rubric_id: UUID) -> ReviewRubric | None: ...
     async def add_rubric(self, rubric: ReviewRubric) -> ReviewRubric: ...
     async def review(self, review_id: UUID) -> Review5Plus | None: ...
+    async def current_reviews(self) -> tuple[Review5Plus, ...]: ...
     async def add_review_version(self, review: Review5Plus) -> Review5Plus: ...
     async def review_created_at(self, review_id: UUID, review_version: int) -> datetime | None: ...
     async def appeal(self, appeal_id: UUID) -> ReviewAppeal | None: ...
@@ -77,6 +84,9 @@ class ReviewStore(Protocol):
         review_version: int,
     ) -> PayoutClaim | None: ...
     async def payout_claim_by_id(self, claim_id: UUID) -> PayoutClaim | None: ...
+    async def payout_for_review(
+        self, review_id: UUID, review_version: int
+    ) -> PayoutClaim | None: ...
     async def add_payout_claim(self, claim: PayoutClaim) -> PayoutClaim: ...
     async def save_payout_claim(self, claim: PayoutClaim, expected_version: int) -> PayoutClaim: ...
     async def settlement_attempt(
@@ -110,6 +120,9 @@ class MemoryRewardStore:
     async def review(self, review_id: UUID) -> Review5Plus | None:
         versions = self._reviews.get(review_id, ())
         return versions[-1] if versions else None
+
+    async def current_reviews(self) -> tuple[Review5Plus, ...]:
+        return tuple(versions[-1] for versions in self._reviews.values() if versions)
 
     async def add_review_version(self, review: Review5Plus) -> Review5Plus:
         versions = self._reviews.get(review.review_id, ())
@@ -196,6 +209,18 @@ class MemoryRewardStore:
 
     async def payout_claim_by_id(self, claim_id: UUID) -> PayoutClaim | None:
         return self._claims.get(claim_id)
+
+    async def payout_for_review(
+        self, review_id: UUID, review_version: int
+    ) -> PayoutClaim | None:
+        return next(
+            (
+                item
+                for item in self._claims.values()
+                if item.review_id == review_id and item.review_version == review_version
+            ),
+            None,
+        )
 
     async def add_payout_claim(self, claim: PayoutClaim) -> PayoutClaim:
         existing = await self.payout_claim(
@@ -354,6 +379,52 @@ class RewardService:
         if rubric is None:
             raise self._not_found()
         return rubric
+
+    async def participant_reward_evidence(
+        self, actor: ActorContext
+    ) -> tuple[RewardWorkspaceItem, ...]:
+        self._participant(actor)
+        if self.work_store is None:
+            return ()
+        assignments = await self.work_store.assignments_for_person(actor.person_id)
+        contribution_ids = {
+            contribution.id
+            for assignment in assignments
+            for contribution in await self.work_store.contributions_for_assignment(assignment.id)
+        }
+        reviews = await self.store.current_reviews()
+        items: list[RewardWorkspaceItem] = []
+        for review in reviews:
+            if review.contribution_id not in contribution_ids:
+                continue
+            items.append(
+                RewardWorkspaceItem(
+                    review=review,
+                    payout=await self.store.payout_for_review(
+                        review.review_id, review.review_version
+                    ),
+                )
+            )
+        return tuple(items)
+
+    async def mentor_review_workspace(
+        self, actor: ActorContext
+    ) -> tuple[RewardWorkspaceItem, ...]:
+        self._mentor(actor)
+        items: list[RewardWorkspaceItem] = []
+        for review in await self.store.current_reviews():
+            evidence = await self.evidence.for_mentor(actor.person_id, review.contribution_id)
+            if evidence is None:
+                continue
+            items.append(
+                RewardWorkspaceItem(
+                    review=review,
+                    payout=await self.store.payout_for_review(
+                        review.review_id, review.review_version
+                    ),
+                )
+            )
+        return tuple(items)
 
     async def propose(
         self, actor: ActorContext, review_id: UUID, expected_version: int

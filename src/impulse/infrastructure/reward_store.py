@@ -100,6 +100,24 @@ class SqlRewardStore(ReviewStore):
             )
         return self._review(row) if row is not None else None
 
+    async def current_reviews(self) -> tuple[Review5Plus, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                (
+                    await session.execute(
+                        select(review_5plus_versions)
+                        .distinct(review_5plus_versions.c.review_id)
+                        .order_by(
+                            review_5plus_versions.c.review_id,
+                            review_5plus_versions.c.review_version.desc(),
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        return tuple(self._review(row) for row in rows)
+
     async def add_review_version(self, review: Review5Plus) -> Review5Plus:
         try:
             async with self.database.session() as session:
@@ -346,6 +364,24 @@ class SqlRewardStore(ReviewStore):
         async with self.database.sessions() as session:
             row = (
                 (await session.execute(select(payout_claims).where(payout_claims.c.id == claim_id)))
+                .mappings()
+                .one_or_none()
+            )
+        return self._payout_claim(row) if row is not None else None
+
+    async def payout_for_review(
+        self, review_id: UUID, review_version: int
+    ) -> PayoutClaim | None:
+        async with self.database.sessions() as session:
+            row = (
+                (
+                    await session.execute(
+                        select(payout_claims).where(
+                            payout_claims.c.review_id == review_id,
+                            payout_claims.c.review_version == review_version,
+                        )
+                    )
+                )
                 .mappings()
                 .one_or_none()
             )

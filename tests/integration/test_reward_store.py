@@ -49,7 +49,7 @@ async def test_review_versions_are_append_only_and_restore_human_signatures() ->
     mentor_id = demo_id("mentor-elena")
     draft = Review5Plus.draft(
         review_id=uuid4(),
-        contribution_id=demo_id("contribution:1:1"),
+        contribution_id=demo_id("contribution:2:1"),
         contribution_version=1,
         rubric=DEFAULT_REVIEW_RUBRIC,
         grade=ReviewGrade.B,

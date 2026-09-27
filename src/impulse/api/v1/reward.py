@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
-from impulse.application.reward import RewardService
+from impulse.application.reward import RewardService, RewardWorkspaceItem
 from impulse.domain.reward import (
     AppealStatus,
     CriterionAssessment,
@@ -156,6 +156,11 @@ class ReviewAppealResultView(BaseModel):
     review: ReviewView
 
 
+class RewardWorkspaceItemView(BaseModel):
+    review: ReviewView
+    payout: PayoutClaimView | None
+
+
 def _service(request: Request) -> RewardService:
     return request.app.state.reward_service
 
@@ -239,6 +244,35 @@ def _appeal_view(appeal: ReviewAppeal) -> ReviewAppealView:
         resolution_reason=appeal.resolution_reason,
         resulting_review_version=appeal.resulting_review_version,
     )
+
+
+def _workspace_view(item: RewardWorkspaceItem) -> RewardWorkspaceItemView:
+    return RewardWorkspaceItemView(
+        review=_review_view(item.review),
+        payout=_payout_view(item.payout) if item.payout is not None else None,
+    )
+
+
+@router.get("/me/reward-evidence", response_model=list[RewardWorkspaceItemView])
+async def participant_reward_evidence(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[RewardService, Depends(_service)],
+) -> list[RewardWorkspaceItemView]:
+    return [
+        _workspace_view(item)
+        for item in await service.participant_reward_evidence(authenticated.actor)
+    ]
+
+
+@router.get("/mentor/review-workspace", response_model=list[RewardWorkspaceItemView])
+async def mentor_review_workspace(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[RewardService, Depends(_service)],
+) -> list[RewardWorkspaceItemView]:
+    return [
+        _workspace_view(item)
+        for item in await service.mentor_review_workspace(authenticated.actor)
+    ]
 
 
 @router.get("/mentor/review-rubrics/{rubric_id}", response_model=ReviewRubricView)

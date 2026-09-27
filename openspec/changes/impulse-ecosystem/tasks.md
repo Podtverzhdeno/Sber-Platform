@@ -77,7 +77,7 @@
 - [x] 9.3 Реализовать rubric/review state machine, evidence-linked draft и human publish с conflict check; scenarios `compensation-5plus/Оценка конкретного проекта` SHALL пройти.
 - [x] 9.4 Реализовать payout claim calculation/approval/demo adapter statuses раздельно от settlement; duplicate/retry/reversal tests SHALL исключить двойную выплату.
 - [x] 9.5 Реализовать appeal блокировку по policy и corrected/upheld flow без переписывания истории; integration test SHALL сохранить обе review versions.
-- [ ] 9.6 Реализовать review/payout explanation UI для участника и human review workspace ментора; Playwright SHALL показать AI draft отдельно от final human grade.
+- [x] 9.6 Реализовать review/payout explanation UI для участника и human review workspace ментора; Playwright SHALL показать AI draft отдельно от final human grade.
 
 ## 10. Рейтинг, дипломы, портфолио и трофеи
 
