@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal
 from typing import Annotated, Literal
 from uuid import UUID
@@ -13,10 +14,12 @@ from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.application.reward import RewardService
 from impulse.domain.reward import (
+    AppealStatus,
     CriterionAssessment,
     PayoutClaim,
     PayoutStatus,
     Review5Plus,
+    ReviewAppeal,
     ReviewGrade,
     ReviewRubric,
     ReviewStatus,
@@ -52,6 +55,20 @@ class DemoSettlementRequest(ReviewTransitionRequest):
 
 class DemoReversalRequest(ReviewTransitionRequest):
     request_key: str = Field(min_length=1, max_length=160)
+
+
+class OpenReviewAppealRequest(ReviewTransitionRequest):
+    reason: str = Field(min_length=1, max_length=4000)
+
+
+class ResolveReviewAppealRequest(BaseModel):
+    expected_appeal_version: int = Field(ge=1)
+    expected_review_version: int = Field(ge=1)
+    outcome: Literal[AppealStatus.UPHELD, AppealStatus.CORRECTED]
+    reason: str = Field(min_length=1, max_length=4000)
+    grade: ReviewGrade | None = None
+    assessments: list[CriterionAssessmentRequest] | None = None
+    explanation: str | None = Field(default=None, min_length=1, max_length=4000)
 
 
 class RubricCriterionView(BaseModel):
@@ -119,6 +136,26 @@ class DemoSettlementView(BaseModel):
     settlement: SettlementAttemptView
 
 
+class ReviewAppealView(BaseModel):
+    id: UUID
+    review_id: UUID
+    disputed_review_version: int
+    participant_id: UUID
+    reason: str
+    opened_at: datetime
+    deadline_at: datetime
+    status: AppealStatus
+    version: int
+    resolved_by: UUID | None
+    resolution_reason: str | None
+    resulting_review_version: int | None
+
+
+class ReviewAppealResultView(BaseModel):
+    appeal: ReviewAppealView
+    review: ReviewView
+
+
 def _service(request: Request) -> RewardService:
     return request.app.state.reward_service
 
@@ -184,6 +221,23 @@ def _settlement_view(attempt: SettlementAttempt) -> SettlementAttemptView:
         status=attempt.status,
         provider_reference=attempt.provider_reference,
         demo=attempt.demo,
+    )
+
+
+def _appeal_view(appeal: ReviewAppeal) -> ReviewAppealView:
+    return ReviewAppealView(
+        id=appeal.appeal_id,
+        review_id=appeal.review_id,
+        disputed_review_version=appeal.disputed_review_version,
+        participant_id=appeal.participant_id,
+        reason=appeal.reason,
+        opened_at=appeal.opened_at,
+        deadline_at=appeal.deadline_at,
+        status=appeal.status,
+        version=appeal.version,
+        resolved_by=appeal.resolved_by,
+        resolution_reason=appeal.resolution_reason,
+        resulting_review_version=appeal.resulting_review_version,
     )
 
 
@@ -335,3 +389,58 @@ async def reverse_payout_demo(
     return DemoSettlementView(
         claim=_payout_view(claim), settlement=_settlement_view(attempt)
     )
+
+
+@router.post(
+    "/me/reviews/{review_id}/appeals",
+    response_model=ReviewAppealResultView,
+)
+async def open_review_appeal(
+    review_id: UUID,
+    command: OpenReviewAppealRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RewardService, Depends(_service)],
+) -> ReviewAppealResultView:
+    appeal, review = await service.open_review_appeal(
+        authenticated.actor,
+        review_id,
+        command.expected_version,
+        reason=command.reason,
+    )
+    return ReviewAppealResultView(appeal=_appeal_view(appeal), review=_review_view(review))
+
+
+@router.post(
+    "/operations/review-appeals/{appeal_id}/resolve",
+    response_model=ReviewAppealResultView,
+)
+async def resolve_review_appeal(
+    appeal_id: UUID,
+    command: ResolveReviewAppealRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RewardService, Depends(_service)],
+) -> ReviewAppealResultView:
+    assessments = (
+        tuple(
+            CriterionAssessment(
+                criterion_key=item.criterion_key,
+                finding=item.finding,
+                evidence_refs=tuple(item.evidence_refs),
+            )
+            for item in command.assessments
+        )
+        if command.assessments is not None
+        else None
+    )
+    appeal, review = await service.resolve_review_appeal(
+        authenticated.actor,
+        appeal_id,
+        expected_appeal_version=command.expected_appeal_version,
+        expected_review_version=command.expected_review_version,
+        outcome=command.outcome,
+        reason=command.reason,
+        grade=command.grade,
+        assessments=assessments,
+        explanation=command.explanation,
+    )
+    return ReviewAppealResultView(appeal=_appeal_view(appeal), review=_review_view(review))

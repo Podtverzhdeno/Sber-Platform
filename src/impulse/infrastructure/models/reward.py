@@ -50,7 +50,7 @@ payout_claims = domain_table(
     typed_field("amount", Numeric(18, 2), nullable=True),
     string_field("currency", 3, nullable=True),
     uuid_field("approved_by", nullable=True),
-    uniques=(("assignment_id", "contribution_version", "terms_version"),),
+    uniques=(("assignment_id", "contribution_version", "terms_version", "review_version"),),
 )
 settlement_attempts = domain_table(
     "settlement_attempts",

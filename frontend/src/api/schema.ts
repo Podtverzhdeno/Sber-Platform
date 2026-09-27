@@ -548,6 +548,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/reviews/{review_id}/appeals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Open Review Appeal */
+        post: operations["open_review_appeal_api_v1_me_reviews__review_id__appeals_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/roadmaps": {
         parameters: {
             query?: never;
@@ -803,6 +820,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/review-appeals/{appeal_id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resolve Review Appeal */
+        post: operations["resolve_review_appeal_api_v1_operations_review_appeals__appeal_id__resolve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/operations/reviews/{review_id}/payout-calculation": {
         parameters: {
             query?: never;
@@ -953,6 +987,11 @@ export interface components {
             /** Scopes */
             scopes: string[];
         };
+        /**
+         * AppealStatus
+         * @enum {string}
+         */
+        AppealStatus: "open" | "upheld" | "corrected";
         /**
          * ApplicationStatus
          * @enum {string}
@@ -1462,6 +1501,13 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** OpenReviewAppealRequest */
+        OpenReviewAppealRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Reason */
+            reason: string;
+        };
         /** PayoutClaimView */
         PayoutClaimView: {
             /** Amount */
@@ -1518,6 +1564,71 @@ export interface components {
              * @enum {string}
              */
             claim_type: "participation" | "winner" | "prize";
+        };
+        /** ResolveReviewAppealRequest */
+        ResolveReviewAppealRequest: {
+            /** Assessments */
+            assessments?: components["schemas"]["CriterionAssessmentRequest"][] | null;
+            /** Expected Appeal Version */
+            expected_appeal_version: number;
+            /** Expected Review Version */
+            expected_review_version: number;
+            /** Explanation */
+            explanation?: string | null;
+            grade?: components["schemas"]["ReviewGrade"] | null;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "upheld" | "corrected";
+            /** Reason */
+            reason: string;
+        };
+        /** ReviewAppealResultView */
+        ReviewAppealResultView: {
+            appeal: components["schemas"]["ReviewAppealView"];
+            review: components["schemas"]["ReviewView"];
+        };
+        /** ReviewAppealView */
+        ReviewAppealView: {
+            /**
+             * Deadline At
+             * Format: date-time
+             */
+            deadline_at: string;
+            /** Disputed Review Version */
+            disputed_review_version: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Opened At
+             * Format: date-time
+             */
+            opened_at: string;
+            /**
+             * Participant Id
+             * Format: uuid
+             */
+            participant_id: string;
+            /** Reason */
+            reason: string;
+            /** Resolution Reason */
+            resolution_reason: string | null;
+            /** Resolved By */
+            resolved_by: string | null;
+            /** Resulting Review Version */
+            resulting_review_version: number | null;
+            /**
+             * Review Id
+             * Format: uuid
+             */
+            review_id: string;
+            status: components["schemas"]["AppealStatus"];
+            /** Version */
+            version: number;
         };
         /**
          * ReviewGrade
@@ -2764,6 +2875,43 @@ export interface operations {
             };
         };
     };
+    open_review_appeal_api_v1_me_reviews__review_id__appeals_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                review_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenReviewAppealRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewAppealResultView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     roadmaps_api_v1_me_roadmaps_get: {
         parameters: {
             query?: never;
@@ -3258,6 +3406,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DemoSettlementView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resolve_review_appeal_api_v1_operations_review_appeals__appeal_id__resolve_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                appeal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveReviewAppealRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReviewAppealResultView"];
                 };
             };
             /** @description Validation Error */

@@ -1,7 +1,8 @@
 """Application policy tests for human-controlled 5+ reviews."""
+# ruff: noqa: RUF001
 
 from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import cast
 from uuid import UUID, uuid4
@@ -23,6 +24,7 @@ from impulse.application.work import (
 )
 from impulse.domain.identity import ActorContext, Role
 from impulse.domain.reward import (
+    AppealStatus,
     CompensationTerms,
     CriterionAssessment,
     PayoutStatus,
@@ -276,3 +278,115 @@ async def test_payout_retry_idempotency_and_reversal_never_double_pay() -> None:
     assert (first.attempt_number, second.attempt_number, reversal.attempt_number) == (1, 2, 3)
     assert paid.status is PayoutStatus.PAID
     assert reversed_claim.status is PayoutStatus.REVERSED
+
+
+@pytest.mark.asyncio
+async def test_appeal_blocks_old_payout_and_correction_creates_new_claim() -> None:
+    work = PayoutWorkStub()
+    store = MemoryRewardStore()
+    original = Review5Plus(
+        review_id=uuid4(),
+        contribution_id=work.contribution_record.id,
+        contribution_version=work.contribution_record.version,
+        rubric_id=uuid4(),
+        rubric_version=1,
+        review_version=1,
+        grade=ReviewGrade.B,
+        assessments=(CriterionAssessment("result", "Принято.", ("artifact:mvp",)),),
+        explanation="Исходная оценка B.",
+        status=ReviewStatus.PUBLISHED,
+        confirmed_by=uuid4(),
+        published_by=uuid4(),
+    )
+    await store.add_review_version(original)
+    service = RewardService(
+        store,
+        EvidenceStub(uuid4(), ReviewEvidence(original.contribution_id, 2, True, False)),
+        cast(WorkStore, work),
+    )
+    operator = actor(uuid4(), Role.OPERATOR)
+    participant = actor(work.application_record.person_id, Role.PARTICIPANT)
+    old_claim = await service.calculate_payout(operator, original.review_id)
+
+    appeal, disputed = await service.open_review_appeal(
+        participant,
+        original.review_id,
+        original.review_version,
+        reason="Не учтён дополнительный подтверждённый результат.",
+    )
+    assert disputed.status is ReviewStatus.DISPUTED
+    with pytest.raises(ApiError) as blocked:
+        await service.approve_payout(operator, old_claim.claim_id, old_claim.version)
+    assert blocked.value.code == "PAYOUT_BLOCKED_BY_APPEAL"
+
+    resolved_appeal, corrected = await service.resolve_review_appeal(
+        operator,
+        appeal.appeal_id,
+        expected_appeal_version=appeal.version,
+        expected_review_version=disputed.review_version,
+        outcome=AppealStatus.CORRECTED,
+        reason="Дополнительный результат подтверждён артефактом.",
+        grade=ReviewGrade.A,
+        assessments=(
+            CriterionAssessment("result", "Превышены ожидания.", ("artifact:mvp-v2",)),
+        ),
+        explanation="Исправленная оценка A основана на дополнительном результате.",
+    )
+    assert resolved_appeal.status is AppealStatus.CORRECTED
+    assert corrected.review_version == 3
+    assert corrected.grade is ReviewGrade.A
+    assert original.grade is ReviewGrade.B
+
+    with pytest.raises(ApiError) as stale_claim:
+        await service.approve_payout(operator, old_claim.claim_id, old_claim.version)
+    assert stale_claim.value.code == "PAYOUT_RECALCULATION_REQUIRED"
+    new_claim = await service.calculate_payout(operator, original.review_id)
+    assert new_claim.claim_id != old_claim.claim_id
+    assert new_claim.review_version == corrected.review_version
+    assert new_claim.amount == Decimal("25000.00")
+
+
+@pytest.mark.asyncio
+async def test_appeal_policy_rejects_foreign_participant_and_closed_window() -> None:
+    work = PayoutWorkStub()
+    store = MemoryRewardStore()
+    review = Review5Plus(
+        review_id=uuid4(),
+        contribution_id=work.contribution_record.id,
+        contribution_version=work.contribution_record.version,
+        rubric_id=uuid4(),
+        rubric_version=1,
+        review_version=1,
+        grade=ReviewGrade.B,
+        assessments=(CriterionAssessment("result", "Принято.", ("artifact:mvp",)),),
+        explanation="Опубликованная оценка.",
+        status=ReviewStatus.PUBLISHED,
+        published_by=uuid4(),
+    )
+    await store.add_review_version(review)
+    published_at = await store.review_created_at(review.review_id, review.review_version)
+    assert published_at is not None
+    service = RewardService(
+        store,
+        EvidenceStub(uuid4(), ReviewEvidence(review.contribution_id, 2, True, False)),
+        cast(WorkStore, work),
+        clock=lambda: published_at + timedelta(days=15),
+    )
+
+    with pytest.raises(ApiError) as hidden:
+        await service.open_review_appeal(
+            actor(uuid4(), Role.PARTICIPANT),
+            review.review_id,
+            review.review_version,
+            reason="Чужая оценка.",
+        )
+    assert hidden.value.code == "RESOURCE_NOT_FOUND"
+
+    with pytest.raises(ApiError) as expired:
+        await service.open_review_appeal(
+            actor(work.application_record.person_id, Role.PARTICIPANT),
+            review.review_id,
+            review.review_version,
+            reason="Срок уже завершился.",
+        )
+    assert expired.value.code == "APPEAL_WINDOW_CLOSED"

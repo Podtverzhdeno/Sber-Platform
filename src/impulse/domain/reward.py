@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime
 from decimal import ROUND_DOWN, ROUND_HALF_EVEN, ROUND_HALF_UP, Decimal
 from enum import StrEnum
 from uuid import UUID
@@ -50,6 +51,65 @@ class SettlementKind(StrEnum):
     REVERSAL = "reversal"
 
 
+class AppealStatus(StrEnum):
+    OPEN = "open"
+    UPHELD = "upheld"
+    CORRECTED = "corrected"
+
+
+@dataclass(frozen=True, slots=True)
+class ReviewAppeal:
+    appeal_id: UUID
+    review_id: UUID
+    disputed_review_version: int
+    participant_id: UUID
+    reason: str
+    opened_at: datetime
+    deadline_at: datetime
+    status: AppealStatus = AppealStatus.OPEN
+    version: int = 1
+    resolved_by: UUID | None = None
+    resolution_reason: str | None = None
+    resulting_review_version: int | None = None
+
+    def __post_init__(self) -> None:
+        if not self.reason.strip():
+            raise CompensationPolicyError("Причина апелляции обязательна.")
+        if self.deadline_at <= self.opened_at:
+            raise CompensationPolicyError("Срок апелляции должен завершаться после публикации.")
+        if self.disputed_review_version < 1 or self.version < 1:
+            raise CompensationPolicyError("Версии апелляции и оценки должны быть положительными.")
+
+    def resolve(
+        self,
+        *,
+        status: AppealStatus,
+        human_id: UUID,
+        reason: str,
+        resulting_review_version: int,
+    ) -> ReviewAppeal:
+        if self.status is not AppealStatus.OPEN:
+            raise CompensationPolicyError("Апелляция уже разрешена.")
+        if status not in {AppealStatus.UPHELD, AppealStatus.CORRECTED}:
+            raise CompensationPolicyError("Неизвестный исход апелляции.")
+        if not reason.strip():
+            raise CompensationPolicyError("Обоснование решения по апелляции обязательно.")
+        return ReviewAppeal(
+            appeal_id=self.appeal_id,
+            review_id=self.review_id,
+            disputed_review_version=self.disputed_review_version,
+            participant_id=self.participant_id,
+            reason=self.reason,
+            opened_at=self.opened_at,
+            deadline_at=self.deadline_at,
+            status=status,
+            version=self.version + 1,
+            resolved_by=human_id,
+            resolution_reason=reason,
+            resulting_review_version=resulting_review_version,
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class PayoutClaim:
     claim_id: UUID
@@ -76,7 +136,11 @@ class PayoutClaim:
         review: Review5Plus,
         compensation: CompensationTerms,
     ) -> PayoutClaim:
-        if review.status is not ReviewStatus.PUBLISHED:
+        if review.status not in {
+            ReviewStatus.PUBLISHED,
+            ReviewStatus.CORRECTED,
+            ReviewStatus.UPHELD,
+        }:
             raise CompensationPolicyError("Начисление требует опубликованной человеком оценки.")
         if review.contribution_version != contribution_version:
             raise CompensationPolicyError("Версия оценки отличается от версии личного вклада.")
@@ -290,6 +354,37 @@ class Review5Plus:
             )
         return self._next(status=ReviewStatus.PUBLISHED, published_by=human_id)
 
+    def dispute(self) -> Review5Plus:
+        self._require(ReviewStatus.PUBLISHED)
+        return self._next(status=ReviewStatus.DISPUTED)
+
+    def uphold(self, human_id: UUID) -> Review5Plus:
+        self._require(ReviewStatus.DISPUTED)
+        return self._next(status=ReviewStatus.UPHELD, published_by=human_id)
+
+    def correct(
+        self,
+        human_id: UUID,
+        *,
+        grade: ReviewGrade,
+        assessments: tuple[CriterionAssessment, ...],
+        explanation: str,
+    ) -> Review5Plus:
+        self._require(ReviewStatus.DISPUTED)
+        if {item.criterion_key for item in assessments} != {
+            item.criterion_key for item in self.assessments
+        }:
+            raise CompensationPolicyError("Коррекция должна сохранить критерии исходной рубрики.")
+        if not explanation.strip():
+            raise CompensationPolicyError("Обоснование исправленной оценки обязательно.")
+        return self._next(
+            status=ReviewStatus.CORRECTED,
+            published_by=human_id,
+            grade=grade,
+            assessments=assessments,
+            explanation=explanation,
+        )
+
     def _require(self, expected: ReviewStatus) -> None:
         if self.status is not expected:
             raise CompensationPolicyError(
@@ -302,6 +397,9 @@ class Review5Plus:
         status: ReviewStatus,
         confirmed_by: UUID | None = None,
         published_by: UUID | None = None,
+        grade: ReviewGrade | None = None,
+        assessments: tuple[CriterionAssessment, ...] | None = None,
+        explanation: str | None = None,
     ) -> Review5Plus:
         return Review5Plus(
             review_id=self.review_id,
@@ -310,9 +408,9 @@ class Review5Plus:
             rubric_id=self.rubric_id,
             rubric_version=self.rubric_version,
             review_version=self.review_version + 1,
-            grade=self.grade,
-            assessments=self.assessments,
-            explanation=self.explanation,
+            grade=grade if grade is not None else self.grade,
+            assessments=assessments if assessments is not None else self.assessments,
+            explanation=explanation if explanation is not None else self.explanation,
             status=status,
             draft_origin=self.draft_origin,
             confirmed_by=confirmed_by if confirmed_by is not None else self.confirmed_by,

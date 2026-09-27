@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from uuid import uuid4
 
@@ -12,10 +13,12 @@ from sqlalchemy import func, select
 from impulse.application.reward import DEFAULT_REVIEW_RUBRIC
 from impulse.bootstrap.demo_seed import demo_id, seed_demo
 from impulse.domain.reward import (
+    AppealStatus,
     CriterionAssessment,
     PayoutClaim,
     PayoutStatus,
     Review5Plus,
+    ReviewAppeal,
     ReviewGrade,
     SettlementAttempt,
     SettlementKind,
@@ -77,7 +80,36 @@ async def test_review_versions_are_append_only_and_restore_human_signatures() ->
         await store.add_review_version(version)
 
     restored = await store.review(draft.review_id)
+    assert restored is not None
     assert restored == versions[-1]
+    now = datetime.now(UTC)
+    appeal = ReviewAppeal(
+        appeal_id=uuid4(),
+        review_id=draft.review_id,
+        disputed_review_version=restored.review_version,
+        participant_id=demo_id("participant-alex"),
+        reason="Участник просит повторно проверить факты.",
+        opened_at=now,
+        deadline_at=now + timedelta(days=14),
+    )
+    disputed = restored.dispute()
+    await store.add_review_appeal(appeal, disputed)
+    upheld = disputed.uphold(mentor_id)
+    resolved = appeal.resolve(
+        status=AppealStatus.UPHELD,
+        human_id=mentor_id,
+        reason="Исходная оценка подтверждена фактами.",
+        resulting_review_version=upheld.review_version,
+    )
+    await store.resolve_review_appeal(
+        resolved,
+        upheld,
+        expected_appeal_version=appeal.version,
+        expected_review_version=disputed.review_version,
+    )
+    restored_after_appeal = await store.review(draft.review_id)
+    assert restored_after_appeal == upheld
+    assert (await store.appeal(appeal.appeal_id)) == resolved
     async with database.sessions() as session:
         count = await session.scalar(
             select(func.count())
@@ -85,7 +117,7 @@ async def test_review_versions_are_append_only_and_restore_human_signatures() ->
             .where(review_5plus_versions.c.review_id == draft.review_id)
         )
     await database.close()
-    assert count == 4
+    assert count == 6
 
 
 @pytest.mark.asyncio

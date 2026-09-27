@@ -163,6 +163,15 @@
         "title": "ActorView",
         "type": "object"
       },
+      "AppealStatus": {
+        "enum": [
+          "open",
+          "upheld",
+          "corrected"
+        ],
+        "title": "AppealStatus",
+        "type": "string"
+      },
       "ApplicationStatus": {
         "enum": [
           "terms_accepted",
@@ -1510,6 +1519,27 @@
         "title": "MilestoneView",
         "type": "object"
       },
+      "OpenReviewAppealRequest": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "reason": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_version",
+          "reason"
+        ],
+        "title": "OpenReviewAppealRequest",
+        "type": "object"
+      },
       "PayoutClaimView": {
         "properties": {
           "amount": {
@@ -1655,6 +1685,189 @@
           }
         },
         "title": "ReportClaimRequest",
+        "type": "object"
+      },
+      "ResolveReviewAppealRequest": {
+        "properties": {
+          "assessments": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/CriterionAssessmentRequest"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assessments"
+          },
+          "expected_appeal_version": {
+            "minimum": 1.0,
+            "title": "Expected Appeal Version",
+            "type": "integer"
+          },
+          "expected_review_version": {
+            "minimum": 1.0,
+            "title": "Expected Review Version",
+            "type": "integer"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ReviewGrade"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "outcome": {
+            "enum": [
+              "upheld",
+              "corrected"
+            ],
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_appeal_version",
+          "expected_review_version",
+          "outcome",
+          "reason"
+        ],
+        "title": "ResolveReviewAppealRequest",
+        "type": "object"
+      },
+      "ReviewAppealResultView": {
+        "properties": {
+          "appeal": {
+            "$ref": "#/components/schemas/ReviewAppealView"
+          },
+          "review": {
+            "$ref": "#/components/schemas/ReviewView"
+          }
+        },
+        "required": [
+          "appeal",
+          "review"
+        ],
+        "title": "ReviewAppealResultView",
+        "type": "object"
+      },
+      "ReviewAppealView": {
+        "properties": {
+          "deadline_at": {
+            "format": "date-time",
+            "title": "Deadline At",
+            "type": "string"
+          },
+          "disputed_review_version": {
+            "title": "Disputed Review Version",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "opened_at": {
+            "format": "date-time",
+            "title": "Opened At",
+            "type": "string"
+          },
+          "participant_id": {
+            "format": "uuid",
+            "title": "Participant Id",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "resolution_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Reason"
+          },
+          "resolved_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolved By"
+          },
+          "resulting_review_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resulting Review Version"
+          },
+          "review_id": {
+            "format": "uuid",
+            "title": "Review Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AppealStatus"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "review_id",
+          "disputed_review_version",
+          "participant_id",
+          "reason",
+          "opened_at",
+          "deadline_at",
+          "status",
+          "version",
+          "resolved_by",
+          "resolution_reason",
+          "resulting_review_version"
+        ],
+        "title": "ReviewAppealView",
         "type": "object"
       },
       "ReviewGrade": {
@@ -3938,6 +4151,72 @@
         "summary": "Streak"
       }
     },
+    "/api/v1/me/reviews/{review_id}/appeals": {
+      "post": {
+        "operationId": "open_review_appeal_api_v1_me_reviews__review_id__appeals_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Review Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenReviewAppealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewAppealResultView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Open Review Appeal"
+      }
+    },
     "/api/v1/me/roadmaps": {
       "get": {
         "operationId": "roadmaps_api_v1_me_roadmaps_get",
@@ -4782,6 +5061,72 @@
           }
         },
         "summary": "Settle Payout Demo"
+      }
+    },
+    "/api/v1/operations/review-appeals/{appeal_id}/resolve": {
+      "post": {
+        "operationId": "resolve_review_appeal_api_v1_operations_review_appeals__appeal_id__resolve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "appeal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Appeal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveReviewAppealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewAppealResultView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resolve Review Appeal"
       }
     },
     "/api/v1/operations/reviews/{review_id}/payout-calculation": {
