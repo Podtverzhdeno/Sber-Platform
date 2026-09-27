@@ -1,5 +1,6 @@
 """Operator API for versioned rating seasons and policies."""
 
+from datetime import datetime
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
@@ -15,8 +16,10 @@ from impulse.domain.recognition import (
     DiplomaThreshold,
     RatingPolicy,
     RatingSeason,
+    ScoreEntry,
     ScoreSourceRule,
     SeasonStatus,
+    Standing,
     TieBreaker,
 )
 
@@ -67,6 +70,21 @@ class OpenSeasonRequest(BaseModel):
     expected_version: int = Field(ge=1)
 
 
+class AppendScoreRequest(BaseModel):
+    person_id: UUID
+    source_type: str = Field(min_length=1, max_length=64)
+    source_id: UUID
+    rule_id: str = Field(min_length=1, max_length=96)
+    points: Decimal = Field(gt=0)
+    occurred_at: datetime
+
+
+class CorrectScoreRequest(BaseModel):
+    points_delta: Decimal
+    reason: str = Field(min_length=1, max_length=2000)
+    occurred_at: datetime
+
+
 class SeasonView(BaseModel):
     id: UUID
     key: str
@@ -85,6 +103,29 @@ class RatingPolicyView(BaseModel):
     tie_breakers: list[TieBreaker]
     diploma_thresholds: list[DiplomaThresholdModel]
     appeal_period_days: int
+
+
+class ScoreEntryView(BaseModel):
+    id: UUID
+    season_id: UUID
+    person_id: UUID
+    source_type: str
+    source_id: UUID
+    rule_id: str
+    points: Decimal
+    occurred_at: datetime
+    correction_of: UUID | None
+    correction_reason: str | None
+
+
+class StandingView(BaseModel):
+    season_id: UUID
+    person_id: UUID
+    place: int
+    score: Decimal
+    successful_projects: int
+    highest_project_score: Decimal
+    earliest_achievement: datetime | None
 
 
 def _season_view(season: RatingSeason) -> SeasonView:
@@ -131,6 +172,25 @@ def _policy_view(policy: RatingPolicy) -> RatingPolicyView:
         ],
         appeal_period_days=policy.appeal_period_days,
     )
+
+
+def _score_view(entry: ScoreEntry) -> ScoreEntryView:
+    return ScoreEntryView(
+        id=entry.entry_id,
+        season_id=entry.season_id,
+        person_id=entry.person_id,
+        source_type=entry.source_type,
+        source_id=entry.source_id,
+        rule_id=entry.rule_id,
+        points=entry.points,
+        occurred_at=entry.occurred_at,
+        correction_of=entry.correction_of,
+        correction_reason=entry.correction_reason,
+    )
+
+
+def _standing_view(row: Standing) -> StandingView:
+    return StandingView(**{field: getattr(row, field) for field in StandingView.model_fields})
 
 
 @router.post("/operations/rating-seasons", response_model=SeasonView)
@@ -181,3 +241,54 @@ async def open_season(
             authenticated.actor, season_id, expected_version=command.expected_version
         )
     )
+
+
+@router.post("/operations/rating-seasons/{season_id}/scores", response_model=ScoreEntryView)
+async def append_score(
+    season_id: UUID,
+    command: AppendScoreRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> ScoreEntryView:
+    return _score_view(
+        await service.append_score(
+            authenticated.actor,
+            season_id,
+            person_id=command.person_id,
+            source_type=command.source_type,
+            source_id=command.source_id,
+            rule_id=command.rule_id,
+            points=command.points,
+            occurred_at=command.occurred_at,
+        )
+    )
+
+
+@router.post("/operations/score-entries/{entry_id}/corrections", response_model=ScoreEntryView)
+async def correct_score(
+    entry_id: UUID,
+    command: CorrectScoreRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> ScoreEntryView:
+    return _score_view(
+        await service.correct_score(
+            authenticated.actor,
+            entry_id,
+            points_delta=command.points_delta,
+            reason=command.reason,
+            occurred_at=command.occurred_at,
+        )
+    )
+
+
+@router.post(
+    "/operations/rating-seasons/{season_id}/standings/rebuild",
+    response_model=list[StandingView],
+)
+async def rebuild_standings_projection(
+    season_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> list[StandingView]:
+    return [_standing_view(item) for item in await service.rebuild(authenticated.actor, season_id)]

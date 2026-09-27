@@ -172,6 +172,60 @@
         "title": "AppealStatus",
         "type": "string"
       },
+      "AppendScoreRequest": {
+        "properties": {
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "points": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Points"
+          },
+          "rule_id": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "source_id": {
+            "format": "uuid",
+            "title": "Source Id",
+            "type": "string"
+          },
+          "source_type": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Source Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "person_id",
+          "source_type",
+          "source_id",
+          "rule_id",
+          "points",
+          "occurred_at"
+        ],
+        "title": "AppendScoreRequest",
+        "type": "object"
+      },
       "ApplicationStatus": {
         "enum": [
           "terms_accepted",
@@ -852,6 +906,40 @@
           "status"
         ],
         "title": "ContributionView",
+        "type": "object"
+      },
+      "CorrectScoreRequest": {
+        "properties": {
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "points_delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "Points Delta"
+          },
+          "reason": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "points_delta",
+          "reason",
+          "occurred_at"
+        ],
+        "title": "CorrectScoreRequest",
         "type": "object"
       },
       "CourseView": {
@@ -2402,6 +2490,85 @@
         "title": "RubricCriterionView",
         "type": "object"
       },
+      "ScoreEntryView": {
+        "properties": {
+          "correction_of": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correction Of"
+          },
+          "correction_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correction Reason"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "points": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Points",
+            "type": "string"
+          },
+          "rule_id": {
+            "title": "Rule Id",
+            "type": "string"
+          },
+          "season_id": {
+            "format": "uuid",
+            "title": "Season Id",
+            "type": "string"
+          },
+          "source_id": {
+            "format": "uuid",
+            "title": "Source Id",
+            "type": "string"
+          },
+          "source_type": {
+            "title": "Source Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "season_id",
+          "person_id",
+          "source_type",
+          "source_id",
+          "rule_id",
+          "points",
+          "occurred_at",
+          "correction_of",
+          "correction_reason"
+        ],
+        "title": "ScoreEntryView",
+        "type": "object"
+      },
       "ScoreSourceRuleModel-Input": {
         "properties": {
           "cap": {
@@ -2631,6 +2798,61 @@
         ],
         "title": "SettlementKind",
         "type": "string"
+      },
+      "StandingView": {
+        "properties": {
+          "earliest_achievement": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Earliest Achievement"
+          },
+          "highest_project_score": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Highest Project Score",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "place": {
+            "title": "Place",
+            "type": "integer"
+          },
+          "score": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Score",
+            "type": "string"
+          },
+          "season_id": {
+            "format": "uuid",
+            "title": "Season Id",
+            "type": "string"
+          },
+          "successful_projects": {
+            "title": "Successful Projects",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "season_id",
+          "person_id",
+          "place",
+          "score",
+          "successful_projects",
+          "highest_project_score",
+          "earliest_achievement"
+        ],
+        "title": "StandingView",
+        "type": "object"
       },
       "StreakView": {
         "properties": {
@@ -5695,6 +5917,132 @@
         "summary": "Publish Policy"
       }
     },
+    "/api/v1/operations/rating-seasons/{season_id}/scores": {
+      "post": {
+        "operationId": "append_score_api_v1_operations_rating_seasons__season_id__scores_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppendScoreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreEntryView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Append Score"
+      }
+    },
+    "/api/v1/operations/rating-seasons/{season_id}/standings/rebuild": {
+      "post": {
+        "operationId": "rebuild_standings_projection_api_v1_operations_rating_seasons__season_id__standings_rebuild_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "season_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Season Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StandingView"
+                  },
+                  "title": "Response Rebuild Standings Projection Api V1 Operations Rating Seasons  Season Id  Standings Rebuild Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rebuild Standings Projection"
+      }
+    },
     "/api/v1/operations/review-appeals/{appeal_id}/resolve": {
       "post": {
         "operationId": "resolve_review_appeal_api_v1_operations_review_appeals__appeal_id__resolve_post",
@@ -5815,6 +6163,72 @@
           }
         },
         "summary": "Calculate Payout"
+      }
+    },
+    "/api/v1/operations/score-entries/{entry_id}/corrections": {
+      "post": {
+        "operationId": "correct_score_api_v1_operations_score_entries__entry_id__corrections_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entry_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entry Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectScoreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScoreEntryView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Correct Score"
       }
     },
     "/api/v1/operations/tasks/{task_id}/moderate": {

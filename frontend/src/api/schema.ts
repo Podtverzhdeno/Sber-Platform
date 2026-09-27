@@ -905,6 +905,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/rating-seasons/{season_id}/scores": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Append Score */
+        post: operations["append_score_api_v1_operations_rating_seasons__season_id__scores_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/rating-seasons/{season_id}/standings/rebuild": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rebuild Standings Projection */
+        post: operations["rebuild_standings_projection_api_v1_operations_rating_seasons__season_id__standings_rebuild_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/operations/review-appeals/{appeal_id}/resolve": {
         parameters: {
             query?: never;
@@ -933,6 +967,23 @@ export interface paths {
         put?: never;
         /** Calculate Payout */
         post: operations["calculate_payout_api_v1_operations_reviews__review_id__payout_calculation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/score-entries/{entry_id}/corrections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Correct Score */
+        post: operations["correct_score_api_v1_operations_score_entries__entry_id__corrections_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1077,6 +1128,30 @@ export interface components {
          * @enum {string}
          */
         AppealStatus: "open" | "upheld" | "corrected";
+        /** AppendScoreRequest */
+        AppendScoreRequest: {
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Points */
+            points: number | string;
+            /** Rule Id */
+            rule_id: string;
+            /**
+             * Source Id
+             * Format: uuid
+             */
+            source_id: string;
+            /** Source Type */
+            source_type: string;
+        };
         /**
          * ApplicationStatus
          * @enum {string}
@@ -1332,6 +1407,18 @@ export interface components {
             status: components["schemas"]["ContributionStatus"];
             /** Version */
             version: number;
+        };
+        /** CorrectScoreRequest */
+        CorrectScoreRequest: {
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /** Points Delta */
+            points_delta: number | string;
+            /** Reason */
+            reason: string;
         };
         /** CourseView */
         CourseView: {
@@ -1900,6 +1987,44 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** ScoreEntryView */
+        ScoreEntryView: {
+            /** Correction Of */
+            correction_of: string | null;
+            /** Correction Reason */
+            correction_reason: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Points */
+            points: string;
+            /** Rule Id */
+            rule_id: string;
+            /**
+             * Season Id
+             * Format: uuid
+             */
+            season_id: string;
+            /**
+             * Source Id
+             * Format: uuid
+             */
+            source_id: string;
+            /** Source Type */
+            source_type: string;
+        };
         /** ScoreSourceRuleModel */
         "ScoreSourceRuleModel-Input": {
             /** Cap */
@@ -1979,6 +2104,29 @@ export interface components {
          * @enum {string}
          */
         SettlementKind: "payment" | "reversal";
+        /** StandingView */
+        StandingView: {
+            /** Earliest Achievement */
+            earliest_achievement: string | null;
+            /** Highest Project Score */
+            highest_project_score: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Place */
+            place: number;
+            /** Score */
+            score: string;
+            /**
+             * Season Id
+             * Format: uuid
+             */
+            season_id: string;
+            /** Successful Projects */
+            successful_projects: number;
+        };
         /** StreakView */
         StreakView: {
             /** Current Days */
@@ -3781,6 +3929,76 @@ export interface operations {
             };
         };
     };
+    append_score_api_v1_operations_rating_seasons__season_id__scores_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                season_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AppendScoreRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoreEntryView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rebuild_standings_projection_api_v1_operations_rating_seasons__season_id__standings_rebuild_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                season_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StandingView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     resolve_review_appeal_api_v1_operations_review_appeals__appeal_id__resolve_post: {
         parameters: {
             query?: never;
@@ -3838,6 +4056,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PayoutClaimView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    correct_score_api_v1_operations_score_entries__entry_id__corrections_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                entry_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectScoreRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScoreEntryView"];
                 };
             };
             /** @description Validation Error */

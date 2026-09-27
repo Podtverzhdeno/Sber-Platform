@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import RowMapping
 from sqlalchemy.exc import IntegrityError
@@ -13,16 +14,26 @@ from sqlalchemy.exc import IntegrityError
 from impulse.api.errors import ApiError
 from impulse.application.recognition import RecognitionStore
 from impulse.domain.recognition import (
+    CohortMember,
     CohortRule,
     DiplomaThreshold,
     RatingPolicy,
     RatingSeason,
+    ScoreEntry,
     ScoreSourceRule,
     SeasonStatus,
+    Standing,
     TieBreaker,
 )
 from impulse.infrastructure.database import Database
-from impulse.infrastructure.models.recognition import rating_policies, seasons
+from impulse.infrastructure.models.development import track_attempts, tracks
+from impulse.infrastructure.models.identity import actor_roles
+from impulse.infrastructure.models.recognition import (
+    rating_policies,
+    score_ledger,
+    seasons,
+    standings,
+)
 
 
 class SqlRecognitionStore(RecognitionStore):
@@ -184,4 +195,135 @@ class SqlRecognitionStore(RecognitionStore):
                 for item in payload["diploma_thresholds"]
             ),
             appeal_period_days=int(payload["appeal_period_days"]),
+        )
+
+    async def score_entry(self, entry_id: UUID) -> ScoreEntry | None:
+        async with self.database.sessions() as session:
+            row = (
+                (await session.execute(select(score_ledger).where(score_ledger.c.id == entry_id)))
+                .mappings()
+                .one_or_none()
+            )
+        return self._score_entry(row) if row is not None else None
+
+    async def add_score_entry(self, entry: ScoreEntry) -> ScoreEntry:
+        try:
+            async with self.database.session() as session:
+                await session.execute(
+                    insert(score_ledger).values(
+                        id=entry.entry_id,
+                        season_id=entry.season_id,
+                        person_id=entry.person_id,
+                        source_type=entry.source_type,
+                        source_id=entry.source_id,
+                        rule_id=entry.rule_id,
+                        points=entry.points,
+                        status="correction" if entry.correction_of else "recorded",
+                        data_origin="demo_runtime",
+                        payload={
+                            "occurred_at": entry.occurred_at.isoformat(),
+                            "correction_of": (
+                                str(entry.correction_of) if entry.correction_of else None
+                            ),
+                            "correction_reason": entry.correction_reason,
+                        },
+                    )
+                )
+        except IntegrityError as exc:
+            raise ApiError(
+                "DUPLICATE_SCORE_SOURCE", "Score source is already recorded.", 409
+            ) from exc
+        return entry
+
+    async def score_entries(self, season_id: UUID) -> tuple[ScoreEntry, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                (
+                    await session.execute(
+                        select(score_ledger)
+                        .where(score_ledger.c.season_id == season_id)
+                        .order_by(score_ledger.c.created_at, score_ledger.c.id)
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        return tuple(self._score_entry(row) for row in rows)
+
+    async def cohort_members(self, policy: RatingPolicy) -> tuple[CohortMember, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(actor_roles.c.person_id, tracks.c.slug)
+                    .join(
+                        track_attempts,
+                        track_attempts.c.person_id == actor_roles.c.person_id,
+                    )
+                    .join(tracks, tracks.c.id == track_attempts.c.track_id)
+                    .where(
+                        actor_roles.c.role == "participant",
+                        actor_roles.c.program_key == policy.cohort.program_key,
+                        track_attempts.c.status == "active",
+                        tracks.c.slug.in_(policy.cohort.track_keys),
+                    )
+                )
+            ).all()
+        grouped: dict[UUID, set[str]] = {}
+        for person_id, track_key in rows:
+            grouped.setdefault(person_id, set()).add(track_key)
+        return tuple(
+            CohortMember(person_id, policy.cohort.program_key, tuple(sorted(track_keys)))
+            for person_id, track_keys in sorted(grouped.items(), key=lambda item: str(item[0]))
+        )
+
+    async def replace_standings(
+        self, season_id: UUID, rows: tuple[Standing, ...]
+    ) -> tuple[Standing, ...]:
+        async with self.database.session() as session:
+            await session.execute(delete(standings).where(standings.c.season_id == season_id))
+            if rows:
+                await session.execute(
+                    insert(standings),
+                    [
+                        {
+                            "season_id": item.season_id,
+                            "person_id": item.person_id,
+                            "place": item.place,
+                            "score": item.score,
+                            "status": "current",
+                            "data_origin": "derived",
+                            "payload": {
+                                "successful_projects": item.successful_projects,
+                                "highest_project_score": str(item.highest_project_score),
+                                "earliest_achievement": (
+                                    item.earliest_achievement.isoformat()
+                                    if item.earliest_achievement
+                                    else None
+                                ),
+                            },
+                        }
+                        for item in rows
+                    ],
+                )
+        return rows
+
+    @staticmethod
+    def _score_entry(row: RowMapping) -> ScoreEntry:
+        payload = dict(row["payload"])
+        correction_of = payload.get("correction_of")
+        return ScoreEntry(
+            entry_id=row["id"],
+            season_id=row["season_id"],
+            person_id=row["person_id"],
+            source_type=row["source_type"],
+            source_id=row["source_id"],
+            rule_id=row["rule_id"],
+            points=Decimal(row["points"]),
+            occurred_at=datetime.fromisoformat(str(payload["occurred_at"])),
+            correction_of=UUID(str(correction_of)) if correction_of else None,
+            correction_reason=(
+                str(payload["correction_reason"])
+                if payload.get("correction_reason") is not None
+                else None
+            ),
         )

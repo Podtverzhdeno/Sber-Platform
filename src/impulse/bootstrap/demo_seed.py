@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid5
 
-from sqlalchemy import Table, delete, func, select
+from sqlalchemy import Table, delete, func, select, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -559,6 +559,7 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
     batches = build_seed_batches()
     demo_person_ids = [demo_id(key) for key, _name, _role in PERSONAS]
     async with database.session() as session:
+        await session.execute(text("SET LOCAL impulse.demo_reset = 'on'"))
         runtime_enrollments = select(enrollments.c.id).where(
             enrollments.c.person_id.in_(demo_person_ids),
             enrollments.c.data_origin == "demo_runtime",

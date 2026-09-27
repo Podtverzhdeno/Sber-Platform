@@ -1,5 +1,8 @@
 """HTTP acceptance scenarios for versioned rating policies."""
 
+from datetime import UTC, datetime
+from uuid import uuid4
+
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
@@ -7,16 +10,18 @@ from impulse.application.identity import DemoAuthService, MemoryIdentityStore, d
 from impulse.application.recognition import MemoryRecognitionStore, RecognitionService
 from impulse.bootstrap.app import create_app
 from impulse.bootstrap.settings import AppEnvironment, Settings
+from impulse.domain.recognition import CohortMember
 
 
 def client() -> TestClient:
+    personas = demo_personas()
     settings = Settings(
         app_env=AppEnvironment.TEST,
         demo_mode=True,
         session_secret=SecretStr("recognition-api-test-secret-long-enough"),
     )
     auth = DemoAuthService(
-        MemoryIdentityStore(demo_personas()),
+        MemoryIdentityStore(personas),
         secret=settings.session_signing_secret(),
         ttl_seconds=settings.session_ttl_seconds,
     )
@@ -24,7 +29,15 @@ def client() -> TestClient:
         create_app(
             settings,
             auth_service=auth,
-            recognition_service=RecognitionService(MemoryRecognitionStore()),
+            recognition_service=RecognitionService(
+                MemoryRecognitionStore(
+                    tuple(
+                        CohortMember(item.person_id, "impulse", ("python",))
+                        for item in personas
+                        if item.key == "participant-alex"
+                    )
+                )
+            ),
         )
     )
 
@@ -45,9 +58,7 @@ def policy_payload() -> dict[str, object]:
             "track_keys": ["python"],
             "minimum_size": 10,
         },
-        "sources": [
-            {"rule_id": "projects", "source_type": "project", "weight": "1", "cap": "600"}
-        ],
+        "sources": [{"rule_id": "projects", "source_type": "project", "weight": "1", "cap": "600"}],
         "tie_breakers": ["successful_projects", "person_id"],
         "diploma_thresholds": [
             {"level": "gold", "place_from": 1, "place_to": 3, "title": "I degree"}
@@ -112,3 +123,63 @@ def test_participant_cannot_create_rating_season() -> None:
             headers={"X-CSRF-Token": csrf},
         )
         assert response.status_code == 404
+
+
+def test_score_api_preserves_source_and_rebuilds_after_correction() -> None:
+    api = client()
+    with api:
+        csrf = login(api, "operator-pavel")
+        headers = {"X-CSRF-Token": csrf}
+        participant = next(item for item in demo_personas() if item.key == "participant-alex")
+        created = api.post(
+            "/api/v1/operations/rating-seasons",
+            json={"key": "score-api", "title": "Score API"},
+            headers=headers,
+        )
+        season_id = created.json()["id"]
+        api.post(
+            f"/api/v1/operations/rating-seasons/{season_id}/policies",
+            json=policy_payload(),
+            headers=headers,
+        )
+        api.post(
+            f"/api/v1/operations/rating-seasons/{season_id}/open",
+            json={"expected_version": 1},
+            headers=headers,
+        )
+        payload = {
+            "person_id": str(participant.person_id),
+            "source_type": "project",
+            "source_id": str(uuid4()),
+            "rule_id": "projects",
+            "points": "80",
+            "occurred_at": datetime.now(UTC).isoformat(),
+        }
+        score = api.post(
+            f"/api/v1/operations/rating-seasons/{season_id}/scores",
+            json=payload,
+            headers=headers,
+        )
+        assert score.status_code == 200
+        duplicate = api.post(
+            f"/api/v1/operations/rating-seasons/{season_id}/scores",
+            json=payload,
+            headers=headers,
+        )
+        assert duplicate.status_code == 409
+        correction = api.post(
+            f"/api/v1/operations/score-entries/{score.json()['id']}/corrections",
+            json={
+                "points_delta": "-10",
+                "reason": "Verified source correction.",
+                "occurred_at": datetime.now(UTC).isoformat(),
+            },
+            headers=headers,
+        )
+        assert correction.status_code == 200
+        rebuilt = api.post(
+            f"/api/v1/operations/rating-seasons/{season_id}/standings/rebuild",
+            headers=headers,
+        )
+        assert rebuilt.status_code == 200
+        assert rebuilt.json()[0]["score"] == "70"
