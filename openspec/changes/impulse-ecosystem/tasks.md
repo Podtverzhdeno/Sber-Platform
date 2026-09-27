@@ -37,11 +37,11 @@
 
 ## 5. Frontend shell и доступная design system
 
-- [ ] 5.1 Реализовать responsive app shell, role-aware sidebar/topbar, routing и page guards; component/e2e tests SHALL покрыть desktop/mobile navigation.
-- [ ] 5.2 Создать design tokens и компоненты badge, card, table, drawer, modal, tooltip, timeline, funnel и state panel; accessibility tests SHALL проверить keyboard/focus/ARIA.
-- [ ] 5.3 Реализовать единые loading/empty/restricted/stale/error/offline states с actionable CTA; Story/test fixtures SHALL покрыть каждое состояние.
-- [ ] 5.4 Настроить TanStack Query, typed API client и error mapping; test SHALL подтвердить retry только для безопасных retryable reads.
-- [ ] 5.5 Добавить CSP-compatible asset build, external-link safety и reduced-motion; automated accessibility/security check SHALL пройти без critical issues.
+- [x] 5.1 Реализовать responsive app shell, role-aware sidebar/topbar, routing и page guards; component/e2e tests SHALL покрыть desktop/mobile navigation.
+- [x] 5.2 Создать design tokens и компоненты badge, card, table, drawer, modal, tooltip, timeline, funnel и state panel; accessibility tests SHALL проверить keyboard/focus/ARIA.
+- [x] 5.3 Реализовать единые loading/empty/restricted/stale/error/offline states с actionable CTA; Story/test fixtures SHALL покрыть каждое состояние.
+- [x] 5.4 Настроить TanStack Query, typed API client и error mapping; test SHALL подтвердить retry только для безопасных retryable reads.
+- [x] 5.5 Добавить CSP-compatible asset build, external-link safety и reduced-motion; automated accessibility/security check SHALL пройти без critical issues.
 
 ## 6. Направления, roadmap и Bootcamp
 
