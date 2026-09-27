@@ -5,6 +5,7 @@ export type RuntimeApiPath =
   | keyof ApiPaths
   | `/api/v1/me/courses/${string}/completion`
   | `/api/v1/me/courses/${string}/learning-days`
+  | `/api/v1/me/consents/${string}`
   | `/api/v1/me/events/${string}/claims`
   | "/api/v1/me/work"
   | "/api/v1/me/reward-evidence"

@@ -87,7 +87,7 @@
 - [x] 10.3 Реализовать opt-in leaderboard с place, successful projects, score и consented trophy proof; privacy tests SHALL обезличить non-consenting participant.
 - [x] 10.4 Реализовать credential issue/verify/revoke/supersede после frozen season; public verification tests SHALL раскрывать только разрешённые поля.
 - [x] 10.5 Реализовать trophy и offer evidence как разные типы; scenario `portfolio-trophies/Победа без оффера` SHALL исключить ложную надпись.
-- [ ] 10.6 Реализовать portfolio/resume UI с review reason, contribution, courses, credentials, trophies и visibility controls; HR consent withdrawal SHALL убрать профиль из search.
+- [x] 10.6 Реализовать portfolio/resume UI с review reason, contribution, courses, credentials, trophies и visibility controls; HR consent withdrawal SHALL убрать профиль из search.
 
 ## 11. Кабинеты заказчика, ментора, руководителя, HR и оператора
 

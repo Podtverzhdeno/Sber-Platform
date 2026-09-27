@@ -8,7 +8,7 @@ const actor = {
   assigned_roles: ["participant"],
   scopes: [],
   consent_scopes: [],
-  navigation: ["Мой путь", "Bootcamp", "Задачи", "События", "Рейтинг", "Аналитика"],
+  navigation: ["Мой путь", "Bootcamp", "Задачи", "События", "Рейтинг", "Портфолио", "Аналитика"],
   csrf_token: "csrf",
 };
 

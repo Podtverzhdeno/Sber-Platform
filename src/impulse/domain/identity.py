@@ -36,7 +36,15 @@ ROLE_SCOPES: dict[Role, frozenset[str]] = {
 
 
 ROLE_NAVIGATION: dict[Role, tuple[str, ...]] = {
-    Role.PARTICIPANT: ("Мой путь", "Bootcamp", "Задачи", "События", "Рейтинг", "Аналитика"),
+    Role.PARTICIPANT: (
+        "Мой путь",
+        "Bootcamp",
+        "Задачи",
+        "События",
+        "Рейтинг",
+        "Портфолио",
+        "Аналитика",
+    ),
     Role.MENTOR: ("Очередь ревью", "Назначения", "Аналитика"),
     Role.CUSTOMER: ("Мои задачи", "Кандидаты", "Приёмка", "Аналитика"),
     Role.MANAGER: ("Инициативы", "Результаты", "Аналитика"),

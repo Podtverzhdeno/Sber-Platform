@@ -7,6 +7,7 @@ import { createQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
 import { Bootcamp, DevelopmentJourney } from "./features/development";
 import { EventCatalog } from "./features/ecosystem";
+import { ParticipantPortfolio } from "./features/portfolio";
 import { MentorReviewWorkspace, ParticipantRewardEvidence } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
 
@@ -36,7 +37,7 @@ const roleLabels: Record<Role, string> = {
 
 const navigationIcons: Record<string, string> = {
   "Мой путь": "⌂", Bootcamp: "◇", "Задачи": "▤", "События": "✦", "Рейтинг": "♜",
-  "Аналитика": "▥", "Очередь ревью": "✓", "Назначения": "▣", "Мои задачи": "▤",
+  "Портфолио": "◈", "Аналитика": "▥", "Очередь ревью": "✓", "Назначения": "▣", "Мои задачи": "▤",
   "Кандидаты": "♙", "Приёмка": "✓", "Инициативы": "◆", "Результаты": "◎",
   "Воронка": "▽", "Операционная очередь": "☷", "Проверки": "◉", "Споры": "⚑",
 };
@@ -138,6 +139,8 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
           <EventCatalog />
         ) : allowed && actor.active_role === "participant" && currentSection === "Задачи" ? (
           <div className="feature-stack"><ParticipantTasks /><ParticipantRewardEvidence /></div>
+        ) : allowed && actor.active_role === "participant" && currentSection === "Портфолио" ? (
+          <ParticipantPortfolio />
         ) : allowed && actor.active_role === "customer" && (currentSection === "Кандидаты" || currentSection === "Приёмка") ? (
           <CustomerParticipantPreview />
         ) : allowed && actor.active_role === "mentor" && sectionIndex === 0 ? (

@@ -310,6 +310,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hr/candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Hr Candidates */
+        get: operations["hr_candidates_api_v1_hr_candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hr/candidates/{person_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Hr Candidate */
+        get: operations["hr_candidate_api_v1_hr_candidates__person_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/marketplace/tasks": {
         parameters: {
             query?: never;
@@ -557,6 +591,23 @@ export interface paths {
         };
         /** Streak */
         get: operations["streak_api_v1_me_learning_streak_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/portfolio": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Portfolio */
+        get: operations["my_portfolio_api_v1_me_portfolio_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1374,6 +1425,22 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** CandidateSummaryView */
+        CandidateSummaryView: {
+            /** Accepted Projects */
+            accepted_projects: number;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Top Grade */
+            top_grade: string | null;
+            /** Verified Courses */
+            verified_courses: number;
+        };
         /** CheckpointRequest */
         CheckpointRequest: {
             /** Key */
@@ -2023,6 +2090,86 @@ export interface components {
             key: string;
             /** Roles */
             roles: components["schemas"]["Role"][];
+        };
+        /** PortfolioContributionView */
+        PortfolioContributionView: {
+            /** Artifact Keys */
+            artifact_keys: string[];
+            /**
+             * Contribution Id
+             * Format: uuid
+             */
+            contribution_id: string;
+            /** Grade */
+            grade: string | null;
+            /** Personal Summary */
+            personal_summary: string;
+            /** Project Title */
+            project_title: string;
+            /** Review Reason */
+            review_reason: string | null;
+            /** Verification Status */
+            verification_status: string;
+        };
+        /** PortfolioCourseView */
+        PortfolioCourseView: {
+            /** Key */
+            key: string;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+        };
+        /** PortfolioCredentialView */
+        PortfolioCredentialView: {
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+            /** Verification Id */
+            verification_id: string;
+        };
+        /** PortfolioTrophyView */
+        PortfolioTrophyView: {
+            /** Organizer */
+            organizer: string;
+            /** Source Url */
+            source_url: string;
+            /** Title */
+            title: string;
+            /** Trophy Type */
+            trophy_type: string;
+        };
+        /** PortfolioView */
+        PortfolioView: {
+            /** Contributions */
+            contributions: components["schemas"]["PortfolioContributionView"][];
+            /** Courses */
+            courses: components["schemas"]["PortfolioCourseView"][];
+            /** Credentials */
+            credentials: components["schemas"]["PortfolioCredentialView"][];
+            /**
+             * Demo Data
+             * @default true
+             */
+            demo_data: boolean;
+            /** Display Name */
+            display_name: string;
+            /** Offers */
+            offers: {
+                [key: string]: string;
+            }[];
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Trophies */
+            trophies: components["schemas"]["PortfolioTrophyView"][];
+            /** Visibility */
+            visibility: {
+                [key: string]: boolean;
+            };
         };
         /** PublicCredentialView */
         PublicCredentialView: {
@@ -3128,6 +3275,57 @@ export interface operations {
             };
         };
     };
+    hr_candidates_api_v1_hr_candidates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateSummaryView"][];
+                };
+            };
+        };
+    };
+    hr_candidate_api_v1_hr_candidates__person_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortfolioView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     marketplace_tasks_api_v1_marketplace_tasks_get: {
         parameters: {
             query?: never;
@@ -3585,6 +3783,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StreakView"];
+                };
+            };
+        };
+    };
+    my_portfolio_api_v1_me_portfolio_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PortfolioView"];
                 };
             };
         };

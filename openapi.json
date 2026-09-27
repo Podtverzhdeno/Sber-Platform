@@ -399,6 +399,47 @@
         "title": "AuthorshipDisputeRequest",
         "type": "object"
       },
+      "CandidateSummaryView": {
+        "properties": {
+          "accepted_projects": {
+            "title": "Accepted Projects",
+            "type": "integer"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "top_grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Grade"
+          },
+          "verified_courses": {
+            "title": "Verified Courses",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "person_id",
+          "display_name",
+          "accepted_projects",
+          "verified_courses",
+          "top_grade"
+        ],
+        "title": "CandidateSummaryView",
+        "type": "object"
+      },
       "CheckpointRequest": {
         "properties": {
           "key": {
@@ -2184,6 +2225,216 @@
           "roles"
         ],
         "title": "PersonaView",
+        "type": "object"
+      },
+      "PortfolioContributionView": {
+        "properties": {
+          "artifact_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Artifact Keys",
+            "type": "array"
+          },
+          "contribution_id": {
+            "format": "uuid",
+            "title": "Contribution Id",
+            "type": "string"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grade"
+          },
+          "personal_summary": {
+            "title": "Personal Summary",
+            "type": "string"
+          },
+          "project_title": {
+            "title": "Project Title",
+            "type": "string"
+          },
+          "review_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Reason"
+          },
+          "verification_status": {
+            "title": "Verification Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contribution_id",
+          "project_title",
+          "personal_summary",
+          "artifact_keys",
+          "grade",
+          "review_reason",
+          "verification_status"
+        ],
+        "title": "PortfolioContributionView",
+        "type": "object"
+      },
+      "PortfolioCourseView": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "status"
+        ],
+        "title": "PortfolioCourseView",
+        "type": "object"
+      },
+      "PortfolioCredentialView": {
+        "properties": {
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verification_id": {
+            "title": "Verification Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "verification_id",
+          "title",
+          "status"
+        ],
+        "title": "PortfolioCredentialView",
+        "type": "object"
+      },
+      "PortfolioTrophyView": {
+        "properties": {
+          "organizer": {
+            "title": "Organizer",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "trophy_type": {
+            "title": "Trophy Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "organizer",
+          "source_url",
+          "trophy_type"
+        ],
+        "title": "PortfolioTrophyView",
+        "type": "object"
+      },
+      "PortfolioView": {
+        "properties": {
+          "contributions": {
+            "items": {
+              "$ref": "#/components/schemas/PortfolioContributionView"
+            },
+            "title": "Contributions",
+            "type": "array"
+          },
+          "courses": {
+            "items": {
+              "$ref": "#/components/schemas/PortfolioCourseView"
+            },
+            "title": "Courses",
+            "type": "array"
+          },
+          "credentials": {
+            "items": {
+              "$ref": "#/components/schemas/PortfolioCredentialView"
+            },
+            "title": "Credentials",
+            "type": "array"
+          },
+          "demo_data": {
+            "default": true,
+            "title": "Demo Data",
+            "type": "boolean"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "offers": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Offers",
+            "type": "array"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "trophies": {
+            "items": {
+              "$ref": "#/components/schemas/PortfolioTrophyView"
+            },
+            "title": "Trophies",
+            "type": "array"
+          },
+          "visibility": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "title": "Visibility",
+            "type": "object"
+          }
+        },
+        "required": [
+          "person_id",
+          "display_name",
+          "contributions",
+          "courses",
+          "credentials",
+          "trophies",
+          "offers",
+          "visibility"
+        ],
+        "title": "PortfolioView",
         "type": "object"
       },
       "PublicCredentialView": {
@@ -4581,6 +4832,68 @@
         "summary": "Event Catalog"
       }
     },
+    "/api/v1/hr/candidates": {
+      "get": {
+        "operationId": "hr_candidates_api_v1_hr_candidates_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CandidateSummaryView"
+                  },
+                  "title": "Response Hr Candidates Api V1 Hr Candidates Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Hr Candidates"
+      }
+    },
+    "/api/v1/hr/candidates/{person_id}": {
+      "get": {
+        "operationId": "hr_candidate_api_v1_hr_candidates__person_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Person Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Hr Candidate"
+      }
+    },
     "/api/v1/marketplace/tasks": {
       "get": {
         "operationId": "marketplace_tasks_api_v1_marketplace_tasks_get",
@@ -5288,6 +5601,24 @@
           }
         },
         "summary": "Streak"
+      }
+    },
+    "/api/v1/me/portfolio": {
+      "get": {
+        "operationId": "my_portfolio_api_v1_me_portfolio_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortfolioView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My Portfolio"
       }
     },
     "/api/v1/me/reviews/{review_id}/appeals": {

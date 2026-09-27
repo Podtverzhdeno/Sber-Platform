@@ -47,7 +47,7 @@ describe("App", () => {
             assigned_roles: ["participant"],
             scopes: [],
             consent_scopes: [],
-            navigation: ["Мой путь", "Bootcamp", "Задачи"],
+            navigation: ["Мой путь", "Bootcamp", "Задачи", "Портфолио"],
             csrf_token: "csrf",
           }), { status: 200 }),
         );
