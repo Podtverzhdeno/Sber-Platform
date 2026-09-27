@@ -31,6 +31,10 @@ compensation_terms = domain_table(
     typed_field("base_amount", Numeric(18, 2), nullable=True),
     typed_field("b_multiplier", Numeric(4, 2)),
     typed_field("a_multiplier", Numeric(4, 2)),
+    typed_field("quantum", Numeric(18, 4)),
+    string_field("rounding_mode", 32),
+    integer_field("policy_version"),
+    string_field("payout_condition", 1000),
     string_field("currency", 3, nullable=True),
     uniques=(("task_terms_version_id",),),
 )

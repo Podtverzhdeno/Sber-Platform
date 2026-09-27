@@ -327,6 +327,10 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
             base_amount="15000.00" if index % 3 != 0 else None,
             b_multiplier="1.50",
             a_multiplier="2.00" if index % 2 else "2.50",
+            quantum="0.01",
+            rounding_mode="half_up",
+            policy_version=1,
+            payout_condition="Принятый личный вклад и опубликованная человеком оценка.",
             currency="RUB" if index % 3 != 0 else None,
         )
         for index in range(1, 9)
