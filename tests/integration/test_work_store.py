@@ -7,7 +7,7 @@ import os
 import httpx
 import pytest
 from pydantic import SecretStr
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from impulse.application.identity import DemoAuthService
 from impulse.application.work import WorkService
@@ -16,7 +16,7 @@ from impulse.bootstrap.demo_seed import seed_demo
 from impulse.bootstrap.settings import AppEnvironment, Settings
 from impulse.infrastructure.database import Database, async_database_url
 from impulse.infrastructure.identity_store import SqlIdentityStore
-from impulse.infrastructure.models.work import tasks
+from impulse.infrastructure.models.work import applications, task_terms_versions, tasks
 from impulse.infrastructure.work_store import SqlWorkStore
 
 pytestmark = pytest.mark.integration
@@ -101,6 +101,44 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
         )
         assert published.json()["status"] == "published"
 
+        participant_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}
+        )
+        participant_csrf = participant_login.json()["csrf_token"]
+        detail = await client.get(f"/api/v1/marketplace/tasks/{task_id}")
+        old_version = detail.json()["terms"]["version"]
+
+        customer_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "customer-roman"}
+        )
+        customer_csrf = customer_login.json()["csrf_token"]
+        revised = await client.post(
+            f"/api/v1/customer/tasks/{task_id}/terms",
+            json={
+                "deadline_at": "2026-11-08T18:00:00Z",
+                "deliverable": "Обновлённый вертикальный срез.",
+                "acceptance_criteria": ["Состояния и миграция проверены"],
+            },
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        participant_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}
+        )
+        participant_csrf = participant_login.json()["csrf_token"]
+        stale = await client.post(
+            f"/api/v1/me/tasks/{task_id}/terms-consent",
+            json={"terms_version": old_version},
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert stale.status_code == 409
+        assert stale.json()["code"] == "TERMS_CHANGED"
+        accepted = await client.post(
+            f"/api/v1/me/tasks/{task_id}/terms-consent",
+            json={"terms_version": revised.json()["version"]},
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert accepted.status_code == 200
+
     async with database.sessions() as session:
         row = (
             await session.execute(
@@ -109,8 +147,21 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
                 )
             )
         ).one()
+        terms_count = int(
+            await session.scalar(
+                select(func.count())
+                .select_from(task_terms_versions)
+                .where(task_terms_versions.c.task_id == task_id)
+            )
+            or 0
+        )
+        accepted_terms = await session.scalar(
+            select(applications.c.accepted_terms_version).where(applications.c.task_id == task_id)
+        )
     assert row.status == "published"
     assert row.version == 5
     assert row.payload["support"]["mode"] == "buddy"
     assert row.payload["nominated_mentor_id"] is None
+    assert terms_count == 3
+    assert accepted_terms == 3
     await database.close()

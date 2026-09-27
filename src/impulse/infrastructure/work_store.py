@@ -6,11 +6,11 @@ from datetime import datetime
 from typing import Any, cast
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
 
 from impulse.api.errors import ApiError
-from impulse.application.work import TaskRecord, WorkStore
+from impulse.application.work import TaskRecord, TermsRecord, WorkStore
 from impulse.domain.work import (
     SupportAssignment,
     SupportMode,
@@ -19,7 +19,12 @@ from impulse.domain.work import (
     TaskStatus,
 )
 from impulse.infrastructure.database import Database
-from impulse.infrastructure.models.work import projects, tasks
+from impulse.infrastructure.models.work import (
+    applications,
+    projects,
+    task_terms_versions,
+    tasks,
+)
 
 
 def _payload(record: TaskRecord) -> dict[str, object]:
@@ -177,3 +182,112 @@ class SqlWorkStore(WorkStore):
                 )
             ).all()
             return tuple(_record(row) for row in rows)
+
+    async def add_terms(self, terms: TermsRecord) -> TermsRecord:
+        async with self.database.session() as session:
+            exists = await session.scalar(select(tasks.c.id).where(tasks.c.id == terms.task_id))
+            if exists is None:
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            next_version = (
+                int(
+                    await session.scalar(
+                        select(func.max(task_terms_versions.c.terms_version)).where(
+                            task_terms_versions.c.task_id == terms.task_id
+                        )
+                    )
+                    or 0
+                )
+                + 1
+            )
+            await session.execute(
+                insert(task_terms_versions).values(
+                    task_id=terms.task_id,
+                    terms_version=next_version,
+                    deadline_at=terms.deadline_at,
+                    status="published",
+                    data_origin="demo_runtime",
+                    payload={
+                        "deliverable": terms.deliverable,
+                        "acceptance_criteria": list(terms.acceptance_criteria),
+                        "support_mode": terms.support_mode,
+                    },
+                )
+            )
+        return TermsRecord(
+            terms.task_id,
+            next_version,
+            terms.deadline_at,
+            terms.deliverable,
+            terms.acceptance_criteria,
+            terms.support_mode,
+        )
+
+    async def latest_terms(self, task_id: UUID) -> TermsRecord | None:
+        async with self.database.sessions() as session:
+            row = (
+                (
+                    await session.execute(
+                        select(task_terms_versions)
+                        .where(task_terms_versions.c.task_id == task_id)
+                        .order_by(task_terms_versions.c.terms_version.desc())
+                        .limit(1)
+                    )
+                )
+                .mappings()
+                .one_or_none()
+            )
+            if row is None:
+                return None
+            payload = dict(row["payload"])
+            return TermsRecord(
+                task_id,
+                row["terms_version"],
+                row["deadline_at"],
+                str(payload.get("deliverable", "")),
+                tuple(str(item) for item in payload.get("acceptance_criteria", [])),
+                str(payload["support_mode"]) if payload.get("support_mode") else None,
+            )
+
+    async def published_tasks(self) -> tuple[TaskRecord, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    self._select()
+                    .where(tasks.c.status == TaskStatus.PUBLISHED.value)
+                    .order_by(tasks.c.created_at.desc())
+                )
+            ).all()
+            return tuple(_record(row) for row in rows)
+
+    async def accepted_terms_version(self, person_id: UUID, task_id: UUID) -> int | None:
+        async with self.database.sessions() as session:
+            return await session.scalar(
+                select(applications.c.accepted_terms_version).where(
+                    applications.c.person_id == person_id,
+                    applications.c.task_id == task_id,
+                )
+            )
+
+    async def accept_terms(self, person_id: UUID, task_id: UUID, version: int) -> None:
+        async with self.database.session() as session:
+            await session.execute(
+                insert(applications)
+                .values(
+                    task_id=task_id,
+                    person_id=person_id,
+                    accepted_terms_version=version,
+                    status="terms_accepted",
+                    data_origin="demo_runtime",
+                    created_by=person_id,
+                )
+                .on_conflict_do_update(
+                    constraint="uq_applications_task_id_person_id",
+                    set_={
+                        "accepted_terms_version": version,
+                        "status": "terms_accepted",
+                        "version": applications.c.version + 1,
+                    },
+                )
+            )

@@ -1,6 +1,20 @@
 {
   "components": {
     "schemas": {
+      "AcceptTermsRequest": {
+        "properties": {
+          "terms_version": {
+            "minimum": 1.0,
+            "title": "Terms Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "terms_version"
+        ],
+        "title": "AcceptTermsRequest",
+        "type": "object"
+      },
       "ActorView": {
         "properties": {
           "active_role": {
@@ -596,6 +610,34 @@
         "title": "LiveResponse",
         "type": "object"
       },
+      "MarketplaceTaskView": {
+        "properties": {
+          "accepted_terms_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted Terms Version"
+          },
+          "task": {
+            "$ref": "#/components/schemas/TaskView"
+          },
+          "terms": {
+            "$ref": "#/components/schemas/TermsView"
+          }
+        },
+        "required": [
+          "task",
+          "terms",
+          "accepted_terms_version"
+        ],
+        "title": "MarketplaceTaskView",
+        "type": "object"
+      },
       "MilestoneView": {
         "properties": {
           "completed": {
@@ -684,6 +726,37 @@
           }
         },
         "title": "ReportClaimRequest",
+        "type": "object"
+      },
+      "ReviseTermsRequest": {
+        "properties": {
+          "acceptance_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Acceptance Criteria",
+            "type": "array"
+          },
+          "deadline_at": {
+            "format": "date-time",
+            "title": "Deadline At",
+            "type": "string"
+          },
+          "deliverable": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Deliverable",
+            "type": "string"
+          }
+        },
+        "required": [
+          "deadline_at",
+          "deliverable",
+          "acceptance_criteria"
+        ],
+        "title": "ReviseTermsRequest",
         "type": "object"
       },
       "RoadmapView": {
@@ -926,6 +999,50 @@
           "support_assignee_id"
         ],
         "title": "TaskView",
+        "type": "object"
+      },
+      "TermsView": {
+        "properties": {
+          "acceptance_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acceptance Criteria",
+            "type": "array"
+          },
+          "deadline_at": {
+            "format": "date-time",
+            "title": "Deadline At",
+            "type": "string"
+          },
+          "deliverable": {
+            "title": "Deliverable",
+            "type": "string"
+          },
+          "support_mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Support Mode"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "deadline_at",
+          "deliverable",
+          "acceptance_criteria",
+          "support_mode"
+        ],
+        "title": "TermsView",
         "type": "object"
       },
       "TrackOverview": {
@@ -1318,6 +1435,72 @@
         "summary": "Submit Task"
       }
     },
+    "/api/v1/customer/tasks/{task_id}/terms": {
+      "post": {
+        "operationId": "revise_terms_api_v1_customer_tasks__task_id__terms_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviseTermsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TermsView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revise Terms"
+      }
+    },
     "/api/v1/development/courses": {
       "get": {
         "operationId": "courses_api_v1_development_courses_get",
@@ -1466,6 +1649,68 @@
           }
         },
         "summary": "Event Catalog"
+      }
+    },
+    "/api/v1/marketplace/tasks": {
+      "get": {
+        "operationId": "marketplace_tasks_api_v1_marketplace_tasks_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MarketplaceTaskView"
+                  },
+                  "title": "Response Marketplace Tasks Api V1 Marketplace Tasks Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Marketplace Tasks"
+      }
+    },
+    "/api/v1/marketplace/tasks/{task_id}": {
+      "get": {
+        "operationId": "marketplace_task_api_v1_marketplace_tasks__task_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceTaskView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Marketplace Task"
       }
     },
     "/api/v1/me": {
@@ -1907,6 +2152,72 @@
           }
         },
         "summary": "Roadmaps"
+      }
+    },
+    "/api/v1/me/tasks/{task_id}/terms-consent": {
+      "post": {
+        "operationId": "accept_terms_api_v1_me_tasks__task_id__terms_consent_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptTermsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketplaceTaskView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Accept Terms"
       }
     },
     "/api/v1/me/tracks": {

@@ -96,6 +96,39 @@ def test_task_without_nominated_mentor_waits_for_support_before_publish() -> Non
         )
         assert published.json()["status"] == "published"
 
+        participant_csrf = login(api, "participant-alex")
+        detail = api.get(f"/api/v1/marketplace/tasks/{task_id}")
+        assert detail.status_code == 200
+        accepted_version = detail.json()["terms"]["version"]
+        assert detail.json()["terms"]["support_mode"] == "operator"
+
+        customer_csrf = login(api, "customer-roman")
+        revised = api.post(
+            f"/api/v1/customer/tasks/{task_id}/terms",
+            json={
+                "deadline_at": "2026-11-05T18:00:00Z",
+                "deliverable": "Обновлённый research document и MVP.",
+                "acceptance_criteria": ["MVP воспроизводим", "Метрика согласована"],
+            },
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert revised.json()["version"] == accepted_version + 1
+
+        participant_csrf = login(api, "participant-alex")
+        stale = api.post(
+            f"/api/v1/me/tasks/{task_id}/terms-consent",
+            json={"terms_version": accepted_version},
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert stale.status_code == 409
+        assert stale.json()["code"] == "TERMS_CHANGED"
+        current = api.post(
+            f"/api/v1/me/tasks/{task_id}/terms-consent",
+            json={"terms_version": revised.json()["version"]},
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert current.json()["accepted_terms_version"] == revised.json()["version"]
+
 
 def test_incomplete_customer_brief_returns_missing_field_map() -> None:
     api = client()
