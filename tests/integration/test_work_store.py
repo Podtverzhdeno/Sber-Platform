@@ -86,6 +86,16 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
                 "data_constraints": "Без персональных данных.",
                 "ip_terms": "Права передаются после приёмки.",
                 "nominated_mentor_id": None,
+                "compensation": {
+                    "paid": False,
+                    "base_amount_per_assignee": None,
+                    "currency": None,
+                    "a_multiplier": "2.00",
+                    "quantum": "0.01",
+                    "rounding_mode": "half_up",
+                    "policy_version": 1,
+                    "payout_condition": "Вознаграждение не предусмотрено.",
+                },
             },
             headers={"X-CSRF-Token": customer_csrf},
         )

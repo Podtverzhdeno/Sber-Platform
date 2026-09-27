@@ -924,6 +924,52 @@ export interface components {
             /** Verification Explanation */
             verification_explanation: string;
         };
+        /** CompensationRequest */
+        CompensationRequest: {
+            /** A Multiplier */
+            a_multiplier: number | string;
+            /** Base Amount Per Assignee */
+            base_amount_per_assignee?: number | string | null;
+            /** Currency */
+            currency?: string | null;
+            /** Paid */
+            paid: boolean;
+            /** Payout Condition */
+            payout_condition: string;
+            /** Policy Version */
+            policy_version: number;
+            /**
+             * Quantum
+             * @default 0.01
+             */
+            quantum: number | string;
+            /** @default half_up */
+            rounding_mode: components["schemas"]["RoundingMode"];
+        };
+        /** CompensationView */
+        CompensationView: {
+            /** A Multiplier */
+            a_multiplier: string;
+            /** A Total */
+            a_total: string | null;
+            /** B Multiplier */
+            b_multiplier: string;
+            /** B Total */
+            b_total: string | null;
+            /** Base Amount Per Assignee */
+            base_amount_per_assignee: string | null;
+            /** Currency */
+            currency: string | null;
+            /** Paid */
+            paid: boolean;
+            /** Payout Condition */
+            payout_condition: string;
+            /** Policy Version */
+            policy_version: number;
+            /** Quantum */
+            quantum: string;
+            rounding_mode: components["schemas"]["RoundingMode"];
+        };
         /**
          * CompletionStatus
          * @enum {string}
@@ -1022,6 +1068,7 @@ export interface components {
         CreateTaskRequest: {
             /** Acceptance Criteria */
             acceptance_criteria: string[];
+            compensation: components["schemas"]["CompensationRequest"];
             /** Data Constraints */
             data_constraints: string;
             /** Deadline At */
@@ -1248,6 +1295,11 @@ export interface components {
          * @enum {string}
          */
         Role: "participant" | "mentor" | "customer" | "manager" | "hr" | "operator";
+        /**
+         * RoundingMode
+         * @enum {string}
+         */
+        RoundingMode: "half_up" | "half_even" | "down";
         /** SelectTrackRequest */
         SelectTrackRequest: {
             /** Freeze Track Key */
@@ -1310,6 +1362,7 @@ export interface components {
         TermsView: {
             /** Acceptance Criteria */
             acceptance_criteria: string[];
+            compensation: components["schemas"]["CompensationView"];
             /**
              * Deadline At
              * Format: date-time

@@ -430,6 +430,185 @@
         "title": "ClaimView",
         "type": "object"
       },
+      "CompensationRequest": {
+        "properties": {
+          "a_multiplier": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "title": "A Multiplier"
+          },
+          "base_amount_per_assignee": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Amount Per Assignee"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z]{3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "paid": {
+            "title": "Paid",
+            "type": "boolean"
+          },
+          "payout_condition": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Payout Condition",
+            "type": "string"
+          },
+          "policy_version": {
+            "minimum": 1.0,
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "quantum": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "default": "0.01",
+            "title": "Quantum"
+          },
+          "rounding_mode": {
+            "$ref": "#/components/schemas/RoundingMode",
+            "default": "half_up"
+          }
+        },
+        "required": [
+          "paid",
+          "a_multiplier",
+          "policy_version",
+          "payout_condition"
+        ],
+        "title": "CompensationRequest",
+        "type": "object"
+      },
+      "CompensationView": {
+        "properties": {
+          "a_multiplier": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "A Multiplier",
+            "type": "string"
+          },
+          "a_total": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "A Total"
+          },
+          "b_multiplier": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "B Multiplier",
+            "type": "string"
+          },
+          "b_total": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "B Total"
+          },
+          "base_amount_per_assignee": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Amount Per Assignee"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "paid": {
+            "title": "Paid",
+            "type": "boolean"
+          },
+          "payout_condition": {
+            "title": "Payout Condition",
+            "type": "string"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "quantum": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Quantum",
+            "type": "string"
+          },
+          "rounding_mode": {
+            "$ref": "#/components/schemas/RoundingMode"
+          }
+        },
+        "required": [
+          "paid",
+          "base_amount_per_assignee",
+          "currency",
+          "b_multiplier",
+          "a_multiplier",
+          "b_total",
+          "a_total",
+          "quantum",
+          "rounding_mode",
+          "policy_version",
+          "payout_condition"
+        ],
+        "title": "CompensationView",
+        "type": "object"
+      },
       "CompletionStatus": {
         "enum": [
           "reported",
@@ -694,6 +873,9 @@
             "title": "Acceptance Criteria",
             "type": "array"
           },
+          "compensation": {
+            "$ref": "#/components/schemas/CompensationRequest"
+          },
           "data_constraints": {
             "maxLength": 4000,
             "title": "Data Constraints",
@@ -765,7 +947,8 @@
           "deliverable",
           "acceptance_criteria",
           "data_constraints",
-          "ip_terms"
+          "ip_terms",
+          "compensation"
         ],
         "title": "CreateTaskRequest",
         "type": "object"
@@ -1296,6 +1479,15 @@
         "title": "Role",
         "type": "string"
       },
+      "RoundingMode": {
+        "enum": [
+          "half_up",
+          "half_even",
+          "down"
+        ],
+        "title": "RoundingMode",
+        "type": "string"
+      },
       "SelectTrackRequest": {
         "properties": {
           "freeze_track_key": {
@@ -1491,6 +1683,9 @@
             "title": "Acceptance Criteria",
             "type": "array"
           },
+          "compensation": {
+            "$ref": "#/components/schemas/CompensationView"
+          },
           "deadline_at": {
             "format": "date-time",
             "title": "Deadline At",
@@ -1521,7 +1716,8 @@
           "deadline_at",
           "deliverable",
           "acceptance_criteria",
-          "support_mode"
+          "support_mode",
+          "compensation"
         ],
         "title": "TermsView",
         "type": "object"

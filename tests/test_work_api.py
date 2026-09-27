@@ -47,6 +47,16 @@ def brief() -> dict[str, object]:
         "data_constraints": "Только синтетические данные.",
         "ip_terms": "Результат доступен заказчику после приёмки.",
         "nominated_mentor_id": None,
+        "compensation": {
+            "paid": True,
+            "base_amount_per_assignee": "10000.00",
+            "currency": "RUB",
+            "a_multiplier": "2.50",
+            "quantum": "0.01",
+            "rounding_mode": "half_up",
+            "policy_version": 1,
+            "payout_condition": "После принятия личного вклада и публикации оценки человеком.",
+        },
     }
 
 
@@ -102,6 +112,19 @@ def test_task_without_nominated_mentor_waits_for_support_before_publish() -> Non
         assert detail.status_code == 200
         accepted_version = detail.json()["terms"]["version"]
         assert detail.json()["terms"]["support_mode"] == "operator"
+        assert detail.json()["terms"]["compensation"] == {
+            "paid": True,
+            "base_amount_per_assignee": "10000.00",
+            "currency": "RUB",
+            "b_multiplier": "1.5",
+            "a_multiplier": "2.50",
+            "b_total": "15000.00",
+            "a_total": "25000.00",
+            "quantum": "0.01",
+            "rounding_mode": "half_up",
+            "policy_version": 1,
+            "payout_condition": "После принятия личного вклада и публикации оценки человеком.",
+        }
 
         customer_csrf = login(api, "customer-roman")
         revised = api.post(

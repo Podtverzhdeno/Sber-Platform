@@ -22,6 +22,7 @@ from impulse.application.work import (
     TermsRecord,
     WorkStore,
 )
+from impulse.domain.reward import CompensationTerms, RoundingMode
 from impulse.domain.work import (
     AcceptanceDecision,
     ApplicationStatus,
@@ -40,6 +41,7 @@ from impulse.domain.work import (
     submit_assignment,
 )
 from impulse.infrastructure.database import Database
+from impulse.infrastructure.models.reward import compensation_terms
 from impulse.infrastructure.models.work import (
     acceptances,
     appeals,
@@ -231,8 +233,10 @@ class SqlWorkStore(WorkStore):
                 )
                 + 1
             )
+            terms_id = uuid4()
             await session.execute(
                 insert(task_terms_versions).values(
+                    id=terms_id,
                     task_id=terms.task_id,
                     terms_version=next_version,
                     deadline_at=terms.deadline_at,
@@ -245,6 +249,23 @@ class SqlWorkStore(WorkStore):
                     },
                 )
             )
+            compensation = terms.compensation
+            await session.execute(
+                insert(compensation_terms).values(
+                    task_terms_version_id=terms_id,
+                    paid=compensation.paid,
+                    base_amount=compensation.base_amount_per_assignee,
+                    b_multiplier=compensation.b_multiplier,
+                    a_multiplier=compensation.a_multiplier,
+                    quantum=compensation.quantum,
+                    rounding_mode=compensation.rounding_mode.value,
+                    policy_version=compensation.policy_version,
+                    payout_condition=compensation.payout_condition,
+                    currency=compensation.currency,
+                    status="published",
+                    data_origin="demo_runtime",
+                )
+            )
         return TermsRecord(
             terms.task_id,
             next_version,
@@ -252,6 +273,7 @@ class SqlWorkStore(WorkStore):
             terms.deliverable,
             terms.acceptance_criteria,
             terms.support_mode,
+            terms.compensation,
         )
 
     async def latest_terms(self, task_id: UUID) -> TermsRecord | None:
@@ -271,6 +293,17 @@ class SqlWorkStore(WorkStore):
             if row is None:
                 return None
             payload = dict(row["payload"])
+            compensation_row = (
+                (
+                    await session.execute(
+                        select(compensation_terms).where(
+                            compensation_terms.c.task_terms_version_id == row["id"]
+                        )
+                    )
+                )
+                .mappings()
+                .one()
+            )
             return TermsRecord(
                 task_id,
                 row["terms_version"],
@@ -278,6 +311,17 @@ class SqlWorkStore(WorkStore):
                 str(payload.get("deliverable", "")),
                 tuple(str(item) for item in payload.get("acceptance_criteria", [])),
                 str(payload["support_mode"]) if payload.get("support_mode") else None,
+                CompensationTerms(
+                    paid=bool(compensation_row["paid"]),
+                    base_amount_per_assignee=compensation_row["base_amount"],
+                    currency=compensation_row["currency"],
+                    b_multiplier=compensation_row["b_multiplier"],
+                    a_multiplier=compensation_row["a_multiplier"],
+                    quantum=compensation_row["quantum"],
+                    rounding_mode=RoundingMode(compensation_row["rounding_mode"]),
+                    policy_version=compensation_row["policy_version"],
+                    payout_condition=compensation_row["payout_condition"],
+                ),
             )
 
     async def published_tasks(self) -> tuple[TaskRecord, ...]:

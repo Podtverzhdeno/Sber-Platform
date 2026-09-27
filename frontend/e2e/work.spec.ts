@@ -30,8 +30,9 @@ test("paid application moves through submission and customer revision", async ({
     navigation: ["Мои задачи", "Кандидаты", "Приёмка", "Аналитика"],
     csrf_token: "csrf-customer",
   };
-  const task = { id: taskId, title: "MVP поиска программ", status: "published", places: 1, payment_label: "Оплачиваемая задача · 30 000 ₽ базово" };
-  const terms = { version: 2, deadline_at: "2026-11-01T18:00:00Z", deliverable: "Работающий MVP и отчёт по метрикам.", acceptance_criteria: ["MVP воспроизводим", "Метрика описана"], support_mode: "buddy" };
+  const task = { id: taskId, title: "MVP поиска программ", status: "published", places: 1 };
+  const compensation = { paid: true, base_amount_per_assignee: "30000.00", currency: "RUB", b_multiplier: "1.5", a_multiplier: "2.50", b_total: "45000.00", a_total: "75000.00", quantum: "0.01", rounding_mode: "half_up", policy_version: 1, payout_condition: "После принятия личного вклада и публикации оценки человеком." };
+  const terms = { version: 2, deadline_at: "2026-11-01T18:00:00Z", deliverable: "Работающий MVP и отчёт по метрикам.", acceptance_criteria: ["MVP воспроизводим", "Метрика описана"], support_mode: "buddy", compensation };
   const workItems = () => hasAssignment ? [{ assignment: { id: assignmentId, task_id: taskId, person_id: participantId, application_id: "00000000-0000-0000-0000-000000000704", status: assignmentStatus }, task, terms, contributions: contribution ? [contribution] : [], decisions: revision ? [revision] : [] }] : [];
 
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: { honor_board_enabled: false } }));
@@ -71,8 +72,18 @@ test("paid application moves through submission and customer revision", async ({
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Задачи" }).click();
-  await expect(page.getByText("Оплачиваемая задача · 30 000 ₽ базово").first()).toBeVisible();
-  await page.getByRole("button", { name: "Принять условия версии 2" }).click();
+  const moneyTooltipTrigger = page.getByText("База 30 000,00 ₽ · B 45 000,00 ₽ · A 75 000,00 ₽").first();
+  await expect(moneyTooltipTrigger).toBeVisible();
+  await moneyTooltipTrigger.focus();
+  await expect(page.getByRole("tooltip").first()).toContainText("B ×1,5: 45 000,00 ₽");
+  await expect(page.getByRole("tooltip").first()).toContainText("A ×2,50: 75 000,00 ₽");
+  await page.getByRole("button", { name: "Открыть условия версии 2" }).click();
+  const consent = page.getByRole("dialog", { name: "Условия задачи · версия 2" });
+  await expect(consent.getByText("30 000,00 ₽", { exact: true })).toBeVisible();
+  await expect(consent.getByText("45 000,00 ₽", { exact: true })).toBeVisible();
+  await expect(consent.getByText("75 000,00 ₽", { exact: true })).toBeVisible();
+  await expect(consent.getByText("После принятия личного вклада и публикации оценки человеком.")).toBeVisible();
+  await consent.getByRole("button", { name: "Подтвердить условия и продолжить" }).click();
   await page.getByRole("button", { name: "Откликнуться" }).click();
   await page.getByRole("button", { name: "Начать работу" }).click();
   await page.getByLabel("Что сделали лично").fill("Я реализовал API поиска и подготовил воспроизводимую проверку метрики.");

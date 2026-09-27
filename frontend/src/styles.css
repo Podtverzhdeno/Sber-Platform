@@ -150,6 +150,12 @@ th, td { padding: 12px; border-bottom: 1px solid rgb(255 255 255 / 10%); text-al
 .work-grid .ui-card { display: flex; flex-direction: column; gap: 14px; }
 .work-grid .ui-card > button, .contribution-form button { width: fit-content; padding: 11px 15px; border: 0; border-radius: 10px; color: #071a11; background: var(--color-accent); cursor: pointer; font-weight: 800; }
 .work-meta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; color: var(--color-muted); font-size: 13px; }
+.payment-breakdown { margin: 18px 0; padding: 16px; border: 1px solid var(--color-border); border-radius: 14px; background: rgb(255 255 255 / 3%); }
+.payment-breakdown dl { display: grid; gap: 10px; margin: 0; }
+.payment-breakdown dl div { display: flex; justify-content: space-between; gap: 20px; padding-bottom: 8px; border-bottom: 1px solid var(--color-border); }
+.payment-breakdown dt { color: var(--color-muted); }
+.payment-breakdown dd { margin: 0; font-weight: 800; }
+.payment-breakdown small { color: var(--color-muted); }
 .revision-note { padding: 16px; border: 1px solid rgb(255 210 122 / 28%); border-radius: 12px; background: rgb(255 210 122 / 8%); }
 .revision-note p, .contribution-summary p { margin-bottom: 8px; }
 .contribution-form, .contribution-form label, .decision-reason { display: grid; gap: 8px; }

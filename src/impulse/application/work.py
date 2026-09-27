@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 
 from impulse.api.errors import ApiError
 from impulse.domain.identity import ActorContext, Role
+from impulse.domain.reward import CompensationTerms
 from impulse.domain.work import (
     AcceptanceDecision,
     ApplicationStatus,
@@ -45,6 +46,7 @@ class TermsRecord:
     deliverable: str
     acceptance_criteria: tuple[str, ...]
     support_mode: str | None
+    compensation: CompensationTerms
 
 
 @dataclass(frozen=True, slots=True)
@@ -236,6 +238,7 @@ class MemoryWorkStore:
             terms.deliverable,
             terms.acceptance_criteria,
             terms.support_mode,
+            terms.compensation,
         )
         self._terms[terms.task_id] = (*current, next_terms)
         return next_terms
@@ -520,6 +523,7 @@ class WorkService:
         title: str,
         brief: TaskBrief,
         nominated_mentor_id: UUID | None,
+        compensation: CompensationTerms,
         places: int = 1,
     ) -> TaskRecord:
         self._role(actor, Role.CUSTOMER)
@@ -546,6 +550,7 @@ class WorkService:
                     brief.deliverable,
                     brief.acceptance_criteria,
                     None,
+                    compensation,
                 )
             )
         return record
@@ -601,6 +606,7 @@ class WorkService:
                     latest.deliverable,
                     latest.acceptance_criteria,
                     support_mode,
+                    latest.compensation,
                 )
             )
         return await self.store.save(
@@ -618,6 +624,13 @@ class WorkService:
     ) -> TermsRecord:
         self._role(actor, Role.CUSTOMER)
         record = await self._owned(actor, task_id)
+        current = await self.store.latest_terms(task_id)
+        if current is None:
+            raise ApiError(
+                code="TASK_TERMS_REQUIRED",
+                message="Добавьте версию условий перед изменением.",
+                status_code=409,
+            )
         support_mode = (
             record.aggregate.support.mode.value if record.aggregate.support is not None else None
         )
@@ -629,6 +642,7 @@ class WorkService:
                 deliverable,
                 acceptance_criteria,
                 support_mode,
+                current.compensation,
             )
         )
 

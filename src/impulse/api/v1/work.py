@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
 
@@ -24,6 +25,7 @@ from impulse.application.work import (
     WorkItem,
     WorkService,
 )
+from impulse.domain.reward import CompensationTerms, RoundingMode
 from impulse.domain.work import (
     AcceptanceDecision,
     ApplicationStatus,
@@ -38,6 +40,17 @@ from impulse.domain.work import (
 router = APIRouter()
 
 
+class CompensationRequest(BaseModel):
+    paid: bool
+    base_amount_per_assignee: Decimal | None = None
+    currency: str | None = Field(default=None, pattern=r"^[A-Z]{3}$")
+    a_multiplier: Decimal
+    quantum: Decimal = Decimal("0.01")
+    rounding_mode: RoundingMode = RoundingMode.HALF_UP
+    policy_version: int = Field(ge=1)
+    payout_condition: str = Field(min_length=1, max_length=1000)
+
+
 class CreateTaskRequest(BaseModel):
     task_key: str = Field(min_length=1, max_length=96)
     title: str = Field(min_length=1, max_length=200)
@@ -49,6 +62,7 @@ class CreateTaskRequest(BaseModel):
     ip_terms: str = Field(max_length=4000)
     nominated_mentor_id: UUID | None = None
     places: int = Field(default=1, ge=1, le=100)
+    compensation: CompensationRequest
 
 
 class SupportRequest(BaseModel):
@@ -170,12 +184,27 @@ class ArtifactView(BaseModel):
     uri: str
 
 
+class CompensationView(BaseModel):
+    paid: bool
+    base_amount_per_assignee: Decimal | None
+    currency: str | None
+    b_multiplier: Decimal
+    a_multiplier: Decimal
+    b_total: Decimal | None
+    a_total: Decimal | None
+    quantum: Decimal
+    rounding_mode: RoundingMode
+    policy_version: int
+    payout_condition: str
+
+
 class TermsView(BaseModel):
     version: int
     deadline_at: AwareDatetime
     deliverable: str
     acceptance_criteria: list[str]
     support_mode: str | None
+    compensation: CompensationView
 
 
 class MarketplaceTaskView(BaseModel):
@@ -276,6 +305,23 @@ def _terms_view(terms: TermsRecord) -> TermsView:
         deliverable=terms.deliverable,
         acceptance_criteria=list(terms.acceptance_criteria),
         support_mode=terms.support_mode,
+        compensation=_compensation_view(terms.compensation),
+    )
+
+
+def _compensation_view(terms: CompensationTerms) -> CompensationView:
+    return CompensationView(
+        paid=terms.paid,
+        base_amount_per_assignee=terms.base_amount_per_assignee,
+        currency=terms.currency,
+        b_multiplier=terms.b_multiplier,
+        a_multiplier=terms.a_multiplier,
+        b_total=terms.premium_total("B"),
+        a_total=terms.premium_total("A"),
+        quantum=terms.quantum,
+        rounding_mode=terms.rounding_mode,
+        policy_version=terms.policy_version,
+        payout_condition=terms.payout_condition,
     )
 
 
@@ -327,6 +373,16 @@ async def create_task(
                 ip_terms=command.ip_terms,
             ),
             nominated_mentor_id=command.nominated_mentor_id,
+            compensation=CompensationTerms(
+                paid=command.compensation.paid,
+                base_amount_per_assignee=command.compensation.base_amount_per_assignee,
+                currency=command.compensation.currency,
+                a_multiplier=command.compensation.a_multiplier,
+                quantum=command.compensation.quantum,
+                rounding_mode=command.compensation.rounding_mode,
+                policy_version=command.compensation.policy_version,
+                payout_condition=command.compensation.payout_condition,
+            ),
             places=command.places,
         )
     )
