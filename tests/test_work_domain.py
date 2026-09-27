@@ -6,12 +6,14 @@ from uuid import uuid4
 import pytest
 
 from impulse.domain.work import (
+    ApplicationStatus,
     SupportAssignment,
     SupportMode,
     TaskAggregate,
     TaskBrief,
     TaskPolicyError,
     TaskStatus,
+    accept_application,
     publication_issues,
 )
 
@@ -70,3 +72,24 @@ def test_naive_deadline_and_missing_data_ip_are_reported_together() -> None:
         "data_constraints",
         "ip_terms",
     )
+
+
+def test_application_acceptance_rejects_stale_version_and_full_task() -> None:
+    with pytest.raises(TaskPolicyError) as stale:
+        accept_application(
+            ApplicationStatus.APPLIED,
+            expected_version=1,
+            actual_version=2,
+            staffed_count=0,
+            places=1,
+        )
+    assert stale.value.code == "STALE_APPLICATION"
+    with pytest.raises(TaskPolicyError) as full:
+        accept_application(
+            ApplicationStatus.APPLIED,
+            expected_version=2,
+            actual_version=2,
+            staffed_count=1,
+            places=1,
+        )
+    assert full.value.code == "TASK_FULL"

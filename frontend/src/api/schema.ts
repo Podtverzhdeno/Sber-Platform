@@ -72,6 +72,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/applications/{application_id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Candidate */
+        post: operations["accept_candidate_api_v1_customer_applications__application_id__accept_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/projects/{project_key}/tasks": {
         parameters: {
             query?: never;
@@ -98,6 +115,23 @@ export interface paths {
         };
         /** Customer Tasks */
         get: operations["customer_tasks_api_v1_customer_tasks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/tasks/{task_id}/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Task Applications */
+        get: operations["task_applications_api_v1_customer_tasks__task_id__applications_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -259,6 +293,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/assignments/{assignment_id}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Assignment */
+        post: operations["start_assignment_api_v1_me_assignments__assignment_id__start_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/consents/{scope}": {
         parameters: {
             query?: never;
@@ -389,6 +440,23 @@ export interface paths {
         get: operations["roadmaps_api_v1_me_roadmaps_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/tasks/{task_id}/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply To Task */
+        post: operations["apply_to_task_api_v1_me_tasks__task_id__applications_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -538,6 +606,11 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AcceptApplicationRequest */
+        AcceptApplicationRequest: {
+            /** Expected Version */
+            expected_version: number;
+        };
         /** AcceptTermsRequest */
         AcceptTermsRequest: {
             /** Terms Version */
@@ -563,6 +636,63 @@ export interface components {
             person_id: string;
             /** Scopes */
             scopes: string[];
+        };
+        /**
+         * ApplicationStatus
+         * @enum {string}
+         */
+        ApplicationStatus: "terms_accepted" | "applied" | "accepted" | "rejected" | "withdrawn";
+        /** ApplicationView */
+        ApplicationView: {
+            /** Accepted Terms Version */
+            accepted_terms_version: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            status: components["schemas"]["ApplicationStatus"];
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+            /** Version */
+            version: number;
+        };
+        /**
+         * AssignmentStatus
+         * @enum {string}
+         */
+        AssignmentStatus: "staffed" | "in_progress" | "submitted" | "closed";
+        /** AssignmentView */
+        AssignmentView: {
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            status: components["schemas"]["AssignmentStatus"];
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
         };
         /**
          * ClaimStatus
@@ -654,6 +784,11 @@ export interface components {
             ip_terms: string;
             /** Nominated Mentor Id */
             nominated_mentor_id?: string | null;
+            /**
+             * Places
+             * @default 1
+             */
+            places: number;
             /** Problem */
             problem: string;
             /** Task Key */
@@ -880,6 +1015,8 @@ export interface components {
             id: string;
             /** Nominated Mentor Id */
             nominated_mentor_id: string | null;
+            /** Places */
+            places: number;
             /** Project Key */
             project_key: string;
             status: components["schemas"]["TaskStatus"];
@@ -1060,6 +1197,43 @@ export interface operations {
             };
         };
     };
+    accept_candidate_api_v1_customer_applications__application_id__accept_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptApplicationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_task_api_v1_customer_projects__project_key__tasks_post: {
         parameters: {
             query?: never;
@@ -1113,6 +1287,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskView"][];
+                };
+            };
+        };
+    };
+    task_applications_api_v1_customer_tasks__task_id__applications_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -1368,6 +1573,39 @@ export interface operations {
             };
         };
     };
+    start_assignment_api_v1_me_assignments__assignment_id__start_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     set_consent_api_v1_me_consents__scope__put: {
         parameters: {
             query?: never;
@@ -1601,6 +1839,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RoadmapView"][];
+                };
+            };
+        };
+    };
+    apply_to_task_api_v1_me_tasks__task_id__applications_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

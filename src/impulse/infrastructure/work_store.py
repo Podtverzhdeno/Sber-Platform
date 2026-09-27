@@ -4,23 +4,35 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Any, cast
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
 
 from impulse.api.errors import ApiError
-from impulse.application.work import TaskRecord, TermsRecord, WorkStore
+from impulse.application.work import (
+    ApplicationRecord,
+    AssignmentRecord,
+    TaskRecord,
+    TermsRecord,
+    WorkStore,
+)
 from impulse.domain.work import (
+    ApplicationStatus,
+    AssignmentStatus,
     SupportAssignment,
     SupportMode,
     TaskAggregate,
     TaskBrief,
+    TaskPolicyError,
     TaskStatus,
+    accept_application,
+    start_assignment,
 )
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.work import (
     applications,
+    assignments,
     projects,
     task_terms_versions,
     tasks,
@@ -31,6 +43,7 @@ def _payload(record: TaskRecord) -> dict[str, object]:
     aggregate = record.aggregate
     return {
         "title": record.title,
+        "places": record.places,
         "brief": {
             "problem": aggregate.brief.problem,
             "deliverable": aggregate.brief.deliverable,
@@ -98,6 +111,7 @@ def _record(row: Any) -> TaskRecord:
             nominated_mentor_id=UUID(str(nominated_raw)) if nominated_raw else None,
             support=support,
         ),
+        places=int(payload.get("places", 1)),
     )
 
 
@@ -290,4 +304,181 @@ class SqlWorkStore(WorkStore):
                         "version": applications.c.version + 1,
                     },
                 )
+            )
+
+    @staticmethod
+    def _application(row: Any) -> ApplicationRecord:
+        return ApplicationRecord(
+            row.id,
+            row.task_id,
+            row.person_id,
+            row.accepted_terms_version,
+            ApplicationStatus(row.status),
+            row.version,
+        )
+
+    async def apply(self, person_id: UUID, task_id: UUID, terms_version: int) -> ApplicationRecord:
+        async with self.database.session() as session:
+            row = (
+                await session.execute(
+                    select(applications).where(
+                        applications.c.person_id == person_id,
+                        applications.c.task_id == task_id,
+                    )
+                )
+            ).one_or_none()
+            if row is None:
+                raise ApiError(
+                    code="TERMS_NOT_ACCEPTED",
+                    message="Подтвердите условия перед откликом.",
+                    status_code=409,
+                )
+            record = self._application(row)
+            if record.status is ApplicationStatus.TERMS_ACCEPTED:
+                updated = (
+                    await session.execute(
+                        update(applications)
+                        .where(
+                            applications.c.id == record.id,
+                            applications.c.version == record.version,
+                        )
+                        .values(
+                            status=ApplicationStatus.APPLIED.value,
+                            version=applications.c.version + 1,
+                        )
+                        .returning(*applications.c)
+                    )
+                ).one()
+                return self._application(updated)
+            return record
+
+    async def applications(self, task_id: UUID) -> tuple[ApplicationRecord, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(applications)
+                    .where(applications.c.task_id == task_id)
+                    .order_by(applications.c.created_at)
+                )
+            ).all()
+            return tuple(self._application(row) for row in rows)
+
+    async def application(self, application_id: UUID) -> ApplicationRecord | None:
+        async with self.database.sessions() as session:
+            row = (
+                await session.execute(
+                    select(applications).where(applications.c.id == application_id)
+                )
+            ).one_or_none()
+            return self._application(row) if row is not None else None
+
+    async def accept_application(
+        self, application_id: UUID, expected_version: int, places: int
+    ) -> AssignmentRecord:
+        async with self.database.session() as session:
+            row = (
+                await session.execute(
+                    select(applications)
+                    .where(applications.c.id == application_id)
+                    .with_for_update()
+                )
+            ).one_or_none()
+            if row is None:
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            application = self._application(row)
+            await session.execute(
+                select(tasks.c.id).where(tasks.c.id == application.task_id).with_for_update()
+            )
+            staffed_count = int(
+                await session.scalar(
+                    select(func.count())
+                    .select_from(assignments)
+                    .where(assignments.c.task_id == application.task_id)
+                )
+                or 0
+            )
+            try:
+                status = accept_application(
+                    application.status,
+                    expected_version=expected_version,
+                    actual_version=application.version,
+                    staffed_count=staffed_count,
+                    places=places,
+                )
+            except TaskPolicyError as exc:
+                raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
+            await session.execute(
+                update(applications)
+                .where(
+                    applications.c.id == application.id,
+                    applications.c.version == application.version,
+                )
+                .values(status=status.value, version=applications.c.version + 1)
+            )
+            assignment_id = uuid4()
+            await session.execute(
+                insert(assignments).values(
+                    id=assignment_id,
+                    task_id=application.task_id,
+                    person_id=application.person_id,
+                    application_id=application.id,
+                    status=AssignmentStatus.STAFFED.value,
+                    data_origin="demo_runtime",
+                    created_by=application.person_id,
+                )
+            )
+            return AssignmentRecord(
+                assignment_id,
+                application.task_id,
+                application.person_id,
+                application.id,
+                AssignmentStatus.STAFFED,
+            )
+
+    @staticmethod
+    def _assignment(row: Any) -> AssignmentRecord:
+        return AssignmentRecord(
+            row.id,
+            row.task_id,
+            row.person_id,
+            row.application_id,
+            AssignmentStatus(row.status),
+        )
+
+    async def assignment(self, assignment_id: UUID) -> AssignmentRecord | None:
+        async with self.database.sessions() as session:
+            row = (
+                await session.execute(select(assignments).where(assignments.c.id == assignment_id))
+            ).one_or_none()
+            return self._assignment(row) if row is not None else None
+
+    async def start_assignment(self, assignment_id: UUID) -> AssignmentRecord:
+        async with self.database.session() as session:
+            row = (
+                await session.execute(
+                    select(assignments).where(assignments.c.id == assignment_id).with_for_update()
+                )
+            ).one_or_none()
+            if row is None:
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            current = self._assignment(row)
+            try:
+                status = start_assignment(current.status)
+            except TaskPolicyError as exc:
+                raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
+            await session.execute(
+                update(assignments)
+                .where(assignments.c.id == assignment_id)
+                .values(status=status.value, version=assignments.c.version + 1)
+            )
+            return AssignmentRecord(
+                current.id,
+                current.task_id,
+                current.person_id,
+                current.application_id,
+                status,
             )

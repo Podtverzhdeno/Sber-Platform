@@ -11,10 +11,14 @@ from uuid import UUID, uuid4
 from impulse.api.errors import ApiError
 from impulse.domain.identity import ActorContext, Role
 from impulse.domain.work import (
+    ApplicationStatus,
+    AssignmentStatus,
     SupportAssignment,
     TaskAggregate,
     TaskBrief,
     TaskPolicyError,
+    accept_application,
+    start_assignment,
 )
 
 
@@ -24,6 +28,7 @@ class TaskRecord:
     task_key: str
     title: str
     aggregate: TaskAggregate
+    places: int = 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -43,6 +48,25 @@ class MarketplaceTask:
     accepted_terms_version: int | None = None
 
 
+@dataclass(frozen=True, slots=True)
+class ApplicationRecord:
+    id: UUID
+    task_id: UUID
+    person_id: UUID
+    accepted_terms_version: int
+    status: ApplicationStatus
+    version: int = 1
+
+
+@dataclass(frozen=True, slots=True)
+class AssignmentRecord:
+    id: UUID
+    task_id: UUID
+    person_id: UUID
+    application_id: UUID
+    status: AssignmentStatus
+
+
 class WorkStore(Protocol):
     async def create(self, record: TaskRecord) -> TaskRecord: ...
     async def get(self, task_id: UUID) -> TaskRecord | None: ...
@@ -53,6 +77,16 @@ class WorkStore(Protocol):
     async def published_tasks(self) -> tuple[TaskRecord, ...]: ...
     async def accepted_terms_version(self, person_id: UUID, task_id: UUID) -> int | None: ...
     async def accept_terms(self, person_id: UUID, task_id: UUID, version: int) -> None: ...
+    async def apply(
+        self, person_id: UUID, task_id: UUID, terms_version: int
+    ) -> ApplicationRecord: ...
+    async def applications(self, task_id: UUID) -> tuple[ApplicationRecord, ...]: ...
+    async def application(self, application_id: UUID) -> ApplicationRecord | None: ...
+    async def accept_application(
+        self, application_id: UUID, expected_version: int, places: int
+    ) -> AssignmentRecord: ...
+    async def assignment(self, assignment_id: UUID) -> AssignmentRecord | None: ...
+    async def start_assignment(self, assignment_id: UUID) -> AssignmentRecord: ...
 
 
 class MemoryWorkStore:
@@ -60,6 +94,8 @@ class MemoryWorkStore:
         self._records: dict[UUID, TaskRecord] = {}
         self._terms: dict[UUID, tuple[TermsRecord, ...]] = {}
         self._acceptances: dict[tuple[UUID, UUID], int] = {}
+        self._applications: dict[UUID, ApplicationRecord] = {}
+        self._assignments: dict[UUID, AssignmentRecord] = {}
 
     async def create(self, record: TaskRecord) -> TaskRecord:
         if any(
@@ -116,6 +152,85 @@ class MemoryWorkStore:
     async def accept_terms(self, person_id: UUID, task_id: UUID, version: int) -> None:
         self._acceptances[(person_id, task_id)] = version
 
+    async def apply(self, person_id: UUID, task_id: UUID, terms_version: int) -> ApplicationRecord:
+        for current in self._applications.values():
+            if (current.person_id, current.task_id) == (person_id, task_id):
+                if current.status is ApplicationStatus.TERMS_ACCEPTED:
+                    updated = ApplicationRecord(
+                        current.id,
+                        task_id,
+                        person_id,
+                        terms_version,
+                        ApplicationStatus.APPLIED,
+                        current.version + 1,
+                    )
+                    self._applications[current.id] = updated
+                    return updated
+                return current
+        record = ApplicationRecord(
+            uuid4(), task_id, person_id, terms_version, ApplicationStatus.APPLIED
+        )
+        self._applications[record.id] = record
+        return record
+
+    async def applications(self, task_id: UUID) -> tuple[ApplicationRecord, ...]:
+        return tuple(item for item in self._applications.values() if item.task_id == task_id)
+
+    async def application(self, application_id: UUID) -> ApplicationRecord | None:
+        return self._applications.get(application_id)
+
+    async def accept_application(
+        self, application_id: UUID, expected_version: int, places: int
+    ) -> AssignmentRecord:
+        application = self._applications[application_id]
+        staffed = sum(item.task_id == application.task_id for item in self._assignments.values())
+        try:
+            status = accept_application(
+                application.status,
+                expected_version=expected_version,
+                actual_version=application.version,
+                staffed_count=staffed,
+                places=places,
+            )
+        except TaskPolicyError as exc:
+            raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
+        self._applications[application_id] = ApplicationRecord(
+            application.id,
+            application.task_id,
+            application.person_id,
+            application.accepted_terms_version,
+            status,
+            application.version + 1,
+        )
+        assignment = AssignmentRecord(
+            uuid4(),
+            application.task_id,
+            application.person_id,
+            application.id,
+            AssignmentStatus.STAFFED,
+        )
+        self._assignments[assignment.id] = assignment
+        return assignment
+
+    async def assignment(self, assignment_id: UUID) -> AssignmentRecord | None:
+        return self._assignments.get(assignment_id)
+
+    async def start_assignment(self, assignment_id: UUID) -> AssignmentRecord:
+        current = self._assignments[assignment_id]
+        try:
+            status = start_assignment(current.status)
+        except TaskPolicyError as exc:
+            raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
+        updated = AssignmentRecord(
+            current.id,
+            current.task_id,
+            current.person_id,
+            current.application_id,
+            status,
+        )
+        self._assignments[assignment_id] = updated
+        return updated
+
 
 class WorkService:
     def __init__(self, store: WorkStore) -> None:
@@ -154,6 +269,7 @@ class WorkService:
         title: str,
         brief: TaskBrief,
         nominated_mentor_id: UUID | None,
+        places: int = 1,
     ) -> TaskRecord:
         self._role(actor, Role.CUSTOMER)
         record = await self.store.create(
@@ -167,6 +283,7 @@ class WorkService:
                     brief,
                     nominated_mentor_id=nominated_mentor_id,
                 ),
+                places,
             )
         )
         if brief.deadline_at is not None:
@@ -191,7 +308,7 @@ class WorkService:
         record = await self._owned(actor, task_id)
         aggregate = self._policy(record.aggregate.submit)
         return await self.store.save(
-            TaskRecord(record.project_key, record.task_key, record.title, aggregate)
+            TaskRecord(record.project_key, record.task_key, record.title, aggregate, record.places)
         )
 
     async def moderate(self, actor: ActorContext, task_id: UUID) -> TaskRecord:
@@ -199,7 +316,7 @@ class WorkService:
         record = await self._required(task_id)
         aggregate = self._policy(record.aggregate.approve_moderation)
         return await self.store.save(
-            TaskRecord(record.project_key, record.task_key, record.title, aggregate)
+            TaskRecord(record.project_key, record.task_key, record.title, aggregate, record.places)
         )
 
     async def assign_support(
@@ -209,7 +326,7 @@ class WorkService:
         record = await self._required(task_id)
         aggregate = self._policy(lambda: record.aggregate.assign_support(support))
         return await self.store.save(
-            TaskRecord(record.project_key, record.task_key, record.title, aggregate)
+            TaskRecord(record.project_key, record.task_key, record.title, aggregate, record.places)
         )
 
     async def publish(self, actor: ActorContext, task_id: UUID) -> TaskRecord:
@@ -236,7 +353,7 @@ class WorkService:
                 )
             )
         return await self.store.save(
-            TaskRecord(record.project_key, record.task_key, record.title, aggregate)
+            TaskRecord(record.project_key, record.task_key, record.title, aggregate, record.places)
         )
 
     async def revise_terms(
@@ -312,6 +429,44 @@ class WorkService:
             )
         await self.store.accept_terms(actor.person_id, task_id, terms_version)
         return MarketplaceTask(detail.task, detail.terms, terms_version)
+
+    async def apply(self, actor: ActorContext, task_id: UUID) -> ApplicationRecord:
+        detail = await self.task_detail(actor, task_id)
+        if detail.accepted_terms_version != detail.terms.version:
+            raise ApiError(
+                code="TERMS_NOT_ACCEPTED",
+                message="Подтвердите актуальную версию условий перед откликом.",
+                status_code=409,
+            )
+        return await self.store.apply(actor.person_id, task_id, detail.terms.version)
+
+    async def task_applications(
+        self, actor: ActorContext, task_id: UUID
+    ) -> tuple[ApplicationRecord, ...]:
+        self._role(actor, Role.CUSTOMER)
+        await self._owned(actor, task_id)
+        return await self.store.applications(task_id)
+
+    async def accept_candidate(
+        self, actor: ActorContext, application_id: UUID, expected_version: int
+    ) -> AssignmentRecord:
+        self._role(actor, Role.CUSTOMER)
+        application = await self.store.application(application_id)
+        if application is None:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        task = await self._owned(actor, application.task_id)
+        return await self.store.accept_application(application_id, expected_version, task.places)
+
+    async def start_work(self, actor: ActorContext, assignment_id: UUID) -> AssignmentRecord:
+        self._role(actor, Role.PARTICIPANT)
+        assignment = await self.store.assignment(assignment_id)
+        if assignment is None or assignment.person_id != actor.person_id:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        return await self.store.start_assignment(assignment_id)
 
     async def _required(self, task_id: UUID) -> TaskRecord:
         record = await self.store.get(task_id)

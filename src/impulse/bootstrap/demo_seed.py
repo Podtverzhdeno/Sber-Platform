@@ -488,6 +488,12 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
             delete(external_sources).where(external_sources.c.data_origin == "demo_runtime")
         )
         await session.execute(
+            delete(assignments).where(
+                assignments.c.person_id.in_(demo_person_ids),
+                assignments.c.data_origin == "demo_runtime",
+            )
+        )
+        await session.execute(
             delete(applications).where(
                 applications.c.person_id.in_(demo_person_ids),
                 applications.c.data_origin == "demo_runtime",

@@ -129,6 +129,55 @@ def test_task_without_nominated_mentor_waits_for_support_before_publish() -> Non
         )
         assert current.json()["accepted_terms_version"] == revised.json()["version"]
 
+        alex_application = api.post(
+            f"/api/v1/me/tasks/{task_id}/applications",
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert alex_application.json()["status"] == "applied"
+
+        maria_csrf = login(api, "participant-maria")
+        api.post(
+            f"/api/v1/me/tasks/{task_id}/terms-consent",
+            json={"terms_version": revised.json()["version"]},
+            headers={"X-CSRF-Token": maria_csrf},
+        )
+        maria_application = api.post(
+            f"/api/v1/me/tasks/{task_id}/applications",
+            headers={"X-CSRF-Token": maria_csrf},
+        )
+
+        customer_csrf = login(api, "customer-roman")
+        candidates = api.get(f"/api/v1/customer/tasks/{task_id}/applications")
+        assert len(candidates.json()) == 2
+        accepted = api.post(
+            f"/api/v1/customer/applications/{alex_application.json()['id']}/accept",
+            json={"expected_version": alex_application.json()["version"]},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert accepted.json()["status"] == "staffed"
+
+        stale_acceptance = api.post(
+            f"/api/v1/customer/applications/{alex_application.json()['id']}/accept",
+            json={"expected_version": alex_application.json()["version"]},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert stale_acceptance.status_code == 409
+        assert stale_acceptance.json()["code"] == "STALE_APPLICATION"
+        full = api.post(
+            f"/api/v1/customer/applications/{maria_application.json()['id']}/accept",
+            json={"expected_version": maria_application.json()["version"]},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert full.status_code == 409
+        assert full.json()["code"] == "TASK_FULL"
+
+        participant_csrf = login(api, "participant-alex")
+        started = api.post(
+            f"/api/v1/me/assignments/{accepted.json()['id']}/start",
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert started.json()["status"] == "in_progress"
+
 
 def test_incomplete_customer_brief_returns_missing_field_map() -> None:
     api = client()

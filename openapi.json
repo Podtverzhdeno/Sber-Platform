@@ -1,6 +1,20 @@
 {
   "components": {
     "schemas": {
+      "AcceptApplicationRequest": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "expected_version"
+        ],
+        "title": "AcceptApplicationRequest",
+        "type": "object"
+      },
       "AcceptTermsRequest": {
         "properties": {
           "terms_version": {
@@ -79,6 +93,103 @@
           "navigation"
         ],
         "title": "ActorView",
+        "type": "object"
+      },
+      "ApplicationStatus": {
+        "enum": [
+          "terms_accepted",
+          "applied",
+          "accepted",
+          "rejected",
+          "withdrawn"
+        ],
+        "title": "ApplicationStatus",
+        "type": "string"
+      },
+      "ApplicationView": {
+        "properties": {
+          "accepted_terms_version": {
+            "title": "Accepted Terms Version",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ApplicationStatus"
+          },
+          "task_id": {
+            "format": "uuid",
+            "title": "Task Id",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "task_id",
+          "person_id",
+          "accepted_terms_version",
+          "status",
+          "version"
+        ],
+        "title": "ApplicationView",
+        "type": "object"
+      },
+      "AssignmentStatus": {
+        "enum": [
+          "staffed",
+          "in_progress",
+          "submitted",
+          "closed"
+        ],
+        "title": "AssignmentStatus",
+        "type": "string"
+      },
+      "AssignmentView": {
+        "properties": {
+          "application_id": {
+            "format": "uuid",
+            "title": "Application Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AssignmentStatus"
+          },
+          "task_id": {
+            "format": "uuid",
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "task_id",
+          "person_id",
+          "application_id",
+          "status"
+        ],
+        "title": "AssignmentView",
         "type": "object"
       },
       "ClaimStatus": {
@@ -327,6 +438,13 @@
               }
             ],
             "title": "Nominated Mentor Id"
+          },
+          "places": {
+            "default": 1,
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Places",
+            "type": "integer"
           },
           "problem": {
             "maxLength": 4000,
@@ -950,6 +1068,10 @@
             ],
             "title": "Nominated Mentor Id"
           },
+          "places": {
+            "title": "Places",
+            "type": "integer"
+          },
           "project_key": {
             "title": "Project Key",
             "type": "string"
@@ -996,7 +1118,8 @@
           "status",
           "nominated_mentor_id",
           "support_mode",
-          "support_assignee_id"
+          "support_assignee_id",
+          "places"
         ],
         "title": "TaskView",
         "type": "object"
@@ -1292,6 +1415,72 @@
         "summary": "Public Config"
       }
     },
+    "/api/v1/customer/applications/{application_id}/accept": {
+      "post": {
+        "operationId": "accept_candidate_api_v1_customer_applications__application_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "application_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Application Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptApplicationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Accept Candidate"
+      }
+    },
     "/api/v1/customer/projects/{project_key}/tasks": {
       "post": {
         "operationId": "create_task_api_v1_customer_projects__project_key__tasks_post",
@@ -1377,6 +1566,50 @@
           }
         },
         "summary": "Customer Tasks"
+      }
+    },
+    "/api/v1/customer/tasks/{task_id}/applications": {
+      "get": {
+        "operationId": "task_applications_api_v1_customer_tasks__task_id__applications_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ApplicationView"
+                  },
+                  "title": "Response Task Applications Api V1 Customer Tasks  Task Id  Applications Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Task Applications"
       }
     },
     "/api/v1/customer/tasks/{task_id}/submit": {
@@ -1787,6 +2020,62 @@
         "summary": "Switch Role"
       }
     },
+    "/api/v1/me/assignments/{assignment_id}/start": {
+      "post": {
+        "operationId": "start_assignment_api_v1_me_assignments__assignment_id__start_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start Assignment"
+      }
+    },
     "/api/v1/me/consents/{scope}": {
       "put": {
         "operationId": "set_consent_api_v1_me_consents__scope__put",
@@ -2152,6 +2441,62 @@
           }
         },
         "summary": "Roadmaps"
+      }
+    },
+    "/api/v1/me/tasks/{task_id}/applications": {
+      "post": {
+        "operationId": "apply_to_task_api_v1_me_tasks__task_id__applications_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Apply To Task"
       }
     },
     "/api/v1/me/tasks/{task_id}/terms-consent": {

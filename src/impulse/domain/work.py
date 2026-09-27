@@ -1,4 +1,5 @@
 """R&D/MVP task aggregate and publication invariants."""
+# ruff: noqa: RUF001
 
 from __future__ import annotations
 
@@ -20,6 +21,44 @@ class SupportMode(StrEnum):
     MENTOR = "mentor"
     BUDDY = "buddy"
     OPERATOR = "operator"
+
+
+class ApplicationStatus(StrEnum):
+    TERMS_ACCEPTED = "terms_accepted"
+    APPLIED = "applied"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    WITHDRAWN = "withdrawn"
+
+
+class AssignmentStatus(StrEnum):
+    STAFFED = "staffed"
+    IN_PROGRESS = "in_progress"
+    SUBMITTED = "submitted"
+    CLOSED = "closed"
+
+
+def accept_application(
+    status: ApplicationStatus,
+    *,
+    expected_version: int,
+    actual_version: int,
+    staffed_count: int,
+    places: int,
+) -> ApplicationStatus:
+    if expected_version != actual_version:
+        raise TaskPolicyError("STALE_APPLICATION", "Заявка изменилась. Обновите список кандидатов.")
+    if status is not ApplicationStatus.APPLIED:
+        raise TaskPolicyError("INVALID_APPLICATION_TRANSITION", "Заявка не ожидает решения.")
+    if staffed_count >= places:
+        raise TaskPolicyError("TASK_FULL", "Все места задачи уже заняты.")
+    return ApplicationStatus.ACCEPTED
+
+
+def start_assignment(status: AssignmentStatus) -> AssignmentStatus:
+    if status is not AssignmentStatus.STAFFED:
+        raise TaskPolicyError("INVALID_ASSIGNMENT_TRANSITION", "Назначение уже начато или закрыто.")
+    return AssignmentStatus.IN_PROGRESS
 
 
 @dataclass(frozen=True, slots=True)

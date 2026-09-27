@@ -10,8 +10,22 @@ from pydantic import AwareDatetime, BaseModel, Field
 
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
-from impulse.application.work import MarketplaceTask, TaskRecord, TermsRecord, WorkService
-from impulse.domain.work import SupportAssignment, SupportMode, TaskBrief, TaskStatus
+from impulse.application.work import (
+    ApplicationRecord,
+    AssignmentRecord,
+    MarketplaceTask,
+    TaskRecord,
+    TermsRecord,
+    WorkService,
+)
+from impulse.domain.work import (
+    ApplicationStatus,
+    AssignmentStatus,
+    SupportAssignment,
+    SupportMode,
+    TaskBrief,
+    TaskStatus,
+)
 
 router = APIRouter()
 
@@ -26,6 +40,7 @@ class CreateTaskRequest(BaseModel):
     data_constraints: str = Field(max_length=4000)
     ip_terms: str = Field(max_length=4000)
     nominated_mentor_id: UUID | None = None
+    places: int = Field(default=1, ge=1, le=100)
 
 
 class SupportRequest(BaseModel):
@@ -43,6 +58,10 @@ class AcceptTermsRequest(BaseModel):
     terms_version: int = Field(ge=1)
 
 
+class AcceptApplicationRequest(BaseModel):
+    expected_version: int = Field(ge=1)
+
+
 class TaskView(BaseModel):
     id: UUID
     project_key: str
@@ -52,6 +71,24 @@ class TaskView(BaseModel):
     nominated_mentor_id: UUID | None
     support_mode: SupportMode | None
     support_assignee_id: UUID | None
+    places: int
+
+
+class ApplicationView(BaseModel):
+    id: UUID
+    task_id: UUID
+    person_id: UUID
+    accepted_terms_version: int
+    status: ApplicationStatus
+    version: int
+
+
+class AssignmentView(BaseModel):
+    id: UUID
+    task_id: UUID
+    person_id: UUID
+    application_id: UUID
+    status: AssignmentStatus
 
 
 class TermsView(BaseModel):
@@ -83,6 +120,28 @@ def _view(record: TaskRecord) -> TaskView:
         nominated_mentor_id=record.aggregate.nominated_mentor_id,
         support_mode=support.mode if support else None,
         support_assignee_id=support.assignee_id if support else None,
+        places=record.places,
+    )
+
+
+def _application_view(item: ApplicationRecord) -> ApplicationView:
+    return ApplicationView(
+        id=item.id,
+        task_id=item.task_id,
+        person_id=item.person_id,
+        accepted_terms_version=item.accepted_terms_version,
+        status=item.status,
+        version=item.version,
+    )
+
+
+def _assignment_view(item: AssignmentRecord) -> AssignmentView:
+    return AssignmentView(
+        id=item.id,
+        task_id=item.task_id,
+        person_id=item.person_id,
+        application_id=item.application_id,
+        status=item.status,
     )
 
 
@@ -134,6 +193,7 @@ async def create_task(
                 ip_terms=command.ip_terms,
             ),
             nominated_mentor_id=command.nominated_mentor_id,
+            places=command.places,
         )
     )
 
@@ -226,3 +286,47 @@ async def accept_terms(
     return _marketplace_view(
         await service.accept_terms(authenticated.actor, task_id, command.terms_version)
     )
+
+
+@router.post("/me/tasks/{task_id}/applications", response_model=ApplicationView)
+async def apply_to_task(
+    task_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> ApplicationView:
+    return _application_view(await service.apply(authenticated.actor, task_id))
+
+
+@router.get("/customer/tasks/{task_id}/applications", response_model=list[ApplicationView])
+async def task_applications(
+    task_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> list[ApplicationView]:
+    return [
+        _application_view(item)
+        for item in await service.task_applications(authenticated.actor, task_id)
+    ]
+
+
+@router.post("/customer/applications/{application_id}/accept", response_model=AssignmentView)
+async def accept_candidate(
+    application_id: UUID,
+    command: AcceptApplicationRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> AssignmentView:
+    return _assignment_view(
+        await service.accept_candidate(
+            authenticated.actor, application_id, command.expected_version
+        )
+    )
+
+
+@router.post("/me/assignments/{assignment_id}/start", response_model=AssignmentView)
+async def start_assignment(
+    assignment_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> AssignmentView:
+    return _assignment_view(await service.start_work(authenticated.actor, assignment_id))

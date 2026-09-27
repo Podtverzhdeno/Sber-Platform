@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
+from uuid import UUID
 
 import httpx
 import pytest
 from pydantic import SecretStr
 from sqlalchemy import func, select
 
+from impulse.api.errors import ApiError
 from impulse.application.identity import DemoAuthService
 from impulse.application.work import WorkService
 from impulse.bootstrap.app import create_app
@@ -16,7 +19,12 @@ from impulse.bootstrap.demo_seed import seed_demo
 from impulse.bootstrap.settings import AppEnvironment, Settings
 from impulse.infrastructure.database import Database, async_database_url
 from impulse.infrastructure.identity_store import SqlIdentityStore
-from impulse.infrastructure.models.work import applications, task_terms_versions, tasks
+from impulse.infrastructure.models.work import (
+    applications,
+    assignments,
+    task_terms_versions,
+    tasks,
+)
 from impulse.infrastructure.work_store import SqlWorkStore
 
 pytestmark = pytest.mark.integration
@@ -43,10 +51,11 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
         secret=settings.session_signing_secret(),
         ttl_seconds=settings.session_ttl_seconds,
     )
+    work_store = SqlWorkStore(database)
     app = create_app(
         settings,
         auth_service=auth,
-        work_service=WorkService(SqlWorkStore(database)),
+        work_service=WorkService(work_store),
     )
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=app), base_url="http://testserver"
@@ -138,6 +147,46 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
             headers={"X-CSRF-Token": participant_csrf},
         )
         assert accepted.status_code == 200
+        alex_application = await client.post(
+            f"/api/v1/me/tasks/{task_id}/applications",
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+
+        maria_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-maria"}
+        )
+        maria_csrf = maria_login.json()["csrf_token"]
+        await client.post(
+            f"/api/v1/me/tasks/{task_id}/terms-consent",
+            json={"terms_version": revised.json()["version"]},
+            headers={"X-CSRF-Token": maria_csrf},
+        )
+        maria_application = await client.post(
+            f"/api/v1/me/tasks/{task_id}/applications",
+            headers={"X-CSRF-Token": maria_csrf},
+        )
+
+    candidates = [alex_application.json(), maria_application.json()]
+    results = await asyncio.gather(
+        *(
+            work_store.accept_application(UUID(item["id"]), item["version"], places=1)
+            for item in candidates
+        ),
+        return_exceptions=True,
+    )
+    assignments_created = [item for item in results if not isinstance(item, BaseException)]
+    failures = [item for item in results if isinstance(item, ApiError)]
+    assert len(assignments_created) == 1
+    assert len(failures) == 1
+    assert failures[0].code == "TASK_FULL"
+    winner = next(
+        item for item in candidates if item["id"] == str(assignments_created[0].application_id)
+    )
+    with pytest.raises(ApiError) as stale:
+        await work_store.accept_application(UUID(winner["id"]), winner["version"], places=1)
+    assert stale.value.code == "STALE_APPLICATION"
+    started = await work_store.start_assignment(assignments_created[0].id)
+    assert started.status.value == "in_progress"
 
     async with database.sessions() as session:
         row = (
@@ -158,10 +207,19 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
         accepted_terms = await session.scalar(
             select(applications.c.accepted_terms_version).where(applications.c.task_id == task_id)
         )
+        assignment_count = int(
+            await session.scalar(
+                select(func.count())
+                .select_from(assignments)
+                .where(assignments.c.task_id == task_id)
+            )
+            or 0
+        )
     assert row.status == "published"
     assert row.version == 5
     assert row.payload["support"]["mode"] == "buddy"
     assert row.payload["nominated_mentor_id"] is None
     assert terms_count == 3
     assert accepted_terms == 3
+    assert assignment_count == 1
     await database.close()
