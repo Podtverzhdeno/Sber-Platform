@@ -35,6 +35,137 @@ class ReviewStatus(StrEnum):
     FROZEN = "frozen"
 
 
+class PayoutStatus(StrEnum):
+    NOT_APPLICABLE = "not_applicable"
+    CALCULATED = "calculated"
+    APPROVED = "approved"
+    SENT_TO_PAYMENT_SYSTEM = "sent_to_payment_system"
+    PAID = "paid"
+    FAILED = "failed"
+    REVERSED = "reversed"
+
+
+class SettlementKind(StrEnum):
+    PAYMENT = "payment"
+    REVERSAL = "reversal"
+
+
+@dataclass(frozen=True, slots=True)
+class PayoutClaim:
+    claim_id: UUID
+    assignment_id: UUID
+    contribution_version: int
+    terms_version: int
+    review_id: UUID
+    review_version: int
+    grade: ReviewGrade
+    amount: Decimal | None
+    currency: str | None
+    status: PayoutStatus
+    version: int = 1
+    approved_by: UUID | None = None
+
+    @classmethod
+    def calculate(
+        cls,
+        *,
+        claim_id: UUID,
+        assignment_id: UUID,
+        contribution_version: int,
+        terms_version: int,
+        review: Review5Plus,
+        compensation: CompensationTerms,
+    ) -> PayoutClaim:
+        if review.status is not ReviewStatus.PUBLISHED:
+            raise CompensationPolicyError("Начисление требует опубликованной человеком оценки.")
+        if review.contribution_version != contribution_version:
+            raise CompensationPolicyError("Версия оценки отличается от версии личного вклада.")
+        amount = compensation.premium_total(review.grade.value)
+        status = PayoutStatus.CALCULATED if amount is not None else PayoutStatus.NOT_APPLICABLE
+        return cls(
+            claim_id=claim_id,
+            assignment_id=assignment_id,
+            contribution_version=contribution_version,
+            terms_version=terms_version,
+            review_id=review.review_id,
+            review_version=review.review_version,
+            grade=review.grade,
+            amount=amount,
+            currency=compensation.currency,
+            status=status,
+        )
+
+    def approve(self, human_id: UUID) -> PayoutClaim:
+        self._require(PayoutStatus.CALCULATED)
+        return self._next(PayoutStatus.APPROVED, approved_by=human_id)
+
+    def send(self) -> PayoutClaim:
+        if self.status not in {PayoutStatus.APPROVED, PayoutStatus.FAILED}:
+            self._require(PayoutStatus.APPROVED)
+        return self._next(PayoutStatus.SENT_TO_PAYMENT_SYSTEM)
+
+    def settle(self, *, success: bool) -> PayoutClaim:
+        self._require(PayoutStatus.SENT_TO_PAYMENT_SYSTEM)
+        return self._next(PayoutStatus.PAID if success else PayoutStatus.FAILED)
+
+    def reverse(self) -> PayoutClaim:
+        self._require(PayoutStatus.PAID)
+        return self._next(PayoutStatus.REVERSED)
+
+    def _require(self, expected: PayoutStatus) -> None:
+        if self.status is not expected:
+            raise CompensationPolicyError(
+                f"Недопустимый переход выплаты из {self.status.value}; ожидается {expected.value}."
+            )
+
+    def _next(
+        self,
+        status: PayoutStatus,
+        *,
+        approved_by: UUID | None = None,
+    ) -> PayoutClaim:
+        return PayoutClaim(
+            claim_id=self.claim_id,
+            assignment_id=self.assignment_id,
+            contribution_version=self.contribution_version,
+            terms_version=self.terms_version,
+            review_id=self.review_id,
+            review_version=self.review_version,
+            grade=self.grade,
+            amount=self.amount,
+            currency=self.currency,
+            status=status,
+            version=self.version + 1,
+            approved_by=approved_by if approved_by is not None else self.approved_by,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class SettlementAttempt:
+    attempt_id: UUID
+    payout_claim_id: UUID
+    attempt_number: int
+    request_key: str
+    kind: SettlementKind
+    status: PayoutStatus
+    provider_reference: str | None
+    demo: bool = True
+
+    def __post_init__(self) -> None:
+        if self.attempt_number < 1 or not self.request_key.strip():
+            raise CompensationPolicyError("Попытке settlement нужны номер и idempotency key.")
+        allowed = {
+            SettlementKind.PAYMENT: {
+                PayoutStatus.SENT_TO_PAYMENT_SYSTEM,
+                PayoutStatus.PAID,
+                PayoutStatus.FAILED,
+            },
+            SettlementKind.REVERSAL: {PayoutStatus.REVERSED},
+        }
+        if self.status not in allowed[self.kind]:
+            raise CompensationPolicyError("Статус settlement не соответствует типу попытки.")
+
+
 @dataclass(frozen=True, slots=True)
 class RubricCriterion:
     key: str

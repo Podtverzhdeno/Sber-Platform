@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -13,10 +14,14 @@ from impulse.application.identity import AuthenticatedSession
 from impulse.application.reward import RewardService
 from impulse.domain.reward import (
     CriterionAssessment,
+    PayoutClaim,
+    PayoutStatus,
     Review5Plus,
     ReviewGrade,
     ReviewRubric,
     ReviewStatus,
+    SettlementAttempt,
+    SettlementKind,
 )
 
 router = APIRouter()
@@ -38,6 +43,15 @@ class CreateReviewRequest(BaseModel):
 
 class ReviewTransitionRequest(BaseModel):
     expected_version: int = Field(ge=1)
+
+
+class DemoSettlementRequest(ReviewTransitionRequest):
+    request_key: str = Field(min_length=1, max_length=160)
+    success: bool = True
+
+
+class DemoReversalRequest(ReviewTransitionRequest):
+    request_key: str = Field(min_length=1, max_length=160)
 
 
 class RubricCriterionView(BaseModel):
@@ -72,6 +86,37 @@ class ReviewView(BaseModel):
     draft_origin: str
     confirmed_by: UUID | None
     published_by: UUID | None
+
+
+class PayoutClaimView(BaseModel):
+    id: UUID
+    assignment_id: UUID
+    contribution_version: int
+    terms_version: int
+    review_id: UUID
+    review_version: int
+    grade: ReviewGrade
+    amount: Decimal | None
+    currency: str | None
+    status: PayoutStatus
+    version: int
+    approved_by: UUID | None
+
+
+class SettlementAttemptView(BaseModel):
+    id: UUID
+    payout_claim_id: UUID
+    attempt_number: int
+    request_key: str
+    kind: SettlementKind
+    status: PayoutStatus
+    provider_reference: str | None
+    demo: bool
+
+
+class DemoSettlementView(BaseModel):
+    claim: PayoutClaimView
+    settlement: SettlementAttemptView
 
 
 def _service(request: Request) -> RewardService:
@@ -109,6 +154,36 @@ def _review_view(review: Review5Plus) -> ReviewView:
         draft_origin=review.draft_origin,
         confirmed_by=review.confirmed_by,
         published_by=review.published_by,
+    )
+
+
+def _payout_view(claim: PayoutClaim) -> PayoutClaimView:
+    return PayoutClaimView(
+        id=claim.claim_id,
+        assignment_id=claim.assignment_id,
+        contribution_version=claim.contribution_version,
+        terms_version=claim.terms_version,
+        review_id=claim.review_id,
+        review_version=claim.review_version,
+        grade=claim.grade,
+        amount=claim.amount,
+        currency=claim.currency,
+        status=claim.status,
+        version=claim.version,
+        approved_by=claim.approved_by,
+    )
+
+
+def _settlement_view(attempt: SettlementAttempt) -> SettlementAttemptView:
+    return SettlementAttemptView(
+        id=attempt.attempt_id,
+        payout_claim_id=attempt.payout_claim_id,
+        attempt_number=attempt.attempt_number,
+        request_key=attempt.request_key,
+        kind=attempt.kind,
+        status=attempt.status,
+        provider_reference=attempt.provider_reference,
+        demo=attempt.demo,
     )
 
 
@@ -191,3 +266,72 @@ async def publish_review(
     service: Annotated[RewardService, Depends(_service)],
 ) -> ReviewView:
     return await _transition("publish", review_id, command, authenticated, service)
+
+
+@router.post(
+    "/operations/reviews/{review_id}/payout-calculation",
+    response_model=PayoutClaimView,
+)
+async def calculate_payout(
+    review_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RewardService, Depends(_service)],
+) -> PayoutClaimView:
+    return _payout_view(await service.calculate_payout(authenticated.actor, review_id))
+
+
+@router.post("/operations/payouts/{claim_id}/approve", response_model=PayoutClaimView)
+async def approve_payout(
+    claim_id: UUID,
+    command: ReviewTransitionRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RewardService, Depends(_service)],
+) -> PayoutClaimView:
+    return _payout_view(
+        await service.approve_payout(
+            authenticated.actor, claim_id, command.expected_version
+        )
+    )
+
+
+@router.post(
+    "/operations/payouts/{claim_id}/demo-settle",
+    response_model=DemoSettlementView,
+)
+async def settle_payout_demo(
+    claim_id: UUID,
+    command: DemoSettlementRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RewardService, Depends(_service)],
+) -> DemoSettlementView:
+    claim, attempt = await service.settle_demo(
+        authenticated.actor,
+        claim_id,
+        command.expected_version,
+        request_key=command.request_key,
+        success=command.success,
+    )
+    return DemoSettlementView(
+        claim=_payout_view(claim), settlement=_settlement_view(attempt)
+    )
+
+
+@router.post(
+    "/operations/payouts/{claim_id}/demo-reverse",
+    response_model=DemoSettlementView,
+)
+async def reverse_payout_demo(
+    claim_id: UUID,
+    command: DemoReversalRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[RewardService, Depends(_service)],
+) -> DemoSettlementView:
+    claim, attempt = await service.reverse_demo(
+        authenticated.actor,
+        claim_id,
+        command.expected_version,
+        request_key=command.request_key,
+    )
+    return DemoSettlementView(
+        claim=_payout_view(claim), settlement=_settlement_view(attempt)
+    )

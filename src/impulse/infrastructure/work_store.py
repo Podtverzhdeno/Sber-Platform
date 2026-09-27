@@ -277,15 +277,18 @@ class SqlWorkStore(WorkStore):
         )
 
     async def latest_terms(self, task_id: UUID) -> TermsRecord | None:
+        return await self.terms_version(task_id, 0)
+
+    async def terms_version(self, task_id: UUID, version: int) -> TermsRecord | None:
         async with self.database.sessions() as session:
+            query = select(task_terms_versions).where(task_terms_versions.c.task_id == task_id)
+            if version > 0:
+                query = query.where(task_terms_versions.c.terms_version == version)
+            else:
+                query = query.order_by(task_terms_versions.c.terms_version.desc()).limit(1)
             row = (
                 (
-                    await session.execute(
-                        select(task_terms_versions)
-                        .where(task_terms_versions.c.task_id == task_id)
-                        .order_by(task_terms_versions.c.terms_version.desc())
-                        .limit(1)
-                    )
+                    await session.execute(query)
                 )
                 .mappings()
                 .one_or_none()

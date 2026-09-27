@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import RowMapping
 from sqlalchemy.exc import IntegrityError
@@ -13,14 +13,23 @@ from impulse.api.errors import ApiError
 from impulse.application.reward import ReviewStore
 from impulse.domain.reward import (
     CriterionAssessment,
+    PayoutClaim,
+    PayoutStatus,
     Review5Plus,
     ReviewGrade,
     ReviewRubric,
     ReviewStatus,
     RubricCriterion,
+    SettlementAttempt,
+    SettlementKind,
 )
 from impulse.infrastructure.database import Database
-from impulse.infrastructure.models.reward import review_5plus_versions, review_rubrics
+from impulse.infrastructure.models.reward import (
+    payout_claims,
+    review_5plus_versions,
+    review_rubrics,
+    settlement_attempts,
+)
 
 
 class SqlRewardStore(ReviewStore):
@@ -156,4 +165,168 @@ class SqlRewardStore(ReviewStore):
             draft_origin=str(payload["draft_origin"]),
             confirmed_by=UUID(str(confirmed_by)) if confirmed_by else None,
             published_by=UUID(str(published_by)) if published_by else None,
+        )
+
+    async def payout_claim(
+        self, assignment_id: UUID, contribution_version: int, terms_version: int
+    ) -> PayoutClaim | None:
+        async with self.database.sessions() as session:
+            row = (
+                (
+                    await session.execute(
+                        select(payout_claims).where(
+                            payout_claims.c.assignment_id == assignment_id,
+                            payout_claims.c.contribution_version == contribution_version,
+                            payout_claims.c.terms_version == terms_version,
+                        )
+                    )
+                )
+                .mappings()
+                .one_or_none()
+            )
+        return self._payout_claim(row) if row is not None else None
+
+    async def payout_claim_by_id(self, claim_id: UUID) -> PayoutClaim | None:
+        async with self.database.sessions() as session:
+            row = (
+                (await session.execute(select(payout_claims).where(payout_claims.c.id == claim_id)))
+                .mappings()
+                .one_or_none()
+            )
+        return self._payout_claim(row) if row is not None else None
+
+    async def add_payout_claim(self, claim: PayoutClaim) -> PayoutClaim:
+        try:
+            async with self.database.session() as session:
+                await session.execute(insert(payout_claims).values(**self._claim_values(claim)))
+        except IntegrityError:
+            existing = await self.payout_claim(
+                claim.assignment_id, claim.contribution_version, claim.terms_version
+            )
+            if existing is not None:
+                return existing
+            raise
+        return claim
+
+    async def save_payout_claim(
+        self, claim: PayoutClaim, expected_version: int
+    ) -> PayoutClaim:
+        async with self.database.session() as session:
+            result = await session.execute(
+                update(payout_claims)
+                .where(
+                    payout_claims.c.id == claim.claim_id,
+                    payout_claims.c.version == expected_version,
+                )
+                .values(**self._claim_values(claim, include_id=False))
+                .returning(payout_claims.c.id)
+            )
+            if result.scalar_one_or_none() is None:
+                raise ApiError(
+                    code="STALE_PAYOUT",
+                    message="Начисление изменилось. Обновите данные перед действием.",
+                    status_code=409,
+                )
+        return claim
+
+    async def settlement_attempt(
+        self, claim_id: UUID, request_key: str
+    ) -> SettlementAttempt | None:
+        async with self.database.sessions() as session:
+            row = (
+                (
+                    await session.execute(
+                        select(settlement_attempts).where(
+                            settlement_attempts.c.payout_claim_id == claim_id,
+                            settlement_attempts.c.request_key == request_key,
+                        )
+                    )
+                )
+                .mappings()
+                .one_or_none()
+            )
+        return self._settlement_attempt(row) if row is not None else None
+
+    async def next_settlement_attempt_number(self, claim_id: UUID) -> int:
+        async with self.database.sessions() as session:
+            value = await session.scalar(
+                select(func.count()).select_from(settlement_attempts).where(
+                    settlement_attempts.c.payout_claim_id == claim_id
+                )
+            )
+        return int(value or 0) + 1
+
+    async def add_settlement_attempt(self, attempt: SettlementAttempt) -> SettlementAttempt:
+        try:
+            async with self.database.session() as session:
+                await session.execute(
+                    insert(settlement_attempts).values(
+                        id=attempt.attempt_id,
+                        payout_claim_id=attempt.payout_claim_id,
+                        attempt_number=attempt.attempt_number,
+                        request_key=attempt.request_key,
+                        kind=attempt.kind.value,
+                        demo=attempt.demo,
+                        provider_reference=attempt.provider_reference,
+                        status=attempt.status.value,
+                        data_origin="demo_runtime",
+                    )
+                )
+        except IntegrityError:
+            existing = await self.settlement_attempt(
+                attempt.payout_claim_id, attempt.request_key
+            )
+            if existing is not None:
+                return existing
+            raise
+        return attempt
+
+    @staticmethod
+    def _claim_values(claim: PayoutClaim, *, include_id: bool = True) -> dict[str, object]:
+        values: dict[str, object] = {
+            "assignment_id": claim.assignment_id,
+            "contribution_version": claim.contribution_version,
+            "terms_version": claim.terms_version,
+            "review_id": claim.review_id,
+            "review_version": claim.review_version,
+            "grade": claim.grade.value,
+            "amount": claim.amount,
+            "currency": claim.currency,
+            "approved_by": claim.approved_by,
+            "status": claim.status.value,
+            "version": claim.version,
+            "data_origin": "demo_runtime",
+        }
+        if include_id:
+            values["id"] = claim.claim_id
+        return values
+
+    @staticmethod
+    def _payout_claim(row: RowMapping) -> PayoutClaim:
+        return PayoutClaim(
+            claim_id=row["id"],
+            assignment_id=row["assignment_id"],
+            contribution_version=row["contribution_version"],
+            terms_version=row["terms_version"],
+            review_id=row["review_id"],
+            review_version=row["review_version"],
+            grade=ReviewGrade(row["grade"]),
+            amount=row["amount"],
+            currency=row["currency"],
+            status=PayoutStatus(row["status"]),
+            version=row["version"],
+            approved_by=row["approved_by"],
+        )
+
+    @staticmethod
+    def _settlement_attempt(row: RowMapping) -> SettlementAttempt:
+        return SettlementAttempt(
+            attempt_id=row["id"],
+            payout_claim_id=row["payout_claim_id"],
+            attempt_number=row["attempt_number"],
+            request_key=row["request_key"],
+            kind=SettlementKind(row["kind"]),
+            status=PayoutStatus(row["status"]),
+            provider_reference=row["provider_reference"],
+            demo=row["demo"],
         )

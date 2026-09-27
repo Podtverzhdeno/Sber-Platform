@@ -1128,6 +1128,69 @@
         "title": "DemoLoginRequest",
         "type": "object"
       },
+      "DemoReversalRequest": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "request_key": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Request Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_version",
+          "request_key"
+        ],
+        "title": "DemoReversalRequest",
+        "type": "object"
+      },
+      "DemoSettlementRequest": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "request_key": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Request Key",
+            "type": "string"
+          },
+          "success": {
+            "default": true,
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "expected_version",
+          "request_key"
+        ],
+        "title": "DemoSettlementRequest",
+        "type": "object"
+      },
+      "DemoSettlementView": {
+        "properties": {
+          "claim": {
+            "$ref": "#/components/schemas/PayoutClaimView"
+          },
+          "settlement": {
+            "$ref": "#/components/schemas/SettlementAttemptView"
+          }
+        },
+        "required": [
+          "claim",
+          "settlement"
+        ],
+        "title": "DemoSettlementView",
+        "type": "object"
+      },
       "DisputeView": {
         "properties": {
           "conflicting_contribution_id": {
@@ -1446,6 +1509,111 @@
         ],
         "title": "MilestoneView",
         "type": "object"
+      },
+      "PayoutClaimView": {
+        "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "approved_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approved By"
+          },
+          "assignment_id": {
+            "format": "uuid",
+            "title": "Assignment Id",
+            "type": "string"
+          },
+          "contribution_version": {
+            "title": "Contribution Version",
+            "type": "integer"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "grade": {
+            "$ref": "#/components/schemas/ReviewGrade"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "review_id": {
+            "format": "uuid",
+            "title": "Review Id",
+            "type": "string"
+          },
+          "review_version": {
+            "title": "Review Version",
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PayoutStatus"
+          },
+          "terms_version": {
+            "title": "Terms Version",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "assignment_id",
+          "contribution_version",
+          "terms_version",
+          "review_id",
+          "review_version",
+          "grade",
+          "amount",
+          "currency",
+          "status",
+          "version",
+          "approved_by"
+        ],
+        "title": "PayoutClaimView",
+        "type": "object"
+      },
+      "PayoutStatus": {
+        "enum": [
+          "not_applicable",
+          "calculated",
+          "approved",
+          "sent_to_payment_system",
+          "paid",
+          "failed",
+          "reversed"
+        ],
+        "title": "PayoutStatus",
+        "type": "string"
       },
       "PersonaView": {
         "properties": {
@@ -1797,6 +1965,69 @@
         ],
         "title": "SelectTrackRequest",
         "type": "object"
+      },
+      "SettlementAttemptView": {
+        "properties": {
+          "attempt_number": {
+            "title": "Attempt Number",
+            "type": "integer"
+          },
+          "demo": {
+            "title": "Demo",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/SettlementKind"
+          },
+          "payout_claim_id": {
+            "format": "uuid",
+            "title": "Payout Claim Id",
+            "type": "string"
+          },
+          "provider_reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Reference"
+          },
+          "request_key": {
+            "title": "Request Key",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PayoutStatus"
+          }
+        },
+        "required": [
+          "id",
+          "payout_claim_id",
+          "attempt_number",
+          "request_key",
+          "kind",
+          "status",
+          "provider_reference",
+          "demo"
+        ],
+        "title": "SettlementAttemptView",
+        "type": "object"
+      },
+      "SettlementKind": {
+        "enum": [
+          "payment",
+          "reversal"
+        ],
+        "title": "SettlementKind",
+        "type": "string"
       },
       "StreakView": {
         "properties": {
@@ -4353,6 +4584,260 @@
           }
         },
         "summary": "Decide Claim"
+      }
+    },
+    "/api/v1/operations/payouts/{claim_id}/approve": {
+      "post": {
+        "operationId": "approve_payout_api_v1_operations_payouts__claim_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "claim_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Claim Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewTransitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayoutClaimView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve Payout"
+      }
+    },
+    "/api/v1/operations/payouts/{claim_id}/demo-reverse": {
+      "post": {
+        "operationId": "reverse_payout_demo_api_v1_operations_payouts__claim_id__demo_reverse_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "claim_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Claim Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoReversalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoSettlementView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reverse Payout Demo"
+      }
+    },
+    "/api/v1/operations/payouts/{claim_id}/demo-settle": {
+      "post": {
+        "operationId": "settle_payout_demo_api_v1_operations_payouts__claim_id__demo_settle_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "claim_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Claim Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoSettlementRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoSettlementView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Settle Payout Demo"
+      }
+    },
+    "/api/v1/operations/reviews/{review_id}/payout-calculation": {
+      "post": {
+        "operationId": "calculate_payout_api_v1_operations_reviews__review_id__payout_calculation_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "review_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Review Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayoutClaimView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Calculate Payout"
       }
     },
     "/api/v1/operations/tasks/{task_id}/moderate": {

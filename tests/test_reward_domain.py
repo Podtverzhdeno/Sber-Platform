@@ -11,6 +11,8 @@ from impulse.domain.reward import (
     CompensationPolicyError,
     CompensationTerms,
     CriterionAssessment,
+    PayoutClaim,
+    PayoutStatus,
     Review5Plus,
     ReviewGrade,
     ReviewRubric,
@@ -206,4 +208,112 @@ def test_review_cannot_be_published_for_unaccepted_contribution_or_another_human
             uuid4(),
             contribution_accepted=True,
             authorship_conflict_open=False,
+        )
+
+
+def published_review(grade: ReviewGrade = ReviewGrade.B) -> Review5Plus:
+    human_id = uuid4()
+    current_rubric = rubric()
+    draft = Review5Plus.draft(
+        review_id=uuid4(),
+        contribution_id=uuid4(),
+        contribution_version=2,
+        rubric=current_rubric,
+        grade=grade,
+        assessments=(
+            CriterionAssessment("quality", "MVP воспроизводится.", ("artifact:mvp",)),
+            CriterionAssessment("ownership", "Авторство подтверждено.", ("commit:42",)),
+        ),
+        explanation="Итоговая человеческая оценка по проверяемым фактам.",
+        draft_origin="human",
+    )
+    return (
+        draft.propose()
+        .confirm(human_id)
+        .publish(
+            human_id,
+            contribution_accepted=True,
+            authorship_conflict_open=False,
+        )
+    )
+
+
+def test_payout_calculation_is_separate_from_approval_and_settlement() -> None:
+    review = published_review()
+    claim = PayoutClaim.calculate(
+        claim_id=uuid4(),
+        assignment_id=uuid4(),
+        contribution_version=2,
+        terms_version=4,
+        review=review,
+        compensation=paid_terms(base_amount_per_assignee=Decimal("10000.00")),
+    )
+    assert claim.status is PayoutStatus.CALCULATED
+    assert claim.amount == Decimal("15000.00")
+    assert claim.approved_by is None
+
+    approver = uuid4()
+    approved = claim.approve(approver)
+    sent = approved.send()
+    failed = sent.settle(success=False)
+    retried = failed.send()
+    paid = retried.settle(success=True)
+    reversed_claim = paid.reverse()
+    assert [item.status for item in (approved, sent, failed, retried, paid, reversed_claim)] == [
+        PayoutStatus.APPROVED,
+        PayoutStatus.SENT_TO_PAYMENT_SYSTEM,
+        PayoutStatus.FAILED,
+        PayoutStatus.SENT_TO_PAYMENT_SYSTEM,
+        PayoutStatus.PAID,
+        PayoutStatus.REVERSED,
+    ]
+    assert approved.approved_by == approver
+    assert reversed_claim.amount == Decimal("15000.00")
+
+
+def test_unpaid_review_is_not_applicable_and_cannot_be_approved() -> None:
+    review = published_review()
+    terms = CompensationTerms(
+        paid=False,
+        base_amount_per_assignee=None,
+        currency=None,
+        a_multiplier=Decimal("2"),
+        quantum=Decimal("0.01"),
+        rounding_mode=RoundingMode.HALF_UP,
+        policy_version=1,
+        payout_condition="Вознаграждение не предусмотрено.",
+    )
+    claim = PayoutClaim.calculate(
+        claim_id=uuid4(),
+        assignment_id=uuid4(),
+        contribution_version=2,
+        terms_version=1,
+        review=review,
+        compensation=terms,
+    )
+    assert claim.status is PayoutStatus.NOT_APPLICABLE
+    assert claim.amount is None
+    with pytest.raises(CompensationPolicyError):
+        claim.approve(uuid4())
+
+
+def test_payout_requires_published_review_and_matching_contribution_version() -> None:
+    draft = review_draft(origin="human")
+    with pytest.raises(CompensationPolicyError, match="опубликованной"):
+        PayoutClaim.calculate(
+            claim_id=uuid4(),
+            assignment_id=uuid4(),
+            contribution_version=draft.contribution_version,
+            terms_version=1,
+            review=draft,
+            compensation=paid_terms(),
+        )
+    with pytest.raises(CompensationPolicyError, match="отличается"):
+        PayoutClaim.calculate(
+            claim_id=uuid4(),
+            assignment_id=uuid4(),
+            contribution_version=999,
+            terms_version=1,
+            review=published_review(),
+            compensation=paid_terms(),
         )

@@ -1,6 +1,9 @@
 """Application policy tests for human-controlled 5+ reviews."""
 
 from dataclasses import replace
+from datetime import UTC, datetime
+from decimal import Decimal
+from typing import cast
 from uuid import UUID, uuid4
 
 import pytest
@@ -11,14 +14,26 @@ from impulse.application.reward import (
     ReviewEvidence,
     RewardService,
 )
+from impulse.application.work import (
+    ApplicationRecord,
+    AssignmentRecord,
+    ContributionRecord,
+    TermsRecord,
+    WorkStore,
+)
 from impulse.domain.identity import ActorContext, Role
 from impulse.domain.reward import (
+    CompensationTerms,
     CriterionAssessment,
+    PayoutStatus,
+    Review5Plus,
     ReviewGrade,
     ReviewRubric,
     ReviewStatus,
+    RoundingMode,
     RubricCriterion,
 )
+from impulse.domain.work import ApplicationStatus, AssignmentStatus, ContributionStatus
 
 
 class EvidenceStub:
@@ -51,6 +66,61 @@ def rubric() -> ReviewRubric:
         version=1,
         criteria=(RubricCriterion("result", "Результат"),),
     )
+
+
+class PayoutWorkStub:
+    def __init__(self) -> None:
+        self.task_id = uuid4()
+        self.application_record = ApplicationRecord(
+            uuid4(), self.task_id, uuid4(), 3, ApplicationStatus.ACCEPTED
+        )
+        self.assignment_record = AssignmentRecord(
+            uuid4(),
+            self.task_id,
+            self.application_record.person_id,
+            self.application_record.id,
+            AssignmentStatus.ACCEPTED,
+        )
+        self.contribution_record = ContributionRecord(
+            uuid4(),
+            self.assignment_record.id,
+            2,
+            "Личный вклад подтверждён.",
+            ("artifact:mvp",),
+            ContributionStatus.ACCEPTED,
+        )
+        self.terms_record = TermsRecord(
+            self.task_id,
+            3,
+            datetime(2026, 10, 1, tzinfo=UTC),
+            "MVP",
+            ("Принят заказчиком",),
+            None,
+            CompensationTerms(
+                paid=True,
+                base_amount_per_assignee=Decimal("10000.00"),
+                currency="RUB",
+                a_multiplier=Decimal("2.5"),
+                quantum=Decimal("0.01"),
+                rounding_mode=RoundingMode.HALF_UP,
+                policy_version=1,
+                payout_condition="После принятия личного вклада и оценки 5+.",
+            ),
+        )
+
+    async def contribution(self, contribution_id: UUID) -> ContributionRecord | None:
+        return self.contribution_record if contribution_id == self.contribution_record.id else None
+
+    async def assignment(self, assignment_id: UUID) -> AssignmentRecord | None:
+        return self.assignment_record if assignment_id == self.assignment_record.id else None
+
+    async def application(self, application_id: UUID) -> ApplicationRecord | None:
+        return self.application_record if application_id == self.application_record.id else None
+
+    async def terms_version(self, task_id: UUID, version: int) -> TermsRecord | None:
+        if (task_id, version) == (self.task_id, self.terms_record.version):
+            return self.terms_record
+        return None
 
 
 @pytest.mark.asyncio
@@ -153,3 +223,56 @@ async def test_foreign_mentor_and_stale_review_are_non_disclosing_or_rejected() 
     with pytest.raises(ApiError) as stale:
         await service.confirm(actor(mentor_id), draft.review_id, 1)
     assert stale.value.code == "STALE_REVIEW"
+
+
+@pytest.mark.asyncio
+async def test_payout_retry_idempotency_and_reversal_never_double_pay() -> None:
+    work = PayoutWorkStub()
+    store = MemoryRewardStore()
+    review = Review5Plus(
+        review_id=uuid4(),
+        contribution_id=work.contribution_record.id,
+        contribution_version=work.contribution_record.version,
+        rubric_id=uuid4(),
+        rubric_version=1,
+        review_version=1,
+        grade=ReviewGrade.B,
+        assessments=(CriterionAssessment("result", "Принято.", ("artifact:mvp",)),),
+        explanation="Принятый результат соответствует оценке B.",
+        status=ReviewStatus.PUBLISHED,
+        confirmed_by=uuid4(),
+        published_by=uuid4(),
+    )
+    await store.add_review_version(review)
+    service = RewardService(
+        store,
+        EvidenceStub(uuid4(), ReviewEvidence(review.contribution_id, 2, True, False)),
+        cast(WorkStore, work),
+    )
+    operator = actor(uuid4(), Role.OPERATOR)
+
+    calculated = await service.calculate_payout(operator, review.review_id)
+    duplicate_calculation = await service.calculate_payout(operator, review.review_id)
+    assert duplicate_calculation.claim_id == calculated.claim_id
+    assert calculated.amount == Decimal("15000.00")
+    approved = await service.approve_payout(operator, calculated.claim_id, 1)
+
+    failed, first = await service.settle_demo(
+        operator, approved.claim_id, approved.version, request_key="payment-1", success=False
+    )
+    duplicate, same_first = await service.settle_demo(
+        operator, approved.claim_id, approved.version, request_key="payment-1", success=False
+    )
+    assert failed.status is PayoutStatus.FAILED
+    assert duplicate.status is PayoutStatus.FAILED
+    assert same_first.attempt_id == first.attempt_id
+
+    paid, second = await service.settle_demo(
+        operator, failed.claim_id, failed.version, request_key="payment-2", success=True
+    )
+    reversed_claim, reversal = await service.reverse_demo(
+        operator, paid.claim_id, paid.version, request_key="reversal-1"
+    )
+    assert (first.attempt_number, second.attempt_number, reversal.attempt_number) == (1, 2, 3)
+    assert paid.status is PayoutStatus.PAID
+    assert reversed_claim.status is PayoutStatus.REVERSED

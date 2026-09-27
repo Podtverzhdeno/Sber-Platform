@@ -752,6 +752,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/operations/payouts/{claim_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve Payout */
+        post: operations["approve_payout_api_v1_operations_payouts__claim_id__approve_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/payouts/{claim_id}/demo-reverse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reverse Payout Demo */
+        post: operations["reverse_payout_demo_api_v1_operations_payouts__claim_id__demo_reverse_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/payouts/{claim_id}/demo-settle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Settle Payout Demo */
+        post: operations["settle_payout_demo_api_v1_operations_payouts__claim_id__demo_settle_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/operations/reviews/{review_id}/payout-calculation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Calculate Payout */
+        post: operations["calculate_payout_api_v1_operations_reviews__review_id__payout_calculation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/operations/tasks/{task_id}/moderate": {
         parameters: {
             query?: never;
@@ -1240,6 +1308,30 @@ export interface components {
             /** Persona Key */
             persona_key: string;
         };
+        /** DemoReversalRequest */
+        DemoReversalRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Request Key */
+            request_key: string;
+        };
+        /** DemoSettlementRequest */
+        DemoSettlementRequest: {
+            /** Expected Version */
+            expected_version: number;
+            /** Request Key */
+            request_key: string;
+            /**
+             * Success
+             * @default true
+             */
+            success: boolean;
+        };
+        /** DemoSettlementView */
+        DemoSettlementView: {
+            claim: components["schemas"]["PayoutClaimView"];
+            settlement: components["schemas"]["SettlementAttemptView"];
+        };
         /** DisputeView */
         DisputeView: {
             /** Conflicting Contribution Id */
@@ -1370,6 +1462,45 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** PayoutClaimView */
+        PayoutClaimView: {
+            /** Amount */
+            amount: string | null;
+            /** Approved By */
+            approved_by: string | null;
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Contribution Version */
+            contribution_version: number;
+            /** Currency */
+            currency: string | null;
+            grade: components["schemas"]["ReviewGrade"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Review Id
+             * Format: uuid
+             */
+            review_id: string;
+            /** Review Version */
+            review_version: number;
+            status: components["schemas"]["PayoutStatus"];
+            /** Terms Version */
+            terms_version: number;
+            /** Version */
+            version: number;
+        };
+        /**
+         * PayoutStatus
+         * @enum {string}
+         */
+        PayoutStatus: "not_applicable" | "calculated" | "approved" | "sent_to_payment_system" | "paid" | "failed" | "reversed";
         /** PersonaView */
         PersonaView: {
             /** Display Name */
@@ -1501,6 +1632,34 @@ export interface components {
             /** Track Key */
             track_key: string;
         };
+        /** SettlementAttemptView */
+        SettlementAttemptView: {
+            /** Attempt Number */
+            attempt_number: number;
+            /** Demo */
+            demo: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            kind: components["schemas"]["SettlementKind"];
+            /**
+             * Payout Claim Id
+             * Format: uuid
+             */
+            payout_claim_id: string;
+            /** Provider Reference */
+            provider_reference: string | null;
+            /** Request Key */
+            request_key: string;
+            status: components["schemas"]["PayoutStatus"];
+        };
+        /**
+         * SettlementKind
+         * @enum {string}
+         */
+        SettlementKind: "payment" | "reversal";
         /** StreakView */
         StreakView: {
             /** Current Days */
@@ -2988,6 +3147,150 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClaimView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    approve_payout_api_v1_operations_payouts__claim_id__approve_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                claim_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReviewTransitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayoutClaimView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reverse_payout_demo_api_v1_operations_payouts__claim_id__demo_reverse_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                claim_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DemoReversalRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoSettlementView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    settle_payout_demo_api_v1_operations_payouts__claim_id__demo_settle_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                claim_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DemoSettlementRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoSettlementView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    calculate_payout_api_v1_operations_reviews__review_id__payout_calculation_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                review_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PayoutClaimView"];
                 };
             };
             /** @description Validation Error */

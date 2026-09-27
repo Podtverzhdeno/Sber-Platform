@@ -80,6 +80,7 @@ def create_app(
         reward_service = RewardService(
             reward_store,
             WorkReviewEvidenceProvider(work_service.store),
+            work_service.store,
         )
 
     @asynccontextmanager
