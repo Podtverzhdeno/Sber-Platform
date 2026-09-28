@@ -142,6 +142,62 @@ th, td { padding: 12px; border-bottom: 1px solid rgb(255 255 255 / 10%); text-al
 .course-grid .ui-card > a { width: fit-content; margin-top: auto; color: #84eaae; }
 .catalog-controls { display: flex; flex-wrap: wrap; gap: 16px; }
 .event-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 18px; }
+
+.event-actions, .course-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; }
+.event-actions button, .event-actions a, .course-actions a {
+  display: inline-flex; min-height: 42px; align-items: center; justify-content: center; padding: 10px 15px;
+  border: 1px solid var(--color-border-strong); border-radius: 10px; color: var(--color-text);
+  background: linear-gradient(145deg, #10243a, #0b1929); font-weight: 800; text-decoration: none; cursor: pointer;
+}
+.event-actions button { border-color: transparent; color: #03201c; background: linear-gradient(135deg, var(--color-primary), #75f1c5); }
+.event-actions button:hover, .event-actions a:hover, .course-actions a:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgb(34 230 208 / 12%); }
+.event-actions button:focus-visible, .event-actions a:focus-visible, .course-actions a:focus-visible { outline: 3px solid rgb(34 230 208 / 35%); outline-offset: 2px; }
+.event-claim-form { display: grid; gap: 14px; }
+.event-claim-form label { display: grid; gap: 6px; color: var(--color-muted); font-size: 13px; }
+.event-claim-form textarea, .event-claim-form input { min-height: 44px; padding: 11px; border: 1px solid var(--color-border); border-radius: 9px; color: var(--color-text); background: #081421; }
+.event-claim-form textarea { min-height: 100px; resize: vertical; }
+
+.course-roadmap-hero { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 24px; align-items: end; padding: 24px; border: 1px solid var(--color-border); border-radius: 16px; background: radial-gradient(circle at 90% 20%, rgb(34 230 208 / 12%), transparent 38%), var(--color-surface-1); }
+.course-progress { display: grid; gap: 6px; padding: 16px; border: 1px solid rgb(34 230 208 / 24%); border-radius: 12px; background: rgb(5 20 31 / 75%); }
+.course-progress strong { color: var(--color-primary); font-size: 30px; }
+.course-progress span { color: var(--color-muted); }
+.course-progress i { height: 7px; overflow: hidden; border-radius: 10px; background: #17283a; }
+.course-progress i b { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--color-info), var(--color-primary)); }
+.course-outcome, .rating-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.course-outcome > div { display: grid; gap: 5px; padding: 15px; border: 1px solid var(--color-border); border-radius: 11px; background: var(--color-surface-1); }
+.course-outcome span { color: var(--color-muted); font-size: 12px; }
+.checkpoint-list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.checkpoint { position: relative; display: grid; grid-template-columns: 48px 1fr; gap: 15px; padding: 0 0 22px; }
+.checkpoint::before { content: ""; position: absolute; top: 42px; bottom: 0; left: 21px; width: 2px; background: var(--color-border); }
+.checkpoint:last-child::before { display: none; }
+.checkpoint-marker { z-index: 1; display: grid; width: 44px; height: 44px; place-items: center; border: 1px solid var(--color-border-strong); border-radius: 50%; color: var(--color-muted); background: var(--color-surface-1); font-weight: 900; }
+.checkpoint--completed .checkpoint-marker { border-color: var(--color-primary); color: #03201c; background: var(--color-primary); }
+.checkpoint--active .checkpoint-marker { border-color: var(--color-ai); color: white; background: var(--color-ai); box-shadow: 0 0 22px rgb(128 104 255 / 30%); }
+.checkpoint > div { padding: 17px; border: 1px solid var(--color-border); border-radius: 13px; background: var(--color-surface-1); }
+.checkpoint--locked > div { opacity: .64; }
+.checkpoint-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.checkpoint h2 { margin: 6px 0; font-size: 18px; }
+.checkpoint p, .checkpoint small { color: var(--color-muted); }
+
+.rating-position { display: grid; min-width: 220px; gap: 4px; padding: 16px 20px; border: 1px solid rgb(34 230 208 / 28%); border-radius: 14px; background: linear-gradient(145deg, rgb(34 230 208 / 10%), rgb(47 149 255 / 5%)); }
+.rating-position strong, .rating-big { color: var(--color-primary); font-size: 30px; }
+.rating-table { overflow: hidden; border: 1px solid var(--color-border); border-radius: 14px; background: var(--color-surface-1); }
+.rating-row { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto auto; gap: 14px; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--color-border); }
+.rating-row:last-child { border-bottom: 0; }
+.rating-row--current { background: linear-gradient(90deg, rgb(34 230 208 / 10%), transparent); box-shadow: inset 3px 0 var(--color-primary); }
+.rating-place { font-size: 22px; text-align: center; }
+.rating-row h3 { margin: 3px 0; }
+.rating-row small { color: var(--color-muted); }
+.rating-trophies { display: flex; flex-wrap: wrap; gap: 5px; }
+.rating-trophies button { padding: 3px 7px; border: 1px solid rgb(242 172 61 / 25%); border-radius: 999px; color: #ffd38a; background: rgb(242 172 61 / 8%); font-size: 10px; cursor: pointer; }
+.demo-fallback-note { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid rgb(128 104 255 / 28%); border-radius: 11px; background: rgb(128 104 255 / 8%); }
+.demo-fallback-note span { flex: 1; color: var(--color-muted); }
+
+@media (max-width: 800px) {
+  .course-roadmap-hero, .course-outcome, .rating-summary { grid-template-columns: 1fr; }
+  .rating-row { grid-template-columns: 42px minmax(0, 1fr); }
+  .rating-row > strong:last-of-type, .rating-row > .secondary-button { grid-column: 2; justify-self: start; }
+}
 .event-facts { display: grid; gap: 8px; margin: 18px 0; }
 .event-facts div { display: grid; grid-template-columns: 120px 1fr; gap: 12px; }
 .event-facts dt { color: var(--color-muted); }

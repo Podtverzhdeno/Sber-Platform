@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { apiRequest } from "../api/client";
-import { Badge, Card, SafeExternalLink, StatePanel } from "../components/ui";
+import { Badge, Card, Modal, SafeExternalLink, StatePanel } from "../components/ui";
 
 type EventItem = {
   key: string;
@@ -38,11 +38,14 @@ export function EventCatalog() {
   const client = useQueryClient();
   const [track, setTrack] = useState("all");
   const [eventType, setEventType] = useState("all");
+  const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
+  const [result, setResult] = useState("Участвовал в команде и подготовил рабочий прототип.");
+  const [evidence, setEvidence] = useState("https://example.org/demo-evidence");
   const events = useQuery({ queryKey: ["events"], queryFn: () => apiRequest<EventPage>("/api/v1/ecosystem/events") });
   const claims = useQuery({ queryKey: ["event-claims"], queryFn: () => apiRequest<Claim[]>("/api/v1/me/event-claims") });
   const report = useMutation({
-    mutationFn: (eventKey: string) => apiRequest<Claim>(`/api/v1/me/events/${encodeURIComponent(eventKey)}/claims`, { method: "POST", headers: csrfHeaders(), body: JSON.stringify({ claim_type: "participation" }) }),
-    onSuccess: async () => { await client.invalidateQueries({ queryKey: ["event-claims"] }); },
+    mutationFn: (eventKey: string) => apiRequest<Claim>(`/api/v1/me/events/${encodeURIComponent(eventKey)}/claims`, { method: "POST", headers: csrfHeaders(), body: JSON.stringify({ claim_type: "participation", result, evidence_url: evidence }) }),
+    onSuccess: async () => { setSelectedEvent(null); await client.invalidateQueries({ queryKey: ["event-claims"] }); },
   });
 
   if (events.isLoading || claims.isLoading) return <StatePanel kind="loading" />;
@@ -65,10 +68,13 @@ export function EventCatalog() {
           <div className="course-meta"><Badge>{item.event_type}</Badge><Badge tone={item.status === "open" ? "success" : "neutral"}>{item.status === "open" ? "Приём открыт" : "Завершено"}</Badge></div>
           <p>{item.recommendation_reason}</p><p className="muted">{item.conditions}</p>
           <dl className="event-facts"><div><dt>Организатор</dt><dd>{item.organizer}</dd></div><div><dt>Дедлайн</dt><dd>{item.deadline_at ? new Date(item.deadline_at).toLocaleDateString("ru-RU") : "Уточняется"}</dd></div><div><dt>Источник проверен</dt><dd>{new Date(item.source_checked_at).toLocaleDateString("ru-RU")}</dd></div></dl>
-          <SafeExternalLink href={item.source_url}>Открыть первоисточник события</SafeExternalLink>
-          {claim ? <div className="claim-state" aria-live="polite"><Badge tone={claim.evidence_state === "verified" ? "success" : "warning"}>{claim.evidence_state === "verified" ? "Подтверждено" : claim.evidence_state === "invalid" ? "Недействительно" : "Предварительно"}</Badge><p>{claim.verification_explanation}</p></div> : <button type="button" onClick={() => { report.mutate(item.key); }}>Сообщить об участии</button>}
+          <div className="event-actions"><SafeExternalLink href={item.source_url}>Открыть первоисточник</SafeExternalLink>{!claim && <button type="button" onClick={() => { setSelectedEvent(item); }}>Сообщить об участии</button>}</div>
+          {claim && <div className="claim-state" aria-live="polite"><Badge tone={claim.evidence_state === "verified" ? "success" : "warning"}>{claim.evidence_state === "verified" ? "Подтверждено" : claim.evidence_state === "invalid" ? "Недействительно" : "Предварительно"}</Badge><p>{claim.verification_explanation}</p></div>}
         </Card>;
       })}</div>}
+      <Modal title={`Сообщить об участии · ${selectedEvent?.title ?? ""}`} open={selectedEvent !== null} onClose={() => { setSelectedEvent(null); }}>
+        <form className="event-claim-form" onSubmit={(event) => { event.preventDefault(); if (selectedEvent) report.mutate(selectedEvent.key); }}><p>Добавьте факты и доказательство. До проверки запись будет отмечена как предварительная и не повлияет на рейтинг.</p><label>Ваш результат<textarea required minLength={20} value={result} onChange={(event) => { setResult(event.target.value); }} /></label><label>Ссылка на доказательство<input required type="url" value={evidence} onChange={(event) => { setEvidence(event.target.value); }} /></label><div className="modal-actions"><button type="submit" disabled={report.isPending}>{report.isPending ? "Отправляем…" : "Отправить на проверку"}</button><button className="secondary-button" type="button" onClick={() => { setSelectedEvent(null); }}>Отмена</button></div></form>
+      </Modal>
     </div>
   );
 }

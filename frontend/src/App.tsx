@@ -12,7 +12,7 @@ import { ManagerWorkspace } from "./features/manager";
 import { HrWorkspace } from "./features/hr";
 import { OperatorWorkspace } from "./features/operator";
 import { ParticipantAnalytics, RoleAnalytics } from "./features/analytics";
-import { ParticipantPortfolio } from "./features/portfolio";
+import { ParticipantPortfolio, ParticipantRating } from "./features/portfolio";
 import { MentorReviewWorkspace, ParticipantRewardEvidence } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
 
@@ -41,6 +41,7 @@ const roleLabels: Record<Role, string> = {
 };
 
 const navigationIcons: Record<string, string> = {
+  "Главная": "⌂",
   "Мой путь": "⌂", Bootcamp: "◇", "Задачи": "▤", "События": "✦", "Рейтинг": "♜",
   "Портфолио": "◈", "Аналитика": "▥", "Очередь ревью": "✓", "Назначения": "▣", "Мои задачи": "▤",
   "Кандидаты": "♙", "Приёмка": "✓", "Инициативы": "◆", "Результаты": "◎",
@@ -135,7 +136,9 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
       </aside>
       <div className="workspace-content">
         <button className="mobile-menu" type="button" aria-expanded={navigationOpen} onClick={() => { setNavigationOpen(true); }}><span aria-hidden="true">☰</span> Меню</button>
-        {allowed && actor.active_role === "participant" && currentSection === "Мой путь" ? (
+        {allowed && currentSection === "Главная" ? (
+          <RoleDashboard actor={actor} currentSection="Главная" />
+        ) : allowed && actor.active_role === "participant" && currentSection === "Мой путь" ? (
           <DevelopmentJourney />
         ) : allowed && actor.active_role === "participant" && currentSection === "Bootcamp" ? (
           <Bootcamp honorBoardEnabled={honorBoardEnabled} honorBoardConsent={actor.consent_scopes.includes("course_honor_board")} />
@@ -145,19 +148,21 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
           <div className="feature-stack"><ParticipantTasks /><ParticipantRewardEvidence /></div>
         ) : allowed && actor.active_role === "participant" && currentSection === "Портфолио" ? (
           <ParticipantPortfolio />
-        ) : allowed && actor.active_role === "participant" && sectionIndex === 6 ? (
+        ) : allowed && actor.active_role === "participant" && currentSection === "Рейтинг" ? (
+          <ParticipantRating />
+        ) : allowed && actor.active_role === "participant" && currentSection === "Аналитика" ? (
           <ParticipantAnalytics />
         ) : allowed && actor.active_role === "customer" && (currentSection === "Кандидаты" || currentSection === "Приёмка") ? (
           <CustomerParticipantPreview />
         ) : allowed && actor.active_role === "customer" && currentSection === "Мои задачи" ? (
           <CustomerWorkspace />
-        ) : allowed && actor.active_role === "mentor" && sectionIndex === 0 ? (
+        ) : allowed && actor.active_role === "mentor" && currentSection === "Очередь ревью" ? (
           <MentorReviewWorkspace />
         ) : allowed && actor.active_role === "manager" && (currentSection === "Инициативы" || currentSection === "Результаты") ? (
           <ManagerWorkspace />
-        ) : allowed && actor.active_role === "hr" && sectionIndex < 2 ? (
-          <HrWorkspace pipelineOnly={sectionIndex === 1} />
-        ) : allowed && actor.active_role === "operator" && sectionIndex < 3 ? (
+        ) : allowed && actor.active_role === "hr" && (currentSection === "Кандидаты" || currentSection === "Воронка") ? (
+          <HrWorkspace pipelineOnly={currentSection === "Воронка"} />
+        ) : allowed && actor.active_role === "operator" && (currentSection === "Операционная очередь" || currentSection === "Проверки" || currentSection === "Споры") ? (
           <OperatorWorkspace />
         ) : allowed && actor.active_role !== "participant" && currentSection === "Аналитика" ? (
           <RoleAnalytics role={actor.active_role} />

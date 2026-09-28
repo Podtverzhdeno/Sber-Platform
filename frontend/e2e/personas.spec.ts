@@ -1,12 +1,12 @@
 import { expect, test } from "@playwright/test";
 
 const personas = [
-  ["participant-alex", "Алекс Речной", "participant", ["Мой путь", "Bootcamp", "Задачи", "События", "Рейтинг", "Портфолио", "Аналитика"]],
-  ["mentor-elena", "Елена Наставник", "mentor", ["Очередь ревью", "Назначения", "Аналитика"]],
-  ["customer-roman", "Роман Заказчик", "customer", ["Мои задачи", "Кандидаты", "Приёмка", "Аналитика"]],
-  ["manager-olga", "Ольга Руководитель", "manager", ["Инициативы", "Результаты", "Аналитика"]],
-  ["hr-nina", "Нина HR", "hr", ["Кандидаты", "Воронка", "Аналитика"]],
-  ["operator-pavel", "Павел Оператор", "operator", ["Операционная очередь", "Проверки", "Споры", "Аналитика"]],
+  ["participant-alex", "Алекс Речной", "participant", ["Главная", "Мой путь", "Bootcamp", "Задачи", "События", "Рейтинг", "Портфолио", "Аналитика"]],
+  ["mentor-elena", "Елена Наставник", "mentor", ["Главная", "Очередь ревью", "Назначения", "Аналитика"]],
+  ["customer-roman", "Роман Заказчик", "customer", ["Главная", "Мои задачи", "Кандидаты", "Приёмка", "Аналитика"]],
+  ["manager-olga", "Ольга Руководитель", "manager", ["Главная", "Инициативы", "Результаты", "Аналитика"]],
+  ["hr-nina", "Нина HR", "hr", ["Главная", "Кандидаты", "Воронка", "Аналитика"]],
+  ["operator-pavel", "Павел Оператор", "operator", ["Главная", "Операционная очередь", "Проверки", "Споры", "Аналитика"]],
 ] as const;
 
 test.beforeEach(async ({ page }) => {
@@ -90,23 +90,17 @@ for (const [key, , , navigation] of personas) {
     await page.goto("/");
     await page.locator(`[data-persona="${key}"]`).click();
 
-    const heading = key === "participant-alex"
-      ? "Найдите своё через практику"
-      : key === "mentor-elena"
-        ? "Проверяйте доказательства, а не вывод AI"
-        : key === "customer-roman"
-          ? "Управляйте задачами от идеи до результата"
-          : key === "manager-olga"
-            ? "Результаты команд без лишних персональных данных"
-          : key === "hr-nina"
-            ? "Кандидаты и evidence-first резюме"
-          : "Дела, источники и зависимости";
-    await expect(page.getByRole("heading", { name: heading })).toBeVisible();
+    await expect(page.getByRole("heading", { name: new RegExp(`Добро пожаловать, ${key === "participant-alex" ? "Алекс" : key === "mentor-elena" ? "Елена" : key === "customer-roman" ? "Роман" : key === "manager-olga" ? "Ольга" : key === "hr-nina" ? "Нина" : "Павел"}`) })).toBeVisible();
     const links = page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link");
     await expect(links).toHaveCount(navigation.length);
     for (const [index, label] of navigation.entries()) {
       await expect(links.nth(index)).toHaveAccessibleName(label);
     }
     await expect(page.getByText("Демо-режим · синтетические данные")).toBeVisible();
+    for (const [index, label] of navigation.entries()) {
+      await links.nth(index).click();
+      await expect(page).toHaveURL(new RegExp(`/workspace/${String(index)}$`));
+      await expect(page.getByRole("link", { name: label })).toHaveClass(/active/);
+    }
   });
 }

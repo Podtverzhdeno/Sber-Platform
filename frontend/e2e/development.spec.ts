@@ -52,9 +52,13 @@ test("Bootcamp explains unavailable source, reported verification and streak", a
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
   await expect(page.getByText("Внешний курс пока не подключён; доступна исходная ссылка.")).toBeVisible();
-  await expect(page.getByRole("link", { name: /Открыть источник курса/ })).toHaveAttribute("rel", "noopener noreferrer");
+  await page.getByRole("button", { name: "Открыть траекторию" }).click();
+  await expect(page.getByRole("heading", { name: "Python: основа" })).toBeVisible();
+  await expect(page.getByText("Checkpoint 3")).toBeVisible();
+  await expect(page.getByRole("link", { name: /Открыть учебный материал/ })).toHaveAttribute("rel", "noopener noreferrer");
+  await page.getByRole("button", { name: /Вернуться в Bootcamp/ }).click();
   await page.getByRole("button", { name: "Отметить завершение" }).click();
-  await expect(page.getByText("Баллы не начисляются до проверки источника.")).toBeVisible();
+  await expect(page.getByText("Результат отправлен на проверку. После подтверждения курс появится в портфолио.")).toBeVisible();
   await page.getByRole("button", { name: "Учебный шаг выполнен" }).click();
   await expect(page.getByRole("heading", { name: "Серия: 2 дн." })).toBeVisible();
   await expect(page.getByText(/зал славы/i)).toHaveCount(0);

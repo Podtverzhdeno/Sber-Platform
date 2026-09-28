@@ -47,7 +47,7 @@ describe("App", () => {
             assigned_roles: ["participant"],
             scopes: [],
             consent_scopes: [],
-            navigation: ["Мой путь", "Bootcamp", "Задачи", "Портфолио"],
+            navigation: ["Главная", "Мой путь", "Bootcamp", "Задачи", "Портфолио"],
             csrf_token: "csrf",
           }), { status: 200 }),
         );
@@ -58,6 +58,7 @@ describe("App", () => {
     fireEvent.click(await screen.findByRole("button", { name: /Алекс Речной/ }));
 
     await waitFor(() => expect(screen.getByRole("navigation")).toBeInTheDocument());
+    expect(screen.getByRole("link", { name: "Главная" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Мой путь" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Очередь ревью" })).not.toBeInTheDocument();
   });
