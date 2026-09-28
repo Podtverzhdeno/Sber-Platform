@@ -42,6 +42,32 @@ npm run dev
 
 Vite откроет приложение на `http://127.0.0.1:5173` и проксирует `/api` и `/health` на backend.
 
+### PostgreSQL и демонстрационные данные
+
+Создайте локальную базу и укажите строку подключения только в `.env`:
+
+```dotenv
+APP_ENV=development
+DEMO_MODE=true
+DATABASE_URL=postgresql://<user>:<password>@127.0.0.1:5432/<database>
+SESSION_SECRET=<local-random-secret-at-least-32-characters>
+```
+
+Примените миграции и загрузите идемпотентный связанный набор данных:
+
+```powershell
+uv run alembic upgrade head
+uv run impulse-demo-seed
+```
+
+Seed создаёт синтетических участников, задачи, условия оплаты, заявки, назначения, личные вклады, артефакты, оценки 5+, начисления, рейтинг, HR-события и операторские кейсы. Повторный запуск обновляет те же стабильные demo UUID и не создаёт дублей. Удаление только seed-owned записей доступно исключительно при `DEMO_MODE=true`:
+
+```powershell
+uv run impulse-demo-reset
+```
+
+Не добавляйте реальный `DATABASE_URL`, пароль PostgreSQL или `SESSION_SECRET` в Git.
+
 ## Проверки качества
 
 ```powershell
