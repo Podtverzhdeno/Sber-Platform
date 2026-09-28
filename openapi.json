@@ -1632,6 +1632,55 @@
         "title": "DisputeView",
         "type": "object"
       },
+      "EarningsView": {
+        "properties": {
+          "approved": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Approved",
+            "type": "string"
+          },
+          "calculated": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Calculated",
+            "type": "string"
+          },
+          "currency": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Currency"
+          },
+          "failed": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Failed",
+            "type": "string"
+          },
+          "paid": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Paid",
+            "type": "string"
+          },
+          "unknown_items": {
+            "title": "Unknown Items",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "calculated",
+          "approved",
+          "paid",
+          "failed",
+          "currency",
+          "unknown_items"
+        ],
+        "title": "EarningsView",
+        "type": "object"
+      },
       "EventView": {
         "properties": {
           "conditions": {
@@ -1723,6 +1772,39 @@
           "source_status"
         ],
         "title": "EventView",
+        "type": "object"
+      },
+      "FunnelStageView": {
+        "properties": {
+          "completed": {
+            "title": "Completed",
+            "type": "boolean"
+          },
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "status",
+          "completed",
+          "count"
+        ],
+        "title": "FunnelStageView",
         "type": "object"
       },
       "HTTPValidationError": {
@@ -2404,6 +2486,47 @@
           "supersedes_id"
         ],
         "title": "OperationalCredentialView",
+        "type": "object"
+      },
+      "ParticipantAnalyticsView": {
+        "properties": {
+          "earnings": {
+            "$ref": "#/components/schemas/EarningsView"
+          },
+          "freshness": {
+            "title": "Freshness",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "next_action": {
+            "title": "Next Action",
+            "type": "string"
+          },
+          "stages": {
+            "items": {
+              "$ref": "#/components/schemas/FunnelStageView"
+            },
+            "title": "Stages",
+            "type": "array"
+          },
+          "successful": {
+            "title": "Successful",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "stages",
+          "successful",
+          "next_action",
+          "earnings",
+          "freshness",
+          "generated_at"
+        ],
+        "title": "ParticipantAnalyticsView",
         "type": "object"
       },
       "PayoutClaimView": {
@@ -5600,6 +5723,24 @@
           }
         },
         "summary": "Switch Role"
+      }
+    },
+    "/api/v1/me/analytics/journey": {
+      "get": {
+        "operationId": "participant_journey_api_v1_me_analytics_journey_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantAnalyticsView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Participant Journey"
       }
     },
     "/api/v1/me/assignments/{assignment_id}/contributions": {

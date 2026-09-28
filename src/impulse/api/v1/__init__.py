@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Request
 
+from impulse.api.v1.analytics import router as analytics_router
 from impulse.api.v1.development import router as development_router
 from impulse.api.v1.ecosystem import router as ecosystem_router
 from impulse.api.v1.identity import router as identity_router
@@ -13,6 +14,7 @@ from impulse.api.v1.work import router as work_router
 from impulse.bootstrap.settings import Settings
 
 router = APIRouter(prefix="/api/v1")
+router.include_router(analytics_router)
 router.include_router(development_router)
 router.include_router(ecosystem_router)
 router.include_router(identity_router)

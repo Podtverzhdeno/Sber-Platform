@@ -11,6 +11,7 @@ import { CustomerWorkspace } from "./features/customer";
 import { ManagerWorkspace } from "./features/manager";
 import { HrWorkspace } from "./features/hr";
 import { OperatorWorkspace } from "./features/operator";
+import { ParticipantAnalytics } from "./features/analytics";
 import { ParticipantPortfolio } from "./features/portfolio";
 import { MentorReviewWorkspace, ParticipantRewardEvidence } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
@@ -145,6 +146,8 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
           <div className="feature-stack"><ParticipantTasks /><ParticipantRewardEvidence /></div>
         ) : allowed && actor.active_role === "participant" && currentSection === "Портфолио" ? (
           <ParticipantPortfolio />
+        ) : allowed && actor.active_role === "participant" && sectionIndex === 6 ? (
+          <ParticipantAnalytics />
         ) : allowed && actor.active_role === "customer" && (currentSection === "Кандидаты" || currentSection === "Приёмка") ? (
           <CustomerParticipantPreview />
         ) : allowed && actor.active_role === "customer" && currentSection === "Мои задачи" ? (

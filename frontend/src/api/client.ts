@@ -12,6 +12,7 @@ export type RuntimeApiPath =
   | "/api/v1/mentor/review-workspace"
   | "/api/v1/mentor/review-queue"
   | "/api/v1/manager/overview"
+  | "/api/v1/me/analytics/journey"
   | "/api/v1/ops/cases"
   | `/api/v1/ops/cases/${string}/timeline`
   | `/api/v1/ops/cases/${string}/decide`

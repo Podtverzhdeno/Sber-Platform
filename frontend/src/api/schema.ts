@@ -463,6 +463,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/analytics/journey": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Participant Journey */
+        get: operations["participant_journey_api_v1_me_analytics_journey_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/assignments/{assignment_id}/contributions": {
         parameters: {
             query?: never;
@@ -1997,6 +2014,21 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** EarningsView */
+        EarningsView: {
+            /** Approved */
+            approved: string;
+            /** Calculated */
+            calculated: string;
+            /** Currency */
+            currency: string | null;
+            /** Failed */
+            failed: string;
+            /** Paid */
+            paid: string;
+            /** Unknown Items */
+            unknown_items: number;
+        };
         /** EventView */
         EventView: {
             /** Conditions */
@@ -2028,6 +2060,19 @@ export interface components {
             title: string;
             /** Track Keys */
             track_keys: string[];
+        };
+        /** FunnelStageView */
+        FunnelStageView: {
+            /** Completed */
+            completed: boolean;
+            /** Count */
+            count: number;
+            /** Key */
+            key: string;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -2297,6 +2342,23 @@ export interface components {
             verification_id: string;
             /** Version */
             version: number;
+        };
+        /** ParticipantAnalyticsView */
+        ParticipantAnalyticsView: {
+            earnings: components["schemas"]["EarningsView"];
+            /** Freshness */
+            freshness: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Next Action */
+            next_action: string;
+            /** Stages */
+            stages: components["schemas"]["FunnelStageView"][];
+            /** Successful */
+            successful: boolean;
         };
         /** PayoutClaimView */
         PayoutClaimView: {
@@ -3818,6 +3880,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    participant_journey_api_v1_me_analytics_journey_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ParticipantAnalyticsView"];
                 };
             };
         };

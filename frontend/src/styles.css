@@ -534,3 +534,25 @@ tbody tr:hover, tbody tr:focus-within { background: rgb(47 149 255 / 5%); }
 .case-timeline p { margin: 5px 0; color: #bac8d8; }
 @media (max-width: 900px) { .ops-layout { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .ops-metrics, .case-facts { grid-template-columns: 1fr; } }
+
+.freshness-chip { display: flex; gap: 8px; align-items: center; padding: 9px 12px; border: 1px solid var(--color-border); border-radius: 9px; color: var(--color-muted); background: var(--color-surface); font-size: 12px; }
+.fresh-dot, .stale-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); box-shadow: 0 0 10px rgb(34 230 208 / 45%); }
+.stale-dot { background: var(--color-warning); }
+.journey-funnel { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.journey-stage { position: relative; display: grid; min-height: 130px; gap: 10px; padding: 15px; border: 1px solid var(--color-border); border-radius: 13px; background: linear-gradient(145deg, #0b1726, #091522); }
+.journey-stage > div { display: grid; gap: 5px; }
+.journey-stage small { color: var(--color-muted); }
+.journey-stage > i { position: absolute; z-index: 2; top: 48%; right: -17px; color: var(--color-muted); font-style: normal; }
+.journey-stage--completed { border-color: rgb(34 230 208 / 30%); background: rgb(34 230 208 / 6%); }
+.journey-stage--unknown { border-style: dashed; }
+.stage-number { display: grid; width: 29px; height: 29px; place-items: center; border-radius: 8px; color: var(--color-primary); background: rgb(34 230 208 / 10%); font-weight: 900; }
+.next-step-panel { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 20px; border: 1px solid rgb(128 104 255 / 24%); border-radius: 14px; background: linear-gradient(120deg, rgb(128 104 255 / 9%), rgb(34 230 208 / 5%)); }
+.next-step-panel h2 { margin: 0; font-size: 20px; }
+.earnings-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.earning-card { display: grid; gap: 6px; padding: 15px; border: 1px solid var(--color-border); border-radius: 12px; background: var(--color-surface); }
+.earning-card span, .earning-card small { color: var(--color-muted); }
+.earning-card strong { font-size: 23px; }
+.earning-card--paid strong { color: var(--color-primary); }
+.earning-card--failed strong { color: #ff7185; }
+@media (max-width: 900px) { .journey-funnel, .earnings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .journey-stage > i { display: none; } }
+@media (max-width: 560px) { .journey-funnel, .earnings-grid { grid-template-columns: 1fr; } .next-step-panel { align-items: flex-start; flex-direction: column; } }
