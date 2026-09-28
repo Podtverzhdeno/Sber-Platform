@@ -1,10 +1,10 @@
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { BrowserRouter, Navigate, NavLink, Route, Routes, useParams } from "react-router-dom";
+import { BrowserRouter, Navigate, NavLink, Route, Routes, useNavigate, useParams } from "react-router-dom";
 
 import { apiRequest } from "./api/client";
 import { createQueryClient } from "./app/query";
-import { StatePanel } from "./components/ui";
+import { Badge, StatePanel } from "./components/ui";
 import { Bootcamp, DevelopmentJourney } from "./features/development";
 import { EventCatalog } from "./features/ecosystem";
 import { CustomerWorkspace } from "./features/customer";
@@ -137,7 +137,7 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
       <div className="workspace-content">
         <button className="mobile-menu" type="button" aria-expanded={navigationOpen} onClick={() => { setNavigationOpen(true); }}><span aria-hidden="true">☰</span> Меню</button>
         {allowed && currentSection === "Главная" ? (
-          <RoleDashboard actor={actor} currentSection="Главная" />
+          actor.active_role === "participant" ? <ParticipantDashboard actor={actor} /> : <RoleDashboard actor={actor} currentSection="Главная" />
         ) : allowed && actor.active_role === "participant" && currentSection === "Мой путь" ? (
           <DevelopmentJourney />
         ) : allowed && actor.active_role === "participant" && currentSection === "Bootcamp" ? (
@@ -176,6 +176,31 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
   );
 }
 
+function ParticipantDashboard({ actor }: { actor: Actor }) {
+  const navigate = useNavigate();
+  const [projectOpen, setProjectOpen] = useState(false);
+  const [buddyOpen, setBuddyOpen] = useState(false);
+  const goTo = (label: string, query = "") => {
+    const index = actor.navigation.indexOf(label);
+    if (index >= 0) void navigate(`/workspace/${String(index)}${query}`);
+  };
+  const metrics = dashboardMetrics.participant;
+  return <div className="dashboard-shell participant-home">
+    <header className="dashboard-heading"><div><p className="eyebrow">Участник · персональный маршрут</p><h1 id="workspace-title">Добро пожаловать, {actor.display_name.split(" ")[0]}!</h1><p className="lead">Следующий шаг связан с реальным результатом: курс готовит к проекту, проект подтверждает опыт, а проверенный опыт усиливает резюме.</p></div><span className="date-chip">Сегодня · 28 сентября</span></header>
+    <section className="metric-grid" aria-label="Ключевые показатели">{metrics.map((metric, metricIndex) => <article className={`metric-card metric-card--${metric.tone}`} key={metric.label}><span className="metric-icon" aria-hidden="true">◇</span><span>{metric.label}</span><strong>{metric.value}</strong><small>{metric.delta}</small><div className="metric-histogram" role="img" aria-label={`Гистограмма «${metric.label}» за шесть недель`}>{[34, 52, 43, 68, 59, 82].map((value, index) => <i key={index} style={{ height: `${String(value - metricIndex * 3)}%` }} />)}</div></article>)}</section>
+    <div className="dashboard-columns"><article className="focus-panel"><div><p className="eyebrow">Следующий результат</p><span className="ui-badge ui-badge--info">MVP · 70%</span><h2>Прототип рекомендательной системы</h2><p>Подключите API научных источников, измерьте качество выдачи и загрузите воспроизводимый отчёт до 12 октября.</p><button type="button" onClick={() => { setProjectOpen(true); }}>Открыть рабочую область →</button></div><div className="focus-visual" aria-hidden="true"><span /><span /><span /></div></article>
+      <aside className="ai-panel"><div><span className="ai-orb" aria-hidden="true">✦</span><div><h2>AI Buddy</h2><span className="ui-badge ui-badge--ai">Бета</span></div></div><p>Подсказывает полезный следующий шаг на основе курса, проекта и подтверждённых результатов.</p><div className="ai-boundary">Рекомендация — черновик. Решения об оценке и выплате принимает человек.</div><button type="button" onClick={() => { setBuddyOpen(true); }}>Получить рекомендацию →</button></aside>
+    </div>
+    <div className="dashboard-lower-grid"><section className="activity-panel"><header><div><p className="eyebrow">Рабочая очередь</p><h2>Актуальные действия</h2></div><button className="secondary-button" type="button" onClick={() => { goTo("Задачи"); }}>Все действия →</button></header>
+      <button className="activity-row" type="button" onClick={() => { setProjectOpen(true); }}><span className="activity-symbol">▤</span><div><strong>Завершить интеграцию API</strong><small>Проект · дедлайн 12 октября · прогресс 70%</small></div><span className="ui-badge ui-badge--info">В работе</span><strong>Сегодня</strong><span>›</span></button>
+      <button className="activity-row" type="button" onClick={() => { goTo("Bootcamp", "?course=python-base"); }}><span className="activity-symbol">✓</span><div><strong>Практика в рабочем окружении</strong><small>Курс Python · +20 постоянных баллов после проверки</small></div><span className="ui-badge ui-badge--ai">Checkpoint</span><strong>45 мин</strong><span>›</span></button>
+      <button className="activity-row" type="button" onClick={() => { goTo("События"); }}><span className="activity-symbol">✦</span><div><strong>AI Journey 2026</strong><small>Регистрация открыта · +5 замороженных баллов</small></div><span className="ui-badge ui-badge--warning">Событие</span><strong>3 дня</strong><span>›</span></button>
+    </section><aside className="insight-panel"><header><h2>Активность</h2><span>6 недель</span></header><div className="home-histogram" role="img" aria-label="Учебная и проектная активность по неделям">{[42, 64, 55, 78, 69, 91].map((value, index) => <i key={index} style={{ height: `${String(value)}%` }}><span>Н{index + 1}</span></i>)}</div><button className="secondary-button" type="button" onClick={() => { goTo("Аналитика"); }}>Открыть аналитику →</button></aside></div>
+    {projectOpen && <div className="overlay" role="presentation"><section className="overlay-panel overlay-panel--dialog" role="dialog" aria-modal="true" aria-label="Рабочая область проекта"><header><h2>Прототип рекомендательной системы</h2><button type="button" aria-label="Закрыть" onClick={() => { setProjectOpen(false); }}>×</button></header><div className="mock-project"><div className="project-stage-strip"><strong>Исследование ✓</strong><strong>Прототип · 70%</strong><span>Проверка</span><span>Приёмка</span></div><p>Подключите Semantic Scholar API, сравните baseline и гибридное ранжирование, приложите отчёт и видео демонстрации.</p><dl><div><dt>Команда</dt><dd>Алекс · Анна · ментор Елена</dd></div><div><dt>Дедлайн</dt><dd>12 октября 2026</dd></div><div><dt>Вознаграждение</dt><dd>База 50 000 ₽ · A 125 000 ₽</dd></div></dl><div className="modal-actions"><button type="button" onClick={() => { setProjectOpen(false); goTo("Задачи"); }}>Перейти к проекту</button><button className="secondary-button" type="button" onClick={() => { setProjectOpen(false); }}>Закрыть</button></div></div></section></div>}
+    {buddyOpen && <div className="overlay" role="presentation"><section className="overlay-panel overlay-panel--drawer" role="dialog" aria-modal="true" aria-label="Рекомендация AI Buddy"><header><h2>Рекомендация AI Buddy</h2><button type="button" aria-label="Закрыть" onClick={() => { setBuddyOpen(false); }}>×</button></header><div className="buddy-recommendation"><Badge tone="warning">Черновик AI</Badge><h3>Сначала завершите checkpoint API</h3><p>Он напрямую связан с текущим проектом, добавит доказательство навыка Python и откроет этап проверки MVP.</p><div className="modal-actions"><button type="button" onClick={() => { setBuddyOpen(false); goTo("Bootcamp", "?course=python-base"); }}>Открыть траекторию</button><button className="secondary-button" type="button" onClick={() => { setBuddyOpen(false); }}>Понятно</button></div></div></section></div>}
+  </div>;
+}
+
 function RoleDashboard({ actor, currentSection }: { actor: Actor; currentSection: string }) {
   return <div className="dashboard-shell">
     <header className="dashboard-heading"><div><p className="eyebrow">{roleLabels[actor.active_role]} · рабочее пространство</p><h1 id="workspace-title">Добро пожаловать, {actor.display_name.split(" ")[0]}!</h1><p className="lead">Все важные действия, результаты и показатели собраны в одном рабочем пространстве.</p></div><span className="date-chip">▣ Сегодня</span></header>
@@ -211,9 +236,14 @@ function ImpulseApp() {
   }
 
   async function logout() {
-    await apiRequest<unknown>("/api/v1/auth/logout", { method: "POST", headers: { "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" } });
-    sessionStorage.removeItem("impulse_csrf");
-    setActor(null);
+    try {
+      await apiRequest<unknown>("/api/v1/auth/logout", { method: "POST", headers: { "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" } });
+    } finally {
+      sessionStorage.removeItem("impulse_csrf");
+      queryClient.removeQueries({ predicate: (query) => !["public-config", "demo-personas"].includes(String(query.queryKey[0])) });
+      setActor(null);
+      window.history.replaceState(null, "", "/");
+    }
   }
 
   return (

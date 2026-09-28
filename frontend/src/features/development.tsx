@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { apiRequest } from "../api/client";
 import { Badge, Card, Modal, SafeExternalLink, StatePanel } from "../components/ui";
@@ -18,10 +18,12 @@ function csrfHeaders(): HeadersInit {
 
 export function DevelopmentJourney() {
   const client = useQueryClient();
+  const navigate = useNavigate();
   const tracks = useQuery({ queryKey: ["tracks"], queryFn: () => apiRequest<TrackOverview>("/api/v1/development/tracks") });
   const roadmaps = useQuery({ queryKey: ["roadmaps"], queryFn: () => apiRequest<Roadmap[]>("/api/v1/me/roadmaps") });
   const [pendingTrack, setPendingTrack] = useState<Track | null>(null);
   const [consultationVisible, setConsultationVisible] = useState(false);
+  const [consultationSent, setConsultationSent] = useState(false);
   const selectTrack = useMutation({
     mutationFn: ({ trackKey, freezeTrackKey }: { trackKey: string; freezeTrackKey?: string }) => apiRequest<TrackOverview>("/api/v1/me/tracks", { method: "POST", headers: csrfHeaders(), body: JSON.stringify({ track_key: trackKey, freeze_track_key: freezeTrackKey }) }),
     onSuccess: async () => {
@@ -48,10 +50,10 @@ export function DevelopmentJourney() {
       <div className="track-grid">
         {overview.tracks.map((track) => <button className={`track-card track-card--${track.status ?? "new"}`} key={track.key} onClick={() => { choose(track); }}><span>{track.title}</span><Badge tone={track.status === "active" ? "success" : "neutral"}>{track.status === "active" ? "Активно" : track.status === "frozen" ? "Заморожено · прогресс сохранён" : "Попробовать"}</Badge></button>)}
       </div>
-      <button className="text-button" type="button" onClick={() => { setConsultationVisible(true); }}>Хочу узнать мнение ментора</button>
-      {consultationVisible && <Card title="Консультация необязательна"><p>Можно обсудить выбор с ментором или продолжить самостоятельно — разрешение и ожидание ответа не требуются.</p><button type="button" onClick={() => { setConsultationVisible(false); }}>Продолжить самостоятельно</button></Card>}
+      <button className="text-button" type="button" onClick={() => { setConsultationVisible(true); }}>Получить рекомендацию ментора</button>
+      {consultationVisible && <Card title="Рекомендация ментора">{consultationSent ? <><Badge tone="success">Запрос отправлен</Badge><p>Елена получила контекст ваших направлений и текущего проекта. Ответ появится в сообщениях; продолжать маршрут можно сразу.</p></> : <p>Ментор увидит выбранные направления, прогресс курсов и текущий проект и сможет предложить следующий практический шаг.</p>}<div className="course-actions">{!consultationSent && <button type="button" onClick={() => { setConsultationSent(true); }}>Отправить запрос</button>}<button className="secondary-button" type="button" onClick={() => { setConsultationVisible(false); }}>Продолжить самостоятельно</button></div></Card>}
       <section aria-labelledby="roadmap-title"><p className="eyebrow">Ваш roadmap</p><h2 id="roadmap-title">Следующие осмысленные шаги</h2><div className="roadmap-grid">
-        {roadmapItems.map((roadmap) => <Card title={`${roadmap.track_key} · версия ${String(roadmap.policy_version)}`} key={roadmap.track_key}>{roadmap.replacement_reason && <p className="notice">{roadmap.replacement_reason}</p>}<ol className="roadmap-list">{roadmap.milestones.map((step) => <li className={step.completed ? "completed" : ""} key={step.key}><button type="button"><strong>{step.title}</strong><span>{step.purpose}</span><small>Навык: {step.skill} · перейти: {step.target_kind}</small></button></li>)}</ol></Card>)}
+        {roadmapItems.map((roadmap) => <Card title={`${roadmap.track_key} · версия ${String(roadmap.policy_version)}`} key={roadmap.track_key}>{roadmap.replacement_reason && <p className="notice">{roadmap.replacement_reason}</p>}<ol className="roadmap-list">{roadmap.milestones.map((step) => <li className={step.completed ? "completed" : ""} key={step.key}><button type="button" onClick={() => { if (step.target_kind === "course") void navigate(`/workspace/2?course=${encodeURIComponent(step.target_key)}`); }}><strong>{step.title}</strong><span>{step.purpose}</span><small>Навык: {step.skill} · {step.completed ? "выполнено" : "+20 баллов за важный checkpoint"}</small></button></li>)}</ol><button type="button" onClick={() => { const courseKey = roadmap.next_step?.target_kind === "course" ? roadmap.next_step.target_key : `${roadmap.track_key}-base`; void navigate(`/workspace/2?course=${encodeURIComponent(courseKey)}`); }}>Начать Bootcamp</button></Card>)}
       </div></section>
       <Modal title={`Освободить место для «${pendingTrack?.title ?? "направления"}»`} open={pendingTrack !== null} onClose={() => { setPendingTrack(null); }}><p>Выберите направление для заморозки. Весь подтверждённый прогресс останется в истории.</p><div className="modal-actions">{activeTracks.map((track) => <button type="button" key={track.key} onClick={() => { if (pendingTrack) selectTrack.mutate({ trackKey: pendingTrack.key, freezeTrackKey: track.key }); }}>Заморозить «{track.title}»</button>)}</div></Modal>
     </div>

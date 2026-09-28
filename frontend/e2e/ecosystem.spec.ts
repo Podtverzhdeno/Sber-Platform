@@ -13,16 +13,21 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/me/events/*/claims", (route) => { reported = true; return route.fulfill({ json: { id: "00000000-0000-0000-0000-000000000099", event_key: "mayaki-2026", claim_type: "participation", status: "reported", trophy_created: false, evidence_state: "provisional", verification_explanation: "Участие заявлено вами; трофей и баллы не созданы." } }); });
 });
 
-test("participant opens event source without hover and sees unverified claim", async ({ page }) => {
+test("open event grants frozen points while completed event accepts proof", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "События" }).click();
-  const source = page.getByRole("link", { name: "Открыть первоисточник события" });
+  const source = page.getByRole("link", { name: "Перейти к событию" });
   await source.focus();
   await expect(source).toBeFocused();
   await expect(source).toHaveAttribute("href", "https://example.test/mayaki");
   await expect(source).toHaveAttribute("rel", "noopener noreferrer");
-  await page.getByRole("button", { name: "Сообщить об участии" }).click();
-  await expect(page.getByText("Предварительно", { exact: true })).toBeVisible();
-  await expect(page.getByText("трофей и баллы не созданы", { exact: false })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Подтвердить результат/ })).toHaveCount(1);
+  await page.getByRole("button", { name: "Зарегистрироваться · +5" }).click();
+  await expect(page.getByText("+5 frozen")).toBeVisible();
+  await expect(page.getByText(/5 баллов заморожены/)).toBeVisible();
+  await page.getByRole("button", { name: /Подтвердить результат/ }).click();
+  await expect(page.getByRole("dialog", { name: /Подтвердить результат/ })).toBeVisible();
+  await page.getByRole("dialog", { name: /Подтвердить результат/ }).locator("select").selectOption("winner");
+  await page.getByRole("button", { name: "Отправить на проверку" }).click();
 });

@@ -11,9 +11,13 @@ test("participant analytics keeps incomplete journey separate from success and p
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Аналитика" }).click();
-  await expect(page.getByRole("heading", { name: "От выбора направления до подтверждённого опыта" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Ваш прогресс и подтверждённый результат" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "От обучения до выплаты" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Активность по неделям" })).toBeVisible();
   await expect(page.getByText("Путь продолжается")).toBeVisible();
   await expect(page.getByText("15 000 RUB")).toBeVisible();
   await expect(page.getByText("0 RUB", { exact: true })).toHaveCount(3);
-  await expect(page.getByText("Не является выплатой")).toHaveCount(2);
+  await expect(page.locator(".analytics-histogram i")).toHaveCount(8);
+  const screenshot = await page.locator(".participant-analytics").screenshot();
+  expect(screenshot.byteLength).toBeGreaterThan(1_000);
 });
