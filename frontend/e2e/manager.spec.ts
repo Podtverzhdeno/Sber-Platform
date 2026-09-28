@@ -11,7 +11,7 @@ test("manager sees accepted artifacts and safe reuse aggregates only", async ({ 
   await page.goto("/");
   await page.locator('[data-persona="manager-olga"]').click();
   await expect(page.getByText("Подготовлен воспроизводимый API и отчёт.")).toBeVisible();
-  await expect(page.getByText("Использован повторно")).toBeVisible();
+  await expect(page.getByText("Повторно использован")).toBeVisible();
   const content = (await page.locator(".manager-workspace").innerText()).toLowerCase();
   expect(content).not.toContain("личный чат");
   expect(content).not.toContain("выплата участника");

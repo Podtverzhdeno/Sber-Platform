@@ -14,5 +14,5 @@ test("operator resolves current case version and sees timeline", async ({ page }
   await page.locator('[data-persona="operator-pavel"]').click();
   await expect(page.getByText("payout:failed")).toBeVisible();
   await page.getByRole("button", { name: "Принять решение" }).click();
-  await expect(page.getByText("Решение по версии 1", { exact: false })).toBeVisible();
+  await expect(page.getByText("Версия 1", { exact: false })).toBeVisible();
 });

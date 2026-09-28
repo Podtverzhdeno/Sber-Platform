@@ -44,6 +44,9 @@
 - [x] 5.5 Добавить CSP-compatible asset build, external-link safety и reduced-motion; automated accessibility/security check SHALL пройти без critical issues.
 - [x] 5.6 Применить утверждённую navy/teal visual system к role-aware shell, dashboard и общим компонентам; Playwright screenshot regression SHALL покрыть 1440×900, 1024×768 и 390×844.
 - [ ] 5.7 Сопоставить каждый реализованный route с `R-*` из `docs/visual-reference-catalog.md`, воспроизвести role-specific composition всех 46 референсов и добавить deterministic screenshot + primary-workflow test; visual review SHALL проверить shell ±8 px, крупные зоны ±16 px, отсутствие исходных PNG в bundle и checklist каждого маршрута.
+  - [x] 5.7.1 Реализовать общий navy/teal shell и эталонные desktop compositions `R-CUS-01/02`, `R-MEN-02`, `R-MGR-02`, `R-OPS-02` с явно маркированной demo projection при пустом API.
+  - [x] 5.7.2 Закрепить customer desktop/tablet/mobile и mentor/manager/operator desktop deterministic Playwright baselines.
+  - [ ] 5.7.3 Довести остальные participant/mentor/customer/manager/operator routes из каталога до индивидуальных compositions и screenshot coverage; parent 5.7 SHALL оставаться открытым до покрытия всех 46 reference IDs.
 
 ## 6. Направления, roadmap и Bootcamp
 
