@@ -110,6 +110,8 @@ MVP работает на вымышленных данных с явной ма
 
 ## OpenSpec workflow
 
+Railway deployment guide: [docs/railway-deploy.md](docs/railway-deploy.md).
+
 1. Требования, сценарии и дизайн находятся в `openspec/changes/impulse-ecosystem/`.
 2. Реализация выполняется по порядку `tasks.md`.
 3. Чекбокс задачи меняется на `[x]` только после прохождения указанной проверки.

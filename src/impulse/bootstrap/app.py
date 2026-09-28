@@ -2,6 +2,7 @@
 
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 
@@ -23,6 +24,7 @@ from impulse.application.talent import MemoryTalentStore, TalentService
 from impulse.application.work import MemoryWorkStore, WorkService
 from impulse.bootstrap.logging import configure_logging
 from impulse.bootstrap.settings import Settings
+from impulse.bootstrap.static import SinglePageApplication
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.development_store import SqlDevelopmentStore
 from impulse.infrastructure.ecosystem_store import SqlEcosystemStore
@@ -138,4 +140,11 @@ def create_app(
     install_error_handlers(app)
     app.include_router(health_router)
     app.include_router(api_v1_router)
+    frontend_directory = Path("frontend/dist")
+    if frontend_directory.is_dir():
+        app.mount(
+            "/",
+            SinglePageApplication(directory=frontend_directory, html=True),
+            name="frontend",
+        )
     return app

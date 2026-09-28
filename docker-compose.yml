@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: impulse
+      POSTGRES_USER: impulse
+      POSTGRES_PASSWORD: impulse-local-only
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U impulse -d impulse"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - impulse-postgres:/var/lib/postgresql/data
+
+  app:
+    build: .
+    environment:
+      APP_ENV: production
+      DEMO_MODE: "true"
+      DATABASE_URL: postgresql://impulse:impulse-local-only@postgres:5432/impulse
+      SESSION_SECRET: local-docker-session-secret-change-before-production
+      AI_BUDDY_ENABLED: "false"
+      AI_MENTOR_DRAFT_ENABLED: "false"
+      AI_OPERATOR_TRIAGE_ENABLED: "false"
+      AI_CUSTOMER_BRIEF_ENABLED: "false"
+    command:
+      - sh
+      - -c
+      - alembic upgrade head && impulse-demo-seed && exec uvicorn impulse.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+volumes:
+  impulse-postgres:

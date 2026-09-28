@@ -159,8 +159,8 @@
 
 ## 18. Docker, Railway и CI/CD
 
-- [ ] 18.1 Создать multi-stage non-root Dockerfile с locked frontend/backend builds и SPA fallback; `docker build` и container smoke SHALL пройти без secret build args.
-- [ ] 18.2 Добавить `/health/live`, `/health/ready`, migration pre-deploy и `railway.toml`; local container+PostgreSQL test SHALL пройти startup/restart.
+- [x] 18.1 Создать multi-stage non-root Dockerfile с locked frontend/backend builds и SPA fallback; `docker build` и container smoke SHALL пройти без secret build args.
+- [x] 18.2 Добавить `/health/live`, `/health/ready`, migration pre-deploy и `railway.toml`; local container+PostgreSQL test SHALL пройти startup/restart.
 - [ ] 18.3 Создать CI pipeline: OpenSpec strict, lint/types, unit/integration/frontend, build, Docker smoke, scans; intentional failure каждого stage SHALL блокировать merge.
 - [ ] 18.4 Добавить expand/backfill/contract migration и Railway rollback instructions; dry-run SHALL развернуть предыдущий image на совместимой schema.
 - [ ] 18.5 Подготовить Railway Variables checklist без значений и budget/free-quota observability; review SHALL подтвердить отсутствие ключа в tracked files.

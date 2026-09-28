@@ -18,6 +18,7 @@ frontend/dist
 frontend/coverage
 frontend/playwright-report
 frontend/test-results
+frontend/.vite
 openspec/changes/archive
 *.iml
 *.db
