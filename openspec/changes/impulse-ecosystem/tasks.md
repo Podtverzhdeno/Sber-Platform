@@ -95,7 +95,7 @@
 - [x] 11.2 Реализовать mentor queue/workspace с due sorting, evidence, rubric, publish/escalate; permission tests SHALL скрыть неназначенные assignments.
 - [x] 11.3 Реализовать manager initiatives/accepted artifacts/reuse aggregates; tests SHALL исключить chats, closed reviews и чужие payouts.
 - [x] 11.4 Реализовать HR candidate search/evidence resume и pipeline invitation→interview→offer→hire; tests SHALL считать каждую стадию только по human event.
-- [ ] 11.5 Реализовать operator unified case queue, timeline, sources, dependencies и versioned decisions; stale case test SHALL запретить старое решение.
+- [x] 11.5 Реализовать operator unified case queue, timeline, sources, dependencies и versioned decisions; stale case test SHALL запретить старое решение.
 - [ ] 11.6 Добавить disabled placeholders только для ролей второй очереди и убрать их из MVP navigation; e2e SHALL вернуть feature-not-enabled без кабинета.
 
 ## 12. Аналитика и события

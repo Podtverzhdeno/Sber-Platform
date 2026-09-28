@@ -1279,6 +1279,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ops/cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Cases */
+        get: operations["cases_api_v1_ops_cases_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/cases/{case_id}/decide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide */
+        post: operations["decide_api_v1_ops_cases__case_id__decide_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ops/cases/{case_id}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Timeline */
+        get: operations["timeline_api_v1_ops_cases__case_id__timeline_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/rating-seasons/{season_id}/leaderboard": {
         parameters: {
             query?: never;
@@ -1508,6 +1559,30 @@ export interface components {
             top_grade: string | null;
             /** Verified Courses */
             verified_courses: number;
+        };
+        /** CaseView */
+        CaseView: {
+            /** Case Type */
+            case_type: string;
+            /** Dependency Refs */
+            dependency_refs: string[];
+            /** Due At */
+            due_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Priority */
+            priority: string;
+            /** Source Refs */
+            source_refs: string[];
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+            /** Version */
+            version: number;
         };
         /** CheckpointRequest */
         CheckpointRequest: {
@@ -1800,6 +1875,15 @@ export interface components {
             /** Next Cursor */
             next_cursor?: string | null;
         };
+        /** DecisionCommand */
+        DecisionCommand: {
+            /** Expected Version */
+            expected_version: number;
+            /** Outcome */
+            outcome: string;
+            /** Reason */
+            reason: string;
+        };
         /** DecisionRequest */
         DecisionRequest: {
             /** Reason */
@@ -1809,6 +1893,22 @@ export interface components {
              * @enum {string}
              */
             status: "verified" | "rejected" | "revoked";
+        };
+        /** DecisionView */
+        DecisionView: {
+            /** Case Version */
+            case_version: number;
+            /** Created At */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Outcome */
+            outcome: string;
+            /** Reason */
+            reason: string;
         };
         /** DemoLoginRequest */
         DemoLoginRequest: {
@@ -5281,6 +5381,94 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    cases_api_v1_ops_cases_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseView"][];
+                };
+            };
+        };
+    };
+    decide_api_v1_ops_cases__case_id__decide_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecisionCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    timeline_api_v1_ops_cases__case_id__timeline_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DecisionView"][];
                 };
             };
             /** @description Validation Error */

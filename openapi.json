@@ -440,6 +440,73 @@
         "title": "CandidateSummaryView",
         "type": "object"
       },
+      "CaseView": {
+        "properties": {
+          "case_type": {
+            "title": "Case Type",
+            "type": "string"
+          },
+          "dependency_refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Dependency Refs",
+            "type": "array"
+          },
+          "due_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Due At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "priority": {
+            "title": "Priority",
+            "type": "string"
+          },
+          "source_refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Refs",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "case_type",
+          "title",
+          "priority",
+          "status",
+          "version",
+          "source_refs",
+          "dependency_refs",
+          "due_at"
+        ],
+        "title": "CaseView",
+        "type": "object"
+      },
       "CheckpointRequest": {
         "properties": {
           "key": {
@@ -1302,6 +1369,34 @@
         "title": "CursorPage[EventView]",
         "type": "object"
       },
+      "DecisionCommand": {
+        "properties": {
+          "expected_version": {
+            "minimum": 1.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "outcome": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "expected_version",
+          "outcome",
+          "reason"
+        ],
+        "title": "DecisionCommand",
+        "type": "object"
+      },
       "DecisionRequest": {
         "properties": {
           "reason": {
@@ -1325,6 +1420,40 @@
           "reason"
         ],
         "title": "DecisionRequest",
+        "type": "object"
+      },
+      "DecisionView": {
+        "properties": {
+          "case_version": {
+            "title": "Case Version",
+            "type": "integer"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "case_version",
+          "outcome",
+          "reason",
+          "created_at"
+        ],
+        "title": "DecisionView",
         "type": "object"
       },
       "DemoLoginRequest": {
@@ -8113,6 +8242,138 @@
           }
         },
         "summary": "Assign Support"
+      }
+    },
+    "/api/v1/ops/cases": {
+      "get": {
+        "operationId": "cases_api_v1_ops_cases_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CaseView"
+                  },
+                  "title": "Response Cases Api V1 Ops Cases Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Cases"
+      }
+    },
+    "/api/v1/ops/cases/{case_id}/decide": {
+      "post": {
+        "operationId": "decide_api_v1_ops_cases__case_id__decide_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaseView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide"
+      }
+    },
+    "/api/v1/ops/cases/{case_id}/timeline": {
+      "get": {
+        "operationId": "timeline_api_v1_ops_cases__case_id__timeline_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DecisionView"
+                  },
+                  "title": "Response Timeline Api V1 Ops Cases  Case Id  Timeline Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Timeline"
       }
     },
     "/api/v1/rating-seasons/{season_id}/leaderboard": {

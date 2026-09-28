@@ -12,6 +12,7 @@ from impulse.api.v1 import router as api_v1_router
 from impulse.application.development import DevelopmentService, MemoryDevelopmentStore
 from impulse.application.ecosystem import EcosystemService, MemoryEcosystemStore
 from impulse.application.identity import DemoAuthService, MemoryIdentityStore, demo_personas
+from impulse.application.operations import MemoryOperationsStore, OperationsService
 from impulse.application.recognition import MemoryRecognitionStore, RecognitionService
 from impulse.application.reward import (
     MemoryRewardStore,
@@ -26,6 +27,7 @@ from impulse.infrastructure.database import Database
 from impulse.infrastructure.development_store import SqlDevelopmentStore
 from impulse.infrastructure.ecosystem_store import SqlEcosystemStore
 from impulse.infrastructure.identity_store import SqlIdentityStore
+from impulse.infrastructure.operations_store import SqlOperationsStore
 from impulse.infrastructure.recognition_store import SqlRecognitionStore
 from impulse.infrastructure.reward_store import SqlRewardStore
 from impulse.infrastructure.talent_store import SqlTalentStore
@@ -42,6 +44,7 @@ def create_app(
     reward_service: RewardService | None = None,
     recognition_service: RecognitionService | None = None,
     talent_service: TalentService | None = None,
+    operations_service: OperationsService | None = None,
 ) -> FastAPI:
     """Build the HTTP application without import-time side effects."""
     runtime_settings = settings or Settings()
@@ -100,6 +103,13 @@ def create_app(
             SqlTalentStore(owned_database) if owned_database is not None else MemoryTalentStore()
         )
         talent_service = TalentService(talent_store)
+    if operations_service is None:
+        operations_store = (
+            SqlOperationsStore(owned_database)
+            if owned_database is not None
+            else MemoryOperationsStore()
+        )
+        operations_service = OperationsService(operations_store)
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
@@ -123,6 +133,7 @@ def create_app(
     app.state.reward_service = reward_service
     app.state.recognition_service = recognition_service
     app.state.talent_service = talent_service
+    app.state.operations_service = operations_service
     app.add_middleware(RequestContextMiddleware)
     install_error_handlers(app)
     app.include_router(health_router)

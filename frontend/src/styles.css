@@ -510,3 +510,27 @@ tbody tr:hover, tbody tr:focus-within { background: rgb(47 149 255 / 5%); }
 .event-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-primary); box-shadow: 0 0 12px rgb(34 230 208 / 50%); }
 .human-origin { color: var(--color-muted); font-size: 12px; }
 @media (max-width: 900px) { .hr-layout { grid-template-columns: 1fr; } }
+
+.ops-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ops-layout { display: grid; grid-template-columns: minmax(290px, .75fr) minmax(0, 1.25fr); gap: 16px; }
+.ops-queue, .case-workspace { padding: 18px; border: 1px solid var(--color-border); border-radius: 14px; background: linear-gradient(145deg, #0b1726, #091522); }
+.ops-queue > button { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 11px; align-items: center; width: 100%; padding: 12px; border: 1px solid var(--color-border); border-radius: 10px; color: var(--color-text); background: #0d1b2c; text-align: left; cursor: pointer; }
+.ops-queue > button + button { margin-top: 8px; }
+.ops-queue > button.active { border-color: rgb(34 230 208 / 45%); background: rgb(34 230 208 / 7%); }
+.ops-queue > button > span:nth-child(2) { display: grid; gap: 4px; }
+.ops-queue small, .case-timeline small { color: var(--color-muted); }
+.priority-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-info); }
+.priority-critical { background: #ff657a; box-shadow: 0 0 12px rgb(255 101 122 / 50%); }
+.priority-high { background: var(--color-warning); }
+.case-workspace > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.case-workspace h2 { margin: 0; }
+.case-workspace > header button { padding: 10px 14px; border: 0; border-radius: 9px; color: #03201c; background: var(--color-primary); font-weight: 800; cursor: pointer; }
+.case-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.case-facts > div { display: grid; gap: 7px; padding: 13px; border: 1px solid var(--color-border); border-radius: 10px; background: #0d1b2c; }
+.case-facts h3 { margin: 0 0 4px; font-size: 15px; }
+.case-facts code { color: #7de9dd; }
+.case-timeline { display: grid; grid-template-columns: 14px 1fr; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--color-border); }
+.case-timeline > span { width: 9px; height: 9px; margin-top: 5px; border-radius: 50%; background: var(--color-primary); }
+.case-timeline p { margin: 5px 0; color: #bac8d8; }
+@media (max-width: 900px) { .ops-layout { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .ops-metrics, .case-facts { grid-template-columns: 1fr; } }

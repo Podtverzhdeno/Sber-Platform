@@ -5,6 +5,7 @@ from fastapi import APIRouter, Request
 from impulse.api.v1.development import router as development_router
 from impulse.api.v1.ecosystem import router as ecosystem_router
 from impulse.api.v1.identity import router as identity_router
+from impulse.api.v1.operations import router as operations_router
 from impulse.api.v1.portfolio import router as portfolio_router
 from impulse.api.v1.recognition import router as recognition_router
 from impulse.api.v1.reward import router as reward_router
@@ -15,6 +16,7 @@ router = APIRouter(prefix="/api/v1")
 router.include_router(development_router)
 router.include_router(ecosystem_router)
 router.include_router(identity_router)
+router.include_router(operations_router)
 router.include_router(portfolio_router)
 router.include_router(recognition_router)
 router.include_router(reward_router)

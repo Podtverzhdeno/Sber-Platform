@@ -65,6 +65,7 @@ Seed использует UUIDv5 namespace и `DEMO_SEED_VERSION`. Каждый 
 - `appeals`
 - `applications`
 - `artifacts`
+- `case_decisions`
 - `assignments`
 - `audit_entries`
 - `compensation_terms`
@@ -83,6 +84,7 @@ Seed использует UUIDv5 namespace и `DEMO_SEED_VERSION`. Каждый 
 - `milestones`
 - `model_policies`
 - `offer_evidence`
+- `operations_cases`
 - `participation_claims`
 - `payout_claims`
 - `persons`

@@ -10,6 +10,7 @@ import { EventCatalog } from "./features/ecosystem";
 import { CustomerWorkspace } from "./features/customer";
 import { ManagerWorkspace } from "./features/manager";
 import { HrWorkspace } from "./features/hr";
+import { OperatorWorkspace } from "./features/operator";
 import { ParticipantPortfolio } from "./features/portfolio";
 import { MentorReviewWorkspace, ParticipantRewardEvidence } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
@@ -154,6 +155,8 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
           <ManagerWorkspace />
         ) : allowed && actor.active_role === "hr" && sectionIndex < 2 ? (
           <HrWorkspace pipelineOnly={sectionIndex === 1} />
+        ) : allowed && actor.active_role === "operator" && sectionIndex < 3 ? (
+          <OperatorWorkspace />
         ) : allowed ? (
           <RoleDashboard actor={actor} currentSection={currentSection ?? "Главная"} />
         ) : (

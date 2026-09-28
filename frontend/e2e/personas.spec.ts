@@ -80,9 +80,12 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/hr/pipeline", async (route) => {
     await route.fulfill({ json: { counts: { invitation: 0, interview: 0, offer: 0, hire: 0 }, events: [] } });
   });
+  await page.route("**/api/v1/ops/cases", async (route) => {
+    await route.fulfill({ json: [] });
+  });
 });
 
-for (const [key, displayName, , navigation] of personas) {
+for (const [key, , , navigation] of personas) {
   test(`persona ${key} sees only assigned navigation`, async ({ page }) => {
     await page.goto("/");
     await page.locator(`[data-persona="${key}"]`).click();
@@ -97,7 +100,7 @@ for (const [key, displayName, , navigation] of personas) {
             ? "Результаты команд без лишних персональных данных"
           : key === "hr-nina"
             ? "Кандидаты и evidence-first резюме"
-            : `Добро пожаловать, ${displayName.split(" ")[0]}!`;
+          : "Дела, источники и зависимости";
     await expect(page.getByRole("heading", { name: heading })).toBeVisible();
     const links = page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link");
     await expect(links).toHaveCount(navigation.length);
