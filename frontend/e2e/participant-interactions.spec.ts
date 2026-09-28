@@ -113,3 +113,17 @@ test("participant settings and AI Buddy controls are interactive", async ({ page
   await page.getByRole("button", { name: "Отправить" }).click();
   await expect(page.getByText(/Сейчас лучше завершить checkpoint/)).toBeVisible();
 });
+
+test("header notifications and rating indicators open real destinations", async ({ page }) => {
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByRole("button", { name: "Рейтинг: 3 место, 450 баллов" })).toBeVisible();
+  await page.getByRole("button", { name: /Уведомления: 3 непрочитанных/ }).click();
+  await expect(page.getByRole("dialog", { name: "Центр уведомлений" })).toBeVisible();
+  await expect(page.getByText("Новый комментарий ментора")).toBeVisible();
+  await page.getByRole("button", { name: /Checkpoint принят/ }).click();
+  await expect(page).toHaveURL(/\/workspace\/4$/);
+  await page.getByRole("button", { name: "Рейтинг: 3 место, 450 баллов" }).click();
+  await expect(page).toHaveURL(/\/workspace\/6$/);
+  await expect(page.getByRole("heading", { name: "Рейтинг подтверждённого опыта" })).toBeVisible();
+});
