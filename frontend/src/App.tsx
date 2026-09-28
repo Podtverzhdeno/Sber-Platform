@@ -11,7 +11,7 @@ import { CustomerWorkspace } from "./features/customer";
 import { ManagerWorkspace } from "./features/manager";
 import { HrWorkspace } from "./features/hr";
 import { OperatorWorkspace } from "./features/operator";
-import { ParticipantAnalytics } from "./features/analytics";
+import { ParticipantAnalytics, RoleAnalytics } from "./features/analytics";
 import { ParticipantPortfolio } from "./features/portfolio";
 import { MentorReviewWorkspace, ParticipantRewardEvidence } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
@@ -160,6 +160,8 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
           <HrWorkspace pipelineOnly={sectionIndex === 1} />
         ) : allowed && actor.active_role === "operator" && sectionIndex < 3 ? (
           <OperatorWorkspace />
+        ) : allowed && actor.active_role !== "participant" && currentSection === "Аналитика" ? (
+          <RoleAnalytics role={actor.active_role} />
         ) : allowed ? (
           <RoleDashboard actor={actor} currentSection={currentSection ?? "Главная"} />
         ) : (

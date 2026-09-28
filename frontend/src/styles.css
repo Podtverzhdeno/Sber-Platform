@@ -556,3 +556,22 @@ tbody tr:hover, tbody tr:focus-within { background: rgb(47 149 255 / 5%); }
 .earning-card--failed strong { color: #ff7185; }
 @media (max-width: 900px) { .journey-funnel, .earnings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .journey-stage > i { display: none; } }
 @media (max-width: 560px) { .journey-funnel, .earnings-grid { grid-template-columns: 1fr; } .next-step-panel { align-items: flex-start; flex-direction: column; } }
+
+.analytics-stale { display: grid; gap: 4px; padding: 13px 15px; border: 1px solid rgb(242 172 61 / 28%); border-radius: 11px; color: #f6d49b; background: rgb(242 172 61 / 7%); }
+.analytics-stale span { color: var(--color-muted); }
+.role-metric-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.role-metric-card { padding: 18px; border: 1px solid var(--color-border); border-radius: 14px; background: linear-gradient(145deg, #0b1726, #091522); }
+.role-metric-card > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.role-metric-card > strong { display: block; margin: 18px 0 5px; color: var(--color-primary); font-size: 34px; }
+.role-metric-card > small { color: var(--color-muted); }
+.role-metric-card details { margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--color-border); }
+.role-metric-card summary { color: #b9c9db; cursor: pointer; font-weight: 800; }
+.role-metric-card details p { color: var(--color-muted); line-height: 1.5; }
+.role-metric-card dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.role-metric-card dl > div { display: grid; gap: 4px; padding: 9px; border-radius: 8px; background: #0d1b2c; }
+.role-metric-card dt { color: var(--color-muted); font-size: 11px; }
+.role-metric-card dd { margin: 0; overflow-wrap: anywhere; }
+.role-metric-card--suppressed { border-style: dashed; }
+.role-metric-card--suppressed > strong { color: var(--color-warning); font-size: 26px; }
+.privacy-note { padding: 9px; border-left: 3px solid var(--color-warning); background: rgb(242 172 61 / 6%); }
+@media (max-width: 720px) { .role-metric-grid { grid-template-columns: 1fr; } .role-metric-card dl { grid-template-columns: 1fr; } }
