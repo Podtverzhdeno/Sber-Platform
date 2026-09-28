@@ -62,4 +62,36 @@ describe("App", () => {
     expect(screen.getByRole("link", { name: "Мой путь" })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Очередь ревью" })).not.toBeInTheDocument();
   });
+
+  it("returns to persona selection even when server logout fails", async () => {
+    const actor = {
+      person_id: "00000000-0000-0000-0000-000000000001",
+      display_name: "Алекс Речной",
+      active_role: "participant",
+      assigned_roles: ["participant"],
+      scopes: [],
+      consent_scopes: [],
+      navigation: ["Главная"],
+    };
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+      const url = requestUrl(input);
+      if (url.endsWith("/personas")) {
+        return Promise.resolve(new Response(JSON.stringify(personas), { status: 200 }));
+      }
+      if (url.endsWith("/auth/logout")) {
+        return Promise.resolve(new Response(JSON.stringify({ code: "INTERNAL_ERROR", message: "Ошибка" }), { status: 500 }));
+      }
+      if (url.endsWith("/me")) {
+        return Promise.resolve(new Response(JSON.stringify(actor), { status: 200 }));
+      }
+      return Promise.resolve(new Response("{}", { status: 200 }));
+    });
+
+    render(<App />);
+    expect(await screen.findByRole("button", { name: "Выйти" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Выйти" }));
+
+    expect(await screen.findByRole("button", { name: /Алекс Речной/ })).toBeEnabled();
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+  });
 });

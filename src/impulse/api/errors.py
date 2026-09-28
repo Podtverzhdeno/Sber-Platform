@@ -32,7 +32,10 @@ class ApiError(Exception):
     field_errors: dict[str, list[str]] | None = field(default=None)
 
     def __post_init__(self) -> None:
-        super().__init__(self.message)
+        # Zero-argument super() is unreliable in slotted dataclasses on Python 3.13:
+        # dataclass may replace the class object while the generated closure still
+        # points at the original one. Call the stable base explicitly.
+        Exception.__init__(self, self.message)
 
 
 def _response(error: ErrorEnvelope, status_code: int) -> JSONResponse:

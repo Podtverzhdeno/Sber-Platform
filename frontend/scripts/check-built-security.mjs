@@ -6,6 +6,7 @@ const styles = await readFile(new URL("../src/styles.css", import.meta.url), "ut
 const failures = [];
 if (!html.includes("Content-Security-Policy")) failures.push("CSP meta is missing");
 if (!html.includes("object-src 'none'")) failures.push("CSP object-src is not locked down");
+if (html.includes("frame-ancestors")) failures.push("frame-ancestors must be delivered as an HTTP header, not meta");
 if (html.includes("'unsafe-inline'")) failures.push("production CSP allows unsafe inline code");
 if (/<script(?![^>]*\bsrc=)[^>]*>/iu.test(html)) failures.push("inline script found");
 if (/\son[a-z]+\s*=/iu.test(html)) failures.push("inline event handler found");

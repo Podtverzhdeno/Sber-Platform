@@ -1,5 +1,5 @@
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BrowserRouter, Navigate, NavLink, Route, Routes, useNavigate, useParams } from "react-router-dom";
 
 import { apiRequest } from "./api/client";
@@ -215,17 +215,24 @@ function RoleDashboard({ actor, currentSection }: { actor: Actor; currentSection
 function ImpulseApp() {
   const configQuery = useQuery({ queryKey: ["public-config"], queryFn: () => apiRequest<PublicConfig>("/api/v1/config") });
   const personasQuery = useQuery({ queryKey: ["demo-personas"], queryFn: () => apiRequest<Persona[]>("/api/v1/auth/personas") });
-  const meQuery = useQuery({ queryKey: ["me"], queryFn: () => apiRequest<Actor>("/api/v1/me") });
+  const [signedOut, setSignedOut] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const explicitSignOut = useRef(false);
+  const meQuery = useQuery({ queryKey: ["me"], queryFn: () => apiRequest<Actor>("/api/v1/me"), enabled: !signedOut });
   const [actor, setActor] = useState<Actor | null>(null);
   const [error, setError] = useState("");
 
-  useEffect(() => { if (meQuery.data) setActor(meQuery.data); }, [meQuery.data]);
+  useEffect(() => {
+    if (meQuery.data && !explicitSignOut.current) setActor(meQuery.data);
+  }, [meQuery.data]);
 
   async function login(personaKey: string) {
     setError("");
     try {
       const nextActor = await apiRequest<Actor>("/api/v1/auth/demo-login", { method: "POST", body: JSON.stringify({ persona_key: personaKey }) });
       if (nextActor.csrf_token) sessionStorage.setItem("impulse_csrf", nextActor.csrf_token);
+      explicitSignOut.current = false;
+      setSignedOut(false);
       setActor(nextActor);
     } catch { setError("Не удалось войти. Проверьте, что backend запущен."); }
   }
@@ -236,20 +243,30 @@ function ImpulseApp() {
   }
 
   async function logout() {
+    if (loggingOut) return;
+    const csrfToken = sessionStorage.getItem("impulse_csrf") ?? "";
+    explicitSignOut.current = true;
+    setSignedOut(true);
+    setLoggingOut(true);
+    setActor(null);
+    sessionStorage.removeItem("impulse_csrf");
+    await queryClient.cancelQueries({ queryKey: ["me"] });
+    queryClient.removeQueries({ predicate: (query) => !["public-config", "demo-personas"].includes(String(query.queryKey[0])) });
+    window.history.replaceState(null, "", "/");
     try {
-      await apiRequest<unknown>("/api/v1/auth/logout", { method: "POST", headers: { "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" } });
+      await apiRequest<unknown>("/api/v1/auth/logout", { method: "POST", headers: { "X-CSRF-Token": csrfToken } });
+    } catch {
+      // The local demo session is deliberately closed even when the server is
+      // unavailable. A subsequent login creates a fresh server session.
     } finally {
-      sessionStorage.removeItem("impulse_csrf");
-      queryClient.removeQueries({ predicate: (query) => !["public-config", "demo-personas"].includes(String(query.queryKey[0])) });
-      setActor(null);
-      window.history.replaceState(null, "", "/");
+      setLoggingOut(false);
     }
   }
 
   return (
     <main className="page-shell">
       <a className="skip-link" href="#workspace-main">Перейти к содержимому</a>
-      <header className="topbar">{actor ? <><div className="global-search"><span aria-hidden="true">⌕</span><label className="sr-only" htmlFor="global-search">Глобальный поиск</label><input id="global-search" type="search" placeholder="Поиск по задачам, участникам, результатам…" /></div><div className="header-actions"><span className="demo-badge">Демо-режим · синтетические данные</span><button className="notification-button" type="button" aria-label="Уведомления">♢<i aria-hidden="true" /></button><div className="top-persona"><span className="mini-avatar" aria-hidden="true">{actor.display_name.slice(0, 1)}</span><span><strong>{actor.display_name}</strong><small>{roleLabels[actor.active_role]}</small></span></div><button className="ghost-button" onClick={() => { void logout(); }}>Выйти</button></div></> : <><a className="brand" href="/" aria-label="Impulse — на главную"><span className="brand-mark" aria-hidden="true">ϟ</span><span>Impulse</span></a><span className="demo-badge">Демо-режим · синтетические данные</span></>}</header>
+      <header className="topbar">{actor ? <><div className="global-search"><span aria-hidden="true">⌕</span><label className="sr-only" htmlFor="global-search">Глобальный поиск</label><input id="global-search" type="search" placeholder="Поиск по задачам, участникам, результатам…" /></div><div className="header-actions"><span className="demo-badge">Демо-режим · синтетические данные</span><button className="notification-button" type="button" aria-label="Уведомления">♢<i aria-hidden="true" /></button><div className="top-persona"><span className="mini-avatar" aria-hidden="true">{actor.display_name.slice(0, 1)}</span><span><strong>{actor.display_name}</strong><small>{roleLabels[actor.active_role]}</small></span></div><button className="ghost-button" disabled={loggingOut} onClick={() => { void logout(); }}>{loggingOut ? "Выходим…" : "Выйти"}</button></div></> : <><a className="brand" href="/" aria-label="Impulse — на главную"><span className="brand-mark" aria-hidden="true">ϟ</span><span>Impulse</span></a><span className="demo-badge">Демо-режим · синтетические данные</span></>}</header>
       <div id="workspace-main">
       <Routes>
         {!actor ? (
