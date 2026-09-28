@@ -22,8 +22,12 @@ test("participant controls HR visibility and sees review reason", async ({ page 
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Портфолио" }).click();
-  await expect(page.getByRole("heading", { name: "Подтверждённый опыт" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Алекс Речной" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Мой лучший принятый вклад" })).toBeVisible();
   await expect(page.getByText("Результат воспроизводим, вклад подтверждён.")).toBeVisible();
+  await page.getByRole("button", { name: "Открыть кейс" }).click();
+  await expect(page.getByRole("dialog", { name: "Карточка принятого вклада" })).toBeVisible();
+  await page.getByRole("button", { name: "Закрыть" }).click();
   await page.getByRole("checkbox", { name: /Резюме для HR/ }).click();
   await expect.poll(() => hrVisible).toBe(true);
   await expect(page.getByRole("checkbox", { name: /Резюме для HR/ })).toBeChecked();
