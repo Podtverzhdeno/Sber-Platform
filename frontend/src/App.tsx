@@ -13,9 +13,10 @@ import { HrWorkspace } from "./features/hr";
 import { OperatorWorkspace } from "./features/operator";
 import { ParticipantAnalytics, RoleAnalytics } from "./features/analytics";
 import { ParticipantPortfolio, ParticipantRating } from "./features/portfolio";
-import { MentorReviewWorkspace, ParticipantRewardEvidence } from "./features/reward";
+import { MentorReviewWorkspace } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
 import { MessagingWorkspace } from "./features/collaboration";
+import { ParticipantAchievements, ParticipantBuddy, ParticipantSettings } from "./features/participant";
 
 type Role = "participant" | "mentor" | "customer" | "manager" | "hr" | "operator";
 
@@ -43,10 +44,10 @@ const roleLabels: Record<Role, string> = {
 
 const navigationIcons: Record<string, string> = {
   "Главная": "⌂",
-  "Мой путь": "⌂", Bootcamp: "◇", "Задачи": "▤", "События": "✦", "Рейтинг": "♜",
+  "Мой путь": "⌂", "Моя траектория": "⌁", Bootcamp: "◇", "Задачи": "▤", "Мои проекты": "▣", "События": "✦", "Рейтинг": "♜",
   "Портфолио": "◈", "Аналитика": "▥", "Очередь ревью": "✓", "Назначения": "▣", "Мои задачи": "▤",
   "Кандидаты": "♙", "Приёмка": "✓", "Инициативы": "◆", "Результаты": "◎",
-  "Воронка": "▽", "Операционная очередь": "☷", "Проверки": "◉", "Споры": "⚑", "Сообщения": "▱",
+  "Воронка": "▽", "Операционная очередь": "☷", "Проверки": "◉", "Споры": "⚑", "Сообщения": "▱", "Достижения": "◆", "AI-Buddy": "✧", "Настройки": "⚙",
 };
 
 const dashboardMetrics: Record<Role, { label: string; value: string; delta: string; tone: string }[]> = {
@@ -139,20 +140,28 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
         <button className="mobile-menu" type="button" aria-expanded={navigationOpen} onClick={() => { setNavigationOpen(true); }}><span aria-hidden="true">☰</span> Меню</button>
         {allowed && currentSection === "Главная" ? (
           actor.active_role === "participant" ? <ParticipantDashboard actor={actor} /> : <RoleDashboard actor={actor} currentSection="Главная" />
-        ) : allowed && actor.active_role === "participant" && currentSection === "Мой путь" ? (
+        ) : allowed && actor.active_role === "participant" && (currentSection === "Мой путь" || currentSection === "Моя траектория") ? (
           <DevelopmentJourney />
         ) : allowed && actor.active_role === "participant" && currentSection === "Bootcamp" ? (
           <Bootcamp honorBoardEnabled={honorBoardEnabled} honorBoardConsent={actor.consent_scopes.includes("course_honor_board")} />
         ) : allowed && actor.active_role === "participant" && currentSection === "События" ? (
           <EventCatalog />
         ) : allowed && actor.active_role === "participant" && currentSection === "Задачи" ? (
-          <div className="feature-stack"><ParticipantTasks /><ParticipantRewardEvidence /></div>
+          <ParticipantTasks view="catalog" />
+        ) : allowed && actor.active_role === "participant" && currentSection === "Мои проекты" ? (
+          <ParticipantTasks view="projects" />
         ) : allowed && actor.active_role === "participant" && currentSection === "Портфолио" ? (
           <ParticipantPortfolio />
         ) : allowed && actor.active_role === "participant" && currentSection === "Рейтинг" ? (
           <ParticipantRating />
         ) : allowed && actor.active_role === "participant" && currentSection === "Аналитика" ? (
           <ParticipantAnalytics />
+        ) : allowed && actor.active_role === "participant" && currentSection === "Достижения" ? (
+          <ParticipantAchievements />
+        ) : allowed && actor.active_role === "participant" && currentSection === "AI-Buddy" ? (
+          <ParticipantBuddy />
+        ) : allowed && actor.active_role === "participant" && currentSection === "Настройки" ? (
+          <ParticipantSettings actorName={actor.display_name} />
         ) : allowed && actor.active_role === "customer" && (currentSection === "Кандидаты" || currentSection === "Приёмка") ? (
           <CustomerParticipantPreview />
         ) : allowed && actor.active_role === "customer" && currentSection === "Мои задачи" ? (
@@ -199,7 +208,7 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
       <button className="activity-row" type="button" onClick={() => { goTo("Bootcamp", "?course=python-base"); }}><span className="activity-symbol">✓</span><div><strong>Практика в рабочем окружении</strong><small>Курс Python · +20 постоянных баллов после проверки</small></div><span className="ui-badge ui-badge--ai">Checkpoint</span><strong>45 мин</strong><span>›</span></button>
       <button className="activity-row" type="button" onClick={() => { goTo("События"); }}><span className="activity-symbol">✦</span><div><strong>AI Journey 2026</strong><small>Регистрация открыта · +5 замороженных баллов</small></div><span className="ui-badge ui-badge--warning">Событие</span><strong>3 дня</strong><span>›</span></button>
     </section><aside className="insight-panel"><header><h2>Активность</h2><span>6 недель</span></header><div className="home-histogram" role="img" aria-label="Учебная и проектная активность по неделям">{[42, 64, 55, 78, 69, 91].map((value, index) => <i key={index} style={{ height: `${String(value)}%` }}><span>Н{index + 1}</span></i>)}</div><button className="secondary-button" type="button" onClick={() => { goTo("Аналитика"); }}>Открыть аналитику →</button></aside></div>
-    {projectOpen && <div className="overlay" role="presentation"><section className="overlay-panel overlay-panel--dialog" role="dialog" aria-modal="true" aria-label="Рабочая область проекта"><header><h2>Прототип рекомендательной системы</h2><button type="button" aria-label="Закрыть" onClick={() => { setProjectOpen(false); }}>×</button></header><div className="mock-project"><div className="project-stage-strip"><strong>Исследование ✓</strong><strong>Прототип · 70%</strong><span>Проверка</span><span>Приёмка</span></div><p>Подключите Semantic Scholar API, сравните baseline и гибридное ранжирование, приложите отчёт и видео демонстрации.</p><dl><div><dt>Команда</dt><dd>Алекс · Анна · ментор Елена</dd></div><div><dt>Дедлайн</dt><dd>12 октября 2026</dd></div><div><dt>Вознаграждение</dt><dd>База 50 000 ₽ · A 125 000 ₽</dd></div></dl><div className="modal-actions"><button type="button" onClick={() => { setProjectOpen(false); goTo("Задачи"); }}>Перейти к проекту</button><button className="secondary-button" type="button" onClick={() => { setProjectOpen(false); }}>Закрыть</button></div></div></section></div>}
+    {projectOpen && <div className="overlay" role="presentation"><section className="overlay-panel overlay-panel--dialog" role="dialog" aria-modal="true" aria-label="Рабочая область проекта"><header><h2>Прототип рекомендательной системы</h2><button type="button" aria-label="Закрыть" onClick={() => { setProjectOpen(false); }}>×</button></header><div className="mock-project"><div className="project-stage-strip"><strong>Исследование ✓</strong><strong>Прототип · 70%</strong><span>Проверка</span><span>Приёмка</span></div><p>Подключите Semantic Scholar API, сравните baseline и гибридное ранжирование, приложите отчёт и видео демонстрации.</p><dl><div><dt>Команда</dt><dd>Алекс · Анна · ментор Елена</dd></div><div><dt>Дедлайн</dt><dd>12 октября 2026</dd></div><div><dt>Вознаграждение</dt><dd>База 50 000 ₽ · A 125 000 ₽</dd></div></dl><div className="modal-actions"><button type="button" onClick={() => { setProjectOpen(false); goTo("Мои проекты"); }}>Перейти к проекту</button><button className="secondary-button" type="button" onClick={() => { setProjectOpen(false); }}>Закрыть</button></div></div></section></div>}
     {buddyOpen && <div className="overlay" role="presentation"><section className="overlay-panel overlay-panel--drawer" role="dialog" aria-modal="true" aria-label="Рекомендация AI Buddy"><header><h2>Рекомендация AI Buddy</h2><button type="button" aria-label="Закрыть" onClick={() => { setBuddyOpen(false); }}>×</button></header><div className="buddy-recommendation"><Badge tone="warning">Черновик AI</Badge><h3>Сначала завершите checkpoint API</h3><p>Он напрямую связан с текущим проектом, добавит доказательство навыка Python и откроет этап проверки MVP.</p><div className="modal-actions"><button type="button" onClick={() => { setBuddyOpen(false); goTo("Bootcamp", "?course=python-base"); }}>Открыть траекторию</button><button className="secondary-button" type="button" onClick={() => { setBuddyOpen(false); }}>Понятно</button></div></div></section></div>}
   </div>;
 }
