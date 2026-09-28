@@ -200,12 +200,12 @@
 - [ ] Добавить participant task detail API/route с брифом, условиями, заказчиком, ментором, командой, ролями, checkpoints, личным вкладом, feedback и version history.
 - [ ] Сделать карточки «Мои задачи» кликабельными и добавить working actions: checkpoint submission, evidence upload, clarification и переход в project/mentor chat.
 - [ ] Реализовать RBAC-filtered global search API и topbar combobox по задачам, проектам, курсам, событиям, участникам, сообщениям и документам.
-- [ ] Удалить authenticated demo-badge, сохранить provenance в About/Settings и preview-документах; заменить utility diamond на доступный streak popover.
+- [x] Удалить authenticated demo-badge, сохранить provenance в About/Settings и preview-документах; заменить utility diamond на доступный streak popover.
 - [ ] Реализовать messaging schema/API: channels, membership, object link, messages, attachments, read cursors, mute, retention и audit.
-- [ ] Добавить route «Сообщения» в навигацию всех ролей и трёхпанельный messenger с personal, mentor, task-team, customer и operator-case чатами.
+- [x] Добавить route «Сообщения» в навигацию всех ролей и трёхпанельный messenger с personal, mentor, task-team, customer и operator-case чатами.
 - [ ] Добавить versioned course/role/project competency models, evidence mapping и объяснимый расчёт уровня без переноса оценки на несвязанные навыки.
 - [ ] Реализовать выпуск и verification page Bootcamp certificate только после verified completion; demo issuer SHALL создавать только явно маркированный preview.
 - [ ] Реализовать отдельный customer-signed project credential после принятия личного вклада с 5+, competency matrix и immutable evidence refs.
-- [ ] Перестроить participant analytics: competency matrix/readiness/certificates в первом viewport, существующие KPI/funnel/activity/rating/learning/results/AI/payment ниже.
+- [x] Перестроить participant analytics: competency matrix/readiness/certificates в первом viewport, существующие KPI/funnel/activity/rating/learning/results/AI/payment ниже.
 - [ ] Добавить миграции, mock graph и API contracts для detail task, search, messages, competency evidence и трёх credential types.
 - [ ] Добавить unit/integration/RBAC/Playwright/screenshot tests для task detail, search, streak, сообщений каждой роли, competency matrix и certificate lifecycle.

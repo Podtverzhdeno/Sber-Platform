@@ -28,7 +28,7 @@ describe("App", () => {
     });
     render(<App />);
 
-    expect(screen.getByText("Демо-режим · синтетические данные")).toBeInTheDocument();
+    expect(screen.queryByText("Демо-режим · синтетические данные")).not.toBeInTheDocument();
     expect(await screen.findByRole("button", { name: /Алекс Речной/ })).toBeEnabled();
   });
 

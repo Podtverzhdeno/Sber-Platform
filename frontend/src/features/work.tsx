@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { apiRequest } from "../api/client";
 import { Badge, Card, Modal, StatePanel, Tooltip } from "../components/ui";
@@ -54,11 +55,13 @@ export function CompensationDetails({ terms, expanded = false }: { terms: Compen
 
 export function ParticipantTasks() {
   const client = useQueryClient();
+  const navigate = useNavigate();
   const catalog = useQuery({ queryKey: ["task-catalog"], queryFn: () => apiRequest<MarketplaceTask[]>("/api/v1/marketplace/tasks"), refetchOnMount: "always" });
   const work = useQuery({ queryKey: ["my-work"], queryFn: () => apiRequest<WorkItem[]>("/api/v1/me/work"), refetchOnMount: "always" });
   const [summary, setSummary] = useState("");
   const [artifactUrl, setArtifactUrl] = useState("");
   const [consentItem, setConsentItem] = useState<MarketplaceTask | null>(null);
+  const [selectedAssignment, setSelectedAssignment] = useState<string | null>(null);
   const acceptTerms = useMutation({ mutationFn: (item: MarketplaceTask) => apiRequest(`/api/v1/me/tasks/${item.task.id}/terms-consent`, { method: "POST", headers: csrfHeaders(), body: JSON.stringify({ terms_version: item.terms.version }) }), onSuccess: async () => client.invalidateQueries({ queryKey: ["task-catalog"] }) });
   const apply = useMutation({ mutationFn: (taskId: string) => apiRequest<Application>(`/api/v1/me/tasks/${taskId}/applications`, { method: "POST", headers: csrfHeaders() }), onSuccess: async () => Promise.all([client.invalidateQueries({ queryKey: ["task-catalog"] }), client.invalidateQueries({ queryKey: ["my-work"] })]) });
   const start = useMutation({ mutationFn: (assignmentId: string) => apiRequest(`/api/v1/me/assignments/${assignmentId}/start`, { method: "POST", headers: csrfHeaders() }), onSuccess: async () => client.invalidateQueries({ queryKey: ["my-work"] }) });
@@ -66,6 +69,26 @@ export function ParticipantTasks() {
 
   if (catalog.isLoading || work.isLoading) return <StatePanel kind="loading" />;
   if (!catalog.data || !work.data || catalog.isError || work.isError) return <StatePanel kind="error" action="Повторить" onAction={() => { void catalog.refetch(); void work.refetch(); }} />;
+  const selectedWork = work.data.find((item) => item.assignment.id === selectedAssignment);
+  if (selectedWork) {
+    const latest = selectedWork.contributions.at(-1);
+    const projectCheckpoints: Array<[string, string, string, string]> = [
+      ["Исследование источников", "accepted", "Алекс · Анна", "Отчёт и выбор Semantic Scholar"],
+      ["Контракт API", "accepted", "Алекс", "OpenAPI-схема и обработка ошибок"],
+      ["Baseline ранжирования", "accepted", "Анна", "Метрики Precision@10 и NDCG"],
+      ["Гибридный прототип", "in_progress", "Команда", "Интеграция API и модели"],
+      ["Итоговая проверка MVP", "not_started", "Роман · Елена", "Демо, отчёт и воспроизводимость"],
+    ];
+    return <div className="feature-stack task-detail-page">
+      <button className="text-button" type="button" onClick={() => { setSelectedAssignment(null); }}>← Вернуться к моим задачам</button>
+      <header className="task-detail-hero"><div><p className="eyebrow">Моя задача · {selectedWork.task.id.slice(0, 8)}</p><h1 id="workspace-title">{selectedWork.task.title}</h1><p className="lead">Разработать и проверить прототип рекомендаций научных статей на открытых данных.</p><div className="work-meta"><WorkStatus status={selectedWork.assignment.status} /><Badge tone="warning">MVP · 70%</Badge><span>Дедлайн 12 октября 2026</span></div></div><CompensationDetails terms={selectedWork.terms.compensation} expanded /></header>
+      <section className="task-people-grid"><article><span className="eyebrow">Заказчик</span><strong>Роман Воронов</strong><small>Руководитель R&amp;D · принимает бизнес-результат</small></article><article><span className="eyebrow">Ментор команды</span><strong>Елена Наставник</strong><small>ML Lead · проверяет вклад и даёт обратную связь</small><button className="text-button" type="button" onClick={() => { void navigate("/workspace/8"); }}>Написать ментору</button></article><article><span className="eyebrow">Ваша роль</span><strong>Backend-разработчик</strong><small>API источников, ранжирование и воспроизводимость</small></article></section>
+      <div className="task-detail-grid"><section className="task-work-plan"><div className="section-heading"><div><p className="eyebrow">План работы</p><h2>Checkpoints проекта</h2></div><strong>3 из 5 выполнено</strong></div>{projectCheckpoints.map(([title, status, owner, result], index) => <article className={`task-checkpoint task-checkpoint--${status}`} key={title}><span>{status === "accepted" ? "✓" : index + 1}</span><div><strong>{title}</strong><small>{owner} · {result}</small></div><Badge tone={status === "accepted" ? "success" : status === "in_progress" ? "warning" : "neutral"}>{status === "accepted" ? "Принято" : status === "in_progress" ? "В работе" : "Не начато"}</Badge></article>)}</section>
+        <aside className="task-team-panel"><h2>Команда</h2><ul><li><span>АР</span><div><strong>Алекс Речной</strong><small>Backend · вы</small></div></li><li><span>АК</span><div><strong>Анна Крылова</strong><small>Data Scientist</small></div></li><li><span>МС</span><div><strong>Максим Соколов</strong><small>Product / Research</small></div></li></ul><button type="button" onClick={() => { void navigate("/workspace/8"); }}>Открыть чат команды</button></aside></div>
+      <section className="task-feedback"><div><p className="eyebrow">Последняя обратная связь</p><h2>Ревью ментора · версия {latest?.version ?? 2}</h2><p>API-контракт и структура решения соответствуют критериям. Добавьте retry с backoff, зафиксируйте лимиты источника и повторите нагрузочный тест.</p><div className="feedback-criteria"><span><strong>A</strong> Архитектура</span><span><strong>B</strong> Надёжность</span><span><strong>A</strong> Документация</span><span><strong>B</strong> Командный вклад</span></div><small>Елена Наставник · 28 сентября, 10:14 · относится к checkpoint «Контракт API»</small></div><div className="task-next-action"><Badge tone="warning">Следующий шаг</Badge><strong>Обновить обработку rate limit</strong><button type="button">Загрузить новую версию</button></div></section>
+      <section className="task-history"><h2>История вашего вклада</h2><article><time>28 сентября</time><div><strong>Контракт API · версия 2</strong><p>Получена обратная связь ментора, запрошено уточнение retry.</p></div></article><article><time>25 сентября</time><div><strong>Контракт API · версия 1</strong><p>Отправлена OpenAPI-схема и коллекция тестов.</p></div></article><article><time>20 сентября</time><div><strong>Исследование источников</strong><p>Результат принят заказчиком.</p></div></article></section>
+    </div>;
+  }
   return <div className="feature-stack">
     <section><p className="eyebrow">Реальные R&amp;D и MVP</p><h1 id="workspace-title">Задачи с понятным результатом</h1><p className="lead">До отклика видны результат, критерии и срок. В «Моей работе» отдельно сохраняются командный результат и ваш личный вклад.</p></section>
     <section aria-labelledby="catalog-title"><h2 id="catalog-title">Доступные задачи</h2><div className="work-grid">{catalog.data.map((item) => <Card key={item.task.id} title={item.task.title}>
@@ -75,7 +98,7 @@ export function ParticipantTasks() {
     </Card>)}</div></section>
     <section aria-labelledby="my-work-title"><h2 id="my-work-title">Моя работа</h2>{work.data.length === 0 ? <StatePanel kind="empty" /> : <div className="work-grid">{work.data.map((item) => {
       const latest = item.contributions.at(-1); const decision = latest ? item.decisions.find((entry) => entry.contribution_id === latest.id) : undefined;
-      return <Card key={item.assignment.id} title={item.task.title}><div className="work-meta"><WorkStatus status={item.assignment.status} /><CompensationDetails terms={item.terms.compensation} /></div>
+      return <Card key={item.assignment.id} title={item.task.title}><button className="task-card-open" type="button" onClick={() => { setSelectedAssignment(item.assignment.id); }}>Открыть рабочую область →</button><div className="work-meta"><WorkStatus status={item.assignment.status} /><CompensationDetails terms={item.terms.compensation} /></div>
         {decision?.decision === "revision_requested" && <div className="revision-note" role="status"><strong>Что доработать</strong><p>{decision.reason}</p><small>Срок: {decision.deadline_at ? new Date(decision.deadline_at).toLocaleString("ru-RU") : "не указан"}</small></div>}
         {latest && <div className="contribution-summary"><strong>Личный вклад · версия {latest.version}</strong><p>{latest.personal_summary}</p><WorkStatus status={latest.status} /></div>}
         {(item.assignment.status === "staffed" || item.assignment.status === "revision_requested") && <button type="button" onClick={() => { start.mutate(item.assignment.id); }}>{item.assignment.status === "revision_requested" ? "Начать доработку" : "Начать работу"}</button>}

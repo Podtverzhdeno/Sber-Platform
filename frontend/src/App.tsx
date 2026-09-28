@@ -15,6 +15,7 @@ import { ParticipantAnalytics, RoleAnalytics } from "./features/analytics";
 import { ParticipantPortfolio, ParticipantRating } from "./features/portfolio";
 import { MentorReviewWorkspace, ParticipantRewardEvidence } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
+import { MessagingWorkspace } from "./features/collaboration";
 
 type Role = "participant" | "mentor" | "customer" | "manager" | "hr" | "operator";
 
@@ -45,7 +46,7 @@ const navigationIcons: Record<string, string> = {
   "Мой путь": "⌂", Bootcamp: "◇", "Задачи": "▤", "События": "✦", "Рейтинг": "♜",
   "Портфолио": "◈", "Аналитика": "▥", "Очередь ревью": "✓", "Назначения": "▣", "Мои задачи": "▤",
   "Кандидаты": "♙", "Приёмка": "✓", "Инициативы": "◆", "Результаты": "◎",
-  "Воронка": "▽", "Операционная очередь": "☷", "Проверки": "◉", "Споры": "⚑",
+  "Воронка": "▽", "Операционная очередь": "☷", "Проверки": "◉", "Споры": "⚑", "Сообщения": "▱",
 };
 
 const dashboardMetrics: Record<Role, { label: string; value: string; delta: string; tone: string }[]> = {
@@ -166,6 +167,8 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
           <OperatorWorkspace />
         ) : allowed && actor.active_role !== "participant" && currentSection === "Аналитика" ? (
           <RoleAnalytics role={actor.active_role} />
+        ) : allowed && currentSection === "Сообщения" ? (
+          <MessagingWorkspace role={actor.active_role} />
         ) : allowed ? (
           <RoleDashboard actor={actor} currentSection={currentSection ?? "Главная"} />
         ) : (
@@ -213,6 +216,7 @@ function RoleDashboard({ actor, currentSection }: { actor: Actor; currentSection
 }
 
 function ImpulseApp() {
+  const navigate = useNavigate();
   const configQuery = useQuery({ queryKey: ["public-config"], queryFn: () => apiRequest<PublicConfig>("/api/v1/config") });
   const personasQuery = useQuery({ queryKey: ["demo-personas"], queryFn: () => apiRequest<Persona[]>("/api/v1/auth/personas") });
   const [signedOut, setSignedOut] = useState(false);
@@ -221,6 +225,9 @@ function ImpulseApp() {
   const meQuery = useQuery({ queryKey: ["me"], queryFn: () => apiRequest<Actor>("/api/v1/me"), enabled: !signedOut });
   const [actor, setActor] = useState<Actor | null>(null);
   const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [streakOpen, setStreakOpen] = useState(false);
 
   useEffect(() => {
     if (meQuery.data && !explicitSignOut.current) setActor(meQuery.data);
@@ -263,10 +270,27 @@ function ImpulseApp() {
     }
   }
 
+  const searchItems = actor ? [
+    { title: "Прототип рекомендательной системы", meta: "Задача · в работе", section: "Задачи", query: "" },
+    { title: "Python для R&D", meta: "Bootcamp · текущий курс", section: "Bootcamp", query: "?course=python-base" },
+    { title: "AI Journey 2026", meta: "Событие · регистрация", section: "События", query: "" },
+    { title: "Елена Наставник", meta: "Сообщения · ментор", section: "Сообщения", query: "" },
+    { title: "Сертификат OpenSpec", meta: "Документ · подтверждён", section: "Портфолио", query: "" },
+  ].filter((item) => item.title.toLowerCase().includes(search.trim().toLowerCase()) || item.meta.toLowerCase().includes(search.trim().toLowerCase())) : [];
+  const openSearchItem = (section: string, query = "") => {
+    if (!actor) return;
+    const index = actor.navigation.indexOf(section);
+    if (index >= 0) {
+      void navigate(`/workspace/${String(index)}${query}`);
+      setSearch("");
+      setSearchOpen(false);
+    }
+  };
+
   return (
     <main className="page-shell">
       <a className="skip-link" href="#workspace-main">Перейти к содержимому</a>
-      <header className="topbar">{actor ? <><div className="global-search"><span aria-hidden="true">⌕</span><label className="sr-only" htmlFor="global-search">Глобальный поиск</label><input id="global-search" type="search" placeholder="Поиск по задачам, участникам, результатам…" /></div><div className="header-actions"><span className="demo-badge">Демо-режим · синтетические данные</span><button className="notification-button" type="button" aria-label="Уведомления">♢<i aria-hidden="true" /></button><div className="top-persona"><span className="mini-avatar" aria-hidden="true">{actor.display_name.slice(0, 1)}</span><span><strong>{actor.display_name}</strong><small>{roleLabels[actor.active_role]}</small></span></div><button className="ghost-button" disabled={loggingOut} onClick={() => { void logout(); }}>{loggingOut ? "Выходим…" : "Выйти"}</button></div></> : <><a className="brand" href="/" aria-label="Impulse — на главную"><span className="brand-mark" aria-hidden="true">ϟ</span><span>Impulse</span></a><span className="demo-badge">Демо-режим · синтетические данные</span></>}</header>
+      <header className="topbar">{actor ? <><div className="global-search"><span aria-hidden="true">⌕</span><label className="sr-only" htmlFor="global-search">Глобальный поиск</label><input id="global-search" type="search" value={search} onFocus={() => { setSearchOpen(true); }} onChange={(event) => { setSearch(event.target.value); setSearchOpen(true); }} placeholder="Поиск по задачам, курсам, людям и сообщениям…" autoComplete="off" />{searchOpen && search.trim().length > 1 && <div className="global-search-results" role="listbox" aria-label="Результаты поиска">{searchItems.length ? searchItems.map((item) => <button type="button" role="option" key={item.title} onClick={() => { openSearchItem(item.section, item.query); }}><strong>{item.title}</strong><span>{item.meta}</span></button>) : <div><strong>Ничего не найдено</strong><span>Попробуйте изменить запрос</span></div>}</div>}</div><div className="header-actions"><div className="streak-utility"><button className="streak-button" type="button" aria-label="Учебный стрик: 14 дней" aria-expanded={streakOpen} onClick={() => { setStreakOpen((value) => !value); }}>🔥 <strong>14</strong></button>{streakOpen && <div className="streak-popover" role="dialog" aria-label="Учебный стрик"><header><span>Текущая серия</span><strong>14 дней подряд</strong></header><div className="streak-week">{["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((day, index) => <span className={index < 6 ? "done" : "today"} key={day}><i>{index < 6 ? "✓" : "·"}</i>{day}</span>)}</div><p><strong>Сегодня:</strong> завершите checkpoint «Практика API», чтобы сохранить серию.</p><button type="button" onClick={() => { setStreakOpen(false); openSearchItem("Bootcamp", "?course=python-base"); }}>Продолжить курс →</button><small>Лучшая серия: 21 день</small></div>}</div><button className="notification-button" type="button" aria-label="Уведомления">♢<i aria-hidden="true" /></button><div className="top-persona"><span className="mini-avatar" aria-hidden="true">{actor.display_name.slice(0, 1)}</span><span><strong>{actor.display_name}</strong><small>{roleLabels[actor.active_role]}</small></span></div><button className="ghost-button" disabled={loggingOut} onClick={() => { void logout(); }}>{loggingOut ? "Выходим…" : "Выйти"}</button></div></> : <a className="brand" href="/" aria-label="Impulse — на главную"><span className="brand-mark" aria-hidden="true">ϟ</span><span>Impulse</span></a>}</header>
       <div id="workspace-main">
       <Routes>
         {!actor ? (
