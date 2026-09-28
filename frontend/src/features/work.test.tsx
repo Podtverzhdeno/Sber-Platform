@@ -20,4 +20,10 @@ describe("CompensationDetails", () => {
     expect(screen.getByText("Неоплачиваемая задача")).toBeVisible();
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
   });
+
+  it("removes insignificant zeroes from whole-ruble amounts", () => {
+    render(<CompensationDetails terms={{ paid: true, base_amount_per_assignee: "90000.00", currency: "RUB", b_multiplier: "1.5000", a_multiplier: "2.5000", b_total: "135000.0000", a_total: "225000.0000", quantum: "0.01", rounding_mode: "half_up", policy_version: 1, payout_condition: "После принятия вклада." }} />);
+
+    expect(screen.getByText("База 90 000 ₽ · B 135 000 ₽ · A 225 000 ₽")).toBeVisible();
+  });
 });

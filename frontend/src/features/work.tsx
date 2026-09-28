@@ -34,7 +34,8 @@ function WorkStatus({ status }: { status: string }) {
 function formatDecimal(value: string) {
   const [integer = "0", fraction] = value.split(".");
   const grouped = integer.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-  return fraction ? `${grouped},${fraction}` : grouped;
+  const significantFraction = fraction?.replace(/0+$/u, "") ?? "";
+  return significantFraction ? `${grouped},${significantFraction}` : grouped;
 }
 
 function formatMoney(value: string, currency: string) {
