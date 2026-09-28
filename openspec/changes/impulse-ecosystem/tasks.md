@@ -209,3 +209,17 @@
 - [x] Перестроить participant analytics: competency matrix/readiness/certificates в первом viewport, существующие KPI/funnel/activity/rating/learning/results/AI/payment ниже.
 - [ ] Добавить миграции, mock graph и API contracts для detail task, search, messages, competency evidence и трёх credential types.
 - [ ] Добавить unit/integration/RBAC/Playwright/screenshot tests для task detail, search, streak, сообщений каждой роли, competency matrix и certificate lifecycle.
+
+# Participant application, workspace and settings follow-up
+
+- [ ] Реализовать идемпотентный API отклика с уникальностью «участник—задача», success/error-состояниями и аудитом; интеграционный тест SHALL доказать отсутствие дубля при повторе запроса.
+- [ ] После успешного отклика обновлять кэш витрины и «Моих задач» без перезагрузки, показывать статус «Заявка отправлена» и success notification с переходом в список.
+- [ ] Разделить «Задачи», ожидающие решения заявки, и «Мои проекты» с принятыми назначениями; RBAC-тест SHALL запрещать доступ к рабочей области до принятия.
+- [ ] Удалить из рабочей области общий блок «Подтверждённый опыт и деньги», сохранив только условия и статус оплаты конкретной задачи в её контексте.
+- [ ] Собрать canonical participant navigation и dashboard-композицию из `participant-experience`, не дублируя доменную логику профильных capabilities.
+- [ ] Реализовать настройки профиля и происхождение навыков, локаль/тему/часовой пояс с сохранением между сессиями.
+- [ ] Реализовать security settings для поддерживаемого auth provider; неподдерживаемые 2FA/external identity flows SHALL иметь честное disabled-состояние без фиктивного успеха.
+- [ ] Реализовать versioned consent records, granular HR visibility и точный HR-preview; privacy/RBAC tests SHALL покрыть каждую категорию данных.
+- [ ] Реализовать матрицу уведомлений с разделением обязательных, продуктовых и маркетинговых сообщений.
+- [ ] Связать настройки AI-Buddy с model-call gate, очисткой пользовательской памяти и переходом к человеку; тест SHALL подтвердить отсутствие модельного вызова после opt-out.
+- [ ] Добавить Playwright journey: открыть задачу → откликнуться → увидеть success → найти в «Моих задачах» → дождаться mock-принятия → открыть «Мои проекты» и рабочую область без общего блока опыта/денег.
