@@ -2,7 +2,7 @@
 
 ## Context
 
-Репозиторий новый: в нём нет существующего приложения, схемы данных, auth-провайдера или API, поэтому адаптация legacy-кода не требуется. Бизнес-мотивация определена в `proposal.md`, наблюдаемое поведение — в 17 delta specs этого change. Word-документ остаётся материалом согласования; после создания change authoritative source для coding agents — Markdown OpenSpec.
+Репозиторий новый: в нём нет существующего приложения, схемы данных, auth-провайдера или API, поэтому адаптация legacy-кода не требуется. Бизнес-мотивация определена в `proposal.md`, наблюдаемое поведение — в delta specs этого change. Word-документ остаётся материалом согласования; после создания change authoritative source для coding agents — Markdown OpenSpec.
 
 Проект должен запускаться локально и одним Docker-образом в Railway, использовать PostgreSQL и настоящий OpenRouter для AI, но демонстрировать бизнес-сценарии на явно маркированных моковых данных. Бесплатные модели имеют низкие и изменчивые лимиты, поэтому AI не может быть обязательной зависимостью основного пути. Ключ OpenRouter уже предоставлен для разработки, но SHALL существовать только в локальном `.env` и Railway Variables и никогда не попадать в Git или образ.
 
@@ -133,10 +133,12 @@ Sber-platform/
 
 - Identity: `persons`, `actor_roles`, `sessions`, `consents`, `visibility_settings`.
 - Development: `tracks`, `track_attempts`, `roadmap_versions`, `milestones`, `courses`, `course_track_links`, `enrollments`, `learning_days`.
-- Work: `projects`, `tasks`, `task_terms_versions`, `applications`, `assignments`, `contributions`, `artifacts`, `acceptances`, `appeals`.
+- Work: `projects`, `tasks`, `task_terms_versions`, `applications`, `assignments`, `project_roles`, `task_checkpoints`, `checkpoint_versions`, `contributions`, `artifacts`, `feedback_entries`, `acceptances`, `appeals`.
 - Reward: `review_rubrics`, `review_5plus_versions`, `compensation_terms`, `payout_claims`, `settlement_attempts`.
-- Recognition: `seasons`, `rating_policies`, `score_ledger`, `standings`, `credentials`, `trophies`, `offer_evidence`.
+- Recognition: `competency_models`, `competency_definitions`, `competency_evidence`, `competency_snapshots`, `seasons`, `rating_policies`, `score_ledger`, `standings`, `credentials`, `credential_versions`, `credential_verifications`, `trophies`, `offer_evidence`.
 - Ecosystem: `events`, `programs`, `participation_claims`, `external_sources`, `provider_records`.
+- Collaboration: `channels`, `channel_memberships`, `messages`, `message_versions`, `message_attachments`, `read_cursors`, `notification_preferences`.
+- Discovery: `search_documents` как перестраиваемая проекция разрешённых типов; RBAC и object relation проверяются повторно до возврата результата.
 - Assist: `agent_threads`, `agent_messages`, `agent_runs`, `agent_suggestions`, `human_decisions`, `agent_feedback`, `model_policies`.
 - Insight: `domain_events`, `audit_entries`, `metric_snapshots`.
 
@@ -148,7 +150,10 @@ Sber-platform/
 
 - Track attempt: `draft → active ↔ frozen`. Активация третьего требует атомарно заморозить выбранный active track; completed milestones принадлежат attempt/version и сохраняются.
 - Enrollment: `available → in_progress → completion_reported → verified | rejected`. Только `verified` может стать основанием ledger.
+- Course credential: `eligible → issued → valid → superseded | revoked`; eligible возникает только из verified enrollment и полной матрицы обязательных компетенций.
 - Task: `draft → moderation → published → staffed → in_progress → submitted → accepted | revision_requested | disputed → closed`. `published` требует support mode и полную terms version.
+- Checkpoint: `not_started → in_progress → submitted → accepted | revision_requested | blocked`; прогресс назначения является проекцией обязательных checkpoints.
+- Project credential: `ineligible → ready_for_signature → issued → valid → superseded | revoked`; переход ready требует business acceptance и принятого персонального contribution.
 - Review 5+: `draft → proposed → human_confirmed → published → disputed → corrected | upheld → frozen`. На contribution version действует одна current финальная версия.
 - Payout: `not_applicable | pending_acceptance → calculated → approved → sent_to_payment_system → paid | failed | reversed`. В MVP payment adapter — демонстрационный; статус UI явно содержит `demo`.
 - Season: `scheduled → open → closing → frozen`. Документ выдаётся после `frozen`; поздняя коррекция создаёт `superseded`/новую версию.
@@ -170,7 +175,11 @@ A_total = quantize(base × published_A_multiplier, policy quantum, policy roundi
 
 Review 5+ хранит rubric version, grade, критерии, human-authored explanation, evidence refs, signer, conflict check и contribution version. AI draft хранится отдельно и может быть удалён без изменения review. Для демо используется утверждённая фикстура рубрики, но UI маркирует её «правила пилота».
 
-`ScoreLedger` append-only. Демо-политика сезона задаётся seed-файлом и содержит weights, caps, tie breaker, cohort, diploma thresholds и appeal period. Пересчёт materialized standings воспроизводится из ledger; трофей визуально не равен баллам без rule. Credential имеет opaque verification ID, public projection, `valid/revoked/superseded`, исходную policy version и checksum payload.
+`ScoreLedger` append-only. Демо-политика сезона задаётся seed-файлом и содержит weights, caps, tie breaker, cohort, diploma thresholds и appeal period. Пересчёт materialized standings воспроизводится из ledger; трофей визуально не равен баллам без rule. Credential имеет type (`course`, `project_experience`, `season_award`), opaque verification ID, public projection, `valid/revoked/superseded`, issuer/template/policy version и checksum payload. Course credential ссылается на verified enrollment и competency evidence; project credential — на business acceptance, личный contribution и human 5+ review.
+
+Матрица компетенций не хранится одним перезаписываемым JSON. Версионированная модель определяет уровни и обязательные evidence rules, `competency_evidence` хранит источник и статус проверки, а snapshot является воспроизводимой проекцией на конкретную дату. Course evidence подтверждает обучение, project evidence — применение; агрегатор не переносит уровень между несвязанными competency keys.
+
+Сообщение не является доменным решением. Ссылка на сообщение MAY объяснять контекст, но acceptance, review, payout, offer и credential создаются только соответствующей командой. Membership канала выводится из object relation или явного разрешения; закрытие назначения атомарно прекращает write-доступ. Глобальный поиск использует минимальную индексную проекцию и после retrieval повторно проверяет разрешение на исходный объект, предотвращая утечку названия закрытой задачи или чата.
 
 До утверждения реальных D01–D10 production-like flags блокируют `paid=true`, открытие season и юридически значимую выдачу; в `DEMO_MODE` сценарии работают на синтетике и визуально обозначены.
 

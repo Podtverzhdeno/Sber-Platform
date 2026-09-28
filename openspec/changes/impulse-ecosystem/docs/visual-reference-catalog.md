@@ -85,7 +85,7 @@ Sidebar заказчика SHALL содержать: Главная, Мои за
 | `R-MGR-07` | `...10_33_17-1.png` | База участников | KPI, filters, participant table, selected candidate, verified experience and invite/assign actions |
 | `R-MGR-08` | `...10_33_20-2.png` | Настройки | manager profile, security, access/session, notifications, team visibility, integrations and AI controls |
 
-Sidebar руководителя SHALL содержать: Главная, Проекты, Команда, Результаты, Аналитика, Календарь, База участников, Настройки. Основной accent этой роли MAY быть фиолетово-синим, но success/decision semantics остаются общими.
+Sidebar руководителя SHALL содержать: Главная, Проекты, Команда, Результаты, Аналитика, Календарь, База участников, Сообщения, Настройки. Основной accent этой роли MAY быть фиолетово-синим, но success/decision semantics остаются общими.
 
 ## Оператор
 
@@ -103,7 +103,7 @@ Sidebar руководителя SHALL содержать: Главная, Пр�
 | `R-OPS-08` | `...22_35_04-8 (1).png` | События и трофеи | KPI, event/trophy table, selected event, calendar, evidence, claims and verification actions |
 | `R-OPS-09` | `...22_35_05-9 (1).png` | Аналитика | operational KPI, queue dynamics, SLA, disputes, category donut, user growth, error table and AI insights |
 
-Sidebar оператора SHALL содержать: Главная, Модерация, Проверка достижений, Задачи и проекты, Выплаты, Споры и апелляции, Пользователи, События и трофеи, Аналитика, Настройки. Нижний блок SHALL идентифицировать операторскую панель и уровень доступа.
+Sidebar оператора SHALL содержать: Главная, Модерация, Проверка достижений, Задачи и проекты, Выплаты, Споры и апелляции, Пользователи, События и трофеи, Аналитика, Сообщения, Настройки. Нижний блок SHALL идентифицировать операторскую панель и уровень доступа.
 
 ## Общая анатомия desktop-экрана
 
