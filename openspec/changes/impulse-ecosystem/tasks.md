@@ -182,3 +182,15 @@
 - [x] Привести действия событий к общим button styles и реализовать форму участия/переход к источнику.
 - [x] Исправить загрузку портфолио и аналитики, добавить demo fallback и рабочий retry.
 - [x] Провести Playwright click audit всех persona routes и primary actions без inert controls, 404/500 и page errors.
+
+# Participant interaction and analytics follow-up
+
+- [ ] Исправить logout: завершать серверную сессию, очищать actor/query cache и возвращать выбор persona.
+- [ ] Связать все CTA главной с mock-проектом, Buddy drawer, рейтингом и очередью актуальных действий.
+- [ ] Заменить некорректные line/sparkline элементы главной на адаптивные гистограммы.
+- [ ] Связать «Начать Bootcamp» и course milestones в «Моём пути» с конкретной траекторией и checkpoint-заданиями/баллами.
+- [ ] Переработать запрос мнения ментора в рабочий сценарий «Получить рекомендацию ментора».
+- [ ] Разделить актуальные и завершённые события; реализовать frozen points и proof claim после завершения.
+- [ ] Реализовать открытие разрешённого публичного профиля выбранного участника из рейтинга.
+- [ ] Пересобрать аналитику участника по reference: KPI, funnel, histograms, направления, рейтинг/баллы, обучение, результаты и AI insight.
+- [ ] Добавить Playwright-тесты logout/login, CTA главной, roadmap deep-link, event lifecycle, rating profile и analytics screenshot.
