@@ -127,3 +127,84 @@ AI assistant SHALL иметь фиолетово-бирюзовый accent, ма
 #### Scenario: Pull request меняет UI
 - **WHEN** изменены tokens, layout или общий компонент
 - **THEN** CI запускает component tests, accessibility checks и screenshot regression для затронутых ключевых экранов
+
+### Requirement: Reference catalog is normative
+Frontend SHALL реализовать экранные композиции по стабильным идентификаторам `R-*` из `docs/visual-reference-catalog.md`. Для каждого доступного пользователю маршрута SHALL существовать ровно один основной reference ID; reference ID SHALL быть указан рядом с route definition или screenshot test. Референс определяет shell, порядок блоков, spans колонок, расположение primary action, плотность и визуальную иерархию. Доменная спецификация и API определяют фактический текст, данные и доступность действий.
+
+Разработчик не SHALL заменять насыщенный рабочий экран одной универсальной карточкой, одинаковой для всех ролей. Общие primitives переиспользуются, но dashboard, queue, detail/inspector и analytics compositions SHALL учитывать работу конкретной роли.
+
+#### Scenario: Coding agent реализует маршрут
+- **WHEN** coding agent начинает или перерабатывает экран, представленный в каталоге
+- **THEN** он находит `R-*`, воспроизводит крупные зоны и прикладывает screenshot baseline с тем же ID
+
+#### Scenario: Демонстрационные данные отличаются
+- **WHEN** API возвращает другие имена, суммы или количество строк, чем изображено в PNG
+- **THEN** UI сохраняет композицию и корректно отображает реальные данные без подмены их текстом из референса
+
+### Requirement: Desktop geometry fidelity
+При viewport 1672×941 desktop shell SHALL воспроизводить геометрию референсов: sidebar 232–256 px, topbar 60–68 px, content inset 24–32 px, gap между крупными зонами 12–16 px. На референсах 1448×1086 руководителя те же отношения SHALL масштабироваться без изменения порядка блоков. Page content SHALL использовать 12-column grid и типовые spans `8+4`, `9+3`, `7+5`; KPI strip SHALL быть равномерным.
+
+Крупная зона SHALL отличаться от референсной границы не более чем на 16 px после нормализации viewport; shell — не более чем на 8 px. Этот допуск применяется к layout review, а не к каждому пикселю текста. Inspector справа от таблицы SHALL оставаться справа при ширине не менее 1200 px. Sticky action/decision area SHALL оставаться видимой при прокрутке длинной формы.
+
+#### Scenario: Список с выбранным объектом
+- **WHEN** desktop route содержит table/list и selected entity по reference catalog
+- **THEN** список занимает основную колонку, inspector — правую, а выбор строки обновляет inspector без полного перестроения страницы
+
+### Requirement: Participant reference routes
+Участник SHALL получить двенадцать визуальных маршрутов `R-PAR-01`–`R-PAR-12`. Их навигация, ключевые блоки и desktop composition SHALL соответствовать разделу «Участник» каталога. Главная и траектория SHALL прежде всего объяснять следующий шаг и цель; task detail SHALL показывать оплату и A/B totals до отклика; portfolio/profile SHALL отделять подтверждённые факты от заявленных; Buddy SHALL быть отдельным отключаемым маршрутом.
+
+#### Scenario: Участник открывает платную задачу
+- **WHEN** открывается маршрут `R-PAR-05`
+- **THEN** справа присутствует заметная payment/apply panel с base, B, A, статусом условий и основным действием, а слева остаются problem, deliverables, criteria и evidence
+
+#### Scenario: Участник ищет смысл следующего шага
+- **WHEN** открывается `R-PAR-01`, `R-PAR-02` или `R-PAR-03`
+- **THEN** первый viewport связывает действие с выбранной ролью, развитием навыка или доступом к реальной задаче
+
+### Requirement: Mentor reference routes
+Ментор SHALL получить восемь композиций `R-MEN-01`–`R-MEN-08`. Проверка вкладов SHALL быть master-detail workspace с due/status filters, доказательствами, rubric, AI suggestion и отдельным human decision. Проекты, участники и сообщения SHALL сохранять правый контекст. Аналитика SHALL повторять dashboard hierarchy, а plan week SHALL использовать календарную сетку и отдельные панели приоритетов/рисков.
+
+#### Scenario: Ментор проверяет вклад
+- **WHEN** открывается `R-MEN-02`
+- **THEN** очередь видна одновременно с доказательствами выбранного участника, AI-рекомендация маркирована как черновик, а publish/escalate являются human actions
+
+### Requirement: Customer reference routes
+Заказчик SHALL получить девять композиций `R-CUS-01`–`R-CUS-09`. Task creation SHALL использовать пятишаговый stepper и participant preview; applications SHALL предоставлять сравнение кандидатов и inspector; result review SHALL объединять этапы, evidence, комментарии, оплату и решение; база участников SHALL показывать только разрешённые verified данные. AI-блоки SHALL быть контекстными и не публиковать решение.
+
+#### Scenario: Заказчик создаёт задачу
+- **WHEN** открывается `R-CUS-03`
+- **THEN** видны текущий шаг и все пять стадий, form занимает основную колонку, AI help — правую, а preview и publish validation доступны до публикации
+
+### Requirement: Manager reference routes
+Руководитель команды SHALL получить восемь композиций `R-MGR-01`–`R-MGR-08`. Главная, проекты, команда, результаты и аналитика SHALL делать видимыми бизнес-ценность, загрузку, сроки, принятые артефакты и повторное использование. Календарь SHALL показывать зависимости и риски, а база участников — только разрешённые профили. Manager UI SHALL не раскрывать закрытые mentor chats, чужие выплаты или hidden participant data.
+
+#### Scenario: Руководитель оценивает портфель
+- **WHEN** открывается `R-MGR-01`, `R-MGR-02` или `R-MGR-04`
+- **THEN** первый viewport содержит состояние портфеля, динамику/воронку и путь к проекту или принятому результату, сохраняя правую business-context колонку
+
+### Requirement: Operator reference routes
+Оператор SHALL получить девять композиций `R-OPS-01`–`R-OPS-09`. Очереди SHALL быть самыми плотными desktop views продукта: KPI, filters, sticky table header, selected row и inspector/decision panel одновременно. Проверки достижений, выплат и споров SHALL показывать evidence, provenance, timeline, зависимости и version до решения. Destructive/reject actions SHALL быть визуально отделены от approve.
+
+#### Scenario: Оператор проверяет достижение
+- **WHEN** открывается `R-OPS-03`
+- **THEN** identity summary, evidence gallery, verification checks, source/history и human decision видимы как части одной рабочей области
+
+#### Scenario: Оператор рассматривает спор
+- **WHEN** открывается `R-OPS-06`
+- **THEN** stage progress, chronology, parties, files, previous decision и resolution controls доступны без перехода на несвязанные страницы
+
+### Requirement: Reference assets and implementation boundary
+Исходные PNG SHALL использоваться только как design references и не SHALL попадать в production bundle, Docker image или публичную static directory. Реализация SHALL строиться из HTML/CSS/SVG/component primitives. Если нужна декоративная иллюстрация, она SHALL быть отдельным оптимизированным asset с лицензией/источником и alt policy; screenshot целого интерфейса нельзя использовать как фон или подложку.
+
+#### Scenario: Production build
+- **WHEN** выполняется production frontend build
+- **THEN** bundle не содержит исходные файлы из `Downloads/Визуал`, абсолютные локальные пути или растровые снимки интерфейса
+
+### Requirement: Per-reference visual acceptance
+Каждый реализованный reference route SHALL иметь Playwright screenshot test на 1440×900 и функциональную проверку primary workflow. Shell/dashboard representative routes SHALL дополнительно покрываться 1024×768 и 390×844. Visual test data SHALL быть deterministic: фиксированная persona, timezone, locale, dates, animation off и stable seeded IDs.
+
+Visual review SHALL использовать checklist из каталога. Автоматический pixel threshold SHALL оставаться малым и единым; обновление baseline требует осмысленного review, ссылки на `R-*` и объяснения расхождения. Массовое обновление snapshots без просмотра SHALL быть запрещено процессом review.
+
+#### Scenario: Изменена общая карточка
+- **WHEN** изменение затрагивает shared card, table, status или shell
+- **THEN** запускаются screenshot tests всех reference routes, использующих компонент, а не только текущей страницы

@@ -43,6 +43,7 @@
 - [x] 5.4 Настроить TanStack Query, typed API client и error mapping; test SHALL подтвердить retry только для безопасных retryable reads.
 - [x] 5.5 Добавить CSP-compatible asset build, external-link safety и reduced-motion; automated accessibility/security check SHALL пройти без critical issues.
 - [x] 5.6 Применить утверждённую navy/teal visual system к role-aware shell, dashboard и общим компонентам; Playwright screenshot regression SHALL покрыть 1440×900, 1024×768 и 390×844.
+- [ ] 5.7 Сопоставить каждый реализованный route с `R-*` из `docs/visual-reference-catalog.md`, воспроизвести role-specific composition всех 46 референсов и добавить deterministic screenshot + primary-workflow test; visual review SHALL проверить shell ±8 px, крупные зоны ±16 px, отсутствие исходных PNG в bundle и checklist каждого маршрута.
 
 ## 6. Направления, roadmap и Bootcamp
 
