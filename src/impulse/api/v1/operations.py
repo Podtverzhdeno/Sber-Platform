@@ -6,11 +6,19 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 
+from impulse.api.errors import ApiError
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.application.operations import CaseDecision, OperationsCase, OperationsService
+from impulse.domain.identity import Role
 
 router = APIRouter()
+
+SECOND_WAVE_ROLES = {
+    Role.PROGRAM_OWNER,
+    Role.ACCESS_ADMIN,
+    Role.UNIVERSITY_COORDINATOR,
+}
 
 
 class CaseView(BaseModel):
@@ -95,4 +103,18 @@ async def decide(
         await service.decide(
             authenticated.actor, case_id, command.expected_version, command.outcome, command.reason
         )
+    )
+
+
+@router.get("/second-wave/{role_key}")
+async def second_wave_placeholder(
+    role_key: Role,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+) -> None:
+    if role_key not in SECOND_WAVE_ROLES or role_key not in authenticated.actor.assigned_roles:
+        raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
+    raise ApiError(
+        "FEATURE_NOT_ENABLED",
+        "This role is reserved for a later product stage and has no MVP workspace.",
+        503,
     )

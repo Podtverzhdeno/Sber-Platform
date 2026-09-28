@@ -3510,7 +3510,10 @@
           "customer",
           "manager",
           "hr",
-          "operator"
+          "operator",
+          "program_owner",
+          "access_admin",
+          "university_coordinator"
         ],
         "title": "Role",
         "type": "string"
@@ -8418,6 +8421,42 @@
           }
         },
         "summary": "Leaderboard"
+      }
+    },
+    "/api/v1/second-wave/{role_key}": {
+      "get": {
+        "operationId": "second_wave_placeholder_api_v1_second_wave__role_key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "role_key",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Role"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Second Wave Placeholder"
       }
     },
     "/health/live": {

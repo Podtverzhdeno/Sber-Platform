@@ -14,6 +14,9 @@ class Role(StrEnum):
     MANAGER = "manager"
     HR = "hr"
     OPERATOR = "operator"
+    PROGRAM_OWNER = "program_owner"
+    ACCESS_ADMIN = "access_admin"
+    UNIVERSITY_COORDINATOR = "university_coordinator"
 
 
 class ConsentScope(StrEnum):
@@ -32,6 +35,9 @@ ROLE_SCOPES: dict[Role, frozenset[str]] = {
     Role.MANAGER: frozenset({"team-analytics:read", "accepted-artifacts:read"}),
     Role.HR: frozenset({"consented-portfolio:read", "talent-pipeline:write"}),
     Role.OPERATOR: frozenset({"operations:read", "operations:write", "verification:write"}),
+    Role.PROGRAM_OWNER: frozenset({"program:read"}),
+    Role.ACCESS_ADMIN: frozenset({"access:read"}),
+    Role.UNIVERSITY_COORDINATOR: frozenset({"university-program:read"}),
 }
 
 
@@ -50,6 +56,9 @@ ROLE_NAVIGATION: dict[Role, tuple[str, ...]] = {
     Role.MANAGER: ("Инициативы", "Результаты", "Аналитика"),
     Role.HR: ("Кандидаты", "Воронка", "Аналитика"),
     Role.OPERATOR: ("Операционная очередь", "Проверки", "Споры", "Аналитика"),
+    Role.PROGRAM_OWNER: (),
+    Role.ACCESS_ADMIN: (),
+    Role.UNIVERSITY_COORDINATOR: (),
 }
 
 

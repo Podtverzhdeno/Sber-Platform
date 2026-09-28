@@ -175,7 +175,10 @@ def actor(role: Role) -> ActorContext:
     )
 
 
-@pytest.mark.parametrize("role", list(Role))
+@pytest.mark.parametrize(
+    "role",
+    [Role.PARTICIPANT, Role.MENTOR, Role.CUSTOMER, Role.MANAGER, Role.HR, Role.OPERATOR],
+)
 def test_object_policy_matrix_covers_all_six_roles_and_foreign_objects(role: Role) -> None:
     current = actor(role)
     own = ProtectedObject(
@@ -197,6 +200,17 @@ def test_object_policy_matrix_covers_all_six_roles_and_foreign_objects(role: Rol
     assert can_read(current, own)
     assert not can_read(current, foreign)
     assert can_write(current, own) is (role not in {Role.MANAGER, Role.HR})
+
+
+@pytest.mark.parametrize(
+    "role",
+    [Role.PROGRAM_OWNER, Role.ACCESS_ADMIN, Role.UNIVERSITY_COORDINATOR],
+)
+def test_second_wave_roles_have_no_object_access_before_feature_enablement(role: Role) -> None:
+    current = actor(role)
+    resource = ProtectedObject(owner_id=current.person_id)
+    assert not can_read(current, resource)
+    assert not can_write(current, resource)
 
 
 @pytest.mark.asyncio

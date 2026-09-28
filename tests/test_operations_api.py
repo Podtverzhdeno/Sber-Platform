@@ -66,3 +66,48 @@ def test_non_operator_cannot_discover_cases() -> None:
     api = client()
     login(api, "participant-alex")
     assert api.get("/api/v1/ops/cases").status_code == 404
+
+
+def test_second_wave_role_has_no_mvp_workspace_or_navigation() -> None:
+    from uuid import uuid4
+
+    from impulse.application.identity import (
+        DemoAuthService,
+        MemoryIdentityStore,
+        PersonaRecord,
+        demo_personas,
+    )
+    from impulse.domain.identity import ROLE_NAVIGATION, Role
+
+    assert ROLE_NAVIGATION[Role.PROGRAM_OWNER] == ()
+    assert ROLE_NAVIGATION[Role.ACCESS_ADMIN] == ()
+    assert ROLE_NAVIGATION[Role.UNIVERSITY_COORDINATOR] == ()
+    assert all(
+        not set(persona.roles)
+        & {Role.PROGRAM_OWNER, Role.ACCESS_ADMIN, Role.UNIVERSITY_COORDINATOR}
+        for persona in demo_personas()
+    )
+    settings = Settings(
+        app_env=AppEnvironment.TEST,
+        demo_mode=True,
+        session_secret=SecretStr("second-wave-test-secret-long-enough"),
+    )
+    service = DemoAuthService(
+        MemoryIdentityStore(
+            (
+                PersonaRecord(
+                    uuid4(),
+                    "owner-demo",
+                    "Владелец программы",
+                    (Role.PROGRAM_OWNER,),
+                ),
+            )
+        ),
+        secret=settings.session_signing_secret(),
+        ttl_seconds=settings.session_ttl_seconds,
+    )
+    api = TestClient(create_app(settings, auth_service=service))
+    login(api, "owner-demo")
+    response = api.get("/api/v1/second-wave/program_owner")
+    assert response.status_code == 503
+    assert response.json()["code"] == "FEATURE_NOT_ENABLED"
