@@ -102,6 +102,12 @@ test("application confirms success and appears in my tasks", async ({ page }) =>
   await page.getByRole("button", { name: "Открыть мои задачи" }).click();
   await expect(page.getByRole("heading", { name: "Мои задачи" })).toBeVisible();
   await expect(page.getByText("Ожидает решения")).toBeVisible();
+  await page.locator(".my-task-row--active").getByRole("button", { name: "Открыть карточку" }).click();
+  await expect(page.getByRole("dialog", { name: "Прототип рекомендательной системы" })).toContainText("Роман Воронов");
+  await expect(page.getByRole("dialog", { name: "Прототип рекомендательной системы" })).toContainText("Елена Наставник");
+  await page.getByRole("button", { name: /Перейти в рабочую область/ }).click();
+  await expect(page).toHaveURL(/\/workspace\/4$/);
+  await expect(page.getByRole("heading", { name: "Checkpoints проекта" })).toBeVisible();
 });
 
 test("participant settings and AI Buddy controls are interactive", async ({ page }) => {
