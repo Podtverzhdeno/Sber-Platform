@@ -353,17 +353,17 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
         title="R&D лаборатория — демо",
     )
     task_specs = (
-        ("Прототип рекомендательной системы для научных статей", "accepted", 6, "R&D · ML"),
-        ("MVP чат-ассистента для внутренних знаний", "in_progress", 4, "MVP · LLM"),
+        ("Прототип рекомендательной системы для научных статей", "published", 6, "R&D · ML"),
+        ("MVP чат-ассистента для внутренних знаний", "published", 4, "MVP · LLM"),
         (
             "Исследование методов сжатия спутниковых изображений",
-            "in_progress",
+            "published",
             4,
             "Исследование · CV",
         ),
-        ("Прогнозирование нагрузки контактного центра", "in_progress", 3, "R&D · Аналитика"),
-        ("Детекция аномалий в сетевом трафике", "in_progress", 3, "MVP · Безопасность"),
-        ("Модель оценки энергоэффективности зданий", "in_progress", 5, "R&D · GreenTech"),
+        ("Прогнозирование нагрузки контактного центра", "published", 3, "R&D · Аналитика"),
+        ("Детекция аномалий в сетевом трафике", "published", 3, "MVP · Безопасность"),
+        ("Модель оценки энергоэффективности зданий", "published", 5, "R&D · GreenTech"),
         ("Автоматизация проверки технической документации", "published", 5, "MVP · NLP"),
         (
             "Дашборд продуктовых метрик корпоративного сервиса",
@@ -442,7 +442,7 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
             f"compensation:{index}",
             task_terms_version_id=demo_id(f"terms:{index}:1"),
             paid=index % 3 != 0,
-            base_amount=str(40000 + index * 5000) if index % 4 != 0 else None,
+            base_amount=str(40000 + index * 5000) if index % 3 != 0 else None,
             b_multiplier="1.50",
             a_multiplier="2.00" if index % 2 else "2.50",
             quantum="0.01",

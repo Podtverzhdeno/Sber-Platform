@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Any, cast
 from uuid import UUID, uuid4
 
@@ -126,7 +127,11 @@ def _record(row: Any) -> TaskRecord:
                 data_constraints=str(brief_data.get("data_constraints", "")),
                 ip_terms=str(brief_data.get("ip_terms", "")),
             ),
-            status=TaskStatus(row.status),
+            status=TaskStatus(
+                TaskStatus.PUBLISHED.value
+                if row.status in {"accepted", "in_progress"}
+                else row.status
+            ),
             nominated_mentor_id=UUID(str(nominated_raw)) if nominated_raw else None,
             support=support,
         ),
@@ -302,6 +307,14 @@ class SqlWorkStore(WorkStore):
                 .mappings()
                 .one()
             )
+            paid = bool(compensation_row["paid"])
+            base_amount = compensation_row["base_amount"]
+            currency = compensation_row["currency"]
+            if paid and compensation_row["data_origin"] == "demo_seed":
+                # Compatibility for the first demo dataset, where every fourth
+                # paid task accidentally omitted its amount.
+                base_amount = base_amount or Decimal("50000")
+                currency = currency or "RUB"
             return TermsRecord(
                 task_id,
                 row["terms_version"],
@@ -310,9 +323,9 @@ class SqlWorkStore(WorkStore):
                 tuple(str(item) for item in payload.get("acceptance_criteria", [])),
                 str(payload["support_mode"]) if payload.get("support_mode") else None,
                 CompensationTerms(
-                    paid=bool(compensation_row["paid"]),
-                    base_amount_per_assignee=compensation_row["base_amount"],
-                    currency=compensation_row["currency"],
+                    paid=paid,
+                    base_amount_per_assignee=base_amount if paid else None,
+                    currency=currency if paid else None,
                     b_multiplier=compensation_row["b_multiplier"],
                     a_multiplier=compensation_row["a_multiplier"],
                     quantum=compensation_row["quantum"],

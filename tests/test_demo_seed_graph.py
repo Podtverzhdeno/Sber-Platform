@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from impulse.bootstrap.demo_seed import build_seed_batches
+from impulse.domain.work import TaskStatus
 
 
 def _rows() -> dict[str, list[dict[str, Any]]]:
@@ -45,3 +46,16 @@ def test_every_review_is_visible_through_a_contribution() -> None:
     for review in rows["review_5plus_versions"]:
         assert review["contribution_id"] in contribution_ids
         assert review["created_by"] in mentor_ids
+
+
+def test_seed_tasks_and_compensation_follow_current_domain_values() -> None:
+    rows = _rows()
+
+    assert all(row["status"] in {status.value for status in TaskStatus} for row in rows["tasks"])
+    for compensation in rows["compensation_terms"]:
+        if compensation["paid"]:
+            assert compensation["base_amount"] is not None
+            assert compensation["currency"] == "RUB"
+        else:
+            assert compensation["base_amount"] is None
+            assert compensation["currency"] is None

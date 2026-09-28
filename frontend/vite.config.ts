@@ -7,11 +7,13 @@ export default defineConfig(({ command }) => ({
     ...(command === "serve" ? [{
       name: "impulse-dev-csp",
       transformIndexHtml(html: string) {
-        // Vite HMR injects imported CSS into a style element in development.
-        // Production keeps the strict external-style policy from index.html.
-        return html
-          .replace("script-src 'self'", "script-src 'self' 'unsafe-inline'")
-          .replace("style-src 'self'", "style-src 'self' 'unsafe-inline'");
+        // Development uses the equivalent HTTP header below. Keeping a second
+        // meta policy makes Chromium merge policies and emit misleading parser
+        // warnings around directives injected by development tooling.
+        return html.replace(
+          /\s*<meta\s+http-equiv="Content-Security-Policy"[\s\S]*?\/>/iu,
+          "",
+        );
       },
     }] : []),
   ],
