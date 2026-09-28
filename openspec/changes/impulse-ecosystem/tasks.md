@@ -173,3 +173,12 @@
 - [ ] 19.4 Запустить full quality suite, OpenSpec `validate --all --strict`, Docker smoke и dependency/secret scans; сохранить краткий release report с командами и результатами.
 - [ ] 19.5 Развернуть demo в Railway после явного подтверждения владельца, задать secrets через Variables и выполнить post-deploy health/login/Buddy smoke без вывода ключа.
 - [ ] 19.6 Провести ручную приёмку шести ролей и accessibility pass, зафиксировать известные ограничения/free quota/launch gates и получить решение expand/iterate/stop.
+# Demo interface integrity follow-up
+
+- [ ] Добавить уникальный маршрут «Главная» в навигацию каждой роли и dashboard участника.
+- [ ] Отделить экран рейтинга участника от главной и показать сезон, когорту, позиции, баллы, проекты и трофеи.
+- [ ] Реализовать detail-route траектории для каждого Bootcamp-курса и переходы к checkpoint-материалам.
+- [ ] Наполнить задачи участника связанными demo-данными оценки, коэффициента, начисления и выплаты.
+- [ ] Привести действия событий к общим button styles и реализовать форму участия/переход к источнику.
+- [ ] Исправить загрузку портфолио и аналитики, добавить demo fallback и рабочий retry.
+- [ ] Провести Playwright click audit всех persona routes и primary actions без inert controls, 404/500 и page errors.
