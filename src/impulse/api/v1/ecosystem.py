@@ -41,6 +41,7 @@ class ClaimView(BaseModel):
     status: ClaimStatus
     trophy_created: bool
     verification_explanation: str
+    evidence_state: Literal["provisional", "verified", "invalid"]
 
 
 class ReportClaimRequest(BaseModel):
@@ -98,6 +99,13 @@ def _claim_view(item: ClaimRecord) -> ClaimView:
         status=item.status,
         trophy_created=trophy_created,
         verification_explanation=explanations[item.status],
+        evidence_state=(
+            "verified"
+            if item.status is ClaimStatus.VERIFIED
+            else "invalid"
+            if item.status in {ClaimStatus.REJECTED, ClaimStatus.REVOKED}
+            else "provisional"
+        ),
     )
 
 

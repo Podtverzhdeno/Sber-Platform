@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
-from impulse.application.analytics import ratio_metric
+from impulse.application.analytics import ratio_metric, visible_personal_rows
 from impulse.bootstrap.app import create_app
 from impulse.bootstrap.settings import AppEnvironment, Settings
 
@@ -115,3 +115,11 @@ def test_hr_empty_funnel_is_unknown_not_zero_success() -> None:
     metrics = {item["key"]: item for item in api.get("/api/v1/analytics/role").json()["metrics"]}
     assert metrics["hr_hire_rate"]["denominator"] == 0
     assert metrics["hr_hire_rate"]["value"] is None
+    assert metrics["hr_hire_rate"]["suppressed"] is True
+    assert metrics["hr_hire_rate"]["suppression_reason"] == "cohort_below_5"
+
+
+def test_personal_rows_are_hidden_below_privacy_threshold() -> None:
+    rows = ({"person_id": "one"}, {"person_id": "two"})
+    assert visible_personal_rows(rows, cohort_size=2) == ()
+    assert visible_personal_rows(rows, cohort_size=5) == rows

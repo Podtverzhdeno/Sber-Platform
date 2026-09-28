@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from dataclasses import replace as dataclass_replace
 from datetime import datetime
 from decimal import Decimal
 
@@ -12,6 +13,8 @@ from impulse.application.work import WorkItem
 from impulse.domain.development import CompletionStatus, TrackAttempt, TrackStatus
 from impulse.domain.reward import PayoutStatus
 from impulse.domain.work import AssignmentStatus, ContributionStatus
+
+MIN_ANALYTICS_COHORT = 5
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,6 +59,8 @@ class Metric:
     cohort: str
     freshness: str
     definition: str
+    suppressed: bool = False
+    suppression_reason: str | None = None
 
 
 def ratio_metric(
@@ -112,6 +117,25 @@ def count_metric(
         "fresh",
         definition,
     )
+
+
+def suppress_small_cohort(metric: Metric, threshold: int = MIN_ANALYTICS_COHORT) -> Metric:
+    """Hide derived values when their denominator cannot safely represent a cohort."""
+    if metric.unit != "percent" or metric.denominator >= threshold:
+        return metric
+    return dataclass_replace(
+        metric,
+        value=None,
+        suppressed=True,
+        suppression_reason=f"cohort_below_{threshold}",
+    )
+
+
+def visible_personal_rows[T](
+    rows: tuple[T, ...], cohort_size: int, threshold: int = MIN_ANALYTICS_COHORT
+) -> tuple[T, ...]:
+    """Never return personal drill-down rows for a small cohort."""
+    return rows if cohort_size >= threshold else ()
 
 
 def participant_analytics(

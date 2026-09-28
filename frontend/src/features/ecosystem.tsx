@@ -27,14 +27,7 @@ type Claim = {
   status: "reported" | "awaiting_verification" | "verified" | "rejected" | "revoked";
   trophy_created: boolean;
   verification_explanation: string;
-};
-
-const statusLabels: Record<Claim["status"], string> = {
-  reported: "Заявлено вами",
-  awaiting_verification: "Ожидает проверки",
-  verified: "Подтверждено",
-  rejected: "Не подтверждено",
-  revoked: "Отозвано",
+  evidence_state: "provisional" | "verified" | "invalid";
 };
 
 function csrfHeaders(): HeadersInit {
@@ -73,7 +66,7 @@ export function EventCatalog() {
           <p>{item.recommendation_reason}</p><p className="muted">{item.conditions}</p>
           <dl className="event-facts"><div><dt>Организатор</dt><dd>{item.organizer}</dd></div><div><dt>Дедлайн</dt><dd>{item.deadline_at ? new Date(item.deadline_at).toLocaleDateString("ru-RU") : "Уточняется"}</dd></div><div><dt>Источник проверен</dt><dd>{new Date(item.source_checked_at).toLocaleDateString("ru-RU")}</dd></div></dl>
           <SafeExternalLink href={item.source_url}>Открыть первоисточник события</SafeExternalLink>
-          {claim ? <div className="claim-state" aria-live="polite"><Badge tone={claim.status === "verified" ? "success" : "warning"}>{statusLabels[claim.status]}</Badge><p>{claim.verification_explanation}</p></div> : <button type="button" onClick={() => { report.mutate(item.key); }}>Сообщить об участии</button>}
+          {claim ? <div className="claim-state" aria-live="polite"><Badge tone={claim.evidence_state === "verified" ? "success" : "warning"}>{claim.evidence_state === "verified" ? "Подтверждено" : claim.evidence_state === "invalid" ? "Недействительно" : "Предварительно"}</Badge><p>{claim.verification_explanation}</p></div> : <button type="button" onClick={() => { report.mutate(item.key); }}>Сообщить об участии</button>}
         </Card>;
       })}</div>}
     </div>

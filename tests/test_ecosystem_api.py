@@ -79,6 +79,7 @@ def test_report_submit_verify_and_revoke_claim() -> None:
         assert reported.status_code == 200
         assert reported.json()["status"] == "reported"
         assert reported.json()["trophy_created"] is False
+        assert reported.json()["evidence_state"] == "provisional"
         claim_id = reported.json()["id"]
 
         awaiting = client.post(
@@ -87,6 +88,7 @@ def test_report_submit_verify_and_revoke_claim() -> None:
         )
         assert awaiting.json()["status"] == "awaiting_verification"
         assert awaiting.json()["trophy_created"] is False
+        assert awaiting.json()["evidence_state"] == "provisional"
 
         operator_csrf = login(client, "operator-pavel")
         verified = client.post(
@@ -95,6 +97,7 @@ def test_report_submit_verify_and_revoke_claim() -> None:
             headers={"X-CSRF-Token": operator_csrf},
         )
         assert verified.json()["trophy_created"] is True
+        assert verified.json()["evidence_state"] == "verified"
         assert len(store.trophies) == 1
 
         revoked = client.post(
@@ -104,4 +107,5 @@ def test_report_submit_verify_and_revoke_claim() -> None:
         )
         assert revoked.json()["status"] == "revoked"
         assert revoked.json()["trophy_created"] is False
+        assert revoked.json()["evidence_state"] == "invalid"
         assert not store.trophies

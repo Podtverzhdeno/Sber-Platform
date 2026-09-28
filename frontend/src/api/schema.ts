@@ -1663,6 +1663,11 @@ export interface components {
             /** Event Key */
             event_key: string;
             /**
+             * Evidence State
+             * @enum {string}
+             */
+            evidence_state: "provisional" | "verified" | "invalid";
+            /**
              * Id
              * Format: uuid
              */
@@ -2260,6 +2265,10 @@ export interface components {
              * Format: date-time
              */
             period_start: string;
+            /** Suppressed */
+            suppressed: boolean;
+            /** Suppression Reason */
+            suppression_reason: string | null;
             /** Unit */
             unit: string;
             /** Value */

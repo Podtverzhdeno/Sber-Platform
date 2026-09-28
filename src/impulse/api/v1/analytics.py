@@ -10,7 +10,13 @@ from pydantic import BaseModel
 
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import current_session
-from impulse.application.analytics import Metric, count_metric, participant_analytics, ratio_metric
+from impulse.application.analytics import (
+    Metric,
+    count_metric,
+    participant_analytics,
+    ratio_metric,
+    suppress_small_cohort,
+)
 from impulse.application.identity import AuthenticatedSession
 from impulse.domain.identity import Role
 
@@ -55,6 +61,8 @@ class MetricView(BaseModel):
     cohort: str
     freshness: str
     definition: str
+    suppressed: bool
+    suppression_reason: str | None
 
 
 class RoleAnalyticsView(BaseModel):
@@ -221,6 +229,7 @@ async def role_analytics(
         ]
     else:
         raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
+    protected = [suppress_small_cohort(item) for item in metrics]
     return RoleAnalyticsView(
-        role=actor.active_role, metrics=[_metric_view(item) for item in metrics]
+        role=actor.active_role, metrics=[_metric_view(item) for item in protected]
     )
