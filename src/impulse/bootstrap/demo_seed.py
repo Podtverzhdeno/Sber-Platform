@@ -637,7 +637,7 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
             season_id=season_row["id"],
             person_id=demo_id(person_key),
             source_type="project",
-            source_id=demo_id(f"contribution:{min(index, 8)}:1"),
+            source_id=demo_id(f"task:{index}"),
             rule_id="accepted-contribution",
             points=str(600 - index * 50),
         )
@@ -724,6 +724,7 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
             note="Приглашение создано HR после просмотра подтверждённого портфолио.",
             occurred_at=DEMO_NOW + timedelta(days=index),
             status="published",
+            data_origin="human",
         )
         for index, person_key in enumerate(participant_keys[:4], start=1)
     ]
@@ -775,12 +776,15 @@ async def _insert_batches(session: AsyncSession, batches: list[SeedBatch]) -> No
         if not batch.rows:
             continue
         statement = insert(batch.table).values(batch.rows)
-        update_values = {
-            key: getattr(statement.excluded, key) for key in batch.rows[0] if key != "id"
-        }
-        statement = statement.on_conflict_do_update(
-            index_elements=[batch.table.c.id], set_=update_values
-        )
+        if batch.table is talent_pipeline_events:
+            statement = statement.on_conflict_do_nothing(index_elements=[batch.table.c.id])
+        else:
+            update_values = {
+                key: getattr(statement.excluded, key) for key in batch.rows[0] if key != "id"
+            }
+            statement = statement.on_conflict_do_update(
+                index_elements=[batch.table.c.id], set_=update_values
+            )
         await session.execute(statement)
 
 
