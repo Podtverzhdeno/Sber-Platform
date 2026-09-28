@@ -24,6 +24,10 @@ test("participant controls HR visibility and sees review reason", async ({ page 
   await page.getByRole("link", { name: "Портфолио" }).click();
   await expect(page.getByRole("heading", { name: "Алекс Речной" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Мой лучший принятый вклад" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Чем выделяется кандидат" })).toBeVisible();
+  await expect(page.getByText("Талант-сигнал")).toBeVisible();
+  await page.getByRole("button", { name: /Самостоятельность/ }).click();
+  await expect(page.getByText(/Сам находит ограничения/)).toBeVisible();
   await expect(page.getByText("Результат воспроизводим, вклад подтверждён.")).toBeVisible();
   await page.getByRole("button", { name: "Открыть кейс" }).click();
   await expect(page.getByRole("dialog", { name: "Карточка принятого вклада" })).toBeVisible();
