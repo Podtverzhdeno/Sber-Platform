@@ -100,7 +100,7 @@
 
 ## 12. Аналитика и события
 
-- [ ] 12.1 Реализовать versioned domain event schema и transactional emission для всех значимых transitions; tests SHALL проверить idempotency и отсутствие raw chat/payment details.
+- [x] 12.1 Реализовать versioned domain event schema и transactional emission для всех значимых transitions; tests SHALL проверить idempotency и отсутствие raw chat/payment details.
 - [ ] 12.2 Реализовать participant funnel и earnings breakdown с next action/unknown/freshness; incomplete journey SHALL не считаться success.
 - [ ] 12.3 Реализовать mentor/customer/manager/HR/operator metric queries с numerator/denominator/period/cohort; fixture tests SHALL сверить формулы из analytics spec.
 - [ ] 12.4 Реализовать small-cohort suppression и provisional/verified import states; privacy test SHALL скрыть персональные строки ниже threshold.

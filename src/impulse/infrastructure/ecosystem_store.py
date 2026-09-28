@@ -24,6 +24,7 @@ from impulse.infrastructure.models.ecosystem import (
 )
 from impulse.infrastructure.models.identity import persons
 from impulse.infrastructure.models.recognition import credentials, score_ledger, trophies
+from impulse.infrastructure.persistence import StaleVersionError, mutate_with_history
 
 
 def _datetime(value: object, fallback: datetime) -> datetime:
@@ -103,6 +104,7 @@ class SqlEcosystemStore(EcosystemStore):
             events.c.event_key,
             participation_claims.c.claim_type,
             participation_claims.c.status,
+            participation_claims.c.version,
             participation_claims.c.payload,
         ).join(events, events.c.id == participation_claims.c.event_id)
 
@@ -192,15 +194,25 @@ class SqlEcosystemStore(EcosystemStore):
                     code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
                 )
             record = self._record(row)
-            await session.execute(
-                update(participation_claims)
-                .where(participation_claims.c.id == claim_id)
-                .values(
-                    status=status.value,
-                    version=participation_claims.c.version + 1,
-                    created_by=actor_id,
+            try:
+                await mutate_with_history(
+                    session,
+                    table=participation_claims,
+                    entity_id=claim_id,
+                    expected_version=row.version,
+                    changes={"status": status.value, "created_by": actor_id},
+                    actor_id=actor_id,
+                    action="participation_claim.decided",
+                    event_key=f"participation-claim:{claim_id}:{status.value}:v{row.version}",
+                    event_type="ecosystem.participation_claim_changed",
+                    event_payload={
+                        "event_key": record.event_key,
+                        "claim_type": record.claim_type,
+                        "status": status.value,
+                    },
                 )
-            )
+            except StaleVersionError as exc:
+                raise ApiError("STALE_CLAIM", "Claim changed; reload it.", 409) from exc
             if claim_creates_trophy(record.claim_type, status):
                 await session.execute(
                     postgres_insert(trophies)

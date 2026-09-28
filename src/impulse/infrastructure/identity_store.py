@@ -19,7 +19,7 @@ from impulse.infrastructure.models.identity import (
     sessions,
     visibility_settings,
 )
-from impulse.infrastructure.models.insight import audit_entries
+from impulse.infrastructure.models.insight import audit_entries, domain_events
 
 
 class SqlIdentityStore(IdentityStore):
@@ -225,5 +225,21 @@ class SqlIdentityStore(IdentityStore):
                     data_origin="demo_runtime",
                     payload={"scope": scope.value},
                 )
+            )
+            await session.execute(
+                postgres_insert(domain_events)
+                .values(
+                    event_key=f"consent:{person_id}:{scope.value}:v{version}",
+                    event_type="identity.consent_changed",
+                    schema_version=1,
+                    entity_type="consent",
+                    entity_id=consent_id,
+                    entity_version=version,
+                    occurred_at=datetime.now(UTC),
+                    created_by=person_id,
+                    data_origin="human",
+                    payload={"scope": scope.value, "granted": granted},
+                )
+                .on_conflict_do_nothing(constraint="uq_domain_events_event_key")
             )
         return await self.granted_consents(person_id)

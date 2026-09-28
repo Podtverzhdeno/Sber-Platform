@@ -55,6 +55,7 @@ from impulse.infrastructure.models.work import (
 from impulse.infrastructure.models.work import (
     artifacts as artifact_table,
 )
+from impulse.infrastructure.persistence import StaleVersionError, mutate_with_history
 
 
 def _payload(record: TaskRecord) -> dict[str, object]:
@@ -286,13 +287,7 @@ class SqlWorkStore(WorkStore):
                 query = query.where(task_terms_versions.c.terms_version == version)
             else:
                 query = query.order_by(task_terms_versions.c.terms_version.desc()).limit(1)
-            row = (
-                (
-                    await session.execute(query)
-                )
-                .mappings()
-                .one_or_none()
-            )
+            row = (await session.execute(query)).mappings().one_or_none()
             if row is None:
                 return None
             payload = dict(row["payload"])
@@ -398,21 +393,29 @@ class SqlWorkStore(WorkStore):
                 )
             record = self._application(row)
             if record.status is ApplicationStatus.TERMS_ACCEPTED:
-                updated = (
-                    await session.execute(
-                        update(applications)
-                        .where(
-                            applications.c.id == record.id,
-                            applications.c.version == record.version,
-                        )
-                        .values(
-                            status=ApplicationStatus.APPLIED.value,
-                            version=applications.c.version + 1,
-                        )
-                        .returning(*applications.c)
+                try:
+                    await mutate_with_history(
+                        session,
+                        table=applications,
+                        entity_id=record.id,
+                        expected_version=record.version,
+                        changes={"status": ApplicationStatus.APPLIED.value},
+                        actor_id=person_id,
+                        action="application.applied",
+                        event_key=f"application:{record.id}:applied:v{record.version}",
+                        event_type="work.application_applied",
+                        event_payload={"task_id": task_id, "terms_version": terms_version},
                     )
-                ).one()
-                return self._application(updated)
+                except StaleVersionError as exc:
+                    raise ApiError("STALE_APPLICATION", "Application changed.", 409) from exc
+                return ApplicationRecord(
+                    record.id,
+                    record.task_id,
+                    record.person_id,
+                    record.accepted_terms_version,
+                    ApplicationStatus.APPLIED,
+                    record.version + 1,
+                )
             return record
 
     async def applications(self, task_id: UUID) -> tuple[ApplicationRecord, ...]:
@@ -472,14 +475,21 @@ class SqlWorkStore(WorkStore):
                 )
             except TaskPolicyError as exc:
                 raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
-            await session.execute(
-                update(applications)
-                .where(
-                    applications.c.id == application.id,
-                    applications.c.version == application.version,
+            try:
+                await mutate_with_history(
+                    session,
+                    table=applications,
+                    entity_id=application.id,
+                    expected_version=application.version,
+                    changes={"status": status.value},
+                    actor_id=None,
+                    action="application.accepted",
+                    event_key=f"application:{application.id}:accepted:v{application.version}",
+                    event_type="work.application_accepted",
+                    event_payload={"task_id": application.task_id},
                 )
-                .values(status=status.value, version=applications.c.version + 1)
-            )
+            except StaleVersionError as exc:
+                raise ApiError("STALE_APPLICATION", "Application changed.", 409) from exc
             assignment_id = uuid4()
             await session.execute(
                 insert(assignments).values(
@@ -533,11 +543,21 @@ class SqlWorkStore(WorkStore):
                 status = start_assignment(current.status)
             except TaskPolicyError as exc:
                 raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
-            await session.execute(
-                update(assignments)
-                .where(assignments.c.id == assignment_id)
-                .values(status=status.value, version=assignments.c.version + 1)
-            )
+            try:
+                await mutate_with_history(
+                    session,
+                    table=assignments,
+                    entity_id=assignment_id,
+                    expected_version=row.version,
+                    changes={"status": status.value},
+                    actor_id=current.person_id,
+                    action="assignment.started",
+                    event_key=f"assignment:{assignment_id}:started:v{row.version}",
+                    event_type="work.assignment_started",
+                    event_payload={"task_id": current.task_id},
+                )
+            except StaleVersionError as exc:
+                raise ApiError("STALE_ASSIGNMENT", "Assignment changed.", 409) from exc
             return AssignmentRecord(
                 current.id,
                 current.task_id,

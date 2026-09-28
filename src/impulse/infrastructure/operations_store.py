@@ -5,12 +5,13 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, select
 
 from impulse.api.errors import ApiError
 from impulse.application.operations import CaseDecision, CaseStatus, OperationsCase, OperationsStore
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.operations import case_decisions, operations_cases
+from impulse.infrastructure.persistence import StaleVersionError, mutate_with_history
 
 
 class SqlOperationsStore(OperationsStore):
@@ -74,34 +75,38 @@ class SqlOperationsStore(OperationsStore):
             )
 
     async def decide(self, item: OperationsCase, decision: CaseDecision) -> OperationsCase:
-        async with self.database.session() as session:
-            changed = await session.scalar(
-                update(operations_cases)
-                .where(
-                    operations_cases.c.id == item.id,
-                    operations_cases.c.version == decision.case_version,
-                )
-                .values(
-                    status=CaseStatus.RESOLVED.value,
-                    version=decision.case_version + 1,
-                    updated_at=decision.created_at,
-                )
-                .returning(operations_cases.c.id)
-            )
-            if changed is None:
-                raise ApiError("STALE_CASE", "Case changed; reload before deciding.", 409)
-            await session.execute(
-                insert(case_decisions).values(
-                    id=decision.id,
-                    case_id=decision.case_id,
-                    case_version=decision.case_version,
+        try:
+            async with self.database.session() as session:
+                await mutate_with_history(
+                    session,
+                    table=operations_cases,
+                    entity_id=item.id,
+                    expected_version=decision.case_version,
+                    changes={"status": CaseStatus.RESOLVED.value},
                     actor_id=decision.actor_id,
-                    outcome=decision.outcome,
-                    reason=decision.reason,
-                    data_origin="human",
-                    created_by=decision.actor_id,
+                    action="case_decided",
+                    event_key=f"operations-case:{item.id}:decided:v{decision.case_version}",
+                    event_type="operations.case_decided",
+                    event_payload={
+                        "case_type": item.case_type,
+                        "priority": item.priority,
+                        "outcome": decision.outcome,
+                    },
                 )
-            )
+                await session.execute(
+                    insert(case_decisions).values(
+                        id=decision.id,
+                        case_id=decision.case_id,
+                        case_version=decision.case_version,
+                        actor_id=decision.actor_id,
+                        outcome=decision.outcome,
+                        reason=decision.reason,
+                        data_origin="human",
+                        created_by=decision.actor_id,
+                    )
+                )
+        except StaleVersionError as exc:
+            raise ApiError("STALE_CASE", "Case changed; reload before deciding.", 409) from exc
         updated = await self.case(item.id)
         if updated is None:
             raise RuntimeError("Updated case disappeared")

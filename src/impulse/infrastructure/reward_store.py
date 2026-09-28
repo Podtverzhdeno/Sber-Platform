@@ -34,6 +34,7 @@ from impulse.infrastructure.models.reward import (
     settlement_attempts,
 )
 from impulse.infrastructure.models.work import appeals
+from impulse.infrastructure.persistence import emit_domain_event
 
 
 class SqlRewardStore(ReviewStore):
@@ -124,6 +125,20 @@ class SqlRewardStore(ReviewStore):
                 await session.execute(
                     insert(review_5plus_versions).values(**self._review_values(review))
                 )
+                await emit_domain_event(
+                    session,
+                    event_key=f"review:{review.review_id}:v{review.review_version}",
+                    event_type="reward.review_changed",
+                    entity_type="review_5plus",
+                    entity_id=review.review_id,
+                    entity_version=review.review_version,
+                    actor_id=review.published_by or review.confirmed_by,
+                    payload={
+                        "contribution_id": review.contribution_id,
+                        "status": review.status.value,
+                        "grade": review.grade.value if review.grade else None,
+                    },
+                )
         except IntegrityError as exc:
             raise ApiError(
                 code="STALE_REVIEW",
@@ -132,9 +147,7 @@ class SqlRewardStore(ReviewStore):
             ) from exc
         return review
 
-    async def review_created_at(
-        self, review_id: UUID, review_version: int
-    ) -> datetime | None:
+    async def review_created_at(self, review_id: UUID, review_version: int) -> datetime | None:
         async with self.database.sessions() as session:
             return await session.scalar(
                 select(review_5plus_versions.c.created_at).where(
@@ -174,13 +187,9 @@ class SqlRewardStore(ReviewStore):
     ) -> ReviewAppeal:
         try:
             async with self.database.session() as session:
+                await session.execute(insert(appeals).values(**self._appeal_values(appeal)))
                 await session.execute(
-                    insert(appeals).values(**self._appeal_values(appeal))
-                )
-                await session.execute(
-                    insert(review_5plus_versions).values(
-                        **self._review_values(disputed_review)
-                    )
+                    insert(review_5plus_versions).values(**self._review_values(disputed_review))
                 )
         except IntegrityError as exc:
             raise ApiError(
@@ -256,9 +265,7 @@ class SqlRewardStore(ReviewStore):
         }
 
     @staticmethod
-    def _appeal_values(
-        appeal: ReviewAppeal, *, include_id: bool = True
-    ) -> dict[str, object]:
+    def _appeal_values(appeal: ReviewAppeal, *, include_id: bool = True) -> dict[str, object]:
         values: dict[str, object] = {
             "person_id": appeal.participant_id,
             "subject_type": "review_5plus",
@@ -369,9 +376,7 @@ class SqlRewardStore(ReviewStore):
             )
         return self._payout_claim(row) if row is not None else None
 
-    async def payout_for_review(
-        self, review_id: UUID, review_version: int
-    ) -> PayoutClaim | None:
+    async def payout_for_review(self, review_id: UUID, review_version: int) -> PayoutClaim | None:
         async with self.database.sessions() as session:
             row = (
                 (
@@ -403,9 +408,7 @@ class SqlRewardStore(ReviewStore):
             raise
         return claim
 
-    async def save_payout_claim(
-        self, claim: PayoutClaim, expected_version: int
-    ) -> PayoutClaim:
+    async def save_payout_claim(self, claim: PayoutClaim, expected_version: int) -> PayoutClaim:
         async with self.database.session() as session:
             result = await session.execute(
                 update(payout_claims)
@@ -422,6 +425,20 @@ class SqlRewardStore(ReviewStore):
                     message="Начисление изменилось. Обновите данные перед действием.",
                     status_code=409,
                 )
+            await emit_domain_event(
+                session,
+                event_key=f"payout:{claim.claim_id}:{claim.status.value}:v{expected_version}",
+                event_type="reward.payout_status_changed",
+                entity_type="payout_claim",
+                entity_id=claim.claim_id,
+                entity_version=expected_version + 1,
+                actor_id=claim.approved_by,
+                payload={
+                    "status": claim.status.value,
+                    "currency": claim.currency,
+                    "grade": claim.grade.value,
+                },
+            )
         return claim
 
     async def settlement_attempt(
@@ -445,9 +462,9 @@ class SqlRewardStore(ReviewStore):
     async def next_settlement_attempt_number(self, claim_id: UUID) -> int:
         async with self.database.sessions() as session:
             value = await session.scalar(
-                select(func.count()).select_from(settlement_attempts).where(
-                    settlement_attempts.c.payout_claim_id == claim_id
-                )
+                select(func.count())
+                .select_from(settlement_attempts)
+                .where(settlement_attempts.c.payout_claim_id == claim_id)
             )
         return int(value or 0) + 1
 
@@ -467,10 +484,26 @@ class SqlRewardStore(ReviewStore):
                         data_origin="demo_runtime",
                     )
                 )
+                await emit_domain_event(
+                    session,
+                    event_key=(
+                        f"settlement:{attempt.payout_claim_id}:"
+                        f"{attempt.kind.value}:n{attempt.attempt_number}"
+                    ),
+                    event_type="reward.settlement_attempted",
+                    entity_type="settlement_attempt",
+                    entity_id=attempt.attempt_id,
+                    entity_version=1,
+                    actor_id=None,
+                    payload={
+                        "payout_claim_id": attempt.payout_claim_id,
+                        "kind": attempt.kind.value,
+                        "status": attempt.status.value,
+                        "demo": attempt.demo,
+                    },
+                )
         except IntegrityError:
-            existing = await self.settlement_attempt(
-                attempt.payout_claim_id, attempt.request_key
-            )
+            existing = await self.settlement_attempt(attempt.payout_claim_id, attempt.request_key)
             if existing is not None:
                 return existing
             raise

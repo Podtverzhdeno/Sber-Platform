@@ -141,19 +141,19 @@ async def test_optimistic_history_is_atomic_and_append_only() -> None:
                 event_type="person.renamed.v1",
             )
 
-    with pytest.raises(IntegrityError):
-        async with database.session() as session:
-            await mutate_with_history(
-                session,
-                table=persons,
-                entity_id=person_id,
-                expected_version=2,
-                changes={"display_name": "Должно откатиться"},
-                actor_id=person_id,
-                action="person.renamed",
-                event_key=event_key,
-                event_type="person.renamed.v1",
-            )
+    async with database.session() as session:
+        repeated_version = await mutate_with_history(
+            session,
+            table=persons,
+            entity_id=person_id,
+            expected_version=2,
+            changes={"display_name": "Idempotent replay must not apply"},
+            actor_id=person_id,
+            action="person.renamed",
+            event_key=event_key,
+            event_type="person.renamed.v1",
+        )
+    assert repeated_version == 2
 
     async with database.sessions() as session:
         version = await session.scalar(select(persons.c.version).where(persons.c.id == person_id))
@@ -167,10 +167,14 @@ async def test_optimistic_history_is_atomic_and_append_only() -> None:
             .select_from(domain_events)
             .where(domain_events.c.entity_id == person_id)
         )
+        event_entity_version = await session.scalar(
+            select(domain_events.c.entity_version).where(domain_events.c.event_key == event_key)
+        )
         audit_id = await session.scalar(
             select(audit_entries.c.id).where(audit_entries.c.entity_id == person_id)
         )
     assert (version, audit_count, event_count) == (2, 1, 1)
+    assert event_entity_version == 2
     assert audit_id is not None
 
     with pytest.raises(DBAPIError):

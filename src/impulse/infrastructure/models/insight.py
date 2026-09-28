@@ -17,6 +17,7 @@ domain_events = domain_table(
     integer_field("schema_version"),
     string_field("entity_type", 64),
     uuid_field("entity_id"),
+    integer_field("entity_version"),
     typed_field("occurred_at", DateTime(timezone=True)),
     uniques=(("event_key",),),
 )
