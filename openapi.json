@@ -2184,6 +2184,79 @@
         "title": "MentorQueueItemView",
         "type": "object"
       },
+      "MetricView": {
+        "properties": {
+          "cohort": {
+            "title": "Cohort",
+            "type": "string"
+          },
+          "definition": {
+            "title": "Definition",
+            "type": "string"
+          },
+          "denominator": {
+            "title": "Denominator",
+            "type": "integer"
+          },
+          "freshness": {
+            "title": "Freshness",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "numerator": {
+            "title": "Numerator",
+            "type": "integer"
+          },
+          "period_end": {
+            "format": "date-time",
+            "title": "Period End",
+            "type": "string"
+          },
+          "period_start": {
+            "format": "date-time",
+            "title": "Period Start",
+            "type": "string"
+          },
+          "unit": {
+            "title": "Unit",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "numerator",
+          "denominator",
+          "value",
+          "unit",
+          "period_start",
+          "period_end",
+          "cohort",
+          "freshness",
+          "definition"
+        ],
+        "title": "MetricView",
+        "type": "object"
+      },
       "MilestoneView": {
         "properties": {
           "completed": {
@@ -3641,6 +3714,26 @@
         "title": "Role",
         "type": "string"
       },
+      "RoleAnalyticsView": {
+        "properties": {
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/MetricView"
+            },
+            "title": "Metrics",
+            "type": "array"
+          },
+          "role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        },
+        "required": [
+          "role",
+          "metrics"
+        ],
+        "title": "RoleAnalyticsView",
+        "type": "object"
+      },
       "RoundingMode": {
         "enum": [
           "half_up",
@@ -4489,6 +4582,24 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/analytics/role": {
+      "get": {
+        "operationId": "role_analytics_api_v1_analytics_role_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleAnalyticsView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Role Analytics"
+      }
+    },
     "/api/v1/auth/demo-login": {
       "post": {
         "operationId": "demo_login_api_v1_auth_demo_login_post",

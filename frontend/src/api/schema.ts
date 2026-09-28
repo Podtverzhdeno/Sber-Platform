@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/v1/analytics/role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Role Analytics */
+        get: operations["role_analytics_api_v1_analytics_role_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/demo-login": {
         parameters: {
             query?: never;
@@ -2217,6 +2234,37 @@ export interface components {
             /** Task Title */
             task_title: string;
         };
+        /** MetricView */
+        MetricView: {
+            /** Cohort */
+            cohort: string;
+            /** Definition */
+            definition: string;
+            /** Denominator */
+            denominator: number;
+            /** Freshness */
+            freshness: string;
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+            /** Numerator */
+            numerator: number;
+            /**
+             * Period End
+             * Format: date-time
+             */
+            period_end: string;
+            /**
+             * Period Start
+             * Format: date-time
+             */
+            period_start: string;
+            /** Unit */
+            unit: string;
+            /** Value */
+            value: string | null;
+        };
         /** MilestoneView */
         MilestoneView: {
             /** Completed */
@@ -2774,6 +2822,12 @@ export interface components {
          * @enum {string}
          */
         Role: "participant" | "mentor" | "customer" | "manager" | "hr" | "operator" | "program_owner" | "access_admin" | "university_coordinator";
+        /** RoleAnalyticsView */
+        RoleAnalyticsView: {
+            /** Metrics */
+            metrics: components["schemas"]["MetricView"][];
+            role: components["schemas"]["Role"];
+        };
         /**
          * RoundingMode
          * @enum {string}
@@ -3090,6 +3144,26 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    role_analytics_api_v1_analytics_role_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleAnalyticsView"];
+                };
+            };
+        };
+    };
     demo_login_api_v1_auth_demo_login_post: {
         parameters: {
             query?: never;

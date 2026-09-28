@@ -43,6 +43,77 @@ class ParticipantAnalytics:
     generated_at: datetime
 
 
+@dataclass(frozen=True, slots=True)
+class Metric:
+    key: str
+    label: str
+    numerator: int
+    denominator: int
+    value: Decimal | None
+    unit: str
+    period_start: datetime
+    period_end: datetime
+    cohort: str
+    freshness: str
+    definition: str
+
+
+def ratio_metric(
+    *,
+    key: str,
+    label: str,
+    numerator: int,
+    denominator: int,
+    period_start: datetime,
+    period_end: datetime,
+    cohort: str,
+    definition: str,
+) -> Metric:
+    value = (
+        (Decimal(numerator) / Decimal(denominator) * Decimal(100)).quantize(Decimal("0.01"))
+        if denominator > 0
+        else None
+    )
+    return Metric(
+        key,
+        label,
+        numerator,
+        denominator,
+        value,
+        "percent",
+        period_start,
+        period_end,
+        cohort,
+        "fresh",
+        definition,
+    )
+
+
+def count_metric(
+    *,
+    key: str,
+    label: str,
+    count: int,
+    period_start: datetime,
+    period_end: datetime,
+    cohort: str,
+    definition: str,
+) -> Metric:
+    return Metric(
+        key,
+        label,
+        count,
+        1,
+        Decimal(count),
+        "count",
+        period_start,
+        period_end,
+        cohort,
+        "fresh",
+        definition,
+    )
+
+
 def participant_analytics(
     attempts: tuple[TrackAttempt, ...],
     enrollments: tuple[EnrollmentRecord, ...],

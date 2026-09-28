@@ -102,7 +102,7 @@
 
 - [x] 12.1 Реализовать versioned domain event schema и transactional emission для всех значимых transitions; tests SHALL проверить idempotency и отсутствие raw chat/payment details.
 - [x] 12.2 Реализовать participant funnel и earnings breakdown с next action/unknown/freshness; incomplete journey SHALL не считаться success.
-- [ ] 12.3 Реализовать mentor/customer/manager/HR/operator metric queries с numerator/denominator/period/cohort; fixture tests SHALL сверить формулы из analytics spec.
+- [x] 12.3 Реализовать mentor/customer/manager/HR/operator metric queries с numerator/denominator/period/cohort; fixture tests SHALL сверить формулы из analytics spec.
 - [ ] 12.4 Реализовать small-cohort suppression и provisional/verified import states; privacy test SHALL скрыть персональные строки ниже threshold.
 - [ ] 12.5 Реализовать role analytics dashboards с definitions drill-down и stale data state; frontend tests SHALL отображать задержку, а не нулевой результат.
 - [ ] 12.6 Добавить analytics dictionary и test-backed query examples в docs; documentation check SHALL выполнить каждый SQL/API example.
