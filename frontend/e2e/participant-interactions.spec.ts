@@ -93,6 +93,9 @@ test("application confirms success and appears in my tasks", async ({ page }) =>
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Задачи", exact: true }).click();
+  await page.getByRole("button", { name: /Список/ }).click();
+  await expect(page.getByRole("listitem").filter({ hasText: "Исследование качества рекомендаций" })).toBeVisible();
+  await page.getByRole("button", { name: /Карточки/ }).click();
   await page.getByRole("button", { name: "Откликнуться" }).click();
   await expect(page.getByText("Вы успешно откликнулись")).toBeVisible();
   await expect(page.getByRole("button", { name: /Заявка отправлена/ })).toBeVisible();
