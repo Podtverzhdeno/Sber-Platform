@@ -164,6 +164,8 @@ Frontend SHALL реализовать экранные композиции по
 ### Requirement: Mentor reference routes
 Ментор SHALL получить восемь композиций `R-MEN-01`–`R-MEN-08`. Проверка вкладов SHALL быть master-detail workspace с due/status filters, доказательствами, rubric, AI suggestion и отдельным human decision. Проекты, участники и сообщения SHALL сохранять правый контекст. Аналитика SHALL повторять dashboard hierarchy, а plan week SHALL использовать календарную сетку и отдельные панели приоритетов/рисков.
 
+Sidebar ментора SHALL содержать «Главная», «Проверка вкладов», «Мои проекты», «Участники», «Сообщения», «Аналитика», «AI-помощник» и «План недели». На desktop главная использует KPI и двухколоночный command-center; review, проекты, участники и сообщения используют master-detail с устойчивым inspector; аналитика — dashboard grid; план — календарную сетку с правой operational rail.
+
 #### Scenario: Ментор проверяет вклад
 - **WHEN** открывается `R-MEN-02`
 - **THEN** очередь видна одновременно с доказательствами выбранного участника, AI-рекомендация маркирована как черновик, а publish/escalate являются human actions
