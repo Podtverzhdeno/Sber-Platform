@@ -226,13 +226,13 @@
 
 # Mentor workspace follow-up
 
-- [ ] Заменить mentor navigation «Очередь ревью»/«Назначения» на восемь канонических маршрутов из `mentor-workspace`, сохранив object context и deep links.
-- [ ] Реализовать mentor command center с едиными KPI-определениями, приоритетным вкладом, компактной очередью, участниками риска, AI boundary и snapshot эффективности.
+- [x] Заменить mentor navigation «Очередь ревью»/«Назначения» на восемь канонических маршрутов из `mentor-workspace`, сохранив object context и deep links.
+- [x] Реализовать mentor command center с едиными KPI-определениями, приоритетным вкладом, компактной очередью, участниками риска, AI boundary и snapshot эффективности.
 - [ ] Расширить review workspace: рабочие фильтры, selection state, lifecycle/version, evidence viewer, missing-evidence checklist, versioned rubric и human decision actions.
-- [ ] Реализовать «Мои проекты» как portfolio master-detail с этапами, командой, заказчиком, сроками, review backlog и объяснимыми рисками.
-- [ ] Реализовать «Участники» как people master-detail с прогрессом, курсами, артефактами, feedback history, risk reasons и coaching actions.
+- [x] Реализовать «Мои проекты» как portfolio master-detail с этапами, командой, заказчиком, сроками, review backlog и объяснимыми рисками.
+- [x] Реализовать «Участники» как people master-detail с прогрессом, курсами, артефактами, feedback history, risk reasons и coaching actions.
 - [ ] Расширить mentor messenger фильтрами и связанным contribution/project context; быстрые действия SHALL открывать доменную форму, а не менять статус из чата.
 - [ ] Перестроить mentor analytics по response/backlog/funnel/revision/completion/capacity с периодом, знаменателями, freshness и drill-down.
-- [ ] Реализовать отдельный mentor AI workspace со сценариями draft/compare/missing evidence/soft feedback, citations и запретом decision tools.
-- [ ] Реализовать «План недели»: day/week/month, встречи, конфликты, timezone, today/priorities/reminders/risk rail и ссылки на доменные объекты.
+- [x] Реализовать отдельный mentor AI workspace со сценариями draft/compare/missing evidence/soft feedback, citations и запретом decision tools.
+- [x] Реализовать «План недели»: day/week/month, встречи, конфликты, timezone, today/priorities/reminders/risk rail и ссылки на доменные объекты.
 - [ ] Добавить связанные seed-данные, API contracts/migrations и unit/integration/RBAC/Playwright/screenshot tests для полного mentor journey.

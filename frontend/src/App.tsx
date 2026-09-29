@@ -17,6 +17,7 @@ import { MentorReviewWorkspace } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
 import { MessagingWorkspace } from "./features/collaboration";
 import { ParticipantAchievements, ParticipantBuddy, ParticipantSettings } from "./features/participant";
+import { MentorAssistant, MentorDashboard, MentorParticipants, MentorProjects, MentorWeekPlan } from "./features/mentor";
 
 type Role = "participant" | "mentor" | "customer" | "manager" | "hr" | "operator";
 
@@ -45,7 +46,7 @@ const roleLabels: Record<Role, string> = {
 const navigationIcons: Record<string, string> = {
   "Главная": "⌂",
   "Мой путь": "⌂", "Моя траектория": "⌁", Bootcamp: "◇", "Задачи": "▤", "Мои проекты": "▣", "События": "✦", "Рейтинг": "♜",
-  "Портфолио": "◈", "Аналитика": "▥", "Очередь ревью": "✓", "Назначения": "▣", "Мои задачи": "▤",
+  "Портфолио": "◈", "Аналитика": "▥", "Очередь ревью": "✓", "Проверка вкладов": "✓", "Назначения": "▣", "Участники": "♙", "AI-помощник": "✧", "План недели": "▦", "Мои задачи": "▤",
   "Кандидаты": "♙", "Приёмка": "✓", "Инициативы": "◆", "Результаты": "◎",
   "Воронка": "▽", "Операционная очередь": "☷", "Проверки": "◉", "Споры": "⚑", "Сообщения": "▱", "Достижения": "◆", "AI-Buddy": "✧", "Настройки": "⚙",
 };
@@ -139,7 +140,7 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
       <div className="workspace-content">
         <button className="mobile-menu" type="button" aria-expanded={navigationOpen} onClick={() => { setNavigationOpen(true); }}><span aria-hidden="true">☰</span> Меню</button>
         {allowed && currentSection === "Главная" ? (
-          actor.active_role === "participant" ? <ParticipantDashboard actor={actor} /> : <RoleDashboard actor={actor} currentSection="Главная" />
+          actor.active_role === "participant" ? <ParticipantDashboard actor={actor} /> : actor.active_role === "mentor" ? <MentorDashboard mentorName={actor.display_name} /> : <RoleDashboard actor={actor} currentSection="Главная" />
         ) : allowed && actor.active_role === "participant" && (currentSection === "Мой путь" || currentSection === "Моя траектория") ? (
           <DevelopmentJourney />
         ) : allowed && actor.active_role === "participant" && currentSection === "Bootcamp" ? (
@@ -166,8 +167,16 @@ function Workspace({ actor, honorBoardEnabled, onSwitchRole }: { actor: Actor; h
           <CustomerParticipantPreview />
         ) : allowed && actor.active_role === "customer" && currentSection === "Мои задачи" ? (
           <CustomerWorkspace />
-        ) : allowed && actor.active_role === "mentor" && currentSection === "Очередь ревью" ? (
+        ) : allowed && actor.active_role === "mentor" && (currentSection === "Очередь ревью" || currentSection === "Проверка вкладов") ? (
           <MentorReviewWorkspace />
+        ) : allowed && actor.active_role === "mentor" && currentSection === "Мои проекты" ? (
+          <MentorProjects />
+        ) : allowed && actor.active_role === "mentor" && currentSection === "Участники" ? (
+          <MentorParticipants />
+        ) : allowed && actor.active_role === "mentor" && currentSection === "AI-помощник" ? (
+          <MentorAssistant />
+        ) : allowed && actor.active_role === "mentor" && currentSection === "План недели" ? (
+          <MentorWeekPlan />
         ) : allowed && actor.active_role === "manager" && (currentSection === "Инициативы" || currentSection === "Результаты") ? (
           <ManagerWorkspace />
         ) : allowed && actor.active_role === "hr" && (currentSection === "Кандидаты" || currentSection === "Воронка") ? (
