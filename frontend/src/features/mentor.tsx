@@ -526,20 +526,29 @@ export function MentorParticipants() {
             ))}
           </ul>
           <div className="mentor-inspector-actions">
-            <button type="button" onClick={() => { void navigate("/workspace/4"); }}>
+            <button
+              type="button"
+              onClick={() => {
+                void navigate("/workspace/4");
+              }}
+            >
               Написать участнику
             </button>
             <button
               className="secondary-button"
               type="button"
-              onClick={() => { void navigate("/workspace/1"); }}
+              onClick={() => {
+                void navigate("/workspace/1");
+              }}
             >
               Открыть вклад
             </button>
             <button
               className="secondary-button"
               type="button"
-              onClick={() => { void navigate("/workspace/7"); }}
+              onClick={() => {
+                void navigate("/workspace/7");
+              }}
             >
               Назначить 1:1
             </button>
@@ -562,6 +571,7 @@ export function MentorAssistant() {
   const [answer, setAnswer] = useState(
     "Критерии результата выполнены частично. Benchmark воспроизводится, однако нет A/B-сравнения и подтверждения авторства финальной конфигурации. Рекомендую запросить два уточнения до решения.",
   );
+  const [sourceNotice, setSourceNotice] = useState("");
   return (
     <div className="feature-stack mentor-assistant">
       <header className="dashboard-heading">
@@ -609,10 +619,27 @@ export function MentorAssistant() {
                 }}
               />
               <div className="ai-citations">
-                <button type="button">[1] evaluation-report.pdf</button>
-                <button type="button">[2] repository/ranking</button>
-                <button type="button">[3] rubric v2</button>
+                {[
+                  "evaluation-report.pdf",
+                  "repository/ranking",
+                  "rubric v2",
+                ].map((source, index) => (
+                  <button
+                    type="button"
+                    key={source}
+                    onClick={() => {
+                      setSourceNotice(
+                        `Источник ${String(index + 1)} открыт: ${source}`,
+                      );
+                    }}
+                  >
+                    [{index + 1}] {source}
+                  </button>
+                ))}
               </div>
+              {sourceNotice && (
+                <small className="source-notice">{sourceNotice}</small>
+              )}
               <small>
                 Уверенность: средняя · обновлено сейчас. Проверьте ссылки перед
                 использованием.
@@ -673,10 +700,374 @@ const weekEvents = [
   { day: 3, start: 4, span: 2, title: "Демо MVP", kind: "demo" },
   { day: 4, start: 1, span: 1, title: "Ревью · Мария", kind: "review" },
 ];
+
+const analyticsParticipants = [
+  {
+    name: "Анна Смирнова",
+    assigned: 5,
+    accepted: 4,
+    revisions: 1,
+    completion: 86,
+  },
+  {
+    name: "Алекс Речной",
+    assigned: 4,
+    accepted: 3,
+    revisions: 1,
+    completion: 78,
+  },
+  {
+    name: "Мария Волкова",
+    assigned: 4,
+    accepted: 4,
+    revisions: 0,
+    completion: 92,
+  },
+  {
+    name: "Илья Кузнецов",
+    assigned: 3,
+    accepted: 1,
+    revisions: 2,
+    completion: 54,
+  },
+];
+
+export function MentorAnalytics() {
+  const [period, setPeriod] = useState("30 дней");
+  const [project, setProject] = useState("Все проекты");
+  const [direction, setDirection] = useState("Все направления");
+  const [detail, setDetail] = useState<string | null>(null);
+  const multiplier =
+    period === "7 дней" ? 0.45 : period === "90 дней" ? 1.7 : 1;
+  const funnel = [
+    ["Назначено", 24],
+    ["Проверено", 21],
+    ["Принято", 15],
+    ["Доработка", 6],
+  ] as const;
+  return (
+    <div className="feature-stack mentor-analytics">
+      <header className="dashboard-heading">
+        <div>
+          <p className="eyebrow">
+            Management contour · данные обновлены 8 минут назад
+          </p>
+          <h1 id="workspace-title">Качество и скорость сопровождения</h1>
+          <p className="lead">
+            Находите перегрузки, повторные доработки и участников, которым нужна
+            поддержка. Метрики не используются для автоматических кадровых
+            решений.
+          </p>
+        </div>
+        <Badge tone="success">Актуально</Badge>
+      </header>
+      <div className="analytics-controls">
+        <label>
+          Период
+          <select
+            value={period}
+            onChange={(event) => {
+              setPeriod(event.target.value);
+            }}
+          >
+            <option>7 дней</option>
+            <option>30 дней</option>
+            <option>90 дней</option>
+          </select>
+        </label>
+        <label>
+          Проект
+          <select
+            value={project}
+            onChange={(event) => {
+              setProject(event.target.value);
+            }}
+          >
+            <option>Все проекты</option>
+            {projects.map((item) => (
+              <option key={item.name}>{item.name}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Направление
+          <select
+            value={direction}
+            onChange={(event) => {
+              setDirection(event.target.value);
+            }}
+          >
+            <option>Все направления</option>
+            <option>ML / Backend</option>
+            <option>LLM / Data</option>
+            <option>CV / Research</option>
+          </select>
+        </label>
+        <span className="analytics-filter-summary">
+          {project} · {direction}
+        </span>
+      </div>
+      <section className="mentor-analytics-kpis">
+        {[
+          ["Медиана ответа", "14 ч", "цель ≤ 18 ч", "response"],
+          ["Принято с первого раза", "71%", "15 из 21", "acceptance"],
+          ["Доля доработок", "29%", "6 из 21", "revisions"],
+          ["Очередь / просрочено", "8 / 2", "25% backlog", "backlog"],
+          ["Баланс нагрузки", "82%", "3 проекта · 12 участников", "capacity"],
+          ["Завершили участие", "9", "из 12 активных", "completion"],
+        ].map(([label, value, note, key]) => (
+          <button
+            type="button"
+            key={key}
+            onClick={() => {
+              setDetail(label ?? null);
+            }}
+          >
+            <span>{label}</span>
+            <strong>{value}</strong>
+            <small>{note}</small>
+            <i>Подробнее →</i>
+          </button>
+        ))}
+      </section>
+      <div className="mentor-analytics-grid">
+        <section className="analytics-panel">
+          <div className="section-heading">
+            <h2>Воронка вкладов</h2>
+            <Badge>{period}</Badge>
+          </div>
+          <div className="mentor-funnel">
+            {funnel.map(([label, base], index) => {
+              const value = Math.round(base * multiplier);
+              return (
+                <button
+                  type="button"
+                  style={{ width: `${String(100 - index * 12)}%` }}
+                  key={label}
+                  onClick={() => {
+                    setDetail(label);
+                  }}
+                >
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                  <small>
+                    {index === 0
+                      ? "100%"
+                      : `${String(Math.round((value / Math.max(1, Math.round(funnel[0][1] * multiplier))) * 100))}%`}
+                  </small>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+        <section className="analytics-panel">
+          <div className="section-heading">
+            <h2>Динамика за период</h2>
+            <div className="chart-legend">
+              <span>Назначено</span>
+              <span>Проверено</span>
+              <span>Принято</span>
+            </div>
+          </div>
+          <div className="mentor-trend-chart">
+            {[8, 12, 10, 15, 13, 18, 16, 21].map((value, index) => (
+              <div key={index}>
+                <i style={{ height: `${String(value * 3)}px` }} />
+                <i style={{ height: `${String((value - 2) * 3)}px` }} />
+                <i style={{ height: `${String((value - 5) * 3)}px` }} />
+                <small>Н{index + 1}</small>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+      <div className="mentor-analytics-grid">
+        <section className="analytics-panel">
+          <h2>Распределение по направлениям</h2>
+          <div className="direction-bars">
+            {[
+              ["ML / Backend", 44],
+              ["LLM / Data", 31],
+              ["CV / Research", 25],
+            ].map(([label, value]) => (
+              <button
+                type="button"
+                key={label}
+                onClick={() => {
+                  setDirection(String(label));
+                }}
+              >
+                <span>{label}</span>
+                <i>
+                  <b style={{ width: `${String(value)}%` }} />
+                </i>
+                <strong>{value}%</strong>
+              </button>
+            ))}
+          </div>
+        </section>
+        <section className="analytics-panel">
+          <h2>Время ответа по дням</h2>
+          <div className="response-days">
+            {[
+              ["Пн", 11],
+              ["Вт", 14],
+              ["Ср", 19],
+              ["Чт", 13],
+              ["Пт", 17],
+              ["Сб", 8],
+              ["Вс", 6],
+            ].map(([day, hours]) => (
+              <div key={day}>
+                <strong>{hours} ч</strong>
+                <i style={{ height: `${String(Number(hours) * 5)}px` }} />
+                <span>{day}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+      <section className="mentor-effectiveness-table">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">People diagnostics</p>
+            <h2>Эффективность участников</h2>
+          </div>
+          <Badge>Не рейтинг людей</Badge>
+        </div>
+        <div className="effectiveness-head">
+          <span>Участник</span>
+          <span>Вкладов</span>
+          <span>Принято</span>
+          <span>Доработок</span>
+          <span>Завершение</span>
+        </div>
+        {analyticsParticipants.map((person) => (
+          <button
+            type="button"
+            key={person.name}
+            onClick={() => {
+              setDetail(person.name);
+            }}
+          >
+            <strong>{person.name}</strong>
+            <span>{person.assigned}</span>
+            <span>{person.accepted}</span>
+            <span>{person.revisions}</span>
+            <span>
+              <i>
+                <b style={{ width: `${String(person.completion)}%` }} />
+              </i>
+              {person.completion}%
+            </span>
+          </button>
+        ))}
+      </section>
+      <div className="mentor-analytics-grid">
+        <section className="analytics-panel">
+          <h2>Нагрузка по проектам</h2>
+          {projects.map((item) => (
+            <button
+              className="project-load-row"
+              type="button"
+              key={item.name}
+              onClick={() => {
+                setProject(item.name);
+              }}
+            >
+              <div>
+                <strong>{item.name}</strong>
+                <small>
+                  {item.team} участников · {item.risk}
+                </small>
+              </div>
+              <span>
+                {item.name === "Рекомендательная система"
+                  ? "86%"
+                  : item.name === "Ассистент базы знаний"
+                    ? "64%"
+                    : "72%"}
+              </span>
+            </button>
+          ))}
+        </section>
+        <section className="analytics-ai-insight">
+          <span className="ai-orb">✦</span>
+          <div>
+            <p className="eyebrow">AI insight · рекомендация</p>
+            <h2>Повторные доработки растут по критерию «Эксперимент»</h2>
+            <p>
+              4 из 6 доработок связаны с отсутствием baseline или A/B-сравнения.
+              Добавьте общий checklist до отправки вклада.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setDetail("AI-рекомендация");
+              }}
+            >
+              Посмотреть основания →
+            </button>
+          </div>
+        </section>
+      </div>
+      {detail && (
+        <div className="overlay">
+          <section className="overlay-panel overlay-panel--dialog">
+            <header>
+              <div>
+                <p className="eyebrow">Drill-down · {period}</p>
+                <h2>{detail}</h2>
+              </div>
+              <button
+                type="button"
+                aria-label="Закрыть"
+                onClick={() => {
+                  setDetail(null);
+                }}
+              >
+                ×
+              </button>
+            </header>
+            <p>
+              Проекты: {project}. Направления: {direction}. Значение рассчитано
+              по назначенным вам объектам; период, числитель и знаменатель
+              сохранены в аналитическом событии.
+            </p>
+            <dl className="analytics-detail-dl">
+              <div>
+                <dt>Когорта</dt>
+                <dd>12 назначенных участников</dd>
+              </div>
+              <div>
+                <dt>Источник</dt>
+                <dd>review decisions + assignments</dd>
+              </div>
+              <div>
+                <dt>Свежесть</dt>
+                <dd>29 сентября, 16:28</dd>
+              </div>
+            </dl>
+            <button
+              type="button"
+              onClick={() => {
+                setDetail(null);
+              }}
+            >
+              Понятно
+            </button>
+          </section>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function MentorWeekPlan() {
   const [view, setView] = useState("Неделя");
   const [meetingOpen, setMeetingOpen] = useState(false);
   const [created, setCreated] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const hours = useMemo(
     () => ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00"],
     [],
@@ -715,8 +1106,14 @@ export function MentorWeekPlan() {
             </button>
           ))}
         </div>
-        <strong>28 сентября — 4 октября · Europe/Moscow</strong>
-        <button className="secondary-button" type="button">
+        <strong>{view}: 28 сентября — 4 октября · Europe/Moscow</strong>
+        <button
+          className="secondary-button"
+          type="button"
+          onClick={() => {
+            setView("День");
+          }}
+        >
           Сегодня
         </button>
       </div>
@@ -748,6 +1145,9 @@ export function MentorWeekPlan() {
                 }}
                 type="button"
                 key={event.title}
+                onClick={() => {
+                  setSelectedEvent(event.title);
+                }}
               >
                 {event.title}
                 <small>Открыть контекст</small>
@@ -784,6 +1184,49 @@ export function MentorWeekPlan() {
           </Card>
         </aside>
       </div>
+      {selectedEvent && (
+        <div className="overlay">
+          <section className="overlay-panel overlay-panel--dialog">
+            <header>
+              <div>
+                <p className="eyebrow">Контекст события</p>
+                <h2>{selectedEvent}</h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedEvent(null);
+                }}
+              >
+                ×
+              </button>
+            </header>
+            <p>
+              Проект «Рекомендательная система» · участники уведомлены ·
+              материалы прикреплены.
+            </p>
+            <div className="context-actions">
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.assign("/workspace/1");
+                }}
+              >
+                Открыть связанное ревью
+              </button>
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => {
+                  setSelectedEvent(null);
+                }}
+              >
+                Закрыть
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
       {meetingOpen && (
         <div className="overlay">
           <section className="overlay-panel overlay-panel--dialog">

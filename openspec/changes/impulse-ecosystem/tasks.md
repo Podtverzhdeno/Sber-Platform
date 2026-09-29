@@ -232,7 +232,7 @@
 - [x] Реализовать «Мои проекты» как portfolio master-detail с этапами, командой, заказчиком, сроками, review backlog и объяснимыми рисками.
 - [x] Реализовать «Участники» как people master-detail с прогрессом, курсами, артефактами, feedback history, risk reasons и coaching actions.
 - [ ] Расширить mentor messenger фильтрами и связанным contribution/project context; быстрые действия SHALL открывать доменную форму, а не менять статус из чата.
-- [ ] Перестроить mentor analytics по response/backlog/funnel/revision/completion/capacity с периодом, знаменателями, freshness и drill-down.
+- [x] Перестроить mentor analytics по response/backlog/funnel/revision/completion/capacity с периодом, знаменателями, freshness и drill-down.
 - [x] Реализовать отдельный mentor AI workspace со сценариями draft/compare/missing evidence/soft feedback, citations и запретом decision tools.
 - [x] Реализовать «План недели»: day/week/month, встречи, конфликты, timezone, today/priorities/reminders/risk rail и ссылки на доменные объекты.
 - [ ] Добавить связанные seed-данные, API contracts/migrations и unit/integration/RBAC/Playwright/screenshot tests для полного mentor journey.
