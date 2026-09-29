@@ -68,6 +68,6 @@ export function StatePanel({ kind, action, onAction }: { kind: StateKind; action
   return <section className={`state-panel state-panel--${kind}`} aria-live={kind === "loading" ? "polite" : "assertive"} aria-busy={kind === "loading"}><h2>{copy.title}</h2><p>{copy.detail}</p>{action && <button type="button" onClick={onAction}>{action}</button>}</section>;
 }
 
-export function SafeExternalLink({ href, children }: { href: string; children: ReactNode }) {
-  return <a href={href} target="_blank" rel="noopener noreferrer">{children}<span className="sr-only"> (откроется в новой вкладке)</span></a>;
+export function SafeExternalLink({ href, children, className }: { href: string; children: ReactNode; className?: string }) {
+  return <a className={className} href={href} target="_blank" rel="noopener noreferrer">{children}<span className="sr-only"> (откроется в новой вкладке)</span></a>;
 }
