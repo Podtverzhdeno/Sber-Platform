@@ -33,4 +33,4 @@ RUN addgroup --system impulse && adduser --system --ingroup impulse impulse \
 USER impulse
 
 EXPOSE 8000
-CMD ["sh", "-c", "exec uvicorn impulse.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["sh", "-c", "alembic upgrade head && impulse-demo-seed && exec uvicorn impulse.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
