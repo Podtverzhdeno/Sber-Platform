@@ -96,7 +96,7 @@ function LoginScreen({ personas, loading, error, onLogin }: { personas: Persona[
     <section className="login-layout" aria-labelledby="login-title">
       <div className="login-copy">
         <p className="eyebrow">Путь от интереса к подтверждённому опыту</p>
-        <h1 id="login-title">Кем вы хотите посмотреть платформу?</h1>
+        <h1 id="login-title">Выберите роль, чтобы присоединиться</h1>
         <p className="lead">Выберите демо-персону. У каждой роли свой рабочий контекст и только разрешённая навигация. Все имена, проекты и выплаты вымышлены.</p>
       </div>
       <div className="persona-panel" aria-live="polite">
