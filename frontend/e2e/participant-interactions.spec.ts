@@ -80,8 +80,14 @@ test("search, streak, task detail and messages are interactive", async ({ page }
   await expect(page).toHaveURL(/workspace\/2\?course=python-base/);
   await page.getByRole("link", { name: "Мои проекты" }).click();
   await page.getByRole("button", { name: /Открыть рабочую область/ }).click();
-  await expect(page.getByRole("heading", { name: "Checkpoints проекта" })).toBeVisible();
-  await expect(page.getByText("Роман Воронов")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Загрузить решение" })).toBeVisible();
+  await page.locator('.ctw-upload-button input[type="file"]').setInputFiles([
+    { name: "solution-final.zip", mimeType: "application/zip", buffer: Buffer.from("solution") },
+    { name: "metrics.pdf", mimeType: "application/pdf", buffer: Buffer.from("metrics") },
+  ]);
+  await expect(page.getByText("solution-final.zip")).toBeVisible();
+  await expect(page.getByText("metrics.pdf")).toBeVisible();
+  await expect(page.getByText("Никита Соколов")).toBeVisible();
   await page.getByRole("link", { name: "Сообщения" }).click();
   await expect(page.getByRole("heading", { name: "Сообщения" })).toBeVisible();
   await page.getByLabel("Сообщение").fill("Готово к повторной проверке");
@@ -107,7 +113,7 @@ test("application confirms success and appears in my tasks", async ({ page }) =>
   await expect(page.getByRole("dialog", { name: "Прототип рекомендательной системы" })).toContainText("Елена Наставник");
   await page.getByRole("button", { name: /Перейти в рабочую область/ }).click();
   await expect(page).toHaveURL(/\/workspace\/4$/);
-  await expect(page.getByRole("heading", { name: "Checkpoints проекта" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Загрузить решение" })).toBeVisible();
 });
 
 test("participant settings and AI Buddy controls are interactive", async ({ page }) => {

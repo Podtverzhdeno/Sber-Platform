@@ -30,6 +30,7 @@ export function TaskWorkspacePage({ mode, title, taskId, description, deadline, 
   const customer = mode === "customer";
   const [notice, setNotice] = useState("");
   const [tab, setTab] = useState("Обзор");
+  const [uploadedFiles, setUploadedFiles] = useState(["solution-v2.zip", "Отчёт по качеству.pdf"]);
   const openTab = (label:string,target:string) => { setTab(label); document.getElementById(target)?.scrollIntoView({ behavior:"smooth", block:"start" }); };
   return <div className="ctw-page">
     <header className="ctw-header">
@@ -47,7 +48,7 @@ export function TaskWorkspacePage({ mode, title, taskId, description, deadline, 
       <section className="ctw-card"><header className="ctw-section-head"><div><small>КОМАНДА</small><h2>4 участника</h2></div><span className="ctw-online">● online</span></header><div className="ctw-team">{members.map(x=><button type="button" key={x[1]}><i>{x[0]}</i><span><b>{x[1]}</b><small>{x[2]}</small></span><em>●</em></button>)}</div><button className="ctw-wide-button" type="button" onClick={onMessage}>Открыть команду</button></section>
       <section className="ctw-card"><small className="ctw-label">КЛЮЧЕВЫЕ МЕТРИКИ</small><h2>Статус задачи</h2><dl className="ctw-metrics"><div><dt>Выполнено этапов</dt><dd>2 / 5</dd></div><div><dt>Артефактов загружено</dt><dd>4</dd></div><div><dt>Есть блокеры</dt><dd className="good">Нет</dd></div><div><dt>Нужна обратная связь</dt><dd className="accent">1</dd></div></dl></section>
       <section className="ctw-card"><small className="ctw-label">БЛИЖАЙШИЕ ДЕДЛАЙНЫ</small><h2>До {deadline}</h2><div className="ctw-deadlines">{[["29","АПР","Интеграция API","Завершить основной backend"],["02","МАЯ","Тестирование","Проверить качество рекомендаций"],["04","МАЯ","Финальная защита","Demo и презентация результата"]].map(x=><article key={x[2]}><span><b>{x[0]}</b><small>{x[1]}</small></span><div><b>{x[2]}</b><small>{x[3]}</small></div></article>)}</div></section>
-      <section className="ctw-decision"><b>Команда ждёт решение</b><p>Требуется подтвердить формат итоговой метрики качества.</p><button type="button" onClick={onPrimaryAction}>Ответить</button></section>
+      {customer ? <section className="ctw-decision"><b>Команда ждёт решение</b><p>Требуется подтвердить формат итоговой метрики качества.</p><button type="button" onClick={onPrimaryAction}>Ответить</button></section> : <section className="ctw-card ctw-upload"><small className="ctw-label">МОЁ РЕШЕНИЕ</small><h2>Загрузить решение</h2><div className="ctw-upload-files">{uploadedFiles.map((file,index)=><div key={`${file}-${String(index)}`}><span aria-hidden="true">↗</span><b>{file}</b><small>{index===0?"Загружено сегодня, 16:40":"Загружено вчера, 18:05"}</small></div>)}</div><label className="ctw-upload-button">Загрузить файл(-ы)<input type="file" multiple onChange={event=>{const names=Array.from(event.target.files??[]).map(file=>file.name);if(names.length){setUploadedFiles(current=>[...current,...names]);setNotice(`Добавлено файлов: ${String(names.length)}`);}event.target.value="";}}/></label></section>}
     </aside></div>
   </div>;
 }
