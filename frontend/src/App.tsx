@@ -211,6 +211,11 @@ function LoginScreen({
   error: string;
   onLogin: (key: string) => void;
 }) {
+  const visiblePersonas = personas.filter((persona, index) => {
+    const role = persona.roles[0];
+    return role !== undefined && personas.findIndex((item) => item.roles[0] === role) === index;
+  });
+  const hasPrimaryDemoRoles = visiblePersonas.some((persona) => persona.roles[0] === "participant" || persona.roles[0] === "customer");
   return (
     <section className="login-layout" aria-labelledby="login-title">
       <div className="login-copy">
@@ -225,21 +230,25 @@ function LoginScreen({
         <h2>Демо-персоны</h2>
         {loading && <StatePanel kind="loading" />}
         <div className="persona-grid">
-          {personas.map((persona) => (
-            <button
-              className="persona-card"
+          {visiblePersonas.map((persona) => {
+            const role = persona.roles[0];
+            const enabled = !hasPrimaryDemoRoles || role === "participant" || role === "customer";
+            return <button
+              className={`persona-card ${enabled ? "persona-card--active" : "persona-card--inactive"}`}
               data-persona={persona.key}
               key={persona.key}
+              disabled={!enabled}
               onClick={() => {
                 onLogin(persona.key);
               }}
             >
               <span>{persona.display_name}</span>
               <small>
-                {persona.roles.map((role) => roleLabels[role]).join(" · ")}
+                {role ? roleLabels[role] : "Роль не назначена"}
               </small>
-            </button>
-          ))}
+              {!enabled && <em>Недоступно в демо</em>}
+            </button>;
+          })}
         </div>
         {error && (
           <p className="error-message" role="alert">

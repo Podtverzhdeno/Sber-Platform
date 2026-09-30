@@ -68,6 +68,11 @@ h1 { max-width: 760px; margin: 0; font-size: clamp(44px, 6vw, 76px); line-height
 .persona-card:hover { border-color: #45df91; background: rgb(69 223 145 / 9%); transform: translateY(-1px); }
 .persona-card span { font-weight: 800; }
 .persona-card small { color: #8fafa0; }
+.persona-card--active { border-color: rgb(69 223 145 / 22%); background: rgb(69 223 145 / 6%); }
+.persona-card--inactive { border-color: rgb(255 255 255 / 4%); color: #627069; background: rgb(0 0 0 / 24%); cursor: not-allowed; filter: saturate(.25); opacity: .58; }
+.persona-card--inactive:hover { border-color: rgb(255 255 255 / 4%); background: rgb(0 0 0 / 24%); transform: none; }
+.persona-card--inactive small { color: #4e5c55; }
+.persona-card--inactive em { color: #64716a; font-size: 10px; font-style: normal; }
 .error-message { color: #ffaaa7; }
 
 .workspace { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 60px; min-height: calc(100vh - 90px); padding: 44px 0 80px; }
