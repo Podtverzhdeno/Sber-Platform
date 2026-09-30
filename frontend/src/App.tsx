@@ -198,6 +198,13 @@ const dashboardMetrics: Record<
   ],
 };
 
+const participantMetricSeries = [
+  [31, 39, 48, 54, 61, 68],
+  [3, 2, 3, 2, 3, 2],
+  [2, 3, 3, 5, 6, 7],
+  [8, 10, 11, 12, 13, 14],
+];
+
 const queryClient = createQueryClient();
 
 function LoginScreen({
@@ -536,10 +543,10 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
               role="img"
               aria-label={`Гистограмма «${metric.label}» за шесть недель`}
             >
-              {[34, 52, 43, 68, 59, 82].map((value, index) => (
+              {(participantMetricSeries[metricIndex] ?? []).map((value, index, series) => (
                 <i
                   key={index}
-                  style={{ height: `${String(value - metricIndex * 3)}%` }}
+                  style={{ height: `${String(Math.max(12,value/Math.max(...series)*100))}%` }}
                 />
               ))}
             </div>

@@ -4,9 +4,13 @@ export function WorkspaceHeader({ eyebrow, title, subtitle, action }: { eyebrow:
   return <header className="ws-header"><div><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p className="lead">{subtitle}</p></div>{action}</header>;
 }
 
-export function MetricCard({ label = "", value = "", delta = "", tone = "cyan", values = [28,42,35,58,51,72], icon }: { label?: string; value?: string | number; delta?: string; tone?: "cyan" | "blue" | "violet" | "amber"; values?: number[]; icon?: ReactNode }) {
-  const max=Math.max(...values,1);
-  return <article className={`ws-metric ws-metric--${tone}`}><span className="ws-metric-icon" aria-hidden="true">{icon}</span><div><small>{label}</small><strong>{value}</strong><em>{delta}</em></div><svg viewBox="0 0 120 34" role="img" aria-label={`Гистограмма показателя ${label}`}>{values.map((item,index)=><rect key={`${String(index)}-${String(item)}`} x={String(index*19)} y={String(34-item/max*31)} width="11" height={String(item/max*31)} rx="2" />)}</svg></article>;
+const metricPatterns=[[22,31,28,44,51,66],[64,57,61,48,53,46],[18,33,29,52,45,73],[46,38,55,49,68,62],[27,48,41,39,58,71],[58,42,47,65,54,76]];
+
+export function MetricCard({ label = "", value = "", delta = "", tone = "cyan", values, icon }: { label?: string; value?: string | number; delta?: string; tone?: "cyan" | "blue" | "violet" | "amber"; values?: number[]; icon?: ReactNode }) {
+  const patternIndex=Array.from(label).reduce((sum,char)=>sum+char.charCodeAt(0),0)%metricPatterns.length;
+  const chartValues=values??metricPatterns[patternIndex]??[28,42,35,58,51,72];
+  const max=Math.max(...chartValues,1);
+  return <article className={`ws-metric ws-metric--${tone}`}><span className="ws-metric-icon" aria-hidden="true">{icon}</span><div><small>{label}</small><strong>{value}</strong><em>{delta}</em></div><svg viewBox="0 0 120 34" role="img" aria-label={`Гистограмма показателя ${label}`}>{chartValues.map((item,index)=><rect key={`${String(index)}-${String(item)}`} x={String(index*19)} y={String(34-item/max*31)} width="11" height={String(item/max*31)} rx="2" />)}</svg></article>;
 }
 
 export function SectionCard({ title, eyebrow, action, className = "", children }: { title?: string; eyebrow?: string; action?: ReactNode; className?: string; children: ReactNode }) {
