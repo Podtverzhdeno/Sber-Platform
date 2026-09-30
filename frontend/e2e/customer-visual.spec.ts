@@ -55,3 +55,12 @@ test("customer opens the selected participant profile and direct dialog", async 
   await expect(page.getByRole("heading",{name:"Никита Соколов"})).toBeVisible();
   await expect(page).toHaveURL(/participant=p1/);
 });
+
+test("customer participant dialogs keep separate histories", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Сообщения", exact: true }).click();
+  await expect(page.getByText("Обновил рекомендательную модель")).toBeVisible();
+  await page.getByRole("button", { name: /Анна Морозова/ }).click();
+  await expect(page.getByText("Подготовила анализ ошибок мультимодальной модели")).toBeVisible();
+  await expect(page.getByText("Обновил рекомендательную модель")).not.toBeVisible();
+});
