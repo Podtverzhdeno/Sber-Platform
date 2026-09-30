@@ -15,8 +15,8 @@ test("customer premium workspace renders every route without overflow", async ({
   await openCustomer(page);
 
   const sidebar = page.getByRole("navigation", { name: "Навигация роли" });
-  await expect(sidebar.getByRole("link")).toHaveCount(9);
-  for (const section of ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Результаты", "Аналитика", "AI-помощник", "Кандидаты", "Сообщения"]) {
+  await expect(sidebar.getByRole("link")).toHaveCount(8);
+  for (const section of ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения"]) {
     await sidebar.getByRole("link", { name: section, exact: true }).click();
     await expect(page.locator(".premium-page, .messenger-page, .analytics-dashboard, .buddy-page, .create-task-workspace").first()).toBeVisible();
     const overflow = await page.evaluate<boolean>("document.documentElement.scrollWidth > document.documentElement.clientWidth");
@@ -31,9 +31,7 @@ test("customer task, application and candidate actions are interactive", async (
   await sidebar.getByRole("link",{name:"Мои задачи",exact:true}).click();
   await page.getByLabel("Поиск по задачам").fill("аномалий");
   await expect(page.locator(".premium-tr")).toHaveCount(2);
-  await page.getByRole("button",{name:"Фильтры"}).click();
-  await expect(page.getByRole("dialog",{name:"Фильтры задач"})).toBeVisible();
-  await page.getByRole("button",{name:"Готово"}).click();
+  await expect(page.getByRole("button",{name:"Фильтры"})).toHaveCount(0);
   await sidebar.getByRole("link",{name:"Заявки",exact:true}).click();
   await page.getByRole("button",{name:"Открыть профиль"}).click();
   await expect(page.getByRole("dialog",{name:/Цифровой профиль/})).toBeVisible();
@@ -41,7 +39,19 @@ test("customer task, application and candidate actions are interactive", async (
   await page.getByRole("button",{name:"В шорт-лист"}).click();
   await expect(page.getByRole("dialog",{name:"Добавлен в шорт-лист"})).toBeVisible();
   await page.getByRole("button",{name:"Готово"}).click();
-  await sidebar.getByRole("link",{name:"Кандидаты",exact:true}).click();
+  await sidebar.getByRole("link",{name:"База участников",exact:true}).click();
   await page.getByRole("button",{name:"Пригласить в задачу"}).click();
   await expect(page.getByRole("dialog",{name:"Готово"})).toBeVisible();
+});
+
+test("customer opens the selected participant profile and direct dialog", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Мои задачи",exact:true}).click();
+  await page.getByRole("button",{name:"Профиль",exact:true}).first().click();
+  await expect(page.getByRole("dialog",{name:/Никита Соколов/})).toBeVisible();
+  await page.getByRole("button",{name:"×"}).click();
+  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Мои задачи",exact:true}).click();
+  await page.getByRole("button",{name:"Написать",exact:true}).first().click();
+  await expect(page.getByRole("heading",{name:"Никита Соколов"})).toBeVisible();
+  await expect(page).toHaveURL(/participant=p1/);
 });

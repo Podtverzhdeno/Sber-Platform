@@ -87,6 +87,10 @@ const chatsByRole: Record<Role, Chat[]> = {
     },
   ],
   customer: [
+    { id: "p1", title: "Никита Соколов", kind: "Личный диалог · участник", preview: "Отправил обновлённую версию", unread: 2, members: ["Алексей · Заказчик", "Никита · Участник"] },
+    { id: "p2", title: "Анна Морозова", kind: "Личный диалог · участник", preview: "Спасибо за обратную связь", unread: 0, members: ["Алексей · Заказчик", "Анна · Участник"] },
+    { id: "p3", title: "Дмитрий Козлов", kind: "Личный диалог · участник", preview: "Готов показать результат", unread: 1, members: ["Алексей · Заказчик", "Дмитрий · Участник"] },
+    { id: "p4", title: "Екатерина Лебедева", kind: "Личный диалог · участник", preview: "Уточнила критерии", unread: 0, members: ["Алексей · Заказчик", "Екатерина · Участник"] },
     {
       id: "project",
       title: "Рекомендательная система",
@@ -240,7 +244,8 @@ const conversations: Record<string, Message[]> = {
 
 export function MessagingWorkspace({ role }: { role: Role }) {
   const chats = chatsByRole[role];
-  const [selectedId, setSelectedId] = useState(chats[0]?.id ?? "");
+  const requestedChat=new URLSearchParams(window.location.search).get("participant");
+  const [selectedId, setSelectedId] = useState(chats.some(chat=>chat.id===requestedChat)?requestedChat??chats[0]?.id??"":chats[0]?.id??"");
   const [filter, setFilter] = useState("");
   const [draft, setDraft] = useState("");
   const [historySearchOpen, setHistorySearchOpen] = useState(false);

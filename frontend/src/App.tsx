@@ -56,7 +56,7 @@ type Actor = {
   csrf_token?: string | null;
 };
 type PublicConfig = { honor_board_enabled?: boolean; demo_mode?: boolean };
-const customerSections = ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Результаты", "Аналитика", "AI-помощник", "Кандидаты", "Сообщения"];
+const customerSections = ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения"];
 
 const roleLabels: Record<Role, string> = {
   participant: "Участник",
@@ -88,6 +88,7 @@ const navigationIcons: Record<string, string> = {
   "Создать задачу": "+",
   Заявки: "◧",
   Кандидаты: "♙",
+  "База участников": "♙",
   Инициативы: "◆",
   Результаты: "◎",
   Воронка: "▽",
@@ -410,7 +411,7 @@ function Workspace({
           <ParticipantSettings actorName={actor.display_name} consentScopes={actor.consent_scopes} />
         ) : allowed &&
           actor.active_role === "customer" &&
-          currentSection === "Кандидаты" ? (
+          currentSection === "База участников" ? (
           <CustomerCandidates />
         ) : allowed &&
           actor.active_role === "customer" &&
