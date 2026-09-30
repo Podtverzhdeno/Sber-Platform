@@ -19,6 +19,7 @@ type Message = {
   text: string;
   own?: boolean;
 };
+const navigateClient = (url:string) => { window.history.pushState({}, "", url); window.dispatchEvent(new PopStateEvent("popstate")); };
 
 const chatsByRole: Record<Role, Chat[]> = {
   participant: [
@@ -534,6 +535,13 @@ export function MessagingWorkspace({ role }: { role: Role }) {
             className="linked-task-button"
             type="button"
             onClick={() => {
+              if (role === "customer") {
+                navigateClient("/workspace/1?task=IMP-2025-0412");
+                return;
+              }
+              if (role === "participant" && selected?.id === "project") {
+                sessionStorage.setItem("impulse_open_assignment", "assignment-1");
+              }
               window.location.assign(
                 selected?.id === "bootcamp"
                   ? "/workspace/2?course=python-base"
@@ -551,6 +559,7 @@ export function MessagingWorkspace({ role }: { role: Role }) {
               ? "Открыть траекторию курса"
               : "Открыть связанную задачу"}
           </button>
+          {role === "customer" && selected?.id.startsWith("p") && <button className="linked-profile-button" type="button" onClick={() => { navigateClient(`/workspace/6?participant=${encodeURIComponent(selected.id)}&profile=open`); }}>Посмотреть профиль</button>}
           {role === "mentor" && (
             <div className="context-actions">
               <button

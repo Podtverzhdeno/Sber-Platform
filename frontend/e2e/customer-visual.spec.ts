@@ -66,6 +66,19 @@ test("customer participant dialogs keep separate histories", async ({ page }) =>
   await expect(page.getByText("Обновил рекомендательную модель")).not.toBeVisible();
 });
 
+test("customer messages open the linked task and selected participant profile", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Сообщения", exact: true }).click();
+  await page.getByRole("button", { name: "Посмотреть профиль" }).click();
+  await expect(page).toHaveURL(/\/workspace\/6\?participant=p1&profile=open$/);
+  await expect(page.getByRole("dialog", { name: /Цифровой профиль Никита Соколов/ })).toBeVisible();
+  await page.getByRole("button", { name: "×" }).click();
+  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Сообщения", exact: true }).click();
+  await page.getByRole("button", { name: "Открыть связанную задачу" }).click();
+  await expect(page).toHaveURL(/\/workspace\/1\?task=IMP-2025-0412$/);
+  await expect(page.locator(".ctw-page")).toBeVisible();
+});
+
 test("customer participant database contains an extended talent pool", async ({ page }) => {
   await openCustomer(page);
   await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "База участников", exact: true }).click();
@@ -103,4 +116,22 @@ test("application filters change independently", async ({ page }) => {
   await expect(direction).toHaveValue("AI / ML");
   await expect(level).toHaveValue("Все");
   await expect(match).toHaveValue("90");
+});
+
+test("customer analytics updates metrics for the selected period", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Аналитика", exact: true }).click();
+  await page.getByRole("button", { name: /Последние 90 дней/ }).click();
+  await expect(page.getByRole("button", { name: /Последние 30 дней/ })).toBeVisible();
+  const business = page.locator(".cta-business");
+  await expect(business).toContainText("Активные задачи");
+  await expect(business).toContainText("8");
+  await expect(business).toContainText("+2");
+  await expect(business).toContainText("Команды в работе");
+  await expect(business).toContainText("12");
+  await expect(business).toContainText("Участники");
+  await expect(business).toContainText("47");
+  await expect(business).toContainText("Завершено задач");
+  await expect(business).toContainText("24");
+  await expect(page.locator(".cta-kpi-grid")).toContainText("612");
 });
