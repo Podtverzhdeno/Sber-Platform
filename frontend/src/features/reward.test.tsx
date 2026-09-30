@@ -7,7 +7,7 @@ import { ParticipantRewardEvidence } from "./reward";
 afterEach(() => vi.restoreAllMocks());
 
 describe("ParticipantRewardEvidence", () => {
-  it("separates AI draft, human decision and payout status", async () => {
+  it("separates AI draft and human decision", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response(JSON.stringify([{
       review: { id: "r1", contribution_id: "c1", contribution_version: 2, version: 4, grade: "B", assessments: [{ criterion_key: "result", finding: "MVP принят.", evidence_refs: ["artifact:mvp"] }], explanation: "Решение подписано ментором.", status: "published", draft_origin: "ai_suggestion", confirmed_by: "mentor", published_by: "mentor" },
       payout: { id: "p1", review_version: 4, amount: "15000.00", currency: "RUB", status: "calculated", version: 1 },
@@ -17,7 +17,6 @@ describe("ParticipantRewardEvidence", () => {
 
     expect(await screen.findByLabelText("Черновик AI")).toHaveTextContent("не выставляет финальную оценку");
     expect(screen.getByLabelText("Финальное решение человека")).toHaveTextContent("Решение подписано ментором");
-    expect(screen.getByText("15 000,00 ₽")).toBeVisible();
-    expect(screen.getAllByText("Начисление рассчитано")).toHaveLength(2);
+    expect(screen.getByText("Оценка опубликована")).toBeVisible();
   });
 });

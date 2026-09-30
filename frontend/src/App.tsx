@@ -1,4 +1,4 @@
-import { QueryClientProvider, useQuery } from "@tanstack/react-query";
+﻿import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import {
   BrowserRouter,
@@ -218,7 +218,7 @@ function LoginScreen({
         <h1 id="login-title">Выберите роль, чтобы присоединиться</h1>
         <p className="lead">
           Выберите демо-персону. У каждой роли свой рабочий контекст и только
-          разрешённая навигация. Все имена, проекты и выплаты вымышлены.
+          разрешённая навигация. Все имена и проекты вымышлены.
         </p>
       </div>
       <div className="persona-panel" aria-live="polite">
@@ -577,7 +577,7 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
             подтверждённых результатов.
           </p>
           <div className="ai-boundary">
-            Рекомендация — черновик. Решения об оценке и выплате принимает
+            Рекомендация — черновик. Решение об оценке принимает
             человек.
           </div>
           <button
@@ -724,8 +724,7 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
                   <dd>12 октября 2026</dd>
                 </div>
                 <div>
-                  <dt>Вознаграждение</dt>
-                  <dd>База 50 000 ₽ · A 125 000 ₽</dd>
+                  <dt>Формат участия</dt><dd>Проектная практика</dd>
                 </div>
               </dl>
               <div className="modal-actions">
@@ -882,7 +881,7 @@ function RoleDashboard({
             Рекомендация остаётся черновиком до решения человека.
           </p>
           <div className="ai-boundary">
-            AI не публикует решения, оценки, выплаты или офферы.
+            AI не публикует решения, оценки или офферы.
           </div>
           <button type="button">Получить рекомендации →</button>
         </aside>

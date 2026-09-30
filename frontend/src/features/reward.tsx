@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { apiRequest } from "../api/client";
@@ -51,21 +51,14 @@ const statusLabels: Record<string, string> = {
   disputed: "Оспаривается",
   corrected: "Исправлено",
   upheld: "Оставлено без изменения",
-  calculated: "Начисление рассчитано",
-  approved: "Начисление одобрено",
+  calculated: "Оценка рассчитана",
+  approved: "Оценка подтверждена",
   sent_to_payment_system: "Передано в платёжный контур",
   paid: "Выплачено",
-  failed: "Ошибка выплаты",
+  failed: "Требует проверки",
   reversed: "Возвращено",
-  not_applicable: "Выплата не предусмотрена",
+  not_applicable: "Не применяется",
 };
-
-function money(amount: string | null, currency: string | null) {
-  if (!amount || !currency) return "Не предусмотрено";
-  const [integer = "0", fraction] = amount.split(".");
-  const grouped = integer.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-  return `${fraction ? `${grouped},${fraction}` : grouped} ${currency === "RUB" ? "₽" : currency}`;
-}
 
 function ReviewEvidence({
   item,
@@ -94,7 +87,7 @@ function ReviewEvidence({
           <strong>Черновик предложен AI</strong>
           <p>
             Это только подготовка по доказательствам. AI не выставляет финальную
-            оценку и не назначает выплату.
+            оценку и не принимает решение за эксперта.
           </p>
         </aside>
       )}
@@ -126,39 +119,9 @@ function ReviewEvidence({
         ))}
       </dl>
       {payout ? (
-        <div className="payout-explanation">
-          <strong>{money(payout.amount, payout.currency)}</strong>
-          <span>{statusLabels[payout.status] ?? payout.status}</span>
-          <small>
-            База 50 000 ₽ · оценка {review.grade} · коэффициент{" "}
-            {review.grade === "A"
-              ? "×2,5"
-              : review.grade === "B"
-                ? "×1,5"
-                : "×1"}
-            . Расчёт связан с версией оценки {payout.review_version}.
-          </small>
-        </div>
+        <div className="payout-explanation"><strong>Оценка опубликована</strong><span>Результат подтверждён экспертом</span></div>
       ) : (
-        <div className="payout-explanation payout-explanation--demo">
-          <strong>
-            {review.grade === "A"
-              ? "125 000 ₽"
-              : review.grade === "B"
-                ? "75 000 ₽"
-                : "50 000 ₽"}
-          </strong>
-          <span>Демо-начисление рассчитано</span>
-          <small>
-            База 50 000 ₽ · оценка {review.grade} · коэффициент{" "}
-            {review.grade === "A"
-              ? "×2,5"
-              : review.grade === "B"
-                ? "×1,5"
-                : "×1"}{" "}
-            · плановая выплата 15 октября 2026.
-          </small>
-        </div>
+        <div className="payout-explanation payout-explanation--demo"><strong>Оценка опубликована</strong><span>Результат подтверждён экспертом</span></div>
       )}
       {mentor && (
         <p className="muted">
@@ -503,11 +466,11 @@ export function ParticipantRewardEvidence() {
       <div>
         <p className="eyebrow">Подтверждённый опыт и деньги</p>
         <h2 id="reward-evidence-title">
-          Почему поставлена оценка и что происходит с выплатой
+          Почему поставлена оценка и как улучшить результат
         </h2>
         <p className="lead">
           Здесь видны факты личного вклада, решение человека и отдельный статус
-          начисления. Оценка не маскирует ошибку перевода.
+          результата. Оценка не скрывает ошибку обработки.
         </p>
       </div>
       {query.data.length ? (

@@ -22,11 +22,11 @@ describe("UI foundation", () => {
 
   it("supports keyboard-focused tooltip and dialog dismissal", () => {
     const close = vi.fn();
-    render(<><Tooltip label="Точная сумма">15 000 ₽</Tooltip><Modal title="Подтверждение" open onClose={close}><p>Проверка</p></Modal></>);
+    render(<><Tooltip label="Подробное пояснение">Проверено</Tooltip><Modal title="Подтверждение" open onClose={close}><p>Проверка</p></Modal></>);
     expect(screen.getByRole("button", { name: "Закрыть" })).toHaveFocus();
     fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
     expect(close).toHaveBeenCalledOnce();
-    expect(screen.getByRole("tooltip")).toHaveTextContent("Точная сумма");
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Подробное пояснение");
   });
 
   it("uses safe external-link attributes and exposes drawer semantics", () => {

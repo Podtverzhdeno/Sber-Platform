@@ -496,7 +496,7 @@ export function MessagingWorkspace({ role }: { role: Role }) {
             </div>
           )}
           <small>
-            Сообщения не заменяют формальную приёмку, оценку или выплату.
+            Сообщения не заменяют формальную приёмку или оценку.
           </small>
         </aside>
       </div>
