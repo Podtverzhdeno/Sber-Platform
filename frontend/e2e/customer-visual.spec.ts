@@ -82,3 +82,18 @@ test("customer opens the shared task workspace from my tasks", async ({ page }) 
   await page.getByRole("button", { name: "Материалы", exact: true }).click();
   await expect(page.getByRole("button", { name: "Материалы", exact: true })).toHaveClass(/active/);
 });
+
+test("application filters change independently", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Заявки", exact: true }).click();
+  const direction = page.getByLabel("Направление");
+  const level = page.getByLabel("Уровень");
+  const match = page.getByLabel("Match");
+  await direction.selectOption("AI / ML");
+  await expect(direction).toHaveValue("AI / ML");
+  await expect(level).toHaveValue("Все");
+  await match.selectOption("90");
+  await expect(direction).toHaveValue("AI / ML");
+  await expect(level).toHaveValue("Все");
+  await expect(match).toHaveValue("90");
+});
