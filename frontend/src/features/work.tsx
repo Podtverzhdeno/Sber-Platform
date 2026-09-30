@@ -61,7 +61,7 @@ export function ParticipantTasks({ view = "catalog" }: { view?: "catalog" | "pro
   if (!catalog.data || !work.data || catalog.isError || work.isError) return <StatePanel kind="error" action="Повторить" onAction={() => { void catalog.refetch(); void work.refetch(); }} />;
   const selectedWork = view === "projects" ? work.data.find((item) => item.assignment.id === selectedAssignment) : undefined;
   if (selectedWork) {
-    return <TaskWorkspacePage mode="participant" title={selectedWork.task.title} taskId={selectedWork.task.id.slice(0, 8)} description={selectedWork.terms.deliverable} deadline={new Date(selectedWork.terms.deadline_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })} tags={["AI / ML", "Python", "RAG", "Backend"]} onMessage={() => { void navigate("/workspace/10"); }} onPrimaryAction={() => { setSummary("Новая версия результата готова к отправке"); setArtifactUrl("https://github.com/impulse/project/releases/latest"); }} />;
+    return <TaskWorkspacePage mode="participant" title={selectedWork.task.title} taskId={selectedWork.task.id.slice(0, 8)} description={selectedWork.terms.deliverable} deadline={new Date(selectedWork.terms.deadline_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })} tags={["AI / ML", "Python", "RAG", "Backend"]} onMessage={() => { void navigate("/workspace/10?participant=project"); }} onPrimaryAction={() => { setSummary("Новая версия результата готова к отправке"); setArtifactUrl("https://github.com/impulse/project/releases/latest"); }} />;
   }
     const pendingItems = catalog.data.filter((item) => appliedTaskIds.includes(item.task.id));
   const categoryOrder = ["ML / AI", "Аналитика", "Разработка"] as const;

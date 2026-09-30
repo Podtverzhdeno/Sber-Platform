@@ -88,8 +88,10 @@ test("search, streak, task detail and messages are interactive", async ({ page }
   await expect(page.getByText("solution-final.zip")).toBeVisible();
   await expect(page.getByText("metrics.pdf")).toBeVisible();
   await expect(page.getByText("Никита Соколов")).toBeVisible();
-  await page.getByRole("link", { name: "Сообщения" }).click();
+  await page.getByRole("button", { name: "Открыть чат команды" }).click();
+  await expect(page).toHaveURL(/\/workspace\/10\?participant=project$/);
   await expect(page.getByRole("heading", { name: "Сообщения" })).toBeVisible();
+  await expect(page.locator(".chat-list button.active strong")).toContainText("Рекомендательная система");
   await page.getByLabel("Сообщение").fill("Готово к повторной проверке");
   await page.getByRole("button", { name: "Отправить" }).click();
   await expect(page.getByText("Готово к повторной проверке")).toBeVisible();
