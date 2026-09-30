@@ -55,6 +55,7 @@ type Actor = {
   csrf_token?: string | null;
 };
 type PublicConfig = { honor_board_enabled?: boolean; demo_mode?: boolean };
+const customerSections = ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Приёмка", "Аналитика", "AI-помощник", "Кандидаты", "Сообщения"];
 
 const roleLabels: Record<Role, string> = {
   participant: "Участник",
@@ -83,6 +84,8 @@ const navigationIcons: Record<string, string> = {
   "AI-помощник": "✧",
   "План недели": "▦",
   "Мои задачи": "▤",
+  "Создать задачу": "+",
+  Заявки: "◧",
   Кандидаты: "♙",
   Приёмка: "✓",
   Инициативы: "◆",
@@ -260,11 +263,12 @@ function Workspace({
 }) {
   const { section = "0" } = useParams();
   const sectionIndex = Number(section);
+  const navigation = actor.active_role === "customer" && mockCustomer ? customerSections : actor.navigation;
   const allowed =
     Number.isInteger(sectionIndex) &&
     sectionIndex >= 0 &&
-    sectionIndex < actor.navigation.length;
-  const currentSection = allowed ? actor.navigation[sectionIndex] : null;
+    sectionIndex < navigation.length;
+  const currentSection = allowed ? navigation[sectionIndex] : null;
   const [navigationOpen, setNavigationOpen] = useState(false);
   return (
     <section
@@ -307,7 +311,7 @@ function Workspace({
           </label>
         )}
         <nav aria-label="Навигация роли">
-          {actor.navigation.map((item, index) => (
+          {navigation.map((item, index) => (
             <NavLink
               to={`/workspace/${String(index)}`}
               key={item}

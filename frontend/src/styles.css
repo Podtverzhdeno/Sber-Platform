@@ -1000,3 +1000,31 @@ tbody tr:hover, tbody tr:focus-within { background: rgb(47 149 255 / 5%); }
   gap: 8px;
   margin-top: 10px;
 }
+.customer-scenario button {
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid #397489;
+  border-radius: 9px;
+  color: #e9fbff;
+  background: #15364b;
+  font-weight: 700;
+  cursor: pointer;
+}
+.customer-scenario button:hover { border-color: #22e6d0; background: #1b4b5b; }
+.customer-scenario button:disabled { opacity: .5; cursor: not-allowed; }
+.customer-scenario button[aria-pressed="true"] { border-color: #22e6d0; color: #06211f; background: #22e6d0; }
+.customer-scenario input:not([type="checkbox"]),
+.customer-scenario select,
+.customer-scenario textarea {
+  display: block;
+  width: 100%;
+  margin-top: 5px;
+  padding: 10px 12px;
+  border: 1px solid #397489;
+  border-radius: 8px;
+  color: #f4f7fb;
+  background: #0d2436;
+}
+.customer-scenario label { display: block; margin: 10px 0; color: #d4e5f0; }
+.customer-scenario .customer-kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 760px) { .customer-scenario .customer-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
