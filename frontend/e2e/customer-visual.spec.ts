@@ -64,3 +64,11 @@ test("customer participant dialogs keep separate histories", async ({ page }) =>
   await expect(page.getByText("Подготовила анализ ошибок мультимодальной модели")).toBeVisible();
   await expect(page.getByText("Обновил рекомендательную модель")).not.toBeVisible();
 });
+
+test("customer participant database contains an extended talent pool", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "База участников", exact: true }).click();
+  await expect(page.locator(".talent-table .candidate-row")).toHaveCount(13);
+  await expect(page.getByText("Мария Орлова", { exact: true })).toBeVisible();
+  await expect(page.getByText("Роман Егоров", { exact: true })).toBeVisible();
+});
