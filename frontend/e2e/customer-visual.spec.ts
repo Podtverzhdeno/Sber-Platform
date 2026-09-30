@@ -14,8 +14,8 @@ test("customer premium workspace renders every route without overflow", async ({
   await expect(sidebar.getByRole("link")).toHaveCount(9);
   for (const section of ["Главная", "Мои задачи", "Заявки", "Приёмка", "Аналитика", "AI-помощник", "Кандидаты", "Сообщения"]) {
     await sidebar.getByRole("link", { name: section, exact: true }).click();
-    await expect(page.locator(".premium-page")).toBeVisible();
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
+    await expect(page.locator(".premium-page, .messenger-page").first()).toBeVisible();
+    const overflow = await page.evaluate<boolean>("document.documentElement.scrollWidth > document.documentElement.clientWidth");
     expect(overflow, `${section} has horizontal overflow`).toBe(false);
     await page.screenshot({ path: `test-results/customer-${section.replace(/[^a-zа-я0-9]+/giu, "-")}.png`, fullPage: true });
   }
