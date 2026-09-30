@@ -17,6 +17,7 @@ import { Bootcamp, DevelopmentJourney } from "./features/development";
 import { EventCatalog } from "./features/ecosystem";
 import { CustomerWorkspace } from "./features/customer";
 import { CustomerScenario } from "./features/customer-scenario";
+import { CustomerPremium } from "./features/customer-premium";
 import { CustomerCandidates } from "./features/customer-candidates";
 import { ManagerWorkspace } from "./features/manager";
 import { HrWorkspace } from "./features/hr";
@@ -349,7 +350,7 @@ function Workspace({
           <span aria-hidden="true">☰</span> Меню
         </button>
         {allowed && actor.active_role === "customer" && mockCustomer ? (
-          <CustomerScenario section={currentSection ?? "Главная"} />
+          currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : <CustomerPremium section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
         ) : allowed && currentSection === "Главная" ? (
           actor.active_role === "participant" ? (
             <ParticipantDashboard actor={actor} />
