@@ -45,6 +45,20 @@ test("customer task, application and candidate actions are interactive", async (
   await expect(page.getByRole("dialog",{name:"Готово"})).toBeVisible();
 });
 
+test("customer accepts a result with rating and detailed review", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Мои задачи",exact:true}).click();
+  await page.getByRole("button",{name:"Принять результат",exact:true}).click();
+  const acceptance=page.getByRole("dialog",{name:"Принять результат"});
+  await expect(acceptance).toBeVisible();
+  await acceptance.getByRole("button",{name:"Оценка 5"}).click();
+  await acceptance.getByLabel("Развёрнутый отзыв").fill("Сильный результат: решение воспроизводимо, критерии выполнены, документация подробная.");
+  await acceptance.getByRole("button",{name:"Подтвердить принятие"}).click();
+  await expect(page.getByRole("dialog",{name:"Результат принят"})).toBeVisible();
+  await page.getByRole("button",{name:"Готово"}).click();
+  await expect(page.getByRole("button",{name:/Результат принят/,exact:true})).toBeDisabled();
+});
+
 test("customer opens the selected participant profile and direct dialog", async ({ page }) => {
   await openCustomer(page);
   await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Мои задачи",exact:true}).click();
