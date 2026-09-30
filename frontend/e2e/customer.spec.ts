@@ -14,8 +14,28 @@ test("customer pilot uses the sidebar and readable action buttons", async ({ pag
   const action = page.getByRole("button", { name: "Открыть задачу" });
   await expect(action).toBeVisible();
   await expect(action).toHaveCSS("color", "rgb(233, 251, 255)");
+  await sidebar.getByRole("link", { name: /Мои задачи/ }).click();
+  await expect(page.locator(".customer-task-list .participant-task-row")).toHaveCount(4);
+  await page.locator(".customer-task-list .participant-task-row").first().getByRole("button", { name: "Открыть задачу" }).click();
+  await expect(page.getByRole("heading", { name: "Исполнители и менторы" })).toBeVisible();
+  await expect(page.getByText("Ментор: Елена Волкова")).toBeVisible();
+  await page.getByRole("button", { name: "Мария Ковалёва" }).click();
+  await expect(page.getByText("Цифровой профиль компетенций")).toBeVisible();
+  await expect(page.getByText("Ход мысли")).toBeVisible();
+  await page.getByRole("button", { name: "Написать лично" }).click();
+  await expect(page.getByRole("heading", { name: "Мария Ковалёва" })).toBeVisible();
   await sidebar.getByRole("link", { name: /Создать задачу/ }).click();
   await expect(page.getByRole("heading", { name: "Создать задачу" })).toBeVisible();
+  await expect(page.getByText("Участники для адресного приглашения")).toBeVisible();
+  await page.getByLabel("Название").fill("Персональный аналитический кейс");
+  await page.getByLabel("Проблема и цель").fill("Проверить спрос по сезонам");
+  await page.getByLabel("Ожидаемый результат").fill("Отчёт с расчётами");
+  await page.getByLabel("Критерии успеха").fill("Воспроизводимый расчёт");
+  await page.locator(".customer-candidate-picker input").first().check();
+  for (let step = 0; step < 4; step += 1) await page.getByRole("button", { name: "Далее" }).click();
+  await page.getByRole("button", { name: "Опубликовать" }).click();
+  await expect(page.getByRole("heading", { name: "Персональный аналитический кейс" })).toBeVisible();
+  await expect(page.getByText("Ожидают ответа на приглашение: Мария Ковалёва")).toBeVisible();
 });
 
 test("customer creates paid and unpaid drafts with participant payment preview", async ({ page }) => {

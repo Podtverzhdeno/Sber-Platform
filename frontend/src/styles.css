@@ -1028,3 +1028,45 @@ tbody tr:hover, tbody tr:focus-within { background: rgb(47 149 255 / 5%); }
 .customer-scenario label { display: block; margin: 10px 0; color: #d4e5f0; }
 .customer-scenario .customer-kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 760px) { .customer-scenario .customer-kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.customer-scenario .participant-page-heading { padding: 0 0 10px; }
+.customer-scenario .participant-page-heading > button,
+.customer-scenario .task-list-action button,
+.customer-scenario .portfolio-profile-actions button { border: 0; color: #03201c; background: linear-gradient(90deg, var(--color-primary), #68a8ff); }
+.customer-scenario .task-filter-row { flex-wrap: wrap; margin: 16px 0; }
+.customer-scenario .task-filter-row button { min-height: 34px; padding: 7px 11px; border-color: var(--color-border); color: var(--color-muted); background: #0d1b2c; font-weight: 600; }
+.customer-scenario .task-filter-row button.active { border-color: var(--color-primary); color: var(--color-primary); background: rgb(34 230 208 / 8%); }
+.customer-scenario .customer-task-list .participant-task-row { grid-template-columns: 42px minmax(230px,1fr) 120px minmax(180px,.5fr) 130px; }
+.customer-scenario .customer-task-state { padding: 7px 8px; border: 1px solid var(--color-border-strong); border-radius: 7px; color: #b7eadd; background: #112b38; font-size: 11px; text-align: center; }
+.customer-scenario .task-list-deadline { color: var(--color-text); }
+.customer-scenario .task-list-deadline small { font-size: 10px; }
+.customer-scenario .text-button { min-height: 0; padding: 2px 0; border: 0; color: var(--color-primary); background: transparent; text-decoration: none; }
+.customer-scenario .text-button:hover { border: 0; color: #8dfbed; background: transparent; text-decoration: underline; }
+.customer-scenario .task-detail-hero h1 { font-size: clamp(26px, 3vw, 36px); }
+.customer-task-terms { display: grid; align-content: start; gap: 8px; padding: 18px; border: 1px solid var(--color-border-strong); border-radius: 12px; background: #0d2233; }
+.customer-task-terms small, .customer-detail-block small { color: var(--color-muted); }
+.customer-task-terms strong { font-size: 22px; }
+.customer-task-terms p { margin: 0; }
+.customer-task-terms button { margin-top: 12px; }
+.customer-detail-block { padding: 15px 0; border-top: 1px solid var(--color-border); }
+.customer-detail-block p { margin: 7px 0 0; color: #c8d9e6; line-height: 1.5; }
+.customer-detail-block h3 { margin: 0 0 7px; }
+.customer-scenario .task-team-panel li { align-items: start; }
+.customer-scenario .task-team-panel li > div { display: grid; gap: 3px; }
+.customer-scenario .customer-person-link { min-height: 0; padding: 0; border: 0; color: var(--color-text); background: transparent; text-align: left; }
+.customer-scenario .customer-person-link:hover { color: var(--color-primary); background: transparent; }
+.customer-profile-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+.customer-scenario .task-detail-grid { align-items: start; }
+.customer-match-text { font-size: 15px !important; }
+.customer-skill-row { display: grid; gap: 5px; margin: 14px 0; }
+.customer-skill-row > div { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; }
+.customer-skill-row meter { width: 100%; height: 12px; accent-color: var(--color-primary); }
+.customer-candidate-picker { margin-top: 20px; padding: 16px; border: 1px solid var(--color-border-strong); border-radius: 12px; }
+.customer-candidate-picker legend { padding: 0 8px; font-weight: 800; }
+.customer-candidate-picker p { color: var(--color-muted); }
+.customer-candidate-picker label { display: flex; align-items: center; gap: 12px; padding: 9px; border-top: 1px solid var(--color-border); }
+.customer-candidate-picker input { width: 18px; height: 18px; }
+.customer-candidate-picker label span { display: grid; gap: 3px; }
+.customer-candidate-picker label small { color: var(--color-muted); }
+.customer-message-history { min-height: 120px; padding: 15px; border: 1px solid var(--color-border); border-radius: 10px; background: #091522; }
+@media (max-width: 1050px) { .customer-scenario .customer-task-list .participant-task-row { grid-template-columns: 42px minmax(180px,1fr) 115px 110px; } .customer-scenario .customer-task-list .task-list-deadline { display: none; } .customer-profile-grid { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .customer-scenario .customer-task-list .participant-task-row { grid-template-columns: 38px minmax(0,1fr); } .customer-scenario .customer-task-state,.customer-scenario .customer-task-list .task-list-action { grid-column: 2; justify-self: start; } .customer-scenario .customer-task-list .task-list-action button { width: auto; } }
