@@ -1185,3 +1185,7 @@ tbody tr:hover, tbody tr:focus-within { background: rgb(47 149 255 / 5%); }
 .ctw-upload-files small{color:#63798d;font-size:8px}
 .ctw-upload-button{display:flex;height:36px;align-items:center;justify-content:center;border:1px solid #267868;border-radius:9px;color:#062019;background:linear-gradient(135deg,#4ae1b4,#36c9a8);font-size:10px;font-weight:800;cursor:pointer}
 .ctw-upload-button input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+
+/* Keep profile initials centered independently from the photo action below. */
+.profile-editor .profile-avatar{position:relative;display:grid;place-items:center;line-height:1;text-align:center}
+.profile-editor .profile-avatar>button{position:absolute;top:calc(100% + 8px);left:0;align-self:auto;margin:0}
