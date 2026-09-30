@@ -1156,7 +1156,7 @@ function ImpulseApp() {
               )}
             </div>
             <div className="header-actions">
-              <div className="streak-utility">
+              {actor.active_role === "participant" && <div className="streak-utility">
                 <button
                   className="streak-button"
                   type="button"
@@ -1198,6 +1198,7 @@ function ImpulseApp() {
                       API», чтобы сохранить серию.
                     </p>
                     <button
+                      className="streak-course-button"
                       type="button"
                       onClick={() => {
                         setStreakOpen(false);
@@ -1209,7 +1210,7 @@ function ImpulseApp() {
                     <small>Лучшая серия: 21 день</small>
                   </div>
                 )}
-              </div>
+              </div>}
               {actor.active_role === "participant" && (
                 <button
                   className="ranking-utility"

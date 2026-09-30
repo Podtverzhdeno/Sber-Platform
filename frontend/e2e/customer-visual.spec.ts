@@ -13,12 +13,13 @@ async function openCustomer(page: import("@playwright/test").Page) {
 test("customer premium workspace renders every route without overflow", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1000 });
   await openCustomer(page);
+  await expect(page.getByRole("button", { name: /Учебный стрик/ })).toHaveCount(0);
 
   const sidebar = page.getByRole("navigation", { name: "Навигация роли" });
   await expect(sidebar.getByRole("link")).toHaveCount(8);
   for (const section of ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения"]) {
     await sidebar.getByRole("link", { name: section, exact: true }).click();
-    await expect(page.locator(".premium-page, .messenger-page, .analytics-dashboard, .buddy-page, .create-task-workspace").first()).toBeVisible();
+    await expect(page.locator(".premium-page, .messenger-page, .customer-talent-analytics, .buddy-page, .create-task-workspace").first()).toBeVisible();
     const overflow = await page.evaluate<boolean>("document.documentElement.scrollWidth > document.documentElement.clientWidth");
     expect(overflow, `${section} has horizontal overflow`).toBe(false);
     await page.screenshot({ path: `test-results/customer-${section.replace(/[^a-zа-я0-9]+/giu, "-")}.png`, fullPage: true });
@@ -68,9 +69,15 @@ test("customer participant dialogs keep separate histories", async ({ page }) =>
 test("customer participant database contains an extended talent pool", async ({ page }) => {
   await openCustomer(page);
   await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "База участников", exact: true }).click();
-  await expect(page.locator(".talent-table .candidate-row")).toHaveCount(13);
+  await expect(page.getByText("23", { exact: true }).first()).toBeVisible();
+  await expect(page.locator(".talent-table .candidate-row")).toHaveCount(21);
   await expect(page.getByText("Мария Орлова", { exact: true })).toBeVisible();
   await expect(page.getByText("Роман Егоров", { exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "2", exact: true }).click();
+  await expect(page.locator(".talent-table .candidate-row")).toHaveCount(4);
+  await expect(page.getByText("Ксения Лапина", { exact: true })).toBeVisible();
+  await expect(page.getByText("Павел Денисов", { exact: true })).toBeVisible();
+  await expect(page.getByText("Надежда Юдина", { exact: true })).toBeVisible();
 });
 
 test("customer opens the shared task workspace from my tasks", async ({ page }) => {

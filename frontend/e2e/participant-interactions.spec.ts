@@ -75,6 +75,7 @@ test("search, streak, task detail and messages are interactive", async ({ page }
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("button", { name: /Учебный стрик/ }).click();
   await expect(page.getByRole("dialog", { name: "Учебный стрик" })).toContainText("14 дней подряд");
+  await expect(page.getByRole("button", { name: "Продолжить курс →" })).toHaveClass(/streak-course-button/);
   await page.getByRole("searchbox", { name: "Глобальный поиск" }).fill("Python");
   await page.getByRole("option", { name: /Python для R&D/ }).click();
   await expect(page).toHaveURL(/workspace\/2\?course=python-base/);
