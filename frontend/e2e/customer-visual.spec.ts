@@ -59,6 +59,20 @@ test("customer accepts a result with rating and detailed review", async ({ page 
   await expect(page.getByRole("button",{name:/Результат принят/,exact:true})).toBeDisabled();
 });
 
+test("customer returns a result for revision with a detailed reason", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Мои задачи",exact:true}).click();
+  await page.getByRole("button",{name:"Вернуть на доработку",exact:true}).click();
+  const revision=page.getByRole("dialog",{name:"Вернуть на доработку"});
+  await expect(revision).toBeVisible();
+  await revision.getByLabel("Причина доработки").fill("Нужно добавить обработку ошибок API, обновить метрики и приложить результаты повторного тестирования.");
+  await revision.getByRole("button",{name:"Отправить на доработку"}).click();
+  await expect(page.getByRole("dialog",{name:"Отправлено на доработку"})).toBeVisible();
+  await page.getByRole("button",{name:"Готово"}).click();
+  await expect(page.getByText("На доработке",{exact:true}).first()).toBeVisible();
+  await expect(page.getByRole("button",{name:"Запрос на доработку отправлен",exact:true})).toBeDisabled();
+});
+
 test("customer opens the selected participant profile and direct dialog", async ({ page }) => {
   await openCustomer(page);
   await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Мои задачи",exact:true}).click();
