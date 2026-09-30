@@ -13,7 +13,8 @@ test("customer pilot uses the sidebar and readable action buttons", async ({ pag
   await expect(page.getByRole("navigation", { name: "Разделы заказчика" })).toHaveCount(0);
   const action = page.getByRole("button", { name: "Открыть задачу" });
   await expect(action).toBeVisible();
-  await expect(action).toHaveCSS("color", "rgb(233, 251, 255)");
+  await expect(action).toHaveCSS("color", "rgb(3, 32, 28)");
+  await expect(action).toHaveCSS("background-image", /linear-gradient/);
   await sidebar.getByRole("link", { name: /Мои задачи/ }).click();
   await expect(page.locator(".customer-task-list .participant-task-row")).toHaveCount(4);
   await page.locator(".customer-task-list .participant-task-row").first().getByRole("button", { name: "Открыть задачу" }).click();
