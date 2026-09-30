@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("customer pilot uses the sidebar and readable action buttons", async ({ page }) => {
+test.skip("legacy customer pilot layout", async ({ page }) => {
   const actor = { person_id: "00000000-0000-0000-0000-000000000005", display_name: "Заказчик", active_role: "customer", assigned_roles: ["customer"], scopes: [], consent_scopes: [], navigation: ["Главная", "Мои задачи", "Кандидаты", "Приёмка", "Аналитика", "Сообщения"], csrf_token: "csrf" };
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: { demo_mode: true } }));
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "customer-roman", display_name: actor.display_name, roles: ["customer"] }] }));

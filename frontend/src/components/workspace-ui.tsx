@@ -5,7 +5,8 @@ export function WorkspaceHeader({ eyebrow, title, subtitle, action }: { eyebrow:
 }
 
 export function MetricCard({ label = "", value = "", delta = "", tone = "cyan", values = [28,42,35,58,51,72] }: { label?: string; value?: string | number; delta?: string; tone?: "cyan" | "blue" | "violet" | "amber"; values?: number[] }) {
-  return <article className={`ws-metric ws-metric--${tone}`}><span className="ws-metric-icon" aria-hidden="true" /><div><small>{label}</small><strong>{value}</strong><em>{delta}</em></div><svg viewBox="0 0 120 34" role="img" aria-label={`Динамика показателя ${label}`}><polyline points={values.map((item,index) => `${String(index * 24)},${String(34-item*.35)}`).join(" ")} /></svg></article>;
+  const max=Math.max(...values,1);
+  return <article className={`ws-metric ws-metric--${tone}`}><span className="ws-metric-icon" aria-hidden="true" /><div><small>{label}</small><strong>{value}</strong><em>{delta}</em></div><svg viewBox="0 0 120 34" role="img" aria-label={`Гистограмма показателя ${label}`}>{values.map((item,index)=><rect key={`${String(index)}-${String(item)}`} x={String(index*19)} y={String(34-item/max*31)} width="11" height={String(item/max*31)} rx="2" />)}</svg></article>;
 }
 
 export function SectionCard({ title, eyebrow, action, className = "", children }: { title?: string; eyebrow?: string; action?: ReactNode; className?: string; children: ReactNode }) {

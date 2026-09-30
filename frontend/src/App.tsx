@@ -56,7 +56,7 @@ type Actor = {
   csrf_token?: string | null;
 };
 type PublicConfig = { honor_board_enabled?: boolean; demo_mode?: boolean };
-const customerSections = ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Приёмка", "Аналитика", "AI-помощник", "Кандидаты", "Сообщения"];
+const customerSections = ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Результаты", "Аналитика", "AI-помощник", "Кандидаты", "Сообщения"];
 
 const roleLabels: Record<Role, string> = {
   participant: "Участник",
@@ -88,7 +88,6 @@ const navigationIcons: Record<string, string> = {
   "Создать задачу": "+",
   Заявки: "◧",
   Кандидаты: "♙",
-  Приёмка: "✓",
   Инициативы: "◆",
   Результаты: "◎",
   Воронка: "▽",
