@@ -72,3 +72,13 @@ test("customer participant database contains an extended talent pool", async ({ 
   await expect(page.getByText("Мария Орлова", { exact: true })).toBeVisible();
   await expect(page.getByText("Роман Егоров", { exact: true })).toBeVisible();
 });
+
+test("customer opens the shared task workspace from my tasks", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Мои задачи", exact: true }).click();
+  await page.getByRole("button", { name: "Открыть задачу", exact: true }).click();
+  await expect(page.locator(".ctw-page")).toBeVisible();
+  await expect(page.getByText("Промежуточные артефакты")).toBeVisible();
+  await page.getByRole("button", { name: "Материалы", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Материалы", exact: true })).toHaveClass(/active/);
+});

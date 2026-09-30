@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 import { apiRequest } from "../api/client";
 import { Badge, Card, Modal, StatePanel } from "../components/ui";
+import { TaskWorkspacePage } from "../components/task-workspace-page";
 
 type Task = { id: string; title: string; status: string; places: number; mode?: "open" | "invitation_only" };
 type Compensation = { paid: boolean; base_amount_per_assignee: string | null; currency: string | null; b_multiplier: string; a_multiplier: string; b_total: string | null; a_total: string | null; quantum: string; rounding_mode: string; policy_version: number; payout_condition: string };
@@ -60,25 +61,9 @@ export function ParticipantTasks({ view = "catalog" }: { view?: "catalog" | "pro
   if (!catalog.data || !work.data || catalog.isError || work.isError) return <StatePanel kind="error" action="Повторить" onAction={() => { void catalog.refetch(); void work.refetch(); }} />;
   const selectedWork = view === "projects" ? work.data.find((item) => item.assignment.id === selectedAssignment) : undefined;
   if (selectedWork) {
-    const latest = selectedWork.contributions.at(-1);
-    const projectCheckpoints: Array<[string, string, string, string]> = [
-      ["Исследование источников", "accepted", "Алекс · Анна", "Отчёт и выбор Semantic Scholar"],
-      ["Контракт API", "accepted", "Алекс", "OpenAPI-схема и обработка ошибок"],
-      ["Baseline ранжирования", "accepted", "Анна", "Метрики Precision@10 и NDCG"],
-      ["Гибридный прототип", "in_progress", "Команда", "Интеграция API и модели"],
-      ["Итоговая проверка MVP", "not_started", "Роман · Елена", "Демо, отчёт и воспроизводимость"],
-    ];
-    return <div className="feature-stack task-detail-page">
-      <button className="text-button" type="button" onClick={() => { setSelectedAssignment(null); }}>← Вернуться к моим проектам</button>
-      <header className="task-detail-hero"><div><p className="eyebrow">Моя задача · {selectedWork.task.id.slice(0, 8)}</p><h1 id="workspace-title">{selectedWork.task.title}</h1><p className="lead">Разработать и проверить прототип рекомендаций научных статей на открытых данных.</p><div className="work-meta"><WorkStatus status={selectedWork.assignment.status} /><Badge tone="warning">MVP · 70%</Badge><span>Дедлайн 12 октября 2026</span></div></div></header>
-      <section className="task-people-grid"><article><span className="eyebrow">Заказчик</span><strong>Роман Воронов</strong><small>Руководитель R&amp;D · принимает бизнес-результат</small></article><article><span className="eyebrow">Ментор команды</span><strong>Елена Наставник</strong><small>ML Lead · проверяет вклад и даёт обратную связь</small><button className="text-button" type="button" onClick={() => { void navigate("/workspace/10"); }}>Написать ментору</button></article><article><span className="eyebrow">Ваша роль</span><strong>Backend-разработчик</strong><small>API источников, ранжирование и воспроизводимость</small></article></section>
-      <div className="task-detail-grid"><section className="task-work-plan"><div className="section-heading"><div><p className="eyebrow">План работы</p><h2>Checkpoints проекта</h2></div><strong>3 из 5 выполнено</strong></div>{projectCheckpoints.map(([title, status, owner, result], index) => <article className={`task-checkpoint task-checkpoint--${status}`} key={title}><span>{status === "accepted" ? "✓" : index + 1}</span><div><strong>{title}</strong><small>{owner} · {result}</small></div><Badge tone={status === "accepted" ? "success" : status === "in_progress" ? "warning" : "neutral"}>{status === "accepted" ? "Принято" : status === "in_progress" ? "В работе" : "Не начато"}</Badge></article>)}</section>
-        <aside className="task-team-panel"><h2>Команда</h2><ul><li><span>АР</span><div><strong>Алекс Речной</strong><small>Backend · вы</small></div></li><li><span>АК</span><div><strong>Анна Крылова</strong><small>Data Scientist</small></div></li><li><span>МС</span><div><strong>Максим Соколов</strong><small>Product / Research</small></div></li></ul><button className="project-chat-action" type="button" onClick={() => { void navigate("/workspace/10"); }}>Открыть чат команды</button></aside></div>
-      <section className="task-feedback"><div><p className="eyebrow">Последняя обратная связь</p><h2>Ревью ментора · версия {latest?.version ?? 2}</h2><p>API-контракт и структура решения соответствуют критериям. Добавьте retry с backoff, зафиксируйте лимиты источника и повторите нагрузочный тест.</p><div className="feedback-criteria"><span><strong>A</strong> Архитектура</span><span><strong>B</strong> Надёжность</span><span><strong>A</strong> Документация</span><span><strong>B</strong> Командный вклад</span></div><small>Елена Наставник · 28 сентября, 10:14 · относится к checkpoint «Контракт API»</small></div><div className="task-next-action"><Badge tone="warning">Следующий шаг</Badge><strong>Обновить обработку rate limit</strong><button className="project-upload-action" type="button">Загрузить новую версию</button></div></section>
-      <section className="task-history"><h2>История вашего вклада</h2><article><time>28 сентября</time><div><strong>Контракт API · версия 2</strong><p>Получена обратная связь ментора, запрошено уточнение retry.</p></div></article><article><time>25 сентября</time><div><strong>Контракт API · версия 1</strong><p>Отправлена OpenAPI-схема и коллекция тестов.</p></div></article><article><time>20 сентября</time><div><strong>Исследование источников</strong><p>Результат принят заказчиком.</p></div></article></section>
-    </div>;
+    return <TaskWorkspacePage mode="participant" title={selectedWork.task.title} taskId={selectedWork.task.id.slice(0, 8)} description={selectedWork.terms.deliverable} deadline={new Date(selectedWork.terms.deadline_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })} tags={["AI / ML", "Python", "RAG", "Backend"]} onMessage={() => { void navigate("/workspace/10"); }} onPrimaryAction={() => { setSummary("Новая версия результата готова к отправке"); setArtifactUrl("https://github.com/impulse/project/releases/latest"); }} />;
   }
-  const pendingItems = catalog.data.filter((item) => appliedTaskIds.includes(item.task.id));
+    const pendingItems = catalog.data.filter((item) => appliedTaskIds.includes(item.task.id));
   const categoryOrder = ["ML / AI", "Аналитика", "Разработка"] as const;
   const categorizedCatalog = catalog.data.map((item, index) => ({ item, category: categoryOrder[index % categoryOrder.length], originalIndex: index }));
   const visibleCatalog = categorizedCatalog.filter(({ category }) => taskCategory === "Все" || category === taskCategory);
