@@ -123,6 +123,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Customer Cases */
+        get: operations["customer_cases_api_v1_customer_cases_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/contributions/{contribution_id}/decision": {
         parameters: {
             query?: never;
@@ -157,6 +174,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/saved-candidates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Saved Candidates */
+        get: operations["saved_candidates_api_v1_customer_saved_candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/tasks": {
         parameters: {
             query?: never;
@@ -166,6 +200,23 @@ export interface paths {
         };
         /** Customer Tasks */
         get: operations["customer_tasks_api_v1_customer_tasks_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/tasks/{task_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Customer Task Detail */
+        get: operations["customer_task_detail_api_v1_customer_tasks__task_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -208,6 +259,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/tasks/{task_id}/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Invite Candidate */
+        post: operations["invite_candidate_api_v1_customer_tasks__task_id__invitations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/tasks/{task_id}/invitations/{person_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke Invitation */
+        post: operations["revoke_invitation_api_v1_customer_tasks__task_id__invitations__person_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/tasks/{task_id}/participant-preview": {
         parameters: {
             query?: never;
@@ -219,6 +304,23 @@ export interface paths {
         get: operations["participant_preview_api_v1_customer_tasks__task_id__participant_preview_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/tasks/{task_id}/repeat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Repeat Task */
+        post: operations["repeat_task_api_v1_customer_tasks__task_id__repeat_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -270,6 +372,75 @@ export interface paths {
         put?: never;
         /** Revise Terms */
         post: operations["revise_terms_api_v1_customer_tasks__task_id__terms_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/team-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Team Request */
+        post: operations["create_team_request_api_v1_customer_team_requests_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/team-requests/{request_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Team Request */
+        get: operations["team_request_api_v1_customer_team_requests__request_id__get"];
+        /** Revise Team Request */
+        put: operations["revise_team_request_api_v1_customer_team_requests__request_id__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/team-requests/{request_id}/matches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Team Request Matches */
+        get: operations["team_request_matches_api_v1_customer_team_requests__request_id__matches_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/team-requests/{request_id}/saved/{person_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save Candidate */
+        post: operations["save_candidate_api_v1_customer_team_requests__request_id__saved__person_id__post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -752,6 +923,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/talent-passport": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Talent Passport */
+        get: operations["talent_passport_api_v1_me_talent_passport_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/tasks/{task_id}/applications": {
         parameters: {
             query?: never;
@@ -763,6 +951,23 @@ export interface paths {
         put?: never;
         /** Apply To Task */
         post: operations["apply_to_task_api_v1_me_tasks__task_id__applications_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/tasks/{task_id}/invitation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide Invitation */
+        post: operations["decide_invitation_api_v1_me_tasks__task_id__invitation_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1595,6 +1800,53 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** CandidateMatchView */
+        CandidateMatchView: {
+            /** Display Name */
+            display_name: string;
+            /** Evidence */
+            evidence: components["schemas"]["CaseEvidenceView"][];
+            /** Matched Preferred */
+            matched_preferred: string[];
+            /** Matched Required */
+            matched_required: string[];
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Request Version */
+            request_version: number;
+        };
+        /** CandidateReservationView */
+        CandidateReservationView: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Evidence Contribution Id
+             * Format: uuid
+             */
+            evidence_contribution_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            match: components["schemas"]["CandidateMatchView"];
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+        };
         /** CandidateSummaryView */
         CandidateSummaryView: {
             /** Accepted Projects */
@@ -1610,6 +1862,53 @@ export interface components {
             top_grade: string | null;
             /** Verified Courses */
             verified_courses: number;
+        };
+        /** CaseEvidenceView */
+        CaseEvidenceView: {
+            /** Artifact Keys */
+            artifact_keys: string[];
+            /** Competency Tags */
+            competency_tags: string[];
+            /**
+             * Contribution Id
+             * Format: uuid
+             */
+            contribution_id: string;
+            /** Personal Summary */
+            personal_summary: string;
+            /**
+             * Reviewer Id
+             * Format: uuid
+             */
+            reviewer_id: string;
+            /**
+             * Submitted At
+             * Format: date-time
+             */
+            submitted_at: string;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+        };
+        /** CaseRubricRequest */
+        CaseRubricRequest: {
+            /** Ai Use */
+            ai_use: string;
+            /** Defense */
+            defense: string;
+            /** Reasoning */
+            reasoning: string;
+            /** Result */
+            result: string;
+            /** Uncertainty */
+            uncertainty: string;
+            /**
+             * Version
+             * @default 1
+             */
+            version: number;
         };
         /** CaseView */
         CaseView: {
@@ -1761,7 +2060,7 @@ export interface components {
          * ConsentScope
          * @enum {string}
          */
-        ConsentScope: "public_rating" | "public_trophies" | "public_profile" | "hr_profile" | "ai_memory" | "course_honor_board";
+        ConsentScope: "public_rating" | "public_trophies" | "public_profile" | "hr_profile" | "talent_profile" | "talent_evidence" | "talent_invitations" | "ai_memory" | "course_honor_board";
         /** ConsentView */
         ConsentView: {
             /** Granted */
@@ -1873,7 +2172,10 @@ export interface components {
         CreateTaskRequest: {
             /** Acceptance Criteria */
             acceptance_criteria: string[];
+            case_rubric?: components["schemas"]["CaseRubricRequest"] | null;
             compensation: components["schemas"]["CompensationRequest"];
+            /** Competency Tags */
+            competency_tags?: string[];
             /** Data Constraints */
             data_constraints: string;
             /** Deadline At */
@@ -1882,6 +2184,8 @@ export interface components {
             deliverable: string;
             /** Ip Terms */
             ip_terms: string;
+            /** @default open */
+            mode: components["schemas"]["TaskMode"];
             /** Nominated Mentor Id */
             nominated_mentor_id?: string | null;
             /**
@@ -1930,6 +2234,34 @@ export interface components {
             items: components["schemas"]["EventView"][];
             /** Next Cursor */
             next_cursor?: string | null;
+        };
+        /** CustomerTaskDetailView */
+        CustomerTaskDetailView: {
+            /** Acceptance Criteria */
+            acceptance_criteria: string[];
+            /** Applications */
+            applications: components["schemas"]["ApplicationView"][];
+            /** Assignments */
+            assignments: components["schemas"]["AssignmentView"][];
+            /** Contributions */
+            contributions: components["schemas"]["ContributionView"][];
+            /** Data Constraints */
+            data_constraints: string;
+            /** Decisions */
+            decisions: components["schemas"]["AcceptanceView"][];
+            /** Deliverable */
+            deliverable: string;
+            /** Ip Terms */
+            ip_terms: string;
+            /** Problem */
+            problem: string;
+            task: components["schemas"]["TaskView"];
+            terms: components["schemas"]["TermsView"] | null;
+        };
+        /** DecideInvitationRequest */
+        DecideInvitationRequest: {
+            /** Accepted */
+            accepted: boolean;
         };
         /** DecisionCommand */
         DecisionCommand: {
@@ -2118,6 +2450,50 @@ export interface components {
             /** Provider Id */
             provider_id: string;
         };
+        /** InvitationView */
+        InvitationView: {
+            /** Expires At */
+            expires_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Status */
+            status: string;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+            /** Terms Version */
+            terms_version: number;
+        };
+        /** InviteCandidateRequest */
+        InviteCandidateRequest: {
+            /**
+             * Evidence Contribution Id
+             * Format: uuid
+             */
+            evidence_contribution_id: string;
+            /** Expires At */
+            expires_at?: string | null;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+        };
         /** IssueCredentialRequest */
         IssueCredentialRequest: {
             /** Correction Reason */
@@ -2216,6 +2592,8 @@ export interface components {
         MarketplaceTaskView: {
             /** Accepted Terms Version */
             accepted_terms_version: number | null;
+            /** Invitation Status */
+            invitation_status?: string | null;
             task: components["schemas"]["TaskView"];
             terms: components["schemas"]["TermsView"];
         };
@@ -2416,6 +2794,15 @@ export interface components {
             stages: components["schemas"]["FunnelStageView"][];
             /** Successful */
             successful: boolean;
+        };
+        /** PassportSkillView */
+        PassportSkillView: {
+            /** Confirmed Case Count */
+            confirmed_case_count: number;
+            /** Key */
+            key: string;
+            /** Practical Level */
+            practical_level: string;
         };
         /** PayoutClaimView */
         PayoutClaimView: {
@@ -2652,6 +3039,11 @@ export interface components {
             tie_breakers: components["schemas"]["TieBreaker"][];
             /** Version */
             version: number;
+        };
+        /** RepeatTaskRequest */
+        RepeatTaskRequest: {
+            /** Task Key */
+            task_key: string;
         };
         /** ReportClaimRequest */
         ReportClaimRequest: {
@@ -3018,6 +3410,25 @@ export interface components {
         SwitchRoleRequest: {
             role: components["schemas"]["Role"];
         };
+        /** TalentPassportView */
+        TalentPassportView: {
+            /** Cases */
+            cases: components["schemas"]["CaseEvidenceView"][];
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Skills */
+            skills: components["schemas"]["PassportSkillView"][];
+            /** Verified Courses */
+            verified_courses: string[];
+        };
+        /**
+         * TaskMode
+         * @enum {string}
+         */
+        TaskMode: "open" | "invitation_only";
         /**
          * TaskStatus
          * @enum {string}
@@ -3025,13 +3436,28 @@ export interface components {
         TaskStatus: "draft" | "submitted" | "awaiting_support" | "ready_to_publish" | "published";
         /** TaskView */
         TaskView: {
+            /** Accepted Result Count */
+            accepted_result_count?: number | null;
+            /** Application Count */
+            application_count?: number | null;
+            /** Assignment Count */
+            assignment_count?: number | null;
+            case_rubric?: components["schemas"]["CaseRubricRequest"] | null;
+            /** Competency Tags */
+            competency_tags?: string[];
+            /** Deadline At */
+            deadline_at?: string | null;
             /**
              * Id
              * Format: uuid
              */
             id: string;
+            /** @default open */
+            mode: components["schemas"]["TaskMode"];
             /** Nominated Mentor Id */
             nominated_mentor_id: string | null;
+            /** Pending Result Count */
+            pending_result_count?: number | null;
             /** Places */
             places: number;
             /** Project Key */
@@ -3044,6 +3470,40 @@ export interface components {
             task_key: string;
             /** Title */
             title: string;
+        };
+        /** TeamRequestCommand */
+        TeamRequestCommand: {
+            /** Preferred Tags */
+            preferred_tags?: string[];
+            /** Relevant Case Task Ids */
+            relevant_case_task_ids: string[];
+            /** Required Tags */
+            required_tags: string[];
+            /** Title */
+            title: string;
+        };
+        /** TeamRequestView */
+        TeamRequestView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Owner Id
+             * Format: uuid
+             */
+            owner_id: string;
+            /** Preferred Tags */
+            preferred_tags: string[];
+            /** Relevant Case Task Ids */
+            relevant_case_task_ids: string[];
+            /** Required Tags */
+            required_tags: string[];
+            /** Title */
+            title: string;
+            /** Version */
+            version: number;
         };
         /** TermsView */
         TermsView: {
@@ -3345,6 +3805,26 @@ export interface operations {
             };
         };
     };
+    customer_cases_api_v1_customer_cases_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskView"][];
+                };
+            };
+        };
+    };
     decide_contribution_api_v1_customer_contributions__contribution_id__decision_post: {
         parameters: {
             query?: never;
@@ -3419,6 +3899,26 @@ export interface operations {
             };
         };
     };
+    saved_candidates_api_v1_customer_saved_candidates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateReservationView"][];
+                };
+            };
+        };
+    };
     customer_tasks_api_v1_customer_tasks_get: {
         parameters: {
             query?: never;
@@ -3435,6 +3935,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TaskView"][];
+                };
+            };
+        };
+    };
+    customer_task_detail_api_v1_customer_tasks__task_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerTaskDetailView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -3507,6 +4038,77 @@ export interface operations {
             };
         };
     };
+    invite_candidate_api_v1_customer_tasks__task_id__invitations_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InviteCandidateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_invitation_api_v1_customer_tasks__task_id__invitations__person_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     participant_preview_api_v1_customer_tasks__task_id__participant_preview_get: {
         parameters: {
             query?: never;
@@ -3525,6 +4127,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WorkItemView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    repeat_task_api_v1_customer_tasks__task_id__repeat_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RepeatTaskRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TaskView"];
                 };
             };
             /** @description Validation Error */
@@ -3632,6 +4271,174 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TermsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_team_request_api_v1_customer_team_requests_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamRequestCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamRequestView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    team_request_api_v1_customer_team_requests__request_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamRequestView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revise_team_request_api_v1_customer_team_requests__request_id__put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TeamRequestCommand"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamRequestView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    team_request_matches_api_v1_customer_team_requests__request_id__matches_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateMatchView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_candidate_api_v1_customer_team_requests__request_id__saved__person_id__post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                request_id: string;
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CandidateReservationView"];
                 };
             };
             /** @description Validation Error */
@@ -4439,6 +5246,26 @@ export interface operations {
             };
         };
     };
+    talent_passport_api_v1_me_talent_passport_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TalentPassportView"];
+                };
+            };
+        };
+    };
     apply_to_task_api_v1_me_tasks__task_id__applications_post: {
         parameters: {
             query?: never;
@@ -4459,6 +5286,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApplicationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    decide_invitation_api_v1_me_tasks__task_id__invitation_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DecideInvitationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationView"];
                 };
             };
             /** @description Validation Error */

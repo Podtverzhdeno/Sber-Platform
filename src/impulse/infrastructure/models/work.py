@@ -37,6 +37,29 @@ applications = domain_table(
     integer_field("accepted_terms_version"),
     uniques=(("task_id", "person_id"),),
 )
+task_invitations = domain_table(
+    "task_invitations",
+    uuid_field("task_id", "tasks.id"),
+    uuid_field("person_id", "persons.id"),
+    integer_field("terms_version"),
+    typed_field("expires_at", DateTime(timezone=True)),
+    uniques=(("task_id", "person_id"),),
+)
+team_request_versions = domain_table(
+    "team_request_versions",
+    uuid_field("request_id"),
+    uuid_field("owner_id", "persons.id"),
+    integer_field("request_version"),
+    uniques=(("request_id", "request_version"),),
+)
+candidate_reservations = domain_table(
+    "candidate_reservations",
+    uuid_field("owner_id", "persons.id"),
+    uuid_field("request_id"),
+    uuid_field("person_id", "persons.id"),
+    uuid_field("evidence_contribution_id", "contributions.id"),
+    uniques=(("owner_id", "request_id", "person_id"),),
+)
 assignments = domain_table(
     "assignments",
     uuid_field("task_id", "tasks.id"),

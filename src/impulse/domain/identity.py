@@ -24,6 +24,9 @@ class ConsentScope(StrEnum):
     PUBLIC_TROPHIES = "public_trophies"
     PUBLIC_PROFILE = "public_profile"
     HR_PROFILE = "hr_profile"
+    TALENT_PROFILE = "talent_profile"
+    TALENT_EVIDENCE = "talent_evidence"
+    TALENT_INVITATIONS = "talent_invitations"
     AI_MEMORY = "ai_memory"
     COURSE_HONOR_BOARD = "course_honor_board"
 
@@ -70,7 +73,14 @@ ROLE_NAVIGATION: dict[Role, tuple[str, ...]] = {
     Role.CUSTOMER: ("Главная", "Мои задачи", "Кандидаты", "Приёмка", "Аналитика", "Сообщения"),
     Role.MANAGER: ("Главная", "Инициативы", "Результаты", "Аналитика", "Сообщения"),
     Role.HR: ("Главная", "Кандидаты", "Воронка", "Аналитика", "Сообщения"),
-    Role.OPERATOR: ("Главная", "Операционная очередь", "Проверки", "Споры", "Аналитика", "Сообщения"),
+    Role.OPERATOR: (
+        "Главная",
+        "Операционная очередь",
+        "Проверки",
+        "Споры",
+        "Аналитика",
+        "Сообщения",
+    ),
     Role.PROGRAM_OWNER: (),
     Role.ACCESS_ADMIN: (),
     Role.UNIVERSITY_COORDINATOR: (),

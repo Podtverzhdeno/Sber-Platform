@@ -129,6 +129,26 @@ async def role_analytics(
     elif actor.active_role is Role.CUSTOMER:
         tasks = await request.app.state.work_service.customer_tasks(actor)
         published = sum(item.aggregate.status.value == "published" for item in tasks)
+        details = [
+            await request.app.state.work_service.customer_task_detail(actor, item.aggregate.task_id)
+            for item in tasks
+        ]
+        applications = sum(len(item.applications) for item in details)
+        assignments = sum(len(item.assignments) for item in details)
+        contributions = sum(len(item.contributions) for item in details)
+        accepted = sum(
+            decision.decision.value == "accepted"
+            for item in details
+            for decision in item.decisions
+        )
+        revisions = sum(
+            decision.decision.value == "revision_requested"
+            for item in details
+            for decision in item.decisions
+        )
+        active_people = len(
+            {assignment.person_id for item in details for assignment in item.assignments}
+        )
         metrics = [
             count_metric(
                 key="customer_tasks",
@@ -148,6 +168,54 @@ async def role_analytics(
                 period_end=end,
                 cohort=cohort,
                 definition="Опубликованные задачи / все задачи заказчика.",
+            ),
+            count_metric(
+                key="customer_applications",
+                label="Заявки на задачи",
+                count=applications,
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition="Все заявки на собственные задачи заказчика.",
+            ),
+            count_metric(
+                key="customer_active_people",
+                label="Назначенные участники",
+                count=active_people,
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition="Уникальные участники с назначением на собственные задачи.",
+            ),
+            ratio_metric(
+                key="customer_staffing_rate",
+                label="Переход заявок в назначения",
+                numerator=assignments,
+                denominator=applications,
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition="Назначения / заявки на собственные задачи.",
+            ),
+            ratio_metric(
+                key="customer_submission_rate",
+                label="Переход назначений в результат",
+                numerator=contributions,
+                denominator=assignments,
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition="Сданные версии личного вклада / назначения; повторы учитываются.",
+            ),
+            ratio_metric(
+                key="customer_acceptance_rate",
+                label="Доля принятых результатов",
+                numerator=accepted,
+                denominator=accepted + revisions,
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition="Принятые решения / все решения о приёмке и доработке.",
             ),
         ]
     elif actor.active_role is Role.MANAGER:

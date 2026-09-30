@@ -16,6 +16,8 @@ import { Badge, StatePanel } from "./components/ui";
 import { Bootcamp, DevelopmentJourney } from "./features/development";
 import { EventCatalog } from "./features/ecosystem";
 import { CustomerWorkspace } from "./features/customer";
+import { CustomerScenario } from "./features/customer-scenario";
+import { CustomerCandidates } from "./features/customer-candidates";
 import { ManagerWorkspace } from "./features/manager";
 import { HrWorkspace } from "./features/hr";
 import { OperatorWorkspace } from "./features/operator";
@@ -52,7 +54,7 @@ type Actor = {
   navigation: string[];
   csrf_token?: string | null;
 };
-type PublicConfig = { honor_board_enabled?: boolean };
+type PublicConfig = { honor_board_enabled?: boolean; demo_mode?: boolean };
 
 const roleLabels: Record<Role, string> = {
   participant: "Участник",
@@ -248,10 +250,12 @@ function LoginScreen({
 function Workspace({
   actor,
   honorBoardEnabled,
+  mockCustomer,
   onSwitchRole,
 }: {
   actor: Actor;
   honorBoardEnabled: boolean;
+  mockCustomer: boolean;
   onSwitchRole: (role: Role) => void;
 }) {
   const { section = "0" } = useParams();
@@ -340,7 +344,9 @@ function Workspace({
         >
           <span aria-hidden="true">☰</span> Меню
         </button>
-        {allowed && currentSection === "Главная" ? (
+        {allowed && actor.active_role === "customer" && mockCustomer ? (
+          <CustomerScenario section={currentSection ?? "Главная"} />
+        ) : allowed && currentSection === "Главная" ? (
           actor.active_role === "participant" ? (
             <ParticipantDashboard actor={actor} />
           ) : actor.active_role === "mentor" ? (
@@ -397,10 +403,14 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Настройки" ? (
-          <ParticipantSettings actorName={actor.display_name} />
+          <ParticipantSettings actorName={actor.display_name} consentScopes={actor.consent_scopes} />
         ) : allowed &&
           actor.active_role === "customer" &&
-          (currentSection === "Кандидаты" || currentSection === "Приёмка") ? (
+          currentSection === "Кандидаты" ? (
+          <CustomerCandidates />
+        ) : allowed &&
+          actor.active_role === "customer" &&
+          currentSection === "Приёмка" ? (
           <CustomerParticipantPreview />
         ) : allowed &&
           actor.active_role === "customer" &&
@@ -1390,6 +1400,7 @@ function ImpulseApp() {
                 element={
                   <Workspace
                     actor={actor}
+                    mockCustomer={configQuery.data?.demo_mode === true}
                     honorBoardEnabled={
                       configQuery.data?.honor_board_enabled === true
                     }

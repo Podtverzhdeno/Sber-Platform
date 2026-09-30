@@ -8,6 +8,7 @@ export type RuntimeApiPath =
   | `/api/v1/me/consents/${string}`
   | `/api/v1/me/events/${string}/claims`
   | "/api/v1/me/work"
+  | "/api/v1/me/talent-passport"
   | "/api/v1/me/reward-evidence"
   | "/api/v1/mentor/review-workspace"
   | "/api/v1/mentor/review-queue"
@@ -24,12 +25,23 @@ export type RuntimeApiPath =
   | `/api/v1/mentor/reviews/${string}/${"propose" | "confirm" | "publish"}`
   | `/api/v1/me/tasks/${string}/terms-consent`
   | `/api/v1/me/tasks/${string}/applications`
+  | `/api/v1/me/tasks/${string}/invitation`
   | `/api/v1/me/assignments/${string}/start`
   | `/api/v1/me/assignments/${string}/contributions`
   | `/api/v1/customer/tasks/${string}/participant-preview`
+  | `/api/v1/customer/tasks/${string}`
   | `/api/v1/customer/contributions/${string}/decision`
   | `/api/v1/customer/projects/${string}/tasks`
   | `/api/v1/customer/tasks/${string}/submit`
+  | `/api/v1/customer/tasks/${string}/repeat`
+  | `/api/v1/customer/tasks/${string}/invitations`
+  | "/api/v1/customer/team-requests"
+  | "/api/v1/customer/cases"
+  | `/api/v1/customer/team-requests/${string}`
+  | `/api/v1/customer/team-requests/${string}/matches`
+  | `/api/v1/customer/team-requests/${string}/saved/${string}`
+  | "/api/v1/customer/saved-candidates"
+  | `/api/v1/customer/tasks/${string}/invitations/${string}/revoke`
   | `/api/v1/customer/tasks/${string}/applications`
   | `/api/v1/customer/applications/${string}/accept`;
 

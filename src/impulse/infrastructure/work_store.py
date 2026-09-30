@@ -15,11 +15,14 @@ from impulse.application.work import (
     AcceptanceRecord,
     ApplicationRecord,
     AssignmentRecord,
+    CandidateReservation,
     CheckpointRecord,
     ContributionRecord,
     DisputeRecord,
+    InvitationRecord,
     TaskRecord,
     TeamArtifactRecord,
+    TeamRequestRecord,
     TermsRecord,
     WorkStore,
 )
@@ -28,11 +31,13 @@ from impulse.domain.work import (
     AcceptanceDecision,
     ApplicationStatus,
     AssignmentStatus,
+    CaseRubric,
     ContributionStatus,
     SupportAssignment,
     SupportMode,
     TaskAggregate,
     TaskBrief,
+    TaskMode,
     TaskPolicyError,
     TaskStatus,
     accept_application,
@@ -48,10 +53,13 @@ from impulse.infrastructure.models.work import (
     appeals,
     applications,
     assignments,
+    candidate_reservations,
     contributions,
     projects,
+    task_invitations,
     task_terms_versions,
     tasks,
+    team_request_versions,
 )
 from impulse.infrastructure.models.work import (
     artifacts as artifact_table,
@@ -64,6 +72,20 @@ def _payload(record: TaskRecord) -> dict[str, object]:
     return {
         "title": record.title,
         "places": record.places,
+        "mode": record.mode.value,
+        "competency_tags": list(record.competency_tags),
+        "case_rubric": (
+            {
+                "version": record.case_rubric.version,
+                "result": record.case_rubric.result,
+                "reasoning": record.case_rubric.reasoning,
+                "uncertainty": record.case_rubric.uncertainty,
+                "ai_use": record.case_rubric.ai_use,
+                "defense": record.case_rubric.defense,
+            }
+            if record.case_rubric
+            else None
+        ),
         "brief": {
             "problem": aggregate.brief.problem,
             "deliverable": aggregate.brief.deliverable,
@@ -136,6 +158,13 @@ def _record(row: Any) -> TaskRecord:
             support=support,
         ),
         places=int(payload.get("places", 1)),
+        mode=TaskMode(str(payload.get("mode", TaskMode.OPEN.value))),
+        competency_tags=tuple(str(item) for item in payload.get("competency_tags", [])),
+        case_rubric=(
+            CaseRubric(**dict(payload["case_rubric"]))
+            if isinstance(payload.get("case_rubric"), dict)
+            else None
+        ),
     )
 
 
@@ -354,6 +383,188 @@ class SqlWorkStore(WorkStore):
                     applications.c.task_id == task_id,
                 )
             )
+
+    @staticmethod
+    def _invitation(row: Any) -> InvitationRecord:
+        return InvitationRecord(
+            row.id, row.task_id, row.person_id, row.terms_version, row.status, row.expires_at
+        )
+
+    async def invitation(self, task_id: UUID, person_id: UUID) -> InvitationRecord | None:
+        async with self.database.sessions() as session:
+            row = (
+                await session.execute(
+                    select(task_invitations).where(
+                        task_invitations.c.task_id == task_id,
+                        task_invitations.c.person_id == person_id,
+                    )
+                )
+            ).one_or_none()
+            return self._invitation(row) if row else None
+
+    @staticmethod
+    def _team_request(row: Any) -> TeamRequestRecord:
+        payload = dict(row.payload)
+        return TeamRequestRecord(
+            row.request_id,
+            row.owner_id,
+            row.request_version,
+            str(payload["title"]),
+            tuple(str(item) for item in payload["required_tags"]),
+            tuple(str(item) for item in payload["preferred_tags"]),
+            tuple(UUID(str(item)) for item in payload["relevant_case_task_ids"]),
+        )
+
+    async def team_request(self, request_id: UUID) -> TeamRequestRecord | None:
+        async with self.database.sessions() as session:
+            row = (
+                await session.execute(
+                    select(team_request_versions)
+                    .where(team_request_versions.c.request_id == request_id)
+                    .order_by(team_request_versions.c.request_version.desc())
+                    .limit(1)
+                )
+            ).one_or_none()
+            return self._team_request(row) if row else None
+
+    async def save_team_request(self, record: TeamRequestRecord) -> TeamRequestRecord:
+        async with self.database.session() as session:
+            latest = await session.scalar(
+                select(func.max(team_request_versions.c.request_version)).where(
+                    team_request_versions.c.request_id == record.id
+                )
+            )
+            if record.version != (latest or 0) + 1:
+                raise ApiError(
+                    code="STALE_TEAM_REQUEST", message="Запрос команды изменился.", status_code=409
+                )
+            await session.execute(
+                insert(team_request_versions).values(
+                    request_id=record.id,
+                    owner_id=record.owner_id,
+                    request_version=record.version,
+                    created_by=record.owner_id,
+                    payload={
+                        "title": record.title,
+                        "required_tags": list(record.required_tags),
+                        "preferred_tags": list(record.preferred_tags),
+                        "relevant_case_task_ids": [
+                            str(item) for item in record.relevant_case_task_ids
+                        ],
+                    },
+                )
+            )
+            return record
+
+    @staticmethod
+    def _reservation(row: Any) -> CandidateReservation:
+        return CandidateReservation(
+            row.id,
+            row.owner_id,
+            row.request_id,
+            row.person_id,
+            row.evidence_contribution_id,
+            row.created_at,
+        )
+
+    async def save_reservation(self, record: CandidateReservation) -> CandidateReservation:
+        async with self.database.session() as session:
+            row = (
+                await session.execute(
+                    insert(candidate_reservations)
+                    .values(
+                        id=record.id,
+                        owner_id=record.owner_id,
+                        request_id=record.request_id,
+                        person_id=record.person_id,
+                        evidence_contribution_id=record.evidence_contribution_id,
+                        created_by=record.owner_id,
+                    )
+                    .on_conflict_do_nothing(
+                        constraint="uq_candidate_reservations_owner_id_request_id_person_id"
+                    )
+                    .returning(*candidate_reservations.c)
+                )
+            ).one_or_none()
+            if row is None:
+                row = (
+                    await session.execute(
+                        select(candidate_reservations).where(
+                            candidate_reservations.c.owner_id == record.owner_id,
+                            candidate_reservations.c.request_id == record.request_id,
+                            candidate_reservations.c.person_id == record.person_id,
+                        )
+                    )
+                ).one()
+            return self._reservation(row)
+
+    async def reservations(self, owner_id: UUID) -> tuple[CandidateReservation, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(candidate_reservations)
+                    .where(candidate_reservations.c.owner_id == owner_id)
+                    .order_by(candidate_reservations.c.created_at.desc())
+                )
+            ).all()
+            return tuple(self._reservation(row) for row in rows)
+
+    async def invite(
+        self, task_id: UUID, person_id: UUID, terms_version: int, expires_at: datetime
+    ) -> InvitationRecord:
+        async with self.database.session() as session:
+            row = (
+                await session.execute(
+                    insert(task_invitations)
+                    .values(
+                        task_id=task_id,
+                        person_id=person_id,
+                        terms_version=terms_version,
+                        expires_at=expires_at,
+                        status="pending",
+                    )
+                    .on_conflict_do_update(
+                        constraint="uq_task_invitations_task_id_person_id",
+                        set_={
+                            "terms_version": terms_version,
+                            "expires_at": expires_at,
+                            "status": "pending",
+                            "version": task_invitations.c.version + 1,
+                        },
+                        where=(task_invitations.c.status != "pending")
+                        | (task_invitations.c.terms_version != terms_version)
+                        | (task_invitations.c.expires_at != expires_at),
+                    )
+                    .returning(*task_invitations.c)
+                )
+            ).one_or_none()
+            if row is None:
+                row = (
+                    await session.execute(
+                        select(task_invitations).where(
+                            task_invitations.c.task_id == task_id,
+                            task_invitations.c.person_id == person_id,
+                        )
+                    )
+                ).one()
+            return self._invitation(row)
+
+    async def decide_invitation(
+        self, task_id: UUID, person_id: UUID, status: str
+    ) -> InvitationRecord:
+        async with self.database.session() as session:
+            row = (
+                await session.execute(
+                    update(task_invitations)
+                    .where(
+                        task_invitations.c.task_id == task_id,
+                        task_invitations.c.person_id == person_id,
+                    )
+                    .values(status=status, version=task_invitations.c.version + 1)
+                    .returning(*task_invitations.c)
+                )
+            ).one()
+            return self._invitation(row)
 
     async def accept_terms(self, person_id: UUID, task_id: UUID, version: int) -> None:
         async with self.database.session() as session:
@@ -717,6 +928,7 @@ class SqlWorkStore(WorkStore):
             row.summary,
             artifact_keys,
             ContributionStatus(row.status),
+            row.created_at,
         )
 
     async def contribution(self, contribution_id: UUID) -> ContributionRecord | None:

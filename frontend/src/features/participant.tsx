@@ -1,24 +1,41 @@
-import { SyntheticEvent, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { SyntheticEvent, useEffect, useMemo, useState } from "react";
 
+import { apiRequest } from "../api/client";
 import { Badge } from "../components/ui";
 
-const settingsTabs = ["Профиль", "Безопасность", "Предпочтения", "Согласия", "Уведомления", "Видимость для HR", "AI-Buddy"] as const;
+const settingsTabs = ["Профиль", "Безопасность", "Предпочтения", "Согласия", "Подбор", "Уведомления", "Видимость для HR", "AI-Buddy"] as const;
 type SettingsTab = typeof settingsTabs[number];
+type TalentConsent = "talent_profile" | "talent_evidence" | "talent_invitations" | "hr_profile";
 
 function Toggle({ checked, label, onChange }: { checked: boolean; label: string; onChange: (value: boolean) => void }) {
   return <label className="settings-toggle"><span><strong>{label}</strong></span><input type="checkbox" checked={checked} onChange={(event) => { onChange(event.target.checked); }} /><i aria-hidden="true" /></label>;
 }
 
-export function ParticipantSettings({ actorName }: { actorName: string }) {
+export function ParticipantSettings({ actorName, consentScopes }: { actorName: string; consentScopes: string[] }) {
   const [tab, setTab] = useState<SettingsTab>("Профиль");
   const [saved, setSaved] = useState("");
-  const [hrVisible, setHrVisible] = useState(true);
+  const [hrVisible, setHrVisible] = useState(consentScopes.includes("hr_profile"));
   const [buddyEnabled, setBuddyEnabled] = useState(true);
   const [consents, setConsents] = useState({ publicProfile: true, communications: false });
+  const [talentConsents, setTalentConsents] = useState(() => new Set(consentScopes));
+  const [talentSaving, setTalentSaving] = useState(false);
+  const currentConsents = useQuery({ queryKey: ["participant-consents"], queryFn: () => apiRequest<{ consent_scopes: string[] }>("/api/v1/me"), refetchOnMount: "always" });
+  useEffect(() => { if (currentConsents.data) { setTalentConsents(new Set(currentConsents.data.consent_scopes)); setHrVisible(currentConsents.data.consent_scopes.includes("hr_profile")); } }, [currentConsents.data]);
   const [visibility, setVisibility] = useState({ base: true, skills: true, projects: true, achievements: true, learning: true, contacts: false });
   const [notifications, setNotifications] = useState({ projects: true, mentors: true, payments: true, events: true, product: false, marketing: false });
   const announce = (message: string) => { setSaved(message); window.setTimeout(() => { setSaved(""); }, 2600); };
   const flip = <T extends Record<string, boolean>>(state: T, key: keyof T, setter: (next: T) => void) => { setter({ ...state, [key]: !state[key] }); };
+  const updateTalentConsent = async (scope: TalentConsent, granted: boolean) => {
+    setTalentSaving(true);
+    try {
+      const result = await apiRequest<{ granted_scopes: string[] }>(`/api/v1/me/consents/${scope}`, { method: "PUT", headers: { "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" }, body: JSON.stringify({ granted }) });
+      setTalentConsents(new Set(result.granted_scopes));
+      if (scope === "hr_profile") setHrVisible(granted);
+      announce("Согласие обновлено");
+    } catch { announce("Не удалось сохранить согласие. Повторите действие."); }
+    finally { setTalentSaving(false); }
+  };
 
   return <div className="participant-settings feature-stack">
     <header className="participant-page-heading"><div><p className="eyebrow">Личный кабинет</p><h1 id="workspace-title">Настройки</h1><p className="lead">Управляйте профилем, приватностью и тем, как платформа помогает строить карьерный путь.</p></div><button type="button" onClick={() => { announce("Настройки сохранены"); }}>Сохранить изменения</button></header>
@@ -30,7 +47,8 @@ export function ParticipantSettings({ actorName }: { actorName: string }) {
         {tab === "Предпочтения" && <><div className="settings-section-title"><div><h2>Предпочтения аккаунта</h2><p>Настройте удобное отображение платформы.</p></div></div><div className="form-grid"><label>Язык<select defaultValue="ru"><option value="ru">Русский</option><option value="en">English</option></select></label><label>Тема<select defaultValue="dark"><option value="dark">Тёмная</option><option value="system">Как в системе</option></select></label><label>Часовой пояс<select defaultValue="moscow"><option value="moscow">Москва · UTC+3</option><option value="amman">Амман · UTC+3</option></select></label></div></>}
         {tab === "Согласия" && <><div className="settings-section-title"><div><h2>Согласия и данные</h2><p>Вы сами определяете, где можно показывать профиль и достижения.</p></div></div><div className="toggle-list"><Toggle checked label="Обработка данных для работы платформы" onChange={() => { announce("Обязательное согласие можно отозвать только через удаление аккаунта"); }} /><Toggle checked={consents.publicProfile} label="Публичный профиль и достижения" onChange={() => { flip(consents, "publicProfile", setConsents); }} /><Toggle checked={consents.communications} label="Необязательные продуктовые коммуникации" onChange={() => { flip(consents, "communications", setConsents); }} /></div></>}
         {tab === "Уведомления" && <><div className="settings-section-title"><div><h2>Уведомления</h2><p>Оставьте только те сигналы, которые помогают двигаться дальше.</p></div></div><div className="toggle-list">{Object.entries({ projects: "Проекты и задачи", mentors: "Сообщения от менторов", payments: "Начисления и выплаты", events: "События", product: "Продуктовые обновления", marketing: "Маркетинговые материалы" }).map(([key, label]) => <Toggle key={key} checked={notifications[key as keyof typeof notifications]} label={label} onChange={() => { flip(notifications, key as keyof typeof notifications, setNotifications); }} />)}</div></>}
-        {tab === "Видимость для HR" && <><div className="settings-section-title"><div><h2>Видимость для HR</h2><p>Откройте доказанный опыт рекрутерам и точно выберите доступные данные.</p></div><Toggle checked={hrVisible} label="Профиль доступен HR" onChange={setHrVisible} /></div><div className={`hr-visibility-grid${hrVisible ? "" : " disabled"}`}>{Object.entries({ base: "Базовая информация", skills: "Навыки", projects: "Проекты и оценки", achievements: "Достижения", learning: "Прогресс обучения", contacts: "Контакты" }).map(([key, label]) => <Toggle key={key} checked={visibility[key as keyof typeof visibility]} label={label} onChange={() => { flip(visibility, key as keyof typeof visibility, setVisibility); }} />)}</div><div className="hr-preview"><p className="eyebrow">Предпросмотр глазами HR</p><div><span className="profile-avatar profile-avatar--small">АР</span><div><strong>{actorName}</strong><small>Аналитик данных · 7 подтверждённых навыков</small><p>Видны проекты, сертификаты и достижения. {visibility.contacts && hrVisible ? "Контакты открыты." : "Контакты скрыты."}</p></div></div></div></>}
+        {tab === "Видимость для HR" && <><div className="settings-section-title"><div><h2>Видимость для HR</h2><p>Откройте доказанный опыт рекрутерам и точно выберите доступные данные.</p></div><Toggle checked={hrVisible} label="Профиль доступен HR" onChange={(value) => { void updateTalentConsent("hr_profile", value); }} /></div><div className={`hr-visibility-grid${hrVisible ? "" : " disabled"}`}>{Object.entries({ base: "Базовая информация", skills: "Навыки", projects: "Проекты и оценки", achievements: "Достижения", learning: "Прогресс обучения", contacts: "Контакты" }).map(([key, label]) => <Toggle key={key} checked={visibility[key as keyof typeof visibility]} label={label} onChange={() => { flip(visibility, key as keyof typeof visibility, setVisibility); }} />)}</div><div className="hr-preview"><p className="eyebrow">Предпросмотр глазами HR</p><div><span className="profile-avatar profile-avatar--small">АР</span><div><strong>{actorName}</strong><small>Аналитик данных · 7 подтверждённых навыков</small><p>Видны проекты, сертификаты и достижения. {visibility.contacts && hrVisible ? "Контакты открыты." : "Контакты скрыты."}</p></div></div></div></>}
+        {tab === "Подбор" && <><div className="settings-section-title"><div><h2>Подбор под задачи команд</h2><p>Управляйте тем, могут ли заказчики и руководители найти вас по подтверждённым кейсам.</p></div></div><fieldset disabled={talentSaving} className="toggle-list"><Toggle checked={talentConsents.has("talent_profile")} label="Показывать мой профиль в подборе" onChange={(value) => { void updateTalentConsent("talent_profile", value); }} /><Toggle checked={talentConsents.has("talent_evidence")} label="Показывать подтверждённые кейсы и разрешённые доказательства" onChange={(value) => { void updateTalentConsent("talent_evidence", value); }} /><Toggle checked={talentConsents.has("talent_invitations")} label="Получать адресные приглашения на задачи" onChange={(value) => { void updateTalentConsent("talent_invitations", value); }} /></fieldset><div className="hr-preview"><p className="eyebrow">Предпросмотр для руководителя</p><strong>{talentConsents.has("talent_profile") ? actorName : "Профиль скрыт"}</strong><p>{talentConsents.has("talent_profile") && talentConsents.has("talent_evidence") ? "Подтверждённые кейсы будут доступны после проверки релевантности запроса. Контакты и личные сообщения скрыты." : "Кейсы и доказательства скрыты."}</p><p>{talentConsents.has("talent_invitations") ? "Адресные приглашения разрешены." : "Адресные приглашения отключены."}</p></div></>}
         {tab === "AI-Buddy" && <><div className="settings-section-title"><div><h2>AI-Buddy</h2><p>Помощник объясняет следующий шаг, но не принимает решения об оценках и деньгах.</p></div><Toggle checked={buddyEnabled} label="AI-Buddy включён" onChange={setBuddyEnabled} /></div><label className="settings-select">Стиль общения<select disabled={!buddyEnabled} defaultValue="brief"><option value="brief">Кратко и по делу</option><option value="coach">Поддерживающий наставник</option><option value="detail">Подробные объяснения</option></select></label><div className="danger-zone"><div><strong>История диалога</strong><small>Очистка удалит сообщения и персональную память, но не обязательный технический аудит.</small></div><button type="button" onClick={() => { announce("История AI-Buddy очищена"); }}>Очистить историю</button></div></>}
       </main></div>
   </div>;

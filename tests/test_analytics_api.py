@@ -16,6 +16,7 @@ def client() -> TestClient:
             Settings(
                 app_env=AppEnvironment.TEST,
                 demo_mode=True,
+                database_url=None,
                 session_secret=SecretStr("analytics-test-secret-long-enough"),
             )
         )
@@ -117,6 +118,16 @@ def test_hr_empty_funnel_is_unknown_not_zero_success() -> None:
     assert metrics["hr_hire_rate"]["value"] is None
     assert metrics["hr_hire_rate"]["suppressed"] is True
     assert metrics["hr_hire_rate"]["suppression_reason"] == "cohort_below_5"
+
+
+def test_customer_empty_funnel_has_explicit_denominators() -> None:
+    api = client()
+    login(api, "customer-roman")
+    metrics = {item["key"]: item for item in api.get("/api/v1/analytics/role").json()["metrics"]}
+    assert metrics["customer_applications"]["value"] == "0"
+    assert metrics["customer_staffing_rate"]["denominator"] == 0
+    assert metrics["customer_staffing_rate"]["value"] is None
+    assert metrics["customer_acceptance_rate"]["value"] is None
 
 
 def test_personal_rows_are_hidden_below_privacy_threshold() -> None:

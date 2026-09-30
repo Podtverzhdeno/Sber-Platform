@@ -162,6 +162,30 @@ def test_independent_consent_revoke_updates_visible_projection() -> None:
         assert client.get("/api/v1/me").json()["consent_scopes"] == ["hr_profile"]
 
 
+def test_talent_visibility_evidence_and_invitations_are_independent() -> None:
+    client, _clock = _test_client_with_clock()
+    with client:
+        csrf = client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-maria"}
+        ).json()["csrf_token"]
+        for scope in ("talent_profile", "talent_evidence", "talent_invitations"):
+            response = client.put(
+                f"/api/v1/me/consents/{scope}",
+                json={"granted": True},
+                headers={"X-CSRF-Token": csrf},
+            )
+            assert response.status_code == 200
+        revoke = client.put(
+            "/api/v1/me/consents/talent_evidence",
+            json={"granted": False},
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert revoke.status_code == 200
+        assert "talent_evidence" not in revoke.json()["granted_scopes"]
+        assert "talent_profile" in revoke.json()["granted_scopes"]
+        assert "talent_invitations" in revoke.json()["granted_scopes"]
+
+
 def actor(role: Role) -> ActorContext:
     person_id = UUID(int=list(Role).index(role) + 1)
     return ActorContext(

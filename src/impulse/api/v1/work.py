@@ -15,26 +15,34 @@ from impulse.application.work import (
     AcceptanceRecord,
     ApplicationRecord,
     AssignmentRecord,
+    CandidateMatch,
+    CandidateReservation,
     CheckpointRecord,
     ContributionRecord,
+    CustomerTaskDetail,
     DisputeRecord,
+    InvitationRecord,
     ManagerOverview,
     MarketplaceTask,
     TaskRecord,
     TeamArtifactRecord,
+    TeamRequestRecord,
     TermsRecord,
     WorkItem,
     WorkService,
 )
+from impulse.domain.development import CompletionStatus
 from impulse.domain.reward import CompensationTerms, RoundingMode
 from impulse.domain.work import (
     AcceptanceDecision,
     ApplicationStatus,
     AssignmentStatus,
+    CaseRubric,
     ContributionStatus,
     SupportAssignment,
     SupportMode,
     TaskBrief,
+    TaskMode,
     TaskStatus,
 )
 
@@ -52,6 +60,15 @@ class CompensationRequest(BaseModel):
     payout_condition: str = Field(min_length=1, max_length=1000)
 
 
+class CaseRubricRequest(BaseModel):
+    version: int = Field(default=1, ge=1)
+    result: str = Field(min_length=1, max_length=1000)
+    reasoning: str = Field(min_length=1, max_length=1000)
+    uncertainty: str = Field(min_length=1, max_length=1000)
+    ai_use: str = Field(min_length=1, max_length=1000)
+    defense: str = Field(min_length=1, max_length=1000)
+
+
 class CreateTaskRequest(BaseModel):
     task_key: str = Field(min_length=1, max_length=96)
     title: str = Field(min_length=1, max_length=200)
@@ -63,6 +80,9 @@ class CreateTaskRequest(BaseModel):
     ip_terms: str = Field(max_length=4000)
     nominated_mentor_id: UUID | None = None
     places: int = Field(default=1, ge=1, le=100)
+    mode: TaskMode = TaskMode.OPEN
+    competency_tags: list[str] = Field(default_factory=list, max_length=20)
+    case_rubric: CaseRubricRequest | None = None
     compensation: CompensationRequest
 
 
@@ -83,6 +103,79 @@ class AcceptTermsRequest(BaseModel):
 
 class AcceptApplicationRequest(BaseModel):
     expected_version: int = Field(ge=1)
+
+
+class RepeatTaskRequest(BaseModel):
+    task_key: str = Field(min_length=1, max_length=96)
+
+
+class InviteCandidateRequest(BaseModel):
+    person_id: UUID
+    evidence_contribution_id: UUID
+    request_id: UUID
+    expires_at: AwareDatetime | None = None
+
+
+class DecideInvitationRequest(BaseModel):
+    accepted: bool
+
+
+class TeamRequestCommand(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+    required_tags: list[str] = Field(min_length=1, max_length=20)
+    preferred_tags: list[str] = Field(default_factory=list, max_length=20)
+    relevant_case_task_ids: list[UUID] = Field(min_length=1, max_length=30)
+
+
+class TeamRequestView(BaseModel):
+    id: UUID
+    owner_id: UUID
+    version: int
+    title: str
+    required_tags: list[str]
+    preferred_tags: list[str]
+    relevant_case_task_ids: list[UUID]
+
+
+class CaseEvidenceView(BaseModel):
+    task_id: UUID
+    contribution_id: UUID
+    personal_summary: str
+    competency_tags: list[str]
+    artifact_keys: list[str]
+    submitted_at: AwareDatetime
+    reviewer_id: UUID
+
+
+class CandidateMatchView(BaseModel):
+    person_id: UUID
+    display_name: str
+    request_version: int
+    matched_required: list[str]
+    matched_preferred: list[str]
+    evidence: list[CaseEvidenceView]
+
+
+class CandidateReservationView(BaseModel):
+    id: UUID
+    request_id: UUID
+    person_id: UUID
+    evidence_contribution_id: UUID
+    created_at: AwareDatetime
+    match: CandidateMatchView
+
+
+class PassportSkillView(BaseModel):
+    key: str
+    practical_level: str
+    confirmed_case_count: int
+
+
+class TalentPassportView(BaseModel):
+    person_id: UUID
+    verified_courses: list[str]
+    skills: list[PassportSkillView]
+    cases: list[CaseEvidenceView]
 
 
 class CheckpointRequest(BaseModel):
@@ -124,6 +217,14 @@ class TaskView(BaseModel):
     support_mode: SupportMode | None
     support_assignee_id: UUID | None
     places: int
+    mode: TaskMode = TaskMode.OPEN
+    competency_tags: list[str] = Field(default_factory=list)
+    case_rubric: CaseRubricRequest | None = None
+    application_count: int | None = None
+    assignment_count: int | None = None
+    pending_result_count: int | None = None
+    accepted_result_count: int | None = None
+    deadline_at: AwareDatetime | None = None
 
 
 class ApplicationView(BaseModel):
@@ -133,6 +234,15 @@ class ApplicationView(BaseModel):
     accepted_terms_version: int
     status: ApplicationStatus
     version: int
+
+
+class InvitationView(BaseModel):
+    id: UUID
+    task_id: UUID
+    person_id: UUID
+    terms_version: int
+    status: str
+    expires_at: AwareDatetime | None
 
 
 class AssignmentView(BaseModel):
@@ -208,10 +318,25 @@ class TermsView(BaseModel):
     compensation: CompensationView
 
 
+class CustomerTaskDetailView(BaseModel):
+    task: TaskView
+    problem: str
+    deliverable: str
+    acceptance_criteria: list[str]
+    data_constraints: str
+    ip_terms: str
+    terms: TermsView | None
+    applications: list[ApplicationView]
+    assignments: list[AssignmentView]
+    contributions: list[ContributionView]
+    decisions: list[AcceptanceView]
+
+
 class MarketplaceTaskView(BaseModel):
     task: TaskView
     terms: TermsView
     accepted_terms_version: int | None
+    invitation_status: str | None = None
 
 
 class WorkItemView(BaseModel):
@@ -263,6 +388,55 @@ def _view(record: TaskRecord) -> TaskView:
         support_mode=support.mode if support else None,
         support_assignee_id=support.assignee_id if support else None,
         places=record.places,
+        mode=record.mode,
+        competency_tags=list(record.competency_tags),
+        case_rubric=(
+            CaseRubricRequest.model_validate(record.case_rubric, from_attributes=True)
+            if record.case_rubric
+            else None
+        ),
+    )
+
+
+def _invitation_view(record: InvitationRecord) -> InvitationView:
+    return InvitationView.model_validate(record, from_attributes=True)
+
+
+def _team_request_view(record: TeamRequestRecord) -> TeamRequestView:
+    return TeamRequestView.model_validate(record, from_attributes=True)
+
+
+def _candidate_match_view(record: CandidateMatch) -> CandidateMatchView:
+    return CandidateMatchView.model_validate(record, from_attributes=True)
+
+
+def _reservation_view(
+    record: CandidateReservation, match: CandidateMatch
+) -> CandidateReservationView:
+    return CandidateReservationView(
+        id=record.id,
+        request_id=record.request_id,
+        person_id=record.person_id,
+        evidence_contribution_id=record.evidence_contribution_id,
+        created_at=record.created_at,
+        match=_candidate_match_view(match),
+    )
+
+
+def _customer_detail_view(detail: CustomerTaskDetail) -> CustomerTaskDetailView:
+    brief = detail.task.aggregate.brief
+    return CustomerTaskDetailView(
+        task=_view(detail.task),
+        problem=brief.problem,
+        deliverable=brief.deliverable,
+        acceptance_criteria=list(brief.acceptance_criteria),
+        data_constraints=brief.data_constraints,
+        ip_terms=brief.ip_terms,
+        terms=_terms_view(detail.terms) if detail.terms else None,
+        applications=[_application_view(item) for item in detail.applications],
+        assignments=[_assignment_view(item) for item in detail.assignments],
+        contributions=[_contribution_view(item) for item in detail.contributions],
+        decisions=[_acceptance_view(item) for item in detail.decisions],
     )
 
 
@@ -356,6 +530,7 @@ def _marketplace_view(item: MarketplaceTask) -> MarketplaceTaskView:
         task=_view(item.task),
         terms=_terms_view(item.terms),
         accepted_terms_version=item.accepted_terms_version,
+        invitation_status=item.invitation_status,
     )
 
 
@@ -403,7 +578,222 @@ async def customer_tasks(
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
     service: Annotated[WorkService, Depends(_service)],
 ) -> list[TaskView]:
-    return [_view(item) for item in await service.customer_tasks(authenticated.actor)]
+    result: list[TaskView] = []
+    for item in await service.customer_tasks(authenticated.actor):
+        detail = await service.customer_task_detail(authenticated.actor, item.aggregate.task_id)
+        accepted_ids = {
+            decision.contribution_id
+            for decision in detail.decisions
+            if decision.decision is AcceptanceDecision.ACCEPTED
+        }
+        decided_ids = {decision.contribution_id for decision in detail.decisions}
+        result.append(
+            _view(item).model_copy(
+                update={
+                    "application_count": len(detail.applications),
+                    "assignment_count": len(detail.assignments),
+                    "pending_result_count": sum(
+                        contribution.id not in decided_ids for contribution in detail.contributions
+                    ),
+                    "accepted_result_count": len(accepted_ids),
+                    "deadline_at": (
+                        detail.terms.deadline_at
+                        if detail.terms is not None
+                        else item.aggregate.brief.deadline_at
+                    ),
+                }
+            )
+        )
+    return result
+
+
+@router.get("/customer/cases", response_model=list[TaskView])
+async def customer_cases(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> list[TaskView]:
+    return [_view(task) for task in await service.case_catalog(authenticated.actor)]
+
+
+@router.get("/customer/tasks/{task_id}", response_model=CustomerTaskDetailView)
+async def customer_task_detail(
+    task_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> CustomerTaskDetailView:
+    return _customer_detail_view(await service.customer_task_detail(authenticated.actor, task_id))
+
+
+@router.post("/customer/tasks/{task_id}/repeat", response_model=TaskView)
+async def repeat_task(
+    task_id: UUID,
+    command: RepeatTaskRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> TaskView:
+    return _view(await service.repeat_task(authenticated.actor, task_id, task_key=command.task_key))
+
+
+@router.post("/customer/tasks/{task_id}/invitations", response_model=InvitationView)
+async def invite_candidate(
+    task_id: UUID,
+    command: InviteCandidateRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> InvitationView:
+    return _invitation_view(
+        await service.invite_candidate(
+            authenticated.actor,
+            task_id,
+            command.person_id,
+            command.evidence_contribution_id,
+            command.request_id,
+            command.expires_at,
+        )
+    )
+
+
+@router.post(
+    "/customer/tasks/{task_id}/invitations/{person_id}/revoke", response_model=InvitationView
+)
+async def revoke_invitation(
+    task_id: UUID,
+    person_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> InvitationView:
+    return _invitation_view(
+        await service.revoke_invitation(authenticated.actor, task_id, person_id)
+    )
+
+
+@router.post("/customer/team-requests", response_model=TeamRequestView)
+async def create_team_request(
+    command: TeamRequestCommand,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> TeamRequestView:
+    return _team_request_view(
+        await service.save_team_request(
+            authenticated.actor,
+            title=command.title,
+            required_tags=tuple(command.required_tags),
+            preferred_tags=tuple(command.preferred_tags),
+            relevant_case_task_ids=tuple(command.relevant_case_task_ids),
+        )
+    )
+
+
+@router.put("/customer/team-requests/{request_id}", response_model=TeamRequestView)
+async def revise_team_request(
+    request_id: UUID,
+    command: TeamRequestCommand,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> TeamRequestView:
+    return _team_request_view(
+        await service.save_team_request(
+            authenticated.actor,
+            request_id=request_id,
+            title=command.title,
+            required_tags=tuple(command.required_tags),
+            preferred_tags=tuple(command.preferred_tags),
+            relevant_case_task_ids=tuple(command.relevant_case_task_ids),
+        )
+    )
+
+
+@router.get("/customer/team-requests/{request_id}", response_model=TeamRequestView)
+async def team_request(
+    request_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> TeamRequestView:
+    return _team_request_view(await service.team_request(authenticated.actor, request_id))
+
+
+@router.get("/customer/team-requests/{request_id}/matches", response_model=list[CandidateMatchView])
+async def team_request_matches(
+    request_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> list[CandidateMatchView]:
+    return [
+        _candidate_match_view(item)
+        for item in await service.match_candidates(authenticated.actor, request_id)
+    ]
+
+
+@router.post(
+    "/customer/team-requests/{request_id}/saved/{person_id}",
+    response_model=CandidateReservationView,
+)
+async def save_candidate(
+    request_id: UUID,
+    person_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> CandidateReservationView:
+    record = await service.save_candidate(authenticated.actor, request_id, person_id)
+    match = next(
+        item
+        for item in await service.match_candidates(authenticated.actor, request_id, limit=None)
+        if item.person_id == person_id
+    )
+    return _reservation_view(record, match)
+
+
+@router.get("/customer/saved-candidates", response_model=list[CandidateReservationView])
+async def saved_candidates(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> list[CandidateReservationView]:
+    return [
+        _reservation_view(record, match)
+        for record, match in await service.saved_candidates(authenticated.actor)
+    ]
+
+
+@router.get("/me/talent-passport", response_model=TalentPassportView)
+async def talent_passport(
+    request: Request,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> TalentPassportView:
+    cases = await service.participant_case_evidence(authenticated.actor)
+    enrollments = await request.app.state.development_service.store.enrollments(
+        authenticated.actor.person_id
+    )
+    verified_courses = sorted(
+        item.course_key for item in enrollments if item.status is CompletionStatus.VERIFIED
+    )
+    skill_counts: dict[str, set[UUID]] = {}
+    for item in cases:
+        for tag in item.competency_tags:
+            skill_counts.setdefault(tag, set()).add(item.task_id)
+    return TalentPassportView(
+        person_id=authenticated.actor.person_id,
+        verified_courses=verified_courses,
+        skills=[
+            PassportSkillView(
+                key=key, practical_level="confirmed", confirmed_case_count=len(task_ids)
+            )
+            for key, task_ids in sorted(skill_counts.items())
+        ],
+        cases=[CaseEvidenceView.model_validate(item, from_attributes=True) for item in cases],
+    )
+
+
+@router.post("/me/tasks/{task_id}/invitation", response_model=InvitationView)
+async def decide_invitation(
+    task_id: UUID,
+    command: DecideInvitationRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> InvitationView:
+    return _invitation_view(
+        await service.decide_invitation(authenticated.actor, task_id, accepted=command.accepted)
+    )
 
 
 @router.get("/manager/overview", response_model=ManagerOverviewView)
@@ -447,6 +837,11 @@ async def create_task(
                 payout_condition=command.compensation.payout_condition,
             ),
             places=command.places,
+            mode=command.mode,
+            competency_tags=tuple(command.competency_tags),
+            case_rubric=(
+                CaseRubric(**command.case_rubric.model_dump()) if command.case_rubric else None
+            ),
         )
     )
 

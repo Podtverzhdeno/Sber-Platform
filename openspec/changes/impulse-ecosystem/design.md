@@ -18,6 +18,7 @@
 
 **Goals:**
 
+- Проверить, помогает ли цепочка подтверждённых кейсов находить подходящих специалистов под конкретные запросы команд и сокращать время первичного отбора.
 - Поставить демонстрируемый end-to-end MVP для шести рабочих ролей в одном развёртывании.
 - Сделать спецификации трассируемыми: requirement/scenario → task → automated test → API/UI behavior.
 - Отделить доменные правила от UI, ORM, OpenRouter и LangGraph так, чтобы провайдеры заменялись адаптерами.
@@ -28,6 +29,7 @@
 
 **Non-Goals:**
 
+- Автоматический найм по общему рейтингу или сертификату; стартап-трек в 12-недельном пилоте.
 - Реальный перевод денег, банковские реквизиты и интеграция с платёжной системой.
 - Корпоративный SSO, кадровая система, API МАЯКОВ, LMS Сбера и юридически значимая электронная подпись.
 - Автоматическая публикация оценки, оффера, трофея, диплома или кадрового решения моделью.
@@ -123,6 +125,8 @@ Sber-platform/
 | Заказчик | собственные задачи, заявки, бизнес-артефакты | бриф, версия условий, business acceptance |
 | Руководитель | агрегаты собственной команды | только объекты, где отдельно имеет customer permission |
 | HR | consented portfolio и проверяемые факты | приглашение, интервью, подтверждение оффера |
+
+Руководитель с назначенным правом заказчика создаёт и ведёт только собственную задачу, включая приглашение выбранных кандидатов; это не даёт доступа к чужим задачам, закрытым комментариям ментора или HR-решениям. Подбор открывает персональные доказательства только в пределах отдельного согласия участника. Отзыв согласия исключает его из новых подборок и закрывает просмотр ранее сохранённой карточки, сохраняя обязательный аудит. HR подтверждает кадровые стадии независимо от руководительской оценки кейса.
 | Оператор | операционные дела и нужные зависимости | модерация, support assignment, verification, dispute decision |
 
 ### 5. Data model и правила хранения
@@ -139,6 +143,7 @@ Sber-platform/
 - Ecosystem: `events`, `programs`, `participation_claims`, `external_sources`, `provider_records`.
 - Collaboration: `channels`, `channel_memberships`, `messages`, `message_versions`, `message_attachments`, `read_cursors`, `notification_preferences`.
 - Discovery: `search_documents` как перестраиваемая проекция разрешённых типов; RBAC и object relation проверяются повторно до возврата результата.
+- Talent: `team_requests`, `case_assessments`, `candidate_matches`, `candidate_shortlists`, `task_invitations`, `talent_pool_entries`; подборка является пересчитываемой проекцией по версии запроса, evidence, согласия и политики, а приглашения и решения — аудируемыми фактами.
 - Assist: `agent_threads`, `agent_messages`, `agent_runs`, `agent_suggestions`, `human_decisions`, `agent_feedback`, `model_policies`.
 - Insight: `domain_events`, `audit_entries`, `metric_snapshots`.
 
@@ -159,6 +164,7 @@ Sber-platform/
 - Season: `scheduled → open → closing → frozen`. Документ выдаётся после `frozen`; поздняя коррекция создаёт `superseded`/новую версию.
 - External evidence: `reported → awaiting_verification → verified | rejected → revoked?`.
 - Agent run: `created → running → awaiting_human | completed | failed | cancelled`; suggestion: `draft → pending_decision → approved | edited | rejected | stale`.
+- Закрытое приглашение: `draft → sent → accepted | declined | expired | revoked`; принятие создаёт заявку или назначение по обычным правилам задачи и не создаёт интервью автоматически. В кадровом резерве: `saved → contacted → removed`; интервью и оффер остаются отдельными HR-событиями.
 
 Недопустимый переход возвращает `409 INVALID_STATE_TRANSITION`; несовпавшая версия — `409 STALE_VERSION`; повтор с тем же idempotency key возвращает исходный результат. Agent suggestion не входит в транзакцию consequential action: человек просматривает предложение, а доменный command заново проверяет evidence и version.
 
@@ -184,6 +190,8 @@ Review 5+ хранит rubric version, grade, критерии, human-authored e
 До утверждения реальных D01–D10 production-like flags блокируют `paid=true`, открытие season и юридически значимую выдачу; в `DEMO_MODE` сценарии работают на синтетике и визуально обозначены.
 
 ### 8. HTTP API contract
+
+Для talent matching API предоставляет запросы команды, объяснимый список соответствий, разрешённый паспорт кандидата, shortlist и приглашения. Кандидат попадает в выдачу только при завершённом кейсе с подтверждённым личным вкладом и действующим доступом; неподтверждённый курс, общий рейтинг или AI-оценка не проходят этот порог. В каждом соответствии возвращаются критерии запроса, ссылки на допустимые доказательства, версии и пробелы; сортировка детерминирована и не является решением о найме. Команды приглашения проверяют владельца задачи, согласие, актуальность доказательств, места и идемпотентность.
 
 Базовый путь — `/api/v1`. Все даты ISO 8601 UTC, списки используют cursor pagination, ошибки имеют единый вид `{code, message, field_errors?, request_id, retryable}`. Опасные записи требуют `Idempotency-Key`; responses с consequential data возвращают `object_version` и `policy_version`.
 
@@ -238,11 +246,15 @@ Design tokens: нейтральная светлая основа, зелёны�
 
 **Ментор:** dashboard нагрузки и overdue; очередь assigned contributions; workspace с brief, rubric, personal evidence, AI suggestion с citations/missing evidence, human edit/publish/escalate; analytics response time, backlog, rework и overload. Track switch — только рекомендация для разговора.
 
-**Заказчик:** dashboard собственных briefs/decisions; wizard задачи с problem, deliverable, criteria, deadline, data/IP, support, paid/unpaid, per-person base, exact A coefficient и places; participant preview; applications/staffing/checkpoints/business acceptance; analytics fill, time-to-acceptance, rework, spend. Mentor nomination optional.
+**Заказчик:** главная с KPI `published/in_progress/awaiting_acceptance/accepted`, приоритетной задачей, последними результатами и краткой аналитикой; портфель задач и результатов с фильтрами и inspector; пятишаговый wizard `brief → criteria/deadline → terms/payment → support → preview/publish`; заявки, сопоставление кандидатов и назначения; прогресс и формальная приёмка относительно принятой версии условий; контекстные сообщения; аналитика воронки, скорости, качества и повторного использования. База участников показывает только consented профили с подтверждённым релевантным кейсом. Открытая задача может принимать заявки новичков; это не открывает им доступ в базу проверенных кандидатов. Mentor nomination optional.
 
-**Руководитель:** initiatives, delegated tasks, deadlines, accepted artifacts, reuse marker и team aggregates. Нет личной переписки, закрытых mentor comments и чужих выплат.
+Для заказчика и руководителя используется общий доменный контур задачи и приглашения, но разрешения определяются отношением к конкретному объекту. Заказчик может выбрать режим `open` или `invitation_only`; закрытая задача доступна только приглашённым. Сохранение черновика, предпросмотр и публикация являются разными командами. Приёмка бизнес-результата не публикует автоматически оценку 5+, не утверждает сумму и не подтверждает факт перевода. Повторное использование создаёт новую версию брифа/задачи и новое приглашение после повторной проверки согласия, а не переносит старое согласие или назначение.
+
+**Руководитель:** initiatives, delegated tasks, deadlines, accepted artifacts, reuse marker и team aggregates. Дополнительно: запрос потребности команды, самостоятельный просмотр доказательств либо короткая объяснимая подборка, сохранение кандидатов, создание закрытой задачи с правом заказчика, приглашение выбранных участников и сравнение результатов по общей рубрике. Нет личной переписки, закрытых mentor comments и чужих выплат.
 
 **HR:** поиск только consented candidates; фильтры по track и verified facts; evidence-first resume; credential/trophy verification; pipeline `viewed → invited → responded → interview → actual offer → hire`. Ranking не создаёт стадию автоматически.
+
+**Практический кейс:** опубликованная до старта рубрика отдельно фиксирует качество результата, ход решения, работу с неопределённостью, использование ИИ с раскрытием его роли и защиту решения. Ментор проверяет личный вклад и доказательства, заказчик принимает бизнес-результат, руководитель принимает решение об интересе к кандидату. Отсутствие наблюдаемого доказательства помечается «не оценено», а не нулём.
 
 **Оператор:** unified cases для moderation, support, external evidence, disputes, deadlines, failed payout и revocation; case timeline, versions, sources, dependencies, AI priority/duplicate suggestion и human decision; policy/season/rubric management; operational analytics.
 
@@ -360,6 +372,8 @@ Versioned dataset содержит как минимум: первая/трет�
 Hard gate немедленно отклоняет релиз при: cross-person disclosure, secret leak, неверной сумме, ложном personal offer, write/consequential action без человека, использовании non-free модели или запрещённого data class. Средний score не компенсирует hard failure.
 
 ### 19. Analytics architecture
+
+Пилот длится 12 недель и охватывает два направления, несколько реальных кейсов, существующий Bootcamp и три подразделения. Для каждого этапа `verified_case → manager_interest → task_invitation → case_completion → interview` фиксируются период, когорта, числитель, знаменатель и источник. Время руководителя на первичный отбор измеряется одинаковым способом для пилота и выбранной базовой процедуры; экономия является проверяемой гипотезой, а не заявленным результатом.
 
 `domain_events` создаются транзакционно вместе с изменением состояния. Payload не содержит raw chat, mentor free text или банковские реквизиты. Для MVP метрики считаются SQL queries/read models по небольшому dataset; преждевременный warehouse не вводится. Событие содержит schema version, occurred/ingested time, actor role, pseudonymous subject, entity, cohort, source, policy, consent scope, correlation/idempotency keys.
 

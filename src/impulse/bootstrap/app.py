@@ -84,6 +84,7 @@ def create_app(
             SqlWorkStore(owned_database) if owned_database is not None else MemoryWorkStore()
         )
         work_service = WorkService(work_store)
+    work_service.consent_store = auth_service.store
     if reward_service is None:
         reward_store = (
             SqlRewardStore(owned_database) if owned_database is not None else MemoryRewardStore()

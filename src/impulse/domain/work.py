@@ -17,6 +17,11 @@ class TaskStatus(StrEnum):
     PUBLISHED = "published"
 
 
+class TaskMode(StrEnum):
+    OPEN = "open"
+    INVITATION_ONLY = "invitation_only"
+
+
 class SupportMode(StrEnum):
     MENTOR = "mentor"
     BUDDY = "buddy"
@@ -157,6 +162,23 @@ class TaskBrief:
     deadline_at: datetime | None = None
     data_constraints: str = ""
     ip_terms: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class CaseRubric:
+    version: int
+    result: str
+    reasoning: str
+    uncertainty: str
+    ai_use: str
+    defense: str
+
+    def missing(self) -> tuple[str, ...]:
+        return tuple(
+            key
+            for key in ("result", "reasoning", "uncertainty", "ai_use", "defense")
+            if not getattr(self, key).strip()
+        )
 
 
 @dataclass(frozen=True, slots=True)
