@@ -16,10 +16,10 @@ test("customer premium workspace renders every route without overflow", async ({
   await expect(page.getByRole("button", { name: /Учебный стрик/ })).toHaveCount(0);
 
   const sidebar = page.getByRole("navigation", { name: "Навигация роли" });
-  await expect(sidebar.getByRole("link")).toHaveCount(8);
-  for (const section of ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения"]) {
+  await expect(sidebar.getByRole("link")).toHaveCount(9);
+  for (const section of ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения", "Настройки"]) {
     await sidebar.getByRole("link", { name: section, exact: true }).click();
-    await expect(page.locator(".premium-page, .messenger-page, .customer-talent-analytics, .buddy-page, .create-task-workspace").first()).toBeVisible();
+    await expect(page.locator(".premium-page, .messenger-page, .customer-talent-analytics, .buddy-page, .create-task-workspace, .participant-settings").first()).toBeVisible();
     const overflow = await page.evaluate<boolean>("document.documentElement.scrollWidth > document.documentElement.clientWidth");
     expect(overflow, `${section} has horizontal overflow`).toBe(false);
     await page.screenshot({ path: `test-results/customer-${section.replace(/[^a-zа-я0-9]+/giu, "-")}.png`, fullPage: true });

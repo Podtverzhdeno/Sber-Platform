@@ -56,7 +56,7 @@ type Actor = {
   csrf_token?: string | null;
 };
 type PublicConfig = { honor_board_enabled?: boolean; demo_mode?: boolean };
-const customerSections = ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения"];
+const customerSections = ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения", "Настройки"];
 
 const roleLabels: Record<Role, string> = {
   participant: "Участник",
@@ -366,7 +366,7 @@ function Workspace({
           <span aria-hidden="true">☰</span> Меню
         </button>
         {allowed && actor.active_role === "customer" && mockCustomer ? (
-          currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" /> : <CustomerPremium section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
+          currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" /> : currentSection === "Настройки" ? <ParticipantSettings actorName={actor.display_name} consentScopes={actor.consent_scopes} /> : <CustomerPremium section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
         ) : allowed && currentSection === "Главная" ? (
           actor.active_role === "participant" ? (
             <ParticipantDashboard actor={actor} />
