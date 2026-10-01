@@ -113,7 +113,8 @@ test("customer settings show the customer profile without participant HR control
   await openCustomer(page);
   await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Настройки",exact:true}).click();
   await expect(page.getByRole("heading",{name:"Профиль заказчика"})).toBeVisible();
-  await expect(page.getByLabel("ФИО")).toHaveValue("Алексей Речной");
+  await expect(page.getByLabel("ФИО")).toHaveValue("Роман Воронов");
+  await expect(page.getByLabel("Telegram")).toHaveValue("@roman_voronov");
   await expect(page.getByRole("button",{name:"Видимость для HR",exact:true})).toHaveCount(0);
   await expect(page.getByRole("button",{name:"Подбор",exact:true})).toHaveCount(0);
 });
