@@ -73,6 +73,48 @@ test("customer returns a result for revision with a detailed reason", async ({ p
   await expect(page.getByRole("button",{name:"Запрос на доработку отправлен",exact:true})).toBeDisabled();
 });
 
+test("AI suggestions update the brief and a published task appears in My Tasks", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Создать задачу",exact:true}).click();
+  await page.getByLabel("Название задачи").fill("AI-поиск внутренних регламентов");
+  await page.getByLabel("Проблема и цель").fill("Сотрудники долго ищут актуальные регламенты.");
+  await page.getByLabel("Ожидаемый результат").fill("Рабочий поисковый прототип.");
+  await page.locator(".create-ai-panel article",{hasText:"Добавьте целевую аудиторию решения"}).getByRole("button").click();
+  await expect(page.getByRole("status")).toContainText("Рекомендация применена");
+  await expect(page.getByLabel("Проблема и цель")).toHaveValue(/Целевая аудитория/);
+  await page.locator(".create-ai-panel article",{hasText:"Укажите формат и источник данных"}).getByRole("button").click();
+  await expect(page.getByLabel("Ожидаемый результат")).toHaveValue(/CSV\/JSON/);
+  await page.getByRole("button",{name:"Продолжить"}).click();
+  await page.getByLabel("Критерии успеха").fill("Precision@10 не ниже 0.8");
+  for(let step=0;step<3;step+=1) await page.getByRole("button",{name:"Продолжить"}).click();
+  await page.getByRole("button",{name:"Опубликовать"}).click();
+  await expect(page).toHaveURL(/\/workspace\/1\?created=IMP-/);
+  await expect(page.getByText("AI-поиск внутренних регламентов",{exact:true}).first()).toBeVisible();
+  await expect(page.getByText("Опубликована",{exact:true}).first()).toBeVisible();
+});
+
+test("customer can send messages and each dialog keeps its own history", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Сообщения",exact:true}).click();
+  const composer=page.getByLabel("Сообщение");
+  await composer.fill("Проверил новую версию, спасибо.");
+  await page.getByRole("button",{name:"Отправить",exact:true}).click();
+  await expect(page.getByText("Проверил новую версию, спасибо.",{exact:true})).toBeVisible();
+  await page.locator(".chat-list>button").nth(1).click();
+  await expect(page.getByText("Проверил новую версию, спасибо.",{exact:true})).toHaveCount(0);
+  await page.locator(".chat-list>button").first().click();
+  await expect(page.getByText("Проверил новую версию, спасибо.",{exact:true})).toBeVisible();
+});
+
+test("customer settings show the customer profile without participant HR controls", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Настройки",exact:true}).click();
+  await expect(page.getByRole("heading",{name:"Профиль заказчика"})).toBeVisible();
+  await expect(page.getByLabel("ФИО")).toHaveValue("Алексей Речной");
+  await expect(page.getByRole("button",{name:"Видимость для HR",exact:true})).toHaveCount(0);
+  await expect(page.getByRole("button",{name:"Подбор",exact:true})).toHaveCount(0);
+});
+
 test("customer opens the selected participant profile and direct dialog", async ({ page }) => {
   await openCustomer(page);
   await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Мои задачи",exact:true}).click();
