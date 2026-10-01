@@ -188,6 +188,17 @@ test("application filters change independently", async ({ page }) => {
   await expect(match).toHaveValue("90");
 });
 
+test("customer applications identify and filter by project", async ({ page }) => {
+  await openCustomer(page);
+  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Заявки",exact:true}).click();
+  await expect(page.locator(".applications-candidate-row.candidate-head")).toContainText("Проект");
+  await expect(page.locator(".application-project").first()).toContainText("IMP-");
+  const project=page.getByLabel("Проект заявки");
+  await project.selectOption({index:1});
+  const selectedTitle=await project.locator("option:checked").textContent();
+  await expect(page.locator(".application-project b")).toHaveText(Array(await page.locator(".application-project b").count()).fill(selectedTitle??""));
+});
+
 test("customer analytics updates metrics for the selected period", async ({ page }) => {
   await openCustomer(page);
   await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Аналитика", exact: true }).click();
