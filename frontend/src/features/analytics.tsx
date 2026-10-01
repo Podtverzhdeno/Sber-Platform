@@ -63,19 +63,25 @@ const competencyGroups: Record<CompetencyView, { label: string; eyebrow: string;
 };
 
 function CompetencyRadar({ items }: { items: Competency[] }) {
-  const center = 112;
-  const radius = 82;
+  const centerX = 170;
+  const centerY = 140;
+  const radius = 78;
   const point = (index: number, value: number) => {
     const angle = -Math.PI / 2 + (Math.PI * 2 * index) / items.length;
     const scaled = radius * value / 100;
-    return `${String(center + Math.cos(angle) * scaled)},${String(center + Math.sin(angle) * scaled)}`;
+    return `${String(centerX + Math.cos(angle) * scaled)},${String(centerY + Math.sin(angle) * scaled)}`;
+  };
+  const labelPoint = (index: number) => {
+    const angle = -Math.PI / 2 + (Math.PI * 2 * index) / items.length;
+    return { x:centerX + Math.cos(angle) * 112, y:centerY + Math.sin(angle) * 108, anchor:Math.cos(angle) > .25 ? "start" : Math.cos(angle) < -.25 ? "end" : "middle" } as const;
   };
   const rings = [25, 50, 75, 100];
-  return <div className="competency-radar"><svg viewBox="0 0 224 224" role="img" aria-label="Циклограмма уровня компетенций">
+  return <div className="competency-radar"><svg viewBox="0 0 340 280" role="img" aria-label="Циклограмма уровня компетенций с подписями показателей">
     {rings.map((ring) => <polygon className="radar-ring" key={ring} points={items.map((_, index) => point(index, ring)).join(" ")} />)}
-    {items.map((item, index) => <line className="radar-axis" key={item.title} x1={center} y1={center} x2={point(index, 100).split(",")[0]} y2={point(index, 100).split(",")[1]} />)}
+    {items.map((item, index) => <line className="radar-axis" key={item.title} x1={centerX} y1={centerY} x2={point(index, 100).split(",")[0]} y2={point(index, 100).split(",")[1]} />)}
     <polygon className="radar-value" points={items.map((item, index) => point(index, item.score)).join(" ")} />
     {items.map((item, index) => { const [cx, cy] = point(index, item.score).split(","); return <circle className="radar-point" key={item.title} cx={cx} cy={cy} r="4" />; })}
+    {items.map((item,index)=>{const label=labelPoint(index);return <text className="radar-axis-label" key={`label-${item.title}`} x={label.x} y={label.y} textAnchor={label.anchor}><tspan x={label.x}>{item.title}</tspan><tspan className="radar-axis-score" x={label.x} dy="13">{item.score}%</tspan></text>;})}
   </svg><div className="radar-legend">{items.map((item, index) => <span key={item.title}><i style={{ "--radar-index": index } as CSSProperties} />{item.title}<strong>{item.score}%</strong></span>)}</div></div>;
 }
 

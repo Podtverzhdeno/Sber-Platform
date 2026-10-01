@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("participant analytics keeps incomplete journey separate from success and paid money", async ({ page }) => {
+test("participant analytics explains the journey and labels the competency radar", async ({ page }) => {
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: {} }));
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: "Алекс Речной", roles: ["participant"] }] }));
   await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: {} }));
@@ -12,11 +12,11 @@ test("participant analytics keeps incomplete journey separate from success and p
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Аналитика" }).click();
   await expect(page.getByRole("heading", { name: "Ваш прогресс и подтверждённый результат" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "От обучения до выплаты" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "От обучения до принятого результата" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Активность по неделям" })).toBeVisible();
   await expect(page.getByText("Путь продолжается")).toBeVisible();
-  await expect(page.getByText("15 000 RUB")).toBeVisible();
-  await expect(page.getByText("0 RUB", { exact: true })).toHaveCount(3);
+  await expect(page.locator(".radar-axis-label")).toHaveCount(5);
+  await expect(page.locator(".radar-axis-label").filter({ hasText: "Python" })).toContainText("82%");
   await expect(page.locator(".analytics-histogram i")).toHaveCount(8);
   const screenshot = await page.locator(".participant-analytics").screenshot();
   expect(screenshot.byteLength).toBeGreaterThan(1_000);

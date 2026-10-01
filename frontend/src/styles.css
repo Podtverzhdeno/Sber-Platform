@@ -460,10 +460,11 @@ th, td { padding: 12px; border-bottom: 1px solid rgb(255 255 255 / 10%); text-al
 .radar-card { min-width: 0; padding: 14px; border: 1px solid #18364d; border-radius: 13px; background: radial-gradient(circle at 50% 30%, rgb(45 161 189 / 12%), transparent 55%), #091a29; }
 .radar-card h3 { margin: 0 0 3px; font-size: 15px; }
 .radar-card small { color: #7890a7; }
-.competency-radar svg { display: block; width: min(100%, 260px); margin: 5px auto; overflow: visible; }
+.competency-radar svg { display: block; width: min(100%, 340px); margin: 5px auto; overflow: visible; }
 .radar-ring, .radar-axis { fill: none; stroke: #24435a; stroke-width: 1; }
 .radar-value { fill: rgb(42 220 198 / 20%); stroke: #39dfca; stroke-width: 2; filter: drop-shadow(0 0 7px rgb(42 220 198 / 22%)); }
 .radar-point { fill: #8cf9eb; stroke: #0b4050; stroke-width: 2; }
+.radar-axis-label{fill:#9eb3c6;font-size:8px;font-weight:700}.radar-axis-score{fill:#52e3cf;font-size:9px;font-weight:850}
 .radar-legend { display: grid; gap: 6px; }
 .radar-legend span { display: grid; grid-template-columns: 7px 1fr auto; gap: 7px; align-items: center; color: #9eb0c2; font-size: 10px; }
 .radar-legend span > i { width: 6px; height: 6px; border-radius: 50%; background: #39dfca; box-shadow: 0 0 7px rgb(57 223 202 / 45%); }
