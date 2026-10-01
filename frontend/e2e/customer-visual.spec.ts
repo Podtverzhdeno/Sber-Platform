@@ -97,6 +97,9 @@ test("customer can send messages and each dialog keeps its own history", async (
   await openCustomer(page);
   await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Сообщения",exact:true}).click();
   const composer=page.getByLabel("Сообщение");
+  await expect(composer).toBeInViewport();
+  await expect(page.getByRole("button",{name:"Прикрепить файл"})).toBeInViewport();
+  await expect(page.getByRole("button",{name:"Отправить",exact:true})).toBeInViewport();
   await composer.fill("Проверил новую версию, спасибо.");
   await page.getByRole("button",{name:"Отправить",exact:true}).click();
   await expect(page.getByText("Проверил новую версию, спасибо.",{exact:true})).toBeVisible();

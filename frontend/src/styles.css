@@ -348,16 +348,17 @@ th, td { padding: 12px; border-bottom: 1px solid rgb(255 255 255 / 10%); text-al
 .chat-list small, .chat-list em { color: var(--muted); font-size: .72rem; font-style: normal; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chat-list b { align-self: center; padding: 3px 7px; border-radius: 20px; background: #18cabb; color: #03110f; }
 .chat-avatar { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #17334a; color: #5bf4df; }
-.chat-thread { display: grid; grid-template-rows: auto 1fr auto; min-width: 0; }
+.chat-thread { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-width: 0; min-height: 0; overflow: hidden; }
 .chat-thread > header { display: flex; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--border); }
 .chat-thread > header div { display: grid; gap: 4px; }
 .chat-thread > header small { color: var(--muted); }
-.message-history { padding: 22px; overflow: auto; background: radial-gradient(circle at 50% 20%, #12314a44, transparent 45%); }
+.message-history { min-height: 0; padding: 22px; overflow: auto; background: radial-gradient(circle at 50% 20%, #12314a44, transparent 45%); }
 .message-history article { width: min(72%, 620px); margin-bottom: 16px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 4px 14px 14px; background: #102235; }
 .message-history article.own { margin-left: auto; border-radius: 14px 4px 14px 14px; background: #0c4c49; }
 .message-history article > div { display: flex; align-items: center; gap: 8px; }
 .message-history time { margin-left: auto; color: var(--muted); font-size: .72rem; }
-.message-composer { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; padding: 14px; border-top: 1px solid var(--border); }
+.message-composer { position: relative; z-index: 2; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; padding: 14px; border-top: 1px solid var(--border); background: #081827; }
+.messenger-page>.messenger-shell{height:100%;min-height:0}.messenger-page>.messenger-shell .chat-list,.messenger-page>.messenger-shell .chat-context{min-height:0;overflow:auto}
 .message-composer textarea { min-height: 44px; max-height: 100px; resize: vertical; }
 .message-composer textarea { box-sizing: border-box; padding: 12px 14px; border: 1px solid #29445e; border-radius: 12px; outline: 0; color: var(--text); background: #0d2031; font: inherit; }
 .message-composer textarea:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px rgb(34 230 208 / 10%); }
