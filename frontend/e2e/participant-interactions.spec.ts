@@ -142,6 +142,10 @@ test("header notifications and rating indicators open real destinations", async 
   await page.getByRole("button", { name: /Checkpoint принят/ }).click();
   await expect(page).toHaveURL(/\/workspace\/4$/);
   await page.getByRole("button", { name: "Рейтинг: 3 место, 450 баллов" }).click();
+  await expect(page.getByRole("dialog", { name: "Баллы и место в рейтинге" })).toBeVisible();
+  await expect(page.getByText("постоянных баллов")).toBeVisible();
+  await expect(page.getByText("До 2 места")).toBeVisible();
+  await page.getByRole("button", { name: "Открыть рейтинг →" }).click();
   await expect(page).toHaveURL(/\/workspace\/6$/);
   await expect(page.getByRole("heading", { name: "Рейтинг подтверждённого опыта" })).toBeVisible();
 });

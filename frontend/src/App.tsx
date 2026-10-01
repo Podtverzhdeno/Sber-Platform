@@ -996,6 +996,7 @@ function ImpulseApp() {
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [streakOpen, setStreakOpen] = useState(false);
+  const [rankingOpen, setRankingOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [readNotifications, setReadNotifications] = useState<string[]>([]);
 
@@ -1171,6 +1172,7 @@ function ImpulseApp() {
                   aria-expanded={streakOpen}
                   onClick={() => {
                     setStreakOpen((value) => !value);
+                    setRankingOpen(false);
                     setNotificationOpen(false);
                     setSearchOpen(false);
                   }}
@@ -1218,20 +1220,7 @@ function ImpulseApp() {
                   </div>
                 )}
               </div>}
-              {actor.active_role === "participant" && (
-                <button
-                  className="ranking-utility"
-                  type="button"
-                  aria-label="Рейтинг: 3 место, 450 баллов"
-                  onClick={() => {
-                    openSearchItem("Рейтинг");
-                  }}
-                >
-                  <span aria-hidden="true">♜</span>
-                  <strong>3 место</strong>
-                  <small>450 баллов</small>
-                </button>
-              )}
+              {actor.active_role === "participant" && <div className="ranking-wrapper"><button className="ranking-utility" type="button" aria-label="Рейтинг: 3 место, 450 баллов" aria-expanded={rankingOpen} onClick={()=>{setRankingOpen(value=>!value);setStreakOpen(false);setNotificationOpen(false);setSearchOpen(false);}}><span aria-hidden="true">♜</span><strong>3 место</strong><small>450 баллов</small></button>{rankingOpen&&<div className="ranking-popover" role="dialog" aria-label="Баллы и место в рейтинге"><header><div><span>Рейтинг сезона</span><strong>3 место</strong></div><b>ТОП 5%</b></header><div className="ranking-score-grid"><article><strong>450</strong><span>постоянных баллов</span></article><article><strong>+5</strong><span>заморожено</span></article></div><div className="ranking-next"><span>До 2 места</span><strong>50 баллов</strong><i><b/></i></div><button type="button" onClick={()=>{setRankingOpen(false);openSearchItem("Рейтинг");}}>Открыть рейтинг →</button></div>}</div>}
               <div className="notification-utility">
                 <button
                   className="notification-button"
@@ -1241,6 +1230,7 @@ function ImpulseApp() {
                   onClick={() => {
                     setNotificationOpen((value) => !value);
                     setStreakOpen(false);
+                    setRankingOpen(false);
                   }}
                 >
                   ♢
