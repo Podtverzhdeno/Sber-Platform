@@ -13,6 +13,8 @@ type Review = {
   id: string;
   contribution_id: string;
   contribution_version: number;
+  rubric_id: string;
+  rubric_version: number;
   version: number;
   grade: "A" | "B" | "C";
   assessments: Assessment[];
@@ -31,13 +33,20 @@ type Payout = {
   version: number;
 };
 type RewardItem = { review: Review; payout: Payout | null };
-type MentorQueueItem = RewardItem & {
+type RubricCriterionLite = { key: string; title: string };
+export type MentorQueueItem = RewardItem & {
   task_title: string;
   deadline_at: string;
   personal_summary: string;
   artifact_keys: string[];
   contribution_accepted: boolean;
   authorship_conflict_open: boolean;
+  participant_name?: string;
+  project_key?: string;
+  task_kind?: string;
+  rubric_key?: string;
+  rubric_version?: number;
+  rubric_criteria?: RubricCriterionLite[];
 };
 
 const csrfHeaders = (): HeadersInit => ({
@@ -486,9 +495,24 @@ export function ParticipantRewardEvidence() {
   );
 }
 
+const kindLabels: Record<string, string> = { case: "Кейс", task: "Задача" };
+const deadlineFormatter = new Intl.DateTimeFormat("ru-RU", {
+  day: "numeric",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
 export function MentorReviewWorkspace() {
   const client = useQueryClient();
   const [escalated, setEscalated] = useState<Set<string>>(new Set());
+  const [revisions, setRevisions] = useState<Set<string>>(new Set());
+  const [queueFilter, setQueueFilter] = useState("Все");
+  const [queueSearch, setQueueSearch] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("Доказательства");
+  const [grade, setGrade] = useState<"A" | "B" | "C">("A");
+  const [decision, setDecision] = useState("");
   const query = useQuery({
     queryKey: ["mentor-review-workspace"],
     queryFn: () => apiRequest<MentorQueueItem[]>("/api/v1/mentor/review-queue"),
@@ -507,8 +531,16 @@ export function MentorReviewWorkspace() {
         headers: csrfHeaders(),
         body: JSON.stringify({ expected_version: review.version }),
       }),
-    onSuccess: async () =>
-      client.invalidateQueries({ queryKey: ["mentor-review-workspace"] }),
+    onSuccess: async (_data, variables) => {
+      await client.invalidateQueries({ queryKey: ["mentor-review-workspace"] });
+      if (variables.action === "publish") {
+        setDecision("Оценка опубликована и отправлена в расчёт вознаграждения.");
+      } else if (variables.action === "confirm") {
+        setDecision("Решение подтверждено человеком; можно опубликовать.");
+      } else {
+        setDecision("Черновик передан на подтверждение.");
+      }
+    },
   });
   if (query.isLoading) return <StatePanel kind="loading" />;
   if (query.isError || !query.data)
@@ -522,118 +554,367 @@ export function MentorReviewWorkspace() {
       />
     );
   if (query.data.length === 0) return <MentorDemoWorkspace />;
+  const now = Date.now();
+  const enriched = query.data.map((item) => ({
+    item,
+    overdue: new Date(item.deadline_at).getTime() < now,
+  }));
+  const search = queueSearch.trim().toLowerCase();
+  const visible = enriched.filter(({ item, overdue }) => {
+    const matchesSearch = `${item.participant_name ?? ""} ${item.task_title}`
+      .toLowerCase()
+      .includes(search);
+    const matchesFilter =
+      queueFilter === "Все" ||
+      (queueFilter === "Просроченные" && overdue) ||
+      (queueFilter === "С AI-черновиком" &&
+        item.review.draft_origin === "ai_suggestion") ||
+      (queueFilter === "С конфликтом" && item.authorship_conflict_open) ||
+      (queueFilter === "Кейсы" && item.task_kind === "case");
+    return matchesSearch && matchesFilter;
+  });
+  const selected = visible.find(({ item }) => item.review.id === selectedId) ?? visible[0];
+  if (!selected) return <StatePanel kind="empty" />;
+  const item = selected.item;
+  const review = item.review;
+  const statusLabel = statusLabels[review.status] ?? review.status;
+  const selectEntry = (candidate: MentorQueueItem) => {
+    setSelectedId(candidate.review.id);
+    setGrade(candidate.review.grade);
+    setDecision("");
+  };
+  const checklist: Array<{ title: string; kind: string; tone: "warning" | "success" }> = [];
+  for (const criterion of item.rubric_criteria ?? []) {
+    const assessment = review.assessments.find(
+      (entry) => entry.criterion_key === criterion.key,
+    );
+    if (!assessment) {
+      checklist.push({
+        title: criterion.title,
+        kind: "Обязательное доказательство отсутствует",
+        tone: "warning",
+      });
+    } else if (assessment.evidence_refs.length === 0) {
+      checklist.push({
+        title: criterion.title,
+        kind: "Рекомендация: приложить доказательство",
+        tone: "warning",
+      });
+    } else {
+      checklist.push({
+        title: criterion.title,
+        kind: `Доказательства: ${assessment.evidence_refs.join(", ")}`,
+        tone: "success",
+      });
+    }
+  }
+  if (item.authorship_conflict_open) {
+    checklist.push({
+      title: "Конфликт авторства открыт",
+      kind: "Разобрать до публикации оценки",
+      tone: "warning",
+    });
+  }
   return (
-    <div className="feature-stack">
-      <section>
-        <p className="eyebrow">Ментор · human-in-the-loop</p>
-        <h1 id="workspace-title">Проверяйте доказательства, а не вывод AI</h1>
-        <p className="lead">
-          Очередь отсортирована сервером по дедлайну. Видны только назначенные
-          вам работы; AI-черновик отделён от финального решения человека.
-        </p>
-      </section>
-      {query.data.length ? (
-        <div className="mentor-queue">
-          {query.data.map((item) => (
-            <article className="mentor-queue-item" key={item.review.id}>
-              <header>
-                <div>
-                  <p className="eyebrow">
-                    До {new Date(item.deadline_at).toLocaleString("ru-RU")}
-                  </p>
-                  <h2>{item.task_title}</h2>
-                </div>
-                <Badge
-                  tone={
-                    item.authorship_conflict_open
-                      ? "warning"
-                      : item.contribution_accepted
-                        ? "success"
-                        : "neutral"
-                  }
-                >
-                  {item.authorship_conflict_open
-                    ? "Конфликт авторства"
-                    : item.contribution_accepted
-                      ? "Вклад принят"
-                      : "Ожидает приёмки"}
-                </Badge>
-              </header>
-              <div className="mentor-evidence">
-                <div>
-                  <h3>Личный вклад</h3>
-                  <p>{item.personal_summary}</p>
-                  <small>
-                    Доказательства:{" "}
-                    {item.artifact_keys.join(", ") || "не приложены"}
-                  </small>
-                </div>
-                <ReviewEvidence item={item} mentor />
+    <div className="feature-stack mentor-demo">
+      <header className="dashboard-heading">
+        <div>
+          <p className="eyebrow">Ментор · review workspace</p>
+          <h1 id="workspace-title">Проверка вкладов</h1>
+          <p className="lead">
+            Очередь отсортирована по дедлайну, фильтры сохраняются при смене
+            выбранного вклада. AI-черновик остаётся отдельным от решения
+            человека.
+          </p>
+        </div>
+        <Badge tone={visible.some((entry) => entry.overdue) ? "warning" : "success"}>
+          {visible.length} из {enriched.length} показано
+        </Badge>
+      </header>
+      <div className="review-workbench">
+        <section className="review-queue-panel">
+          <header>
+            <div>
+              <h2>Очередь вкладов</h2>
+              <span>{visible.length} показано</span>
+            </div>
+            <label>
+              <span className="sr-only">Поиск по очереди</span>
+              <input
+                value={queueSearch}
+                onChange={(event) => {
+                  setQueueSearch(event.target.value);
+                }}
+                placeholder="Участник или задача…"
+              />
+            </label>
+            <div className="filter-chips">
+              {["Все", "Просроченные", "С AI-черновиком", "С конфликтом", "Кейсы"].map(
+                (chip) => (
+                  <button
+                    className={queueFilter === chip ? "active" : ""}
+                    type="button"
+                    key={chip}
+                    onClick={() => {
+                      setQueueFilter(chip);
+                    }}
+                  >
+                    {chip}
+                  </button>
+                ),
+              )}
+            </div>
+          </header>
+          {visible.map(({ item: entry, overdue }) => (
+            <button
+              className={`review-person${entry.review.id === selectedId ? " active" : ""}`}
+              type="button"
+              key={entry.review.id}
+              onClick={() => {
+                selectEntry(entry);
+              }}
+            >
+              <span className="candidate-avatar">
+                {(entry.participant_name || "У").slice(0, 1)}
+              </span>
+              <span>
+                <strong>{entry.participant_name || "Участник"}</strong>
+                <small>{entry.task_title}</small>
+                <em>
+                  До {deadlineFormatter.format(new Date(entry.deadline_at))}
+                </em>
+              </span>
+              <Badge
+                tone={
+                  entry.authorship_conflict_open || overdue ? "warning" : "neutral"
+                }
+              >
+                {entry.authorship_conflict_open
+                  ? "Конфликт авторства"
+                  : overdue
+                    ? "Просрочено"
+                    : (statusLabels[entry.review.status] ?? entry.review.status)}
+              </Badge>
+            </button>
+          ))}
+        </section>
+        <section className="review-detail-panel">
+          <header>
+            <div className="review-person-title">
+              <span className="candidate-avatar">
+                {(item.participant_name || "У").slice(0, 1)}
+              </span>
+              <div>
+                <p className="eyebrow">
+                  Личный вклад · версия {review.contribution_version}
+                </p>
+                <h2>{item.participant_name || "Участник"}</h2>
+                <span>
+                  {item.task_title} ·{" "}
+                  {kindLabels[item.task_kind ?? "task"] ?? item.task_kind} ·
+                  проект {item.project_key || "—"}
+                </span>
               </div>
-              <div className="review-actions">
-                {item.review.status === "draft" && (
+            </div>
+            <Badge
+              tone={
+                item.authorship_conflict_open || selected.overdue
+                  ? "warning"
+                  : "neutral"
+              }
+            >
+              {item.authorship_conflict_open
+                ? "Конфликт авторства"
+                : selected.overdue
+                  ? "Просрочено"
+                  : statusLabel}
+            </Badge>
+          </header>
+          <nav className="detail-tabs" aria-label="Разделы проверки">
+            {["Доказательства", "Критерии", "История"].map((tab) => (
+              <button
+                className={activeTab === tab ? "active" : ""}
+                type="button"
+                key={tab}
+                onClick={() => {
+                  setActiveTab(tab);
+                }}
+              >
+                {tab}
+              </button>
+            ))}
+          </nav>
+          {activeTab === "Доказательства" && (
+            <>
+              <p>{item.personal_summary}</p>
+              <div className="evidence-files">
+                {item.artifact_keys.map((key) => (
+                  <span key={key}>
+                    ▤ {key} <b>Доступен</b>
+                  </span>
+                ))}
+                {item.artifact_keys.length === 0 && (
+                  <span>Доказательства не приложены</span>
+                )}
+              </div>
+              <div
+                className="missing-evidence-checklist"
+                aria-label="Чеклист недостающих данных"
+              >
+                <p className="eyebrow">Чеклист недостающих данных</p>
+                {checklist.map((row) => (
+                  <div className="checklist-row" key={row.title}>
+                    <Badge tone={row.tone}>{row.kind}</Badge>
+                    <span>{row.title}</span>
+                  </div>
+                ))}
+                {checklist.length === 0 && (
+                  <p className="muted">
+                    Рубрика недоступна: опирайтесь на ключевые оценки ниже.
+                  </p>
+                )}
+              </div>
+              <ReviewEvidence item={item} mentor />
+            </>
+          )}
+          {activeTab === "Критерии" && (
+            <div className="review-rubric-panel">
+              <p className="eyebrow">
+                Рубрика «{item.rubric_key || "impulse-5plus-demo"}» · версия{" "}
+                {review.rubric_version}
+              </p>
+              {(item.rubric_criteria ?? []).map((criterion) => {
+                const assessment = review.assessments.find(
+                  (entry) => entry.criterion_key === criterion.key,
+                );
+                return (
+                  <div className="rubric-row" key={criterion.key}>
+                    <span>{criterion.title}</span>
+                    {assessment ? (
+                      <strong>{assessment.finding}</strong>
+                    ) : (
+                      <Badge tone="warning">Оценки нет</Badge>
+                    )}
+                    {assessment && <i>{criterion.key}</i>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {activeTab === "История" && (
+            <ul className="review-history-list" aria-label="История версий">
+              <li>
+                Решение · версия {review.version} · {statusLabel}
+              </li>
+              <li>Вклад · версия {review.contribution_version}</li>
+              <li>
+                Рубрика · версия {review.rubric_version}
+                {item.rubric_key ? ` (${item.rubric_key})` : ""}
+              </li>
+              <li>
+                Черновик подготовлен:{" "}
+                {review.draft_origin === "ai_suggestion"
+                  ? "AI — это не решение, проверяйте доказательства"
+                  : "человеком"}
+              </li>
+              {review.published_by && <li>Опубликовано · {review.published_by.slice(0, 8)}</li>}
+              {review.confirmed_by && <li>Подтверждено · {review.confirmed_by.slice(0, 8)}</li>}
+            </ul>
+          )}
+          <section className="human-review-box">
+            <header>
+              <div>
+                <p className="eyebrow">Решение ментора</p>
+                <h3>
+                  {review.status === "published"
+                    ? "Оценка опубликована"
+                    : "Оценка в работе"}
+                </h3>
+              </div>
+              <div className="grade-buttons">
+                {(["A", "B", "C"] as const).map((mark) => (
                   <button
+                    className={grade === mark ? "active" : ""}
                     type="button"
+                    key={mark}
                     onClick={() => {
-                      transition.mutate({
-                        review: item.review,
-                        action: "propose",
-                      });
+                      setGrade(mark);
                     }}
                   >
-                    Передать на подтверждение
+                    {mark}
                   </button>
-                )}
-                {item.review.status === "proposed" && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      transition.mutate({
-                        review: item.review,
-                        action: "confirm",
-                      });
-                    }}
-                  >
-                    Подтвердить человеком
-                  </button>
-                )}
-                {item.review.status === "human_confirmed" && (
-                  <button
-                    type="button"
-                    disabled={
-                      !item.contribution_accepted ||
-                      item.authorship_conflict_open
-                    }
-                    onClick={() => {
-                      transition.mutate({
-                        review: item.review,
-                        action: "publish",
-                      });
-                    }}
-                  >
-                    Опубликовать оценку
-                  </button>
-                )}
+                ))}
+              </div>
+            </header>
+            <label>
+              Объяснение оценки
+              <textarea key={review.id} defaultValue={review.explanation} />
+            </label>
+            <footer>
+              {review.status === "draft" && (
                 <button
-                  className="secondary-button"
                   type="button"
                   onClick={() => {
-                    setEscalated((current) =>
-                      new Set(current).add(item.review.id),
-                    );
+                    transition.mutate({ review, action: "propose" });
                   }}
                 >
-                  {escalated.has(item.review.id)
-                    ? "Передано оператору (демо)"
-                    : "Эскалировать оператору"}
+                  Передать на подтверждение
                 </button>
-              </div>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <StatePanel kind="empty" />
-      )}
+              )}
+              {review.status === "proposed" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    transition.mutate({ review, action: "confirm" });
+                  }}
+                >
+                  Подтвердить человеком
+                </button>
+              )}
+              {review.status === "human_confirmed" && (
+                <button
+                  type="button"
+                  disabled={!item.contribution_accepted || item.authorship_conflict_open}
+                  onClick={() => {
+                    transition.mutate({ review, action: "publish" });
+                  }}
+                >
+                  Опубликовать оценку {grade}
+                </button>
+              )}
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => {
+                  setRevisions((current) => new Set(current).add(review.id));
+                  setDecision(
+                    "Демо-режим: запрос доработки отправлен участнику; статус вклада не изменён из чата и решения.",
+                  );
+                }}
+              >
+                Запросить доработку/уточнение
+              </button>
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => {
+                  setEscalated((current) => new Set(current).add(review.id));
+                }}
+              >
+                {escalated.has(review.id)
+                  ? "Передано оператору (демо)"
+                  : "Передать оператору"}
+              </button>
+            </footer>
+            {revisions.has(review.id) && decision && (
+              <p className="inline-success">{decision}</p>
+            )}
+            {!revisions.has(review.id) && decision && (
+              <p className="inline-success">{decision}</p>
+            )}
+          </section>
+        </section>
+      </div>
     </div>
   );
 }

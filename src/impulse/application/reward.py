@@ -9,6 +9,7 @@ from typing import Protocol, TypeVar
 from uuid import UUID, uuid4
 
 from impulse.api.errors import ApiError
+from impulse.application.identity import PersonaRecord
 from impulse.application.work import WorkStore
 from impulse.domain.identity import ActorContext, Role
 from impulse.domain.reward import (
@@ -53,6 +54,12 @@ class MentorQueueItem:
     artifact_keys: tuple[str, ...]
     contribution_accepted: bool
     authorship_conflict_open: bool
+    participant_name: str = ""
+    project_key: str = ""
+    task_kind: str = "task"
+    rubric_key: str = ""
+    rubric_version: int = 0
+    rubric_criteria: tuple[RubricCriterion, ...] = ()
 
 
 DEFAULT_REVIEW_RUBRIC = ReviewRubric(
@@ -299,6 +306,10 @@ class WorkReviewEvidenceProvider:
         )
 
 
+class IdentityStoreLite(Protocol):
+    async def get_persona_by_id(self, person_id: UUID) -> PersonaRecord | None: ...
+
+
 class RewardService:
     def __init__(
         self,
@@ -307,12 +318,14 @@ class RewardService:
         work_store: WorkStore | None = None,
         clock: Callable[[], datetime] | None = None,
         appeal_window: timedelta = timedelta(days=14),
+        identity: IdentityStoreLite | None = None,
     ) -> None:
         self.store = store
         self.evidence = evidence
         self.work_store = work_store
         self.clock = clock or (lambda: datetime.now(UTC))
         self.appeal_window = appeal_window
+        self.identity = identity
 
     @staticmethod
     def _not_found() -> ApiError:
@@ -450,6 +463,12 @@ class RewardService:
             terms = await self.work_store.latest_terms(assignment.task_id)
             if task is None or terms is None:
                 continue
+            rubric = await self.store.rubric(review.rubric_id)
+            participant_name = ""
+            if self.identity is not None:
+                persona = await self.identity.get_persona_by_id(assignment.person_id)
+                if persona is not None:
+                    participant_name = persona.display_name
             items.append(
                 MentorQueueItem(
                     workspace=RewardWorkspaceItem(
@@ -464,6 +483,12 @@ class RewardService:
                     artifact_keys=contribution.artifact_keys,
                     contribution_accepted=evidence.accepted,
                     authorship_conflict_open=evidence.authorship_conflict_open,
+                    participant_name=participant_name,
+                    project_key=task.project_key,
+                    task_kind="case" if task.case_rubric is not None else "task",
+                    rubric_key=rubric.key if rubric is not None else "",
+                    rubric_version=rubric.version if rubric is not None else review.rubric_version,
+                    rubric_criteria=rubric.criteria if rubric is not None else (),
                 )
             )
         return tuple(

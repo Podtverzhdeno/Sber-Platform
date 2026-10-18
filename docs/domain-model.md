@@ -13,6 +13,8 @@
 | Recognition | сезон, ledger, место, диплом, трофей и оффер | score — append-only основание, оффер хранится отдельно |
 | Ecosystem | программы, события и внешние источники | внешний факт связывается по provider/external ID |
 | Assist | agent threads, runs, suggestions и решения человека | suggestion не является доменным решением |
+| Messaging | каналы, участники, сообщения и курсоры прочтения | доступ объекта определяется членством; сообщения append-only |
+| Notifications | лента уведомлений и счётчик непрочитанных | адресовано персонально, управление read-состоянием |
 | Insight | аудит, события и снимки метрик | записи создаются в транзакции изменения |
 
 ```mermaid
@@ -72,14 +74,19 @@ Seed использует UUIDv5 namespace и `DEMO_SEED_VERSION`. Каждый 
 - `appeals`
 - `applications`
 - `artifacts`
+- `candidate_reservations`
 - `case_decisions`
 - `assignments`
 - `audit_entries`
+- `competency_definitions`
+- `competency_evidence`
+- `competency_models`
 - `compensation_terms`
 - `consents`
 - `contributions`
 - `course_track_links`
 - `courses`
+- `course_certificates`
 - `credentials`
 - `domain_events`
 - `enrollments`
@@ -88,15 +95,22 @@ Seed использует UUIDv5 namespace и `DEMO_SEED_VERSION`. Каждый 
 - `human_decisions`
 - `learning_days`
 - `metric_snapshots`
+- `messaging_channels`
+- `messaging_memberships`
+- `messaging_messages`
+- `messaging_read_cursors`
 - `milestones`
 - `model_policies`
+- `notifications`
 - `offer_evidence`
 - `operations_cases`
 - `participation_claims`
 - `payout_claims`
 - `persons`
+- `profile_skills`
 - `programs`
 - `projects`
+- `project_credentials`
 - `provider_records`
 - `rating_policies`
 - `review_5plus_versions`
@@ -108,8 +122,10 @@ Seed использует UUIDv5 namespace и `DEMO_SEED_VERSION`. Каждый 
 - `settlement_attempts`
 - `standings`
 - `talent_pipeline_events`
+- `task_invitations`
 - `task_terms_versions`
 - `tasks`
+- `team_request_versions`
 - `track_attempts`
 - `tracks`
 - `trophies`

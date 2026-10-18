@@ -1,10 +1,9 @@
 """Application policy tests for human-controlled 5+ reviews."""
-# ruff: noqa: RUF001
 
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from typing import cast
+from typing import Any, cast
 from uuid import UUID, uuid4
 
 import pytest
@@ -54,6 +53,15 @@ class EvidenceStub:
         if mentor_id != self.mentor_id or contribution_id != self.evidence.contribution_id:
             return None
         return self.evidence
+
+
+@dataclass(frozen=True, slots=True)
+class MentorIdentityStub:
+    display_name: str
+    person_id: UUID
+
+    async def get_persona_by_id(self, person_id: UUID) -> "MentorIdentityStub | None":
+        return self if person_id == self.person_id else None
 
 
 def actor(person_id: UUID, role: Role = Role.MENTOR) -> ActorContext:
@@ -433,11 +441,13 @@ async def test_reward_workspaces_expose_only_owned_or_assigned_review() -> None:
     work = PayoutWorkStub()
     mentor_id = uuid4()
     store = MemoryRewardStore()
+    rubric_record = rubric()
+    await store.add_rubric(rubric_record)
     review = Review5Plus(
         review_id=uuid4(),
         contribution_id=work.contribution_record.id,
         contribution_version=work.contribution_record.version,
-        rubric_id=uuid4(),
+        rubric_id=rubric_record.rubric_id,
         rubric_version=1,
         review_version=1,
         grade=ReviewGrade.B,
@@ -450,7 +460,15 @@ async def test_reward_workspaces_expose_only_owned_or_assigned_review() -> None:
     )
     await store.add_review_version(review)
     evidence = EvidenceStub(mentor_id, ReviewEvidence(review.contribution_id, 2, True, False))
-    service = RewardService(store, evidence, cast(WorkStore, work))
+    identity_stub = MentorIdentityStub(
+        display_name="Алекс Речной", person_id=work.application_record.person_id
+    )
+    service = RewardService(
+        store,
+        evidence,
+        cast(WorkStore, work),
+        identity=cast(Any, identity_stub),
+    )
 
     participant_items = await service.participant_reward_evidence(
         actor(work.application_record.person_id, Role.PARTICIPANT)
@@ -465,4 +483,10 @@ async def test_reward_workspaces_expose_only_owned_or_assigned_review() -> None:
     assert foreign_mentor_items == ()
     assert queue[0].task_title == "MVP для mentor queue"
     assert queue[0].deadline_at == work.terms_record.deadline_at
+    assert queue[0].participant_name == "Алекс Речной"
+    assert queue[0].project_key == "impulse-demo"
+    assert queue[0].task_kind == "task"
+    assert queue[0].rubric_key == "demo-5plus"
+    assert queue[0].rubric_version == 1
+    assert queue[0].rubric_criteria == rubric_record.criteria
     assert foreign_queue == ()

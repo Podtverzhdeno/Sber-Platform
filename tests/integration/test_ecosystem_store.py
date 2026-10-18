@@ -1,5 +1,4 @@
 """PostgreSQL external evidence lifecycle and append-only correction tests."""
-# ruff: noqa: RUF001
 
 from __future__ import annotations
 

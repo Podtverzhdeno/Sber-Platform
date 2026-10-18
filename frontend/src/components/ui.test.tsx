@@ -4,6 +4,11 @@ import { describe, expect, it, vi } from "vitest";
 import { Badge, Card, DataTable, Drawer, Funnel, Modal, SafeExternalLink, StatePanel, Timeline, Tooltip } from "./ui";
 
 describe("UI foundation", () => {
+  it("blocks executable and data URL schemes", () => {
+    render(<SafeExternalLink href="javascript:alert(1)">unsafe</SafeExternalLink>);
+    expect(screen.getByRole("link", { name: /unsafe/ })).toHaveAttribute("href", "#");
+  });
+
   it("renders every product state with an actionable explanation", () => {
     for (const kind of ["loading", "empty", "restricted", "stale", "error", "offline"] as const) {
       const { unmount } = render(<StatePanel kind={kind} action="Продолжить" />);

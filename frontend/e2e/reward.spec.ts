@@ -36,12 +36,12 @@ test("mentor sees AI draft separately and publishes only through human steps", a
   await page.locator('[data-persona="mentor-elena"]').click();
 
   await expect(page.getByLabel("Черновик AI")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "MVP рекомендательной системы" })).toBeVisible();
+  await expect(page.getByText("MVP рекомендательной системы").first()).toBeVisible();
   await expect(page.getByText("Реализовал ранжирование и воспроизводимые тесты.")).toBeVisible();
   await expect(page.getByLabel("Финальное решение человека")).toContainText("ещё не опубликована");
   await page.getByRole("button", { name: "Передать на подтверждение" }).click();
   await page.getByRole("button", { name: "Подтвердить человеком" }).click();
   await page.getByRole("button", { name: "Опубликовать оценку" }).click();
   await expect(page.getByLabel("Финальное решение человека")).toContainText("подписал 00000000");
-  await expect(page.getByText("Опубликовано")).toBeVisible();
+  await expect(page.getByRole("article").getByText("Опубликовано")).toBeVisible();
 });

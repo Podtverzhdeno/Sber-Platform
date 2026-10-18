@@ -170,6 +170,12 @@ class MentorQueueItemView(BaseModel):
     artifact_keys: list[str]
     contribution_accepted: bool
     authorship_conflict_open: bool
+    participant_name: str = ""
+    project_key: str = ""
+    task_kind: str = "task"
+    rubric_key: str = ""
+    rubric_version: int = 0
+    rubric_criteria: list[RubricCriterionView] = []
 
 
 def _service(request: Request) -> RewardService:
@@ -274,6 +280,15 @@ def _queue_view(item: MentorQueueItem) -> MentorQueueItemView:
         artifact_keys=list(item.artifact_keys),
         contribution_accepted=item.contribution_accepted,
         authorship_conflict_open=item.authorship_conflict_open,
+        participant_name=item.participant_name,
+        project_key=item.project_key,
+        task_kind=item.task_kind,
+        rubric_key=item.rubric_key,
+        rubric_version=item.rubric_version,
+        rubric_criteria=[
+            RubricCriterionView(key=criterion.key, title=criterion.title)
+            for criterion in item.rubric_criteria
+        ],
     )
 
 

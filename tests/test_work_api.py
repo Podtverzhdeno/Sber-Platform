@@ -1,5 +1,4 @@
 """Customer and operator task publication API scenarios."""
-# ruff: noqa: RUF001
 
 from uuid import uuid4
 
@@ -152,6 +151,210 @@ def test_repeat_task_creates_fresh_draft_without_work_or_published_terms() -> No
         assert forbidden.status_code in {403, 404}
 
 
+def test_repeat_task_reinvites_strong_participant_after_fresh_consent() -> None:
+    from uuid import UUID
+
+    store = MemoryWorkStore()
+    api = client(store)
+    with api:
+        customer_csrf = login(api, "customer-roman")
+        task_id = api.post(
+            "/api/v1/customer/projects/demo-rd-lab/tasks",
+            json={
+                **brief(),
+                "mode": "invitation_only",
+                "competency_tags": ["nlp"],
+                "case_rubric": case_rubric(),
+            },
+            headers={"X-CSRF-Token": customer_csrf},
+        ).json()["id"]
+        api.post(
+            f"/api/v1/customer/tasks/{task_id}/submit", headers={"X-CSRF-Token": customer_csrf}
+        )
+        operator_csrf = login(api, "operator-pavel")
+        api.post(
+            f"/api/v1/operations/tasks/{task_id}/moderate", headers={"X-CSRF-Token": operator_csrf}
+        )
+        api.post(
+            f"/api/v1/operations/tasks/{task_id}/support",
+            json={"mode": "operator"},
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        api.post(
+            f"/api/v1/operations/tasks/{task_id}/publish", headers={"X-CSRF-Token": operator_csrf}
+        )
+        customer_csrf = login(api, "customer-roman")
+        source_id = api.post(
+            "/api/v1/customer/projects/demo-rd-lab/tasks",
+            json={
+                **brief(),
+                "task_key": "verified-nlp-result",
+                "competency_tags": ["nlp"],
+                "case_rubric": case_rubric(),
+            },
+            headers={"X-CSRF-Token": customer_csrf},
+        ).json()["id"]
+        api.post(
+            f"/api/v1/customer/tasks/{source_id}/submit", headers={"X-CSRF-Token": customer_csrf}
+        )
+        operator_csrf = login(api, "operator-pavel")
+        api.post(
+            f"/api/v1/operations/tasks/{source_id}/moderate",
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        api.post(
+            f"/api/v1/operations/tasks/{source_id}/support",
+            json={"mode": "operator"},
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        api.post(
+            f"/api/v1/operations/tasks/{source_id}/publish", headers={"X-CSRF-Token": operator_csrf}
+        )
+        participant_csrf = login(api, "participant-alex")
+        person_id = UUID(api.get("/api/v1/me").json()["person_id"])
+        assignment_id, evidence_id = uuid4(), uuid4()
+        store._assignments[assignment_id] = AssignmentRecord(  # pyright: ignore[reportPrivateUsage]
+            assignment_id, UUID(source_id), person_id, uuid4(), AssignmentStatus.ACCEPTED
+        )
+        store._contributions[assignment_id] = (  # pyright: ignore[reportPrivateUsage]
+            ContributionRecord(
+                evidence_id,
+                assignment_id,
+                1,
+                "Личный вклад подтверждён заказчиком",
+                ("proof",),
+                ContributionStatus.ACCEPTED,
+            ),
+        )
+        for scope in ("talent_profile", "talent_evidence", "talent_invitations"):
+            assert (
+                api.put(
+                    f"/api/v1/me/consents/{scope}",
+                    json={"granted": True},
+                    headers={"X-CSRF-Token": participant_csrf},
+                ).status_code
+                == 200
+            )
+        customer_csrf = login(api, "customer-roman")
+        request_id = api.post(
+            "/api/v1/customer/team-requests",
+            json={
+                "title": "Нужен NLP инженер",
+                "required_tags": ["nlp"],
+                "preferred_tags": [],
+                "relevant_case_task_ids": [source_id],
+            },
+            headers={"X-CSRF-Token": customer_csrf},
+        ).json()["id"]
+        command = {
+            "person_id": str(person_id),
+            "evidence_contribution_id": str(evidence_id),
+            "request_id": request_id,
+        }
+        invitation_path = f"/api/v1/customer/tasks/{task_id}/invitations"
+        customer_csrf = login(api, "customer-roman")
+        first_invitation = api.post(
+            invitation_path, json=command, headers={"X-CSRF-Token": customer_csrf}
+        )
+        assert first_invitation.status_code == 200
+        participant_csrf = login(api, "participant-alex")
+        accepted = api.post(
+            f"/api/v1/me/tasks/{task_id}/invitation",
+            json={"accepted": True},
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert accepted.json()["status"] == "accepted"
+        version = api.get(f"/api/v1/marketplace/tasks/{task_id}").json()["terms"]["version"]
+        api.post(
+            f"/api/v1/me/tasks/{task_id}/terms-consent",
+            json={"terms_version": version},
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert (
+            api.post(
+                f"/api/v1/me/tasks/{task_id}/applications",
+                headers={"X-CSRF-Token": participant_csrf},
+            ).json()["status"]
+            == "applied"
+        )
+        customer_csrf = login(api, "customer-roman")
+        repeated = api.post(
+            f"/api/v1/customer/tasks/{task_id}/repeat",
+            json={"task_key": "nlp-repeat"},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert repeated.status_code == 200
+        copy = repeated.json()
+        assert copy["status"] == "draft"
+        detail = api.get(f"/api/v1/customer/tasks/{copy['id']}").json()
+        assert detail["applications"] == []
+        assert detail["assignments"] == []
+        assert detail["decisions"] == []
+        assert detail["terms"]["version"] == 1
+        participant_csrf = login(api, "participant-alex")
+        assert (
+            api.put(
+                "/api/v1/me/consents/talent_invitations",
+                json={"granted": False},
+                headers={"X-CSRF-Token": participant_csrf},
+            ).status_code
+            == 200
+        )
+        customer_csrf = login(api, "customer-roman")
+        api.post(
+            f"/api/v1/customer/tasks/{copy['id']}/submit", headers={"X-CSRF-Token": customer_csrf}
+        )
+        operator_csrf = login(api, "operator-pavel")
+        api.post(
+            f"/api/v1/operations/tasks/{copy['id']}/moderate",
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        api.post(
+            f"/api/v1/operations/tasks/{copy['id']}/support",
+            json={"mode": "operator"},
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        api.post(
+            f"/api/v1/operations/tasks/{copy['id']}/publish",
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        customer_csrf = login(api, "customer-roman")
+        assert (
+            api.post(
+                f"/api/v1/customer/tasks/{copy['id']}/invitations",
+                json=command,
+                headers={"X-CSRF-Token": customer_csrf},
+            ).status_code
+            == 404
+        )
+        participant_csrf = login(api, "participant-alex")
+        assert (
+            api.post(
+                f"/api/v1/me/tasks/{copy['id']}/terms-consent",
+                json={"terms_version": version},
+                headers={"X-CSRF-Token": participant_csrf},
+            ).status_code
+            == 404
+        )
+        assert (
+            api.put(
+                "/api/v1/me/consents/talent_invitations",
+                json={"granted": True},
+                headers={"X-CSRF-Token": participant_csrf},
+            ).status_code
+            == 200
+        )
+        customer_csrf = login(api, "customer-roman")
+        reinvited = api.post(
+            f"/api/v1/customer/tasks/{copy['id']}/invitations",
+            json=command,
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert reinvited.status_code == 200
+        assert reinvited.json()["status"] == "pending"
+        assert api.get(f"/api/v1/customer/tasks/{copy['id']}").json()["assignments"] == []
+
+
 def test_invitation_only_task_is_hidden_without_invitation() -> None:
     api = client()
     with api:
@@ -202,12 +405,61 @@ def test_invitation_only_task_is_hidden_without_invitation() -> None:
         assert api.get(f"/api/v1/marketplace/tasks/{task_id}").status_code == 404
         assert (
             api.post(
+                f"/api/v1/me/tasks/{task_id}/applications",
+                headers={"X-CSRF-Token": participant_csrf},
+            ).status_code
+            == 404
+        )
+        assert (
+            api.post(
                 f"/api/v1/me/tasks/{task_id}/terms-consent",
                 json={"terms_version": 1},
                 headers={"X-CSRF-Token": participant_csrf},
             ).status_code
             == 404
         )
+
+
+def test_published_case_rubric_version_survives_task_start() -> None:
+    api = client()
+    with api:
+        customer_csrf = login(api, "customer-roman")
+        created = api.post(
+            "/api/v1/customer/projects/demo-rd-lab/tasks",
+            json={**brief(), "case_rubric": case_rubric()},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert created.status_code == 200
+        assert created.json()["case_rubric"]["version"] == 1
+        task_id = created.json()["id"]
+        api.post(
+            f"/api/v1/customer/tasks/{task_id}/submit", headers={"X-CSRF-Token": customer_csrf}
+        )
+        operator_csrf = login(api, "operator-pavel")
+        api.post(
+            f"/api/v1/operations/tasks/{task_id}/moderate",
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        api.post(
+            f"/api/v1/operations/tasks/{task_id}/support",
+            json={"mode": "operator"},
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        api.post(
+            f"/api/v1/operations/tasks/{task_id}/publish",
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        customer_csrf = login(api, "customer-roman")
+        detail = api.get(f"/api/v1/customer/tasks/{task_id}").json()
+        assert detail["task"]["status"] == "published"
+        assert detail["task"]["case_rubric"]["version"] == 1
+        repeat = api.post(
+            f"/api/v1/customer/tasks/{task_id}/repeat",
+            json={"task_key": "case-rubric-repeat"},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert repeat.status_code == 200
+        assert repeat.json()["case_rubric"]["version"] == 1
 
 
 def test_closed_invitation_checks_consent_evidence_and_is_idempotent() -> None:
@@ -507,6 +759,69 @@ def test_team_request_matches_only_confirmed_relevant_cases_with_consent() -> No
         login(api, "customer-roman")
         assert api.get(matches_path).json() == []
         assert api.get("/api/v1/customer/saved-candidates").json() == []
+
+
+def test_passport_exposes_fix_history_freshness_and_last_confirmed() -> None:
+    from uuid import UUID
+
+    store = MemoryWorkStore()
+    api = client(store)
+    with api:
+        customer_csrf = login(api, "customer-roman")
+        source = api.post(
+            "/api/v1/customer/projects/demo-rd-lab/tasks",
+            json={**brief(), "competency_tags": ["Python", "NLP"], "case_rubric": case_rubric()},
+            headers={"X-CSRF-Token": customer_csrf},
+        ).json()
+        source_id = source["id"]
+        api.post(
+            f"/api/v1/customer/tasks/{source_id}/submit", headers={"X-CSRF-Token": customer_csrf}
+        )
+        operator_csrf = login(api, "operator-pavel")
+        api.post(
+            f"/api/v1/operations/tasks/{source_id}/moderate",
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        api.post(
+            f"/api/v1/operations/tasks/{source_id}/support",
+            json={"mode": "operator"},
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        api.post(
+            f"/api/v1/operations/tasks/{source_id}/publish", headers={"X-CSRF-Token": operator_csrf}
+        )
+        login(api, "participant-alex")
+        person_id = UUID(api.get("/api/v1/me").json()["person_id"])
+        assignment_id, revision_id, contribution_id = uuid4(), uuid4(), uuid4()
+        store._assignments[assignment_id] = AssignmentRecord(  # pyright: ignore[reportPrivateUsage]
+            assignment_id, UUID(source_id), person_id, uuid4(), AssignmentStatus.ACCEPTED
+        )
+        store._contributions[assignment_id] = (  # pyright: ignore[reportPrivateUsage]
+            ContributionRecord(
+                revision_id,
+                assignment_id,
+                1,
+                "Требуется доработка метрик",
+                (),
+                ContributionStatus.REVISION_REQUESTED,
+            ),
+            ContributionRecord(
+                contribution_id,
+                assignment_id,
+                2,
+                "Решил кейс с воспроизводимым кодом",
+                ("notebook",),
+                ContributionStatus.ACCEPTED,
+            ),
+        )
+        passport = api.get("/api/v1/me/talent-passport")
+        assert passport.status_code == 200
+        data = passport.json()
+        assert [case["contribution_id"] for case in data["cases"]] == [str(contribution_id)]
+        assert data["cases"][0]["case_fixes"] == 1
+        assert data["cases"][0]["freshness"] == "current"
+        assert data["skills"][0]["practical_level"] == "confirmed"
+        assert data["skills"][0]["last_confirmed_at"] is not None
 
 
 def test_task_without_nominated_mentor_waits_for_support_before_publish() -> None:
@@ -845,3 +1160,586 @@ def test_manager_overview_contains_only_safe_owned_projection() -> None:
     assert "chat" not in serialized
     assert "review" not in serialized
     assert "payout" not in serialized
+
+
+def _publish_case(api: TestClient, customer_csrf: str, source_id: str) -> None:
+    api.post(f"/api/v1/customer/tasks/{source_id}/submit", headers={"X-CSRF-Token": customer_csrf})
+    operator_csrf = login(api, "operator-pavel")
+    api.post(
+        f"/api/v1/operations/tasks/{source_id}/moderate", headers={"X-CSRF-Token": operator_csrf}
+    )
+    api.post(
+        f"/api/v1/operations/tasks/{source_id}/support",
+        json={"mode": "operator"},
+        headers={"X-CSRF-Token": operator_csrf},
+    )
+    api.post(
+        f"/api/v1/operations/tasks/{source_id}/publish", headers={"X-CSRF-Token": operator_csrf}
+    )
+
+
+def test_match_view_is_explainable_versioned_and_deterministic() -> None:
+    from uuid import UUID
+
+    store = MemoryWorkStore()
+    api = client(store)
+    with api:
+        customer_csrf = login(api, "customer-roman")
+        source = api.post(
+            "/api/v1/customer/projects/demo-rd-lab/tasks",
+            json={**brief(), "competency_tags": ["Python", "NLP"], "case_rubric": case_rubric()},
+            headers={"X-CSRF-Token": customer_csrf},
+        ).json()
+        source_id = source["id"]
+        _publish_case(api, customer_csrf, source_id)
+        matched_ids: list[str] = []
+        for persona in ("participant-alex", "participant-maria"):
+            csrf = login(api, persona)
+            person_id = UUID(api.get("/api/v1/me").json()["person_id"])
+            matched_ids.append(str(person_id))
+            assignment_id, contribution_id = uuid4(), uuid4()
+            store._assignments[assignment_id] = AssignmentRecord(  # pyright: ignore[reportPrivateUsage]
+                assignment_id, UUID(source_id), person_id, uuid4(), AssignmentStatus.ACCEPTED
+            )
+            store._contributions[assignment_id] = (  # pyright: ignore[reportPrivateUsage]
+                ContributionRecord(
+                    contribution_id,
+                    assignment_id,
+                    1,
+                    "Решил кейс с воспроизводимым кодом",
+                    ("notebook",),
+                    ContributionStatus.ACCEPTED,
+                ),
+            )
+            for scope in ("talent_profile", "talent_evidence"):
+                assert (
+                    api.put(
+                        f"/api/v1/me/consents/{scope}",
+                        json={"granted": True},
+                        headers={"X-CSRF-Token": csrf},
+                    ).status_code
+                    == 200
+                )
+        customer_csrf = login(api, "customer-roman")
+        command = {
+            "title": "Ищем NLP инженера",
+            "required_tags": ["NLP"],
+            "preferred_tags": ["Python"],
+            "relevant_case_task_ids": [source_id],
+        }
+        request_id = api.post(
+            "/api/v1/customer/team-requests", json=command, headers={"X-CSRF-Token": customer_csrf}
+        ).json()["id"]
+        matches_path = f"/api/v1/customer/team-requests/{request_id}/matches"
+        matches = api.get(matches_path).json()
+        assert len(matches) == 2
+        person_ids = [item["person_id"] for item in matches]
+        assert person_ids == sorted(person_ids)
+        assert sorted(person_ids) == sorted(matched_ids)
+        assert matches[0]["request_version"] == 1
+        assert set(matches[0]) == {
+            "person_id",
+            "display_name",
+            "request_version",
+            "matched_required",
+            "matched_preferred",
+            "evidence",
+        }
+        assert set(matches[0]["evidence"][0]) == {
+            "task_id",
+            "contribution_id",
+            "personal_summary",
+            "competency_tags",
+            "artifact_keys",
+            "submitted_at",
+            "reviewer_id",
+            "case_fixes",
+            "freshness",
+        }
+        revised = api.put(
+            f"/api/v1/customer/team-requests/{request_id}",
+            json=command,
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert revised.json()["version"] == 2
+        assert api.get(matches_path).json()[0]["request_version"] == 2
+
+
+def test_customer_task_object_level_blocks_foreign_customers() -> None:
+    api = client()
+    with api:
+        csrf = login(api, "customer-roman")
+        task_id = api.post(
+            "/api/v1/customer/projects/demo-rd-lab/tasks",
+            json=brief(),
+            headers={"X-CSRF-Token": csrf},
+        ).json()["id"]
+        foreign_csrf = login(api, "manager-olga")
+        switched = api.post(
+            "/api/v1/me/active-role",
+            json={"role": "customer"},
+            headers={"X-CSRF-Token": foreign_csrf},
+        )
+        assert switched.status_code == 200
+        assert api.get(f"/api/v1/customer/tasks/{task_id}").status_code == 404
+        stranger = str(uuid4())
+        response = api.post(
+            f"/api/v1/customer/tasks/{task_id}/invitations",
+            json={
+                "person_id": stranger,
+                "evidence_contribution_id": stranger,
+                "request_id": stranger,
+            },
+            headers={"X-CSRF-Token": foreign_csrf},
+        )
+        assert response.status_code == 404
+
+
+def _invitation_only_task(api: TestClient, customer_csrf: str, places: int = 1) -> str:
+    task_id = api.post(
+        "/api/v1/customer/projects/demo-rd-lab/tasks",
+        json={**brief(), "mode": "invitation_only", "places": places},
+        headers={"X-CSRF-Token": customer_csrf},
+    ).json()["id"]
+    _publish_case(api, customer_csrf, task_id)
+    return task_id
+
+
+def _published_case_task(api: TestClient, key: str) -> str:
+    customer_csrf = login(api, "customer-roman")
+    source_id = api.post(
+        "/api/v1/customer/projects/demo-rd-lab/tasks",
+        json={
+            **brief(),
+            "task_key": key,
+            "competency_tags": ["NLP"],
+            "case_rubric": case_rubric(),
+        },
+        headers={"X-CSRF-Token": customer_csrf},
+    ).json()["id"]
+    _publish_case(api, customer_csrf, source_id)
+    return source_id
+
+
+def _inject_case_evidence(
+    store: MemoryWorkStore, api: TestClient, persona: str, source_id: str
+) -> tuple[str, str]:
+    from uuid import UUID
+
+    csrf = login(api, persona)
+    person_id = UUID(api.get("/api/v1/me").json()["person_id"])
+    assignment_id, contribution_id = uuid4(), uuid4()
+    store._assignments[assignment_id] = AssignmentRecord(  # pyright: ignore[reportPrivateUsage]
+        assignment_id, UUID(source_id), person_id, uuid4(), AssignmentStatus.ACCEPTED
+    )
+    store._contributions[assignment_id] = (  # pyright: ignore[reportPrivateUsage]
+        ContributionRecord(
+            contribution_id,
+            assignment_id,
+            1,
+            "Решил кейс с воспроизводимым кодом",
+            ("proof",),
+            ContributionStatus.ACCEPTED,
+        ),
+    )
+    for scope in ("talent_profile", "talent_evidence", "talent_invitations"):
+        assert (
+            api.put(
+                f"/api/v1/me/consents/{scope}",
+                json={"granted": True},
+                headers={"X-CSRF-Token": csrf},
+            ).status_code
+            == 200
+        )
+    return str(person_id), str(contribution_id)
+
+
+def test_invitation_decline_expiry_and_reinvitation() -> None:
+    store = MemoryWorkStore()
+    api = client(store)
+    with api:
+        customer_csrf = login(api, "customer-roman")
+        task_id = _invitation_only_task(api, customer_csrf)
+        source_id = _published_case_task(api, "invitation-source-case")
+        person_id, evidence_id = _inject_case_evidence(store, api, "participant-alex", source_id)
+        customer_csrf = login(api, "customer-roman")
+        request_id = api.post(
+            "/api/v1/customer/team-requests",
+            json={
+                "title": "Ищем NLP инженера",
+                "required_tags": ["NLP"],
+                "preferred_tags": [],
+                "relevant_case_task_ids": [source_id],
+            },
+            headers={"X-CSRF-Token": customer_csrf},
+        ).json()["id"]
+        invitation_path = f"/api/v1/customer/tasks/{task_id}/invitations"
+        command = {
+            "person_id": person_id,
+            "evidence_contribution_id": evidence_id,
+            "request_id": request_id,
+        }
+        expired = api.post(
+            invitation_path,
+            json={**command, "expires_at": "2025-01-01T00:00:00Z"},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert expired.status_code == 409
+        assert expired.json()["code"] == "INVITATION_EXPIRED"
+        first = api.post(invitation_path, json=command, headers={"X-CSRF-Token": customer_csrf})
+        assert first.status_code == 200
+        assert first.json()["status"] == "pending"
+        login(api, "participant-alex")
+        declined = api.post(
+            f"/api/v1/me/tasks/{task_id}/invitation",
+            json={"accepted": False},
+            headers={"X-CSRF-Token": login(api, "participant-alex")},
+        )
+        assert declined.json()["status"] == "declined"
+        assert api.get(f"/api/v1/marketplace/tasks/{task_id}").status_code == 404
+        customer_csrf = login(api, "customer-roman")
+        again = api.post(invitation_path, json=command, headers={"X-CSRF-Token": customer_csrf})
+        assert again.status_code == 200
+        assert again.json()["status"] == "pending"
+        assert again.json()["id"] == first.json()["id"]
+        login(api, "participant-alex")
+        assert api.get(f"/api/v1/marketplace/tasks/{task_id}").status_code == 200
+
+
+def test_invited_results_compare_on_single_published_rubric() -> None:
+    store = MemoryWorkStore()
+    api = client(store)
+    with api:
+        customer_csrf = login(api, "customer-roman")
+        task_id = _invitation_only_task(api, customer_csrf, places=2)
+        source_id = _published_case_task(api, "closed-compare-case")
+        candidates: list[tuple[str, str, str]] = []
+        for persona in ("participant-alex", "participant-maria"):
+            person_id, evidence_id = _inject_case_evidence(store, api, persona, source_id)
+            candidates.append((persona, person_id, evidence_id))
+        customer_csrf = login(api, "customer-roman")
+        request_id = api.post(
+            "/api/v1/customer/team-requests",
+            json={
+                "title": "Ищем NLP инженера",
+                "required_tags": ["NLP"],
+                "preferred_tags": [],
+                "relevant_case_task_ids": [source_id],
+            },
+            headers={"X-CSRF-Token": customer_csrf},
+        ).json()["id"]
+        for persona, person_id, evidence_id in candidates:
+            customer_csrf = login(api, "customer-roman")
+            invited = api.post(
+                f"/api/v1/customer/tasks/{task_id}/invitations",
+                json={
+                    "person_id": person_id,
+                    "evidence_contribution_id": evidence_id,
+                    "request_id": request_id,
+                },
+                headers={"X-CSRF-Token": customer_csrf},
+            )
+            assert invited.status_code == 200
+            participant_csrf = login(api, persona)
+            terms_version = api.get(f"/api/v1/marketplace/tasks/{task_id}").json()["terms"][
+                "version"
+            ]
+            accepted = api.post(
+                f"/api/v1/me/tasks/{task_id}/invitation",
+                json={"accepted": True},
+                headers={"X-CSRF-Token": participant_csrf},
+            )
+            assert accepted.json()["status"] == "accepted"
+            api.post(
+                f"/api/v1/me/tasks/{task_id}/terms-consent",
+                json={"terms_version": terms_version},
+                headers={"X-CSRF-Token": participant_csrf},
+            )
+            applied = api.post(
+                f"/api/v1/me/tasks/{task_id}/applications",
+                headers={"X-CSRF-Token": participant_csrf},
+            )
+            assert applied.json()["status"] == "applied"
+            application_id, application_version = (
+                applied.json()["id"],
+                applied.json()["version"],
+            )
+            customer_csrf = login(api, "customer-roman")
+            assignment = api.post(
+                f"/api/v1/customer/applications/{application_id}/accept",
+                json={"expected_version": application_version},
+                headers={"X-CSRF-Token": customer_csrf},
+            )
+            assert assignment.status_code == 200
+            assignment_id = assignment.json()["id"]
+            participant_csrf = login(api, persona)
+            api.post(
+                f"/api/v1/me/assignments/{assignment_id}/start",
+                headers={"X-CSRF-Token": participant_csrf},
+            )
+            submitted = api.post(
+                f"/api/v1/me/assignments/{assignment_id}/contributions",
+                json={
+                    "personal_summary": f"Собственный вклад {persona}: ввод прототипа и замеры.",
+                    "artifacts": [{"key": "repo", "uri": "https://cdn.example.com/artifact.zip"}],
+                },
+                headers={"X-CSRF-Token": participant_csrf},
+            )
+            assert submitted.status_code == 200
+        customer_csrf = login(api, "customer-roman")
+        source_detail = api.get(f"/api/v1/customer/tasks/{source_id}").json()
+        assert source_detail["task"]["case_rubric"]["version"] == 1
+        preview = api.get(f"/api/v1/customer/tasks/{task_id}/participant-preview").json()
+        summaries = {item["contributions"][0]["personal_summary"] for item in preview}
+        assert len(preview) == 2
+        assert len(summaries) == 2
+        pipeline = api.get("/api/v1/hr/pipeline")
+        assert pipeline.status_code == 404
+        login(api, "hr-nina")
+        counts = api.get("/api/v1/hr/pipeline").json()["counts"]
+        assert counts == {"invitation": 0, "interview": 0, "offer": 0, "hire": 0}
+
+
+def test_application_selection_shows_honest_participant_experience() -> None:
+    store = MemoryWorkStore()
+    api = client(store)
+    with api:
+        source_id = _published_case_task(api, "selection-case")
+        _inject_case_evidence(store, api, "participant-alex", source_id)
+        customer_csrf = login(api, "customer-roman")
+        task_id = api.post(
+            "/api/v1/customer/projects/demo-rd-lab/tasks",
+            json=brief(),
+            headers={"X-CSRF-Token": customer_csrf},
+        ).json()["id"]
+        _publish_case(api, customer_csrf, task_id)
+        customer_csrf = login(api, "customer-roman")
+        terms_version = api.get(f"/api/v1/customer/tasks/{task_id}").json()["terms"]["version"]
+        for persona in ("participant-alex", "participant-igor"):
+            csrf = login(api, persona)
+            consented = api.post(
+                f"/api/v1/me/tasks/{task_id}/terms-consent",
+                json={"terms_version": terms_version},
+                headers={"X-CSRF-Token": csrf},
+            )
+            assert consented.status_code == 200
+            applied = api.post(
+                f"/api/v1/me/tasks/{task_id}/applications",
+                headers={"X-CSRF-Token": csrf},
+            )
+            assert applied.status_code == 200
+            assert applied.json()["status"] == "applied"
+
+        customer_csrf = login(api, "customer-roman")
+        applications = api.get(f"/api/v1/customer/tasks/{task_id}/applications").json()
+        assert len(applications) == 2
+        verified = {
+            entry["participant_name"]: entry["verified_case_count"] for entry in applications
+        }
+        assert verified["Алекс Речной"] == 1
+        assert verified["Игорь Лесной"] == 0
+        novice = next(entry for entry in applications if entry["verified_case_count"] == 0)
+        assert novice["participant_name"] == "Игорь Лесной"
+
+        assignment = api.post(
+            f"/api/v1/customer/applications/{novice['id']}/accept",
+            json={"expected_version": novice["version"]},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert assignment.status_code == 200
+        assert assignment.json()["status"] == "staffed"
+        refreshed = api.get(f"/api/v1/customer/tasks/{task_id}/applications").json()
+        accepted_entry = next(entry for entry in refreshed if entry["id"] == novice["id"])
+        assert accepted_entry["status"] == "accepted"
+
+
+def test_cabinet_matches_verified_candidates_only_and_foreign_task_invite_forbidden() -> None:
+    store = MemoryWorkStore()
+    api = client(store)
+    with api:
+        source_id = _published_case_task(api, "cabinet-source-case")
+
+        alex_id, alex_evidence = _inject_case_evidence(store, api, "participant-alex", source_id)
+        from uuid import UUID
+
+        login(api, "participant-maria")
+        maria_id = UUID(api.get("/api/v1/me").json()["person_id"])
+        maria_assignment, maria_contribution = uuid4(), uuid4()
+        store._assignments[maria_assignment] = AssignmentRecord(  # pyright: ignore[reportPrivateUsage]
+            maria_assignment, UUID(source_id), maria_id, uuid4(), AssignmentStatus.ACCEPTED
+        )
+        store._contributions[maria_assignment] = (  # pyright: ignore[reportPrivateUsage]
+            ContributionRecord(
+                maria_contribution,
+                maria_assignment,
+                1,
+                "Решил кейс без согласия",
+                ("notebook",),
+                ContributionStatus.ACCEPTED,
+            ),
+        )
+
+        customer_csrf = login(api, "customer-roman")
+        request_id = api.post(
+            "/api/v1/customer/team-requests",
+            json={
+                "title": "Ищем NLP инженера",
+                "required_tags": ["NLP"],
+                "preferred_tags": [],
+                "relevant_case_task_ids": [source_id],
+            },
+            headers={"X-CSRF-Token": customer_csrf},
+        ).json()["id"]
+        matches = api.get(f"/api/v1/customer/team-requests/{request_id}/matches").json()
+        assert [entry["person_id"] for entry in matches] == [alex_id]
+        assert matches[0]["evidence"][0]["contribution_id"] == alex_evidence
+
+        task_id = _invitation_only_task(api, customer_csrf)
+        olga = login(api, "manager-olga")
+        switched = api.post(
+            "/api/v1/me/active-role", json={"role": "customer"}, headers={"X-CSRF-Token": olga}
+        )
+        assert switched.status_code == 200
+        foreign = api.post(
+            f"/api/v1/customer/tasks/{task_id}/invitations",
+            json={
+                "person_id": alex_id,
+                "evidence_contribution_id": alex_evidence,
+                "request_id": request_id,
+            },
+            headers={"X-CSRF-Token": olga},
+        )
+        assert foreign.status_code == 404
+        assert foreign.json()["code"] == "RESOURCE_NOT_FOUND"
+
+        granted = api.post(
+            f"/api/v1/customer/tasks/{task_id}/invitations",
+            json={
+                "person_id": alex_id,
+                "evidence_contribution_id": alex_evidence,
+                "request_id": request_id,
+            },
+            headers={"X-CSRF-Token": login(api, "customer-roman")},
+        )
+        assert granted.status_code == 200
+        assert granted.json()["status"] == "pending"
+
+
+def test_acceptance_flow_asks_artifact_allowlist_and_avoids_automatic_rewards() -> None:
+    store = MemoryWorkStore()
+    api = client(store)
+    with api:
+        customer_csrf = login(api, "customer-roman")
+        payload = brief()
+        payload["allowed_artifacts"] = ["repo", "report"]
+        task_id = api.post(
+            "/api/v1/customer/projects/demo-rd-lab/tasks",
+            json=payload,
+            headers={"X-CSRF-Token": customer_csrf},
+        ).json()["id"]
+        _publish_case(api, customer_csrf, task_id)
+        customer_csrf = login(api, "customer-roman")
+        detail = api.get(f"/api/v1/customer/tasks/{task_id}").json()
+        assert detail["allowed_artifacts"] == ["repo", "report"]
+        terms_version = detail["terms"]["version"]
+
+        participant_csrf = login(api, "participant-alex")
+        participant = api.get(f"/api/v1/marketplace/tasks/{task_id}")
+        assert participant.status_code == 200
+        assert participant.json()["allowed_artifacts"] == ["repo", "report"]
+        consenting = api.post(
+            f"/api/v1/me/tasks/{task_id}/terms-consent",
+            json={"terms_version": terms_version},
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert consenting.status_code == 200
+        applied = api.post(
+            f"/api/v1/me/tasks/{task_id}/applications", headers={"X-CSRF-Token": participant_csrf}
+        )
+        assert applied.status_code == 200
+
+        accepted = api.post(
+            f"/api/v1/customer/applications/{applied.json()['id']}/accept",
+            json={"expected_version": applied.json()["version"]},
+            headers={"X-CSRF-Token": login(api, "customer-roman")},
+        )
+        assert accepted.status_code == 200
+        assignment_id = accepted.json()["id"]
+
+        participant_csrf = login(api, "participant-alex")
+        started = api.post(
+            f"/api/v1/me/assignments/{assignment_id}/start",
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert started.json()["status"] == "in_progress"
+        forbidden_artifact = api.post(
+            f"/api/v1/me/assignments/{assignment_id}/contributions",
+            json={
+                "personal_summary": (
+                    "Я реализовал API поиска и приложил архив рабочего прототипа."
+                ),
+                "artifacts": [{"key": "zip", "uri": "https://example.test/prototypes/build.zip"}],
+            },
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert forbidden_artifact.status_code == 409
+        assert forbidden_artifact.json()["code"] == "ARTIFACT_NOT_ALLOWED"
+
+        contribution = api.post(
+            f"/api/v1/me/assignments/{assignment_id}/contributions",
+            json={
+                "personal_summary": (
+                    "Я реализовал API поиска и добавил измерение offline-метрики."
+                ),
+                "artifacts": [
+                    {
+                        "key": "repo",
+                        "uri": "https://example.test/team/repository/commit/42",
+                    }
+                ],
+            },
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert contribution.status_code == 200
+        assert contribution.json()["version"] == 1
+
+        accepted_result = api.post(
+            f"/api/v1/customer/contributions/{contribution.json()['id']}/decision",
+            json={
+                "decision": "accepted",
+                "reason": "Результат соответствует критериям приёмки.",
+            },
+            headers={"X-CSRF-Token": login(api, "customer-roman")},
+        )
+        assert accepted_result.status_code == 200
+        assert accepted_result.json()["decision"] == "accepted"
+
+        participant_csrf = login(api, "participant-alex")
+        evidence = api.get("/api/v1/me/reward-evidence")
+        assert evidence.status_code == 200
+        assert evidence.json() == []
+
+        credential = api.post(
+            f"/api/v1/customer/contributions/{contribution.json()['id']}/credential"
+        )
+        assert credential.status_code in {403, 401}
+
+        customer_csrf = login(api, "customer-roman")
+        credential = api.post(
+            f"/api/v1/customer/contributions/{contribution.json()['id']}/credential",
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert credential.status_code == 409
+        assert credential.json()["code"] == "REVIEW_NOT_FOUND"
+
+        metrics = {
+            item["key"]: item for item in api.get("/api/v1/analytics/role").json()["metrics"]
+        }
+        assert metrics["customer_acceptance_rate"]["numerator"] == 1
+        assert metrics["customer_acceptance_rate"]["denominator"] == 1
+        assert metrics["customer_acceptance_rate"]["suppressed"] is True
+        assert metrics["customer_repeat_participants"]["numerator"] == 0
+        assert metrics["customer_repeat_participants"]["denominator"] == 1
+        assert metrics["customer_time_to_result_hours"]["numerator"] == 1
+        assert metrics["customer_time_to_result_hours"]["value"] is not None
+        assert metrics["customer_time_to_result_hours"]["suppressed"] is False

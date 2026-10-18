@@ -45,6 +45,31 @@ async def test_sql_session_role_switch_and_consent_projection() -> None:
     )
     app = create_app(settings, auth_service=service)
 
+    def consent_filters() -> tuple:
+        return (
+            consents.c.person_id == demo_id("participant-alex"),
+            consents.c.scope == "hr_profile",
+        )
+
+    async with database.sessions() as session:
+        consent_before = int(
+            await session.scalar(
+                select(func.count()).select_from(consents).where(*consent_filters())
+            )
+            or 0
+        )
+        audit_before = int(
+            await session.scalar(
+                select(func.count())
+                .select_from(audit_entries)
+                .where(
+                    audit_entries.c.created_by == demo_id("participant-alex"),
+                    audit_entries.c.entity_type == "consent",
+                )
+            )
+            or 0
+        )
+
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=app), base_url="http://testserver"
     ) as client:
@@ -78,12 +103,7 @@ async def test_sql_session_role_switch_and_consent_projection() -> None:
     async with database.sessions() as session:
         count = int(
             await session.scalar(
-                select(func.count())
-                .select_from(consents)
-                .where(
-                    consents.c.person_id == demo_id("participant-alex"),
-                    consents.c.scope == "hr_profile",
-                )
+                select(func.count()).select_from(consents).where(*consent_filters())
             )
             or 0
         )
@@ -105,5 +125,5 @@ async def test_sql_session_role_switch_and_consent_projection() -> None:
             or 0
         )
 
-    assert (count, bool(visible), audit_count) == (2, False, 2)
+    assert (count - consent_before, bool(visible), audit_count - audit_before) == (2, False, 2)
     await database.close()

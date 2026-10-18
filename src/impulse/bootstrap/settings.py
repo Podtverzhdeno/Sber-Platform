@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Self
 
-from pydantic import AnyHttpUrl, Field, SecretStr, model_validator
+from pydantic import AnyHttpUrl, Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -29,6 +29,8 @@ class Settings(BaseSettings):
     demo_mode: bool = True
     app_host: str = "127.0.0.1"
     app_port: int = Field(default=8000, ge=1, le=65535)
+    allowed_origin: AnyHttpUrl | None = None
+    max_request_bytes: int = Field(default=1_048_576, ge=1_024, le=10_485_760)
     database_url: SecretStr | None = None
     session_secret: SecretStr | None = None
     session_ttl_seconds: int = Field(default=43_200, ge=300, le=604_800)
@@ -42,7 +44,10 @@ class Settings(BaseSettings):
     openrouter_model_buddy: str = "openrouter/free"
     openrouter_model_structured: str = "openrouter/free"
     ai_max_requests_per_user_day: int = Field(default=5, ge=1, le=100)
+    ai_max_requests_per_run: int = Field(default=3, ge=1, le=20)
     ai_max_tool_calls_per_run: int = Field(default=4, ge=1, le=20)
+    ai_max_steps_per_run: int = Field(default=8, ge=1, le=50)
+    ai_timeout_seconds: float = Field(default=30, ge=1, le=120)
     honor_board_enabled: bool = False
 
     langfuse_enabled: bool = False
@@ -50,6 +55,14 @@ class Settings(BaseSettings):
     langfuse_secret_key: SecretStr | None = None
     langfuse_base_url: AnyHttpUrl | None = None
     langfuse_content_capture_enabled: bool = False
+
+    @field_validator("database_url", "session_secret", mode="before")
+    @classmethod
+    def blank_secret_is_unset(cls, value: object) -> object:
+        """Treat a blank value as absent and fall back to defaults."""
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
 
     @property
     def any_ai_enabled(self) -> bool:

@@ -54,7 +54,7 @@ test("Bootcamp explains unavailable source, reported verification and streak", a
   await expect(page.getByText("Внешний курс пока не подключён; доступна исходная ссылка.")).toBeVisible();
   await page.getByRole("button", { name: "Открыть траекторию" }).click();
   await expect(page.getByRole("heading", { name: "Python: основа" })).toBeVisible();
-  await expect(page.getByText("Checkpoint 3")).toBeVisible();
+  await expect(page.getByText("Checkpoint 3").first()).toBeVisible();
   await expect(page.getByRole("link", { name: /Открыть учебный материал/ })).toHaveAttribute("rel", "noopener noreferrer");
   await page.getByRole("button", { name: /Вернуться в Bootcamp/ }).click();
   await page.getByRole("button", { name: "Отметить завершение" }).click();

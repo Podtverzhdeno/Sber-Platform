@@ -518,6 +518,21 @@ class SqlRecognitionStore(RecognitionStore):
             )
         return self._credential(row) if row is not None else None
 
+    async def person_credentials(self, person_id: UUID) -> tuple[Credential, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                (
+                    await session.execute(
+                        select(credentials)
+                        .where(credentials.c.person_id == person_id)
+                        .order_by(credentials.c.credential_version.desc())
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        return tuple(self._credential(row) for row in rows)
+
     async def add_credential(self, credential: Credential) -> Credential:
         try:
             async with self.database.session() as session:

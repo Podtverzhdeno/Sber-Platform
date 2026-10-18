@@ -131,6 +131,10 @@
             "title": "Display Name",
             "type": "string"
           },
+          "locale": {
+            "title": "Locale",
+            "type": "string"
+          },
           "navigation": {
             "items": {
               "type": "string"
@@ -149,6 +153,10 @@
             },
             "title": "Scopes",
             "type": "array"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
           }
         },
         "required": [
@@ -158,7 +166,9 @@
           "assigned_roles",
           "scopes",
           "consent_scopes",
-          "navigation"
+          "navigation",
+          "locale",
+          "timezone"
         ],
         "title": "ActorView",
         "type": "object"
@@ -248,6 +258,17 @@
             "title": "Id",
             "type": "string"
           },
+          "participant_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participant Name"
+          },
           "person_id": {
             "format": "uuid",
             "title": "Person Id",
@@ -260,6 +281,17 @@
             "format": "uuid",
             "title": "Task Id",
             "type": "string"
+          },
+          "verified_case_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified Case Count"
           },
           "version": {
             "title": "Version",
@@ -397,6 +429,101 @@
           "deadline_at"
         ],
         "title": "AuthorshipDisputeRequest",
+        "type": "object"
+      },
+      "BriefDraftRequest": {
+        "properties": {
+          "brief": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Brief",
+            "type": "string"
+          },
+          "correlation_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Correlation Id",
+            "type": "string"
+          },
+          "data_class": {
+            "$ref": "#/components/schemas/DataClass"
+          }
+        },
+        "required": [
+          "brief",
+          "data_class",
+          "correlation_id"
+        ],
+        "title": "BriefDraftRequest",
+        "type": "object"
+      },
+      "BriefDraftView": {
+        "properties": {
+          "acceptance_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acceptance Criteria",
+            "type": "array"
+          },
+          "deliverable": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deliverable"
+          },
+          "disclaimer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disclaimer"
+          },
+          "editable": {
+            "const": true,
+            "default": true,
+            "title": "Editable",
+            "type": "boolean"
+          },
+          "gateway_called": {
+            "title": "Gateway Called",
+            "type": "boolean"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "notice": {
+            "title": "Notice",
+            "type": "string"
+          },
+          "problem": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Problem"
+          }
+        },
+        "required": [
+          "kind",
+          "gateway_called",
+          "notice"
+        ],
+        "title": "BriefDraftView",
         "type": "object"
       },
       "CandidateMatchView": {
@@ -539,6 +666,11 @@
             "title": "Artifact Keys",
             "type": "array"
           },
+          "case_fixes": {
+            "default": 0,
+            "title": "Case Fixes",
+            "type": "integer"
+          },
           "competency_tags": {
             "items": {
               "type": "string"
@@ -549,6 +681,11 @@
           "contribution_id": {
             "format": "uuid",
             "title": "Contribution Id",
+            "type": "string"
+          },
+          "freshness": {
+            "default": "current",
+            "title": "Freshness",
             "type": "string"
           },
           "personal_summary": {
@@ -697,6 +834,181 @@
           "due_at"
         ],
         "title": "CaseView",
+        "type": "object"
+      },
+      "CertificateCompetencyView": {
+        "properties": {
+          "competency": {
+            "title": "Competency",
+            "type": "string"
+          },
+          "evidence": {
+            "title": "Evidence",
+            "type": "string"
+          },
+          "level": {
+            "title": "Level",
+            "type": "string"
+          }
+        },
+        "required": [
+          "competency",
+          "level",
+          "evidence"
+        ],
+        "title": "CertificateCompetencyView",
+        "type": "object"
+      },
+      "ChannelView": {
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "last_message": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/impulse__api__v1__messaging__MessageView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "muted": {
+            "title": "Muted",
+            "type": "boolean"
+          },
+          "participants": {
+            "items": {
+              "$ref": "#/components/schemas/ParticipantView"
+            },
+            "title": "Participants",
+            "type": "array"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "sender_enabled": {
+            "title": "Sender Enabled",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "task_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "unread": {
+            "title": "Unread",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "status",
+          "task_id",
+          "role",
+          "muted",
+          "sender_enabled",
+          "unread",
+          "participants",
+          "last_message",
+          "created_at"
+        ],
+        "title": "ChannelView",
+        "type": "object"
+      },
+      "ChannelWorkContextView": {
+        "properties": {
+          "contribution_accepted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contribution Accepted"
+          },
+          "contribution_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contribution Version"
+          },
+          "deadline_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline At"
+          },
+          "project_key": {
+            "title": "Project Key",
+            "type": "string"
+          },
+          "review_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Status"
+          },
+          "task_title": {
+            "title": "Task Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "project_key",
+          "task_title",
+          "deadline_at",
+          "contribution_version",
+          "contribution_accepted",
+          "review_status"
+        ],
+        "title": "ChannelWorkContextView",
         "type": "object"
       },
       "CheckpointRequest": {
@@ -1255,6 +1567,83 @@
         "title": "CorrectScoreRequest",
         "type": "object"
       },
+      "CourseCertificateView": {
+        "properties": {
+          "certificate_id": {
+            "title": "Certificate Id",
+            "type": "string"
+          },
+          "competencies": {
+            "items": {
+              "$ref": "#/components/schemas/CertificateCompetencyView"
+            },
+            "title": "Competencies",
+            "type": "array"
+          },
+          "course_key": {
+            "title": "Course Key",
+            "type": "string"
+          },
+          "course_title": {
+            "title": "Course Title",
+            "type": "string"
+          },
+          "holder_name": {
+            "title": "Holder Name",
+            "type": "string"
+          },
+          "issued_at": {
+            "format": "date-time",
+            "title": "Issued At",
+            "type": "string"
+          },
+          "period": {
+            "title": "Period",
+            "type": "string"
+          },
+          "preview_marking": {
+            "title": "Preview Marking",
+            "type": "string"
+          },
+          "program_version": {
+            "title": "Program Version",
+            "type": "string"
+          },
+          "result": {
+            "title": "Result",
+            "type": "string"
+          },
+          "specialization": {
+            "title": "Specialization",
+            "type": "string"
+          },
+          "verification_id": {
+            "title": "Verification Id",
+            "type": "string"
+          },
+          "workload_hours": {
+            "title": "Workload Hours",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "certificate_id",
+          "verification_id",
+          "holder_name",
+          "course_key",
+          "course_title",
+          "specialization",
+          "program_version",
+          "period",
+          "workload_hours",
+          "result",
+          "competencies",
+          "issued_at",
+          "preview_marking"
+        ],
+        "title": "CourseCertificateView",
+        "type": "object"
+      },
       "CourseView": {
         "properties": {
           "access_note": {
@@ -1392,6 +1781,14 @@
             },
             "maxItems": 30,
             "title": "Acceptance Criteria",
+            "type": "array"
+          },
+          "allowed_artifacts": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 10,
+            "title": "Allowed Artifacts",
             "type": "array"
           },
           "case_rubric": {
@@ -1605,6 +2002,13 @@
             "title": "Acceptance Criteria",
             "type": "array"
           },
+          "allowed_artifacts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Artifacts",
+            "type": "array"
+          },
           "applications": {
             "items": {
               "$ref": "#/components/schemas/ApplicationView"
@@ -1670,6 +2074,7 @@
           "acceptance_criteria",
           "data_constraints",
           "ip_terms",
+          "allowed_artifacts",
           "terms",
           "applications",
           "assignments",
@@ -1678,6 +2083,18 @@
         ],
         "title": "CustomerTaskDetailView",
         "type": "object"
+      },
+      "DataClass": {
+        "enum": [
+          "public",
+          "demo_synthetic",
+          "personal_minimal",
+          "internal_business",
+          "sensitive_personal",
+          "secret"
+        ],
+        "title": "DataClass",
+        "type": "string"
       },
       "DecideInvitationRequest": {
         "properties": {
@@ -2097,6 +2514,131 @@
         "title": "EventView",
         "type": "object"
       },
+      "EvidenceAnchorView": {
+        "properties": {
+          "competency_key": {
+            "title": "Competency Key",
+            "type": "string"
+          },
+          "counted": {
+            "title": "Counted",
+            "type": "boolean"
+          },
+          "level": {
+            "title": "Level",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "source_kind": {
+            "title": "Source Kind",
+            "type": "string"
+          },
+          "source_ref": {
+            "title": "Source Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "competency_key",
+          "source_kind",
+          "source_ref",
+          "level",
+          "observed_at",
+          "reason",
+          "counted"
+        ],
+        "title": "EvidenceAnchorView",
+        "type": "object"
+      },
+      "FeedbackRequest": {
+        "properties": {
+          "rating": {
+            "maximum": 1.0,
+            "minimum": -1.0,
+            "title": "Rating",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rating"
+        ],
+        "title": "FeedbackRequest",
+        "type": "object"
+      },
+      "FeedbackView": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "rating": {
+            "title": "Rating",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "rating"
+        ],
+        "title": "FeedbackView",
+        "type": "object"
+      },
+      "FrameworkReportView": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "domain": {
+            "enum": [
+              "course",
+              "role",
+              "project"
+            ],
+            "title": "Domain",
+            "type": "string"
+          },
+          "framework_key": {
+            "title": "Framework Key",
+            "type": "string"
+          },
+          "skills": {
+            "items": {
+              "$ref": "#/components/schemas/SkillReportView"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "framework_key",
+          "domain",
+          "version",
+          "title",
+          "created_at",
+          "skills"
+        ],
+        "title": "FrameworkReportView",
+        "type": "object"
+      },
       "FunnelStageView": {
         "properties": {
           "completed": {
@@ -2141,6 +2683,35 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HrVisibilityRequest": {
+        "properties": {
+          "visible": {
+            "title": "Visible",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "visible"
+        ],
+        "title": "HrVisibilityRequest",
+        "type": "object"
+      },
+      "HrVisibilityView": {
+        "properties": {
+          "visibility": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "title": "Visibility",
+            "type": "object"
+          }
+        },
+        "required": [
+          "visibility"
+        ],
+        "title": "HrVisibilityView",
         "type": "object"
       },
       "ImportClaimRequest": {
@@ -2522,6 +3093,13 @@
             ],
             "title": "Accepted Terms Version"
           },
+          "allowed_artifacts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Artifacts",
+            "type": "array"
+          },
           "invitation_status": {
             "anyOf": [
               {
@@ -2570,6 +3148,11 @@
             "title": "Deadline At",
             "type": "string"
           },
+          "participant_name": {
+            "default": "",
+            "title": "Participant Name",
+            "type": "string"
+          },
           "payout": {
             "anyOf": [
               {
@@ -2584,8 +3167,36 @@
             "title": "Personal Summary",
             "type": "string"
           },
+          "project_key": {
+            "default": "",
+            "title": "Project Key",
+            "type": "string"
+          },
           "review": {
             "$ref": "#/components/schemas/ReviewView"
+          },
+          "rubric_criteria": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RubricCriterionView"
+            },
+            "title": "Rubric Criteria",
+            "type": "array"
+          },
+          "rubric_key": {
+            "default": "",
+            "title": "Rubric Key",
+            "type": "string"
+          },
+          "rubric_version": {
+            "default": 0,
+            "title": "Rubric Version",
+            "type": "integer"
+          },
+          "task_kind": {
+            "default": "task",
+            "title": "Task Kind",
+            "type": "string"
           },
           "task_title": {
             "title": "Task Title",
@@ -2603,6 +3214,28 @@
           "authorship_conflict_open"
         ],
         "title": "MentorQueueItemView",
+        "type": "object"
+      },
+      "MessageRequest": {
+        "properties": {
+          "client_message_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Client Message Id",
+            "type": "string"
+          },
+          "content": {
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Content",
+            "type": "string"
+          }
+        },
+        "required": [
+          "client_message_id",
+          "content"
+        ],
+        "title": "MessageRequest",
         "type": "object"
       },
       "MetricView": {
@@ -2743,6 +3376,104 @@
         "title": "MilestoneView",
         "type": "object"
       },
+      "MuteRequest": {
+        "properties": {
+          "muted": {
+            "title": "Muted",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "muted"
+        ],
+        "title": "MuteRequest",
+        "type": "object"
+      },
+      "NotificationList": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationView"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "unread": {
+            "title": "Unread",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "unread"
+        ],
+        "title": "NotificationList",
+        "type": "object"
+      },
+      "NotificationView": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Type"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "read": {
+            "title": "Read",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "body",
+          "entity_type",
+          "entity_id",
+          "read",
+          "created_at"
+        ],
+        "title": "NotificationView",
+        "type": "object"
+      },
       "OfferEvidenceStatus": {
         "enum": [
           "verified",
@@ -2839,6 +3570,20 @@
           "basis"
         ],
         "title": "OfferProofView",
+        "type": "object"
+      },
+      "OpenPersonalRequest": {
+        "properties": {
+          "peer_id": {
+            "format": "uuid",
+            "title": "Peer Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "peer_id"
+        ],
+        "title": "OpenPersonalRequest",
         "type": "object"
       },
       "OpenReviewAppealRequest": {
@@ -3040,6 +3785,310 @@
         "title": "ParticipantAnalyticsView",
         "type": "object"
       },
+      "ParticipantProfileView": {
+        "properties": {
+          "about": {
+            "title": "About",
+            "type": "string"
+          },
+          "avatar_url": {
+            "title": "Avatar Url",
+            "type": "string"
+          },
+          "buddy_enabled": {
+            "title": "Buddy Enabled",
+            "type": "boolean"
+          },
+          "city": {
+            "title": "City",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "locale": {
+            "enum": [
+              "ru-RU",
+              "en-US"
+            ],
+            "title": "Locale",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "primary_track": {
+            "title": "Primary Track",
+            "type": "string"
+          },
+          "skills": {
+            "items": {
+              "$ref": "#/components/schemas/ProfileSkillView"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "study_year": {
+            "title": "Study Year",
+            "type": "string"
+          },
+          "telegram": {
+            "title": "Telegram",
+            "type": "string"
+          },
+          "theme": {
+            "enum": [
+              "dark",
+              "system"
+            ],
+            "title": "Theme",
+            "type": "string"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          },
+          "university": {
+            "title": "University",
+            "type": "string"
+          }
+        },
+        "required": [
+          "person_id",
+          "display_name",
+          "city",
+          "university",
+          "study_year",
+          "primary_track",
+          "email",
+          "telegram",
+          "about",
+          "avatar_url",
+          "locale",
+          "theme",
+          "timezone",
+          "buddy_enabled",
+          "skills"
+        ],
+        "title": "ParticipantProfileView",
+        "type": "object"
+      },
+      "ParticipantTaskDetailView": {
+        "properties": {
+          "acceptance_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acceptance Criteria",
+            "type": "array"
+          },
+          "accepted_terms_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepted Terms Version"
+          },
+          "allowed_artifacts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Artifacts",
+            "type": "array"
+          },
+          "checkpoints": {
+            "items": {
+              "$ref": "#/components/schemas/CheckpointView"
+            },
+            "title": "Checkpoints",
+            "type": "array"
+          },
+          "customer": {
+            "$ref": "#/components/schemas/PartnerView"
+          },
+          "data_constraints": {
+            "title": "Data Constraints",
+            "type": "string"
+          },
+          "deadline_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline At"
+          },
+          "deliverable": {
+            "title": "Deliverable",
+            "type": "string"
+          },
+          "feedback": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewFeedbackView"
+            },
+            "title": "Feedback",
+            "type": "array"
+          },
+          "invitation_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Invitation Status"
+          },
+          "ip_terms": {
+            "title": "Ip Terms",
+            "type": "string"
+          },
+          "membership": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AssignmentView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "mentor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PartnerView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "personal": {
+            "items": {
+              "$ref": "#/components/schemas/ContributionView"
+            },
+            "title": "Personal",
+            "type": "array"
+          },
+          "problem": {
+            "title": "Problem",
+            "type": "string"
+          },
+          "support": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SupportView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "task": {
+            "$ref": "#/components/schemas/TaskView"
+          },
+          "team": {
+            "items": {
+              "$ref": "#/components/schemas/TeamMemberView"
+            },
+            "title": "Team",
+            "type": "array"
+          },
+          "terms": {
+            "$ref": "#/components/schemas/TermsView"
+          },
+          "terms_history": {
+            "items": {
+              "$ref": "#/components/schemas/TermsHistoryEntryView"
+            },
+            "title": "Terms History",
+            "type": "array"
+          }
+        },
+        "required": [
+          "task",
+          "problem",
+          "deliverable",
+          "acceptance_criteria",
+          "deadline_at",
+          "data_constraints",
+          "ip_terms",
+          "allowed_artifacts",
+          "terms",
+          "terms_history",
+          "accepted_terms_version",
+          "invitation_status",
+          "customer",
+          "mentor",
+          "support",
+          "team",
+          "membership",
+          "checkpoints",
+          "personal",
+          "feedback"
+        ],
+        "title": "ParticipantTaskDetailView",
+        "type": "object"
+      },
+      "ParticipantView": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "role"
+        ],
+        "title": "ParticipantView",
+        "type": "object"
+      },
+      "PartnerView": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "display_name"
+        ],
+        "title": "PartnerView",
+        "type": "object"
+      },
       "PassportSkillView": {
         "properties": {
           "confirmed_case_count": {
@@ -3049,6 +4098,18 @@
           "key": {
             "title": "Key",
             "type": "string"
+          },
+          "last_confirmed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Confirmed At"
           },
           "practical_level": {
             "title": "Practical Level",
@@ -3503,6 +4564,201 @@
         "title": "PortfolioView",
         "type": "object"
       },
+      "PostMessageRequest": {
+        "properties": {
+          "artifact_refs": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 24,
+            "title": "Artifact Refs",
+            "type": "array"
+          },
+          "body": {
+            "maxLength": 40000,
+            "minLength": 1,
+            "title": "Body",
+            "type": "string"
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "title": "PostMessageRequest",
+        "type": "object"
+      },
+      "ProfileSkillView": {
+        "properties": {
+          "origin": {
+            "enum": [
+              "self_reported",
+              "imported",
+              "verified_course",
+              "verified_project"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "origin",
+          "verified"
+        ],
+        "title": "ProfileSkillView",
+        "type": "object"
+      },
+      "ProjectCompetencyView": {
+        "properties": {
+          "competency": {
+            "title": "Competency",
+            "type": "string"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidence Refs",
+            "type": "array"
+          },
+          "finding": {
+            "title": "Finding",
+            "type": "string"
+          },
+          "level": {
+            "title": "Level",
+            "type": "string"
+          }
+        },
+        "required": [
+          "competency",
+          "level",
+          "evidence_refs",
+          "finding"
+        ],
+        "title": "ProjectCompetencyView",
+        "type": "object"
+      },
+      "ProjectCredentialView": {
+        "properties": {
+          "artifact_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Artifact Keys",
+            "type": "array"
+          },
+          "competencies": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectCompetencyView"
+            },
+            "title": "Competencies",
+            "type": "array"
+          },
+          "contribution_version": {
+            "title": "Contribution Version",
+            "type": "integer"
+          },
+          "credential_id": {
+            "title": "Credential Id",
+            "type": "string"
+          },
+          "customer_name": {
+            "title": "Customer Name",
+            "type": "string"
+          },
+          "grade_label": {
+            "title": "Grade Label",
+            "type": "string"
+          },
+          "holder_name": {
+            "title": "Holder Name",
+            "type": "string"
+          },
+          "payment_status": {
+            "title": "Payment Status",
+            "type": "string"
+          },
+          "period": {
+            "title": "Period",
+            "type": "string"
+          },
+          "personal_summary": {
+            "title": "Personal Summary",
+            "type": "string"
+          },
+          "project_key": {
+            "title": "Project Key",
+            "type": "string"
+          },
+          "review_explanation": {
+            "title": "Review Explanation",
+            "type": "string"
+          },
+          "signed_at": {
+            "format": "date-time",
+            "title": "Signed At",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "superseded_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Superseded By"
+          },
+          "task_key": {
+            "title": "Task Key",
+            "type": "string"
+          },
+          "task_title": {
+            "title": "Task Title",
+            "type": "string"
+          },
+          "verification_id": {
+            "title": "Verification Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "credential_id",
+          "verification_id",
+          "contribution_version",
+          "holder_name",
+          "customer_name",
+          "task_title",
+          "task_key",
+          "project_key",
+          "period",
+          "personal_summary",
+          "artifact_keys",
+          "grade_label",
+          "review_explanation",
+          "competencies",
+          "payment_status",
+          "signed_at",
+          "status",
+          "superseded_by"
+        ],
+        "title": "ProjectCredentialView",
+        "type": "object"
+      },
       "PublicCredentialView": {
         "properties": {
           "cohort_title": {
@@ -3679,6 +4935,33 @@
           "appeal_period_days"
         ],
         "title": "RatingPolicyView",
+        "type": "object"
+      },
+      "ReadAllResult": {
+        "properties": {
+          "cleared": {
+            "title": "Cleared",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cleared"
+        ],
+        "title": "ReadAllResult",
+        "type": "object"
+      },
+      "ReadMessageRequest": {
+        "properties": {
+          "message_id": {
+            "format": "uuid",
+            "title": "Message Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message_id"
+        ],
+        "title": "ReadMessageRequest",
         "type": "object"
       },
       "RepeatTaskRequest": {
@@ -3893,6 +5176,45 @@
           "resulting_review_version"
         ],
         "title": "ReviewAppealView",
+        "type": "object"
+      },
+      "ReviewFeedbackView": {
+        "properties": {
+          "contribution_id": {
+            "format": "uuid",
+            "title": "Contribution Id",
+            "type": "string"
+          },
+          "contribution_version": {
+            "title": "Contribution Version",
+            "type": "integer"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "grade": {
+            "title": "Grade",
+            "type": "string"
+          },
+          "review_version": {
+            "title": "Review Version",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "contribution_id",
+          "contribution_version",
+          "review_version",
+          "grade",
+          "explanation",
+          "status"
+        ],
+        "title": "ReviewFeedbackView",
         "type": "object"
       },
       "ReviewGrade": {
@@ -4400,6 +5722,50 @@
         "title": "ScoreSourceRuleModel",
         "type": "object"
       },
+      "SearchItem": {
+        "properties": {
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "meta": {
+            "title": "Meta",
+            "type": "string"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "ref",
+          "title",
+          "meta"
+        ],
+        "title": "SearchItem",
+        "type": "object"
+      },
+      "SearchResults": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SearchItem"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "SearchResults",
+        "type": "object"
+      },
       "SeasonStatus": {
         "enum": [
           "scheduled",
@@ -4560,6 +5926,50 @@
         "title": "SettlementKind",
         "type": "string"
       },
+      "SkillReportView": {
+        "properties": {
+          "anchors": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceAnchorView"
+            },
+            "title": "Anchors",
+            "type": "array"
+          },
+          "excluded": {
+            "items": {
+              "$ref": "#/components/schemas/EvidenceAnchorView"
+            },
+            "title": "Excluded",
+            "type": "array"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "level": {
+            "title": "Level",
+            "type": "string"
+          },
+          "skill_key": {
+            "title": "Skill Key",
+            "type": "string"
+          },
+          "skill_title": {
+            "title": "Skill Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill_key",
+          "skill_title",
+          "level",
+          "explanation",
+          "anchors",
+          "excluded"
+        ],
+        "title": "SkillReportView",
+        "type": "object"
+      },
       "StandingView": {
         "properties": {
           "earliest_achievement": {
@@ -4673,6 +6083,23 @@
           "mode"
         ],
         "title": "SupportRequest",
+        "type": "object"
+      },
+      "SupportView": {
+        "properties": {
+          "assignee": {
+            "$ref": "#/components/schemas/PartnerView"
+          },
+          "mode": {
+            "title": "Mode",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode",
+          "assignee"
+        ],
+        "title": "SupportView",
         "type": "object"
       },
       "SwitchRoleRequest": {
@@ -4896,6 +6323,29 @@
         "title": "TaskView",
         "type": "object"
       },
+      "TeamMemberView": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AssignmentStatus"
+          }
+        },
+        "required": [
+          "person_id",
+          "display_name",
+          "status"
+        ],
+        "title": "TeamMemberView",
+        "type": "object"
+      },
       "TeamRequestCommand": {
         "properties": {
           "preferred_tags": {
@@ -4995,6 +6445,30 @@
         "title": "TeamRequestView",
         "type": "object"
       },
+      "TermsHistoryEntryView": {
+        "properties": {
+          "deadline_at": {
+            "format": "date-time",
+            "title": "Deadline At",
+            "type": "string"
+          },
+          "deliverable": {
+            "title": "Deliverable",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "deadline_at",
+          "deliverable"
+        ],
+        "title": "TermsHistoryEntryView",
+        "type": "object"
+      },
       "TermsView": {
         "properties": {
           "acceptance_criteria": {
@@ -5041,6 +6515,38 @@
           "compensation"
         ],
         "title": "TermsView",
+        "type": "object"
+      },
+      "ThreadView": {
+        "properties": {
+          "content_deleted": {
+            "title": "Content Deleted",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/impulse__api__v1__buddy__MessageView"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "messages",
+          "content_deleted"
+        ],
+        "title": "ThreadView",
         "type": "object"
       },
       "TieBreaker": {
@@ -5147,6 +6653,106 @@
         "title": "TrophyProofView",
         "type": "object"
       },
+      "UpdateParticipantProfileRequest": {
+        "properties": {
+          "about": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "About",
+            "type": "string"
+          },
+          "avatar_url": {
+            "default": "",
+            "maxLength": 2048,
+            "title": "Avatar Url",
+            "type": "string"
+          },
+          "buddy_enabled": {
+            "default": true,
+            "title": "Buddy Enabled",
+            "type": "boolean"
+          },
+          "city": {
+            "default": "",
+            "maxLength": 160,
+            "title": "City",
+            "type": "string"
+          },
+          "display_name": {
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "email": {
+            "default": "",
+            "maxLength": 255,
+            "title": "Email",
+            "type": "string"
+          },
+          "locale": {
+            "default": "ru-RU",
+            "enum": [
+              "ru-RU",
+              "en-US"
+            ],
+            "title": "Locale",
+            "type": "string"
+          },
+          "primary_track": {
+            "default": "",
+            "maxLength": 160,
+            "title": "Primary Track",
+            "type": "string"
+          },
+          "skills": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 30,
+            "title": "Skills",
+            "type": "array"
+          },
+          "study_year": {
+            "default": "",
+            "maxLength": 64,
+            "title": "Study Year",
+            "type": "string"
+          },
+          "telegram": {
+            "default": "",
+            "maxLength": 120,
+            "title": "Telegram",
+            "type": "string"
+          },
+          "theme": {
+            "default": "dark",
+            "enum": [
+              "dark",
+              "system"
+            ],
+            "title": "Theme",
+            "type": "string"
+          },
+          "timezone": {
+            "default": "Europe/Moscow",
+            "maxLength": 80,
+            "title": "Timezone",
+            "type": "string"
+          },
+          "university": {
+            "default": "",
+            "maxLength": 255,
+            "title": "University",
+            "type": "string"
+          }
+        },
+        "required": [
+          "display_name"
+        ],
+        "title": "UpdateParticipantProfileRequest",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -5238,6 +6844,13 @@
       },
       "WorkItemView": {
         "properties": {
+          "allowed_artifacts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Artifacts",
+            "type": "array"
+          },
           "assignment": {
             "$ref": "#/components/schemas/AssignmentView"
           },
@@ -5271,6 +6884,102 @@
         ],
         "title": "WorkItemView",
         "type": "object"
+      },
+      "impulse__api__v1__buddy__MessageView": {
+        "properties": {
+          "client_message_id": {
+            "title": "Client Message Id",
+            "type": "string"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "client_message_id",
+          "role",
+          "content"
+        ],
+        "title": "MessageView",
+        "type": "object"
+      },
+      "impulse__api__v1__messaging__MessageView": {
+        "properties": {
+          "artifact_refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Artifact Refs",
+            "type": "array"
+          },
+          "author_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author Id"
+          },
+          "author_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author Name"
+          },
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "sequence": {
+            "title": "Sequence",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "author_id",
+          "author_name",
+          "kind",
+          "body",
+          "artifact_refs",
+          "sequence",
+          "created_at"
+        ],
+        "title": "MessageView",
+        "type": "object"
       }
     }
   },
@@ -5280,9 +6989,396 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/agents/buddy/memory": {
+      "delete": {
+        "operationId": "withdraw_memory_api_v1_agents_buddy_memory_delete",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Withdraw Memory",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
+    "/api/v1/agents/buddy/threads": {
+      "post": {
+        "operationId": "create_thread_api_v1_agents_buddy_threads_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThreadView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Thread",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
+    "/api/v1/agents/buddy/threads/{thread_id}": {
+      "get": {
+        "operationId": "get_thread_api_v1_agents_buddy_threads__thread_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "thread_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Thread Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThreadView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Thread",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
+    "/api/v1/agents/buddy/threads/{thread_id}/cancel": {
+      "post": {
+        "operationId": "cancel_thread_api_v1_agents_buddy_threads__thread_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "thread_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Thread Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThreadView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Thread",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
+    "/api/v1/agents/buddy/threads/{thread_id}/events": {
+      "get": {
+        "operationId": "thread_events_api_v1_agents_buddy_threads__thread_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "thread_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Thread Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Thread Events",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
+    "/api/v1/agents/buddy/threads/{thread_id}/feedback": {
+      "post": {
+        "operationId": "add_feedback_api_v1_agents_buddy_threads__thread_id__feedback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "thread_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Thread Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Feedback",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
+    "/api/v1/agents/buddy/threads/{thread_id}/messages": {
+      "post": {
+        "operationId": "add_message_api_v1_agents_buddy_threads__thread_id__messages_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "thread_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Thread Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/impulse__api__v1__buddy__MessageView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Message",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
     "/api/v1/analytics/role": {
       "get": {
         "operationId": "role_analytics_api_v1_analytics_role_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "baseline_hours",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "exclusiveMinimum": 0,
+                  "maximum": 10000,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Baseline Hours"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -5293,6 +7389,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "Role Analytics"
@@ -5395,6 +7501,45 @@
           }
         },
         "summary": "Personas"
+      }
+    },
+    "/api/v1/bootcamp/certificates/{verification_id}": {
+      "get": {
+        "operationId": "verify_certificate_api_v1_bootcamp_certificates__verification_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "verification_id",
+            "required": true,
+            "schema": {
+              "title": "Verification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseCertificateView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify Certificate"
       }
     },
     "/api/v1/config": {
@@ -5551,6 +7696,62 @@
           }
         },
         "summary": "Customer Cases"
+      }
+    },
+    "/api/v1/customer/contributions/{contribution_id}/credential": {
+      "post": {
+        "operationId": "sign_project_credential_api_v1_customer_contributions__contribution_id__credential_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "contribution_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Contribution Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectCredentialView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sign Project Credential"
       }
     },
     "/api/v1/customer/contributions/{contribution_id}/decision": {
@@ -7226,6 +9427,212 @@
         "summary": "Start Assignment"
       }
     },
+    "/api/v1/me/assistant/customer-brief": {
+      "post": {
+        "operationId": "customer_brief_draft_api_v1_me_assistant_customer_brief_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BriefDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BriefDraftView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Customer Brief Draft"
+      }
+    },
+    "/api/v1/me/bootcamp/certificates": {
+      "get": {
+        "operationId": "my_certificates_api_v1_me_bootcamp_certificates_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CourseCertificateView"
+                  },
+                  "title": "Response My Certificates Api V1 Me Bootcamp Certificates Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My Certificates"
+      }
+    },
+    "/api/v1/me/bootcamp/certificates/{course_key}": {
+      "post": {
+        "operationId": "issue_certificate_api_v1_me_bootcamp_certificates__course_key__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_key",
+            "required": true,
+            "schema": {
+              "title": "Course Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseCertificateView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Issue Certificate"
+      }
+    },
+    "/api/v1/me/competencies": {
+      "get": {
+        "operationId": "my_competencies_api_v1_me_competencies_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FrameworkReportView"
+                  },
+                  "title": "Response My Competencies Api V1 Me Competencies Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My Competencies"
+      }
+    },
+    "/api/v1/me/competency-evidence": {
+      "get": {
+        "operationId": "my_evidence_api_v1_me_competency_evidence_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "competency_key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Competency Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/EvidenceAnchorView"
+                  },
+                  "title": "Response My Evidence Api V1 Me Competency Evidence Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "My Evidence"
+      }
+    },
     "/api/v1/me/consents/{scope}": {
       "put": {
         "operationId": "set_consent_api_v1_me_consents__scope__put",
@@ -7677,6 +10084,561 @@
         "summary": "Streak"
       }
     },
+    "/api/v1/me/messaging/channels": {
+      "get": {
+        "operationId": "channels_api_v1_me_messaging_channels_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ChannelView"
+                  },
+                  "title": "Response Channels Api V1 Me Messaging Channels Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Channels"
+      }
+    },
+    "/api/v1/me/messaging/channels/personal": {
+      "post": {
+        "operationId": "open_personal_api_v1_me_messaging_channels_personal_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpenPersonalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Open Personal"
+      }
+    },
+    "/api/v1/me/messaging/channels/{channel_id}": {
+      "get": {
+        "operationId": "channel_api_v1_me_messaging_channels__channel_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "channel_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Channel Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Channel"
+      }
+    },
+    "/api/v1/me/messaging/channels/{channel_id}/context": {
+      "get": {
+        "operationId": "channel_context_api_v1_me_messaging_channels__channel_id__context_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "channel_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Channel Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ChannelWorkContextView"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Channel Context Api V1 Me Messaging Channels  Channel Id  Context Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Channel Context"
+      }
+    },
+    "/api/v1/me/messaging/channels/{channel_id}/messages": {
+      "get": {
+        "operationId": "messages_api_v1_me_messaging_channels__channel_id__messages_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "channel_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Channel Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Before"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/impulse__api__v1__messaging__MessageView"
+                  },
+                  "title": "Response Messages Api V1 Me Messaging Channels  Channel Id  Messages Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Messages"
+      },
+      "post": {
+        "operationId": "post_message_api_v1_me_messaging_channels__channel_id__messages_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "channel_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Channel Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/impulse__api__v1__messaging__MessageView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Post Message"
+      }
+    },
+    "/api/v1/me/messaging/channels/{channel_id}/mute": {
+      "post": {
+        "operationId": "set_mute_api_v1_me_messaging_channels__channel_id__mute_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "channel_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Channel Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MuteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Mute"
+      }
+    },
+    "/api/v1/me/messaging/channels/{channel_id}/read": {
+      "post": {
+        "operationId": "mark_read_api_v1_me_messaging_channels__channel_id__read_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "channel_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Channel Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Mark Read"
+      }
+    },
+    "/api/v1/me/notifications": {
+      "get": {
+        "operationId": "notifications_api_v1_me_notifications_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Notifications"
+      }
+    },
+    "/api/v1/me/notifications/read-all": {
+      "post": {
+        "operationId": "read_all_api_v1_me_notifications_read_all_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadAllResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Read All"
+      }
+    },
+    "/api/v1/me/notifications/{notification_id}/read": {
+      "post": {
+        "operationId": "read_notification_api_v1_me_notifications__notification_id__read_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "notification_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Notification Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Read Notification"
+      }
+    },
     "/api/v1/me/portfolio": {
       "get": {
         "operationId": "my_portfolio_api_v1_me_portfolio_get",
@@ -7693,6 +10655,100 @@
           }
         },
         "summary": "My Portfolio"
+      }
+    },
+    "/api/v1/me/profile": {
+      "get": {
+        "operationId": "participant_profile_api_v1_me_profile_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantProfileView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Participant Profile"
+      },
+      "put": {
+        "operationId": "update_participant_profile_api_v1_me_profile_put",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateParticipantProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantProfileView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Participant Profile"
+      }
+    },
+    "/api/v1/me/project-credentials": {
+      "get": {
+        "operationId": "my_project_credentials_api_v1_me_project_credentials_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectCredentialView"
+                  },
+                  "title": "Response My Project Credentials Api V1 Me Project Credentials Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My Project Credentials"
       }
     },
     "/api/v1/me/reviews/{review_id}/appeals": {
@@ -7821,6 +10877,46 @@
           }
         },
         "summary": "Talent Passport"
+      }
+    },
+    "/api/v1/me/tasks/{task_id}": {
+      "get": {
+        "operationId": "participant_task_detail_api_v1_me_tasks__task_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParticipantTaskDetailView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Participant Task Detail"
       }
     },
     "/api/v1/me/tasks/{task_id}/applications": {
@@ -8065,6 +11161,89 @@
           }
         },
         "summary": "Select Track"
+      }
+    },
+    "/api/v1/me/visibility": {
+      "get": {
+        "operationId": "hr_visibility_api_v1_me_visibility_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HrVisibilityView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Hr Visibility"
+      }
+    },
+    "/api/v1/me/visibility/{scope}": {
+      "put": {
+        "operationId": "set_hr_visibility_api_v1_me_visibility__scope__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "scope",
+            "required": true,
+            "schema": {
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HrVisibilityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HrVisibilityView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Hr Visibility"
       }
     },
     "/api/v1/me/work": {
@@ -9965,6 +13144,45 @@
         "summary": "Timeline"
       }
     },
+    "/api/v1/project-credentials/{verification_id}": {
+      "get": {
+        "operationId": "verify_project_credential_api_v1_project_credentials__verification_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "verification_id",
+            "required": true,
+            "schema": {
+              "title": "Verification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectCredentialView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify Project Credential"
+      }
+    },
     "/api/v1/rating-seasons/{season_id}/leaderboard": {
       "get": {
         "operationId": "leaderboard_api_v1_rating_seasons__season_id__leaderboard_get",
@@ -10007,6 +13225,59 @@
           }
         },
         "summary": "Leaderboard"
+      }
+    },
+    "/api/v1/search": {
+      "get": {
+        "operationId": "search_api_v1_search_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "maxLength": 96,
+              "minLength": 2,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 8,
+              "maximum": 20,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResults"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Search"
       }
     },
     "/api/v1/second-wave/{role_key}": {

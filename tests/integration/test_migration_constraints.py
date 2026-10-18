@@ -196,12 +196,17 @@ async def test_demo_seed_is_linked_and_idempotent() -> None:
     second = await seed_demo(database)
 
     assert first == second
-    assert second["persons"] == 8
+    assert second["persons"] == 15
     assert second["courses"] == 12
     assert second["events"] == 8
-    assert second["tasks"] == 8
+    assert second["tasks"] == 12
     assert second["appeals"] == 1
-    assert second["score_ledger"] == 3
+    assert second["score_ledger"] == 10
+    assert second["messaging_channels"] == 2
+    assert second["messaging_memberships"] == 5
+    assert second["messaging_messages"] == 4
+    assert second["messaging_read_cursors"] == 2
+    assert second["notifications"] == 7
 
     async with database.sessions() as session:
         alex = await session.execute(

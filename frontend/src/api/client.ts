@@ -3,11 +3,14 @@ import type { paths } from "./schema";
 export type ApiPaths = paths;
 export type RuntimeApiPath =
   | keyof ApiPaths
+  | `/api/v1/search?${string}`
   | `/api/v1/me/courses/${string}/completion`
   | `/api/v1/me/courses/${string}/learning-days`
   | `/api/v1/me/consents/${string}`
+  | `/api/v1/me/visibility/${string}`
   | `/api/v1/me/events/${string}/claims`
   | "/api/v1/me/work"
+  | "/api/v1/me/profile"
   | "/api/v1/me/talent-passport"
   | "/api/v1/me/reward-evidence"
   | "/api/v1/mentor/review-workspace"
@@ -23,6 +26,12 @@ export type RuntimeApiPath =
   | `/api/v1/hr/candidates/${string}`
   | `/api/v1/hr/candidates/${string}/pipeline-events`
   | `/api/v1/mentor/reviews/${string}/${"propose" | "confirm" | "publish"}`
+  | `/api/v1/me/notifications/${string}/read`
+  | `/api/v1/me/tasks/${string}`
+  | `/api/v1/me/messaging/channels/${string}`
+  | `/api/v1/me/messaging/channels/${string}/messages`
+  | `/api/v1/me/messaging/channels/${string}/read`
+  | `/api/v1/me/messaging/channels/${string}/mute`
   | `/api/v1/me/tasks/${string}/terms-consent`
   | `/api/v1/me/tasks/${string}/applications`
   | `/api/v1/me/tasks/${string}/invitation`
@@ -43,7 +52,13 @@ export type RuntimeApiPath =
   | "/api/v1/customer/saved-candidates"
   | `/api/v1/customer/tasks/${string}/invitations/${string}/revoke`
   | `/api/v1/customer/tasks/${string}/applications`
-  | `/api/v1/customer/applications/${string}/accept`;
+  | `/api/v1/customer/applications/${string}/accept`
+  | "/api/v1/me/bootcamp/certificates"
+  | `/api/v1/me/bootcamp/certificates/${string}`
+  | `/api/v1/bootcamp/certificates/${string}`
+  | "/api/v1/me/project-credentials"
+  | `/api/v1/project-credentials/${string}`
+  | `/api/v1/customer/contributions/${string}/credential`;
 
 export class ApiClientError extends Error {
   readonly status: number;

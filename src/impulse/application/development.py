@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import secrets
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 from typing import Protocol
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from impulse.api.errors import ApiError
 from impulse.domain.development import (
@@ -52,6 +53,127 @@ class CourseRecord:
 class EnrollmentRecord:
     course_key: str
     status: CompletionStatus
+
+
+@dataclass(frozen=True, slots=True)
+class CompletedCompetency:
+    competency: str
+    level: str
+    evidence: str
+
+
+@dataclass(frozen=True, slots=True)
+class CourseCertificate:
+    certificate_id: UUID
+    verification_id: str
+    person_id: UUID
+    holder_name: str
+    course_key: str
+    course_title: str
+    specialization: str
+    program_version: str
+    period: str
+    workload_hours: int
+    result: str
+    competencies: tuple[CompletedCompetency, ...]
+    issued_at: datetime
+
+    def preview_marking(self) -> str:
+        """Demo issuer documents are never presented as an official Sber certificate."""
+        return "Демонстрационный образец"
+
+
+COURSE_CERTIFICATE_REGISTRY: dict[str, dict[str, object]] = {
+    "openspec-sdd": {
+        "specialization": "Python / Data / Product / ML",
+        "program_version": "1.0.0",
+        "workload_hours": 24,
+        "competencies": (
+            ("Спецификация и документация", "базовый", "OpenSpec-задание курса"),
+            ("Ведение проекта по SDD", "базовый", "Практическое задание курса"),
+        ),
+    },
+    "agent-development": {
+        "specialization": "Python / ML",
+        "program_version": "1.0.0",
+        "workload_hours": 32,
+        "competencies": (
+            ("Проектирование агентных сценариев", "базовый", "Практическое задание курса"),
+            ("Контекст и ограничения агентов", "базовый", "Практическое задание курса"),
+        ),
+    },
+    "python-base": {
+        "specialization": "Python / Data / ML",
+        "program_version": "1.0.0",
+        "workload_hours": 40,
+        "competencies": (("Синтаксис и идиомы Python", "базовый", "Итоговое задание курса"),),
+    },
+}
+
+
+class CertificateStore(Protocol):
+    async def course_certificate(
+        self, person_id: UUID, course_key: str
+    ) -> CourseCertificate | None: ...
+
+    async def certificate_by_verification(
+        self, verification_id: str
+    ) -> CourseCertificate | None: ...
+
+    async def course_certificates(self, person_id: UUID) -> tuple[CourseCertificate, ...]: ...
+
+    async def add_course_certificate(self, certificate: CourseCertificate) -> CourseCertificate: ...
+
+
+class MemoryCertificateStore:
+    """Deterministic in-memory adapter for demo runs and tests."""
+
+    def __init__(self) -> None:
+        self._by_person_course: dict[tuple[UUID, str], CourseCertificate] = {}
+        self._by_verification: dict[str, CourseCertificate] = {}
+
+    async def course_certificate(
+        self, person_id: UUID, course_key: str
+    ) -> CourseCertificate | None:
+        return self._by_person_course.get((person_id, course_key))
+
+    async def certificate_by_verification(self, verification_id: str) -> CourseCertificate | None:
+        return self._by_verification.get(verification_id)
+
+    async def course_certificates(self, person_id: UUID) -> tuple[CourseCertificate, ...]:
+        items = [item for key, item in self._by_person_course.items() if key[0] == person_id]
+        items.sort(key=lambda item: item.issued_at)
+        return tuple(items)
+
+    async def add_course_certificate(self, certificate: CourseCertificate) -> CourseCertificate:
+        self._by_person_course[(certificate.person_id, certificate.course_key)] = certificate
+        self._by_verification[certificate.verification_id] = certificate
+        return certificate
+
+    def install_course_certificate(self, certificate: CourseCertificate) -> None:
+        """Sync seeding hook for deterministic demo documents."""
+        self._by_person_course[(certificate.person_id, certificate.course_key)] = certificate
+        self._by_verification[certificate.verification_id] = certificate
+
+
+def demo_course_certificate(person_id: UUID, certificate_id: UUID) -> CourseCertificate:
+    """Synthetic preview document for the demo roster; never an official certificate."""
+    registry = COURSE_CERTIFICATE_REGISTRY["openspec-sdd"]
+    return CourseCertificate(
+        certificate_id=certificate_id,
+        verification_id="demo-cert-openspec-sdd",
+        person_id=person_id,
+        holder_name="Алекс Речной",
+        course_key="openspec-sdd",
+        course_title="OpenSpec и SDD",
+        specialization=str(registry["specialization"]),
+        program_version=str(registry["program_version"]),
+        period="2026",
+        workload_hours=int(registry["workload_hours"]),
+        result="Подтверждённое завершение Bootcamp-курса",
+        competencies=tuple(CompletedCompetency(*entry) for entry in registry["competencies"]),
+        issued_at=datetime.now(UTC),
+    )
 
 
 class DevelopmentStore(Protocol):
@@ -141,6 +263,7 @@ class MemoryDevelopmentStore:
             ),
         )
         self._enrollments: dict[tuple[UUID, str], EnrollmentRecord] = {}
+        self._seed_person_id: UUID | None = None
         self._days: dict[UUID, frozenset[date]] = {}
 
     async def tracks(self) -> tuple[TrackRecord, ...]:
@@ -161,6 +284,18 @@ class MemoryDevelopmentStore:
     def install_roadmap(self, roadmap: RoadmapRecord) -> None:
         """Replace one in-memory policy version for deterministic contract tests."""
         self._roadmaps[roadmap.track_key] = roadmap
+
+    def install_enrollments(self, records: tuple[EnrollmentRecord, ...]) -> None:
+        """Seed per-person enrollments for deterministic certificate tests."""
+        seed = self._seed_person_id
+        if seed is None:
+            raise RuntimeError("Call enroll_as(person_id) before install_enrollments")
+        for record in records:
+            self._enrollments[(seed, record.course_key)] = record
+
+    def enroll_as(self, person_id: UUID) -> None:
+        """Select the owner for subsequently installed enrollments."""
+        self._seed_person_id = person_id
 
     async def courses(self) -> tuple[CourseRecord, ...]:
         return self._courses
@@ -193,8 +328,12 @@ class MemoryDevelopmentStore:
 
 
 class DevelopmentService:
-    def __init__(self, store: DevelopmentStore) -> None:
+    def __init__(
+        self, store: DevelopmentStore, certificates: CertificateStore | None = None
+    ) -> None:
         self.store = store
+        self.certificates = certificates
+        self.competency_service: object | None = None
 
     @staticmethod
     def _participant(actor: ActorContext) -> None:
@@ -277,6 +416,77 @@ class DevelopmentService:
     async def report_completion(self, actor: ActorContext, course_key: str) -> EnrollmentRecord:
         self._participant(actor)
         return await self.store.report_completion(actor.person_id, course_key)
+
+    async def issue_course_certificate(
+        self,
+        actor: ActorContext,
+        course_key: str,
+        *,
+        holder_name: str,
+    ) -> CourseCertificate:
+        """Issue the Bootcamp certificate only after a verified course completion."""
+        self._participant(actor)
+        registry = COURSE_CERTIFICATE_REGISTRY.get(course_key)
+        if registry is None or self.certificates is None:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        existing = await self.certificates.course_certificate(actor.person_id, course_key)
+        if existing is not None:
+            return existing
+        enrolled = {
+            item.course_key: item.status for item in await self.store.enrollments(actor.person_id)
+        }
+        if enrolled.get(course_key) is not CompletionStatus.VERIFIED:
+            raise ApiError(
+                code="CERTIFICATE_NOT_VERIFIED",
+                message="Сертификат выдаётся только после подтверждённого завершения курса.",
+                status_code=409,
+            )
+        course = next((item for item in await self.store.courses() if item.key == course_key), None)
+        if course is None:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        certificate = CourseCertificate(
+            certificate_id=uuid4(),
+            verification_id=secrets.token_urlsafe(16),
+            person_id=actor.person_id,
+            holder_name=holder_name,
+            course_key=course.key,
+            course_title=course.title,
+            specialization=str(registry["specialization"]),
+            program_version=str(registry["program_version"]),
+            period="2026",
+            workload_hours=int(registry["workload_hours"]),
+            result="Подтверждённое завершение Bootcamp-курса",
+            competencies=tuple(CompletedCompetency(*entry) for entry in registry["competencies"]),
+            issued_at=datetime.now(UTC),
+        )
+        issued = await self.certificates.add_course_certificate(certificate)
+        anchor = getattr(self, "competency_service", None)
+        if anchor is not None:
+            for entry in certificate.competencies:
+                await anchor.record_source_transition(
+                    actor.person_id,
+                    entry.competency,
+                    source_kind="course",
+                    source_ref=f"course:{certificate.course_key}",
+                    level=entry.level,
+                    observed_at=certificate.issued_at,
+                )
+        return issued
+
+    async def course_certificates(self, actor: ActorContext) -> tuple[CourseCertificate, ...]:
+        if self.certificates is None:
+            return ()
+        self._participant(actor)
+        return await self.certificates.course_certificates(actor.person_id)
+
+    async def verify_course_certificate(self, verification_id: str) -> CourseCertificate | None:
+        if self.certificates is None:
+            return None
+        return await self.certificates.certificate_by_verification(verification_id)
 
     async def record_learning(
         self, actor: ActorContext, course_key: str, occurred_at: datetime

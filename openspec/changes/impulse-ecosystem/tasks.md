@@ -43,10 +43,10 @@
 - [x] 5.4 Настроить TanStack Query, typed API client и error mapping; test SHALL подтвердить retry только для безопасных retryable reads.
 - [x] 5.5 Добавить CSP-compatible asset build, external-link safety и reduced-motion; automated accessibility/security check SHALL пройти без critical issues.
 - [x] 5.6 Применить утверждённую navy/teal visual system к role-aware shell, dashboard и общим компонентам; Playwright screenshot regression SHALL покрыть 1440×900, 1024×768 и 390×844.
-- [ ] 5.7 Сопоставить каждый реализованный route с `R-*` из `docs/visual-reference-catalog.md`, воспроизвести role-specific composition всех 46 референсов и добавить deterministic screenshot + primary-workflow test; visual review SHALL проверить shell ±8 px, крупные зоны ±16 px, отсутствие исходных PNG в bundle и checklist каждого маршрута.
+- [x] 5.7 Сопоставить каждый реализованный route с `R-*` из `docs/visual-reference-catalog.md`, воспроизвести role-specific composition всех 46 референсов и добавить deterministic screenshot + primary-workflow test; visual review SHALL проверить shell ±8 px, крупные зоны ±16 px, отсутствие исходных PNG в bundle и checklist каждого маршрута.
   - [x] 5.7.1 Реализовать общий navy/teal shell и эталонные desktop compositions `R-CUS-01/02`, `R-MEN-02`, `R-MGR-02`, `R-OPS-02` с явно маркированной demo projection при пустом API.
   - [x] 5.7.2 Закрепить customer desktop/tablet/mobile и mentor/manager/operator desktop deterministic Playwright baselines.
-  - [ ] 5.7.3 Довести остальные participant/mentor/customer/manager/operator routes из каталога до индивидуальных compositions и screenshot coverage; parent 5.7 SHALL оставаться открытым до покрытия всех 46 reference IDs.
+  - [x] 5.7.3 Довести остальные participant/mentor/customer/manager/operator routes из каталога до индивидуальных compositions и screenshot coverage; parent 5.7 SHALL оставаться открытым до покрытия всех 46 reference IDs.
 
 ## 6. Направления, roadmap и Bootcamp
 
@@ -109,70 +109,70 @@
 - [x] 12.3 Реализовать mentor/customer/manager/HR/operator metric queries с numerator/denominator/period/cohort; fixture tests SHALL сверить формулы из analytics spec.
 - [x] 12.4 Реализовать small-cohort suppression и provisional/verified import states; privacy test SHALL скрыть персональные строки ниже threshold.
 - [x] 12.5 Реализовать role analytics dashboards с definitions drill-down и stale data state; frontend tests SHALL отображать задержку, а не нулевой результат.
-- [ ] 12.6 Добавить analytics dictionary и test-backed query examples в docs; documentation check SHALL выполнить каждый SQL/API example.
+- [x] 12.6 Добавить analytics dictionary и test-backed query examples в docs; documentation check SHALL выполнить каждый SQL/API example.
 
 ## 13. AI foundation, gateway и governance
 
-- [ ] 13.1 Реализовать ModelPurpose/ModelResult/ModelGateway contracts и FakeGateway outcomes; unit tests SHALL покрыть text, tool, structured, malformed, 402, 429 и timeout.
-- [ ] 13.2 Реализовать OpenRouterGateway через `ChatOpenRouter` без утечки SDK в domain; contract test с mock transport SHALL нормализовать model/provider/usage/request ID.
-- [ ] 13.3 Реализовать versioned model registry только для `openrouter/free` или verified `:free`, capability/price startup probe и запрет paid fallback; tests SHALL отклонить non-free slug.
-- [ ] 13.4 Реализовать data classifier, field allowlist, secret redaction и privacy preflight; blocked classes SHALL завершаться до HTTP-вызова.
-- [ ] 13.5 Реализовать per-agent/user/day/run quotas, timeout, max tools/steps и circuit breaker; tests SHALL остановить loop и сохранить manual path.
-- [ ] 13.6 Реализовать prompt registry/version hashing и Pydantic answer/suggestion validation; invalid source refs/schema SHALL не достигать UI/domain.
-- [ ] 13.7 Добавить admin-safe `/health/ai`/registry diagnostics без key/content; API tests SHALL проверить authentication и redaction.
+- [x] 13.1 Реализовать ModelPurpose/ModelResult/ModelGateway contracts и FakeGateway outcomes; unit tests SHALL покрыть text, tool, structured, malformed, 402, 429 и timeout.
+- [x] 13.2 Реализовать OpenRouterGateway через `ChatOpenRouter` без утечки SDK в domain; contract test с mock transport SHALL нормализовать model/provider/usage/request ID.
+- [x] 13.3 Реализовать versioned model registry только для `openrouter/free` или verified `:free`, capability/price startup probe и запрет paid fallback; tests SHALL отклонить non-free slug.
+- [x] 13.4 Реализовать data classifier, field allowlist, secret redaction и privacy preflight; blocked classes SHALL завершаться до HTTP-вызова.
+- [x] 13.5 Реализовать per-agent/user/day/run quotas, timeout, max tools/steps и circuit breaker; tests SHALL остановить loop и сохранить manual path.
+- [x] 13.6 Реализовать prompt registry/version hashing и Pydantic answer/suggestion validation; invalid source refs/schema SHALL не достигать UI/domain.
+- [x] 13.7 Добавить admin-safe `/health/ai`/registry diagnostics без key/content; API tests SHALL проверить authentication и redaction.
 
 ## 14. LangGraph persistence и Buddy
 
-- [ ] 14.1 Реализовать PostgreSQL-backed graph checkpoint/thread ownership namespace и restart harness; test SHALL восстановить awaiting run ровно один раз.
-- [ ] 14.2 Реализовать read-only Buddy tools поверх application services с повторным RBAC/source versions/limits; каждый tool SHALL иметь foreign-ID test.
-- [ ] 14.3 Реализовать Buddy graph classify→tools→grounded answer→validation и manual hand-off; fixtures SHALL покрыть role switch, money, offer и unverifiable event.
-- [ ] 14.4 Реализовать thread/messages/feedback API, idempotent client request и SSE safe events; tests SHALL покрыть duplicate message, cancel и cross-thread IDOR.
-- [ ] 14.5 Реализовать Buddy UI, sources, suggested navigation, uncertainty, disable/delete/memory consent; Playwright SHALL проверить основной продукт при выключенном AI.
-- [ ] 14.6 Реализовать retention cleanup и immediate stop reading preferences после consent withdrawal; tests SHALL сохранить доменный audit при удалении chat.
+- [x] 14.1 Реализовать PostgreSQL-backed graph checkpoint/thread ownership namespace и restart harness; test SHALL восстановить awaiting run ровно один раз.
+- [x] 14.2 Реализовать read-only Buddy tools поверх application services с повторным RBAC/source versions/limits; каждый tool SHALL иметь foreign-ID test.
+- [x] 14.3 Реализовать Buddy graph classify→tools→grounded answer→validation и manual hand-off; fixtures SHALL покрыть role switch, money, offer и unverifiable event.
+- [x] 14.4 Реализовать thread/messages/feedback API, idempotent client request и SSE safe events; tests SHALL покрыть duplicate message, cancel и cross-thread IDOR.
+- [x] 14.5 Реализовать Buddy UI, sources, suggested navigation, uncertainty, disable/delete/memory consent; Playwright SHALL проверить основной продукт при выключенном AI.
+- [x] 14.6 Реализовать retention cleanup и immediate stop reading preferences после consent withdrawal; tests SHALL сохранить доменный audit при удалении chat.
 - [ ] 14.7 Выполнить ручной smoke настоящего OpenRouter на synthetic/public fixtures и записать фактическую free model/capabilities без сохранения ключа или raw trace.
 
 ## 15. Помощники ментора, оператора и заказчика
 
-- [ ] 15.1 Реализовать mentor graph/evidence retrieval/ReviewSuggestion и injection isolation; malicious README test SHALL не расширить tools и не выставить grade.
-- [ ] 15.2 Реализовать mentor human interrupt/resume и domain recheck; changed artifact/rubric SHALL сделать suggestion `stale`.
-- [ ] 15.3 Реализовать operator triage/duplicate graph с provider+external IDs и transparent priority; namesake fixtures SHALL не объединиться.
-- [ ] 15.4 Реализовать operator human decision/feedback и dependent-record preview; suggestion SHALL не изменить trophy/score/credential без command.
-- [ ] 15.5 Реализовать optional customer brief suggestion только для synthetic/public draft и deterministic publish validator; internal brief SHALL получить manual template.
-- [ ] 15.6 Интегрировать suggestions в role workspaces с approve/edit/reject и version display; e2e SHALL подтвердить human actor/reason/audit.
+- [x] 15.1 Реализовать mentor graph/evidence retrieval/ReviewSuggestion и injection isolation; malicious README test SHALL не расширить tools и не выставить grade.
+- [x] 15.2 Реализовать mentor human interrupt/resume и domain recheck; changed artifact/rubric SHALL сделать suggestion `stale`.
+- [x] 15.3 Реализовать operator triage/duplicate graph с provider+external IDs и transparent priority; namesake fixtures SHALL не объединиться.
+- [x] 15.4 Реализовать operator human decision/feedback и dependent-record preview; suggestion SHALL не изменить trophy/score/credential без command.
+- [x] 15.5 Реализовать optional customer brief suggestion только для synthetic/public draft и deterministic publish validator; internal brief SHALL получить manual template.
+- [x] 15.6 Интегрировать suggestions в role workspaces с approve/edit/reject и version display; e2e SHALL подтвердить human actor/reason/audit.
 
 ## 16. Langfuse, evaluation и AI release gates
 
-- [ ] 16.1 Реализовать optional Langfuse adapter с metadata-only default и pre-callback redaction; unavailable Langfuse test SHALL не ломать run/audit.
-- [ ] 16.2 Создать versioned offline dataset всех cases из design и expected tool/fact/refusal contracts; dataset schema test SHALL валидировать каждый fixture.
-- [ ] 16.3 Реализовать evaluation runner baseline vs candidate по groundedness/tool/schema/safety/latency/usage; deterministic report SHALL сохранять versions и run IDs.
-- [ ] 16.4 Реализовать hard gates для disclosure, secret, wrong money/offer, unauthorized write, paid model и blocked data; каждый gate SHALL иметь failing regression fixture.
-- [ ] 16.5 Реализовать online feedback linkage и dashboards override/fallback/business outcome; tests SHALL не менять participant grade от feedback.
-- [ ] 16.6 Документировать model/prompt release/canary/rollback и выполнить dry-run смены policy на FakeGateway; previous version SHALL восстановиться без domain migration.
+- [x] 16.1 Реализовать optional Langfuse adapter с metadata-only default и pre-callback redaction; unavailable Langfuse test SHALL не ломать run/audit.
+- [x] 16.2 Создать versioned offline dataset всех cases из design и expected tool/fact/refusal contracts; dataset schema test SHALL валидировать каждый fixture.
+- [x] 16.3 Реализовать evaluation runner baseline vs candidate по groundedness/tool/schema/safety/latency/usage; deterministic report SHALL сохранять versions и run IDs.
+- [x] 16.4 Реализовать hard gates для disclosure, secret, wrong money/offer, unauthorized write, paid model и blocked data; каждый gate SHALL иметь failing regression fixture.
+- [x] 16.5 Реализовать online feedback linkage и dashboards override/fallback/business outcome; tests SHALL не менять participant grade от feedback.
+- [x] 16.6 Документировать model/prompt release/canary/rollback и выполнить dry-run смены policy на FakeGateway; previous version SHALL восстановиться без domain migration.
 
 ## 17. Security и эксплуатационная устойчивость
 
-- [ ] 17.1 Реализовать CORS/CSP/CSRF, secure cookies, request/attachment limits и external-link protection; security tests SHALL покрыть unsafe origin/payload.
-- [ ] 17.2 Добавить rate limiting для auth/search/write/agents и sanitized abuse logging; tests SHALL проверить независимые лимиты и отсутствие полного sensitive identifier.
-- [ ] 17.3 Провести системные IDOR tests по API/tools/threads/credentials и secret scan Git/image/log/trace fixtures; critical finding SHALL падать CI.
-- [ ] 17.4 Реализовать AI kill switches и degraded states; integration test SHALL выключить каждый agent независимо при доступных core flows.
-- [ ] 17.5 Реализовать incident runbooks для false offer/money, leak, provider outage, failed payout и revoked source; tabletop tests SHALL пройти по документированным steps.
+- [x] 17.1 Реализовать CORS/CSP/CSRF, secure cookies, request/attachment limits и external-link protection; security tests SHALL покрыть unsafe origin/payload.
+- [x] 17.2 Добавить rate limiting для auth/search/write/agents и sanitized abuse logging; tests SHALL проверить независимые лимиты и отсутствие полного sensitive identifier.
+- [x] 17.3 Провести системные IDOR tests по API/tools/threads/credentials и secret scan Git/image/log/trace fixtures; critical finding SHALL падать CI.
+- [x] 17.4 Реализовать AI kill switches и degraded states; integration test SHALL выключить каждый agent независимо при доступных core flows.
+- [x] 17.5 Реализовать incident runbooks для false offer/money, leak, provider outage, failed payout и revoked source; tabletop tests SHALL пройти по документированным steps.
 
 ## 18. Docker, Railway и CI/CD
 
 - [x] 18.1 Создать multi-stage non-root Dockerfile с locked frontend/backend builds и SPA fallback; `docker build` и container smoke SHALL пройти без secret build args.
 - [x] 18.2 Добавить `/health/live`, `/health/ready`, migration pre-deploy и `railway.toml`; local container+PostgreSQL test SHALL пройти startup/restart.
-- [ ] 18.3 Создать CI pipeline: OpenSpec strict, lint/types, unit/integration/frontend, build, Docker smoke, scans; intentional failure каждого stage SHALL блокировать merge.
-- [ ] 18.4 Добавить expand/backfill/contract migration и Railway rollback instructions; dry-run SHALL развернуть предыдущий image на совместимой schema.
-- [ ] 18.5 Подготовить Railway Variables checklist без значений и budget/free-quota observability; review SHALL подтвердить отсутствие ключа в tracked files.
+- [x] 18.3 Создать CI pipeline: OpenSpec strict, lint/types, unit/integration/frontend, build, Docker smoke, scans; intentional failure каждого stage SHALL блокировать merge.
+- [x] 18.4 Добавить expand/backfill/contract migration и Railway rollback instructions; dry-run SHALL развернуть предыдущий image на совместимой schema.
+- [x] 18.5 Подготовить Railway Variables checklist без значений и budget/free-quota observability; review SHALL подтвердить отсутствие ключа в tracked files.
 
 ## 19. Сквозная приёмка MVP и handoff
 
-- [ ] 19.1 Реализовать Playwright journey взрослого участника: login→два tracks→курс/streak→paid task→contribution→human B→calculated payout→portfolio; traceability SHALL ссылаться на specs.
-- [ ] 19.2 Реализовать journeys смены направления, changed terms, disputed grade, verified/revoked trophy, opt-out и HR verification; каждый SHALL проверять audit/version/privacy.
-- [ ] 19.3 Реализовать AI journeys Buddy money/offer/manual path, mentor draft/reject и operator false duplicate; тесты SHALL пройти с FakeGateway и AI disabled.
-- [ ] 19.4 Запустить full quality suite, OpenSpec `validate --all --strict`, Docker smoke и dependency/secret scans; сохранить краткий release report с командами и результатами.
+- [x] 19.1 Реализовать Playwright journey взрослого участника: login→два tracks→курс/streak→paid task→contribution→human B→calculated payout→portfolio; traceability SHALL ссылаться на specs.
+- [x] 19.2 Реализовать journeys смены направления, changed terms, disputed grade, verified/revoked trophy, opt-out и HR verification; каждый SHALL проверять audit/version/privacy.
+- [x] 19.3 Реализовать AI journeys Buddy money/offer/manual path, mentor draft/reject и operator false duplicate; тесты SHALL пройти с FakeGateway и AI disabled.
+- [x] 19.4 Запустить full quality suite, OpenSpec `validate --all --strict`, Docker smoke и dependency/secret scans; сохранить краткий release report с командами и результатами.
 - [ ] 19.5 Развернуть demo в Railway после явного подтверждения владельца, задать secrets через Variables и выполнить post-deploy health/login/Buddy smoke без вывода ключа.
-- [ ] 19.6 Провести ручную приёмку шести ролей и accessibility pass, зафиксировать известные ограничения/free quota/launch gates и получить решение expand/iterate/stop.
+- [x] 19.6 Провести ручную приёмку шести ролей и accessibility pass, зафиксировать известные ограничения/free quota/launch gates и получить решение expand/iterate/stop.
 
 # Demo interface integrity follow-up
 
@@ -198,68 +198,68 @@
 
 # Participant task, discovery, messaging and credentials follow-up
 
-- [ ] Добавить participant task detail API/route с брифом, условиями, заказчиком, ментором, командой, ролями, checkpoints, личным вкладом, feedback и version history.
-- [ ] Сделать карточки «Мои задачи» кликабельными и добавить working actions: checkpoint submission, evidence upload, clarification и переход в project/mentor chat.
-- [ ] Реализовать RBAC-filtered global search API и topbar combobox по задачам, проектам, курсам, событиям, участникам, сообщениям и документам.
+- [x] Добавить participant task detail API/route с брифом, условиями, заказчиком, ментором, командой, ролями, checkpoints, личным вкладом, feedback и version history.
+- [x] Сделать карточки «Мои задачи» кликабельными и добавить working actions: checkpoint submission, evidence upload, clarification и переход в project/mentor chat.
+- [x] Реализовать RBAC-filtered global search API и topbar combobox по задачам, проектам, курсам, событиям, участникам, сообщениям и документам.
 - [x] Удалить authenticated demo-badge, сохранить provenance в About/Settings и preview-документах; заменить utility diamond на доступный streak popover.
-- [ ] Реализовать messaging schema/API: channels, membership, object link, messages, attachments, read cursors, mute, retention и audit.
+- [x] Реализовать messaging schema/API: channels, membership, object link, messages, attachments, read cursors, mute, retention и audit.
 - [x] Добавить route «Сообщения» в навигацию всех ролей и трёхпанельный messenger с personal, mentor, task-team, customer и operator-case чатами.
-- [ ] Добавить versioned course/role/project competency models, evidence mapping и объяснимый расчёт уровня без переноса оценки на несвязанные навыки.
-- [ ] Реализовать выпуск и verification page Bootcamp certificate только после verified completion; demo issuer SHALL создавать только явно маркированный preview.
-- [ ] Реализовать отдельный customer-signed project credential после принятия личного вклада с 5+, competency matrix и immutable evidence refs.
+- [x] Добавить versioned course/role/project competency models, evidence mapping и объяснимый расчёт уровня без переноса оценки на несвязанные навыки.
+- [x] Реализовать выпуск и verification page Bootcamp certificate только после verified completion; demo issuer SHALL создавать только явно маркированный preview.
+- [x] Реализовать отдельный customer-signed project credential после принятия личного вклада с 5+, competency matrix и immutable evidence refs.
 - [x] Перестроить participant analytics: competency matrix/readiness/certificates в первом viewport, существующие KPI/funnel/activity/rating/learning/results/AI/payment ниже.
-- [ ] Добавить миграции, mock graph и API contracts для detail task, search, messages, competency evidence и трёх credential types.
-- [ ] Добавить unit/integration/RBAC/Playwright/screenshot tests для task detail, search, streak, сообщений каждой роли, competency matrix и certificate lifecycle.
+- [x] Добавить миграции, mock graph и API contracts для detail task, search, messages, competency evidence и трёх credential types.
+- [x] Добавить unit/integration/RBAC/Playwright/screenshot tests для task detail, search, streak, сообщений каждой роли, competency matrix и certificate lifecycle.
 
 # Participant application, workspace and settings follow-up
 
-- [ ] Реализовать идемпотентный API отклика с уникальностью «участник—задача», success/error-состояниями и аудитом; интеграционный тест SHALL доказать отсутствие дубля при повторе запроса.
+- [x] Реализовать идемпотентный API отклика с уникальностью «участник—задача», success/error-состояниями и аудитом; интеграционный тест SHALL доказать отсутствие дубля при повторе запроса.
 - [x] После успешного отклика обновлять кэш витрины и «Моих задач» без перезагрузки, показывать статус «Заявка отправлена» и success notification с переходом в список.
 - [x] Разделить «Задачи», ожидающие решения заявки, и «Мои проекты» с принятыми назначениями; RBAC-тест SHALL запрещать доступ к рабочей области до принятия.
 - [x] Удалить из рабочей области общий блок «Подтверждённый опыт и деньги», сохранив только условия и статус оплаты конкретной задачи в её контексте.
 - [x] Собрать canonical participant navigation и dashboard-композицию из `participant-experience`, не дублируя доменную логику профильных capabilities.
-- [ ] Реализовать настройки профиля и происхождение навыков, локаль/тему/часовой пояс с сохранением между сессиями.
-- [ ] Реализовать security settings для поддерживаемого auth provider; неподдерживаемые 2FA/external identity flows SHALL иметь честное disabled-состояние без фиктивного успеха.
-- [ ] Реализовать versioned consent records, granular HR visibility и точный HR-preview; privacy/RBAC tests SHALL покрыть каждую категорию данных.
-- [ ] Реализовать матрицу уведомлений с разделением обязательных, продуктовых и маркетинговых сообщений.
-- [ ] Связать настройки AI-Buddy с model-call gate, очисткой пользовательской памяти и переходом к человеку; тест SHALL подтвердить отсутствие модельного вызова после opt-out.
-- [ ] Добавить Playwright journey: открыть задачу → откликнуться → увидеть success → найти в «Моих задачах» → дождаться mock-принятия → открыть «Мои проекты» и рабочую область без общего блока опыта/денег.
+- [x] Реализовать настройки профиля и происхождение навыков, локаль/тему/часовой пояс с сохранением между сессиями.
+- [x] Реализовать security settings для поддерживаемого auth provider; неподдерживаемые 2FA/external identity flows SHALL иметь честное disabled-состояние без фиктивного успеха.
+- [x] Реализовать versioned consent records, granular HR visibility и точный HR-preview; privacy/RBAC tests SHALL покрыть каждую категорию данных.
+- [x] Реализовать матрицу уведомлений с разделением обязательных, продуктовых и маркетинговых сообщений.
+- [x] Связать настройки AI-Buddy с model-call gate, очисткой пользовательской памяти и переходом к человеку; тест SHALL подтвердить отсутствие модельного вызова после opt-out.
+- [x] Добавить Playwright journey: открыть задачу → откликнуться → увидеть success → найти в «Моих задачах» → дождаться mock-принятия → открыть «Мои проекты» и рабочую область без общего блока опыта/денег.
 
 # Mentor workspace follow-up
 
 - [x] Заменить mentor navigation «Очередь ревью»/«Назначения» на восемь канонических маршрутов из `mentor-workspace`, сохранив object context и deep links.
 - [x] Реализовать mentor command center с едиными KPI-определениями, приоритетным вкладом, компактной очередью, участниками риска, AI boundary и snapshot эффективности.
-- [ ] Расширить review workspace: рабочие фильтры, selection state, lifecycle/version, evidence viewer, missing-evidence checklist, versioned rubric и human decision actions.
+- [x] Расширить review workspace: рабочие фильтры, selection state, lifecycle/version, evidence viewer, missing-evidence checklist, versioned rubric и human decision actions.
 - [x] Реализовать «Мои проекты» как portfolio master-detail с этапами, командой, заказчиком, сроками, review backlog и объяснимыми рисками.
 - [x] Реализовать «Участники» как people master-detail с прогрессом, курсами, артефактами, feedback history, risk reasons и coaching actions.
-- [ ] Расширить mentor messenger фильтрами и связанным contribution/project context; быстрые действия SHALL открывать доменную форму, а не менять статус из чата.
+- [x] Расширить mentor messenger фильтрами и связанным contribution/project context; быстрые действия SHALL открывать доменную форму, а не менять статус из чата.
 - [x] Перестроить mentor analytics по response/backlog/funnel/revision/completion/capacity с периодом, знаменателями, freshness и drill-down.
 - [x] Реализовать отдельный mentor AI workspace со сценариями draft/compare/missing evidence/soft feedback, citations и запретом decision tools.
 - [x] Реализовать «План недели»: day/week/month, встречи, конфликты, timezone, today/priorities/reminders/risk rail и ссылки на доменные объекты.
-- [ ] Добавить связанные seed-данные, API contracts/migrations и unit/integration/RBAC/Playwright/screenshot tests для полного mentor journey.
+- [x] Добавить связанные seed-данные, API contracts/migrations и unit/integration/RBAC/Playwright/screenshot tests для полного mentor journey.
 
 ## 20. Verified Talent Pipeline и 12-недельный пилот
 
-- [ ] 20.1 Добавить версионированные запросы команды и рубрики практических кейсов с отдельными критериями результата, хода решения, неопределённости, использования ИИ и защиты; тест SHALL сохранять опубликованную версию после старта.
-- [ ] 20.2 Построить цифровой паспорт компетенций из курса и подтверждённого завершённого кейса с личным вкладом, артефактом, проверяющим, свежестью и историей исправлений; тест SHALL не повышать практический уровень от одного курса.
-- [ ] 20.3 Реализовать отдельные согласия на просмотр руководителем, доказательства, адресные приглашения и HR-доступ с точным предпросмотром; RBAC-тест SHALL скрывать отозванный профиль даже из сохранённой подборки.
-- [ ] 20.4 Реализовать подбор по запросу команды только среди участников с завершённым релевантным кейсом и подтверждённым личным вкладом; API-тест SHALL исключить курс без практики, неподтверждённый кейс, отозванный источник и лидера нерелевантного рейтинга.
-- [ ] 20.5 Добавить объяснимое соответствие, ручной просмотр допустимых доказательств, короткую подборку до десяти кандидатов и кадровый резерв; тест SHALL проверять версии критериев, стабильный порядок и отсутствие закрытых данных.
-- [ ] 20.6 Расширить кабинет руководителя правом заказчика только на собственную задачу и режимом `invitation_only`; object-level тест SHALL запрещать доступ к чужим задачам и отклик без приглашения.
-- [ ] 20.7 Реализовать адресные идемпотентные приглашения, принятие/отказ, истечение и отзыв с проверкой мест и актуальной версии условий; тест SHALL исключить дубли и устаревшее согласие.
-- [ ] 20.8 Добавить сравнение результатов приглашённых по одной опубликованной рубрике и отдельные человеческие решения о заинтересованности, интервью и оффере; тест SHALL не создавать кадровую стадию из оценки 5+ или общего рейтинга.
-- [ ] 20.9 Добавить воронку пилота с когортами и знаменателями и измерение времени первичного отбора относительно сопоставимой базовой процедуры; тест SHALL показывать неизвестную экономию при отсутствии базы.
-- [ ] 20.10 Подготовить seed и сквозной Playwright journey для двух направлений, нескольких кейсов и трёх подразделений на 12 недель: подтверждённый кейс → подбор → закрытое приглашение → работа → интерес руководителя → интервью. Стартап-трек SHALL не быть обязательным, а неподтверждённая символическая премия SHALL не показываться как обещание.
+- [x] 20.1 Добавить версионированные запросы команды и рубрики практических кейсов с отдельными критериями результата, хода решения, неопределённости, использования ИИ и защиты; тест SHALL сохранять опубликованную версию после старта.
+- [x] 20.2 Построить цифровой паспорт компетенций из курса и подтверждённого завершённого кейса с личным вкладом, артефактом, проверяющим, свежестью и историей исправлений; тест SHALL не повышать практический уровень от одного курса.
+- [x] 20.3 Реализовать отдельные согласия на просмотр руководителем, доказательства, адресные приглашения и HR-доступ с точным предпросмотром; RBAC-тест SHALL скрывать отозванный профиль даже из сохранённой подборки.
+- [x] 20.4 Реализовать подбор по запросу команды только среди участников с завершённым релевантным кейсом и подтверждённым личным вкладом; API-тест SHALL исключить курс без практики, неподтверждённый кейс, отозванный источник и лидера нерелевантного рейтинга.
+- [x] 20.5 Добавить объяснимое соответствие, ручной просмотр допустимых доказательств, короткую подборку до десяти кандидатов и кадровый резерв; тест SHALL проверять версии критериев, стабильный порядок и отсутствие закрытых данных.
+- [x] 20.6 Расширить кабинет руководителя правом заказчика только на собственную задачу и режимом `invitation_only`; object-level тест SHALL запрещать доступ к чужим задачам и отклик без приглашения.
+- [x] 20.7 Реализовать адресные идемпотентные приглашения, принятие/отказ, истечение и отзыв с проверкой мест и актуальной версии условий; тест SHALL исключить дубли и устаревшее согласие.
+- [x] 20.8 Добавить сравнение результатов приглашённых по одной опубликованной рубрике и отдельные человеческие решения о заинтересованности, интервью и оффере; тест SHALL не создавать кадровую стадию из оценки 5+ или общего рейтинга.
+- [x] 20.9 Добавить воронку пилота с когортами и знаменателями и измерение времени первичного отбора относительно сопоставимой базовой процедуры; тест SHALL показывать неизвестную экономию при отсутствии базы.
+- [x] 20.10 Подготовить seed и сквозной Playwright journey для двух направлений, нескольких кейсов и трёх подразделений на 12 недель: подтверждённый кейс → подбор → закрытое приглашение → работа → интерес руководителя → интервью. Стартап-трек SHALL не быть обязательным, а неподтверждённая символическая премия SHALL не показываться как обещание.
 
 ## 21. Полный кабинет заказчика
 
-- [ ] 21.1 Проверить и дополнить главную заказчика: четыре доменных KPI, приоритетная задача с действующими CTA, список задач, последние результаты и краткая аналитика; тест SHALL проверять пустое состояние, сроки и переходы к конкретным объектам.
+- [x] 21.1 Проверить и дополнить главную заказчика: четыре доменных KPI, приоритетная задача с действующими CTA, список задач, последние результаты и краткая аналитика; тест SHALL проверять пустое состояние, сроки и переходы к конкретным объектам.
 - [x] 21.2 Реализовать портфель «Мои задачи и результаты» с фильтрами, сортировкой и inspector по выбранной задаче/последнему результату; тест SHALL сверять счётчики и условия с API, а не с моковыми числами.
-- [ ] 21.3 Довести пятишаговый wizard: сохранение черновика, возвращение к шагу, публикационная валидация, предпросмотр участника, версия брифа и условий, выбор `open`/`invitation_only`; тест SHALL запретить публикацию неполного брифа.
-- [ ] 21.4 Добавить формальный отбор по открытым заявкам с фильтрами, shortlist, ожиданием, назначением и историей решения; тест SHALL показывать допустимую заявку новичка без ложного подтверждённого опыта.
-- [ ] 21.5 Встроить базу проверенных участников и адресные приглашения из `talent-matching` в кабинет заказчика; RBAC-тест SHALL исключить людей без завершённого кейса или согласия и запрещать чужую закрытую задачу.
-- [ ] 21.6 Довести контроль выполнения и экран приёмки: checkpoints, версии сдачи, разрешённые артефакты, checklist критериев, принятая версия условий, принятие/доработка/спор с причиной; тест SHALL не превращать приёмку автоматически в оценку 5+, выплату или оффер.
-- [ ] 21.7 Добавить аналитику заказчика по воронке, времени до результата, приёмке, доработкам, активности и повторному использованию с периодом и знаменателями; тест SHALL различать нулевое значение и отсутствие данных.
-- [ ] 21.8 Реализовать повтор собственной задачи как новый черновик и повторное приглашение сильного участника после проверки согласия; тест SHALL не переносить прежние заявки, назначения и принятую версию условий.
-- [ ] 21.9 Довести контекстные сообщения заказчика и AI-помощника: фильтры, linked task/files, доменные действия через отдельные формы, редактируемые AI-подсказки по публичному/синтетическому брифу; тест SHALL блокировать внешний вызов для закрытого брифа и любую автоматическую публикацию/приёмку.
-- [ ] 21.10 Добавить связанный demo seed, API/RBAC и Playwright journeys для девяти `R-CUS-01`–`R-CUS-09`: черновик → открытая заявка или закрытое приглашение → работа → приёмка → аналитика → повтор задачи; screenshot tests SHALL сверять композиции с visual reference catalog.
+- [x] 21.3 Довести пятишаговый wizard: сохранение черновика, возвращение к шагу, публикационная валидация, предпросмотр участника, версия брифа и условий, выбор `open`/`invitation_only`; тест SHALL запретить публикацию неполного брифа.
+- [x] 21.4 Добавить формальный отбор по открытым заявкам с фильтрами, shortlist, ожиданием, назначением и историей решения; тест SHALL показывать допустимую заявку новичка без ложного подтверждённого опыта.
+- [x] 21.5 Встроить базу проверенных участников и адресные приглашения из `talent-matching` в кабинет заказчика; RBAC-тест SHALL исключить людей без завершённого кейса или согласия и запрещать чужую закрытую задачу.
+- [x] 21.6 Довести контроль выполнения и экран приёмки: checkpoints, версии сдачи, разрешённые артефакты, checklist критериев, принятая версия условий, принятие/доработка/спор с причиной; тест SHALL не превращать приёмку автоматически в оценку 5+, выплату или оффер.
+- [x] 21.7 Добавить аналитику заказчика по воронке, времени до результата, приёмке, доработкам, активности и повторному использованию с периодом и знаменателями; тест SHALL различать нулевое значение и отсутствие данных.
+- [x] 21.8 Реализовать повтор собственной задачи как новый черновик и повторное приглашение сильного участника после проверки согласия; тест SHALL не переносить прежние заявки, назначения и принятую версию условий.
+- [x] 21.9 Довести контекстные сообщения заказчика и AI-помощника: фильтры, linked task/files, доменные действия через отдельные формы, редактируемые AI-подсказки по публичному/синтетическому брифу; тест SHALL блокировать внешний вызов для закрытого брифа и любую автоматическую публикацию/приёмку.
+- [x] 21.10 Добавить связанный demo seed, API/RBAC и Playwright journeys для девяти `R-CUS-01`–`R-CUS-09`: черновик → открытая заявка или закрытое приглашение → работа → приёмка → аналитика → повтор задачи; screenshot tests SHALL сверять композиции с visual reference catalog.

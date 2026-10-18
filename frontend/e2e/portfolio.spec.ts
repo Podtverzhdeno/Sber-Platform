@@ -17,6 +17,12 @@ test("participant controls HR visibility and sees review reason", async ({ page 
     contributions: [{ contribution_id: "10000000-0000-0000-0000-000000000001", project_title: "R&D прототип", personal_summary: "Реализовал API и проверяемый эксперимент.", artifact_keys: ["demo-report"], grade: "A", review_reason: "Результат воспроизводим, вклад подтверждён.", verification_status: "verified" }],
     courses: [{ key: "openspec", title: "OpenSpec и SDD", status: "verified" }], credentials: [], trophies: [], offers: [],
   } }));
+  await page.route("**/api/v1/me/talent-passport", (route) => route.fulfill({ json: {
+    verified_courses: ["openspec"],
+    skills: [{ key: "Самостоятельность", practical_level: "confirmed", confirmed_case_count: 1 }],
+    cases: [{ contribution_id: "10000000-0000-0000-0000-000000000001", submitted_at: "2026-09-28", reviewer_id: "10000000-0000-0000-0000-000000000010" }],
+  } }));
+  await page.route("**/api/v1/me/project-credentials", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/me/consents/hr_profile", async (route) => { hrVisible = (route.request().postDataJSON() as { granted: boolean }).granted; await route.fulfill({ json: { scope: "hr_profile", granted: hrVisible, granted_scopes: hrVisible ? ["hr_profile"] : [] } }); });
 
   await page.goto("/");
@@ -25,9 +31,9 @@ test("participant controls HR visibility and sees review reason", async ({ page 
   await expect(page.getByRole("heading", { name: "Алекс Речной" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Мой лучший принятый вклад" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Чем выделяется кандидат" })).toBeVisible();
-  await expect(page.getByText("Талант-сигнал")).toBeVisible();
-  await page.getByRole("button", { name: /Самостоятельность/ }).click();
-  await expect(page.getByText(/Сам находит ограничения/)).toBeVisible();
+  await expect(page.getByText("Матрица компетенций")).toBeVisible();
+  await expect(page.getByText("Самостоятельность", { exact: true })).toBeVisible();
+  await expect(page.getByText("1 подтверждённых кейсов")).toBeVisible();
   await expect(page.getByText("Результат воспроизводим, вклад подтверждён.")).toBeVisible();
   await page.getByRole("button", { name: "Открыть кейс" }).click();
   await expect(page.getByRole("dialog", { name: "Карточка принятого вклада" })).toBeVisible();

@@ -128,3 +128,8 @@ Sidebar оператора SHALL содержать: Главная, Модер�
 - 1440×900 сохраняет desktop-композицию, 1024×768 — адаптированную, 390×844 — одноколоночную;
 - отсутствуют горизонтальный scroll страницы, наложения и обрезанные CTA;
 - screenshot test создан для каждого реализованного `R-*` маршрута.
+
+Актуальное сопоставление всех 46 идентификаторов с role-local routes, тестами и открытыми
+пробелами ведётся в [`visual-route-traceability.md`](visual-route-traceability.md). Таблица
+трассировки SHALL обновляться вместе с навигацией или reference-specific screenshot test.
+Автоматическая проверка: `uv run python scripts/check_visual_reference_docs.py`.

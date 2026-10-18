@@ -120,6 +120,23 @@ def test_hr_empty_funnel_is_unknown_not_zero_success() -> None:
     assert metrics["hr_hire_rate"]["suppression_reason"] == "cohort_below_5"
 
 
+def test_pilot_funnel_is_unknown_without_selection_pairs_or_baseline() -> None:
+    api = client()
+    login(api, "hr-nina")
+    metrics = {item["key"]: item for item in api.get("/api/v1/analytics/role").json()["metrics"]}
+    assert metrics["pilot_leader_interest"]["value"] == "0"
+    assert metrics["pilot_selection_hours"]["value"] is None
+    assert metrics["pilot_selection_hours"]["suppressed"] is True
+    assert metrics["pilot_selection_hours"]["suppression_reason"] == "no_selection_pairs"
+    assert metrics["pilot_selection_savings_hours"]["value"] is None
+    assert metrics["pilot_selection_savings_hours"]["suppressed"] is True
+    assert metrics["pilot_selection_savings_hours"]["suppression_reason"] == "baseline_missing"
+    with_baseline = api.get("/api/v1/analytics/role?baseline_hours=24").json()["metrics"]
+    savings = {item["key"]: item for item in with_baseline}["pilot_selection_savings_hours"]
+    assert savings["value"] is None
+    assert savings["suppression_reason"] == "no_selection_pairs"
+
+
 def test_customer_empty_funnel_has_explicit_denominators() -> None:
     api = client()
     login(api, "customer-roman")
@@ -128,6 +145,10 @@ def test_customer_empty_funnel_has_explicit_denominators() -> None:
     assert metrics["customer_staffing_rate"]["denominator"] == 0
     assert metrics["customer_staffing_rate"]["value"] is None
     assert metrics["customer_acceptance_rate"]["value"] is None
+    assert metrics["customer_repeat_participants"]["denominator"] == 0
+    assert metrics["customer_repeat_participants"]["value"] is None
+    assert metrics["customer_time_to_result_hours"]["numerator"] == 0
+    assert metrics["customer_time_to_result_hours"]["value"] is None
 
 
 def test_personal_rows_are_hidden_below_privacy_threshold() -> None:

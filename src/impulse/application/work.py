@@ -29,6 +29,7 @@ from impulse.domain.work import (
     open_authorship_dispute,
     start_assignment,
     submit_assignment,
+    validate_artifacts,
     validate_personal_contribution,
 )
 
@@ -62,6 +63,17 @@ class MarketplaceTask:
     terms: TermsRecord
     accepted_terms_version: int | None = None
     invitation_status: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ParticipantTaskDetail:
+    task: MarketplaceTask
+    brief: TaskBrief
+    terms_history: tuple[TermsRecord, ...]
+    team: tuple[AssignmentRecord, ...]
+    membership: AssignmentRecord | None
+    checkpoints: tuple[CheckpointRecord, ...]
+    contributions: tuple[ContributionRecord, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -104,6 +116,7 @@ class CaseEvidence:
     artifact_keys: tuple[str, ...]
     submitted_at: datetime
     reviewer_id: UUID
+    case_fixes: int = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -133,6 +146,7 @@ class AssignmentRecord:
     person_id: UUID
     application_id: UUID
     status: AssignmentStatus
+    created_at: datetime | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -168,6 +182,7 @@ class AcceptanceRecord:
     reason: str
     deadline_at: datetime | None
     owner_id: UUID | None
+    decided_at: datetime | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -245,6 +260,7 @@ class WorkStore(Protocol):
     async def team_request(self, request_id: UUID) -> TeamRequestRecord | None: ...
     async def save_reservation(self, record: CandidateReservation) -> CandidateReservation: ...
     async def reservations(self, owner_id: UUID) -> tuple[CandidateReservation, ...]: ...
+    async def reservations_all(self) -> tuple[CandidateReservation, ...]: ...
     async def invite(
         self, task_id: UUID, person_id: UUID, terms_version: int, expires_at: datetime
     ) -> InvitationRecord: ...
@@ -260,6 +276,9 @@ class WorkStore(Protocol):
     async def accept_application(
         self, application_id: UUID, expected_version: int, places: int
     ) -> AssignmentRecord: ...
+    async def accepted_contribution_counts(
+        self, person_ids: tuple[UUID, ...]
+    ) -> dict[UUID, int]: ...
     async def assignment(self, assignment_id: UUID) -> AssignmentRecord | None: ...
     async def start_assignment(self, assignment_id: UUID) -> AssignmentRecord: ...
     async def add_checkpoint(
@@ -298,6 +317,8 @@ class WorkStore(Protocol):
     async def acceptance_for_contribution(
         self, contribution_id: UUID
     ) -> AcceptanceRecord | None: ...
+    async def terms_history(self, task_id: UUID) -> tuple[TermsRecord, ...]: ...
+    async def checkpoints(self, task_id: UUID) -> tuple[CheckpointRecord, ...]: ...
 
 
 class MemoryWorkStore:
@@ -356,6 +377,9 @@ class MemoryWorkStore:
 
     async def reservations(self, owner_id: UUID) -> tuple[CandidateReservation, ...]:
         return tuple(item for item in self._reservations.values() if item.owner_id == owner_id)
+
+    async def reservations_all(self) -> tuple[CandidateReservation, ...]:
+        return tuple(self._reservations.values())
 
     async def invite(
         self, task_id: UUID, person_id: UUID, terms_version: int, expires_at: datetime
@@ -428,6 +452,9 @@ class MemoryWorkStore:
             None,
         )
 
+    async def terms_history(self, task_id: UUID) -> tuple[TermsRecord, ...]:
+        return self._terms.get(task_id, ())
+
     async def published_tasks(self) -> tuple[TaskRecord, ...]:
         return tuple(
             item for item in self._records.values() if item.aggregate.status.value == "published"
@@ -495,12 +522,24 @@ class MemoryWorkStore:
             application.person_id,
             application.id,
             AssignmentStatus.STAFFED,
+            datetime.now(UTC),
         )
         self._assignments[assignment.id] = assignment
         return assignment
 
     async def assignment(self, assignment_id: UUID) -> AssignmentRecord | None:
         return self._assignments.get(assignment_id)
+
+    async def accepted_contribution_counts(self, person_ids: tuple[UUID, ...]) -> dict[UUID, int]:
+        counts = {person_id: 0 for person_id in person_ids}
+        for assignment_id, versions in self._contributions.items():
+            assignment = self._assignments.get(assignment_id)
+            if assignment is None or assignment.person_id not in counts:
+                continue
+            counts[assignment.person_id] += sum(
+                version.status is ContributionStatus.ACCEPTED for version in versions
+            )
+        return counts
 
     async def start_assignment(self, assignment_id: UUID) -> AssignmentRecord:
         current = self._assignments[assignment_id]
@@ -514,6 +553,7 @@ class MemoryWorkStore:
             current.person_id,
             current.application_id,
             status,
+            current.created_at,
         )
         self._assignments[assignment_id] = updated
         return updated
@@ -521,6 +561,9 @@ class MemoryWorkStore:
     async def add_checkpoint(self, task_id: UUID, checkpoint: CheckpointRecord) -> CheckpointRecord:
         self._checkpoints[task_id] = (*self._checkpoints.get(task_id, ()), checkpoint)
         return checkpoint
+
+    async def checkpoints(self, task_id: UUID) -> tuple[CheckpointRecord, ...]:
+        return self._checkpoints.get(task_id, ())
 
     async def add_team_artifact(
         self, task_id: UUID, artifact: TeamArtifactRecord
@@ -544,6 +587,7 @@ class MemoryWorkStore:
             assignment.person_id,
             assignment.application_id,
             next_status,
+            assignment.created_at,
         )
         return record
 
@@ -595,9 +639,17 @@ class MemoryWorkStore:
             assignment.person_id,
             assignment.application_id,
             assignment_status,
+            assignment.created_at,
         )
         record = AcceptanceRecord(
-            uuid4(), contribution.id, contribution.version, decision, reason, deadline_at, owner_id
+            uuid4(),
+            contribution.id,
+            contribution.version,
+            decision,
+            reason,
+            deadline_at,
+            owner_id,
+            datetime.now(UTC),
         )
         self._acceptance_decisions[contribution.id] = record
         return record
@@ -644,6 +696,7 @@ class MemoryWorkStore:
                 assignment.person_id,
                 assignment.application_id,
                 AssignmentStatus.DISPUTED,
+                assignment.created_at,
             )
         record = DisputeRecord(
             uuid4(), contribution_id, conflicting_contribution_id, "open", reason, deadline_at
@@ -873,6 +926,11 @@ class WorkService:
         self._role(actor, Role.PARTICIPANT)
         return await self._case_evidence(actor.person_id)
 
+    async def pilot_interest(self, actor: ActorContext) -> tuple[CandidateReservation, ...]:
+        """HR-only aggregate view of leader interest for the pilot funnel."""
+        self._role(actor, Role.HR)
+        return await self.store.reservations_all()
+
     async def save_candidate(
         self, actor: ActorContext, request_id: UUID, person_id: UUID
     ) -> CandidateReservation:
@@ -918,6 +976,7 @@ class WorkService:
 
     async def _case_evidence(self, person_id: UUID) -> tuple[CaseEvidence, ...]:
         evidence: list[CaseEvidence] = []
+        fix_counts: dict[UUID, int] = {}
         for assignment in await self.store.assignments_for_person(person_id):
             if assignment.status not in {AssignmentStatus.ACCEPTED, AssignmentStatus.CLOSED}:
                 continue
@@ -925,6 +984,8 @@ class WorkService:
             if source is None or source.aggregate.status is not TaskStatus.PUBLISHED:
                 continue
             for contribution in await self.store.contributions_for_assignment(assignment.id):
+                if contribution.status is ContributionStatus.REVISION_REQUESTED:
+                    fix_counts[assignment.id] = fix_counts.get(assignment.id, 0) + 1
                 if (
                     contribution.status is not ContributionStatus.ACCEPTED
                     or not contribution.artifact_keys
@@ -939,6 +1000,7 @@ class WorkService:
                         contribution.artifact_keys,
                         contribution.submitted_at,
                         source.aggregate.customer_id,
+                        fix_counts.get(assignment.id, 0),
                     )
                 )
         return tuple(
@@ -1214,6 +1276,37 @@ class WorkService:
         invitation = await self.store.invitation(task_id, person_id)
         return self._invitation_active(invitation)
 
+    async def participant_task_detail(
+        self, actor: ActorContext, task_id: UUID
+    ) -> ParticipantTaskDetail:
+        marketplace = await self.task_detail(actor, task_id)
+        membership = next(
+            (
+                item
+                for item in await self.store.assignments_for_person(actor.person_id)
+                if item.task_id == task_id
+            ),
+            None,
+        )
+        team: tuple[AssignmentRecord, ...] = (
+            tuple(await self.store.assignments_for_task(task_id)) if membership else ()
+        )
+        checkpoints = tuple(await self.store.checkpoints(task_id)) if membership else ()
+        contributions = (
+            tuple(await self.store.contributions_for_assignment(membership.id))
+            if membership
+            else ()
+        )
+        return ParticipantTaskDetail(
+            task=marketplace,
+            brief=marketplace.task.aggregate.brief,
+            terms_history=tuple(await self.store.terms_history(task_id)),
+            team=team,
+            membership=membership,
+            checkpoints=checkpoints,
+            contributions=contributions,
+        )
+
     @staticmethod
     def _invitation_active(invitation: InvitationRecord | None) -> bool:
         return (
@@ -1381,6 +1474,18 @@ class WorkService:
         await self._owned(actor, task_id)
         return await self.store.applications(task_id)
 
+    async def application_participants(
+        self, applications: tuple[ApplicationRecord, ...]
+    ) -> dict[UUID, tuple[str | None, int]]:
+        person_ids = tuple(dict.fromkeys(item.person_id for item in applications))
+        counts = await self.store.accepted_contribution_counts(person_ids)
+        names: dict[UUID, str | None] = {person_id: None for person_id in person_ids}
+        if self.consent_store is not None:
+            for person_id in person_ids:
+                persona = await self.consent_store.get_persona_by_id(person_id)
+                names[person_id] = persona.display_name if persona else None
+        return {person_id: (names[person_id], counts.get(person_id, 0)) for person_id in person_ids}
+
     async def accept_candidate(
         self, actor: ActorContext, application_id: UUID, expected_version: int
     ) -> AssignmentRecord:
@@ -1443,6 +1548,18 @@ class WorkService:
                 message=str(exc),
                 status_code=409,
                 field_errors={"personal_summary": ["Требуется личное описание вклада."]},
+            ) from exc
+        try:
+            validate_artifacts(
+                (await self._required(assignment.task_id)).aggregate.brief.allowed_artifacts,
+                tuple(item.key for item in artifacts),
+            )
+        except TaskPolicyError as exc:
+            raise ApiError(
+                code=exc.code,
+                message=str(exc),
+                status_code=409,
+                field_errors={"artifacts": ["Артефакт не входит в разрешённый список задачи."]},
             ) from exc
         return await self.store.submit_contribution(assignment_id, summary, artifacts)
 

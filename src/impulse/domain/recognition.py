@@ -1,5 +1,4 @@
 """Versioned rating-season policy and lifecycle invariants."""
-# ruff: noqa: RUF001
 
 from __future__ import annotations
 

@@ -8,7 +8,7 @@ from decimal import Decimal
 from uuid import uuid4
 
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import func, insert, select
 
 from impulse.application.reward import DEFAULT_REVIEW_RUBRIC
 from impulse.bootstrap.demo_seed import demo_id, seed_demo
@@ -25,7 +25,7 @@ from impulse.domain.reward import (
 )
 from impulse.infrastructure.database import Database, async_database_url
 from impulse.infrastructure.models.reward import review_5plus_versions
-from impulse.infrastructure.models.work import assignments
+from impulse.infrastructure.models.work import assignments, contributions
 from impulse.infrastructure.reward_store import SqlRewardStore
 
 pytestmark = pytest.mark.integration
@@ -47,10 +47,33 @@ async def test_review_versions_are_append_only_and_restore_human_signatures() ->
     assert rubric == DEFAULT_REVIEW_RUBRIC
 
     mentor_id = demo_id("mentor-elena")
+    # Demo seed already holds review v1 rows for every seeded contribution, so
+    # the append-only scenario anchors on a fresh runtime contribution slot.
+    runtime_assignment = demo_id("assignment:1")
+    contribution_id = uuid4()
+    async with database.sessions() as session:
+        version = await session.scalar(
+            select(func.max(contributions.c.contribution_version)).where(
+                contributions.c.assignment_id == runtime_assignment
+            )
+        )
+    contribution_version = int(version or 0) + 1
+    async with database.session() as session:
+        await session.execute(
+            insert(contributions).values(
+                id=contribution_id,
+                assignment_id=runtime_assignment,
+                contribution_version=contribution_version,
+                summary="Сценарий регрессии: версии оценки добавляются и не редактируются.",
+                status="submitted",
+                data_origin="demo_runtime",
+                created_by=demo_id("participant-alex"),
+            )
+        )
     draft = Review5Plus.draft(
         review_id=uuid4(),
-        contribution_id=demo_id("contribution:2:1"),
-        contribution_version=1,
+        contribution_id=contribution_id,
+        contribution_version=contribution_version,
         rubric=DEFAULT_REVIEW_RUBRIC,
         grade=ReviewGrade.B,
         assessments=tuple(

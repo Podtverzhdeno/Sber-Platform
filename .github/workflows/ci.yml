@@ -1,0 +1,285 @@
+---
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.13"
+  NODE_VERSION: "24"
+
+jobs:
+  openspec_strict_and_docs:
+    name: openspec-strict-and-docs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: Install Python dependencies
+        run: uv sync --frozen
+      - name: Validate OpenSpec
+        run: npx -y @fission-ai/openspec@latest validate --all --strict --no-interactive
+      - name: Validate documentation contracts
+        run: uv run python scripts/check_docs.py
+
+  backend_format_lint_types:
+    name: backend-format-lint-types
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Check formatting
+        run: uv run ruff format --check .
+      - name: Run Ruff
+        run: uv run ruff check .
+      - name: Run Pyright
+        run: uv run pyright
+
+  backend_unit_api_integration:
+    name: backend-unit-api-integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      TEST_DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      APP_ENV: test
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Apply migrations to clean PostgreSQL
+        run: uv run alembic upgrade head
+      - name: Run unit, API, and integration tests
+        run: |
+          mkdir -p test-results
+          uv run pytest \
+            --cov=impulse \
+            --cov-report=term-missing \
+            --cov-report=xml:test-results/coverage.xml \
+            --junitxml=test-results/pytest.xml
+      - name: Upload backend test reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: backend-test-reports
+          path: test-results/
+          if-no-files-found: error
+          retention-days: 14
+
+  frontend_quality_and_contracts:
+    name: frontend-quality-and-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Run ESLint
+        run: npm run lint
+      - name: Run TypeScript checks
+        run: npm run typecheck
+      - name: Run unit tests
+        run: npm test
+      - name: Verify generated API schema
+        run: npm run api:check
+
+  frontend_build_and_e2e:
+    name: frontend-build-and-e2e
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Build production bundle
+        run: npm run build
+      - name: Verify built security controls
+        run: npm run security:check
+      - name: Run browser tests
+        run: npm run test:e2e
+        env:
+          TZ: Europe/Moscow
+          LANG: ru_RU.UTF-8
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: playwright-report
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  docker_smoke:
+    name: docker-smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build and start the stack
+        run: docker compose up --detach --build --wait
+      - name: Record image digest
+        run: docker compose images --format json
+      - name: Verify non-root process
+        run: test "$(docker compose exec -T app id -u)" != "0"
+      - name: Verify health and SPA fallback
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:8000/health/live
+          curl --fail --silent --show-error http://127.0.0.1:8000/health/ready
+          curl --fail --silent --show-error \
+            --header 'Accept: text/html' \
+            http://127.0.0.1:8000/participant | grep -q '<div id="root"></div>'
+      - name: Verify demo login
+        run: |
+          curl --fail --silent --show-error \
+            --header 'Content-Type: application/json' \
+            --data '{"persona_key":"participant-alex"}' \
+            http://127.0.0.1:8000/api/v1/auth/demo-login \
+            | python -c 'import json,sys; data=json.load(sys.stdin); assert data["active_role"] == "participant"'
+      - name: Verify readiness fails closed without PostgreSQL
+        run: |
+          docker compose stop postgres
+          if curl --fail --silent http://127.0.0.1:8000/health/ready; then
+            echo 'readiness unexpectedly remained healthy without PostgreSQL'
+            exit 1
+          fi
+      - name: Stop the stack
+        if: ${{ always() }}
+        run: docker compose down --volumes
+
+  secret_and_dependency_scans:
+    name: secret-and-dependency-scans
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: Install locked dependencies
+        run: uv sync --frozen
+      - name: Scan repository for secrets
+        run: uv run impulse-secret-scan
+      - name: Audit Python production dependencies
+        run: |
+          uv export --frozen --no-dev --no-hashes --format requirements-txt --output-file requirements-ci.txt
+          uvx pip-audit --requirement requirements-ci.txt
+      - name: Audit npm production dependencies
+        working-directory: frontend
+        run: |
+          npm ci
+          npm audit --omit=dev --audit-level=high
+      - name: Build final container image
+        run: docker build --tag impulse-ci:${{ github.sha }} .
+      - name: Scan final image for critical vulnerabilities
+        run: >-
+          docker run --rm
+          --volume /var/run/docker.sock:/var/run/docker.sock
+          aquasec/trivy:0.67.2 image
+          --exit-code 1
+          --severity CRITICAL
+          --ignore-unfixed
+          impulse-ci:${{ github.sha }}
+
+  required_gates:
+    name: required-gates
+    if: ${{ always() }}
+    needs:
+      - openspec_strict_and_docs
+      - backend_format_lint_types
+      - backend_unit_api_integration
+      - frontend_quality_and_contracts
+      - frontend_build_and_e2e
+      - docker_smoke
+      - secret_and_dependency_scans
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every mandatory gate to succeed
+        run: |
+          test '${{ needs.openspec_strict_and_docs.result }}' = 'success'
+          test '${{ needs.backend_format_lint_types.result }}' = 'success'
+          test '${{ needs.backend_unit_api_integration.result }}' = 'success'
+          test '${{ needs.frontend_quality_and_contracts.result }}' = 'success'
+          test '${{ needs.frontend_build_and_e2e.result }}' = 'success'
+          test '${{ needs.docker_smoke.result }}' = 'success'
+          test '${{ needs.secret_and_dependency_scans.result }}' = 'success'

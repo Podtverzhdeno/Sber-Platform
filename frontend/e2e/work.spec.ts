@@ -18,7 +18,7 @@ test("paid application moves through submission and customer revision", async ({
     active_role: "participant",
     assigned_roles: ["participant"],
     scopes: [], consent_scopes: [],
-    navigation: ["Мой путь", "Bootcamp", "Задачи", "События", "Рейтинг", "Аналитика"],
+    navigation: ["Мой путь", "Bootcamp", "Задачи", "Мои проекты", "События", "Рейтинг", "Аналитика"],
     csrf_token: "csrf-participant",
   };
   const customer = {
@@ -73,34 +73,42 @@ test("paid application moves through submission and customer revision", async ({
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Задачи" }).click();
-  const moneyTooltipTrigger = page.getByText("База 30 000,00 ₽ · B 45 000,00 ₽ · A 75 000,00 ₽").first();
-  await expect(moneyTooltipTrigger).toBeVisible();
-  await moneyTooltipTrigger.focus();
-  await expect(page.getByRole("tooltip").first()).toContainText("B ×1,5: 45 000,00 ₽");
-  await expect(page.getByRole("tooltip").first()).toContainText("A ×2,50: 75 000,00 ₽");
   await page.getByRole("button", { name: "Открыть условия версии 2" }).click();
   const consent = page.getByRole("dialog", { name: "Условия задачи · версия 2" });
-  await expect(consent.getByText("30 000,00 ₽", { exact: true })).toBeVisible();
-  await expect(consent.getByText("45 000,00 ₽", { exact: true })).toBeVisible();
-  await expect(consent.getByText("75 000,00 ₽", { exact: true })).toBeVisible();
-  await expect(consent.getByText("После принятия личного вклада и публикации оценки человеком.")).toBeVisible();
+  await expect(consent.getByText("Работающий MVP и отчёт по метрикам.")).toBeVisible();
   await consent.getByRole("button", { name: "Подтвердить условия и продолжить" }).click();
   await page.getByRole("button", { name: "Откликнуться" }).click();
+  await expect(page.getByText("Вы успешно откликнулись")).toBeVisible();
+  await expect(page.getByText("✓ Заявка отправлена")).toBeVisible();
+  await expect(page.getByText("Проект сформирован · рабочая область доступна")).toBeVisible();
+  await page.getByRole("button", { name: "Открыть мои задачи" }).click();
+  await expect(page.getByRole("heading", { name: "Мои задачи" })).toBeVisible();
+  await expect(page.getByText("В работе").first()).toBeVisible();
+  await expect(page.getByText(/30\s?000\s?₽/)).toHaveCount(0);
+
+  await page.getByRole("link", { name: "Мои проекты" }).click();
+  await expect(page.getByRole("heading", { name: "Проекты в работе" })).toBeVisible();
+  await expect(page.getByText("Можно начинать")).toBeVisible();
   await page.getByRole("button", { name: "Начать работу" }).click();
+  await expect(page.getByLabel("Что сделали лично")).toBeVisible();
   await page.getByLabel("Что сделали лично").fill("Я реализовал API поиска и подготовил воспроизводимую проверку метрики.");
   await page.getByLabel("Ссылка на доказательство").fill("https://example.test/commit/42");
   await page.getByRole("button", { name: "Отправить личный вклад" }).click();
+  await expect(page.getByText("Личный вклад · версия 1")).toBeVisible();
   await expect(page.getByText("На приёмке").first()).toBeVisible();
 
   await page.getByRole("button", { name: "Выйти" }).click();
   await page.locator('[data-persona="customer-roman"]').click();
+  await page.getByRole("link", { name: "Приёмка" }).click();
   await expect(page.getByText("Я реализовал API поиска и подготовил воспроизводимую проверку метрики.")).toBeVisible();
   await page.getByRole("button", { name: "Вернуть на доработку" }).click();
+  await expect(page.getByText("Нужна доработка")).toBeVisible();
 
   await page.getByRole("button", { name: "Выйти" }).click();
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Задачи" }).click();
+  await page.getByRole("link", { name: "Мои проекты" }).click();
   await expect(page.getByText("Нужно уточнить результат и приложить воспроизводимые доказательства.")).toBeVisible();
   await expect(page.getByText(/Срок:/)).toBeVisible();
-  await expect(page.getByRole("button", { name: "Начать доработку" })).toBeVisible();
+  await page.getByRole("button", { name: "Начать доработку" }).click();
+  await expect(page.getByLabel("Что сделали лично")).toBeVisible();
 });

@@ -1,5 +1,4 @@
 """Event catalog, participation claims and external evidence use cases."""
-# ruff: noqa: RUF001
 
 from __future__ import annotations
 

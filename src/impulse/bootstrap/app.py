@@ -3,32 +3,72 @@
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
+from uuid import UUID
 
 from fastapi import FastAPI
 
+from impulse.ai.gateway import ModelRegistry
+from impulse.ai.suggestions import SuggestionService
 from impulse.api.errors import install_error_handlers
 from impulse.api.health import router as health_router
 from impulse.api.request_context import RequestContextMiddleware
+from impulse.api.security import SecurityMiddleware
 from impulse.api.v1 import router as api_v1_router
-from impulse.application.development import DevelopmentService, MemoryDevelopmentStore
+from impulse.application.buddy import BuddyConversationService
+from impulse.application.competencies import (
+    CompetencyService,
+    MemoryCompetencyEvidenceStore,
+    MemoryFrameworkStore,
+    install_demo_competencies,
+)
+from impulse.application.development import (
+    DevelopmentService,
+    MemoryCertificateStore,
+    MemoryDevelopmentStore,
+    demo_course_certificate,
+)
 from impulse.application.ecosystem import EcosystemService, MemoryEcosystemStore
 from impulse.application.identity import DemoAuthService, MemoryIdentityStore, demo_personas
+from impulse.application.messaging import (
+    MemoryMessagingStore,
+    MessagingService,
+    WorkTaskChannelSource,
+)
+from impulse.application.notifications import (
+    MemoryNotificationsStore,
+    NotificationFeedService,
+    memory_demo_notifications,
+)
 from impulse.application.operations import MemoryOperationsStore, OperationsService
+from impulse.application.project_credentials import (
+    MemoryProjectCredentialStore,
+    ProjectCredentialService,
+)
 from impulse.application.recognition import MemoryRecognitionStore, RecognitionService
 from impulse.application.reward import (
     MemoryRewardStore,
     RewardService,
     WorkReviewEvidenceProvider,
 )
+from impulse.application.search import SearchService
 from impulse.application.talent import MemoryTalentStore, TalentService
 from impulse.application.work import MemoryWorkStore, WorkService
+from impulse.bootstrap.demo_seed import demo_id
 from impulse.bootstrap.logging import configure_logging
 from impulse.bootstrap.settings import Settings
-from impulse.bootstrap.static import SinglePageApplication
+from impulse.bootstrap.static import install_spa_fallback
+from impulse.domain.notifications import Notification
+from impulse.infrastructure.competencies_store import SqlCompetencyEvidenceStore, SqlFrameworkStore
+from impulse.infrastructure.credentials_store import (
+    SqlCertificateStore,
+    SqlProjectCredentialStore,
+)
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.development_store import SqlDevelopmentStore
 from impulse.infrastructure.ecosystem_store import SqlEcosystemStore
 from impulse.infrastructure.identity_store import SqlIdentityStore
+from impulse.infrastructure.messaging_store import SqlMessagingStore
+from impulse.infrastructure.notifications_store import SqlNotificationsStore
 from impulse.infrastructure.operations_store import SqlOperationsStore
 from impulse.infrastructure.recognition_store import SqlRecognitionStore
 from impulse.infrastructure.reward_store import SqlRewardStore
@@ -47,11 +87,20 @@ def create_app(
     recognition_service: RecognitionService | None = None,
     talent_service: TalentService | None = None,
     operations_service: OperationsService | None = None,
+    messaging_service: MessagingService | None = None,
+    notifications_service: NotificationFeedService | None = None,
+    search_service: SearchService | None = None,
+    project_credential_service: ProjectCredentialService | None = None,
+    competency_service: CompetencyService | None = None,
+    ai_registry: ModelRegistry | None = None,
+    buddy_service: BuddyConversationService | None = None,
+    ai_suggestion_service: SuggestionService | None = None,
 ) -> FastAPI:
     """Build the HTTP application without import-time side effects."""
     runtime_settings = settings or Settings()
     configure_logging()
     owned_database: Database | None = None
+    buddy_service = buddy_service or BuddyConversationService()
     if auth_service is None:
         if runtime_settings.database_url is None:
             identity_store = MemoryIdentityStore(demo_personas())
@@ -69,7 +118,20 @@ def create_app(
             if owned_database is not None
             else MemoryDevelopmentStore()
         )
-        development_service = DevelopmentService(development_store)
+        certificate_store = (
+            SqlCertificateStore(owned_database)
+            if owned_database is not None
+            else MemoryCertificateStore()
+        )
+        development_service = DevelopmentService(development_store, certificate_store)
+        if runtime_settings.demo_mode and owned_database is None:
+            assert isinstance(certificate_store, MemoryCertificateStore)
+            certificate_store.install_course_certificate(
+                demo_course_certificate(
+                    demo_id("participant-alex"),
+                    demo_id("certificate:participant-alex:openspec-sdd"),
+                )
+            )
     if ecosystem_service is None:
         ecosystem_store = (
             SqlEcosystemStore(owned_database)
@@ -93,6 +155,19 @@ def create_app(
             reward_store,
             WorkReviewEvidenceProvider(work_service.store),
             work_service.store,
+            identity=work_service.consent_store,
+        )
+    if project_credential_service is None:
+        project_store = (
+            SqlProjectCredentialStore(owned_database)
+            if owned_database is not None
+            else MemoryProjectCredentialStore()
+        )
+        project_credential_service = ProjectCredentialService(
+            work_service.store,
+            reward_service.store,
+            project_store,
+            persona_by_id=auth_service.store.get_persona_by_id,
         )
     if recognition_service is None:
         recognition_store = (
@@ -113,9 +188,54 @@ def create_app(
             else MemoryOperationsStore()
         )
         operations_service = OperationsService(operations_store)
+    if messaging_service is None:
+        messaging_store = (
+            SqlMessagingStore(owned_database)
+            if owned_database is not None
+            else MemoryMessagingStore()
+        )
+        messaging_service = MessagingService(messaging_store)
+        messaging_service.task_channels = WorkTaskChannelSource(
+            work_service.store, reward_service.store
+        )
+    if notifications_service is None:
+        notification_rows = memory_demo_notifications()
+        grouped: dict[UUID, list[Notification]] = {}
+        for row in notification_rows:
+            grouped.setdefault(row.person_id, []).append(row)
+        notifications_store = (
+            SqlNotificationsStore(owned_database)
+            if owned_database is not None
+            else MemoryNotificationsStore(
+                {person_id: tuple(items) for person_id, items in grouped.items()}
+            )
+        )
+        notifications_service = NotificationFeedService(notifications_store)
+    if search_service is None:
+        search_service = SearchService(
+            work_service.store,
+            development_service.store,
+            ecosystem_service.store,
+            messaging_service=messaging_service,
+            auth_service=auth_service,
+            recognition_store=recognition_service.store,
+        )
+    if competency_service is None:
+        competency_service = CompetencyService(
+            SqlFrameworkStore(owned_database)
+            if owned_database is not None
+            else MemoryFrameworkStore(),
+            SqlCompetencyEvidenceStore(owned_database)
+            if owned_database is not None
+            else MemoryCompetencyEvidenceStore(),
+        )
+    development_service.competency_service = competency_service
+    project_credential_service.competency_service = competency_service
 
     @asynccontextmanager
     async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
+        if runtime_settings.demo_mode and owned_database is None:
+            await install_demo_competencies(competency_service, demo_id("participant-alex"))
         try:
             yield
         finally:
@@ -134,18 +254,32 @@ def create_app(
     app.state.ecosystem_service = ecosystem_service
     app.state.work_service = work_service
     app.state.reward_service = reward_service
+    app.state.project_credential_service = project_credential_service
     app.state.recognition_service = recognition_service
     app.state.talent_service = talent_service
     app.state.operations_service = operations_service
+    app.state.messaging_service = messaging_service
+    app.state.notifications_service = notifications_service
+    app.state.search_service = search_service
+    app.state.competency_service = competency_service
+    app.state.ai_registry = ai_registry
+    app.state.buddy_service = buddy_service
+    app.state.ai_suggestion_service = ai_suggestion_service
     app.add_middleware(RequestContextMiddleware)
+    allowed_origins = (
+        frozenset({str(runtime_settings.allowed_origin).rstrip("/")})
+        if runtime_settings.allowed_origin is not None
+        else frozenset[str]()
+    )
+    app.add_middleware(
+        SecurityMiddleware,
+        allowed_origins=allowed_origins,
+        max_request_bytes=runtime_settings.max_request_bytes,
+    )
     install_error_handlers(app)
     app.include_router(health_router)
     app.include_router(api_v1_router)
     frontend_directory = Path("frontend/dist")
     if frontend_directory.is_dir():
-        app.mount(
-            "/",
-            SinglePageApplication(directory=frontend_directory, html=True),
-            name="frontend",
-        )
+        install_spa_fallback(app, frontend_directory)
     return app

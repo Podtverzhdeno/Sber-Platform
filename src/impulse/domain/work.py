@@ -1,5 +1,4 @@
 """R&D/MVP task aggregate and publication invariants."""
-# ruff: noqa: RUF001
 
 from __future__ import annotations
 
@@ -154,6 +153,18 @@ def validate_personal_contribution(summary: str) -> str:
     return normalized
 
 
+def validate_artifacts(allowed_artifacts: tuple[str, ...], keys: tuple[str, ...]) -> None:
+    if not allowed_artifacts:
+        return
+    outsiders = tuple(key for key in keys if key not in allowed_artifacts)
+    if outsiders:
+        raise TaskPolicyError(
+            "ARTIFACT_NOT_ALLOWED",
+            "Артефакт не входит в разрешённый список задачи.",
+            missing_fields=outsiders,
+        )
+
+
 @dataclass(frozen=True, slots=True)
 class TaskBrief:
     problem: str = ""
@@ -162,6 +173,7 @@ class TaskBrief:
     deadline_at: datetime | None = None
     data_constraints: str = ""
     ip_terms: str = ""
+    allowed_artifacts: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)

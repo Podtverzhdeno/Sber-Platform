@@ -43,3 +43,11 @@ visibility_settings = domain_table(
     typed_field("visible", Boolean()),
     uniques=(("person_id", "scope"),),
 )
+profile_skills = domain_table(
+    "profile_skills",
+    uuid_field("person_id", "persons.id"),
+    string_field("title", 120),
+    string_field("origin", 32),
+    typed_field("verified", Boolean()),
+    uniques=(("person_id", "title", "origin"),),
+)

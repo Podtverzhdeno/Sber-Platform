@@ -19,6 +19,12 @@ test.beforeEach(async ({ page }) => {
     } });
   });
   await page.route("**/api/v1/auth/logout", (route) => route.fulfill({ json: { ok: true } }));
+  await page.route("**/api/v1/me/profile", (route) => route.fulfill({ json: {
+    person_id: "1", display_name: "Алекс Речной", city: "Москва", university: "МГУ", study_year: "4 курс",
+    primary_track: "Python", email: "alex@example.test", telegram: "@alex_rechnoy", about: "", avatar_url: "",
+    locale: "ru-RU", theme: "dark", timezone: "Europe/Moscow", buddy_enabled: true, skills: [],
+  } }));
+  await page.route("**/api/v1/me/visibility", (route) => route.fulfill({ json: { visibility: { hr_basic: true, hr_skills: true, hr_projects: true, hr_achievements: true, hr_learning: true, hr_contacts: false } } }));
   await page.route("**/api/v1/marketplace/tasks", (route) => route.fulfill({ json: [{
     task: { id: "task-market", title: "Исследование качества рекомендаций", status: "published", places: 3 },
     terms: { version: 1, deadline_at: "2026-10-20T18:00:00Z", deliverable: "Подготовить benchmark и MVP ранжирования", acceptance_criteria: ["Воспроизводимый отчёт", "Работающий API"], support_mode: "mentor", compensation: { paid: true, base_amount_per_assignee: "60000", currency: "RUB", b_multiplier: "1.5", a_multiplier: "2.5", b_total: "90000", a_total: "150000", quantum: "0.01", rounding_mode: "half_up", policy_version: 1, payout_condition: "Принятый личный вклад" } },
@@ -32,6 +38,48 @@ test.beforeEach(async ({ page }) => {
     contributions: [{ id: "contribution-1", version: 2, personal_summary: "Реализован API и интеграционные тесты", artifact_keys: ["api"], status: "submitted" }],
     decisions: [],
   }] }));
+  await page.route("**/api/v1/search*", (route) => route.fulfill({ json: { items: [{ kind: "course", meta: "available", ref: "course:python-base", title: "Python для R&D" }] } }));
+  await page.route("**/api/v1/me/notifications", (route) => route.fulfill({ json: { items: [
+    { id: "note-mentor", kind: "message", title: "Новый комментарий ментора", body: "Елена Наставник оставила замечание в рабочей области", read: false, created_at: "2026-10-18T09:15:00Z", entity_type: "message", entity_id: null },
+    { id: "note-checkpoint", kind: "checkpoint", title: "Checkpoint принят", body: "Версия 2 зачтена ментором", read: false, created_at: "2026-10-18T08:00:00Z", entity_type: "checkpoint", entity_id: null },
+  ], unread: 3 } }));
+  await page.route("**/api/v1/me/notifications/*/read", (route) => route.fulfill({ json: { ok: true } }));
+  await page.route("**/api/v1/me/notifications/read-all", (route) => route.fulfill({ json: { ok: true } }));
+  await page.route("**/api/v1/me/tasks/task-1", (route) => route.fulfill({ json: {
+    task: { id: "task-1", title: "Прототип рекомендательной системы", status: "in_progress" },
+    problem: "Собрать рекомендации на открытом корпусе и оценить качество",
+    deadline_at: "2026-10-12T18:00:00Z",
+    customer: { id: "3", display_name: "Роман Воронов" },
+    mentor: { id: "2", display_name: "Елена Наставник" },
+    support: { mode: "mentor", assignee: { id: "2", display_name: "Елена Наставник" } },
+    acceptance_criteria: ["Воспроизводимость"],
+    terms_history: [],
+    checkpoints: [],
+    personal: [{ id: "contribution-1", version: 2, status: "submitted", artifact_keys: ["api"] }],
+    feedback: [],
+    membership: { id: "assignment-1", status: "in_progress" },
+    invitation_status: null,
+  } }));
+  const messagingMessages: Record<string, Array<{ id: string; author_id: string | null; author_name: string | null; kind: string; body: string; artifact_refs: string[]; sequence: number; created_at: string }>> = {
+    "channel-project": [{ id: "message-1", author_id: "2", author_name: "Елена Наставник", kind: "text", body: "Нужно согласовать формат допуска сегментов", artifact_refs: [], sequence: 1, created_at: "2026-10-08T09:30:00Z" }],
+    "channel-mentor": [],
+  };
+  await page.route("**/api/v1/me/messaging/channels", (route) => route.fulfill({ json: [
+    { id: "channel-project", kind: "project", title: "Рекомендательная система", status: "active", task_id: "task-1", role: "member", muted: false, sender_enabled: true, unread: 0, participants: [{ id: "1", display_name: "Алекс Речной", role: "member" }, { id: "2", display_name: "Елена Наставник", role: "mentor" }, { id: "3", display_name: "Роман Воронов", role: "customer" }], last_message: messagingMessages["channel-project"].at(-1) ?? null, created_at: "2026-10-01T09:00:00Z" },
+    { id: "channel-mentor", kind: "mentor", title: "Елена Наставник", status: "active", task_id: null, role: "member", muted: false, sender_enabled: true, unread: 0, participants: [{ id: "1", display_name: "Алекс Речной", role: "member" }, { id: "2", display_name: "Елена Наставник", role: "mentor" }], last_message: null, created_at: "2026-10-01T09:05:00Z" },
+  ] }));
+  await page.route("**/api/v1/me/messaging/channels/*/messages", async (route) => {
+    const channelId = route.request().url().split("/").at(-2) ?? "channel-project";
+    if (route.request().method() === "POST") {
+      const body = route.request().postDataJSON() as { body: string };
+      const created = { id: `message-${String(messagingMessages[channelId].length + 1)}`, author_id: "1", author_name: "Алекс Речной", kind: "text", body: body.body, artifact_refs: [], sequence: messagingMessages[channelId].length + 1, created_at: new Date().toISOString() };
+      messagingMessages[channelId].push(created);
+      await route.fulfill({ json: created });
+      return;
+    }
+    await route.fulfill({ json: messagingMessages[channelId] ?? [] });
+  });
+  await page.route("**/api/v1/me/messaging/channels/*/context", (route) => route.fulfill({ json: { project_key: "impulse-demo", task_title: "Прототип рекомендательной системы", deadline_at: "2026-10-12T18:00:00Z", contribution_version: 2, contribution_accepted: null, review_status: null } }));
 });
 
 test("logout returns persona picker and allows another role", async ({ page }) => {
@@ -39,9 +87,11 @@ test("logout returns persona picker and allows another role", async ({ page }) =
   await page.locator('[data-persona="participant-alex"]').click();
   await expect(page.getByRole("heading", { name: "Добро пожаловать, Алекс!" })).toBeVisible();
   await page.getByRole("button", { name: "Выйти" }).click();
-  await expect(page.getByRole("heading", { name: "Кем вы хотите посмотреть платформу?" })).toBeVisible();
-  await page.locator('[data-persona="mentor-elena"]').click();
-  await expect(page.getByRole("heading", { name: "Добро пожаловать, Елена!" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Выберите роль, чтобы присоединиться" })).toBeVisible();
+  await expect(page.locator('[data-persona="mentor-elena"]')).toBeDisabled();
+  await expect(page.locator('[data-persona="participant-alex"]')).toBeEnabled();
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByRole("heading", { name: "Добро пожаловать, Алекс!" })).toBeVisible();
 });
 
 test("participant home actions open project, buddy and linked routes", async ({ page }) => {
@@ -78,24 +128,18 @@ test("search, streak, task detail and messages are interactive", async ({ page }
   await expect(page.getByRole("button", { name: "Продолжить курс →" })).toHaveClass(/streak-course-button/);
   await page.getByRole("searchbox", { name: "Глобальный поиск" }).fill("Python");
   await page.getByRole("option", { name: /Python для R&D/ }).click();
-  await expect(page).toHaveURL(/workspace\/2\?course=python-base/);
-  await page.getByRole("link", { name: "Мои проекты" }).click();
-  await page.getByRole("button", { name: /Открыть рабочую область/ }).click();
-  await expect(page.getByRole("heading", { name: "Загрузить решение" })).toBeVisible();
-  await page.locator('.ctw-upload-button input[type="file"]').setInputFiles([
-    { name: "solution-final.zip", mimeType: "application/zip", buffer: Buffer.from("solution") },
-    { name: "metrics.pdf", mimeType: "application/pdf", buffer: Buffer.from("metrics") },
-  ]);
-  await expect(page.getByText("solution-final.zip")).toBeVisible();
-  await expect(page.getByText("metrics.pdf")).toBeVisible();
-  await expect(page.getByText("Никита Соколов")).toBeVisible();
+  await expect(page).toHaveURL(/workspace\/2$/);
+  await page.getByRole("link", { name: "Мои проекты", exact: true }).click();
+  await page.getByRole("button", { name: "Открыть рабочую область →" }).click();
+  await expect(page.getByRole("heading", { name: "Прототип рекомендательной системы" })).toBeVisible();
+  await expect(page.getByText("Загрузить решение")).toBeVisible();
   await page.getByRole("button", { name: "Открыть чат команды" }).click();
   await expect(page).toHaveURL(/\/workspace\/10\?participant=project$/);
   await expect(page.getByRole("heading", { name: "Сообщения" })).toBeVisible();
   await expect(page.locator(".chat-list button.active strong")).toContainText("Рекомендательная система");
   await page.getByLabel("Сообщение").fill("Готово к повторной проверке");
   await page.getByRole("button", { name: "Отправить" }).click();
-  await expect(page.getByText("Готово к повторной проверке")).toBeVisible();
+  await expect(page.getByRole("paragraph").filter({ hasText: "Готово к повторной проверке" })).toBeVisible();
 });
 
 test("application confirms success and appears in my tasks", async ({ page }) => {

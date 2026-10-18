@@ -31,6 +31,25 @@ class ConsentScope(StrEnum):
     COURSE_HONOR_BOARD = "course_honor_board"
 
 
+HR_VISIBILITY_SCOPES: tuple[str, ...] = (
+    "hr_basic",
+    "hr_skills",
+    "hr_projects",
+    "hr_achievements",
+    "hr_learning",
+    "hr_contacts",
+)
+
+HR_VISIBILITY_DEFAULTS: dict[str, bool] = {
+    "hr_basic": True,
+    "hr_skills": True,
+    "hr_projects": True,
+    "hr_achievements": True,
+    "hr_learning": True,
+    "hr_contacts": False,
+}
+
+
 ROLE_SCOPES: dict[Role, frozenset[str]] = {
     Role.PARTICIPANT: frozenset({"journey:read", "own-work:write", "consent:write"}),
     Role.MENTOR: frozenset({"assigned-work:read", "review-draft:write", "review:publish"}),
@@ -71,15 +90,27 @@ ROLE_NAVIGATION: dict[Role, tuple[str, ...]] = {
         "План недели",
     ),
     Role.CUSTOMER: ("Главная", "Мои задачи", "Кандидаты", "Приёмка", "Аналитика", "Сообщения"),
-    Role.MANAGER: ("Главная", "Инициативы", "Результаты", "Аналитика", "Сообщения"),
+    Role.MANAGER: (
+        "Главная",
+        "Инициативы",
+        "Команда",
+        "Аналитика",
+        "Результаты",
+        "Календарь команды",
+        "База участников",
+        "Настройки",
+    ),
     Role.HR: ("Главная", "Кандидаты", "Воронка", "Аналитика", "Сообщения"),
     Role.OPERATOR: (
         "Главная",
         "Операционная очередь",
         "Проверки",
+        "Задачи и проекты",
+        "Выплаты",
         "Споры",
+        "Пользователи",
+        "События и трофеи",
         "Аналитика",
-        "Сообщения",
     ),
     Role.PROGRAM_OWNER: (),
     Role.ACCESS_ADMIN: (),

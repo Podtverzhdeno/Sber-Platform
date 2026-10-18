@@ -131,6 +131,49 @@ def suppress_small_cohort(metric: Metric, threshold: int = MIN_ANALYTICS_COHORT)
     )
 
 
+def hours_metric(
+    *,
+    key: str,
+    label: str,
+    seconds_sum: float,
+    observations: int,
+    period_start: datetime,
+    period_end: datetime,
+    cohort: str,
+    definition: str,
+) -> Metric:
+    value = (
+        (Decimal(seconds_sum) / Decimal(observations) / Decimal(3600)).quantize(Decimal("0.1"))
+        if observations
+        else None
+    )
+    return Metric(
+        key,
+        label,
+        observations,
+        1,
+        value,
+        "hours",
+        period_start,
+        period_end,
+        cohort,
+        "fresh",
+        definition,
+    )
+
+
+def unknown_reason(metric: Metric, reason: str | None) -> Metric:
+    """Blank the derived value when the required comparable baseline is absent."""
+    if reason is None and metric.value is not None:
+        return metric
+    return dataclass_replace(
+        metric,
+        value=None,
+        suppressed=True,
+        suppression_reason=reason or metric.suppression_reason or "unknown",
+    )
+
+
 def visible_personal_rows[T](
     rows: tuple[T, ...], cohort_size: int, threshold: int = MIN_ANALYTICS_COHORT
 ) -> tuple[T, ...]:

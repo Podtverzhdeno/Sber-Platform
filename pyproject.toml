@@ -62,7 +62,9 @@ src = ["src", "tests"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "ASYNC", "S", "RUF"]
-ignore = ["S101"]
+# Пользовательские строки платформы и тестовые fixtures содержат кириллицу;
+# RUF001/002/003 помечают такие сообщения как «неоднозначные» гомоглифы — это ложные срабатывания.
+ignore = ["S101", "RUF001", "RUF002", "RUF003"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**/*.py" = ["S105", "S106"]

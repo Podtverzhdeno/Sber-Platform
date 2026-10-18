@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
@@ -9,8 +10,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Request
 from pydantic import AnyHttpUrl, AwareDatetime, BaseModel, Field
 
+from impulse.api.errors import ApiError
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
+from impulse.application.project_credentials import ProjectCredentialService
 from impulse.application.work import (
     AcceptanceRecord,
     ApplicationRecord,
@@ -24,6 +27,7 @@ from impulse.application.work import (
     InvitationRecord,
     ManagerOverview,
     MarketplaceTask,
+    ParticipantTaskDetail,
     TaskRecord,
     TeamArtifactRecord,
     TeamRequestRecord,
@@ -32,6 +36,7 @@ from impulse.application.work import (
     WorkService,
 )
 from impulse.domain.development import CompletionStatus
+from impulse.domain.identity import ConsentScope
 from impulse.domain.reward import CompensationTerms, RoundingMode
 from impulse.domain.work import (
     AcceptanceDecision,
@@ -82,6 +87,7 @@ class CreateTaskRequest(BaseModel):
     places: int = Field(default=1, ge=1, le=100)
     mode: TaskMode = TaskMode.OPEN
     competency_tags: list[str] = Field(default_factory=list, max_length=20)
+    allowed_artifacts: list[str] = Field(default_factory=list, max_length=10)
     case_rubric: CaseRubricRequest | None = None
     compensation: CompensationRequest
 
@@ -145,6 +151,8 @@ class CaseEvidenceView(BaseModel):
     artifact_keys: list[str]
     submitted_at: AwareDatetime
     reviewer_id: UUID
+    case_fixes: int = 0
+    freshness: str = "current"
 
 
 class CandidateMatchView(BaseModel):
@@ -169,6 +177,7 @@ class PassportSkillView(BaseModel):
     key: str
     practical_level: str
     confirmed_case_count: int
+    last_confirmed_at: AwareDatetime | None = None
 
 
 class TalentPassportView(BaseModel):
@@ -234,6 +243,8 @@ class ApplicationView(BaseModel):
     accepted_terms_version: int
     status: ApplicationStatus
     version: int
+    participant_name: str | None = None
+    verified_case_count: int | None = None
 
 
 class InvitationView(BaseModel):
@@ -276,6 +287,69 @@ class AcceptanceView(BaseModel):
     reason: str
     deadline_at: AwareDatetime | None
     owner_id: UUID | None
+
+
+class ProjectCompetencyView(BaseModel):
+    competency: str
+    level: str
+    evidence_refs: list[str]
+    finding: str
+
+
+class ProjectCredentialView(BaseModel):
+    credential_id: str
+    verification_id: str
+    contribution_version: int
+    holder_name: str
+    customer_name: str
+    task_title: str
+    task_key: str
+    project_key: str
+    period: str
+    personal_summary: str
+    artifact_keys: list[str]
+    grade_label: str
+    review_explanation: str
+    competencies: list[ProjectCompetencyView]
+    payment_status: str
+    signed_at: AwareDatetime
+    status: str
+    superseded_by: str | None
+
+
+def _project_credential_view(item: object) -> ProjectCredentialView:
+    from impulse.application.project_credentials import ProjectCredential
+
+    if not isinstance(item, ProjectCredential):
+        raise TypeError("Expected ProjectCredential")
+    return ProjectCredentialView(
+        credential_id=str(item.credential_id),
+        verification_id=item.verification_id,
+        contribution_version=item.contribution_version,
+        holder_name=item.holder_name,
+        customer_name=item.customer_name,
+        task_title=item.task_title,
+        task_key=item.task_key,
+        project_key=item.project_key,
+        period=item.period,
+        personal_summary=item.personal_summary,
+        artifact_keys=list(item.artifact_keys),
+        grade_label=item.grade_label(),
+        review_explanation=item.review_explanation,
+        competencies=[
+            ProjectCompetencyView(
+                competency=cell.competency,
+                level=cell.level,
+                evidence_refs=list(cell.evidence_refs),
+                finding=cell.finding,
+            )
+            for cell in item.competencies
+        ],
+        payment_status=item.payment_status,
+        signed_at=item.signed_at,
+        status=item.status,
+        superseded_by=item.superseded_by,
+    )
 
 
 class DisputeView(BaseModel):
@@ -325,6 +399,7 @@ class CustomerTaskDetailView(BaseModel):
     acceptance_criteria: list[str]
     data_constraints: str
     ip_terms: str
+    allowed_artifacts: list[str]
     terms: TermsView | None
     applications: list[ApplicationView]
     assignments: list[AssignmentView]
@@ -337,12 +412,68 @@ class MarketplaceTaskView(BaseModel):
     terms: TermsView
     accepted_terms_version: int | None
     invitation_status: str | None = None
+    allowed_artifacts: list[str] = Field(default_factory=list)
+
+
+class PartnerView(BaseModel):
+    id: UUID
+    display_name: str
+
+
+class SupportView(BaseModel):
+    mode: str
+    assignee: PartnerView
+
+
+class TeamMemberView(BaseModel):
+    person_id: UUID
+    display_name: str
+    status: AssignmentStatus
+
+
+class TermsHistoryEntryView(BaseModel):
+    version: int
+    deadline_at: AwareDatetime
+    deliverable: str
+
+
+class ReviewFeedbackView(BaseModel):
+    contribution_id: UUID
+    contribution_version: int
+    review_version: int
+    grade: str
+    explanation: str
+    status: str
+
+
+class ParticipantTaskDetailView(BaseModel):
+    task: TaskView
+    problem: str
+    deliverable: str
+    acceptance_criteria: list[str]
+    deadline_at: AwareDatetime | None
+    data_constraints: str
+    ip_terms: str
+    allowed_artifacts: list[str]
+    terms: TermsView
+    terms_history: list[TermsHistoryEntryView]
+    accepted_terms_version: int | None
+    invitation_status: str | None
+    customer: PartnerView
+    mentor: PartnerView | None
+    support: SupportView | None
+    team: list[TeamMemberView]
+    membership: AssignmentView | None
+    checkpoints: list[CheckpointView]
+    personal: list[ContributionView]
+    feedback: list[ReviewFeedbackView]
 
 
 class WorkItemView(BaseModel):
     assignment: AssignmentView
     task: TaskView
     terms: TermsView
+    allowed_artifacts: list[str] = Field(default_factory=list)
     contributions: list[ContributionView]
     decisions: list[AcceptanceView]
 
@@ -432,6 +563,7 @@ def _customer_detail_view(detail: CustomerTaskDetail) -> CustomerTaskDetailView:
         acceptance_criteria=list(brief.acceptance_criteria),
         data_constraints=brief.data_constraints,
         ip_terms=brief.ip_terms,
+        allowed_artifacts=list(brief.allowed_artifacts),
         terms=_terms_view(detail.terms) if detail.terms else None,
         applications=[_application_view(item) for item in detail.applications],
         assignments=[_assignment_view(item) for item in detail.assignments],
@@ -440,7 +572,9 @@ def _customer_detail_view(detail: CustomerTaskDetail) -> CustomerTaskDetailView:
     )
 
 
-def _application_view(item: ApplicationRecord) -> ApplicationView:
+def _application_view(
+    item: ApplicationRecord, participant: tuple[str | None, int] | None = None
+) -> ApplicationView:
     return ApplicationView(
         id=item.id,
         task_id=item.task_id,
@@ -448,6 +582,8 @@ def _application_view(item: ApplicationRecord) -> ApplicationView:
         accepted_terms_version=item.accepted_terms_version,
         status=item.status,
         version=item.version,
+        participant_name=None if participant is None else participant[0],
+        verified_case_count=None if participant is None else participant[1],
     )
 
 
@@ -531,6 +667,59 @@ def _marketplace_view(item: MarketplaceTask) -> MarketplaceTaskView:
         terms=_terms_view(item.terms),
         accepted_terms_version=item.accepted_terms_version,
         invitation_status=item.invitation_status,
+        allowed_artifacts=list(item.task.aggregate.brief.allowed_artifacts),
+    )
+
+
+def _partner_view(person_id: UUID | None, persona) -> PartnerView | None:
+    if person_id is None:
+        return None
+    return PartnerView(
+        id=person_id,
+        display_name=persona.display_name if persona is not None else "",
+    )
+
+
+def _participant_task_detail_view(
+    detail: ParticipantTaskDetail,
+    customer: PartnerView,
+    mentor: PartnerView | None,
+    support: SupportView | None,
+    team: list[TeamMemberView],
+    feedback: list[ReviewFeedbackView],
+) -> ParticipantTaskDetailView:
+    brief = detail.brief
+    return ParticipantTaskDetailView(
+        task=_view(detail.task.task),
+        problem=brief.problem,
+        deliverable=brief.deliverable,
+        acceptance_criteria=list(brief.acceptance_criteria),
+        deadline_at=brief.deadline_at,
+        data_constraints=brief.data_constraints,
+        ip_terms=brief.ip_terms,
+        allowed_artifacts=list(brief.allowed_artifacts),
+        terms=_terms_view(detail.task.terms),
+        terms_history=[
+            TermsHistoryEntryView(
+                version=terms.version,
+                deadline_at=terms.deadline_at,
+                deliverable=terms.deliverable,
+            )
+            for terms in detail.terms_history
+        ],
+        accepted_terms_version=detail.task.accepted_terms_version,
+        invitation_status=detail.task.invitation_status,
+        customer=customer,
+        mentor=mentor,
+        support=support,
+        team=team,
+        membership=(_assignment_view(detail.membership) if detail.membership is not None else None),
+        checkpoints=[
+            CheckpointView(key=item.key, title=item.title, status=item.status)
+            for item in detail.checkpoints
+        ],
+        personal=[_contribution_view(item) for item in detail.contributions],
+        feedback=feedback,
     )
 
 
@@ -539,6 +728,7 @@ def _work_item_view(item: WorkItem) -> WorkItemView:
         assignment=_assignment_view(item.assignment),
         task=_view(item.task),
         terms=_terms_view(item.terms),
+        allowed_artifacts=list(item.task.aggregate.brief.allowed_artifacts),
         contributions=[_contribution_view(contribution) for contribution in item.contributions],
         decisions=[_acceptance_view(decision) for decision in item.decisions],
     )
@@ -768,19 +958,33 @@ async def talent_passport(
         item.course_key for item in enrollments if item.status is CompletionStatus.VERIFIED
     )
     skill_counts: dict[str, set[UUID]] = {}
+    skill_fresh: dict[str, AwareDatetime] = {}
     for item in cases:
         for tag in item.competency_tags:
             skill_counts.setdefault(tag, set()).add(item.task_id)
+            known = skill_fresh.get(tag)
+            if known is None or item.submitted_at > known:
+                skill_fresh[tag] = item.submitted_at
+    now = datetime.now(UTC)
+    fresh_limit = now - timedelta(days=90)
+    case_views = []
+    for entry in cases:
+        view = CaseEvidenceView.model_validate(entry, from_attributes=True).model_dump()
+        view["freshness"] = "current" if entry.submitted_at >= fresh_limit else "aging"
+        case_views.append(CaseEvidenceView.model_validate(view))
     return TalentPassportView(
         person_id=authenticated.actor.person_id,
         verified_courses=verified_courses,
         skills=[
             PassportSkillView(
-                key=key, practical_level="confirmed", confirmed_case_count=len(task_ids)
+                key=key,
+                practical_level="confirmed",
+                confirmed_case_count=len(task_ids),
+                last_confirmed_at=skill_fresh.get(key),
             )
             for key, task_ids in sorted(skill_counts.items())
         ],
-        cases=[CaseEvidenceView.model_validate(item, from_attributes=True) for item in cases],
+        cases=case_views,
     )
 
 
@@ -824,6 +1028,7 @@ async def create_task(
                 deadline_at=command.deadline_at,
                 data_constraints=command.data_constraints,
                 ip_terms=command.ip_terms,
+                allowed_artifacts=tuple(command.allowed_artifacts),
             ),
             nominated_mentor_id=command.nominated_mentor_id,
             compensation=CompensationTerms(
@@ -924,6 +1129,72 @@ async def marketplace_task(
     return _marketplace_view(await service.task_detail(authenticated.actor, task_id))
 
 
+@router.get("/me/tasks/{task_id}", response_model=ParticipantTaskDetailView)
+async def participant_task_detail(
+    request: Request,
+    task_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> ParticipantTaskDetailView:
+    detail = await service.participant_task_detail(authenticated.actor, task_id)
+    personas = request.app.state.auth_service.store
+    reward = request.app.state.reward_service
+    reviews = [
+        workspace.review
+        for workspace in await reward.participant_reward_evidence(authenticated.actor)
+    ]
+
+    aggregate = detail.task.task.aggregate
+    customer, mentor = await personas.get_persona_by_id(aggregate.customer_id), None
+    if aggregate.nominated_mentor_id is not None:
+        mentor = await personas.get_persona_by_id(aggregate.nominated_mentor_id)
+    support = None
+    if aggregate.support is not None and aggregate.support.assignee_id is not None:
+        support_assignee = await personas.get_persona_by_id(aggregate.support.assignee_id)
+        assignee_view = _partner_view(aggregate.support.assignee_id, support_assignee)
+        if assignee_view is not None:
+            support = SupportView(mode=aggregate.support.mode.value, assignee=assignee_view)
+
+    team = []
+    for member in detail.team:
+        persona = await personas.get_persona_by_id(member.person_id)
+        member_view = _partner_view(member.person_id, persona)
+        if member_view is not None:
+            team.append(
+                TeamMemberView(
+                    person_id=member_view.id,
+                    display_name=member_view.display_name,
+                    status=member.status,
+                )
+            )
+
+    personal_ids = {contribution.id for contribution in detail.contributions}
+    feedback = [
+        ReviewFeedbackView(
+            contribution_id=review.contribution_id,
+            contribution_version=review.contribution_version,
+            review_version=review.review_version,
+            grade=review.grade.value,
+            explanation=review.explanation,
+            status=review.status.value,
+        )
+        for review in reviews
+        if review.contribution_id in personal_ids
+    ]
+    customer_view = _partner_view(aggregate.customer_id, customer) or PartnerView(
+        id=aggregate.customer_id, display_name=""
+    )
+
+    return _participant_task_detail_view(
+        detail,
+        customer=customer_view,
+        mentor=_partner_view(aggregate.nominated_mentor_id, mentor),
+        support=support,
+        team=team,
+        feedback=feedback,
+    )
+
+
 @router.post("/me/tasks/{task_id}/terms-consent", response_model=MarketplaceTaskView)
 async def accept_terms(
     task_id: UUID,
@@ -951,9 +1222,10 @@ async def task_applications(
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
     service: Annotated[WorkService, Depends(_service)],
 ) -> list[ApplicationView]:
+    records = await service.task_applications(authenticated.actor, task_id)
+    participants = await service.application_participants(records)
     return [
-        _application_view(item)
-        for item in await service.task_applications(authenticated.actor, task_id)
+        _application_view(item, participants.get(item.person_id, (None, 0))) for item in records
     ]
 
 
@@ -1023,6 +1295,45 @@ async def submit_contribution(
             tuple(TeamArtifactRecord(item.key, str(item.uri)) for item in command.artifacts),
         )
     )
+
+
+@router.post(
+    "/customer/contributions/{contribution_id}/credential",
+    response_model=ProjectCredentialView,
+)
+async def sign_project_credential(
+    contribution_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    request: Request,
+) -> ProjectCredentialView:
+    service: ProjectCredentialService = request.app.state.project_credential_service
+    document = await service.sign_project_credential(authenticated.actor, contribution_id)
+    return _project_credential_view(document)
+
+
+@router.get("/me/project-credentials", response_model=list[ProjectCredentialView])
+async def my_project_credentials(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    request: Request,
+) -> list[ProjectCredentialView]:
+    service: ProjectCredentialService = request.app.state.project_credential_service
+    documents = await service.portfolio_credentials(authenticated.actor)
+    return [_project_credential_view(item) for item in documents]
+
+
+@router.get("/project-credentials/{verification_id}", response_model=ProjectCredentialView)
+async def verify_project_credential(
+    verification_id: str,
+    request: Request,
+) -> ProjectCredentialView:
+    service: ProjectCredentialService = request.app.state.project_credential_service
+    document = await service.store.credential_by_verification(verification_id)
+    if document is None:
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404)
+    consents = await request.app.state.auth_service.store.granted_consents(document.person_id)
+    if ConsentScope.PUBLIC_PROFILE not in consents:
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404)
+    return _project_credential_view(document)
 
 
 @router.post("/customer/contributions/{contribution_id}/decision", response_model=AcceptanceView)

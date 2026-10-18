@@ -9,11 +9,14 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from typing import Protocol
 from uuid import UUID, uuid4
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
 from impulse.api.errors import ApiError
 from impulse.domain.identity import (
+    HR_VISIBILITY_DEFAULTS,
+    HR_VISIBILITY_SCOPES,
     ROLE_NAVIGATION,
     ROLE_SCOPES,
     ActorContext,
@@ -44,6 +47,32 @@ class SessionRecord:
     revoked: bool = False
 
 
+@dataclass(frozen=True, slots=True)
+class ProfileSkill:
+    title: str
+    origin: str = "self_reported"
+    verified: bool = False
+
+
+@dataclass(frozen=True, slots=True)
+class ParticipantProfile:
+    person_id: UUID
+    display_name: str
+    city: str = ""
+    university: str = ""
+    study_year: str = ""
+    primary_track: str = ""
+    email: str = ""
+    telegram: str = ""
+    about: str = ""
+    avatar_url: str = ""
+    locale: str = "ru-RU"
+    theme: str = "dark"
+    timezone: str = "Europe/Moscow"
+    buddy_enabled: bool = True
+    skills: tuple[ProfileSkill, ...] = ()
+
+
 class IdentityStore(Protocol):
     async def list_personas(self) -> tuple[PersonaRecord, ...]: ...
 
@@ -65,6 +94,16 @@ class IdentityStore(Protocol):
         self, person_id: UUID, scope: ConsentScope, granted: bool
     ) -> frozenset[ConsentScope]: ...
 
+    async def hr_visibility(self, person_id: UUID) -> dict[str, bool]: ...
+
+    async def set_hr_visibility(self, person_id: UUID, scope: str, visible: bool) -> bool: ...
+
+    async def participant_profile(self, person_id: UUID) -> ParticipantProfile | None: ...
+
+    async def update_participant_profile(
+        self, profile: ParticipantProfile
+    ) -> ParticipantProfile: ...
+
 
 class MemoryIdentityStore:
     """Zero-config demo adapter; production uses the SQL store."""
@@ -73,6 +112,8 @@ class MemoryIdentityStore:
         self._personas = {persona.key: persona for persona in personas}
         self._sessions: dict[str, SessionRecord] = {}
         self._consents: dict[UUID, frozenset[ConsentScope]] = {}
+        self._profiles: dict[UUID, ParticipantProfile] = {}
+        self._visibility: dict[tuple[UUID, str], bool] = {}
 
     async def list_personas(self) -> tuple[PersonaRecord, ...]:
         return tuple(self._personas.values())
@@ -104,6 +145,16 @@ class MemoryIdentityStore:
     async def granted_consents(self, person_id: UUID) -> frozenset[ConsentScope]:
         return self._consents.get(person_id, frozenset())
 
+    async def hr_visibility(self, person_id: UUID) -> dict[str, bool]:
+        return {
+            scope: self._visibility.get((person_id, scope), HR_VISIBILITY_DEFAULTS[scope])
+            for scope in HR_VISIBILITY_SCOPES
+        }
+
+    async def set_hr_visibility(self, person_id: UUID, scope: str, visible: bool) -> bool:
+        self._visibility[(person_id, scope)] = visible
+        return visible
+
     async def set_consent(
         self, person_id: UUID, scope: ConsentScope, granted: bool
     ) -> frozenset[ConsentScope]:
@@ -115,6 +166,39 @@ class MemoryIdentityStore:
         result = frozenset(current)
         self._consents[person_id] = result
         return result
+
+    async def participant_profile(self, person_id: UUID) -> ParticipantProfile | None:
+        stored = self._profiles.get(person_id)
+        if stored is not None:
+            return stored
+        persona = await self.get_persona_by_id(person_id)
+        if persona is None:
+            return None
+        skills = (
+            (
+                ProfileSkill("Python", "imported", False),
+                ProfileSkill("SQL", "verified_course", True),
+                ProfileSkill("OpenSpec / SDD", "verified_project", True),
+            )
+            if Role.PARTICIPANT in persona.roles
+            else ()
+        )
+        return ParticipantProfile(person_id, persona.display_name, skills=skills)
+
+    async def update_participant_profile(self, profile: ParticipantProfile) -> ParticipantProfile:
+        persona = await self.get_persona_by_id(profile.person_id)
+        if persona is None:
+            raise ApiError("AUTH_REQUIRED", "Войдите в систему.", 401)
+        current = await self.participant_profile(profile.person_id)
+        preserved = tuple(
+            item
+            for item in (current.skills if current is not None else ())
+            if item.origin != "self_reported"
+        )
+        stored = replace(profile, skills=(*preserved, *profile.skills))
+        self._profiles[profile.person_id] = stored
+        self._personas[persona.key] = replace(persona, display_name=profile.display_name)
+        return stored
 
 
 @dataclass(frozen=True, slots=True)
@@ -239,10 +323,78 @@ class DemoAuthService:
             )
         return await self.store.set_consent(authenticated.actor.person_id, scope, granted)
 
+    @staticmethod
+    def _participant_only(authenticated: AuthenticatedSession) -> None:
+        if authenticated.actor.active_role is not Role.PARTICIPANT:
+            raise ApiError(
+                code="FORBIDDEN",
+                message="Действие недоступно для активной роли.",
+                status_code=403,
+            )
+
+    async def hr_visibility(self, authenticated: AuthenticatedSession) -> dict[str, bool]:
+        self._participant_only(authenticated)
+        return await self.store.hr_visibility(authenticated.actor.person_id)
+
+    async def set_hr_visibility(
+        self, authenticated: AuthenticatedSession, scope: str, visible: bool
+    ) -> dict[str, bool]:
+        self._participant_only(authenticated)
+        if scope not in HR_VISIBILITY_SCOPES:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        consents = await self.store.granted_consents(authenticated.actor.person_id)
+        if visible and ConsentScope.HR_PROFILE not in consents:
+            raise ApiError(
+                code="HR_VISIBILITY_LOCKED",
+                message="Сначала откройте профиль для HR на вкладке «Видимость для HR».",
+                status_code=409,
+            )
+        await self.store.set_hr_visibility(authenticated.actor.person_id, scope, visible)
+        return await self.store.hr_visibility(authenticated.actor.person_id)
+
+    async def participant_profile(self, authenticated: AuthenticatedSession) -> ParticipantProfile:
+        self._participant_only(authenticated)
+        profile = await self.store.participant_profile(authenticated.actor.person_id)
+        if profile is None:
+            raise self.unauthenticated()
+        return profile
+
+    async def update_participant_profile(
+        self, authenticated: AuthenticatedSession, profile: ParticipantProfile
+    ) -> ParticipantProfile:
+        self._participant_only(authenticated)
+        if profile.person_id != authenticated.actor.person_id:
+            raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
+        if profile.locale not in {"ru-RU", "en-US"}:
+            raise ApiError("PROFILE_LOCALE_UNSUPPORTED", "Язык не поддерживается.", 422)
+        if profile.theme not in {"dark", "system"}:
+            raise ApiError("PROFILE_THEME_UNSUPPORTED", "Тема не поддерживается.", 422)
+        try:
+            ZoneInfo(profile.timezone)
+        except ZoneInfoNotFoundError:
+            raise ApiError(
+                "PROFILE_TIMEZONE_UNSUPPORTED", "Часовой пояс не поддерживается.", 422
+            ) from None
+        normalized = replace(
+            profile,
+            display_name=profile.display_name.strip(),
+            skills=tuple(
+                ProfileSkill(item.title.strip(), "self_reported", False)
+                for item in profile.skills
+                if item.title.strip()
+            ),
+        )
+        if not normalized.display_name:
+            raise ApiError("PROFILE_NAME_REQUIRED", "Укажите ФИО.", 422)
+        return await self.store.update_participant_profile(normalized)
+
     async def _actor(
         self, persona: PersonaRecord, role: Role, correlation_id: str = ""
     ) -> ActorContext:
         consents = await self.store.granted_consents(persona.person_id)
+        profile = await self.store.participant_profile(persona.person_id)
         return ActorContext(
             person_id=persona.person_id,
             display_name=persona.display_name,
@@ -251,6 +403,8 @@ class DemoAuthService:
             scopes=ROLE_SCOPES[role],
             program_key=persona.program_key,
             consent_scopes=consents,
+            locale=profile.locale if profile is not None else "ru-RU",
+            timezone=profile.timezone if profile is not None else "Europe/Moscow",
             correlation_id=correlation_id,
         )
 

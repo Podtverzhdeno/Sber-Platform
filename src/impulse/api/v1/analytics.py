@@ -1,11 +1,12 @@
 """Role-scoped analytics API."""
-# ruff: noqa: RUF001
 
+from collections import Counter
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Annotated
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel
 
 from impulse.api.errors import ApiError
@@ -13,11 +14,14 @@ from impulse.api.v1.identity import current_session
 from impulse.application.analytics import (
     Metric,
     count_metric,
+    hours_metric,
     participant_analytics,
     ratio_metric,
     suppress_small_cohort,
+    unknown_reason,
 )
 from impulse.application.identity import AuthenticatedSession
+from impulse.application.talent import PipelineStage
 from impulse.domain.identity import Role
 
 router = APIRouter()
@@ -96,6 +100,7 @@ def _metric_view(item: Metric) -> MetricView:
 async def role_analytics(
     request: Request,
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    baseline_hours: Annotated[float | None, Query(gt=0, le=10000)] = None,
 ) -> RoleAnalyticsView:
     actor = authenticated.actor
     end = datetime.now(UTC)
@@ -137,9 +142,7 @@ async def role_analytics(
         assignments = sum(len(item.assignments) for item in details)
         contributions = sum(len(item.contributions) for item in details)
         accepted = sum(
-            decision.decision.value == "accepted"
-            for item in details
-            for decision in item.decisions
+            decision.decision.value == "accepted" for item in details for decision in item.decisions
         )
         revisions = sum(
             decision.decision.value == "revision_requested"
@@ -217,6 +220,62 @@ async def role_analytics(
                 cohort=cohort,
                 definition="Принятые решения / все решения о приёмке и доработке.",
             ),
+            count_metric(
+                key="customer_revisions",
+                label="Запрошенные доработки",
+                count=revisions,
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition="Число решений об отправке личного вклада на доработку.",
+            ),
+            ratio_metric(
+                key="customer_repeat_participants",
+                label="Повторное привлечение участников",
+                numerator=sum(
+                    frequency > 1
+                    for frequency in Counter(
+                        assignment.person_id for item in details for assignment in item.assignments
+                    ).values()
+                ),
+                denominator=active_people,
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition=(
+                    "Участники с назначением более чем на одну задачу заказчика / "
+                    "все назначенные участники."
+                ),
+            ),
+            hours_metric(
+                key="customer_time_to_result_hours",
+                label="Среднее время до результата",
+                seconds_sum=sum(
+                    (decision.decided_at - submission.submitted_at).total_seconds()
+                    for item in details
+                    for decision in item.decisions
+                    if decision.decision.value == "accepted" and decision.decided_at
+                    for submission in item.contributions
+                    if submission.id == decision.contribution_id
+                ),
+                observations=sum(
+                    1
+                    for item in details
+                    for decision in item.decisions
+                    if decision.decision.value == "accepted" and decision.decided_at
+                    if any(
+                        submission.id == decision.contribution_id
+                        for submission in item.contributions
+                    )
+                ),
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition=(
+                    "Среднее время от сдачи версии личного вклада до решения о приёмке; "
+                    "None — приёмок ещё не было."
+                ),
+            ),
         ]
     elif actor.active_role is Role.MANAGER:
         overview = await request.app.state.work_service.manager_overview(actor)
@@ -248,6 +307,68 @@ async def role_analytics(
         events = await request.app.state.talent_service.events(actor)
         invitations = sum(item.stage.value == "invitation" for item in events)
         hires = sum(item.stage.value == "hire" for item in events)
+        reservations = await request.app.state.work_service.pilot_interest(actor)
+        first_saves: dict[UUID, datetime] = {}
+        for reservation in reservations:
+            known = first_saves.get(reservation.person_id)
+            if known is None or reservation.created_at < known:
+                first_saves[reservation.person_id] = reservation.created_at
+        observations, seconds_sum = 0, 0.0
+        for event in events:
+            if event.stage is not PipelineStage.INVITATION:
+                continue
+            start = first_saves.get(event.candidate_id)
+            if start is None or event.occurred_at < start:
+                continue
+            observations += 1
+            seconds_sum += (event.occurred_at - start).total_seconds()
+        selection = unknown_reason(
+            hours_metric(
+                key="pilot_selection_hours",
+                label="Время первичного отбора",
+                seconds_sum=seconds_sum,
+                observations=observations,
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition=(
+                    "Среднее время от сохранения интереса руководителя "
+                    "до человеческого события приглашения."
+                ),
+            ),
+            "no_selection_pairs" if observations == 0 else None,
+        )
+        if baseline_hours is None or selection.value is None:
+            savings = unknown_reason(
+                hours_metric(
+                    key="pilot_selection_savings_hours",
+                    label="Экономия времени первичного отбора",
+                    seconds_sum=0.0,
+                    observations=0,
+                    period_start=start,
+                    period_end=end,
+                    cohort=cohort,
+                    definition=(
+                        "Базовая процедура минус платформенный отбор; "
+                        "без сопоставимой базы значение неизвестно."
+                    ),
+                ),
+                "baseline_missing" if baseline_hours is None else "no_selection_pairs",
+            )
+        else:
+            savings = hours_metric(
+                key="pilot_selection_savings_hours",
+                label="Экономия времени первичного отбора",
+                seconds_sum=float(baseline_hours) * observations * 3600 - seconds_sum,
+                observations=observations,
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition=(
+                    "Базовая процедура минус платформенный отбор; "
+                    "без сопоставимой базы значение неизвестно."
+                ),
+            )
         metrics = [
             count_metric(
                 key="hr_invitations",
@@ -270,6 +391,29 @@ async def role_analytics(
                     "Human events найма / human events приглашения; рейтинг не создаёт стадии."
                 ),
             ),
+            count_metric(
+                key="pilot_leader_interest",
+                label="Интерес руководителей",
+                count=len(reservations),
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition=(
+                    "Сохранения в кадровом резерве; интерес не равен приглашению и офферу."
+                ),
+            ),
+            ratio_metric(
+                key="pilot_invitation_from_interest",
+                label="Интерес — приглашение",
+                numerator=invitations,
+                denominator=len(reservations),
+                period_start=start,
+                period_end=end,
+                cohort=cohort,
+                definition=("Human events приглашения / зафиксированный интерес руководителей."),
+            ),
+            selection,
+            savings,
         ]
     elif actor.active_role is Role.OPERATOR:
         cases = await request.app.state.operations_service.cases(actor)

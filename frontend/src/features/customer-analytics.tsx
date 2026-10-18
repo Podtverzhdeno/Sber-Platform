@@ -25,7 +25,7 @@ export function CustomerAnalytics() {
     const url = URL.createObjectURL(new Blob([report], { type: "text/plain;charset=utf-8" }));
     const link = document.createElement("a"); link.href = url; link.download = "impulse-talent-report.txt"; link.click(); URL.revokeObjectURL(url);
   };
-  return <div className="customer-talent-analytics">
+  return <div className="customer-talent-analytics" data-reference="R-CUS-06">
     <header className="cta-page-header"><div><p className="cta-eyebrow">TALENT INTELLIGENCE</p><h1 id="workspace-title">Аналитика</h1><p>Отслеживаем путь кандидатов от входа в платформу до реальных задач, Talent Pool и интервью.</p></div><div className="cta-page-actions"><button type="button" className="cta-period" onClick={() => { setPeriod(value => (value + 1) % periods.length); }}>{periodLabel}⌄</button><button type="button" className="cta-export" onClick={exportReport}>Экспорт отчёта</button></div></header>
     <section className="cta-kpi-grid" aria-label="Ключевые показатели"><KpiCard label="АКТИВНЫЕ УЧАСТНИКИ" value={data.kpis[0][0]} delta={data.kpis[0][1]} caption="за выбранный период" icon="◎"/><KpiCard label="ПОДТВЕРДИЛИ КОМПЕТЕНЦИИ" value={data.kpis[1][0]} delta={data.kpis[1][1]} caption="Qualified Talent" icon="✓"/><KpiCard label="ПРОЕКТОВ ПРИНЯТО" value={data.kpis[2][0]} delta={data.kpis[2][1]} caption="реальные задачи" icon="▣"/><KpiCard label="TALENT POOL" value={data.kpis[3][0]} delta={data.kpis[3][1]} caption="интерес бизнеса" icon="✦"/></section>
     <section className="cta-main-grid">

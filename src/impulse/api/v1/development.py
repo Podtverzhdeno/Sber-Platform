@@ -8,10 +8,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 from pydantic import AwareDatetime, BaseModel, Field
 
+from impulse.api.errors import ApiError
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.development import DevelopmentService
 from impulse.application.identity import AuthenticatedSession
 from impulse.domain.development import CompletionStatus, TrackStatus, local_learning_days
+from impulse.domain.identity import ConsentScope
 
 router = APIRouter()
 
@@ -248,3 +250,96 @@ async def streak(
         iter(local_learning_days((datetime.now(UTC),), authenticated.actor.timezone))
     )
     return _streak_view(await service.streak(authenticated.actor, local_today=local_today))
+
+
+class CertificateCompetencyView(BaseModel):
+    competency: str
+    level: str
+    evidence: str
+
+
+class CourseCertificateView(BaseModel):
+    certificate_id: str
+    verification_id: str
+    holder_name: str
+    course_key: str
+    course_title: str
+    specialization: str
+    program_version: str
+    period: str
+    workload_hours: int
+    result: str
+    competencies: list[CertificateCompetencyView]
+    issued_at: AwareDatetime
+    preview_marking: str
+
+
+def _certificate_view(item: object) -> CourseCertificateView:
+    from impulse.application.development import CourseCertificate
+
+    if not isinstance(item, CourseCertificate):
+        raise TypeError("Expected CourseCertificate")
+    return CourseCertificateView(
+        certificate_id=str(item.certificate_id),
+        verification_id=item.verification_id,
+        holder_name=item.holder_name,
+        course_key=item.course_key,
+        course_title=item.course_title,
+        specialization=item.specialization,
+        program_version=item.program_version,
+        period=item.period,
+        workload_hours=item.workload_hours,
+        result=item.result,
+        competencies=[
+            CertificateCompetencyView(
+                competency=entry.competency,
+                level=entry.level,
+                evidence=entry.evidence,
+            )
+            for entry in item.competencies
+        ],
+        issued_at=item.issued_at,
+        preview_marking=item.preview_marking(),
+    )
+
+
+@router.get("/me/bootcamp/certificates", response_model=list[CourseCertificateView])
+async def my_certificates(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+) -> list[CourseCertificateView]:
+    certificates = await service.course_certificates(authenticated.actor)
+    return [_certificate_view(item) for item in certificates]
+
+
+@router.post("/me/bootcamp/certificates/{course_key}", response_model=CourseCertificateView)
+async def issue_certificate(
+    course_key: str,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+) -> CourseCertificateView:
+    certificate = await service.issue_course_certificate(
+        authenticated.actor,
+        course_key,
+        holder_name=authenticated.actor.display_name,
+    )
+    return _certificate_view(certificate)
+
+
+@router.get("/bootcamp/certificates/{verification_id}", response_model=CourseCertificateView)
+async def verify_certificate(
+    verification_id: str,
+    request: Request,
+    service: Annotated[DevelopmentService, Depends(_service)],
+) -> CourseCertificateView:
+    certificate = await service.verify_course_certificate(verification_id)
+    if certificate is None:
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404)
+    consents = await request.app.state.auth_service.store.granted_consents(certificate.person_id)
+    if ConsentScope.PUBLIC_PROFILE not in consents:
+        raise ApiError(
+            code="RESOURCE_NOT_FOUND",
+            message="Resource not found.",
+            status_code=404,
+        )
+    return _certificate_view(certificate)

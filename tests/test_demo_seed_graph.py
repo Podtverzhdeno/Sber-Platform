@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from impulse.bootstrap.demo_seed import build_seed_batches
+from impulse.bootstrap.demo_seed import build_seed_batches, demo_id
 from impulse.domain.work import TaskStatus
 
 
@@ -20,7 +20,37 @@ def test_demo_seed_contains_connected_role_workflows() -> None:
     assert len(rows["contributions"]) >= 8
     assert len(rows["review_5plus_versions"]) >= 8
     assert len(rows["operations_cases"]) >= 5
-    assert len(rows["talent_pipeline_events"]) >= 4
+    assert len(rows["talent_pipeline_events"]) >= 7
+
+
+def test_demo_seed_pilot_has_directions_units_and_optional_startup() -> None:
+    rows = _rows()
+
+    season = next(row for row in rows["seasons"] if row["season_key"] == "demo-autumn-2026")
+    pilot = season["payload"]["pilot"]
+    assert pilot["weeks"] == 12
+    assert len(pilot["directions"]) == 2
+    assert len(pilot["business_units"]) == 3
+    assert pilot["startup_track_optional"] is True
+    assert pilot["symbolic_bonus"]["guaranteed"] is False
+    track_slugs = {row["slug"] for row in rows["tracks"]}
+    assert "startup" not in track_slugs
+
+
+def test_demo_seed_talent_pipeline_keeps_human_stage_order() -> None:
+    rows = _rows()
+
+    stages: dict[str, set[str]] = {}
+    for event in rows["talent_pipeline_events"]:
+        assert event["data_origin"] == "human"
+        stages.setdefault(str(event["candidate_id"]), set()).add(event["stage"])
+    by_person = {
+        key: stages.get(str(demo_id(key)), set())
+        for key in ("participant-alex", "participant-maria", "participant-igor")
+    }
+    assert by_person["participant-alex"] == {"invitation", "interview", "offer"}
+    assert by_person["participant-maria"] == {"invitation", "interview"}
+    assert by_person["participant-igor"] == {"invitation"}
 
 
 def test_every_seed_assignment_connects_task_application_and_participant() -> None:

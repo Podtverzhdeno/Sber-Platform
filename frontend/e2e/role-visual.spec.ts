@@ -7,10 +7,11 @@ type VisualPersona = {
   navigation: string[];
   reference: string;
   heading: string;
+  statusText?: string;
 };
 
 const personas: VisualPersona[] = [
-  { key: "mentor-elena", displayName: "Елена Наставник", role: "mentor", navigation: ["Очередь ревью", "Назначения", "Аналитика"], reference: "R-MEN-02", heading: "Проверка вкладов" },
+  { key: "mentor-elena", displayName: "Елена Наставник", role: "mentor", navigation: ["Очередь ревью", "Проверка вкладов", "Мои проекты"], reference: "R-MEN-02", heading: "Проверка вкладов", statusText: "Данные актуальны" },
   { key: "manager-olga", displayName: "Ольга Руководитель", role: "manager", navigation: ["Инициативы", "Результаты", "Аналитика"], reference: "R-MGR-02", heading: "Результаты команд без лишних персональных данных" },
   { key: "operator-pavel", displayName: "Павел Оператор", role: "operator", navigation: ["Операционная очередь", "Проверки", "Споры", "Аналитика"], reference: "R-OPS-02", heading: "Дела, источники и зависимости" },
 ];
@@ -29,7 +30,11 @@ for (const persona of personas) {
     await page.goto("/");
     await page.locator(`[data-persona="${persona.key}"]`).click();
     await expect(page.getByRole("heading", { name: persona.heading })).toBeVisible();
-    await expect(page.locator(".demo-data-chip")).toBeVisible();
+    if (persona.statusText) {
+      await expect(page.getByText(persona.statusText)).toBeVisible();
+    } else {
+      await expect(page.locator(".demo-data-chip")).toBeVisible();
+    }
     await expect(page).toHaveScreenshot(`${persona.reference.toLowerCase()}-desktop.png`, {
       animations: "disabled",
       fullPage: true,

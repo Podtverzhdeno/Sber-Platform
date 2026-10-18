@@ -139,7 +139,7 @@ function MentorMetrics() {
 export function MentorDashboard({ mentorName }: { mentorName: string }) {
   const navigate = useNavigate();
   return (
-    <div className="feature-stack mentor-dashboard">
+    <div className="feature-stack mentor-dashboard" data-reference="R-MEN-01">
       <header className="dashboard-heading">
         <div>
           <p className="eyebrow">Рабочий command center</p>
@@ -296,7 +296,7 @@ export function MentorProjects() {
     project.name.toLowerCase().includes(filter.toLowerCase()),
   );
   return (
-    <div className="feature-stack mentor-portfolio">
+    <div className="feature-stack mentor-portfolio" data-reference="R-MEN-03">
       <header className="dashboard-heading">
         <div>
           <p className="eyebrow">Портфель сопровождения</p>
@@ -428,7 +428,7 @@ export function MentorParticipants() {
     person.name.toLowerCase().includes(query.toLowerCase()),
   );
   return (
-    <div className="feature-stack mentor-people">
+    <div className="feature-stack mentor-people" data-reference="R-MEN-04">
       <header className="dashboard-heading">
         <div>
           <p className="eyebrow">People contour</p>
@@ -573,7 +573,7 @@ export function MentorAssistant() {
   );
   const [sourceNotice, setSourceNotice] = useState("");
   return (
-    <div className="feature-stack mentor-assistant">
+    <div className="feature-stack mentor-assistant" data-reference="R-MEN-07">
       <header className="dashboard-heading">
         <div>
           <p className="eyebrow">AI-помощник · human-in-the-loop</p>
@@ -746,7 +746,7 @@ export function MentorAnalytics() {
     ["Доработка", 6],
   ] as const;
   return (
-    <div className="feature-stack mentor-analytics">
+    <div className="feature-stack mentor-analytics" data-reference="R-MEN-06">
       <header className="dashboard-heading">
         <div>
           <p className="eyebrow">
@@ -1073,7 +1073,7 @@ export function MentorWeekPlan() {
     [],
   );
   return (
-    <div className="feature-stack mentor-plan">
+    <div className="feature-stack mentor-plan" data-reference="R-MEN-08">
       <header className="dashboard-heading">
         <div>
           <p className="eyebrow">Календарь и приоритеты</p>

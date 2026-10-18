@@ -186,6 +186,228 @@ def test_talent_visibility_evidence_and_invitations_are_independent() -> None:
         assert "talent_invitations" in revoke.json()["granted_scopes"]
 
 
+def test_profile_preferences_and_skill_provenance_survive_new_session() -> None:
+    client, _clock = _test_client_with_clock()
+    with client:
+        login = client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}
+        ).json()
+        csrf = login["csrf_token"]
+        initial = client.get("/api/v1/me/profile")
+        assert initial.status_code == 200
+        assert {item["origin"] for item in initial.json()["skills"]} >= {
+            "imported",
+            "verified_course",
+            "verified_project",
+        }
+
+        updated = client.put(
+            "/api/v1/me/profile",
+            headers={"X-CSRF-Token": csrf},
+            json={
+                "display_name": "Алекс Речной-Петров",
+                "city": "Амман",
+                "university": "МГТУ",
+                "study_year": "4 курс",
+                "primary_track": "Python-разработчик",
+                "email": "alex@example.test",
+                "telegram": "@alex_data",
+                "about": "Развиваю backend и аналитику.",
+                "locale": "en-US",
+                "theme": "system",
+                "timezone": "Asia/Amman",
+                "skills": ["FastAPI", "Визуализация данных"],
+            },
+        )
+        assert updated.status_code == 200
+        payload = updated.json()
+        self_reported = [item for item in payload["skills"] if item["origin"] == "self_reported"]
+        assert {item["title"] for item in self_reported} == {
+            "FastAPI",
+            "Визуализация данных",
+        }
+        assert all(item["verified"] is False for item in self_reported)
+        assert any(item["verified"] is True for item in payload["skills"])
+
+        client.post("/api/v1/auth/logout", headers={"X-CSRF-Token": csrf})
+        relogin = client.post("/api/v1/auth/demo-login", json={"persona_key": "participant-alex"})
+        assert relogin.status_code == 200
+        assert relogin.json()["display_name"] == "Алекс Речной-Петров"
+        me = client.get("/api/v1/me").json()
+        assert me["display_name"] == "Алекс Речной-Петров"
+        assert me["locale"] == "en-US"
+        assert me["timezone"] == "Asia/Amman"
+        refreshed = client.get("/api/v1/me/profile").json()
+        assert refreshed["locale"] == "en-US"
+        assert refreshed["theme"] == "system"
+        assert refreshed["timezone"] == "Asia/Amman"
+
+
+def test_profile_update_rejects_other_roles_and_invalid_timezone() -> None:
+    client, _clock = _test_client_with_clock()
+    with client:
+        customer = client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "customer-roman"}
+        ).json()
+        assert client.get("/api/v1/me/profile").status_code == 403
+        forbidden = client.put(
+            "/api/v1/me/profile",
+            headers={"X-CSRF-Token": customer["csrf_token"]},
+            json={"display_name": "Роман", "timezone": "Europe/Moscow"},
+        )
+        assert forbidden.status_code == 403
+
+        participant = client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-maria"}
+        ).json()
+        invalid = client.put(
+            "/api/v1/me/profile",
+            headers={"X-CSRF-Token": participant["csrf_token"]},
+            json={"display_name": "Мария", "timezone": "Mars/Olympus"},
+        )
+        assert invalid.status_code == 422
+        assert invalid.json()["code"] == "PROFILE_TIMEZONE_UNSUPPORTED"
+
+
+def test_buddy_gate_default_on_and_persists_opt_out() -> None:
+    client, _clock = _test_client_with_clock()
+    with client:
+        login = client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-maria"}
+        ).json()
+        default = client.get("/api/v1/me/profile")
+        assert default.status_code == 200
+        assert default.json()["buddy_enabled"] is True
+        client.put(
+            "/api/v1/me/profile",
+            headers={"X-CSRF-Token": login["csrf_token"]},
+            json={"display_name": "Мария Северова", "buddy_enabled": False},
+        )
+        refreshed = client.get("/api/v1/me/profile").json()
+        assert refreshed["buddy_enabled"] is False
+        client.post("/api/v1/auth/logout", headers={"X-CSRF-Token": login["csrf_token"]})
+        client.post("/api/v1/auth/demo-login", json={"persona_key": "participant-maria"})
+        after_relogin = client.get("/api/v1/me/profile").json()
+        assert after_relogin["buddy_enabled"] is False
+
+
+def test_hr_visibility_matrix_defaults_and_per_category_persistence() -> None:
+    client, _clock = _test_client_with_clock()
+    with client:
+        login = client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}
+        ).json()
+        csrf = login["csrf_token"]
+        granted = client.put(
+            "/api/v1/me/consents/hr_profile",
+            headers={"X-CSRF-Token": csrf},
+            json={"granted": True},
+        )
+        assert granted.status_code == 200
+        defaults = client.get("/api/v1/me/visibility").json()["visibility"]
+        assert defaults == {
+            "hr_basic": True,
+            "hr_skills": True,
+            "hr_projects": True,
+            "hr_achievements": True,
+            "hr_learning": True,
+            "hr_contacts": False,
+        }
+        for scope, visible in (
+            ("hr_skills", False),
+            ("hr_projects", False),
+            ("hr_achievements", True),
+            ("hr_learning", False),
+            ("hr_contacts", True),
+            ("hr_basic", True),
+        ):
+            response = client.put(
+                f"/api/v1/me/visibility/{scope}",
+                headers={"X-CSRF-Token": csrf},
+                json={"visible": visible},
+            )
+            assert response.status_code == 200
+        matrix = client.get("/api/v1/me/visibility").json()["visibility"]
+        assert matrix["hr_skills"] is False
+        assert matrix["hr_projects"] is False
+        assert matrix["hr_learning"] is False
+        assert matrix["hr_contacts"] is True
+        client.post("/api/v1/auth/logout", headers={"X-CSRF-Token": csrf})
+        relogin = client.post("/api/v1/auth/demo-login", json={"persona_key": "participant-alex"})
+        client.get("/api/v1/me/visibility").json()
+        assert relogin.status_code == 200
+        persisted = client.get("/api/v1/me/visibility").json()["visibility"]
+        assert persisted["hr_contacts"] is True
+        assert persisted["hr_learning"] is False
+        for scope in ("hr_skills", "hr_projects", "hr_achievements", "hr_learning", "hr_contacts"):
+            forbidden_code = client.put(
+                f"/api/v1/me/visibility/{scope}",
+                headers={"X-CSRF-Token": relogin.json()["csrf_token"]},
+                json={"visible": False},
+            ).status_code
+            assert forbidden_code == 200
+
+
+def test_hr_visibility_requires_master_consent_and_participant_role() -> None:
+    client, _clock = _test_client_with_clock()
+    with client:
+        customer = client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "customer-roman"}
+        ).json()
+        assert (
+            client.put(
+                "/api/v1/me/visibility/hr_skills",
+                headers={"X-CSRF-Token": customer["csrf_token"]},
+                json={"visible": True},
+            ).status_code
+            == 403
+        )
+
+        alex = client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}
+        ).json()
+        locked = client.put(
+            "/api/v1/me/visibility/hr_contacts",
+            headers={"X-CSRF-Token": alex["csrf_token"]},
+            json={"visible": True},
+        )
+        assert locked.status_code == 409
+        assert locked.json()["code"] == "HR_VISIBILITY_LOCKED"
+
+        revoke = client.put(
+            "/api/v1/me/consents/hr_profile",
+            headers={"X-CSRF-Token": alex["csrf_token"]},
+            json={"granted": False},
+        )
+        assert revoke.status_code == 200
+        still_locked = client.put(
+            "/api/v1/me/visibility/hr_projects",
+            headers={"X-CSRF-Token": alex["csrf_token"]},
+            json={"visible": True},
+        )
+        assert still_locked.status_code == 409
+
+        unknown = client.put(
+            "/api/v1/me/visibility/hr_unknown",
+            headers={"X-CSRF-Token": alex["csrf_token"]},
+            json={"visible": True},
+        )
+        assert unknown.status_code == 404
+
+        grant = client.put(
+            "/api/v1/me/consents/hr_profile",
+            headers={"X-CSRF-Token": alex["csrf_token"]},
+            json={"granted": True},
+        )
+        assert grant.status_code == 200
+        opened = client.put(
+            "/api/v1/me/visibility/hr_projects",
+            headers={"X-CSRF-Token": alex["csrf_token"]},
+            json={"visible": True},
+        )
+        assert opened.status_code == 200
+
+
 def actor(role: Role) -> ActorContext:
     person_id = UUID(int=list(Role).index(role) + 1)
     return ActorContext(

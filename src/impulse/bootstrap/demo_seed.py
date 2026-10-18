@@ -1,5 +1,4 @@
 """Deterministic, versioned and idempotent demo dataset."""
-# ruff: noqa: RUF001
 
 from __future__ import annotations
 
@@ -12,9 +11,15 @@ from sqlalchemy import Table, delete, func, select, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from impulse.application.notifications import DEMO_NOTIFICATION_SCRIPTS
 from impulse.application.reward import DEFAULT_REVIEW_RUBRIC
 from impulse.bootstrap.settings import Settings
 from impulse.infrastructure.database import Database
+from impulse.infrastructure.models.competencies import competency_evidence
+from impulse.infrastructure.models.credentials import (
+    course_certificates,
+    project_credentials,
+)
 from impulse.infrastructure.models.development import (
     course_track_links,
     courses,
@@ -36,9 +41,18 @@ from impulse.infrastructure.models.identity import (
     actor_roles,
     consents,
     persons,
+    profile_skills,
     sessions,
     visibility_settings,
 )
+from impulse.infrastructure.models.insight import audit_entries, domain_events
+from impulse.infrastructure.models.messaging import (
+    messaging_channels,
+    messaging_memberships,
+    messaging_messages,
+    messaging_read_cursors,
+)
+from impulse.infrastructure.models.notifications import notifications
 from impulse.infrastructure.models.operations import case_decisions, operations_cases
 from impulse.infrastructure.models.recognition import (
     credentials,
@@ -593,7 +607,19 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
         season_key="demo-autumn-2026",
         title="Демо-сезон: осень 2026",
         status="open",
-        payload={"policy_version": 1},
+        payload={
+            "policy_version": 1,
+            "pilot": {
+                "weeks": 12,
+                "directions": ("NLP", "CV"),
+                "business_units": ("Ритейл", "Транспорт", "Образование"),
+                "startup_track_optional": True,
+                "symbolic_bonus": {
+                    "guaranteed": False,
+                    "note": "Символическая премия не является обещанием выплаты.",
+                },
+            },
+        },
     )
     policy_row = demo_row(
         "rating-policy:autumn-2026:1",
@@ -728,6 +754,171 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
         )
         for index, person_key in enumerate(participant_keys[:4], start=1)
     ]
+    talent_rows.extend(
+        demo_row(
+            f"talent:{person_key}:interview",
+            candidate_id=demo_id(person_key),
+            hr_id=demo_id("hr-nina"),
+            stage="interview",
+            note="Интервью по закрытой задаче проведено отдельным human событием.",
+            occurred_at=DEMO_NOW + timedelta(days=10 + index),
+            status="published",
+            data_origin="human",
+        )
+        for index, person_key in enumerate(("participant-alex", "participant-maria"), start=1)
+    )
+    talent_rows.append(
+        demo_row(
+            "talent:participant-alex:offer",
+            candidate_id=demo_id("participant-alex"),
+            hr_id=demo_id("hr-nina"),
+            stage="offer",
+            note="Оффер оформлен отдельным полномочным human событием.",
+            occurred_at=DEMO_NOW + timedelta(days=20),
+            status="published",
+            data_origin="human",
+        )
+    )
+    task_channel_id = demo_id("messaging-channel:task-1")
+    personal_channel_id = demo_id("messaging-channel:personal:alex-elena")
+    channel_rows = [
+        demo_row(
+            "messaging-channel:task-1",
+            kind="task_team",
+            context_key=f"task:{demo_id('task:1')}",
+            title=task_specs[0][0],
+            task_id=demo_id("task:1"),
+            status="active",
+        ),
+        demo_row(
+            "messaging-channel:personal:alex-elena",
+            kind="personal",
+            context_key=f"pair:{demo_id('participant-alex')}:{demo_id('mentor-elena')}",
+            title=None,
+            task_id=None,
+            status="active",
+        ),
+    ]
+    membership_rows = [
+        demo_row(
+            "messaging-membership:task-1:customer-roman",
+            channel_id=task_channel_id,
+            person_id=demo_id("customer-roman"),
+            role="customer",
+            muted=False,
+            sender_enabled=True,
+            status="active",
+        ),
+        demo_row(
+            "messaging-membership:task-1:mentor-elena",
+            channel_id=task_channel_id,
+            person_id=demo_id("mentor-elena"),
+            role="mentor",
+            muted=False,
+            sender_enabled=True,
+            status="active",
+        ),
+        demo_row(
+            "messaging-membership:task-1:participant-alex",
+            channel_id=task_channel_id,
+            person_id=demo_id("participant-alex"),
+            role="member",
+            muted=False,
+            sender_enabled=True,
+            status="active",
+        ),
+        demo_row(
+            "messaging-membership:personal:alex",
+            channel_id=personal_channel_id,
+            person_id=demo_id("participant-alex"),
+            role="member",
+            muted=False,
+            sender_enabled=True,
+            status="active",
+        ),
+        demo_row(
+            "messaging-membership:personal:elena",
+            channel_id=personal_channel_id,
+            person_id=demo_id("mentor-elena"),
+            role="member",
+            muted=False,
+            sender_enabled=True,
+            status="active",
+        ),
+    ]
+    message_rows = [
+        demo_row(
+            "messaging-message:task-1:1",
+            channel_id=task_channel_id,
+            author_id=None,
+            kind="system",
+            body=("Чат команды создан. История и артефакты задачи — общий контекст команды."),
+            sequence=1,
+            status="active",
+            payload={"artifact_refs": []},
+        ),
+        demo_row(
+            "messaging-message:task-1:2",
+            channel_id=task_channel_id,
+            author_id=demo_id("participant-alex"),
+            kind="text",
+            body="Собрал прототип рекомендательной системы, выгружаю метрики качества.",
+            sequence=2,
+            status="active",
+            payload={"artifact_refs": ["repository"]},
+        ),
+        demo_row(
+            "messaging-message:task-1:3",
+            channel_id=task_channel_id,
+            author_id=demo_id("mentor-elena"),
+            kind="text",
+            body="Прототип в работе; пришлите сравнение метрик до пятницы.",
+            sequence=3,
+            status="active",
+            payload={"artifact_refs": []},
+        ),
+        demo_row(
+            "messaging-message:personal:elena:1",
+            channel_id=personal_channel_id,
+            author_id=demo_id("mentor-elena"),
+            kind="text",
+            body="Привет! Через час голосуем за приоритет эксперимента.",
+            sequence=1,
+            status="active",
+            payload={"artifact_refs": []},
+        ),
+    ]
+    cursor_rows = [
+        demo_row(
+            "messaging-cursor:task-1:mentor-elena",
+            channel_id=task_channel_id,
+            person_id=demo_id("mentor-elena"),
+            last_sequence=1,
+            status="active",
+        ),
+        demo_row(
+            "messaging-cursor:personal:participant-alex",
+            channel_id=personal_channel_id,
+            person_id=demo_id("participant-alex"),
+            last_sequence=1,
+            status="active",
+        ),
+    ]
+    notification_rows = [
+        demo_row(
+            f"notification:{index}",
+            person_id=demo_id(key),
+            kind=kind.value,
+            title=title,
+            body=body,
+            entity_type=None,
+            entity_id=None,
+            created_at=(
+                DEMO_NOW + timedelta(days=len(DEMO_NOTIFICATION_SCRIPTS) - index, hours=index)
+            ),
+        )
+        for index, (key, kind, title, body) in enumerate(DEMO_NOTIFICATION_SCRIPTS)
+    ]
     return [
         SeedBatch(review_rubrics, [rubric_row]),
         SeedBatch(projects, [project_row]),
@@ -748,6 +939,11 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
         SeedBatch(standings, standing_rows),
         SeedBatch(operations_cases, operations_rows),
         SeedBatch(case_decisions, decision_rows),
+        SeedBatch(messaging_channels, channel_rows),
+        SeedBatch(messaging_memberships, membership_rows),
+        SeedBatch(messaging_messages, message_rows),
+        SeedBatch(messaging_read_cursors, cursor_rows),
+        SeedBatch(notifications, notification_rows),
         SeedBatch(talent_pipeline_events, talent_rows),
     ]
 
@@ -796,6 +992,24 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
     demo_person_ids = [demo_id(key) for key, _name, _role in PERSONAS]
     async with database.session() as session:
         await session.execute(text("SET LOCAL impulse.demo_reset = 'on'"))
+        await session.execute(
+            delete(audit_entries).where(
+                audit_entries.c.actor_id.in_(demo_person_ids)
+                | audit_entries.c.created_by.in_(demo_person_ids)
+            )
+        )
+        await session.execute(
+            delete(domain_events).where(domain_events.c.created_by.in_(demo_person_ids))
+        )
+        await session.execute(
+            delete(talent_pipeline_events).where(
+                talent_pipeline_events.c.candidate_id.in_(demo_person_ids)
+                | talent_pipeline_events.c.hr_id.in_(demo_person_ids)
+            )
+        )
+        await session.execute(
+            delete(notifications).where(notifications.c.person_id.in_(demo_person_ids))
+        )
         runtime_enrollments = select(enrollments.c.id).where(
             enrollments.c.person_id.in_(demo_person_ids),
             enrollments.c.data_origin == "demo_runtime",
@@ -844,6 +1058,13 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
         await session.execute(
             delete(payout_claims).where(payout_claims.c.data_origin == "demo_runtime")
         )
+        for messaging_table in (
+            messaging_read_cursors,
+            messaging_messages,
+            messaging_memberships,
+            messaging_channels,
+        ):
+            await session.execute(delete(messaging_table))
         await session.execute(
             delete(review_5plus_versions).where(
                 review_5plus_versions.c.data_origin == "demo_runtime"
@@ -886,6 +1107,17 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
                     runtime_table.c.person_id.in_(demo_person_ids),
                     runtime_table.c.data_origin == "demo_runtime",
                 )
+            )
+        await session.execute(
+            delete(profile_skills).where(profile_skills.c.person_id.in_(demo_person_ids))
+        )
+        for runtime_table in (
+            competency_evidence,
+            project_credentials,
+            course_certificates,
+        ):
+            await session.execute(
+                delete(runtime_table).where(runtime_table.c.data_origin == "demo_runtime")
             )
         for batch in reversed(batches):
             await session.execute(

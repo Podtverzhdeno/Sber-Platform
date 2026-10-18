@@ -1,5 +1,10 @@
 ﻿import { QueryClientProvider, useQuery } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import {
+  useDeferredValue,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   BrowserRouter,
   Navigate,
@@ -13,7 +18,7 @@ import {
 import { apiRequest } from "./api/client";
 import { createQueryClient } from "./app/query";
 import { Badge, StatePanel } from "./components/ui";
-import { Bootcamp, DevelopmentJourney } from "./features/development";
+import { Bootcamp, DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
 import { EventCatalog } from "./features/ecosystem";
 import { CustomerWorkspace } from "./features/customer";
 import { CustomerScenario } from "./features/customer-scenario";
@@ -22,6 +27,7 @@ import { CustomerCandidates } from "./features/customer-candidates";
 import { ManagerWorkspace } from "./features/manager";
 import { HrWorkspace } from "./features/hr";
 import { OperatorWorkspace } from "./features/operator";
+import { ManagerVisualPage, OperatorVisualPage } from "./features/visual-gap-pages";
 import { ParticipantAnalytics, RoleAnalytics } from "./features/analytics";
 import { ParticipantPortfolio, ParticipantRating } from "./features/portfolio";
 import { MentorReviewWorkspace } from "./features/reward";
@@ -56,7 +62,95 @@ type Actor = {
   csrf_token?: string | null;
 };
 type PublicConfig = { honor_board_enabled?: boolean; demo_mode?: boolean };
+type SearchItem = { kind: string; meta: string; ref: string; title: string };
+type SearchResults = { items: SearchItem[] };
+type NotificationItem = {
+  id: string;
+  kind: string;
+  title: string;
+  body: string;
+  read: boolean;
+  created_at: string;
+  entity_type: string | null;
+  entity_id: string | null;
+};
+type NotificationList = { items: NotificationItem[]; unread: number };
 const customerSections = ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения", "Настройки"];
+
+const searchKindLabels: Record<string, string> = {
+  task: "Задача",
+  course: "Курс",
+  event: "Событие",
+  person: "Участник",
+  message: "Сообщение",
+  document: "Документ",
+};
+const taskStatusLabels: Record<string, string> = {
+  draft: "черновик",
+  submitted: "на проверке",
+  awaiting_support: "на согласовании",
+  ready_to_publish: "готова к публикации",
+  published: "опубликована",
+};
+const courseAvailabilityLabels: Record<string, string> = {
+  available: "доступна",
+  unavailable: "недоступна",
+};
+const personaRoleLabels: Record<string, string> = {
+  participant: "участник",
+  mentor: "ментор",
+  customer: "заказчик",
+  manager: "руководитель",
+  hr: "HR",
+  operator: "оператор",
+};
+const documentStatusLabels: Record<string, string> = {
+  valid: "действует",
+  revoked: "отозван",
+  superseded: "заменён",
+};
+const searchSections: Record<string, string[]> = {
+  task: ["Задачи", "Мои задачи", "Мои проекты"],
+  course: ["Bootcamp", "Мой путь", "Моя траектория"],
+  event: ["События"],
+  person: ["Сообщения"],
+  message: ["Сообщения"],
+  document: ["Достижения"],
+};
+const notificationSections: Record<string, string[]> = {
+  message: ["Сообщения"],
+  application: ["Заявки", "Мои задачи", "Задачи"],
+  review: ["Очередь ревью", "Проверка вкладов", "Мои проекты"],
+  checkpoint: ["Мои проекты"],
+  certificate: ["Портфолио"],
+  system: ["Главная", "Мой путь"],
+};
+const notificationStyles: Record<
+  string,
+  { symbol: string; className: string }
+> = {
+  message: { symbol: "▱", className: "notification-symbol--mentor" },
+  application: { symbol: "◧", className: "notification-symbol--success" },
+  review: { symbol: "✓", className: "notification-symbol--success" },
+  checkpoint: { symbol: "✓", className: "notification-symbol--success" },
+  certificate: { symbol: "◇", className: "notification-symbol--document" },
+  system: { symbol: "◎", className: "notification-symbol--document" },
+};
+
+function formatRelativeTime(raw: string): string {
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return "";
+  const minutes = Math.round((Date.now() - date.getTime()) / 60_000);
+  if (minutes < 1) return "только что";
+  if (minutes < 60) return `${String(minutes)} мин назад`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${String(hours)} ч назад`;
+  const days = Math.round(hours / 24);
+  if (days === 1) return "вчера";
+  if (days < 7) return `${String(days)} дн назад`;
+  return date.toLocaleDateString("ru-RU", { day: "numeric", month: "long" });
+}
+
 
 const roleLabels: Record<Role, string> = {
   participant: "Участник",
@@ -366,12 +460,16 @@ function Workspace({
           <span aria-hidden="true">☰</span> Меню
         </button>
         {allowed && actor.active_role === "customer" && mockCustomer ? (
-          currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" /> : currentSection === "Настройки" ? <ParticipantSettings actorName="Роман Воронов" consentScopes={actor.consent_scopes} role="customer" /> : <CustomerPremium section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
+          currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" personId={actor.person_id} /> : currentSection === "Настройки" ? <ParticipantSettings actorName="Роман Воронов" consentScopes={actor.consent_scopes} role="customer" /> : <CustomerPremium section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
         ) : allowed && currentSection === "Главная" ? (
           actor.active_role === "participant" ? (
             <ParticipantDashboard actor={actor} />
           ) : actor.active_role === "mentor" ? (
             <MentorDashboard mentorName={actor.display_name} />
+          ) : actor.active_role === "manager" ? (
+            <ManagerVisualPage section="Главная" />
+          ) : actor.active_role === "operator" ? (
+            <OperatorVisualPage section="Главная" />
           ) : (
             <RoleDashboard actor={actor} currentSection="Главная" />
           )
@@ -466,7 +564,9 @@ function Workspace({
           actor.active_role === "manager" &&
           (currentSection === "Инициативы" ||
             currentSection === "Результаты") ? (
-          <ManagerWorkspace />
+          <ManagerWorkspace section={currentSection} />
+        ) : allowed && actor.active_role === "manager" ? (
+          <ManagerVisualPage section={currentSection ?? "Главная"} />
         ) : allowed &&
           actor.active_role === "hr" &&
           (currentSection === "Кандидаты" || currentSection === "Воронка") ? (
@@ -476,13 +576,32 @@ function Workspace({
           (currentSection === "Операционная очередь" ||
             currentSection === "Проверки" ||
             currentSection === "Споры") ? (
-          <OperatorWorkspace />
+          <OperatorWorkspace section={currentSection} />
+        ) : allowed &&
+          actor.active_role === "operator" &&
+          currentSection === "Аналитика" ? (
+          <RoleAnalytics role="operator" />
+        ) : allowed && actor.active_role === "operator" ? (
+          <OperatorVisualPage section={currentSection ?? "Главная"} />
         ) : allowed &&
           actor.active_role !== "participant" &&
           currentSection === "Аналитика" ? (
           <RoleAnalytics role={actor.active_role} />
         ) : allowed && currentSection === "Сообщения" ? (
-          <MessagingWorkspace role={actor.active_role} />
+          <MessagingWorkspace
+            role={actor.active_role}
+            personId={actor.person_id}
+            quickTargets={
+              actor.active_role === "mentor"
+                ? {
+                    review: navigation.findIndex(
+                      (name) => name === "Очередь ревью" || name === "Проверка вкладов",
+                    ),
+                    plan: navigation.indexOf("План недели"),
+                  }
+                : undefined
+            }
+          />
         ) : allowed ? (
           <RoleDashboard
             actor={actor}
@@ -512,7 +631,7 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
   };
   const metrics = dashboardMetrics.participant;
   return (
-    <div className="dashboard-shell participant-home">
+    <div className="dashboard-shell participant-home" data-reference="R-PAR-01">
       <header className="dashboard-heading">
         <div>
           <p className="eyebrow">Участник · персональный маршрут</p>
@@ -829,6 +948,22 @@ function RoleDashboard({
   actor: Actor;
   currentSection: string;
 }) {
+  const navigate = useNavigate();
+  const goTo = (label: string) => {
+    const index = actor.navigation.indexOf(label);
+    if (index >= 0) void navigate(`/workspace/${String(index)}`);
+  };
+  const fallbackTarget =
+    actor.navigation.find((item) => item !== "Главная") ?? "Главная";
+  const focusTarget =
+    actor.active_role === "customer" && actor.navigation.includes("Мои задачи")
+      ? "Мои задачи"
+      : fallbackTarget;
+  const queueTarget = actor.navigation.includes("Аналитика")
+    ? "Аналитика"
+    : focusTarget;
+  const aiTarget =
+    actor.navigation.find((item) => item.includes("AI")) ?? queueTarget;
   return (
     <div className="dashboard-shell">
       <header className="dashboard-heading">
@@ -872,7 +1007,12 @@ function RoleDashboard({
               Откройте раздел, проверьте факты и зафиксируйте следующий шаг. Все
               записи в текущем окружении являются демонстрационными.
             </p>
-            <button type="button">
+            <button
+              type="button"
+              onClick={() => {
+                goTo(focusTarget);
+              }}
+            >
               Открыть рабочую область <span aria-hidden="true">→</span>
             </button>
           </div>
@@ -899,7 +1039,14 @@ function RoleDashboard({
           <div className="ai-boundary">
             AI не публикует решения, оценки или офферы.
           </div>
-          <button type="button">Получить рекомендации →</button>
+          <button
+            type="button"
+            onClick={() => {
+              goTo(aiTarget);
+            }}
+          >
+            Получить рекомендации →
+          </button>
         </aside>
       </div>
       <div className="dashboard-lower-grid">
@@ -909,7 +1056,13 @@ function RoleDashboard({
               <p className="eyebrow">Рабочая очередь</p>
               <h2>Актуальные действия</h2>
             </div>
-            <button className="secondary-button" type="button">
+            <button
+              className="secondary-button"
+              type="button"
+              onClick={() => {
+                goTo(queueTarget);
+              }}
+            >
               Все действия →
             </button>
           </header>
@@ -998,7 +1151,6 @@ function ImpulseApp() {
   const [streakOpen, setStreakOpen] = useState(false);
   const [rankingOpen, setRankingOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [readNotifications, setReadNotifications] = useState<string[]>([]);
 
   useEffect(() => {
     if (meQuery.data && !explicitSignOut.current) setActor(meQuery.data);
@@ -1057,44 +1209,94 @@ function ImpulseApp() {
     }
   }
 
-  const searchItems = actor
-    ? [
-        {
-          title: "Прототип рекомендательной системы",
-          meta: "Задача · в работе",
-          section: "Задачи",
-          query: "",
-        },
-        {
-          title: "Python для R&D",
-          meta: "Bootcamp · текущий курс",
-          section: "Bootcamp",
-          query: "?course=python-base",
-        },
-        {
-          title: "AI Journey 2026",
-          meta: "Событие · регистрация",
-          section: "События",
-          query: "",
-        },
-        {
-          title: "Елена Наставник",
-          meta: "Сообщения · ментор",
-          section: "Сообщения",
-          query: "",
-        },
-        {
-          title: "Сертификат OpenSpec",
-          meta: "Документ · подтверждён",
-          section: "Портфолио",
-          query: "",
-        },
-      ].filter(
-        (item) =>
-          item.title.toLowerCase().includes(search.trim().toLowerCase()) ||
-          item.meta.toLowerCase().includes(search.trim().toLowerCase()),
-      )
-    : [];
+  const deferredSearch = useDeferredValue(search);
+  const trimmedSearch = deferredSearch.trim();
+  const searchQuery = useQuery({
+    queryKey: ["search", trimmedSearch],
+    queryFn: () =>
+      apiRequest<SearchResults>(
+        `/api/v1/search?q=${encodeURIComponent(trimmedSearch)}&limit=8`,
+      ),
+    enabled: Boolean(actor) && trimmedSearch.length > 1,
+  });
+  const searchItems = searchQuery.data?.items ?? [];
+  const notificationsQuery = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => apiRequest<NotificationList>("/api/v1/me/notifications"),
+    enabled: Boolean(actor),
+  });
+  const notificationItems = notificationsQuery.data?.items ?? [];
+  const unreadCount = notificationsQuery.data?.unread ?? 0;
+  const invalidateNotifications = () => {
+    void queryClient.invalidateQueries({ queryKey: ["notifications"] });
+  };
+  async function readAllNotifications() {
+    setError("");
+    try {
+      await apiRequest("/api/v1/me/notifications/read-all", {
+        method: "POST",
+        headers: { "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" },
+      });
+      invalidateNotifications();
+    } catch {
+      setError("Не удалось обновить уведомления.");
+    }
+  }
+  async function openNotification(item: NotificationItem) {
+    setError("");
+    setNotificationOpen(false);
+    if (!item.read) {
+      try {
+        await apiRequest(`/api/v1/me/notifications/${item.id}/read`, {
+          method: "POST",
+          headers: {
+            "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "",
+          },
+        });
+        invalidateNotifications();
+      } catch {
+        setError("Не удалось обновить уведомления.");
+        return;
+      }
+    }
+    const candidates =
+      notificationSections[item.kind] ?? notificationSections.system ?? [];
+    const section = candidates.find((name) =>
+      actor?.navigation.includes(name),
+    );
+    if (section) openSearchItem(section);
+  }
+  const firstSection = (names: string[]) =>
+    names.find((name) => actor?.navigation.includes(name)) ?? "";
+  const searchItemMeta = (item: SearchItem) => {
+    const kindLabel = searchKindLabels[item.kind];
+    const metaLabel =
+      item.kind === "task"
+        ? (taskStatusLabels[item.meta] ?? item.meta)
+        : item.kind === "course"
+          ? (courseAvailabilityLabels[item.meta] ?? item.meta)
+          : item.kind === "person"
+            ? item.meta
+                .split(",")
+                .map((role) => personaRoleLabels[role] ?? role)
+                .join(", ")
+            : item.kind === "document"
+              ? (documentStatusLabels[item.meta] ?? item.meta)
+              : item.meta;
+    return kindLabel ? `${kindLabel} · ${metaLabel}` : metaLabel;
+  };
+  const searchItemQuery = (item: SearchItem) => {
+    if (item.kind === "task") {
+      return `?task=${encodeURIComponent(item.ref)}`;
+    }
+    if (item.kind === "person") {
+      return `?participant=${encodeURIComponent(item.ref.slice("person:".length))}`;
+    }
+    if (item.kind === "message") {
+      return `?channel=${encodeURIComponent(item.ref.slice("message:".length).split(":")[0] ?? "")}`;
+    }
+    return "";
+  };
   const openSearchItem = (section: string, query = "") => {
     if (!actor) return;
     const index = actor.navigation.indexOf(section);
@@ -1140,18 +1342,27 @@ function ImpulseApp() {
                   role="listbox"
                   aria-label="Результаты поиска"
                 >
-                  {searchItems.length ? (
+                  {searchQuery.isFetching && !searchQuery.data ? (
+                    <div>
+                      <strong>Ищем…</strong>
+                      <span>Подбираем задачи, курсы и события</span>
+                    </div>
+                  ) : searchItems.length ? (
                     searchItems.map((item) => (
                       <button
                         type="button"
                         role="option"
-                        key={item.title}
+                        key={`${item.kind}:${item.ref}`}
                         onClick={() => {
-                          openSearchItem(item.section, item.query);
+                          const section = firstSection(
+                            searchSections[item.kind] ?? [],
+                          );
+                          if (!section) return;
+                          openSearchItem(section, searchItemQuery(item));
                         }}
                       >
                         <strong>{item.title}</strong>
-                        <span>{item.meta}</span>
+                        <span>{searchItemMeta(item)}</span>
                       </button>
                     ))
                   ) : (
@@ -1225,17 +1436,18 @@ function ImpulseApp() {
                 <button
                   className="notification-button"
                   type="button"
-                  aria-label={`Уведомления: ${String(3 - readNotifications.length)} непрочитанных`}
+                  aria-label={`Уведомления: ${String(unreadCount)} непрочитанных`}
                   aria-expanded={notificationOpen}
                   onClick={() => {
                     setNotificationOpen((value) => !value);
                     setStreakOpen(false);
                     setRankingOpen(false);
+                    setSearchOpen(false);
                   }}
                 >
                   ♢
-                  {readNotifications.length < 3 && (
-                    <i aria-hidden="true">{3 - readNotifications.length}</i>
+                  {unreadCount > 0 && (
+                    <i aria-hidden="true">{unreadCount}</i>
                   )}
                 </button>
                 {notificationOpen && (
@@ -1247,106 +1459,69 @@ function ImpulseApp() {
                     <header>
                       <div>
                         <span>Уведомления</span>
-                        <strong>{3 - readNotifications.length} новых</strong>
+                        <strong>
+                          {unreadCount > 0
+                            ? `${String(unreadCount)} новых`
+                            : "Все прочитаны"}
+                        </strong>
                       </div>
                       <button
                         type="button"
+                        disabled={unreadCount === 0 || notificationsQuery.isPending}
                         onClick={() => {
-                          setReadNotifications([
-                            "feedback",
-                            "checkpoint",
-                            "certificate",
-                          ]);
+                          void readAllNotifications();
                         }}
                       >
                         Прочитать все
                       </button>
                     </header>
                     <div className="notification-list">
-                      <button
-                        className={
-                          readNotifications.includes("feedback") ? "read" : ""
-                        }
-                        type="button"
-                        onClick={() => {
-                          setReadNotifications((items) =>
-                            Array.from(new Set([...items, "feedback"])),
+                      {notificationItems.length ? (
+                        notificationItems.map((item) => {
+                          const style =
+                            notificationStyles[item.kind] ?? {
+                              symbol: "◎",
+                              className: "notification-symbol--document",
+                            };
+                          return (
+                            <button
+                              className={item.read ? "read" : ""}
+                              key={item.id}
+                              type="button"
+                              onClick={() => {
+                                void openNotification(item);
+                              }}
+                            >
+                              <span
+                                className={`notification-symbol ${style.className}`}
+                              >
+                                {style.symbol}
+                              </span>
+                              <div>
+                                <strong>{item.title}</strong>
+                                <p>{item.body}</p>
+                                <small>
+                                  {formatRelativeTime(item.created_at)}
+                                </small>
+                              </div>
+                              <i>›</i>
+                            </button>
                           );
-                          setNotificationOpen(false);
-                          openSearchItem("Сообщения");
-                        }}
-                      >
-                        <span className="notification-symbol notification-symbol--mentor">
-                          ЕН
-                        </span>
-                        <div>
-                          <strong>Новый комментарий ментора</strong>
-                          <p>
-                            Елена попросила уточнить обработку rate limit в
-                            проекте.
-                          </p>
-                          <small>12 минут назад</small>
+                        })
+                      ) : (
+                        <div className="notification-empty">
+                          <strong>Пока нет уведомлений</strong>
+                          <span>Здесь появятся события ваших проектов</span>
                         </div>
-                        <i>›</i>
-                      </button>
-                      <button
-                        className={
-                          readNotifications.includes("checkpoint") ? "read" : ""
-                        }
-                        type="button"
-                        onClick={() => {
-                          setReadNotifications((items) =>
-                            Array.from(new Set([...items, "checkpoint"])),
-                          );
-                          setNotificationOpen(false);
-                          openSearchItem("Мои проекты");
-                        }}
-                      >
-                        <span className="notification-symbol notification-symbol--success">
-                          ✓
-                        </span>
-                        <div>
-                          <strong>Checkpoint принят</strong>
-                          <p>
-                            «Контракт API» подтверждён и добавлен в ваш
-                            прогресс.
-                          </p>
-                          <small>Сегодня, 10:14</small>
-                        </div>
-                        <i>›</i>
-                      </button>
-                      <button
-                        className={
-                          readNotifications.includes("certificate")
-                            ? "read"
-                            : ""
-                        }
-                        type="button"
-                        onClick={() => {
-                          setReadNotifications((items) =>
-                            Array.from(new Set([...items, "certificate"])),
-                          );
-                          setNotificationOpen(false);
-                          openSearchItem("Портфолио");
-                        }}
-                      >
-                        <span className="notification-symbol notification-symbol--document">
-                          ◇
-                        </span>
-                        <div>
-                          <strong>Сертификат готов</strong>
-                          <p>Документ «OpenSpec и SDD» доступен в портфолио.</p>
-                          <small>Вчера</small>
-                        </div>
-                        <i>›</i>
-                      </button>
+                      )}
                     </div>
                     <footer>
                       <button
                         type="button"
                         onClick={() => {
                           setNotificationOpen(false);
-                          openSearchItem("Сообщения");
+                          const section = firstSection(["Сообщения"]);
+                          if (section) openSearchItem(section);
                         }}
                       >
                         Открыть сообщения →
@@ -1386,6 +1561,14 @@ function ImpulseApp() {
       </header>
       <div id="workspace-main">
         <Routes>
+          <Route
+            path="/verify/:verificationId"
+            element={<PublicVerificationPage />}
+          />
+          <Route
+            path="/verify/projects/:verificationId"
+            element={<ProjectVerificationPage />}
+          />
           {!actor ? (
             <Route
               path="*"

@@ -1,1 +1,1 @@
-"""Repository automation scripts."""
+"""Repository maintenance and experimental tooling."""

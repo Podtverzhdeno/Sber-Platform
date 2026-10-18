@@ -58,6 +58,7 @@ class RecognitionStore(Protocol):
     async def credential(self, credential_id: UUID) -> Credential | None: ...
     async def credential_by_verification(self, verification_id: str) -> Credential | None: ...
     async def latest_credential(self, season_id: UUID, person_id: UUID) -> Credential | None: ...
+    async def person_credentials(self, person_id: UUID) -> tuple[Credential, ...]: ...
     async def add_credential(self, credential: Credential) -> Credential: ...
     async def replace_credential(
         self, previous: Credential, replacement: Credential
@@ -184,6 +185,11 @@ class MemoryRecognitionStore:
             if item.season_id == season_id and item.person_id == person_id
         ]
         return max(rows, key=lambda item: item.credential_version, default=None)
+
+    async def person_credentials(self, person_id: UUID) -> tuple[Credential, ...]:
+        items = [item for item in self._credentials.values() if item.person_id == person_id]
+        items.sort(key=lambda item: item.credential_version, reverse=True)
+        return tuple(items)
 
     async def add_credential(self, credential: Credential) -> Credential:
         self._credentials[credential.credential_id] = credential

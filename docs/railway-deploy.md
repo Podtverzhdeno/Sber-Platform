@@ -11,21 +11,9 @@
    `Postgres` либо скорректировать ссылку на переменную ниже.
 3. В том же проекте выбрать `New -> GitHub Repo`, подключить `Podtverzhdeno/Sber-Platform`
    и ветку `main`. Railway автоматически обнаружит корневой `Dockerfile`.
-4. В `Variables` сервиса приложения задать:
-
-   ```dotenv
-   APP_ENV=production
-   DEMO_MODE=true
-   DATABASE_URL=${{Postgres.DATABASE_URL}}
-   SESSION_SECRET=<случайная строка длиной не менее 32 символов>
-   AI_BUDDY_ENABLED=true
-   AI_MENTOR_DRAFT_ENABLED=true
-   AI_OPERATOR_TRIAGE_ENABLED=true
-   AI_CUSTOMER_BRIEF_ENABLED=true
-   OPENROUTER_API_KEY=<секрет только в Railway>
-   OPENROUTER_MODEL_BUDDY=openrouter/free
-   OPENROUTER_MODEL_STRUCTURED=openrouter/free
-   ```
+4. Заполнить и подписать [Railway Variables checklist](railway-variables-checklist.md).
+   Checklist намеренно не содержит значений. Секреты задаются только в Railway UI, а
+   production credentials помечаются sealed.
 
 5. Применить staged changes. Перед развёртыванием `railway.toml` выполняет миграции и
    идемпотентно обновляет демонстрационные данные. Команда запуска образа повторяет эту
@@ -37,6 +25,14 @@ PostgreSQL не нужно делать публичным: приложение
 Railway. После каждого push в подключённую ветку Railway автоматически собирает и
 публикует новую версию, а `/health/ready` не позволяет переключить трафик на экземпляр,
 который не видит базу.
+
+## Миграции и откат
+
+Production schema changes SHALL следовать схеме expand → backfill → contract. Перед contract
+обязателен dry-run возврата предыдущего image на expanded schema. Порядок выпуска и аварийного
+отката описан в [migration-rollbacks.md](migration-rollbacks.md). Во время incident rollback
+сначала возвращается последний исправный Railway deployment; `alembic downgrade` автоматически
+не запускается.
 
 ## Локальная проверка production-контейнера
 

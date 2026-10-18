@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any, cast
 from uuid import UUID, uuid4
@@ -97,6 +97,7 @@ def _payload(record: TaskRecord) -> dict[str, object]:
             ),
             "data_constraints": aggregate.brief.data_constraints,
             "ip_terms": aggregate.brief.ip_terms,
+            "allowed_artifacts": list(aggregate.brief.allowed_artifacts),
         },
         "nominated_mentor_id": (
             str(aggregate.nominated_mentor_id)
@@ -148,6 +149,9 @@ def _record(row: Any) -> TaskRecord:
                 deadline_at=(datetime.fromisoformat(str(deadline_raw)) if deadline_raw else None),
                 data_constraints=str(brief_data.get("data_constraints", "")),
                 ip_terms=str(brief_data.get("ip_terms", "")),
+                allowed_artifacts=tuple(
+                    str(item) for item in brief_data.get("allowed_artifacts", [])
+                ),
             ),
             status=TaskStatus(
                 TaskStatus.PUBLISHED.value
@@ -313,6 +317,22 @@ class SqlWorkStore(WorkStore):
 
     async def latest_terms(self, task_id: UUID) -> TermsRecord | None:
         return await self.terms_version(task_id, 0)
+
+    async def terms_history(self, task_id: UUID) -> tuple[TermsRecord, ...]:
+        async with self.database.sessions() as session:
+            versions = (
+                await session.scalars(
+                    select(task_terms_versions.c.terms_version)
+                    .where(task_terms_versions.c.task_id == task_id)
+                    .order_by(task_terms_versions.c.terms_version)
+                )
+            ).all()
+        records: list[TermsRecord] = []
+        for version in versions:
+            record = await self.terms_version(task_id, int(version))
+            if record is not None:
+                records.append(record)
+        return tuple(records)
 
     async def terms_version(self, task_id: UUID, version: int) -> TermsRecord | None:
         async with self.database.sessions() as session:
@@ -509,6 +529,17 @@ class SqlWorkStore(WorkStore):
             ).all()
             return tuple(self._reservation(row) for row in rows)
 
+    async def reservations_all(self) -> tuple[CandidateReservation, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(candidate_reservations).order_by(
+                        candidate_reservations.c.created_at.desc()
+                    )
+                )
+            ).all()
+            return tuple(self._reservation(row) for row in rows)
+
     async def invite(
         self, task_id: UUID, person_id: UUID, terms_version: int, expires_at: datetime
     ) -> InvitationRecord:
@@ -662,6 +693,30 @@ class SqlWorkStore(WorkStore):
             ).one_or_none()
             return self._application(row) if row is not None else None
 
+    async def accepted_contribution_counts(self, person_ids: tuple[UUID, ...]) -> dict[UUID, int]:
+        if not person_ids:
+            return {}
+        async with self.database.session() as session:
+            rows = (
+                await session.execute(
+                    select(assignments.c.person_id, func.count())
+                    .select_from(contributions)
+                    .join(
+                        assignments,
+                        assignments.c.id == contributions.c.assignment_id,
+                    )
+                    .where(
+                        assignments.c.person_id.in_(list(person_ids)),
+                        contributions.c.status == ContributionStatus.ACCEPTED.value,
+                    )
+                    .group_by(assignments.c.person_id)
+                )
+            ).all()
+            counts = {person_id: 0 for person_id in person_ids}
+            for row in rows:
+                counts[UUID(str(row[0]))] = int(row[1] or 0)
+            return counts
+
     async def accept_application(
         self, application_id: UUID, expected_version: int, places: int
     ) -> AssignmentRecord:
@@ -742,6 +797,7 @@ class SqlWorkStore(WorkStore):
             row.person_id,
             row.application_id,
             AssignmentStatus(row.status),
+            row.created_at,
         )
 
     async def assignment(self, assignment_id: UUID) -> AssignmentRecord | None:
@@ -841,6 +897,23 @@ class SqlWorkStore(WorkStore):
                 .values(payload=payload, version=tasks.c.version + 1)
             )
         return artifact
+
+    async def checkpoints(self, task_id: UUID) -> tuple[CheckpointRecord, ...]:
+        async with self.database.sessions() as session:
+            row = (
+                await session.execute(select(tasks.c.payload).where(tasks.c.id == task_id))
+            ).one_or_none()
+        if row is None:
+            return ()
+        payload = dict(row.payload)
+        return tuple(
+            CheckpointRecord(
+                str(item.get("key", "")),
+                str(item.get("title", "")),
+                str(item.get("status", "planned")),
+            )
+            for item in payload.get("checkpoints", [])
+        )
 
     async def submit_contribution(
         self, assignment_id: UUID, summary: str, artifacts: tuple[TeamArtifactRecord, ...]
@@ -1000,6 +1073,7 @@ class SqlWorkStore(WorkStore):
             reason,
             deadline_at,
             owner_id,
+            datetime.now(UTC),
         )
 
     async def open_authorship_dispute(
@@ -1165,4 +1239,5 @@ class SqlWorkStore(WorkStore):
             str(payload["reason"]),
             datetime.fromisoformat(str(deadline)) if deadline else None,
             UUID(str(owner_id)) if owner_id else None,
+            row.created_at,
         )

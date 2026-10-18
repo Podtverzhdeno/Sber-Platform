@@ -76,6 +76,21 @@ uv run ruff check .
 uv run pyright
 uv run pytest
 uv run impulse-secret-scan
+uv run python scripts/check_docs.py
+uv run python scripts/check_analytics_docs.py
+uv run python scripts/check_visual_reference_docs.py
+uv run python scripts/check_release_docs.py
+uv run python scripts/check_release_report.py
+uv run python scripts/check_incident_runbooks.py
+uv run python scripts/check_release_acceptance_docs.py
+uv run python scripts/check_ai_release_docs.py
+uv run python scripts/check_ci_docs.py
+uv run python scripts/check_ci_evidence_docs.py
+uv run python scripts/check_markdown_links.py
+uv run python scripts/check_post_deploy_docs.py
+uv run python scripts/check_security_docs.py
+uv run python scripts/check_journey_docs.py
+uv run python scripts/check_contract_docs.py
 
 cd frontend
 npm run lint
@@ -111,6 +126,24 @@ MVP работает на вымышленных данных с явной ма
 ## OpenSpec workflow
 
 Railway deployment guide: [docs/railway-deploy.md](docs/railway-deploy.md).
+Analytics dictionary: [docs/analytics-dictionary.md](docs/analytics-dictionary.md).
+Migration rollback runbook: [docs/migration-rollbacks.md](docs/migration-rollbacks.md).
+Current pre-RC quality report: [docs/release-report.md](docs/release-report.md).
+Railway Variables checklist: [docs/railway-variables-checklist.md](docs/railway-variables-checklist.md).
+Incident runbooks: [docs/incident-runbooks.md](docs/incident-runbooks.md).
+Release readiness and six-role acceptance: [docs/release-acceptance.md](docs/release-acceptance.md).
+AI model/prompt release, canary and rollback: [docs/ai-release-policy.md](docs/ai-release-policy.md).
+CI workflow: [.github/workflows/ci.yml](.github/workflows/ci.yml). Quality gates and
+intentional-failure matrix: [docs/ci-quality-gates.md](docs/ci-quality-gates.md).
+CI intentional-failure evidence: [docs/ci-intentional-failure-evidence.md](docs/ci-intentional-failure-evidence.md).
+Railway post-deploy smoke: [docs/railway-post-deploy-smoke.md](docs/railway-post-deploy-smoke.md).
+Security/RBAC/IDOR test matrix: [docs/security-test-matrix.md](docs/security-test-matrix.md).
+Playwright journey traceability: [docs/journey-traceability.md](docs/journey-traceability.md).
+Retention and deletion runbook: [docs/retention-deletion.md](docs/retention-deletion.md).
+Offline AI evaluation contract: [docs/ai-evaluation-contract.md](docs/ai-evaluation-contract.md).
+Observability and alert contract: [docs/observability-alerts.md](docs/observability-alerts.md).
+API error/retry/idempotency contract: [docs/api-error-contract.md](docs/api-error-contract.md).
+OpenCode local gateway PoC: [docs/opencode-gateway-poc.md](docs/opencode-gateway-poc.md).
 
 1. Требования, сценарии и дизайн находятся в `openspec/changes/impulse-ecosystem/`.
 2. Реализация выполняется по порядку `tasks.md`.
