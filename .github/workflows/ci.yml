@@ -207,18 +207,25 @@ jobs:
         working-directory: .
       - name: Wait for backend readiness
         run: |
+          set +e
           ready=""
+          code=""
           for attempt in $(seq 1 30); do
             code=$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 5 http://127.0.0.1:8000/health/ready)
+            rc=$?
             if [ "${code}" = "200" ]; then
               ready=1
               break
             fi
+            if [ "$attempt" = "1" ] || [ "$attempt" = "15" ]; then
+              backend_probe=$(cat /tmp/backend.log 2>/dev/null | tr '\n' ' ' | tail -c 900)
+              echo "::notice::backend_probe_attempt_${attempt}=${backend_probe}"
+            fi
             sleep 2
           done
           if [ -z "${ready}" ]; then
-            backend_logs=$(cat /tmp/backend.log 2>/dev/null | tr '\n' ' ' | tail -c 1500)
-            echo "::error::backend_not_ready=${backend_logs}"
+            backend_logs=$(cat /tmp/backend.log 2>/dev/null | tr '\n' ' ' | tail -c 1800)
+            echo "::error::backend_not_ready last_code=${code} curl_rc=${rc} log=${backend_logs}"
             exit 1
           fi
         working-directory: .
