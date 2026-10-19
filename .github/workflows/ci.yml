@@ -199,10 +199,12 @@ jobs:
               print('::error::e2e.log is missing')
               raise SystemExit(0)
           log = log_path.read_text(encoding='utf-8', errors='replace')
-          headings = [line for line in log.splitlines() if '.spec.ts' in line and ('fail' in line.lower() or '✘' in line or '×' in line)][:20]
-          print('::error::e2e_failures=' + urllib.parse.quote(' | '.join(headings)[:900]))
-          tail = [line for line in log.splitlines()][-25:]
-          print('::error::e2e_tail=' + urllib.parse.quote(' \n'.join(tail)[:1800]))
+          failures = [line.strip() for line in log.splitlines() if ('✘' in line or '✕' in line) and line.strip()][:30]
+          print('::error::e2e_failures=' + urllib.parse.quote(' | '.join(failures)[:1200]))
+          spec_lines = [line.strip() for line in log.splitlines() if '.spec.ts' in line][:40]
+          print('::error::e2e_spec_lines=' + urllib.parse.quote(' | '.join(spec_lines)[:1400]))
+          tail = [line for line in log.splitlines()][-45:]
+          print('::error::e2e_tail=' + urllib.parse.quote(' \n'.join(tail)[:2200]))
           PY
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
@@ -245,6 +247,10 @@ jobs:
             pg_logs=$(docker compose logs --tail=40 postgres 2>&1 | tr '\n' ' ' | tail -c 1200)
             echo "::error::postgres_logs=${pg_logs}"
             echo "::error::last_live_code=${code}"
+            activity=$(docker compose exec -T postgres psql -U impulse -d impulse -c "SELECT pid, state, wait_event_type, wait_event, query FROM pg_stat_activity" 2>&1 | tr '\n' ' ' | tail -c 1500)
+            echo "::error::pg_activity=${activity}"
+            ports=$(docker compose exec -T app sh -c 'netstat -tlnp 2>/dev/null | grep -w 8000' 2>&1 | tr '\n' ' ')
+            echo "::error::app_8000_listener=${ports}"
             exit 1
           fi
           curl --fail --silent --show-error http://127.0.0.1:8000/health/live
