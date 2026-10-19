@@ -499,3 +499,58 @@ def test_unknown_and_forbidden_api_responses_are_indistinguishable() -> None:
         forbidden = client.get("/test/resources/forbidden", headers=headers)
     assert unknown.status_code == forbidden.status_code == 404
     assert unknown.json() == forbidden.json()
+
+
+def _theme_client() -> tuple[TestClient, str]:
+    settings = _test_settings()
+    service = DemoAuthService(
+        MemoryIdentityStore(demo_personas()),
+        secret=settings.session_signing_secret(),
+        ttl_seconds=settings.session_ttl_seconds,
+    )
+    client = TestClient(create_app(settings, auth_service=service))
+    login = client.post("/api/v1/auth/demo-login", json={"persona_key": "participant-alex"})
+    return client, str(login.json()["csrf_token"])
+
+
+@pytest.mark.spec("participant-settings/Быстрая смена темы")
+def test_topbar_theme_choice_persists_in_profile() -> None:
+    client, csrf = _theme_client()
+    saved = client.put(
+        "/api/v1/me/theme",
+        headers={"X-CSRF-Token": csrf},
+        json={"theme": "light"},
+    )
+    assert saved.status_code == 200
+    profile = client.get("/api/v1/me/profile").json()
+    assert profile["theme"] == "light"
+
+
+@pytest.mark.spec("participant-settings/Быстрая смена темы")
+def test_theme_endpoint_rejects_unsupported_value() -> None:
+    client, csrf = _theme_client()
+    rejected = client.put(
+        "/api/v1/me/theme",
+        headers={"X-CSRF-Token": csrf},
+        json={"theme": "neon"},
+    )
+    assert rejected.status_code == 422
+
+
+@pytest.mark.spec("participant-settings/Быстрая смена темы")
+def test_theme_endpoint_is_readonly_for_non_participants() -> None:
+    settings = _test_settings()
+    service = DemoAuthService(
+        MemoryIdentityStore(demo_personas()),
+        secret=settings.session_signing_secret(),
+        ttl_seconds=settings.session_ttl_seconds,
+    )
+    client = TestClient(create_app(settings, auth_service=service))
+    login = client.post("/api/v1/auth/demo-login", json={"persona_key": "customer-roman"})
+    csrf = login.json()["csrf_token"]
+    saved = client.put(
+        "/api/v1/me/theme",
+        headers={"X-CSRF-Token": csrf},
+        json={"theme": "dark"},
+    )
+    assert saved.status_code == 200

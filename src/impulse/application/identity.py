@@ -293,6 +293,21 @@ class DemoAuthService:
                 status_code=403,
             )
 
+    async def save_theme(
+        self, authenticated: AuthenticatedSession, theme: str
+    ) -> ActorContext:
+        if theme not in {"dark", "light", "system"}:
+            raise ApiError("PROFILE_THEME_UNSUPPORTED", "Тема не поддерживается.", 422)
+        if authenticated.actor.active_role is not Role.PARTICIPANT:
+            return authenticated.actor
+        profile = await self.store.participant_profile(authenticated.actor.person_id)
+        if profile is None:
+            return authenticated.actor
+        await self.store.update_participant_profile(
+            replace(profile, theme=theme)
+        )
+        return authenticated.actor
+
     async def switch_role(self, authenticated: AuthenticatedSession, role: Role) -> ActorContext:
         if role not in authenticated.actor.assigned_roles:
             raise ApiError(
@@ -369,7 +384,7 @@ class DemoAuthService:
             raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
         if profile.locale not in {"ru-RU", "en-US"}:
             raise ApiError("PROFILE_LOCALE_UNSUPPORTED", "Язык не поддерживается.", 422)
-        if profile.theme not in {"dark", "system"}:
+        if profile.theme not in {"dark", "light", "system"}:
             raise ApiError("PROFILE_THEME_UNSUPPORTED", "Тема не поддерживается.", 422)
         try:
             ZoneInfo(profile.timezone)

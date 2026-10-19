@@ -570,11 +570,38 @@ th, td { padding: 12px; border-bottom: 1px solid rgb(255 255 255 / 10%); text-al
 }
 
 html { color-scheme: dark; }
+:root[data-theme='light'] {
+  --color-bg: #f3f6fb;
+  --color-sidebar: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-2: #eef2f8;
+  --color-border: #d7e0ec;
+  --color-border-strong: #b9c7db;
+  --color-text: #10233a;
+  --color-muted: #5a6b82;
+  --color-primary: #0d9488;
+  --color-primary-strong: #0b7c72;
+  --color-accent: #0d9488;
+  --color-info: #1d6fd8;
+  --color-ai: #6d55e0;
+  --color-warning: #b45309;
+  --color-danger: #d63b4e;
+  --shadow-raised: 0 16px 44px rgb(15 42 74 / 14%);
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+html[data-theme='light'] { color-scheme: light; }
 body {
   color: var(--color-text);
   background:
     radial-gradient(circle at 76% -12%, rgb(35 103 170 / 13%), transparent 34rem),
     linear-gradient(145deg, #050d18 0%, #071220 52%, #050b14 100%);
+}
+:root[data-theme='light'] body {
+  background:
+    radial-gradient(circle at 76% -12%, rgb(29 111 216 / 8%), transparent 34rem),
+    linear-gradient(145deg, #ffffff 0%, #eef3fa 52%, #e7eef7 100%);
 }
 button, input, textarea, select { min-height: 40px; }
 button { transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease; }
@@ -596,6 +623,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .global-search input { width: 100%; min-height: 0; border: 0; outline: 0; color: var(--color-text); background: transparent; }
 .global-search input::placeholder { color: #667b96; }
 .header-actions { gap: 14px; }
+.theme-toggle { width: 40px; padding: 0; font-size: 17px; line-height: 1; letter-spacing: 0; color: var(--color-text); background: var(--color-surface-raised); }
+.theme-toggle[aria-pressed='true'] { border-color: var(--color-primary-strong); box-shadow: 0 0 12px rgb(34 230 208 / 18%); }
 .demo-badge { border-color: rgb(34 230 208 / 25%); color: #64e8d8; background: rgb(34 230 208 / 8%); text-transform: uppercase; letter-spacing: .06em; }
 .notification-button { position: relative; width: 40px; border: 1px solid var(--color-border); border-radius: 10px; color: #b5c5d9; background: #0b1726; cursor: pointer; }
 .notification-button i { position: absolute; top: 7px; right: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--color-danger); }

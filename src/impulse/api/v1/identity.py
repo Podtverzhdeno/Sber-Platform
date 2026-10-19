@@ -80,7 +80,7 @@ class ParticipantProfileView(BaseModel):
     about: str
     avatar_url: str
     locale: Literal["ru-RU", "en-US"]
-    theme: Literal["dark", "system"]
+    theme: Literal["dark", "light", "system"]
     timezone: str
     buddy_enabled: bool
     skills: list[ProfileSkillView]
@@ -97,7 +97,7 @@ class UpdateParticipantProfileRequest(BaseModel):
     about: str = Field(default="", max_length=2000)
     avatar_url: str = Field(default="", max_length=2048)
     locale: Literal["ru-RU", "en-US"] = "ru-RU"
-    theme: Literal["dark", "system"] = "dark"
+    theme: Literal["dark", "light", "system"] = "dark"
     timezone: str = Field(default="Europe/Moscow", max_length=80)
     buddy_enabled: bool = True
     skills: list[str] = Field(default_factory=list, max_length=30)
@@ -249,6 +249,20 @@ async def update_participant_profile(
         skills=tuple(ProfileSkill(title=item) for item in command.skills),
     )
     return _profile_view(await service.update_participant_profile(authenticated, profile))
+
+
+class ThemeUpdateRequest(BaseModel):
+    theme: Literal["dark", "light", "system"]
+
+
+@router.put("/me/theme", response_model=ActorView)
+async def update_actor_theme(
+    command: ThemeUpdateRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[DemoAuthService, Depends(_service)],
+) -> ActorView:
+    actor = await service.save_theme(authenticated, command.theme)
+    return _actor_view(AuthenticatedSession(actor=actor, session=authenticated.session))
 
 
 @router.post("/me/active-role", response_model=ActorView)

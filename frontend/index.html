@@ -15,6 +15,22 @@
       content="Impulse — путь от профессиональной пробы до подтверждённого опыта"
     />
     <title>Impulse</title>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("impulse-theme");
+          var theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches
+                ? "light"
+                : "dark";
+          document.documentElement.dataset.theme = theme;
+        } catch (error) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
