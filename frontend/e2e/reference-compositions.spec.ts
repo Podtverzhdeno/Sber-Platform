@@ -120,8 +120,7 @@ interface ParticipantMocks {
 }
 
 async function installParticipantData(page: Page, options: ParticipantMocks = {}): Promise<void> {
-  const task = { id: "task-market", title: "MVP поиска программ", status: "published", places: 1 };
-  const terms = {
+  const task = { id: "task-market", title: "MVP поиска программ", status: "published", places: 1 };  const terms = {
     version: 2,
     deadline_at: "2026-11-01T18:00:00Z",
     deliverable: "Работающий MVP и отчёт по метрикам.",
@@ -141,6 +140,53 @@ async function installParticipantData(page: Page, options: ParticipantMocks = {}
       payout_condition: "После принятия личного вклада и публикации оценки человеком.",
     },
   };
+  await page.route("**/api/v1/me/growth/next-step", (route) => route.fulfill({
+    json: {
+      policy_version: 1,
+      steps: [
+        {
+          trajectory_key: "python-dev",
+          milestone_key: "m2",
+          target_kind: "course",
+          target_key: "rag-mvp",
+          target_title: "RAG: надёжный поиск по документам",
+          position: 2,
+          score: 4,
+          factors: ["trajectory_gap", "milestone_priority"],
+          reasons: ["coverage_inserted"],
+          available: true,
+          stale_reason: null,
+        },
+      ],
+      next_available: {
+        trajectory_key: "python-dev",
+        milestone_key: "m2",
+        target_kind: "course",
+        target_key: "rag-mvp",
+        target_title: "RAG: надёжный поиск по документам",
+        position: 2,
+        score: 4,
+        factors: ["trajectory_gap", "milestone_priority"],
+        reasons: ["coverage_inserted"],
+        available: true,
+        stale_reason: null,
+      },
+      skill: {
+        policy_version: 1,
+        skill_key: "python",
+        title: "Python",
+        requested_skill: "Python",
+        current_level: "базовый",
+        target_level: "уверенный",
+        current_known: true,
+        counted_sources: ["course:python-base"],
+        missing_evidence: ["checkpoint:rag-checkpoint", "project:semantic-search-rd"],
+        explanation:
+          "Уровень «базовый» подтверждён источниками course:python-base. До целевого уровня «уверенный» нужны источники: checkpoint:rag-checkpoint, project:semantic-search-rd. Выбран шаг «course:rag-mvp (RAG: надёжный поиск по документам)», но он не закрывает недостающие источники — карта не обещает повышение уровня.",
+        fallback: null,
+      },
+    },
+  }));
   await page.route("**/api/v1/development/tracks", (route) => route.fulfill({
     json: {
       active_count: 1,

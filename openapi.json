@@ -3575,6 +3575,16 @@
             "title": "Policy Version",
             "type": "integer"
           },
+          "skill": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SkillGapView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "steps": {
             "items": {
               "$ref": "#/components/schemas/ScoredStepView"
@@ -3586,7 +3596,8 @@
         "required": [
           "policy_version",
           "steps",
-          "next_available"
+          "next_available",
+          "skill"
         ],
         "title": "NextStepView",
         "type": "object"
@@ -6204,6 +6215,90 @@
         ],
         "title": "SettlementKind",
         "type": "string"
+      },
+      "SkillGapView": {
+        "description": "Skill Passport gap projection for the next-result card (openspec 22.2).",
+        "properties": {
+          "counted_sources": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Counted Sources",
+            "type": "array"
+          },
+          "current_known": {
+            "title": "Current Known",
+            "type": "boolean"
+          },
+          "current_level": {
+            "title": "Current Level",
+            "type": "string"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "fallback": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fallback"
+          },
+          "missing_evidence": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Evidence",
+            "type": "array"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "requested_skill": {
+            "title": "Requested Skill",
+            "type": "string"
+          },
+          "skill_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Skill Key"
+          },
+          "target_level": {
+            "title": "Target Level",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_version",
+          "skill_key",
+          "title",
+          "requested_skill",
+          "current_level",
+          "target_level",
+          "current_known",
+          "counted_sources",
+          "missing_evidence",
+          "explanation",
+          "fallback"
+        ],
+        "title": "SkillGapView",
+        "type": "object"
       },
       "SkillPositionView": {
         "properties": {

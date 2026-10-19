@@ -3573,6 +3573,7 @@ export interface components {
             next_available: components["schemas"]["ScoredStepView"] | null;
             /** Policy Version */
             policy_version: number;
+            skill: components["schemas"]["SkillGapView"] | null;
             /** Steps */
             steps: components["schemas"]["ScoredStepView"][];
         };
@@ -4552,6 +4553,34 @@ export interface components {
          * @enum {string}
          */
         SettlementKind: "payment" | "reversal";
+        /**
+         * SkillGapView
+         * @description Skill Passport gap projection for the next-result card (openspec 22.2).
+         */
+        SkillGapView: {
+            /** Counted Sources */
+            counted_sources: string[];
+            /** Current Known */
+            current_known: boolean;
+            /** Current Level */
+            current_level: string;
+            /** Explanation */
+            explanation: string;
+            /** Fallback */
+            fallback: string | null;
+            /** Missing Evidence */
+            missing_evidence: string[];
+            /** Policy Version */
+            policy_version: number;
+            /** Requested Skill */
+            requested_skill: string;
+            /** Skill Key */
+            skill_key: string | null;
+            /** Target Level */
+            target_level: string;
+            /** Title */
+            title: string;
+        };
         /** SkillPositionView */
         SkillPositionView: {
             /** Current Level */

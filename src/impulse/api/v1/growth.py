@@ -14,12 +14,12 @@ from impulse.application.development import DevelopmentService
 from impulse.application.growth import GrowthService
 from impulse.application.identity import AuthenticatedSession
 from impulse.application.work import WorkService
+from impulse.domain.passport import SkillGapProjection
 from impulse.domain.priority import ScoredStep
 
 router = APIRouter()
 
 TARGET_LEVEL_LABEL = "уверенный"
-
 
 class WeightedProgressView(BaseModel):
     percent: float | None
@@ -101,10 +101,43 @@ class ScoredStepView(BaseModel):
     stale_reason: str | None
 
 
+class SkillGapView(BaseModel):
+    """Skill Passport gap projection for the next-result card (openspec 22.2)."""
+
+    policy_version: int
+    skill_key: str | None
+    title: str
+    requested_skill: str
+    current_level: str
+    target_level: str
+    current_known: bool
+    counted_sources: list[str]
+    missing_evidence: list[str]
+    explanation: str
+    fallback: str | None
+
+
 class NextStepView(BaseModel):
     policy_version: int
     steps: list[ScoredStepView]
     next_available: ScoredStepView | None
+    skill: SkillGapView | None
+
+
+def _skill_gap_view(item: SkillGapProjection) -> SkillGapView:
+    return SkillGapView(
+        policy_version=item.policy_version,
+        skill_key=item.skill_key,
+        title=item.title,
+        requested_skill=item.requested_skill,
+        current_level=item.current_level,
+        target_level=item.target_level,
+        current_known=item.current_known,
+        counted_sources=list(f"{kind}:{ref}" for kind, ref in item.counted_sources),
+        missing_evidence=list(f"{kind}:{ref}" for kind, ref in item.missing_evidence),
+        explanation=item.explanation,
+        fallback=item.fallback,
+    )
 
 
 def _step_view(item: ScoredStep) -> ScoredStepView:
@@ -266,6 +299,12 @@ async def growth_next_step(
         steps=[_step_view(item) for item in result.steps],
         next_available=(
             _step_view(best) if (best := result.next_available()) is not None else None
+        ),
+        skill=(
+            _skill_gap_view(gap)
+            if (gap := await service.skill_passport(authenticated.actor, result, _roadmaps))
+            is not None
+            else None
         ),
     )
 

@@ -1,4 +1,5 @@
 ﻿import { QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { PassportNextResultCard } from "./features/next-result";
 import {
   useDeferredValue,
   useEffect,
@@ -681,28 +682,11 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
       </section>
       <div className="dashboard-columns">
         <article className="focus-panel">
-          <div>
-            <p className="eyebrow">Следующий результат</p>
-            <span className="ui-badge ui-badge--info">MVP · 70%</span>
-            <h2>Прототип рекомендательной системы</h2>
-            <p>
-              Подключите API научных источников, измерьте качество выдачи и
-              загрузите воспроизводимый отчёт до 12 октября.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setProjectOpen(true);
-              }}
-            >
-              Открыть рабочую область →
-            </button>
-          </div>
-          <div className="focus-visual" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
+          <PassportNextResultCard
+            onOpenWorkspace={() => {
+              setProjectOpen(true);
+            }}
+          />
         </article>
         <aside className="ai-panel">
           <div>

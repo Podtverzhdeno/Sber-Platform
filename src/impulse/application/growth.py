@@ -45,6 +45,11 @@ from impulse.domain.growth import (
     weighted_completion,
 )
 from impulse.domain.identity import ActorContext
+from impulse.domain.passport import (
+    PassportSkillFacts,
+    SkillGapProjection,
+    skill_passport_gap,
+)
 from impulse.domain.priority import (
     PolicyResult,
     StepSpec,
@@ -535,6 +540,58 @@ class GrowthService:
         states = await self._target_states(active_tracks, roadmaps, courses_index, tasks_by_key)
         return roadmaps if roadmaps else None, select_steps(tuple(specs), states)
 
+    async def skill_passport(
+        self,
+        actor: ActorContext,
+        result: PolicyResult,
+        roadmaps: dict[str, RoadmapRecord] | None,
+    ) -> SkillGapProjection | None:
+        """Проекция Skill Passport gap для карты «Следующий результат» (openspec 22.2)."""
+        card = result.next_available()
+        if card is None:
+            card = result.steps[0] if result.steps else None
+        if card is None:
+            return None
+        roadmap = (roadmaps or {}).get(card.spec.trajectory_key)
+        if roadmap is None:
+            return None
+        milestone = next(
+            (item for item in roadmap.milestones if item.key == card.spec.milestone_key), None
+        )
+        if milestone is None:
+            return None
+        candidate_step = (
+            card.spec.target_kind,
+            card.spec.target_key,
+            card.spec.target_title,
+        )
+        facts: list[PassportSkillFacts] = []
+        for report in await self._competency.person_reports(actor.person_id):
+            for point in report.skills:
+                facts.append(
+                    PassportSkillFacts(
+                        key=point.skill.key,
+                        title=point.skill.title,
+                        evidence_sources=point.skill.evidence_sources,
+                        counted=tuple(
+                            (anchor.row.source_kind, anchor.row.source_ref)
+                            for anchor in point.anchors
+                        ),
+                        excluded=tuple(
+                            (anchor.row.source_kind, anchor.row.source_ref)
+                            for anchor in point.excluded
+                        ),
+                        level=point.level,
+                    )
+                )
+        return skill_passport_gap(
+            requested_skill=milestone.skill,
+            target_level="уверенный",
+            target_rank=SKILL_TARGET_RANK,
+            candidates=tuple(facts),
+            candidate_step=candidate_step,
+        )
+
     async def _target_states(
         self,
         active_tracks: tuple[TrackRecord, ...],
@@ -588,6 +645,7 @@ __all__ = [
     "GrowthSnapshot",
     "HoursBlock",
     "MilestoneSnapshot",
+    "SkillGapProjection",
     "SkillPositionSnapshot",
     "TrajectoryGrowth",
 ]
