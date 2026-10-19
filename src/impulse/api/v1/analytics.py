@@ -317,11 +317,11 @@ async def role_analytics(
         for event in events:
             if event.stage is not PipelineStage.INVITATION:
                 continue
-            start = first_saves.get(event.candidate_id)
-            if start is None or event.occurred_at < start:
+            saved_at = first_saves.get(event.candidate_id)
+            if saved_at is None or event.occurred_at < saved_at:
                 continue
             observations += 1
-            seconds_sum += (event.occurred_at - start).total_seconds()
+            seconds_sum += (event.occurred_at - saved_at).total_seconds()
         selection = unknown_reason(
             hours_metric(
                 key="pilot_selection_hours",

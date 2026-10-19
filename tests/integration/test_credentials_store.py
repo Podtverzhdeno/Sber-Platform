@@ -3,7 +3,7 @@
 import os
 from dataclasses import replace
 from datetime import UTC, datetime
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from sqlalchemy import delete, func, select
@@ -38,7 +38,7 @@ def integration_url() -> str:
     return async_database_url(url)
 
 
-def demo_certificate(person_id) -> CourseCertificate:
+def demo_certificate(person_id: UUID) -> CourseCertificate:
     return CourseCertificate(
         certificate_id=uuid4(),
         verification_id=f"cert-{uuid4().hex[:12]}",
@@ -59,7 +59,7 @@ def demo_certificate(person_id) -> CourseCertificate:
     )
 
 
-def demo_credential(person_id) -> ProjectCredential:
+def demo_credential(person_id: UUID) -> ProjectCredential:
     return ProjectCredential(
         credential_id=uuid4(),
         verification_id=f"proj-{uuid4().hex[:12]}",

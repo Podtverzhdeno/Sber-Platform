@@ -293,9 +293,7 @@ class DemoAuthService:
                 status_code=403,
             )
 
-    async def save_theme(
-        self, authenticated: AuthenticatedSession, theme: str
-    ) -> ActorContext:
+    async def save_theme(self, authenticated: AuthenticatedSession, theme: str) -> ActorContext:
         if theme not in {"dark", "light", "system"}:
             raise ApiError("PROFILE_THEME_UNSUPPORTED", "Тема не поддерживается.", 422)
         if authenticated.actor.active_role is not Role.PARTICIPANT:
@@ -303,9 +301,7 @@ class DemoAuthService:
         profile = await self.store.participant_profile(authenticated.actor.person_id)
         if profile is None:
             return authenticated.actor
-        await self.store.update_participant_profile(
-            replace(profile, theme=theme)
-        )
+        await self.store.update_participant_profile(replace(profile, theme=theme))
         return authenticated.actor
 
     async def switch_role(self, authenticated: AuthenticatedSession, role: Role) -> ActorContext:

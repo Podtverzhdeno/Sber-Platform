@@ -3,8 +3,10 @@
 import asyncio
 from datetime import UTC, datetime
 from decimal import Decimal
+from typing import Any, cast
 from uuid import uuid4
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
@@ -73,7 +75,7 @@ def test_search_requires_session() -> None:
     assert anonymous.status_code == 401
 
 
-def _seed_shared_dialog(api: TestClient) -> dict:
+def _seed_shared_dialog(api: TestClient) -> dict[str, Any]:
     """Create a personal dialog + message so memory-mode search has context."""
     csrf = api.post("/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}).json()[
         "csrf_token"
@@ -145,8 +147,9 @@ def test_search_uses_canonical_peer_route_for_messages() -> None:
 
 def test_search_documents_only_own_credentials() -> None:
     api = build()
+    app = cast(FastAPI, api.app)
     asyncio.run(
-        api.app.state.recognition_service.store.add_credential(
+        app.state.recognition_service.store.add_credential(
             Credential(
                 credential_id=uuid4(),
                 verification_id="RPM-SEARCH-0001",

@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from fastapi import FastAPI
 from starlette.exceptions import HTTPException
 from starlette.staticfiles import StaticFiles
-from starlette.types import Scope
+from starlette.types import ExceptionHandler, Scope
 
 from impulse.api.errors import error_for_exception
 
@@ -68,7 +68,7 @@ def install_spa_fallback(app: FastAPI, directory: Path) -> None:
                 pass  # Asset lookup failed: keep the stable envelope instead.
         return error_for_exception(request, exc)
 
-    app.add_exception_handler(HTTPException, spa_or_envelope)
+    app.add_exception_handler(HTTPException, cast(ExceptionHandler, spa_or_envelope))
 
 
 def _serve_allowed(path: str, accepts_html: bool) -> bool:

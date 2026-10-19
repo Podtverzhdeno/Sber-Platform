@@ -4,9 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from impulse.application.development import CourseRecord
-from impulse.application.ecosystem import EventRecord
-from impulse.application.identity import ActorContext
+from impulse.application.development import DevelopmentStore
+from impulse.application.ecosystem import EcosystemStore
+from impulse.application.identity import ActorContext, DemoAuthService
+from impulse.application.messaging import MessagingService
+from impulse.application.recognition import RecognitionStore
+from impulse.application.work import WorkStore
 
 
 @dataclass(frozen=True, slots=True)
@@ -26,13 +29,13 @@ class SearchService:
 
     def __init__(
         self,
-        work_store,
-        development_store,
-        ecosystem_store,
+        work_store: WorkStore,
+        development_store: DevelopmentStore,
+        ecosystem_store: EcosystemStore,
         *,
-        messaging_service=None,
-        auth_service=None,
-        recognition_store=None,
+        messaging_service: MessagingService | None = None,
+        auth_service: DemoAuthService | None = None,
+        recognition_store: RecognitionStore | None = None,
     ) -> None:
         self.work_store = work_store
         self.development_store = development_store
@@ -65,7 +68,6 @@ class SearchService:
                 )
 
         for course in await self.development_store.courses():
-            course: CourseRecord
             if _contains(prepared, course.title):
                 hits.append(
                     SearchHit(
@@ -77,7 +79,6 @@ class SearchService:
                 )
 
         for event in await self.ecosystem_store.events():
-            event: EventRecord
             if _contains(prepared, event.title, event.organizer):
                 hits.append(
                     SearchHit(
@@ -100,9 +101,13 @@ class SearchService:
         self, prepared: str, actor_context: ActorContext
     ) -> tuple[SearchHit, ...]:
         """People from shared messaging channels only; personas of other chats stay invisible."""
+        messaging = self.messaging_service
+        auth = self.auth_service
+        if messaging is None or auth is None:
+            return ()
         hits: list[SearchHit] = []
-        for peer_id in await self.messaging_service.accessible_peers(actor_context):
-            persona = await self.auth_service.store.get_persona_by_id(peer_id)
+        for peer_id in await messaging.accessible_peers(actor_context):
+            persona = await auth.store.get_persona_by_id(peer_id)
             if persona is None or not _contains(prepared, persona.display_name):
                 continue
             roles = ",".join(role.value for role in persona.roles)
@@ -119,10 +124,11 @@ class SearchService:
     async def _message_hits(
         self, prepared: str, limit: int, actor_context: ActorContext
     ) -> tuple[SearchHit, ...]:
+        messaging = self.messaging_service
+        if messaging is None:
+            return ()
         hits: list[SearchHit] = []
-        for hit in await self.messaging_service.search_messages(
-            actor_context, prepared, limit=limit
-        ):
+        for hit in await messaging.search_messages(actor_context, prepared, limit=limit):
             snippet = hit.body if len(hit.body) <= 80 else f"{hit.body[:77]}…"
             hits.append(
                 SearchHit(
@@ -137,8 +143,11 @@ class SearchService:
     async def _document_hits(
         self, prepared: str, actor_context: ActorContext
     ) -> tuple[SearchHit, ...]:
+        recognition = self.recognition_store
+        if recognition is None:
+            return ()
         hits: list[SearchHit] = []
-        for credential in await self.recognition_store.person_credentials(actor_context.person_id):
+        for credential in await recognition.person_credentials(actor_context.person_id):
             if _contains(prepared, credential.title, credential.level, credential.verification_id):
                 hits.append(
                     SearchHit(

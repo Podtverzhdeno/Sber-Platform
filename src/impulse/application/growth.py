@@ -168,7 +168,7 @@ class GrowthService:
         now = datetime.now(UTC).replace(microsecond=0)
         store = self._development.store
         tracks = {item.key: item for item in await store.tracks()}
-        attempts = (await store.attempts(actor.person_id))
+        attempts = await store.attempts(actor.person_id)
         attempts_by_track = {attempt.track_key: attempt for attempt in attempts}
         active_tracks = tuple(
             tracks[attempt.track_key] for attempt in attempts if attempt.track_key in tracks
@@ -183,9 +183,7 @@ class GrowthService:
             for enrollment in await store.enrollments(actor.person_id)
             if enrollment.status is CompletionStatus.VERIFIED
         )
-        course_index: dict[str, CourseRecord] = {
-            item.key: item for item in await store.courses()
-        }
+        course_index: dict[str, CourseRecord] = {item.key: item for item in await store.courses()}
         published_task_keys = frozenset(
             item.task_key for item in await self._work.store.published_tasks()
         )
@@ -205,9 +203,9 @@ class GrowthService:
             tuple((event.occurred_at, event.kind) for event in events),
             boundaries=boundaries,
         )
-        observed = frozenset(
-            event.occurred_at for event in events
-        ) | frozenset(interval[1] for interval in intervals)
+        observed = frozenset(event.occurred_at for event in events) | frozenset(
+            interval[1] for interval in intervals
+        )
         latest_observed_at = max(observed) if observed else None
         return GrowthSnapshot(
             snapshot_id=uuid5(NAMESPACE_URL, f"impulse-growth:{actor.person_id}:{now}"),
@@ -357,9 +355,7 @@ class GrowthService:
         known_keys = frozenset(point.skill_key for point in skills if point.known)
         return skills, readiness(weights, current_ranks, known_keys)
 
-    def _hours(
-        self, intervals: tuple[tuple[datetime, datetime, str, str], ...]
-    ) -> HoursBlock:
+    def _hours(self, intervals: tuple[tuple[datetime, datetime, str, str], ...]) -> HoursBlock:
         minutes = merged_minutes(tuple((item[0], item[1]) for item in intervals))
         return HoursBlock(
             known=bool(intervals),
@@ -373,9 +369,7 @@ class GrowthService:
             ),
         )
 
-    def _activity_events(
-        self, items: tuple[WorkItem, ...]
-    ) -> tuple[ActivityEventSnapshot, ...]:
+    def _activity_events(self, items: tuple[WorkItem, ...]) -> tuple[ActivityEventSnapshot, ...]:
         events: list[ActivityEventSnapshot] = []
         for item in items:
             title = item.task.title
@@ -480,9 +474,7 @@ class GrowthService:
             return item.target_key in published_task_keys
         return False
 
-    def _target_title(
-        self, item: RoadmapMilestone, courses: dict[str, CourseRecord]
-    ) -> str:
+    def _target_title(self, item: RoadmapMilestone, courses: dict[str, CourseRecord]) -> str:
         if item.target_kind == "course":
             course = courses.get(item.target_key)
             if course is not None:
@@ -510,9 +502,7 @@ class GrowthService:
             record = await store.roadmap(track.key)
             if record is not None:
                 roadmaps[track.key] = record
-        courses_index: dict[str, CourseRecord] = {
-            item.key: item for item in await store.courses()
-        }
+        courses_index: dict[str, CourseRecord] = {item.key: item for item in await store.courses()}
         tasks_by_key: dict[str, object] = {
             item.task_key: item for item in await self._work.store.published_tasks()
         }

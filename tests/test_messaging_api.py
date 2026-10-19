@@ -6,9 +6,11 @@ from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
 from impulse.application.messaging import (
+    ChannelWorkContext,
     MemoryMessagingStore,
     MessagingService,
     TaskChannelContext,
+    TaskChannelSource,
 )
 from impulse.bootstrap.app import create_app
 from impulse.bootstrap.settings import AppEnvironment, Settings
@@ -28,19 +30,26 @@ class FakeTaskChannels:
         by_person: dict[UUID, tuple[TaskChannelContext, ...]],
         senders: dict[UUID, set[UUID]],
     ) -> None:
-        self._by_person = by_person
-        self._senders = senders
+        self.by_person = by_person
+        self.senders = senders
 
     async def channels_for(self, person_id: UUID) -> tuple[TaskChannelContext, ...]:
-        return self._by_person.get(person_id, ())
+        return self.by_person.get(person_id, ())
 
     async def can_send(self, person_id: UUID, task_id: UUID) -> bool:
-        return person_id in self._senders.get(task_id, set())
+        return person_id in self.senders.get(task_id, set())
+
+    async def work_context(self, task_id: UUID) -> ChannelWorkContext | None:
+        # Task work context is outside the scenarios covered by this test module.
+        del task_id
+        return None
 
 
-def build(**overrides) -> tuple[TestClient, MemoryMessagingStore]:
+def build(
+    *, task_channels: TaskChannelSource | None = None
+) -> tuple[TestClient, MemoryMessagingStore]:
     store = MemoryMessagingStore()
-    service = MessagingService(store, task_channels=overrides.pop("task_channels", None))
+    service = MessagingService(store, task_channels=task_channels)
     api = TestClient(
         create_app(
             Settings(
@@ -175,10 +184,10 @@ def test_task_channel_visibility_and_revocation() -> None:
     assert hidden.json()["code"] == "RESOURCE_NOT_FOUND"
 
     # Losing send access blocks sending but keeps history readable (fresh alex session).
-    task_channels._by_person[ALEX] = (
+    task_channels.by_person[ALEX] = (
         TaskChannelContext(TASK_ID, "Прототип рекомендательной системы", ROMAN, (ELENA,), ()),
     )
-    task_channels._senders[TASK_ID].discard(ALEX)
+    task_channels.senders[TASK_ID].discard(ALEX)
     alex_csrf = login(api, "participant-alex")
     read_only = api.post(
         f"/api/v1/me/messaging/channels/{channel['id']}/messages",

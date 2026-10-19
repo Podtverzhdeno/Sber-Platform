@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 import structlog
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.types import ExceptionHandler
 
 from impulse.api.request_context import get_request_id
 
@@ -104,8 +105,8 @@ def install_error_handlers(app: FastAPI) -> None:
             500,
         )
 
-    app.add_exception_handler(ApiError, api_error_handler)
-    app.add_exception_handler(StarletteHTTPException, error_for_exception)
+    app.add_exception_handler(ApiError, cast(ExceptionHandler, api_error_handler))
+    app.add_exception_handler(StarletteHTTPException, cast(ExceptionHandler, error_for_exception))
     app.add_exception_handler(Exception, unexpected_error_handler)
 
 

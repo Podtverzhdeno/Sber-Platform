@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any, cast
 from uuid import UUID
 
-from sqlalchemy import desc, func, insert, select, update
+from sqlalchemy import CursorResult, Row, desc, func, insert, select, update
 
 from impulse.domain.notifications import Notification, NotificationKind
 from impulse.infrastructure.database import Database
@@ -18,7 +19,7 @@ class SqlNotificationsStore:
     def __init__(self, database: Database) -> None:
         self.database = database
 
-    def _row_notification(self, row) -> Notification:
+    def _row_notification(self, row: Row[Any]) -> Notification:
         return Notification(
             id=row.id,
             person_id=row.person_id,
@@ -102,4 +103,4 @@ class SqlNotificationsStore:
                 )
                 .values(read_at=datetime.now(UTC), version=notifications.c.version + 1)
             )
-            return changed.rowcount or 0
+            return cast(CursorResult[Any], changed).rowcount or 0

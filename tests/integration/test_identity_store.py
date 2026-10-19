@@ -7,7 +7,7 @@ import os
 import httpx
 import pytest
 from pydantic import SecretStr
-from sqlalchemy import func, select
+from sqlalchemy import ColumnElement, func, select
 
 from impulse.application.identity import DemoAuthService
 from impulse.bootstrap.app import create_app
@@ -45,7 +45,7 @@ async def test_sql_session_role_switch_and_consent_projection() -> None:
     )
     app = create_app(settings, auth_service=service)
 
-    def consent_filters() -> tuple:
+    def consent_filters() -> tuple[ColumnElement[bool], ...]:
         return (
             consents.c.person_id == demo_id("participant-alex"),
             consents.c.scope == "hr_profile",

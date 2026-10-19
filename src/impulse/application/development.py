@@ -5,7 +5,7 @@ from __future__ import annotations
 import secrets
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
-from typing import Protocol
+from typing import Protocol, TypedDict
 from uuid import UUID, uuid4
 
 from impulse.api.errors import ApiError
@@ -83,7 +83,16 @@ class CourseCertificate:
         return "Демонстрационный образец"
 
 
-COURSE_CERTIFICATE_REGISTRY: dict[str, dict[str, object]] = {
+class CourseCertificateSpec(TypedDict):
+    """Static per-course certificate descriptor from the Bootcamp registry."""
+
+    specialization: str
+    program_version: str
+    workload_hours: int
+    competencies: tuple[tuple[str, str, str], ...]
+
+
+COURSE_CERTIFICATE_REGISTRY: dict[str, CourseCertificateSpec] = {
     "openspec-sdd": {
         "specialization": "Python / Data / Product / ML",
         "program_version": "1.0.0",

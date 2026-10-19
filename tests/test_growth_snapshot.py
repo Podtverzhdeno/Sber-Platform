@@ -139,15 +139,17 @@ def test_growth_snapshot_aggregates_verified_course_completion() -> None:
         RoadmapRecord(
             track_key="python",
             policy_version=9,
-            milestones=(RoadmapMilestone(
-                key="foundation",
-                position=1,
-                title="Освоить основу",
-                purpose="Создать базу для первой практической задачи.",
-                skill="Python-разработчик",
-                target_kind="course",
-                target_key="python-base",
-            ),),
+            milestones=(
+                RoadmapMilestone(
+                    key="foundation",
+                    position=1,
+                    title="Освоить основу",
+                    purpose="Создать базу для первой практической задачи.",
+                    skill="Python-разработчик",
+                    target_kind="course",
+                    target_key="python-base",
+                ),
+            ),
         )
     )
     dev_store.enroll_as(demo_id("participant-alex"))

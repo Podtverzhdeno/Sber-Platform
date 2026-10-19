@@ -12,6 +12,7 @@ from uuid import UUID, uuid4
 from impulse.api.errors import ApiError
 from impulse.application.work import WorkStore
 from impulse.domain.identity import ActorContext
+from impulse.domain.reward import Review5Plus
 from impulse.domain.work import (
     AssignmentStatus,
     ContributionStatus,
@@ -143,7 +144,7 @@ class TaskChannelSource(Protocol):
 
 
 class ReviewStoreLite(Protocol):
-    async def current_reviews(self) -> tuple: ...
+    async def current_reviews(self) -> tuple[Review5Plus, ...]: ...
 
 
 class MessagingStore(Protocol):

@@ -173,9 +173,7 @@ def _score(spec: StepSpec, state: TargetState) -> ScoredStep:
         if effort_penalty > 0:
             reasons.append(f"Оценочный объём {state.effort_hours} ч снижает приоритет")
 
-    percent_score = (
-        (score * Decimal(100)).quantize(Decimal("0.1"), ROUND_HALF_UP) / Decimal(100)
-    )
+    percent_score = (score * Decimal(100)).quantize(Decimal("0.1"), ROUND_HALF_UP) / Decimal(100)
     return ScoredStep(
         spec=spec,
         state=state,

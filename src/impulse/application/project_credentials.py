@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from typing import Protocol
 from uuid import UUID, uuid4
 
 from impulse.api.errors import ApiError
 from impulse.application.identity import ActorContext
+from impulse.application.reward import ReviewStore
+from impulse.application.work import WorkStore
 from impulse.domain.identity import ConsentScope, Role
 from impulse.domain.reward import Review5Plus, ReviewGrade, ReviewStatus
 from impulse.domain.work import ContributionStatus
@@ -99,12 +101,10 @@ class MemoryProjectCredentialStore:
         if superseded_id is not None:
             previous = self._by_verification.get(superseded_id)
             if previous is not None:
-                superseded = ProjectCredential(
-                    **{
-                        **previous.__dict__,
-                        "status": "superseded",
-                        "superseded_by": credential.verification_id,
-                    }
+                superseded = replace(
+                    previous,
+                    status="superseded",
+                    superseded_by=credential.verification_id,
                 )
                 self._by_key[(previous.contribution_id, previous.contribution_version)] = superseded
                 self._by_verification[superseded.verification_id] = superseded
@@ -116,8 +116,8 @@ class ProjectCredentialService:
 
     def __init__(
         self,
-        work_store,
-        reward_store,
+        work_store: WorkStore,
+        reward_store: ReviewStore,
         store: ProjectCredentialStore,
         persona_by_id: Callable[[UUID], Awaitable[object]] | None = None,
     ) -> None:

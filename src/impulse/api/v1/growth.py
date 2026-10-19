@@ -173,8 +173,7 @@ async def growth_snapshot(
         definitions=snapshot.definitions,
         period_boundaries=boundaries,
         activity={
-            name: ActivityBucketView(**counts)
-            for name, counts in sorted(snapshot.activity.items())
+            name: ActivityBucketView(**counts) for name, counts in sorted(snapshot.activity.items())
         },
         events=[
             ActivityEventView(

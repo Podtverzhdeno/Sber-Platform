@@ -12,7 +12,7 @@ from pydantic import AnyHttpUrl, AwareDatetime, BaseModel, Field
 
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import csrf_session, current_session
-from impulse.application.identity import AuthenticatedSession
+from impulse.application.identity import AuthenticatedSession, PersonaRecord
 from impulse.application.project_credentials import ProjectCredentialService
 from impulse.application.work import (
     AcceptanceRecord,
@@ -671,7 +671,7 @@ def _marketplace_view(item: MarketplaceTask) -> MarketplaceTaskView:
     )
 
 
-def _partner_view(person_id: UUID | None, persona) -> PartnerView | None:
+def _partner_view(person_id: UUID | None, persona: PersonaRecord | None) -> PartnerView | None:
     if person_id is None:
         return None
     return PartnerView(
@@ -967,7 +967,7 @@ async def talent_passport(
                 skill_fresh[tag] = item.submitted_at
     now = datetime.now(UTC)
     fresh_limit = now - timedelta(days=90)
-    case_views = []
+    case_views: list[CaseEvidenceView] = []
     for entry in cases:
         view = CaseEvidenceView.model_validate(entry, from_attributes=True).model_dump()
         view["freshness"] = "current" if entry.submitted_at >= fresh_limit else "aging"
@@ -1155,7 +1155,7 @@ async def participant_task_detail(
         if assignee_view is not None:
             support = SupportView(mode=aggregate.support.mode.value, assignee=assignee_view)
 
-    team = []
+    team: list[TeamMemberView] = []
     for member in detail.team:
         persona = await personas.get_persona_by_id(member.person_id)
         member_view = _partner_view(member.person_id, persona)

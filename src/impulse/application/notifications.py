@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Protocol, runtime_checkable
 from uuid import UUID, uuid4
@@ -98,10 +98,13 @@ class NotificationStore(Protocol):
 class MemoryNotificationsStore:
     """dict-backed store used for in-process and DB-less runs."""
 
-    _items: dict[UUID, list[Notification]] = field(default_factory=dict)
+    _items: dict[UUID, list[Notification]]
 
     def __init__(self, items: Mapping[UUID, tuple[Notification, ...]] | None = None) -> None:
-        self._items = {person_id: list(rows) for person_id, rows in (items or {}).items()}
+        if items is None:
+            self._items = {}
+        else:
+            self._items = {person_id: list(rows) for person_id, rows in items.items()}
 
     async def list(self, person_id: UUID) -> tuple[Notification, ...]:
         rows = self._items.get(person_id, [])
