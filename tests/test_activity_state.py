@@ -46,12 +46,15 @@ def _login(client: TestClient) -> None:
 
 
 def _counts(**kind_values: int) -> dict[str, int]:
-    counts = {key: 0 for key in (
-        "course_checkpoint",
-        "project_submission",
-        "revision_accepted",
-        "event_participation",
-    )}
+    counts = {
+        key: 0
+        for key in (
+            "course_checkpoint",
+            "project_submission",
+            "revision_accepted",
+            "event_participation",
+        )
+    }
     counts.update(kind_values)
     counts["total"] = sum(counts.values())
     return counts
@@ -85,7 +88,9 @@ def test_activity_state_risk_names_missing_category_and_action() -> None:
 @pytest.mark.spec("participant-experience/activity-state")
 def test_activity_state_risk_without_zero_kinds_reports_minimum() -> None:
     result = activity_state(
-        _counts(course_checkpoint=2, project_submission=1, revision_accepted=1, event_participation=1),
+        _counts(
+            course_checkpoint=2, project_submission=1, revision_accepted=1, event_participation=1
+        ),
         target=(12, 30),
     )
     assert result.state == "risk"
