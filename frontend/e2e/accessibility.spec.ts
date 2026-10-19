@@ -40,6 +40,25 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
   });
 }
 
+for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
+  test(`light theme accessibility at ${String(viewport.width)}px`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.setViewportSize(viewport);
+    await page.goto("/");
+    await page.locator('[data-persona="participant-alex"]').click();
+    if (viewport.width < 1024) {
+      await page.getByRole("button", { name: "Меню", exact: true }).click();
+      await expect(page.getByRole("button", { name: "Меню", exact: true })).toHaveAttribute("aria-expanded", "true");
+    }
+    await page.getByRole("link", { name: "Bootcamp" }).click();
+    await expect(page).toHaveURL(/\/workspace\/1$/);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    const results = await new AxeBuilder({ page }).analyze();
+    const violations = results.violations.filter((item) => ["critical", "serious"].includes(item.impact ?? ""));
+    expect(violations.map((item) => ({ id: item.id, impact: item.impact, nodes: item.nodes.map((node) => node.target) }))).toEqual([]);
+  });
+}
+
 test("page guard rejects a section outside role navigation", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
