@@ -248,7 +248,6 @@ jobs:
       - name: Verify built security controls
         run: npm run security:check
       - name: Run browser tests
-      - name: Run browser tests
         run: |
           set -o pipefail
           npm run test:e2e 2>&1 | tee e2e.log
