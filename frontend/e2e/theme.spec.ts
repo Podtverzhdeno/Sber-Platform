@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+test.use({ colorScheme: "light" });
+
 const actor = {
   person_id: "00000000-0000-0000-0000-000000000001",
   display_name: "Алекс Речной",
