@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+﻿import { expect, test } from "@playwright/test";
 
 const navigation = ["Главная", "Моя траектория", "Bootcamp", "Задачи", "Мои проекты", "События", "Рейтинг", "Портфолио", "Достижения", "Аналитика", "Сообщения", "AI-Buddy", "Настройки"];
 
@@ -174,7 +174,7 @@ test.beforeEach(async ({ page }) => {
           ],
           completion: { percent: 66.7, coverage: 1, partial: false },
           readiness_skills: [
-            { skill_key: "Python", title: "Python", current_level: "базовый", known: true },
+            { skill_key: "Python", title: "Python", current_level: "базовый", target_level: "уверенный", known: true },
           ],
           readiness: { percent: 50, coverage: 1, partial: false },
           object_refs: [],
@@ -183,6 +183,18 @@ test.beforeEach(async ({ page }) => {
       ],
     },
   }));
+  await page.route("**/api/v1/development/tracks", (route) => route.fulfill({ json: { active_count: 1, max_active: 2, tracks: [{ key: "python-dev", title: "Python-разработчик", status: "active", completed_milestones: ["m1"] }] } }));
+  await page.route("**/api/v1/me/roadmaps", (route) => route.fulfill({ json: [
+    {
+      track_key: "python-dev",
+      policy_version: 2,
+      replacement_reason: null,
+      milestones: [
+        { key: "m1", position: 1, title: "Курс Python для анализа данных", purpose: "Основа для первого вклада", skill: "Python", target_kind: "course", target_key: "python-base", completed: true },
+      ],
+      next_step: null,
+    },
+  ] }));
 });
 
 test("logout returns persona picker and allows another role", async ({ page }) => {
@@ -281,6 +293,36 @@ test("rating opens selected public profile", async ({ page }) => {
   await expect(page.getByText("Победитель МАЯКИ")).toBeVisible();
   await page.getByRole("button", { name: /Вернуться в рейтинг/ }).click();
   await expect(page.getByRole("heading", { name: "Рейтинг подтверждённого опыта" })).toBeVisible();
+});
+
+test("trajectory views keep selection and open overview by deep link", async ({ page }) => {
+  await page.goto("/workspace/1?view=list");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByTestId("trajectory-view-list")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByTestId("trajectory-view-cards")).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByTestId("trajectory-row-python-dev")).toBeVisible();
+  await expect(page.getByTestId("trajectory-percent-python-dev")).toContainText("67%");
+  await page.getByTestId("trajectory-view-cards").click();
+  await expect(page).toHaveURL(/view=cards/);
+  await page.reload();
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByTestId("trajectory-card-python-dev")).toBeVisible();
+  await expect(page.getByTestId("trajectory-view-cards")).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("trajectory-open-overview-python-dev").click();
+  await expect(page.getByRole("dialog", { name: /Python-разработчик · обзор/ })).toBeVisible();
+  await expect(page.getByTestId("trajectory-overview-body")).toContainText("Правила evidence");
+  await expect(page.getByTestId("trajectory-overview-body")).toContainText("Этапы направления");
+  await page.locator('[aria-label="Закрыть"]').click();
+  await expect(page).not.toHaveURL(/track=/);
+  await page.goto("/workspace/1?track=python-dev&pane=detail");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByRole("dialog", { name: /Python-разработчик · подробнее/ })).toBeVisible();
+  await expect(page.getByTestId("trajectory-formula")).toContainText("равный вес");
+  await expect(page.getByTestId("trajectory-contour-0")).toContainText("базовый → уверенный");
+  await expect(page.getByTestId("trajectory-day-2026-10-16")).toBeVisible();
+  await expect(page.getByTestId("trajectory-next-step")).toContainText("course · python-base");
+  await page.getByTestId("trajectory-stage-m1").click();
+  await expect(page).toHaveURL(/workspace\/2\?course=python-base/);
 });
 
 test("search, streak, task detail and messages are interactive", async ({ page }) => {

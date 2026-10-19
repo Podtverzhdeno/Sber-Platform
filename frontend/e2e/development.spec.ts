@@ -17,6 +17,40 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
   await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: actor }));
   await page.route("**/api/v1/me/roadmaps", (route) => route.fulfill({ json: [{ track_key: "python", policy_version: 1, replacement_reason: null, milestones: [{ key: "foundation", position: 1, title: "Основа", purpose: "Подготовиться к проекту", skill: "Python", target_kind: "course", target_key: "python-base", completed: false }], next_step: { key: "foundation", position: 1, title: "Основа", purpose: "Подготовиться к проекту", skill: "Python", target_kind: "course", target_key: "python-base", completed: false } }] }));
+  await page.route("**/api/v1/me/growth/snapshot", (route) => route.fulfill({
+    json: {
+      snapshot_id: "growth-snapshot-e2e-1",
+      generated_at: "2026-10-19T17:55:00+03:00",
+      snapshot_version: 2,
+      actor_timezone: "Europe/Moscow",
+      definitions: { activity: "impulse-growth-activity-v3", hours: "impulse-growth-hours-v1", milestones: "impulse-growth-milestones-v2", readiness: "impulse-growth-readiness-v1", snapshot: "impulse-growth-snapshot-v2" },
+      period_boundaries: { day: { start: "2026-10-19T00:00:00+03:00", end: "2026-10-20T00:00:00+03:00" } },
+      activity: { day: { total: 0, course_checkpoint: 0, project_submission: 0, revision_accepted: 0, event_participation: 0 } },
+      activity_state: {},
+      events: [],
+      hours: { known: true, trusted_minutes: 0, self_reported_minutes: 0, intervals: [] },
+      freshness: { known: false, latest_observed_at: "2026-10-18T12:00:00+03:00" },
+      trajectories: [
+        {
+          track_key: "python",
+          track_title: "Python-разработчик",
+          policy_version: 1,
+          milestones: [
+            { key: "foundation", position: 1, title: "Основа", purpose: "Подготовиться к проекту", skill: "Python", target_kind: "course", target_key: "python-base", target_title: "Основа", status: "available", known: true },
+          ],
+          completion: { percent: 33.4, coverage: 1, partial: true },
+          readiness_skills: [
+            { skill_key: "Python", title: "Python", current_level: "базовый", target_level: "уверенный", known: true },
+          ],
+          readiness: { percent: 50, coverage: 1, partial: false },
+          object_refs: [],
+          next_step_ref: "course:python-base",
+        },
+      ],
+    },
+  }));
+  await page.route("**/api/v1/competency-evidence", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({ json: [] }));
 });
 
 test("participant activates second track and freezes one only when choosing third", async ({ page }) => {

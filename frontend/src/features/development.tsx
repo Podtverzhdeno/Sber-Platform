@@ -4,6 +4,10 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { apiRequest } from "../api/client";
 import { Badge, Card, Modal, SafeExternalLink, StatePanel } from "../components/ui";
+import { useEvidenceAnchors, useGrowthSnapshot } from "./kpi-data";
+import { buildStages, buildTrajectoryCards, buildTrackDetail, buildTrackOverview, isTrajectoryViewMode, trajectorySlug } from "./trajectory-data";
+import { TrackDetailBody, TrackOverviewBody, TrajectoryBoard, TrajectoryModeToggle } from "./trajectory-view";
+import type { TrajectoryViewMode } from "./trajectory-data";
 
 type Track = { key: string; title: string; status: "active" | "frozen" | null; completed_milestones: string[] };
 type TrackOverview = { active_count: number; max_active: number; tracks: Track[] };
@@ -27,13 +31,6 @@ type CourseCertificate = {
   preview_marking: string;
 };
 
-const externalRoadmaps: Record<string, { title: string; href: string }> = {
-  python: { title: "Roadmap Python-разработчика", href: "https://roadmap.sh/python" },
-  data: { title: "Roadmap аналитика данных", href: "https://roadmap.sh/data-analyst" },
-  product: { title: "Roadmap продакт-менеджера", href: "https://roadmap.sh/product-manager" },
-  ml: { title: "Roadmap ML / AI-инженера", href: "https://roadmap.sh/ai-data-scientist" },
-};
-
 function csrfHeaders(): HeadersInit {
   return { "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" };
 }
@@ -41,11 +38,19 @@ function csrfHeaders(): HeadersInit {
 export function DevelopmentJourney() {
   const client = useQueryClient();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const tracks = useQuery({ queryKey: ["tracks"], queryFn: () => apiRequest<TrackOverview>("/api/v1/development/tracks") });
   const roadmaps = useQuery({ queryKey: ["roadmaps"], queryFn: () => apiRequest<Roadmap[]>("/api/v1/me/roadmaps") });
+  const growth = useGrowthSnapshot(true);
+  const anchors = useEvidenceAnchors(true);
   const [pendingTrack, setPendingTrack] = useState<Track | null>(null);
   const [consultationVisible, setConsultationVisible] = useState(false);
   const [consultationSent, setConsultationSent] = useState(false);
+  const modeParam = searchParams.get("view");
+  const mode: TrajectoryViewMode = isTrajectoryViewMode(modeParam) ? modeParam : "cards";
+  const trackSlug = searchParams.get("track");
+  const pane = searchParams.get("pane") === "detail" ? "detail" : "overview";
+  const trackCards = buildTrajectoryCards(growth.data?.trajectories ?? null);
   const selectTrack = useMutation({
     mutationFn: ({ trackKey, freezeTrackKey }: { trackKey: string; freezeTrackKey?: string }) => apiRequest<TrackOverview>("/api/v1/me/tracks", { method: "POST", headers: csrfHeaders(), body: JSON.stringify({ track_key: trackKey, freeze_track_key: freezeTrackKey }) }),
     onSuccess: async () => {
@@ -54,10 +59,35 @@ export function DevelopmentJourney() {
     },
   });
 
+  function changeMode(value: TrajectoryViewMode) {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set("view", value);
+      return next;
+    });
+  }
+
+  function openTrack(slug: string, openPane: "overview" | "detail") {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set("track", slug);
+      next.set("pane", openPane);
+      return next;
+    });
+  }
+
+  function closeTrack() {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.delete("track");
+      next.delete("pane");
+      return next;
+    });
+  }
+
   if (tracks.isLoading || roadmaps.isLoading) return <StatePanel kind="loading" />;
   if (tracks.isError || roadmaps.isError || !tracks.data || !roadmaps.data) return <StatePanel kind="error" action="Повторить" onAction={() => { void tracks.refetch(); void roadmaps.refetch(); }} />;
   const overview = tracks.data;
-  const roadmapItems = roadmaps.data;
 
   function choose(track: Track) {
     if (track.status === "active") return;
@@ -66,17 +96,30 @@ export function DevelopmentJourney() {
   }
 
   const activeTracks = overview.tracks.filter((track) => track.status === "active");
+  const selectedTrajectory = (growth.data?.trajectories ?? []).find((trajectory) => trajectorySlug(trajectory.track_key) === trackSlug) ?? null;
+  const selectedOverview = selectedTrajectory === null ? null : buildTrackOverview(selectedTrajectory);
+  const roadmapMatch = selectedTrajectory === null ? null : roadmaps.data.find((roadmap) => trajectorySlug(roadmap.track_key) === trackSlug) ?? null;
   return (
     <div className="feature-stack" data-reference="R-PAR-02">
       <section><p className="eyebrow">Профессиональные направления</p><h1 id="workspace-title">Найдите своё через практику</h1><p className="lead">Можно развивать два направления одновременно. Смена интереса — полезный результат: прогресс сохраняется, штрафов и негативных меток нет.</p></section>
       <div className="track-grid">
         {overview.tracks.map((track) => <button className={`track-card track-card--${track.status ?? "new"}`} key={track.key} onClick={() => { choose(track); }}><span>{track.title}</span><Badge tone={track.status === "active" ? "success" : "neutral"}>{track.status === "active" ? "Активно" : track.status === "frozen" ? "Заморожено · прогресс сохранён" : "Попробовать"}</Badge></button>)}
       </div>
+      <section aria-labelledby="roadmap-title"><p className="eyebrow">Ваш roadmap</p><h2 id="roadmap-title">Следующие осмысленные шаги</h2><TrajectoryModeToggle mode={mode} onChange={changeMode} /><TrajectoryBoard mode={mode} cards={trackCards} loading={growth.isPending} onOpenTrack={openTrack} />{growth.isError && <p className="trajectory-state" data-testid="trajectory-unavailable">Прогресс направлений недоступен: обновите позже или обратитесь к ментору.</p>}</section>
       <button className="text-button" type="button" onClick={() => { setConsultationVisible(true); }}>Получить рекомендацию ментора</button>
       {consultationVisible && <Card title="Рекомендация ментора">{consultationSent ? <><Badge tone="success">Запрос отправлен</Badge><p>Елена получила контекст ваших направлений и текущего проекта. Ответ появится в сообщениях; продолжать маршрут можно сразу.</p></> : <p>Ментор увидит выбранные направления, прогресс курсов и текущий проект и сможет предложить следующий практический шаг.</p>}<div className="course-actions">{!consultationSent && <button type="button" onClick={() => { setConsultationSent(true); }}>Отправить запрос</button>}<button className="secondary-button" type="button" onClick={() => { setConsultationVisible(false); }}>Продолжить самостоятельно</button></div></Card>}
-      <section aria-labelledby="roadmap-title"><p className="eyebrow">Ваш roadmap</p><h2 id="roadmap-title">Следующие осмысленные шаги</h2><div className="roadmap-grid">
-        {roadmapItems.map((roadmap) => { const external = externalRoadmaps[roadmap.track_key.toLowerCase()]; return <Card title={`${roadmap.track_key} · версия ${String(roadmap.policy_version)}`} key={roadmap.track_key}>{roadmap.replacement_reason && <p className="notice">{roadmap.replacement_reason}</p>}<ol className="roadmap-list">{roadmap.milestones.map((step) => <li className={step.completed ? "completed" : ""} key={step.key}><button type="button" onClick={() => { if (step.target_kind === "course") void navigate(`/workspace/2?course=${encodeURIComponent(step.target_key)}`); }}><strong>{step.title}</strong><span>{step.purpose}</span><small>Навык: {step.skill} · {step.completed ? "выполнено" : "+20 баллов за важный checkpoint"}</small></button></li>)}</ol><div className="roadmap-actions"><button className="roadmap-start-button" type="button" onClick={() => { const courseKey = roadmap.next_step?.target_kind === "course" ? roadmap.next_step.target_key : `${roadmap.track_key}-base`; void navigate(`/workspace/2?course=${encodeURIComponent(courseKey)}`); }}>Начать Bootcamp</button>{external && <SafeExternalLink className="roadmap-external-link" href={external.href}>{external.title} ↗</SafeExternalLink>}</div></Card>; })}
-      </div></section>
+      <Modal title={`${selectedOverview?.title ?? ""} · ${pane === "detail" ? "подробнее" : "обзор"}`} open={selectedOverview !== null} onClose={() => { closeTrack(); }}>
+        {selectedTrajectory !== null && pane === "detail" ? <TrackDetailBody facts={buildTrackDetail(selectedTrajectory, growth.data ?? null, anchors.data ?? null)} /> : null}
+        {selectedOverview !== null && <TrackOverviewBody facts={selectedOverview} />}
+        {pane === "detail" && selectedTrajectory !== null && (
+          <section>
+            <strong>Этапы и материалы направления</strong>
+            <ol className="trajectory-detail-stages">
+              {buildStages(roadmapMatch?.milestones ?? null, selectedTrajectory.milestones).map((stage) => <li key={stage.key}><button type="button" data-testid={`trajectory-stage-${stage.key}`} onClick={() => { if (stage.kind === "course") void navigate(`/workspace/2?course=${encodeURIComponent(stage.targetKey)}`); }}><strong>{stage.title}</strong><span>{stage.purpose}</span><small>Навык: {stage.skill} · {stage.completed ? "выполнено" : "доступно"}</small></button></li>)}
+            </ol>
+          </section>
+        )}
+      </Modal>
       <Modal title={`Освободить место для «${pendingTrack?.title ?? "направления"}»`} open={pendingTrack !== null} onClose={() => { setPendingTrack(null); }}><p>Выберите направление для заморозки. Весь подтверждённый прогресс останется в истории.</p><div className="modal-actions">{activeTracks.map((track) => <button type="button" key={track.key} onClick={() => { if (pendingTrack) selectTrack.mutate({ trackKey: pendingTrack.key, freezeTrackKey: track.key }); }}>Заморозить «{track.title}»</button>)}</div></Modal>
     </div>
   );
