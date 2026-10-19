@@ -101,11 +101,29 @@ jobs:
       - name: Run unit, API, and integration tests
         run: |
           mkdir -p test-results
+          set -o pipefail
           uv run pytest \
             --cov=impulse \
             --cov-report=term-missing \
             --cov-report=xml:test-results/coverage.xml \
-            --junitxml=test-results/pytest.xml
+            --junitxml=test-results/pytest.xml 2>&1 | tee test-results/pytest.log
+      - name: Publish failed test names
+        if: ${{ failure() }}
+        run: |
+          python - <<'PY'
+          import pathlib, urllib.parse
+          log_path = pathlib.Path('test-results/pytest.log')
+          if not log_path.exists():
+              print('::error::pytest.log is missing')
+              raise SystemExit(0)
+          log = log_path.read_text(encoding='utf-8', errors='replace')
+          failed = [line for line in log.splitlines() if line.startswith('FAILED ')][:15]
+          print('::error::failed_tests=' + urllib.parse.quote(' | '.join(failed)[:800]))
+          for line in failed[:5]:
+              print('::error::' + urllib.parse.quote(line[:250]))
+          tail = [line for line in log.splitlines() if line.startswith('E ')][-15:]
+          print('::error::tail=' + urllib.parse.quote(' \n'.join(tail)[:1800]))
+          PY
       - name: Upload backend test reports
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -165,10 +183,28 @@ jobs:
       - name: Verify built security controls
         run: npm run security:check
       - name: Run browser tests
-        run: npm run test:e2e
+        run: |
+          set -o pipefail
+          npm run test:e2e 2>&1 | tee e2e.log
         env:
           TZ: Europe/Moscow
           LANG: ru_RU.UTF-8
+      - name: Publish e2e failures
+        if: ${{ failure() }}
+        run: |
+          tail -40 frontend/e2e.log
+          python - <<'PY'
+          import pathlib, urllib.parse
+          log_path = pathlib.Path('frontend/e2e.log')
+          if not log_path.exists():
+              print('::error::e2e.log is missing')
+              raise SystemExit(0)
+          log = log_path.read_text(encoding='utf-8', errors='replace')
+          headings = [line for line in log.splitlines() if '.spec.ts' in line and ('fail' in line.lower() or '✘' in line or '×' in line)][:20]
+          print('::error::e2e_failures=' + urllib.parse.quote(' | '.join(headings)[:900]))
+          tail = [line for line in log.splitlines()][-25:]
+          print('::error::e2e_tail=' + urllib.parse.quote(' \n'.join(tail)[:1800]))
+          PY
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -214,6 +250,19 @@ jobs:
             echo 'readiness unexpectedly remained healthy without PostgreSQL'
             exit 1
           fi
+      - name: Diagnose stack on failure
+        if: ${{ failure() }}
+        run: |
+          set +e
+          docker compose ps
+          docker compose logs --tail=60 app
+          for path in /health/live /health/ready /participant; do
+            code=$(curl --silent --output /dev/null --write-out '%{http_code}' --header 'Accept: text/html' "http://127.0.0.1:8000$path")
+            echo "probe $path -> $code"
+          done
+          curl --silent --header 'Accept: text/html' --show-error --max-time 15 http://127.0.0.1:8000/participant | head -c 400
+          echo
+          exit 0
       - name: Stop the stack
         if: ${{ always() }}
         run: docker compose down --volumes
