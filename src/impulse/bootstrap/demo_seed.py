@@ -15,6 +15,14 @@ from impulse.application.notifications import DEMO_NOTIFICATION_SCRIPTS
 from impulse.application.reward import DEFAULT_REVIEW_RUBRIC
 from impulse.bootstrap.settings import Settings
 from impulse.infrastructure.database import Database
+from impulse.infrastructure.models.assist import (
+    agent_feedback,
+    agent_messages,
+    agent_runs,
+    agent_suggestions,
+    agent_threads,
+    human_decisions,
+)
 from impulse.infrastructure.models.competencies import competency_evidence
 from impulse.infrastructure.models.credentials import (
     course_certificates,
@@ -1119,6 +1127,37 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
             await session.execute(
                 delete(runtime_table).where(runtime_table.c.data_origin == "demo_runtime")
             )
+        demo_thread_ids = select(agent_threads.c.id).where(
+            agent_threads.c.owner_id.in_(demo_person_ids)
+        )
+        demo_run_ids = select(agent_runs.c.id).where(
+            agent_runs.c.actor_id.in_(demo_person_ids) | agent_runs.c.thread_id.in_(demo_thread_ids)
+        )
+        demo_suggestion_ids = select(agent_suggestions.c.id).where(
+            agent_suggestions.c.run_id.in_(demo_run_ids)
+        )
+        await session.execute(
+            delete(agent_feedback).where(
+                agent_feedback.c.run_id.in_(demo_run_ids)
+                | agent_feedback.c.actor_id.in_(demo_person_ids)
+            )
+        )
+        await session.execute(
+            delete(human_decisions).where(
+                human_decisions.c.suggestion_id.in_(demo_suggestion_ids)
+                | human_decisions.c.actor_id.in_(demo_person_ids)
+            )
+        )
+        await session.execute(
+            delete(agent_suggestions).where(agent_suggestions.c.run_id.in_(demo_run_ids))
+        )
+        await session.execute(delete(agent_runs).where(agent_runs.c.id.in_(demo_run_ids)))
+        await session.execute(
+            delete(agent_messages).where(agent_messages.c.thread_id.in_(demo_thread_ids))
+        )
+        await session.execute(
+            delete(agent_threads).where(agent_threads.c.owner_id.in_(demo_person_ids))
+        )
         for batch in reversed(batches):
             await session.execute(
                 delete(batch.table).where(batch.table.c.data_origin == "demo_seed")

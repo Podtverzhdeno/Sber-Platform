@@ -36,6 +36,35 @@ def test_security_headers_unsafe_origin_and_oversized_payload() -> None:
         assert oversized.status_code == 413
 
 
+def test_same_origin_requests_are_accepted_without_allowed_origin_list() -> None:
+    settings = Settings.model_validate(
+        {
+            "app_env": AppEnvironment.TEST,
+            "session_secret": "security-controls-secret-long-enough",
+            "demo_mode": True,
+        }
+    )
+    with TestClient(create_app(settings)) as client:
+        production_like = client.post(
+            "/api/v1/auth/demo-login",
+            headers={"Origin": "https://testserver"},
+            json={"persona_key": "participant-alex"},
+        )
+        assert production_like.status_code == 200
+        localhost_same = client.post(
+            "/api/v1/auth/demo-login",
+            headers={"Origin": "http://127.0.0.1:4173", "Host": "127.0.0.1:4173"},
+            json={"persona_key": "participant-alex"},
+        )
+        assert localhost_same.status_code == 200
+        localhost_other_port = client.post(
+            "/api/v1/auth/demo-login",
+            headers={"Origin": "http://127.0.0.1:4173", "Host": "127.0.0.1:8000"},
+            json={"persona_key": "participant-alex"},
+        )
+        assert localhost_other_port.status_code == 403
+
+
 def test_rate_limit_buckets_are_independent_by_category_and_actor() -> None:
     limiter = RequestRateLimiter({"auth": RateRule(1), "search": RateRule(1)})
     assert limiter.allow("auth", "actor-a", now=1)

@@ -8,6 +8,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from time import monotonic
 from typing import cast
+from urllib.parse import urlparse
 
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
@@ -66,7 +67,8 @@ class SecurityMiddleware:
         path = str(scope.get("path", "/"))
         origin = headers.get(b"origin", b"").decode("ascii", errors="ignore")
         if method not in {"GET", "HEAD", "OPTIONS"} and origin:
-            if origin not in self.allowed_origins:
+            same_origin = self._same_origin(origin, headers)
+            if origin not in self.allowed_origins and not same_origin:
                 await self._reject(send, 403, "UNSAFE_ORIGIN")
                 return
         raw_length = headers.get(b"content-length", b"0")
@@ -106,6 +108,22 @@ class SecurityMiddleware:
             await send(message)
 
         await self.app(scope, receive, secure_send)
+
+    @staticmethod
+    def _same_origin(origin: str, headers: dict[bytes, bytes]) -> bool:
+        try:
+            origin_url = urlparse(origin)
+            host_header = headers.get(b"host", b"").decode("ascii", errors="ignore")
+            host_url = urlparse(f"http://{host_header}")
+        except ValueError:
+            return False
+        if origin_url.hostname is None or host_url.hostname is None:
+            return False
+        if origin_url.hostname != host_url.hostname:
+            return False
+        if origin_url.port is not None and host_url.port is not None:
+            return origin_url.port == host_url.port
+        return True
 
     @staticmethod
     def _category(path: str, method: str) -> str:
