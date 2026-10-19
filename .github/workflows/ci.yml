@@ -259,14 +259,21 @@ jobs:
               print('::error::e2e.log is missing')
               raise SystemExit(0)
           log = log_path.read_text(encoding='utf-8', errors='replace')
-          failures = [line.strip() for line in log.splitlines() if ('✘' in line or '✕' in line) and line.strip()][:30]
-          print('::error::e2e_failures=' + urllib.parse.quote(' | '.join(failures)[:1200]))
-          spec_lines = [line.strip() for line in log.splitlines() if '.spec.ts' in line][:40]
-          print('::error::e2e_spec_lines=' + urllib.parse.quote(' | '.join(spec_lines)[:1400]))
-          tail = [line for line in log.splitlines()][-45:]
-          print('::error::e2e_tail=' + urllib.parse.quote(' \n'.join(tail)[:2200]))
-          backend_logs = pathlib.Path('/tmp/backend.log').read_text(encoding='utf-8', errors='replace').splitlines()[-20:]
-          print('::error::backend_logs=' + urllib.parse.quote(' \n'.join(backend_logs)[:1500]))
+          lines = log.splitlines()
+          failures = [line.strip() for line in lines if line.strip().startswith(tuple('%d) ' % n for n in range(1, 30)))]
+          print('::error::e2e_failure_headers=' + urllib.parse.quote(' | '.join(failures)[:1200]))
+          bodies = []
+          for index, line in enumerate(lines):
+              if line.strip()[:4] in {'1) ', '2) ', '3) '} and line.strip()[0:2].isdigit():
+                  bodies.extend(lines[index:index+13])
+                  if len(bodies) > 90:
+                      break
+          print('::error::e2e_failure_bodies=' + urllib.parse.quote(' \n'.join(bodies)[:4200]))
+          tail = [line for line in lines][-25:]
+          print('::error::e2e_tail=' + urllib.parse.quote(' \n'.join(tail)[:1800]))
+          backend_text = pathlib.Path('/tmp/backend.log').read_text(encoding='utf-8', errors='replace')
+          post_lines = [line for line in backend_text.splitlines() if 'POST /api/v1/auth' in line or 'GET /health' in line][-14:]
+          print('::error::backend_auth_lines=' + urllib.parse.quote(' \n'.join(post_lines)[:1400]))
           PY
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
