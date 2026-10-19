@@ -108,17 +108,19 @@ describe("buddy suggestion card", () => {
   it("dismisses by suggestion id through the mutation", async () => {
     const requests: { path: string; method: string; body: unknown }[] = [];
     vi.spyOn(globalThis, "fetch").mockImplementation((input, init) => {
-      const path =
+      const rawPath =
         input instanceof Request
           ? new URL(input.url).pathname
           : input instanceof URL
             ? input.pathname
-            : String(input);
+            : input;
+      const path = typeof rawPath === "string" ? rawPath : "";
       const method = init?.method ?? "GET";
+      const rawBody = init?.body;
       requests.push({
         path,
         method,
-        body: init?.body ? JSON.parse(String(init.body)) : null,
+        body: typeof rawBody === "string" ? JSON.parse(rawBody) : null,
       });
       if (path === "/api/v1/agents/buddy/suggestion") {
         return Promise.resolve(

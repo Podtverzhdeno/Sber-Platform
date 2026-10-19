@@ -187,34 +187,38 @@ async function installParticipantData(page: Page, options: ParticipantMocks = {}
       },
     },
   }));
-  await page.route("**/api/v1/agents/buddy/suggestion", (route) => route.fulfill({
-    json: {
-      policy_version: 1,
-      ai_model_available: false,
-      dismissed: false,
-      suggestion: {
-        kind: "bootcamp_idle",
-        version: 1,
-        suggestion_id: "bootcamp_idle:2026-09-20T09:00:00+00:00:2026-10-19",
-        generated_at: "2026-10-19T17:55:00+03:00",
-        observation:
-          "Практика Bootcamp давно не подтверждалась: 29 дн. без проверенного checkpoint.",
-        gap: "Навыки траектории «Python-разработчик» растут, пока checkpoint не пройден: портфолио не получает нового подтверждённого результата.",
-        action: {
-          kind: "checkpoint",
-          ref: "checkpoint:rag-mvp",
-          title: "Начать checkpoint: RAG: надёжный поиск по документам",
-        },
-        benefit:
-          "Проверочный checkpoint даёт подтверждённый результат и закрывает недостающий источник в Skill Passport.",
-        source_categories: ["checkpoint", "course", "skill_evidence"],
-        explanation:
-          "Автоматический анализ разрешённых данных: дата последнего verified course-checkpoint из Bootcamp-сертификатов и целевой шаг активной траектории. Модель не вызывается; сегменты без лишних деталей.",
-        idle_days: 29,
-        model_called: false,
-        auto_enrolled: false,
+  const buddySuggestionPayload = {
+    policy_version: 1,
+    ai_model_available: false,
+    dismissed: false,
+    suggestion: {
+      kind: "bootcamp_idle",
+      version: 1,
+      suggestion_id: "bootcamp_idle:2026-09-20T09:00:00+00:00:2026-10-19",
+      generated_at: "2026-10-19T17:55:00+03:00",
+      observation:
+        "Практика Bootcamp давно не подтверждалась: 29 дн. без проверенного checkpoint.",
+      gap: "Навыки траектории «Python-разработчик» растут, пока checkpoint не пройден: портфолио не получает нового подтверждённого результата.",
+      action: {
+        kind: "checkpoint",
+        ref: "checkpoint:rag-mvp",
+        title: "Начать checkpoint: RAG: надёжный поиск по документам",
       },
+      benefit:
+        "Проверочный checkpoint даёт подтверждённый результат и закрывает недостающий источник в Skill Passport.",
+      source_categories: ["checkpoint", "course", "skill_evidence"],
+      explanation:
+        "Автоматический анализ разрешённых данных: дата последнего verified course-checkpoint из Bootcamp-сертификатов и целевой шаг активной траектории. Модель не вызывается; сегменты без лишних деталей.",
+      idle_days: 29,
+      model_called: false,
+      auto_enrolled: false,
     },
+  };
+  await page.route("**/api/v1/agents/buddy/suggestion", (route) => route.fulfill({
+    json: buddySuggestionPayload,
+  }));
+  await page.route("**/api/v1/agents/buddy/suggestion/dismiss", (route) => route.fulfill({
+    status: 204,
   }));
   await page.route("**/api/v1/development/tracks", (route) => route.fulfill({
     json: {

@@ -80,6 +80,31 @@ test.beforeEach(async ({ page }) => {
     await route.fulfill({ json: messagingMessages[channelId] ?? [] });
   });
   await page.route("**/api/v1/me/messaging/channels/*/context", (route) => route.fulfill({ json: { project_key: "impulse-demo", task_title: "Прототип рекомендательной системы", deadline_at: "2026-10-12T18:00:00Z", contribution_version: 2, contribution_accepted: null, review_status: null } }));
+  let buddyDismissed = false;
+  const buddySuggestion = {
+    kind: "bootcamp_idle",
+    version: 1,
+    suggestion_id: "bootcamp_idle:2026-09-20T09:00:00+00:00:2026-10-19",
+    generated_at: "2026-10-19T17:55:00+03:00",
+    observation: "Практика Bootcamp давно не подтверждалась: 29 дн. без проверенного checkpoint.",
+    gap: "Навыки траектории «Python-разработчик» растут, пока checkpoint не пройден: портфолио не получает нового подтверждённого результата.",
+    action: { kind: "checkpoint", ref: "checkpoint:rag-mvp", title: "Начать checkpoint: RAG: надёжный поиск по документам" },
+    benefit: "Проверочный checkpoint даёт подтверждённый результат и закрывает недостающий источник в Skill Passport.",
+    source_categories: ["checkpoint", "course", "skill_evidence"],
+    explanation: "Автоматический анализ разрешённых данных: дата последнего verified course-checkpoint из Bootcamp-сертификатов и целевой шаг активной траектории. Модель не вызывается; сегменты без лишних деталей.",
+    idle_days: 29,
+    model_called: false,
+    auto_enrolled: false,
+  };
+  await page.route("**/api/v1/agents/buddy/suggestion", (route) => route.fulfill({
+    json: buddyDismissed
+      ? { policy_version: 1, ai_model_available: false, dismissed: true, suggestion: null }
+      : { policy_version: 1, ai_model_available: false, dismissed: false, suggestion: buddySuggestion },
+  }));
+  await page.route("**/api/v1/agents/buddy/suggestion/dismiss", (route) => {
+    buddyDismissed = true;
+    return route.fulfill({ status: 204 });
+  });
 });
 
 test("logout returns persona picker and allows another role", async ({ page }) => {
@@ -100,9 +125,14 @@ test("participant home actions open project, buddy and linked routes", async ({ 
   await page.getByRole("button", { name: /Открыть рабочую область/ }).click();
   await expect(page.getByRole("dialog", { name: "Рабочая область проекта" })).toBeVisible();
   await page.getByRole("dialog", { name: "Рабочая область проекта" }).getByText("Закрыть", { exact: true }).click();
-  await page.getByRole("button", { name: /Получить рекомендацию/ }).click();
-  await expect(page.getByRole("dialog", { name: "Рекомендация AI Buddy" })).toBeVisible();
-  await page.getByRole("button", { name: "Понятно" }).click();
+  await page.getByTestId("buddy-suggestion-why").locator("summary").click();
+  await expect(page.getByTestId("buddy-suggestion-explanation")).toBeVisible();
+  await page.getByRole("button", { name: /Начать checkpoint/ }).click();
+  await expect(page).toHaveURL(/\/workspace\/2\?course=python-base$/);
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByTestId("buddy-suggestion-dismiss").click();
+  await expect(page.getByTestId("buddy-suggestion-dismissed")).toBeVisible();
   await expect(page.locator(".metric-histogram")).toHaveCount(4);
   await page.getByRole("button", { name: /Все действия/ }).click();
   await expect(page).toHaveURL(/\/workspace\/3$/);
