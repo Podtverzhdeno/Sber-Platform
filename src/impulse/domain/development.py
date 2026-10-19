@@ -113,6 +113,7 @@ class RoadmapMilestone:
     skill: str
     target_kind: str
     target_key: str
+    mandatory: bool = True
 
 
 @dataclass(frozen=True, slots=True)
