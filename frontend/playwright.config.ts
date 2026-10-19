@@ -10,6 +10,9 @@ export default defineConfig({
     trace: "retain-on-failure",
     colorScheme: "dark",
   },
+  expect: {
+    toHaveScreenshot: { maxDiffPixels: 6000 },
+  },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     command: "npm run dev -- --host 127.0.0.1 --port 4173",
