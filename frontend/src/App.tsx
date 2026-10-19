@@ -1,6 +1,7 @@
 ﻿import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
 import { BuddySuggestionCard } from "./features/buddy-suggestion";
+import { ActivityPanel } from "./features/activity-panel";
 import {
   useDeferredValue,
   useEffect,
@@ -762,32 +763,11 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
             <span>›</span>
           </button>
         </section>
-        <aside className="insight-panel">
-          <header>
-            <h2>Активность</h2>
-            <span>6 недель</span>
-          </header>
-          <div
-            className="home-histogram"
-            role="img"
-            aria-label="Учебная и проектная активность по неделям"
-          >
-            {[42, 64, 55, 78, 69, 91].map((value, index) => (
-              <i key={index} style={{ height: `${String(value)}%` }}>
-                <span>Н{index + 1}</span>
-              </i>
-            ))}
-          </div>
-          <button
-            className="secondary-button"
-            type="button"
-            onClick={() => {
-              goTo("Аналитика");
-            }}
-          >
-            Открыть аналитику →
-          </button>
-        </aside>
+        <ActivityPanel
+          onOpenAnalytics={() => {
+            goTo("Аналитика");
+          }}
+        />
       </div>
       {projectOpen && (
         <div className="overlay" role="presentation">

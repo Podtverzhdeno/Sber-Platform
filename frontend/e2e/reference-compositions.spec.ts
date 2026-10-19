@@ -224,6 +224,69 @@ async function installParticipantData(page: Page, options: ParticipantMocks = {}
     buddyDismissed = true;
     return route.fulfill({ status: 204 });
   });
+  await page.route("**/api/v1/me/growth/snapshot", (route) => route.fulfill({
+    json: {
+      snapshot_id: "growth-snapshot-e2e-1",
+      generated_at: "2026-10-19T17:55:00+03:00",
+      snapshot_version: 2,
+      actor_timezone: "Europe/Moscow",
+      definitions: {
+        activity: "impulse-growth-activity-v3",
+        hours: "impulse-growth-hours-v1",
+        milestones: "impulse-growth-milestones-v2",
+        readiness: "impulse-growth-readiness-v1",
+        snapshot: "impulse-growth-snapshot-v2",
+      },
+      period_boundaries: {
+        day: { start: "2026-10-19T00:00:00+03:00", end: "2026-10-20T00:00:00+03:00" },
+        week: { start: "2026-10-13T00:00:00+03:00", end: "2026-10-20T00:00:00+03:00" },
+        month: { start: "2026-10-01T00:00:00+03:00", end: "2026-11-01T00:00:00+03:00" },
+        year: { start: "2026-01-01T00:00:00+03:00", end: "2027-01-01T00:00:00+03:00" },
+      },
+      activity: {
+        day: { total: 2, course_checkpoint: 1, project_submission: 1, revision_accepted: 0, event_participation: 0 },
+        week: { total: 4, course_checkpoint: 2, project_submission: 1, revision_accepted: 1, event_participation: 0 },
+        month: { total: 1, course_checkpoint: 0, project_submission: 1, revision_accepted: 0, event_participation: 0 },
+        year: { total: 14, course_checkpoint: 7, project_submission: 4, revision_accepted: 2, event_participation: 1 },
+      },
+      activity_state: {
+        day: { version: 1, state: "success", total: 2, target_min: 1, target_max: 3, missing_category: null, text: "Активность 2 в рамках цели 1–3 квалифицированных событий за период.", action: null },
+        week: { version: 1, state: "success", total: 4, target_min: 3, target_max: 7, missing_category: null, text: "Активность 4 в рамках цели 3–7 квалифицированных событий за период.", action: null },
+        month: { version: 1, state: "risk", total: 1, target_min: 12, target_max: 30, missing_category: "course_checkpoint", text: "Активность 1 ниже цели 12–30 за период: нет ни одного события категории «курсы/checkpoints». Один цвет не объясняет состояние — см. текст.", action: "Начните checkpoint курса в Bootcamp" },
+        year: { version: 1, state: "success", total: 14, target_min: 120, target_max: 300, missing_category: null, text: "Активность 14 в рамках цели 120–300 квалифицированных событий за период.", action: null },
+      },
+      events: [
+        { kind: "project_submission", title: "Вклад: API поиска", occurred_at: "2026-10-18T12:00:00+03:00", source_kind: "contribution", source_ref: "contribution-1" },
+        { kind: "course_checkpoint", title: "Checkpoint RAG", occurred_at: "2026-10-16T09:30:00+03:00", source_kind: "checkpoint", source_ref: "rag-mvp" },
+      ],
+      hours: {
+        known: true,
+        trusted_minutes: 210,
+        self_reported_minutes: 45,
+        intervals: [
+          { start: "2026-10-16T09:30:00+03:00", end: "2026-10-16T11:00:00+03:00", source_kind: "checkpoint", source_ref: "rag-mvp" },
+        ],
+      },
+      freshness: { known: true, latest_observed_at: "2026-10-18T12:00:00+03:00" },
+      trajectories: [
+        {
+          track_key: "python-dev",
+          track_title: "Python-разработчик",
+          policy_version: 2,
+          milestones: [
+            { key: "m1", position: 1, title: "Курс Python для анализа данных", purpose: "Основа", skill: "Python", target_kind: "course", target_key: "python-base", target_title: "Python для R&D", status: "completed", known: true },
+          ],
+          completion: { percent: 66.7, coverage: 1, partial: false },
+          readiness_skills: [
+            { skill_key: "Python", title: "Python", current_level: "базовый", known: true },
+          ],
+          readiness: { percent: 50, coverage: 1, partial: false },
+          object_refs: [],
+          next_step_ref: "course:python-base",
+        },
+      ],
+    },
+  }));
   await page.route("**/api/v1/development/tracks", (route) => route.fulfill({
     json: {
       active_count: 1,

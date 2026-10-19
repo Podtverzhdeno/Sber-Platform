@@ -2310,6 +2310,28 @@ export interface components {
             /** Title */
             title: string;
         };
+        /**
+         * ActivityStateView
+         * @description Versioned activity evaluation for one period (openspec 22.4).
+         */
+        ActivityStateView: {
+            /** Action */
+            action: string | null;
+            /** Missing Category */
+            missing_category: string | null;
+            /** State */
+            state: string;
+            /** Target Max */
+            target_max: number | null;
+            /** Target Min */
+            target_min: number | null;
+            /** Text */
+            text: string;
+            /** Total */
+            total: number;
+            /** Version */
+            version: number;
+        };
         /** ActorView */
         ActorView: {
             active_role: components["schemas"]["Role"];
@@ -3335,6 +3357,10 @@ export interface components {
             /** Activity */
             activity: {
                 [key: string]: components["schemas"]["ActivityBucketView"];
+            };
+            /** Activity State */
+            activity_state: {
+                [key: string]: components["schemas"]["ActivityStateView"];
             };
             /** Actor Timezone */
             actor_timezone: string;

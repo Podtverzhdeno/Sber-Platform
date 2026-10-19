@@ -166,6 +166,19 @@ class ActivityBucketView(BaseModel):
     event_participation: int
 
 
+class ActivityStateView(BaseModel):
+    """Versioned activity evaluation for one period (openspec 22.4)."""
+
+    version: int
+    state: str
+    total: int
+    target_min: int | None
+    target_max: int | None
+    missing_category: str | None
+    text: str
+    action: str | None
+
+
 class GrowthSnapshotView(BaseModel):
     snapshot_id: str
     generated_at: AwareDatetime
@@ -174,10 +187,38 @@ class GrowthSnapshotView(BaseModel):
     definitions: dict[str, str]
     period_boundaries: dict[str, dict[str, str]]
     activity: dict[str, ActivityBucketView]
+    activity_state: dict[str, ActivityStateView]
     events: list[ActivityEventView]
     hours: HoursView
     freshness: FreshnessView
     trajectories: list[TrajectoryGrowthView]
+
+
+def _activity_states(
+    activity: dict[str, ActivityBucketView],
+    *,
+    has_plan: bool,
+) -> dict[str, ActivityStateView]:
+    from impulse.domain.growth import ACTIVITY_TARGET_RANGES, activity_state
+
+    states: dict[str, ActivityStateView] = {}
+    for period, bucket in sorted(activity.items()):
+        target = ACTIVITY_TARGET_RANGES.get(period) if has_plan else None
+        result = activity_state(
+            bucket.model_dump(),
+            target=target,
+        )
+        states[period] = ActivityStateView(
+            version=result.version,
+            state=result.state,
+            total=result.total,
+            target_min=result.target_min,
+            target_max=result.target_max,
+            missing_category=result.missing_category,
+            text=result.text,
+            action=result.action,
+        )
+    return states
 
 
 def _request_growth_service(request: Request) -> GrowthService:
@@ -199,6 +240,9 @@ async def growth_snapshot(
 
     snapshot = await service.snapshot(authenticated.actor)
     boundaries = period_boundaries(now=snapshot.generated_at, timezone=snapshot.actor_timezone)
+    activity_buckets = {
+        name: ActivityBucketView(**counts) for name, counts in sorted(snapshot.activity.items())
+    }
     return GrowthSnapshotView(
         snapshot_id=str(snapshot.snapshot_id),
         generated_at=snapshot.generated_at,
@@ -206,9 +250,8 @@ async def growth_snapshot(
         actor_timezone=snapshot.actor_timezone,
         definitions=snapshot.definitions,
         period_boundaries=boundaries,
-        activity={
-            name: ActivityBucketView(**counts) for name, counts in sorted(snapshot.activity.items())
-        },
+        activity=activity_buckets,
+        activity_state=_activity_states(activity_buckets, has_plan=bool(snapshot.trajectories)),
         events=[
             ActivityEventView(
                 kind=event.kind,

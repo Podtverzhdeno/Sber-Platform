@@ -164,6 +164,83 @@
         "title": "ActivityEventView",
         "type": "object"
       },
+      "ActivityStateView": {
+        "description": "Versioned activity evaluation for one period (openspec 22.4).",
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action"
+          },
+          "missing_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Missing Category"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "target_max": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Max"
+          },
+          "target_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Min"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "state",
+          "total",
+          "target_min",
+          "target_max",
+          "missing_category",
+          "text",
+          "action"
+        ],
+        "title": "ActivityStateView",
+        "type": "object"
+      },
       "ActorView": {
         "properties": {
           "active_role": {
@@ -2921,6 +2998,13 @@
             "title": "Activity",
             "type": "object"
           },
+          "activity_state": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ActivityStateView"
+            },
+            "title": "Activity State",
+            "type": "object"
+          },
           "actor_timezone": {
             "title": "Actor Timezone",
             "type": "string"
@@ -2984,6 +3068,7 @@
           "definitions",
           "period_boundaries",
           "activity",
+          "activity_state",
           "events",
           "hours",
           "freshness",

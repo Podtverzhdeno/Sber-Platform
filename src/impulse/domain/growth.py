@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
@@ -11,6 +12,7 @@ ACTIVITY_DEFINITIONS_VERSION = 3
 HOURS_DEFINITIONS_VERSION = 2
 MILESTONE_DEFINITIONS_VERSION = 4
 READINESS_DEFINITIONS_VERSION = 3
+ACTIVITY_STATE_VERSION = 1
 
 QUALIFIED_ACTIVITY_KINDS = (
     "course_checkpoint",
@@ -18,6 +20,30 @@ QUALIFIED_ACTIVITY_KINDS = (
     "revision_accepted",
     "event_participation",
 )
+
+# Опубликованный целевой диапазон квалифицированных событий за период.
+# Одна и та же версия определения для всех участников: цель берётся из
+# действующего плана платформы, а не из сравнения с другими людьми.
+ACTIVITY_TARGET_RANGES: dict[str, tuple[int, int]] = {
+    "day": (1, 3),
+    "week": (3, 7),
+    "month": (12, 30),
+    "year": (120, 300),
+}
+
+ACTIVITY_CATEGORY_LABELS: dict[str, str] = {
+    "course_checkpoint": "курсы/checkpoints",
+    "project_submission": "проекты",
+    "revision_accepted": "принятые исправления",
+    "event_participation": "события",
+}
+
+ACTIVITY_CATEGORY_ACTIONS: dict[str, str] = {
+    "course_checkpoint": "Начните checkpoint курса в Bootcamp",
+    "project_submission": "Отправьте содержательный вклад в проект",
+    "revision_accepted": "Доводите исправления до принятого статуса",
+    "event_participation": "Примите участие в подтверждённом событии",
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -167,6 +193,88 @@ def period_boundaries(
     }
 
 
+@dataclass(frozen=True, slots=True)
+class ActivityStateResult:
+    """Версионированная оценка активности за период: порог, текст, категория."""
+
+    version: int
+    state: str
+    total: int
+    target_min: int | None
+    target_max: int | None
+    missing_category: str | None
+    text: str
+    action: str | None
+
+
+def activity_state(
+    counts: Mapping[str, int],
+    *,
+    target: tuple[int, int] | None,
+) -> ActivityStateResult:
+    """Сравнивает активность периода с целевым диапазоном плана.
+
+    Цель None (нет действующего плана) — нейтральное состояние без порога.
+    Риск и успех всегда получают текст: цвет не является единственным
+    объяснением состояния.
+    """
+    total = counts.get("total", 0)
+    if target is None:
+        return ActivityStateResult(
+            version=ACTIVITY_STATE_VERSION,
+            state="neutral",
+            total=total,
+            target_min=None,
+            target_max=None,
+            missing_category=None,
+            text=(
+                f"Цель периода не задана действующим планом: {total} "
+                "квалифицированных событий за период — состояние нейтральное."
+            ),
+            action=None,
+        )
+    target_min, target_max = target
+    if total >= target_min:
+        return ActivityStateResult(
+            version=ACTIVITY_STATE_VERSION,
+            state="success",
+            total=total,
+            target_min=target_min,
+            target_max=target_max,
+            missing_category=None,
+            text=(
+                f"Активность {total} в рамках цели {target_min}–{target_max} "
+                "квалифицированных событий за период."
+            ),
+            action=None,
+        )
+    zero_kind = next((kind for kind in QUALIFIED_ACTIVITY_KINDS if counts.get(kind, 0) == 0), None)
+    if zero_kind is not None:
+        missing_kind = zero_kind
+        label = ACTIVITY_CATEGORY_LABELS[zero_kind]
+        detail = f"нет ни одного события категории «{label}»"
+    else:
+        missing_kind = min(
+            QUALIFIED_ACTIVITY_KINDS,
+            key=lambda kind: (counts.get(kind, 0), QUALIFIED_ACTIVITY_KINDS.index(kind)),
+        )
+        label = ACTIVITY_CATEGORY_LABELS[missing_kind]
+        detail = f"минимум в категории «{label}» ({counts.get(missing_kind, 0)})"
+    return ActivityStateResult(
+        version=ACTIVITY_STATE_VERSION,
+        state="risk",
+        total=total,
+        target_min=target_min,
+        target_max=target_max,
+        missing_category=missing_kind,
+        text=(
+            f"Активность {total} ниже цели {target_min}–{target_max} за период: "
+            f"{detail}. Один цвет не объясняет состояние — см. текст."
+        ),
+        action=ACTIVITY_CATEGORY_ACTIONS[missing_kind],
+    )
+
+
 def activity_bucket_counts(
     events: tuple[tuple[datetime, str], ...],
     *,
@@ -198,15 +306,21 @@ def activity_bucket_counts(
 
 
 __all__ = [
+    "ACTIVITY_CATEGORY_ACTIONS",
+    "ACTIVITY_CATEGORY_LABELS",
     "ACTIVITY_DEFINITIONS_VERSION",
+    "ACTIVITY_STATE_VERSION",
+    "ACTIVITY_TARGET_RANGES",
     "HOURS_DEFINITIONS_VERSION",
     "MILESTONE_DEFINITIONS_VERSION",
     "QUALIFIED_ACTIVITY_KINDS",
     "READINESS_DEFINITIONS_VERSION",
+    "ActivityStateResult",
     "MilestoneWeight",
     "ReadinessWeight",
     "WeightedResult",
     "activity_bucket_counts",
+    "activity_state",
     "merge_intervals",
     "merged_minutes",
     "period_boundaries",
