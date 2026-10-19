@@ -4,6 +4,9 @@ context: |
   Language: Russian
   All artifacts must be written in Russian.
   Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+  Before any implementation, every agent session must read the active change tasks,
+  agent-work-coordination spec, parallel-agent-workflow document, git status, and all
+  active claim status files. No product write is allowed before a successful atomic claim.
 
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
@@ -26,3 +29,16 @@ context: |
 #     archive:
 #       guidance:
 #         - Summarize the archive outcome before finishing
+
+operations:
+  apply:
+    guidance:
+      - Read `changes/impulse-ecosystem/specs/agent-work-coordination/spec.md` completely before changing files.
+      - Read `changes/impulse-ecosystem/docs/parallel-agent-workflow.md`, `changes/impulse-ecosystem/tasks.md`, `git status` and every active `.agents/coordination/claims/*/status.md` before selecting work.
+      - Create an atomic claim with `IN_PROGRESS` and a non-conflicting write-scope before the first product write.
+      - Do not change a task checkbox to `[x]`; only the independent reviewer/integrator may accept it after evidence checks.
+      - If there is no safe READY task, return `NO_SAFE_TASK` instead of editing a claimed or dirty file.
+  archive:
+    guidance:
+      - Do not archive the change while any claim is `IN_PROGRESS`, `BLOCKED` or `REVIEW`.
+      - Preserve coordination audit history and ensure accepted tasks are `DONE` before archive.

@@ -185,6 +185,27 @@ Frontend SHALL реализовать экранные композиции по
 - **WHEN** API возвращает другие имена, суммы или количество строк, чем изображено в PNG
 - **THEN** UI сохраняет композицию и корректно отображает реальные данные без подмены их текстом из референса
 
+### Requirement: СберЧат является общим визуальным референсом сообщений
+Локальный файл `C:\Users\user\Downloads\СберЧат.html` с SHA-256 `B8032F0ECF85C92A4E17E6BEA18D9FA80EC11E06758D4DC5353768F992C41B7D` SHALL иметь ID `R-MSG-01` и задавать стиль сообщений всех ролей. Role-specific PNG определяет бизнес-контекст, а `R-MSG-01` — shell мессенджера, dialog list, chat, bubbles, composer, menus, overlays, плотность и interaction states.
+
+#### Scenario: Референсы расходятся
+- **WHEN** ролевая PNG показывает постоянную правую project panel, а СберЧат использует двухпанельную основу
+- **THEN** список и чат следуют `R-MSG-01`, а project panel сохраняется как сворачиваемая третья колонка или drawer без изменения стиля ядра мессенджера
+
+### Requirement: Внешний HTML используется только как design reference
+`R-MSG-01` SHALL NOT попадать в bundle, image или public static directory. Реализация SHALL NOT переиспользовать его scripts, source maps, embedded assets, cookies, telemetry, WebSocket/HTTP endpoints, API keys или пользовательский контент. Допустимо вручную воспроизводить композицию собственными HTML/CSS/SVG primitives и semantic tokens при соблюдении лицензий и безопасности.
+
+#### Scenario: Production build сообщений
+- **WHEN** собирается frontend
+- **THEN** артефакты не содержат `СберЧат.html`, абсолютный путь Downloads, конфигурацию внешних сервисов, реальные тексты или base64-ресурсы референса
+
+### Requirement: Темы мессенджера имеют отдельный visual acceptance
+Для `R-MSG-01` SHALL существовать детерминированные screenshot baselines светлой и тёмной темы на 1440×900, а также ключевых list/chat состояний на 390×844. Review SHALL проверять геометрию, плотность строк, selected/unread states, header, bubbles, composer, context overlay, focus и отсутствие theme flash. Fixtures SHALL быть безопасными и одинаковыми между темами.
+
+#### Scenario: Меняется тема при открытом чате
+- **WHEN** screenshot test переключает светлую тему на тёмную
+- **THEN** dialog ID, история, draft, scroll и focus сохраняются, а все surfaces меняют палитру в пределах одного стабильного layout
+
 ### Requirement: Desktop geometry fidelity
 При viewport 1672×941 desktop shell SHALL воспроизводить геометрию референсов: sidebar 232–256 px, topbar 60–68 px, content inset 24–32 px, gap между крупными зонами 12–16 px. На референсах 1448×1086 руководителя те же отношения SHALL масштабироваться без изменения порядка блоков. Page content SHALL использовать 12-column grid и типовые spans `8+4`, `9+3`, `7+5`; KPI strip SHALL быть равномерным.
 

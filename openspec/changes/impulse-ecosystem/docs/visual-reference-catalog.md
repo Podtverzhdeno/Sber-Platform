@@ -14,18 +14,26 @@
 - Допуск по размеру крупной зоны при visual review: ±8 px для shell и ±16 px для контентной сетки. Допуск не разрешает перенос ключевого блока в другую колонку.
 - Файл SHALL использоваться в screenshot review как эталон направления, а локальный Playwright baseline — как точный регрессионный контракт реализованного UI.
 
+## Общий референс сообщений
+
+| ID | Файл | Экраны | Нормативная композиция |
+|---|---|---|---|
+| `R-MSG-01` | `C:\Users\user\Downloads\СберЧат.html`<br>SHA-256 `B8032F0ECF85C92A4E17E6BEA18D9FA80EC11E06758D4DC5353768F992C41B7D` | «Сообщения» всех ролей | стиль СберЧата: tabs/search и плотный dialog list; active/unread/pin/mute/draft states; chat header; date/service rows; incoming/outgoing grouped bubbles; reply/forward/reactions/status; attachment previews; sticky composer; context menus, modals и responsive single-pane flow |
+
+`R-MSG-01` имеет приоритет над прежним оформлением ядра мессенджера во всех role-specific PNG. Ролевые `R-PAR-07`, `R-MEN-05`, `R-CUS-09` и экраны сообщений остальных ролей продолжают определять доступные диалоги и business-context panel. Светлая версия следует сохранённому референсу; тёмная SHALL сохранять ту же геометрию и иерархию через парные semantic tokens Impulse. Исходный HTML, встроенные ресурсы, реальные имена/сообщения и runtime-конфигурация не копируются в репозиторий или приложение.
+
 ## Участник
 
 Каталог: `C:\Users\user\Downloads\Визуал\Участник`.
 
 | ID | Файл | Экран | Нормативная композиция |
 |---|---|---|---|
-| `R-PAR-01` | `...22_22_24-1 (1).png` | Главная | welcome, 4 KPI, крупный next-step hero, AI Buddy, две карточки траекторий, рекомендации, прогресс, события |
-| `R-PAR-02` | `...22_22_25-2 (1).png` | Моя траектория | две активные роли, общий прогресс, горизонтальный roadmap, карточки треков, Buddy, рекомендации и сертификаты |
-| `R-PAR-03` | `...22_22_27-3 (1).png` | Bootcamp / курс | hero курса, why-now, прогресс и модули слева, модульная программа в центре, Buddy и связанные задачи справа |
-| `R-PAR-04` | `...22_22_28-4 (1).png` | Каталог задач | заголовок и filters toolbar, список рекомендованных карточек, причины релевантности, оплата/дедлайн, Buddy-рекомендация |
-| `R-PAR-05` | `...22_22_29-5 (1).png` | Карточка задачи | полноширинный hero, описание и результаты слева, sticky apply/payment panel справа, A/B/base суммы и 5+ multiplier |
-| `R-PAR-06` | `...22_22_30-6 (1).png` | Мои проекты | этапный plan strip, workspace проекта, загрузка результата, чеклист, команда, дедлайн и Buddy в правой колонке |
+| `R-PAR-01` | `...22_22_24-1 (1).png` | Главная | welcome, KPI с drill-down, Skill Passport gap → конкретный проект, объяснимая AI Buddy-рекомендация, period activity, две траектории, progress formula и историческая дневная повестка |
+| `R-PAR-02` | `...22_22_25-2 (1).png` | Моя траектория | карточки/список, две активные траектории со стабильными цветами, overview до перехода, процент до цели, циклограмма, roadmap и detail-аналитика дней/часов/evidence |
+| `R-PAR-03` | `...22_22_27-3 (1).png` | Bootcamp / курс | выделенный фильтр актуальности, независимые access/completion/recommendation states, конкретные цель/результат/следующий шаг, матрица и current/projected/target циклограмма |
+| `R-PAR-04` | `...22_22_28-4 (1).png` | Каталог задач | filters toolbar, рекомендованные карточки, Skill Passport relevance, оплата/дедлайн, подробный detail до отклика и подтверждаемый отзыв отправленной заявки |
+| `R-PAR-05` | `...22_22_29-5 (1).png` | Карточка задачи | полноширинный полный бриф слева, версии/ограничения/evidence, sticky apply/payment panel справа, A/B/base суммы и 5+ multiplier |
+| `R-PAR-06` | `...22_22_30-6 (1).png` | Мои проекты | карточки/список, detail и CTA workspace; collapsible task/results/events/platforms/team/metrics/deadlines; GigaCode/GigaCoWork/GigaAgent/GitVerse; team quick card, metric drill-down и «Обсудить срок» |
 | `R-PAR-07` | `...22_22_32-7 (1).png` | Сообщения | трёхпанельный messenger: диалоги, текущий чат, контекст проекта/прогресс/встречи |
 | `R-PAR-08` | `...22_22_33-8 (1).png` | Портфолио | profile hero, KPI, табы, проекты и вклад, 5+ оценки, трофеи, сертификаты, навыки и публичность |
 | `R-PAR-09` | `...10_25_50-1 (1).png` | Профиль / резюме | профиль и readiness, проекты, оценки 5+, курсы, дипломы/трофеи, навыки, активность и visibility controls |
@@ -33,7 +41,7 @@
 | `R-PAR-11` | `...10_25_52-3 (1).png` | AI Buddy | intro/границы, prompt shortcuts, центральный чат, контекст пользователя и next-step widgets |
 | `R-PAR-12` | `...10_25_52-4 (1).png` | Настройки | tabs, карточка профиля, уведомления, безопасность, privacy/consents, AI Buddy controls и опасная зона |
 
-Sidebar участника SHALL содержать: Главная, Моя траектория, Bootcamp, Задачи, Мои проекты, Сообщения, Портфолио, Достижения, AI Buddy, Настройки. Текущий раздел выделяется бирюзовой подложкой и левым accent.
+Sidebar участника SHALL содержать: Главная, Моя траектория, Bootcamp, Задачи, Мои проекты, События, Сообщения, Портфолио, Достижения, Аналитика, AI Buddy, Настройки. Текущий раздел выделяется бирюзовой подложкой и левым accent. Topbar SHALL содержать доступный переключатель светлой/тёмной темы с иконками солнца/луны. Supplemental route «События» SHALL использовать card/list catalog и detail composition в том же participant visual system, даже если для него отсутствует отдельный исходный `R-PAR-*` PNG.
 
 ## Ментор
 
@@ -60,7 +68,7 @@ Sidebar ментора SHALL содержать: Главная, Проверк�
 |---|---|---|---|
 | `R-CUS-01` | `...21_35_53-1 (1).png` | Главная | 4 task KPI, ближайшая задача, customer AI card, мои задачи, результаты и компактная аналитика |
 | `R-CUS-02` | `...21_35_54-2 (1).png` | Мои задачи и результаты | KPI + tabs/filters, task list, выбранная задача, этапы, команда, результат и actions справа |
-| `R-CUS-03` | `...21_35_55-3 (1).png` | Создание задачи | пятишаговый stepper, form sections, AI brief assistant, participant preview и sticky publish action |
+| `R-CUS-03` | `...21_35_55-3 (1).png` | Создание задачи | пятишаговый stepper; compact accepted-case candidate picker; explained support dropdown; real AI patches с gradient/provenance/undo; working versioned participant preview; explicit human publish |
 | `R-CUS-04` | `...21_35_56-4 (1).png` | Заявки | KPI, filters, candidate comparison table, participant detail и decision panel |
 | `R-CUS-05` | `...21_35_57-5 (1).png` | Проверка результата | stage strip, author/result/evidence, attachments, comments, compensation and accept/revision/dispute panel |
 | `R-CUS-06` | `...21_35_57-6 (1).png` | Аналитика заказчика | filters и KPI, result funnel, activity trend, directions donut, task ratings и AI insight panel |

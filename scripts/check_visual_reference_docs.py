@@ -8,9 +8,11 @@ from pathlib import Path
 
 CATALOG = Path("openspec/changes/impulse-ecosystem/docs/visual-reference-catalog.md")
 TRACEABILITY = Path("openspec/changes/impulse-ecosystem/docs/visual-route-traceability.md")
-REFERENCE_ID = re.compile(r"R-(?:PAR|MEN|CUS|MGR|OPS)-\d{2}")
-TABLE_REFERENCE = re.compile(r"^\| `(?P<reference>R-(?:PAR|MEN|CUS|MGR|OPS)-\d{2})`", re.MULTILINE)
-EXPECTED_ROLE_COUNTS = {"PAR": 12, "MEN": 8, "CUS": 9, "MGR": 8, "OPS": 9}
+REFERENCE_ID = re.compile(r"R-(?:MSG|PAR|MEN|CUS|MGR|OPS)-\d{2}")
+TABLE_REFERENCE = re.compile(
+    r"^\| `(?P<reference>R-(?:MSG|PAR|MEN|CUS|MGR|OPS)-\d{2})`", re.MULTILINE
+)
+EXPECTED_ROLE_COUNTS = {"MSG": 1, "PAR": 12, "MEN": 8, "CUS": 9, "MGR": 8, "OPS": 9}
 SOURCE_SUFFIXES = {".css", ".html", ".js", ".jsx", ".json", ".ts", ".tsx"}
 RASTER_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 
