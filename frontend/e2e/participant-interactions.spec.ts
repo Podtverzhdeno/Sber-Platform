@@ -31,13 +31,22 @@ test.beforeEach(async ({ page }) => {
     accepted_terms_version: 1,
   }] }));
   await page.route("**/api/v1/me/tasks/task-market/applications", (route) => route.fulfill({ status: 201, json: { id: "application-1", status: "submitted" } }));
-  await page.route("**/api/v1/me/work", (route) => route.fulfill({ json: [{
-    assignment: { id: "assignment-1", task_id: "task-1", person_id: "1", status: "in_progress" },
-    task: { id: "task-1", title: "Прототип рекомендательной системы", status: "published", places: 4 },
-    terms: { version: 1, deadline_at: "2026-10-12T18:00:00Z", deliverable: "MVP", acceptance_criteria: ["Воспроизводимость"], support_mode: "mentor", compensation: { paid: true, base_amount_per_assignee: "50000", currency: "RUB", b_multiplier: "1.5", a_multiplier: "2.5", b_total: "75000", a_total: "125000", quantum: "0.01", rounding_mode: "half_up", policy_version: 1, payout_condition: "Принятый личный вклад" } },
-    contributions: [{ id: "contribution-1", version: 2, personal_summary: "Реализован API и интеграционные тесты", artifact_keys: ["api"], status: "submitted" }],
-    decisions: [],
-  }] }));
+  await page.route("**/api/v1/me/work", (route) => route.fulfill({ json: [
+    {
+      assignment: { id: "assignment-1", task_id: "task-1", person_id: "1", status: "in_progress" },
+      task: { id: "task-1", title: "Прототип рекомендательной системы", status: "published", places: 4 },
+      terms: { version: 1, deadline_at: "2026-10-12T18:00:00Z", deliverable: "MVP", acceptance_criteria: ["Воспроизводимость"], support_mode: "mentor", compensation: { paid: true, base_amount_per_assignee: "50000", currency: "RUB", b_multiplier: "1.5", a_multiplier: "2.5", b_total: "75000", a_total: "125000", quantum: "0.01", rounding_mode: "half_up", policy_version: 1, payout_condition: "Принятый личный вклад" } },
+      contributions: [{ id: "contribution-1", version: 2, personal_summary: "Реализован API и интеграционные тесты", artifact_keys: ["api"], status: "submitted" }],
+      decisions: [],
+    },
+    {
+      assignment: { id: "assignment-2", task_id: "task-2", person_id: "1", status: "accepted" },
+      task: { id: "task-2", title: "Прогнозирование нагрузки контактного центра", status: "published", places: 2 },
+      terms: { version: 1, deadline_at: "2026-09-30T18:00:00Z", deliverable: "Baseline и признаковая схема", acceptance_criteria: ["Воспроизводимые метрики"], support_mode: "mentor", compensation: { paid: true, base_amount_per_assignee: "50000", currency: "RUB", b_multiplier: "1.5", a_multiplier: "2.5", b_total: "75000", a_total: "125000", quantum: "0.01", rounding_mode: "half_up", policy_version: 1, payout_condition: "Принятый личный вклад" } },
+      contributions: [{ id: "contribution-2", version: 1, personal_summary: "Подготовил признаки и baseline-модель", artifact_keys: ["notebook"], status: "accepted" }],
+      decisions: [{ id: "decision-2", contribution_id: "contribution-2", decision: "accepted", reason: "Целевые метрики достигнуты", deadline_at: null, owner_id: "2" }],
+    },
+  ] }));
   await page.route("**/api/v1/search*", (route) => route.fulfill({ json: { items: [{ kind: "course", meta: "available", ref: "course:python-base", title: "Python для R&D" }] } }));
   await page.route("**/api/v1/me/notifications", (route) => route.fulfill({ json: { items: [
     { id: "note-mentor", kind: "message", title: "Новый комментарий ментора", body: "Елена Наставник оставила замечание в рабочей области", read: false, created_at: "2026-10-18T09:15:00Z", entity_type: "message", entity_id: null },
@@ -45,6 +54,12 @@ test.beforeEach(async ({ page }) => {
   ], unread: 3 } }));
   await page.route("**/api/v1/me/notifications/*/read", (route) => route.fulfill({ json: { ok: true } }));
   await page.route("**/api/v1/me/notifications/read-all", (route) => route.fulfill({ json: { ok: true } }));
+  await page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({ json: [
+    { competency_key: "backend", counted: false, level: "P1", observed_at: "2026-10-18T09:30:00+03:00", reason: "Не совпал с текущим портфелем навыков", source_kind: "checkpoint", source_ref: "beh-1" },
+    { competency_key: "backend", counted: true, level: "P2", observed_at: "2026-10-18T12:00:00+03:00", reason: "Вклад принят заказчиком", source_kind: "contribution", source_ref: "contribution-1" },
+  ] }));
+  await page.route("**/api/v1/me/bootcamp/certificates", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/learning/streak", (route) => route.fulfill({ json: { current_days: 3, qualified_dates: ["2026-10-16", "2026-10-17", "2026-10-18"], reason: "Учебная активность подтверждена." } }));
   await page.route("**/api/v1/me/tasks/task-1", (route) => route.fulfill({ json: {
     task: { id: "task-1", title: "Прототип рекомендательной системы", status: "in_progress" },
     problem: "Собрать рекомендации на открытом корпусе и оценить качество",
@@ -204,6 +219,54 @@ test("participant home actions open project, buddy and linked routes", async ({ 
   await page.getByTestId("activity-scale").getByRole("button", { name: "Год" }).click();
   await expect(page.getByTestId("activity-total")).toContainText("14");
   await expect(page.getByTestId("activity-state-success")).toContainText("в рамках цели 120–300");
+  // KPI drill-down: card click, dialog contents, Back restores the plain dashboard
+  await page.getByTestId("kpi-card-projects").click();
+  await expect(page).toHaveURL(/kpi=projects/);
+  await expect(page.getByRole("dialog", { name: /Проекты: активные, завершённые и требующие внимания/ })).toBeVisible();
+  await expect(page.getByTestId("kpi-item-assignment-1")).toContainText("В работе");
+  // The history group deep-links into the completed project workspace
+  await page.getByTestId("kpi-open-project-assignment-2").click();
+  await expect(page).toHaveURL(/\/workspace\/4\?project=assignment-2/);
+  await expect(page.getByRole("heading", { name: "Прогнозирование нагрузки контактного центра" })).toBeVisible();
+  await page.goBack();
+  await expect(page.getByTestId("kpi-item-assignment-1")).toContainText("В работе");
+  await page.goBack();
+  await expect(page.getByRole("dialog", { name: /Проекты: активные/ })).not.toBeVisible();
+  // Deep link restores the drill-down with concrete evidence after a full reload
+  await page.goto("/workspace/0?kpi=verified&evidence=contribution-1");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByRole("dialog", { name: /Подтверждённый опыт/ })).toBeVisible();
+  await expect(page.getByTestId("kpi-anchor-contribution-1")).toContainText("входит в KPI");
+  await expect(page.getByTestId("kpi-anchor-contribution-1")).toHaveAttribute("data-kpi-evidence-current", "true");
+  // Daily agenda: chip opens today, prev jumps one day back, deep link opens a concrete historical day
+  await page.getByTestId("kpi-close").click();
+  await expect(page).not.toHaveURL(/kpi=/);
+  await page.locator(".date-chip--button").click();
+  await expect(page).toHaveURL(/date=\d{4}-\d{2}-\d{2}/);
+  await expect(page.getByTestId("agenda-dialog")).toBeVisible();
+  const dayBefore = new URLSearchParams(new URL(page.url()).search).get("date") ?? "";
+  await page.getByTestId("agenda-prev").click();
+  const dayAfter = new URLSearchParams(new URL(page.url()).search).get("date") ?? "";
+  const expectedPrev = dayBefore === "" ? "" : new Date(new Date(`${dayBefore}T00:00:00Z`).getTime() - 86400000).toISOString().slice(0, 10);
+  expect(dayAfter).toBe(expectedPrev);
+  await page.getByTestId("agenda-today").click();
+  await expect(page).not.toHaveURL(/date=/);
+  await expect(page.getByTestId("agenda-dialog")).not.toBeVisible();
+  // Deep link: previous empty/non-empty historical day opens on its own URL
+  await page.goto("/workspace/0?date=2026-10-18");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByTestId("agenda-dialog")).toBeVisible();
+  await expect(page.getByTestId(/agenda-item-event:/)).toContainText("Вклад: API поиска");
+  await expect(page.getByTestId("agenda-history-note")).toContainText("не требуют повторного участия");
+  await page.getByTestId("agenda-today").click();
+  await expect(page).not.toHaveURL(/date=/);
+  await expect(page.getByTestId("agenda-dialog")).not.toBeVisible();
+  // The empty historical day shows an empty state instead of borrowing neighbours
+  await page.goto("/workspace/0?date=2026-10-15");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByTestId("agenda-empty")).toContainText("квалифицированных действий нет");
+  await page.getByTestId("agenda-today").click();
+  await expect(page).not.toHaveURL(/date=/);
   await page.getByRole("button", { name: /Все действия/ }).click();
   await expect(page).toHaveURL(/\/workspace\/3$/);
 });
@@ -230,7 +293,7 @@ test("search, streak, task detail and messages are interactive", async ({ page }
   await page.getByRole("option", { name: /Python для R&D/ }).click();
   await expect(page).toHaveURL(/workspace\/2$/);
   await page.getByRole("link", { name: "Мои проекты", exact: true }).click();
-  await page.getByRole("button", { name: "Открыть рабочую область →" }).click();
+  await page.getByRole("button", { name: "Открыть рабочую область →" }).first().click();
   await expect(page.getByRole("heading", { name: "Прототип рекомендательной системы" })).toBeVisible();
   await expect(page.getByText("Загрузить решение")).toBeVisible();
   await page.getByRole("button", { name: "Открыть чат команды" }).click();
@@ -255,7 +318,7 @@ test("application confirms success and appears in my tasks", async ({ page }) =>
   await page.getByRole("button", { name: "Открыть мои задачи" }).click();
   await expect(page.getByRole("heading", { name: "Мои задачи" })).toBeVisible();
   await expect(page.getByText("Ожидает решения")).toBeVisible();
-  await page.locator(".my-task-row--active").getByRole("button", { name: "Открыть карточку" }).click();
+  await page.locator(".my-task-row--active").getByRole("button", { name: "Открыть карточку" }).first().click();
   await expect(page.getByRole("dialog", { name: "Прототип рекомендательной системы" })).toContainText("Роман Воронов");
   await expect(page.getByRole("dialog", { name: "Прототип рекомендательной системы" })).toContainText("Елена Наставник");
   await page.getByRole("button", { name: /Перейти в рабочую область/ }).click();

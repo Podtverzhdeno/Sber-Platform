@@ -317,6 +317,12 @@ async function installParticipantData(page: Page, options: ParticipantMocks = {}
     ],
   }));
   await page.route("**/api/v1/me/learning/streak", (route) => route.fulfill({ json: { current_days: 3, qualified_dates: ["2026-10-16", "2026-10-17", "2026-10-18"], reason: "Учебная активность подтверждена." } }));
+  await page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({
+    json: [
+      { competency_key: "python", counted: true, level: "P2", observed_at: "2026-10-18T12:00:00+03:00", reason: "Вклад версии 2 принят заказчиком: отбор стал воспроизводимым", source_kind: "contribution", source_ref: "contribution-1" },
+      { competency_key: "rag", counted: false, level: "P1", observed_at: "2026-10-17T14:00:00+03:00", reason: "Checkpoint не совпал с активным портфелем навыков", source_kind: "checkpoint", source_ref: "checkpoint-rag-global" },
+    ],
+  }));
   await page.route("**/api/v1/me/bootcamp/certificates", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/marketplace/tasks", (route) => route.fulfill({ json: [{ task, terms, accepted_terms_version: 2 }] }));
   await page.route("**/api/v1/me/work", (route) => route.fulfill({

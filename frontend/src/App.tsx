@@ -2,6 +2,16 @@
 import { PassportNextResultCard } from "./features/next-result";
 import { BuddySuggestionCard } from "./features/buddy-suggestion";
 import { ActivityPanel } from "./features/activity-panel";
+import { KpiDetailsBody } from "./features/kpi-details";
+import {
+  KPI_KEYS,
+  KPI_TITLES,
+  buildKpiValues,
+  useKpiDataSources,
+  type KpiKey,
+} from "./features/kpi-data";
+import { DayAgendaBody } from "./features/day-agenda";
+import { todayISO } from "./features/agenda-data";
 import {
   useDeferredValue,
   useEffect,
@@ -16,6 +26,7 @@ import {
   Routes,
   useNavigate,
   useParams,
+  useSearchParams,
 } from "react-router-dom";
 
 import { apiRequest } from "./api/client";
@@ -633,12 +644,58 @@ function Workspace({
 
 function ParticipantDashboard({ actor }: { actor: Actor }) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [projectOpen, setProjectOpen] = useState(false);
   const goTo = (label: string, query = "") => {
     const index = actor.navigation.indexOf(label);
     if (index >= 0) void navigate(`/workspace/${String(index)}${query}`);
   };
+  const kpiParam = searchParams.get("kpi");
+  const kpi: KpiKey | null =
+    kpiParam !== null && KPI_KEYS.includes(kpiParam as KpiKey) ? (kpiParam as KpiKey) : null;
+  const agendaDateParam = searchParams.get("date");
+  const evidenceRef = searchParams.get("evidence");
+  const openKpi = (key: KpiKey) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("kpi", key);
+    setSearchParams(next);
+  };
+  const closeKpi = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("kpi");
+    next.delete("evidence");
+    setSearchParams(next);
+  };
+  const openAgenda = () => {
+    const next = new URLSearchParams(searchParams);
+    next.set("date", todayDate);
+    setSearchParams(next);
+  };
+  const changeAgendaDate = (nextDate: string | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (nextDate === null) next.delete("date");
+    else next.set("date", nextDate);
+    setSearchParams(next);
+  };
+  const closeAgenda = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("date");
+    setSearchParams(next);
+  };
+  const agendaOpen = searchParams.has("date");
+  const todayDate = todayISO();
+  const proposedAgendaDate =
+    agendaDateParam !== null && /^\d{4}-\d{2}-\d{2}$/.test(agendaDateParam) ? agendaDateParam : null;
+  const sources = useKpiDataSources(true);
+  const kpiValues = buildKpiValues(sources);
   const metrics = dashboardMetrics.participant;
+  const agendaDate = proposedAgendaDate ?? todayDate;
+  const verifiedState =
+    sources.anchors.isError || sources.certificates.isError
+      ? ("error" as const)
+      : sources.anchors.status === "success" && sources.certificates.status === "success"
+        ? ("success" as const)
+        : ("pending" as const);
   return (
     <div className="dashboard-shell participant-home" data-reference="R-PAR-01">
       <header className="dashboard-heading">
@@ -652,34 +709,61 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
             проект подтверждает опыт, а проверенный опыт усиливает резюме.
           </p>
         </div>
-        <span className="date-chip">Сегодня · 28 сентября</span>
+        <button
+          type="button"
+          className="date-chip date-chip--button"
+          onClick={openAgenda}
+          aria-haspopup="dialog"
+        >
+          Сегодня
+        </button>
       </header>
       <section className="metric-grid" aria-label="Ключевые показатели">
-        {metrics.map((metric, metricIndex) => (
-          <article
-            className={`metric-card metric-card--${metric.tone}`}
-            key={metric.label}
-          >
-            <span className="metric-icon" aria-hidden="true">
-              ◇
-            </span>
-            <span>{metric.label}</span>
-            <strong>{metric.value}</strong>
-            <small>{metric.delta}</small>
-            <div
-              className="metric-histogram"
-              role="img"
-              aria-label={`Гистограмма «${metric.label}» за шесть недель`}
+        {metrics.map((metric, metricIndex) => {
+          const kpiKey = KPI_KEYS[metricIndex] ?? "streak";
+          const drill = kpiValues[kpiKey];
+          const value = drill?.value ?? "…";
+          const delta = drill?.delta ?? "загрузка";
+          const card = (
+            <>
+              <span className="metric-icon" aria-hidden="true">
+                ◇
+              </span>
+              <span>{metric.label}</span>
+              <strong data-testid={`kpi-card-${kpiKey}`}>{value}</strong>
+              <small>{delta}</small>
+              <div
+                className="metric-histogram"
+                aria-hidden="true"
+                data-testid={`kpi-spark-${String(metricIndex)}`}
+              >
+                {(participantMetricSeries[metricIndex] ?? []).map((seriesValue, seriesIndex, series) => (
+                  <i
+                    key={seriesIndex}
+                    style={{ height: `${String(Math.max(12,seriesValue/Math.max(...series)*100))}%` }}
+                  />
+                ))}
+              </div>
+            </>
+          );
+          return kpiKey === "streak" ? (
+            <article className={`metric-card metric-card--${metric.tone}`} key={metric.label}>
+              {card}
+            </article>
+          ) : (
+            <button
+              type="button"
+              key={metric.label}
+              className={`metric-card metric-card--${metric.tone} metric-card--drill`}
+              onClick={() => {
+                openKpi(kpiKey);
+              }}
+              aria-haspopup="dialog"
             >
-              {(participantMetricSeries[metricIndex] ?? []).map((value, index, series) => (
-                <i
-                  key={index}
-                  style={{ height: `${String(Math.max(12,value/Math.max(...series)*100))}%` }}
-                />
-              ))}
-            </div>
-          </article>
-        ))}
+              {card}
+            </button>
+          );
+        })}
       </section>
       <div className="dashboard-columns">
         <article className="focus-panel">
@@ -769,6 +853,74 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
           }}
         />
       </div>
+      {kpi !== null && (
+        <div className="overlay" role="presentation">
+          <section
+            className="overlay-panel overlay-panel--dialog kpi-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label={KPI_TITLES[kpi]}
+            data-testid="kpi-dialog"
+          >
+            <header>
+              <h2>{KPI_TITLES[kpi]}</h2>
+              <button
+                type="button"
+                aria-label="Закрыть"
+                onClick={closeKpi}
+                data-testid="kpi-close"
+              >
+                ×
+              </button>
+            </header>
+            <KpiDetailsBody
+              kpi={kpi}
+              progressState={sources.growth.status}
+              progress={sources.growth.data}
+              projectsState={sources.work.status}
+              projects={sources.work.data}
+              verifiedState={verifiedState}
+              anchors={sources.anchors.data}
+              certificates={sources.certificates.data}
+              evidenceRef={evidenceRef}
+              onOpenProject={(assignmentId) => {
+                goTo("Мои проекты", `?project=${assignmentId}`);
+              }}
+            />
+          </section>
+        </div>
+      )}
+      {agendaOpen && (
+        <div className="overlay" role="presentation">
+          <section
+            className="overlay-panel overlay-panel--dialog agenda-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Агенда дня"
+            data-testid="agenda-dialog"
+          >
+            <header>
+              <h2>Агенда дня</h2>
+              <button
+                type="button"
+                aria-label="Закрыть"
+                onClick={closeAgenda}
+                data-testid="agenda-dialog-close"
+              >
+                ×
+              </button>
+            </header>
+            <DayAgendaBody
+              state={sources.growth.status}
+              snapshot={sources.growth.data}
+              work={sources.work.data}
+              selectedDate={agendaDate}
+              onDateChange={changeAgendaDate}
+              onClose={closeAgenda}
+            />
+          </section>
+        </div>
+      )}
       {projectOpen && (
         <div className="overlay" role="presentation">
           <section

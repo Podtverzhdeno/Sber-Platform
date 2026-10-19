@@ -1,7 +1,7 @@
 ﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import type { FC } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { apiRequest } from "../api/client";
 import { Badge, Card, Modal, StatePanel } from "../components/ui";
@@ -64,13 +64,14 @@ export const CompensationDetails: FC<{ terms: Compensation; expanded?: boolean }
 export function ParticipantTasks({ view = "catalog" }: { view?: "catalog" | "projects" }) {
   const client = useQueryClient();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const catalog = useQuery({ queryKey: ["task-catalog"], queryFn: () => apiRequest<MarketplaceTask[]>("/api/v1/marketplace/tasks"), refetchOnMount: "always" });
   const work = useQuery({ queryKey: ["my-work"], queryFn: () => apiRequest<WorkItem[]>("/api/v1/me/work"), refetchOnMount: "always" });
   const [summary, setSummary] = useState("");
   const [artifactUrl, setArtifactUrl] = useState("");
   const [consentItem, setConsentItem] = useState<MarketplaceTask | null>(null);
   const [taskPreview, setTaskPreview] = useState<{ taskId: string; assignmentId: string | null; title: string } | null>(null);
-  const [selectedAssignment, setSelectedAssignment] = useState<string | null>(() => { const assignmentId = sessionStorage.getItem("impulse_open_assignment"); sessionStorage.removeItem("impulse_open_assignment"); return assignmentId; });
+  const [selectedAssignment, setSelectedAssignment] = useState<string | null>(() => { const fromUrl = searchParams.get("project"); if (fromUrl !== null) return fromUrl; const assignmentId = sessionStorage.getItem("impulse_open_assignment"); sessionStorage.removeItem("impulse_open_assignment"); return assignmentId; });
   const [applicationNotice, setApplicationNotice] = useState<string | null>(null);
   const [catalogView, setCatalogView] = useState<"cards" | "list">(() => localStorage.getItem("impulse_task_catalog_view") === "list" ? "list" : "cards");
   const [taskCategory, setTaskCategory] = useState<"Все" | "Аналитика" | "ML / AI" | "Разработка">("Все");
