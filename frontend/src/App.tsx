@@ -1,5 +1,6 @@
 ﻿import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
+import { BuddySuggestionCard } from "./features/buddy-suggestion";
 import {
   useDeferredValue,
   useEffect,
@@ -24,7 +25,7 @@ import {
   type ThemeChoice,
 } from "./app/theme";
 import { createQueryClient } from "./app/query";
-import { Badge, StatePanel } from "./components/ui";
+import { StatePanel } from "./components/ui";
 import { Bootcamp, DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
 import { EventCatalog } from "./features/ecosystem";
 import { CustomerWorkspace } from "./features/customer";
@@ -632,7 +633,6 @@ function Workspace({
 function ParticipantDashboard({ actor }: { actor: Actor }) {
   const navigate = useNavigate();
   const [projectOpen, setProjectOpen] = useState(false);
-  const [buddyOpen, setBuddyOpen] = useState(false);
   const goTo = (label: string, query = "") => {
     const index = actor.navigation.indexOf(label);
     if (index >= 0) void navigate(`/workspace/${String(index)}${query}`);
@@ -689,31 +689,11 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
           />
         </article>
         <aside className="ai-panel">
-          <div>
-            <span className="ai-orb" aria-hidden="true">
-              ✦
-            </span>
-            <div>
-              <h2>AI Buddy</h2>
-              <span className="ui-badge ui-badge--ai">Бета</span>
-            </div>
-          </div>
-          <p>
-            Подсказывает полезный следующий шаг на основе курса, проекта и
-            подтверждённых результатов.
-          </p>
-          <div className="ai-boundary">
-            Рекомендация — черновик. Решение об оценке принимает
-            человек.
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setBuddyOpen(true);
+          <BuddySuggestionCard
+            onOpenWorkspace={() => {
+              goTo("Bootcamp", "?course=python-base");
             }}
-          >
-            Получить рекомендацию →
-          </button>
+          />
         </aside>
       </div>
       <div className="dashboard-lower-grid">
@@ -871,57 +851,6 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
                   }}
                 >
                   Закрыть
-                </button>
-              </div>
-            </div>
-          </section>
-        </div>
-      )}
-      {buddyOpen && (
-        <div className="overlay" role="presentation">
-          <section
-            className="overlay-panel overlay-panel--drawer"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Рекомендация AI Buddy"
-          >
-            <header>
-              <h2>Рекомендация AI Buddy</h2>
-              <button
-                type="button"
-                aria-label="Закрыть"
-                onClick={() => {
-                  setBuddyOpen(false);
-                }}
-              >
-                ×
-              </button>
-            </header>
-            <div className="buddy-recommendation">
-              <Badge tone="warning">Черновик AI</Badge>
-              <h3>Сначала завершите checkpoint API</h3>
-              <p>
-                Он напрямую связан с текущим проектом, добавит доказательство
-                навыка Python и откроет этап проверки MVP.
-              </p>
-              <div className="modal-actions">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setBuddyOpen(false);
-                    goTo("Bootcamp", "?course=python-base");
-                  }}
-                >
-                  Открыть траекторию
-                </button>
-                <button
-                  className="secondary-button"
-                  type="button"
-                  onClick={() => {
-                    setBuddyOpen(false);
-                  }}
-                >
-                  Понятно
                 </button>
               </div>
             </div>

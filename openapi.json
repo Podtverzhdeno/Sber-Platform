@@ -593,6 +593,153 @@
         "title": "BriefDraftView",
         "type": "object"
       },
+      "BuddyActionView": {
+        "properties": {
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "ref",
+          "title"
+        ],
+        "title": "BuddyActionView",
+        "type": "object"
+      },
+      "BuddySuggestionStateView": {
+        "properties": {
+          "ai_model_available": {
+            "title": "Ai Model Available",
+            "type": "boolean"
+          },
+          "dismissed": {
+            "title": "Dismissed",
+            "type": "boolean"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "suggestion": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BuddySuggestionView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "policy_version",
+          "ai_model_available",
+          "dismissed",
+          "suggestion"
+        ],
+        "title": "BuddySuggestionStateView",
+        "type": "object"
+      },
+      "BuddySuggestionView": {
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BuddyActionView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "auto_enrolled": {
+            "title": "Auto Enrolled",
+            "type": "boolean"
+          },
+          "benefit": {
+            "title": "Benefit",
+            "type": "string"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "gap": {
+            "title": "Gap",
+            "type": "string"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "idle_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idle Days"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "model_called": {
+            "title": "Model Called",
+            "type": "boolean"
+          },
+          "observation": {
+            "title": "Observation",
+            "type": "string"
+          },
+          "source_categories": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Categories",
+            "type": "array"
+          },
+          "suggestion_id": {
+            "title": "Suggestion Id",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "kind",
+          "version",
+          "suggestion_id",
+          "generated_at",
+          "observation",
+          "gap",
+          "action",
+          "benefit",
+          "source_categories",
+          "explanation",
+          "idle_days",
+          "model_called",
+          "auto_enrolled"
+        ],
+        "title": "BuddySuggestionView",
+        "type": "object"
+      },
       "CandidateMatchView": {
         "properties": {
           "display_name": {
@@ -6459,6 +6606,21 @@
         "title": "StreakView",
         "type": "object"
       },
+      "SuggestionDismissRequest": {
+        "properties": {
+          "suggestion_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Suggestion Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "suggestion_id"
+        ],
+        "title": "SuggestionDismissRequest",
+        "type": "object"
+      },
       "SupportMode": {
         "enum": [
           "mentor",
@@ -7685,6 +7847,80 @@
           }
         },
         "summary": "Withdraw Memory",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
+    "/api/v1/agents/buddy/suggestion": {
+      "get": {
+        "description": "Объяснимая рекомендация главной: только разрешённые данные и no model call.",
+        "operationId": "get_suggestion_api_v1_agents_buddy_suggestion_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuddySuggestionStateView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Suggestion",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
+    "/api/v1/agents/buddy/suggestion/dismiss": {
+      "post": {
+        "operationId": "dismiss_suggestion_api_v1_agents_buddy_suggestion_dismiss_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuggestionDismissRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dismiss Suggestion",
         "tags": [
           "buddy"
         ]

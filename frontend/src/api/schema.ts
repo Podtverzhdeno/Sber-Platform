@@ -21,6 +21,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/agents/buddy/suggestion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Suggestion
+         * @description Объяснимая рекомендация главной: только разрешённые данные и no model call.
+         */
+        get: operations["get_suggestion_api_v1_agents_buddy_suggestion_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/agents/buddy/suggestion/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dismiss Suggestion */
+        post: operations["dismiss_suggestion_api_v1_agents_buddy_suggestion_dismiss_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/agents/buddy/threads": {
         parameters: {
             query?: never;
@@ -2448,6 +2485,56 @@ export interface components {
             /** Problem */
             problem?: string | null;
         };
+        /** BuddyActionView */
+        BuddyActionView: {
+            /** Kind */
+            kind: string;
+            /** Ref */
+            ref: string;
+            /** Title */
+            title: string;
+        };
+        /** BuddySuggestionStateView */
+        BuddySuggestionStateView: {
+            /** Ai Model Available */
+            ai_model_available: boolean;
+            /** Dismissed */
+            dismissed: boolean;
+            /** Policy Version */
+            policy_version: number;
+            suggestion: components["schemas"]["BuddySuggestionView"] | null;
+        };
+        /** BuddySuggestionView */
+        BuddySuggestionView: {
+            action: components["schemas"]["BuddyActionView"] | null;
+            /** Auto Enrolled */
+            auto_enrolled: boolean;
+            /** Benefit */
+            benefit: string;
+            /** Explanation */
+            explanation: string;
+            /** Gap */
+            gap: string;
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Idle Days */
+            idle_days: number | null;
+            /** Kind */
+            kind: string;
+            /** Model Called */
+            model_called: boolean;
+            /** Observation */
+            observation: string;
+            /** Source Categories */
+            source_categories: string[];
+            /** Suggestion Id */
+            suggestion_id: string;
+            /** Version */
+            version: number;
+        };
         /** CandidateMatchView */
         CandidateMatchView: {
             /** Display Name */
@@ -4641,6 +4728,11 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** SuggestionDismissRequest */
+        SuggestionDismissRequest: {
+            /** Suggestion Id */
+            suggestion_id: string;
+        };
         /**
          * SupportMode
          * @enum {string}
@@ -5114,6 +5206,59 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_suggestion_api_v1_agents_buddy_suggestion_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuddySuggestionStateView"];
+                };
+            };
+        };
+    };
+    dismiss_suggestion_api_v1_agents_buddy_suggestion_dismiss_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuggestionDismissRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             204: {

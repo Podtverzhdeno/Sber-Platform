@@ -2,12 +2,22 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from impulse.api.errors import ApiError
+from impulse.application.development import DevelopmentService
+from impulse.application.growth import GrowthService
+from impulse.domain.buddy_suggestion import (
+    BOOTCAMP_IDLE_THRESHOLD_DAYS,
+    BuddySuggestion,
+    build_bootcamp_idle_suggestion,
+    build_domain_next_suggestion,
+)
 from impulse.domain.identity import ActorContext, Role
+from impulse.domain.priority import StepSpec
 
 
 @dataclass(frozen=True, slots=True)
@@ -51,6 +61,7 @@ class BuddyConversationService:
         self._message_keys: dict[tuple[UUID, str], BuddyMessage] = {}
         self._feedback: dict[tuple[UUID, UUID], BuddyFeedback] = {}
         self._memory_blocked: set[UUID] = set()
+        self._dismissed_suggestions: dict[UUID, str] = {}
         self.deletion_audit: list[BuddyDeletionAudit] = []
 
     @staticmethod
@@ -111,6 +122,14 @@ class BuddyConversationService:
         self._feedback[key] = feedback
         return feedback
 
+    def dismiss_suggestion(self, actor: ActorContext, suggestion_id: str) -> None:
+        """Remember the dismissed home-card version; never mutates growth state."""
+        self._participant(actor)
+        self._dismissed_suggestions[actor.person_id] = suggestion_id
+
+    def dismissed_suggestion(self, person_id: UUID) -> str | None:
+        return self._dismissed_suggestions.get(person_id)
+
     def withdraw_memory(self, actor: ActorContext) -> BuddyDeletionAudit:
         """Stop reads synchronously, then remove content while retaining minimal audit."""
         self._participant(actor)
@@ -155,3 +174,113 @@ class BuddyConversationService:
     def _memory_allowed(self, actor: ActorContext) -> None:
         if actor.person_id in self._memory_blocked:
             raise ApiError("AI_MEMORY_DISABLED", "AI memory consent is not active.", 409)
+
+
+@dataclass(frozen=True, slots=True)
+class BuddySuggestionState:
+    """Home-card outcome: explainable suggestion plus its dismissal flag."""
+
+    suggestion: BuddySuggestion | None
+    dismissed: bool
+
+
+class BuddySuggestionService:
+    """Объяснимая детерминированная рекомендация главной (openspec 22.3).
+
+    Анализ строится только из разрешённых данных (`GrowthService.next_step`,
+    Bootcamp-сертификаты). Модель не вызывается, запись на курс не создается,
+    траектория и уровень не меняются; dismiss не удаляет Growth snapshot.
+    """
+
+    def __init__(
+        self,
+        growth: GrowthService,
+        development: DevelopmentService,
+        conversations: BuddyConversationService,
+        now: Callable[[], datetime] | None = None,
+    ) -> None:
+        self._growth = growth
+        self._development = development
+        self._conversations = conversations
+        self._now = now or (lambda: datetime.now(UTC).replace(microsecond=0))
+
+    async def state(self, actor: ActorContext) -> BuddySuggestionState:
+        self._check_participant(actor)
+        _roadmaps, result = await self._growth.next_step(actor)
+        step = result.next_available()
+        if step is None:
+            return BuddySuggestionState(suggestion=None, dismissed=False)
+        now = self._now()
+        spec = step.spec
+        suggestion = await self._build(actor.person_id, spec.trajectory_key, spec, now)
+        dismissed = (
+            self._conversations.dismissed_suggestion(actor.person_id) == suggestion.suggestion_id
+        )
+        if dismissed:
+            return BuddySuggestionState(suggestion=None, dismissed=True)
+        return BuddySuggestionState(suggestion=suggestion, dismissed=False)
+
+    def dismiss(self, actor: ActorContext, suggestion_id: str) -> None:
+        self._check_participant(actor)
+        self._conversations.dismiss_suggestion(actor, suggestion_id)
+
+    async def _track_title(self, trajectory_key: str) -> str:
+        for track in await self._development.store.tracks():
+            if track.key == trajectory_key:
+                return track.title
+        return trajectory_key
+
+    async def _build(
+        self,
+        person_id: UUID,
+        trajectory_key: str,
+        spec: StepSpec,
+        now: datetime,
+    ) -> BuddySuggestion:
+        track_title = await self._track_title(trajectory_key)
+        last_verified_at = await self._last_verified_checkpoint_at(person_id)
+        idle = last_verified_at is None or (now - last_verified_at).days >= (
+            BOOTCAMP_IDLE_THRESHOLD_DAYS
+        )
+        if idle:
+            return build_bootcamp_idle_suggestion(
+                now=now,
+                last_verified_at=last_verified_at,
+                track_title=track_title,
+                step_kind=spec.target_kind,
+                step_key=spec.target_key,
+                step_title=spec.target_title,
+            )
+        return build_domain_next_suggestion(
+            now=now,
+            track_title=track_title,
+            step_kind=spec.target_kind,
+            step_key=spec.target_key,
+            step_title=spec.target_title,
+        )
+
+    async def _last_verified_checkpoint_at(self, person_id: UUID) -> datetime | None:
+        certificates = self._development.certificates
+        if certificates is None:
+            return None
+        issued = await certificates.course_certificates(person_id)
+        last = max((item.issued_at for item in issued), default=None)
+        if last is None:
+            return None
+        return last if last.tzinfo is not None else last.replace(tzinfo=UTC)
+
+    @staticmethod
+    def _check_participant(actor: ActorContext) -> None:
+        if actor.active_role is not Role.PARTICIPANT:
+            raise ApiError("FORBIDDEN", "Buddy suggestions are available to a participant.", 403)
+
+
+__all__ = [
+    "BuddyConversationService",
+    "BuddyDeletionAudit",
+    "BuddyFeedback",
+    "BuddyMessage",
+    "BuddySuggestionService",
+    "BuddySuggestionState",
+    "BuddyThread",
+]

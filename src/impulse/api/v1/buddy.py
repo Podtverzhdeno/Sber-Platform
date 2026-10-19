@@ -9,11 +9,20 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
+from pydantic import AwareDatetime, BaseModel, Field
 
 from impulse.api.v1.identity import csrf_session, current_session
-from impulse.application.buddy import BuddyConversationService, BuddyMessage, BuddyThread
+from impulse.application.buddy import (
+    BuddyConversationService,
+    BuddyMessage,
+    BuddySuggestion,
+    BuddySuggestionService,
+    BuddyThread,
+)
+from impulse.application.development import DevelopmentService
+from impulse.application.growth import GrowthService
 from impulse.application.identity import AuthenticatedSession
+from impulse.domain.buddy_suggestion import BUDDY_SUGGESTION_VERSION
 
 router = APIRouter(prefix="/agents/buddy", tags=["buddy"])
 
@@ -143,3 +152,98 @@ async def thread_events(
         yield f"event: status\ndata: {safe}\n\n"
 
     return StreamingResponse(events(), media_type="text/event-stream")
+
+
+class BuddyActionView(BaseModel):
+    kind: str
+    ref: str
+    title: str
+
+
+class BuddySuggestionView(BaseModel):
+    kind: str
+    version: int
+    suggestion_id: str
+    generated_at: AwareDatetime
+    observation: str
+    gap: str
+    action: BuddyActionView | None
+    benefit: str
+    source_categories: list[str]
+    explanation: str
+    idle_days: int | None
+    model_called: bool
+    auto_enrolled: bool
+
+
+class BuddySuggestionStateView(BaseModel):
+    policy_version: int
+    ai_model_available: bool
+    dismissed: bool
+    suggestion: BuddySuggestionView | None
+
+
+class SuggestionDismissRequest(BaseModel):
+    suggestion_id: str = Field(min_length=1, max_length=256)
+
+
+def _suggestion_service(request: Request) -> BuddySuggestionService:
+    development = request.app.state.development_service
+    assert isinstance(development, DevelopmentService)
+    growth = GrowthService(
+        development,
+        request.app.state.competency_service,
+        request.app.state.work_service,
+    )
+    return BuddySuggestionService(growth, development, request.app.state.buddy_service)
+
+
+def _suggestion_view(item: BuddySuggestion) -> BuddySuggestionView:
+    return BuddySuggestionView(
+        kind=str(item.kind.value),
+        version=item.version,
+        suggestion_id=item.suggestion_id,
+        generated_at=item.generated_at,
+        observation=item.observation,
+        gap=item.gap,
+        action=(
+            BuddyActionView(kind=item.action.kind, ref=item.action.ref, title=item.action.title)
+            if item.action is not None
+            else None
+        ),
+        benefit=item.benefit,
+        source_categories=list(item.source_categories),
+        explanation=item.explanation,
+        idle_days=item.idle_days,
+        model_called=item.model_called,
+        auto_enrolled=item.auto_enrolled,
+    )
+
+
+@router.get("/suggestion", response_model=BuddySuggestionStateView)
+async def get_suggestion(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    request: Request,
+    service: Annotated[BuddySuggestionService, Depends(_suggestion_service)],
+) -> BuddySuggestionStateView:
+    """Объяснимая рекомендация главной: только разрешённые данные и no model call."""
+    state = await service.state(authenticated.actor)
+    settings = getattr(request.app.state, "settings", None)
+    ai_available = bool(getattr(settings, "ai_buddy_enabled", False))
+    return BuddySuggestionStateView(
+        policy_version=state.suggestion.version
+        if state.suggestion is not None
+        else BUDDY_SUGGESTION_VERSION,
+        ai_model_available=ai_available,
+        dismissed=state.dismissed,
+        suggestion=(_suggestion_view(state.suggestion) if state.suggestion is not None else None),
+    )
+
+
+@router.post("/suggestion/dismiss", status_code=204)
+async def dismiss_suggestion(
+    body: SuggestionDismissRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[BuddyConversationService, Depends(_service)],
+) -> None:
+    service.dismiss_suggestion(authenticated.actor, body.suggestion_id)
