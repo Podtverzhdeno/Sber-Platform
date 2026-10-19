@@ -163,12 +163,65 @@ jobs:
     name: frontend-build-and-e2e
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      APP_ENV: test
     defaults:
       run:
         working-directory: frontend
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Install backend dependencies
+        run: uv sync --frozen
+        working-directory: .
+      - name: Apply backend migrations
+        run: uv run alembic upgrade head
+        working-directory: .
+      - name: Seed demo data
+        run: uv run impulse-demo-seed
+        working-directory: .
+      - name: Start backend for browser tests
+        run: |
+          nohup uv run uvicorn impulse.main:app --host 127.0.0.1 --port 8000 --app-dir . > /tmp/backend.log 2>&1 &
+          echo $! > /tmp/backend.pid
+        working-directory: .
+      - name: Wait for backend readiness
+        run: |
+          ready=""
+          for attempt in $(seq 1 30); do
+            code=$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 5 http://127.0.0.1:8000/health/ready)
+            if [ "${code}" = "200" ]; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ -z "${ready}" ]; then
+            backend_logs=$(cat /tmp/backend.log 2>/dev/null | tr '\n' ' ' | tail -c 1500)
+            echo "::error::backend_not_ready=${backend_logs}"
+            exit 1
+          fi
+        working-directory: .
       - name: Install Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -205,6 +258,8 @@ jobs:
           print('::error::e2e_spec_lines=' + urllib.parse.quote(' | '.join(spec_lines)[:1400]))
           tail = [line for line in log.splitlines()][-45:]
           print('::error::e2e_tail=' + urllib.parse.quote(' \n'.join(tail)[:2200]))
+          backend_logs = pathlib.Path('/tmp/backend.log').read_text(encoding='utf-8', errors='replace').splitlines()[-20:]
+          print('::error::backend_logs=' + urllib.parse.quote(' \n'.join(backend_logs)[:1500]))
           PY
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
