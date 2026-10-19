@@ -214,12 +214,16 @@ async function installParticipantData(page: Page, options: ParticipantMocks = {}
       auto_enrolled: false,
     },
   };
+  let buddyDismissed = false;
   await page.route("**/api/v1/agents/buddy/suggestion", (route) => route.fulfill({
-    json: buddySuggestionPayload,
+    json: buddyDismissed
+      ? { ...buddySuggestionPayload, dismissed: true, suggestion: null }
+      : buddySuggestionPayload,
   }));
-  await page.route("**/api/v1/agents/buddy/suggestion/dismiss", (route) => route.fulfill({
-    status: 204,
-  }));
+  await page.route("**/api/v1/agents/buddy/suggestion/dismiss", (route) => {
+    buddyDismissed = true;
+    return route.fulfill({ status: 204 });
+  });
   await page.route("**/api/v1/development/tracks", (route) => route.fulfill({
     json: {
       active_count: 1,
@@ -484,10 +488,10 @@ test("R-PAR-01 dashboard composition and action", async ({ page }) => {
   await openWorkspace(page, participantBase.key);
   await expect(page.locator('[data-reference="R-PAR-01"]')).toBeVisible();
   await screenshot(page, "R-PAR-01");
-  await page.getByRole("button", { name: /Получить рекомендацию/ }).click();
-  await expect(page.getByRole("dialog", { name: "Рекомендация AI Buddy" })).toBeVisible();
-  await page.getByRole("button", { name: "Закрыть" }).click();
-  await expect(page.getByRole("dialog", { name: "Рекомендация AI Buddy" })).toHaveCount(0);
+  await page.getByTestId("buddy-suggestion-why").locator("summary").click();
+  await expect(page.getByTestId("buddy-suggestion-explanation")).toBeVisible();
+  await page.getByTestId("buddy-suggestion-dismiss").click();
+  await expect(page.getByTestId("buddy-suggestion-dismissed")).toBeVisible();
 });
 
 test("R-PAR-02 journey composition and mentor consultation", async ({ page }) => {
