@@ -25,6 +25,7 @@ SQL_EXPECTATION = re.compile(r"^-- expect-json: (?P<value>.+)$", re.MULTILINE)
 HTTP_REQUEST = re.compile(r"^(?P<method>GET|POST|PUT|PATCH|DELETE) (?P<path>\S+)$")
 HTTP_EXPECTATION = re.compile(r"^EXPECT (?P<path>[A-Za-z0-9_.]+) = (?P<value>.+)$")
 METRIC_ROW = re.compile(r"^\| `(?P<key>[a-z][a-z0-9_]+)` \|", re.MULTILINE)
+METRIC_SECTION = re.compile(r"## Role metrics\n.*?(?=\n## )", re.DOTALL)
 ROLE_PERSONAS = (
     "mentor-elena",
     "customer-roman",
@@ -110,7 +111,10 @@ def _check_http(body: str, metadata: dict[str, str], api: TestClient) -> None:
 
 
 def _check_metric_dictionary(text: str, api: TestClient) -> int:
-    documented = set(METRIC_ROW.findall(text))
+    section = METRIC_SECTION.search(text)
+    if section is None:
+        raise AssertionError('Missing "## Role metrics" section')
+    documented = set(METRIC_ROW.findall(str(section.group(0))))
     exposed: set[str] = set()
     for persona in ROLE_PERSONAS:
         login = api.post("/api/v1/auth/demo-login", json={"persona_key": persona})

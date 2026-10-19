@@ -106,6 +106,110 @@ GET /api/v1/me/analytics/journey
 EXPECT code = "RESOURCE_NOT_FOUND"
 ```
 
+## Versioned qualification и target definitions
+
+Определения, по которым считаются рост и аналитика, зафиксированы с версиями и
+возвращаются API участника. UI «Как считается» SHALL читать подписи из этих же ключей,
+а не из hardcoded-строк интерфейса:
+
+| Ключ | Версия | Определение |
+|---|---|---|
+| `activity` | `impulse-growth-activity-v3` | только квалифицированные события |
+| `hours` | `impulse-growth-hours-v2` | trusted интервалы с дедупликацией пересечений |
+| `milestones` | `impulse-growth-milestones-v4` | прогресс траектории по обязательным milestones |
+| `readiness` | `impulse-growth-readiness-v3` | готовность роли по целевым competency levels |
+| `snapshot` | `impulse-growth-snapshot-v2` | структура снапшота роста участника |
+
+В квалифицированную активность (`activity`) SHALL входить verified course/checkpoint
+completion, содержательная project submission/checkpoint, принятое исправление и
+verified event participation. Просмотр страницы, login и исключительно
+само-проанализированные отчёты не увеличивают подтверждённую активность или прогресс.
+Не завершённые и не подтверждённые данными значения отделяются от окончательных:
+percent остаётся равным `null` при coverage меньше единицы и `partial=true`, а
+само-проверенные часы учитываются в `self_reported`, но никогда не смешиваются с
+`trusted` часами.
+
+```http test persona=participant-alex status=200
+GET /api/v1/me/growth/snapshot
+EXPECT definitions.activity = "impulse-growth-activity-v3"
+EXPECT definitions.hours = "impulse-growth-hours-v2"
+EXPECT definitions.milestones = "impulse-growth-milestones-v4"
+EXPECT definitions.readiness = "impulse-growth-readiness-v3"
+EXPECT definitions.snapshot = "impulse-growth-snapshot-v2"
+EXPECT freshness.known = false
+```
+
+```http test persona=participant-alex status=200
+GET /api/v1/me/growth/next-step
+EXPECT policy_version = 1
+EXPECT next_available = null
+EXPECT steps.0.stale_reason = "roadmap_version_changed"
+```
+
+### Дедупликация пересекающихся интервалов часов
+
+Необработанные интервалы скорости застёгиваются на концах; пересечение (30 минут
+между `540–660` и `630–750`) не считается дважды, поэтому trusted часы
+вычисляются как `MERGE(120, 90) = 210` вместо сложения `120 + 120 = 240`.
+
+```sql test
+WITH raw(start_a, end_a, start_b, end_b) AS (VALUES (540, 660, 630, 750)),
+first_span AS (SELECT end_a - start_a AS minutes FROM raw),
+second_span AS (
+  SELECT MAX(0, end_b - MAX(end_a, start_b)) AS minutes FROM raw
+)
+SELECT printf('%.2f', first_span.minutes + second_span.minutes * 1.0) AS trusted_minutes
+FROM first_span CROSS JOIN second_span;
+-- expect-json: [["210.00"]]
+```
+
+```sql test
+WITH sample(later_start_minute, candidate_end_minute) AS (VALUES (540, 630))
+SELECT printf('%.2f', MAX(0, candidate_end_minute - later_start_minute) * 1.0) AS deduplicated_tail
+FROM sample;
+-- expect-json: [["90.00"]]
+```
+
+### Grace period пропущенного дня
+
+День считается пропущенным только после его завершения **и** grace period в таймзоне
+участника: активность в `1450` минуте при закрытии дня `1439` и grace 60 минут всё ещё
+учитывается, а `1601` — уже считается пропущенной.
+
+```sql test
+WITH sample(event_local_minute, close_of_day_minute, grace_minutes) AS (
+  VALUES
+    (1450, 1439, 60),
+    (1601, 1439, 60)
+),
+outcome AS (
+  SELECT CASE
+    WHEN event_local_minute > close_of_day_minute + grace_minutes
+      THEN 'missed_after_grace'
+    ELSE 'counted'
+  END AS day_state,
+  event_local_minute
+  FROM sample
+)
+SELECT day_state FROM outcome ORDER BY event_local_minute;
+-- expect-json: [["counted"], ["missed_after_grace"]]
+```
+
+### Прогресс траектории и готовность роли не смешиваются
+
+«Прогресс траектории» измеряет выполнение обязательных milestones (numerator /
+mandatory milestones), «Готовность роли» — долю достигнутых целевых competency
+levels. Прогресс `100%` при незакрытой practical milestone даёт readiness ниже 100:
+
+```sql test
+WITH milestones(mandatory, completed) AS (VALUES (4, 4)),
+readiness(targets, reached) AS (VALUES (6, 4))
+SELECT printf('%.2f', completed * 100.0 / mandatory * 1.0) AS trajectory_progress_percent,
+       printf('%.2f', reached * 100.0 / targets * 1.0) AS role_readiness_percent
+FROM milestones CROSS JOIN readiness;
+-- expect-json: [["100.00", "66.67"]]
+```
+
 ## Проверка
 
 ```powershell
