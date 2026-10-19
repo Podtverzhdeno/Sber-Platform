@@ -25,7 +25,11 @@ from impulse.application.development import (
 )
 from impulse.application.work import WorkItem, WorkService
 from impulse.domain.competencies import LEVEL_RANK, UNKNOWN_LEVEL
-from impulse.domain.development import CompletionStatus, RoadmapMilestone
+from impulse.domain.development import (
+    CompletionStatus,
+    RoadmapMilestone,
+    TrackStatus,
+)
 from impulse.domain.growth import (
     ACTIVITY_DEFINITIONS_VERSION,
     HOURS_DEFINITIONS_VERSION,
@@ -41,6 +45,12 @@ from impulse.domain.growth import (
     weighted_completion,
 )
 from impulse.domain.identity import ActorContext
+from impulse.domain.priority import (
+    PolicyResult,
+    StepSpec,
+    TargetState,
+    select_steps,
+)
 from impulse.domain.work import AssignmentStatus, ContributionStatus
 
 GROWTH_SNAPSHOT_VERSION = 2
@@ -478,6 +488,108 @@ class GrowthService:
             if course is not None:
                 return course.title
         return item.target_key
+
+    async def next_step(
+        self, actor: ActorContext
+    ) -> tuple[dict[str, RoadmapRecord] | None, PolicyResult]:
+        """Детерминированный приоритет следующего шага (openspec 22.12)."""
+        store = self._development.store
+        catalog = {item.key: item for item in await store.tracks()}
+        attempts = await store.attempts(actor.person_id)
+        active_attempts = tuple(item for item in attempts if item.status is TrackStatus.ACTIVE)
+        active_tracks = tuple(
+            catalog[attempt.track_key]
+            for attempt in active_attempts
+            if attempt.track_key in catalog
+        )
+        trajectory_positions = {
+            attempt.track_key: position for position, attempt in enumerate(active_attempts)
+        }
+        roadmaps: dict[str, RoadmapRecord] = {}
+        for track in active_tracks:
+            record = await store.roadmap(track.key)
+            if record is not None:
+                roadmaps[track.key] = record
+        courses_index: dict[str, CourseRecord] = {
+            item.key: item for item in await store.courses()
+        }
+        tasks_by_key: dict[str, object] = {
+            item.task_key: item for item in await self._work.store.published_tasks()
+        }
+        specs: list[StepSpec] = []
+        for track in active_tracks:
+            roadmap = roadmaps.get(track.key)
+            attempt = next((item for item in active_attempts if item.track_key == track.key), None)
+            if roadmap is None or attempt is None:
+                continue
+            for milestone in roadmap.milestones:
+                if not milestone.mandatory or milestone.key in attempt.completed_milestones:
+                    continue
+                known = (
+                    milestone.target_kind == "course" and milestone.target_key in courses_index
+                ) or (milestone.target_kind == "task" and milestone.target_key in tasks_by_key)
+                if not known:
+                    continue
+                target_title = self._target_title(milestone, courses_index)
+                specs.append(
+                    StepSpec(
+                        trajectory_key=track.key,
+                        trajectory_position=trajectory_positions.get(track.key, 0),
+                        position=milestone.position,
+                        milestone_key=milestone.key,
+                        target_kind=milestone.target_kind,
+                        target_key=milestone.target_key,
+                        target_title=target_title,
+                    )
+                )
+        states = await self._target_states(active_tracks, roadmaps, courses_index, tasks_by_key)
+        return roadmaps if roadmaps else None, select_steps(tuple(specs), states)
+
+    async def _target_states(
+        self,
+        active_tracks: tuple[TrackRecord, ...],
+        roadmaps: dict[str, RoadmapRecord],
+        courses: dict[str, CourseRecord],
+        published_tasks: dict[str, object],
+    ) -> dict[tuple[str, str], TargetState]:
+        states: dict[tuple[str, str], TargetState] = {}
+        for track in active_tracks:
+            roadmap = roadmaps.get(track.key)
+            if roadmap is None:
+                continue
+            for milestone in roadmap.milestones:
+                key = (milestone.target_kind, milestone.target_key)
+                if key in states:
+                    continue
+                if milestone.target_kind == "course":
+                    record = courses.get(milestone.target_key)
+                    if record is None:
+                        continue
+                    states[key] = TargetState(
+                        published=record.availability != "unavailable",
+                        prerequisites_known=False,
+                        prerequisites_met=True,
+                        effort_hours=None,
+                    )
+                elif milestone.target_kind == "task":
+                    record = published_tasks.get(milestone.target_key)
+                    if record is None:
+                        continue
+                    accepted = sum(
+                        1
+                        for item in await self._work.store.assignments_for_task(
+                            record.aggregate.task_id  # type: ignore[attr-defined]
+                        )
+                        if item.status is AssignmentStatus.ACCEPTED
+                    )
+                    states[key] = TargetState(
+                        published=True,
+                        places_filled=accepted >= record.places,  # type: ignore[attr-defined]
+                        prerequisites_known=False,
+                        prerequisites_met=True,
+                        effort_hours=None,
+                    )
+        return states
 
 
 __all__ = [

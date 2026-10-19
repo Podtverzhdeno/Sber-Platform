@@ -3559,6 +3559,38 @@
         "title": "MuteRequest",
         "type": "object"
       },
+      "NextStepView": {
+        "properties": {
+          "next_available": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ScoredStepView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/ScoredStepView"
+            },
+            "title": "Steps",
+            "type": "array"
+          }
+        },
+        "required": [
+          "policy_version",
+          "steps",
+          "next_available"
+        ],
+        "title": "NextStepView",
+        "type": "object"
+      },
       "NotificationList": {
         "properties": {
           "items": {
@@ -5891,6 +5923,82 @@
           "cap"
         ],
         "title": "ScoreSourceRuleModel",
+        "type": "object"
+      },
+      "ScoredStepView": {
+        "properties": {
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "factors": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Factors",
+            "type": "array"
+          },
+          "milestone_key": {
+            "title": "Milestone Key",
+            "type": "string"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "stale_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stale Reason"
+          },
+          "target_key": {
+            "title": "Target Key",
+            "type": "string"
+          },
+          "target_kind": {
+            "title": "Target Kind",
+            "type": "string"
+          },
+          "target_title": {
+            "title": "Target Title",
+            "type": "string"
+          },
+          "trajectory_key": {
+            "title": "Trajectory Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trajectory_key",
+          "milestone_key",
+          "target_kind",
+          "target_key",
+          "target_title",
+          "position",
+          "score",
+          "factors",
+          "reasons",
+          "available",
+          "stale_reason"
+        ],
+        "title": "ScoredStepView",
         "type": "object"
       },
       "SearchItem": {
@@ -10520,6 +10628,24 @@
           }
         },
         "summary": "Report Claim"
+      }
+    },
+    "/api/v1/me/growth/next-step": {
+      "get": {
+        "operationId": "growth_next_step_api_v1_me_growth_next_step_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NextStepView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Growth Next Step"
       }
     },
     "/api/v1/me/growth/snapshot": {

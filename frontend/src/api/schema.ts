@@ -1076,6 +1076,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/growth/next-step": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Growth Next Step */
+        get: operations["growth_next_step_api_v1_me_growth_next_step_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/growth/snapshot": {
         parameters: {
             query?: never;
@@ -3551,6 +3568,14 @@ export interface components {
             /** Muted */
             muted: boolean;
         };
+        /** NextStepView */
+        NextStepView: {
+            next_available: components["schemas"]["ScoredStepView"] | null;
+            /** Policy Version */
+            policy_version: number;
+            /** Steps */
+            steps: components["schemas"]["ScoredStepView"][];
+        };
         /** NotificationList */
         NotificationList: {
             /** Items */
@@ -4423,6 +4448,31 @@ export interface components {
             source_type: string;
             /** Weight */
             weight: string;
+        };
+        /** ScoredStepView */
+        ScoredStepView: {
+            /** Available */
+            available: boolean;
+            /** Factors */
+            factors: string[];
+            /** Milestone Key */
+            milestone_key: string;
+            /** Position */
+            position: number;
+            /** Reasons */
+            reasons: string[];
+            /** Score */
+            score: number;
+            /** Stale Reason */
+            stale_reason: string | null;
+            /** Target Key */
+            target_key: string;
+            /** Target Kind */
+            target_kind: string;
+            /** Target Title */
+            target_title: string;
+            /** Trajectory Key */
+            trajectory_key: string;
         };
         /** SearchItem */
         SearchItem: {
@@ -6978,6 +7028,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    growth_next_step_api_v1_me_growth_next_step_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NextStepView"];
                 };
             };
         };

@@ -14,6 +14,7 @@ from impulse.application.development import DevelopmentService
 from impulse.application.growth import GrowthService
 from impulse.application.identity import AuthenticatedSession
 from impulse.application.work import WorkService
+from impulse.domain.priority import ScoredStep
 
 router = APIRouter()
 
@@ -84,6 +85,43 @@ class HoursView(BaseModel):
 class FreshnessView(BaseModel):
     known: bool
     latest_observed_at: AwareDatetime | None
+
+
+class ScoredStepView(BaseModel):
+    trajectory_key: str
+    milestone_key: str
+    target_kind: str
+    target_key: str
+    target_title: str
+    position: int
+    score: float
+    factors: list[str]
+    reasons: list[str]
+    available: bool
+    stale_reason: str | None
+
+
+class NextStepView(BaseModel):
+    policy_version: int
+    steps: list[ScoredStepView]
+    next_available: ScoredStepView | None
+
+
+def _step_view(item: ScoredStep) -> ScoredStepView:
+    spec = item.spec
+    return ScoredStepView(
+        trajectory_key=spec.trajectory_key,
+        milestone_key=spec.milestone_key,
+        target_kind=spec.target_kind,
+        target_key=spec.target_key,
+        target_title=spec.target_title,
+        position=spec.position,
+        score=float(item.score),
+        factors=list(item.factors),
+        reasons=list(item.reasons),
+        available=item.available,
+        stale_reason=item.stale_reason,
+    )
 
 
 class ActivityBucketView(BaseModel):
@@ -216,6 +254,21 @@ async def growth_snapshot(
 
 def _target_level_label() -> str:
     return TARGET_LEVEL_LABEL
+
+
+@router.get("/me/growth/next-step", response_model=NextStepView)
+async def growth_next_step(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[GrowthService, Depends(_request_growth_service)],
+) -> NextStepView:
+    _roadmaps, result = await service.next_step(authenticated.actor)
+    return NextStepView(
+        policy_version=result.policy_version,
+        steps=[_step_view(item) for item in result.steps],
+        next_available=(
+            _step_view(best) if (best := result.next_available()) is not None else None
+        ),
+    )
 
 
 def _share(value: Decimal | None) -> float | None:
