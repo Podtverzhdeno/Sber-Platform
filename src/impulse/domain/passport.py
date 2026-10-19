@@ -28,9 +28,7 @@ FALLBACK_NO_COVERING_STEP = (
     "Подходящего проекта или checkpoint для недостающего источника нет в "
     "активной траектории: уровень не повышается — нужно накопление evidence."
 )
-FALLBACK_TARGET_REACHED = (
-    "Навык уже на целевом уровне: следующий шаг закрепляет его в портфолио."
-)
+FALLBACK_TARGET_REACHED = "Навык уже на целевом уровне: следующий шаг закрепляет его в портфолио."
 
 
 @dataclass(frozen=True, slots=True)
@@ -131,8 +129,7 @@ def _explanation(
     if fact.level == target_level:
         return base + f" Целевой уровень «{target_level}» достигнут."
     return (
-        base
-        + " Все заявленные во фреймворке источники уже проверены: законных "
+        base + " Все заявленные во фреймворке источники уже проверены: законных "
         "случаев повышения уровня больше нет."
     )
 
@@ -173,9 +170,7 @@ def skill_passport_gap(
     closes_gap, covering = _cover_step(missing, candidate_step)
     if fact.level == target_level:
         fallback = (
-            FALLBACK_TARGET_REACHED
-            if candidate_step is not None
-            else FALLBACK_NO_COVERING_STEP
+            FALLBACK_TARGET_REACHED if candidate_step is not None else FALLBACK_NO_COVERING_STEP
         )
     elif candidate_step is None:
         fallback = FALLBACK_NO_COVERING_STEP

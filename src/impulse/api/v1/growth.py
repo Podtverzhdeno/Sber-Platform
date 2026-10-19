@@ -21,6 +21,7 @@ router = APIRouter()
 
 TARGET_LEVEL_LABEL = "уверенный"
 
+
 class WeightedProgressView(BaseModel):
     percent: float | None
     coverage: float
