@@ -15,6 +15,7 @@ def client(gateway: FakeGateway | None = None, *, brief_ai: bool = True) -> Test
         demo_mode=True,
         database_url=None,
         session_secret=SecretStr("assistant-test-secret-long-enough"),
+        openrouter_api_key=SecretStr("assistant-test-key-not-real"),
         ai_customer_brief_enabled=brief_ai,
     )
     service = SuggestionService(gateway) if gateway is not None else None

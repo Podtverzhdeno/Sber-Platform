@@ -110,7 +110,7 @@ jobs:
       - name: Publish failed test names
         if: ${{ failure() }}
         run: |
-          python - <<'PY'
+          python3 - <<'PY'
           import pathlib, urllib.parse
           log_path = pathlib.Path('test-results/pytest.log')
           if not log_path.exists():
@@ -192,8 +192,7 @@ jobs:
       - name: Publish e2e failures
         if: ${{ failure() }}
         run: |
-          tail -40 frontend/e2e.log
-          python - <<'PY'
+          python3 - <<'PY'
           import pathlib, urllib.parse
           log_path = pathlib.Path('frontend/e2e.log')
           if not log_path.exists():
@@ -254,14 +253,17 @@ jobs:
         if: ${{ failure() }}
         run: |
           set +e
-          docker compose ps
-          docker compose logs --tail=60 app
+          ps_output=$(docker compose ps --format json 2>&1 | head -c 800)
+          echo "::error::compose_ps=${ps_output}"
+          app_logs=$(docker compose logs --tail=60 app 2>&1 | tr '\n' ' ' | head -c 1800)
+          echo "::error::app_logs=${app_logs}"
           for path in /health/live /health/ready /participant; do
-            code=$(curl --silent --output /dev/null --write-out '%{http_code}' --header 'Accept: text/html' "http://127.0.0.1:8000$path")
-            echo "probe $path -> $code"
+            code=$(curl --silent --output /dev/null --write-out '%{http_code}' --header 'Accept: text/html' --max-time 10 "http://127.0.0.1:8000$path")
+            rc=$?
+            echo "::error::probe ${path} -> ${code} (curl_rc=${rc})"
           done
-          curl --silent --header 'Accept: text/html' --show-error --max-time 15 http://127.0.0.1:8000/participant | head -c 400
-          echo
+          spa_head=$(curl --silent --header 'Accept: text/html' --show-error --max-time 15 http://127.0.0.1:8000/participant | head -c 300 | tr '\n' ' ')
+          echo "::error::spa_head=${spa_head}"
           exit 0
       - name: Stop the stack
         if: ${{ always() }}
