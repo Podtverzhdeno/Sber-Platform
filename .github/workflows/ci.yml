@@ -247,18 +247,6 @@ jobs:
         run: npm run build
       - name: Verify built security controls
         run: npm run security:check
-      - name: Regenerate visual baselines (temporary)
-        run: npx playwright test --update-snapshots=all 2>&1 | tail -4
-        env:
-          TZ: Europe/Moscow
-          LANG: ru_RU.UTF-8
-        working-directory: frontend
-      - name: Upload regenerated baselines (temporary)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: visual-baselines-regen
-          path: frontend/e2e/*.spec.ts-snapshots/
-          if-no-files-found: error
       - name: Run browser tests
         run: |
           set -o pipefail
