@@ -253,7 +253,7 @@ jobs:
         if: ${{ failure() }}
         run: |
           python3 - <<'PY'
-          import pathlib, urllib.parse
+          import pathlib, re, urllib.parse
           log_path = pathlib.Path('e2e.log')
           if not log_path.exists():
               print('::error::e2e.log is missing')
@@ -263,12 +263,12 @@ jobs:
           failures = [line.strip() for line in lines if line.strip().startswith(tuple('%d) ' % n for n in range(1, 40)))]
           print('::error::e2e_failure_headers=' + urllib.parse.quote(' | '.join(failures)[:1200]))
           bodies = []
-          counted = 0
           for index, line in enumerate(lines):
               stripped = line.strip()
-              if (stripped[:3].rstrip(') ').isdigit() and stripped[:2].rstrip().isdigit() and ') ' in stripped[:4] and '[chromium]' in stripped) and counted < 5:
+              if re.match(r'^\d+\) ', stripped) and '[chromium]' in stripped:
                   bodies.extend(lines[index:index+14])
-                  counted += 1
+                  if len(bodies) > 96:
+                      break
           print('::error::e2e_failure_bodies=' + urllib.parse.quote(' \n'.join(bodies)[:4200]))
           tail = [line for line in lines][-25:]
           print('::error::e2e_tail=' + urllib.parse.quote(' \n'.join(tail)[:1800]))
