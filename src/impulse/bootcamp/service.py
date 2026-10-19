@@ -8,7 +8,8 @@ persona consistently with the development use cases.
 
 from __future__ import annotations
 
-from typing import Mapping, Protocol
+from collections.abc import Mapping
+from typing import Protocol
 from uuid import UUID
 
 from impulse.api.errors import ApiError
@@ -76,7 +77,9 @@ class BootcampCatalogService:
                 status_by_course[item.course_key] = item.status
         milestones_by_course = await self._milestones_by_course(actor.person_id)
         reports = (
-            () if self.competencies is None else await self.competencies.person_reports(actor.person_id)
+            ()
+            if self.competencies is None
+            else await self.competencies.person_reports(actor.person_id)
         )
         return project_cards(
             courses,

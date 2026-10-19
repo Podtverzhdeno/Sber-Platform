@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from impulse.bootcamp.api import CourseCardView as CourseCardView
+from impulse.bootcamp.api import MustTakeView as MustTakeView
+from impulse.bootcamp.api import router as catalog_router
 from impulse.bootcamp.catalog import (
     ACCESS_AVAILABLE,
     ACCESS_PREREQUISITE,
@@ -14,8 +17,8 @@ from impulse.bootcamp.catalog import (
     MustTakeReason,
     SkillPosition,
     determine_access_state,
-    project_cards,
     prerequisite_keys,
+    project_cards,
 )
 from impulse.bootcamp.service import BootcampCatalogService
 
@@ -29,8 +32,11 @@ __all__ = [
     "TARGET_LEVEL_LABEL",
     "BootcampCatalogService",
     "CourseCard",
+    "CourseCardView",
     "MustTakeReason",
+    "MustTakeView",
     "SkillPosition",
+    "catalog_router",
     "determine_access_state",
     "prerequisite_keys",
     "project_cards",

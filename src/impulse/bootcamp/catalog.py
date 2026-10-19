@@ -13,8 +13,9 @@ is a separate boolean with one explainable reason per included factor.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Mapping, Protocol
+from typing import Protocol
 
 from impulse.domain.development import CompletionStatus
 
@@ -36,22 +37,46 @@ PREREQUISITE_RULES: dict[str, tuple[str, ...]] = {
 
 
 class CourseRecordLike(Protocol):
-    key: str
-    title: str
-    track_keys: tuple[str, ...]
-    source_url: str
-    availability: str
-    access_note: str
+    @property
+    def key(self) -> str: ...
+
+    @property
+    def title(self) -> str: ...
+
+    @property
+    def track_keys(self) -> tuple[str, ...]: ...
+
+    @property
+    def source_url(self) -> str: ...
+
+    @property
+    def availability(self) -> str: ...
+
+    @property
+    def access_note(self) -> str: ...
 
 
 class RoadmapMilestoneLike(Protocol):
-    key: str
-    position: int
-    title: str
-    purpose: str
-    skill: str
-    target_kind: str
-    target_key: str
+    @property
+    def key(self) -> str: ...
+
+    @property
+    def position(self) -> int: ...
+
+    @property
+    def title(self) -> str: ...
+
+    @property
+    def purpose(self) -> str: ...
+
+    @property
+    def skill(self) -> str: ...
+
+    @property
+    def target_kind(self) -> str: ...
+
+    @property
+    def target_key(self) -> str: ...
 
 
 def prerequisite_keys(course_key: str) -> tuple[str, ...]:
@@ -144,7 +169,7 @@ def access_note_for(
     titles: Mapping[str, str],
 ) -> str:
     """Honest limitation note: name the prerequisite, never promise enrollment."""
-    if access_state is ACCESS_PREREQUISITE:
+    if access_state == ACCESS_PREREQUISITE:
         prerequisite_titles = [titles.get(key, key) for key in prerequisite_keys(course.key)]
         missing = ", ".join(prerequisite_titles)
         return (
@@ -241,7 +266,7 @@ def relevance_for(
         f"Этап маршрута: «{milestones[0].milestone.title}» · навык "
         f"{milestones[0].milestone.skill}."
     )
-    if access_state is ACCESS_AVAILABLE:
+    if access_state == ACCESS_AVAILABLE:
         reasons.append("Доступен сейчас в каталоге.")
     return Relevance(relevant=True, reasons=tuple(reasons))
 
@@ -254,9 +279,9 @@ def recommendation_reason_for(
     if not milestones:
         return "Общий курс каталога, не привязан к активной траектории."
     milestone = milestones[0].milestone
-    if completion_state is COMPLETION_VERIFIED:
+    if completion_state == COMPLETION_VERIFIED:
         return f"Этап «{milestone.title}» подтверждён: доказательство в карточке курсов."
-    if completion_state is COMPLETION_PENDING:
+    if completion_state == COMPLETION_PENDING:
         return f"Этап «{milestone.title}»: завершение отправлено на проверку."
     return f"Этап «{milestone.title}»: {milestone.purpose}"
 
@@ -303,13 +328,13 @@ def project_cards(
                 relevance_reasons=relevance.reasons,
                 must_take=(
                     _must_take_for(milestones, skill_positions)
-                    if completion_state is not COMPLETION_VERIFIED
+                    if completion_state != COMPLETION_VERIFIED
                     else None
                 ),
                 pending_verification_note=(
                     "Завершение отправлено на проверку: повторно проходить тот же шаг "
                     "не нужно, прогноз применится только после подтверждения."
-                    if completion_state is COMPLETION_PENDING
+                    if completion_state == COMPLETION_PENDING
                     else None
                 ),
                 verified_evidence=verified_evidence_for(course.key)
