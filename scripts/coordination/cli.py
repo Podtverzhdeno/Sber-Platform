@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -662,6 +663,82 @@ class CoordinationStore:
         if to_audit:
             self.audit(action, claim.task_id, actor, detail)
 
+    def migrate_legacy_review(
+        self, task_id: str, actor: str, evidence: dict[str, Any]
+    ) -> ClaimState:
+        required = {
+            "changed_files",
+            "commands_run",
+            "passed",
+            "failed_or_not_run",
+            "risks",
+            "next_safe_step",
+        }
+        missing = sorted(required - evidence.keys())
+        if missing:
+            raise StateError(
+                "legacy REVIEW migration requires evidence fields: " + ", ".join(missing)
+            )
+        list_fields = required - {"next_safe_step"}
+        invalid_lists = sorted(key for key in list_fields if not isinstance(evidence[key], list))
+        if invalid_lists or not isinstance(evidence["next_safe_step"], str):
+            raise StateError(
+                "legacy REVIEW evidence has invalid field types; "
+                "list fields and next_safe_step are required"
+            )
+        if not actor.strip():
+            raise StateError("legacy REVIEW migration requires a non-empty actor")
+
+        with self.scheduler_lock():
+            directory = self.claim_dir(task_id)
+            status_json = directory / STATUS_JSON
+            legacy_path = directory / STATUS_MD
+            if status_json.exists():
+                existing = self.read_claim(task_id)
+                migration = existing.review.get("legacy_migration") if existing.review else None
+                if isinstance(migration, dict):
+                    return existing
+                raise StateError(
+                    f"claim {task_id} already has status.json and is not a legacy REVIEW claim"
+                )
+            try:
+                source = legacy_path.read_bytes()
+            except OSError as exc:
+                raise StorageError(f"legacy status.md for claim {task_id} is unavailable") from exc
+            claim = _parse_status_md(legacy_path, task_id)
+            if claim is None:
+                raise InvalidClaimError(f"legacy claim {task_id} cannot be parsed")
+            self._ensure_transition(claim, "REVIEW", ("REVIEW",))
+
+            source_hash = hashlib.sha256(source).hexdigest()
+            backup = directory / "legacy-status.md"
+            if backup.exists() and backup.read_bytes() != source:
+                raise StorageError(
+                    f"legacy backup for claim {task_id} exists with different content"
+                )
+            if not backup.exists():
+                _atomic_write(backup, source.decode("utf-8"))
+
+            claim.review = dict(evidence)
+            claim.review["legacy_migration"] = {
+                "actor": actor,
+                "migrated_at": iso(utc_now()),
+                "source": "legacy-status.md",
+                "source_sha256": source_hash,
+            }
+            self.persist(
+                claim,
+                "legacy_review_migrated",
+                actor,
+                {"source_sha256": source_hash, "status_preserved": "REVIEW"},
+            )
+            self._append_event(
+                claim,
+                "legacy_review_migrated",
+                {"actor": actor, "source_sha256": source_hash},
+            )
+            return claim
+
     def create_claim(self, options: ClaimOptions) -> ClaimState:
         task_id = options.task_id.strip()
         self.validate_task_id(task_id)
@@ -1288,6 +1365,14 @@ def _build_parser() -> argparse.ArgumentParser:
         help="JSON с changed_files/commands_run/passed/failed_or_not_run/risks/next_safe_step",
     )
 
+    migrate_p = subparsers.add_parser(
+        "migrate-legacy-review",
+        help="convert a legacy status.md REVIEW to audited status.json without approving it",
+    )
+    migrate_p.add_argument("--task", required=True)
+    migrate_p.add_argument("--actor", required=True)
+    migrate_p.add_argument("--evidence-file", required=True)
+
     approve_p = subparsers.add_parser("approve", help="REVIEW -> DONE; только независимый reviewer")
     approve_p.add_argument("--task", required=True)
     approve_p.add_argument("--reviewer", required=True)
@@ -1390,6 +1475,18 @@ def _cmd_review(args: argparse.Namespace, store: CoordinationStore) -> int:
     return EXIT_OK
 
 
+def _cmd_migrate_legacy_review(args: argparse.Namespace, store: CoordinationStore) -> int:
+    claim = store.migrate_legacy_review(
+        args.task, args.actor, _load_evidence_file(args.evidence_file)
+    )
+    migration = claim.review.get("legacy_migration", {}) if claim.review else {}
+    print(
+        f"OK LEGACY_REVIEW_MIGRATED task={claim.task_id} status={claim.status} "
+        f"source_sha256={migration.get('source_sha256', '-')}"
+    )
+    return EXIT_OK
+
+
 def _cmd_approve(args: argparse.Namespace, store: CoordinationStore) -> int:
     claim = store.approve(
         args.task, args.reviewer, _load_evidence_file(args.evidence_file), TaskBoard(store)
@@ -1430,6 +1527,7 @@ def _dispatch(args: argparse.Namespace) -> int:
         "approve-owner": _cmd_approve_owner,
         "release": _cmd_release,
         "review": _cmd_review,
+        "migrate-legacy-review": _cmd_migrate_legacy_review,
         "approve": _cmd_approve,
         "reject": _cmd_reject,
         "board": _cmd_board,

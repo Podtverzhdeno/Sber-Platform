@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -69,6 +70,67 @@ def test_legacy_review_claim_with_handoff_can_be_approved(root: Path) -> None:
 
     assert approved.ok, approved.stderr
     assert checkbox_count(tasks_md_text(root), "9.3", checked=True) == 1
+
+
+def test_migrate_legacy_review_preserves_source_and_requires_separate_approval(
+    root: Path,
+) -> None:
+    claim_dir = root / ".agents" / "coordination" / "claims" / "9.4.lock"
+    claim_dir.mkdir()
+    source = (
+        b"# Claim 9.4\n\n"
+        b"- session_id: legacy-worker\n"
+        b"- status: REVIEW\n"
+        b"- verification:\n"
+        b"  - targeted tests\n"
+        b"- progress: DONE\n"
+    )
+    (claim_dir / "status.md").write_bytes(source)
+    evidence = root / "legacy-evidence.json"
+    evidence.write_text(
+        json.dumps(
+            {
+                "changed_files": ["feature/legacy.py"],
+                "commands_run": ["pytest targeted"],
+                "passed": ["targeted tests"],
+                "failed_or_not_run": [],
+                "risks": [],
+                "next_safe_step": "independent approval",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    migrated = run_cli_inproc(
+        root,
+        [
+            "migrate-legacy-review",
+            "--task",
+            "9.4",
+            "--actor",
+            "migration-operator",
+            "--evidence-file",
+            str(evidence),
+        ],
+    )
+
+    assert migrated.ok, migrated.stderr
+    payload = json.loads((claim_dir / "status.json").read_text(encoding="utf-8"))
+    assert payload["status"] == "REVIEW"
+    assert payload["session_id"] == "legacy-worker"
+    assert payload["review"]["changed_files"] == ["feature/legacy.py"]
+    assert (
+        payload["review"]["legacy_migration"]["source_sha256"] == hashlib.sha256(source).hexdigest()
+    )
+    assert (claim_dir / "legacy-status.md").read_bytes() == source
+    assert checkbox_count(tasks_md_text(root), "9.4", checked=False) == 1
+
+    approved = run_cli_inproc(
+        root,
+        ["approve", "--task", "9.4", "--reviewer", "independent-reviewer"],
+    )
+    assert approved.ok, approved.stderr
+    assert checkbox_count(tasks_md_text(root), "9.4", checked=True) == 1
 
 
 def test_board_lists_statuses_owners_dependencies_heartbeat(root: Path) -> None:
@@ -170,6 +232,7 @@ def test_cli_help_outlines_all_commands(root: Path) -> None:
         "approve",
         "reject",
         "review",
+        "migrate-legacy-review",
         "release",
         "board",
     ):
