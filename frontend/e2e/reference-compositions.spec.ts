@@ -107,7 +107,12 @@ async function openWorkspace(page: Page, key: string): Promise<void> {
 }
 
 const screenshot = (page: Page, reference: string): Promise<void> =>
-  expect(page).toHaveScreenshot(`${reference.toLowerCase()}-desktop.png`, { animations: "disabled", fullPage: true, maxDiffPixelRatio: 0.01 });
+  expect(page).toHaveScreenshot(`${reference.toLowerCase()}-desktop.png`, {
+    animations: "disabled",
+    fullPage: true,
+    maxDiffPixelRatio: 0.01,
+    maxDiffPixels: reference === "R-PAR-01" ? 12_000 : 6_000,
+  });
 
 const participantBase = {
   key: "participant-alex",
