@@ -45,6 +45,7 @@ test("customer lifecycle: draft, publish, accept, revise, rework, accept, analyt
   const metric = (key: string, label: string, unit: string, value: string | null, numerator: number, denominator: number) => ({ key, label, unit, value, numerator, denominator, period_start: "2026-10-01T00:00:00Z", period_end: "2026-10-18T00:00:00Z", cohort: "customer:customer:30d", freshness: "fresh", definition: "Проверяемая формула периода.", suppressed: false, suppression_reason: null });
 
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: { demo_mode: false } }));
+  await page.route("**/api/v1/customer/support-models", (route) => route.fulfill({ json: { version: 1, models: [{ code: "platform", name: "Поддержка платформы", responsible: "Команда платформы", activities: ["Координация и хелпдеск"], response_time: "до 1 рабочего дня", restrictions: ["Не заменяет ментора по домену"], available: true, unavailable_reason: null, requires_assignee: false }] } }));
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "customer-roman", display_name: actor.display_name, roles: ["customer"] }] }));
   let loggedIn = false;
   await page.route("**/api/v1/auth/demo-login", (route) => { loggedIn = true; return route.fulfill({ json: actor }); });
