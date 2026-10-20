@@ -130,5 +130,6 @@ Seed использует UUIDv5 namespace и `DEMO_SEED_VERSION`. Каждый 
 - `track_attempts`
 - `tracks`
 - `trophies`
+- `qualification_events`
 - `visibility_settings`
 <!-- tables:end -->

@@ -30,7 +30,7 @@ type CourseCardState = {
 
 type Streak = { current_days: number; qualified_dates: string[]; reason: string };
 
-const CATALOG_PATH: RuntimeApiPath = "/api/v1/me/bootcamp/catalog" as unknown as RuntimeApiPath;
+const CATALOG_PATH: RuntimeApiPath = "/api/v1/me/bootcamp/catalog";
 
 const csrfHeaders = (): HeadersInit => ({
   "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "",

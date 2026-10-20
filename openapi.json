@@ -3156,6 +3156,82 @@
         "title": "EarningsView",
         "type": "object"
       },
+      "EngagementOverviewView": {
+        "properties": {
+          "best_days": {
+            "title": "Best Days",
+            "type": "integer"
+          },
+          "current_days": {
+            "title": "Current Days",
+            "type": "integer"
+          },
+          "grace_available": {
+            "title": "Grace Available",
+            "type": "boolean"
+          },
+          "qualified_dates": {
+            "items": {
+              "format": "date",
+              "type": "string"
+            },
+            "title": "Qualified Dates",
+            "type": "array"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "today_saved": {
+            "title": "Today Saved",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "current_days",
+          "best_days",
+          "qualified_dates",
+          "reason",
+          "today_saved",
+          "grace_available"
+        ],
+        "title": "EngagementOverviewView",
+        "type": "object"
+      },
+      "EngagementQualifyRequest": {
+        "properties": {
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "source": {
+            "$ref": "#/components/schemas/EngagementSource"
+          },
+          "source_ref": {
+            "title": "Source Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "source_ref",
+          "occurred_at"
+        ],
+        "title": "EngagementQualifyRequest",
+        "type": "object"
+      },
+      "EngagementSource": {
+        "description": "Actions that qualify a learning day; passive events never accrue.",
+        "enum": [
+          "course_learning",
+          "project_submission",
+          "accepted_revision",
+          "verified_event_participation"
+        ],
+        "title": "EngagementSource",
+        "type": "string"
+      },
       "EventDetailView": {
         "properties": {
           "conditions": {
@@ -12306,6 +12382,80 @@
           }
         },
         "summary": "Participant Dispute"
+      }
+    },
+    "/api/v1/me/engagement/overview": {
+      "get": {
+        "operationId": "engagement_overview_api_v1_me_engagement_overview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngagementOverviewView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Engagement Overview"
+      }
+    },
+    "/api/v1/me/engagement/qualify": {
+      "post": {
+        "operationId": "record_qualification_api_v1_me_engagement_qualify_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EngagementQualifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngagementOverviewView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record Qualification"
       }
     },
     "/api/v1/me/event-claims": {

@@ -1029,6 +1029,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/bootcamp/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Каталог Bootcamp карточкой на курс: доступ, завершение и «Надо пройти» */
+        get: operations["bootcamp_catalog_api_v1_me_bootcamp_catalog_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/bootcamp/certificates": {
         parameters: {
             query?: never;
@@ -1193,6 +1210,40 @@ export interface paths {
         get: operations["participant_dispute_api_v1_me_disputes__dispute_id__get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/engagement/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Engagement Overview */
+        get: operations["engagement_overview_api_v1_me_engagement_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/engagement/qualify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Qualification */
+        post: operations["record_qualification_api_v1_me_engagement_qualify_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3078,6 +3129,34 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** CourseCardView */
+        CourseCardView: {
+            /** Access Note */
+            access_note: string;
+            /** Access State */
+            access_state: string;
+            /** Completion State */
+            completion_state: string;
+            /** Key */
+            key: string;
+            must_take: components["schemas"]["MustTakeView"] | null;
+            /** Pending Verification Note */
+            pending_verification_note: string | null;
+            /** Recommendation Reason */
+            recommendation_reason: string;
+            /** Relevance Reasons */
+            relevance_reasons: string[];
+            /** Relevant */
+            relevant: boolean;
+            /** Source Url */
+            source_url: string;
+            /** Title */
+            title: string;
+            /** Track Keys */
+            track_keys: string[];
+            /** Verified Evidence */
+            verified_evidence: string | null;
+        };
         /** CourseCertificateView */
         CourseCertificateView: {
             /** Certificate Id */
@@ -3497,6 +3576,38 @@ export interface components {
             /** Unknown Items */
             unknown_items: number;
         };
+        /** EngagementOverviewView */
+        EngagementOverviewView: {
+            /** Best Days */
+            best_days: number;
+            /** Current Days */
+            current_days: number;
+            /** Grace Available */
+            grace_available: boolean;
+            /** Qualified Dates */
+            qualified_dates: string[];
+            /** Reason */
+            reason: string;
+            /** Today Saved */
+            today_saved: boolean;
+        };
+        /** EngagementQualifyRequest */
+        EngagementQualifyRequest: {
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            source: components["schemas"]["EngagementSource"];
+            /** Source Ref */
+            source_ref: string;
+        };
+        /**
+         * EngagementSource
+         * @description Actions that qualify a learning day; passive events never accrue.
+         * @enum {string}
+         */
+        EngagementSource: "course_learning" | "project_submission" | "accepted_revision" | "verified_event_participation";
         /** EventDetailView */
         EventDetailView: {
             /** Conditions */
@@ -3995,6 +4106,22 @@ export interface components {
             unit: string;
             /** Value */
             value: string | null;
+        };
+        /** MustTakeView */
+        MustTakeView: {
+            /** Current Level */
+            current_level: string | null;
+            /** Explanation */
+            explanation: string;
+            /** Projected Impact */
+            projected_impact: string;
+            /**
+             * Skill
+             * @example OpenSpec / SDD
+             */
+            skill: string;
+            /** Target Level */
+            target_level: string | null;
         };
         /** MuteRequest */
         MuteRequest: {
@@ -7489,6 +7616,26 @@ export interface operations {
             };
         };
     };
+    bootcamp_catalog_api_v1_me_bootcamp_catalog_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseCardView"][];
+                };
+            };
+        };
+    };
     my_certificates_api_v1_me_bootcamp_certificates_get: {
         parameters: {
             query?: never;
@@ -7786,6 +7933,61 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DisputeView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    engagement_overview_api_v1_me_engagement_overview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EngagementOverviewView"];
+                };
+            };
+        };
+    };
+    record_qualification_api_v1_me_engagement_qualify_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EngagementQualifyRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EngagementOverviewView"];
                 };
             };
             /** @description Validation Error */
