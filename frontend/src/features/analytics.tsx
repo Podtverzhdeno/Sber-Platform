@@ -1,5 +1,5 @@
 ﻿import { useQuery } from "@tanstack/react-query";
-import { useState, type CSSProperties } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 
 import { apiRequest } from "../api/client";
 import { Badge, StatePanel } from "../components/ui";
@@ -29,6 +29,81 @@ const demoAnalytics: Analytics = {
 
 type CompetencyView = "technical" | "practical" | "soft";
 type Competency = { title: string; level: string; score: number; delta: number; evidence: string; detail: string };
+
+type CourseCertificate = { certificate_id: string; course_key: string; course_title: string; holder_name: string; issued_at: string; period: string; preview_marking: string; program_version: number; result: string; specialization: string; verification_id: string; workload_hours: number; competencies: { competency: string; evidence: string; level: string }[] };
+type ProjectCredential = { artifact_keys: string[]; competencies: { competency: string; evidence_refs: string[]; finding: string; level: string }[]; contribution_version: number; credential_id: string; customer_name: string; grade_label: string; holder_name: string; payment_status: string; period: string; personal_summary: string; project_key: string; review_explanation: string; signed_at: string; status: string; superseded_by: string | null; task_key: string; task_title: string; verification_id: string };
+type DocumentRecord = { key: string; kind: "certificate" | "project"; title: string; meta: string; verification_id: string; details: [string, string][]; openLabel: string; openHref: string };
+
+const certificateDocuments = (items: CourseCertificate[]): DocumentRecord[] => items.map((item) => ({
+  key: `certificate-${item.certificate_id}`,
+  kind: "certificate",
+  title: item.course_title,
+  meta: `Сертификат курса · ${item.period} · ${String(item.workload_hours)} ч`,
+  verification_id: item.verification_id,
+  details: [
+    ["Держатель", item.holder_name] as [string, string],
+    ["Специализация", item.specialization] as [string, string],
+    ["Компетенции", item.competencies.map((entry) => `${entry.competency} · ${entry.level}`).join("; ")] as [string, string],
+    ["Доказательства", item.competencies.map((entry) => entry.evidence).join("; ")] as [string, string],
+    ["Результат", item.result] as [string, string],
+    ["Версия программы", String(item.program_version)] as [string, string],
+    ["Выдан", new Date(item.issued_at).toLocaleDateString("ru-RU")] as [string, string],
+    ["Verification ID", item.verification_id] as [string, string],
+  ],
+  openLabel: "Открыть публичную проверку сертификата",
+  openHref: `/verify/${encodeURIComponent(item.verification_id)}`,
+}));
+
+const projectCredentialDocuments = (items: ProjectCredential[]): DocumentRecord[] => items.map((item) => ({
+  key: `project-${item.verification_id}`,
+  kind: "project",
+  title: item.task_title,
+  meta: `Проектный credential · оценка ${item.grade_label} · ${item.period}`,
+  verification_id: item.verification_id,
+  details: [
+    ["Статус", item.status] as [string, string],
+    ["Задача", item.task_title] as [string, string],
+    ["Заказчик", item.customer_name] as [string, string],
+    ["Держатель", item.holder_name] as [string, string],
+    ["Компетенции", item.competencies.map((entry) => `${entry.competency} · ${entry.level}`).join("; ")] as [string, string],
+    ["Находки", item.competencies.map((entry) => entry.finding).join("; ")] as [string, string],
+    ["Артефакты", item.artifact_keys.join(", ")] as [string, string],
+    ["Личное резюме", item.personal_summary] as [string, string],
+    ["Решение ревьюера", item.review_explanation] as [string, string],
+    ["Подписан", new Date(item.signed_at).toLocaleDateString("ru-RU")] as [string, string],
+    ["Verification ID", item.verification_id] as [string, string],
+  ],
+  openLabel: "Открыть публичную проверку проектного credential",
+  openHref: `/verify/projects/${encodeURIComponent(item.verification_id)}`,
+}));
+
+export function VerifiedDocumentsPanel() {
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const certificates = useQuery({ queryKey: ["bootcamp-certificates"], queryFn: () => apiRequest<CourseCertificate[]>("/api/v1/me/bootcamp/certificates"), refetchOnMount: "always" });
+  const projectCredentials = useQuery({ queryKey: ["project-credentials-summary"], queryFn: () => apiRequest<ProjectCredential[]>("/api/v1/me/project-credentials"), refetchOnMount: "always" });
+  const documents = [...certificateDocuments(certificates.data ?? []), ...projectCredentialDocuments(projectCredentials.data ?? [])];
+  const errorState = certificates.isError || projectCredentials.isError;
+  return <><p className="eyebrow">Документы</p><h2 id="documents-title">Проверяемые документы</h2>{documentState(errorState, certificates.isLoading || projectCredentials.isLoading, () => { void certificates.refetch(); void projectCredentials.refetch(); })}{!errorState && !certificates.isLoading && !projectCredentials.isLoading && (documents.length === 0 ? <p role="status">Проверяемых документов пока нет: появляются после подтверждённых результатов.</p> : <section data-testid="document-list" aria-label="Проверяемый список документов">{documents.map((document) => { const open = openKey === document.key; return <article className={open ? "document-item document-item--open" : "document-item"} data-testid="document-item" key={document.key}><span aria-hidden="true">{document.kind === "certificate" ? "✓" : "◆"}</span><div><strong>{document.title}</strong><small>{document.meta}</small></div><button aria-expanded={open} aria-controls={`document-details-${document.key}`} className="document-toggle" type="button" onClick={() => { setOpenKey(open ? null : document.key); }}>{open ? "Свернуть" : "Проверить"}</button>{open && <section className="document-viewer" data-testid="document-viewer" id={`document-details-${document.key}`} aria-label={`Проверка документа ${document.title}`}><p className="document-viewer-heading">Verification viewer · {document.verification_id}</p><dl>{document.details.map(([term, value]) => <div key={term}><dt>{term}</dt><dd>{value}</dd></div>)}</dl><a href={document.openHref}>{document.openLabel}</a><button data-testid="document-pdf" type="button" onClick={() => { window.print(); }}>Печать / PDF</button></section>}</article>; })}</section>)}</>;
+}
+
+const documentState = (error: boolean, isLoading: boolean, retry: () => void): ReactNode => error ? <StatePanel kind="error" action="Повторить" onAction={retry} /> : isLoading ? <StatePanel kind="loading" /> : null;
+
+type ReadinessPlanProps = { navigation: string[]; gapExpanded: boolean; setGapExpanded: (update: (value: boolean) => boolean) => void };
+
+function readinessPlan({ navigation, gapExpanded, setGapExpanded }: ReadinessPlanProps): ReactNode {
+  const tasksIndex = navigation.indexOf("Задачи");
+  const workspaceHref = tasksIndex >= 0 ? `/workspace/${String(tasksIndex)}` : null;
+  const workspaceLabel = workspaceHref ? "Открыть рабочую область задачи →" : "Рабочая область задачи недоступна в боковой навигации";
+  const planSteps: { label: string; detail: string; actionLabel: string }[] = [
+    { label: "Добавить unit-тесты", detail: "retry, timeout и rate limit", actionLabel: "Открыть рабочую область задачи с checkpoint →" },
+    { label: "Запустить integration suite", detail: "минимум 80% критического пути", actionLabel: "Открыть рабочую область задачи с suite →" },
+    { label: "Отправить evidence ментору", detail: "отчёт, commit и объяснение границ", actionLabel: "Открыть рабочую область задачи с формой evidence →" },
+  ];
+  return <>
+    <button className={`readiness-gap${gapExpanded ? " readiness-gap--expanded" : ""}`} type="button" aria-expanded={gapExpanded} onClick={() => { setGapExpanded((value) => !value); }}><span className="readiness-gap__top"><strong>До следующего уровня</strong><i>{gapExpanded ? "−" : "+"}</i></span><p>Завершите проектный checkpoint по автоматическим тестам.</p><em>Прогноз после принятия: 54% → 66% (+12%)</em></button>
+    {gapExpanded && <div className="readiness-detail"><p className="eyebrow">План подтверждения</p><h3>Автоматические тесты API</h3><ul>{planSteps.map((step, index) => <li key={step.label}><span>{String(index + 1)}</span><div><strong>{step.label}</strong><small>{step.detail}</small></div>{workspaceHref ? <a data-testid={`plan-step-${String(index)}`} href={workspaceHref}>{step.actionLabel}</a> : <span role="status">{workspaceLabel}</span>}</li>)}</ul><dl><div><dt>Сейчас</dt><dd>54%</dd></div><div><dt>Прогноз после принятия</dt><dd>66%</dd></div><div><dt>Дедлайн</dt><dd>12 октября</dd></div></dl>{workspaceHref && <a href={workspaceHref}>Открыть проектный checkpoint →</a>}</div>}
+	</>;
+}
 
 const competencyGroups: Record<CompetencyView, { label: string; eyebrow: string; competencies: Competency[] }> = {
   technical: {
@@ -124,7 +199,7 @@ export function TrajectoryGrowthAnalytics({ snapshot }: { snapshot: GrowthSnapsh
   </section>;
 }
 
-export function ParticipantAnalytics() {
+export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[] }) {
   const [competencyView, setCompetencyView] = useState<CompetencyView>("technical");
   const [selectedSkill, setSelectedSkill] = useState<Competency | null>(null);
   const [gapExpanded, setGapExpanded] = useState(false);
@@ -152,7 +227,7 @@ export function ParticipantAnalytics() {
           <aside className="radar-card"><div><p className="eyebrow">Циклограмма</p><h3>{competencyGroup.label}</h3><small>{competencyGroup.eyebrow}</small></div><CompetencyRadar items={competencyGroup.competencies} /></aside>
         </div>
       </div>
-      <aside className="credential-summary"><p className="eyebrow">Документы</p><h2>3 подтверждения</h2><article><span>✓</span><div><strong>OpenSpec и SDD</strong><small>Сертификат курса · действителен</small></div></article><article><span>✓</span><div><strong>Python для R&amp;D</strong><small>Сертификат курса · действителен</small></div></article><article><span>◆</span><div><strong>Прогнозирование нагрузки</strong><small>Проектный опыт · оценка B</small></div></article><a className="analytics-certificate-link" href="/workspace/7">Открыть все сертификаты <span>→</span></a><button className={`readiness-gap${gapExpanded ? " readiness-gap--expanded" : ""}`} type="button" aria-expanded={gapExpanded} onClick={() => { setGapExpanded((value) => !value); }}><span className="readiness-gap__top"><strong>До следующего уровня</strong><i>{gapExpanded ? "−" : "+"}</i></span><p>Завершите проектный checkpoint по автоматическим тестам.</p><em>+12% к готовности роли</em></button>{gapExpanded && <div className="readiness-detail"><p className="eyebrow">План подтверждения</p><h3>Автоматические тесты API</h3><ul><li><span>1</span><div><strong>Добавить unit-тесты</strong><small>retry, timeout и rate limit</small></div></li><li><span>2</span><div><strong>Запустить integration suite</strong><small>минимум 80% критического пути</small></div></li><li><span>3</span><div><strong>Отправить evidence ментору</strong><small>отчёт, commit и объяснение границ</small></div></li></ul><dl><div><dt>Сейчас</dt><dd>54%</dd></div><div><dt>После принятия</dt><dd>66%</dd></div><div><dt>Дедлайн</dt><dd>12 октября</dd></div></dl><a href="/workspace/4">Открыть проектный checkpoint →</a></div>}</aside>
+      <aside className="credential-summary"><VerifiedDocumentsPanel />{readinessPlan({ navigation, gapExpanded, setGapExpanded })}</aside>
     </section>
     <section className="metric-grid participant-kpi-grid"><article className="metric-card metric-card--teal"><span>Прогресс траектории</span><strong>68%</strong><small>+12% за месяц</small></article><article className="metric-card metric-card--blue"><span>Активные проекты</span><strong>2</strong><small>1 результат до 12 октября</small></article><article className="metric-card metric-card--violet"><span>Подтверждённый опыт</span><strong>7</strong><small>2 оценки A · 3 оценки B</small></article><article className="metric-card metric-card--teal"><span>Принятые результаты</span><strong>3</strong><small>+1 за месяц</small></article></section>
     <div className="analytics-main-grid"><section className="analytics-panel"><div className="section-heading"><div><p className="eyebrow">Конверсия пути</p><h2>От обучения до принятого результата</h2></div><Badge tone="success">42% до результата</Badge></div><div className="analytics-funnel">{[{ label: "Обучение", value: 12, rate: "100%" }, { label: "Отклики", value: 8, rate: "67%" }, { label: "Работа", value: 5, rate: "63%" }, { label: "Принято", value: 3, rate: "60%" }, { label: "Подтверждено", value: 2, rate: "67%" }].map((stage, index) => <div key={stage.label} style={{ width: `${String(100 - index * 11)}%` }}><span>{stage.label}</span><strong>{stage.value}</strong><small>{stage.rate}</small></div>)}</div></section>

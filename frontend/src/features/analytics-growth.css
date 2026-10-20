@@ -16,6 +16,25 @@
 .growth-unknown-fill { fill: var(--color-muted); }
 .trajectory-growth-legend { display: flex; flex-wrap: wrap; gap: 7px; }
 .trajectory-growth-legend span { padding: 4px 7px; border-left: 3px solid; color: var(--color-muted); font-size: 10px; }
+.document-item { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: start; padding: 9px 10px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface-2); }
+.document-item > span { color: var(--color-primary); }
+.document-item > div { display: grid; gap: 3px; }
+.document-item small { color: var(--color-muted); }
+.document-toggle, .document-viewer button { padding: 6px 10px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-surface-raised); color: var(--color-text); font-size: 11px; cursor: pointer; }
+.document-toggle { align-self: center; }
+.document-viewer { grid-column: 1 / -1; padding: 12px 14px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-surface-raised); display: grid; gap: 10px; }
+.document-viewer-heading { color: var(--color-muted); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.document-viewer dl { display: grid; grid-template-columns: minmax(70px, auto) 1fr; gap: 6px 14px; margin: 0; }
+.document-viewer dt { color: var(--color-muted); }
+.document-viewer dd { margin: 0; }
+.readiness-detail a[data-testid^="plan-step-"] { display: inline-block; margin-top: 4px; font-size: 11px; }
+@media (prefers-reduced-motion: reduce) {
+  .document-viewer,
+  .readiness-detail,
+  .trajectory-growth-radar svg,
+  .growth-ring,
+  .growth-target { transition: none; animation: none; }
+}
 .trajectory-growth-legend .target { border-color: #ffca38; }.trajectory-growth-legend .deficit { border-color: var(--color-danger); }.trajectory-growth-legend .achieved { border-color: var(--color-primary); }.trajectory-growth-legend .unknown { border-color: var(--color-muted); }
 .trajectory-growth-facts > p { margin: 0 0 8px; }
 .trajectory-growth-facts .growth-partial { padding: 9px 11px; border: 1px solid var(--color-warning); border-radius: 9px; color: var(--color-warning); }

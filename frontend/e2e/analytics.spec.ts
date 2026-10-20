@@ -1,23 +1,118 @@
 import { expect, test } from "@playwright/test";
 
-test("participant analytics explains the journey and labels the competency radar", async ({ page }) => {
-  await page.route("**/api/v1/config", (route) => route.fulfill({ json: {} }));
+const actor = {
+  person_id: "00000000-0000-0000-0000-000000000001",
+  display_name: "Алекс Речной",
+  active_role: "participant",
+  assigned_roles: ["participant"],
+  scopes: [],
+  consent_scopes: [],
+  navigation: ["Мой путь", "Bootcamp", "Задачи", "События", "Рейтинг", "Аналитика"],
+  csrf_token: "csrf",
+};
+
+const certificate = {
+  certificate_id: "cert-1",
+  course_key: "python-base",
+  course_title: "Python: основа",
+  holder_name: "Алекс Речной",
+  issued_at: "2026-10-15T10:00:00Z",
+  period: "Сезон 2026",
+  preview_marking: "демо",
+  program_version: 3,
+  result: "91%",
+  specialization: "Python-разработчик",
+  verification_id: "ver-cert-1",
+  workload_hours: 42,
+  competencies: [{ competency: "Python", evidence: "итоговый тест 91%", level: "уверенный" }],
+};
+
+const projectCredential = {
+  artifact_keys: ["benchmark-report"],
+  competencies: [{ competency: "Качество решения", evidence_refs: ["ref-1"], finding: "benchmark принят", level: "уверенный" }],
+  contribution_version: 2,
+  credential_id: "cred-1",
+  customer_name: "СБЕР",
+  grade_label: "B",
+  holder_name: "Алекс Речной",
+  payment_status: "paid",
+  period: "Сезон 2026",
+  personal_summary: "Воспроизводимый benchmark",
+  project_key: "python-base",
+  review_explanation: "Метод повторён и подтверждён",
+  signed_at: "2026-10-16T10:00:00Z",
+  status: "verified",
+  superseded_by: null,
+  task_key: "task-benchmark",
+  task_title: "Проверка прототипа на данных",
+  verification_id: "ver-proj-1",
+};
+
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/v1/config", (route) => route.fulfill({ json: { honor_board_enabled: true } }));
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: "Алекс Речной", roles: ["participant"] }] }));
-  await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: {} }));
-  await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: { person_id: "1", display_name: "Алекс Речной", active_role: "participant", assigned_roles: ["participant"], scopes: [], consent_scopes: [], navigation: ["Мой путь", "Bootcamp", "Задачи", "События", "Рейтинг", "Портфолио", "Аналитика"], csrf_token: "csrf" } }));
-  await page.route("**/api/v1/development/tracks", (route) => route.fulfill({ json: { active_count: 1, max_active: 2, tracks: [] } }));
-  await page.route("**/api/v1/me/roadmaps", (route) => route.fulfill({ json: [] }));
-  await page.route("**/api/v1/me/analytics/journey", (route) => route.fulfill({ json: { stages: [{ key: "direction", title: "Направление выбрано", status: "completed", completed: true, count: 1 }, { key: "learning", title: "Обучение подтверждено", status: "not_started", completed: false, count: 0 }, { key: "practice", title: "Реальный проект", status: "not_started", completed: false, count: 0 }, { key: "verified_experience", title: "Опыт подтверждён", status: "not_started", completed: false, count: 0 }], successful: false, next_action: "Завершите следующий курс roadmap и дождитесь подтверждения.", earnings: { calculated: "15000", approved: "0", paid: "0", failed: "0", currency: "RUB", unknown_items: 0 }, freshness: "fresh", generated_at: "2026-09-28T10:00:00Z" } }));
+  await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
+  await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: actor }));
+  await page.route("**/api/v1/me/analytics/journey", (route) => route.fulfill({ json: { stages: [], successful: true, next_action: "Продолжить работу над проектом", earnings: { calculated: "0", approved: "0", paid: "0", failed: "0", currency: "RUB", unknown_items: 0 }, freshness: "fresh", generated_at: "2026-10-20T10:00:00Z" } }));
+  await page.route("**/api/v1/me/growth/snapshot", (route) => route.fulfill({
+    json: {
+      snapshot_id: "growth-snapshot-e2e-analytics",
+      generated_at: "2026-10-20T09:00:00+03:00",
+      snapshot_version: 2,
+      actor_timezone: "Europe/Moscow",
+      definitions: {},
+      period_boundaries: { day: {} },
+      activity: { day: { total: 0, course_checkpoint: 0, project_submission: 0, revision_accepted: 0, event_participation: 0 } },
+      activity_state: {},
+      events: [],
+      hours: { known: true, trusted_minutes: 0, self_reported_minutes: 0, intervals: [] },
+      freshness: { known: true, latest_observed_at: "2026-10-20T09:00:00+03:00" },
+      trajectories: [
+        { track_key: "python", track_title: "Python-разработчик", policy_version: 1, milestones: [], completion: { percent: null, coverage: 1, partial: false }, readiness_skills: [], readiness: { percent: null, coverage: 0, partial: true }, object_refs: [], next_step_ref: null },
+      ],
+    },
+  }));
+  await page.route("**/api/v1/me/bootcamp/certificates", (route) => route.fulfill({ json: [certificate] }));
+  await page.route("**/api/v1/bootcamp/certificates/**", (route) => route.fulfill({ json: certificate }));
+  await page.route("**/api/v1/project-credentials/**", (route) => route.fulfill({ json: projectCredential }));
+  await page.route("**/api/v1/me/project-credentials", (route) => route.fulfill({ json: [projectCredential] }));
+  await page.route("**/api/v1/competency-evidence", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({ json: [] }));
+});
+
+test("documents panel reveals verification and lands exactly on certificate, project and task checkpoints", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Аналитика" }).click();
-  await expect(page.getByRole("heading", { name: "Ваш прогресс и подтверждённый результат" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "От обучения до принятого результата" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Активность по неделям" })).toBeVisible();
-  await expect(page.getByText("Путь продолжается")).toBeVisible();
-  await expect(page.locator(".radar-axis-label")).toHaveCount(5);
-  await expect(page.locator(".radar-axis-label").filter({ hasText: "Python" })).toContainText("82%");
-  await expect(page.locator(".analytics-histogram i")).toHaveCount(8);
-  const screenshot = await page.locator(".participant-analytics").screenshot();
-  expect(screenshot.byteLength).toBeGreaterThan(1_000);
+
+  const documents = page.getByTestId("document-item");
+  await expect(documents.filter({ hasText: "Python: основа" })).toBeVisible();
+  await expect(documents.filter({ hasText: "Проверка прототипа на данных" })).toBeVisible();
+
+  await documents.filter({ hasText: "Python: основа" }).getByRole("button", { name: "Проверить" }).click();
+  const certificateViewer = page.getByTestId("document-viewer").first();
+  await expect(certificateViewer).toContainText("ver-cert-1");
+  await certificateViewer.getByRole("link", { name: "Открыть публичную проверку сертификата" }).click();
+  await expect(page).toHaveURL(/\/verify\/ver-cert-1$/);
+  await expect(page.getByRole("heading", { name: "Python: основа" })).toBeVisible();
+  await expect(page.getByText(/демо · не является официальным сертификатом/)).toBeVisible();
+
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Аналитика" }).click();
+  await documents.filter({ hasText: "Проверка прототипа на данных" }).getByRole("button", { name: "Проверить" }).click();
+  const projectViewer = page.getByTestId("document-viewer").first();
+  await projectViewer.getByRole("link", { name: "Открыть публичную проверку проектного credential" }).click();
+  await expect(page).toHaveURL(/\/verify\/projects\/ver-proj-1$/);
+
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Аналитика" }).click();
+  await page.getByRole("button", { name: /До следующего уровня/ }).click();
+  const firstPlanStep = page.getByTestId("plan-step-0");
+  await expect(firstPlanStep).toHaveAttribute("href", "/workspace/2");
+  await firstPlanStep.click();
+  await expect(page).toHaveURL(/\/workspace\/2$/);
 });
+
+
