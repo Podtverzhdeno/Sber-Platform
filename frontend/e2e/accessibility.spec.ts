@@ -62,6 +62,7 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
 test("page guard rejects a section outside role navigation", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByRole("navigation", { name: "Навигация роли" })).toBeVisible();
   await page.evaluate("window.history.pushState({}, '', '/workspace/99'); window.dispatchEvent(new PopStateEvent('popstate')); ");
   await expect(page.getByRole("heading", { name: "Раздел недоступен" })).toBeVisible();
   await expect(page.locator(".next-action")).toHaveCount(0);
