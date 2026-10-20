@@ -132,9 +132,7 @@ def validate_requested_scopes(
     return selected
 
 
-def validate_workspace_ref(
-    provider: PlatformProvider, workspace_ref: str | None
-) -> str | None:
+def validate_workspace_ref(provider: PlatformProvider, workspace_ref: str | None) -> str | None:
     ref = (workspace_ref or "").strip()
     if provider.maybe_repository and not ref:
         raise ApiError(

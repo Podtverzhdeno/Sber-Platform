@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from datetime import timedelta
 from uuid import UUID, uuid4
 
@@ -150,7 +151,7 @@ def test_idempotent_callback_returns_single_connection_without_extend() -> None:
     assert repeat.status_code == 200
     assert repeat.json()["id"] == connection_id
 
-    events = fixture.store._audit.get(UUID(connection_id), ())
+    events = asyncio.run(fixture.store.audit_for(UUID(connection_id)))
     completed = [event for event in events if event.action == "connect_completed"]
     assert len(completed) == 1
     assert len(fixture.gateway.exchange_calls) == 1
@@ -198,13 +199,11 @@ def test_tokens_stay_sealed_and_redacted_from_api() -> None:
     csrf = login(client, "participant-alex")
     connection_id = completed_connection(client, csrf, PROJECT)
 
-    record = fixture.store._connections.get(connection_id)
+    record = asyncio.run(fixture.store.get(connection_id))
     assert record is not None
     assert record.sealed_access_token is not None
     assert SECRET_ACCESS_TOKEN.encode("utf-8") != record.sealed_access_token.ciphertext
-    unsealed = fixture.service.vault.unseal(
-        record.sealed_access_token, record.provider_key
-    )
+    unsealed = fixture.service.vault.unseal(record.sealed_access_token, record.provider_key)
     assert unsealed == SECRET_ACCESS_TOKEN
 
     for path in (
@@ -238,18 +237,12 @@ def test_expired_connection_requires_reconnect_and_stops_sync() -> None:
 
     fixture.clock.advance(timedelta(seconds=7200))
     payload = client.get(f"/api/v1/projects/{PROJECT}/platforms").json()
-    gitverse = next(
-        item
-        for item in payload["items"]
-        if item["provider_key"] == "gitverse"
-    )
+    gitverse = next(item for item in payload["items"] if item["provider_key"] == "gitverse")
     connection = gitverse["connection"]
     assert isinstance(connection, dict)
     assert connection["status"] == ConnectionStatus.EXPIRED.value
 
-    link = client.get(
-        f"/api/v1/projects/{PROJECT}/platforms/connections/{connection_id}/deep-link"
-    )
+    link = client.get(f"/api/v1/projects/{PROJECT}/platforms/connections/{connection_id}/deep-link")
     assert link.status_code == 409
 
     reconnect_challenge = client.post(
@@ -307,9 +300,7 @@ def test_provider_outage_reports_safe_retryable_error() -> None:
     connection = gitverse["connection"]
     assert isinstance(connection, dict)
     assert connection["status"] == ConnectionStatus.ERROR.value
-    assert connection["last_error"] == (
-        "Платформа временно недоступна. Повторите позже."
-    )
+    assert connection["last_error"] == ("Платформа временно недоступна. Повторите позже.")
 
     reconnect_chall = client.post(
         f"/api/v1/projects/{PROJECT}/platforms/gitverse/reconnect",

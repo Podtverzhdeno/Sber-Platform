@@ -111,9 +111,7 @@ def _connection_card(view: ConnectionView) -> ConnectionCardView:
         workspace_ref=view.workspace_ref,
         scopes=list(view.scopes),
         status=view.status,
-        last_sync_at=(
-            view.last_sync_at.isoformat() if view.last_sync_at else None
-        ),
+        last_sync_at=(view.last_sync_at.isoformat() if view.last_sync_at else None),
         last_error=view.last_error,
     )
 
@@ -126,9 +124,7 @@ def _connection_response(view: ConnectionView) -> ConnectionViewResponse:
         workspace_ref=view.workspace_ref,
         scopes=list(view.scopes),
         status=view.status,
-        last_sync_at=(
-            view.last_sync_at.isoformat() if view.last_sync_at else None
-        ),
+        last_sync_at=(view.last_sync_at.isoformat() if view.last_sync_at else None),
         last_error=view.last_error,
     )
 
@@ -150,16 +146,10 @@ def _diagnostics_view(diagnostics: ConnectionDiagnostics) -> DiagnosticsView:
         scopes=list(diagnostics.scopes),
         token_fingerprint=diagnostics.token_fingerprint,
         token_expires_at=(
-            diagnostics.token_expires_at.isoformat()
-            if diagnostics.token_expires_at
-            else None
+            diagnostics.token_expires_at.isoformat() if diagnostics.token_expires_at else None
         ),
         sync_paused=diagnostics.sync_paused,
-        last_sync_at=(
-            diagnostics.last_sync_at.isoformat()
-            if diagnostics.last_sync_at
-            else None
-        ),
+        last_sync_at=(diagnostics.last_sync_at.isoformat() if diagnostics.last_sync_at else None),
         last_error=diagnostics.last_error,
     )
 
@@ -180,9 +170,7 @@ async def catalog(
     return PlatformCatalogResponse(items=items)
 
 
-def _card(
-    provider: PlatformProvider, view: ConnectionView | None
-) -> ProviderCardView:
+def _card(provider: PlatformProvider, view: ConnectionView | None) -> ProviderCardView:
     connected = view is not None and view.status != ConnectionStatus.NOT_CONNECTED.value
     return ProviderCardView(
         provider_key=provider.key,
@@ -190,11 +178,7 @@ def _card(
         purpose=provider.purpose,
         required_permissions=list(provider.required_permissions),
         repository_label=provider.repository_label,
-        connection=(
-            _connection_card(view)
-            if connected and view is not None
-            else None
-        ),
+        connection=(_connection_card(view) if connected and view is not None else None),
     )
 
 

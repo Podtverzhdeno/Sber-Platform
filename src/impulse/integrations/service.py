@@ -90,9 +90,7 @@ class PlatformGateway(Protocol):
 
 @runtime_checkable
 class MembershipPort(Protocol):
-    async def active_assignment(
-        self, project_id: UUID, person_id: UUID
-    ) -> UUID | None:
+    async def active_assignment(self, project_id: UUID, person_id: UUID) -> UUID | None:
         """Assignment id when the person holds an active assignment, else None."""
         ...
 
@@ -154,13 +152,9 @@ class ConnectionStore(Protocol):
 
     async def append_audit(self, event: PlatformAuditEvent) -> None: ...
 
-    async def audit_for(
-        self, connection_id: UUID
-    ) -> tuple[PlatformAuditEvent, ...]: ...
+    async def audit_for(self, connection_id: UUID) -> tuple[PlatformAuditEvent, ...]: ...
 
-    async def find_idempotent_result(
-        self, idempotency_key: str
-    ) -> ConnectionRecord | None: ...
+    async def find_idempotent_result(self, idempotency_key: str) -> ConnectionRecord | None: ...
 
 
 @dataclass
@@ -200,9 +194,7 @@ class MemoryConnectionStore:
     async def audit_for(self, connection_id: UUID) -> tuple[PlatformAuditEvent, ...]:
         return tuple(self._audit.get(connection_id, ()))
 
-    async def find_idempotent_result(
-        self, idempotency_key: str
-    ) -> ConnectionRecord | None:
+    async def find_idempotent_result(self, idempotency_key: str) -> ConnectionRecord | None:
         connection_id = self._idempotency.get(idempotency_key)
         return self._connections.get(connection_id) if connection_id else None
 
@@ -239,9 +231,7 @@ class SealedVault:
         nonce = secrets.token_bytes(16)
         keystream = self._keystream(nonce, len(raw))
         ciphertext = bytes(a ^ b for a, b in zip(raw, keystream, strict=True))
-        tag = hmac.new(
-            self._mac_key, nonce + ciphertext, hashlib.sha256
-        ).digest()
+        tag = hmac.new(self._mac_key, nonce + ciphertext, hashlib.sha256).digest()
         return SealedSecret(nonce=nonce, ciphertext=ciphertext, tag=tag)
 
     def unseal(self, sealed: SealedSecret, provider_key: str) -> str:
@@ -253,9 +243,7 @@ class SealedVault:
         if not hmac.compare_digest(expected, sealed.tag):
             raise CredentialRejectedError(provider_key)
         keystream = self._keystream(sealed.nonce, len(sealed.ciphertext))
-        raw = bytes(
-            a ^ b for a, b in zip(sealed.ciphertext, keystream, strict=True)
-        )
+        raw = bytes(a ^ b for a, b in zip(sealed.ciphertext, keystream, strict=True))
         return raw.decode("utf-8")
 
 
@@ -358,20 +346,14 @@ class PlatformConnectionService:
 
     # -- guards ---------------------------------------------------------------
 
-    async def _authorise_participant(
-        self, actor: ActorContext, project_id: UUID
-    ) -> UUID:
+    async def _authorise_participant(self, actor: ActorContext, project_id: UUID) -> UUID:
         """Only the assigned project member reaches platform state; others get 404."""
-        assignment_id = await self.membership.active_assignment(
-            project_id, actor.person_id
-        )
+        assignment_id = await self.membership.active_assignment(project_id, actor.person_id)
         if assignment_id is None:
             raise NON_DISCLOSING_404
         return assignment_id
 
-    async def _provider_for(
-        self, project_id: UUID, provider_key: str
-    ) -> PlatformProvider:
+    async def _provider_for(self, project_id: UUID, provider_key: str) -> PlatformProvider:
         enabled = await self.project_config.enabled_providers(project_id)
         if provider_key not in enabled:
             raise NON_DISCLOSING_404
@@ -384,11 +366,7 @@ class PlatformConnectionService:
         self, actor: ActorContext, project_id: UUID, connection_id: UUID
     ) -> ConnectionRecord:
         record = await self.store.get(connection_id)
-        if (
-            record is None
-            or record.project_id != project_id
-            or record.person_id != actor.person_id
-        ):
+        if record is None or record.project_id != project_id or record.person_id != actor.person_id:
             raise NON_DISCLOSING_404
         await self._authorise_participant(actor, record.project_id)
         provider = get_provider(record.provider_key)
@@ -424,9 +402,7 @@ class PlatformConnectionService:
 
     # -- catalog --------------------------------------------------------------
 
-    async def catalog(
-        self, actor: ActorContext, project_id: UUID
-    ) -> tuple[ConnectionView, ...]:
+    async def catalog(self, actor: ActorContext, project_id: UUID) -> tuple[ConnectionView, ...]:
         await self._authorise_participant(actor, project_id)
         enabled = await self.project_config.enabled_providers(project_id)
         views: list[ConnectionView] = []
@@ -493,16 +469,12 @@ class PlatformConnectionService:
         selected_scopes = validate_requested_scopes(provider, scopes)
         resolved_workspace = validate_workspace_ref(provider, workspace_ref)
         if reconnect:
-            if (
-                existing is None
-                or existing.status
-                not in {
-                    ConnectionStatus.CONNECTED,
-                    ConnectionStatus.ACTION_REQUIRED,
-                    ConnectionStatus.EXPIRED,
-                    ConnectionStatus.ERROR,
-                }
-            ):
+            if existing is None or existing.status not in {
+                ConnectionStatus.CONNECTED,
+                ConnectionStatus.ACTION_REQUIRED,
+                ConnectionStatus.EXPIRED,
+                ConnectionStatus.ERROR,
+            }:
                 raise ApiError(
                     code="PLATFORM_RECONNECT_UNAVAILABLE",
                     message="Подключение платформы ещё не установлено.",
@@ -510,10 +482,7 @@ class PlatformConnectionService:
                 )
             record = existing
         else:
-            if (
-                existing is not None
-                and existing.status is ConnectionStatus.CONNECTED
-            ):
+            if existing is not None and existing.status is ConnectionStatus.CONNECTED:
                 raise ApiError(
                     code="PLATFORM_ALREADY_CONNECTED",
                     message="Платформа уже подключена к проекту.",
@@ -585,9 +554,7 @@ class PlatformConnectionService:
                 message="Подтверждение подключения не прошло проверку.",
                 status_code=400,
             )
-        replay = await self.store.find_idempotent_result(
-            idempotency_key.strip()
-        )
+        replay = await self.store.find_idempotent_result(idempotency_key.strip())
         if (
             replay is not None
             and replay.person_id == actor.person_id
@@ -613,9 +580,7 @@ class PlatformConnectionService:
             )
         selected_scopes = record.scopes
         try:
-            tokens = await self.gateway.exchange_code(
-                provider_key, code, selected_scopes
-            )
+            tokens = await self.gateway.exchange_code(provider_key, code, selected_scopes)
         except ProviderOutageError:
             record = replace(
                 record,
@@ -663,9 +628,7 @@ class PlatformConnectionService:
             status=ConnectionStatus.CONNECTED,
             sealed_access_token=self.vault.seal(tokens.access_token),
             sealed_refresh_token=(
-                self.vault.seal(tokens.refresh_token)
-                if tokens.refresh_token
-                else None
+                self.vault.seal(tokens.refresh_token) if tokens.refresh_token else None
             ),
             account_ref=tokens.account_ref,
             token_expires_at=token_expires_at,
@@ -692,9 +655,7 @@ class PlatformConnectionService:
         provider_confirmed = False
         if record.sealed_access_token is not None:
             try:
-                access_token = self.vault.unseal(
-                    record.sealed_access_token, record.provider_key
-                )
+                access_token = self.vault.unseal(record.sealed_access_token, record.provider_key)
             except CredentialRejectedError:
                 access_token = ""
             if access_token:
@@ -737,15 +698,12 @@ class PlatformConnectionService:
         fingerprint: str | None = None
         if record.sealed_access_token is not None:
             try:
-                access_token = self.vault.unseal(
-                    record.sealed_access_token, record.provider_key
-                )
+                access_token = self.vault.unseal(record.sealed_access_token, record.provider_key)
             except CredentialRejectedError:
                 access_token = ""
             if access_token:
                 fingerprint = (
-                    "sha256:"
-                    + hashlib.sha256(access_token.encode("utf-8")).hexdigest()[:16]
+                    "sha256:" + hashlib.sha256(access_token.encode("utf-8")).hexdigest()[:16]
                 )
         return ConnectionDiagnostics(
             connection_id=record.id,
@@ -759,9 +717,7 @@ class PlatformConnectionService:
             last_error=record.last_error,
         )
 
-    async def deep_link(
-        self, actor: ActorContext, project_id: UUID, connection_id: UUID
-    ) -> str:
+    async def deep_link(self, actor: ActorContext, project_id: UUID, connection_id: UUID) -> str:
         """Allowlist-validated workspace deep link; audit keeps no URL content."""
         record = await self._connection_for(actor, project_id, connection_id)
         record = await self._apply_expiry(record)
@@ -780,5 +736,3 @@ class PlatformConnectionService:
             )
         await self._audit(record, actor.person_id, "open_workspace", "ok")
         return url
-
-

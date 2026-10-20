@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
@@ -29,9 +30,7 @@ def catalog(client: TestClient, project_id: UUID) -> dict[str, list[dict[str, ob
     return response.json()
 
 
-def card_for(
-    payload: dict[str, list[dict[str, object]]], provider_key: str
-) -> dict[str, object]:
+def card_for(payload: dict[str, list[dict[str, object]]], provider_key: str) -> dict[str, object]:
     matches = [item for item in payload["items"] if item["provider_key"] == provider_key]
     assert len(matches) == 1
     return matches[0]
@@ -49,7 +48,9 @@ def test_catalog_shows_enabled_providers_with_real_states(platform: PlatformFixt
     assert gigacode["purpose"] == (
         "ИИ-разработка кода проекта: ассистент, ревью и чат по репозиторию задания."
     )
-    assert "repo:read" in gigacode["required_permissions"]
+    required_permissions = gigacode["required_permissions"]
+    assert isinstance(required_permissions, list)
+    assert "repo:read" in required_permissions
     assert gigacode["connection"] is None
     assert gigacode["repository_label"] == "Репозиторий участник/проект"
 
@@ -76,7 +77,7 @@ def test_connect_gitverse_is_project_scoped_with_audit(platform: PlatformFixture
     assert view["status"] == "connected"
     connection_id = UUID(str(view["id"]))
 
-    events = platform.store._audit.get(connection_id, ())
+    events = asyncio.run(platform.store.audit_for(connection_id))
     actions = [event.action for event in events]
     assert "connect_started" in actions
     assert "connect_completed" in actions
@@ -132,9 +133,7 @@ def test_deep_link_only_for_connected_platform(platform: PlatformFixture) -> Non
     client, csrf = platform.member_client("participant-alex")
 
     connection_id = completed_connection(client, csrf, PROJECT)
-    link = client.get(
-        f"/api/v1/projects/{PROJECT}/platforms/connections/{connection_id}/deep-link"
-    )
+    link = client.get(f"/api/v1/projects/{PROJECT}/platforms/connections/{connection_id}/deep-link")
     assert link.status_code == 200
     assert link.json()["url"] == "https://gitverse.ru/impulse-demo/navigator"
 
@@ -174,7 +173,7 @@ def test_revoke_is_idempotent_and_stops_provider_access(platform: PlatformFixtur
 
     events = [
         event
-        for event in platform.store._audit.get(connection_id, ())
+        for event in asyncio.run(platform.store.audit_for(connection_id))
         if event.action == "revoked"
     ]
     assert len(events) == 1
@@ -222,13 +221,9 @@ def test_reconnect_available_for_connected_platform(platform: PlatformFixture) -
 
 def test_non_member_receives_non_disclosing_404(platform: PlatformFixture) -> None:
     platform.membership.add(PROJECT, platform.person_ids["participant-alex"])
-    platform.membership.add(
-        OTHER_PROJECT, platform.person_ids["participant-maria"]
-    )
+    platform.membership.add(OTHER_PROJECT, platform.person_ids["participant-maria"])
     stranger = TestClient(platform.app)
-    login = stranger.post(
-        "/api/v1/auth/demo-login", json={"persona_key": "participant-maria"}
-    )
+    login = stranger.post("/api/v1/auth/demo-login", json={"persona_key": "participant-maria"})
     assert login.status_code == 200
 
     leaked = stranger.get(f"/api/v1/projects/{PROJECT}/platforms")

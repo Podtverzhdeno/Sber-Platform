@@ -37,6 +37,7 @@ SECRET_ACCESS_TOKEN = "gitverse_live_demo_access_token_31337"
 SECRET_REFRESH_TOKEN = "gitverse_live_demo_refresh_token_31337"
 VAULT_KEY = bytes(range(64))
 
+
 def _persona_id(key: str) -> UUID:
     """Resolve a stable demo persona id (uuid5-derived, like the identity layer)."""
     matches = [item.person_id for item in demo_personas() if item.key == key]
@@ -61,9 +62,7 @@ def login(client: TestClient, persona: str) -> str:
 class TestClock:
     """Controllable clock for expiry scenarios."""
 
-    moment: datetime = field(
-        default_factory=lambda: datetime(2026, 10, 19, 12, 0, tzinfo=UTC)
-    )
+    moment: datetime = field(default_factory=lambda: datetime(2026, 10, 19, 12, 0, tzinfo=UTC))
 
     def __call__(self) -> datetime:
         return self.moment
@@ -114,9 +113,7 @@ class StaticMembership:
         self.assignments[(project_id, person_id)] = assignment_id
         return assignment_id
 
-    async def active_assignment(
-        self, project_id: UUID, person_id: UUID
-    ) -> UUID | None:
+    async def active_assignment(self, project_id: UUID, person_id: UUID) -> UUID | None:
         return self.assignments.get((project_id, person_id))
 
 
@@ -142,9 +139,7 @@ class PlatformFixture:
     def member_client(self, persona: str) -> tuple[TestClient, str]:
         """Authenticated client for a demo persona with its CSRF token."""
         client = TestClient(self.app)
-        response = client.post(
-            "/api/v1/auth/demo-login", json={"persona_key": persona}
-        )
+        response = client.post("/api/v1/auth/demo-login", json={"persona_key": persona})
         assert response.status_code == 200, response.text
         token = response.json()["csrf_token"]
         assert isinstance(token, str)
