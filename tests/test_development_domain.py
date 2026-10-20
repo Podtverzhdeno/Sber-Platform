@@ -1,6 +1,6 @@
 """Career roadmap and Bootcamp policy scenarios."""
 
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 import pytest
 
@@ -16,6 +16,12 @@ from impulse.domain.development import (
     rating_eligible,
     recalculate_roadmap,
     select_track,
+)
+from impulse.domain.engagement import (
+    EngagementRecord,
+    EngagementSource,
+    engagement_calendar,
+    engagement_day,
 )
 
 
@@ -110,3 +116,71 @@ def test_streak_explains_break_and_only_verified_completion_is_rating_eligible()
     assert rating_eligible(CompletionStatus.VERIFIED)
     assert not rating_eligible(CompletionStatus.REPORTED)
     assert not rating_eligible(CompletionStatus.REJECTED)
+
+
+def _record(source: EngagementSource, ref: str, day: date) -> EngagementRecord:
+    return EngagementRecord(source, ref, datetime(day.year, day.month, day.day, 21, 0, tzinfo=UTC))
+
+
+@pytest.mark.spec("participant-experience/engagement-qualification")
+def test_first_qualifying_action_of_each_source_accrues_exactly_one_day() -> None:
+    records = (
+        _record(EngagementSource.PROJECT_SUBMISSION, "contribution-1", date(2026, 10, 18)),
+        _record(EngagementSource.ACCEPTED_REVISION, "revision-7", date(2026, 10, 18)),
+        _record(EngagementSource.COURSE_LEARNING, "course-day-1", date(2026, 10, 19)),
+        _record(EngagementSource.VERIFIED_EVENT_PARTICIPATION, "event-3", date(2026, 10, 19)),
+    )
+    days = engagement_day(records, "Europe/Moscow")
+    assert days == frozenset({date(2026, 10, 19), date(2026, 10, 20)})
+    calendar = engagement_calendar(days, local_today=date(2026, 10, 20))
+    assert calendar.current_days == 2
+    assert calendar.best_days == 2
+    assert calendar.today_saved is True
+    assert calendar.grace_available is False
+
+
+@pytest.mark.spec("participant-experience/engagement-qualification")
+def test_duplicate_source_ref_never_double_accrues() -> None:
+    records = (
+        _record(EngagementSource.PROJECT_SUBMISSION, "contribution-1", date(2026, 10, 18)),
+        _record(EngagementSource.PROJECT_SUBMISSION, "contribution-1", date(2026, 10, 19)),
+    )
+    days = engagement_day(records, "Europe/Moscow")
+    assert days == frozenset({date(2026, 10, 19)})
+    calendar = engagement_calendar(days, local_today=date(2026, 10, 19))
+    assert calendar.current_days == 1
+    assert calendar.best_days == 1
+
+
+@pytest.mark.spec("participant-experience/engagement-qualification")
+def test_second_qualifying_action_of_same_day_does_not_extend_streak() -> None:
+    records = (
+        _record(EngagementSource.PROJECT_SUBMISSION, "contribution-1", date(2026, 10, 18)),
+        _record(EngagementSource.ACCEPTED_REVISION, "revision-7", date(2026, 10, 18)),
+    )
+    days = engagement_day(records, "Europe/Moscow")
+    assert days == frozenset({date(2026, 10, 19)})
+    calendar = engagement_calendar(days, local_today=date(2026, 10, 19))
+    assert calendar.current_days == 1
+
+
+@pytest.mark.spec("participant-experience/engagement-qualification")
+def test_calendar_keeps_best_run_after_current_break() -> None:
+    base = date(2026, 9, 1)
+    historical = frozenset(base + timedelta(days=offset) for offset in range(5))
+    far = base + timedelta(days=30)
+    calendar = engagement_calendar(
+        historical | {far}, local_today=base + timedelta(days=32)
+    )
+    assert calendar.current_days == 0
+    assert calendar.best_days == 5
+    assert "прервана" in calendar.reason
+    assert calendar.today_saved is False
+
+
+@pytest.mark.spec("participant-experience/engagement-qualification")
+def test_empty_calendar_is_not_zero_streak_lie() -> None:
+    calendar = engagement_calendar(frozenset(), local_today=date(2026, 10, 20))
+    assert calendar.current_days == 0
+    assert calendar.best_days == 0
+    assert "первое квалифицируемое" in calendar.reason

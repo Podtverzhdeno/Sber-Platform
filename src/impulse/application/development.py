@@ -25,6 +25,11 @@ from impulse.domain.development import (
     recalculate_roadmap,
     select_track,
 )
+from impulse.domain.engagement import (
+    EngagementCalendar,
+    EngagementSource,
+    engagement_calendar,
+)
 from impulse.domain.identity import ActorContext, Role
 
 
@@ -315,6 +320,17 @@ class DevelopmentStore(Protocol):
 
     async def learning_dates(self, person_id: UUID) -> frozenset[date]: ...
 
+    async def record_engagement_event(
+        self,
+        person_id: UUID,
+        source: EngagementSource,
+        source_ref: str,
+        local_date: date,
+        timezone: str,
+    ) -> None: ...
+
+    async def engagement_dates(self, person_id: UUID) -> frozenset[date]: ...
+
 
 class MemoryDevelopmentStore:
     def __init__(self) -> None:
@@ -381,6 +397,7 @@ class MemoryDevelopmentStore:
         self._enrollments: dict[tuple[UUID, str], EnrollmentRecord] = {}
         self._seed_person_id: UUID | None = None
         self._days: dict[UUID, frozenset[date]] = {}
+        self._engagement: dict[UUID, list[tuple[EngagementSource, str, date]]] = {}
 
     async def tracks(self) -> tuple[TrackRecord, ...]:
         return self._tracks
@@ -441,6 +458,22 @@ class MemoryDevelopmentStore:
 
     async def learning_dates(self, person_id: UUID) -> frozenset[date]:
         return self._days.get(person_id, frozenset())
+
+    async def record_engagement_event(
+        self,
+        person_id: UUID,
+        source: EngagementSource,
+        source_ref: str,
+        local_date: date,
+        timezone: str,
+    ) -> None:
+        seen = self._engagement.setdefault(person_id, [])
+        if any(entry[0] == source and entry[1] == source_ref for entry in seen):
+            return
+        seen.append((source, source_ref, local_date))
+
+    async def engagement_dates(self, person_id: UUID) -> frozenset[date]:
+        return frozenset(entry[2] for entry in self._engagement.get(person_id, ()))
 
 
 class DevelopmentService:
@@ -678,6 +711,29 @@ class DevelopmentService:
         return calculate_streak(
             await self.store.learning_dates(actor.person_id), local_today=local_today
         )
+
+    async def engagement(
+        self, actor: ActorContext, *, local_today: date
+    ) -> EngagementCalendar:
+        self._participant(actor)
+        dates = await self.store.learning_dates(actor.person_id)
+        dates |= await self.store.engagement_dates(actor.person_id)
+        return engagement_calendar(dates, local_today=local_today)
+
+    async def record_qualification(
+        self,
+        actor: ActorContext,
+        source: EngagementSource,
+        source_ref: str,
+        occurred_at: datetime,
+    ) -> EngagementCalendar:
+        """First qualifying action accrues one local day; later events never double-credit."""
+        self._participant(actor)
+        local_date = next(iter(local_learning_days((occurred_at,), actor.timezone)))
+        await self.store.record_engagement_event(
+            actor.person_id, source, source_ref, local_date, actor.timezone
+        )
+        return await self.engagement(actor, local_today=local_date)
 
     @staticmethod
     def enrollment_rating_eligible(enrollment: EnrollmentRecord) -> bool:

@@ -1,0 +1,58 @@
+"""Qualified engagement events for the development streak.
+
+Revision ID: 20261020_0021
+Revises: 20261020_0020
+"""
+
+from collections.abc import Sequence
+
+import sqlalchemy as sa
+from alembic import op
+from sqlalchemy.dialects import postgresql
+
+revision: str = "20261020_0021"
+down_revision: str | Sequence[str] | None = "20261020_0020"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
+
+JSON = sa.JSON().with_variant(postgresql.JSONB(), "postgresql")
+
+
+def upgrade() -> None:
+    op.create_table(
+        "qualification_events",
+        sa.Column("id", sa.Uuid(), nullable=False),
+        sa.Column("version", sa.Integer(), server_default="1", nullable=False),
+        sa.Column("data_origin", sa.String(32), server_default="system", nullable=False),
+        sa.Column("provenance", JSON, server_default="{}", nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column("created_by", sa.Uuid(), nullable=True),
+        sa.Column("person_id", sa.Uuid(), nullable=False),
+        sa.Column("source", sa.String(64), nullable=False),
+        sa.Column("source_ref", sa.String(192), nullable=False),
+        sa.Column("local_date", sa.Date(), nullable=False),
+        sa.Column("timezone", sa.String(64), nullable=False),
+        sa.CheckConstraint("version > 0", name=op.f("ck_qualification_events_version_positive")),
+        sa.ForeignKeyConstraint(
+            ["person_id"],
+            ["persons.id"],
+            ondelete="RESTRICT",
+            name=op.f("fk_qualification_events_person_id_persons"),
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_qualification_events")),
+        sa.UniqueConstraint(
+            "person_id",
+            "source",
+            "source_ref",
+            name=op.f("uq_qualification_events_person_id_source_source_ref"),
+        ),
+    )
+
+
+def downgrade() -> None:
+    op.drop_table("qualification_events")

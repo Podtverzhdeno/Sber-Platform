@@ -56,3 +56,12 @@ learning_days = domain_table(
     string_field("timezone", 64),
     uniques=(("enrollment_id", "local_date"),),
 )
+qualification_events = domain_table(
+    "qualification_events",
+    uuid_field("person_id", "persons.id"),
+    string_field("source", 64),
+    string_field("source_ref", 192),
+    typed_field("local_date", Date()),
+    string_field("timezone", 64),
+    uniques=(("person_id", "source", "source_ref"),),
+)

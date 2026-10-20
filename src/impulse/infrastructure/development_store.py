@@ -23,6 +23,7 @@ from impulse.domain.development import (
     TrackAttempt,
     TrackStatus,
 )
+from impulse.domain.engagement import EngagementSource
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.development import (
     course_track_links,
@@ -30,6 +31,7 @@ from impulse.infrastructure.models.development import (
     enrollments,
     learning_days,
     milestones,
+    qualification_events,
     roadmap_versions,
     track_attempts,
     tracks,
@@ -281,6 +283,42 @@ class SqlDevelopmentStore(DevelopmentStore):
                     select(learning_days.c.local_date)
                     .join(enrollments, enrollments.c.id == learning_days.c.enrollment_id)
                     .where(enrollments.c.person_id == person_id)
+                    .distinct()
+                )
+            ).scalars()
+            return frozenset(rows)
+
+    async def record_engagement_event(
+        self,
+        person_id: UUID,
+        source: EngagementSource,
+        source_ref: str,
+        local_date: date,
+        timezone: str,
+    ) -> None:
+        async with self.database.session() as session:
+            await session.execute(
+                postgres_insert(qualification_events)
+                .values(
+                    person_id=person_id,
+                    source=source.value,
+                    source_ref=source_ref,
+                    local_date=local_date,
+                    timezone=timezone,
+                    data_origin="qualified_action",
+                    created_by=person_id,
+                )
+                .on_conflict_do_nothing(
+                    constraint="uq_qualification_events_person_id_source_source_ref"
+                )
+            )
+
+    async def engagement_dates(self, person_id: UUID) -> frozenset[date]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(qualification_events.c.local_date)
+                    .where(qualification_events.c.person_id == person_id)
                     .distinct()
                 )
             ).scalars()

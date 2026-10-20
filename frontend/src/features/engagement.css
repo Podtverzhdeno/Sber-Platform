@@ -1,0 +1,83 @@
+.engagement-flash {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 210, 122, 0.35);
+  background: rgba(255, 210, 122, 0.12);
+  color: #ffd27a;
+  font-size: 13px;
+  white-space: nowrap;
+  animation: engagement-flash-in 320ms ease-out;
+}
+
+.engagement-calendar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.engagement-day {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  border-radius: 9px;
+  background: rgba(69, 223, 145, 0.12);
+  color: #98edbd;
+  font-size: 12px;
+}
+
+.engagement-day--empty {
+  background: rgba(255, 255, 255, 0.06);
+  color: #aabdb4;
+}
+
+.engagement-facts {
+  display: grid;
+  gap: 6px;
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+.engagement-facts dt {
+  color: #aabdb4;
+  font-size: 12px;
+}
+
+.engagement-facts dd {
+  margin: 2px 0 0;
+  color: #edf7f1;
+}
+
+.engagement-hint {
+  margin: 8px 0 0;
+  color: #aabdb4;
+  font-size: 12px;
+}
+
+.engagement-reason {
+  margin: 8px 0 0;
+  color: #edf7f1;
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .engagement-flash {
+    animation: none;
+  }
+}
+
+@keyframes engagement-flash-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

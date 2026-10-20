@@ -13,6 +13,7 @@ from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.development import DevelopmentService
 from impulse.application.identity import AuthenticatedSession
 from impulse.domain.development import CompletionStatus, TrackStatus, local_learning_days
+from impulse.domain.engagement import EngagementSource
 from impulse.domain.identity import ConsentScope
 
 router = APIRouter()
@@ -315,6 +316,69 @@ async def streak(
         iter(local_learning_days((datetime.now(UTC),), authenticated.actor.timezone))
     )
     return _streak_view(await service.streak(authenticated.actor, local_today=local_today))
+
+
+class EngagementQualifyRequest(BaseModel):
+    source: EngagementSource
+    source_ref: str
+    occurred_at: AwareDatetime
+
+
+class EngagementOverviewView(BaseModel):
+    current_days: int
+    best_days: int
+    qualified_dates: list[date]
+    reason: str
+    today_saved: bool
+    grace_available: bool
+
+
+def _engagement_view(result: object) -> EngagementOverviewView:
+    from impulse.domain.engagement import EngagementCalendar
+
+    if not isinstance(result, EngagementCalendar):
+        raise TypeError("Expected EngagementCalendar")
+    return EngagementOverviewView(
+        current_days=result.current_days,
+        best_days=result.best_days,
+        qualified_dates=sorted(result.qualified_dates),
+        reason=result.reason,
+        today_saved=result.today_saved,
+        grace_available=result.grace_available,
+    )
+
+
+@router.get("/me/engagement/overview", response_model=EngagementOverviewView)
+async def engagement_overview(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+) -> EngagementOverviewView:
+    local_today = next(
+        iter(local_learning_days((datetime.now(UTC),), authenticated.actor.timezone))
+    )
+    return _engagement_view(await service.engagement(authenticated.actor, local_today=local_today))
+
+
+@router.post("/me/engagement/qualify", response_model=EngagementOverviewView)
+async def record_qualification(
+    command: EngagementQualifyRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+) -> EngagementOverviewView:
+    if not command.source_ref.strip():
+        raise ApiError(
+            code="VALIDATION_ERROR",
+            message="source_ref идентифицирует квалифицируемое действие.",
+            status_code=422,
+        )
+    return _engagement_view(
+        await service.record_qualification(
+            authenticated.actor,
+            command.source,
+            command.source_ref.strip(),
+            command.occurred_at,
+        )
+    )
 
 
 class CertificateCompetencyView(BaseModel):

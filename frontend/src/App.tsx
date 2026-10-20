@@ -4,6 +4,7 @@ import { ParticipantMetricSpark } from "./features/participant-home-spark";
 import { BuddySuggestionCard } from "./features/buddy-suggestion";
 import { ActivityPanel } from "./features/activity-panel";
 import { KpiDetailsBody } from "./features/kpi-details";
+import { TopbarEngagementIndicator } from "./features/engagement";
 import {
   KPI_KEYS,
   KPI_TITLES,
@@ -1210,7 +1211,6 @@ function ImpulseApp() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [streakOpen, setStreakOpen] = useState(false);
   const [rankingOpen, setRankingOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [themeChoice, setThemeChoice] = useState<ThemeChoice>(() =>
@@ -1434,7 +1434,6 @@ function ImpulseApp() {
                 value={search}
                 onFocus={() => {
                   setSearchOpen(true);
-                  setStreakOpen(false);
                   setNotificationOpen(false);
                 }}
                 onChange={(event) => {
@@ -1500,63 +1499,10 @@ function ImpulseApp() {
                   </span>
                 </button>
               </div>
-              {actor.active_role === "participant" && <div className="streak-utility">
-                <button
-                  className="streak-button"
-                  type="button"
-                  aria-label="Учебный стрик: 14 дней"
-                  aria-expanded={streakOpen}
-                  onClick={() => {
-                    setStreakOpen((value) => !value);
-                    setRankingOpen(false);
-                    setNotificationOpen(false);
-                    setSearchOpen(false);
-                  }}
-                >
-                  🔥 <strong>14</strong>
-                </button>
-                {streakOpen && (
-                  <div
-                    className="streak-popover"
-                    role="dialog"
-                    aria-label="Учебный стрик"
-                  >
-                    <header>
-                      <span>Текущая серия</span>
-                      <strong>14 дней подряд</strong>
-                    </header>
-                    <div className="streak-week">
-                      {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map(
-                        (day, index) => (
-                          <span
-                            className={index < 6 ? "done" : "today"}
-                            key={day}
-                          >
-                            <i>{index < 6 ? "✓" : "·"}</i>
-                            {day}
-                          </span>
-                        ),
-                      )}
-                    </div>
-                    <p>
-                      <strong>Сегодня:</strong> завершите checkpoint «Практика
-                      API», чтобы сохранить серию.
-                    </p>
-                    <button
-                      className="streak-course-button"
-                      type="button"
-                      onClick={() => {
-                        setStreakOpen(false);
-                        openSearchItem("Bootcamp", "?course=python-base");
-                      }}
-                    >
-                      Продолжить курс →
-                    </button>
-                    <small>Лучшая серия: 21 день</small>
-                  </div>
-                )}
-              </div>}
-              {actor.active_role === "participant" && <div className="ranking-wrapper"><button className="ranking-utility" type="button" aria-label="Рейтинг: 3 место, 450 баллов" aria-expanded={rankingOpen} onClick={()=>{setRankingOpen(value=>!value);setStreakOpen(false);setNotificationOpen(false);setSearchOpen(false);}}><span aria-hidden="true">♜</span><strong>3 место</strong><small>450 баллов</small></button>{rankingOpen&&<div className="ranking-popover" role="dialog" aria-label="Баллы и место в рейтинге"><header><div><span>Рейтинг сезона</span><strong>3 место</strong></div><b>ТОП 5%</b></header><div className="ranking-score-grid"><article><strong>450</strong><span>постоянных баллов</span></article><article><strong>+5</strong><span>заморожено</span></article></div><div className="ranking-next"><span>До 2 места</span><strong>50 баллов</strong><i><b/></i></div><a href={`/workspace/${String(actor.navigation.indexOf("Рейтинг"))}`} onClick={event=>{event.preventDefault();setRankingOpen(false);openSearchItem("Рейтинг");}}>Открыть рейтинг →</a></div>}</div>}
+              {actor.active_role === "participant" && (
+                <TopbarEngagementIndicator />
+              )}
+              {actor.active_role === "participant" && <div className="ranking-wrapper"><button className="ranking-utility" type="button" aria-label="Рейтинг: 3 место, 450 баллов" aria-expanded={rankingOpen} onClick={()=>{setRankingOpen(value=>!value);setNotificationOpen(false);setSearchOpen(false);}}><span aria-hidden="true">♜</span><strong>3 место</strong><small>450 баллов</small></button>{rankingOpen&&<div className="ranking-popover" role="dialog" aria-label="Баллы и место в рейтинге"><header><div><span>Рейтинг сезона</span><strong>3 место</strong></div><b>ТОП 5%</b></header><div className="ranking-score-grid"><article><strong>450</strong><span>постоянных баллов</span></article><article><strong>+5</strong><span>заморожено</span></article></div><div className="ranking-next"><span>До 2 места</span><strong>50 баллов</strong><i><b/></i></div><a href={`/workspace/${String(actor.navigation.indexOf("Рейтинг"))}`} onClick={event=>{event.preventDefault();setRankingOpen(false);openSearchItem("Рейтинг");}}>Открыть рейтинг →</a></div>}</div>}
               <div className="notification-utility">
                 <button
                   className="notification-button"
@@ -1565,7 +1511,6 @@ function ImpulseApp() {
                   aria-expanded={notificationOpen}
                   onClick={() => {
                     setNotificationOpen((value) => !value);
-                    setStreakOpen(false);
                     setRankingOpen(false);
                     setSearchOpen(false);
                   }}
