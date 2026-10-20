@@ -6,8 +6,6 @@ import {
 } from "./engagement-client";
 import "./engagement.css";
 
-const WEEKDAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-
 export function TopbarEngagementIndicator() {
   const [open, setOpen] = useState(false);
   const indicatorQuery = useQuery({
@@ -102,9 +100,7 @@ export function TopbarEngagementIndicator() {
             </div>
           </dl>
           <p className="engagement-hint">
-            {WEEKDAYS.length > 0
-              ? "Календарь показывает только квалифицированные дни; счёт без входов и сообщений."
-              : ""}
+            Календарь показывает только квалифицированные дни; счёт без входов и сообщений.
           </p>
         </div>
       )}
