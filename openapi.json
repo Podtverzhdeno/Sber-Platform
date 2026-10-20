@@ -2712,6 +2712,282 @@
         "title": "EarningsView",
         "type": "object"
       },
+      "EventDetailView": {
+        "properties": {
+          "conditions": {
+            "title": "Conditions",
+            "type": "string"
+          },
+          "deadline_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline At"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "ends_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ends At"
+          },
+          "event_type": {
+            "title": "Event Type",
+            "type": "string"
+          },
+          "expected_result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Result"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "organizer": {
+            "title": "Organizer",
+            "type": "string"
+          },
+          "participation_rules": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participation Rules"
+          },
+          "prerequisites": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prerequisites"
+          },
+          "program": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/EventProgramStageView"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Program"
+          },
+          "recommendation_reason": {
+            "title": "Recommendation Reason",
+            "type": "string"
+          },
+          "rewards": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/EventRewardView"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rewards"
+          },
+          "source_checked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Checked At"
+          },
+          "source_status": {
+            "title": "Source Status",
+            "type": "string"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "starts_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Starts At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "target_audience": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Audience"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "track_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Track Keys",
+            "type": "array"
+          },
+          "venue_format": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Venue Format"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "event_type",
+          "organizer",
+          "status",
+          "conditions",
+          "source_url",
+          "source_status",
+          "source_checked_at",
+          "track_keys",
+          "recommendation_reason",
+          "description",
+          "target_audience",
+          "prerequisites",
+          "program",
+          "expected_result",
+          "participation_rules",
+          "venue_format",
+          "timezone",
+          "starts_at",
+          "ends_at",
+          "deadline_at",
+          "rewards"
+        ],
+        "title": "EventDetailView",
+        "type": "object"
+      },
+      "EventProgramStageView": {
+        "properties": {
+          "day": {
+            "title": "Day",
+            "type": "string"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "day",
+          "title",
+          "detail"
+        ],
+        "title": "EventProgramStageView",
+        "type": "object"
+      },
+      "EventRewardView": {
+        "properties": {
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "note": {
+            "title": "Note",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "label",
+          "note"
+        ],
+        "title": "EventRewardView",
+        "type": "object"
+      },
       "EventView": {
         "properties": {
           "conditions": {
@@ -5408,6 +5684,106 @@
           "message_id"
         ],
         "title": "ReadMessageRequest",
+        "type": "object"
+      },
+      "RegistrationAggregateView": {
+        "properties": {
+          "computed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed At"
+          },
+          "confirmed_registrations": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confirmed Registrations"
+          },
+          "contains_personal_data": {
+            "title": "Contains Personal Data",
+            "type": "boolean"
+          },
+          "counter_state": {
+            "title": "Counter State",
+            "type": "string"
+          },
+          "definition": {
+            "title": "Definition",
+            "type": "string"
+          },
+          "definition_text": {
+            "title": "Definition Text",
+            "type": "string"
+          },
+          "definition_version": {
+            "title": "Definition Version",
+            "type": "integer"
+          },
+          "event_key": {
+            "title": "Event Key",
+            "type": "string"
+          },
+          "participations": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participations"
+          },
+          "source_checked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Checked At"
+          },
+          "started_registrations": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started Registrations"
+          }
+        },
+        "required": [
+          "event_key",
+          "started_registrations",
+          "confirmed_registrations",
+          "participations",
+          "counter_state",
+          "computed_at",
+          "source_checked_at",
+          "definition",
+          "definition_version",
+          "definition_text",
+          "contains_personal_data"
+        ],
+        "title": "RegistrationAggregateView",
         "type": "object"
       },
       "RepeatTaskRequest": {
@@ -9907,6 +10283,90 @@
           }
         },
         "summary": "Event Catalog"
+      }
+    },
+    "/api/v1/ecosystem/events/{event_key}": {
+      "get": {
+        "operationId": "event_detail_api_v1_ecosystem_events__event_key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_key",
+            "required": true,
+            "schema": {
+              "title": "Event Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventDetailView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Event Detail",
+        "tags": [
+          "events"
+        ]
+      }
+    },
+    "/api/v1/ecosystem/events/{event_key}/registration": {
+      "get": {
+        "operationId": "event_registration_aggregate_api_v1_ecosystem_events__event_key__registration_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "event_key",
+            "required": true,
+            "schema": {
+              "title": "Event Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationAggregateView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Event Registration Aggregate",
+        "tags": [
+          "events"
+        ]
       }
     },
     "/api/v1/hr/candidates": {

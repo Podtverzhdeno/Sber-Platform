@@ -688,6 +688,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/ecosystem/events/{event_key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Event Detail */
+        get: operations["event_detail_api_v1_ecosystem_events__event_key__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ecosystem/events/{event_key}/registration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Event Registration Aggregate */
+        get: operations["event_registration_aggregate_api_v1_ecosystem_events__event_key__registration_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hr/candidates": {
         parameters: {
             query?: never;
@@ -3244,6 +3278,73 @@ export interface components {
             /** Unknown Items */
             unknown_items: number;
         };
+        /** EventDetailView */
+        EventDetailView: {
+            /** Conditions */
+            conditions: string;
+            /** Deadline At */
+            deadline_at: string | null;
+            /** Description */
+            description: string | null;
+            /** Ends At */
+            ends_at: string | null;
+            /** Event Type */
+            event_type: string;
+            /** Expected Result */
+            expected_result: string | null;
+            /** Key */
+            key: string;
+            /** Organizer */
+            organizer: string;
+            /** Participation Rules */
+            participation_rules: string | null;
+            /** Prerequisites */
+            prerequisites: string[] | null;
+            /** Program */
+            program: components["schemas"]["EventProgramStageView"][] | null;
+            /** Recommendation Reason */
+            recommendation_reason: string;
+            /** Rewards */
+            rewards: components["schemas"]["EventRewardView"][] | null;
+            /** Source Checked At */
+            source_checked_at: string | null;
+            /** Source Status */
+            source_status: string;
+            /** Source Url */
+            source_url: string;
+            /** Starts At */
+            starts_at: string | null;
+            /** Status */
+            status: string;
+            /** Target Audience */
+            target_audience: string | null;
+            /** Timezone */
+            timezone: string | null;
+            /** Title */
+            title: string;
+            /** Track Keys */
+            track_keys: string[];
+            /** Venue Format */
+            venue_format: string | null;
+        };
+        /** EventProgramStageView */
+        EventProgramStageView: {
+            /** Day */
+            day: string;
+            /** Detail */
+            detail: string;
+            /** Title */
+            title: string;
+        };
+        /** EventRewardView */
+        EventRewardView: {
+            /** Kind */
+            kind: string;
+            /** Label */
+            label: string;
+            /** Note */
+            note: string;
+        };
         /** EventView */
         EventView: {
             /** Conditions */
@@ -4283,6 +4384,31 @@ export interface components {
              * Format: uuid
              */
             message_id: string;
+        };
+        /** RegistrationAggregateView */
+        RegistrationAggregateView: {
+            /** Computed At */
+            computed_at: string | null;
+            /** Confirmed Registrations */
+            confirmed_registrations: number | null;
+            /** Contains Personal Data */
+            contains_personal_data: boolean;
+            /** Counter State */
+            counter_state: string;
+            /** Definition */
+            definition: string;
+            /** Definition Text */
+            definition_text: string;
+            /** Definition Version */
+            definition_version: number;
+            /** Event Key */
+            event_key: string;
+            /** Participations */
+            participations: number | null;
+            /** Source Checked At */
+            source_checked_at: string | null;
+            /** Started Registrations */
+            started_registrations: number | null;
         };
         /** RepeatTaskRequest */
         RepeatTaskRequest: {
@@ -6478,6 +6604,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CursorPage_EventView_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    event_detail_api_v1_ecosystem_events__event_key__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EventDetailView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    event_registration_aggregate_api_v1_ecosystem_events__event_key__registration_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                event_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistrationAggregateView"];
                 };
             };
             /** @description Validation Error */

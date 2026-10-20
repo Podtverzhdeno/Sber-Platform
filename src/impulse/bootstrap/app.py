@@ -58,6 +58,9 @@ from impulse.bootstrap.logging import configure_logging
 from impulse.bootstrap.settings import Settings
 from impulse.bootstrap.static import install_spa_fallback
 from impulse.domain.notifications import Notification
+from impulse.events import ParticipantEventsService
+from impulse.events import router as participant_events_router
+from impulse.events.store import MemoryEventDetailStore, SqlEventDetailStore
 from impulse.infrastructure.competencies_store import SqlCompetencyEvidenceStore, SqlFrameworkStore
 from impulse.infrastructure.credentials_store import (
     SqlCertificateStore,
@@ -95,6 +98,7 @@ def create_app(
     ai_registry: ModelRegistry | None = None,
     buddy_service: BuddyConversationService | None = None,
     ai_suggestion_service: SuggestionService | None = None,
+    participant_events_service: ParticipantEventsService | None = None,
 ) -> FastAPI:
     """Build the HTTP application without import-time side effects."""
     runtime_settings = settings or Settings()
@@ -141,6 +145,13 @@ def create_app(
             )
         )
         ecosystem_service = EcosystemService(ecosystem_store)
+    if participant_events_service is None:
+        participant_events_store = (
+            SqlEventDetailStore(owned_database)
+            if owned_database is not None
+            else MemoryEventDetailStore()
+        )
+        participant_events_service = ParticipantEventsService(participant_events_store)
     if work_service is None:
         work_store = (
             SqlWorkStore(owned_database) if owned_database is not None else MemoryWorkStore()
@@ -265,6 +276,7 @@ def create_app(
     app.state.ai_registry = ai_registry
     app.state.buddy_service = buddy_service
     app.state.ai_suggestion_service = ai_suggestion_service
+    app.state.participant_events_service = participant_events_service
     app.add_middleware(RequestContextMiddleware)
     allowed_origins = (
         frozenset({str(runtime_settings.allowed_origin).rstrip("/")})
@@ -279,6 +291,7 @@ def create_app(
     install_error_handlers(app)
     app.include_router(health_router)
     app.include_router(api_v1_router)
+    app.include_router(participant_events_router, prefix="/api/v1")
     frontend_directory = Path("frontend/dist")
     if frontend_directory.is_dir():
         install_spa_fallback(app, frontend_directory)
