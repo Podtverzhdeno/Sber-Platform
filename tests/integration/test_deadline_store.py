@@ -10,12 +10,14 @@ import pytest
 from pydantic import SecretStr
 from sqlalchemy import select
 
+from impulse.application.deadline import DeadlineChangeService
 from impulse.application.identity import DemoAuthService
 from impulse.application.work import WorkService
 from impulse.bootstrap.app import create_app
 from impulse.bootstrap.demo_seed import seed_demo
 from impulse.bootstrap.settings import AppEnvironment, Settings
 from impulse.infrastructure.database import Database, async_database_url
+from impulse.infrastructure.deadline_store import SqlDeadlineChangeStore
 from impulse.infrastructure.identity_store import SqlIdentityStore
 from impulse.infrastructure.models.work import deadline_requests, task_terms_versions
 from impulse.infrastructure.work_store import SqlWorkStore
@@ -45,7 +47,12 @@ async def test_deadline_request_leaves_terms_until_approval() -> None:
         ttl_seconds=settings.session_ttl_seconds,
     )
     work_store = SqlWorkStore(database)
-    app = create_app(settings, auth_service=auth, work_service=WorkService(work_store))
+    app = create_app(
+        settings,
+        auth_service=auth,
+        work_service=WorkService(work_store),
+        deadline_service=DeadlineChangeService(SqlDeadlineChangeStore(database), work_store),
+    )
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=app), base_url="http://testserver"
     ) as client:
@@ -142,6 +149,16 @@ async def test_deadline_request_leaves_terms_until_approval() -> None:
         ).json()
         before_version = customer_detail["terms"]["version"]
 
+        async with database.sessions() as session:
+            before_terms = (
+                await session.execute(
+                    select(task_terms_versions)
+                    .where(task_terms_versions.c.task_id == task_id)
+                    .order_by(task_terms_versions.c.terms_version)
+                )
+            ).all()
+        before_terms_versions = [row.terms_version for row in before_terms]
+
         participant_login = await client.post(
             "/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}
         )
@@ -160,9 +177,11 @@ async def test_deadline_request_leaves_terms_until_approval() -> None:
         request_id = UUID(proposed.json()["id"])
 
         async with database.sessions() as session:
-            terms_rows = (
+            after_terms = (
                 await session.execute(
-                    select(task_terms_versions).where(task_terms_versions.c.task_id == task_id)
+                    select(task_terms_versions)
+                    .where(task_terms_versions.c.task_id == task_id)
+                    .order_by(task_terms_versions.c.terms_version)
                 )
             ).all()
             stored = (
@@ -171,9 +190,13 @@ async def test_deadline_request_leaves_terms_until_approval() -> None:
                 )
             ).one()
             assert stored.status == "pending"
-            assert [row.terms_version for row in terms_rows] == [before_version]
-            assert terms_rows[0].deadline_at.strftime("%Y-%m-%d") == "2026-11-01"
+            assert [row.terms_version for row in after_terms] == before_terms_versions
+            assert after_terms[-1].deadline_at.strftime("%Y-%m-%d") == "2026-11-01"
 
+        customer_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "customer-roman"}
+        )
+        customer_csrf = customer_login.json()["csrf_token"]
         approved = await client.post(
             f"/api/v1/customer/deadline-requests/{request_id}/decision",
             json={"approve": True, "comment": "Согласовано."},
@@ -191,7 +214,7 @@ async def test_deadline_request_leaves_terms_until_approval() -> None:
                 )
             ).all()
             assert [row.terms_version for row in terms_rows] == [
-                before_version,
+                *before_terms_versions,
                 before_version + 1,
             ]
             assert terms_rows[-1].deadline_at.strftime("%Y-%m-%d") == "2026-11-08"

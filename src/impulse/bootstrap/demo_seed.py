@@ -85,6 +85,7 @@ from impulse.infrastructure.models.work import (
     artifacts,
     assignments,
     contributions,
+    deadline_requests,
     projects,
     task_terms_versions,
     tasks,
@@ -1102,6 +1103,9 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
         )
         await session.execute(
             delete(task_terms_versions).where(task_terms_versions.c.data_origin == "demo_runtime")
+        )
+        await session.execute(
+            delete(deadline_requests).where(deadline_requests.c.data_origin == "demo_runtime")
         )
         await session.execute(
             delete(tasks).where(
