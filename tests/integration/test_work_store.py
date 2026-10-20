@@ -533,6 +533,10 @@ async def test_application_withdrawal_is_idempotent_and_blocked_after_acceptance
         assert accepted.status_code == 200
         assert accepted.json()["status"] == "staffed"
 
+        participant_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}
+        )
+        participant_csrf = participant_login.json()["csrf_token"]
         forbidden = await client.post(
             f"/api/v1/me/applications/{application_id}/withdraw",
             headers={"X-CSRF-Token": participant_csrf},
