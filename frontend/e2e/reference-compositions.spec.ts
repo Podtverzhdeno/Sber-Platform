@@ -119,6 +119,90 @@ const participantBase = {
   display_name: "Алекс Речной",
 };
 
+const catalogCards = [
+  {
+    key: "openspec-sdd",
+    title: "OpenSpec и SDD",
+    track_keys: ["python"],
+    source_url: "https://example.test/courses/openspec",
+    access_state: "available",
+    access_note: "Доступен в демо без регистрации во внешней LMS.",
+    completion_state: "not_started",
+    relevant: true,
+    relevance_reasons: [
+      "Связан с активными направлениями: python.",
+      "Закрывает незакрытый пробел: этап маршрута ещё не подтверждён.",
+    ],
+    recommendation_reason: "Этап «Освоить основу маршрута»: создать базу первой задачи.",
+    must_take: {
+      skill: "OpenSpec",
+      current_level: "базовый",
+      target_level: "уверенный",
+      projected_impact:
+        "Прогноз: курс ведёт к этапу «Освоить основу маршрута» траектории «Python-разработчик». Повышение применяется только после подтверждения checkpoint.",
+      explanation:
+        "Закрывает пробел навыка «OpenSpec»: сейчас «базовый», целевой уровень «уверенный».",
+    },
+    pending_verification_note: null,
+    verified_evidence: null,
+  },
+  {
+    key: "python-base",
+    title: "Python: основа",
+    track_keys: ["python"],
+    source_url: "https://example.test/courses/python",
+    access_state: "unavailable",
+    access_note: "Внешний курс пока не подключён; доступна исходная ссылка.",
+    completion_state: "reported",
+    relevant: true,
+    relevance_reasons: ["Связан с активными направлениями: python."],
+    recommendation_reason: "Этап «Освоить основу маршрута»: завершение отправлено на проверку.",
+    must_take: {
+      skill: "OpenSpec",
+      current_level: "базовый",
+      target_level: "уверенный",
+      projected_impact:
+        "Прогноз: курс ведёт к этапу «Освоить основу маршрута» траектории «Python-разработчик». Повышение применяется только после подтверждения checkpoint.",
+      explanation:
+        "Закрывает пробел навыка «OpenSpec»: сейчас «базовый», целевой уровень «уверенный».",
+    },
+    pending_verification_note:
+      "Завершение отправлено на проверку: повторно проходить тот же шаг не нужно, прогноз применится только после подтверждения.",
+    verified_evidence: null,
+  },
+  {
+    key: "agent-development",
+    title: "Агентная разработка",
+    track_keys: ["python"],
+    source_url: "https://example.test/courses/agents",
+    access_state: "prerequisite_not_met",
+    access_note: "Требуется подтверждённый prerequisite: OpenSpec и SDD.",
+    completion_state: "not_started",
+    relevant: false,
+    relevance_reasons: [],
+    recommendation_reason: "Общий курс каталога, не привязан к активной траектории.",
+    must_take: null,
+    pending_verification_note: null,
+    verified_evidence: null,
+  },
+  {
+    key: "greenhouse-esg",
+    title: "Отчётность ESG",
+    track_keys: ["data"],
+    source_url: "https://example.test/courses/esg",
+    access_state: "available",
+    access_note: "",
+    completion_state: "verified",
+    relevant: false,
+    relevance_reasons: [],
+    recommendation_reason:
+      "Этап «Освоить основу маршрута» подтверждён: доказательство в карточке курсов.",
+    must_take: null,
+    pending_verification_note: null,
+    verified_evidence: "course:greenhouse-esg",
+  },
+];
+
 interface ParticipantMocks {
   workStatus?: string;
   contributionSummary?: string | null;
@@ -349,6 +433,7 @@ async function installParticipantData(page: Page, options: ParticipantMocks = {}
     ],
   }));
   await page.route("**/api/v1/me/bootcamp/certificates", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/bootcamp/catalog", (route) => route.fulfill({ json: catalogCards }));
   await page.route("**/api/v1/marketplace/tasks", (route) => route.fulfill({ json: [{ task, terms, accepted_terms_version: 2 }] }));
   await page.route("**/api/v1/me/work", (route) => route.fulfill({
     json: [

@@ -1858,6 +1858,105 @@
         "title": "CorrectScoreRequest",
         "type": "object"
       },
+      "CourseCardView": {
+        "properties": {
+          "access_note": {
+            "title": "Access Note",
+            "type": "string"
+          },
+          "access_state": {
+            "title": "Access State",
+            "type": "string"
+          },
+          "completion_state": {
+            "title": "Completion State",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "must_take": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MustTakeView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pending_verification_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pending Verification Note"
+          },
+          "recommendation_reason": {
+            "title": "Recommendation Reason",
+            "type": "string"
+          },
+          "relevance_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Relevance Reasons",
+            "type": "array"
+          },
+          "relevant": {
+            "title": "Relevant",
+            "type": "boolean"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "track_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Track Keys",
+            "type": "array"
+          },
+          "verified_evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified Evidence"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "track_keys",
+          "source_url",
+          "access_state",
+          "access_note",
+          "completion_state",
+          "relevant",
+          "relevance_reasons",
+          "recommendation_reason",
+          "must_take",
+          "pending_verification_note",
+          "verified_evidence"
+        ],
+        "title": "CourseCardView",
+        "type": "object"
+      },
       "CourseCertificateView": {
         "properties": {
           "certificate_id": {
@@ -4397,6 +4496,56 @@
           "suppression_reason"
         ],
         "title": "MetricView",
+        "type": "object"
+      },
+      "MustTakeView": {
+        "properties": {
+          "current_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Level"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "projected_impact": {
+            "title": "Projected Impact",
+            "type": "string"
+          },
+          "skill": {
+            "examples": [
+              "OpenSpec / SDD"
+            ],
+            "title": "Skill",
+            "type": "string"
+          },
+          "target_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Level"
+          }
+        },
+        "required": [
+          "skill",
+          "current_level",
+          "target_level",
+          "projected_impact",
+          "explanation"
+        ],
+        "title": "MustTakeView",
         "type": "object"
       },
       "MuteRequest": {
@@ -11653,6 +11802,31 @@
           }
         },
         "summary": "Customer Brief Draft"
+      }
+    },
+    "/api/v1/me/bootcamp/catalog": {
+      "get": {
+        "operationId": "bootcamp_catalog_api_v1_me_bootcamp_catalog_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CourseCardView"
+                  },
+                  "title": "Response Bootcamp Catalog Api V1 Me Bootcamp Catalog Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Каталог Bootcamp карточкой на курс: доступ, завершение и «Надо пройти»",
+        "tags": [
+          "bootcamp"
+        ]
       }
     },
     "/api/v1/me/bootcamp/certificates": {
