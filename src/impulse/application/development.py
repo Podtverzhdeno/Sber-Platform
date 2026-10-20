@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import secrets
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from typing import Protocol, TypedDict
 from uuid import UUID, uuid4
 
 from impulse.api.errors import ApiError
+from impulse.domain.competencies import LEVEL_RANK, UNKNOWN_LEVEL
 from impulse.domain.development import (
     CompletionStatus,
     RoadmapMilestone,
@@ -182,6 +184,111 @@ def demo_course_certificate(person_id: UUID, certificate_id: UUID) -> CourseCert
         result="Подтверждённое завершение Bootcamp-курса",
         competencies=tuple(CompletedCompetency(*entry) for entry in registry["competencies"]),
         issued_at=datetime.now(UTC),
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class CourseMilestoneFact:
+    key: str
+    position: int
+    title: str
+    purpose: str
+    skill: str
+    completed: bool
+
+
+@dataclass(frozen=True, slots=True)
+class CourseCycleFact:
+    competency: str
+    current_level: str
+    projected_level: str
+    target_level: str
+    projected_confirmed: bool
+    evidence: str
+
+
+@dataclass(frozen=True, slots=True)
+class CourseDetailProjection:
+    course_key: str
+    title: str
+    source_url: str
+    availability: str
+    access_note: str
+    enrollment_status: str | None
+    verified: bool
+    specialization: str | None
+    program_version: str | None
+    workload_hours: int | None
+    program_competencies: tuple[tuple[str, str, str], ...]
+    objective: str | None
+    milestone_title: str | None
+    next_step: str | None
+    artifact: str | None
+    cycle: tuple[CourseCycleFact, ...]
+
+
+def strongest_level_label(first: str, second: str) -> str:
+    first_rank = LEVEL_RANK.get(first, -1)
+    second_rank = LEVEL_RANK.get(second, -1)
+    if first_rank >= second_rank:
+        return first if first_rank >= 0 else (second if second_rank >= 0 else UNKNOWN_LEVEL)
+    return second
+
+
+def build_course_detail(
+    course: CourseRecord,
+    *,
+    program: CourseCertificateSpec | None,
+    enrollment_status: CompletionStatus | None,
+    milestones: tuple[CourseMilestoneFact, ...],
+    skill_levels: Mapping[str, str] | None = None,
+    course_endorsed: Mapping[str, str] | None = None,
+) -> CourseDetailProjection:
+    """Assemble the explainable course-detail projection for one Bootcamp course."""
+    levels = dict(skill_levels or {})
+    endorsed = dict(course_endorsed or {})
+    first_milestone = milestones[0] if milestones else None
+    open_milestone = next((item for item in milestones if not item.completed), None)
+    competencies: tuple[tuple[str, str, str], ...] = (
+        tuple(program["competencies"]) if program is not None else ()
+    )
+    artifact = competencies[0][2] if competencies else None
+    cycle: list[CourseCycleFact] = []
+    for name, target_level, evidence in competencies:
+        confirmed = endorsed.get(name)
+        current = levels.get(name) or UNKNOWN_LEVEL
+        projected = (
+            strongest_level_label(current, confirmed)
+            if confirmed is not None
+            else strongest_level_label(current, target_level)
+        )
+        cycle.append(
+            CourseCycleFact(
+                competency=name,
+                current_level=current,
+                projected_level=projected,
+                target_level=target_level,
+                projected_confirmed=confirmed is not None,
+                evidence=evidence,
+            )
+        )
+    return CourseDetailProjection(
+        course_key=course.key,
+        title=course.title,
+        source_url=course.source_url,
+        availability=course.availability,
+        access_note=course.access_note,
+        enrollment_status=(enrollment_status.value if enrollment_status is not None else None),
+        verified=enrollment_status is CompletionStatus.VERIFIED,
+        specialization=(str(program["specialization"]) if program is not None else None),
+        program_version=(str(program["program_version"]) if program is not None else None),
+        workload_hours=(int(program["workload_hours"]) if program is not None else None),
+        program_competencies=competencies,
+        objective=(first_milestone.purpose if first_milestone is not None else None),
+        milestone_title=(first_milestone.title if first_milestone is not None else None),
+        next_step=(open_milestone.title if open_milestone is not None else None),
+        artifact=artifact,
+        cycle=tuple(cycle),
     )
 
 
@@ -421,6 +528,63 @@ class DevelopmentService:
                     )
                 )
         return tuple(result)
+
+    async def course_detail(self, actor: ActorContext, course_key: str) -> CourseDetailProjection:
+        self._participant(actor)
+        course = next((item for item in await self.store.courses() if item.key == course_key), None)
+        if course is None:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        program = COURSE_CERTIFICATE_REGISTRY.get(course_key)
+        enrolled = {
+            item.course_key: item.status for item in await self.store.enrollments(actor.person_id)
+        }
+        milestone_facts: list[CourseMilestoneFact] = []
+        for projection in await self.roadmaps(actor):
+            for milestone in projection.milestones:
+                if milestone.target_kind != "course" or milestone.target_key != course_key:
+                    continue
+                milestone_facts.append(
+                    CourseMilestoneFact(
+                        key=milestone.key,
+                        position=milestone.position,
+                        title=milestone.title,
+                        purpose=milestone.purpose,
+                        skill=milestone.skill,
+                        completed=milestone.key in projection.completed_keys,
+                    )
+                )
+        milestone_facts.sort(key=lambda item: (item.position, item.key))
+        skill_levels: dict[str, str] = {}
+        course_endorsed: dict[str, str] = {}
+        anchor_service = getattr(self, "competency_service", None)
+        if anchor_service is not None:
+            course_ref = f"course:{course_key}"
+            for report in await anchor_service.person_reports(actor.person_id):
+                for point in getattr(report, "skills", ()):
+                    title = point.skill.title
+                    existing = skill_levels.get(title)
+                    if existing is None or LEVEL_RANK.get(point.level, -1) > LEVEL_RANK.get(
+                        existing, -1
+                    ):
+                        skill_levels[title] = point.level
+                    for anchor in point.anchors:
+                        row = anchor.row
+                        if row.source_kind == "course" and row.source_ref == course_ref:
+                            mapped = course_endorsed.get(title)
+                            if mapped is None or LEVEL_RANK.get(row.level, -1) > LEVEL_RANK.get(
+                                mapped, -1
+                            ):
+                                course_endorsed[title] = row.level
+        return build_course_detail(
+            course,
+            program=program,
+            enrollment_status=enrolled.get(course_key),
+            milestones=tuple(milestone_facts),
+            skill_levels=skill_levels,
+            course_endorsed=course_endorsed,
+        )
 
     async def report_completion(self, actor: ActorContext, course_key: str) -> EnrollmentRecord:
         self._participant(actor)

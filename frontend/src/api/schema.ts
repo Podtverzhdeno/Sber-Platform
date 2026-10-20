@@ -381,6 +381,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/support-models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Support Model Catalog */
+        get: operations["support_model_catalog_api_v1_customer_support_models_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/tasks": {
         parameters: {
             query?: never;
@@ -1056,6 +1073,23 @@ export interface paths {
         put?: never;
         /** Report Completion */
         post: operations["report_completion_api_v1_me_courses__course_key__completion_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/courses/{course_key}/detail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Course Detail */
+        get: operations["course_detail_api_v1_me_courses__course_key__detail_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3007,6 +3041,56 @@ export interface components {
             /** Workload Hours */
             workload_hours: number;
         };
+        /** CourseCyclePointView */
+        CourseCyclePointView: {
+            /** Competency */
+            competency: string;
+            /** Current Level */
+            current_level: string;
+            /** Evidence */
+            evidence: string;
+            /** Projected Confirmed */
+            projected_confirmed: boolean;
+            /** Projected Level */
+            projected_level: string;
+            /** Target Level */
+            target_level: string;
+        };
+        /** CourseDetailView */
+        CourseDetailView: {
+            /** Access Note */
+            access_note: string;
+            /** Artifact */
+            artifact: string | null;
+            /** Availability */
+            availability: string;
+            /** Course Key */
+            course_key: string;
+            /** Cycle */
+            cycle: components["schemas"]["CourseCyclePointView"][];
+            /** Enrollment Status */
+            enrollment_status: string | null;
+            /** Milestone Title */
+            milestone_title: string | null;
+            /** Next Step */
+            next_step: string | null;
+            /** Objective */
+            objective: string | null;
+            /** Program Competencies */
+            program_competencies: string[][];
+            /** Program Version */
+            program_version: string | null;
+            /** Source Url */
+            source_url: string;
+            /** Specialization */
+            specialization: string | null;
+            /** Title */
+            title: string;
+            /** Verified */
+            verified: boolean;
+            /** Workload Hours */
+            workload_hours: number | null;
+        };
         /** CourseView */
         CourseView: {
             /** Access Note */
@@ -4885,11 +4969,39 @@ export interface components {
             /** Suggestion Id */
             suggestion_id: string;
         };
+        /** SupportCatalogView */
+        SupportCatalogView: {
+            /** Models */
+            models: components["schemas"]["SupportModelView"][];
+            /** Version */
+            version: number;
+        };
         /**
          * SupportMode
          * @enum {string}
          */
         SupportMode: "mentor" | "buddy" | "operator";
+        /** SupportModelView */
+        SupportModelView: {
+            /** Activities */
+            activities: string[];
+            /** Available */
+            available: boolean;
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Requires Assignee */
+            requires_assignee: boolean;
+            /** Response Time */
+            response_time: string;
+            /** Responsible */
+            responsible: string;
+            /** Restrictions */
+            restrictions: string[];
+            /** Unavailable Reason */
+            unavailable_reason: string | null;
+        };
         /** SupportRequest */
         SupportRequest: {
             /** Assignee Id */
@@ -6005,6 +6117,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CandidateReservationView"][];
+                };
+            };
+        };
+    };
+    support_model_catalog_api_v1_customer_support_models_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportCatalogView"];
                 };
             };
         };
@@ -7249,6 +7381,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CompletionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    course_detail_api_v1_me_courses__course_key__detail_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseDetailView"];
                 };
             };
             /** @description Validation Error */

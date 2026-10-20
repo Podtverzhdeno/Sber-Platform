@@ -67,6 +67,34 @@ class CourseView(BaseModel):
     rating_eligible: bool
 
 
+class CourseCyclePointView(BaseModel):
+    competency: str
+    current_level: str
+    projected_level: str
+    target_level: str
+    projected_confirmed: bool
+    evidence: str
+
+
+class CourseDetailView(BaseModel):
+    course_key: str
+    title: str
+    source_url: str
+    availability: str
+    access_note: str
+    enrollment_status: str | None
+    verified: bool
+    specialization: str | None
+    program_version: str | None
+    workload_hours: int | None
+    program_competencies: list[list[str]]
+    objective: str | None
+    milestone_title: str | None
+    next_step: str | None
+    artifact: str | None
+    cycle: list[CourseCyclePointView]
+
+
 class CompletionView(BaseModel):
     course_key: str
     status: CompletionStatus
@@ -201,6 +229,43 @@ async def courses(
             )
         )
     return result
+
+
+@router.get("/me/courses/{course_key}/detail", response_model=CourseDetailView)
+async def course_detail(
+    course_key: str,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+) -> CourseDetailView:
+    detail = await service.course_detail(authenticated.actor, course_key)
+    return CourseDetailView(
+        course_key=detail.course_key,
+        title=detail.title,
+        source_url=detail.source_url,
+        availability=detail.availability,
+        access_note=detail.access_note,
+        enrollment_status=detail.enrollment_status,
+        verified=detail.verified,
+        specialization=detail.specialization,
+        program_version=detail.program_version,
+        workload_hours=detail.workload_hours,
+        program_competencies=[list(entry) for entry in detail.program_competencies],
+        objective=detail.objective,
+        milestone_title=detail.milestone_title,
+        next_step=detail.next_step,
+        artifact=detail.artifact,
+        cycle=[
+            CourseCyclePointView(
+                competency=item.competency,
+                current_level=item.current_level,
+                projected_level=item.projected_level,
+                target_level=item.target_level,
+                projected_confirmed=item.projected_confirmed,
+                evidence=item.evidence,
+            )
+            for item in detail.cycle
+        ],
+    )
 
 
 @router.post("/me/courses/{course_key}/completion", response_model=CompletionView)

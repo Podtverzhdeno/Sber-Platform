@@ -49,6 +49,26 @@ test.beforeEach(async ({ page }) => {
       ],
     },
   }));
+  await page.route("**/api/v1/me/courses/*/detail", (route) => route.fulfill({
+    json: {
+      course_key: "python-base",
+      title: "Python: основа",
+      source_url: "https://example.test/python",
+      availability: "unavailable",
+      access_note: "Внешний курс пока не подключён; доступна исходная ссылка.",
+      enrollment_status: null,
+      verified: false,
+      specialization: "Python / Data / ML",
+      program_version: "1.0.0",
+      workload_hours: 40,
+      program_competencies: [["Синтаксис и идиомы Python", "базовый", "Итоговое задание курса"]],
+      objective: "Подготовиться к первому вкладу в направлении python.",
+      milestone_title: "Основа",
+      next_step: "Основа",
+      artifact: "Итоговое задание курса",
+      cycle: [{ competency: "Синтаксис и идиомы Python", current_level: "не подтверждено", projected_level: "базовый", target_level: "базовый", projected_confirmed: false, evidence: "Итоговое задание курса" }],
+    },
+  }));
   await page.route("**/api/v1/competency-evidence", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({ json: [] }));
 });
@@ -88,6 +108,9 @@ test("Bootcamp explains unavailable source, reported verification and streak", a
   await expect(page.getByText("Внешний курс пока не подключён; доступна исходная ссылка.")).toBeVisible();
   await page.getByRole("button", { name: "Открыть траекторию" }).click();
   await expect(page.getByRole("heading", { name: "Python: основа" })).toBeVisible();
+  await expect(page.getByTestId("course-competency-0")).toContainText("Прогноз: базовый");
+  await expect(page.getByTestId("course-competency-0")).toContainText("до подтверждения на checkpoint");
+  await expect(page.getByText("Подготовиться к первому вкладу в направлении python.")).toBeVisible();
   await expect(page.getByText("Checkpoint 3").first()).toBeVisible();
   await expect(page.getByRole("link", { name: /Открыть учебный материал/ })).toHaveAttribute("rel", "noopener noreferrer");
   await page.getByRole("button", { name: /Вернуться в Bootcamp/ }).click();

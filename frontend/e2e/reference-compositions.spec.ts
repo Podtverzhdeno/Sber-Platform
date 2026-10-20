@@ -321,6 +321,26 @@ async function installParticipantData(page: Page, options: ParticipantMocks = {}
       { key: "rag-mvp", title: "RAG: надёжный поиск по документам", track_keys: ["python-dev"], recommendation_reason: "Связан с текущим MVP проекта.", source_url: "https://education.sber.ru/rag", availability: "Открыт", access_note: "Практикум в среде платформы.", completion_status: null, rating_eligible: true },
     ],
   }));
+  await page.route(/\/api\/v1\/me\/courses\/[^/]+\/detail$/, (route) => route.fulfill({
+    json: {
+      course_key: "python-base",
+      title: "Основы Python для анализа данных",
+      source_url: "https://education.sber.ru/python-base",
+      availability: "Открыт",
+      access_note: "Доступен по подписке Impulse.",
+      enrollment_status: "active",
+      verified: false,
+      specialization: "Python / Data / ML",
+      program_version: "2.0.0",
+      workload_hours: 40,
+      program_competencies: [["Работа с табличными данными", "базовый", "Итоговое задание курса"]],
+      objective: "Собрать базу для первого вклада в реальный проект команды.",
+      milestone_title: "Курс Python для анализа данных",
+      next_step: "Практика в рабочем окружении",
+      artifact: "Ноутбук с подтверждённым исследованием",
+      cycle: [{ competency: "Работа с табличными данными", current_level: "не подтверждено", projected_level: "базовый", target_level: "базовый", projected_confirmed: false, evidence: "Итоговое задание курса" }],
+    },
+  }));
   await page.route("**/api/v1/me/learning/streak", (route) => route.fulfill({ json: { current_days: 3, qualified_dates: ["2026-10-16", "2026-10-17", "2026-10-18"], reason: "Учебная активность подтверждена." } }));
   await page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({
     json: [

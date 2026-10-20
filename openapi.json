@@ -1935,6 +1935,197 @@
         "title": "CourseCertificateView",
         "type": "object"
       },
+      "CourseCyclePointView": {
+        "properties": {
+          "competency": {
+            "title": "Competency",
+            "type": "string"
+          },
+          "current_level": {
+            "title": "Current Level",
+            "type": "string"
+          },
+          "evidence": {
+            "title": "Evidence",
+            "type": "string"
+          },
+          "projected_confirmed": {
+            "title": "Projected Confirmed",
+            "type": "boolean"
+          },
+          "projected_level": {
+            "title": "Projected Level",
+            "type": "string"
+          },
+          "target_level": {
+            "title": "Target Level",
+            "type": "string"
+          }
+        },
+        "required": [
+          "competency",
+          "current_level",
+          "projected_level",
+          "target_level",
+          "projected_confirmed",
+          "evidence"
+        ],
+        "title": "CourseCyclePointView",
+        "type": "object"
+      },
+      "CourseDetailView": {
+        "properties": {
+          "access_note": {
+            "title": "Access Note",
+            "type": "string"
+          },
+          "artifact": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact"
+          },
+          "availability": {
+            "title": "Availability",
+            "type": "string"
+          },
+          "course_key": {
+            "title": "Course Key",
+            "type": "string"
+          },
+          "cycle": {
+            "items": {
+              "$ref": "#/components/schemas/CourseCyclePointView"
+            },
+            "title": "Cycle",
+            "type": "array"
+          },
+          "enrollment_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enrollment Status"
+          },
+          "milestone_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Milestone Title"
+          },
+          "next_step": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Step"
+          },
+          "objective": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objective"
+          },
+          "program_competencies": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Program Competencies",
+            "type": "array"
+          },
+          "program_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Program Version"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "specialization": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialization"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          },
+          "workload_hours": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workload Hours"
+          }
+        },
+        "required": [
+          "course_key",
+          "title",
+          "source_url",
+          "availability",
+          "access_note",
+          "enrollment_status",
+          "verified",
+          "specialization",
+          "program_version",
+          "workload_hours",
+          "program_competencies",
+          "objective",
+          "milestone_title",
+          "next_step",
+          "artifact",
+          "cycle"
+        ],
+        "title": "CourseDetailView",
+        "type": "object"
+      },
       "CourseView": {
         "properties": {
           "access_note": {
@@ -7082,6 +7273,27 @@
         "title": "SuggestionDismissRequest",
         "type": "object"
       },
+      "SupportCatalogView": {
+        "properties": {
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/SupportModelView"
+            },
+            "title": "Models",
+            "type": "array"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "models"
+        ],
+        "title": "SupportCatalogView",
+        "type": "object"
+      },
       "SupportMode": {
         "enum": [
           "mentor",
@@ -7090,6 +7302,72 @@
         ],
         "title": "SupportMode",
         "type": "string"
+      },
+      "SupportModelView": {
+        "properties": {
+          "activities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Activities",
+            "type": "array"
+          },
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "requires_assignee": {
+            "title": "Requires Assignee",
+            "type": "boolean"
+          },
+          "response_time": {
+            "title": "Response Time",
+            "type": "string"
+          },
+          "responsible": {
+            "title": "Responsible",
+            "type": "string"
+          },
+          "restrictions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Restrictions",
+            "type": "array"
+          },
+          "unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unavailable Reason"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "responsible",
+          "activities",
+          "response_time",
+          "restrictions",
+          "available",
+          "unavailable_reason",
+          "requires_assignee"
+        ],
+        "title": "SupportModelView",
+        "type": "object"
       },
       "SupportRequest": {
         "properties": {
@@ -9263,6 +9541,24 @@
         "summary": "Saved Candidates"
       }
     },
+    "/api/v1/customer/support-models": {
+      "get": {
+        "operationId": "support_model_catalog_api_v1_customer_support_models_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportCatalogView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Support Model Catalog"
+      }
+    },
     "/api/v1/customer/tasks": {
       "get": {
         "operationId": "customer_tasks_api_v1_customer_tasks_get",
@@ -11256,6 +11552,45 @@
           }
         },
         "summary": "Report Completion"
+      }
+    },
+    "/api/v1/me/courses/{course_key}/detail": {
+      "get": {
+        "operationId": "course_detail_api_v1_me_courses__course_key__detail_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_key",
+            "required": true,
+            "schema": {
+              "title": "Course Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseDetailView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Course Detail"
       }
     },
     "/api/v1/me/courses/{course_key}/learning-days": {
