@@ -88,6 +88,7 @@ Seed использует UUIDv5 namespace и `DEMO_SEED_VERSION`. Каждый 
 - `courses`
 - `course_certificates`
 - `credentials`
+- `deadline_requests`
 - `domain_events`
 - `enrollments`
 - `events`

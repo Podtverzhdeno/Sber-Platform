@@ -14,12 +14,17 @@ from impulse.api.health import router as health_router
 from impulse.api.request_context import RequestContextMiddleware
 from impulse.api.security import SecurityMiddleware
 from impulse.api.v1 import router as api_v1_router
+from impulse.api.v1.deadline import router as deadline_router
 from impulse.application.buddy import BuddyConversationService
 from impulse.application.competencies import (
     CompetencyService,
     MemoryCompetencyEvidenceStore,
     MemoryFrameworkStore,
     install_demo_competencies,
+)
+from impulse.application.deadline import (
+    DeadlineChangeService,
+    MemoryDeadlineChangeStore,
 )
 from impulse.application.development import (
     DevelopmentService,
@@ -67,6 +72,7 @@ from impulse.infrastructure.credentials_store import (
     SqlProjectCredentialStore,
 )
 from impulse.infrastructure.database import Database
+from impulse.infrastructure.deadline_store import SqlDeadlineChangeStore
 from impulse.infrastructure.development_store import SqlDevelopmentStore
 from impulse.infrastructure.ecosystem_store import SqlEcosystemStore
 from impulse.infrastructure.identity_store import SqlIdentityStore
@@ -99,6 +105,7 @@ def create_app(
     buddy_service: BuddyConversationService | None = None,
     ai_suggestion_service: SuggestionService | None = None,
     participant_events_service: ParticipantEventsService | None = None,
+    deadline_service: DeadlineChangeService | None = None,
 ) -> FastAPI:
     """Build the HTTP application without import-time side effects."""
     runtime_settings = settings or Settings()
@@ -222,6 +229,16 @@ def create_app(
             )
         )
         notifications_service = NotificationFeedService(notifications_store)
+    if deadline_service is None:
+        deadline_work_store = work_service.store
+        deadline_store = (
+            SqlDeadlineChangeStore(owned_database)
+            if owned_database is not None
+            else MemoryDeadlineChangeStore(deadline_work_store)
+        )
+        deadline_service = DeadlineChangeService(
+            deadline_store, deadline_work_store, notifications_service
+        )
     if search_service is None:
         search_service = SearchService(
             work_service.store,
@@ -271,6 +288,7 @@ def create_app(
     app.state.operations_service = operations_service
     app.state.messaging_service = messaging_service
     app.state.notifications_service = notifications_service
+    app.state.deadline_service = deadline_service
     app.state.search_service = search_service
     app.state.competency_service = competency_service
     app.state.ai_registry = ai_registry
@@ -291,6 +309,7 @@ def create_app(
     install_error_handlers(app)
     app.include_router(health_router)
     app.include_router(api_v1_router)
+    app.include_router(deadline_router, prefix="/api/v1")
     app.include_router(participant_events_router, prefix="/api/v1")
     frontend_directory = Path("frontend/dist")
     if frontend_directory.is_dir():

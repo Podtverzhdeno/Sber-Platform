@@ -15,6 +15,7 @@ class NotificationKind(StrEnum):
     APPLICATION = "application"
     REVIEW = "review"
     CHECKPOINT = "checkpoint"
+    DEADLINE = "deadline"
     CERTIFICATE = "certificate"
     SYSTEM = "system"
 

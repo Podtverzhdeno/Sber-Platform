@@ -67,6 +67,18 @@ assignments = domain_table(
     uuid_field("application_id", "applications.id"),
     uniques=(("task_id", "person_id"), ("application_id",)),
 )
+deadline_requests = domain_table(
+    "deadline_requests",
+    uuid_field("task_id", "tasks.id"),
+    uuid_field("requested_by", "persons.id"),
+    uuid_field("addressee_id", "persons.id"),
+    integer_field("base_terms_version"),
+    typed_field("proposed_deadline_at", DateTime(timezone=True)),
+    string_field("reason", 1000),
+    string_field("impact", 1000),
+    typed_field("decided_at", DateTime(timezone=True), nullable=True),
+    string_field("decision_comment", 1000, nullable=True),
+)
 contributions = domain_table(
     "contributions",
     uuid_field("assignment_id", "assignments.id"),
