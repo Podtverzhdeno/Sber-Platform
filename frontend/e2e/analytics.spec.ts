@@ -115,4 +115,39 @@ test("documents panel reveals verification and lands exactly on certificate, pro
   await expect(page).toHaveURL(/\/workspace\/2$/);
 });
 
+test("mobile layout in light theme keeps verification and plan deep links exact", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route("**/api/v1/me/theme", (route) => route.fulfill({ json: actor }));
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  const themeToggle = page.locator(".theme-toggle");
+  await themeToggle.click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(themeToggle).toHaveAttribute("aria-pressed", "false");
+
+  const openAnalytics = async (): Promise<void> => {
+    await page.getByRole("button", { name: "Меню", exact: true }).click();
+    await expect(page.getByRole("button", { name: "Меню", exact: true })).toHaveAttribute("aria-expanded", "true");
+    await page.getByRole("link", { name: "Аналитика" }).click();
+  };
+
+  await openAnalytics();
+  const documents = page.getByTestId("document-item");
+  await expect(documents.filter({ hasText: "Проверка прототипа на данных" })).toBeVisible();
+  await documents.filter({ hasText: "Проверка прототипа на данных" }).getByRole("button", { name: "Проверить" }).click();
+  const projectViewer = page.getByTestId("document-viewer").first();
+  await projectViewer.getByRole("link", { name: "Открыть публичную проверку проектного credential" }).click();
+  await expect(page).toHaveURL(/\/verify\/projects\/ver-proj-1$/);
+  await expect(page.getByRole("heading", { name: "Проверка прототипа на данных" })).toBeVisible();
+
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await openAnalytics();
+  await page.getByRole("button", { name: /До следующего уровня/ }).click();
+  const lastPlanStep = page.getByTestId("plan-step-2");
+  await expect(lastPlanStep).toHaveAttribute("href", "/workspace/2");
+  await lastPlanStep.click();
+  await expect(page).toHaveURL(/\/workspace\/2$/);
+});
+
 
