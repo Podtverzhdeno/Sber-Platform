@@ -316,6 +316,11 @@ def _status_md_as_dict(path: Path, task_id: str) -> dict[str, Any] | None:
             continue
         key, value = item.group(1), item.group(2).strip()
         if key in _STATUS_MD_SCALAR_FIELDS and value:
+            if key == "status":
+                # Older manually-created claims sometimes annotate the status,
+                # for example: "REVIEW (backend scope)". The lifecycle value
+                # is the first token; the annotation remains in status.md.
+                value = value.split(maxsplit=1)[0].strip("()`")
             if key == "lane" and value in ("none", "-"):
                 fields["lane"] = None
             else:
@@ -331,6 +336,21 @@ def _status_md_as_dict(path: Path, task_id: str) -> dict[str, Any] | None:
     list_keys = set(_STATUS_MD_LIST_FIELDS.values())
     for key in list_keys:
         fields.setdefault(key, [])
+    handoff_match = re.search(
+        r"(?ims)^## (?:[\w -]+ )?handoff\s*$\s*(.+?)(?=^##\s|\Z)",
+        text,
+    )
+    if fields.get("status") == "REVIEW" and handoff_match is not None:
+        handoff = handoff_match.group(1).strip()
+        has_inline_value = re.search(
+            r"(?m)^-\s+(?:changed_files|commands_run|passed|failed_or_not_run|risks|"
+            r"next_safe_step|note):\s*(?!\[\]\s*$)\S.+$",
+            handoff,
+        )
+        has_list_value = re.search(r"(?m)^\s{2,}[-*]\s+\S", handoff)
+        has_json_value = "{" in handoff and "}" in handoff
+        if has_inline_value or has_list_value or has_json_value:
+            fields["review"] = {"legacy_handoff": handoff}
     return fields
 
 

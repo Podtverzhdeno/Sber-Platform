@@ -45,6 +45,32 @@ def test_board_survives_non_numeric_claim_directory(root: Path) -> None:
     assert rows["9.3"][2] == "session-z"
 
 
+def test_legacy_review_claim_with_handoff_can_be_approved(root: Path) -> None:
+    claim_dir = root / ".agents" / "coordination" / "claims" / "9.3.lock"
+    claim_dir.mkdir()
+    (claim_dir / "status.md").write_text(
+        "# Claim 9.3\n\n"
+        "- session_id: legacy-worker\n"
+        "- status: REVIEW (frontend scope)\n"
+        "- write_scope:\n"
+        "  - feature/legacy\n"
+        "\n## Owner feedback handoff\n\n"
+        "- changed_files:\n"
+        "  - feature/legacy.py\n"
+        "- passed:\n"
+        "  - targeted tests\n",
+        encoding="utf-8",
+    )
+
+    approved = run_cli_inproc(
+        root,
+        ["approve", "--task", "9.3", "--reviewer", "independent-reviewer"],
+    )
+
+    assert approved.ok, approved.stderr
+    assert checkbox_count(tasks_md_text(root), "9.3", checked=True) == 1
+
+
 def test_board_lists_statuses_owners_dependencies_heartbeat(root: Path) -> None:
     ready = run_cli_inproc(
         root, claim_args("9.3", "session-alpha", scope="feature/approach", lane="messenger")
