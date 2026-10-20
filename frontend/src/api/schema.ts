@@ -347,6 +347,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/deadline-requests/{request_id}/decision": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decide Deadline Change */
+        post: operations["decide_deadline_change_api_v1_customer_deadline_requests__request_id__decision_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/projects/{project_key}/tasks": {
         parameters: {
             query?: never;
@@ -373,6 +390,23 @@ export interface paths {
         };
         /** Saved Candidates */
         get: operations["saved_candidates_api_v1_customer_saved_candidates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/support-models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Support Model Catalog */
+        get: operations["support_model_catalog_api_v1_customer_support_models_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -443,6 +477,23 @@ export interface paths {
         put?: never;
         /** Add Checkpoint */
         post: operations["add_checkpoint_api_v1_customer_tasks__task_id__checkpoints_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/tasks/{task_id}/deadline-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Customer Deadline Requests */
+        get: operations["customer_deadline_requests_api_v1_customer_tasks__task_id__deadline_requests_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -920,6 +971,24 @@ export interface paths {
         put?: never;
         /** Submit Contribution */
         post: operations["submit_contribution_api_v1_me_assignments__assignment_id__contributions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/assignments/{assignment_id}/deadline-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Deadline Requests */
+        get: operations["my_deadline_requests_api_v1_me_assignments__assignment_id__deadline_requests_get"];
+        put?: never;
+        /** Propose Deadline Change */
+        post: operations["propose_deadline_change_api_v1_me_assignments__assignment_id__deadline_requests_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3237,6 +3306,72 @@ export interface components {
          * @enum {string}
          */
         DataClass: "public" | "demo_synthetic" | "personal_minimal" | "internal_business" | "sensitive_personal" | "secret";
+        /** DeadlineChangeDecision */
+        DeadlineChangeDecision: {
+            /** Approve */
+            approve: boolean;
+            /** Comment */
+            comment?: string | null;
+        };
+        /** DeadlineChangeProposal */
+        DeadlineChangeProposal: {
+            /** Base Terms Version */
+            base_terms_version: number;
+            /**
+             * Impact
+             * @default
+             */
+            impact: string;
+            /**
+             * Proposed Deadline At
+             * Format: date-time
+             */
+            proposed_deadline_at: string;
+            /** Reason */
+            reason: string;
+        };
+        /** DeadlineChangeView */
+        DeadlineChangeView: {
+            /**
+             * Addressee Id
+             * Format: uuid
+             */
+            addressee_id: string;
+            /** Base Terms Version */
+            base_terms_version: number;
+            /** Created At */
+            created_at: string | null;
+            /** Decided At */
+            decided_at: string | null;
+            /** Decision Comment */
+            decision_comment: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Impact */
+            impact: string;
+            /**
+             * Proposed Deadline At
+             * Format: date-time
+             */
+            proposed_deadline_at: string;
+            /** Reason */
+            reason: string;
+            /**
+             * Requested By
+             * Format: uuid
+             */
+            requested_by: string;
+            /** Status */
+            status: string;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+        };
         /** DecideInvitationRequest */
         DecideInvitationRequest: {
             /** Accepted */
@@ -4969,11 +5104,39 @@ export interface components {
             /** Suggestion Id */
             suggestion_id: string;
         };
+        /** SupportCatalogView */
+        SupportCatalogView: {
+            /** Models */
+            models: components["schemas"]["SupportModelView"][];
+            /** Version */
+            version: number;
+        };
         /**
          * SupportMode
          * @enum {string}
          */
         SupportMode: "mentor" | "buddy" | "operator";
+        /** SupportModelView */
+        SupportModelView: {
+            /** Activities */
+            activities: string[];
+            /** Available */
+            available: boolean;
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Requires Assignee */
+            requires_assignee: boolean;
+            /** Response Time */
+            response_time: string;
+            /** Responsible */
+            responsible: string;
+            /** Restrictions */
+            restrictions: string[];
+            /** Unavailable Reason */
+            unavailable_reason: string | null;
+        };
         /** SupportRequest */
         SupportRequest: {
             /** Assignee Id */
@@ -6036,6 +6199,43 @@ export interface operations {
             };
         };
     };
+    decide_deadline_change_api_v1_customer_deadline_requests__request_id__decision_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeadlineChangeDecision"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeadlineChangeView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_task_api_v1_customer_projects__project_key__tasks_post: {
         parameters: {
             query?: never;
@@ -6089,6 +6289,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CandidateReservationView"][];
+                };
+            };
+        };
+    };
+    support_model_catalog_api_v1_customer_support_models_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportCatalogView"];
                 };
             };
         };
@@ -6199,6 +6419,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CheckpointView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    customer_deadline_requests_api_v1_customer_tasks__task_id__deadline_requests_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeadlineChangeView"][];
                 };
             };
             /** @description Validation Error */
@@ -7087,6 +7338,74 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ContributionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_deadline_requests_api_v1_me_assignments__assignment_id__deadline_requests_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeadlineChangeView"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    propose_deadline_change_api_v1_me_assignments__assignment_id__deadline_requests_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeadlineChangeProposal"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeadlineChangeView"];
                 };
             };
             /** @description Validation Error */

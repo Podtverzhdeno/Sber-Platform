@@ -2578,6 +2578,160 @@
         "title": "DataClass",
         "type": "string"
       },
+      "DeadlineChangeDecision": {
+        "properties": {
+          "approve": {
+            "title": "Approve",
+            "type": "boolean"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          }
+        },
+        "required": [
+          "approve"
+        ],
+        "title": "DeadlineChangeDecision",
+        "type": "object"
+      },
+      "DeadlineChangeProposal": {
+        "properties": {
+          "base_terms_version": {
+            "minimum": 1.0,
+            "title": "Base Terms Version",
+            "type": "integer"
+          },
+          "impact": {
+            "default": "",
+            "maxLength": 1000,
+            "title": "Impact",
+            "type": "string"
+          },
+          "proposed_deadline_at": {
+            "format": "date-time",
+            "title": "Proposed Deadline At",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "proposed_deadline_at",
+          "reason",
+          "base_terms_version"
+        ],
+        "title": "DeadlineChangeProposal",
+        "type": "object"
+      },
+      "DeadlineChangeView": {
+        "properties": {
+          "addressee_id": {
+            "format": "uuid",
+            "title": "Addressee Id",
+            "type": "string"
+          },
+          "base_terms_version": {
+            "title": "Base Terms Version",
+            "type": "integer"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decision_comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision Comment"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "impact": {
+            "title": "Impact",
+            "type": "string"
+          },
+          "proposed_deadline_at": {
+            "format": "date-time",
+            "title": "Proposed Deadline At",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "requested_by": {
+            "format": "uuid",
+            "title": "Requested By",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "task_id": {
+            "format": "uuid",
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "task_id",
+          "requested_by",
+          "addressee_id",
+          "base_terms_version",
+          "proposed_deadline_at",
+          "reason",
+          "impact",
+          "status",
+          "decision_comment",
+          "decided_at",
+          "created_at"
+        ],
+        "title": "DeadlineChangeView",
+        "type": "object"
+      },
       "DecideInvitationRequest": {
         "properties": {
           "accepted": {
@@ -7273,6 +7427,27 @@
         "title": "SuggestionDismissRequest",
         "type": "object"
       },
+      "SupportCatalogView": {
+        "properties": {
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/SupportModelView"
+            },
+            "title": "Models",
+            "type": "array"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "models"
+        ],
+        "title": "SupportCatalogView",
+        "type": "object"
+      },
       "SupportMode": {
         "enum": [
           "mentor",
@@ -7281,6 +7456,72 @@
         ],
         "title": "SupportMode",
         "type": "string"
+      },
+      "SupportModelView": {
+        "properties": {
+          "activities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Activities",
+            "type": "array"
+          },
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "requires_assignee": {
+            "title": "Requires Assignee",
+            "type": "boolean"
+          },
+          "response_time": {
+            "title": "Response Time",
+            "type": "string"
+          },
+          "responsible": {
+            "title": "Responsible",
+            "type": "string"
+          },
+          "restrictions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Restrictions",
+            "type": "array"
+          },
+          "unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unavailable Reason"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "responsible",
+          "activities",
+          "response_time",
+          "restrictions",
+          "available",
+          "unavailable_reason",
+          "requires_assignee"
+        ],
+        "title": "SupportModelView",
+        "type": "object"
       },
       "SupportRequest": {
         "properties": {
@@ -9367,6 +9608,72 @@
         "summary": "Decide Contribution"
       }
     },
+    "/api/v1/customer/deadline-requests/{request_id}/decision": {
+      "post": {
+        "operationId": "decide_deadline_change_api_v1_customer_deadline_requests__request_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Request Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeadlineChangeDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeadlineChangeView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide Deadline Change"
+      }
+    },
     "/api/v1/customer/projects/{project_key}/tasks": {
       "post": {
         "operationId": "create_task_api_v1_customer_projects__project_key__tasks_post",
@@ -9452,6 +9759,24 @@
           }
         },
         "summary": "Saved Candidates"
+      }
+    },
+    "/api/v1/customer/support-models": {
+      "get": {
+        "operationId": "support_model_catalog_api_v1_customer_support_models_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportCatalogView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Support Model Catalog"
       }
     },
     "/api/v1/customer/tasks": {
@@ -9624,6 +9949,50 @@
           }
         },
         "summary": "Add Checkpoint"
+      }
+    },
+    "/api/v1/customer/tasks/{task_id}/deadline-requests": {
+      "get": {
+        "operationId": "customer_deadline_requests_api_v1_customer_tasks__task_id__deadline_requests_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeadlineChangeView"
+                  },
+                  "title": "Response Customer Deadline Requests Api V1 Customer Tasks  Task Id  Deadline Requests Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Customer Deadline Requests"
       }
     },
     "/api/v1/customer/tasks/{task_id}/invitations": {
@@ -11056,6 +11425,114 @@
           }
         },
         "summary": "Submit Contribution"
+      }
+    },
+    "/api/v1/me/assignments/{assignment_id}/deadline-requests": {
+      "get": {
+        "operationId": "my_deadline_requests_api_v1_me_assignments__assignment_id__deadline_requests_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DeadlineChangeView"
+                  },
+                  "title": "Response My Deadline Requests Api V1 Me Assignments  Assignment Id  Deadline Requests Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "My Deadline Requests"
+      },
+      "post": {
+        "operationId": "propose_deadline_change_api_v1_me_assignments__assignment_id__deadline_requests_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeadlineChangeProposal"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeadlineChangeView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Propose Deadline Change"
       }
     },
     "/api/v1/me/assignments/{assignment_id}/start": {

@@ -40,6 +40,7 @@ export type RuntimeApiPath =
   | `/api/v1/me/tasks/${string}/invitation`
   | `/api/v1/me/assignments/${string}/start`
   | `/api/v1/me/assignments/${string}/contributions`
+  | `/api/v1/me/assignments/${string}/deadline-requests`
   | `/api/v1/customer/tasks/${string}/participant-preview`
   | `/api/v1/customer/tasks/${string}`
   | `/api/v1/customer/contributions/${string}/decision`
@@ -56,6 +57,8 @@ export type RuntimeApiPath =
   | `/api/v1/customer/tasks/${string}/invitations/${string}/revoke`
   | `/api/v1/customer/tasks/${string}/applications`
   | `/api/v1/customer/applications/${string}/accept`
+  | `/api/v1/customer/deadline-requests/${string}/decision`
+  | `/api/v1/customer/tasks/${string}/deadline-requests`
   | "/api/v1/me/bootcamp/certificates"
   | `/api/v1/me/bootcamp/certificates/${string}`
   | `/api/v1/bootcamp/certificates/${string}`
