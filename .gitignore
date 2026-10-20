@@ -17,6 +17,7 @@ dist/
 build/
 *.egg-info/
 frontend/node_modules/
+.railway/node_modules/
 frontend/dist/
 frontend/coverage/
 frontend/playwright-report/
