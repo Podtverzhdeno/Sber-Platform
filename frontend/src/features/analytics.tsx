@@ -3,6 +3,7 @@ import { useState, type CSSProperties } from "react";
 
 import { apiRequest } from "../api/client";
 import { Badge, StatePanel } from "../components/ui";
+import "./analytics-growth.css";
 
 type Stage = { key: string; title: string; status: "completed" | "in_progress" | "not_started" | "unknown"; completed: boolean; count: number };
 type Earnings = { calculated: string; approved: string; paid: string; failed: string; currency: string | null; unknown_items: number };
@@ -10,6 +11,9 @@ type Analytics = { stages: Stage[]; successful: boolean; next_action: string; ea
 type Role = "mentor" | "customer" | "manager" | "hr" | "operator";
 type Metric = { key: string; label: string; numerator: number; denominator: number; value: string | null; unit: "percent" | "count"; period_start: string; period_end: string; cohort: string; freshness: "fresh" | "stale" | "unknown"; definition: string; suppressed: boolean; suppression_reason: string | null };
 type RoleAnalyticsData = { role: Role; metrics: Metric[] };
+type GrowthSkill = { skill_key: string; title: string; current_level: string; target_level: string; known: boolean };
+type GrowthTrajectory = { track_key: string; track_title: string; policy_version: number; readiness_skills: GrowthSkill[]; readiness: { percent: number | null; coverage: number; partial: boolean }; completion: { percent: number | null; coverage: number; partial: boolean } };
+type GrowthSnapshot = { snapshot_id: string; generated_at: string; actor_timezone: string; freshness: { known: boolean; latest_observed_at: string | null }; trajectories: GrowthTrajectory[] };
 const demoAnalytics: Analytics = {
   stages: [
     { key: "learning", title: "Обучение", status: "completed", completed: true, count: 6 },
@@ -85,11 +89,47 @@ function CompetencyRadar({ items }: { items: Competency[] }) {
   </svg><div className="radar-legend">{items.map((item, index) => <span key={item.title}><i style={{ "--radar-index": index } as CSSProperties} />{item.title}<strong>{item.score}%</strong></span>)}</div></div>;
 }
 
+const growthLevelRank: Record<string, number> = { "базовый": 1, "уверенный": 2 };
+
+function growthLevel(label: string, known: boolean): number | null {
+  if (!known) return null;
+  return growthLevelRank[label.toLowerCase()] ?? null;
+}
+
+export function TrajectoryGrowthAnalytics({ snapshot }: { snapshot: GrowthSnapshot }) {
+  const [selectedKey, setSelectedKey] = useState(snapshot.trajectories[0]?.track_key ?? "");
+  const selected = snapshot.trajectories.find((item) => item.track_key === selectedKey) ?? snapshot.trajectories[0];
+  if (!selected) return <StatePanel kind="empty" />;
+  const skills = selected.readiness_skills;
+  const center = 130;
+  const radius = 86;
+  const point = (index: number, rank: number) => {
+    const angle = -Math.PI / 2 + (Math.PI * 2 * index) / Math.max(skills.length, 1);
+    const scale = Math.min(rank / 2, 1);
+    return { x: center + Math.cos(angle) * radius * scale, y: center + Math.sin(angle) * radius * scale };
+  };
+  const targetPoints = skills.map((skill, index) => point(index, growthLevel(skill.target_level, true) ?? 2));
+  const currentPoints = skills.map((skill, index) => { const rank = growthLevel(skill.current_level, skill.known); return rank === null ? null : point(index, rank); });
+  return <section className="trajectory-growth-analytics" aria-labelledby="trajectory-growth-title">
+    <header><div><p className="eyebrow">По выбранной траектории</p><h2 id="trajectory-growth-title">Текущий уровень и цель</h2></div><label>Траектория<select value={selected.track_key} onChange={(event) => { setSelectedKey(event.target.value); }}>{snapshot.trajectories.map((item) => <option value={item.track_key} key={item.track_key}>{item.track_title}</option>)}</select></label></header>
+    <div className="trajectory-growth-grid">
+      <div className="trajectory-growth-radar"><svg viewBox="0 0 260 260" role="img" aria-label={`Циклограмма траектории ${selected.track_title}: жёлтая цель, красный дефицит, зелёный достигнутый уровень, серый неизвестный уровень`}>
+        {[1, 2].map((rank) => <polygon className="growth-ring" key={rank} points={skills.map((_, index) => { const p = point(index, rank); return `${String(p.x)},${String(p.y)}`; }).join(" ")} />)}
+        <polygon className="growth-target" points={targetPoints.map((p) => `${String(p.x)},${String(p.y)}`).join(" ")} />
+        {currentPoints.map((current, index) => { const nextIndex = (index + 1) % Math.max(skills.length, 1); const next = currentPoints[nextIndex]; if (!current || !next) return null; const currentRank = growthLevel(skills[index]?.current_level ?? "", skills[index]?.known ?? false) ?? 0; const targetRank = growthLevel(skills[index]?.target_level ?? "", true) ?? 2; const nextCurrent = growthLevel(skills[nextIndex]?.current_level ?? "", skills[nextIndex]?.known ?? false) ?? 0; const nextTarget = growthLevel(skills[nextIndex]?.target_level ?? "", true) ?? 2; const achieved = currentRank >= targetRank && nextCurrent >= nextTarget; return <line className={achieved ? "growth-achieved" : "growth-deficit"} key={`${selected.track_key}-${String(index)}`} x1={current.x} y1={current.y} x2={next.x} y2={next.y} />; })}
+        {skills.map((skill, index) => { const current = currentPoints[index]; const target = targetPoints[index] ?? point(index, 2); const angle = -Math.PI / 2 + (Math.PI * 2 * index) / Math.max(skills.length, 1); const label = { x: center + Math.cos(angle) * 112, y: center + Math.sin(angle) * 112 }; return <g key={skill.skill_key}>{current ? <circle className={(growthLevel(skill.current_level, skill.known) ?? 0) >= (growthLevel(skill.target_level, true) ?? 2) ? "growth-achieved-fill" : "growth-deficit-fill"} cx={current.x} cy={current.y} r="4" /> : <circle className="growth-unknown-fill" cx={target.x} cy={target.y} r="4" />}<text x={label.x} y={label.y} textAnchor={Math.cos(angle) > .2 ? "start" : Math.cos(angle) < -.2 ? "end" : "middle"}>{skill.title}</text></g>; })}
+      </svg><div className="trajectory-growth-legend"><span className="target">Цель</span><span className="deficit">Ниже цели</span><span className="achieved">Цель достигнута</span><span className="unknown">Нет данных</span></div></div>
+      <div className="trajectory-growth-facts"><p><strong>Прогресс траектории:</strong> {selected.completion.percent === null ? "Недостаточно данных" : `${String(selected.completion.percent)}%`}</p><p><strong>Готовность роли:</strong> {selected.readiness.percent === null ? "Недостаточно данных" : `${String(selected.readiness.percent)}%`}</p>{selected.readiness.partial && <p className="growth-partial" role="status">Охват данных {Math.round(selected.readiness.coverage * 100)}%. Неизвестные уровни не заменены нулём.</p>}<ul aria-label="Числовая альтернатива циклограммы">{skills.map((skill) => { const current = growthLevel(skill.current_level, skill.known); const target = growthLevel(skill.target_level, true); const state = current === null || target === null ? "unknown" : current < target ? "deficit" : "achieved"; return <li className={`growth-skill--${state}`} key={skill.skill_key}><strong>{skill.title}</strong><span>Сейчас: {current === null ? "нет подтверждённых данных" : skill.current_level}</span><span>Цель: {target === null ? "несовместимая шкала" : skill.target_level}</span></li>; })}</ul><small>Формулы версии {selected.policy_version}. Снимок {new Date(snapshot.generated_at).toLocaleString("ru-RU")} · {snapshot.actor_timezone}</small></div>
+    </div>
+  </section>;
+}
+
 export function ParticipantAnalytics() {
   const [competencyView, setCompetencyView] = useState<CompetencyView>("technical");
   const [selectedSkill, setSelectedSkill] = useState<Competency | null>(null);
   const [gapExpanded, setGapExpanded] = useState(false);
   const query = useQuery({ queryKey: ["participant-analytics"], queryFn: () => apiRequest<Analytics>("/api/v1/me/analytics/journey"), refetchOnMount: "always" });
+  const growthQuery = useQuery({ queryKey: ["participant-growth-analytics"], queryFn: () => apiRequest<GrowthSnapshot>("/api/v1/me/growth/snapshot"), refetchOnMount: "always" });
   if (query.isLoading) return <StatePanel kind="loading" />;
   const data = query.data ?? demoAnalytics;
   const activity = [42, 58, 51, 73, 66, 88, 79, 94];
@@ -100,6 +140,7 @@ export function ParticipantAnalytics() {
   return <div className="feature-stack participant-analytics analytics-dashboard">
     {query.isError && <div className="demo-fallback-note" role="status"><strong>Демонстрационная аналитика</strong><span>API временно недоступен — показана связанная mock-проекция.</span><button className="secondary-button" type="button" onClick={() => { void query.refetch(); }}>Повторить</button></div>}
     <header className="dashboard-heading"><div><p className="eyebrow">Аналитика · личный путь</p><h1 id="workspace-title">Ваш прогресс и подтверждённый результат</h1><p className="lead">Показываем, как обучение превращается в проекты, оценки и позицию в рейтинге.</p></div><div className="analytics-controls"><label>Период<select defaultValue="90"><option value="30">30 дней</option><option value="90">3 месяца</option><option value="season">Сезон</option></select></label><label>Направление<select defaultValue="all"><option value="all">Все</option><option value="python">Python</option><option value="data">Data</option></select></label><div className="freshness-chip"><span className="fresh-dot" />Обновлено сегодня</div></div></header>
+    {growthQuery.status === "pending" ? <StatePanel kind="loading" /> : growthQuery.status === "error" ? <StatePanel kind="error" action="Повторить аналитику траекторий" onAction={() => { void growthQuery.refetch(); }} /> : <TrajectoryGrowthAnalytics snapshot={growthQuery.data} />}
     <section className="competency-overview competency-overview--expanded">
       <div className="competency-main">
         <div className="section-heading"><div><p className="eyebrow">Главный результат развития</p><h2>Расширенная матрица · Python-разработчик</h2></div><Badge tone="success">Готовность 72%</Badge></div>
