@@ -289,18 +289,39 @@ test("kpi spark bars expose number, unit and period on focus without hover", asy
   await expect(streakBars.nth(5)).toHaveAttribute("aria-label", "14 дней · точка 6 из 6");
 });
 
+test("buddy outage keeps an honest error and the plain next result alive", async ({ page }) => {
+  await page.route("**/api/v1/agents/buddy/suggestion", (route) => route.fulfill({
+    status: 503,
+    json: { code: "UNAVAILABLE" },
+  }));
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByTestId("buddy-suggestion-activate").click();
+  await expect(page.getByTestId("buddy-suggestion-unavailable")).toContainText("не вызывает модель");
+  await page.getByTestId("buddy-suggestion-retry").click();
+  await expect(page.getByTestId("buddy-suggestion-unavailable")).toContainText("не вызывает модель");
+  // The domain next-result flow stays reachable during the outage
+  await expect(page.getByTestId("next-result-card")).toBeVisible();
+  await expect(page.getByTestId("next-result-badge")).toContainText("базовый → уверенный");
+});
+
 test("participant home actions open project, buddy and linked routes", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("button", { name: /Открыть рабочую область/ }).click();
   await expect(page.getByRole("dialog", { name: "Рабочая область проекта" })).toBeVisible();
   await page.getByRole("dialog", { name: "Рабочая область проекта" }).getByText("Закрыть", { exact: true }).click();
+  // openspec 22.26: the advice appears only after explicit activation
+  await page.getByTestId("buddy-suggestion-activate").click();
+  await expect(page.getByTestId("buddy-suggestion-kind")).toBeVisible();
   await page.getByTestId("buddy-suggestion-why").locator("summary").click();
   await expect(page.getByTestId("buddy-suggestion-explanation")).toBeVisible();
   await page.getByRole("button", { name: /Начать checkpoint/ }).click();
   await expect(page).toHaveURL(/\/workspace\/2\?course=python-base$/);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByTestId("buddy-suggestion-activate").click();
+  await expect(page.getByTestId("buddy-suggestion-kind")).toBeVisible();
   await page.getByTestId("buddy-suggestion-dismiss").click();
   await expect(page.getByTestId("buddy-suggestion-dismissed")).toBeVisible();
   await expect(page.locator(".metric-histogram")).toHaveCount(4);

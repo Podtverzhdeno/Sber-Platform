@@ -38,14 +38,16 @@ const suggestionState: BuddySuggestionStateView = {
 
 function renderBody(
   props: {
-    state: "pending" | "error" | "success";
+    phase: "idle" | "loading" | "error" | "result";
     data: BuddySuggestionStateView | undefined;
-  } = { state: "success", data: suggestionState },
+  } = { phase: "result", data: suggestionState },
+  onActivate: () => void = () => undefined,
 ) {
   return render(
     <BuddySuggestionBody
       {...props}
       dismissPending={false}
+      onActivate={onActivate}
       onDismiss={() => undefined}
       onOpenWorkspace={() => undefined}
     />,
@@ -56,7 +58,26 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("buddy suggestion card", () => {
+describe("buddy suggestion card (openspec 22.26)", () => {
+  it("starts with purpose and activation button, without any personal advice", () => {
+    renderBody({ phase: "idle", data: undefined });
+    expect(
+      screen.getByTestId("buddy-suggestion-purpose").textContent,
+    ).toContain("объяснимый следующий шаг");
+    expect(screen.getByTestId("buddy-suggestion-activate")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("buddy-suggestion-observation"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("buddy-suggestion-kind"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the analysis state before the advice appears", () => {
+    renderBody({ phase: "loading", data: undefined });
+    expect(screen.getByTestId("buddy-suggestion-loading")).toBeInTheDocument();
+  });
+
   it("marks the advice as automatic analysis with timestamp and sources", () => {
     renderBody();
     expect(screen.getByTestId("buddy-suggestion-kind").textContent).toBe(
@@ -90,9 +111,10 @@ describe("buddy suggestion card", () => {
     const onOpenWorkspace = vi.fn();
     render(
       <BuddySuggestionBody
-        state="success"
+        phase="result"
         data={suggestionState}
         dismissPending={false}
+        onActivate={() => undefined}
         onDismiss={() => undefined}
         onOpenWorkspace={onOpenWorkspace}
       />,
@@ -103,6 +125,84 @@ describe("buddy suggestion card", () => {
     fireEvent.click(action);
     expect(onOpenWorkspace).toHaveBeenCalledTimes(1);
     expect(suggestionState.suggestion?.auto_enrolled).toBe(false);
+  });
+
+  it("fires the recommendation request only after explicit activation", async () => {
+    const paths: string[] = [];
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+      const rawPath =
+        input instanceof Request
+          ? new URL(input.url).pathname
+          : input instanceof URL
+            ? input.pathname
+            : input;
+      const path = typeof rawPath === "string" ? rawPath : "";
+      paths.push(path);
+      if (path === "/api/v1/agents/buddy/suggestion") {
+        return Promise.resolve(
+          new Response(JSON.stringify(suggestionState), { status: 200 }),
+        );
+      }
+      return Promise.resolve(new Response(null, { status: 204 }));
+    });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <BuddySuggestionCard onOpenWorkspace={() => undefined} />
+      </QueryClientProvider>,
+    );
+    await waitFor(() => {
+      expect(screen.getByTestId("buddy-suggestion-activate")).toBeInTheDocument();
+    });
+    expect(
+      paths.filter((path) => path === "/api/v1/agents/buddy/suggestion"),
+    ).toHaveLength(0);
+    fireEvent.click(screen.getByTestId("buddy-suggestion-activate"));
+    await waitFor(() => {
+      expect(screen.getByTestId("buddy-suggestion-kind")).toBeInTheDocument();
+    });
+    expect(
+      paths.filter((path) => path === "/api/v1/agents/buddy/suggestion"),
+    ).toHaveLength(1);
+  });
+
+  it("keeps an honest retry without stale or invented advice", async () => {
+    let failing = true;
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+      const rawPath =
+        input instanceof Request
+          ? new URL(input.url).pathname
+          : input instanceof URL
+            ? input.pathname
+            : input;
+      const path = typeof rawPath === "string" ? rawPath : "";
+      if (path === "/api/v1/agents/buddy/suggestion") {
+        if (failing) {
+          return Promise.resolve(
+            new Response(JSON.stringify({ code: "UNAVAILABLE" }), { status: 503 }),
+          );
+        }
+        return Promise.resolve(
+          new Response(JSON.stringify(suggestionState), { status: 200 }),
+        );
+      }
+      return Promise.resolve(new Response(null, { status: 204 }));
+    });
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <BuddySuggestionCard onOpenWorkspace={() => undefined} />
+      </QueryClientProvider>,
+    );
+    fireEvent.click(await screen.findByTestId("buddy-suggestion-activate"));
+    const unavailable = await screen.findByTestId("buddy-suggestion-unavailable");
+    expect(unavailable.textContent).toContain("не вызывает модель");
+    expect(screen.getByTestId("buddy-suggestion-retry")).toBeInTheDocument();
+    failing = false;
+    fireEvent.click(screen.getByTestId("buddy-suggestion-retry"));
+    await waitFor(() => {
+      expect(screen.getByTestId("buddy-suggestion-kind")).toBeInTheDocument();
+    });
   });
 
   it("dismisses by suggestion id through the mutation", async () => {
@@ -135,6 +235,7 @@ describe("buddy suggestion card", () => {
         <BuddySuggestionCard onOpenWorkspace={() => undefined} />
       </QueryClientProvider>,
     );
+    fireEvent.click(await screen.findByTestId("buddy-suggestion-activate"));
     await waitFor(() => {
       expect(screen.getByTestId("buddy-suggestion-kind")).toBeInTheDocument();
     });
@@ -149,7 +250,7 @@ describe("buddy suggestion card", () => {
 
   it("keeps a domain note after dismissal without inventing data", () => {
     renderBody({
-      state: "success",
+      phase: "result",
       data: {
         policy_version: 1,
         ai_model_available: false,
@@ -163,16 +264,21 @@ describe("buddy suggestion card", () => {
     expect(screen.queryByTestId("buddy-suggestion-kind")).not.toBeInTheDocument();
   });
 
-  it("stays honest when the service is unavailable", () => {
-    renderBody({ state: "error", data: undefined });
-    expect(screen.getByTestId("buddy-suggestion-unavailable").textContent).toContain(
-      "не вызывает модель",
-    );
-    expect(screen.queryByTestId("buddy-suggestion-observation")).not.toBeInTheDocument();
-  });
-
-  it("shows the pending state without data", () => {
-    renderBody({ state: "pending", data: undefined });
-    expect(screen.getByTestId("buddy-suggestion-loading")).toBeInTheDocument();
+  it("stays honest on empty state when no step exists", () => {
+    renderBody({
+      phase: "result",
+      data: {
+        policy_version: 1,
+        ai_model_available: false,
+        dismissed: false,
+        suggestion: null,
+      },
+    });
+    expect(
+      screen.getByTestId("buddy-suggestion-dismissed").textContent,
+    ).toContain("Пока нет шага для автоматического анализа");
+    expect(
+      screen.queryByTestId("buddy-suggestion-observation"),
+    ).not.toBeInTheDocument();
   });
 });

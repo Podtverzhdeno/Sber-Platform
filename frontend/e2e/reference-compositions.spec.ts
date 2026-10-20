@@ -582,6 +582,9 @@ test("R-PAR-01 dashboard composition and action", async ({ page }) => {
   await openWorkspace(page, participantBase.key);
   await expect(page.locator('[data-reference="R-PAR-01"]')).toBeVisible();
   await screenshot(page, "R-PAR-01");
+  // openspec 22.26: the card starts user-initiated; advice only after activation
+  await page.getByTestId("buddy-suggestion-activate").click();
+  await expect(page.getByTestId("buddy-suggestion-kind")).toBeVisible();
   await page.getByTestId("buddy-suggestion-why").locator("summary").click();
   await expect(page.getByTestId("buddy-suggestion-explanation")).toBeVisible();
   await page.getByTestId("buddy-suggestion-dismiss").click();

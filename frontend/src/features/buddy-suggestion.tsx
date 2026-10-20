@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "../api/client";
 import type { components } from "../api/schema";
 
@@ -27,10 +27,13 @@ function formatTimestamp(value: string): string {
 }
 
 /**
- * AI-Buddy карта главной участника (openspec 22.3).
+ * AI-Buddy карта главной участника (openspec 22.3, activation 22.26).
  * Рекомендация — объяснимый автоматический анализ разрешённых данных:
  * наблюдение, пробел, действие, польза, категории источников и время расчёта.
- * Карта не вызывает модель, не записывает на курс и скрываемая (dismiss).
+ * Пока участник не нажал «Получить рекомендацию», frontend не выполняет
+ * необязательный recommendation request: запрос read-only, не считается
+ * активностью и не вызывает модель. Ошибка — честный retry, без подмены
+ * старым или вымышленным советом.
  */
 export function BuddySuggestionCard(props: {
   onOpenWorkspace: () => void;
@@ -39,8 +42,10 @@ export function BuddySuggestionCard(props: {
     queryKey: ["buddy-suggestion"],
     queryFn: () =>
       apiRequest<BuddySuggestionStateView>("/api/v1/agents/buddy/suggestion"),
+    enabled: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
-  const queryClient = useQueryClient();
   const dismiss = useMutation({
     mutationFn: (suggestionId: string) =>
       apiRequest<null>("/api/v1/agents/buddy/suggestion/dismiss", {
@@ -49,14 +54,25 @@ export function BuddySuggestionCard(props: {
         body: JSON.stringify({ suggestion_id: suggestionId }),
       }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["buddy-suggestion"] });
+      void query.refetch();
     },
   });
+  const phase: BuddyCardPhase =
+    query.fetchStatus === "fetching"
+      ? "loading"
+      : query.isError
+        ? "error"
+        : query.data !== undefined
+          ? "result"
+          : "idle";
   return (
     <BuddySuggestionBody
-      state={query.status}
+      phase={phase}
       data={query.data}
       dismissPending={dismiss.isPending}
+      onActivate={() => {
+        void query.refetch();
+      }}
       onDismiss={(suggestionId) => {
         dismiss.mutate(suggestionId);
       }}
@@ -65,14 +81,49 @@ export function BuddySuggestionCard(props: {
   );
 }
 
+type BuddyCardPhase = "idle" | "loading" | "error" | "result";
+
 export function BuddySuggestionBody(props: {
-  state: "pending" | "error" | "success";
-  data: BuddySuggestionStateView | undefined;
+  phase: BuddyCardPhase;
+  data?: BuddySuggestionStateView;
   dismissPending: boolean;
+  onActivate: () => void;
   onDismiss: (suggestionId: string) => void;
   onOpenWorkspace: () => void;
 }) {
-  if (props.state === "pending") {
+  if (props.phase === "idle") {
+    return (
+      <article className="ai-panel" data-testid="buddy-suggestion-card">
+        <div>
+          <span className="ai-orb" aria-hidden="true">
+            ✦
+          </span>
+          <div>
+            <h2>AI Buddy</h2>
+            <span className="ui-badge ui-badge--ai">Автоматический анализ</span>
+          </div>
+        </div>
+        <p data-testid="buddy-suggestion-purpose">
+          Buddy предложит объяснимый следующий шаг по вашим подтверждённым
+          данным: главное наблюдение, закрываемый пробел, действие и пользу.
+          Анализ запускается только по кнопке — заранее готового персонального
+          вывода здесь нет.
+        </p>
+        <button
+          type="button"
+          data-testid="buddy-suggestion-activate"
+          onClick={props.onActivate}
+        >
+          Получить рекомендацию
+        </button>
+        <p className="ai-boundary" data-testid="buddy-suggestion-idle-hint">
+          Доменный следующий шаг всегда доступен в карточке «Следующий
+          результат».
+        </p>
+      </article>
+    );
+  }
+  if (props.phase === "loading") {
     return (
       <article className="ai-panel" data-testid="buddy-suggestion-card" aria-busy="true">
         <p data-testid="buddy-suggestion-loading">
@@ -81,7 +132,7 @@ export function BuddySuggestionBody(props: {
       </article>
     );
   }
-  if (props.state === "error" || !props.data) {
+  if (props.phase === "error") {
     return (
       <article className="ai-panel" data-testid="buddy-suggestion-card">
         <div>
@@ -94,14 +145,26 @@ export function BuddySuggestionBody(props: {
           </div>
         </div>
         <p data-testid="buddy-suggestion-unavailable">
-          Buddy-анализ недоступен: карта не подменяет данные и не вызывает модель.
-          Доменный следующий шаг продолжает показывать карточка
+          Buddy-анализ недоступен: карта не подменяет данные и не вызывает
+          модель. Доменный следующий шаг продолжает показывать карточка
           «Следующий результат».
         </p>
+        <button
+          type="button"
+          className="secondary-button"
+          data-testid="buddy-suggestion-retry"
+          disabled={props.dismissPending}
+          onClick={props.onActivate}
+        >
+          Попробовать снова
+        </button>
       </article>
     );
   }
   const data = props.data;
+  if (!data) {
+    return null;
+  }
   const suggestion = data.suggestion ?? null;
   if (data.dismissed || suggestion === null) {
     return (
