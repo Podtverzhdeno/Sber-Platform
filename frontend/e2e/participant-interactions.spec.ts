@@ -437,6 +437,7 @@ test("search, streak, task detail and messages are interactive", async ({ page }
   await page.getByRole("option", { name: /Python для R&D/ }).click();
   await expect(page).toHaveURL(/workspace\/2$/);
   await page.getByRole("link", { name: "Мои проекты", exact: true }).click();
+  await page.getByRole("button", { name: "Открыть проект →" }).first().click();
   await page.getByRole("button", { name: "Открыть рабочую область →" }).first().click();
   await expect(page.getByRole("heading", { name: "Прототип рекомендательной системы" })).toBeVisible();
   await expect(page.getByText("Загрузить решение")).toBeVisible();

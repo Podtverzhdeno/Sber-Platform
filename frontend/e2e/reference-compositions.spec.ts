@@ -653,6 +653,7 @@ test("R-PAR-06 projects composition and workspace", async ({ page }) => {
   await page.getByRole("link", { name: "Мои проекты", exact: true }).click();
   await expect(page.locator('[data-reference="R-PAR-06"]')).toBeVisible();
   await screenshot(page, "R-PAR-06");
+  await page.getByRole("button", { name: "Открыть проект →" }).click();
   await page.getByRole("button", { name: "Открыть рабочую область →" }).click();
   await expect(page.getByRole("heading", { name: "MVP поиска программ" })).toBeVisible();
   await expect(page.getByText("Загрузить решение")).toBeVisible();
