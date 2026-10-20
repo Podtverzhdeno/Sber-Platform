@@ -467,6 +467,7 @@ class ParticipantTaskDetailView(BaseModel):
     checkpoints: list[CheckpointView]
     personal: list[ContributionView]
     feedback: list[ReviewFeedbackView]
+    applications: list[ApplicationView]
 
 
 class WorkItemView(BaseModel):
@@ -720,6 +721,7 @@ def _participant_task_detail_view(
         ],
         personal=[_contribution_view(item) for item in detail.contributions],
         feedback=feedback,
+        applications=[_application_view(item) for item in detail.applications],
     )
 
 

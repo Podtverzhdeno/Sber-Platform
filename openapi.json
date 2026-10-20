@@ -4974,6 +4974,13 @@
             "title": "Allowed Artifacts",
             "type": "array"
           },
+          "applications": {
+            "items": {
+              "$ref": "#/components/schemas/ApplicationView"
+            },
+            "title": "Applications",
+            "type": "array"
+          },
           "checkpoints": {
             "items": {
               "$ref": "#/components/schemas/CheckpointView"
@@ -5108,7 +5115,8 @@
           "membership",
           "checkpoints",
           "personal",
-          "feedback"
+          "feedback",
+          "applications"
         ],
         "title": "ParticipantTaskDetailView",
         "type": "object"

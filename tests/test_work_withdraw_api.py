@@ -225,3 +225,26 @@ def test_withdraw_blocks_foreign_application_and_demands_participant_role() -> N
         )
         assert response.status_code == 403
         assert response.json()["code"] == "FORBIDDEN"
+
+
+def test_participant_detail_surfaces_own_application_for_withdraw() -> None:
+    api = client()
+    with api:
+        task_id = _published_case_task(api)
+        applied = _apply(api, task_id)
+        application_id = str(applied["id"])
+
+        login(api, "participant-alex")
+        detail = api.get(f"/api/v1/me/tasks/{task_id}").json()
+        assert [row["id"] for row in detail["applications"]] == [application_id]
+        assert [row["status"] for row in detail["applications"]] == ["applied"]
+
+        _withdraw(api, application_id)
+
+        login(api, "participant-alex")
+        withdrawn_detail = api.get(f"/api/v1/me/tasks/{task_id}").json()
+        assert [row["status"] for row in withdrawn_detail["applications"]] == ["withdrawn"]
+
+        stranger = login(api, "participant-igor")
+        privacy = api.get(f"/api/v1/me/tasks/{task_id}", headers={"X-CSRF-Token": stranger}).json()
+        assert privacy.get("applications") == []

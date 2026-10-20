@@ -75,6 +75,7 @@ class ParticipantTaskDetail:
     membership: AssignmentRecord | None
     checkpoints: tuple[CheckpointRecord, ...]
     contributions: tuple[ContributionRecord, ...]
+    applications: tuple[ApplicationRecord, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -1334,6 +1335,11 @@ class WorkService:
             if membership
             else ()
         )
+        applications = tuple(
+            item
+            for item in await self.store.applications(task_id)
+            if item.person_id == actor.person_id
+        )
         return ParticipantTaskDetail(
             task=marketplace,
             brief=marketplace.task.aggregate.brief,
@@ -1342,6 +1348,7 @@ class WorkService:
             membership=membership,
             checkpoints=checkpoints,
             contributions=contributions,
+            applications=applications,
         )
 
     @staticmethod

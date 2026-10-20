@@ -4221,6 +4221,8 @@ export interface components {
             accepted_terms_version: number | null;
             /** Allowed Artifacts */
             allowed_artifacts: string[];
+            /** Applications */
+            applications: components["schemas"]["ApplicationView"][];
             /** Checkpoints */
             checkpoints: components["schemas"]["CheckpointView"][];
             customer: components["schemas"]["PartnerView"];
