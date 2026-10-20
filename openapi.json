@@ -7273,27 +7273,6 @@
         "title": "SuggestionDismissRequest",
         "type": "object"
       },
-      "SupportCatalogView": {
-        "properties": {
-          "models": {
-            "items": {
-              "$ref": "#/components/schemas/SupportModelView"
-            },
-            "title": "Models",
-            "type": "array"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "version",
-          "models"
-        ],
-        "title": "SupportCatalogView",
-        "type": "object"
-      },
       "SupportMode": {
         "enum": [
           "mentor",
@@ -7302,72 +7281,6 @@
         ],
         "title": "SupportMode",
         "type": "string"
-      },
-      "SupportModelView": {
-        "properties": {
-          "activities": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Activities",
-            "type": "array"
-          },
-          "available": {
-            "title": "Available",
-            "type": "boolean"
-          },
-          "code": {
-            "title": "Code",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "requires_assignee": {
-            "title": "Requires Assignee",
-            "type": "boolean"
-          },
-          "response_time": {
-            "title": "Response Time",
-            "type": "string"
-          },
-          "responsible": {
-            "title": "Responsible",
-            "type": "string"
-          },
-          "restrictions": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Restrictions",
-            "type": "array"
-          },
-          "unavailable_reason": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Unavailable Reason"
-          }
-        },
-        "required": [
-          "code",
-          "name",
-          "responsible",
-          "activities",
-          "response_time",
-          "restrictions",
-          "available",
-          "unavailable_reason",
-          "requires_assignee"
-        ],
-        "title": "SupportModelView",
-        "type": "object"
       },
       "SupportRequest": {
         "properties": {
@@ -9539,24 +9452,6 @@
           }
         },
         "summary": "Saved Candidates"
-      }
-    },
-    "/api/v1/customer/support-models": {
-      "get": {
-        "operationId": "support_model_catalog_api_v1_customer_support_models_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SupportCatalogView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Support Model Catalog"
       }
     },
     "/api/v1/customer/tasks": {
