@@ -103,6 +103,7 @@ test.beforeEach(async ({ page }) => {
   ] }));
   await page.route("**/api/v1/me/bootcamp/certificates", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/me/learning/streak", (route) => route.fulfill({ json: { current_days: 3, qualified_dates: ["2026-10-16", "2026-10-17", "2026-10-18"], reason: "Учебная активность подтверждена." } }));
+  await page.route("**/api/v1/me/engagement/overview", (route) => route.fulfill({ json: { current_days: 14, best_days: 14, qualified_dates: ["2026-10-06", "2026-10-07", "2026-10-08", "2026-10-09", "2026-10-10", "2026-10-11", "2026-10-12", "2026-10-13", "2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17", "2026-10-18", "2026-10-19"], reason: "Учебная активность подтверждена.", today_saved: true, grace_available: false } }));
   await page.route("**/api/v1/me/tasks/task-1", (route) => route.fulfill({ json: {
     task: { id: "task-1", title: "Прототип рекомендательной системы", status: "in_progress" },
     problem: "Собрать рекомендации на открытом корпусе и оценить качество",
@@ -432,7 +433,9 @@ test("search, streak, task detail and messages are interactive", async ({ page }
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("button", { name: /Учебный стрик/ }).click();
   await expect(page.getByRole("dialog", { name: "Учебный стрик" })).toContainText("14 дней подряд");
-  await expect(page.getByRole("button", { name: "Продолжить курс →" })).toHaveClass(/streak-course-button/);
+  await expect(page.getByRole("img", { name: "Квалифицированные дни: 14, лучшая серия 14 дней" })).toBeVisible();
+  await page.getByRole("button", { name: /Учебный стрик/ }).click();
+  await expect(page.getByRole("dialog", { name: "Учебный стрик" })).not.toBeVisible();
   await page.getByRole("searchbox", { name: "Глобальный поиск" }).fill("Python");
   await page.getByRole("option", { name: /Python для R&D/ }).click();
   await expect(page).toHaveURL(/workspace\/2$/);
