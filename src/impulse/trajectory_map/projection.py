@@ -224,9 +224,7 @@ def build_trajectory_map(
     """Derive the interactive map state machine from a published roadmap version."""
     milestones = projection.milestones
     completed = projection.completed_keys
-    live_status: Mapping[str, CompletionStatus] = (
-        enrollments if enrollments is not None else {}
-    )
+    live_status: Mapping[str, CompletionStatus] = enrollments if enrollments is not None else {}
     groups = _branch_groups(milestones)
     satisfied_groups = {
         group.group_key
