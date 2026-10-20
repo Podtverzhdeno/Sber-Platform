@@ -109,7 +109,7 @@ export function DevelopmentJourney() {
       <button className="text-button" type="button" onClick={() => { setConsultationVisible(true); }}>Получить рекомендацию ментора</button>
       {consultationVisible && <Card title="Рекомендация ментора">{consultationSent ? <><Badge tone="success">Запрос отправлен</Badge><p>Елена получила контекст ваших направлений и текущего проекта. Ответ появится в сообщениях; продолжать маршрут можно сразу.</p></> : <p>Ментор увидит выбранные направления, прогресс курсов и текущий проект и сможет предложить следующий практический шаг.</p>}<div className="course-actions">{!consultationSent && <button type="button" onClick={() => { setConsultationSent(true); }}>Отправить запрос</button>}<button className="secondary-button" type="button" onClick={() => { setConsultationVisible(false); }}>Продолжить самостоятельно</button></div></Card>}
       <Modal title={`${selectedOverview?.title ?? ""} · ${pane === "detail" ? "подробнее" : "обзор"}`} open={selectedOverview !== null} onClose={() => { closeTrack(); }}>
-        {selectedTrajectory !== null && pane === "detail" ? <TrackDetailBody facts={buildTrackDetail(selectedTrajectory, growth.data ?? null, anchors.data ?? null)} /> : null}
+        {selectedTrajectory !== null && pane === "detail" ? <TrackDetailBody facts={buildTrackDetail(selectedTrajectory, growth.data ?? null, anchors.data ?? null, roadmapMatch)} /> : null}
         {selectedOverview !== null && <TrackOverviewBody facts={selectedOverview} />}
         {pane === "detail" && selectedTrajectory !== null && (
           <section>

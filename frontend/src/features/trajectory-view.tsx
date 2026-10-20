@@ -42,11 +42,14 @@ export function TrajectoryModeToggle({ mode, onChange }: ModeToggleProps) {
 
 function CardBody({ card }: { card: TrajectoryCard }) {
   return (
-    <p className="trajectory-percent">
-      <strong data-testid={`trajectory-percent-${card.slug}`}>{card.percentText}</strong>
-      <span>{card.remainderText}</span>
-      {card.partial && <span> · покрытие неполное ({String(card.coverage)})</span>}
-    </p>
+    <>
+      <p className="trajectory-percent">
+        <strong data-testid={`trajectory-percent-${card.slug}`}>{card.percentText}</strong>
+        <span>{card.remainderText}</span>
+        {card.partial && <span> · покрытие неполное ({String(card.coverage)})</span>}
+      </p>
+      <CycleBar percent={card.completionPercent} label={`trajectory-card-cycle-${card.slug}`} />
+    </>
   );
 }
 
@@ -181,14 +184,30 @@ function Contour({ contour, index }: { contour: SkillContour; index: number }) {
     <li data-testid={`trajectory-contour-${String(index)}`}>
       <span>
         {contour.title}: {contour.progressText}
+        {contour.known && contour.currentLevel !== null && contour.targetLevel !== null && (
+          <span className="trajectory-contour" aria-hidden="true">
+            <i data-level="current">{contour.currentLevel}</i>
+            <b data-level="target">{contour.targetLevel}</b>
+          </span>
+        )}
       </span>
-      {contour.known && contour.currentLevel !== null && contour.targetLevel !== null && (
-        <span className="trajectory-contour" aria-hidden="true">
-          <i data-level="current">{contour.currentLevel}</i>
-          <b data-level="target">{contour.targetLevel}</b>
-        </span>
-      )}
+      <small data-testid={`trajectory-contour-cycle-${String(index)}`}>{contour.cycleText}</small>
     </li>
+  );
+}
+
+export function CycleBar({ percent, label }: { percent: number | null; label: string }) {
+  const value = percent === null ? 0 : Math.max(0, Math.min(percent, 100));
+  return (
+    <div
+      className="trajectory-cycle"
+      data-testid={label}
+      role="img"
+      aria-label={`${label}: ${percentText(percent)}`}
+    >
+      <i aria-hidden="true" style={{ width: `${String(value)}%` }} />
+      <strong>{percentText(percent)}</strong>
+    </div>
   );
 }
 
@@ -201,11 +220,22 @@ export function TrackDetailBody({ facts }: { facts: TrajectoryDetailFacts }) {
         {facts.partial && <span> · покрытие неполное</span>}
         <span> · готовность роли: {facts.readinessPercentText}</span>
       </p>
+      <div className="trajectory-cycles">
+        <CycleBar percent={facts.completionPercent} label="cycle-completion" />
+        <CycleBar percent={facts.readinessPercent} label="cycle-readiness" />
+        <small>{facts.readinessCycleText}</small>
+      </div>
+      {facts.planChange && (
+        <p data-testid="trajectory-plan-change">
+          <strong>План обновлён.</strong> {facts.planChange} Подтверждённые milestones сохранены и
+          пересчитаны по новой версии без потери прогресса.
+        </p>
+      )}
       <p className="trajectory-formula" data-testid="trajectory-formula">
         {facts.formulaText}
       </p>
       <section>
-        <strong>Current/targetциклограмма</strong>
+        <strong>Current/target циклограмма</strong>
         {facts.contours.length > 0 ? (
           <ul data-testid="trajectory-contours" className="trajectory-contours">
             {facts.contours.map((contour, index) => (
@@ -232,6 +262,21 @@ export function TrackDetailBody({ facts }: { facts: TrajectoryDetailFacts }) {
         ) : (
           <p data-testid="trajectory-calendar-empty">Квалифицированных событий за период нет.</p>
         )}
+        <dl data-testid="trajectory-days">
+          <div>
+            <dt>Дни с квалифицированной активностью</dt>
+            <dd>{String(facts.days.qualifiedDays)}</dd>
+          </div>
+          <div>
+            <dt>Дни без активности (в периоде 14 дней)</dt>
+            <dd>{String(facts.days.quietDays)}</dd>
+          </div>
+          <div>
+            <dt>Сегодня (по {Intl.DateTimeFormat().resolvedOptions().timeZone})</dt>
+            <dd>{facts.days.todayKey}</dd>
+          </div>
+        </dl>
+        <small>{facts.days.note}</small>
       </section>
       <section data-testid="trajectory-hours">
         <strong>Часы</strong>

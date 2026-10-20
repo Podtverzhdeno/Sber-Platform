@@ -66,7 +66,14 @@ export interface SkillContour {
   currentLevel: string | null;
   targetLevel: string | null;
   progressText: string;
+  cycleText: string;
 }
+
+const cyclePercentText = (current: number, target: number): string => {
+  if (target <= 0) return "цель не определена";
+  const percent = Math.round((current / target) * 100);
+  return `${String(Math.min(percent, 100))}% пути к целевому уровню`;
+};
 
 export function buildSkillContours(
   skills: TrajectoryGrowthView["readiness_skills"] | null,
@@ -80,6 +87,7 @@ export function buildSkillContours(
         currentLevel: null,
         targetLevel: null,
         progressText: "уровень пока неизвестен",
+        cycleText: "циклограмма недоступна",
       };
     }
     const currentRank = LEVEL_RANK[skill.current_level];
@@ -91,6 +99,7 @@ export function buildSkillContours(
         currentLevel: skill.current_level,
         targetLevel: skill.target_level,
         progressText: `${skill.current_level} → целевой уровень не определён формулой`,
+        cycleText: "целевой уровень не определён формулой",
       };
     }
     const current = LEVEL_LABELS[currentRank] ?? skill.current_level;
@@ -101,8 +110,36 @@ export function buildSkillContours(
       currentLevel: current,
       targetLevel: target,
       progressText: `${current} → ${target}`,
+      cycleText: cyclePercentText(currentRank + 1, targetRank + 1),
     };
   });
+}
+
+export interface DayAnalytics {
+  qualifiedDays: number;
+  quietDays: number;
+  todayKey: string;
+  note: string;
+}
+
+const PERIOD_LENGTH_DAYS = 14;
+
+export function buildDayAnalytics(events: GrowthSnapshotView["events"] | null): DayAnalytics {
+  const days = new Set<string>();
+  for (const event of events ?? []) days.add(event.occurred_at.slice(0, 10));
+  const todayKey = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Moscow" }).format(new Date());
+  const qualifiedDays = days.size;
+  const quietDays = Math.max(
+    0,
+    PERIOD_LENGTH_DAYS - qualifiedDays - (days.has(todayKey) ? 0 : 1),
+  );
+  return {
+    qualifiedDays,
+    quietDays,
+    todayKey,
+    note:
+      "Пропуски фиксируются только после завершения дня и grace period с учётом timezone, заморозки и выходных плана; подтверждённые интервалы не повторяются как пропуски.",
+  };
 }
 
 export interface TrajectoryCard {
@@ -113,6 +150,7 @@ export interface TrajectoryCard {
   colorClass: string;
   colorName: string;
   percentText: string;
+  completionPercent: number | null;
   remainderText: string;
   partial: boolean;
   coverage: number;
@@ -136,6 +174,7 @@ export function buildTrajectoryCards(trajectories: TrajectoryGrowthView[] | null
       colorClass: trajectoryColorClass(trajectory.track_key),
       colorName: trajectoryColorName(trajectory.track_key),
       percentText: percentText(trajectory.completion.percent),
+      completionPercent: trajectory.completion.percent ?? null,
       remainderText: remainderText(trajectory.completion.percent),
       partial: trajectory.completion.partial,
       coverage: trajectory.completion.coverage,
@@ -193,11 +232,15 @@ export interface TrajectoryDetailFacts {
   formulaId: string | null;
   formulaText: string;
   percentText: string;
+  completionPercent: number | null;
   remainderText: string;
   partial: boolean;
+  readinessPercent: number | null;
   readinessPercentText: string;
+  readinessCycleText: string;
   contours: SkillContour[];
   calendar: { day: string; label: string; count: number; kindsLabel: string }[];
+  days: DayAnalytics;
   hoursKnown: boolean;
   trustedHoursText: string | null;
   selfReportedHoursText: string | null;
@@ -211,6 +254,7 @@ export interface TrajectoryDetailFacts {
     observedAt: string;
   }[];
   nextStepRef: string | null;
+  planChange: string | null;
 }
 
 const KIND_LABELS: Record<string, string> = {
@@ -273,8 +317,10 @@ export function buildTrackDetail(
   trajectory: TrajectoryGrowthView,
   snapshot: GrowthSnapshotView | null,
   anchors: EvidenceAnchorView[] | null,
+  roadmap?: { replacement_reason: string | null } | null,
 ): TrajectoryDetailFacts {
   const formulaId = snapshot?.definitions.milestones ?? null;
+  const readinessPercent = trajectory.readiness.percent ?? null;
   return {
     title: trajectory.track_title,
     slug: trajectorySlug(trajectory.track_key),
@@ -283,11 +329,18 @@ export function buildTrackDetail(
     formulaId,
     formulaText: `Подтверждённые обязательные этапы имеют равный вес; optional-этапы не влияют на процент. Формула ${formulaId ?? "без версии"}`,
     percentText: percentText(trajectory.completion.percent),
+    completionPercent: trajectory.completion.percent ?? null,
     remainderText: remainderText(trajectory.completion.percent),
     partial: trajectory.completion.partial,
+    readinessPercent: trajectory.readiness.percent ?? null,
     readinessPercentText: percentText(trajectory.readiness.percent),
+    readinessCycleText:
+      readinessPercent === null
+        ? "циклограмма готовности недоступна"
+        : cyclePercentText(readinessPercent, 100),
     contours: buildSkillContours(trajectory.readiness_skills),
     calendar: buildEventCalendar(snapshot?.events ?? null),
+    days: buildDayAnalytics(snapshot?.events ?? null),
     hoursKnown: snapshot?.hours.known ?? false,
     trustedHoursText: snapshot ? hoursText(snapshot.hours.trusted_minutes) : null,
     selfReportedHoursText: snapshot ? hoursText(snapshot.hours.self_reported_minutes) : null,
@@ -303,6 +356,10 @@ export function buildTrackDetail(
       observedAt: RU_TIME.format(new Date(anchor.observed_at)),
     })),
     nextStepRef: trajectory.next_step_ref,
+    planChange:
+      roadmap?.replacement_reason && roadmap.replacement_reason.length > 0
+        ? roadmap.replacement_reason
+        : null,
   };
 }
 

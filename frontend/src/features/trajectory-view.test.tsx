@@ -112,6 +112,7 @@ describe("trajectory cards builder", () => {
     expect(card?.completedCount).toBe(1);
     expect(card?.totalMilestones).toBe(2);
     expect(card?.nextStepTitle).toBe("Проект RAG");
+    expect(card?.completionPercent).toBeCloseTo(66.7, 1);
   });
 
   it("keeps honest fallbacks when no data", () => {
@@ -120,6 +121,7 @@ describe("trajectory cards builder", () => {
     expect(empty?.percentText).toBe("—");
     expect(empty?.remainderText).toBe("остаток неизвестен, пока нет подтверждённых данных");
     expect(empty?.partial).toBe(true);
+    expect(empty?.completionPercent).toBeNull();
   });
 });
 
@@ -237,6 +239,34 @@ describe("detail facts", () => {
     expect(screen.getByTestId("trajectory-calendar-empty")).toBeInTheDocument();
     expect(screen.getByTestId("trajectory-evidence-empty")).toBeInTheDocument();
     expect(screen.getByTestId("trajectory-hours")).toHaveTextContent("Часы пока не подтверждены");
+  });
+
+  it("adds cycle bar, day analytics and plan change facts", () => {
+    const facts = buildTrackDetail(trajectory, snapshot, evidence, {
+      replacement_reason: "Формула процентов изменилась",
+    });
+    expect(facts.completionPercent).toBeCloseTo(66.7, 1);
+    expect(facts.readinessPercent).toBeCloseTo(50, 1);
+    expect(facts.readinessCycleText).toContain("50%");
+    expect(facts.contours.at(0)?.cycleText).toContain("50% пути к целевому уровню");
+    expect(facts.days.qualifiedDays).toBe(2);
+    expect(facts.days.quietDays).toBe(11);
+    expect(facts.days.note).toContain("grace period");
+    expect(facts.planChange).toBe("Формула процентов изменилась");
+    render(<TrackDetailBody facts={facts} />);
+    expect(screen.getByTestId("cycle-completion")).toHaveAttribute("aria-label", "cycle-completion: 67%");
+    expect(screen.getByTestId("cycle-readiness")).toHaveAttribute("aria-label", "cycle-readiness: 50%");
+    expect(screen.getByTestId("trajectory-days")).toHaveTextContent("Дни с квалифицированной активностью");
+    expect(screen.getByTestId("trajectory-plan-change")).toHaveTextContent("Подтверждённые milestones сохранены");
+  });
+
+  it("keeps plan change null without roadmap reason", () => {
+    const facts = buildTrackDetail(trajectory, snapshot, evidence, null);
+    expect(facts.planChange).toBeNull();
+    const factsWithoutRoadmap = buildTrackDetail(trajectory, snapshot, evidence);
+    expect(factsWithoutRoadmap.planChange).toBeNull();
+    const factsEmptyReason = buildTrackDetail(trajectory, snapshot, evidence, { replacement_reason: null });
+    expect(factsEmptyReason.planChange).toBeNull();
   });
 });
 
