@@ -56,13 +56,13 @@ export function NextResultBody(props: {
   const withoutOpenStep = step === null && staleSteps.length > 0;
   return (
     <article className="focus-panel" data-testid="next-result-card">
-      <div>
+      <div className="next-result-flow">
         <p className="eyebrow">Следующий результат</p>
         <GapBadge gap={gap} />
         <GapTitle gap={gap} />
         <GapBody state={props.state} gap={gap} withoutOpenStep={withoutOpenStep} staleReason={staleSteps[0]?.stale_reason ?? null} />
         {step !== null ? (
-          <StepRecommendation step={step} onOpenTarget={props.onOpenTarget} />
+          <StepRecommendation step={step} />
         ) : null}
         {withoutOpenStep ? (
           <p className="next-result-stale" data-testid="next-result-blocked" role="note">
@@ -71,13 +71,29 @@ export function NextResultBody(props: {
             Прогноз повышения уровня не показываем.
           </p>
         ) : null}
-        <button
-          type="button"
-          onClick={props.onOpenWorkspace}
-          aria-label="Открыть рабочую область"
-        >
-          Открыть рабочую область →
-        </button>
+        <div className="next-result-actions" data-testid="next-result-actions">
+          {step !== null ? (
+            <button
+              type="button"
+              className="next-result-target"
+              data-testid="next-result-target"
+              onClick={() => {
+                props.onOpenTarget(step.target_kind === "course" ? "course" : "task", step.target_key);
+              }}
+            >
+              {step.target_kind === "course"
+                ? `Перейти к курсу «${step.target_title}»`
+                : `Открыть задачу «${step.target_title}» в каталоге`}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={props.onOpenWorkspace}
+            aria-label="Открыть рабочую область"
+          >
+            Открыть рабочую область →
+          </button>
+        </div>
       </div>
       <div className="focus-visual" aria-hidden="true">
         <span />
@@ -88,16 +104,7 @@ export function NextResultBody(props: {
   );
 }
 
-function StepRecommendation(props: {
-  step: ScoredStepView;
-  onOpenTarget: (kind: NextTargetKind, key: string) => void;
-}) {
-  const { step } = props;
-  const kind = step.target_kind === "course" ? "course" : "task";
-  const label =
-    kind === "course"
-      ? `Перейти к курсу «${step.target_title}»`
-      : `Открыть задачу «${step.target_title}» в каталоге`;
+function StepRecommendation({ step }: { step: ScoredStepView }) {
   return (
     <div className="next-result-step" data-testid="next-result-step">
       <p className="next-result-object" data-testid="next-result-object">
@@ -114,16 +121,6 @@ function StepRecommendation(props: {
         Прогноз прироста отдельный: уровень повышается только после проверки
         evidence платформой.
       </p>
-      <button
-        type="button"
-        className="next-result-target"
-        data-testid="next-result-target"
-        onClick={() => {
-          props.onOpenTarget(kind, step.target_key);
-        }}
-      >
-        {label}
-      </button>
     </div>
   );
 }
