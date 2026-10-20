@@ -21,6 +21,7 @@ from impulse.domain.work import (
     open_authorship_dispute,
     publication_issues,
     validate_personal_contribution,
+    withdraw_application,
 )
 
 
@@ -140,3 +141,16 @@ def test_revision_has_reason_deadline_owner_state_and_authorship_dispute_blocks_
         deadline_at=datetime(2026, 11, 12, tzinfo=UTC),
     )
     assert disputed is ContributionStatus.DISPUTED
+
+
+def test_withdraw_policy_keeps_accepted_and_rejected_applications_final() -> None:
+    assert withdraw_application(ApplicationStatus.APPLIED) is ApplicationStatus.WITHDRAWN
+    assert withdraw_application(ApplicationStatus.TERMS_ACCEPTED) is ApplicationStatus.WITHDRAWN
+
+    with pytest.raises(TaskPolicyError) as forbidden:
+        withdraw_application(ApplicationStatus.ACCEPTED)
+    assert forbidden.value.code == "ACCEPTED_WITHDRAW_FORBIDDEN"
+
+    with pytest.raises(TaskPolicyError) as rejected:
+        withdraw_application(ApplicationStatus.REJECTED)
+    assert rejected.value.code == "INVALID_APPLICATION_TRANSITION"

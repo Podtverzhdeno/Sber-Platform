@@ -31,10 +31,12 @@ export type RuntimeApiPath =
   | `/api/v1/me/tasks/${string}`
   | `/api/v1/me/messaging/channels/${string}`
   | `/api/v1/me/messaging/channels/${string}/messages`
+  | `/api/v1/me/messaging/channels/${string}/context`
   | `/api/v1/me/messaging/channels/${string}/read`
   | `/api/v1/me/messaging/channels/${string}/mute`
   | `/api/v1/me/tasks/${string}/terms-consent`
   | `/api/v1/me/tasks/${string}/applications`
+  | `/api/v1/me/applications/${string}/withdraw`
   | `/api/v1/me/tasks/${string}/invitation`
   | `/api/v1/me/assignments/${string}/start`
   | `/api/v1/me/assignments/${string}/contributions`

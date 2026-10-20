@@ -74,6 +74,20 @@ def accept_application(
     return ApplicationStatus.ACCEPTED
 
 
+def withdraw_application(status: ApplicationStatus) -> ApplicationStatus:
+    if status is ApplicationStatus.ACCEPTED:
+        raise TaskPolicyError(
+            "ACCEPTED_WITHDRAW_FORBIDDEN",
+            "Заявка принята: отзыв возможен только до подтверждения исполнителя.",
+        )
+    if status is ApplicationStatus.REJECTED:
+        raise TaskPolicyError(
+            "INVALID_APPLICATION_TRANSITION",
+            "Отклонённую заявку отозвать нельзя.",
+        )
+    return ApplicationStatus.WITHDRAWN
+
+
 def start_assignment(status: AssignmentStatus) -> AssignmentStatus:
     if status not in {AssignmentStatus.STAFFED, AssignmentStatus.REVISION_REQUESTED}:
         raise TaskPolicyError("INVALID_ASSIGNMENT_TRANSITION", "Назначение уже начато или закрыто.")

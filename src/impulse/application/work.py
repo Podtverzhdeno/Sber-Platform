@@ -31,6 +31,7 @@ from impulse.domain.work import (
     submit_assignment,
     validate_artifacts,
     validate_personal_contribution,
+    withdraw_application,
 )
 
 
@@ -273,6 +274,9 @@ class WorkStore(Protocol):
     ) -> ApplicationRecord: ...
     async def applications(self, task_id: UUID) -> tuple[ApplicationRecord, ...]: ...
     async def application(self, application_id: UUID) -> ApplicationRecord | None: ...
+    async def withdraw_application(
+        self, application_id: UUID, status: ApplicationStatus
+    ) -> ApplicationRecord: ...
     async def accept_application(
         self, application_id: UUID, expected_version: int, places: int
     ) -> AssignmentRecord: ...
@@ -467,25 +471,58 @@ class MemoryWorkStore:
         self._acceptances[(person_id, task_id)] = version
 
     async def apply(self, person_id: UUID, task_id: UUID, terms_version: int) -> ApplicationRecord:
-        for current in self._applications.values():
-            if (current.person_id, current.task_id) == (person_id, task_id):
-                if current.status is ApplicationStatus.TERMS_ACCEPTED:
-                    updated = ApplicationRecord(
-                        current.id,
-                        task_id,
-                        person_id,
-                        terms_version,
-                        ApplicationStatus.APPLIED,
-                        current.version + 1,
-                    )
-                    self._applications[current.id] = updated
-                    return updated
+        matching = [
+            record
+            for record in self._applications.values()
+            if (record.person_id, record.task_id) == (person_id, task_id)
+        ]
+        current = matching[-1] if matching else None
+        if current is not None:
+            if current.status is ApplicationStatus.APPLIED:
                 return current
+            if current.status is ApplicationStatus.TERMS_ACCEPTED:
+                updated = ApplicationRecord(
+                    current.id,
+                    task_id,
+                    person_id,
+                    terms_version,
+                    ApplicationStatus.APPLIED,
+                    current.version + 1,
+                )
+                self._applications[current.id] = updated
+                return updated
+            if current.status in {ApplicationStatus.WITHDRAWN, ApplicationStatus.REJECTED}:
+                record = ApplicationRecord(
+                    current.id,
+                    task_id,
+                    person_id,
+                    terms_version,
+                    ApplicationStatus.APPLIED,
+                    current.version + 1,
+                )
+                self._applications[current.id] = record
+                return record
+            return current
         record = ApplicationRecord(
             uuid4(), task_id, person_id, terms_version, ApplicationStatus.APPLIED
         )
         self._applications[record.id] = record
         return record
+
+    async def withdraw_application(
+        self, application_id: UUID, status: ApplicationStatus
+    ) -> ApplicationRecord:
+        current = self._applications[application_id]
+        updated = ApplicationRecord(
+            current.id,
+            current.task_id,
+            current.person_id,
+            current.accepted_terms_version,
+            status,
+            current.version + 1,
+        )
+        self._applications[application_id] = updated
+        return updated
 
     async def applications(self, task_id: UUID) -> tuple[ApplicationRecord, ...]:
         return tuple(item for item in self._applications.values() if item.task_id == task_id)
@@ -1466,6 +1503,23 @@ class WorkService:
                 status_code=409,
             )
         return await self.store.apply(actor.person_id, task_id, detail.terms.version)
+
+    async def withdraw_application(
+        self, actor: ActorContext, application_id: UUID
+    ) -> ApplicationRecord:
+        self._role(actor, Role.PARTICIPANT)
+        application = await self.store.application(application_id)
+        if application is None or application.person_id != actor.person_id:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        if application.status is ApplicationStatus.WITHDRAWN:
+            return application
+        try:
+            status = withdraw_application(application.status)
+        except TaskPolicyError as exc:
+            raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
+        return await self.store.withdraw_application(application_id, status)
 
     async def task_applications(
         self, actor: ActorContext, task_id: UUID

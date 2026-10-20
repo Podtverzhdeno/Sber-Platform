@@ -380,3 +380,174 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
     assert contribution_row.summary.startswith("Я реализовал API")
     assert artifact_count == 1
     await database.close()
+
+
+@pytest.mark.asyncio
+async def test_application_withdrawal_is_idempotent_and_blocked_after_acceptance() -> None:
+    database = Database(integration_url())
+    await seed_demo(database)
+    settings = Settings(
+        app_env=AppEnvironment.TEST,
+        demo_mode=True,
+        session_secret=SecretStr("withdraw-integration-secret-long-enough"),
+    )
+    auth = DemoAuthService(
+        SqlIdentityStore(database),
+        secret=settings.session_signing_secret(),
+        ttl_seconds=settings.session_ttl_seconds,
+    )
+    work_store = SqlWorkStore(database)
+    app = create_app(
+        settings,
+        auth_service=auth,
+        work_service=WorkService(work_store),
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app), base_url="http://testserver"
+    ) as client:
+        customer_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "customer-roman"}
+        )
+        customer_csrf = customer_login.json()["csrf_token"]
+        draft = await client.post(
+            "/api/v1/customer/projects/demo-rd-lab/tasks",
+            json={
+                "task_key": "withdraw-rd",
+                "title": "PostgreSQL withdrawal",
+                "problem": "Проверить отзыв заявки.",
+                "deliverable": "Работающий срез.",
+                "acceptance_criteria": ["Отзыв воспроизводим"],
+                "deadline_at": "2026-11-01T18:00:00Z",
+                "data_constraints": "Без персональных данных.",
+                "ip_terms": "Права передаются после приёмки.",
+                "nominated_mentor_id": None,
+                "compensation": {
+                    "paid": False,
+                    "base_amount_per_assignee": None,
+                    "currency": None,
+                    "a_multiplier": "2.00",
+                    "quantum": "0.01",
+                    "rounding_mode": "half_up",
+                    "policy_version": 1,
+                    "payout_condition": "Вознаграждение не предусмотрено.",
+                },
+            },
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert draft.status_code == 200
+        task_id = draft.json()["id"]
+        await client.post(
+            f"/api/v1/customer/tasks/{task_id}/submit",
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        operator_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "operator-pavel"}
+        )
+        operator_csrf = operator_login.json()["csrf_token"]
+        await client.post(
+            f"/api/v1/operations/tasks/{task_id}/moderate",
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        await client.post(
+            f"/api/v1/operations/tasks/{task_id}/support",
+            json={"mode": "operator"},
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        await client.post(
+            f"/api/v1/operations/tasks/{task_id}/publish",
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+
+        participant_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}
+        )
+        participant_csrf = participant_login.json()["csrf_token"]
+        detail = await client.get(f"/api/v1/marketplace/tasks/{task_id}")
+        terms_version = int(detail.json()["terms"]["version"])
+        await client.post(
+            f"/api/v1/me/tasks/{task_id}/terms-consent",
+            json={"terms_version": terms_version},
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        applied = await client.post(
+            f"/api/v1/me/tasks/{task_id}/applications",
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert applied.status_code == 200
+        application_id = applied.json()["id"]
+        assert applied.json()["version"] == 1
+
+        withdrawn = await client.post(
+            f"/api/v1/me/applications/{application_id}/withdraw",
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert withdrawn.status_code == 200
+        assert withdrawn.json()["status"] == "withdrawn"
+        assert withdrawn.json()["version"] == 2
+        repeat = await client.post(
+            f"/api/v1/me/applications/{application_id}/withdraw",
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert repeat.status_code == 200
+        assert repeat.json() == withdrawn.json()
+
+        customer_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "customer-roman"}
+        )
+        customer_csrf = customer_login.json()["csrf_token"]
+        raced = await client.post(
+            f"/api/v1/customer/applications/{application_id}/accept",
+            json={"expected_version": 1},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert raced.status_code == 409
+        assert raced.json()["code"] == "STALE_APPLICATION"
+
+        participant_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}
+        )
+        participant_csrf = participant_login.json()["csrf_token"]
+        await client.post(
+            f"/api/v1/me/tasks/{task_id}/terms-consent",
+            json={"terms_version": terms_version},
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        reapplied = await client.post(
+            f"/api/v1/me/tasks/{task_id}/applications",
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert reapplied.status_code == 200
+        assert reapplied.json()["id"] == application_id
+        assert reapplied.json()["status"] == "applied"
+        assert reapplied.json()["version"] == 3
+
+        customer_login = await client.post(
+            "/api/v1/auth/demo-login", json={"persona_key": "customer-roman"}
+        )
+        customer_csrf = customer_login.json()["csrf_token"]
+        accepted = await client.post(
+            f"/api/v1/customer/applications/{application_id}/accept",
+            json={"expected_version": 3},
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert accepted.status_code == 200
+        assert accepted.json()["status"] == "staffed"
+
+        forbidden = await client.post(
+            f"/api/v1/me/applications/{application_id}/withdraw",
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert forbidden.status_code == 409
+        assert forbidden.json()["code"] == "ACCEPTED_WITHDRAW_FORBIDDEN"
+
+    async with database.sessions() as session:
+        row = (
+            await session.execute(
+                select(applications.c.status, applications.c.version).where(
+                    applications.c.id == UUID(application_id)
+                )
+            )
+        ).one()
+    assert row.status == "accepted"
+    assert row.version == 4
+    await database.close()

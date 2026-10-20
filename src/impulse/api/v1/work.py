@@ -1216,6 +1216,17 @@ async def apply_to_task(
     return _application_view(await service.apply(authenticated.actor, task_id))
 
 
+@router.post("/me/applications/{application_id}/withdraw", response_model=ApplicationView)
+async def withdraw_application(
+    application_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> ApplicationView:
+    return _application_view(
+        await service.withdraw_application(authenticated.actor, application_id)
+    )
+
+
 @router.get("/customer/tasks/{task_id}/applications", response_model=list[ApplicationView])
 async def task_applications(
     task_id: UUID,

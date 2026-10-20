@@ -671,7 +671,72 @@ class SqlWorkStore(WorkStore):
                     ApplicationStatus.APPLIED,
                     record.version + 1,
                 )
+            if record.status in {ApplicationStatus.WITHDRAWN, ApplicationStatus.REJECTED}:
+                try:
+                    await mutate_with_history(
+                        session,
+                        table=applications,
+                        entity_id=record.id,
+                        expected_version=record.version,
+                        changes={
+                            "status": ApplicationStatus.APPLIED.value,
+                            "accepted_terms_version": terms_version,
+                        },
+                        actor_id=person_id,
+                        action="application.reapplied",
+                        event_key=f"application:{record.id}:applied:v{record.version}",
+                        event_type="work.application_reapplied",
+                        event_payload={"task_id": task_id, "terms_version": terms_version},
+                    )
+                except StaleVersionError as exc:
+                    raise ApiError("STALE_APPLICATION", "Application changed.", 409) from exc
+                return ApplicationRecord(
+                    record.id,
+                    record.task_id,
+                    record.person_id,
+                    terms_version,
+                    ApplicationStatus.APPLIED,
+                    record.version + 1,
+                )
             return record
+
+    async def withdraw_application(
+        self, application_id: UUID, status: ApplicationStatus
+    ) -> ApplicationRecord:
+        async with self.database.session() as session:
+            row = (
+                await session.execute(
+                    select(applications).where(applications.c.id == application_id)
+                )
+            ).one_or_none()
+            if row is None:
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            record = self._application(row)
+            try:
+                await mutate_with_history(
+                    session,
+                    table=applications,
+                    entity_id=record.id,
+                    expected_version=record.version,
+                    changes={"status": status.value},
+                    actor_id=record.person_id,
+                    action="application.withdrawn",
+                    event_key=f"application:{record.id}:withdrawn:v{record.version}",
+                    event_type="work.application_withdrawn",
+                    event_payload={"task_id": record.task_id, "status": status.value},
+                )
+            except StaleVersionError as exc:
+                raise ApiError("STALE_APPLICATION", "Application changed.", 409) from exc
+            return ApplicationRecord(
+                record.id,
+                record.task_id,
+                record.person_id,
+                record.accepted_terms_version,
+                status,
+                record.version + 1,
+            )
 
     async def applications(self, task_id: UUID) -> tuple[ApplicationRecord, ...]:
         async with self.database.sessions() as session:

@@ -381,6 +381,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/support-models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Support Model Catalog */
+        get: operations["support_model_catalog_api_v1_customer_support_models_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/tasks": {
         parameters: {
             query?: never;
@@ -886,6 +903,23 @@ export interface paths {
         get: operations["participant_journey_api_v1_me_analytics_journey_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/applications/{application_id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Withdraw Application */
+        post: operations["withdraw_application_api_v1_me_applications__application_id__withdraw_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4952,11 +4986,39 @@ export interface components {
             /** Suggestion Id */
             suggestion_id: string;
         };
+        /** SupportCatalogView */
+        SupportCatalogView: {
+            /** Models */
+            models: components["schemas"]["SupportModelView"][];
+            /** Version */
+            version: number;
+        };
         /**
          * SupportMode
          * @enum {string}
          */
         SupportMode: "mentor" | "buddy" | "operator";
+        /** SupportModelView */
+        SupportModelView: {
+            /** Activities */
+            activities: string[];
+            /** Available */
+            available: boolean;
+            /** Code */
+            code: string;
+            /** Name */
+            name: string;
+            /** Requires Assignee */
+            requires_assignee: boolean;
+            /** Response Time */
+            response_time: string;
+            /** Responsible */
+            responsible: string;
+            /** Restrictions */
+            restrictions: string[];
+            /** Unavailable Reason */
+            unavailable_reason: string | null;
+        };
         /** SupportRequest */
         SupportRequest: {
             /** Assignee Id */
@@ -6076,6 +6138,26 @@ export interface operations {
             };
         };
     };
+    support_model_catalog_api_v1_customer_support_models_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportCatalogView"];
+                };
+            };
+        };
+    };
     customer_tasks_api_v1_customer_tasks_get: {
         parameters: {
             query?: never;
@@ -7009,6 +7091,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ParticipantAnalyticsView"];
+                };
+            };
+        };
+    };
+    withdraw_application_api_v1_me_applications__application_id__withdraw_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
