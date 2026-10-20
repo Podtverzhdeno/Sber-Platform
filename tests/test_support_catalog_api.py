@@ -28,8 +28,7 @@ def test_support_catalog_requires_authentication() -> None:
     assert response.status_code == 401
 
 
-def test_support_catalog_is_versioned_explainable_and_marks_unavailable_options(
-) -> None:
+def test_support_catalog_is_versioned_explainable_and_marks_unavailable_options() -> None:
     client = _client()
     login = client.post("/api/v1/auth/demo-login", json={"persona_key": "customer-roman"})
     assert login.status_code == 200
