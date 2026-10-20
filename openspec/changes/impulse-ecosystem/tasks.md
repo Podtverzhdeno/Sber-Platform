@@ -131,7 +131,7 @@
 - [x] 14.4 Реализовать thread/messages/feedback API, idempotent client request и SSE safe events; tests SHALL покрыть duplicate message, cancel и cross-thread IDOR.
 - [x] 14.5 Реализовать Buddy UI, sources, suggested navigation, uncertainty, disable/delete/memory consent; Playwright SHALL проверить основной продукт при выключенном AI.
 - [x] 14.6 Реализовать retention cleanup и immediate stop reading preferences после consent withdrawal; tests SHALL сохранить доменный audit при удалении chat.
-- [ ] 14.7 Выполнить ручной smoke настоящего OpenRouter на synthetic/public fixtures и записать фактическую free model/capabilities без сохранения ключа или raw trace.
+- [x] 14.7 Выполнить ручной smoke настоящего OpenRouter на synthetic/public fixtures и записать фактическую free model/capabilities без сохранения ключа или raw trace.
 
 ## 15. Помощники ментора, оператора и заказчика
 
@@ -297,7 +297,7 @@
 
 ## 23. Уточнение wizard заказчика
 
-- [ ] 23.1 Реализовать catalog моделей поддержки с кодом, названием, ответственными, activities, SLA и restrictions; wizard dropdown SHALL валидировать обязательного ментора/эксперта и честно disabled недоступные options.
+- [x] 23.1 Реализовать catalog моделей поддержки с кодом, названием, ответственными, activities, SLA и restrictions; wizard dropdown SHALL валидировать обязательного ментора/эксперта и честно disabled недоступные options.
 - [ ] 23.2 Переработать candidate picker для `invitation_only`: compact accessible controls, accepted relevant case, match reason, availability и selection summary; API/RBAC tests SHALL повторно проверять consent/case/places/terms при публикации и не создавать assignment до принятия invitation.
 - [ ] 23.3 Подключить customer AI suggestions к реальному API как versioned field patches с apply/undo/stale merge, idempotency и human edit; tests SHALL покрыть public/synthetic allowlist, closed brief block, timeout/quota и запрет save/publish side effects.
 - [ ] 23.4 Добавить gradient + textual/programmatic provenance для применённого AI fragment в обеих темах с before/after и reduced motion; component/accessibility tests SHALL проверять contrast, screen reader и снятие applied-state после human edit/undo.

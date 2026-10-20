@@ -11,9 +11,11 @@ type TaskFilter = "all" | "draft" | "in_progress" | "awaiting_acceptance" | "com
 type TaskSort = "action" | "deadline";
 type TaskMode = "open" | "invitation_only";
 type ApplicationFilter = "all" | "applied" | "accepted";
-type DraftForm = { title: string; competencyTags: string; rubricResult: string; rubricReasoning: string; rubricUncertainty: string; rubricAiUse: string; rubricDefense: string; problem: string; deliverable: string; criterion: string; deadline: string; dataConstraints: string; ipTerms: string; places: string; baseAmount: string; aMultiplier: string };
+type SupportModel = { code: string; name: string; responsible: string; activities: string[]; response_time: string; restrictions: string[]; available: boolean; unavailable_reason: string | null; requires_assignee: boolean };
+type SupportCatalog = { version: number; models: SupportModel[] };
+type DraftForm = { title: string; competencyTags: string; rubricResult: string; rubricReasoning: string; rubricUncertainty: string; rubricAiUse: string; rubricDefense: string; problem: string; deliverable: string; criterion: string; deadline: string; dataConstraints: string; ipTerms: string; places: string; baseAmount: string; aMultiplier: string; supportModel: string; supportAssignee: string };
 
-const initialForm: DraftForm = { title: "", competencyTags: "", rubricResult: "", rubricReasoning: "", rubricUncertainty: "", rubricAiUse: "", rubricDefense: "", problem: "", deliverable: "", criterion: "", deadline: "2026-12-20T18:00", dataConstraints: "Только обезличенные демонстрационные данные", ipTerms: "Результат передаётся заказчику, авторство участника сохраняется в портфолио", places: "2", baseAmount: "50000", aMultiplier: "2" };
+const initialForm: DraftForm = { title: "", competencyTags: "", rubricResult: "", rubricReasoning: "", rubricUncertainty: "", rubricAiUse: "", rubricDefense: "", problem: "", deliverable: "", criterion: "", deadline: "2026-12-20T18:00", dataConstraints: "Только обезличенные демонстрационные данные", ipTerms: "Результат передаётся заказчику, авторство участника сохраняется в портфолио", places: "2", baseAmount: "50000", aMultiplier: "2", supportModel: "platform", supportAssignee: "request" };
 const demoTasks: Task[] = [
   { id: "demo-task-1", project_key: "R&D · Аналитика", task_key: "recommendation", title: "Прототип рекомендательной системы для научных статей", status: "in_progress", nominated_mentor_id: null, support_mode: "platform", support_assignee_id: null, places: 6, demo: true, applications: 28, deadline: "25 апреля 2026" },
   { id: "demo-task-2", project_key: "MVP · LLM", task_key: "knowledge-chat", title: "MVP чат-ассистента для внутренних знаний", status: "submitted", nominated_mentor_id: null, support_mode: "platform", support_assignee_id: null, places: 3, demo: true, applications: 15, deadline: "12 апреля 2026" },
@@ -46,6 +48,11 @@ export function CustomerWorkspace() {
   const queryClient = useQueryClient();
   const tasks = useQuery({ queryKey: ["customer-tasks"], queryFn: () => apiRequest<Task[]>("/api/v1/customer/tasks"), refetchOnMount: "always" });
   const publicConfig = useQuery({ queryKey: ["public-config"], queryFn: () => apiRequest<{ demo_mode?: boolean }>("/api/v1/config") });
+  const supportCatalog = useQuery({ queryKey: ["customer-support-models"], queryFn: async () => {
+    const response = await fetch("/api/v1/customer/support-models", { headers: { Accept: "application/json" } });
+    if (!response.ok) throw new Error("SUPPORT_CATALOG_UNAVAILABLE");
+    return await response.json() as SupportCatalog;
+  } });
   const [taskMode, setTaskMode] = useState<TaskMode>("open");
   const [form, setForm] = useState<DraftForm>(initialForm);
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -94,6 +101,7 @@ export function CustomerWorkspace() {
         rubricUncertainty: form.rubricUncertainty, rubricAiUse: form.rubricAiUse, rubricDefense: form.rubricDefense,
         problem: form.problem, deliverable: form.deliverable, criterion: form.criterion, deadline: form.deadline,
         dataConstraints: form.dataConstraints, ipTerms: form.ipTerms, places: form.places, baseAmount: form.baseAmount, aMultiplier: form.aMultiplier,
+        supportModel: form.supportModel, supportAssignee: form.supportAssignee,
       },
     }));
   });
@@ -133,6 +141,10 @@ export function CustomerWorkspace() {
   const canAdvance = (step: number): boolean => {
     if (step === 1) return form.title.trim().length > 0 && tags(form.competencyTags).length > 0;
     if (step === 2) return form.problem.trim().length > 0 && form.deliverable.trim().length > 0 && form.criterion.trim().length > 0;
+    if (step === 4) {
+      const model = supportCatalog.data?.models.find((item) => item.code === form.supportModel);
+      return Boolean(model?.available && (!model.requires_assignee || form.supportAssignee !== ""));
+    }
     return true;
   };
   const briefGaps = (): string[] => [
@@ -258,6 +270,10 @@ export function CustomerWorkspace() {
           </>)}
         </>)}
         {wizardStep === 4 && (<>
+          <label className="span-2" htmlFor="wizard-support-model">Модель поддержки<select id="wizard-support-model" value={form.supportModel} onChange={(event) => { setForm({ ...form, supportModel: event.target.value }); }}>{supportCatalog.data?.models.map((model) => <option key={model.code} value={model.code} disabled={!model.available}>{model.name}{model.available ? "" : ` — ${model.unavailable_reason ?? "недоступно"}`}</option>)}</select></label>
+          {supportCatalog.isLoading && <small className="span-2">Загружаем опубликованные модели поддержки…</small>}
+          {supportCatalog.isError && <p className="span-2" role="alert">Не удалось загрузить модели поддержки. Повторите позже.</p>}
+          {(() => { const model = supportCatalog.data?.models.find((item) => item.code === form.supportModel); return model ? <section className="span-2" aria-live="polite"><h3>{model.name}</h3><p><strong>Кто отвечает:</strong> {model.responsible}</p><p><strong>Что входит:</strong> {model.activities.join(" · ")}</p><p><strong>SLA:</strong> {model.response_time}</p><p><strong>Ограничения:</strong> {model.restrictions.join(" · ")}</p>{model.requires_assignee && <label htmlFor="wizard-support-assignee">Назначение<select id="wizard-support-assignee" value={form.supportAssignee} onChange={(event) => { setForm({ ...form, supportAssignee: event.target.value }); }}><option value="request">Запросить назначение ментора у платформы</option><option value="" disabled>Выберите допустимого ментора</option></select></label>}</section> : null; })()}
           <label htmlFor="wizard-places-input">Мест для участников<input id="wizard-places-input" type="number" min="1" value={form.places} onChange={(event) => { setForm({ ...form, places: event.target.value }); }} /></label>
           <label htmlFor="wizard-factor-input">Множитель A вклада в итоговую оценку<input id="wizard-factor-input" type="text" value={form.aMultiplier} onChange={(event) => { setForm({ ...form, aMultiplier: event.target.value }); }} /></label>
           <small className="span-2">Суммы выплат участники увидят только после подтверждения платформой; неподтверждённая символическая премия не показывается как обещание.</small>
@@ -269,6 +285,7 @@ export function CustomerWorkspace() {
           <p>Результат: {form.deliverable}</p>
           <ul>{form.criterion.split("\n").map((item) => item.trim()).filter(Boolean).map((item, index) => <li key={`preview-${String(index)}`}>{item}</li>)}</ul>
           <p>Условия: версия 1 · {taskMode === "open" ? "открытая заявка" : "доступ по приглашению"}</p>
+          <p>Поддержка: {supportCatalog.data?.models.find((item) => item.code === form.supportModel)?.name ?? "модель не загружена"}</p>
         </>)}
       </form>
       {wizardStep === 5 && briefGaps().length > 0 && <p role="alert" data-testid="wizard-brief-complete">{`Бриф неполный: заполните ${briefGaps().join(", ")}.`}</p>}

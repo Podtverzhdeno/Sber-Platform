@@ -69,6 +69,15 @@ const analytics = {
     { key: "customer_active_people", value: "4", numerator: 4, denominator: 4, unit: "people" },
   ],
 };
+const supportCatalog = {
+  version: 1,
+  models: [
+    { code: "platform", name: "Сопровождение платформы", responsible: "Операционная команда платформы", activities: ["Маршрутизация вопросов", "Контроль статусов", "Эскалация блокеров"], response_time: "Ответ в течение 1 рабочего дня", restrictions: ["Не заменяет предметного ментора", "Не принимает результат за заказчика"], available: true, unavailable_reason: null, requires_assignee: false },
+    { code: "assigned_mentor", name: "Назначенный ментор", responsible: "Выбранный ментор", activities: ["Checkpoint-сессии", "Ревью evidence"], response_time: "Ответ в течение 2 рабочих дней", restrictions: ["Требуется назначение"], available: true, unavailable_reason: null, requires_assignee: true },
+    { code: "expert_consultations", name: "Экспертные консультации", responsible: "Эксперт", activities: ["Консультация"], response_time: "По расписанию", restrictions: ["Без регулярного ведения"], available: false, unavailable_reason: "Нет свободного экспертного пула", requires_assignee: false },
+    { code: "customer_self", name: "Самостоятельное ведение заказчиком", responsible: "Заказчик", activities: ["Ответы на вопросы"], response_time: "По условиям", restrictions: ["Доступность обеспечивает заказчик"], available: true, unavailable_reason: null, requires_assignee: false },
+  ],
+};
 
 function mockHome(
   tasks: Task[],
@@ -97,6 +106,9 @@ function mockHome(
     }
     if (path === "/api/v1/analytics/role") {
       return Promise.resolve(new Response(JSON.stringify(analytics), { status: 200 }));
+    }
+    if (path === "/api/v1/customer/support-models") {
+      return Promise.resolve(new Response(JSON.stringify(supportCatalog), { status: 200 }));
     }
     const match = /^\/api\/v1\/customer\/tasks\/([\w-]+)(\/applications)?$/.exec(path);
     if (match) {
@@ -136,6 +148,30 @@ function itemAt<T>(list: T[], index: number): T {
 }
 
 describe("customer home", () => {
+  it("explains support models and disables unavailable policy options", async () => {
+    mockHome([taskEconomy]);
+    renderHome();
+    await waitFor(() => { expect(screen.getAllByText("Оптимизация логистики региона").length).toBeGreaterThan(0); });
+    fireEvent.click(screen.getByRole("button", { name: "+ Создать задачу" }));
+    fireEvent.change(screen.getByLabelText("Название"), { target: { value: "Новая задача" } });
+    fireEvent.change(screen.getByLabelText("Компетенции кейса через запятую"), { target: { value: "AI" } });
+    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    fireEvent.change(screen.getByLabelText("Проблема"), { target: { value: "Нужно проверить гипотезу." } });
+    fireEvent.change(screen.getByLabelText("Результат"), { target: { value: "Проверяемый прототип." } });
+    fireEvent.change(screen.getByLabelText("Критерии приёмки построчно"), { target: { value: "Есть метрика" } });
+    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    const selector = await screen.findByLabelText("Модель поддержки");
+    expect(selector).toHaveValue("platform");
+    expect(screen.getByText("Операционная команда платформы")).toBeInTheDocument();
+    expect(screen.getByText(/Не заменяет предметного ментора/)).toBeInTheDocument();
+    const expert = screen.getByRole("option", { name: /Экспертные консультации/ });
+    expect(expert).toBeDisabled();
+    fireEvent.change(selector, { target: { value: "assigned_mentor" } });
+    expect(screen.getByLabelText("Назначение")).toHaveValue("request");
+    expect(screen.getByText(/Checkpoint-сессии/)).toBeInTheDocument();
+  });
+
   it("renders domain KPIs, deadlines and opens the priority task from CTA", async () => {
     mockHome([taskEconomy, taskKnowledge]);
     renderHome();
