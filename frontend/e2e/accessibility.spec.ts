@@ -21,6 +21,7 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/me/roadmaps", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/development/courses", (route) => route.fulfill({ json: [{ key: "openspec", title: "OpenSpec и SDD", track_keys: ["python"], recommendation_reason: "Для направления python", source_url: "https://example.test/course", availability: "available", access_note: "Доступен в демо", completion_status: null, rating_eligible: false }] }));
   await page.route("**/api/v1/me/learning/streak", (route) => route.fulfill({ json: { current_days: 2, qualified_dates: ["2026-09-26", "2026-09-27"], reason: "Серия сохранена." } }));
+  await page.route("**/api/v1/me/bootcamp/catalog", (route) => route.fulfill({ json: [] }));
 });
 
 for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
