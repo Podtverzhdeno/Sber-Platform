@@ -269,7 +269,7 @@
 ## 22. Объяснимый кабинет участника и Skill Passport
 
 - [ ] 22.1 Добавить в topbar доступный переключатель солнце/луна с немедленным применением светлой/тёмной темы, системным default, сохранением в профиле и восстановлением без theme flash; component/Playwright tests SHALL покрыть keyboard, `aria-pressed`, reload и `prefers-color-scheme`.
-- [ ] 22.2 Перестроить «Следующий результат» вокруг Skill Passport gap: навык, текущий/целевой уровень, недостающее evidence, объяснение выбора проекта/checkpoint и честный fallback без подходящей задачи; API/UI tests SHALL запретить повышение уровня до проверки evidence.
+- [x] 22.2 Перестроить «Следующий результат» вокруг Skill Passport gap: навык, текущий/целевой уровень, недостающее evidence, объяснение выбора проекта/checkpoint и честный fallback без подходящей задачи; API/UI tests SHALL запретить повышение уровня до проверки evidence.
 - [ ] 22.3 Сделать рекомендацию AI-Buddy на главной результатом объяснимого анализа разрешённых данных с timestamp, причинами, источниками, dismiss и deterministic manual fallback; tests SHALL покрыть давно неактивный Bootcamp, opt-out, quota/provider outage и отсутствие автоматической записи/смены траектории.
 - [ ] 22.4 Реализовать activity projection и UI с day/week/month/year, разложением course/project/event, timezone, freshness и версионированным определением; threshold tests SHALL различать risk/success/neutral и запретить использование одного цвета без текста.
 - [ ] 22.5 Добавить drill-down KPI «Прогресс маршрута», «Проектов в работе» и «Подтверждено», а также историческую дневную повестку; Playwright SHALL открыть завершённый проект, конкретное evidence и предыдущий пустой/непустой день по deep link.
