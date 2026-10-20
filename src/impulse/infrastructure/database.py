@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import AsyncGenerator
+import os
+from collections.abc import AsyncGenerator, Mapping
 from contextlib import asynccontextmanager
 
 from sqlalchemy import MetaData, text
+from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -34,6 +36,32 @@ def async_database_url(url: str) -> str:
     if url.startswith("postgresql://"):
         return "postgresql+asyncpg://" + url.removeprefix("postgresql://")
     return url
+
+
+def required_database_url(
+    environ: Mapping[str, str] | None = None,
+    *,
+    purpose: str = "database startup",
+) -> str:
+    """Return a validated database URL without exposing credentials in errors."""
+    source = os.environ if environ is None else environ
+    raw = source.get("DATABASE_URL", "").strip()
+    if not raw:
+        raise RuntimeError(
+            f"DATABASE_URL is required for {purpose}. "
+            "On Railway, add a PostgreSQL service and set DATABASE_URL to the "
+            "Postgres service reference variable."
+        )
+    try:
+        parsed = make_url(raw)
+    except Exception as exc:
+        raise RuntimeError(f"DATABASE_URL is invalid for {purpose}") from exc
+    if source.get("RAILWAY_ENVIRONMENT") and parsed.host in {"localhost", "127.0.0.1", "::1"}:
+        raise RuntimeError(
+            f"DATABASE_URL for {purpose} points to localhost inside Railway. "
+            "Use the private PostgreSQL service reference variable instead."
+        )
+    return raw
 
 
 class Database:

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import os
 from logging.config import fileConfig
 
 from alembic import context
@@ -12,15 +11,14 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from impulse.infrastructure import models as models
-from impulse.infrastructure.database import Base, async_database_url
+from impulse.infrastructure.database import Base, async_database_url, required_database_url
 
 config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-database_url = os.environ.get("DATABASE_URL")
-if database_url:
-    config.set_main_option("sqlalchemy.url", async_database_url(database_url).replace("%", "%%"))
+database_url = required_database_url(purpose="Alembic migrations")
+config.set_main_option("sqlalchemy.url", async_database_url(database_url).replace("%", "%%"))
 
 target_metadata = Base.metadata
 

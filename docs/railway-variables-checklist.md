@@ -31,6 +31,12 @@
 обоснованной настройки. Sealed variables невозможно прочитать обратно; они также не копируются
 автоматически в PR/duplicated environments, поэтому для preview нужны отдельные test credentials.
 
+Для каждого Railway project/environment переменная приложения задаётся именно ссылкой, а не
+локальным URL: `DATABASE_URL=${{Postgres.DATABASE_URL}}`, где `Postgres` — точное имя PostgreSQL
+service в этом проекте. Для `spirited-healing / production` и `optimistic-energy / production`
+ссылка настраивается отдельно. Значения с `localhost`, `127.0.0.1` или `::1` внутри Railway
+некорректны: база работает в другом контейнере.
+
 ## Review перед применением staged changes
 
 - [ ] В Variables нет literal production secret в reference или описании.
