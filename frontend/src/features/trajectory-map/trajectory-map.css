@@ -1,0 +1,118 @@
+.tmap-track {
+  --tmap-accent: var(--color-accent, #36d399);
+  overflow: hidden;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  border: 1px solid color-mix(in srgb, var(--tmap-accent) 24%, var(--color-border, #3a5147));
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--tmap-accent) 14%, transparent), transparent 42%),
+    var(--color-surface);
+}
+
+.tmap-track-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.tmap-track-title {
+  font-size: 1.05rem;
+  font-weight: 750;
+}
+
+.tmap-route {
+  display: grid;
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.tmap-step {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  min-height: 7.5rem;
+}
+
+.tmap-step:nth-child(4n + 2) { transform: translateX(4rem); }
+.tmap-step:nth-child(4n + 4) { transform: translateX(-4rem); }
+
+.tmap-connector {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% - 0.45rem);
+  width: 0.35rem;
+  height: 3rem;
+  border-radius: 999px;
+  background: var(--color-border, #3a5147);
+  transform: translateX(-50%);
+}
+
+.tmap-connector--done {
+  background: linear-gradient(180deg, var(--tmap-accent), color-mix(in srgb, var(--tmap-accent) 45%, var(--color-border, #3a5147)));
+}
+
+.tmap-checkpoint {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  align-items: center;
+  width: min(100%, 25rem);
+  min-height: 4.5rem;
+  padding: 0.65rem 1rem 0.65rem 0.65rem;
+  border: 1px solid var(--color-border, #3a5147);
+  border-radius: 1.25rem;
+  color: var(--color-text);
+  text-align: left;
+  background: color-mix(in srgb, var(--color-surface) 92%, var(--tmap-accent));
+  box-shadow: 0 0.6rem 1.8rem color-mix(in srgb, #000 12%, transparent);
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  touch-action: manipulation;
+}
+
+.tmap-checkpoint:hover,
+.tmap-checkpoint:focus-visible,
+.tmap-step--active .tmap-checkpoint {
+  border-color: var(--tmap-accent);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--tmap-accent) 22%, transparent), 0 0.8rem 2rem color-mix(in srgb, #000 16%, transparent);
+  transform: translateY(-0.16rem);
+}
+
+.tmap-marker {
+  display: grid;
+  place-items: center;
+  width: 2.8rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  color: #fff;
+  font-weight: 800;
+  background: var(--tmap-accent);
+}
+
+.tmap-checkpoint--success .tmap-marker { background: #178f62; }
+.tmap-checkpoint--warning .tmap-marker { background: #a66a19; }
+.tmap-checkpoint--warning { opacity: 0.8; }
+
+.tmap-copy { display: grid; gap: 0.2rem; min-width: 0; }
+.tmap-copy small { color: var(--color-muted); line-height: 1.35; }
+.tmap-impact { display: flex; flex-wrap: wrap; gap: 0.6rem 1rem; align-items: center; }
+.tmap-impact em { color: var(--tmap-accent); font-style: normal; font-weight: 650; }
+.tmap-detail-points { padding: 0.75rem 1rem; border-radius: 0.9rem; background: color-mix(in srgb, var(--tmap-accent) 10%, transparent); }
+
+@media (max-width: 640px) {
+  .tmap-track-header { align-items: flex-start; flex-direction: column; }
+  .tmap-step:nth-child(n) { transform: none; }
+  .tmap-checkpoint { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tmap-checkpoint { transition: none; }
+  .tmap-checkpoint:hover,
+  .tmap-checkpoint:focus-visible,
+  .tmap-step--active .tmap-checkpoint { transform: none; }
+}
