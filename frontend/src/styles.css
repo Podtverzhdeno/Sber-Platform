@@ -38,3 +38,7 @@
   .participant-home .next-result-actions { flex-direction: column; align-items: stretch; }
   .participant-home .next-result-actions button { width: 100%; }
 }
+ /* openspec 22.22 — disclosure-заголовки секций рабочей области */
+.ctw-section-toggle { background: none; border: 0; color: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; padding: 0; text-align: left; }
+.ctw-chevron { color: var(--color-muted, #aabdb4); font-size: 12px; }
+.ctw-section-aside { display: inline-flex; align-items: center; }

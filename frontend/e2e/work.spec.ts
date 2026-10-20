@@ -316,3 +316,34 @@ test("proposes a deadline change and surfaces the pending duplicate honestly", a
   await expect(page.getByText("Уже есть активный запрос на перенос срока — дождитесь решения заказчика.")).toBeVisible();
   expect(proposalCalls).toBe(2);
 });
+
+test("collapses workspace sections by keyboard and keeps drafts across reload", async ({ page }) => {
+  await mockShell(page);
+  await page.route("**/api/v1/me", (route) => route.fulfill({ json: participant }));
+  await page.route("**/api/v1/marketplace/tasks", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/work", (route) => route.fulfill({ json: [workItem(assignmentId, "in_progress")] }));
+  await page.route("**/api/v1/me/reward-evidence", (route) => route.fulfill({ json: [] }));
+
+  await page.goto(`/workspace/3?project=${assignmentId}`);
+  await expect(page.locator(".ctw-page")).toBeVisible();
+  await expect(page.locator("#ctw-body-about")).toBeVisible();
+
+  const aboutToggle = page.getByRole("button", { name: /Описание/ });
+  await aboutToggle.focus();
+  await page.keyboard.press("Enter");
+  await expect(aboutToggle).toHaveAttribute("aria-expanded", "false");
+  await expect(page.locator("#ctw-body-about")).toBeHidden();
+  await expect(page.locator("#ctw-body-results")).toBeVisible();
+  await expect(page.getByText("4 результата")).toBeVisible();
+
+  await page.reload();
+  const restored = page.getByRole("button", { name: /Описание/ });
+  await expect(restored).toHaveAttribute("aria-expanded", "false");
+  await expect(page.locator("#ctw-body-about")).toBeHidden();
+  await expect(page.locator("#ctw-body-results")).toBeVisible();
+
+  await restored.click();
+  await expect(restored).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator("#ctw-body-about")).toBeVisible();
+  await expect(page.getByText("Работающий прототип и API")).toBeVisible();
+});
