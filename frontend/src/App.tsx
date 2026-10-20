@@ -771,6 +771,13 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
             onOpenWorkspace={() => {
               setProjectOpen(true);
             }}
+            onOpenTarget={(kind, key) => {
+              if (kind === "course") {
+                goTo("Bootcamp", `?course=${encodeURIComponent(key)}`);
+              } else {
+                goTo("Задачи");
+              }
+            }}
           />
         </article>
         <aside className="ai-panel">

@@ -6,12 +6,30 @@ import {
   PassportNextResultCard,
   NextResultBody,
   type NextStepView,
+  type ScoredStepView,
 } from "./next-result";
+
+const stepFixture: ScoredStepView = {
+  trajectory_key: "python-dev",
+  milestone_key: "m2",
+  target_kind: "course",
+  target_key: "rag-mvp",
+  target_title: "RAG: надёжный поиск по документам",
+  position: 2,
+  score: 4.2,
+  factors: ["trajectory_gap", "prerequisites_met", "availability_open", "no_deadline"],
+  reasons: [
+    "Первый недостающий обязательный шаг активной траектории",
+    "Срок ещё близок",
+  ],
+  available: true,
+  stale_reason: null,
+};
 
 const nextStep: NextStepView = {
   policy_version: 1,
-  steps: [],
-  next_available: null,
+  steps: [stepFixture],
+  next_available: stepFixture,
   skill: {
     policy_version: 1,
     skill_key: "python",
@@ -29,13 +47,21 @@ const nextStep: NextStepView = {
 };
 
 function renderCard(
-  props: { data: NextStepView | undefined; state: "pending" | "error" | "success" } = {
+  props: {
+    data: NextStepView | undefined;
+    state: "pending" | "error" | "success";
+    onOpenTarget?: (kind: "course" | "task", key: string) => void;
+  } = {
     data: nextStep,
     state: "success",
   },
 ) {
   return render(
-    <NextResultBody {...props} onOpenWorkspace={() => undefined} />,
+    <NextResultBody
+      {...props}
+      onOpenWorkspace={() => undefined}
+      onOpenTarget={props.onOpenTarget ?? (() => undefined)}
+    />,
   );
 }
 
@@ -99,6 +125,65 @@ describe("passport next result card", () => {
     expect(screen.queryByTestId("next-result-fallback")).not.toBeInTheDocument();
   });
 
+  it("renders the chosen step object, why reasons, forecast note and deep link", () => {
+    const onOpenTarget = vi.fn();
+    renderCard({ data: nextStep, state: "success", onOpenTarget });
+    expect(screen.getByTestId("next-result-object").textContent).toBe(
+      "Объект: Курс · RAG: надёжный поиск по документам",
+    );
+    const reasons = screen.getByTestId("next-result-reasons");
+    expect(reasons.textContent).toContain("Первый недостающий обязательный шаг");
+    expect(reasons.textContent).toContain("Срок ещё близок");
+    expect(screen.getByTestId("next-result-forecast").textContent).toContain(
+      "уровень повышается только после проверки evidence",
+    );
+    const cta = screen.getByTestId("next-result-target");
+    expect(cta.textContent).toContain("Перейти к курсу");
+    cta.click();
+    expect(onOpenTarget).toHaveBeenCalledWith("course", "rag-mvp");
+  });
+
+  it("deep-links the task catalog for a task step", () => {
+    const onOpenTarget = vi.fn();
+    const step: ScoredStepView = {
+      ...stepFixture,
+      target_kind: "task",
+      target_key: "semantic-search-rd",
+      target_title: "Проект Semantic Search",
+    };
+    renderCard({
+      data: { ...nextStep, steps: [step], next_available: step },
+      state: "success",
+      onOpenTarget,
+    });
+    expect(screen.getByTestId("next-result-object").textContent).toContain(
+      "Задача · Проект Semantic Search",
+    );
+    screen.getByTestId("next-result-target").click();
+    expect(onOpenTarget).toHaveBeenCalledWith("task", "semantic-search-rd");
+  });
+
+  it("shows a blocked honest note when only stale steps remain", () => {
+    const staleStep: ScoredStepView = {
+      ...stepFixture,
+      available: false,
+      stale_reason: "Проект закрыт и не соответствует актуальной модели",
+    };
+    renderCard({
+      data: { ...nextStep, steps: [staleStep], next_available: null },
+      state: "success",
+    });
+    expect(screen.getByTestId("next-result-blocked").textContent).toContain(
+      "Подходящего открытого объекта нет, действие заблокировано",
+    );
+    expect(screen.getByTestId("next-result-stale").textContent).toContain(
+      "Проект закрыт и не соответствует актуальной модели",
+    );
+    expect(screen.queryByTestId("next-result-target")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("next-result-forecast")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Открыть рабочую область" })).toBeInTheDocument();
+  });
+
   it("fetches from the growth API through react-query", async () => {
     vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
       const path = input instanceof Request ? new URL(input.url).pathname : input instanceof URL ? input.pathname : input;
@@ -112,7 +197,10 @@ describe("passport next result card", () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={client}>
-        <PassportNextResultCard onOpenWorkspace={() => undefined} />
+        <PassportNextResultCard
+          onOpenWorkspace={() => undefined}
+          onOpenTarget={() => undefined}
+        />
       </QueryClientProvider>,
     );
     await waitFor(() => {

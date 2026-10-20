@@ -54,6 +54,49 @@ test.beforeEach(async ({ page }) => {
   ], unread: 3 } }));
   await page.route("**/api/v1/me/notifications/*/read", (route) => route.fulfill({ json: { ok: true } }));
   await page.route("**/api/v1/me/notifications/read-all", (route) => route.fulfill({ json: { ok: true } }));
+  await page.route("**/api/v1/me/growth/next-step", (route) => route.fulfill({ json: {
+    policy_version: 1,
+    steps: [{
+      trajectory_key: "python-dev",
+      milestone_key: "m2",
+      target_kind: "course",
+      target_key: "rag-mvp",
+      target_title: "RAG: надёжный поиск по документам",
+      position: 2,
+      score: 4.2,
+      factors: ["trajectory_gap", "prerequisites_met", "availability_open"],
+      reasons: ["Первый недостающий обязательный шаг активной траектории"],
+      available: true,
+      stale_reason: null,
+    }],
+    next_available: {
+      trajectory_key: "python-dev",
+      milestone_key: "m2",
+      target_kind: "course",
+      target_key: "rag-mvp",
+      target_title: "RAG: надёжный поиск по документам",
+      position: 2,
+      score: 4.2,
+      factors: ["trajectory_gap", "prerequisites_met", "availability_open"],
+      reasons: ["Первый недостающий обязательный шаг активной траектории"],
+      available: true,
+      stale_reason: null,
+    },
+    skill: {
+      policy_version: 1,
+      skill_key: "python",
+      requested_skill: "Python",
+      title: "Python",
+      current_level: "базовый",
+      target_level: "уверенный",
+      current_known: true,
+      counted_sources: ["course:python-base"],
+      missing_evidence: ["checkpoint:rag-checkpoint"],
+      explanation:
+        "Уровень «базовый» подтверждён источниками course:python-base. До целевого уровня «уверенный» нужны источники: checkpoint:rag-checkpoint.",
+      fallback: null,
+    },
+  } }));
   await page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({ json: [
     { competency_key: "backend", counted: false, level: "P1", observed_at: "2026-10-18T09:30:00+03:00", reason: "Не совпал с текущим портфелем навыков", source_kind: "checkpoint", source_ref: "beh-1" },
     { competency_key: "backend", counted: true, level: "P2", observed_at: "2026-10-18T12:00:00+03:00", reason: "Вклад принят заказчиком", source_kind: "contribution", source_ref: "contribution-1" },
@@ -207,6 +250,23 @@ test("logout returns persona picker and allows another role", async ({ page }) =
   await expect(page.locator('[data-persona="participant-alex"]')).toBeEnabled();
   await page.locator('[data-persona="participant-alex"]').click();
   await expect(page.getByRole("heading", { name: "Добро пожаловать, Алекс!" })).toBeVisible();
+});
+
+test("next result card keeps the chosen step explainable and deep-links it", async ({ page }) => {
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByTestId("next-result-badge")).toContainText("базовый → уверенный");
+  await expect(page.getByTestId("next-result-object")).toContainText(
+    "Объект: Курс · RAG: надёжный поиск по документам",
+  );
+  await expect(page.getByTestId("next-result-reasons")).toContainText(
+    "Первый недостающий обязательный шаг",
+  );
+  await expect(page.getByTestId("next-result-forecast")).toContainText(
+    "после проверки evidence",
+  );
+  await page.getByTestId("next-result-target").click();
+  await expect(page).toHaveURL(/\/workspace\/2\?course=rag-mvp$/);
 });
 
 test("participant home actions open project, buddy and linked routes", async ({ page }) => {
