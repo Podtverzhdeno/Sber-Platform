@@ -160,7 +160,7 @@ function CardActions({ card }: { card: CourseCardState }) {
           className="secondary-button"
           onClick={() => { learning.mutate(card.key); }}
         >
-          Учебный шаг выполнен
+          Записать учебный день
         </button>
       )}
       {card.access_state === "available" && (
@@ -188,16 +188,27 @@ function CatalogFilters({
   const view = searchParams.get("view") ?? "card";
   return (
     <>
-      <label className="catalog-filter">
-        Актуальность
-        <select
-          value={relevanceFilter}
-          onChange={(event) => { updateFilter("relevance", event.target.value); }}
+      <div role="group" aria-label="Фильтр актуальности" className="catalog-filter">
+        <button
+          type="button"
+          aria-pressed={relevanceFilter !== "relevant"}
+          onClick={() => { updateFilter("relevance", "all"); }}
         >
-          <option value="all">Все курсы</option>
-          <option value="relevant">Актуальные</option>
-        </select>
-      </label>
+          Все курсы
+        </button>
+        <button
+          type="button"
+          aria-pressed={relevanceFilter === "relevant"}
+          onClick={() => { updateFilter("relevance", "relevant"); }}
+        >
+          Актуальные
+        </button>
+      </div>
+      <p className="muted">
+        Актуальные — курсы, доступные сейчас и связанные с активной траекторией
+        и незакрытым пробелом навыков; карточка каждого курса объясняет, почему
+        он попал в выборку.
+      </p>
       <label className="catalog-filter">
         Направление
         <select value={trackFilter} onChange={(event) => { updateFilter("track", event.target.value); }}>

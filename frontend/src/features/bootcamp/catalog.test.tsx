@@ -109,7 +109,7 @@ function jsonResponse(data: unknown, status = 200) {
 }
 
 function installFetch(catalogFixture: CatalogCard[] = cards) {
-  const mocks = { mutationCount: 0, catalogCalls: 0 };
+  const mocks = { mutationCount: 0, catalogCalls: 0, learningCount: 0 };
   const fetchMock = vi.fn((input: RequestInfo | URL): Promise<Response> => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
     if (url.includes("/me/bootcamp/catalog")) {
@@ -124,6 +124,7 @@ function installFetch(catalogFixture: CatalogCard[] = cards) {
       return Promise.resolve(jsonResponse({ course_key: "openspec-sdd", status: "reported" }));
     }
     if (url.includes("/learning-days")) {
+      mocks.learningCount += 1;
       return Promise.resolve(jsonResponse({ ...streak, current_days: streak.current_days + 1 }));
     }
     return Promise.resolve(
@@ -221,7 +222,7 @@ describe("Bootcamp catalog states and filters (22.15)", () => {
       within(card).queryByRole("button", { name: "Отметить завершение" }),
     ).not.toBeInTheDocument();
     expect(
-      within(card).queryByRole("button", { name: "Учебный шаг выполнен" }),
+      within(card).queryByRole("button", { name: "Записать учебный день" }),
     ).not.toBeInTheDocument();
     expect(within(card).queryByRole("link", { name: /Первоисточник курса/ })).not.toBeInTheDocument();
     expect(within(card).getByText("Внешний доступ ограничен")).toBeInTheDocument();
@@ -251,7 +252,7 @@ describe("Bootcamp catalog states and filters (22.15)", () => {
       within(card).queryByRole("button", { name: "Отметить завершение" }),
     ).not.toBeInTheDocument();
     expect(
-      within(card).queryByRole("button", { name: "Учебный шаг выполнен" }),
+      within(card).queryByRole("button", { name: "Записать учебный день" }),
     ).not.toBeInTheDocument();
   });
 
@@ -269,7 +270,7 @@ describe("Bootcamp catalog states and filters (22.15)", () => {
     renderCatalog("/workspace/3");
 
     await screen.findByTestId("course-openspec-sdd");
-    fireEvent.change(screen.getByLabelText("Актуальность"), { target: { value: "relevant" } });
+    fireEvent.click(within(screen.getByRole("group", { name: "Фильтр актуальности" })).getByRole("button", { name: "Актуальные" }));
     expect(screen.getByTestId("route").textContent).toContain("relevance=relevant");
     await waitFor(() => expect(screen.queryByTestId("course-greenhouse-esg")).not.toBeInTheDocument());
     expect(
@@ -282,6 +283,32 @@ describe("Bootcamp catalog states and filters (22.15)", () => {
     expect(screen.queryByTestId("course-greenhouse-esg")).not.toBeInTheDocument();
   });
 
+  it("exposes the relevance filter as aria-pressed toggles with its definition", async () => {
+    installFetch();
+    renderCatalog("/workspace/3");
+
+    await screen.findByTestId("course-openspec-sdd");
+    const group = screen.getByRole("group", { name: "Фильтр актуальности" });
+    expect(within(group).getByRole("button", { name: "Все курсы" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(group).getByRole("button", { name: "Актуальные" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByText(/Актуальные — курсы, доступные сейчас/)).toBeInTheDocument();
+
+    fireEvent.click(within(group).getByRole("button", { name: "Актуальные" }));
+    await waitFor(() => expect(within(group).getByRole("button", { name: "Актуальные" })).toHaveAttribute("aria-pressed", "true"));
+    expect(within(group).getByRole("button", { name: "Все курсы" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByTestId("route").textContent).toContain("relevance=relevant");
+  });
+
+  it("calls the learning-day endpoint through the honest streak button", async () => {
+    const mocks = installFetch();
+    renderCatalog("/workspace/3");
+
+    const card = await screen.findByTestId("course-openspec-sdd");
+    fireEvent.click(within(card).getByRole("button", { name: "Записать учебный день" }));
+    await waitFor(() => { expect(mocks.learningCount).toBe(1); });
+    expect(within(screen.getByTestId("course-openspec-sdd")).getByRole("button", { name: "Записать учебный день" })).toBeEnabled();
+  });
+
   it("restores filters and view on Back and on a fresh reload", async () => {
     installFetch();
     const first = renderCatalog("/workspace/3?track=data&view=list");
@@ -290,7 +317,7 @@ describe("Bootcamp catalog states and filters (22.15)", () => {
     expect(screen.getByRole("list", { name: "Каталог Bootcamp списком" })).toBeInTheDocument();
     expect(screen.queryByTestId("course-openspec-sdd")).not.toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("Актуальность"), { target: { value: "relevant" } });
+    fireEvent.click(within(screen.getByRole("group", { name: "Фильтр актуальности" })).getByRole("button", { name: "Актуальные" }));
     expect(screen.getByTestId("route").textContent).toContain("relevance=relevant");
     await waitFor(() => expect(screen.queryByTestId("course-greenhouse-esg")).not.toBeInTheDocument());
 

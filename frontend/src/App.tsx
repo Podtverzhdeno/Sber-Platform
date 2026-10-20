@@ -40,6 +40,7 @@ import {
 import { createQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
 import { Bootcamp, DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
+import { BootcampCatalog } from "./features/bootcamp";
 import { EventCatalog } from "./features/ecosystem";
 import { CustomerWorkspace } from "./features/customer";
 import { CustomerScenario } from "./features/customer-scenario";
@@ -403,6 +404,7 @@ function Workspace({
     sectionIndex < navigation.length;
   const currentSection = allowed ? navigation[sectionIndex] : null;
   const [navigationOpen, setNavigationOpen] = useState(false);
+  const [searchParams] = useSearchParams();
   return (
     <section
       className={`workspace${navigationOpen ? " workspace--nav-open" : ""}`}
@@ -503,12 +505,19 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Bootcamp" ? (
-          <Bootcamp
-            honorBoardEnabled={honorBoardEnabled}
-            honorBoardConsent={actor.consent_scopes.includes(
-              "course_honor_board",
-            )}
-          />
+          searchParams.get("course") === null ? (
+            <BootcampCatalog
+              honorBoardEnabled={honorBoardEnabled}
+              honorBoardConsent={actor.consent_scopes.includes("course_honor_board")}
+            />
+          ) : (
+            <Bootcamp
+              honorBoardEnabled={honorBoardEnabled}
+              honorBoardConsent={actor.consent_scopes.includes(
+                "course_honor_board",
+              )}
+            />
+          )
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "События" ? (

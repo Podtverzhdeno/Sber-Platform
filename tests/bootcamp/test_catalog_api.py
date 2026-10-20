@@ -157,3 +157,14 @@ def test_catalog_contract_requires_a_session() -> None:
 
     assert response.status_code == 401
     assert response.json()["code"] == "AUTH_REQUIRED"
+
+
+def test_api_assembly_includes_catalog_route() -> None:
+    from impulse.bootstrap.app import create_app
+
+    app = create_app()
+    with TestClient(app) as client:
+        response = client.get("/api/v1/me/bootcamp/catalog")
+
+    assert response.status_code != 404, "catalog route must be assembled on the application"
+    assert response.json()["code"] in {"AUTH_REQUIRED", "FORBIDDEN"}

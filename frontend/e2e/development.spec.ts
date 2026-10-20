@@ -94,29 +94,60 @@ test("participant activates second track and freezes one only when choosing thir
   await expect(page.locator(".track-card").filter({ hasText: "Продуктовый аналитик" })).toContainText("Активно");
 });
 
-test("Bootcamp explains unavailable source, reported verification and streak", async ({ page }) => {
+test("Bootcamp catalog explains states, keeps filters in URL and streak honest", async ({ page }) => {
   let reported = false;
   let streak = 1;
-  await page.route("**/api/v1/development/tracks", (route) => route.fulfill({ json: { active_count: 1, max_active: 2, tracks: [{ key: "python", title: "Python-разработчик", status: "active", completed_milestones: [] }] } }));
-  await page.route("**/api/v1/development/courses", (route) => route.fulfill({ json: [{ key: "python-base", title: "Python: основа", track_keys: ["python"], recommendation_reason: "Подходит для направления python.", source_url: "https://example.test/python", availability: "unavailable", access_note: "Внешний курс пока не подключён; доступна исходная ссылка.", completion_status: reported ? "reported" : null, rating_eligible: false }] }));
+  const catalogCard = () => ({
+    key: "python-base",
+    title: "Python: основа",
+    track_keys: ["python"],
+    source_url: "https://example.test/python",
+    access_state: "available",
+    access_note: "Доступен в демо без регистрации во внешней LMS.",
+    completion_state: reported ? "reported" : "not_started",
+    relevant: true,
+    relevance_reasons: ["Связан с активными направлениями: python."],
+    recommendation_reason: "Подходит для направления python.",
+    must_take: null,
+    pending_verification_note: reported
+      ? "Завершение отправлено на проверку: повторно проходить тот же шаг не нужно."
+      : null,
+    verified_evidence: null,
+  });
+  await page.route("**/api/v1/me/bootcamp/catalog", (route) => route.fulfill({ json: [catalogCard()] }));
+  await page.route("**/api/v1/development/courses", (route) => route.fulfill({ json: [{ key: "python-base", title: "Python: основа", track_keys: ["python"], recommendation_reason: "Подходит для направления python.", source_url: "https://example.test/python", availability: "available", access_note: "Доступен в демо без регистрации во внешней LMS.", completion_status: reported ? "reported" : null, rating_eligible: false }] }));
   await page.route("**/api/v1/me/learning/streak", (route) => route.fulfill({ json: { current_days: streak, qualified_dates: ["2026-09-27"], reason: "Серия сохранена." } }));
   await page.route("**/api/v1/me/courses/*/completion", (route) => { reported = true; return route.fulfill({ json: { course_key: "python-base", status: "reported", rating_eligible: false, explanation: "Ожидает проверки" } }); });
   await page.route("**/api/v1/me/courses/*/learning-days", (route) => { streak = 2; return route.fulfill({ json: { current_days: 2, qualified_dates: ["2026-09-27", "2026-09-28"], reason: "Серия сохранена." } }); });
+
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
-  await expect(page.getByText("Внешний курс пока не подключён; доступна исходная ссылка.")).toBeVisible();
-  await page.getByRole("button", { name: "Открыть траекторию" }).click();
+
+  const card = page.locator('[data-testid="course-python-base"]');
+  await expect(card).toContainText("Доступен");
+  const relevanceGroup = page.getByRole("group", { name: "Фильтр актуальности" });
+  await expect(relevanceGroup.getByRole("button", { name: "Все курсы" })).toHaveAttribute("aria-pressed", "true");
+  await expect(relevanceGroup.getByRole("button", { name: "Актуальные" })).toHaveAttribute("aria-pressed", "false");
+  await expect(page.getByText(/Актуальные — курсы, доступные сейчас/)).toBeVisible();
+
+  await card.getByRole("button", { name: "Записать учебный день" }).click();
+  await expect(page.getByRole("heading", { name: "Серия: 2 дн." })).toBeVisible();
+
+  await relevanceGroup.getByRole("button", { name: "Актуальные" }).click();
+  await expect(page).toHaveURL(/relevance=relevant/);
+  await expect(card).toBeVisible();
+
+  await card.getByRole("button", { name: "Открыть траекторию" }).click();
   await expect(page.getByRole("heading", { name: "Python: основа" })).toBeVisible();
   await expect(page.getByTestId("course-competency-0")).toContainText("Прогноз: базовый");
-  await expect(page.getByTestId("course-competency-0")).toContainText("до подтверждения на checkpoint");
-  await expect(page.getByText("Подготовиться к первому вкладу в направлении python.")).toBeVisible();
-  await expect(page.getByText("Checkpoint 3").first()).toBeVisible();
-  await expect(page.getByRole("link", { name: /Открыть учебный материал/ })).toHaveAttribute("rel", "noopener noreferrer");
-  await page.getByRole("button", { name: /Вернуться в Bootcamp/ }).click();
-  await page.getByRole("button", { name: "Отметить завершение" }).click();
-  await expect(page.getByText("Результат отправлен на проверку. После подтверждения курс появится в портфолио.")).toBeVisible();
-  await page.getByRole("button", { name: "Учебный шаг выполнен" }).click();
-  await expect(page.getByRole("heading", { name: "Серия: 2 дн." })).toBeVisible();
-  await expect(page.getByText(/зал славы/i)).toHaveCount(0);
+  await page.goBack();
+  await expect(page).toHaveURL(/relevance=relevant/);
+  await expect(card).toBeVisible();
+
+  await card.getByRole("button", { name: "Отметить завершение" }).click();
+  await expect(page.getByText("Ожидает проверки")).toBeVisible();
+  await expect(page.getByText(/повторно проходить тот же шаг не нужно/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Отметить завершение" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Записать учебный день" })).toHaveCount(0);
 });
