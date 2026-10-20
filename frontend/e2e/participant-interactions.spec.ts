@@ -269,6 +269,26 @@ test("next result card keeps the chosen step explainable and deep-links it", asy
   await expect(page).toHaveURL(/\/workspace\/2\?course=rag-mvp$/);
 });
 
+test("kpi spark bars expose number, unit and period on focus without hover", async ({ page }) => {
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByTestId("kpi-card-progress")).toBeVisible();
+  const progressBars = page.getByTestId("kpi-spark-0").locator("i");
+  await expect(progressBars).toHaveCount(6);
+  await expect(progressBars.nth(5)).toHaveAttribute("aria-label", "68% · точка 6 из 6");
+  // Keyboard focus reaches each bar without any pointer; tooltip data stays in the DOM
+  await progressBars.nth(5).focus();
+  await expect(progressBars.nth(5)).toBeFocused();
+  await progressBars.nth(3).focus();
+  await expect(progressBars.nth(3)).toHaveAttribute("data-tip", "54% · точка 4 из 6");
+  await progressBars.nth(0).focus();
+  await expect(progressBars.nth(0)).toHaveAttribute("data-tip", "31% · точка 1 из 6");
+  // The streak card bars stay focusable even without a drill dialog
+  const streakBars = page.getByTestId("kpi-spark-3").locator("i");
+  await streakBars.nth(5).focus();
+  await expect(streakBars.nth(5)).toHaveAttribute("aria-label", "14 дней · точка 6 из 6");
+});
+
 test("participant home actions open project, buddy and linked routes", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();

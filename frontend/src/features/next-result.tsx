@@ -55,44 +55,46 @@ export function NextResultBody(props: {
   const staleSteps = (props.data?.steps ?? []).filter((item) => item.stale_reason !== null);
   const withoutOpenStep = step === null && staleSteps.length > 0;
   return (
-    <article className="focus-panel" data-testid="next-result-card">
-      <div className="next-result-flow">
-        <p className="eyebrow">Следующий результат</p>
-        <GapBadge gap={gap} />
-        <GapTitle gap={gap} />
-        <GapBody state={props.state} gap={gap} withoutOpenStep={withoutOpenStep} staleReason={staleSteps[0]?.stale_reason ?? null} />
-        {step !== null ? (
-          <StepRecommendation step={step} />
-        ) : null}
-        {withoutOpenStep ? (
-          <p className="next-result-stale" data-testid="next-result-blocked" role="note">
-            Подходящего открытого объекта нет, действие заблокировано: невыполненные
-            обязательные шаги нужно обновить в траектории после проверки платформой.
-            Прогноз повышения уровня не показываем.
-          </p>
-        ) : null}
-        <div className="next-result-actions" data-testid="next-result-actions">
+    <>
+      <div className="next-result-card" data-testid="next-result-card">
+        <div className="next-result-flow">
+          <p className="eyebrow">Следующий результат</p>
+          <GapBadge gap={gap} />
+          <GapTitle gap={gap} />
+          <GapBody state={props.state} gap={gap} withoutOpenStep={withoutOpenStep} staleReason={staleSteps[0]?.stale_reason ?? null} />
           {step !== null ? (
+            <StepRecommendation step={step} />
+          ) : null}
+          {withoutOpenStep ? (
+            <p className="next-result-stale" data-testid="next-result-blocked" role="note">
+              Подходящего открытого объекта нет, действие заблокировано: невыполненные
+              обязательные шаги нужно обновить в траектории после проверки платформой.
+              Прогноз повышения уровня не показываем.
+            </p>
+          ) : null}
+          <div className="next-result-actions" data-testid="next-result-actions">
+            {step !== null ? (
+              <button
+                type="button"
+                className="next-result-target"
+                data-testid="next-result-target"
+                onClick={() => {
+                  props.onOpenTarget(step.target_kind === "course" ? "course" : "task", step.target_key);
+                }}
+              >
+                {step.target_kind === "course"
+                  ? `Перейти к курсу «${step.target_title}»`
+                  : `Открыть задачу «${step.target_title}» в каталоге`}
+              </button>
+            ) : null}
             <button
               type="button"
-              className="next-result-target"
-              data-testid="next-result-target"
-              onClick={() => {
-                props.onOpenTarget(step.target_kind === "course" ? "course" : "task", step.target_key);
-              }}
+              onClick={props.onOpenWorkspace}
+              aria-label="Открыть рабочую область"
             >
-              {step.target_kind === "course"
-                ? `Перейти к курсу «${step.target_title}»`
-                : `Открыть задачу «${step.target_title}» в каталоге`}
+              Открыть рабочую область →
             </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={props.onOpenWorkspace}
-            aria-label="Открыть рабочую область"
-          >
-            Открыть рабочую область →
-          </button>
+          </div>
         </div>
       </div>
       <div className="focus-visual" aria-hidden="true">
@@ -100,7 +102,7 @@ export function NextResultBody(props: {
         <span />
         <span />
       </div>
-    </article>
+    </>
   );
 }
 

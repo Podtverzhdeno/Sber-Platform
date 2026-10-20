@@ -1,5 +1,6 @@
 ﻿import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
+import { ParticipantMetricSpark } from "./features/participant-home-spark";
 import { BuddySuggestionCard } from "./features/buddy-suggestion";
 import { ActivityPanel } from "./features/activity-panel";
 import { KpiDetailsBody } from "./features/kpi-details";
@@ -732,18 +733,11 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
               <span>{metric.label}</span>
               <strong data-testid={`kpi-card-${kpiKey}`}>{value}</strong>
               <small>{delta}</small>
-              <div
-                className="metric-histogram"
-                aria-hidden="true"
-                data-testid={`kpi-spark-${String(metricIndex)}`}
-              >
-                {(participantMetricSeries[metricIndex] ?? []).map((seriesValue, seriesIndex, series) => (
-                  <i
-                    key={seriesIndex}
-                    style={{ height: `${String(Math.max(12,seriesValue/Math.max(...series)*100))}%` }}
-                  />
-                ))}
-              </div>
+              <ParticipantMetricSpark
+                kpiKey={kpiKey}
+                series={participantMetricSeries[metricIndex] ?? []}
+                testId={`kpi-spark-${String(metricIndex)}`}
+              />
             </>
           );
           return kpiKey === "streak" ? (

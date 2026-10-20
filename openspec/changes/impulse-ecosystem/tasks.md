@@ -292,6 +292,8 @@
 - [ ] 22.22 Сделать секции project workspace независимо сворачиваемыми с accessible headers и сохранением draft/state; component/E2E tests SHALL покрыть keyboard, focus, reload, error/empty и отсутствие потери незавершённой формы.
 - [ ] 22.23 Добавить team member quick card с consent-filtered portfolio transition и exact direct-chat transition, а также object-backed metric drill-down для stages/artifacts/blockers/feedback; RBAC/E2E tests SHALL исключить скрытые profile fields и чужой channel.
 - [ ] 22.24 Реализовать versioned deadline discussion flow «Обсудить срок»: proposal/reason/impact, pending/approved/rejected/stale states, notifications и atomic terms/calendar update после human approval; tests SHALL доказать, что participant request сам не меняет действующий deadline.
+- [ ] 22.25 Развести текст и мини-график KPI-карточек главной в отдельные layout-области: длинные подписи переносятся без перекрытия графика на desktop/tablet/mobile, столбец открывает число+единицу+период на hover/focus и те же данные доступны без hover для touch и screen reader; «Следующий результат» SHALL использовать полную ширину без вложенного обрезания, CTA — action-group с явным промежутком; Playwright SHALL покрыть длинную подпись, клавиатурную подсказку и работу на touch без hover.
+- [ ] 22.26 Сделать совет Buddy на главной запускаемым пользователем: до активации SHALL показываться назначение и кнопка «Получить рекомендацию» без повторного запроса рекомендаций; после активации — loading, объяснимый результат/empty/error состояния с честным retry и без подстановки старого или вымышленного совета; Playwright SHALL покрыть первый показ, активацию, outage и сохранение доступа к «Следующему результату».
 
 ## 23. Уточнение wizard заказчика
 
