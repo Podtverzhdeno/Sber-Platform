@@ -475,7 +475,7 @@ async def test_application_withdrawal_is_idempotent_and_blocked_after_acceptance
         )
         assert applied.status_code == 200
         application_id = applied.json()["id"]
-        assert applied.json()["version"] == 1
+        assert applied.json()["version"] == 2
 
         withdrawn = await client.post(
             f"/api/v1/me/applications/{application_id}/withdraw",
@@ -483,7 +483,7 @@ async def test_application_withdrawal_is_idempotent_and_blocked_after_acceptance
         )
         assert withdrawn.status_code == 200
         assert withdrawn.json()["status"] == "withdrawn"
-        assert withdrawn.json()["version"] == 2
+        assert withdrawn.json()["version"] == 3
         repeat = await client.post(
             f"/api/v1/me/applications/{application_id}/withdraw",
             headers={"X-CSRF-Token": participant_csrf},
@@ -519,7 +519,7 @@ async def test_application_withdrawal_is_idempotent_and_blocked_after_acceptance
         assert reapplied.status_code == 200
         assert reapplied.json()["id"] == application_id
         assert reapplied.json()["status"] == "applied"
-        assert reapplied.json()["version"] == 3
+        assert reapplied.json()["version"] == 5
 
         customer_login = await client.post(
             "/api/v1/auth/demo-login", json={"persona_key": "customer-roman"}
@@ -527,7 +527,7 @@ async def test_application_withdrawal_is_idempotent_and_blocked_after_acceptance
         customer_csrf = customer_login.json()["csrf_token"]
         accepted = await client.post(
             f"/api/v1/customer/applications/{application_id}/accept",
-            json={"expected_version": 3},
+            json={"expected_version": 5},
             headers={"X-CSRF-Token": customer_csrf},
         )
         assert accepted.status_code == 200
@@ -549,5 +549,5 @@ async def test_application_withdrawal_is_idempotent_and_blocked_after_acceptance
             )
         ).one()
     assert row.status == "accepted"
-    assert row.version == 4
+    assert row.version == 6
     await database.close()

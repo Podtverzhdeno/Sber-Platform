@@ -381,23 +381,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/customer/support-models": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Support Model Catalog */
-        get: operations["support_model_catalog_api_v1_customer_support_models_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/customer/tasks": {
         parameters: {
             query?: never;
@@ -4986,39 +4969,11 @@ export interface components {
             /** Suggestion Id */
             suggestion_id: string;
         };
-        /** SupportCatalogView */
-        SupportCatalogView: {
-            /** Models */
-            models: components["schemas"]["SupportModelView"][];
-            /** Version */
-            version: number;
-        };
         /**
          * SupportMode
          * @enum {string}
          */
         SupportMode: "mentor" | "buddy" | "operator";
-        /** SupportModelView */
-        SupportModelView: {
-            /** Activities */
-            activities: string[];
-            /** Available */
-            available: boolean;
-            /** Code */
-            code: string;
-            /** Name */
-            name: string;
-            /** Requires Assignee */
-            requires_assignee: boolean;
-            /** Response Time */
-            response_time: string;
-            /** Responsible */
-            responsible: string;
-            /** Restrictions */
-            restrictions: string[];
-            /** Unavailable Reason */
-            unavailable_reason: string | null;
-        };
         /** SupportRequest */
         SupportRequest: {
             /** Assignee Id */
@@ -6134,26 +6089,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CandidateReservationView"][];
-                };
-            };
-        };
-    };
-    support_model_catalog_api_v1_customer_support_models_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SupportCatalogView"];
                 };
             };
         };
