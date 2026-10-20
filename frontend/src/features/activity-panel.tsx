@@ -60,7 +60,7 @@ function formatStamp(value: string | null | undefined): string {
 
 /**
  * Панель «Активность» главной страницы участника (openspec 22.4).
- * Данные — только из /me/growth/snapshot:переключатель день/неделя/месяц/год,
+ * Данные — только из /me/growth/snapshot: компактный выбор день/неделя/месяц/год,
  * разложение по квалифицированным категориям, состояние против плана
  * (риск/успех/нейтрально) и раскрытие «Как считается» с версией определения,
  * таймзоной, периодом и свежестью. Цвет никогда не единственное объяснение —
@@ -71,7 +71,7 @@ export function ActivityPanel(props: { onOpenAnalytics: () => void }) {
     queryKey: ["growth-snapshot"],
     queryFn: () => apiRequest<GrowthSnapshotView>("/api/v1/me/growth/snapshot"),
   });
-  const [period, setPeriod] = useState<ActivityPeriod>("week");
+  const [period, setPeriod] = useState<ActivityPeriod>("day");
   return (
     <ActivityBody
       state={query.status}
@@ -96,20 +96,21 @@ export function ActivityBody(props: {
     <aside className="insight-panel" data-testid="activity-panel">
       <header>
         <h2>Активность</h2>
-        <div role="group" aria-label="Масштаб активности" data-testid="activity-scale">
-          {PERIODS.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              aria-pressed={props.period === item.key}
-              className={props.period === item.key ? "activity-scale-button activity-scale-button--active" : "activity-scale-button"}
-              onClick={() => {
-                props.onPeriod(item.key);
-              }}
-            >
-              {item.label}
-            </button>
-          ))}
+        <div data-testid="activity-scale">
+          <select
+            aria-label="Период активности"
+            className="activity-scale-button activity-scale-button--active"
+            value={props.period}
+            onChange={(event) => {
+              props.onPeriod(event.target.value as ActivityPeriod);
+            }}
+          >
+            {PERIODS.map((item) => (
+              <option key={item.key} value={item.key}>
+                {item.label}
+              </option>
+            ))}
+          </select>
         </div>
       </header>
       {props.state === "pending" ? (

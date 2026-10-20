@@ -284,11 +284,12 @@ test("participant home actions open project, buddy and linked routes", async ({ 
   await page.getByTestId("buddy-suggestion-dismiss").click();
   await expect(page.getByTestId("buddy-suggestion-dismissed")).toBeVisible();
   await expect(page.locator(".metric-histogram")).toHaveCount(4);
-  await expect(page.getByTestId("activity-total")).toContainText("4");
-  await page.getByTestId("activity-scale").getByRole("button", { name: "Месяц" }).click();
+  await expect(page.getByTestId("activity-scale").getByRole("combobox", { name: "Период активности" })).toHaveValue("day");
+  await expect(page.getByTestId("activity-total")).toContainText("2");
+  await page.getByTestId("activity-scale").getByRole("combobox", { name: "Период активности" }).selectOption("month");
   await expect(page.getByTestId("activity-total")).toContainText("1");
   await expect(page.getByTestId("activity-state-risk")).toContainText("ниже цели 12–30");
-  await page.getByTestId("activity-scale").getByRole("button", { name: "Год" }).click();
+  await page.getByTestId("activity-scale").getByRole("combobox", { name: "Период активности" }).selectOption("year");
   await expect(page.getByTestId("activity-total")).toContainText("14");
   await expect(page.getByTestId("activity-state-success")).toContainText("в рамках цели 120–300");
   // KPI drill-down: card click, dialog contents, Back restores the plain dashboard

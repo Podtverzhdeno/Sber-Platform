@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { ActivityBody, type ActivityPeriod, type GrowthSnapshotView } from "./activity-panel";
 
@@ -185,13 +185,28 @@ describe("activity panel", () => {
     );
   });
 
-  it("marks pressed scale button for screen readers", () => {
+  it("shows only the selected period and exposes the other periods in a compact selector", () => {
     renderActivity({ period: "month" });
-    const pressed = screen
-      .getAllByRole("button")
-      .filter((button) => button.getAttribute("aria-pressed") === "true");
-    expect(pressed).toHaveLength(1);
-    expect(pressed[0]?.textContent).toBe("Месяц");
+    const selector = screen.getByRole("combobox", { name: "Период активности" });
+    expect(selector).toHaveValue("month");
+    expect(screen.getAllByRole("option")).toHaveLength(4);
+  });
+
+  it("passes the selected period to the activity projection", () => {
+    const onPeriod = vi.fn();
+    render(
+      <ActivityBody
+        state="success"
+        data={snapshot}
+        period="day"
+        onPeriod={onPeriod}
+        onOpenAnalytics={() => undefined}
+      />,
+    );
+    fireEvent.change(screen.getByRole("combobox", { name: "Период активности" }), {
+      target: { value: "year" },
+    });
+    expect(onPeriod).toHaveBeenCalledWith("year");
   });
 
   it("stays neutral without an active plan and keeps text", () => {
