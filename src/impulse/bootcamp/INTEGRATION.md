@@ -19,6 +19,7 @@ shared files согласно `agent-work-coordination`, поэтому они �
 1. `src/impulse/api/v1/__init__.py`:
    ```python
    from impulse.bootcamp import catalog_router as bootcamp_catalog_router
+
    ...
    router.include_router(bootcamp_catalog_router)
    ```

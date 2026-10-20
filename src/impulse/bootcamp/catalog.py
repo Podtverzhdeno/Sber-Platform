@@ -259,12 +259,9 @@ def relevance_for(
         f"({', '.join(sorted(course.track_keys))})."
     )
     if any(not item.completed for item in milestones):
-        reasons.append(
-            "Закрывает незакрытый пробел: этап маршрута ещё не подтверждён."
-        )
+        reasons.append("Закрывает незакрытый пробел: этап маршрута ещё не подтверждён.")
     reasons.append(
-        f"Этап маршрута: «{milestones[0].milestone.title}» · навык "
-        f"{milestones[0].milestone.skill}."
+        f"Этап маршрута: «{milestones[0].milestone.title}» · навык {milestones[0].milestone.skill}."
     )
     if access_state == ACCESS_AVAILABLE:
         reasons.append("Доступен сейчас в каталоге.")
@@ -296,9 +293,7 @@ def project_cards(
     titles: Mapping[str, str] | None = None,
 ) -> tuple[CourseCard, ...]:
     """Build every catalog card with independent access/completion/recommendation."""
-    resolved_titles = (
-        {item.key: item.title for item in courses} if titles is None else titles
-    )
+    resolved_titles = {item.key: item.title for item in courses} if titles is None else titles
     cards: list[CourseCard] = []
     for course in courses:
         access_state = determine_access_state(course, verified_courses=verified_courses)
@@ -340,9 +335,7 @@ def project_cards(
                 verified_evidence=verified_evidence_for(course.key)
                 if completion_state is COMPLETION_VERIFIED
                 else None,
-                recommendation_reason=recommendation_reason_for(
-                    milestones, completion_state
-                ),
+                recommendation_reason=recommendation_reason_for(milestones, completion_state),
             )
         )
     return tuple(cards)
