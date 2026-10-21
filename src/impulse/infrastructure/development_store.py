@@ -343,17 +343,14 @@ class SqlDevelopmentStore(DevelopmentStore):
         granted = len(status_by_date)
         available = sum(1 for entry in status_by_date if entry[1] == "available")
         consumed_dates = frozenset(
-            entry[0]
-            for entry in status_by_date
-            if entry[1] == "consumed" and entry[0] is not None
+            entry[0] for entry in status_by_date if entry[1] == "consumed" and entry[0] is not None
         )
         return granted, available, consumed_dates
 
     async def grant_freeze_day(self, person_id: UUID, granted_at: datetime, rule: str) -> None:
         async with self.database.session() as session:
             await session.execute(
-                postgres_insert(freeze_days)
-                .values(
+                postgres_insert(freeze_days).values(
                     person_id=person_id,
                     local_date=None,
                     status="available",
@@ -385,8 +382,7 @@ class SqlDevelopmentStore(DevelopmentStore):
     ) -> None:
         async with self.database.session() as session:
             await session.execute(
-                postgres_insert(freeze_exceptions)
-                .values(
+                postgres_insert(freeze_exceptions).values(
                     person_id=person_id,
                     local_date=local_date,
                     scope=scope,
@@ -427,9 +423,7 @@ class SqlDevelopmentStore(DevelopmentStore):
             WeeklyRhythm(
                 version=row["rhythm_version"],
                 preset=row["preset"],
-                active_days=frozenset(
-                    int(day) for day in row["active_days"].split(",") if day
-                ),
+                active_days=frozenset(int(day) for day in row["active_days"].split(",") if day),
                 reminder_hour=row["reminder_hour"],
                 reminder_window_hours=row["reminder_window_hours"],
                 effective_from=row["effective_from"],
@@ -441,8 +435,7 @@ class SqlDevelopmentStore(DevelopmentStore):
     async def save_weekly_rhythm(self, person_id: UUID, rhythm: WeeklyRhythm) -> None:
         async with self.database.session() as session:
             await session.execute(
-                postgres_insert(weekly_rhythm_versions)
-                .values(
+                postgres_insert(weekly_rhythm_versions).values(
                     person_id=person_id,
                     rhythm_version=rhythm.version,
                     preset=rhythm.preset,

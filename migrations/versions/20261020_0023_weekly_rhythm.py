@@ -52,9 +52,7 @@ def upgrade() -> None:
             "rhythm_version",
             name=op.f("uq_weekly_rhythm_versions_person_id_rhythm_version"),
         ),
-        sa.CheckConstraint(
-            "version > 0", name=op.f("ck_weekly_rhythm_versions_version_positive")
-        ),
+        sa.CheckConstraint("version > 0", name=op.f("ck_weekly_rhythm_versions_version_positive")),
         sa.ForeignKeyConstraint(
             ["person_id"],
             ["persons.id"],

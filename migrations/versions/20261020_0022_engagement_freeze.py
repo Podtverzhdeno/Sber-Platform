@@ -76,9 +76,7 @@ def upgrade() -> None:
         sa.Column("local_date", sa.Date(), nullable=False),
         sa.Column("scope", sa.String(96), nullable=False),
         sa.Column("explanation", sa.String(400), nullable=False),
-        sa.CheckConstraint(
-            "version > 0", name=op.f("ck_freeze_exceptions_version_positive")
-        ),
+        sa.CheckConstraint("version > 0", name=op.f("ck_freeze_exceptions_version_positive")),
         sa.ForeignKeyConstraint(
             ["person_id"],
             ["persons.id"],

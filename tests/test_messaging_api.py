@@ -283,8 +283,7 @@ def test_closed_dialogs_are_hidden_from_all_participants() -> None:
             channels_map[identifier] = replace(channel, status=ChannelStatus.CLOSED)
 
     assert all(
-        item["id"] != dialog["id"]
-        for item in api.get("/api/v1/me/messaging/channels").json()
+        item["id"] != dialog["id"] for item in api.get("/api/v1/me/messaging/channels").json()
     )
 
     elena_csrf = login(api, "mentor-elena")

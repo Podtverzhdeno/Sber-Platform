@@ -402,6 +402,7 @@ def test_weekly_rhythm_active_version_survives_a_scheduled_future_version() -> N
         assert body["scheduled_from"] == "2026-10-25"
         assert body["scheduled_preset"] == "weekends"
 
+
 @pytest.mark.spec("participant-experience/weekly-rhythm")
 def test_weekly_rhythm_rejects_retroactive_effective_date() -> None:
     client, _store = _freeze_client()

@@ -178,9 +178,7 @@ def test_calendar_keeps_best_run_after_current_break() -> None:
     base = date(2026, 9, 1)
     historical = frozenset(base + timedelta(days=offset) for offset in range(5))
     far = base + timedelta(days=30)
-    calendar = engagement_calendar(
-        historical | {far}, local_today=base + timedelta(days=32)
-    )
+    calendar = engagement_calendar(historical | {far}, local_today=base + timedelta(days=32))
     assert calendar.current_days == 0
     assert calendar.best_days == 5
     assert "прервана" in calendar.reason
@@ -226,9 +224,7 @@ def test_frozen_calendar_auto_consumes_single_missed_day() -> None:
     assert frozen.qualified_dates == days
     assert frozen.grace_available is True
     assert "не считается активностью" in frozen.reason
-    extended = engagement_calendar(
-        days | {date(2026, 10, 19)}, local_today=date(2026, 10, 20)
-    )
+    extended = engagement_calendar(days | {date(2026, 10, 19)}, local_today=date(2026, 10, 20))
     assert extended.current_days == frozen.current_days
     assert extended.best_days == frozen.best_days
 

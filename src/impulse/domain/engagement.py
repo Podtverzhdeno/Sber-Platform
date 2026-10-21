@@ -112,9 +112,7 @@ def engagement_calendar(
     )
 
 
-def engagement_day(
-    records: tuple[EngagementRecord, ...], timezone: str
-) -> frozenset[date]:
+def engagement_day(records: tuple[EngagementRecord, ...], timezone: str) -> frozenset[date]:
     """Local-day projection; identical source refs collapse before projection."""
     unique: dict[tuple[EngagementSource, str], datetime] = {}
     for record in records:
@@ -153,9 +151,7 @@ class FrozenEngagementCalendar:
     consumed_dates: frozenset[date]
 
 
-def _covered_runs(
-    covered: frozenset[date], *, local_today: date
-) -> tuple[int, int]:
+def _covered_runs(covered: frozenset[date], *, local_today: date) -> tuple[int, int]:
     """Current and best runs over qualified days union persisted freeze days."""
     if not covered:
         return 0, 0
@@ -239,9 +235,7 @@ def frozen_calendar(
 
 def service_block_audit(*, scope: str, explanation: str) -> str:
     """Honest audit line for provider/outage blocks that never consume freeze stock."""
-    return (
-        f"Служебный сбой ({scope}) зафиксирован без расхода заморозки: {explanation}"
-    )
+    return f"Служебный сбой ({scope}) зафиксирован без расхода заморозки: {explanation}"
 
 
 WEEKLY_RHYTHM_PRESET_VERSION = 1
@@ -336,6 +330,7 @@ def iso_week_bounds(local_today: date) -> tuple[date, date]:
 @dataclass(frozen=True, slots=True)
 class WeeklyRhythmProjection:
     """Weekly rhythm progress: НЕ серия, НЕ verified progress — только договор ритма."""
+
     version: int
     preset: str
     active_days: frozenset[int]

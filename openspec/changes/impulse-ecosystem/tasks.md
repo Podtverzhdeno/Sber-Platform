@@ -334,3 +334,7 @@
 
 - [ ] 27.1 Diagnose slow section loading and eliminate sequential N+1 reads in reward evidence, portfolio/HR selection and participant analytics: batch reward payouts in one query and parallelize independent store reads for `/me/notifications` sections `/me/portfolio`, `/hr/candidates`, `/me/analytics/journey`, `/analytics/role`; API tests SHALL подтверждать идентичные payload shapes и RBAC-поведение, а измерение на demo-сервере задаёт per-endpoint timing в отчёте.
 - [ ] 27.2 Batch the published task catalog and work items reads (`work_store`): все задачи/термины/приглашения/вклады как агрегатные запросы вместо последовательных per-task awaits; выполнить после integration claim 22.17, затем recheck timings всех разделов витрин.
+
+## 28. CI repair queue
+
+- [ ] ci-repair-format-backend-84 CI job `backend-format-lint-types` на PR #84 падает на шаге `ruff format --check .` (12 файлов без форматирования: migrations 0022/0023, development/buddy/engagement sources и их тесты); форматирование SHALL быть чисто механическим без изменения семантики, а `ruff check` и `pyright` SHALL остаться зелёными.

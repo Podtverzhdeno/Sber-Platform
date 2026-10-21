@@ -235,12 +235,7 @@ class BuddySuggestionService:
         _roadmaps, result = await self._growth.next_step(actor)
         now = self._now()
         available = tuple(step for step in result.steps if step.available)
-        built = tuple(
-            [
-                await self._build(actor.person_id, step, now)
-                for step in available[:6]
-            ]
-        )
+        built = tuple([await self._build(actor.person_id, step, now) for step in available[:6]])
         visible = tuple(
             item
             for item in built

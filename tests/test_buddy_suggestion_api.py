@@ -327,9 +327,7 @@ def test_target_recheck_rejects_object_removed_after_card_generation() -> None:
         suggestion_id = client.get("/api/v1/agents/buddy/suggestion").json()["suggestion"][
             "suggestion_id"
         ]
-        store.install_roadmap(
-            RoadmapRecord(track_key="python", policy_version=5, milestones=())
-        )
+        store.install_roadmap(RoadmapRecord(track_key="python", policy_version=5, milestones=()))
         response = client.get(
             "/api/v1/agents/buddy/suggestion/target",
             params={"suggestion_id": suggestion_id},

@@ -61,7 +61,7 @@ def test_recommendation_never_calls_model_or_changes_skill_levels() -> None:
     app = create_app(Settings(app_env=AppEnvironment.TEST))
     development = cast(DevelopmentService, app.state.development_service)
     store = development.store
-    assert isinstance(development.store, MemoryDevelopmentStore)
+    assert isinstance(store, MemoryDevelopmentStore)
     _install_roadmap(store)
     with TestClient(app) as api:
         login(api, "participant-alex")
@@ -125,7 +125,9 @@ def test_skill_lineage_exposes_observed_history_for_drilldown() -> None:
         login(api, "participant-alex")
         reports = api.get("/api/v1/me/competencies").json()
         role = next(item for item in reports if item["framework_key"] == "role:product-engineer")
-        specification = next(skill for skill in role["skills"] if skill["skill_key"] == "specification")
+        specification = next(
+            skill for skill in role["skills"] if skill["skill_key"] == "specification"
+        )
         assert specification["level"] == "уверенный"
         assert specification["explanation"].startswith("Уровень")
         anchors = specification["anchors"]

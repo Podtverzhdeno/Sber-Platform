@@ -531,9 +531,7 @@ class MemoryDevelopmentStore:
     async def record_freeze_exception(
         self, person_id: UUID, local_date: date, scope: str, explanation: str
     ) -> None:
-        self._freeze_exceptions.setdefault(person_id, []).append(
-            (local_date, scope, explanation)
-        )
+        self._freeze_exceptions.setdefault(person_id, []).append((local_date, scope, explanation))
 
     async def freeze_exceptions(self, person_id: UUID) -> tuple[str, ...]:
         return tuple(
@@ -862,9 +860,7 @@ class DevelopmentService:
     ) -> str:
         """Outage/external block: audit-only record, inventory is never spent."""
         self._participant(actor)
-        await self.store.record_freeze_exception(
-            actor.person_id, local_date, scope, explanation
-        )
+        await self.store.record_freeze_exception(actor.person_id, local_date, scope, explanation)
         return service_block_audit(scope=scope, explanation=explanation)
 
     async def save_weekly_rhythm(
@@ -913,15 +909,11 @@ class DevelopmentService:
         history = await self.store.weekly_rhythm_history(actor.person_id)
         active_candidates = [item for item in history if item.effective_from <= local_today]
         current = active_candidates[-1] if active_candidates else None
-        scheduled = next(
-            (item for item in history if item.effective_from > local_today), None
-        )
+        scheduled = next((item for item in history if item.effective_from > local_today), None)
         if current is None:
             context: dict[str, object] = {"versioned": False}
         else:
-            context = await self.weekly_rhythm_snapshot(
-                actor, current, local_today=local_today
-            )
+            context = await self.weekly_rhythm_snapshot(actor, current, local_today=local_today)
         context["history_count"] = len(history)
         if scheduled is not None:
             context["scheduled_from"] = scheduled.effective_from
@@ -936,9 +928,7 @@ class DevelopmentService:
         history = await self.store.weekly_rhythm_history(actor.person_id)
         dates = await self.store.learning_dates(actor.person_id)
         dates |= await self.store.engagement_dates(actor.person_id)
-        projection = weekly_rhythm_projection(
-            rhythm, dates, local_today=local_today
-        )
+        projection = weekly_rhythm_projection(rhythm, dates, local_today=local_today)
         return {"versioned": True, "history_count": len(history), "projection": projection}
 
     @staticmethod

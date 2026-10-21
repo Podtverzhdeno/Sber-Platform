@@ -484,12 +484,8 @@ def _rhythm_view(result: dict[str, object]) -> WeeklyRhythmView:
         return WeeklyRhythmView(
             versioned=False,
             history_count=int(str(result["history_count"])),
-            scheduled_from=(
-                scheduled_from if isinstance(scheduled_from, date) else None
-            ),
-            scheduled_preset=(
-                scheduled_preset if isinstance(scheduled_preset, str) else None
-            ),
+            scheduled_from=(scheduled_from if isinstance(scheduled_from, date) else None),
+            scheduled_preset=(scheduled_preset if isinstance(scheduled_preset, str) else None),
         )
     return WeeklyRhythmView(
         versioned=True,
@@ -505,12 +501,8 @@ def _rhythm_view(result: dict[str, object]) -> WeeklyRhythmView:
         target_days=projection.target_days,
         done_days=projection.done_days,
         hint=projection.hint,
-        scheduled_from=(
-            scheduled_from if isinstance(scheduled_from, date) else None
-        ),
-        scheduled_preset=(
-            scheduled_preset if isinstance(scheduled_preset, str) else None
-        ),
+        scheduled_from=(scheduled_from if isinstance(scheduled_from, date) else None),
+        scheduled_preset=(scheduled_preset if isinstance(scheduled_preset, str) else None),
     )
 
 
