@@ -465,6 +465,10 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+// CI-воркеры узкие (4 vCPU, полный parallel): reload-тяжёлые journey допускают
+// до двух повторов только в этом файле, не меняя глобальную политику.
+test.describe.configure({ retries: 2 });
+
 test.describe("engagement journey: desktop acceptance", () => {
   test.use({ viewport: { width: 1440, height: 1280 } });
 
