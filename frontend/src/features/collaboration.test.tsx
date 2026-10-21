@@ -43,20 +43,39 @@ const messageFixture = {
   created_at: "2026-10-20T09:00:00Z",
 };
 
+const personalChannelId = "00000000-0000-0000-0000-000000000102";
+
+type ChannelFixture = Omit<typeof channelFixture, "task_id" | "last_message"> & {
+  task_id: string | null;
+  last_message: typeof channelFixture.last_message | null;
+};
+
+const personalChannelFixture: ChannelFixture = {
+  ...channelFixture,
+  id: personalChannelId,
+  kind: "personal",
+  title: "Личный диалог",
+  task_id: null,
+  last_message: null,
+  created_at: "2026-10-20T07:00:00Z",
+};
+
 afterEach(() => {
   vi.restoreAllMocks();
   window.sessionStorage.clear();
   window.localStorage.clear();
 });
 
-function mockMessagingApi() {
+function mockMessagingApi(channels: ChannelFixture[] = [channelFixture]) {
   vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
     const path = input instanceof Request ? new URL(input.url).pathname : String(input);
     if (path === "/api/v1/me/messaging/channels") {
-      return Promise.resolve(new Response(JSON.stringify([channelFixture]), { status: 200 }));
+      return Promise.resolve(new Response(JSON.stringify(channels), { status: 200 }));
     }
-    if (path === `/api/v1/me/messaging/channels/${channelId}/messages`) {
-      return Promise.resolve(new Response(JSON.stringify([messageFixture]), { status: 200 }));
+    for (const channel of channels) {
+      if (path === `/api/v1/me/messaging/channels/${channel.id}/messages`) {
+        return Promise.resolve(new Response(JSON.stringify(channel.last_message ? [messageFixture] : []), { status: 200 }));
+      }
     }
     return Promise.resolve(new Response(null, { status: 404 }));
   });
@@ -158,5 +177,15 @@ describe("SberChat-style messenger shell", () => {
     await waitFor(() => {
       expect(screen.queryByRole("searchbox", { name: "Поиск по сообщениям чата" })).toBeNull();
     });
+  });
+
+  it("глубокая ссылка ?task=<task_id> открывает чат команды задачи, а не первый диалог", async () => {
+    window.history.replaceState({}, "", "/workspace/10?task=task-alpha");
+    mockMessagingApi([personalChannelFixture, channelFixture]);
+    renderWorkspace();
+
+    await screen.findByRole("region", { name: "Текущий чат · Команда проекта Альфа" });
+    expect(screen.getByRole("region", { name: "Текущий чат · Команда проекта Альфа" })).toBeInTheDocument();
+    expect(window.sessionStorage.getItem("impulse.messenger.selected-channel")).toBe(channelId);
   });
 });

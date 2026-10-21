@@ -114,6 +114,7 @@ export function MessagingWorkspace({
 
   const requestedPeer = new URLSearchParams(window.location.search).get("participant");
   const requestedChannel = new URLSearchParams(window.location.search).get("channel");
+  const requestedTask = new URLSearchParams(window.location.search).get("task");
   const reference =
     role === "participant"
       ? "R-PAR-07"
@@ -133,6 +134,7 @@ export function MessagingWorkspace({
   const [pending, setPending] = useState<PendingMessageOverlay[]>([]);
   const [replyId, setReplyId] = useState<string | null>(null);
   const openedPeerRef = useRef("");
+  const openedTaskRef = useRef("");
 
   const selected =
     channels.find((item) => item.id === selectedId) ??
@@ -140,6 +142,21 @@ export function MessagingWorkspace({
       ? channels.find((item) => item.id === requestedChannel)
       : undefined) ??
     (channels.length ? channels[0] : undefined);
+
+  // Глубокая ссылка ?task=<task_id>: открываем чат команды этой задачи,
+  // когда он появится в списке каналов; явный ?channel= приоритетнее.
+  useEffect(() => {
+    if (!requestedTask || requestedChannel !== null || openedTaskRef.current === requestedTask) {
+      return;
+    }
+    const byTask = channels.find((item) => item.task_id === requestedTask);
+    if (!byTask) {
+      return;
+    }
+    openedTaskRef.current = requestedTask;
+    setSelectedId(byTask.id);
+    setMobilePane("chat");
+  }, [channels, requestedChannel, requestedTask]);
 
   useEffect(() => {
     if (!requestedPeer || requestedPeer === openedPeerRef.current || !UUID_PATTERN.test(requestedPeer)) {

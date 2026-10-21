@@ -107,6 +107,20 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/me/tasks/task-1", (route) => route.fulfill({ json: {
     task: { id: "task-1", title: "Прототип рекомендательной системы", status: "in_progress" },
     problem: "Собрать рекомендации на открытом корпусе и оценить качество",
+    deliverable: "Работающий прототип и API",
+    data_constraints: "Открытый корпус, без персональных данных",
+    ip_terms: "Результаты принадлежат платформе и заказчику по условиям задачи.",
+    accepted_terms_version: 2,
+    allowed_artifacts: ["api"],
+    applications: [],
+    terms: {
+      version: 2,
+      deadline_at: "2026-10-12T18:00:00Z",
+      deliverable: "Работающий прототип и API",
+      acceptance_criteria: ["Воспроизводимость"],
+      support_mode: "mentor",
+      compensation: { paid: false, base_amount_per_assignee: null, currency: null, b_multiplier: "1", b_total: null, a_multiplier: "1", a_total: null, quantum: "0.01", rounding_mode: "half_up", payout_condition: "", policy_version: 1 },
+    },
     deadline_at: "2026-10-12T18:00:00Z",
     customer: { id: "3", display_name: "Роман Воронов" },
     mentor: { id: "2", display_name: "Елена Наставник" },
@@ -456,7 +470,7 @@ test("search, streak, task detail and messages are interactive", async ({ page }
   await expect(page.getByRole("heading", { name: "Прототип рекомендательной системы" })).toBeVisible();
   await expect(page.getByText("Загрузить решение")).toBeVisible();
   await page.getByRole("button", { name: "Открыть чат команды" }).click();
-  await expect(page).toHaveURL(/\/workspace\/10\?participant=project$/);
+  await expect(page).toHaveURL(/\/workspace\/10\?task=task-1$/);
   await expect(page.getByRole("heading", { name: "Сообщения" })).toBeVisible();
   await expect(page.getByRole("region", { name: "Текущий чат · Рекомендательная система" })).toBeVisible();
   await page.getByRole("textbox", { name: "Текст сообщения" }).fill("Готово к повторной проверке");

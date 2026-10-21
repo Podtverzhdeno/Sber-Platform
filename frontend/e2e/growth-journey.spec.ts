@@ -304,10 +304,10 @@ test("participant growth journey: theme, passport project, evidence checkpoint, 
   await page.goto(`/workspace/4?project=${ASSIGNMENT_ID}`);
   await expect(page.getByRole("heading", { name: "Проверка прототипа на данных" })).toBeVisible();
   await page.getByRole("button", { name: "Открыть чат команды" }).click();
-  await expect(page).toHaveURL(/\/workspace\/10\?participant=project$/);
+  await expect(page).toHaveURL(new RegExp(`/workspace\\/10\\?task=${TASK_ID}$`));
   await page.goBack();
   await page.getByRole("button", { name: "Загрузить новую версию" }).click();
-  await expect(page.getByRole("status")).toContainText("Черновик новой версии подготовлен. Добавьте файлы и отправьте результат.");
+  await expect(page.locator(".ctw-notice")).toContainText("Черновик новой версии подготовлен. Добавьте файлы и отправьте результат.");
 
   // Проектная карточка: checkpoint-форма личного вклада с клавиатуры.
   await page.goto("/workspace/4");
