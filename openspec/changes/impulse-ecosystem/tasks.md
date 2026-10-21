@@ -173,7 +173,7 @@
 - [x] 19.2 Реализовать journeys смены направления, changed terms, disputed grade, verified/revoked trophy, opt-out и HR verification; каждый SHALL проверять audit/version/privacy.
 - [x] 19.3 Реализовать AI journeys Buddy money/offer/manual path, mentor draft/reject и operator false duplicate; тесты SHALL пройти с FakeGateway и AI disabled.
 - [x] 19.4 Запустить full quality suite, OpenSpec `validate --all --strict`, Docker smoke и dependency/secret scans; сохранить краткий release report с командами и результатами.
-- [ ] 19.5 Развернуть demo в Railway после явного подтверждения владельца, задать secrets через Variables и выполнить post-deploy health/login/Buddy smoke без вывода ключа.
+- [x] 19.5 Развернуть demo в Railway после явного подтверждения владельца, задать secrets через Variables и выполнить post-deploy health/login/Buddy smoke без вывода ключа.
 - [x] 19.6 Провести ручную приёмку шести ролей и accessibility pass, зафиксировать известные ограничения/free quota/launch gates и получить решение expand/iterate/stop.
 
 # Demo interface integrity follow-up
@@ -337,4 +337,4 @@
 
 ## 28. CI repair queue
 
-- [ ] ci-repair-format-backend-84 CI job `backend-format-lint-types` на PR #84 падает на шаге `ruff format --check .` (12 файлов без форматирования: migrations 0022/0023, development/buddy/engagement sources и их тесты); форматирование SHALL быть чисто механическим без изменения семантики, а `ruff check` и `pyright` SHALL остаться зелёными.
+- [x] ci-repair-format-backend-84 CI job `backend-format-lint-types` на PR #84 падает на шаге `ruff format --check .` (12 файлов без форматирования: migrations 0022/0023, development/buddy/engagement sources и их тесты); форматирование SHALL быть чисто механическим без изменения семантики, а `ruff check` и `pyright` SHALL остаться зелёными.
