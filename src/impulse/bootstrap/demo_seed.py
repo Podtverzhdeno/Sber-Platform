@@ -32,11 +32,16 @@ from impulse.infrastructure.models.development import (
     course_track_links,
     courses,
     enrollments,
+    freeze_days,
+    freeze_exceptions,
     learning_days,
     milestones,
+    monthly_goal_plans,
+    qualification_events,
     roadmap_versions,
     track_attempts,
     tracks,
+    weekly_rhythm_versions,
 )
 from impulse.infrastructure.models.ecosystem import (
     events,
@@ -268,6 +273,15 @@ def build_seed_batches() -> list[SeedBatch]:
         )
         for index in range(1, 5)
     ]
+    freeze_rows = [
+        demo_row(
+            "freeze:alex:initial",
+            person_id=demo_id("participant-alex"),
+            local_date=None,
+            status="available",
+            payload={"rule": "demo_engagement_acceptance_v2"},
+        )
+    ]
     track_attempt_rows = [
         demo_row(
             "track-attempt:alex:python:1",
@@ -349,6 +363,7 @@ def build_seed_batches() -> list[SeedBatch]:
         SeedBatch(courses, course_rows),
         SeedBatch(course_track_links, course_link_rows),
         SeedBatch(enrollments, enrollment_rows),
+        SeedBatch(freeze_days, freeze_rows),
         SeedBatch(external_sources, [source_row]),
         SeedBatch(programs, [program_row]),
         SeedBatch(events, event_rows),
@@ -977,9 +992,57 @@ async def seed_demo(database: Database) -> dict[str, int]:
 
 
 async def _insert_batches(session: AsyncSession, batches: list[SeedBatch]) -> None:
+    channel_id_remap: dict[object, object] = {}
     for batch in batches:
         if not batch.rows:
             continue
+        if batch.table is messaging_channels:
+            for row in batch.rows:
+                existing_id = await session.scalar(
+                    select(messaging_channels.c.id).where(
+                        messaging_channels.c.kind == row["kind"],
+                        messaging_channels.c.context_key == row["context_key"],
+                    )
+                )
+                seeded_id = row["id"]
+                if existing_id is not None and existing_id != seeded_id:
+                    channel_id_remap[seeded_id] = existing_id
+                    row["id"] = existing_id
+        if channel_id_remap:
+            for row in batch.rows:
+                channel_id = row.get("channel_id")
+                if channel_id in channel_id_remap:
+                    row["channel_id"] = channel_id_remap[channel_id]
+        if batch.table is messaging_memberships:
+            for row in batch.rows:
+                existing_id = await session.scalar(
+                    select(messaging_memberships.c.id).where(
+                        messaging_memberships.c.channel_id == row["channel_id"],
+                        messaging_memberships.c.person_id == row["person_id"],
+                    )
+                )
+                if existing_id is not None:
+                    row["id"] = existing_id
+        elif batch.table is messaging_messages:
+            for row in batch.rows:
+                existing_id = await session.scalar(
+                    select(messaging_messages.c.id).where(
+                        messaging_messages.c.channel_id == row["channel_id"],
+                        messaging_messages.c.sequence == row["sequence"],
+                    )
+                )
+                if existing_id is not None:
+                    row["id"] = existing_id
+        elif batch.table is messaging_read_cursors:
+            for row in batch.rows:
+                existing_id = await session.scalar(
+                    select(messaging_read_cursors.c.id).where(
+                        messaging_read_cursors.c.channel_id == row["channel_id"],
+                        messaging_read_cursors.c.person_id == row["person_id"],
+                    )
+                )
+                if existing_id is not None:
+                    row["id"] = existing_id
         statement = insert(batch.table).values(batch.rows)
         if batch.table is talent_pipeline_events:
             statement = statement.on_conflict_do_nothing(index_elements=[batch.table.c.id])
@@ -1019,16 +1082,25 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
         await session.execute(
             delete(notifications).where(notifications.c.person_id.in_(demo_person_ids))
         )
-        runtime_enrollments = select(enrollments.c.id).where(
-            enrollments.c.person_id.in_(demo_person_ids),
-            enrollments.c.data_origin == "demo_runtime",
+        demo_enrollments = select(enrollments.c.id).where(
+            enrollments.c.person_id.in_(demo_person_ids)
         )
         await session.execute(
             delete(learning_days).where(
-                learning_days.c.enrollment_id.in_(runtime_enrollments),
+                learning_days.c.enrollment_id.in_(demo_enrollments),
                 learning_days.c.data_origin == "demo_runtime",
             )
         )
+        for engagement_table in (
+            monthly_goal_plans,
+            weekly_rhythm_versions,
+            freeze_exceptions,
+            freeze_days,
+            qualification_events,
+        ):
+            await session.execute(
+                delete(engagement_table).where(engagement_table.c.person_id.in_(demo_person_ids))
+            )
         await session.execute(
             delete(enrollments).where(
                 enrollments.c.person_id.in_(demo_person_ids),

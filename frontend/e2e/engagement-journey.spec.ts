@@ -451,6 +451,63 @@ function installRoutes(page: Page, options: { engagementAvailable?: boolean } = 
   void page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({ json: [] }));
   void page.route("**/api/v1/development/tracks", (route) => route.fulfill({ json: { active_count: 1, max_active: 2, tracks: [{ key: "python", title: "Python-разработчик", status: "active", completed_milestones: [] }] } }));
   void page.route("**/api/v1/me/roadmaps", (route) => route.fulfill({ json: [{ track_key: "python", policy_version: 1, replacement_reason: null, milestones: [milestone], next_step: milestone }] }));
+  void page.route("**/api/v1/me/trajectory-map", (route) => route.fulfill({
+    json: [{
+      track_key: "python",
+      policy_version: 1,
+      replacement_reason: null,
+      current_key: "m3",
+      checkpoints: [
+        {
+          ...milestone,
+          key: "m1",
+          state: "COMPLETED",
+          state_label: "Пройдено",
+          mandatory: true,
+          actionable: false,
+          points_available: 20,
+          points_earned: 20,
+          points_rule: "После проверки evidence",
+          policy_version: 1,
+          locked_reasons: [],
+          branch: null,
+        },
+        {
+          ...milestone,
+          key: "m2",
+          position: 2,
+          title: "Подтвердить практику",
+          state: "COMPLETED",
+          state_label: "Пройдено",
+          mandatory: true,
+          actionable: false,
+          points_available: 30,
+          points_earned: 30,
+          points_rule: "После проверки evidence",
+          policy_version: 1,
+          locked_reasons: [],
+          branch: null,
+        },
+        {
+          ...milestone,
+          key: "m3",
+          position: 3,
+          title: "Закрепить результат в проекте",
+          state: "CURRENT",
+          state_label: "Текущий шаг",
+          mandatory: true,
+          actionable: true,
+          points_available: 50,
+          points_earned: 0,
+          points_rule: "После проверки evidence",
+          policy_version: 1,
+          locked_reasons: [],
+          branch: null,
+        },
+      ],
+      progress: { completed_mandatory: 2, total_mandatory: 3, percent: 66 },
+    }],
+  }));
 }
 
 test.beforeEach(async ({ page }) => {
@@ -562,8 +619,8 @@ test.describe("engagement journey: desktop acceptance", () => {
 
   // Radar/readiness: снапшот пересчитался по квалифицируемым событиям.
   await page.goto("/workspace/1");
-  await expect(page.getByTestId("trajectory-percent-python")).toContainText("66%");
-  await expect(page.getByTestId("trajectory-card-python")).toContainText("Готовность роли: 66%");
+  await expect(page.getByTestId("trajectory-map")).toBeVisible();
+  await expect(page.getByTestId("trajectory-track-progress")).toContainText("66%");
   // Честная reload-поверхность: рост стрика фиксируется flat-анимацией 5 → 6.
   await expect(page.locator(".engagement-flash", { hasText: "5 → 6" })).toBeVisible();
 
