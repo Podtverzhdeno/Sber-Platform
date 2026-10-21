@@ -33,6 +33,12 @@ def draft_command() -> dict[str, object]:
         "brief": "Нужно приложение для поиска статей",
         "data_class": "public",
         "correlation_id": "assistant-1",
+        "draft_version": 7,
+        "fields": {
+            "problem": "Исследователи долго ищут статьи",
+            "deliverable": "",
+            "criterion": "",
+        },
     }
 
 
@@ -87,6 +93,37 @@ def test_ai_draft_is_returned_editable_but_never_publishes() -> None:
         assert body["problem"].startswith("Найти")
         assert body["acceptance_criteria"][0].startswith("Precision@10")
         assert body["disclaimer"] == "draft_requires_human_publish"
+        assert body["suggestion_id"]
+        assert body["draft_version"] == 7
+        patches = {item["target_field"]: item for item in body["patches"]}
+        assert patches["problem"] == {
+            "target_field": "problem",
+            "before": "Исследователи долго ищут статьи",
+            "field_version": 7,
+            "proposed_text": "Найти релевантные статьи по запросу исследователя",
+            "reason": "Уточнить проблему и целевую аудиторию решения.",
+            "source_version": "customer-brief-v1",
+            "prompt_version": "customer-brief-prompt-v1",
+        }
+        assert patches["deliverable"]["before"] == ""
+        assert patches["criterion"]["proposed_text"].startswith("Precision@10")
+
+
+def test_demo_synthetic_brief_is_allowed_by_the_same_explicit_gate() -> None:
+    gateway = FakeGateway([structured_draft()])
+    api = client(gateway)
+    command = draft_command()
+    command["data_class"] = "demo_synthetic"
+    with api:
+        csrf = login(api, "customer-roman")
+        response = api.post(
+            "/api/v1/me/assistant/customer-brief",
+            json=command,
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert response.status_code == 200
+        assert response.json()["gateway_called"] is True
+        assert len(gateway.invocations) == 1
 
 
 def test_assistant_off_is_safe_manual_template_without_call() -> None:
@@ -127,3 +164,22 @@ def test_malformed_gateway_error_keeps_workspace_safe() -> None:
             headers={"X-CSRF-Token": csrf},
         )
         assert response.status_code == 503
+
+
+def test_timeout_and_quota_have_distinct_safe_states() -> None:
+    for outcome, status, code, retryable in (
+        (FakeOutcome.timeout(), 503, "ASSISTANT_TIMEOUT", True),
+        (FakeOutcome.http_error(429), 429, "ASSISTANT_QUOTA_EXCEEDED", True),
+        (FakeOutcome.http_error(402), 429, "ASSISTANT_QUOTA_EXCEEDED", False),
+    ):
+        api = client(FakeGateway([outcome]), brief_ai=True)
+        with api:
+            csrf = login(api, "customer-roman")
+            response = api.post(
+                "/api/v1/me/assistant/customer-brief",
+                json=draft_command(),
+                headers={"X-CSRF-Token": csrf},
+            )
+            assert response.status_code == status
+            assert response.json()["code"] == code
+            assert response.json()["retryable"] is retryable

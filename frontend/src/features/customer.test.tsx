@@ -83,7 +83,7 @@ function mockHome(
   tasks: Task[],
   createTask?: (body: Record<string, unknown>) => { id: string; status: string },
   applicationsOverride?: { id: string; task_id: string; person_id: string; accepted_terms_version: number; status: string; version: number; participant_name: string; verified_case_count: number }[],
-  assistant?: (body: Record<string, unknown>) => Record<string, unknown>,
+  assistant?: (body: Record<string, unknown>) => Record<string, unknown> | Response,
 ) {
   return vi.spyOn(globalThis, "fetch").mockImplementation((input, init) => {
     const path = input instanceof Request ? new URL(input.url).pathname : input instanceof URL ? input.pathname : input;
@@ -96,7 +96,8 @@ function mockHome(
     if (path === "/api/v1/me/assistant/customer-brief" && method === "POST" && assistant) {
       const rawBody = typeof init?.body === "string" ? init.body : "{}";
       const body = JSON.parse(rawBody) as Record<string, unknown>;
-      return Promise.resolve(new Response(JSON.stringify(assistant(body)), { status: 200 }));
+      const result = assistant(body);
+      return Promise.resolve(result instanceof Response ? result : new Response(JSON.stringify(result), { status: 200 }));
     }
     if (path === "/api/v1/customer/tasks") {
       return Promise.resolve(new Response(JSON.stringify(tasks), { status: 200 }));
@@ -325,7 +326,11 @@ describe("customer home", () => {
 
 describe("customer ai draft hint", () => {
   it("suggests an editable ai draft and inserts it after explicit approval", async () => {
-    mockHome([taskEconomy], undefined, undefined, () => ({
+    let saveCalls = 0;
+    mockHome([taskEconomy], () => {
+      saveCalls += 1;
+      return { id: "unexpected-save", status: "draft" };
+    }, undefined, () => ({
       kind: "customer_brief",
       editable: true,
       problem: "Найти релевантные статьи по запросу исследователя",
@@ -353,6 +358,71 @@ describe("customer ai draft hint", () => {
     expect(screen.getByLabelText("Проблема")).toHaveValue("Найти статьи быстро");
     expect(screen.getByLabelText("Результат")).toHaveValue("Прототип поиска");
     expect(screen.getByLabelText("Критерии приёмки построчно")).toHaveValue("Precision@10 >= 0.7");
+    expect(saveCalls).toBe(0);
+  });
+
+  it("sends a versioned field snapshot and blocks a stale patch without changing the draft", async () => {
+    const requests: Record<string, unknown>[] = [];
+    mockHome([taskEconomy], undefined, undefined, (body) => {
+      requests.push(body);
+      return {
+        kind: "customer_brief",
+        editable: true,
+        problem: "AI формулировка",
+        deliverable: null,
+        acceptance_criteria: [],
+        notice: "Черновик от AI можно редактировать.",
+        gateway_called: true,
+        suggestion_id: "suggestion-1",
+        draft_version: body.draft_version,
+        patches: [{
+          target_field: "problem",
+          before: "Исходная формулировка",
+          field_version: body.draft_version,
+          proposed_text: "AI формулировка",
+          reason: "Уточнить аудиторию.",
+          source_version: "customer-brief-v1",
+          prompt_version: "customer-brief-prompt-v1",
+        }],
+      };
+    });
+    renderHome();
+    await waitFor(() => { expect(screen.getAllByText("Оптимизация логистики региона").length).toBeGreaterThan(0); });
+    fireEvent.click(screen.getByRole("button", { name: "+ Создать задачу" }));
+    fireEvent.change(screen.getByLabelText("Название"), { target: { value: "Поиск статей" } });
+    fireEvent.change(screen.getByLabelText("Компетенции кейса через запятую"), { target: { value: "NLP" } });
+    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    fireEvent.change(screen.getByLabelText("Проблема"), { target: { value: "Исходная формулировка" } });
+    fireEvent.click(screen.getByRole("button", { name: "AI-подсказка по брифу" }));
+    await screen.findByDisplayValue("AI формулировка");
+    expect(requests[0]).toMatchObject({
+      fields: { problem: "Исходная формулировка", deliverable: "", criterion: "" },
+    });
+    expect(Number(requests[0]?.draft_version)).toBeGreaterThan(1);
+
+    fireEvent.change(screen.getByLabelText("Проблема"), { target: { value: "Изменено человеком после генерации" } });
+    fireEvent.click(screen.getByRole("button", { name: "Вставить в бриф" }));
+    expect(screen.getByLabelText("Проблема")).toHaveValue("Изменено человеком после генерации");
+    expect(screen.getByTestId("wizard-ai-stale")).toHaveTextContent("Автоматическое применение заблокировано");
+    expect(screen.queryByTestId("wizard-ai-applied")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Обновить рекомендацию" })).toBeInTheDocument();
+  });
+
+  it("keeps fields unchanged on quota and offers retry or manual continuation", async () => {
+    mockHome([taskEconomy], undefined, undefined, () => new Response(JSON.stringify({ code: "ASSISTANT_QUOTA_EXCEEDED", message: "Лимит", request_id: "test", retryable: true }), { status: 429 }));
+    renderHome();
+    await waitFor(() => { expect(screen.getAllByText("Оптимизация логистики региона").length).toBeGreaterThan(0); });
+    fireEvent.click(screen.getByRole("button", { name: "+ Создать задачу" }));
+    fireEvent.change(screen.getByLabelText("Название"), { target: { value: "Поиск статей" } });
+    fireEvent.change(screen.getByLabelText("Компетенции кейса через запятую"), { target: { value: "NLP" } });
+    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    fireEvent.change(screen.getByLabelText("Проблема"), { target: { value: "Текст человека" } });
+    fireEvent.click(screen.getByRole("button", { name: "AI-подсказка по брифу" }));
+    await waitFor(() => { expect(screen.getByTestId("wizard-ai-error")).toHaveTextContent("Лимит AI-помощника исчерпан"); });
+    expect(screen.getByLabelText("Проблема")).toHaveValue("Текст человека");
+    expect(screen.queryByTestId("wizard-ai-applied")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Повторить анализ" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Продолжить вручную" })).toBeInTheDocument();
   });
 });
 

@@ -48,6 +48,24 @@ function experienceLabel(item: Application) {
 type AiAppliedField = "problem" | "deliverable" | "criterion";
 
 type AiAppliedPatch = { field: AiAppliedField; before: string; after: string };
+type AiSuggestionPatch = {
+  target_field: AiAppliedField;
+  before: string;
+  field_version: number;
+  proposed_text: string;
+  reason: string;
+  source_version: string;
+  prompt_version: string;
+};
+type AiDraft = {
+  problem: string;
+  deliverable: string;
+  criteria: string;
+  notice: string;
+  suggestionId: string | null;
+  draftVersion: number;
+  patches: AiSuggestionPatch[];
+};
 
 const aiAppliedTitles: Record<AiAppliedField, string> = {
   problem: "Проблема",
@@ -79,8 +97,11 @@ export function CustomerWorkspace() {
   const [credentialNotice, setCredentialNotice] = useState("");
   const [credentialError, setCredentialError] = useState("");
   const [lastVerificationId, setLastVerificationId] = useState<string | null>(null);
-  const [aiDraft, setAiDraft] = useState<{ problem: string; deliverable: string; criteria: string; notice: string } | null>(null);
+  const [aiDraft, setAiDraft] = useState<AiDraft | null>(null);
   const [aiApplied, setAiApplied] = useState<AiAppliedPatch[]>([]);
+  const [aiStaleFields, setAiStaleFields] = useState<AiAppliedField[]>([]);
+  const [aiError, setAiError] = useState<"quota" | "timeout" | "provider" | null>(null);
+  const [draftVersion, setDraftVersion] = useState(1);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewSnapshot, setPreviewSnapshot] = useState<string | null>(null);
   const [previewSavedView, setPreviewSavedView] = useState<{ form: Partial<DraftForm>; taskMode: TaskMode } | null>(null);
@@ -97,15 +118,39 @@ export function CustomerWorkspace() {
     },
   });
   const aiDraftSuggestion = useMutation({
-    mutationFn: () => apiRequest<{ kind: string; editable: boolean; problem: string | null; deliverable: string | null; acceptance_criteria: string[]; notice: string; gateway_called: boolean }>("/api/v1/me/assistant/customer-brief", {
+    mutationFn: () => apiRequest<{ kind: string; editable: boolean; problem: string | null; deliverable: string | null; acceptance_criteria: string[]; notice: string; gateway_called: boolean; suggestion_id?: string | null; draft_version?: number; patches?: AiSuggestionPatch[] }>("/api/v1/me/assistant/customer-brief", {
       method: "POST",
       headers: csrfHeaders(),
-      body: JSON.stringify({ brief: form.problem || form.title, data_class: "public", correlation_id: `wizard-${String(Date.now())}` }),
+      body: JSON.stringify({
+        brief: form.problem || form.title,
+        data_class: "public",
+        correlation_id: `wizard-${String(Date.now())}`,
+        draft_version: draftVersion,
+        fields: { problem: form.problem, deliverable: form.deliverable, criterion: form.criterion },
+      }),
     }),
     onSuccess: (body) => {
-      setAiDraft(body.kind === "manual_template" ? { problem: "", deliverable: "", criteria: "", notice: body.notice } : { problem: body.problem ?? "", deliverable: body.deliverable ?? "", criteria: body.acceptance_criteria.join("\n"), notice: body.notice });
+      setAiError(null);
+      setAiStaleFields([]);
+      const proposed = { problem: body.problem ?? "", deliverable: body.deliverable ?? "", criterion: body.acceptance_criteria.join("\n") };
+      const fallbackPatches: AiSuggestionPatch[] = (["problem", "deliverable", "criterion"] as const)
+        .filter((field) => proposed[field].trim() !== "")
+        .map((field) => ({ target_field: field, before: form[field], field_version: draftVersion, proposed_text: proposed[field], reason: "Усилить проверяемость постановки.", source_version: "customer-brief-v1", prompt_version: "customer-brief-prompt-v1" }));
+      setAiDraft({
+        problem: proposed.problem,
+        deliverable: proposed.deliverable,
+        criteria: proposed.criterion,
+        notice: body.notice,
+        suggestionId: body.suggestion_id ?? null,
+        draftVersion: body.draft_version ?? draftVersion,
+        patches: body.patches ?? fallbackPatches,
+      });
     },
-    onError: () => { setAiDraft({ problem: "", deliverable: "", criteria: "", notice: "AI-помощник недоступен, заполните бриф вручную." }); },
+    onError: (error) => {
+      setAiDraft(null);
+      setAiStaleFields([]);
+      setAiError(error instanceof ApiClientError && error.code === "ASSISTANT_QUOTA_EXCEEDED" ? "quota" : error instanceof ApiClientError && error.code === "ASSISTANT_TIMEOUT" ? "timeout" : "provider");
+    },
   });
   const detail = useQuery({ queryKey: ["customer-task-detail", selectedTask], enabled: selectedTask !== null && !selectedTask.startsWith("demo-"), queryFn: () => apiRequest<TaskDetail>(`/api/v1/customer/tasks/${selectedTask ?? ""}`) });
   const applications = useQuery({ queryKey: ["customer-applications", selectedTask], enabled: selectedTask !== null, queryFn: () => apiRequest<Application[]>(`/api/v1/customer/tasks/${selectedTask ?? ""}/applications`) });
@@ -191,11 +236,13 @@ export function CustomerWorkspace() {
   };
   const applyAiDraft = () => {
     if (!aiDraft) return;
-    const sources: { field: AiAppliedField; after: string }[] = [
-      { field: "problem", after: aiDraft.problem },
-      { field: "deliverable", after: aiDraft.deliverable },
-      { field: "criterion", after: aiDraft.criteria },
-    ];
+    const editedProposed: Record<AiAppliedField, string> = { problem: aiDraft.problem, deliverable: aiDraft.deliverable, criterion: aiDraft.criteria };
+    const stale = aiDraft.patches.filter((patch) => form[patch.target_field] !== patch.before).map((patch) => patch.target_field);
+    if (stale.length > 0) {
+      setAiStaleFields(stale);
+      return;
+    }
+    const sources = aiDraft.patches.map((patch) => ({ field: patch.target_field, after: editedProposed[patch.target_field] }));
     const patches: AiAppliedPatch[] = [];
     const nextForm = { ...form };
     for (const source of sources) {
@@ -207,7 +254,9 @@ export function CustomerWorkspace() {
     if (patches.length > 0) {
       setForm(nextForm);
       setAiApplied((current) => [...current.filter((entry) => !patches.some((patch) => patch.field === entry.field)), ...patches]);
+      setDraftVersion((current) => current + 1);
     }
+    setAiStaleFields([]);
     setAiDraft(null);
   };
   const canAdvance = (step: number): boolean => {
@@ -368,28 +417,31 @@ export function CustomerWorkspace() {
         </>)}
         {wizardStep === 2 && (<>
           <div className={`customer-ai-field span-2${aiFieldState("problem") ? " customer-ai-applied" : ""}`}>
-            <label htmlFor="wizard-problem-input">Проблема<textarea id="wizard-problem-input" rows={2} value={form.problem} onChange={(event) => { setForm({ ...form, problem: event.target.value }); clearAiApplied("problem"); }} aria-describedby={aiFieldState("problem") ? "wizard-ai-problem-note" : undefined} /></label>
+            <label htmlFor="wizard-problem-input">Проблема<textarea id="wizard-problem-input" rows={2} value={form.problem} onChange={(event) => { setForm({ ...form, problem: event.target.value }); setDraftVersion((current) => current + 1); clearAiApplied("problem"); }} aria-describedby={aiFieldState("problem") ? "wizard-ai-problem-note" : undefined} /></label>
             {aiFieldState("problem") && <span className="customer-ai-applied-flag" id="wizard-ai-problem-note" data-testid="wizard-ai-applied"><span aria-hidden="true">✦</span>Добавлено AI</span>}
           </div>
           <div className={`customer-ai-field span-2${aiFieldState("deliverable") ? " customer-ai-applied" : ""}`}>
-            <label htmlFor="wizard-deliverable-input">Результат<textarea id="wizard-deliverable-input" rows={2} value={form.deliverable} onChange={(event) => { setForm({ ...form, deliverable: event.target.value }); clearAiApplied("deliverable"); }} aria-describedby={aiFieldState("deliverable") ? "wizard-ai-deliverable-note" : undefined} /></label>
+            <label htmlFor="wizard-deliverable-input">Результат<textarea id="wizard-deliverable-input" rows={2} value={form.deliverable} onChange={(event) => { setForm({ ...form, deliverable: event.target.value }); setDraftVersion((current) => current + 1); clearAiApplied("deliverable"); }} aria-describedby={aiFieldState("deliverable") ? "wizard-ai-deliverable-note" : undefined} /></label>
             {aiFieldState("deliverable") && <span className="customer-ai-applied-flag" id="wizard-ai-deliverable-note" data-testid="wizard-ai-applied"><span aria-hidden="true">✦</span>Добавлено AI</span>}
           </div>
           <div className={`customer-ai-field span-2${aiFieldState("criterion") ? " customer-ai-applied" : ""}`}>
-            <label htmlFor="wizard-criteria-input">Критерии приёмки построчно<textarea id="wizard-criteria-input" rows={3} value={form.criterion} onChange={(event) => { setForm({ ...form, criterion: event.target.value }); clearAiApplied("criterion"); }} aria-describedby={aiFieldState("criterion") ? "wizard-ai-criteria-note" : undefined} /></label>
+            <label htmlFor="wizard-criteria-input">Критерии приёмки построчно<textarea id="wizard-criteria-input" rows={3} value={form.criterion} onChange={(event) => { setForm({ ...form, criterion: event.target.value }); setDraftVersion((current) => current + 1); clearAiApplied("criterion"); }} aria-describedby={aiFieldState("criterion") ? "wizard-ai-criteria-note" : undefined} /></label>
             {aiFieldState("criterion") && <span className="customer-ai-applied-flag" id="wizard-ai-criteria-note" data-testid="wizard-ai-applied"><span aria-hidden="true">✦</span>Добавлено AI</span>}
           </div>
           <div className="ai-draft-editor span-2" aria-label="AI-подсказка по брифу">
-            {!aiDraftSuggestion.isPending && !aiDraft && <button type="button" className="secondary-button" onClick={() => { aiDraftSuggestion.mutate(); }}>AI-подсказка по брифу</button>}
+            {!aiDraftSuggestion.isPending && !aiDraft && !aiError && <button type="button" className="secondary-button" onClick={() => { aiDraftSuggestion.mutate(); }}>AI-подсказка по брифу</button>}
             {aiDraftSuggestion.isPending && <small>Анализируем бриф…</small>}
+            {aiError && <div role="alert" data-testid="wizard-ai-error"><p>{aiError === "quota" ? "Лимит AI-помощника исчерпан." : aiError === "timeout" ? "AI-помощник не успел ответить." : "AI-помощник недоступен."} Поля не изменены.</p><div className="wizard-actions"><button type="button" onClick={() => { setAiError(null); aiDraftSuggestion.mutate(); }}>Повторить анализ</button><button type="button" className="secondary-button" onClick={() => { setAiError(null); }}>Продолжить вручную</button></div></div>}
             {aiDraft && (<>
               <small>{aiDraft.notice}</small>
+              {aiDraft.suggestionId && <small>{`Источник ${aiDraft.patches[0]?.source_version ?? "customer-brief-v1"} · prompt ${aiDraft.patches[0]?.prompt_version ?? "customer-brief-prompt-v1"} · версия черновика ${String(aiDraft.draftVersion)}`}</small>}
               {aiDraft.problem !== "" && (<>
                 <label htmlFor="wizard-ai-problem">Черновик · проблема<textarea id="wizard-ai-problem" data-testid="wizard-ai-problem" rows={2} value={aiDraft.problem} onChange={(event) => { setAiDraft({ ...aiDraft, problem: event.target.value }); }} /></label>
                 <label htmlFor="wizard-ai-deliverable">Черновик · результат<textarea id="wizard-ai-deliverable" data-testid="wizard-ai-deliverable" rows={2} value={aiDraft.deliverable} onChange={(event) => { setAiDraft({ ...aiDraft, deliverable: event.target.value }); }} /></label>
                 <label htmlFor="wizard-ai-criteria">Черновик · критерии<textarea id="wizard-ai-criteria" data-testid="wizard-ai-criteria" rows={2} value={aiDraft.criteria} onChange={(event) => { setAiDraft({ ...aiDraft, criteria: event.target.value }); }} /></label>
               </>)}
-              <div className="wizard-actions span-2">{aiDraft.problem !== "" && <button type="button" onClick={() => { applyAiDraft(); }}>Вставить в бриф</button>}{aiDraft.problem !== "" && <button className="secondary-button" type="button" onClick={() => { setAiDraft(null); }}>Отклонить</button>}</div>
+              {aiStaleFields.length > 0 && <div role="alert" data-testid="wizard-ai-stale"><p>{`Подсказка устарела: изменены поля ${aiStaleFields.map((field) => aiAppliedTitles[field]).join(", ")}. Автоматическое применение заблокировано.`}</p><p>Сравните текст, обновите рекомендацию или объедините формулировки вручную.</p></div>}
+              <div className="wizard-actions span-2">{aiDraft.problem !== "" && <button type="button" onClick={() => { applyAiDraft(); }}>Вставить в бриф</button>}{aiDraft.problem !== "" && <button type="button" className="secondary-button" onClick={() => { setAiDraft(null); setAiStaleFields([]); aiDraftSuggestion.mutate(); }}>Обновить рекомендацию</button>}{aiDraft.problem !== "" && <button className="secondary-button" type="button" onClick={() => { setAiDraft(null); setAiStaleFields([]); }}>Отклонить</button>}{aiDraft.problem === "" && <button type="button" className="secondary-button" onClick={() => { setAiDraft(null); aiDraftSuggestion.mutate(); }}>Повторить анализ</button>}</div>
             </>)}
           </div>
           {aiApplied.length > 0 && <section className="customer-ai-changes" aria-label="Фрагменты, добавленные AI-подсказкой">
