@@ -9029,6 +9029,29 @@
             ],
             "title": "Reminder Window Hours"
           },
+          "scheduled_from": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled From"
+          },
+          "scheduled_preset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduled Preset"
+          },
           "target_days": {
             "anyOf": [
               {

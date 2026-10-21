@@ -904,16 +904,29 @@ class DevelopmentService:
             raise ApiError(code=error.code, message=str(error), status_code=422) from error
         await self.store.save_weekly_rhythm(actor.person_id, rhythm)
         return rhythm
+
     async def weekly_rhythm_overview(
         self, actor: ActorContext, *, local_today: date
     ) -> dict[str, object]:
-        """Current rhythm contract plus its honest within-week progress (не серия)."""
+        """Active contract (latest version already in force) plus honest progress."""
         self._participant(actor)
         history = await self.store.weekly_rhythm_history(actor.person_id)
-        current = history[-1] if history else None
-        if current is None or current.effective_from > local_today:
-            return {"versioned": False, "history_count": len(history), "projection": None}
-        return await self.weekly_rhythm_snapshot(actor, current, local_today=local_today)
+        active_candidates = [item for item in history if item.effective_from <= local_today]
+        current = active_candidates[-1] if active_candidates else None
+        scheduled = next(
+            (item for item in history if item.effective_from > local_today), None
+        )
+        if current is None:
+            context: dict[str, object] = {"versioned": False}
+        else:
+            context = await self.weekly_rhythm_snapshot(
+                actor, current, local_today=local_today
+            )
+        context["history_count"] = len(history)
+        if scheduled is not None:
+            context["scheduled_from"] = scheduled.effective_from
+            context["scheduled_preset"] = scheduled.preset
+        return context
 
     async def weekly_rhythm_snapshot(
         self, actor: ActorContext, rhythm: WeeklyRhythm, *, local_today: date

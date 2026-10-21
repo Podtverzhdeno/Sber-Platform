@@ -356,9 +356,51 @@ def test_weekly_rhythm_save_creates_versioned_history() -> None:
         overview = client.get("/api/v1/me/engagement/rhythm")
         assert overview.status_code == 200
         state = overview.json()
-        # v3 is future-dated, so the running contract stays v2 and reports it honestly.
-        assert state["versioned"] is False
+        # v3 is future-dated: the running contract stays v2 and the echo is honest about scheduling.
+        assert state["versioned"] is True
+        assert state["version"] == 2
+        assert state["active_days"] == [2, 4]
         assert state["history_count"] == 3
+        assert state["scheduled_from"] == "2026-10-25"
+        assert state["scheduled_preset"] == "all_week"
+
+
+@pytest.mark.spec("participant-experience/weekly-rhythm")
+def test_weekly_rhythm_active_version_survives_a_scheduled_future_version() -> None:
+    """R1: a scheduled contract must not hide the version that is still in force."""
+    client, _store = _freeze_client()
+    with client:
+        csrf = _login(client)
+        first = client.post(
+            "/api/v1/me/engagement/rhythm",
+            json={
+                "preset": "workdays",
+                "reminder_hour": 18,
+                "reminder_window_hours": 3,
+                "effective_from": "2026-10-22",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert first.status_code == 200
+        client.post(
+            "/api/v1/me/engagement/rhythm",
+            json={
+                "preset": "weekends",
+                "reminder_hour": 10,
+                "reminder_window_hours": 2,
+                "effective_from": "2026-10-25",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        overview = client.get("/api/v1/me/engagement/rhythm")
+        body = overview.json()
+        assert body["versioned"] is True
+        assert body["version"] == 1
+        assert body["preset"] == "workdays"
+        assert body["active_days"] == [1, 2, 3, 4, 5]
+        assert body["history_count"] == 2
+        assert body["scheduled_from"] == "2026-10-25"
+        assert body["scheduled_preset"] == "weekends"
 
 @pytest.mark.spec("participant-experience/weekly-rhythm")
 def test_weekly_rhythm_rejects_retroactive_effective_date() -> None:

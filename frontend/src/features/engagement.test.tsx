@@ -266,10 +266,35 @@ describe("TopbarEngagementIndicator", () => {
     await screen.findByText("4");
     openPopover();
     await screen.findByText("2 из 5 в этой неделе");
+    expect(screen.queryByText(/Запланировано новое соглашение/)).toBeNull();
     expect(screen.getByText(/не тождественен серии/)).toBeTruthy();
     expect(screen.getByText(/Соглашение v1/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Сохранить ритм" })).toBeTruthy();
     expect(screen.getByText("4 дней подряд")).toBeTruthy();
+  });
+
+  it("keeps the active contract visible when a future version is scheduled", async () => {
+    const fetchMock = installOverview(OVERVIEW);
+    fetchMock.mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+      const key = routeKey(input);
+      if ((init?.method ?? "GET") === "POST") {
+        throw new Error("rhythm summary route is GET-only in this test");
+      }
+      const payload =
+        key === "/api/v1/me/engagement/rhythm"
+          ? { ...RHYTHM, scheduled_from: "2026-10-25", scheduled_preset: "weekends" }
+          : OVERVIEW;
+      return new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+    renderIndicator();
+    await screen.findByText("4");
+    openPopover();
+    await screen.findByText("2 из 5 в этой неделе");
+    await screen.findByText(/Запланировано новое соглашение: Выходные, с 2026-10-25/);
+    expect(screen.getByText(/Соглашение v1/)).toBeTruthy();
   });
 
   it("saves a custom rhythm with the csrf token and ISO weekdays", async () => {

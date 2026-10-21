@@ -470,15 +470,26 @@ class WeeklyRhythmView(BaseModel):
     target_days: int | None = None
     done_days: int | None = None
     hint: str | None = None
+    scheduled_from: date | None = None
+    scheduled_preset: str | None = None
 
 
 def _rhythm_view(result: dict[str, object]) -> WeeklyRhythmView:
     from impulse.domain.engagement import WeeklyRhythmProjection
 
-    projection = result["projection"]
+    projection = result.get("projection")
+    scheduled_from = result.get("scheduled_from")
+    scheduled_preset = result.get("scheduled_preset")
     if not isinstance(projection, WeeklyRhythmProjection):
         return WeeklyRhythmView(
-            versioned=False, history_count=int(str(result["history_count"]))
+            versioned=False,
+            history_count=int(str(result["history_count"])),
+            scheduled_from=(
+                scheduled_from if isinstance(scheduled_from, date) else None
+            ),
+            scheduled_preset=(
+                scheduled_preset if isinstance(scheduled_preset, str) else None
+            ),
         )
     return WeeklyRhythmView(
         versioned=True,
@@ -494,6 +505,12 @@ def _rhythm_view(result: dict[str, object]) -> WeeklyRhythmView:
         target_days=projection.target_days,
         done_days=projection.done_days,
         hint=projection.hint,
+        scheduled_from=(
+            scheduled_from if isinstance(scheduled_from, date) else None
+        ),
+        scheduled_preset=(
+            scheduled_preset if isinstance(scheduled_preset, str) else None
+        ),
     )
 
 

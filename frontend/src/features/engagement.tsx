@@ -249,6 +249,15 @@ export function TopbarEngagementIndicator() {
                 )}
               </header>
               {rhythmData.hint && <p className="engagement-rhythm-hint">{rhythmData.hint}</p>}
+              {rhythmData.versioned && rhythmData.scheduled_from && (
+                <p className="engagement-rhythm-hint">
+                  {`Запланировано новое соглашение: ${
+                    rhythmData.scheduled_preset
+                      ? (RHYTHM_PRESETS[rhythmData.scheduled_preset] ?? rhythmData.scheduled_preset)
+                      : ""
+                  }, с ${rhythmData.scheduled_from}.`}
+                </p>
+              )}
               {!rhythmData.versioned && rhythmData.history_count > 0 && (
                 <p className="engagement-rhythm-hint">
                   Будущее соглашение ещё не действует; запланировано на {rhythmData.effective_from}.

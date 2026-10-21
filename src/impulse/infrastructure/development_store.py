@@ -420,12 +420,12 @@ class SqlDevelopmentStore(DevelopmentStore):
                         weekly_rhythm_versions.c.effective_from,
                     )
                     .where(weekly_rhythm_versions.c.person_id == person_id)
-                    .order_by(weekly_rhythm_versions.c.version)
+                    .order_by(weekly_rhythm_versions.c.rhythm_version)
                 )
             ).mappings()
         rhythms = tuple(
             WeeklyRhythm(
-                version=row["version"],
+                version=row["rhythm_version"],
                 preset=row["preset"],
                 active_days=frozenset(
                     int(day) for day in row["active_days"].split(",") if day

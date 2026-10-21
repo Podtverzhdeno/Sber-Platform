@@ -30,6 +30,8 @@ export interface WeeklyRhythm {
   target_days: number | null;
   done_days: number | null;
   hint: string | null;
+  scheduled_from: string | null;
+  scheduled_preset: string | null;
 }
 
 export interface WeeklyRhythmInput {
