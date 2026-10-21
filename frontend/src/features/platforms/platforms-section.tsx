@@ -6,6 +6,10 @@ import { csrfHeaders, platformRequest, safeExternalUrl } from "./client";
 import {
   PLATFORM_STATUS_LABELS,
   PLATFORM_STATUS_TONES,
+  SYNC_ITEM_STATUS_LABELS,
+  SYNC_ITEM_STATUS_TONES,
+  SYNC_KIND_LABELS,
+  type PlatformSyncPanel,
   type PlatformsSectionProps,
 } from "./statuses";
 import type {
@@ -13,14 +17,19 @@ import type {
   ConnectionViewResponse,
   DeepLinkView,
   PlatformCatalogResponse,
+  SyncItemView,
+  SyncItemsResponse,
+  SyncRefreshView,
+  TrajectoryCheckpointOption,
 } from "./types";
 
 /**
- * «Платформы» — project platform connection catalog (openspec 22.20).
- * Server-side connection model for GigaCode, GigaCoWork, GigaAgent and
- * GitVerse. The UI never renders credential material: access tokens are
- * sealed on the server and every connect callback round-trips OAuth state
- * plus a fresh idempotency key so retries stay side-effect free.
+ * «Платформы» — project platform connection catalog (openspec 22.20) with
+ * sync projections (openspec 22.21). The UI never renders credential
+ * material: access tokens are sealed on the server, every connect callback
+ * round-trips OAuth state plus a fresh idempotency key, and imported
+ * platform objects stay honest — they never close checkpoints or touch the
+ * Skill Passport without an explicit bind plus separate human verification.
  */
 
 function catalogPath(projectId: string): string {
@@ -39,9 +48,188 @@ function connectionPath(
   return `${catalogPath(projectId)}/connections/${connectionId}/${suffix}`;
 }
 
+const TRAJECTORY_MAP_PATH = "/api/v1/me/trajectory-map";
+
+interface TrajectoryTrackPayload {
+  checkpoints: {
+    key: string;
+    title: string;
+    state_label: string;
+    actionable: boolean;
+  }[];
+}
+
+/** Actor-owned actionable checkpoints across all trajectory tracks. */
+function checkpointOptions(
+  tracks: TrajectoryTrackPayload[] | undefined,
+): TrajectoryCheckpointOption[] {
+  const seen = new Set<string>();
+  const options: TrajectoryCheckpointOption[] = [];
+  for (const track of tracks ?? []) {
+    for (const node of track.checkpoints) {
+      if (!node.actionable || seen.has(node.key)) continue;
+      seen.add(node.key);
+      options.push({
+        key: node.key,
+        title: node.title,
+        state_label: node.state_label,
+      });
+    }
+  }
+  return options;
+}
+
+function formatSyncMoment(value: string | null): string {
+  if (value === null) return "—";
+  return `${value.slice(0, 10)} ${value.slice(11, 16)} UTC`;
+}
+
+function itemSource(item: SyncItemView) {
+  if (item.source_url === null) return null;
+  const safe = safeExternalUrl(item.source_url);
+  if (safe === null) return null;
+  return (
+    <p>
+      <a
+        href={safe}
+        target="_blank"
+        rel="noreferrer noopener external"
+        data-testid={`platform-sync-source-${item.external_id}`}
+      >
+        Источник на платформе
+      </a>
+    </p>
+  );
+}
+
 interface ActiveChallenge {
   providerKey: string;
   challenge: ConnectChallengeView;
+}
+
+function PlatformSyncPanelView(props: {
+  panel: PlatformSyncPanel;
+  providerKey: string;
+  onCloseSync: () => void;
+  onRefreshSync: () => void;
+  onBindSync: (itemId: string, checkpointKey: string) => void;
+}) {
+  const [choices, setChoices] = useState<Record<string, string>>({});
+  const panel = props.panel;
+  const canBind = panel.checkpoints.length > 0;
+  return (
+    <div data-testid={`platform-sync-panel-${props.providerKey}`}>
+      <h4>Данные платформы: {panel.connectionTitle}</h4>
+      <p data-testid={`platform-sync-honesty-${props.providerKey}`}>
+        Платформенные материалы не закрывают checkpoint и не меняют Skill
+        Passport сами: прогресс обновит только проверка после явной привязки.
+      </p>
+      <button
+        type="button"
+        disabled={panel.refreshing}
+        onClick={props.onRefreshSync}
+        data-testid={`platform-sync-refresh-${props.providerKey}`}
+      >
+        Обновить данные
+      </button>
+      <button
+        type="button"
+        className="secondary-button"
+        onClick={props.onCloseSync}
+        data-testid={`platform-sync-close-${props.providerKey}`}
+      >
+        Скрыть данные
+      </button>
+      {panel.error !== null ? (
+        <p role="alert" data-testid={`platform-sync-error-${props.providerKey}`}>
+          {panel.error}
+        </p>
+      ) : null}
+      {panel.pending ? (
+        <p role="status" aria-busy="true" data-testid={`platform-sync-loading-${props.providerKey}`}>
+          Загружаем данные платформы…
+        </p>
+      ) : panel.items.length === 0 ? (
+        <p role="status" data-testid={`platform-sync-empty-${props.providerKey}`}>
+          Данные платформы ещё не синхронизированы.
+        </p>
+      ) : (
+        <ul aria-label="Импортированные материалы платформы">
+          {panel.items.map((item) => (
+            <li key={item.id} data-testid={`platform-sync-item-${item.external_id}`}>
+              <p>
+                <span
+                  className={`ui-badge ui-badge--${SYNC_ITEM_STATUS_TONES[item.status]}`}
+                >
+                  {SYNC_ITEM_STATUS_LABELS[item.status]}
+                </span>{" "}
+                <span>{SYNC_KIND_LABELS[item.kind]}</span>{" "}
+                <strong>{item.title_label ?? item.external_id}</strong>
+              </p>
+              <p>
+                Создано платформой: {formatSyncMoment(item.occurred_at)} ·
+                обновлено: {formatSyncMoment(item.last_synced_at)}
+              </p>
+              {itemSource(item)}
+              {item.bound_checkpoint_key !== null ? (
+                <p data-testid={`platform-sync-bound-${item.external_id}`}>
+                  Привязано к checkpoint {item.bound_checkpoint_key};
+                  подтверждения ещё нет — проверка идёт отдельно.
+                </p>
+              ) : canBind ? (
+                <div>
+                  <label htmlFor={`platform-sync-select-${item.id}`}>
+                    Checkpoint для привязки
+                  </label>
+                  <select
+                    id={`platform-sync-select-${item.id}`}
+                    value={choices[item.id] ?? ""}
+                    onChange={(event) => { setChoices((previous) => ({
+                        ...previous,
+                        [item.id]: event.target.value,
+                      })); }
+                    }
+                    data-testid={`platform-sync-select-${item.external_id}`}
+                  >
+                    <option value="">Выберите checkpoint…</option>
+                    {panel.checkpoints.map((option) => (
+                      <option key={option.key} value={option.key}>
+                        {option.state_label} · {option.title}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    disabled={panel.bindPending || (choices[item.id] ?? "") === ""}
+                    onClick={() => { props.onBindSync(item.id, choices[item.id] ?? ""); }}
+                    data-testid={`platform-sync-bind-${item.external_id}`}
+                  >
+                    Привязать к checkpoint
+                  </button>
+                  <p>
+                    Привязка не меняет прогресс: подтверждение — за проверкой.
+                  </p>
+                </div>
+              ) : panel.checkpointsPending ? (
+                <p data-testid={`platform-sync-checkpoints-pending-${item.external_id}`}>
+                  Загружаем ваши checkpoints…
+                </p>
+              ) : (
+                <p data-testid={`platform-sync-no-checkpoints-${item.external_id}`}>
+                  Доступных для привязки checkpoint нет.
+                </p>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+      {panel.bindError !== null ? (
+        <p role="alert" data-testid={`platform-sync-bind-error-${props.providerKey}`}>
+          {panel.bindError}
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 /** Presenter: every state, label and safe-link check is exercised directly. */
@@ -211,6 +399,15 @@ export function PlatformsSectionBody(props: PlatformsSectionProps) {
                 >
                   Переподключить
                 </button>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  aria-expanded={props.syncPanel?.connectionId === connection.id}
+                  onClick={() => { props.onOpenSync(connection.id, card.title); }}
+                  data-testid={`platform-sync-open-${card.provider_key}`}
+                >
+                  Данные платформы
+                </button>
                 {props.linkUrl?.connectionId === connection.id ? (
                   <p>
                     <a
@@ -224,6 +421,18 @@ export function PlatformsSectionBody(props: PlatformsSectionProps) {
                   </p>
                 ) : null}
               </footer>
+            ) : null}
+            {connection !== null
+            && connection.status === "connected"
+            && props.syncPanel !== null
+            && props.syncPanel.connectionId === connection.id ? (
+              <PlatformSyncPanelView
+                panel={props.syncPanel}
+                providerKey={card.provider_key}
+                onCloseSync={props.onCloseSync}
+                onRefreshSync={props.onRefreshSync}
+                onBindSync={props.onBindSync}
+              />
             ) : null}
             {connection === null ||
             connection.status === "not_connected" ||
@@ -316,6 +525,10 @@ export function PlatformsSection(props: { projectId: string }) {
   const queryClient = useQueryClient();
   const [challenge, setChallenge] = useState<ActiveChallenge | null>(null);
   const [linkUrl, setLinkUrl] = useState<PlatformsSectionProps["linkUrl"]>(null);
+  const [syncConnection, setSyncConnection] = useState<{
+    id: string;
+    title: string;
+  } | null>(null);
 
   const query = useQuery<PlatformCatalogResponse>({
     queryKey: ["platforms", projectId],
@@ -327,6 +540,63 @@ export function PlatformsSection(props: { projectId: string }) {
   const refreshCatalog = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: ["platforms", projectId] });
   }, [projectId, queryClient]);
+
+  const openSync = useCallback((connectionId: string, connectionTitle: string) => {
+    setSyncConnection({ id: connectionId, title: connectionTitle });
+  }, []);
+  const closeSync = useCallback(() => { setSyncConnection(null); }, []);
+
+  const syncConnectionId = syncConnection?.id ?? null;
+
+  const syncItemsQuery = useQuery<SyncItemsResponse>({
+    queryKey: ["platform-sync-items", projectId, syncConnectionId],
+    queryFn: () =>
+      platformRequest<SyncItemsResponse>(
+        `${catalogPath(projectId)}/connections/${syncConnectionId ?? ""}/sync-items`,
+      ),
+    enabled: syncConnectionId !== null,
+    retry: retrySafeRead,
+  });
+
+  const checkpointsQuery = useQuery<TrajectoryTrackPayload[]>({
+    queryKey: ["trajectory-map-checkpoints", projectId],
+    queryFn: () =>
+      platformRequest<TrajectoryTrackPayload[]>(TRAJECTORY_MAP_PATH),
+    enabled: syncConnectionId !== null,
+    retry: retrySafeRead,
+  });
+
+  const refreshSync = useMutation({
+    mutationFn: () =>
+      platformRequest<SyncRefreshView>(
+        `${catalogPath(projectId)}/connections/${syncConnectionId ?? ""}/sync-items/refresh`,
+        { method: "POST", headers: csrfHeaders() },
+      ),
+    onSettled: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["platform-sync-items", projectId],
+      });
+      void queryClient.invalidateQueries({ queryKey: ["platforms", projectId] });
+    },
+  });
+
+  const bindSync = useMutation({
+    mutationFn: (input: { itemId: string; checkpointKey: string }) =>
+      platformRequest<SyncItemView>(
+        `${catalogPath(projectId)}/connections/${syncConnectionId ?? ""}`
+        + `/sync-items/${input.itemId}/bind-checkpoint`,
+        {
+          method: "POST",
+          headers: csrfHeaders(),
+          body: JSON.stringify({ checkpoint_key: input.checkpointKey }),
+        },
+      ),
+    onSettled: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["platform-sync-items", projectId],
+      });
+    },
+  });
 
   const connect = useMutation({
     mutationFn: (input: {
@@ -415,12 +685,35 @@ export function PlatformsSection(props: { projectId: string }) {
         ? openDeepLink.variables
         : null,
       linkUrl,
+      syncPanel:
+        syncConnection === null
+          ? null
+          : {
+              connectionId: syncConnection.id,
+              connectionTitle: syncConnection.title,
+              pending: syncItemsQuery.isPending,
+              refreshing: refreshSync.isPending,
+              bindPending: bindSync.isPending,
+              error: syncItemsQuery.error instanceof Error
+                ? syncItemsQuery.error.message
+                : null,
+              bindError: bindSync.error instanceof Error
+                ? bindSync.error.message
+                : null,
+              items: syncItemsQuery.data?.items ?? [],
+              checkpoints: checkpointOptions(checkpointsQuery.data),
+              checkpointsPending: checkpointsQuery.isPending,
+            },
       onConnect: (providerKey, workspaceRef, scopes) => { connect.mutate({ providerKey, workspaceRef, scopes }); },
       onCancelChallenge: () => { setChallenge(null); },
       onComplete: (providerKey, state, code) => { complete.mutate({ providerKey, state, code }); },
       onReconnect: (providerKey) => { reconnect.mutate(providerKey); },
       onRevoke: (connectionId) => { revoke.mutate(connectionId); },
       onOpenDeepLink: (connectionId) => { openDeepLink.mutate(connectionId); },
+      onOpenSync: openSync,
+      onCloseSync: closeSync,
+      onRefreshSync: () => { refreshSync.mutate(); },
+      onBindSync: (itemId, checkpointKey) => { bindSync.mutate({ itemId, checkpointKey }); },
       onRetry: refreshCatalog,
     }),
     [
@@ -432,6 +725,13 @@ export function PlatformsSection(props: { projectId: string }) {
       reconnect,
       openDeepLink,
       linkUrl,
+      syncConnection,
+      syncItemsQuery,
+      checkpointsQuery,
+      refreshSync,
+      bindSync,
+      openSync,
+      closeSync,
       refreshCatalog,
     ],
   );

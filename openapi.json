@@ -9162,6 +9162,185 @@
         "title": "SwitchRoleRequest",
         "type": "object"
       },
+      "SyncBindRequest": {
+        "properties": {
+          "checkpoint_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkpoint Key"
+          }
+        },
+        "title": "SyncBindRequest",
+        "type": "object"
+      },
+      "SyncItemViewResponse": {
+        "description": "One sync projection: provenance, freshness and the explicit binding.\n\n`verification_status` stays `not_bound` | `awaiting_human_verification`:\nno state in this surface ever claims a confirmed evidence.",
+        "properties": {
+          "bound_checkpoint_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bound Checkpoint Key"
+          },
+          "connection_id": {
+            "format": "uuid",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "external_id": {
+            "title": "External Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "imported_at": {
+            "title": "Imported At",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "last_synced_at": {
+            "title": "Last Synced At",
+            "type": "string"
+          },
+          "occurred_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Occurred At"
+          },
+          "provider_key": {
+            "title": "Provider Key",
+            "type": "string"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title Label"
+          },
+          "verification_status": {
+            "title": "Verification Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "connection_id",
+          "provider_key",
+          "kind",
+          "status",
+          "external_id",
+          "title_label",
+          "source_url",
+          "occurred_at",
+          "imported_at",
+          "last_synced_at",
+          "bound_checkpoint_key",
+          "verification_status"
+        ],
+        "title": "SyncItemViewResponse",
+        "type": "object"
+      },
+      "SyncItemsResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SyncItemViewResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "SyncItemsResponse",
+        "type": "object"
+      },
+      "SyncRefreshView": {
+        "properties": {
+          "checked_at": {
+            "title": "Checked At",
+            "type": "string"
+          },
+          "connection_id": {
+            "format": "uuid",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "imported_new": {
+            "title": "Imported New",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SyncItemViewResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "refreshed_existing": {
+            "title": "Refreshed Existing",
+            "type": "integer"
+          },
+          "skipped_invalid": {
+            "title": "Skipped Invalid",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "connection_id",
+          "checked_at",
+          "imported_new",
+          "refreshed_existing",
+          "skipped_invalid",
+          "items"
+        ],
+        "title": "SyncRefreshView",
+        "type": "object"
+      },
       "TalentPassportView": {
         "properties": {
           "cases": {
@@ -18230,6 +18409,209 @@
           }
         },
         "summary": "Revoke"
+      }
+    },
+    "/api/v1/projects/{project_id}/platforms/connections/{connection_id}/sync-items": {
+      "get": {
+        "operationId": "sync_items_api_v1_projects__project_id__platforms_connections__connection_id__sync_items_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connection Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncItemsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sync Items"
+      }
+    },
+    "/api/v1/projects/{project_id}/platforms/connections/{connection_id}/sync-items/refresh": {
+      "post": {
+        "operationId": "refresh_sync_items_api_v1_projects__project_id__platforms_connections__connection_id__sync_items_refresh_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncRefreshView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Refresh Sync Items"
+      }
+    },
+    "/api/v1/projects/{project_id}/platforms/connections/{connection_id}/sync-items/{item_id}/bind-checkpoint": {
+      "post": {
+        "description": "Binding requires an explicit checkpoint key; nothing is auto-confirmed.",
+        "operationId": "bind_sync_item_to_checkpoint_api_v1_projects__project_id__platforms_connections__connection_id__sync_items__item_id__bind_checkpoint_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Project Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connection Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncBindRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncItemViewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Bind Sync Item To Checkpoint"
       }
     },
     "/api/v1/projects/{project_id}/platforms/{provider_key}/callback": {

@@ -1,4 +1,4 @@
-"""Shared builders for project platform connection tests (openspec 22.20)."""
+"""Shared builders for project platform connection tests (openspec 22.20/22.21)."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ from pydantic import SecretStr
 from impulse.api.errors import install_error_handlers
 from impulse.api.v1.identity import router as identity_router
 from impulse.application.identity import (
+    ActorContext,
     DemoAuthService,
     MemoryIdentityStore,
     demo_personas,
@@ -31,6 +32,11 @@ from impulse.integrations.service import (
     PlatformGateway,
     ProjectPlatformConfigPort,
     SealedVault,
+)
+from impulse.integrations.sync import (
+    MemorySyncStore,
+    PlatformSyncService,
+    ProviderSyncItem,
 )
 
 SECRET_ACCESS_TOKEN = "gitverse_live_demo_access_token_31337"
@@ -102,6 +108,35 @@ class ScriptedGateway:
         return True
 
 
+class ScriptedSyncGateway:
+    """Scriptable provider sync surface standing in for real provider HTTP."""
+
+    def __init__(self) -> None:
+        self.items: tuple[ProviderSyncItem, ...] = ()
+        self.error: Exception | None = None
+        self.calls: list[tuple[str, str, str | None]] = []
+
+    async def fetch_items(
+        self, provider_key: str, access_token: str, workspace_ref: str | None
+    ) -> tuple[ProviderSyncItem, ...]:
+        self.calls.append((provider_key, access_token, workspace_ref))
+        error = self.error
+        if error is not None:
+            raise error
+        return self.items
+
+
+class StaticCheckpoints:
+    """Actor-owned actionable checkpoint keys for binding scenarios."""
+
+    def __init__(self) -> None:
+        self.keys: frozenset[str] = frozenset()
+
+    async def actionable_checkpoints(self, actor: ActorContext) -> frozenset[str]:
+        del actor
+        return self.keys
+
+
 class StaticMembership:
     """Assignment-backed membership port over real assignment facts."""
 
@@ -135,6 +170,10 @@ class PlatformFixture:
     membership: StaticMembership
     clock: TestClock
     person_ids: dict[str, UUID]
+    sync_service: PlatformSyncService
+    sync_store: MemorySyncStore
+    sync_gateway: ScriptedSyncGateway
+    checkpoints: StaticCheckpoints
 
     def member_client(self, persona: str) -> tuple[TestClient, str]:
         """Authenticated client for a demo persona with its CSRF token."""
@@ -211,6 +250,9 @@ def build_app(
     membership: MembershipPort | None = None,
     config: ProjectPlatformConfigPort | None = None,
     clock: TestClock | None = None,
+    sync_gateway: ScriptedSyncGateway | None = None,
+    sync_store: MemorySyncStore | None = None,
+    checkpoints: StaticCheckpoints | None = None,
 ) -> PlatformFixture:
     """Assemble the identity + platform routers behind one real FastAPI app."""
     clock = clock or TestClock()
@@ -218,12 +260,26 @@ def build_app(
     store = store or MemoryConnectionStore()
     membership = membership or StaticMembership()
     config = config or StaticProjectConfig()
+    sealed_vault = vault or SealedVault(VAULT_KEY)
     service = PlatformConnectionService(
         cast(ConnectionStore, store),
-        vault or SealedVault(VAULT_KEY),
+        sealed_vault,
         cast(PlatformGateway, gateway),
         cast(MembershipPort, membership),
         cast(ProjectPlatformConfigPort, config),
+        now=clock,
+    )
+    sync_items_store = MemorySyncStore() if sync_store is None else sync_store
+    sync_items_gateway = sync_gateway or ScriptedSyncGateway()
+    binding_points = checkpoints or StaticCheckpoints()
+    sync_service = PlatformSyncService(
+        cast(ConnectionStore, store),
+        sync_items_store,
+        sync_items_gateway,
+        binding_points,
+        cast(MembershipPort, membership),
+        cast(ProjectPlatformConfigPort, config),
+        sealed_vault,
         now=clock,
     )
     app = FastAPI()
@@ -238,6 +294,7 @@ def build_app(
         ttl_seconds=3600,
     )
     app.state.platforms_service = service
+    app.state.platforms_sync_service = sync_service
     install_error_handlers(app)
     app.include_router(identity_router, prefix="/api/v1")
     app.include_router(platform_router, prefix="/api/v1")
@@ -250,4 +307,8 @@ def build_app(
         membership=cast(StaticMembership, membership),
         clock=clock,
         person_ids=person_ids,
+        sync_service=sync_service,
+        sync_store=sync_items_store,
+        sync_gateway=sync_items_gateway,
+        checkpoints=binding_points,
     )

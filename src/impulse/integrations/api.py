@@ -19,6 +19,11 @@ from impulse.integrations.service import (
     ConnectionView,
     PlatformConnectionService,
 )
+from impulse.integrations.sync import (
+    PlatformSyncService,
+    SyncItemView,
+    SyncRefreshReport,
+)
 
 router = APIRouter(prefix="/projects/{project_id}/platforms")
 
@@ -93,6 +98,45 @@ class DiagnosticsView(BaseModel):
     last_error: str | None
 
 
+class SyncItemViewResponse(BaseModel):
+    """One sync projection: provenance, freshness and the explicit binding.
+
+    `verification_status` stays `not_bound` | `awaiting_human_verification`:
+    no state in this surface ever claims a confirmed evidence.
+    """
+
+    id: UUID
+    connection_id: UUID
+    provider_key: str
+    kind: str
+    status: str
+    external_id: str
+    title_label: str | None
+    source_url: str | None
+    occurred_at: str | None
+    imported_at: str
+    last_synced_at: str
+    bound_checkpoint_key: str | None
+    verification_status: str
+
+
+class SyncItemsResponse(BaseModel):
+    items: list[SyncItemViewResponse]
+
+
+class SyncRefreshView(BaseModel):
+    connection_id: UUID
+    checked_at: str
+    imported_new: int
+    refreshed_existing: int
+    skipped_invalid: int
+    items: list[SyncItemViewResponse]
+
+
+class SyncBindRequest(BaseModel):
+    checkpoint_key: str | None = None
+
+
 def _service(request: Request) -> PlatformConnectionService:
     service = getattr(request.app.state, "platforms_service", None)
     if service is None:
@@ -102,6 +146,48 @@ def _service(request: Request) -> PlatformConnectionService:
             status_code=503,
         )
     return service
+
+
+def _sync_service(request: Request) -> PlatformSyncService:
+    service = getattr(request.app.state, "platforms_sync_service", None)
+    if service is None:
+        raise ApiError(
+            code="PLATFORM_SERVICE_UNAVAILABLE",
+            message="Каталог платформ недоступен.",
+            status_code=503,
+        )
+    return service
+
+
+def _item_response(view: SyncItemView) -> SyncItemViewResponse:
+    return SyncItemViewResponse(
+        id=view.id,
+        connection_id=view.connection_id,
+        provider_key=view.provider_key,
+        kind=view.kind,
+        status=view.status,
+        external_id=view.external_id,
+        title_label=view.title_label,
+        source_url=view.source_url,
+        occurred_at=(view.occurred_at.isoformat() if view.occurred_at else None),
+        imported_at=view.imported_at.isoformat(),
+        last_synced_at=view.last_synced_at.isoformat(),
+        bound_checkpoint_key=view.bound_checkpoint_key,
+        verification_status=view.verification_status,
+    )
+
+
+def _refresh_response(
+    report: SyncRefreshReport, views: tuple[SyncItemView, ...]
+) -> SyncRefreshView:
+    return SyncRefreshView(
+        connection_id=report.connection_id,
+        checked_at=report.checked_at.isoformat(),
+        imported_new=report.imported_new,
+        refreshed_existing=report.refreshed_existing,
+        skipped_invalid=report.skipped_invalid,
+        items=[_item_response(view) for view in views],
+    )
 
 
 def _connection_card(view: ConnectionView) -> ConnectionCardView:
@@ -289,3 +375,58 @@ async def diagnostics(
 ) -> DiagnosticsView:
     view = await service.diagnostics(authenticated.actor, project_id, connection_id)
     return _diagnostics_view(view)
+
+
+# -- sync projections (openspec 22.21) ----------------------------------------
+
+
+@router.get(
+    "/connections/{connection_id}/sync-items",
+    response_model=SyncItemsResponse,
+)
+async def sync_items(
+    project_id: UUID,
+    connection_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[PlatformSyncService, Depends(_sync_service)],
+) -> SyncItemsResponse:
+    views = await service.items(authenticated.actor, project_id, connection_id)
+    return SyncItemsResponse(items=[_item_response(view) for view in views])
+
+
+@router.post(
+    "/connections/{connection_id}/sync-items/refresh",
+    response_model=SyncRefreshView,
+)
+async def refresh_sync_items(
+    project_id: UUID,
+    connection_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[PlatformSyncService, Depends(_sync_service)],
+) -> SyncRefreshView:
+    report = await service.refresh(authenticated.actor, project_id, connection_id)
+    views = await service.items(authenticated.actor, project_id, connection_id)
+    return _refresh_response(report, views)
+
+
+@router.post(
+    "/connections/{connection_id}/sync-items/{item_id}/bind-checkpoint",
+    response_model=SyncItemViewResponse,
+)
+async def bind_sync_item_to_checkpoint(
+    project_id: UUID,
+    connection_id: UUID,
+    item_id: UUID,
+    command: SyncBindRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[PlatformSyncService, Depends(_sync_service)],
+) -> SyncItemViewResponse:
+    """Binding requires an explicit checkpoint key; nothing is auto-confirmed."""
+    view = await service.bind_to_checkpoint(
+        authenticated.actor,
+        project_id,
+        connection_id,
+        item_id,
+        command.checkpoint_key,
+    )
+    return _item_response(view)

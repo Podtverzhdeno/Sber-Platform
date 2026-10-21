@@ -4,11 +4,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { safeExternalUrl } from "./client";
 import { PlatformsSection, PlatformsSectionBody } from "./platforms-section";
-import type { PlatformsSectionProps } from "./statuses";
+import type { PlatformSyncPanel, PlatformsSectionProps } from "./statuses";
 import type {
   ConnectChallengeView,
   ConnectionCardView,
   PlatformCatalogResponse,
+  SyncItemView,
+  TrajectoryCheckpointOption,
 } from "./types";
 
 const WORKSPACE_GIGACODE = ["repo:read", "repo:assistant", "repo:review"];
@@ -55,6 +57,55 @@ const challenge: ConnectChallengeView = {
   expires_at: "2026-10-19T12:10:00+00:00",
 };
 
+const SYNC_ITEM_BASE: SyncItemView = {
+  id: "0f0e0d0c-b0a9-4c8d-9e0f-1234567890ab",
+  connection_id: "conn-gitverse",
+  provider_key: "gitverse",
+  kind: "commit",
+  status: "imported",
+  external_id: "9f8c3a2b1d4e",
+  title_label: "Навигатор: первый коммит",
+  source_url:
+    "https://gitverse.ru/impulse-demo/navigator/commit/9f8c3a2b1d4e",
+  occurred_at: "2026-10-19T09:00:00+00:00",
+  imported_at: "2026-10-19T12:00:00+00:00",
+  last_synced_at: "2026-10-19T12:00:00+00:00",
+  bound_checkpoint_key: null,
+  verification_status: "not_bound",
+};
+
+const CHECKPOINT_OPTIONS: TrajectoryCheckpointOption[] = [
+  {
+    key: "checkpoint:python-base",
+    title: "Первый checkpoint Python",
+    state_label: "Текущий шаг",
+  },
+];
+
+function syncItem(
+  overrides: Partial<SyncItemView> = {},
+): SyncItemView {
+  return { ...SYNC_ITEM_BASE, ...overrides };
+}
+
+function syncPanelFixture(
+  overrides: Partial<PlatformSyncPanel> = {},
+): PlatformSyncPanel {
+  return {
+    connectionId: "conn-gitverse",
+    connectionTitle: "GitVerse",
+    pending: false,
+    refreshing: false,
+    bindPending: false,
+    error: null,
+    bindError: null,
+    items: [syncItem()],
+    checkpoints: CHECKPOINT_OPTIONS,
+    checkpointsPending: false,
+    ...overrides,
+  };
+}
+
 function baseProps(
   items: PlatformCatalogResponse["items"],
   overrides: Partial<PlatformsSectionProps> = {},
@@ -67,12 +118,17 @@ function baseProps(
     completing: false,
     openingLinkConnectionId: null,
     linkUrl: null,
+    syncPanel: null,
     onConnect: () => undefined,
     onCancelChallenge: () => undefined,
     onComplete: () => undefined,
     onReconnect: () => undefined,
     onRevoke: () => undefined,
     onOpenDeepLink: () => undefined,
+    onOpenSync: () => undefined,
+    onCloseSync: () => undefined,
+    onRefreshSync: () => undefined,
+    onBindSync: () => undefined,
     onRetry: () => undefined,
     ...overrides,
   };
@@ -198,6 +254,120 @@ describe("platforms section presenter", () => {
     fireEvent.click(screen.getByTestId("platform-open-gitverse"));
     expect(onOpenDeepLink).toHaveBeenCalledWith("conn-gitverse");
   });
+
+  it("renders sync data with honest statuses and keeps credentials out", () => {
+    render(
+      <PlatformsSectionBody
+        {...baseProps([card("gitverse", "connected")], {
+          syncPanel: syncPanelFixture(),
+        })}
+      />,
+    );
+    expect(
+      screen.getByTestId("platform-sync-panel-gitverse"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("platform-sync-item-9f8c3a2b1d4e"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Импортировано, не подтверждено")).toBeInTheDocument();
+    expect(screen.getByText("Коммит")).toBeInTheDocument();
+    const honesty = screen.getByTestId("platform-sync-honesty-gitverse");
+    expect(honesty.textContent).toContain("не закрывают checkpoint");
+    expect(honesty.textContent).toContain("Skill Passport");
+    // Binding is always available in fixture, but never auto: needs a choice.
+    expect(screen.getByTestId("platform-sync-bind-9f8c3a2b1d4e")).toHaveProperty(
+      "disabled",
+      true,
+    );
+    const html = screen.getByTestId("platforms-section").innerHTML;
+    expect(html).not.toMatch(/access_token|refresh_token|Bearer /);
+  });
+
+  it("binds exactly to the explicitly chosen actionable checkpoint", () => {
+    const onBindSync = vi.fn();
+    render(
+      <PlatformsSectionBody
+        {...baseProps([card("gitverse", "connected")], {
+          syncPanel: syncPanelFixture(),
+          onBindSync,
+        })}
+      />,
+    );
+    fireEvent.change(screen.getByTestId("platform-sync-select-9f8c3a2b1d4e"), {
+      target: { value: "checkpoint:python-base" },
+    });
+    fireEvent.click(screen.getByTestId("platform-sync-bind-9f8c3a2b1d4e"));
+    expect(onBindSync).toHaveBeenCalledWith(
+      SYNC_ITEM_BASE.id,
+      "checkpoint:python-base",
+    );
+  });
+
+  it("shows bound state honestly: no confirmation claims until verified", () => {
+    render(
+      <PlatformsSectionBody
+        {...baseProps([card("gitverse", "connected")], {
+          syncPanel: syncPanelFixture({
+            items: [
+              syncItem({
+                bound_checkpoint_key: "checkpoint:python-base",
+                verification_status: "awaiting_human_verification",
+              }),
+            ],
+          }),
+        })}
+      />,
+    );
+    const bound = screen.getByTestId("platform-sync-bound-9f8c3a2b1d4e");
+    expect(bound.textContent).toContain("checkpoint:python-base");
+    expect(bound.textContent).toContain("подтверждения ещё нет");
+    expect(
+      screen.queryByTestId("platform-sync-select-9f8c3a2b1d4e"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("platform-sync-bind-9f8c3a2b1d4e"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("stays honest when no checkpoints are available for binding", () => {
+    render(
+      <PlatformsSectionBody
+        {...baseProps([card("gitverse", "connected")], {
+          syncPanel: syncPanelFixture({
+            checkpoints: [],
+            checkpointsPending: true,
+          }),
+        })}
+      />,
+    );
+    expect(
+      screen.getByTestId("platform-sync-checkpoints-pending-9f8c3a2b1d4e"),
+    ).toBeInTheDocument();
+  });
+
+  it("reflects loading, error and refresh states without hiding passed data", () => {
+    render(
+      <PlatformsSectionBody
+        {...baseProps([card("gitverse", "connected")], {
+          syncPanel: syncPanelFixture({
+            items: [],
+            error: "Платформа временно недоступна. Повторите позже.",
+            refreshing: true,
+          }),
+        })}
+      />,
+    );
+    expect(
+      screen.getByTestId("platform-sync-empty-gitverse"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("platform-sync-error-gitverse"),
+    ).toBeInTheDocument();
+    expect(screen.getByTestId("platform-sync-refresh-gitverse")).toHaveProperty(
+      "disabled",
+      true,
+    );
+  });
 });
 
 describe("safeExternalUrl", () => {
@@ -315,5 +485,127 @@ describe("PlatformsSection container", () => {
     await waitFor(() => {
       expect(screen.queryByTestId("platform-challenge")).not.toBeInTheDocument();
     });
+  });
+
+  it("loads sync data, refreshes it with CSRF and binds to the chosen checkpoint", async () => {
+    const calls: { url: string; method: string; csrf: string | null }[] = [];
+    let bound = false;
+    const boundItem = syncItem({
+      bound_checkpoint_key: "checkpoint:python-base",
+      verification_status: "awaiting_human_verification",
+    });
+    vi.spyOn(globalThis, "fetch").mockImplementation((input, init) => {
+      const url = input instanceof Request ? input.url : String(input);
+      const method = init?.method ?? "GET";
+      const call = {
+        url,
+        method,
+        csrf: init?.headers
+          ? new Headers(init.headers).get("X-CSRF-Token")
+          : null,
+      };
+      calls.push(call);
+      if (method === "GET" && url.endsWith("/platforms")) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ items: [card("gitverse", "connected")] }), {
+            status: 200,
+          }),
+        );
+      }
+      if (method === "GET" && url.includes("/me/trajectory-map")) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify([
+              {
+                checkpoints: [
+                  {
+                    key: "checkpoint:python-base",
+                    title: "Первый checkpoint Python",
+                    state_label: "Текущий шаг",
+                    actionable: true,
+                  },
+                  {
+                    key: "checkpoint:sealed",
+                    title: "Уже закрытый checkpoint",
+                    state_label: "Завершён",
+                    actionable: false,
+                  },
+                ],
+              },
+            ]),
+            { status: 200 },
+          ),
+        );
+      }
+      if (method === "GET" && url.endsWith("/sync-items")) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ items: [bound ? boundItem : syncItem()] }), {
+            status: 200,
+          }),
+        );
+      }
+      if (method === "POST" && url.endsWith("/sync-items/refresh")) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              connection_id: "conn-gitverse",
+              checked_at: "2026-10-19T13:00:00+00:00",
+              imported_new: 0,
+              refreshed_existing: 1,
+              skipped_invalid: 0,
+              items: [bound ? boundItem : syncItem()],
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (method === "POST" && url.includes("/bind-checkpoint")) {
+        const rawBody: unknown = init?.body;
+        expect(JSON.parse(typeof rawBody === "string" ? rawBody : "{}")).toEqual(
+          { checkpoint_key: "checkpoint:python-base" },
+        );
+        bound = true;
+        return Promise.resolve(
+          new Response(JSON.stringify(boundItem), { status: 200 }),
+        );
+      }
+      return Promise.resolve(new Response(null, { status: 204 }));
+    });
+    renderSection("44444444-4444-4444-8444-444444444444");
+    await waitFor(() => {
+      expect(screen.getByTestId("platform-sync-open-gitverse")).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByTestId("platform-sync-open-gitverse"));
+    await waitFor(() => {
+      expect(screen.getByTestId("platform-sync-item-9f8c3a2b1d4e")).toBeInTheDocument();
+    });
+    // Only actor-owned actionable checkpoints are offered — no sealed ones.
+    expect(screen.getAllByText(/Первый checkpoint Python/).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Уже закрытый checkpoint/)).not.toBeInTheDocument();
+    // Refresh passes an empty JSON POST with the CSRF header, no body payload.
+    fireEvent.click(screen.getByTestId("platform-sync-refresh-gitverse"));
+    await waitFor(() => {
+      const refresh = calls.find(
+        (call) => call.method === "POST" && call.url.endsWith("/sync-items/refresh"),
+      );
+      expect(refresh).toBeDefined();
+      expect(refresh?.csrf).not.toBeNull();
+    });
+    // Bind posts the explicit checkpoint key with CSRF, then honest bound copy.
+    fireEvent.change(screen.getByTestId("platform-sync-select-9f8c3a2b1d4e"), {
+      target: { value: "checkpoint:python-base" },
+    });
+    fireEvent.click(screen.getByTestId("platform-sync-bind-9f8c3a2b1d4e"));
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("platform-sync-bound-9f8c3a2b1d4e"),
+      ).toBeInTheDocument();
+    });
+    expect(screen.getByText("Импортировано, не подтверждено")).toBeInTheDocument();
+    const bind = calls.find((call) => call.url.includes("/bind-checkpoint"));
+    expect(bind?.method).toBe("POST");
+    expect(bind?.csrf).not.toBeNull();
+    const html = screen.getByTestId("platforms-section").innerHTML;
+    expect(html).not.toMatch(/access_token|refresh_token|Bearer /);
   });
 });

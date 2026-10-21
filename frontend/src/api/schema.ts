@@ -2600,6 +2600,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{project_id}/platforms/connections/{connection_id}/sync-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sync Items */
+        get: operations["sync_items_api_v1_projects__project_id__platforms_connections__connection_id__sync_items_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/platforms/connections/{connection_id}/sync-items/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Refresh Sync Items */
+        post: operations["refresh_sync_items_api_v1_projects__project_id__platforms_connections__connection_id__sync_items_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/platforms/connections/{connection_id}/sync-items/{item_id}/bind-checkpoint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bind Sync Item To Checkpoint
+         * @description Binding requires an explicit checkpoint key; nothing is auto-confirmed.
+         */
+        post: operations["bind_sync_item_to_checkpoint_api_v1_projects__project_id__platforms_connections__connection_id__sync_items__item_id__bind_checkpoint_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/projects/{project_id}/platforms/{provider_key}/callback": {
         parameters: {
             query?: never;
@@ -6044,6 +6098,75 @@ export interface components {
         /** SwitchRoleRequest */
         SwitchRoleRequest: {
             role: components["schemas"]["Role"];
+        };
+        /** SyncBindRequest */
+        SyncBindRequest: {
+            /** Checkpoint Key */
+            checkpoint_key?: string | null;
+        };
+        /**
+         * SyncItemViewResponse
+         * @description One sync projection: provenance, freshness and the explicit binding.
+         *
+         *     `verification_status` stays `not_bound` | `awaiting_human_verification`:
+         *     no state in this surface ever claims a confirmed evidence.
+         */
+        SyncItemViewResponse: {
+            /** Bound Checkpoint Key */
+            bound_checkpoint_key: string | null;
+            /**
+             * Connection Id
+             * Format: uuid
+             */
+            connection_id: string;
+            /** External Id */
+            external_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Imported At */
+            imported_at: string;
+            /** Kind */
+            kind: string;
+            /** Last Synced At */
+            last_synced_at: string;
+            /** Occurred At */
+            occurred_at: string | null;
+            /** Provider Key */
+            provider_key: string;
+            /** Source Url */
+            source_url: string | null;
+            /** Status */
+            status: string;
+            /** Title Label */
+            title_label: string | null;
+            /** Verification Status */
+            verification_status: string;
+        };
+        /** SyncItemsResponse */
+        SyncItemsResponse: {
+            /** Items */
+            items: components["schemas"]["SyncItemViewResponse"][];
+        };
+        /** SyncRefreshView */
+        SyncRefreshView: {
+            /** Checked At */
+            checked_at: string;
+            /**
+             * Connection Id
+             * Format: uuid
+             */
+            connection_id: string;
+            /** Imported New */
+            imported_new: number;
+            /** Items */
+            items: components["schemas"]["SyncItemViewResponse"][];
+            /** Refreshed Existing */
+            refreshed_existing: number;
+            /** Skipped Invalid */
+            skipped_invalid: number;
         };
         /** TalentPassportView */
         TalentPassportView: {
@@ -11443,6 +11566,111 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ConnectionViewResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sync_items_api_v1_projects__project_id__platforms_connections__connection_id__sync_items_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                connection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SyncItemsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refresh_sync_items_api_v1_projects__project_id__platforms_connections__connection_id__sync_items_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                project_id: string;
+                connection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SyncRefreshView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    bind_sync_item_to_checkpoint_api_v1_projects__project_id__platforms_connections__connection_id__sync_items__item_id__bind_checkpoint_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                project_id: string;
+                connection_id: string;
+                item_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SyncBindRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SyncItemViewResponse"];
                 };
             };
             /** @description Validation Error */

@@ -88,6 +88,8 @@ from impulse.integrations import platform_router
 from impulse.integrations.runtime import (
     DefaultProjectPlatformConfig,
     FailClosedPlatformGateway,
+    FailClosedPlatformSyncGateway,
+    TrajectoryCheckpointLocator,
     WorkAssignmentMembership,
 )
 from impulse.integrations.service import (
@@ -95,6 +97,7 @@ from impulse.integrations.service import (
     MemoryConnectionStore,
     PlatformConnectionService,
 )
+from impulse.integrations.sync import MemorySyncStore, PlatformSyncService
 
 
 def create_app(
@@ -119,6 +122,7 @@ def create_app(
     participant_events_service: ParticipantEventsService | None = None,
     deadline_service: DeadlineChangeService | None = None,
     platforms_service: PlatformConnectionService | None = None,
+    platforms_sync_service: PlatformSyncService | None = None,
 ) -> FastAPI:
     """Build the HTTP application without import-time side effects."""
     runtime_settings = settings or Settings()
@@ -261,13 +265,27 @@ def create_app(
             auth_service=auth_service,
             recognition_store=recognition_service.store,
         )
+    platforms_store = MemoryConnectionStore()
+    platforms_membership = WorkAssignmentMembership(work_service.store)
+    platforms_config = DefaultProjectPlatformConfig()
+    platforms_vault = DeploymentSealedVault.from_secret(runtime_settings.platform_sealing_secret())
     if platforms_service is None:
         platforms_service = PlatformConnectionService(
-            MemoryConnectionStore(),
-            DeploymentSealedVault.from_secret(runtime_settings.platform_sealing_secret()),
+            platforms_store,
+            platforms_vault,
             FailClosedPlatformGateway(),
-            WorkAssignmentMembership(work_service.store),
-            DefaultProjectPlatformConfig(),
+            platforms_membership,
+            platforms_config,
+        )
+    if platforms_sync_service is None:
+        platforms_sync_service = PlatformSyncService(
+            platforms_store,
+            MemorySyncStore(),
+            FailClosedPlatformSyncGateway(),
+            TrajectoryCheckpointLocator(development_service),
+            platforms_membership,
+            platforms_config,
+            platforms_vault,
         )
     if competency_service is None:
         competency_service = CompetencyService(
@@ -317,6 +335,7 @@ def create_app(
     app.state.ai_suggestion_service = ai_suggestion_service
     app.state.participant_events_service = participant_events_service
     app.state.platforms_service = platforms_service
+    app.state.platforms_sync_service = platforms_sync_service
     app.add_middleware(RequestContextMiddleware)
     allowed_origins = (
         frozenset({str(runtime_settings.allowed_origin).rstrip("/")})
