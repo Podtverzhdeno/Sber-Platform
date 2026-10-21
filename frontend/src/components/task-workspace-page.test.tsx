@@ -3,6 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TaskWorkspacePage } from "./task-workspace-page";
 
+vi.mock("../features/platforms", () => ({
+  PlatformsSection: ({ projectId }: { projectId: string }) => (
+    <div data-testid="platforms-runtime">Каталог платформ · {projectId}</div>
+  ),
+}));
+
 const renderWorkspace = (taskId = "task-123") =>
   render(
     <TaskWorkspacePage
@@ -32,6 +38,30 @@ afterEach(() => {
 });
 
 describe("workspace collapsible sections (openspec 22.22)", () => {
+  it("mounts the project-scoped platform catalog inside its own collapsible section", () => {
+    render(
+      <TaskWorkspacePage
+        mode="participant"
+        title="Проект"
+        taskId="task-platforms"
+        projectId="00000000-0000-0000-0000-000000000100"
+        description="Описание"
+        deadline="12 мая"
+        tags={["API"]}
+        onMessage={() => undefined}
+        onPrimaryAction={() => undefined}
+      />,
+    );
+
+    const toggle = screen.getByRole("button", { name: /Инструменты проекта/ });
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByTestId("platforms-runtime")).toHaveTextContent(
+      "00000000-0000-0000-0000-000000000100",
+    );
+    fireEvent.click(toggle);
+    expect(sectionBody("platforms")).not.toBeVisible();
+  });
+
   it("collapses one section through its disclosure header while others stay open and status stays visible", () => {
     renderWorkspace();
     const aboutToggle = screen.getByRole("button", { name: /Описание/ });
@@ -122,20 +152,22 @@ describe("workspace team and metric drill-down (openspec 22.23)", () => {
     feedback: [{ contribution_id: "contribution-1", contribution_version: 2, review_version: 1, grade: "B", explanation: "Нужен benchmark", status: "draft" }],
     freshness: "обновлено 21 октября, 11:30",
   };
+  const member = workspace.team[0];
+  if (member === undefined) throw new Error("team fixture must contain a member");
 
   it("opens a consent-filtered member card and delegates exact profile and message transitions", () => {
     const selectMember = vi.fn();
     const openProfile = vi.fn();
     const openMessage = vi.fn();
-    render(<TaskWorkspacePage mode="participant" title="Проект" taskId="00000000-0000-0000-0000-000000000100" description="Описание" deadline="12 мая" tags={["API"]} workspace={workspace} quickCard={{ person_id: workspace.team[0].person_id, task_id: "00000000-0000-0000-0000-000000000100", assignment_status: "submitted", contribution_status: "submitted", availability: "on_review", project_role: "Исполнитель", responsibility: "API готов", display_name: "Мария Воронова", portfolio_available: true, profile: { city: "Москва", university: null, telegram: null, about: null, skills: [{ title: "FastAPI", origin: "project", verified: true }] } }} onSelectMember={selectMember} onCloseQuickCard={() => undefined} onOpenProfile={openProfile} onOpenDirectMessage={openMessage} onMessage={() => undefined} onPrimaryAction={() => undefined} />);
+    render(<TaskWorkspacePage mode="participant" title="Проект" taskId="00000000-0000-0000-0000-000000000100" description="Описание" deadline="12 мая" tags={["API"]} workspace={workspace} quickCard={{ person_id: member.person_id, task_id: "00000000-0000-0000-0000-000000000100", assignment_status: "submitted", contribution_status: "submitted", availability: "on_review", project_role: "Исполнитель", responsibility: "API готов", display_name: "Мария Воронова", portfolio_available: true, profile: { city: "Москва", university: null, telegram: null, about: null, skills: [{ title: "FastAPI", origin: "project", verified: true }] } }} onSelectMember={selectMember} onCloseQuickCard={() => undefined} onOpenProfile={openProfile} onOpenDirectMessage={openMessage} onMessage={() => undefined} onPrimaryAction={() => undefined} />);
 
     fireEvent.click(screen.getByRole("button", { name: /Мария Воронова/ }));
-    expect(selectMember).toHaveBeenCalledWith(workspace.team[0].person_id);
+    expect(selectMember).toHaveBeenCalledWith(member.person_id);
     expect(screen.getByRole("dialog", { name: "Карточка участника" })).toHaveTextContent("API готов");
     fireEvent.click(screen.getByRole("button", { name: "Подробная информация" }));
     fireEvent.click(screen.getByRole("button", { name: "Сообщение" }));
-    expect(openProfile).toHaveBeenCalledWith(workspace.team[0].person_id);
-    expect(openMessage).toHaveBeenCalledWith(workspace.team[0].person_id);
+    expect(openProfile).toHaveBeenCalledWith(member.person_id);
+    expect(openMessage).toHaveBeenCalledWith(member.person_id);
   });
 
   it("explains numerator, denominator, freshness and object-backed metric rows including non-inert zero states", () => {

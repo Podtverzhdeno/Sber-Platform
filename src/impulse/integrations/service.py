@@ -247,6 +247,22 @@ class SealedVault:
         return raw.decode("utf-8")
 
 
+class DeploymentSealedVault(SealedVault):
+    """Vault whose independent keys are derived from a deployment secret.
+
+    The source secret is never retained. Domain separation prevents credentials
+    from sharing key material with signed sessions even when both are rooted in
+    the same deployment-managed secret.
+    """
+
+    @classmethod
+    def from_secret(cls, secret: str) -> DeploymentSealedVault:
+        if len(secret) < 32:
+            raise ValueError("platform vault secret must be at least 32 characters")
+        key = hashlib.sha512(b"impulse/platform-vault/v1\x00" + secret.encode("utf-8")).digest()
+        return cls(key)
+
+
 @dataclass(frozen=True, slots=True)
 class ConnectionView:
     """Public connection projection; contains no credential material."""

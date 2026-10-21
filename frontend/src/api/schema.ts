@@ -2532,6 +2532,125 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/projects/{project_id}/platforms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Catalog */
+        get: operations["catalog_api_v1_projects__project_id__platforms_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/platforms/connections/{connection_id}/deep-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Deep Link */
+        get: operations["deep_link_api_v1_projects__project_id__platforms_connections__connection_id__deep_link_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/platforms/connections/{connection_id}/diagnostics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Diagnostics */
+        get: operations["diagnostics_api_v1_projects__project_id__platforms_connections__connection_id__diagnostics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/platforms/connections/{connection_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke */
+        post: operations["revoke_api_v1_projects__project_id__platforms_connections__connection_id__revoke_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/platforms/{provider_key}/callback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Callback */
+        post: operations["callback_api_v1_projects__project_id__platforms__provider_key__callback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/platforms/{provider_key}/connect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Connect */
+        post: operations["connect_api_v1_projects__project_id__platforms__provider_key__connect_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{project_id}/platforms/{provider_key}/reconnect": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reconnect */
+        post: operations["reconnect_api_v1_projects__project_id__platforms__provider_key__reconnect_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/rating-seasons/{season_id}/leaderboard": {
         parameters: {
             query?: never;
@@ -3002,6 +3121,15 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** CallbackRequest */
+        CallbackRequest: {
+            /** Code */
+            code: string;
+            /** Idempotency Key */
+            idempotency_key: string;
+            /** State */
+            state: string;
+        };
         /** CandidateMatchView */
         CandidateMatchView: {
             /** Display Name */
@@ -3315,6 +3443,69 @@ export interface components {
             /** Rating Eligible */
             rating_eligible: boolean;
             status: components["schemas"]["CompletionStatus"];
+        };
+        /** ConnectChallengeView */
+        ConnectChallengeView: {
+            /** Authorization Url */
+            authorization_url: string;
+            /** Expires At */
+            expires_at: string;
+            /** Provider Key */
+            provider_key: string;
+            /** State */
+            state: string;
+        };
+        /** ConnectRequest */
+        ConnectRequest: {
+            /** Scopes */
+            scopes?: string[];
+            /** Workspace Ref */
+            workspace_ref?: string | null;
+        };
+        /** ConnectionCardView */
+        ConnectionCardView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Error */
+            last_error: string | null;
+            /** Last Sync At */
+            last_sync_at: string | null;
+            /** Provider Key */
+            provider_key: string;
+            /** Scopes */
+            scopes: string[];
+            /** Status */
+            status: string;
+            /** Workspace Ref */
+            workspace_ref: string | null;
+        };
+        /** ConnectionViewResponse */
+        ConnectionViewResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Error */
+            last_error: string | null;
+            /** Last Sync At */
+            last_sync_at: string | null;
+            /**
+             * Project Id
+             * Format: uuid
+             */
+            project_id: string;
+            /** Provider Key */
+            provider_key: string;
+            /** Scopes */
+            scopes: string[];
+            /** Status */
+            status: string;
+            /** Workspace Ref */
+            workspace_ref: string | null;
         };
         /** ConsentRequest */
         ConsentRequest: {
@@ -3748,6 +3939,11 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** DeepLinkView */
+        DeepLinkView: {
+            /** Url */
+            url: string;
+        };
         /** DemoLoginRequest */
         DemoLoginRequest: {
             /** Persona Key */
@@ -3776,6 +3972,30 @@ export interface components {
         DemoSettlementView: {
             claim: components["schemas"]["PayoutClaimView"];
             settlement: components["schemas"]["SettlementAttemptView"];
+        };
+        /** DiagnosticsView */
+        DiagnosticsView: {
+            /**
+             * Connection Id
+             * Format: uuid
+             */
+            connection_id: string;
+            /** Last Error */
+            last_error: string | null;
+            /** Last Sync At */
+            last_sync_at: string | null;
+            /** Provider Key */
+            provider_key: string;
+            /** Scopes */
+            scopes: string[];
+            /** Status */
+            status: string;
+            /** Sync Paused */
+            sync_paused: boolean;
+            /** Token Expires At */
+            token_expires_at: string | null;
+            /** Token Fingerprint */
+            token_fingerprint: string | null;
         };
         /** DiplomaThresholdModel */
         DiplomaThresholdModel: {
@@ -4951,6 +5171,11 @@ export interface components {
             /** Events */
             events: components["schemas"]["PipelineEventView"][];
         };
+        /** PlatformCatalogResponse */
+        PlatformCatalogResponse: {
+            /** Items */
+            items: components["schemas"]["ProviderCardView"][];
+        };
         /** PortfolioContributionView */
         PortfolioContributionView: {
             /** Artifact Keys */
@@ -5111,6 +5336,23 @@ export interface components {
             task_title: string;
             /** Verification Id */
             verification_id: string;
+        };
+        /**
+         * ProviderCardView
+         * @description One row of the «Платформы» section for a project workspace.
+         */
+        ProviderCardView: {
+            connection: components["schemas"]["ConnectionCardView"] | null;
+            /** Provider Key */
+            provider_key: string;
+            /** Purpose */
+            purpose: string;
+            /** Repository Label */
+            repository_label: string;
+            /** Required Permissions */
+            required_permissions: string[];
+            /** Title */
+            title: string;
         };
         /** PublicCredentialView */
         PublicCredentialView: {
@@ -11072,6 +11314,249 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectCredentialView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    catalog_api_v1_projects__project_id__platforms_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformCatalogResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    deep_link_api_v1_projects__project_id__platforms_connections__connection_id__deep_link_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                connection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeepLinkView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    diagnostics_api_v1_projects__project_id__platforms_connections__connection_id__diagnostics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project_id: string;
+                connection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DiagnosticsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    revoke_api_v1_projects__project_id__platforms_connections__connection_id__revoke_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                project_id: string;
+                connection_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionViewResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    callback_api_v1_projects__project_id__platforms__provider_key__callback_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                project_id: string;
+                provider_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CallbackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectionViewResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    connect_api_v1_projects__project_id__platforms__provider_key__connect_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                project_id: string;
+                provider_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConnectRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectChallengeView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    reconnect_api_v1_projects__project_id__platforms__provider_key__reconnect_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                project_id: string;
+                provider_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConnectRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectChallengeView"];
                 };
             };
             /** @description Validation Error */

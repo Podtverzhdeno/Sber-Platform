@@ -42,3 +42,17 @@
 .ctw-section-toggle { background: none; border: 0; color: inherit; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; padding: 0; text-align: left; }
 .ctw-chevron { color: var(--color-muted, #aabdb4); font-size: 12px; }
 .ctw-section-aside { display: inline-flex; align-items: center; }
+
+/* openspec 22.20 — project-scoped platform catalog */
+.ctw-card [data-testid="platforms-section"] { display: grid; gap: 14px; }
+.ctw-card [data-testid="platforms-section"] > h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+.ctw-card [data-testid="platforms-section"] > p { margin: 0; color: var(--color-muted); line-height: 1.55; }
+.ctw-card [data-testid^="platform-card-"] { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--color-border); border-radius: 13px; background: var(--color-surface-1); }
+.ctw-card [data-testid^="platform-card-"] header, .ctw-card [data-testid^="platform-card-"] footer { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.ctw-card [data-testid^="platform-card-"] h3, .ctw-card [data-testid^="platform-card-"] p { margin: 0; }
+.ctw-card [data-testid^="platform-card-"] ul { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0; list-style: none; }
+.ctw-card [data-testid^="platform-card-"] li { padding: 5px 8px; border: 1px solid var(--color-border); border-radius: 999px; color: var(--color-muted); font-size: 11px; }
+.ctw-card [data-testid^="platform-card-"] button, .ctw-card [data-testid="platform-connect-form"] button, .ctw-card [data-testid="platform-challenge"] button { min-height: 38px; padding: 8px 12px; border: 1px solid var(--color-border-strong); border-radius: 9px; color: var(--color-text); background: var(--color-surface-2); cursor: pointer; font-weight: 750; }
+.ctw-card [data-testid="platform-connect-form"], .ctw-card [data-testid="platform-challenge"] { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--color-primary); border-radius: 13px; background: color-mix(in srgb, var(--color-primary) 7%, var(--color-surface-1)); }
+.ctw-card [data-testid="platform-connect-form"] label, .ctw-card [data-testid="platform-connect-form"] fieldset { display: grid; gap: 8px; }
+.ctw-card [data-testid="platform-connect-form"] input, .ctw-card [data-testid="platform-challenge"] input { min-height: 42px; padding: 9px 11px; border: 1px solid var(--color-border-strong); border-radius: 9px; color: var(--color-text); background: var(--color-surface-1); }

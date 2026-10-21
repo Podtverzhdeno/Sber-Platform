@@ -2,8 +2,7 @@
 
 Server-side connection model for GigaCode, GigaCoWork, GigaAgent and GitVerse:
 project-scoped scopes, sealed credentials, connect/reconnect/revoke lifecycle,
-content-free audit and allowlist-validated deep links. Wiring into the FastAPI
-app registry and OpenAPI snapshot ownership remains a separate integration lane.
+content-free audit and allowlist-validated deep links.
 """
 
 from __future__ import annotations

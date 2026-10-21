@@ -1,11 +1,14 @@
 import { useEffect, useState, type ReactNode } from "react";
 
+import { PlatformsSection } from "../features/platforms";
+
 type WorkspaceMode = "customer" | "participant";
 
 type TaskWorkspacePageProps = {
   mode: WorkspaceMode;
   title: string;
   taskId: string;
+  projectId?: string;
   description: string;
   deadline: string;
   tags: string[];
@@ -108,7 +111,7 @@ function WorkspaceCard({ taskId, id, eyebrow, title, aside, hideAsideWhenCollaps
   </section>;
 }
 
-export function TaskWorkspacePage({ mode, title, taskId, description, deadline, tags, onMessage, onPrimaryAction, workspace, quickCard, quickCardLoading = false, quickCardError = false, onSelectMember, onCloseQuickCard, onOpenProfile, onOpenDirectMessage }: TaskWorkspacePageProps) {
+export function TaskWorkspacePage({ mode, title, taskId, projectId, description, deadline, tags, onMessage, onPrimaryAction, workspace, quickCard, quickCardLoading = false, quickCardError = false, onSelectMember, onCloseQuickCard, onOpenProfile, onOpenDirectMessage }: TaskWorkspacePageProps) {
   const customer = mode === "customer";
   const [notice, setNotice] = useState("");
   const [tab, setTab] = useState("Обзор");
@@ -135,6 +138,9 @@ export function TaskWorkspacePage({ mode, title, taskId, description, deadline, 
       <WorkspaceCard taskId={taskId} id="about" eyebrow="О ЗАДАЧЕ" title="Описание">
         <p className="ctw-copy">{description}</p><div className="ctw-description-grid"><div><small>Ожидаемый результат</small><b>Работающий прототип и API</b></div><div><small>Формат сдачи</small><b>Demo, репозиторий и документация</b></div></div><div className="ctw-tech"><small>Технологии</small>{["Python","FastAPI","PostgreSQL","Embeddings","Vector DB"].map(x=><span key={x}>{x}</span>)}</div>
       </WorkspaceCard>
+      {!customer && projectId ? <WorkspaceCard taskId={taskId} id="platforms" eyebrow="ПЛАТФОРМЫ" title="Инструменты проекта">
+        <PlatformsSection projectId={projectId} />
+      </WorkspaceCard> : null}
       <WorkspaceCard taskId={taskId} id="results" eyebrow="РЕЗУЛЬТАТЫ" title="Промежуточные артефакты" aside={<span>4 результата</span>}>
         <div className="ctw-results">{[["◇","Архитектура решения","Схема компонентов","Проверено"],["<>" ,"API prototype","OpenAPI / Swagger","Готово"],["▦","Dataset v2","Подготовленные данные","Обновлено"],["↗","Demo build","Последняя сборка","В работе"]].map(x=><button type="button" key={x[1]} onClick={()=>{setNotice(["Артефакт",x[1],x[2],x[3]].filter(Boolean).join(" · ")+". Подробный разбор доступен в чате команды.");}}><i>{x[0]}</i><span><b>{x[1]}</b><small>{x[2]}</small></span><em>{x[3]}</em></button>)}</div>
       </WorkspaceCard>

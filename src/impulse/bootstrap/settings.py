@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 from enum import StrEnum
 from typing import Self
 
@@ -33,6 +34,7 @@ class Settings(BaseSettings):
     max_request_bytes: int = Field(default=1_048_576, ge=1_024, le=10_485_760)
     database_url: SecretStr | None = None
     session_secret: SecretStr | None = None
+    platform_vault_secret: SecretStr | None = None
     session_ttl_seconds: int = Field(default=43_200, ge=300, le=604_800)
     auth_provider_url: AnyHttpUrl | None = None
 
@@ -56,7 +58,7 @@ class Settings(BaseSettings):
     langfuse_base_url: AnyHttpUrl | None = None
     langfuse_content_capture_enabled: bool = False
 
-    @field_validator("database_url", "session_secret", mode="before")
+    @field_validator("database_url", "session_secret", "platform_vault_secret", mode="before")
     @classmethod
     def blank_secret_is_unset(cls, value: object) -> object:
         """Treat a blank value as absent and fall back to defaults."""
@@ -120,3 +122,19 @@ class Settings(BaseSettings):
         if self.app_env in {AppEnvironment.DEVELOPMENT, AppEnvironment.TEST}:
             return "impulse-local-development-session-secret-change-me"
         raise ValueError("SESSION_SECRET is required for authentication")
+
+    def platform_sealing_secret(self) -> str:
+        """Return deployment-owned key material for the credential vault.
+
+        A dedicated secret is preferred. The signed-session secret is a safe
+        compatibility root because the vault derives domain-separated keys.
+        """
+        if self.platform_vault_secret is not None:
+            value = self.platform_vault_secret.get_secret_value()
+            if len(value) < 32:
+                raise ValueError("PLATFORM_VAULT_SECRET must contain at least 32 characters")
+            return value
+        session_root = self.session_signing_secret()
+        return hashlib.sha256(
+            ("impulse/platform-secret-root/v1\x00" + session_root).encode("utf-8")
+        ).hexdigest()

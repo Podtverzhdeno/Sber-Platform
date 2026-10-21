@@ -84,6 +84,17 @@ from impulse.infrastructure.recognition_store import SqlRecognitionStore
 from impulse.infrastructure.reward_store import SqlRewardStore
 from impulse.infrastructure.talent_store import SqlTalentStore
 from impulse.infrastructure.work_store import SqlWorkStore
+from impulse.integrations import platform_router
+from impulse.integrations.runtime import (
+    DefaultProjectPlatformConfig,
+    FailClosedPlatformGateway,
+    WorkAssignmentMembership,
+)
+from impulse.integrations.service import (
+    DeploymentSealedVault,
+    MemoryConnectionStore,
+    PlatformConnectionService,
+)
 
 
 def create_app(
@@ -107,6 +118,7 @@ def create_app(
     ai_suggestion_service: SuggestionService | None = None,
     participant_events_service: ParticipantEventsService | None = None,
     deadline_service: DeadlineChangeService | None = None,
+    platforms_service: PlatformConnectionService | None = None,
 ) -> FastAPI:
     """Build the HTTP application without import-time side effects."""
     runtime_settings = settings or Settings()
@@ -249,6 +261,14 @@ def create_app(
             auth_service=auth_service,
             recognition_store=recognition_service.store,
         )
+    if platforms_service is None:
+        platforms_service = PlatformConnectionService(
+            MemoryConnectionStore(),
+            DeploymentSealedVault.from_secret(runtime_settings.platform_sealing_secret()),
+            FailClosedPlatformGateway(),
+            WorkAssignmentMembership(work_service.store),
+            DefaultProjectPlatformConfig(),
+        )
     if competency_service is None:
         competency_service = CompetencyService(
             SqlFrameworkStore(owned_database)
@@ -296,6 +316,7 @@ def create_app(
     app.state.buddy_service = buddy_service
     app.state.ai_suggestion_service = ai_suggestion_service
     app.state.participant_events_service = participant_events_service
+    app.state.platforms_service = platforms_service
     app.add_middleware(RequestContextMiddleware)
     allowed_origins = (
         frozenset({str(runtime_settings.allowed_origin).rstrip("/")})
@@ -312,6 +333,7 @@ def create_app(
     app.include_router(api_v1_router)
     app.include_router(deadline_router, prefix="/api/v1")
     app.include_router(participant_events_router, prefix="/api/v1")
+    app.include_router(platform_router, prefix="/api/v1")
     # impulse.bootcamp.api imports current_session from impulse.api.v1.identity,
     # so including catalog_router from the api/v1 package would deadlock the
     # package __init__; assemble it here like deadline and participant events.
