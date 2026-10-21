@@ -198,3 +198,53 @@ async def test_sql_payout_versioning_and_request_key_are_idempotent() -> None:
     assert duplicate.attempt_id == first.attempt_id
     assert await store.next_settlement_attempt_number(claim.claim_id) == 2
     await database.close()
+
+
+@pytest.mark.asyncio
+async def test_sql_payouts_for_reviews_batches_by_review_version_pair() -> None:
+    database = Database(integration_url())
+    await seed_demo(database)
+    async with database.sessions() as session:
+        assignment_id = await session.scalar(select(assignments.c.id).limit(1))
+    assert assignment_id is not None
+
+    store = SqlRewardStore(database)
+    first = PayoutClaim(
+        claim_id=uuid4(),
+        assignment_id=assignment_id,
+        contribution_version=11,
+        terms_version=1,
+        review_id=uuid4(),
+        review_version=3,
+        grade=ReviewGrade.A,
+        amount=Decimal("25000.00"),
+        currency="RUB",
+        status=PayoutStatus.CALCULATED,
+    )
+    await store.add_payout_claim(first)
+    second = PayoutClaim(
+        claim_id=uuid4(),
+        assignment_id=assignment_id,
+        contribution_version=12,
+        terms_version=1,
+        review_id=uuid4(),
+        review_version=1,
+        grade=ReviewGrade.B,
+        amount=Decimal("10000.00"),
+        currency="RUB",
+        status=PayoutStatus.CALCULATED,
+    )
+    await store.add_payout_claim(second)
+
+    found = await store.payouts_for_reviews(
+        [(first.review_id, first.review_version), (second.review_id, second.review_version)]
+    )
+    assert set(found) == {
+        (first.review_id, first.review_version),
+        (second.review_id, second.review_version),
+    }
+    assert found[(first.review_id, first.review_version)] == first
+    assert found[(second.review_id, second.review_version)] == second
+    assert await store.payouts_for_reviews([(first.review_id, 99)]) == {}
+    assert await store.payouts_for_reviews([]) == {}
+    await database.close()

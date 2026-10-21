@@ -2,15 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Protocol, TypeVar
 from uuid import UUID, uuid4
 
 from impulse.api.errors import ApiError
+from impulse.application.concurrency import compose_reads
 from impulse.application.identity import PersonaRecord
-from impulse.application.work import WorkStore
+from impulse.application.work import AssignmentRecord, ContributionRecord, WorkStore
 from impulse.domain.identity import ActorContext, Role
 from impulse.domain.reward import (
     AppealStatus,
@@ -105,6 +106,9 @@ class ReviewStore(Protocol):
     async def payout_for_review(
         self, review_id: UUID, review_version: int
     ) -> PayoutClaim | None: ...
+    async def payouts_for_reviews(
+        self, review_versions: Sequence[tuple[UUID, int]]
+    ) -> dict[tuple[UUID, int], PayoutClaim]: ...
     async def add_payout_claim(self, claim: PayoutClaim) -> PayoutClaim: ...
     async def save_payout_claim(self, claim: PayoutClaim, expected_version: int) -> PayoutClaim: ...
     async def settlement_attempt(
@@ -237,6 +241,16 @@ class MemoryRewardStore:
             ),
             None,
         )
+
+    async def payouts_for_reviews(
+        self, review_versions: Sequence[tuple[UUID, int]]
+    ) -> dict[tuple[UUID, int], PayoutClaim]:
+        pairs = {(review_id, version) for review_id, version in review_versions}
+        return {
+            (claim.review_id, claim.review_version): claim
+            for claim in self._claims.values()
+            if (claim.review_id, claim.review_version) in pairs
+        }
 
     async def add_payout_claim(self, claim: PayoutClaim) -> PayoutClaim:
         existing = await self.payout_claim(
@@ -404,95 +418,102 @@ class RewardService:
         self, actor: ActorContext
     ) -> tuple[RewardWorkspaceItem, ...]:
         self._participant(actor)
-        if self.work_store is None:
+        work_store = self.work_store
+        if work_store is None:
             return ()
-        assignments = await self.work_store.assignments_for_person(actor.person_id)
-        contribution_ids = {
-            contribution.id
-            for assignment in assignments
-            for contribution in await self.work_store.contributions_for_assignment(assignment.id)
-        }
+        assignments = await work_store.assignments_for_person(actor.person_id)
+
+        async def contributions_of(
+            assignment: AssignmentRecord,
+        ) -> tuple[ContributionRecord, ...]:
+            return await work_store.contributions_for_assignment(assignment.id)
+
+        contributions = await compose_reads(assignments, contributions_of)
+        contribution_ids = frozenset({item.id for group in contributions for item in group})
         reviews = await self.store.current_reviews()
-        items: list[RewardWorkspaceItem] = []
-        for review in reviews:
-            if review.contribution_id not in contribution_ids:
-                continue
-            items.append(
-                RewardWorkspaceItem(
-                    review=review,
-                    payout=await self.store.payout_for_review(
-                        review.review_id, review.review_version
-                    ),
-                )
+        relevant = [item for item in reviews if item.contribution_id in contribution_ids]
+        payouts = await self.store.payouts_for_reviews(
+            [(item.review_id, item.review_version) for item in relevant]
+        )
+        return tuple(
+            RewardWorkspaceItem(
+                review=item, payout=payouts.get((item.review_id, item.review_version))
             )
-        return tuple(items)
+            for item in relevant
+        )
 
     async def mentor_review_workspace(self, actor: ActorContext) -> tuple[RewardWorkspaceItem, ...]:
         self._mentor(actor)
-        items: list[RewardWorkspaceItem] = []
-        for review in await self.store.current_reviews():
-            evidence = await self.evidence.for_mentor(actor.person_id, review.contribution_id)
-            if evidence is None:
-                continue
-            items.append(
-                RewardWorkspaceItem(
-                    review=review,
-                    payout=await self.store.payout_for_review(
-                        review.review_id, review.review_version
-                    ),
-                )
+        reviews = await self.store.current_reviews()
+        evidence_list = await compose_reads(
+            reviews,
+            lambda review: self.evidence.for_mentor(actor.person_id, review.contribution_id),
+        )
+        relevant = [
+            item
+            for item, evidence in zip(reviews, evidence_list, strict=True)
+            if evidence is not None
+        ]
+        payouts = await self.store.payouts_for_reviews(
+            [(item.review_id, item.review_version) for item in relevant]
+        )
+        return tuple(
+            RewardWorkspaceItem(
+                review=item, payout=payouts.get((item.review_id, item.review_version))
             )
-        return tuple(items)
+            for item in relevant
+        )
 
     async def mentor_review_queue(self, actor: ActorContext) -> tuple[MentorQueueItem, ...]:
         self._mentor(actor)
         if self.work_store is None:
             return ()
-        items: list[MentorQueueItem] = []
-        for review in await self.store.current_reviews():
-            evidence = await self.evidence.for_mentor(actor.person_id, review.contribution_id)
-            if evidence is None:
-                continue
-            contribution = await self.work_store.contribution(review.contribution_id)
-            if contribution is None:
-                continue
-            assignment = await self.work_store.assignment(contribution.assignment_id)
-            if assignment is None:
-                continue
-            task = await self.work_store.get(assignment.task_id)
-            terms = await self.work_store.latest_terms(assignment.task_id)
-            if task is None or terms is None:
-                continue
-            rubric = await self.store.rubric(review.rubric_id)
-            participant_name = ""
-            if self.identity is not None:
-                persona = await self.identity.get_persona_by_id(assignment.person_id)
-                if persona is not None:
-                    participant_name = persona.display_name
-            items.append(
-                MentorQueueItem(
-                    workspace=RewardWorkspaceItem(
-                        review=review,
-                        payout=await self.store.payout_for_review(
-                            review.review_id, review.review_version
-                        ),
-                    ),
-                    task_title=task.title,
-                    deadline_at=terms.deadline_at,
-                    personal_summary=contribution.personal_summary,
-                    artifact_keys=contribution.artifact_keys,
-                    contribution_accepted=evidence.accepted,
-                    authorship_conflict_open=evidence.authorship_conflict_open,
-                    participant_name=participant_name,
-                    project_key=task.project_key,
-                    task_kind="case" if task.case_rubric is not None else "task",
-                    rubric_key=rubric.key if rubric is not None else "",
-                    rubric_version=rubric.version if rubric is not None else review.rubric_version,
-                    rubric_criteria=rubric.criteria if rubric is not None else (),
-                )
-            )
+        reviews = await self.store.current_reviews()
+        candidates = await compose_reads(reviews, lambda review: self._queue_item(actor, review))
+        queue_items = [item for item in candidates if item is not None]
         return tuple(
-            sorted(items, key=lambda item: (item.deadline_at, item.workspace.review.review_id))
+            sorted(
+                queue_items,
+                key=lambda item: (item.deadline_at, item.workspace.review.review_id),
+            )
+        )
+
+    async def _queue_item(self, actor: ActorContext, review: Review5Plus) -> MentorQueueItem | None:
+        evidence = await self.evidence.for_mentor(actor.person_id, review.contribution_id)
+        if evidence is None:
+            return None
+        assert self.work_store is not None
+        contribution = await self.work_store.contribution(review.contribution_id)
+        if contribution is None:
+            return None
+        assignment = await self.work_store.assignment(contribution.assignment_id)
+        if assignment is None:
+            return None
+        task = await self.work_store.get(assignment.task_id)
+        terms = await self.work_store.latest_terms(assignment.task_id)
+        if task is None or terms is None:
+            return None
+        rubric = await self.store.rubric(review.rubric_id)
+        participant_name = ""
+        if self.identity is not None:
+            persona = await self.identity.get_persona_by_id(assignment.person_id)
+            if persona is not None:
+                participant_name = persona.display_name
+        payout = await self.store.payout_for_review(review.review_id, review.review_version)
+        return MentorQueueItem(
+            workspace=RewardWorkspaceItem(review=review, payout=payout),
+            task_title=task.title,
+            deadline_at=terms.deadline_at,
+            personal_summary=contribution.personal_summary,
+            artifact_keys=contribution.artifact_keys,
+            contribution_accepted=evidence.accepted,
+            authorship_conflict_open=evidence.authorship_conflict_open,
+            participant_name=participant_name,
+            project_key=task.project_key,
+            task_kind="case" if task.case_rubric is not None else "task",
+            rubric_key=rubric.key if rubric is not None else "",
+            rubric_version=rubric.version if rubric is not None else review.rubric_version,
+            rubric_criteria=rubric.criteria if rubric is not None else (),
         )
 
     async def propose(

@@ -58,6 +58,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/agents/buddy/suggestion/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Suggestion Feedback */
+        post: operations["suggestion_feedback_api_v1_agents_buddy_suggestion_feedback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/agents/buddy/suggestion/target": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resolve Suggestion Target
+         * @description Stale/RBAC recheck immediately before the browser follows a deep link.
+         */
+        get: operations["resolve_suggestion_target_api_v1_agents_buddy_suggestion_target_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/agents/buddy/threads": {
         parameters: {
             query?: never;
@@ -1216,6 +1253,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/engagement/freeze": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Freeze Summary */
+        get: operations["freeze_summary_api_v1_me_engagement_freeze_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/engagement/freeze/service-block": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Freeze Service Block */
+        post: operations["freeze_service_block_api_v1_me_engagement_freeze_service_block_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/engagement/freeze/use": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Use Freeze Day */
+        post: operations["use_freeze_day_api_v1_me_engagement_freeze_use_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/engagement/overview": {
         parameters: {
             query?: never;
@@ -1244,6 +1332,24 @@ export interface paths {
         put?: never;
         /** Record Qualification */
         post: operations["record_qualification_api_v1_me_engagement_qualify_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/engagement/rhythm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Weekly Rhythm Overview */
+        get: operations["weekly_rhythm_overview_api_v1_me_engagement_rhythm_get"];
+        put?: never;
+        /** Save Weekly Rhythm */
+        post: operations["save_weekly_rhythm_api_v1_me_engagement_rhythm_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2697,10 +2803,36 @@ export interface components {
         };
         /** BuddyActionView */
         BuddyActionView: {
+            /** Available */
+            available: boolean;
+            /** Canonical Path */
+            canonical_path: string;
+            /** Checkpoint Id */
+            checkpoint_id: string | null;
+            /** Deadline At */
+            deadline_at: string | null;
+            /** Effect State */
+            effect_state: string;
+            /** Estimated Minutes */
+            estimated_minutes: number | null;
             /** Kind */
             kind: string;
+            /** Points */
+            points: number | null;
+            /** Points Note */
+            points_note: string;
             /** Ref */
             ref: string;
+            /** Skill Forecast */
+            skill_forecast: string;
+            /** Stale Reason */
+            stale_reason: string | null;
+            /** Target Id */
+            target_id: string;
+            /** Target Kind */
+            target_kind: string;
+            /** Target Version */
+            target_version: number | null;
             /** Title */
             title: string;
         };
@@ -2713,6 +2845,8 @@ export interface components {
             /** Policy Version */
             policy_version: number;
             suggestion: components["schemas"]["BuddySuggestionView"] | null;
+            /** Suggestions */
+            suggestions: components["schemas"]["BuddySuggestionView"][];
         };
         /** BuddySuggestionView */
         BuddySuggestionView: {
@@ -2721,6 +2855,8 @@ export interface components {
             auto_enrolled: boolean;
             /** Benefit */
             benefit: string;
+            /** Coverage Note */
+            coverage_note: string;
             /** Explanation */
             explanation: string;
             /** Gap */
@@ -2738,6 +2874,10 @@ export interface components {
             model_called: boolean;
             /** Observation */
             observation: string;
+            /** Partial */
+            partial: boolean;
+            /** Rank Score */
+            rank_score: string;
             /** Source Categories */
             source_categories: string[];
             /** Suggestion Id */
@@ -3582,6 +3722,16 @@ export interface components {
             best_days: number;
             /** Current Days */
             current_days: number;
+            /**
+             * Freeze State
+             * @default idle
+             */
+            freeze_state: string;
+            /**
+             * Frozen Dates
+             * @default []
+             */
+            frozen_dates: string[];
             /** Grace Available */
             grace_available: boolean;
             /** Qualified Dates */
@@ -3762,6 +3912,29 @@ export interface components {
             title: string;
             /** Version */
             version: number;
+        };
+        /** FreezeExceptionRequest */
+        FreezeExceptionRequest: {
+            /** Explanation */
+            explanation: string;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /** Scope */
+            scope: string;
+        };
+        /** FreezeSummaryView */
+        FreezeSummaryView: {
+            /** Available */
+            available: number;
+            /** Consumed Total */
+            consumed_total: number;
+            /** Granted Total */
+            granted_total: number;
+            /** Policy Version */
+            policy_version: number;
         };
         /** FreshnessView */
         FreshnessView: {
@@ -5233,6 +5406,24 @@ export interface components {
             /** Suggestion Id */
             suggestion_id: string;
         };
+        /** SuggestionFeedbackRequest */
+        SuggestionFeedbackRequest: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "dismiss" | "snooze" | "irrelevant";
+            /** Snooze Until */
+            snooze_until?: string | null;
+            /** Suggestion Id */
+            suggestion_id: string;
+        };
+        /** SuggestionTargetView */
+        SuggestionTargetView: {
+            /** Suggestion Id */
+            suggestion_id: string;
+            target: components["schemas"]["BuddyActionView"];
+        };
         /** SupportCatalogView */
         SupportCatalogView: {
             /** Models */
@@ -5616,6 +5807,58 @@ export interface components {
             /** Source Url */
             source_url: string;
         };
+        /** WeeklyRhythmRequest */
+        WeeklyRhythmRequest: {
+            /** Custom Days */
+            custom_days?: number[];
+            /**
+             * Effective From
+             * Format: date
+             */
+            effective_from: string;
+            /** Preset */
+            preset: string;
+            /** Reminder Hour */
+            reminder_hour: number;
+            /** Reminder Window Hours */
+            reminder_window_hours: number;
+        };
+        /** WeeklyRhythmView */
+        WeeklyRhythmView: {
+            /**
+             * Active Days
+             * @default []
+             */
+            active_days: number[];
+            /** Done Days */
+            done_days?: number | null;
+            /** Effective From */
+            effective_from?: string | null;
+            /** Hint */
+            hint?: string | null;
+            /** History Count */
+            history_count: number;
+            /** Preset */
+            preset?: string | null;
+            /** Reminder Hour */
+            reminder_hour?: number | null;
+            /** Reminder Window Hours */
+            reminder_window_hours?: number | null;
+            /** Scheduled From */
+            scheduled_from?: string | null;
+            /** Scheduled Preset */
+            scheduled_preset?: string | null;
+            /** Target Days */
+            target_days?: number | null;
+            /** Version */
+            version?: number | null;
+            /** Versioned */
+            versioned: boolean;
+            /** Week End */
+            week_end?: string | null;
+            /** Week Start */
+            week_start?: string | null;
+        };
         /** WeightedProgressView */
         WeightedProgressView: {
             /** Coverage */
@@ -5794,6 +6037,70 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    suggestion_feedback_api_v1_agents_buddy_suggestion_feedback_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SuggestionFeedbackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    resolve_suggestion_target_api_v1_agents_buddy_suggestion_target_get: {
+        parameters: {
+            query: {
+                suggestion_id: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SuggestionTargetView"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -7946,6 +8253,94 @@ export interface operations {
             };
         };
     };
+    freeze_summary_api_v1_me_engagement_freeze_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FreezeSummaryView"];
+                };
+            };
+        };
+    };
+    freeze_service_block_api_v1_me_engagement_freeze_service_block_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FreezeExceptionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    use_freeze_day_api_v1_me_engagement_freeze_use_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EngagementOverviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     engagement_overview_api_v1_me_engagement_overview_get: {
         parameters: {
             query?: never;
@@ -7988,6 +8383,61 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EngagementOverviewView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    weekly_rhythm_overview_api_v1_me_engagement_rhythm_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WeeklyRhythmView"];
+                };
+            };
+        };
+    };
+    save_weekly_rhythm_api_v1_me_engagement_rhythm_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WeeklyRhythmRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WeeklyRhythmView"];
                 };
             };
             /** @description Validation Error */

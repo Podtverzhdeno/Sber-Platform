@@ -38,6 +38,10 @@ operations:
       - Create an atomic claim with `IN_PROGRESS` and a non-conflicting write-scope before the first product write.
       - Do not change a task checkbox to `[x]`; only the independent reviewer/integrator may accept it after evidence checks.
       - If there is no safe READY task, return `NO_SAFE_TASK` instead of editing a claimed or dirty file.
+      - Select a conflict-free wave: do not start READY tasks whose write scopes overlap each other, active claims, or the main agent reserved scope.
+      - Run task-scoped checks as author, preserve independent review, and leave full regression/build/OpenSpec/screenshot checks to one integration task per exact revision.
+      - Do not deploy or run external production smoke unless the current task is explicitly approval-gated for that operation.
+      - An isolated AI Engineering Platform worker with a validated `.aip-task-contract.json` may use its hashed context manifest instead of rereading the entire global backlog and unrelated claims; manual sessions may not.
   archive:
     guidance:
       - Do not archive the change while any claim is `IN_PROGRESS`, `BLOCKED` or `REVIEW`.

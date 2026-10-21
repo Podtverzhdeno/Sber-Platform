@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, select, tuple_, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import RowMapping
 from sqlalchemy.exc import IntegrityError
@@ -391,6 +392,30 @@ class SqlRewardStore(ReviewStore):
                 .one_or_none()
             )
         return self._payout_claim(row) if row is not None else None
+
+    async def payouts_for_reviews(
+        self, review_versions: Sequence[tuple[UUID, int]]
+    ) -> dict[tuple[UUID, int], PayoutClaim]:
+        unique = sorted({(review_id, version) for review_id, version in review_versions})
+        if not unique:
+            return {}
+        async with self.database.sessions() as session:
+            rows = (
+                (
+                    await session.execute(
+                        select(payout_claims).where(
+                            tuple_(payout_claims.c.review_id, payout_claims.c.review_version).in_(
+                                unique
+                            )
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        return {
+            (row["review_id"], int(row["review_version"])): self._payout_claim(row) for row in rows
+        }
 
     async def add_payout_claim(self, claim: PayoutClaim) -> PayoutClaim:
         try:

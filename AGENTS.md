@@ -23,3 +23,7 @@
 - обходить approval gate для Railway, секретов и внешних систем.
 
 Если безопасной READY-задачи нет, агент MUST вернуть `NO_SAFE_TASK`, а не создавать конфликт. Полный протокол, heartbeat, handoff и reviewer flow определены OpenSpec-документами выше.
+
+Для скорости без снижения качества author MUST запускать релевантные проверки собственного scope, независимый reviewer MUST проверять diff и acceptance, а полный regression/build/OpenSpec/screenshot suite MUST выполняться одной integration-задачей на точной integration revision. Обычные feature-задачи MUST NOT запускать deploy или внешний production smoke. Scheduler MUST выбирать конфликт-свободную волну и не заполнять слот задачей, пересекающейся с активным scope.
+
+Исключение для worker, запущенного AI Engineering Platform: если `.aip-task-contract.json` содержит атомарно выданный claim, dependency state, acceptance, scope и SHA-256 context manifest, worker MAY не перечитывать весь глобальный backlog и чужие logs. Он всё равно MUST прочитать этот `AGENTS.md`, task contract и перечисленные в contract capability files. Ручная сессия без такого контракта следует полному preflight выше.

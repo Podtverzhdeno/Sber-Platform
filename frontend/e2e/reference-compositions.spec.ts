@@ -752,9 +752,9 @@ test("R-PAR-07 participant messaging send", async ({ page }) => {
   await openWorkspace(page, participantBase.key);
   await page.getByRole("link", { name: "Сообщения", exact: true }).click();
   await expect(page.locator('[data-reference="R-PAR-07"]')).toBeVisible();
-  await page.getByLabel("Сообщение").fill("Принял правки по чеклисту, обновляю артефакт.");
-  await page.getByRole("button", { name: "Отправить" }).click();
-  await expect(page.getByRole("paragraph").filter({ hasText: "Принял правки по чеклисту, обновляю артефакт." })).toBeVisible();
+  await page.getByTestId("composer-textarea").fill("Принял правки по чеклисту, обновляю артефакт.");
+  await page.getByTestId("composer-send").click();
+  await expect(page.locator(".msg-chat__rows").getByText("Принял правки по чеклисту, обновляю артефакт.", { exact: true })).toBeVisible();
   await screenshot(page, "R-PAR-07");
 });
 
@@ -856,9 +856,9 @@ test("R-MEN-05 mentor messaging send", async ({ page }) => {
   await openWorkspace(page, "mentor-elena");
   await page.getByRole("link", { name: "Сообщения", exact: true }).click();
   await expect(page.locator('[data-reference="R-MEN-05"]')).toBeVisible();
-  await page.getByLabel("Сообщение").fill("Проверил evidence, отправляю rubric-комментарий.");
-  await page.getByRole("button", { name: "Отправить" }).click();
-  await expect(page.getByRole("paragraph").filter({ hasText: "Проверил evidence, отправляю rubric-комментарий." })).toBeVisible();
+  await page.getByTestId("composer-textarea").fill("Проверил evidence, отправляю rubric-комментарий.");
+  await page.getByTestId("composer-send").click();
+  await expect(page.locator(".msg-chat__rows").getByText("Проверил evidence, отправляю rubric-комментарий.", { exact: true })).toBeVisible();
   await screenshot(page, "R-MEN-05");
 });
 
@@ -1007,9 +1007,9 @@ test("R-CUS-09 customer messaging send", async ({ page }) => {
   await openWorkspace(page, "customer-roman");
   await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Сообщения", exact: true }).click();
   await expect(page.locator('[data-reference="R-CUS-09"]')).toBeVisible();
-  await page.getByLabel("Сообщение").fill("Принял результат, остаётся финальный артефакт.");
-  await page.getByRole("button", { name: "Отправить" }).click();
-  await expect(page.getByRole("paragraph").filter({ hasText: "Принял результат, остаётся финальный артефакт." })).toBeVisible();
+  await page.getByTestId("composer-textarea").fill("Принял результат, остаётся финальный артефакт.");
+  await page.getByTestId("composer-send").click();
+  await expect(page.locator(".msg-chat__rows").getByText("Принял результат, остаётся финальный артефакт.", { exact: true })).toBeVisible();
   await screenshot(page, "R-CUS-09");
 });
 

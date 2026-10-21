@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+import asyncio
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Protocol
@@ -251,13 +252,21 @@ class WorkStore(Protocol):
     async def create(self, record: TaskRecord) -> TaskRecord: ...
     async def get(self, task_id: UUID) -> TaskRecord | None: ...
     async def save(self, record: TaskRecord) -> TaskRecord: ...
+    async def tasks_for_ids(self, task_ids: Sequence[UUID]) -> dict[UUID, TaskRecord]: ...
     async def customer_tasks(self, customer_id: UUID) -> tuple[TaskRecord, ...]: ...
     async def add_terms(self, terms: TermsRecord) -> TermsRecord: ...
     async def latest_terms(self, task_id: UUID) -> TermsRecord | None: ...
     async def terms_version(self, task_id: UUID, version: int) -> TermsRecord | None: ...
+    async def latest_terms_for_tasks(self, task_ids: Sequence[UUID]) -> dict[UUID, TermsRecord]: ...
     async def published_tasks(self) -> tuple[TaskRecord, ...]: ...
     async def accepted_terms_version(self, person_id: UUID, task_id: UUID) -> int | None: ...
+    async def accepted_terms_versions(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> dict[UUID, int | None]: ...
     async def invitation(self, task_id: UUID, person_id: UUID) -> InvitationRecord | None: ...
+    async def invitations_for_person_tasks(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> dict[UUID, InvitationRecord]: ...
     async def save_team_request(self, record: TeamRequestRecord) -> TeamRequestRecord: ...
     async def team_request(self, request_id: UUID) -> TeamRequestRecord | None: ...
     async def save_reservation(self, record: CandidateReservation) -> CandidateReservation: ...
@@ -319,9 +328,15 @@ class WorkStore(Protocol):
     async def contributions_for_assignment(
         self, assignment_id: UUID
     ) -> tuple[ContributionRecord, ...]: ...
+    async def contributions_for_assignments(
+        self, assignment_ids: Sequence[UUID]
+    ) -> dict[UUID, tuple[ContributionRecord, ...]]: ...
     async def acceptance_for_contribution(
         self, contribution_id: UUID
     ) -> AcceptanceRecord | None: ...
+    async def acceptances_for_contributions(
+        self, contribution_ids: Sequence[UUID]
+    ) -> dict[UUID, AcceptanceRecord]: ...
     async def terms_history(self, task_id: UUID) -> tuple[TermsRecord, ...]: ...
     async def checkpoints(self, task_id: UUID) -> tuple[CheckpointRecord, ...]: ...
 
@@ -356,8 +371,30 @@ class MemoryWorkStore:
     async def get(self, task_id: UUID) -> TaskRecord | None:
         return self._records.get(task_id)
 
+    async def tasks_for_ids(self, task_ids: Sequence[UUID]) -> dict[UUID, TaskRecord]:
+        identifiers = set(task_ids)
+        if not identifiers:
+            return {}
+        return {
+            item.aggregate.task_id: item
+            for item in self._records.values()
+            if item.aggregate.task_id in identifiers
+        }
+
     async def invitation(self, task_id: UUID, person_id: UUID) -> InvitationRecord | None:
         return self._invitations.get((task_id, person_id))
+
+    async def invitations_for_person_tasks(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> dict[UUID, InvitationRecord]:
+        identifiers = set(task_ids)
+        if not identifiers:
+            return {}
+        return {
+            task_id: item
+            for (task_id, owner), item in self._invitations.items()
+            if owner == person_id and task_id in identifiers
+        }
 
     async def save_team_request(self, record: TeamRequestRecord) -> TeamRequestRecord:
         existing = self._team_requests.get(record.id, ())
@@ -451,6 +488,16 @@ class MemoryWorkStore:
         versions = self._terms.get(task_id, ())
         return versions[-1] if versions else None
 
+    async def latest_terms_for_tasks(self, task_ids: Sequence[UUID]) -> dict[UUID, TermsRecord]:
+        identifiers = set(task_ids)
+        if not identifiers:
+            return {}
+        found: dict[UUID, TermsRecord] = {}
+        for task_id in self._terms:
+            if task_id in identifiers and self._terms[task_id]:
+                found[task_id] = self._terms[task_id][-1]
+        return found
+
     async def terms_version(self, task_id: UUID, version: int) -> TermsRecord | None:
         return next(
             (item for item in self._terms.get(task_id, ()) if item.version == version),
@@ -467,6 +514,18 @@ class MemoryWorkStore:
 
     async def accepted_terms_version(self, person_id: UUID, task_id: UUID) -> int | None:
         return self._acceptances.get((person_id, task_id))
+
+    async def accepted_terms_versions(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> dict[UUID, int | None]:
+        identifiers = set(task_ids)
+        if not identifiers:
+            return {}
+        return {
+            task_id: version
+            for (owner, task_id), version in self._acceptances.items()
+            if owner == person_id and task_id in identifiers
+        }
 
     async def accept_terms(self, person_id: UUID, task_id: UUID, version: int) -> None:
         self._acceptances[(person_id, task_id)] = version
@@ -756,8 +815,31 @@ class MemoryWorkStore:
     ) -> tuple[ContributionRecord, ...]:
         return self._contributions.get(assignment_id, ())
 
+    async def contributions_for_assignments(
+        self, assignment_ids: Sequence[UUID]
+    ) -> dict[UUID, tuple[ContributionRecord, ...]]:
+        identifiers = set(assignment_ids)
+        if not identifiers:
+            return {}
+        return {
+            assignment_id: self._contributions.get(assignment_id, ())
+            for assignment_id in identifiers
+        }
+
     async def acceptance_for_contribution(self, contribution_id: UUID) -> AcceptanceRecord | None:
         return self._acceptance_decisions.get(contribution_id)
+
+    async def acceptances_for_contributions(
+        self, contribution_ids: Sequence[UUID]
+    ) -> dict[UUID, AcceptanceRecord]:
+        identifiers = set(contribution_ids)
+        if not identifiers:
+            return {}
+        return {
+            contribution_id: decision
+            for contribution_id, decision in self._acceptance_decisions.items()
+            if contribution_id in identifiers
+        }
 
 
 class WorkService:
@@ -1252,30 +1334,31 @@ class WorkService:
 
     async def marketplace(self, actor: ActorContext) -> tuple[MarketplaceTask, ...]:
         self._role(actor, Role.PARTICIPANT)
+        published = await self.store.published_tasks()
+        task_ids = tuple({item.aggregate.task_id for item in published})
+        invitation_ids = tuple(
+            {item.aggregate.task_id for item in published if item.mode is TaskMode.INVITATION_ONLY}
+        )
+        invitations, terms_map, accepted = await asyncio.gather(
+            self.store.invitations_for_person_tasks(actor.person_id, invitation_ids),
+            self.store.latest_terms_for_tasks(task_ids),
+            self.store.accepted_terms_versions(actor.person_id, task_ids),
+        )
         result: list[MarketplaceTask] = []
-        for task in await self.store.published_tasks():
-            invitation = (
-                await self.store.invitation(task.aggregate.task_id, actor.person_id)
-                if task.mode is TaskMode.INVITATION_ONLY
-                else None
-            )
+        for task in published:
+            task_id = task.aggregate.task_id
+            invitation = invitations.get(task_id) if task.mode is TaskMode.INVITATION_ONLY else None
             if task.mode is TaskMode.INVITATION_ONLY and not self._invitation_active(invitation):
                 continue
-            terms = await self.store.latest_terms(task.aggregate.task_id)
+            terms = terms_map.get(task_id)
             if terms is None:
                 continue
             result.append(
                 MarketplaceTask(
                     task,
                     terms,
-                    await self.store.accepted_terms_version(
-                        actor.person_id, task.aggregate.task_id
-                    ),
-                    (
-                        (invitation.status if invitation else None)
-                        if task.mode is TaskMode.INVITATION_ONLY
-                        else None
-                    ),
+                    accepted.get(task_id),
+                    invitation.status if invitation is not None else None,
                 )
             )
         return tuple(result)
@@ -1753,25 +1836,39 @@ class WorkService:
         return await self._work_items(await self.store.assignments_for_task(task_id))
 
     async def _work_items(self, assignments: tuple[AssignmentRecord, ...]) -> tuple[WorkItem, ...]:
+        task_ids = tuple({item.task_id for item in assignments})
+        assignment_ids = tuple({item.id for item in assignments})
+        tasks_map, terms_map, contributions_map = await asyncio.gather(
+            self.store.tasks_for_ids(task_ids),
+            self.store.latest_terms_for_tasks(task_ids),
+            self.store.contributions_for_assignments(assignment_ids),
+        )
+        decisions_map = await self.store.acceptances_for_contributions(
+            tuple(contribution.id for group in contributions_map.values() for contribution in group)
+        )
         result: list[WorkItem] = []
         for assignment in assignments:
-            task = await self._required(assignment.task_id)
-            terms = await self.store.latest_terms(assignment.task_id)
+            task = tasks_map.get(assignment.task_id)
+            if task is None:
+                raise ApiError(
+                    code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+                )
+            terms = terms_map.get(assignment.task_id)
             if terms is None:
                 continue
-            contributions = await self.store.contributions_for_assignment(assignment.id)
-            decisions: list[AcceptanceRecord] = []
-            for contribution in contributions:
-                decision = await self.store.acceptance_for_contribution(contribution.id)
-                if decision is not None:
-                    decisions.append(decision)
+            contributions = contributions_map.get(assignment.id, ())
+            decisions = tuple(
+                decisions_map[contribution.id]
+                for contribution in contributions
+                if contribution.id in decisions_map
+            )
             result.append(
                 WorkItem(
                     assignment,
                     task,
                     terms,
                     contributions,
-                    tuple(decisions),
+                    decisions,
                 )
             )
         return tuple(result)

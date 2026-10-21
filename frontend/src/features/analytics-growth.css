@@ -39,7 +39,19 @@
 .trajectory-growth-facts > p { margin: 0 0 8px; }
 .trajectory-growth-facts .growth-partial { padding: 9px 11px; border: 1px solid var(--color-warning); border-radius: 9px; color: var(--color-warning); }
 .trajectory-growth-facts ul { display: grid; gap: 6px; margin: 12px 0; padding: 0; list-style: none; }
-.trajectory-growth-facts li { display: grid; grid-template-columns: minmax(120px, 1fr) auto auto; gap: 10px; padding: 9px 10px; border: 1px solid var(--color-border); border-left: 3px solid; border-radius: 9px; font-size: 11px; }
+.trajectory-growth-facts li { display: grid; padding: 0; border: 1px solid var(--color-border); border-left: 3px solid; border-radius: 9px; font-size: 11px; }
+.trajectory-growth-facts li > button { display: grid; grid-template-columns: minmax(120px, 1fr) auto auto; gap: 10px; align-items: start; width: 100%; padding: 9px 10px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.trajectory-growth-facts li > button > strong { font-size: 12px; color: var(--color-text); }
+.skill-drilldown { display: grid; gap: 9px; margin: 6px 0; padding: 12px 14px; border: 1px solid var(--color-border); border-left: 3px solid var(--color-primary); border-radius: 11px; background: var(--color-surface-raised); font-size: 11px; }
+.skill-drilldown h3 { margin: 0; font-size: 14px; }
+.skill-drilldown p { margin: 0; }
+.skill-drilldown .skill-lineage { display: grid; gap: 6px; }
+.skill-drilldown .skill-lineage h4 { margin: 0; font-size: 12px; }
+.skill-drilldown .skill-lineage ul { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.skill-drilldown .skill-lineage li { padding-left: 10px; border-left: 2px solid var(--color-border); }
+.skill-drilldown .skill-lineage li.skill-evidence--excluded { color: var(--color-muted); border-left-color: var(--color-warning); }
+.skill-drilldown .skill-buddy { display: grid; gap: 6px; padding: 10px 12px; border: 1px solid var(--color-border); border-left: 3px solid #ffca38; border-radius: 10px; background: rgb(255 202 56 / 6%); }
+.skill-drilldown .skill-buddy small { color: var(--color-muted); }
 .trajectory-growth-facts li span { color: var(--color-muted); }.growth-skill--deficit { border-left-color: var(--color-danger)!important; }.growth-skill--achieved { border-left-color: var(--color-primary)!important; }.growth-skill--unknown { border-left-color: var(--color-muted)!important; }
 .trajectory-growth-facts > small { color: var(--color-muted); }
-@media(max-width:800px){.trajectory-growth-analytics>header{align-items:stretch;flex-direction:column}.trajectory-growth-grid{grid-template-columns:1fr}.trajectory-growth-facts li{grid-template-columns:1fr}.trajectory-growth-analytics select{min-width:0;width:100%}}
+@media(max-width:800px){.trajectory-growth-analytics>header{align-items:stretch;flex-direction:column}.trajectory-growth-grid{grid-template-columns:1fr}.trajectory-growth-facts li{grid-template-columns:1fr}.trajectory-growth-facts li>button{grid-template-columns:1fr}.trajectory-growth-analytics select{min-width:0;width:100%}}

@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "review_agents": 3,
+  "max_review_backlog": 6,
+  "canary_risks": ["critical"],
+  "context_roots": [
+    "openspec/changes/impulse-ecosystem/tasks.md",
+    "openspec/changes/impulse-ecosystem/specs"
+  ],
+  "shared_dependency_paths": [
+    ".venv",
+    "frontend/node_modules"
+  ],
+  "task_checks": [
+    {
+      "paths": ["src/**/*.py", "tests/**/*.py", "migrations/**/*.py"],
+      "name": "ruff changed Python files",
+      "command": ["uv", "run", "ruff", "check", "{changed_files}"],
+      "changed_extensions": [".py"],
+      "timeout_seconds": 180
+    },
+    {
+      "paths": ["frontend/src/**", "frontend/e2e/**", "frontend/scripts/**"],
+      "name": "eslint changed frontend files",
+      "command": ["npx", "eslint", "{changed_files}", "--max-warnings", "0"],
+      "cwd": "frontend",
+      "changed_extensions": [".ts", ".tsx", ".js", ".mjs"],
+      "timeout_seconds": 300
+    },
+    {
+      "paths": ["openspec/**", "AGENTS.md"],
+      "name": "OpenSpec strict",
+      "command": ["openspec", "validate", "impulse-ecosystem", "--strict"],
+      "timeout_seconds": 180
+    }
+  ],
+  "wave_checks": [
+    {
+      "paths": ["src/**", "tests/**", "migrations/**", "pyproject.toml"],
+      "name": "backend regression",
+      "command": ["uv", "run", "pytest"],
+      "timeout_seconds": 1800
+    },
+    {
+      "paths": ["frontend/src/**", "frontend/e2e/**", "frontend/scripts/**", "frontend/package*.json"],
+      "commands": [
+        {
+          "name": "frontend lint",
+          "command": ["npm", "run", "lint"],
+          "cwd": "frontend",
+          "timeout_seconds": 600
+        },
+        {
+          "name": "frontend typecheck",
+          "command": ["npm", "run", "typecheck"],
+          "cwd": "frontend",
+          "timeout_seconds": 600
+        },
+        {
+          "name": "frontend unit regression",
+          "command": ["npm", "test"],
+          "cwd": "frontend",
+          "timeout_seconds": 1200
+        },
+        {
+          "name": "frontend build",
+          "command": ["npm", "run", "build"],
+          "cwd": "frontend",
+          "timeout_seconds": 1200
+        }
+      ]
+    },
+    {
+      "paths": ["openapi.json", "frontend/src/api/**"],
+      "name": "generated API contract",
+      "command": ["npm", "run", "api:check"],
+      "cwd": "frontend",
+      "timeout_seconds": 300
+    },
+    {
+      "paths": ["frontend/e2e/**", "frontend/src/App.tsx", "frontend/src/api/**"],
+      "name": "browser acceptance",
+      "command": ["npm", "run", "test:e2e"],
+      "cwd": "frontend",
+      "timeout_seconds": 2400
+    },
+    {
+      "paths": ["openspec/**", "AGENTS.md"],
+      "name": "OpenSpec strict",
+      "command": ["openspec", "validate", "impulse-ecosystem", "--strict"],
+      "timeout_seconds": 180
+    }
+  ],
+  "risk_routes": [
+    {
+      "paths": ["migrations/**", "railway.toml", "Dockerfile", ".github/workflows/**"],
+      "risk": "critical"
+    },
+    {
+      "paths": ["src/impulse/security/**", "src/impulse/identity/**", "src/impulse/api/**", "openapi.json"],
+      "risk": "high"
+    },
+    {
+      "paths": ["frontend/src/App.tsx", "frontend/src/api/**", "frontend/e2e/**", "src/**", "tests/**"],
+      "risk": "medium"
+    }
+  ],
+  "models": {}
+}

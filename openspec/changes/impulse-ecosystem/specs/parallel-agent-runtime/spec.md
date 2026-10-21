@@ -89,3 +89,80 @@ Production-like режим SHALL создавать отдельный проц�
 #### Scenario: Manager остановлен во время трёх активных задач
 - **WHEN** владелец повторно запускает pool в resume-режиме
 - **THEN** platform сначала восстанавливает известные runs и не создаёт дублирующие task branches
+
+### Requirement: Runtime формирует конфликт-свободные волны
+Из доступных READY-задач runtime SHALL выбирать детерминированный набор без пересечения `write_scope` между выбранными задачами, активными workers и reserved scopes. Приоритет SHALL учитывать число разблокируемых downstream-задач и размер scope. Runtime SHALL предпочесть свободный слот заведомому merge conflict.
+
+#### Scenario: Две READY-задачи затрагивают общий frontend-файл
+- **WHEN** обе задачи могли бы занять два свободных worker slot
+- **THEN** runtime запускает одну задачу, а вторую рассматривает снова после integration первой
+
+### Requirement: Runtime разделяет task checks и wave quality gate
+Author SHALL запускать релевантные проверки своего scope, отдельный reviewer SHALL подтвердить diff и acceptance, а integration-task SHALL один раз выполнить полный suite на точной объединённой revision. Evidence предыдущей revision SHALL NOT подтверждать новую revision.
+
+#### Scenario: Завершилась волна независимых задач
+- **WHEN** task commits прошли независимый review и последовательно объединены
+- **THEN** один integration run выполняет общий regression/build/spec validation до принятия волны
+
+### Requirement: Runtime быстро завершает бесперспективное ожидание provider
+Runtime SHALL иметь настраиваемый idle timeout по отсутствию stdout и filesystem-прогресса. Явная ошибка исчерпанной квоты, отсутствия средств или авторизации SHALL завершать попытку немедленно с отдельным evidence, не удаляя worktree и не помечая task `DONE`.
+
+#### Scenario: Provider предлагает retry через несколько часов
+- **WHEN** worker получает неисправимую для текущей сессии quota/auth ошибку
+- **THEN** процесс останавливается, слот освобождается для независимой задачи, а run доступен для resume после восстановления доступа
+
+### Requirement: Quality policy является машиночитаемой и revision-bound
+Runtime SHALL читать versioned `.aip/quality.json`, выбирать task/wave checks по изменённым paths и выполнять команды без shell внутри worktree. PASS MAY кэшироваться только по точному commit SHA, argv, cwd, runtime fingerprint и dependency-lock hash. FAIL, timeout и evidence другой revision SHALL NOT переиспользоваться.
+
+#### Scenario: Повторная проверка того же commit
+- **WHEN** commit, команда и lockfiles не изменились
+- **THEN** runtime использует PASS cache evidence, а изменение любого элемента ключа запускает проверку заново
+
+### Requirement: Review использует свежую integration base
+Перед review runtime SHALL сравнить task branch с актуальной integration revision. Независимые изменения MAY быть безопасно rebased с повторной привязкой checks к новому SHA. Пересекающиеся paths SHALL блокировать review как `STALE_INTEGRATION_CONFLICT`.
+
+#### Scenario: Пока автор работал, изменился общий API client
+- **WHEN** task diff и новый integration diff затрагивают пересекающиеся paths
+- **THEN** reviewer не расходуется на устаревший commit, а задача возвращается на integration recovery
+
+### Requirement: Author, reviewer и integration образуют staged pipeline
+Runtime SHALL ограничивать общее число model processes через `max_agents`, отдельно ограничивать reviewer concurrency и применять backpressure по `max_review_backlog`. Быстрые authors SHALL NOT создавать неограниченную очередь непроверенных commits.
+
+#### Scenario: Reviewer-очередь заполнена
+- **WHEN** число ожидающих review достигает настроенного предела
+- **THEN** scheduler перестаёт выдавать новые author claims до освобождения review capacity
+
+### Requirement: Structured handoff заменяет повторное чтение model log
+После task checks runtime SHALL сформировать JSON handoff с task/run IDs, commit, risk, моделями, changed files, acceptance IDs, evidence и review focus. Reviewer SHALL получать handoff вместе с diff; raw author log SHALL оставаться диагностическим артефактом, а не обязательным контекстом.
+
+#### Scenario: Author log содержит длинную историю исследования
+- **WHEN** reviewer начинает проверку
+- **THEN** он использует contract, handoff и diff, не тратя контекст на полный raw trace
+
+### Requirement: Task context является минимальным и проверяемым
+Runtime SHALL извлекать из allowlisted `context_roots` только фрагменты, совпавшие с task ID/title и acceptance IDs, ограничивать общий размер context snippets и сохранять SHA-256 исходных файлов. Worker SHALL читать полный глобальный backlog только если compact context не содержит необходимого требования.
+
+#### Scenario: Backlog содержит сотни завершённых задач
+- **WHEN** worker получает одну READY-задачу
+- **THEN** contract содержит относящиеся к ней SDD-фрагменты и hashes, а unrelated completed tasks не расходуют model context
+
+### Requirement: Dependency reuse не объединяет mutable workspaces
+Runtime MAY разделять package caches и явно разрешённые dependency directories между worktrees. Product files, build output и test database SHALL оставаться изолированными. Каждый run SHALL получить уникальный test namespace.
+
+#### Scenario: Десять frontend workers используют один npm cache
+- **WHEN** зависимости уже доступны на зафиксированном lockfile
+- **THEN** workers не скачивают их повторно, но пишут source/build output только в свои worktrees
+
+### Requirement: Model routing зависит от риска изменения
+Quality policy MAY назначать author/reviewer model по risk level, вычисленному из paths. Critical migration, security, identity, API contract и shared wiring SHALL NOT получать reviewer слабее установленного policy minimum. Независимый review и deterministic checks SHALL выполняться для любого маршрута.
+
+#### Scenario: Изменение затрагивает migration
+- **WHEN** risk route классифицирует task как `critical`
+- **THEN** runtime выбирает critical reviewer route и сохраняет выбранные модели в handoff
+
+### Requirement: Runtime публикует throughput и quality metrics
+Итог пула SHALL содержать stage durations, accepted/failed tasks, accepted tasks per hour, quality checks/cache hits, provider failures, scope deferrals и wave-gate result. Метрики SHALL строиться из append-only events и не содержать secrets или raw prompts.
+
+#### Scenario: Владелец сравнивает две конфигурации пула
+- **WHEN** обе волны завершены
+- **THEN** он сравнивает принятые задачи в час, возвраты, cache hits и failures, а не только peak concurrency

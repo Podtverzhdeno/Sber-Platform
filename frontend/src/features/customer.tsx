@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { apiRequest, ApiClientError } from "../api/client";
 import { Badge, StatePanel } from "../components/ui";
+import "./customer-ai-provenance.css";
 
 type Task = { id: string; project_key: string; task_key: string; title: string; status: string; nominated_mentor_id: string | null; support_mode: string | null; support_assignee_id: string | null; places: number; demo?: boolean; applications?: number; deadline?: string; base?: string; b?: string; a?: string; application_count?: number | null; assignment_count?: number | null; pending_result_count?: number | null; accepted_result_count?: number | null; deadline_at?: string | null };
 type Application = { id: string; task_id: string; person_id: string; accepted_terms_version: number; status: string; version: number; participant_name?: string | null; verified_case_count?: number | null };
@@ -44,6 +45,16 @@ function experienceLabel(item: Application) {
   return `Кейсов подтверждено: ${String(item.verified_case_count)}`;
 }
 
+type AiAppliedField = "problem" | "deliverable" | "criterion";
+
+type AiAppliedPatch = { field: AiAppliedField; before: string; after: string };
+
+const aiAppliedTitles: Record<AiAppliedField, string> = {
+  problem: "Проблема",
+  deliverable: "Результат",
+  criterion: "Критерии приёмки",
+};
+
 export function CustomerWorkspace() {
   const queryClient = useQueryClient();
   const tasks = useQuery({ queryKey: ["customer-tasks"], queryFn: () => apiRequest<Task[]>("/api/v1/customer/tasks"), refetchOnMount: "always" });
@@ -69,6 +80,22 @@ export function CustomerWorkspace() {
   const [credentialError, setCredentialError] = useState("");
   const [lastVerificationId, setLastVerificationId] = useState<string | null>(null);
   const [aiDraft, setAiDraft] = useState<{ problem: string; deliverable: string; criteria: string; notice: string } | null>(null);
+  const [aiApplied, setAiApplied] = useState<AiAppliedPatch[]>([]);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewSnapshot, setPreviewSnapshot] = useState<string | null>(null);
+  const [previewSavedView, setPreviewSavedView] = useState<{ form: Partial<DraftForm>; taskMode: TaskMode } | null>(null);
+  const [previewStale, setPreviewStale] = useState(false);
+  const buildWizardDraft = (): string => JSON.stringify({
+    step: wizardStep,
+    taskMode,
+    form: {
+      title: form.title, competencyTags: form.competencyTags, rubricResult: form.rubricResult, rubricReasoning: form.rubricReasoning,
+      rubricUncertainty: form.rubricUncertainty, rubricAiUse: form.rubricAiUse, rubricDefense: form.rubricDefense,
+      problem: form.problem, deliverable: form.deliverable, criterion: form.criterion, deadline: form.deadline,
+      dataConstraints: form.dataConstraints, ipTerms: form.ipTerms, places: form.places, baseAmount: form.baseAmount, aMultiplier: form.aMultiplier,
+      supportModel: form.supportModel, supportAssignee: form.supportAssignee,
+    },
+  });
   const aiDraftSuggestion = useMutation({
     mutationFn: () => apiRequest<{ kind: string; editable: boolean; problem: string | null; deliverable: string | null; acceptance_criteria: string[]; notice: string; gateway_called: boolean }>("/api/v1/me/assistant/customer-brief", {
       method: "POST",
@@ -92,19 +119,36 @@ export function CustomerWorkspace() {
     queryFn: () => apiRequest<{ metrics: { key: string; value: string | null; numerator: number; denominator: number; unit: string }[] }>("/api/v1/analytics/role"),
   });
   useEffect(() => {
-    if (!wizardOpen) return;
-    localStorage.setItem(wizardDraftKey, JSON.stringify({
-      step: wizardStep,
-      taskMode,
-      form: {
-        title: form.title, competencyTags: form.competencyTags, rubricResult: form.rubricResult, rubricReasoning: form.rubricReasoning,
-        rubricUncertainty: form.rubricUncertainty, rubricAiUse: form.rubricAiUse, rubricDefense: form.rubricDefense,
-        problem: form.problem, deliverable: form.deliverable, criterion: form.criterion, deadline: form.deadline,
-        dataConstraints: form.dataConstraints, ipTerms: form.ipTerms, places: form.places, baseAmount: form.baseAmount, aMultiplier: form.aMultiplier,
-        supportModel: form.supportModel, supportAssignee: form.supportAssignee,
-      },
-    }));
+    if (!wizardOpen || previewOpen) return;
+    localStorage.setItem(wizardDraftKey, buildWizardDraft());
   });
+  useEffect(() => {
+    if (!previewOpen || previewSnapshot === null) return;
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== null && event.key !== wizardDraftKey) return;
+      const saved = localStorage.getItem(wizardDraftKey);
+      if (saved && saved !== previewSnapshot) setPreviewStale(true);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [previewOpen, previewSnapshot]);
+  const openPreview = () => {
+    setPreviewSnapshot(buildWizardDraft());
+    setPreviewSavedView(null);
+    setPreviewStale(false);
+    setPreviewOpen(true);
+  };
+  const updatePreview = () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(wizardDraftKey) ?? "{}") as { step?: number; taskMode?: TaskMode; form?: Partial<DraftForm> };
+      if (saved.form) setPreviewSavedView({ form: saved.form, taskMode: saved.taskMode === "invitation_only" ? "invitation_only" : "open" });
+      setPreviewStale(false);
+    } catch {
+      setPreviewStale(false);
+    }
+  };
   useEffect(() => {
     try {
       const parsed = JSON.parse(localStorage.getItem(shortlistKey) ?? "{}") as Record<string, string[]>;
@@ -138,6 +182,34 @@ export function CustomerWorkspace() {
       localStorage.removeItem(shortlistKey);
     }
   };
+  const aiFieldState = (field: AiAppliedField) => aiApplied.find((entry) => entry.field === field);
+  const clearAiApplied = (field: AiAppliedField) => { setAiApplied((current) => current.filter((entry) => entry.field !== field)); };
+  const undoAiApplied = (field: AiAppliedField) => {
+    const entry = aiApplied.find((item) => item.field === field);
+    if (entry) setForm((current) => ({ ...current, [field]: entry.before }));
+    clearAiApplied(field);
+  };
+  const applyAiDraft = () => {
+    if (!aiDraft) return;
+    const sources: { field: AiAppliedField; after: string }[] = [
+      { field: "problem", after: aiDraft.problem },
+      { field: "deliverable", after: aiDraft.deliverable },
+      { field: "criterion", after: aiDraft.criteria },
+    ];
+    const patches: AiAppliedPatch[] = [];
+    const nextForm = { ...form };
+    for (const source of sources) {
+      if (source.after.trim() === "") continue;
+      if (nextForm[source.field] === source.after) continue;
+      patches.push({ field: source.field, before: nextForm[source.field], after: source.after });
+      nextForm[source.field] = source.after;
+    }
+    if (patches.length > 0) {
+      setForm(nextForm);
+      setAiApplied((current) => [...current.filter((entry) => !patches.some((patch) => patch.field === entry.field)), ...patches]);
+    }
+    setAiDraft(null);
+  };
   const canAdvance = (step: number): boolean => {
     if (step === 1) return form.title.trim().length > 0 && tags(form.competencyTags).length > 0;
     if (step === 2) return form.problem.trim().length > 0 && form.deliverable.trim().length > 0 && form.criterion.trim().length > 0;
@@ -147,13 +219,13 @@ export function CustomerWorkspace() {
     }
     return true;
   };
-  const briefGaps = (): string[] => [
-    ...(form.title.trim() ? [] : ["название"]),
-    ...(tags(form.competencyTags).length ? [] : ["компетенции"]),
-    ...(form.problem.trim() ? [] : ["проблему"]),
-    ...(form.deliverable.trim() ? [] : ["результат"]),
-    ...(form.criterion.trim() ? [] : ["критерии приёмки"]),
-    ...(Number(form.places) > 0 ? [] : ["количество мест"]),
+  const briefGaps = (view: DraftForm = form): string[] => [
+    ...(view.title.trim() ? [] : ["название"]),
+    ...(tags(view.competencyTags).length ? [] : ["компетенции"]),
+    ...(view.problem.trim() ? [] : ["проблему"]),
+    ...(view.deliverable.trim() ? [] : ["результат"]),
+    ...(view.criterion.trim() ? [] : ["критерии приёмки"]),
+    ...(Number(view.places) > 0 ? [] : ["количество мест"]),
   ];
   const create = useMutation({
     mutationFn: () => apiRequest<Task>("/api/v1/customer/projects/impulse-demo/tasks", { method: "POST", headers: csrfHeaders(), body: JSON.stringify({
@@ -226,6 +298,11 @@ export function CustomerWorkspace() {
   const recentResults = (portfolioDetails.data ?? []).flatMap((item) => item.contributions.map((result) => ({ task: item.task, result, decision: item.decisions.find((entry) => entry.contribution_id === result.id) }))).slice(-3).reverse();
   const acceptedMetric = roleAnalytics.data?.metrics.find((item) => item.key === "customer_acceptance_rate");
   const activeMetric = roleAnalytics.data?.metrics.find((item) => item.key === "customer_active_people");
+  const previewForm: DraftForm = { ...form, ...(previewSavedView?.form ?? {}) };
+  const previewMode = previewSavedView?.taskMode ?? taskMode;
+  const previewMissing = briefGaps(previewForm);
+  const previewCriteria = previewForm.criterion.split("\n").map((item) => item.trim()).filter(Boolean);
+  const previewSupport = supportCatalog.data?.models.find((item) => item.code === previewForm.supportModel);
   return <div className="feature-stack customer-workspace">
     <header className="dashboard-heading"><div><p className="eyebrow">Заказчик · R&amp;D и MVP</p><h1 id="workspace-title">Управляйте задачами от идеи до результата</h1><p className="lead">Создайте проверяемый бриф, заранее покажите участнику условия и принимайте личный вклад по фактам.</p></div><div className="dashboard-actions"><a href="/workspace/3">Открыть аналитику</a><button type="button" onClick={openWizard}>+ Создать задачу</button></div></header>
     <section className="metric-grid" aria-label="Сводка задач">{metrics.map(([label, value, tone]) => <article className={`metric-card metric-card--${tone}`} key={label}><span className="metric-icon">◇</span><span>{label}</span><strong>{value}</strong><small>{isDemoProjection ? "+2 за последний месяц" : "Актуальное состояние"}</small><i aria-hidden="true" /></article>)}</section>
@@ -235,15 +312,73 @@ export function CustomerWorkspace() {
         <button className={taskMode === "open" ? "active" : ""} type="button" onClick={() => { setTaskMode("open"); }}>Открытая</button>
         <button className={taskMode === "invitation_only" ? "active" : ""} type="button" onClick={() => { setTaskMode("invitation_only"); }}>По приглашению</button>
       </div>
-      <form className="wizard-form">
+      {previewOpen && <section className="customer-preview" aria-labelledby="preview-title">
+        <header>
+          <div>
+            <p className="eyebrow">Взгляд участника</p>
+            <h2 id="preview-title">Предпросмотр задачи</h2>
+            <small>Проекция сохранённой версии черновика · публикация и приглашения из предпросмотра недоступны</small>
+          </div>
+          <button className="secondary-button" type="button" onClick={() => { setPreviewOpen(false); setPreviewSavedView(null); setPreviewStale(false); }}>Вернуться к редактированию</button>
+        </header>
+        {previewStale && <p role="alert" data-testid="preview-stale">Версия предпросмотра устарела: черновик изменён в другой вкладке. <button type="button" className="secondary-button" data-testid="preview-update" onClick={updatePreview}>Обновить предпросмотр</button></p>}
+        {previewMissing.length > 0 && <p role="status" data-testid="preview-missing">{`Участнику не хватит: ${previewMissing.join(", ")}.`}</p>}
+        <article className="preview-block">
+          <h3>Бриф</h3>
+          <dl>
+            <div><dt>Задача</dt><dd>{previewForm.title.trim() === "" ? "не указано" : previewForm.title}</dd></div>
+            <div><dt>Проблема</dt><dd>{previewForm.problem.trim() === "" ? "не указано" : previewForm.problem}</dd></div>
+            <div><dt>Результат</dt><dd>{previewForm.deliverable.trim() === "" ? "не указано" : previewForm.deliverable}</dd></div>
+            <div><dt>Критерии приёмки</dt><dd>{previewCriteria.length === 0 ? "не указано" : <ul>{previewCriteria.map((item, index) => <li key={`preview-criterion-${String(index)}`}>{item}</li>)}</ul>}</dd></div>
+          </dl>
+        </article>
+        <article className="preview-block">
+          <h3>Условия</h3>
+          <dl>
+            <div><dt>Доступ</dt><dd>{previewMode === "open" ? "Открытая заявка" : "Только адресные приглашения (talent-matching)"}</dd></div>
+            <div><dt>Мест</dt><dd>{Number(previewForm.places) > 0 ? previewForm.places : "не указано"}</dd></div>
+            <div><dt>Дедлайн</dt><dd>{previewForm.deadline || "не задан"}</dd></div>
+            <div><dt>Версия условий</dt><dd>1 · {previewMode === "open" ? "открытая заявка" : "доступ по приглашению"}</dd></div>
+            <div><dt>Оплата</dt><dd>Не утверждена платформой: суммы выплат участник увидит только после подтверждения; премия за оценку 5+ не обещается.</dd></div>
+          </dl>
+        </article>
+        <article className="preview-block">
+          <h3>Ограничения и сопровождение</h3>
+          <dl>
+            <div><dt>Ограничения данных</dt><dd>{previewForm.dataConstraints.trim() === "" ? "не указано" : previewForm.dataConstraints}</dd></div>
+            <div><dt>Права на результат</dt><dd>{previewForm.ipTerms.trim() === "" ? "не указано" : previewForm.ipTerms}</dd></div>
+            <div><dt>Поддержка</dt><dd>{previewSupport?.name ?? "модель не загружена"}</dd></div>
+          </dl>
+        </article>
+        {previewForm.competencyTags.trim() !== "" && <article className="preview-block">
+          <h3>Рубрика</h3>
+          <dl>
+            <div><dt>Результат</dt><dd>{previewForm.rubricResult.trim() === "" ? "не указано" : previewForm.rubricResult}</dd></div>
+            <div><dt>Ход решения</dt><dd>{previewForm.rubricReasoning.trim() === "" ? "не указано" : previewForm.rubricReasoning}</dd></div>
+            <div><dt>Неопределённость</dt><dd>{previewForm.rubricUncertainty.trim() === "" ? "не указано" : previewForm.rubricUncertainty}</dd></div>
+            <div><dt>Использование ИИ</dt><dd>{previewForm.rubricAiUse.trim() === "" ? "не указано" : previewForm.rubricAiUse}</dd></div>
+            <div><dt>Защита решения</dt><dd>{previewForm.rubricDefense.trim() === "" ? "не указано" : previewForm.rubricDefense}</dd></div>
+          </dl>
+        </article>}
+      </section>}
+      {!previewOpen && <form className="wizard-form">
         {wizardStep === 1 && (<>
           <label className="span-2" htmlFor="wizard-title-input">Название<input id="wizard-title-input" value={form.title} onChange={(event) => { setForm({ ...form, title: event.target.value }); }} /></label>
           <label className="span-2" htmlFor="wizard-tags-input">Компетенции кейса через запятую<input id="wizard-tags-input" value={form.competencyTags} onChange={(event) => { setForm({ ...form, competencyTags: event.target.value }); }} /></label>
         </>)}
         {wizardStep === 2 && (<>
-          <label className="span-2" htmlFor="wizard-problem-input">Проблема<textarea id="wizard-problem-input" rows={2} value={form.problem} onChange={(event) => { setForm({ ...form, problem: event.target.value }); }} /></label>
-          <label className="span-2" htmlFor="wizard-deliverable-input">Результат<textarea id="wizard-deliverable-input" rows={2} value={form.deliverable} onChange={(event) => { setForm({ ...form, deliverable: event.target.value }); }} /></label>
-          <label className="span-2" htmlFor="wizard-criteria-input">Критерии приёмки построчно<textarea id="wizard-criteria-input" rows={3} value={form.criterion} onChange={(event) => { setForm({ ...form, criterion: event.target.value }); }} /></label>
+          <div className={`customer-ai-field span-2${aiFieldState("problem") ? " customer-ai-applied" : ""}`}>
+            <label htmlFor="wizard-problem-input">Проблема<textarea id="wizard-problem-input" rows={2} value={form.problem} onChange={(event) => { setForm({ ...form, problem: event.target.value }); clearAiApplied("problem"); }} aria-describedby={aiFieldState("problem") ? "wizard-ai-problem-note" : undefined} /></label>
+            {aiFieldState("problem") && <span className="customer-ai-applied-flag" id="wizard-ai-problem-note" data-testid="wizard-ai-applied"><span aria-hidden="true">✦</span>Добавлено AI</span>}
+          </div>
+          <div className={`customer-ai-field span-2${aiFieldState("deliverable") ? " customer-ai-applied" : ""}`}>
+            <label htmlFor="wizard-deliverable-input">Результат<textarea id="wizard-deliverable-input" rows={2} value={form.deliverable} onChange={(event) => { setForm({ ...form, deliverable: event.target.value }); clearAiApplied("deliverable"); }} aria-describedby={aiFieldState("deliverable") ? "wizard-ai-deliverable-note" : undefined} /></label>
+            {aiFieldState("deliverable") && <span className="customer-ai-applied-flag" id="wizard-ai-deliverable-note" data-testid="wizard-ai-applied"><span aria-hidden="true">✦</span>Добавлено AI</span>}
+          </div>
+          <div className={`customer-ai-field span-2${aiFieldState("criterion") ? " customer-ai-applied" : ""}`}>
+            <label htmlFor="wizard-criteria-input">Критерии приёмки построчно<textarea id="wizard-criteria-input" rows={3} value={form.criterion} onChange={(event) => { setForm({ ...form, criterion: event.target.value }); clearAiApplied("criterion"); }} aria-describedby={aiFieldState("criterion") ? "wizard-ai-criteria-note" : undefined} /></label>
+            {aiFieldState("criterion") && <span className="customer-ai-applied-flag" id="wizard-ai-criteria-note" data-testid="wizard-ai-applied"><span aria-hidden="true">✦</span>Добавлено AI</span>}
+          </div>
           <div className="ai-draft-editor span-2" aria-label="AI-подсказка по брифу">
             {!aiDraftSuggestion.isPending && !aiDraft && <button type="button" className="secondary-button" onClick={() => { aiDraftSuggestion.mutate(); }}>AI-подсказка по брифу</button>}
             {aiDraftSuggestion.isPending && <small>Анализируем бриф…</small>}
@@ -254,9 +389,25 @@ export function CustomerWorkspace() {
                 <label htmlFor="wizard-ai-deliverable">Черновик · результат<textarea id="wizard-ai-deliverable" data-testid="wizard-ai-deliverable" rows={2} value={aiDraft.deliverable} onChange={(event) => { setAiDraft({ ...aiDraft, deliverable: event.target.value }); }} /></label>
                 <label htmlFor="wizard-ai-criteria">Черновик · критерии<textarea id="wizard-ai-criteria" data-testid="wizard-ai-criteria" rows={2} value={aiDraft.criteria} onChange={(event) => { setAiDraft({ ...aiDraft, criteria: event.target.value }); }} /></label>
               </>)}
-              <div className="wizard-actions span-2">{aiDraft.problem !== "" && <button type="button" onClick={() => { setForm({ ...form, problem: aiDraft.problem, deliverable: aiDraft.deliverable, criterion: aiDraft.criteria }); setAiDraft(null); }}>Вставить в бриф</button>}{aiDraft.problem !== "" && <button className="secondary-button" type="button" onClick={() => { setAiDraft(null); }}>Отклонить</button>}</div>
+              <div className="wizard-actions span-2">{aiDraft.problem !== "" && <button type="button" onClick={() => { applyAiDraft(); }}>Вставить в бриф</button>}{aiDraft.problem !== "" && <button className="secondary-button" type="button" onClick={() => { setAiDraft(null); }}>Отклонить</button>}</div>
             </>)}
           </div>
+          {aiApplied.length > 0 && <section className="customer-ai-changes" aria-label="Фрагменты, добавленные AI-подсказкой">
+            <header>
+              <h3>Фрагменты от AI-подсказки</h3>
+              <small>Метка «Добавлено AI» и описание доступны без графики; градиент — вспомогательное выделение до правки или отмены.</small>
+            </header>
+            <ul data-testid="wizard-ai-changes" aria-live="polite">
+              {aiApplied.map((entry) => (<li className="customer-ai-change" key={entry.field} data-testid="wizard-ai-change" data-field={entry.field}>
+                <span className="customer-ai-change-meta">{aiAppliedTitles[entry.field]}</span>
+                <span className="customer-ai-change-diff">
+                  <span className="customer-ai-before" data-testid={`wizard-ai-${entry.field}-before`}>{`До: ${entry.before.trim() === "" ? "пусто" : entry.before}`}</span>
+                  <span className="customer-ai-after" data-testid={`wizard-ai-${entry.field}-after`}>{`После: ${entry.after}`}</span>
+                </span>
+                <button type="button" className="secondary-button" onClick={() => { undoAiApplied(entry.field); }}>Отменить</button>
+              </li>))}
+            </ul>
+          </section>}
         </>)}
         {wizardStep === 3 && (<>
           <label htmlFor="wizard-deadline-input">Дедлайн<input id="wizard-deadline-input" type="datetime-local" value={form.deadline} onChange={(event) => { setForm({ ...form, deadline: event.target.value }); }} /></label>
@@ -287,16 +438,17 @@ export function CustomerWorkspace() {
           <p>Условия: версия 1 · {taskMode === "open" ? "открытая заявка" : "доступ по приглашению"}</p>
           <p>Поддержка: {supportCatalog.data?.models.find((item) => item.code === form.supportModel)?.name ?? "модель не загружена"}</p>
         </>)}
-      </form>
-      {wizardStep === 5 && briefGaps().length > 0 && <p role="alert" data-testid="wizard-brief-complete">{`Бриф неполный: заполните ${briefGaps().join(", ")}.`}</p>}
-      <div className="wizard-actions span-2">
+      </form>}
+      {!previewOpen && wizardStep === 5 && briefGaps().length > 0 && <p role="alert" data-testid="wizard-brief-complete">{`Бриф неполный: заполните ${briefGaps().join(", ")}.`}</p>}
+      {!previewOpen && <div className="wizard-actions span-2">
         {wizardStep > 1 && <button className="secondary-button" type="button" onClick={() => { setWizardStep(wizardStep - 1); }}>Назад</button>}
         {wizardStep < 5 ? <button type="button" disabled={!canAdvance(wizardStep)} onClick={() => { setWizardStep(wizardStep + 1); }}>Далее</button> : (<>
+          <button className="secondary-button" type="button" onClick={openPreview}>Показать предпросмотр</button>
           <button className="secondary-button" type="button" disabled={create.isPending || !form.title.trim()} onClick={() => { setPublishAfterCreate(false); create.mutate(); }}>Сохранить черновик</button>
           <button type="button" disabled={create.isPending || briefGaps().length > 0} onClick={() => { setPublishAfterCreate(true); create.mutate(); }}>Отправить на модерацию</button>
           {create.isError && <p role="alert">Не удалось сохранить задачу. Проверьте обязательные поля.</p>}
         </>)}
-      </div>
+      </div>}
     </section>}
     {isDemoProjection && <section className="customer-hero-grid" aria-label="Демонстрационная сводка"><article className="customer-focus-card"><div><p className="eyebrow">Ближайшая задача под вашим контролем</p><div className="focus-meta"><Badge tone="success">MVP</Badge><span>ID IMP-2026-0412</span><Badge>В работе</Badge></div><h2>Прототип рекомендательной системы для научных статей</h2><p>Разработка MVP, который на основе эмбеддингов и метаданных предлагает релевантные научные статьи.</p><dl><div><dt>Заявок</dt><dd>28</dd></div><div><dt>Участников</dt><dd>6</dd></div><div><dt>Дедлайн</dt><dd>25 апреля</dd></div></dl><div className="focus-actions"><button type="button" onClick={() => { window.location.assign("/workspace/1?task=IMP-2026-0412"); }}>Открыть задачу →</button><button className="secondary-button" type="button" onClick={() => { window.location.assign("/workspace/1?task=IMP-2026-0412&result=open"); }}>Посмотреть результаты</button></div></div><div className="customer-visual" aria-hidden="true"><span /><span /><span /><span /></div></article><aside className="ai-panel customer-ai"><div><span className="ai-orb" aria-hidden="true">✦</span><div><h2>AI-помощник заказчика</h2><span className="ui-badge ui-badge--ai">Бета</span></div></div><p>Поможет сформулировать техническое задание, уточнить критерии и предложить релевантные форматы результата.</p><ul><li>Проверит полноту брифа</li><li>Подсветит риски сроков</li><li>Предложит критерии приёмки</li></ul><div className="ai-boundary">Не публикует задачу и не принимает решения за заказчика.</div><button type="button" onClick={() => { window.location.assign("/workspace/5"); }}>Получить рекомендации →</button></aside></section>}
     {!isDemoProjection && priorityTask && <section className="customer-focus-card" aria-labelledby="priority-task-title"><div><p className="eyebrow">Ближайшая задача под вашим контролем</p><h2 id="priority-task-title">{priorityTask.title}</h2><p>{customerTaskStatus(priorityTask)} · {priorityTask.pending_result_count ? `${String(priorityTask.pending_result_count)} результатов ждут решения` : "Откройте задачу, чтобы проверить состояние"}</p><dl><div><dt>Заявок</dt><dd>{priorityTask.application_count ?? 0}</dd></div><div><dt>Участников</dt><dd>{priorityTask.assignment_count ?? 0}</dd></div><div><dt>Дедлайн</dt><dd>{priorityTask.deadline_at ? new Date(priorityTask.deadline_at).toLocaleDateString("ru-RU") : "Не задан"}</dd></div></dl><div className="focus-actions"><button type="button" onClick={() => { setSelectedTask(priorityTask.id); }}>Открыть задачу →</button><button className="secondary-button" type="button" onClick={() => { setSelectedTask(priorityTask.id); }}>Посмотреть результаты</button></div></div></section>}

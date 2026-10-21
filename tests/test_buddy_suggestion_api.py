@@ -56,6 +56,27 @@ def _install_roadmap(store: MemoryDevelopmentStore) -> None:
     )
 
 
+def _install_three_step_roadmap(store: MemoryDevelopmentStore) -> None:
+    store.install_roadmap(
+        RoadmapRecord(
+            track_key="python",
+            policy_version=4,
+            milestones=tuple(
+                RoadmapMilestone(
+                    f"checkpoint-{index}",
+                    index,
+                    f"Checkpoint {index}",
+                    "Проверяемый шаг активной траектории.",
+                    "Python-разработчик",
+                    "course",
+                    "openspec-sdd",
+                )
+                for index in range(1, 4)
+            ),
+        )
+    )
+
+
 def _last_checkpoint_days_ago(days: int) -> CourseCertificate:
     registry_person = demo_id("participant-alex")
     return CourseCertificate(
@@ -222,3 +243,96 @@ def test_suggestion_requires_participant_role() -> None:
             json={"suggestion_id": "x"},
         )
         assert wrong_method.status_code == 403
+
+
+@pytest.mark.spec("agent-buddy/action-cards")
+def test_returns_up_to_three_typed_cards_and_resolves_exact_target_without_writes() -> None:
+    app = create_app(Settings(app_env=AppEnvironment.TEST))
+    development = cast(DevelopmentService, app.state.development_service)
+    store = development.store
+    assert isinstance(store, MemoryDevelopmentStore)
+    _install_three_step_roadmap(store)
+    person_id = demo_id("participant-alex")
+    with TestClient(app) as client:
+        login(client, "participant-alex")
+        before_attempts = asyncio.run(store.attempts(person_id))
+        before_enrollments = asyncio.run(store.enrollments(person_id))
+        payload = client.get("/api/v1/agents/buddy/suggestion").json()
+        assert len(payload["suggestions"]) == 3
+        assert payload["suggestion"] == payload["suggestions"][0]
+        assert len({item["suggestion_id"] for item in payload["suggestions"]}) == 3
+        for item in payload["suggestions"]:
+            action = item["action"]
+            assert action["target_kind"] == "course"
+            assert action["target_id"] == "openspec-sdd"
+            assert action["checkpoint_id"].startswith("checkpoint-")
+            assert action["canonical_path"].startswith("/workspace/2?course=openspec-sdd")
+            assert action["effect_state"] == "projected"
+            assert action["points"] is None
+            assert item["partial"] is True
+            assert item["coverage_note"]
+        first = payload["suggestions"][0]
+        resolved = client.get(
+            "/api/v1/agents/buddy/suggestion/target",
+            params={"suggestion_id": first["suggestion_id"]},
+        )
+        assert resolved.status_code == 200
+        assert resolved.json()["target"]["canonical_path"] == first["action"]["canonical_path"]
+        assert asyncio.run(store.attempts(person_id)) == before_attempts
+        assert asyncio.run(store.enrollments(person_id)) == before_enrollments
+
+
+@pytest.mark.spec("agent-buddy/recommendation-feedback")
+def test_snooze_and_irrelevant_feedback_change_ranking_preferences_only() -> None:
+    app = create_app(Settings(app_env=AppEnvironment.TEST))
+    development = cast(DevelopmentService, app.state.development_service)
+    store = development.store
+    assert isinstance(store, MemoryDevelopmentStore)
+    _install_three_step_roadmap(store)
+    person_id = demo_id("participant-alex")
+    with TestClient(app) as client:
+        csrf = login(client, "participant-alex")
+        before_attempts = asyncio.run(store.attempts(person_id))
+        initial = client.get("/api/v1/agents/buddy/suggestion").json()["suggestions"]
+        snoozed_id = initial[0]["suggestion_id"]
+        response = client.post(
+            "/api/v1/agents/buddy/suggestion/feedback",
+            headers={"X-CSRF-Token": csrf},
+            json={"suggestion_id": snoozed_id, "action": "snooze"},
+        )
+        assert response.status_code == 204
+        after_snooze = client.get("/api/v1/agents/buddy/suggestion").json()["suggestions"]
+        assert snoozed_id not in {item["suggestion_id"] for item in after_snooze}
+        irrelevant_id = after_snooze[0]["suggestion_id"]
+        response = client.post(
+            "/api/v1/agents/buddy/suggestion/feedback",
+            headers={"X-CSRF-Token": csrf},
+            json={"suggestion_id": irrelevant_id, "action": "irrelevant"},
+        )
+        assert response.status_code == 204
+        after_irrelevant = client.get("/api/v1/agents/buddy/suggestion").json()["suggestions"]
+        assert irrelevant_id not in {item["suggestion_id"] for item in after_irrelevant}
+        assert asyncio.run(store.attempts(person_id)) == before_attempts
+
+
+@pytest.mark.spec("agent-buddy/stale-object-recheck")
+def test_target_recheck_rejects_object_removed_after_card_generation() -> None:
+    app = create_app(Settings(app_env=AppEnvironment.TEST))
+    development = cast(DevelopmentService, app.state.development_service)
+    store = development.store
+    assert isinstance(store, MemoryDevelopmentStore)
+    _install_roadmap(store)
+    with TestClient(app) as client:
+        login(client, "participant-alex")
+        suggestion_id = client.get("/api/v1/agents/buddy/suggestion").json()["suggestion"][
+            "suggestion_id"
+        ]
+        store.install_roadmap(
+            RoadmapRecord(track_key="python", policy_version=5, milestones=())
+        )
+        response = client.get(
+            "/api/v1/agents/buddy/suggestion/target",
+            params={"suggestion_id": suggestion_id},
+        )
+        assert response.status_code == 409
+        assert response.json()["code"] == "SUGGESTION_STALE"

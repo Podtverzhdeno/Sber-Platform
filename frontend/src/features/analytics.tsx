@@ -1,5 +1,6 @@
 ﻿import { useQuery } from "@tanstack/react-query";
 import { useState, type CSSProperties, type ReactNode } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { apiRequest } from "../api/client";
 import { Badge, StatePanel } from "../components/ui";
@@ -13,7 +14,12 @@ type Metric = { key: string; label: string; numerator: number; denominator: numb
 type RoleAnalyticsData = { role: Role; metrics: Metric[] };
 type GrowthSkill = { skill_key: string; title: string; current_level: string; target_level: string; known: boolean };
 type GrowthTrajectory = { track_key: string; track_title: string; policy_version: number; readiness_skills: GrowthSkill[]; readiness: { percent: number | null; coverage: number; partial: boolean }; completion: { percent: number | null; coverage: number; partial: boolean } };
-type GrowthSnapshot = { snapshot_id: string; generated_at: string; actor_timezone: string; freshness: { known: boolean; latest_observed_at: string | null }; trajectories: GrowthTrajectory[] };
+type GrowthSnapshot = { snapshot_id: string; generated_at: string; actor_timezone: string; definitions: Record<string, string>; freshness: { known: boolean; latest_observed_at: string | null }; trajectories: GrowthTrajectory[] };
+type EvidenceAnchorView = { competency_key: string; source_kind: string; source_ref: string; level: string; observed_at: string; reason: string; counted: boolean };
+type FrameworkSkillView = { skill_key: string; skill_title: string; level: string; explanation: string; anchors: EvidenceAnchorView[]; excluded: EvidenceAnchorView[] };
+type FrameworkReportView = { framework_key: string; domain: "course" | "role" | "project"; version: number; title: string; created_at: string; skills: FrameworkSkillView[] };
+type BuddySuggestionView = { suggestion_id: string; kind: string; observation: string; gap: string; benefit: string; explanation: string; source_categories: string[]; model_called: boolean; auto_enrolled: boolean; partial: boolean; coverage_note: string };
+type BuddySuggestionStateView = { policy_version: number; ai_model_available: boolean; dismissed: boolean; suggestion: BuddySuggestionView | null; suggestions: BuddySuggestionView[] };
 const demoAnalytics: Analytics = {
   stages: [
     { key: "learning", title: "Обучение", status: "completed", completed: true, count: 6 },
@@ -171,11 +177,75 @@ function growthLevel(label: string, known: boolean): number | null {
   return growthLevelRank[label.toLowerCase()] ?? null;
 }
 
-export function TrajectoryGrowthAnalytics({ snapshot }: { snapshot: GrowthSnapshot }) {
-  const [selectedKey, setSelectedKey] = useState(snapshot.trajectories[0]?.track_key ?? "");
-  const selected = snapshot.trajectories.find((item) => item.track_key === selectedKey) ?? snapshot.trajectories[0];
+const drilldownSuggestionNeedle = (suggestion: BuddySuggestionView): string =>
+  `${suggestion.observation} ${suggestion.gap} ${suggestion.benefit} ${suggestion.explanation}`.toLowerCase();
+
+function SkillDrilldown({ snapshot, skill, reports, reportsPending, reportsError, onRetryReports, buddy, buddyPending }: {
+  snapshot: GrowthSnapshot;
+  skill: GrowthSkill;
+  reports?: FrameworkReportView[];
+  reportsPending?: boolean;
+  reportsError?: boolean;
+  onRetryReports?: () => void;
+  buddy?: BuddySuggestionStateView;
+  buddyPending?: boolean;
+}) {
+  const needle = skill.title.toLowerCase();
+  const lineage = (reports ?? [])
+    .map((report) => ({ report, entry: report.skills.find((item) => item.skill_key === skill.skill_key) ?? null }))
+    .filter((item): item is { report: FrameworkReportView; entry: FrameworkSkillView } => item.entry !== null);
+  const buddyTip: BuddySuggestionView | null =
+    (buddy?.suggestions ?? []).find((suggestion) => drilldownSuggestionNeedle(suggestion).includes(needle)) ??
+    (buddy?.suggestion != null && drilldownSuggestionNeedle(buddy.suggestion).includes(needle) ? buddy.suggestion : null);
+  const observed = lineage.flatMap(({ entry }) => entry.anchors.map((anchor) => anchor.observed_at));
+  const lastObserved = observed.length > 0 ? new Date(Math.max(...observed.map((value) => new Date(value).getTime()))).toLocaleString("ru-RU") : null;
+  return <section className="skill-drilldown" id={`drilldown-${skill.skill_key}`} data-testid="skill-drilldown" aria-labelledby="skill-drilldown-title">
+    <h3 id="skill-drilldown-title">{skill.title}</h3>
+    {!skill.known && <p role="status">Уровень не подтверждён: разрешённые источники ещё не наблюдались. «Не подтверждено» — точная подпись, а не ноль.</p>}
+    <p data-testid="skill-definition">Определение: навык подтверждается только источниками, разрешёнными версиями фреймворков; уровень считается по формуле <strong>{snapshot.definitions.readiness ?? "impulse-growth-readiness"}</strong>.</p>
+    <p data-testid="skill-formula">Формула: взвешенная доля min(текущий, цель) с ограничением до 100%; неизвестный обязательный уровень не заменяется нулём — итог остаётся неполным (coverage).</p>
+    {reportsError ? <p data-testid="skill-lineage" role="alert">Линия доказательств недоступна прямо сейчас. Уровень остаётся с точной подписью.<button className="secondary-button" type="button" onClick={onRetryReports}>Повторить</button></p>
+      : reportsPending ? <p data-testid="skill-lineage" role="status">Загружается линия доказательств…</p>
+      : lineage.length === 0 ? <p data-testid="skill-lineage">Источники для навыка в ваших фреймворках не зафиксированы: линия пуста, «не подтверждено» не заменяется нулём.</p>
+      : <div data-testid="skill-lineage">{lineage.map(({ report, entry }) => <div className="skill-lineage" key={report.framework_key}><h4>{report.title} · v{String(report.version)}</h4><p>{entry.explanation}</p><ul>{entry.anchors.map((anchor, index) => <li key={index}>{anchor.source_kind}:{anchor.source_ref} · {anchor.level} · {new Date(anchor.observed_at).toLocaleDateString("ru-RU")}</li>)}{entry.excluded.map((anchor, index) => <li key={`excluded-${String(index)}`} className="skill-evidence--excluded">{anchor.source_kind}:{anchor.source_ref} — не учитывается: {anchor.reason}</li>)}</ul></div>)}</div>}
+    <p data-testid="skill-history">История: {lastObserved === null ? "подтверждённых точек ещё нет — пусто, не ноль." : `последнее подтверждённое наблюдение ${lastObserved}`}.</p>
+    <p data-testid="skill-freshness">Свежесть: {snapshot.freshness.known && snapshot.freshness.latest_observed_at !== null ? `последнее проверяемое событие снапшота ${new Date(snapshot.freshness.latest_observed_at).toLocaleString("ru-RU")}` : "проверяемых событий ещё нет — данные не подменяются нулём."}</p>
+    <aside className="skill-buddy" data-testid="skill-buddy">
+      <p className="eyebrow">Совет Buddy · не решение</p>
+      {buddyPending ? <p role="status">Buddy готовит совет…</p> : buddyTip !== null ? <>
+        <p><strong>{buddyTip.gap}</strong></p>
+        <p>{buddyTip.observation}</p>
+        <p><strong>Что даст:</strong> {buddyTip.benefit}</p>
+        <small>{buddyTip.explanation}</small>
+      </> : <p>Пока нет совета по этому навыку: Buddy опирается только на подтверждённые данные и не меняет уровень.</p>}
+      <small>Совет не вызывает модель и не переносит уровень навыка: подтверждение возможно только через проверяемое evidence.</small>
+    </aside>
+  </section>;
+}
+
+export function TrajectoryGrowthAnalytics({ snapshot, selectedTrajectoryKey, onTrajectorySelect, selectedSkillKey, onSkillSelect, reports, reportsPending, reportsError, onRetryReports, buddy, buddyPending }: {
+  snapshot: GrowthSnapshot;
+  selectedTrajectoryKey?: string;
+  onTrajectorySelect?: (track: string) => void;
+  selectedSkillKey?: string | null;
+  onSkillSelect?: (skill: string | null) => void;
+  reports?: FrameworkReportView[];
+  reportsPending?: boolean;
+  reportsError?: boolean;
+  onRetryReports?: () => void;
+  buddy?: BuddySuggestionStateView;
+  buddyPending?: boolean;
+}) {
+  const [localTrajectory, setLocalTrajectory] = useState(snapshot.trajectories[0]?.track_key ?? "");
+  const [localSkill, setLocalSkill] = useState<string | null>(null);
+  const trajectoryKey = selectedTrajectoryKey !== undefined ? selectedTrajectoryKey : localTrajectory;
+  const skillKey = selectedSkillKey !== undefined ? selectedSkillKey : localSkill;
+  const selectTrajectory = (track: string) => { if (onTrajectorySelect === undefined) setLocalTrajectory(track); else onTrajectorySelect(track); };
+  const toggleSkill = (skill: string) => { if (onSkillSelect === undefined) setLocalSkill((current) => (current === skill ? null : skill)); else onSkillSelect(skillKey === skill ? null : skill); };
+  const selected = snapshot.trajectories.find((item) => item.track_key === trajectoryKey) ?? snapshot.trajectories[0];
   if (!selected) return <StatePanel kind="empty" />;
   const skills = selected.readiness_skills;
+  const drilldownSkill = skills.find((skill) => skill.skill_key === skillKey) ?? null;
   const center = 130;
   const radius = 86;
   const point = (index: number, rank: number) => {
@@ -186,7 +256,7 @@ export function TrajectoryGrowthAnalytics({ snapshot }: { snapshot: GrowthSnapsh
   const targetPoints = skills.map((skill, index) => point(index, growthLevel(skill.target_level, true) ?? 2));
   const currentPoints = skills.map((skill, index) => { const rank = growthLevel(skill.current_level, skill.known); return rank === null ? null : point(index, rank); });
   return <section className="trajectory-growth-analytics" aria-labelledby="trajectory-growth-title">
-    <header><div><p className="eyebrow">По выбранной траектории</p><h2 id="trajectory-growth-title">Текущий уровень и цель</h2></div><label>Траектория<select value={selected.track_key} onChange={(event) => { setSelectedKey(event.target.value); }}>{snapshot.trajectories.map((item) => <option value={item.track_key} key={item.track_key}>{item.track_title}</option>)}</select></label></header>
+    <header><div><p className="eyebrow">По выбранной траектории</p><h2 id="trajectory-growth-title">Текущий уровень и цель</h2></div><label>Траектория<select value={selected.track_key} onChange={(event) => { selectTrajectory(event.target.value); }}>{snapshot.trajectories.map((item) => <option value={item.track_key} key={item.track_key}>{item.track_title}</option>)}</select></label></header>
     <div className="trajectory-growth-grid">
       <div className="trajectory-growth-radar"><svg viewBox="0 0 260 260" role="img" aria-label={`Циклограмма траектории ${selected.track_title}: жёлтая цель, красный дефицит, зелёный достигнутый уровень, серый неизвестный уровень`}>
         {[1, 2].map((rank) => <polygon className="growth-ring" key={rank} points={skills.map((_, index) => { const p = point(index, rank); return `${String(p.x)},${String(p.y)}`; }).join(" ")} />)}
@@ -194,7 +264,7 @@ export function TrajectoryGrowthAnalytics({ snapshot }: { snapshot: GrowthSnapsh
         {currentPoints.map((current, index) => { const nextIndex = (index + 1) % Math.max(skills.length, 1); const next = currentPoints[nextIndex]; if (!current || !next) return null; const currentRank = growthLevel(skills[index]?.current_level ?? "", skills[index]?.known ?? false) ?? 0; const targetRank = growthLevel(skills[index]?.target_level ?? "", true) ?? 2; const nextCurrent = growthLevel(skills[nextIndex]?.current_level ?? "", skills[nextIndex]?.known ?? false) ?? 0; const nextTarget = growthLevel(skills[nextIndex]?.target_level ?? "", true) ?? 2; const achieved = currentRank >= targetRank && nextCurrent >= nextTarget; return <line className={achieved ? "growth-achieved" : "growth-deficit"} key={`${selected.track_key}-${String(index)}`} x1={current.x} y1={current.y} x2={next.x} y2={next.y} />; })}
         {skills.map((skill, index) => { const current = currentPoints[index]; const target = targetPoints[index] ?? point(index, 2); const angle = -Math.PI / 2 + (Math.PI * 2 * index) / Math.max(skills.length, 1); const label = { x: center + Math.cos(angle) * 112, y: center + Math.sin(angle) * 112 }; return <g key={skill.skill_key}>{current ? <circle className={(growthLevel(skill.current_level, skill.known) ?? 0) >= (growthLevel(skill.target_level, true) ?? 2) ? "growth-achieved-fill" : "growth-deficit-fill"} cx={current.x} cy={current.y} r="4" /> : <circle className="growth-unknown-fill" cx={target.x} cy={target.y} r="4" />}<text x={label.x} y={label.y} textAnchor={Math.cos(angle) > .2 ? "start" : Math.cos(angle) < -.2 ? "end" : "middle"}>{skill.title}</text></g>; })}
       </svg><div className="trajectory-growth-legend"><span className="target">Цель</span><span className="deficit">Ниже цели</span><span className="achieved">Цель достигнута</span><span className="unknown">Нет данных</span></div></div>
-      <div className="trajectory-growth-facts"><p><strong>Прогресс траектории:</strong> {selected.completion.percent === null ? "Недостаточно данных" : `${String(selected.completion.percent)}%`}</p><p><strong>Готовность роли:</strong> {selected.readiness.percent === null ? "Недостаточно данных" : `${String(selected.readiness.percent)}%`}</p>{selected.readiness.partial && <p className="growth-partial" role="status">Охват данных {Math.round(selected.readiness.coverage * 100)}%. Неизвестные уровни не заменены нулём.</p>}<ul aria-label="Числовая альтернатива циклограммы">{skills.map((skill) => { const current = growthLevel(skill.current_level, skill.known); const target = growthLevel(skill.target_level, true); const state = current === null || target === null ? "unknown" : current < target ? "deficit" : "achieved"; return <li className={`growth-skill--${state}`} key={skill.skill_key}><strong>{skill.title}</strong><span>Сейчас: {current === null ? "нет подтверждённых данных" : skill.current_level}</span><span>Цель: {target === null ? "несовместимая шкала" : skill.target_level}</span></li>; })}</ul><small>Формулы версии {selected.policy_version}. Снимок {new Date(snapshot.generated_at).toLocaleString("ru-RU")} · {snapshot.actor_timezone}</small></div>
+      <div className="trajectory-growth-facts"><p><strong>Прогресс траектории:</strong> {selected.completion.percent === null ? "Недостаточно данных" : `${String(selected.completion.percent)}%`}</p><p><strong>Готовность роли:</strong> {selected.readiness.percent === null ? "Недостаточно данных" : `${String(selected.readiness.percent)}%`}</p>{selected.readiness.partial && <p className="growth-partial" role="status">Охват данных {Math.round(selected.readiness.coverage * 100)}%. Неизвестные уровни не заменены нулём.</p>}<ul aria-label="Числовая альтернатива циклограммы">{skills.map((skill) => { const current = growthLevel(skill.current_level, skill.known); const target = growthLevel(skill.target_level, true); const state = current === null || target === null ? "unknown" : current < target ? "deficit" : "achieved"; return <li className={`growth-skill--${state}`} key={skill.skill_key}><button type="button" aria-expanded={skillKey === skill.skill_key} aria-controls={`drilldown-${skill.skill_key}`} aria-label={`Подробнее о навыке ${skill.title}`} data-testid={`skill-toggle-${skill.skill_key}`} onClick={() => { toggleSkill(skill.skill_key); }}><strong>{skill.title}</strong><span>Сейчас: {current === null ? "нет подтверждённых данных" : skill.current_level}</span><span>Цель: {target === null ? "несовместимая шкала" : skill.target_level}</span></button></li>; })}</ul>{drilldownSkill !== null && <SkillDrilldown key={drilldownSkill.skill_key} snapshot={snapshot} skill={drilldownSkill} reports={reports} reportsPending={reportsPending} reportsError={reportsError} onRetryReports={onRetryReports} buddy={buddy} buddyPending={buddyPending} />}<small>Формулы версии {selected.policy_version}. Снимок {new Date(snapshot.generated_at).toLocaleString("ru-RU")} · {snapshot.actor_timezone}</small></div>
     </div>
   </section>;
 }
@@ -203,8 +273,14 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
   const [competencyView, setCompetencyView] = useState<CompetencyView>("technical");
   const [selectedSkill, setSelectedSkill] = useState<Competency | null>(null);
   const [gapExpanded, setGapExpanded] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   const query = useQuery({ queryKey: ["participant-analytics"], queryFn: () => apiRequest<Analytics>("/api/v1/me/analytics/journey"), refetchOnMount: "always" });
   const growthQuery = useQuery({ queryKey: ["participant-growth-analytics"], queryFn: () => apiRequest<GrowthSnapshot>("/api/v1/me/growth/snapshot"), refetchOnMount: "always" });
+  const skillReportsQuery = useQuery({ queryKey: ["participant-skill-reports"], queryFn: () => apiRequest<FrameworkReportView[]>("/api/v1/me/competencies"), refetchOnMount: "always" });
+  const buddyQuery = useQuery({ queryKey: ["participant-buddy-drilldown"], queryFn: () => apiRequest<BuddySuggestionStateView>("/api/v1/agents/buddy/suggestion"), refetchOnMount: "always" });
+  const updateParams = (key: string, value: string | null) => { setSearchParams((previous) => { const next = new URLSearchParams(previous); if (value) next.set(key, value); else next.delete(key); return next; }); };
+  const urlSkill = searchParams.get("skill");
+  const urlTrajectory = searchParams.get("trajectory");
   if (query.isLoading) return <StatePanel kind="loading" />;
   const data = query.data ?? demoAnalytics;
   const activity = [42, 58, 51, 73, 66, 88, 79, 94];
@@ -215,7 +291,7 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
   return <div className="feature-stack participant-analytics analytics-dashboard">
     {query.isError && <div className="demo-fallback-note" role="status"><strong>Демонстрационная аналитика</strong><span>API временно недоступен — показана связанная mock-проекция.</span><button className="secondary-button" type="button" onClick={() => { void query.refetch(); }}>Повторить</button></div>}
     <header className="dashboard-heading"><div><p className="eyebrow">Аналитика · личный путь</p><h1 id="workspace-title">Ваш прогресс и подтверждённый результат</h1><p className="lead">Показываем, как обучение превращается в проекты, оценки и позицию в рейтинге.</p></div><div className="analytics-controls"><label>Период<select defaultValue="90"><option value="30">30 дней</option><option value="90">3 месяца</option><option value="season">Сезон</option></select></label><label>Направление<select defaultValue="all"><option value="all">Все</option><option value="python">Python</option><option value="data">Data</option></select></label><div className="freshness-chip"><span className="fresh-dot" />Обновлено сегодня</div></div></header>
-    {growthQuery.status === "pending" ? <StatePanel kind="loading" /> : growthQuery.status === "error" ? <StatePanel kind="error" action="Повторить аналитику траекторий" onAction={() => { void growthQuery.refetch(); }} /> : <TrajectoryGrowthAnalytics snapshot={growthQuery.data} />}
+    {growthQuery.status === "pending" ? <StatePanel kind="loading" /> : growthQuery.status === "error" ? <StatePanel kind="error" action="Повторить аналитику траекторий" onAction={() => { void growthQuery.refetch(); }} /> : <TrajectoryGrowthAnalytics snapshot={growthQuery.data} selectedTrajectoryKey={urlTrajectory ?? undefined} onTrajectorySelect={(track) => { setSearchParams((previous) => { const next = new URLSearchParams(previous); next.set("trajectory", track); next.delete("skill"); return next; }); }} selectedSkillKey={urlSkill ?? undefined} onSkillSelect={(skill) => { updateParams("skill", skill); }} reports={skillReportsQuery.data} reportsPending={skillReportsQuery.isPending} reportsError={skillReportsQuery.isError} onRetryReports={() => { void skillReportsQuery.refetch(); }} buddy={buddyQuery.data ?? undefined} buddyPending={buddyQuery.isPending} />}
     <section className="competency-overview competency-overview--expanded">
       <div className="competency-main">
         <div className="section-heading"><div><p className="eyebrow">Главный результат развития</p><h2>Расширенная матрица · Python-разработчик</h2></div><Badge tone="success">Готовность 72%</Badge></div>

@@ -79,6 +79,38 @@ Lane — это конфликтная область, а не назначен�
 - `NO_SAFE_TASK` является корректным результатом, если свободная работа требует чужих файлов или незавершённых dependencies.
 - Новую задачу можно добавить в `tasks.md` и board без изменения числа или имён агентов.
 
+## Быстрая волна без снижения качества
+
+1. Scheduler выбирает совместимый набор READY-задач: ни одна пара не пересекается по `write-scope`; reserved scope основного агента также исключается.
+2. Сначала идут задачи, которые разблокируют больше зависимостей, затем задачи с меньшим scope. Количество процессов не является целью само по себе: важнее число принятых изменений без переделки.
+3. Author выполняет только проверки своего изменения: ближайшие unit/component/integration tests, typecheck и lint затронутого пакета. Он не повторяет полный suite и не запускает deploy.
+4. Отдельный reviewer проверяет diff, acceptance, scope и релевантные тесты. Автор не может принять свою работу.
+5. После merge совместимой волны отдельная integration-задача один раз запускает full regression/build/OpenSpec/migration/screenshot gates на точной integration revision. Новый merge инвалидирует это evidence.
+6. Только approval-gated deployment-задача выполняет Railway deploy и post-deploy smoke. Feature-агенты не расходуют время и квоту на повторные внешние проверки.
+7. Runtime завершает попытку сразу при исчерпанной квоте/отсутствии авторизации и по idle timeout при отсутствии log/diff-прогресса; worktree и logs сохраняются для resume.
+
+Такой каскад сохраняет три независимых уровня качества — локальная проверка, reviewer и общий integration gate — но убирает повторение одинаковых дорогих операций каждым worker.
+
+## Машиночитаемый quality contract
+
+Репозиторий хранит `.aip/quality.json`. Он определяет task checks по path patterns, wave checks, risk routes, reviewer capacity и безопасно переиспользуемые dependency directories. Команды передаются массивом аргументов, запускаются без shell и не могут выбрать `cwd` вне worktree.
+
+- Task cache key включает точный commit SHA, argv, cwd, runtime fingerprint и хэш dependency lockfiles.
+- FAIL, timeout или evidence другой revision не переиспользуются.
+- До LLM-review автоматически выполняются scope guard, `git diff --check` и checks для изменённых путей.
+- Перед review task branch сравнивается с актуальной integration revision. Независимый diff автоматически rebase; пересечение файлов даёт `STALE_INTEGRATION_CONFLICT` до траты reviewer-времени.
+- Author передаёт reviewer структурированный JSON handoff, а не заставляет его восстанавливать факты из полного model log.
+- Contract извлекает из разрешённых `context_roots` не более 120 строк, совпавших с task ID/title и acceptance IDs, и сохраняет SHA-256 исходных SDD-файлов. Полный backlog не копируется в каждый prompt.
+- Общими могут быть только dependency caches и явно перечисленные immutable dependency directories. `node_modules`, `.venv`, build output и test namespaces не должны становиться общей изменяемой продуктовой областью.
+
+## Staged capacity и backpressure
+
+`max_agents` ограничивает общее число model processes. Author может использовать свободные слоты, reviewer имеет отдельный предел, а `max_review_backlog` ограничивает количество task branches, ожидающих проверки. При заполненной review-очереди scheduler временно прекращает новые claims. Поэтому высокая скорость author не создаёт бесконтрольную очередь непроверенного кода.
+
+Risk routing выбирает модель по фактическому scope: migration/security/API/shared wiring требуют усиленного reviewer; документация и изолированный leaf-модуль могут использовать более дешёвую модель. Независимость reviewer и все deterministic gates сохраняются независимо от цены модели.
+
+Board и CLI показывают длительность стадий, accepted tasks/hour, cache hits, provider failures, scope deferrals, review backlog и wave-gate status. Оптимизация оценивается по принятым задачам в час и числу возвратов, а не по числу запущенных процессов.
+
 ## Универсальный prompt для новой сессии
 
 Текст prompt приведён в итоговом сообщении владельцу и может использоваться без номера агента. Сессия сама выбирает безопасную задачу по этому протоколу.

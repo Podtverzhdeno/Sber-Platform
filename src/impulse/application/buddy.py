@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, replace
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
 from impulse.api.errors import ApiError
@@ -17,7 +17,7 @@ from impulse.domain.buddy_suggestion import (
     build_domain_next_suggestion,
 )
 from impulse.domain.identity import ActorContext, Role
-from impulse.domain.priority import StepSpec
+from impulse.domain.priority import ScoredStep, StepSpec
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,7 +61,9 @@ class BuddyConversationService:
         self._message_keys: dict[tuple[UUID, str], BuddyMessage] = {}
         self._feedback: dict[tuple[UUID, UUID], BuddyFeedback] = {}
         self._memory_blocked: set[UUID] = set()
-        self._dismissed_suggestions: dict[UUID, str] = {}
+        self._dismissed_suggestions: dict[UUID, set[str]] = {}
+        self._snoozed_suggestions: dict[tuple[UUID, str], datetime] = {}
+        self._irrelevant_suggestions: set[tuple[UUID, str]] = set()
         self.deletion_audit: list[BuddyDeletionAudit] = []
 
     @staticmethod
@@ -125,10 +127,29 @@ class BuddyConversationService:
     def dismiss_suggestion(self, actor: ActorContext, suggestion_id: str) -> None:
         """Remember the dismissed home-card version; never mutates growth state."""
         self._participant(actor)
-        self._dismissed_suggestions[actor.person_id] = suggestion_id
+        self._dismissed_suggestions.setdefault(actor.person_id, set()).add(suggestion_id)
 
     def dismissed_suggestion(self, person_id: UUID) -> str | None:
-        return self._dismissed_suggestions.get(person_id)
+        dismissed = self._dismissed_suggestions.get(person_id, set())
+        return next(iter(dismissed), None)
+
+    def suggestion_hidden(self, person_id: UUID, suggestion_id: str, *, now: datetime) -> bool:
+        if suggestion_id in self._dismissed_suggestions.get(person_id, set()):
+            return True
+        if (person_id, suggestion_id) in self._irrelevant_suggestions:
+            return True
+        snoozed_until = self._snoozed_suggestions.get((person_id, suggestion_id))
+        return snoozed_until is not None and snoozed_until > now
+
+    def snooze_suggestion(
+        self, actor: ActorContext, suggestion_id: str, *, until: datetime
+    ) -> None:
+        self._participant(actor)
+        self._snoozed_suggestions[(actor.person_id, suggestion_id)] = until
+
+    def mark_suggestion_irrelevant(self, actor: ActorContext, suggestion_id: str) -> None:
+        self._participant(actor)
+        self._irrelevant_suggestions.add((actor.person_id, suggestion_id))
 
     def withdraw_memory(self, actor: ActorContext) -> BuddyDeletionAudit:
         """Stop reads synchronously, then remove content while retaining minimal audit."""
@@ -180,8 +201,13 @@ class BuddyConversationService:
 class BuddySuggestionState:
     """Home-card outcome: explainable suggestion plus its dismissal flag."""
 
-    suggestion: BuddySuggestion | None
+    suggestions: tuple[BuddySuggestion, ...]
     dismissed: bool
+
+    @property
+    def suggestion(self) -> BuddySuggestion | None:
+        """Compatibility projection for clients on contract v1."""
+        return self.suggestions[0] if self.suggestions else None
 
 
 class BuddySuggestionService:
@@ -207,22 +233,75 @@ class BuddySuggestionService:
     async def state(self, actor: ActorContext) -> BuddySuggestionState:
         self._check_participant(actor)
         _roadmaps, result = await self._growth.next_step(actor)
-        step = result.next_available()
-        if step is None:
-            return BuddySuggestionState(suggestion=None, dismissed=False)
         now = self._now()
-        spec = step.spec
-        suggestion = await self._build(actor.person_id, spec.trajectory_key, spec, now)
-        dismissed = (
-            self._conversations.dismissed_suggestion(actor.person_id) == suggestion.suggestion_id
+        available = tuple(step for step in result.steps if step.available)
+        built = tuple(
+            [
+                await self._build(actor.person_id, step, now)
+                for step in available[:6]
+            ]
         )
-        if dismissed:
-            return BuddySuggestionState(suggestion=None, dismissed=True)
-        return BuddySuggestionState(suggestion=suggestion, dismissed=False)
+        visible = tuple(
+            item
+            for item in built
+            if not self._conversations.suggestion_hidden(
+                actor.person_id, item.suggestion_id, now=now
+            )
+        )[:3]
+        return BuddySuggestionState(
+            suggestions=visible,
+            dismissed=bool(built) and not visible,
+        )
 
     def dismiss(self, actor: ActorContext, suggestion_id: str) -> None:
         self._check_participant(actor)
         self._conversations.dismiss_suggestion(actor, suggestion_id)
+
+    async def feedback(
+        self,
+        actor: ActorContext,
+        suggestion_id: str,
+        *,
+        action: str,
+        snooze_until: datetime | None = None,
+    ) -> None:
+        """Store a preference only; never complete or mutate the target object."""
+        self._check_participant(actor)
+        suggestion = await self.resolve(actor, suggestion_id)
+        if action == "dismiss":
+            self._conversations.dismiss_suggestion(actor, suggestion_id)
+            return
+        if action == "irrelevant":
+            self._conversations.mark_suggestion_irrelevant(actor, suggestion_id)
+            return
+        if action != "snooze":
+            raise ApiError("INVALID_FEEDBACK", "Unsupported suggestion feedback.", 422)
+        until = snooze_until or (self._now() + timedelta(days=7))
+        deadline = suggestion.action.deadline_at if suggestion.action is not None else None
+        if deadline is not None and deadline <= self._now() + timedelta(days=3):
+            raise ApiError(
+                "URGENT_SUGGESTION",
+                "Urgent mandatory work cannot be hidden by snooze.",
+                409,
+            )
+        self._conversations.snooze_suggestion(actor, suggestion_id, until=until)
+
+    async def resolve(self, actor: ActorContext, suggestion_id: str) -> BuddySuggestion:
+        """Re-read permitted sources immediately before navigation."""
+        self._check_participant(actor)
+        _roadmaps, result = await self._growth.next_step(actor)
+        now = self._now()
+        for step in result.steps:
+            if not step.available:
+                continue
+            suggestion = await self._build(actor.person_id, step, now)
+            if suggestion.suggestion_id == suggestion_id:
+                return suggestion
+        raise ApiError(
+            "SUGGESTION_STALE",
+            "The recommended object is no longer available. Refresh recommendations.",
+            409,
+        )
 
     async def _track_title(self, trajectory_key: str) -> str:
         for track in await self._development.store.tracks():
@@ -233,30 +312,55 @@ class BuddySuggestionService:
     async def _build(
         self,
         person_id: UUID,
-        trajectory_key: str,
-        spec: StepSpec,
+        step: ScoredStep,
         now: datetime,
     ) -> BuddySuggestion:
+        spec: StepSpec = step.spec
+        trajectory_key = spec.trajectory_key
         track_title = await self._track_title(trajectory_key)
         last_verified_at = await self._last_verified_checkpoint_at(person_id)
         idle = last_verified_at is None or (now - last_verified_at).days >= (
             BOOTCAMP_IDLE_THRESHOLD_DAYS
         )
         if idle:
-            return build_bootcamp_idle_suggestion(
+            suggestion = build_bootcamp_idle_suggestion(
                 now=now,
                 last_verified_at=last_verified_at,
                 track_title=track_title,
                 step_kind=spec.target_kind,
                 step_key=spec.target_key,
                 step_title=spec.target_title,
+                checkpoint_id=spec.milestone_key,
+                effort_hours=step.state.effort_hours,
+                deadline_at=step.state.deadline_at,
+                rank_score=str(step.score),
             )
-        return build_domain_next_suggestion(
-            now=now,
-            track_title=track_title,
-            step_kind=spec.target_kind,
-            step_key=spec.target_key,
-            step_title=spec.target_title,
+        else:
+            suggestion = build_domain_next_suggestion(
+                now=now,
+                track_title=track_title,
+                step_kind=spec.target_kind,
+                step_key=spec.target_key,
+                step_title=spec.target_title,
+                checkpoint_id=spec.milestone_key,
+                effort_hours=step.state.effort_hours,
+                deadline_at=step.state.deadline_at,
+                rank_score=str(step.score),
+            )
+        categories = tuple(
+            dict.fromkeys(
+                (
+                    *suggestion.source_categories,
+                    "participant_scope",
+                    *step.factors,
+                )
+            )
+        )
+        reason = "; ".join(step.reasons) if step.reasons else "стабильный tie-break"
+        return replace(
+            suggestion,
+            source_categories=categories,
+            explanation=f"{suggestion.explanation} Факторы policy: {reason}.",
         )
 
     async def _last_verified_checkpoint_at(self, person_id: UUID) -> datetime | None:

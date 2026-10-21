@@ -123,18 +123,20 @@ test("customer can send messages and each dialog keeps its own history", async (
   await installMessages(page);
   await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Сообщения",exact:true}).click();
   await expect(page.locator(".messenger-page")).toBeVisible();
-  const composer=page.getByLabel("Сообщение");
+  const composer=page.getByRole("textbox", { name: "Текст сообщения" });
   await expect(composer).toBeInViewport();
-  await expect(page.getByRole("button",{name:"Прикрепить артефакт"})).toBeInViewport();
+  await expect(page.getByRole("button",{name:"Вложения"})).toBeInViewport();
   await expect(page.getByRole("button",{name:"Отправить",exact:true})).toBeInViewport();
   await composer.fill("Проверил новую версию, спасибо.");
   await page.getByRole("button",{name:"Отправить",exact:true}).click();
-  await expect(page.getByRole("paragraph").filter({ hasText: "Проверил новую версию, спасибо." })).toBeVisible();
-  await page.locator(".chat-list>button").nth(1).click();
-  await expect(page.locator(".message-history").getByText("Обновил rubric и checklist проекта.")).toBeVisible();
-  await expect(page.locator(".message-history").getByText("Проверил новую версию, спасибо.")).toHaveCount(0);
-  await page.locator(".chat-list>button").first().click();
-  await expect(page.locator(".message-history").getByText("Проверил новую версию, спасибо.")).toBeVisible();
+  const dialogs=page.getByRole("list", { name: "Диалоги" });
+  const history=page.getByRole("list", { name: "История чата" });
+  await expect(history.getByText("Проверил новую версию, спасибо.", { exact: true })).toBeVisible();
+  await dialogs.getByRole("button", { name: /^Елена Наставник/ }).click();
+  await expect(history.getByText("Обновил rubric и checklist проекта.")).toBeVisible();
+  await expect(history.getByText("Проверил новую версию, спасибо.")).toHaveCount(0);
+  await dialogs.getByRole("button", { name: /^Рекомендательная система/ }).click();
+  await expect(history.getByText("Проверил новую версию, спасибо.")).toBeVisible();
 });
 
 test("customer settings show the customer profile without participant HR controls", async ({ page }) => {
@@ -165,10 +167,12 @@ test("customer participant dialogs keep separate histories", async ({ page }) =>
   await openCustomer(page);
   await installMessages(page);
   await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Сообщения", exact: true }).click();
-  await expect(page.locator(".message-history").getByText("Результат доступен на приёмке; посмотрите evidence.")).toBeVisible();
-  await page.locator(".chat-list>button").nth(1).click();
-  await expect(page.locator(".message-history").getByText("Обновил rubric и checklist проекта.")).toBeVisible();
-  await expect(page.locator(".message-history").getByText("Результат доступен на приёмке")).toHaveCount(0);
+  const dialogs=page.getByRole("list", { name: "Диалоги" });
+  const history=page.getByRole("list", { name: "История чата" });
+  await expect(history.getByText("Результат доступен на приёмке; посмотрите evidence.")).toBeVisible();
+  await dialogs.getByRole("button", { name: /^Елена Наставник/ }).click();
+  await expect(history.getByText("Обновил rubric и checklist проекта.")).toBeVisible();
+  await expect(history.getByText("Результат доступен на приёмке")).toHaveCount(0);
 });
 
 test("customer messages expose the linked work context", async ({ page }) => {
@@ -178,10 +182,12 @@ test("customer messages expose the linked work context", async ({ page }) => {
   await expect(page.locator(".chat-context h2")).toContainText("Рекомендательная система");
   await expect(page.locator(".chat-context")).toContainText("impulse-demo");
   await expect(page.locator(".chat-context")).toContainText("версия 2");
-  await page.getByRole("button", { name: "Прикрепить артефакт" }).click();
-  await expect(page.getByText("Артефакт: repository")).toBeVisible();
-  await page.getByRole("button", { name: "Прикрепить артефакт" }).click();
-  await expect(page.getByText("Артефакт: repository")).toHaveCount(0);
+  await page.getByRole("button", { name: "Вложения" }).click();
+  await page.getByLabel("Ключ артефакта").fill("repository");
+  await page.getByRole("button", { name: "Добавить", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Убрать вложение repository" })).toBeVisible();
+  await page.getByRole("button", { name: "Убрать вложение repository" }).click();
+  await expect(page.getByRole("button", { name: "Убрать вложение repository" })).toHaveCount(0);
 });
 
 test("customer participant database contains an extended talent pool", async ({ page }) => {

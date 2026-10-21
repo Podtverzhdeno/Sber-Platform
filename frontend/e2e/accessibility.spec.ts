@@ -64,6 +64,10 @@ test("page guard rejects a section outside role navigation", async ({ page }) =>
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await expect(page.getByRole("navigation", { name: "Навигация роли" })).toBeVisible();
+  // Wait for the post-login router settle ("/" -> <Navigate replace to="/workspace/0">).
+  // A popstate issued before that settle is lost: react-router keeps the old location and
+  // renders the home section instead of the guarded section (CI flake reproduced on 8fe8714).
+  await expect(page).toHaveURL(/\/workspace\/0$/);
   await page.evaluate("window.history.pushState({}, '', '/workspace/99'); window.dispatchEvent(new PopStateEvent('popstate')); ");
   await expect(page.getByRole("heading", { name: "Раздел недоступен" })).toBeVisible();
   await expect(page.locator(".next-action")).toHaveCount(0);

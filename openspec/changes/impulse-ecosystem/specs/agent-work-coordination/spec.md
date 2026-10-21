@@ -90,3 +90,31 @@ Claim SHALL использовать состояния `IN_PROGRESS`, `BLOCKED`
 #### Scenario: Агенту нужен ключ провайдера
 - **WHEN** ключ отсутствует
 - **THEN** агент завершает локально проверяемую часть и отмечает внешний smoke заблокированным, не записывая фиктивный success и не прося вставить ключ в claim
+
+### Requirement: Scheduler выбирает конфликт-свободную волну, а не первые N задач
+Перед запуском worker scheduler SHALL построить детерминированный набор READY-задач, в котором `write_scope` не пересекаются ни между собой, ни с активными claims и reserved scope основного агента. Приоритет SHALL получать задача, разблокирующая больше downstream-зависимостей; при равенстве — задача с меньшим scope. Свободный слот SHALL оставаться незанятым, если его заполнение создаёт будущий merge conflict.
+
+#### Scenario: Десять слотов и две READY-задачи меняют один экран
+- **WHEN** обе задачи объявляют `frontend/src/features/analytics.tsx`
+- **THEN** scheduler запускает только одну из них, а вторую оставляет READY до integration первой
+
+### Requirement: Проверки выполняются каскадом без потери качества
+Feature-agent SHALL выполнять task-scoped tests, typecheck и lint для своего diff. Независимый reviewer SHALL проверять acceptance, scope, ошибки реализации и релевантные тесты. Полный regression, build, OpenSpec validation, migration compatibility и общие screenshot suites SHALL выполняться один раз integration-задачей на принятую волну и SHALL быть привязаны к точной integration revision. Изменение revision SHALL инвалидировать прежний wave evidence.
+
+#### Scenario: В волне восемь независимых frontend-задач
+- **WHEN** каждая задача прошла собственные проверки и независимый review
+- **THEN** восемь агентов не повторяют одинаковый full suite, а integrator запускает его один раз на объединённой revision до принятия волны
+
+### Requirement: Feature-задачи не выполняют deployment и внешние smoke повторно
+Обычный author или reviewer SHALL NOT запускать Railway deploy, production smoke, внешние миграции или платные сетевые проверки, если операция не указана в acceptance текущей approval-gated задачи. Deployment evidence SHALL переиспользоваться только для той же revision и среды.
+
+#### Scenario: Агент реализует карточку Bootcamp
+- **WHEN** acceptance требует component test и E2E маршрута, но не production deploy
+- **THEN** агент ограничивается локальными проверками, а Railway не вызывается
+
+### Requirement: Зависший или недоступный provider завершается с сохраняемым evidence
+Runtime SHALL отслеживать stdout и filesystem-прогресс. После настраиваемого idle timeout процесс SHALL быть остановлен с отдельным статусом, а worktree и log SHALL сохраниться для resume. Неисправимые ответы провайдера об исчерпанной квоте, отсутствии средств или авторизации SHALL завершать попытку немедленно без многочасового retry; задача SHALL NOT считаться выполненной.
+
+#### Scenario: Бесплатная квота модели исчерпана
+- **WHEN** runtime получает `free usage exceeded` с повтором через несколько часов
+- **THEN** worker завершается с provider-unavailable evidence, его scope остаётся защищённым до recovery, а scheduler продолжает независимые задачи

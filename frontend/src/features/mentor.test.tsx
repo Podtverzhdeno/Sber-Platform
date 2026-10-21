@@ -176,9 +176,18 @@ describe("mentor workspace", () => {
           </QueryClientProvider>
         </MemoryRouter>,
       );
-      fireEvent.click(
-        await screen.findByRole("button", { name: /Рекомендательная система/ }),
-      );
+      await waitFor(() => {
+        expect(
+          screen
+            .getAllByRole("button", { name: /Рекомендательная система/ })
+            .some((el) => el.classList.contains("msg-dialog-list__row")),
+        ).toBe(true);
+      });
+      const row = screen
+        .getAllByRole("button", { name: /Рекомендательная система/ })
+        .find((el) => el.classList.contains("msg-dialog-list__row"));
+      if (!row) throw new Error("dialog row not found");
+      fireEvent.click(row);
       await waitFor(() => {
         expect(
           screen.getByText("Пришлите сравнение метрик до пятницы."),
@@ -188,20 +197,27 @@ describe("mentor workspace", () => {
       expect(screen.getAllByText("repository").length).toBeGreaterThan(0);
 
       expect(screen.getByText("Все")).toBeVisible();
-      fireEvent.click(screen.getByRole("button", { name: "Заказчики" }));
+      fireEvent.click(screen.getByRole("tab", { name: "Архив" }));
       expect(
         screen.queryByRole("button", { name: /Рекомендательная система/ }),
       ).not.toBeInTheDocument();
-      fireEvent.click(screen.getByRole("button", { name: "Проектные группы" }));
-      await screen.findByRole("button", { name: /Рекомендательная система/ });
+      fireEvent.click(screen.getByRole("tab", { name: "Все" }));
+      await waitFor(() => {
+        expect(
+          screen
+            .getAllByRole("button", { name: /Рекомендательная система/ })
+            .some((el) => el.classList.contains("msg-dialog-list__row")),
+        ).toBe(true);
+      });
 
       expect(screen.getByText(/версия 3 · ожидает приёмки/)).toBeVisible();
       expect(screen.getByText("Оценка ожидает подтверждения")).toBeVisible();
-      expect(screen.getByText(/артефакты задачи разрешены/)).toBeVisible();
-      expect(screen.queryByRole("button", { name: "Открыть связанную задачу" })).not.toBeInTheDocument();
-      const reviewButton = screen.getByRole("button", { name: "Открыть review workspace" });
+      expect(screen.getAllByText("repository").length).toBeGreaterThan(0);
+      expect(screen.getByTestId("context-disclaimer")).toBeVisible();
+      expect(screen.getByRole("button", { name: "Открыть вклад задачи" })).toBeEnabled();
+      const reviewButton = screen.getByRole("button", { name: "Открыть workspace оценки" });
       expect(reviewButton).toBeEnabled();
-      expect(screen.getByRole("button", { name: "Форма встречи" })).toBeEnabled();
+      expect(screen.getByRole("button", { name: "Запланировать встречу" })).toBeEnabled();
     } finally {
       globalThis.fetch = originalFetch;
     }

@@ -80,6 +80,28 @@ export class ApiClientError extends Error {
   }
 }
 
+const READ_CACHE_TTL_MS = 30_000;
+const VOLATILE_READ_PATHS = [
+  "/api/v1/me/messaging/",
+  "/api/v1/me/notifications",
+] as const;
+
+type ReadCacheEntry = {
+  expiresAt: number;
+  value: unknown;
+};
+
+const readCache = new Map<string, ReadCacheEntry>();
+const pendingReads = new Map<string, Promise<unknown>>();
+let cacheGeneration = 0;
+let activeFetch = globalThis.fetch;
+
+export function clearApiReadCache(): void {
+  cacheGeneration += 1;
+  readCache.clear();
+  pendingReads.clear();
+}
+
 async function decodeError(response: Response): Promise<ApiClientError> {
   const fallback = { code: "HTTP_ERROR", message: `HTTP ${String(response.status)}`, retryable: false };
   try {
@@ -96,12 +118,53 @@ async function decodeError(response: Response): Promise<ApiClientError> {
 }
 
 export async function apiRequest<T>(path: RuntimeApiPath, options?: RequestInit): Promise<T> {
+  if (activeFetch !== globalThis.fetch) {
+    activeFetch = globalThis.fetch;
+    clearApiReadCache();
+  }
   const headers = new Headers(options?.headers);
   headers.set("Content-Type", "application/json");
-  const response = await fetch(path, { credentials: "include", ...options, headers });
-  if (!response.ok) throw await decodeError(response);
-  if (response.status === 204) return undefined as T;
-  return (await response.json()) as T;
+  const method = (options?.method ?? "GET").toUpperCase();
+  const volatileRead = VOLATILE_READ_PATHS.some((prefix) => path.startsWith(prefix));
+  const bypassRequested =
+    headers.get("Cache-Control") === "no-cache" ||
+    options?.cache === "no-store" ||
+    options?.cache === "reload";
+  const canReuseRead = method === "GET" && !volatileRead && !bypassRequested;
+
+  if (!canReuseRead) {
+    if (method !== "GET" && method !== "HEAD") clearApiReadCache();
+    const response = await fetch(path, { credentials: "include", ...options, headers });
+    if (!response.ok) throw await decodeError(response);
+    if (response.status === 204) return undefined as T;
+    return (await response.json()) as T;
+  }
+
+  const cacheKey = path;
+  const cached = readCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.value as T;
+  if (cached) readCache.delete(cacheKey);
+
+  const pending = pendingReads.get(cacheKey);
+  if (pending) return pending as Promise<T>;
+
+  const generation = cacheGeneration;
+  const request = (async () => {
+    const response = await fetch(path, { credentials: "include", ...options, headers });
+    if (!response.ok) throw await decodeError(response);
+    if (response.status === 204) return undefined as T;
+    const value = (await response.json()) as T;
+    if (generation === cacheGeneration) {
+      readCache.set(cacheKey, { expiresAt: Date.now() + READ_CACHE_TTL_MS, value });
+    }
+    return value;
+  })();
+  pendingReads.set(cacheKey, request);
+  try {
+    return await request;
+  } finally {
+    if (pendingReads.get(cacheKey) === request) pendingReads.delete(cacheKey);
+  }
 }
 
 export function retrySafeRead(failureCount: number, error: unknown): boolean {

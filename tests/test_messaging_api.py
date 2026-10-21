@@ -1,11 +1,13 @@
 """Messaging workspace acceptance scenarios."""
 
+from dataclasses import replace
 from uuid import UUID, uuid5
 
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
 from impulse.application.messaging import (
+    ChannelStatus,
     ChannelWorkContext,
     MemoryMessagingStore,
     MessagingService,
@@ -258,3 +260,86 @@ def test_history_pagination_is_ascending() -> None:
     assert [item["sequence"] for item in first_page] == [1, 2]
     latest = api.get(base).json()
     assert [item["sequence"] for item in latest] == [1, 2, 3]
+
+
+def test_closed_dialogs_are_hidden_from_all_participants() -> None:
+    api, store = build()
+    alex_csrf = login(api, "participant-alex")
+    opened = api.post(
+        "/api/v1/me/messaging/channels/personal",
+        json={"peer_id": str(ELENA)},
+        headers={"X-CSRF-Token": alex_csrf},
+    )
+    assert opened.status_code == 200
+    dialog = opened.json()
+    channel_id = UUID(dialog["id"])
+    alex_channels = api.get("/api/v1/me/messaging/channels").json()
+    assert any(item["id"] == dialog["id"] for item in alex_channels)
+
+    # Test-only introspection: emulate channel closure behind the service layer.
+    channels_map = store._channels  # pyright: ignore[reportPrivateUsage]
+    for identifier, channel in list(channels_map.items()):
+        if identifier == channel_id:
+            channels_map[identifier] = replace(channel, status=ChannelStatus.CLOSED)
+
+    assert all(
+        item["id"] != dialog["id"]
+        for item in api.get("/api/v1/me/messaging/channels").json()
+    )
+
+    elena_csrf = login(api, "mentor-elena")
+    del elena_csrf
+    elena_channels = api.get("/api/v1/me/messaging/channels").json()
+    assert all(item["id"] != dialog["id"] for item in elena_channels)
+
+    alex_csrf = login(api, "participant-alex")
+    send = api.post(
+        f"/api/v1/me/messaging/channels/{channel_id}/messages",
+        json={"body": "Попытка записи в закрытый диалог"},
+        headers={"X-CSRF-Token": alex_csrf},
+    )
+    assert send.status_code == 403
+    assert send.json()["code"] == "MESSAGING_READ_ONLY"
+
+
+def test_read_cursor_persists_across_sessions_and_devices() -> None:
+    api, _store = build()
+    alex_csrf = login(api, "participant-alex")
+    opened = api.post(
+        "/api/v1/me/messaging/channels/personal",
+        json={"peer_id": str(ELENA)},
+        headers={"X-CSRF-Token": alex_csrf},
+    )
+    assert opened.status_code == 200
+    dialog = opened.json()
+
+    posted = api.post(
+        f"/api/v1/me/messaging/channels/{dialog['id']}/messages",
+        json={"body": "Приоритеты зафиксировал в тикете."},
+        headers={"X-CSRF-Token": alex_csrf},
+    )
+    assert posted.status_code == 200
+    message = posted.json()
+
+    first_elena_csrf = login(api, "mentor-elena")
+    read = api.post(
+        f"/api/v1/me/messaging/channels/{dialog['id']}/read",
+        json={"message_id": message["id"]},
+        headers={"X-CSRF-Token": first_elena_csrf},
+    )
+    assert read.status_code == 200
+    assert read.json()["unread"] == 0
+
+    second_elena_csrf = login(api, "mentor-elena")
+    elena_channels = api.get("/api/v1/me/messaging/channels").json()
+    matching = [item for item in elena_channels if item["id"] == dialog["id"]]
+    assert len(matching) == 1
+    assert matching[0]["unread"] == 0
+
+    again = api.post(
+        f"/api/v1/me/messaging/channels/{dialog['id']}/read",
+        json={"message_id": message["id"]},
+        headers={"X-CSRF-Token": second_elena_csrf},
+    )
+    assert again.status_code == 200
+    assert again.json()["unread"] == 0

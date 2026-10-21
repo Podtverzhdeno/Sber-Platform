@@ -22,7 +22,7 @@ from impulse.application.work import (
 from impulse.bootstrap.app import create_app
 from impulse.bootstrap.demo_seed import seed_demo
 from impulse.bootstrap.settings import AppEnvironment, Settings
-from impulse.domain.work import AcceptanceDecision
+from impulse.domain.work import AcceptanceDecision, TaskStatus
 from impulse.infrastructure.database import Database, async_database_url
 from impulse.infrastructure.identity_store import SqlIdentityStore
 from impulse.infrastructure.models.work import (
@@ -293,6 +293,24 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
     persisted_decision = await work_store.acceptance_for_contribution(contribution.id)
     assert persisted_decision is not None
     assert persisted_decision.decision is AcceptanceDecision.REVISION_REQUESTED
+    task_batch = await work_store.tasks_for_ids((task_id, UUID(int=0)))
+    assert set(task_batch) == {task_id}
+    terms_batch = await work_store.latest_terms_for_tasks((task_id, UUID(int=0)))
+    assert terms_batch[task_id].version == 3
+    accepted_batch = await work_store.accepted_terms_versions(
+        started.person_id, (task_id, UUID(int=0))
+    )
+    assert accepted_batch == {task_id: 3}
+    contribution_batch = await work_store.contributions_for_assignments(
+        (started.id, conflicting_started.id, UUID(int=0))
+    )
+    assert [item.version for item in contribution_batch[started.id]] == [1, 2]
+    assert [item.version for item in contribution_batch[conflicting_started.id]] == [1]
+    assert contribution_batch[UUID(int=0)] == ()
+    acceptance_batch = await work_store.acceptances_for_contributions(
+        (contribution.id, revised_contribution.id, UUID(int=0))
+    )
+    assert set(acceptance_batch) == {contribution.id, revised_contribution.id}
 
     async with database.sessions() as session:
         row = (
@@ -554,4 +572,75 @@ async def test_application_withdrawal_is_idempotent_and_blocked_after_acceptance
         ).one()
     assert row.status == "accepted"
     assert row.version == 6
+    await database.close()
+
+
+@pytest.mark.asyncio
+async def test_sql_batch_task_and_terms_reads_match_single_reads() -> None:
+    database = Database(integration_url())
+    await seed_demo(database)
+    store = SqlWorkStore(database)
+    async with database.sessions() as session:
+        task_ids = tuple(
+            await session.scalars(
+                select(tasks.c.id).where(tasks.c.status == TaskStatus.PUBLISHED.value).limit(4)
+            )
+        )
+    assert len(task_ids) >= 2
+
+    batched_tasks = await store.tasks_for_ids(task_ids)
+    for task_id in task_ids:
+        single = await store.get(task_id)
+        assert single is not None
+        assert batched_tasks[task_id] == single
+
+    batched_terms = await store.latest_terms_for_tasks(task_ids)
+    for task_id in task_ids:
+        single_terms = await store.latest_terms(task_id)
+        assert batched_terms.get(task_id) == single_terms
+
+    async with database.sessions() as session:
+        person_id = await session.scalar(select(applications.c.person_id).limit(1))
+    assert person_id is not None
+    batched_accepted = await store.accepted_terms_versions(person_id, task_ids)
+    for task_id in task_ids:
+        single_version = await store.accepted_terms_version(person_id, task_id)
+        assert batched_accepted.get(task_id) == single_version
+    assert await store.tasks_for_ids(()) == {}
+    assert await store.latest_terms_for_tasks(()) == {}
+    assert await store.accepted_terms_versions(person_id, ()) == {}
+    assert await store.invitations_for_person_tasks(person_id, ()) == {}
+    await database.close()
+
+
+@pytest.mark.asyncio
+async def test_sql_batch_contributions_and_acceptances_match_single_reads() -> None:
+    database = Database(integration_url())
+    await seed_demo(database)
+    store = SqlWorkStore(database)
+    async with database.sessions() as session:
+        assignment_ids = tuple(
+            await session.scalars(
+                select(assignments.c.id).order_by(assignments.c.created_at).limit(4)
+            )
+        )
+    assert len(assignment_ids) >= 2
+
+    batched = await store.contributions_for_assignments(assignment_ids)
+    contribution_ids: list[UUID] = []
+    for assignment_id in assignment_ids:
+        single = await store.contributions_for_assignment(assignment_id)
+        grouped = batched.get(assignment_id, ())
+        assert grouped == single
+        contribution_ids.extend(item.id for item in grouped)
+
+    batched_acceptances = await store.acceptances_for_contributions(
+        (*tuple(contribution_ids), UUID(int=777))
+    )
+    for contribution_id in contribution_ids:
+        single_acceptance = await store.acceptance_for_contribution(contribution_id)
+        assert batched_acceptances.get(contribution_id) == single_acceptance
+    assert batched_acceptances.get(UUID(int=777), None) is None
+    assert await store.contributions_for_assignments(()) == {}
+    assert await store.acceptances_for_contributions(()) == {}
     await database.close()

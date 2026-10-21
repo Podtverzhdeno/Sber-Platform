@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import UTC, datetime
 from decimal import Decimal
 from typing import Any, cast
@@ -225,6 +226,15 @@ class SqlWorkStore(WorkStore):
             row = (await session.execute(self._select().where(tasks.c.id == task_id))).one_or_none()
             return _record(row) if row is not None else None
 
+    async def tasks_for_ids(self, task_ids: Sequence[UUID]) -> dict[UUID, TaskRecord]:
+        identifiers = tuple(set(task_ids))
+        if not identifiers:
+            return {}
+        async with self.database.sessions() as session:
+            rows = (await session.execute(self._select().where(tasks.c.id.in_(identifiers)))).all()
+        records = tuple(_record(row) for row in rows)
+        return {record.aggregate.task_id: record for record in records}
+
     async def save(self, record: TaskRecord) -> TaskRecord:
         async with self.database.session() as session:
             result = await session.execute(
@@ -344,7 +354,6 @@ class SqlWorkStore(WorkStore):
             row = (await session.execute(query)).mappings().one_or_none()
             if row is None:
                 return None
-            payload = dict(row["payload"])
             compensation_row = (
                 (
                     await session.execute(
@@ -356,33 +365,83 @@ class SqlWorkStore(WorkStore):
                 .mappings()
                 .one()
             )
-            paid = bool(compensation_row["paid"])
-            base_amount = compensation_row["base_amount"]
-            currency = compensation_row["currency"]
-            if paid and compensation_row["data_origin"] == "demo_seed":
-                # Compatibility for the first demo dataset, where every fourth
-                # paid task accidentally omitted its amount.
-                base_amount = base_amount or Decimal("50000")
-                currency = currency or "RUB"
-            return TermsRecord(
-                task_id,
-                row["terms_version"],
-                row["deadline_at"],
-                str(payload.get("deliverable", "")),
-                tuple(str(item) for item in payload.get("acceptance_criteria", [])),
-                str(payload["support_mode"]) if payload.get("support_mode") else None,
-                CompensationTerms(
-                    paid=paid,
-                    base_amount_per_assignee=base_amount if paid else None,
-                    currency=currency if paid else None,
-                    b_multiplier=compensation_row["b_multiplier"],
-                    a_multiplier=compensation_row["a_multiplier"],
-                    quantum=compensation_row["quantum"],
-                    rounding_mode=RoundingMode(compensation_row["rounding_mode"]),
-                    policy_version=compensation_row["policy_version"],
-                    payout_condition=compensation_row["payout_condition"],
-                ),
+            return self._terms_record(task_id, row, compensation_row)
+
+    @staticmethod
+    def _terms_record(task_id: UUID, row: Any, compensation_row: Any) -> TermsRecord:
+        payload = dict(row["payload"])
+        paid = bool(compensation_row["paid"])
+        base_amount = compensation_row["base_amount"]
+        currency = compensation_row["currency"]
+        if paid and compensation_row["data_origin"] == "demo_seed":
+            # Compatibility for the first demo dataset, where every fourth
+            # paid task accidentally omitted its amount.
+            base_amount = base_amount or Decimal("50000")
+            currency = currency or "RUB"
+        return TermsRecord(
+            task_id,
+            row["terms_version"],
+            row["deadline_at"],
+            str(payload.get("deliverable", "")),
+            tuple(str(item) for item in payload.get("acceptance_criteria", [])),
+            str(payload["support_mode"]) if payload.get("support_mode") else None,
+            CompensationTerms(
+                paid=paid,
+                base_amount_per_assignee=base_amount if paid else None,
+                currency=currency if paid else None,
+                b_multiplier=compensation_row["b_multiplier"],
+                a_multiplier=compensation_row["a_multiplier"],
+                quantum=compensation_row["quantum"],
+                rounding_mode=RoundingMode(compensation_row["rounding_mode"]),
+                policy_version=compensation_row["policy_version"],
+                payout_condition=compensation_row["payout_condition"],
+            ),
+        )
+
+    async def latest_terms_for_tasks(self, task_ids: Sequence[UUID]) -> dict[UUID, TermsRecord]:
+        identifiers = tuple(set(task_ids))
+        if not identifiers:
+            return {}
+        async with self.database.sessions() as session:
+            term_rows = (
+                (
+                    await session.execute(
+                        select(task_terms_versions)
+                        .where(task_terms_versions.c.task_id.in_(identifiers))
+                        .order_by(
+                            task_terms_versions.c.task_id,
+                            task_terms_versions.c.terms_version.desc(),
+                        )
+                    )
+                )
+                .mappings()
+                .all()
             )
+            latest_rows: dict[UUID, Any] = {}
+            for row in term_rows:
+                latest_rows.setdefault(row["task_id"], row)
+            compensation_rows = (
+                (
+                    await session.execute(
+                        select(compensation_terms).where(
+                            compensation_terms.c.task_terms_version_id.in_(
+                                tuple(row["id"] for row in latest_rows.values())
+                            )
+                        )
+                    )
+                )
+                .mappings()
+                .all()
+            )
+        compensation_by_terms = {row["task_terms_version_id"]: row for row in compensation_rows}
+        return {
+            task_id: self._terms_record(
+                task_id,
+                row,
+                compensation_by_terms[row["id"]],
+            )
+            for task_id, row in latest_rows.items()
+        }
 
     async def published_tasks(self) -> tuple[TaskRecord, ...]:
         async with self.database.sessions() as session:
@@ -404,6 +463,29 @@ class SqlWorkStore(WorkStore):
                 )
             )
 
+    async def accepted_terms_versions(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> dict[UUID, int | None]:
+        identifiers = tuple(set(task_ids))
+        if not identifiers:
+            return {}
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(
+                        applications.c.task_id,
+                        applications.c.accepted_terms_version,
+                    ).where(
+                        applications.c.person_id == person_id,
+                        applications.c.task_id.in_(identifiers),
+                    )
+                )
+            ).all()
+        accepted: dict[UUID, int | None] = {}
+        for task_id, version in rows:
+            accepted.setdefault(task_id, version)
+        return accepted
+
     @staticmethod
     def _invitation(row: Any) -> InvitationRecord:
         return InvitationRecord(
@@ -421,6 +503,23 @@ class SqlWorkStore(WorkStore):
                 )
             ).one_or_none()
             return self._invitation(row) if row else None
+
+    async def invitations_for_person_tasks(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> dict[UUID, InvitationRecord]:
+        identifiers = tuple(set(task_ids))
+        if not identifiers:
+            return {}
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(task_invitations).where(
+                        task_invitations.c.task_id.in_(identifiers),
+                        task_invitations.c.person_id == person_id,
+                    )
+                )
+            ).all()
+        return {row.task_id: self._invitation(row) for row in rows}
 
     @staticmethod
     def _team_request(row: Any) -> TeamRequestRecord:
@@ -1270,19 +1369,56 @@ class SqlWorkStore(WorkStore):
     async def contributions_for_assignment(
         self, assignment_id: UUID
     ) -> tuple[ContributionRecord, ...]:
+        groups = await self.contributions_for_assignments((assignment_id,))
+        return groups.get(assignment_id, ())
+
+    async def contributions_for_assignments(
+        self, assignment_ids: Sequence[UUID]
+    ) -> dict[UUID, tuple[ContributionRecord, ...]]:
+        identifiers = tuple(set(assignment_ids))
+        if not identifiers:
+            return {}
+        grouped: dict[UUID, list[ContributionRecord]] = {key: [] for key in identifiers}
         async with self.database.sessions() as session:
-            contribution_ids = tuple(
-                await session.scalars(
-                    select(contributions.c.id)
-                    .where(contributions.c.assignment_id == assignment_id)
-                    .order_by(contributions.c.contribution_version)
+            rows = (
+                await session.execute(
+                    select(contributions)
+                    .where(contributions.c.assignment_id.in_(identifiers))
+                    .order_by(contributions.c.contribution_version, contributions.c.id)
+                )
+            ).all()
+            artifact_rows = []
+            if rows:
+                artifact_rows = list(
+                    (
+                        await session.execute(
+                            select(
+                                artifact_table.c.contribution_id,
+                                artifact_table.c.artifact_key,
+                            )
+                            .where(
+                                artifact_table.c.contribution_id.in_(tuple(row.id for row in rows))
+                            )
+                            .order_by(artifact_table.c.artifact_key)
+                        )
+                    ).all()
+                )
+        artifact_keys: dict[UUID, list[str]] = {}
+        for contribution_id, artifact_key in artifact_rows:
+            artifact_keys.setdefault(contribution_id, []).append(str(artifact_key))
+        for row in rows:
+            grouped[row.assignment_id].append(
+                ContributionRecord(
+                    row.id,
+                    row.assignment_id,
+                    row.contribution_version,
+                    row.summary,
+                    tuple(artifact_keys.get(row.id, ())),
+                    ContributionStatus(row.status),
+                    row.created_at,
                 )
             )
-            records = [
-                await self._contribution(session, contribution_id)
-                for contribution_id in contribution_ids
-            ]
-        return tuple(record for record in records if record is not None)
+        return {key: tuple(items) for key, items in grouped.items()}
 
     async def acceptance_for_contribution(self, contribution_id: UUID) -> AcceptanceRecord | None:
         async with self.database.sessions() as session:
@@ -1291,8 +1427,24 @@ class SqlWorkStore(WorkStore):
                     select(acceptances).where(acceptances.c.contribution_id == contribution_id)
                 )
             ).one_or_none()
-        if row is None:
-            return None
+        return self._acceptance(row) if row else None
+
+    async def acceptances_for_contributions(
+        self, contribution_ids: Sequence[UUID]
+    ) -> dict[UUID, AcceptanceRecord]:
+        identifiers = tuple(set(contribution_ids))
+        if not identifiers:
+            return {}
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(acceptances).where(acceptances.c.contribution_id.in_(identifiers))
+                )
+            ).all()
+        return {row.contribution_id: self._acceptance(row) for row in rows}
+
+    @staticmethod
+    def _acceptance(row: Any) -> AcceptanceRecord:
         payload = dict(row.payload)
         deadline = payload.get("deadline_at")
         owner_id = payload.get("owner_id")

@@ -1,5 +1,6 @@
 """Role-scoped analytics API."""
 
+import asyncio
 from collections import Counter
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
@@ -20,8 +21,13 @@ from impulse.application.analytics import (
     suppress_small_cohort,
     unknown_reason,
 )
+from impulse.application.concurrency import compose_reads
+from impulse.application.development import EnrollmentRecord
 from impulse.application.identity import AuthenticatedSession
+from impulse.application.reward import RewardWorkspaceItem
 from impulse.application.talent import PipelineStage
+from impulse.application.work import CustomerTaskDetail, TaskRecord, WorkItem
+from impulse.domain.development import TrackAttempt
 from impulse.domain.identity import Role
 
 router = APIRouter()
@@ -82,11 +88,30 @@ async def participant_journey(
     actor = authenticated.actor
     if actor.active_role is not Role.PARTICIPANT:
         raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
+    development_service = request.app.state.development_service
+    work_service = request.app.state.work_service
+    reward_service = request.app.state.reward_service
+
+    async def attempts() -> tuple[TrackAttempt, ...]:
+        return await development_service.store.attempts(actor.person_id)
+
+    async def enrollments() -> tuple[EnrollmentRecord, ...]:
+        return await development_service.store.enrollments(actor.person_id)
+
+    async def work() -> tuple[WorkItem, ...]:
+        return await work_service.participant_work(actor)
+
+    async def rewards() -> tuple[RewardWorkspaceItem, ...]:
+        return await reward_service.participant_reward_evidence(actor)
+
+    traced_attempts, completed, work_items, reward_items = await asyncio.gather(
+        attempts(), enrollments(), work(), rewards()
+    )
     projection = participant_analytics(
-        await request.app.state.development_service.store.attempts(actor.person_id),
-        await request.app.state.development_service.store.enrollments(actor.person_id),
-        await request.app.state.work_service.participant_work(actor),
-        await request.app.state.reward_service.participant_reward_evidence(actor),
+        traced_attempts,
+        completed,
+        work_items,
+        reward_items,
         generated_at=datetime.now(UTC),
     )
     return ParticipantAnalyticsView.model_validate(projection, from_attributes=True)
@@ -134,10 +159,13 @@ async def role_analytics(
     elif actor.active_role is Role.CUSTOMER:
         tasks = await request.app.state.work_service.customer_tasks(actor)
         published = sum(item.aggregate.status.value == "published" for item in tasks)
-        details = [
-            await request.app.state.work_service.customer_task_detail(actor, item.aggregate.task_id)
-            for item in tasks
-        ]
+
+        async def detail_for(item: TaskRecord) -> CustomerTaskDetail:
+            return await request.app.state.work_service.customer_task_detail(
+                actor, item.aggregate.task_id
+            )
+
+        details = await compose_reads(tasks, detail_for)
         applications = sum(len(item.applications) for item in details)
         assignments = sum(len(item.assignments) for item in details)
         contributions = sum(len(item.contributions) for item in details)

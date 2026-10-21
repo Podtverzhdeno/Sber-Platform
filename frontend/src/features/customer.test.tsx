@@ -355,3 +355,177 @@ describe("customer ai draft hint", () => {
     expect(screen.getByLabelText("Критерии приёмки построчно")).toHaveValue("Precision@10 >= 0.7");
   });
 });
+
+describe("customer ai applied provenance", () => {
+  it("marks applied fragments with textual and programmatic proof, lists before/after and stays idempotent", async () => {
+    mockHome([taskEconomy], undefined, undefined, () => ({
+      kind: "customer_brief",
+      editable: true,
+      problem: "Найти релевантные статьи по запросу исследователя",
+      deliverable: "Прототип поиска",
+      acceptance_criteria: ["Precision@10 >= 0.7"],
+      notice: "Черновик от AI можно редактировать; публикация возможна только человеком.",
+      gateway_called: true,
+    }));
+    renderHome();
+
+    await waitFor(() => { expect(screen.getAllByText("Оптимизация логистики региона").length).toBeGreaterThan(0); });
+    fireEvent.click(screen.getByRole("button", { name: "+ Создать задачу" }));
+    fireEvent.change(screen.getByLabelText("Название"), { target: { value: "Поиск статей" } });
+    fireEvent.change(screen.getByLabelText("Компетенции кейса через запятую"), { target: { value: "NLP" } });
+    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    await screen.findByText("Проблема");
+
+    expect(screen.queryByText("Фрагменты от AI-подсказки")).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("Проблема"), { target: { value: "Старая формулировка" } });
+    fireEvent.click(screen.getByRole("button", { name: "AI-подсказка по брифу" }));
+    await waitFor(() => {
+      const element = document.getElementById("wizard-ai-problem") as HTMLTextAreaElement | null;
+      expect(element?.value.startsWith("Найти")).toBe(true);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Вставить в бриф" }));
+
+    expect(screen.getAllByTestId("wizard-ai-applied").length).toBe(3);
+    for (const flag of screen.getAllByTestId("wizard-ai-applied")) {
+      expect(flag).toHaveTextContent("Добавлено AI");
+    }
+    const problemField = document.getElementById("wizard-problem-input") as HTMLTextAreaElement;
+    expect(problemField.value).toBe("Найти релевантные статьи по запросу исследователя");
+    const describedBy = problemField.getAttribute("aria-describedby");
+    expect(describedBy).toBe("wizard-ai-problem-note");
+    expect(document.getElementById("wizard-ai-problem-note")).toHaveTextContent("Добавлено AI");
+    expect(document.getElementById("wizard-deliverable-input")).toHaveAttribute("aria-describedby", "wizard-ai-deliverable-note");
+    expect(document.getElementById("wizard-criteria-input")).toHaveAttribute("aria-describedby", "wizard-ai-criteria-note");
+
+    expect(screen.getByText("Фрагменты от AI-подсказки")).toBeInTheDocument();
+    expect(screen.getAllByTestId("wizard-ai-change").length).toBe(3);
+    expect(screen.getByTestId("wizard-ai-problem-before")).toHaveTextContent("До: Старая формулировка");
+    expect(screen.getByTestId("wizard-ai-problem-after")).toHaveTextContent("После: Найти релевантные статьи");
+    expect(screen.getByTestId("wizard-ai-deliverable-before")).toHaveTextContent("До: пусто");
+    expect(screen.getByTestId("wizard-ai-deliverable-after")).toHaveTextContent("После: Прототип поиска");
+    expect(screen.getByTestId("wizard-ai-criterion-after")).toHaveTextContent("После: Precision@10 >= 0.7");
+
+    fireEvent.click(screen.getByRole("button", { name: "AI-подсказка по брифу" }));
+    await waitFor(() => {
+      const element = document.getElementById("wizard-ai-problem") as HTMLTextAreaElement | null;
+      expect(element?.value.startsWith("Найти")).toBe(true);
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Вставить в бриф" }));
+    expect(screen.getAllByTestId("wizard-ai-change").length).toBe(3);
+    expect(screen.getByTestId("wizard-ai-problem-before")).toHaveTextContent("До: Старая формулировка");
+
+    fireEvent.change(screen.getByLabelText("Проблема"), { target: { value: "Старая формулировка отредактирована" } });
+    expect(screen.getAllByTestId("wizard-ai-applied").length).toBe(2);
+    expect(screen.getAllByTestId("wizard-ai-change").length).toBe(2);
+    expect(screen.queryByTestId("wizard-ai-problem-before")).not.toBeInTheDocument();
+
+    fireEvent.click(firstElement(screen.getAllByRole("button", { name: "Отменить" })));
+    expect((document.getElementById("wizard-deliverable-input") as HTMLTextAreaElement).value).toBe("");
+    expect(screen.getAllByTestId("wizard-ai-applied").length).toBe(1);
+    expect(screen.getAllByTestId("wizard-ai-change").length).toBe(1);
+    expect(screen.getByTestId("wizard-ai-criterion-after")).toHaveTextContent("После: Precision@10 >= 0.7");
+  });
+});
+
+async function openWizardAtStepFive(options?: { places?: string }) {
+  mockHome([taskEconomy], undefined, undefined, () => ({
+    kind: "customer_brief",
+    editable: true,
+    problem: null,
+    deliverable: null,
+    acceptance_criteria: [],
+    notice: "AI-помощник недоступен, заполните бриф вручную.",
+    gateway_called: false,
+  }));
+  renderHome();
+  await waitFor(() => { expect(screen.getAllByText("Оптимизация логистики региона").length).toBeGreaterThan(0); });
+  fireEvent.click(screen.getByRole("button", { name: "+ Создать задачу" }));
+  fireEvent.change(screen.getByLabelText("Название"), { target: { value: "Публичный бриф" } });
+  fireEvent.change(screen.getByLabelText("Компетенции кейса через запятую"), { target: { value: "NLP" } });
+  fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+  fireEvent.change(screen.getByLabelText("Проблема"), { target: { value: "Сверить гипотезу на исторических данных." } });
+  fireEvent.change(screen.getByLabelText("Результат"), { target: { value: "Отчёт с метриками." } });
+  fireEvent.change(screen.getByLabelText("Критерии приёмки построчно"), { target: { value: "Метрика выше базовой" } });
+  fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+  fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+  if (options?.places !== undefined) {
+    fireEvent.change(screen.getByLabelText("Мест для участников"), { target: { value: options.places } });
+  }
+  fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+  await screen.findByText("Предпросмотр участника");
+}
+
+describe("customer participant preview", () => {
+  it("opens a participant projection with honest missing states and no publication controls from preview", async () => {
+    await openWizardAtStepFive({ places: "0" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Показать предпросмотр" }));
+    expect(screen.getByText("Предпросмотр задачи")).toBeInTheDocument();
+    expect(screen.getByText(/Сверить гипотезу на исторических данных/)).toBeInTheDocument();
+    expect(screen.getByTestId("preview-missing")).toHaveTextContent(/количество мест/);
+    expect(screen.queryByRole("button", { name: "Отправить на модерацию" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Сохранить черновик" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Не утверждена платформой/)).toBeInTheDocument();
+    expect(screen.getByText(/премия за оценку 5\+ не обещается/)).toBeInTheDocument();
+    expect(screen.getByText("Открытая заявка")).toBeInTheDocument();
+    expect(screen.getAllByText("не указано").length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("button", { name: "Вернуться к редактированию" }));
+    expect(screen.getByText("Шаг 5 из 5")).toBeInTheDocument();
+    expect(screen.getByTestId("wizard-brief-complete")).toHaveTextContent(/количество мест/);
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
+    expect(screen.getByText("Шаг 2 из 5")).toBeInTheDocument();
+    expect(screen.getByLabelText("Проблема")).toHaveValue("Сверить гипотезу на исторических данных.");
+    expect(screen.getByLabelText("Критерии приёмки построчно")).toHaveValue("Метрика выше базовой");
+    expect(screen.queryByRole("button", { name: "Отправить на модерацию" })).toBeNull();
+  });
+
+  it("keeps preview honest on foreign-tab draft change: stale notice, no auto-mix, explicit refresh", async () => {
+    await openWizardAtStepFive();
+
+    fireEvent.click(screen.getByRole("button", { name: "Показать предпросмотр" }));
+    expect(screen.queryByTestId("preview-stale")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("preview-missing")).not.toBeInTheDocument();
+
+    const changedDraft = JSON.stringify({
+      step: 5,
+      taskMode: "open",
+      form: {
+        title: "Внешнее имя черновика",
+        competencyTags: "NLP",
+        rubricResult: "", rubricReasoning: "", rubricUncertainty: "", rubricAiUse: "", rubricDefense: "",
+        problem: "Внешняя формулировка проблемы.",
+        deliverable: "Внешний результат.",
+        criterion: "Внешний критерий",
+        deadline: "", dataConstraints: "", ipTerms: "", places: "4", baseAmount: "", aMultiplier: "1.0",
+        supportModel: "platform", supportAssignee: "",
+      },
+    });
+    localStorage.setItem("impulse_customer_wizard_draft", changedDraft);
+    fireEvent(window, new StorageEvent("storage", { key: "impulse_customer_wizard_draft" }));
+    await waitFor(() => { expect(screen.getByTestId("preview-stale")).toBeInTheDocument(); });
+    expect(screen.getByText(/Сверить гипотезу на исторических данных/)).toBeInTheDocument();
+    expect(screen.queryByText("Внешняя формулировка проблемы.")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId("preview-update"));
+    expect(screen.queryByTestId("preview-stale")).not.toBeInTheDocument();
+    expect(screen.getByText("Внешнее имя черновика")).toBeInTheDocument();
+    expect(screen.getByText(/Внешняя формулировка проблемы/)).toBeInTheDocument();
+    expect(screen.getByText("Внешний критерий")).toBeInTheDocument();
+    expect(screen.queryByText(/Сверить гипотезу на исторических данных/)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Вернуться к редактированию" }));
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
+    fireEvent.click(screen.getByRole("button", { name: "Назад" }));
+    expect(screen.getByText("Шаг 1 из 5")).toBeInTheDocument();
+    expect(screen.getByLabelText("Название")).toHaveValue("Публичный бриф");
+    fireEvent.click(screen.getByRole("button", { name: "Далее" }));
+    expect(screen.getByText("Шаг 2 из 5")).toBeInTheDocument();
+    expect(screen.getByLabelText("Проблема")).toHaveValue("Сверить гипотезу на исторических данных.");
+    expect(screen.getByLabelText("Критерии приёмки построчно")).toHaveValue("Метрика выше базовой");
+  });
+});

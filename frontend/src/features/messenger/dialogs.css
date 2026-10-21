@@ -1,0 +1,373 @@
+/* Dialog list pane for R-MSG-01 (25.2). Own namespace `msg-dialog-*`,
+   built only on the global semantic tokens from styles.css. */
+
+.msg-dialog-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.msg-dialog-list__top {
+  display: flex;
+  gap: var(--space-2, 8px);
+  align-items: flex-start;
+  padding: var(--space-2, 8px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.msg-dialog-list__search {
+  flex: 1;
+  min-width: 0;
+}
+
+.msg-dialog-list__search-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.msg-dialog-list__search-field {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1, 4px);
+  padding: 0 var(--space-2, 8px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-bg);
+  color: var(--color-muted);
+}
+
+.msg-dialog-list__search-field:focus-within {
+  border-color: var(--color-accent);
+}
+
+.msg-dialog-list__search-field input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  padding-block: var(--space-1, 4px);
+}
+
+.msg-dialog-list__search-field input:focus-visible {
+  outline: none;
+}
+
+.msg-dialog-list__create {
+  position: relative;
+}
+
+.msg-dialog-list__create-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1, 4px);
+  padding: var(--space-1, 4px) var(--space-2, 8px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.msg-dialog-list__create-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.msg-dialog-list__create-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 1px;
+}
+
+.msg-dialog-list__create-menu {
+  position: absolute;
+  top: calc(100% + var(--space-1, 4px));
+  right: 0;
+  z-index: 4;
+  min-width: 180px;
+  max-height: 240px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-surface-raised, var(--color-surface));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+
+.msg-dialog-list__create-menu button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2, 8px);
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.msg-dialog-list__create-menu button:focus-visible {
+  outline: 2px solid var(--color-accent);
+}
+
+.msg-dialog-list__create-menu small {
+  color: var(--color-muted);
+}
+
+.msg-dialog-list__tabs {
+  display: flex;
+  gap: var(--space-1, 4px);
+  padding: 0 var(--space-2, 8px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.msg-dialog-list__tabs button {
+  padding: var(--space-1, 4px) var(--space-2, 8px);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--color-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.msg-dialog-list__tabs button.active {
+  color: var(--color-text);
+  border-bottom-color: var(--color-accent);
+}
+
+.msg-dialog-list__tabs button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.msg-dialog-list__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.msg-dialog-list__rows,
+.msg-dialog-list__contacts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.msg-dialog-list__row-item {
+  position: relative;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.msg-dialog-list__row {
+  display: flex;
+  gap: var(--space-2, 8px);
+  width: 100%;
+  padding: var(--space-2, 8px);
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.msg-dialog-list__row:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.msg-dialog-list__row-item.selected .msg-dialog-list__row {
+  background: var(--color-surface-raised, var(--color-surface));
+}
+
+.msg-dialog-list__row-item.muted .msg-dialog-list__preview,
+.msg-dialog-list__row-item.muted .msg-dialog-list__row-title {
+  opacity: 0.72;
+}
+
+.msg-dialog-list__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--color-surface-raised, var(--color-surface));
+  border: 1px solid var(--color-border);
+  font-weight: 600;
+}
+
+.msg-dialog-list__row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.msg-dialog-list__row-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1, 4px);
+  min-width: 0;
+}
+
+.msg-dialog-list__row-title strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msg-dialog-list__draft {
+  flex: 0 0 auto;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--color-accent);
+}
+
+.msg-dialog-list__mention {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+  font-style: normal;
+  font-size: 11px;
+  color: var(--color-accent);
+}
+
+.msg-dialog-list__muteinner {
+  display: inline-flex;
+  color: var(--color-muted);
+}
+
+.msg-dialog-list__preview {
+  color: var(--color-muted);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msg-dialog-list__kind {
+  color: var(--color-muted);
+  font-size: 11px;
+}
+
+.msg-dialog-list__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1, 4px);
+  color: var(--color-muted);
+  font-size: 12px;
+  flex: 0 0 auto;
+}
+
+.msg-dialog-list__unread {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--color-bg, #fff);
+  text-align: center;
+  font-weight: 600;
+}
+
+.msg-dialog-list__row-item.muted .msg-dialog-list__unread {
+  opacity: 0.6;
+}
+
+.msg-dialog-list__row-actions {
+  position: absolute;
+  top: var(--space-1, 4px);
+  right: var(--space-1, 4px);
+  display: inline-flex;
+  gap: 2px;
+}
+
+.msg-dialog-list__row-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--color-surface-raised, var(--color-surface));
+  color: var(--color-muted);
+  opacity: 0;
+  cursor: pointer;
+}
+
+.msg-dialog-list__row-item:hover .msg-dialog-list__row-action,
+.msg-dialog-list__row-item:focus-within .msg-dialog-list__row-action {
+  opacity: 0.9;
+}
+
+.msg-dialog-list__row-action:focus-visible {
+  outline: 2px solid var(--color-accent);
+}
+
+.msg-dialog-list__contacts button,
+.msg-dialog-list__contacts li > button {
+  display: flex;
+  gap: var(--space-2, 8px);
+  width: 100%;
+  padding: var(--space-2, 8px);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  align-items: center;
+  cursor: pointer;
+}
+
+.msg-dialog-list__contacts button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+
+.msg-dialog-list__contact-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.msg-dialog-list__contact-text small {
+  color: var(--color-muted);
+}
+
+.msg-dialog-list__empty {
+  padding: var(--space-4, 16px) var(--space-2, 8px);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.msg-dialog-list__empty p {
+  margin: 0 0 var(--space-1, 4px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .msg-dialog-list__create-menu,
+  .msg-dialog-list__row-action {
+    transition: opacity 120ms ease;
+  }
+}

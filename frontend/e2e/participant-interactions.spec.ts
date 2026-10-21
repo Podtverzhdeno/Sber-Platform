@@ -160,6 +160,16 @@ test.beforeEach(async ({ page }) => {
       ? { policy_version: 1, ai_model_available: false, dismissed: true, suggestion: null }
       : { policy_version: 1, ai_model_available: false, dismissed: false, suggestion: buddySuggestion },
   }));
+  await page.route("**/api/v1/agents/buddy/suggestion/target*", (route) => route.fulfill({
+    json: {
+      target: {
+        kind: "checkpoint",
+        ref: "checkpoint:rag-mvp",
+        title: "Начать checkpoint: RAG: надёжный поиск по документам",
+        canonical_path: "/workspace/2?course=python-base",
+      },
+    },
+  }));
   await page.route("**/api/v1/agents/buddy/suggestion/dismiss", (route) => {
     buddyDismissed = true;
     return route.fulfill({ status: 204 });
@@ -447,10 +457,10 @@ test("search, streak, task detail and messages are interactive", async ({ page }
   await page.getByRole("button", { name: "Открыть чат команды" }).click();
   await expect(page).toHaveURL(/\/workspace\/10\?participant=project$/);
   await expect(page.getByRole("heading", { name: "Сообщения" })).toBeVisible();
-  await expect(page.locator(".chat-list button.active strong")).toContainText("Рекомендательная система");
-  await page.getByLabel("Сообщение").fill("Готово к повторной проверке");
+  await expect(page.getByRole("region", { name: "Текущий чат · Рекомендательная система" })).toBeVisible();
+  await page.getByRole("textbox", { name: "Текст сообщения" }).fill("Готово к повторной проверке");
   await page.getByRole("button", { name: "Отправить" }).click();
-  await expect(page.getByRole("paragraph").filter({ hasText: "Готово к повторной проверке" })).toBeVisible();
+  await expect(page.getByRole("list", { name: "История чата" }).getByText("Готово к повторной проверке", { exact: true })).toBeVisible();
 });
 
 test("application confirms success and appears in my tasks", async ({ page }) => {

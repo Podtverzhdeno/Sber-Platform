@@ -8,7 +8,8 @@ export function createQueryClient(): QueryClient {
       queries: {
         retry: retrySafeRead,
         refetchOnWindowFocus: false,
-        staleTime: 15_000,
+        staleTime: 60_000,
+        gcTime: 10 * 60_000,
       },
       mutations: { retry: false },
     },

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import AsyncIterator
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request
@@ -158,6 +158,19 @@ class BuddyActionView(BaseModel):
     kind: str
     ref: str
     title: str
+    target_kind: str
+    target_id: str
+    checkpoint_id: str | None
+    target_version: int | None
+    canonical_path: str
+    estimated_minutes: int | None
+    deadline_at: AwareDatetime | None
+    points: int | None
+    points_note: str
+    skill_forecast: str
+    effect_state: str
+    available: bool
+    stale_reason: str | None
 
 
 class BuddySuggestionView(BaseModel):
@@ -174,6 +187,9 @@ class BuddySuggestionView(BaseModel):
     idle_days: int | None
     model_called: bool
     auto_enrolled: bool
+    rank_score: str
+    partial: bool
+    coverage_note: str
 
 
 class BuddySuggestionStateView(BaseModel):
@@ -181,10 +197,22 @@ class BuddySuggestionStateView(BaseModel):
     ai_model_available: bool
     dismissed: bool
     suggestion: BuddySuggestionView | None
+    suggestions: list[BuddySuggestionView]
 
 
 class SuggestionDismissRequest(BaseModel):
     suggestion_id: str = Field(min_length=1, max_length=256)
+
+
+class SuggestionFeedbackRequest(BaseModel):
+    suggestion_id: str = Field(min_length=1, max_length=256)
+    action: Literal["dismiss", "snooze", "irrelevant"]
+    snooze_until: AwareDatetime | None = None
+
+
+class SuggestionTargetView(BaseModel):
+    suggestion_id: str
+    target: BuddyActionView
 
 
 def _suggestion_service(request: Request) -> BuddySuggestionService:
@@ -207,7 +235,24 @@ def _suggestion_view(item: BuddySuggestion) -> BuddySuggestionView:
         observation=item.observation,
         gap=item.gap,
         action=(
-            BuddyActionView(kind=item.action.kind, ref=item.action.ref, title=item.action.title)
+            BuddyActionView(
+                kind=item.action.kind,
+                ref=item.action.ref,
+                title=item.action.title,
+                target_kind=item.action.target.kind.value,
+                target_id=item.action.target.object_id,
+                checkpoint_id=item.action.target.checkpoint_id,
+                target_version=item.action.target.version,
+                canonical_path=item.action.canonical_path,
+                estimated_minutes=item.action.estimated_minutes,
+                deadline_at=item.action.deadline_at,
+                points=item.action.points,
+                points_note=item.action.points_note,
+                skill_forecast=item.action.skill_forecast,
+                effect_state=item.action.effect_state,
+                available=item.action.available,
+                stale_reason=item.action.stale_reason,
+            )
             if item.action is not None
             else None
         ),
@@ -217,6 +262,9 @@ def _suggestion_view(item: BuddySuggestion) -> BuddySuggestionView:
         idle_days=item.idle_days,
         model_called=item.model_called,
         auto_enrolled=item.auto_enrolled,
+        rank_score=item.rank_score,
+        partial=item.partial,
+        coverage_note=item.coverage_note,
     )
 
 
@@ -231,12 +279,43 @@ async def get_suggestion(
     settings = getattr(request.app.state, "settings", None)
     ai_available = bool(getattr(settings, "ai_buddy_enabled", False))
     return BuddySuggestionStateView(
-        policy_version=state.suggestion.version
-        if state.suggestion is not None
-        else BUDDY_SUGGESTION_VERSION,
+        policy_version=BUDDY_SUGGESTION_VERSION,
         ai_model_available=ai_available,
         dismissed=state.dismissed,
         suggestion=(_suggestion_view(state.suggestion) if state.suggestion is not None else None),
+        suggestions=[_suggestion_view(item) for item in state.suggestions],
+    )
+
+
+@router.get("/suggestion/target", response_model=SuggestionTargetView)
+async def resolve_suggestion_target(
+    suggestion_id: str,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[BuddySuggestionService, Depends(_suggestion_service)],
+) -> SuggestionTargetView:
+    """Stale/RBAC recheck immediately before the browser follows a deep link."""
+    suggestion = await service.resolve(authenticated.actor, suggestion_id)
+    if suggestion.action is None:
+        raise ValueError("Suggestion has no navigation target")
+    action = _suggestion_view(suggestion).action
+    assert action is not None
+    return SuggestionTargetView(
+        suggestion_id=suggestion.suggestion_id,
+        target=action,
+    )
+
+
+@router.post("/suggestion/feedback", status_code=204)
+async def suggestion_feedback(
+    body: SuggestionFeedbackRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[BuddySuggestionService, Depends(_suggestion_service)],
+) -> None:
+    await service.feedback(
+        authenticated.actor,
+        body.suggestion_id,
+        action=body.action,
+        snooze_until=body.snooze_until,
     )
 
 

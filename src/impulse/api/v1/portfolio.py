@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from dataclasses import replace
 from typing import Annotated
 from uuid import UUID
@@ -11,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import csrf_session, current_session
+from impulse.application.concurrency import compose_reads
 from impulse.application.development import DevelopmentService
 from impulse.application.identity import AuthenticatedSession, DemoAuthService, PersonaRecord
 from impulse.application.reward import RewardService
@@ -119,14 +121,20 @@ async def _projection(
 ) -> PortfolioView:
     auth, work, reward, development = _services(request)
     actor = _participant_actor(persona, authenticated)
-    work_items = await work.participant_work(actor)
-    reward_items = await reward.participant_reward_evidence(actor)
+    work_items, reward_items, course_records, enrollments, consents = await asyncio.gather(
+        work.participant_work(actor),
+        reward.participant_reward_evidence(actor),
+        development.store.courses(),
+        development.store.enrollments(persona.person_id),
+        auth.store.granted_consents(persona.person_id),
+    )
     public_statuses = {ReviewStatus.PUBLISHED, ReviewStatus.CORRECTED, ReviewStatus.UPHELD}
     reviews = {
         item.review.contribution_id: item.review
         for item in reward_items
         if item.review.status in public_statuses
     }
+    course_titles = {item.key: item.title for item in course_records}
     contributions: list[PortfolioContributionView] = []
     for item in work_items:
         for contribution in item.contributions:
@@ -144,17 +152,15 @@ async def _projection(
                     verification_status="verified",
                 )
             )
-    course_records = {item.key: item for item in await development.store.courses()}
     courses = [
         PortfolioCourseView(
             key=item.course_key,
-            title=course_records[item.course_key].title,
+            title=course_titles[item.course_key],
             status=item.status.value,
         )
-        for item in await development.store.enrollments(persona.person_id)
-        if item.status is CompletionStatus.VERIFIED and item.course_key in course_records
+        for item in enrollments
+        if item.status is CompletionStatus.VERIFIED and item.course_key in course_titles
     ]
-    consents = await auth.store.granted_consents(persona.person_id)
     return PortfolioView(
         person_id=persona.person_id,
         display_name=persona.display_name,
@@ -194,13 +200,24 @@ async def hr_candidates(
 ) -> list[CandidateSummaryView]:
     _require_role(authenticated, Role.HR)
     auth, *_ = _services(request)
+    participants = [
+        persona for persona in await auth.store.list_personas() if Role.PARTICIPANT in persona.roles
+    ]
+    consents = await compose_reads(
+        participants, lambda persona: auth.store.granted_consents(persona.person_id)
+    )
+    eligible = [
+        persona
+        for persona, persona_consents in zip(participants, consents, strict=True)
+        if ConsentScope.HR_PROFILE in persona_consents
+    ]
+    portfolios: tuple[PortfolioView, ...] = ()
+    if eligible:
+        portfolios = await compose_reads(
+            eligible, lambda persona: _projection(request, authenticated, persona)
+        )
     result: list[CandidateSummaryView] = []
-    for persona in await auth.store.list_personas():
-        if Role.PARTICIPANT not in persona.roles:
-            continue
-        if ConsentScope.HR_PROFILE not in await auth.store.granted_consents(persona.person_id):
-            continue
-        portfolio = await _projection(request, authenticated, persona)
+    for persona, portfolio in zip(eligible, portfolios, strict=True):
         grades = [item.grade for item in portfolio.contributions if item.grade]
         candidate = CandidateSummaryView(
             person_id=persona.person_id,
