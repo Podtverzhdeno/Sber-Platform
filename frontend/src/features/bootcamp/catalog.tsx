@@ -188,7 +188,7 @@ function CatalogFilters({
   const view = searchParams.get("view") ?? "card";
   return (
     <>
-      <div role="group" aria-label="Фильтр актуальности" className="catalog-filter">
+      <div role="group" aria-label="Фильтр актуальности" className="catalog-segments">
         <button
           type="button"
           aria-pressed={relevanceFilter !== "relevant"}
@@ -220,7 +220,7 @@ function CatalogFilters({
           ))}
         </select>
       </label>
-      <div role="group" aria-label="Вид каталога">
+      <div role="group" aria-label="Вид каталога" className="catalog-segments">
         <button
           type="button"
           aria-pressed={view === "card"}
