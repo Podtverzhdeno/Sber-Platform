@@ -5,7 +5,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { apiRequest, ApiClientError } from "../api/client";
 import { Badge, Card, Modal, StatePanel } from "../components/ui";
-import { TaskWorkspacePage } from "../components/task-workspace-page";
+import { TaskWorkspacePage, type TeamQuickCard } from "../components/task-workspace-page";
 
 type Task = { id: string; title: string; status: string; places: number; mode?: "open" | "invitation_only" };
 type Compensation = { paid: boolean; base_amount_per_assignee: string | null; currency: string | null; b_multiplier: string; a_multiplier: string; b_total: string | null; a_total: string | null; quantum: string; rounding_mode: string; policy_version: number; payout_condition: string };
@@ -133,6 +133,7 @@ export function ParticipantTasks({ view = "catalog" }: { view?: "catalog" | "pro
   const [deadlineImpact, setDeadlineImpact] = useState("");
   const [deadlineAt, setDeadlineAt] = useState("");
   const [selectedAssignment, setSelectedAssignment] = useState<string | null>(() => { const fromUrl = searchParams.get("project"); if (fromUrl !== null) return fromUrl; const assignmentId = sessionStorage.getItem("impulse_open_assignment"); sessionStorage.removeItem("impulse_open_assignment"); return assignmentId; });
+  const [selectedTeamMember, setSelectedTeamMember] = useState<string | null>(null);
   const [applicationNotice, setApplicationNotice] = useState<string | null>(null);
   const [catalogView, setCatalogView] = useState<"cards" | "list">(() => localStorage.getItem("impulse_task_catalog_view") === "list" ? "list" : "cards");
   const [taskCategory, setTaskCategory] = useState<"Все" | "Аналитика" | "ML / AI" | "Разработка">("Все");
@@ -185,12 +186,24 @@ export function ParticipantTasks({ view = "catalog" }: { view?: "catalog" | "pro
     queryFn: () => apiRequest<TaskDetail>(`/api/v1/me/tasks/${taskPreview?.taskId ?? ""}`),
     enabled: taskPreview !== null,
   });
+  const selectedWorkForWorkspace = work.data?.find((item) => item.assignment.id === selectedAssignment);
+  const workspaceDetail = useQuery({
+    queryKey: ["workspace-task-detail", selectedWorkForWorkspace?.task.id],
+    queryFn: () => apiRequest<TaskDetail>(`/api/v1/me/tasks/${selectedWorkForWorkspace?.task.id ?? ""}`),
+    enabled: view === "projects" && !detailMode && selectedWorkForWorkspace !== undefined,
+  });
+  const teamQuickCard = useQuery({
+    queryKey: ["workspace-team-quick-card", selectedWorkForWorkspace?.task.id, selectedTeamMember],
+    queryFn: () => apiRequest<TeamQuickCard>(`/api/v1/me/tasks/${selectedWorkForWorkspace?.task.id ?? ""}/team/${selectedTeamMember ?? ""}/quick-card`),
+    enabled: selectedWorkForWorkspace !== undefined && selectedTeamMember !== null,
+    retry: false,
+  });
 
   if (catalog.isLoading || work.isLoading) return <StatePanel kind="loading" />;
   if (!catalog.data || !work.data || catalog.isError || work.isError) return <StatePanel kind="error" action="Повторить" onAction={() => { void catalog.refetch(); void work.refetch(); }} />;
-  const selectedWork = view === "projects" ? work.data.find((item) => item.assignment.id === selectedAssignment) : undefined;
+  const selectedWork = view === "projects" ? selectedWorkForWorkspace : undefined;
   if (selectedWork && !detailMode) {
-    return <TaskWorkspacePage mode="participant" title={selectedWork.task.title} taskId={selectedWork.task.id.slice(0, 8)} description={selectedWork.terms.deliverable} deadline={new Date(selectedWork.terms.deadline_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })} tags={["AI / ML", "Python", "RAG", "Backend"]} onMessage={() => { void navigate("/workspace/10?participant=project"); }} onPrimaryAction={() => { setSummary("Новая версия результата готова к отправке"); setArtifactUrl("https://github.com/impulse/project/releases/latest"); }} />;
+    return <TaskWorkspacePage mode="participant" title={selectedWork.task.title} taskId={selectedWork.task.id} description={selectedWork.terms.deliverable} deadline={new Date(selectedWork.terms.deadline_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long" })} tags={["AI / ML", "Python", "RAG", "Backend"]} workspace={workspaceDetail.data ? { team: workspaceDetail.data.team, checkpoints: workspaceDetail.data.checkpoints, contributions: workspaceDetail.data.personal, feedback: workspaceDetail.data.feedback, freshness: `условия версии ${String(workspaceDetail.data.terms.version)}` } : undefined} quickCard={teamQuickCard.data ?? null} quickCardLoading={teamQuickCard.isLoading && selectedTeamMember !== null} quickCardError={teamQuickCard.isError} onSelectMember={(personId) => { setSelectedTeamMember(personId); }} onCloseQuickCard={() => { setSelectedTeamMember(null); }} onOpenProfile={(personId) => { void navigate(`/workspace/7?participant=${encodeURIComponent(personId)}&project=${encodeURIComponent(selectedWork.task.id)}&return=${encodeURIComponent(`/workspace/4?project=${selectedWork.assignment.id}`)}`); }} onOpenDirectMessage={(personId) => { void navigate(`/workspace/10?participant=${encodeURIComponent(personId)}&task=${encodeURIComponent(selectedWork.task.id)}`); }} onMessage={() => { void navigate(`/workspace/10?task=${encodeURIComponent(selectedWork.task.id)}`); }} onPrimaryAction={() => { setSummary("Новая версия результата готова к отправке"); setArtifactUrl("https://github.com/impulse/project/releases/latest"); }} />;
   }
     const pendingItems = catalog.data.filter((item) => appliedTaskIds.includes(item.task.id));
   const categoryOrder = ["ML / AI", "Аналитика", "Разработка"] as const;

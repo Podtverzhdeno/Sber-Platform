@@ -1,5 +1,5 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TaskWorkspacePage } from "./task-workspace-page";
 
@@ -108,5 +108,48 @@ describe("workspace collapsible sections (openspec 22.22)", () => {
     renderWorkspace("task-other");
     expect(screen.getByRole("button", { name: /Описание/ })).toHaveAttribute("aria-expanded", "true");
     expect(sectionBody("about")).toBeVisible();
+  });
+});
+
+describe("workspace team and metric drill-down (openspec 22.23)", () => {
+  const workspace = {
+    team: [{ person_id: "00000000-0000-0000-0000-000000000002", display_name: "Мария Воронова", status: "submitted" }],
+    checkpoints: [
+      { key: "research", title: "Исследование", status: "completed" },
+      { key: "api", title: "API", status: "in_progress" },
+    ],
+    contributions: [{ id: "contribution-1", version: 2, personal_summary: "API готов", artifact_keys: ["openapi-v2"], status: "submitted" }],
+    feedback: [{ contribution_id: "contribution-1", contribution_version: 2, review_version: 1, grade: "B", explanation: "Нужен benchmark", status: "draft" }],
+    freshness: "обновлено 21 октября, 11:30",
+  };
+
+  it("opens a consent-filtered member card and delegates exact profile and message transitions", () => {
+    const selectMember = vi.fn();
+    const openProfile = vi.fn();
+    const openMessage = vi.fn();
+    render(<TaskWorkspacePage mode="participant" title="Проект" taskId="00000000-0000-0000-0000-000000000100" description="Описание" deadline="12 мая" tags={["API"]} workspace={workspace} quickCard={{ person_id: workspace.team[0].person_id, task_id: "00000000-0000-0000-0000-000000000100", assignment_status: "submitted", contribution_status: "submitted", availability: "on_review", project_role: "Исполнитель", responsibility: "API готов", display_name: "Мария Воронова", portfolio_available: true, profile: { city: "Москва", university: null, telegram: null, about: null, skills: [{ title: "FastAPI", origin: "project", verified: true }] } }} onSelectMember={selectMember} onCloseQuickCard={() => undefined} onOpenProfile={openProfile} onOpenDirectMessage={openMessage} onMessage={() => undefined} onPrimaryAction={() => undefined} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Мария Воронова/ }));
+    expect(selectMember).toHaveBeenCalledWith(workspace.team[0].person_id);
+    expect(screen.getByRole("dialog", { name: "Карточка участника" })).toHaveTextContent("API готов");
+    fireEvent.click(screen.getByRole("button", { name: "Подробная информация" }));
+    fireEvent.click(screen.getByRole("button", { name: "Сообщение" }));
+    expect(openProfile).toHaveBeenCalledWith(workspace.team[0].person_id);
+    expect(openMessage).toHaveBeenCalledWith(workspace.team[0].person_id);
+  });
+
+  it("explains numerator, denominator, freshness and object-backed metric rows including non-inert zero states", () => {
+    render(<TaskWorkspacePage mode="participant" title="Проект" taskId="00000000-0000-0000-0000-000000000100" description="Описание" deadline="12 мая" tags={["API"]} workspace={workspace} onMessage={() => undefined} onPrimaryAction={() => undefined} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Выполнено этапов" }));
+    const stages = screen.getByRole("dialog", { name: "Расчёт ключевой метрики" });
+    expect(stages).toHaveTextContent("Числитель — завершённые checkpoint-и");
+    expect(stages).toHaveTextContent("обновлено 21 октября, 11:30");
+    expect(stages).toHaveTextContent("Исследование");
+    expect(stages).toHaveTextContent("API");
+    fireEvent.click(screen.getByRole("button", { name: "Закрыть" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Есть блокеры" }));
+    expect(screen.getByRole("dialog", { name: "Расчёт ключевой метрики" })).toHaveTextContent("Активных блокеров нет");
   });
 });

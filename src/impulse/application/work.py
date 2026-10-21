@@ -165,6 +165,30 @@ class TeamArtifactRecord:
     uri: str
 
 
+_TEAM_QUICK_AVAILABILITY: dict[AssignmentStatus, str] = {
+    AssignmentStatus.STAFFED: "available",
+    AssignmentStatus.IN_PROGRESS: "in_progress",
+    AssignmentStatus.SUBMITTED: "on_review",
+    AssignmentStatus.REVISION_REQUESTED: "on_review",
+    AssignmentStatus.DISPUTED: "on_review",
+    AssignmentStatus.ACCEPTED: "done",
+    AssignmentStatus.CLOSED: "done",
+}
+
+
+@dataclass(frozen=True, slots=True)
+class TeamQuickCard:
+    """Object-backed quick card projection for a teammate of one task."""
+
+    person_id: UUID
+    task_id: UUID
+    assignment_status: str | None
+    contribution_status: str | None
+    availability: str
+    project_role: str
+    responsibility: str
+
+
 @dataclass(frozen=True, slots=True)
 class ContributionRecord:
     id: UUID
@@ -1432,6 +1456,35 @@ class WorkService:
             checkpoints=checkpoints,
             contributions=contributions,
             applications=applications,
+        )
+
+    async def team_quick_card(
+        self, actor: ActorContext, task_id: UUID, person_id: UUID
+    ) -> TeamQuickCard:
+        self._role(actor, Role.PARTICIPANT)
+        assignments = await self.store.assignments_for_task(task_id)
+        target = next(
+            (item for item in assignments if item.person_id == person_id),
+            None,
+        )
+        assigned_ids = {item.person_id for item in assignments}
+        if target is None or actor.person_id not in assigned_ids:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        contributions = tuple(await self.store.contributions_for_assignment(target.id))
+        return TeamQuickCard(
+            person_id=person_id,
+            task_id=task_id,
+            assignment_status=target.status.value,
+            contribution_status=(contributions[-1].status.value if contributions else None),
+            availability=_TEAM_QUICK_AVAILABILITY[target.status],
+            project_role="Исполнитель",
+            responsibility=(
+                contributions[-1].personal_summary
+                if contributions
+                else "Личный вклад ещё не зафиксирован"
+            ),
         )
 
     @staticmethod

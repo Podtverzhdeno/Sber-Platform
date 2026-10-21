@@ -431,6 +431,37 @@ class TeamMemberView(BaseModel):
     status: AssignmentStatus
 
 
+class QuickCardSkillView(BaseModel):
+    title: str
+    origin: str
+    verified: bool
+
+
+def _empty_quick_card_skills() -> list[QuickCardSkillView]:
+    return []
+
+
+class QuickCardProfileView(BaseModel):
+    city: str | None = None
+    university: str | None = None
+    telegram: str | None = None
+    about: str | None = None
+    skills: list[QuickCardSkillView] = Field(default_factory=_empty_quick_card_skills)
+
+
+class TeamQuickCardView(BaseModel):
+    person_id: UUID
+    task_id: UUID
+    assignment_status: str | None
+    contribution_status: str | None
+    availability: str
+    project_role: str
+    responsibility: str
+    display_name: str
+    portfolio_available: bool
+    profile: QuickCardProfileView
+
+
 class TermsHistoryEntryView(BaseModel):
     version: int
     deadline_at: AwareDatetime
@@ -1194,6 +1225,57 @@ async def participant_task_detail(
         support=support,
         team=team,
         feedback=feedback,
+    )
+
+
+@router.get("/me/tasks/{task_id}/team/{person_id}/quick-card", response_model=TeamQuickCardView)
+async def participant_team_quick_card(
+    task_id: UUID,
+    person_id: UUID,
+    request: Request,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> TeamQuickCardView:
+    card = await service.team_quick_card(authenticated.actor, task_id, person_id)
+    store = request.app.state.auth_service.store
+    profile = await store.participant_profile(person_id)
+    persona = await store.get_persona_by_id(person_id)
+    if profile is not None:
+        display_name: str = profile.display_name
+    elif persona is not None:
+        display_name = persona.display_name
+    else:
+        display_name = ""
+    public_profile = ConsentScope.PUBLIC_PROFILE in (await store.granted_consents(person_id))
+    city = profile.city if profile is not None else ""
+    university = profile.university if profile is not None else ""
+    telegram = profile.telegram if profile is not None else ""
+    about = profile.about if profile is not None else ""
+    skills = (
+        [
+            QuickCardSkillView(title=skill.title, origin=skill.origin, verified=skill.verified)
+            for skill in profile.skills
+        ]
+        if profile is not None
+        else []
+    )
+    return TeamQuickCardView(
+        person_id=card.person_id,
+        task_id=card.task_id,
+        assignment_status=card.assignment_status,
+        contribution_status=card.contribution_status,
+        availability=card.availability,
+        project_role=card.project_role,
+        responsibility=card.responsibility,
+        display_name=display_name,
+        portfolio_available=public_profile,
+        profile=QuickCardProfileView(
+            city=city if public_profile else None,
+            university=university if public_profile else None,
+            telegram=telegram if public_profile else None,
+            about=about if public_profile else None,
+            skills=skills if public_profile else [],
+        ),
     )
 
 

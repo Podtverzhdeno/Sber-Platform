@@ -8,6 +8,7 @@ const applicationId = "00000000-0000-0000-0000-000000000704";
 const submittedAssignmentId = "00000000-0000-0000-0000-000000000707";
 const deadlineRequestId = "00000000-0000-0000-0000-000000000708";
 const participantId = "00000000-0000-0000-0000-000000000001";
+const teammateId = "00000000-0000-0000-0000-000000000002";
 
 const participant = {
   person_id: participantId,
@@ -235,6 +236,47 @@ test("opens the exact assignment workspace through the project deep link", async
   await expect(page.getByRole("heading", { name: "Проекты в работе" })).toHaveCount(0);
   expect(new URL(page.url()).searchParams.get("project")).toBe(assignmentId);
   expect(new URL(page.url()).searchParams.get("detail")).toBeNull();
+});
+
+test("opens an API-backed teammate card, metric objects and the exact direct chat", async ({ page }) => {
+  await mockShell(page);
+  await page.route("**/api/v1/me", (route) => route.fulfill({ json: participant }));
+  await page.route("**/api/v1/marketplace/tasks", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/work", (route) => route.fulfill({ json: [workItem(assignmentId, "in_progress")] }));
+  await page.route("**/api/v1/me/reward-evidence", (route) => route.fulfill({ json: [] }));
+  await page.route(`**/api/v1/me/tasks/${taskId}`, (route) => route.fulfill({ json: {
+    ...detailPayload(),
+    team: [{ person_id: teammateId, display_name: "Мария Воронова", status: "submitted" }],
+    checkpoints: [{ key: "research", title: "Исследование", status: "completed" }, { key: "api", title: "API", status: "in_progress" }],
+    personal: [{ id: contributionId, assignment_id: assignmentId, version: 2, personal_summary: "API готов", artifact_keys: ["openapi-v2"], status: "submitted" }],
+    feedback: [{ contribution_id: contributionId, contribution_version: 2, review_version: 1, grade: "B", explanation: "Нужен benchmark", status: "draft" }],
+  } }));
+  await page.route(`**/api/v1/me/tasks/${taskId}/team/${teammateId}/quick-card`, (route) => route.fulfill({ json: {
+    person_id: teammateId,
+    task_id: taskId,
+    assignment_status: "submitted",
+    contribution_status: "submitted",
+    availability: "on_review",
+    project_role: "Исполнитель",
+    responsibility: "API готов",
+    display_name: "Мария Воронова",
+    portfolio_available: true,
+    profile: { city: "Москва", university: null, telegram: null, about: null, skills: [{ title: "FastAPI", origin: "project", verified: true }] },
+  } }));
+
+  await page.goto(`/workspace/3?project=${assignmentId}`);
+  await page.getByRole("button", { name: /Мария Воронова/ }).click();
+  const card = page.getByRole("dialog", { name: "Карточка участника" });
+  await expect(card).toContainText("API готов");
+  await expect(card).toContainText("FastAPI");
+  await card.getByRole("button", { name: "Закрыть" }).click();
+
+  await page.getByRole("button", { name: "Выполнено этапов" }).click();
+  await expect(page.getByRole("dialog", { name: "Расчёт ключевой метрики" })).toContainText("1 / 2");
+  await page.getByRole("button", { name: "Закрыть" }).click();
+  await page.getByRole("button", { name: /Мария Воронова/ }).click();
+  await card.getByRole("button", { name: "Сообщение" }).click();
+  await expect(page).toHaveURL(new RegExp(`/workspace/10\\?participant=${teammateId}&task=${taskId}$`));
 });
 
 test("keeps project layout, filter and selection in the URL", async ({ page }) => {
