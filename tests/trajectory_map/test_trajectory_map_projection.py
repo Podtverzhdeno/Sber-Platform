@@ -26,7 +26,6 @@ from impulse.domain.development import (
     TrackStatus,
 )
 from impulse.domain.passport import PassportSkillFacts, SkillGapProjection, skill_passport_gap
-from impulse.trajectory_map.api import router as trajectory_map_router
 from impulse.trajectory_map.projection import (
     BRANCH_RULE,
     CHECKPOINT_POINTS,
@@ -377,9 +376,6 @@ def _client() -> tuple[TestClient, MemoryDevelopmentStore]:
         ttl_seconds=settings.session_ttl_seconds,
     )
     app = create_app(settings, auth_service=auth)
-    # production wiring is `router.include_router(trajectory_map_router)` inside
-    # the /api/v1 router; the test reproduces the same final prefix
-    app.include_router(trajectory_map_router, prefix="/api/v1")
     development = cast(DevelopmentService, app.state.development_service)
     store = development.store
     assert isinstance(store, MemoryDevelopmentStore)

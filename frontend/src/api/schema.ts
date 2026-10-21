@@ -1886,6 +1886,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/trajectory-map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Trajectory Map */
+        get: operations["my_trajectory_map_api_v1_me_trajectory_map_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/trajectory-map/checkpoints/{checkpoint_key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My Trajectory Checkpoint */
+        get: operations["my_trajectory_checkpoint_api_v1_me_trajectory_map_checkpoints__checkpoint_key__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/visibility": {
         parameters: {
             query?: never;
@@ -4260,6 +4294,71 @@ export interface components {
             /** Task Title */
             task_title: string;
         };
+        /** MapBranchView */
+        MapBranchView: {
+            /** Group Key */
+            group_key: string;
+            /** Member Keys */
+            member_keys: string[];
+            /** Rule */
+            rule: string;
+            /** Satisfied */
+            satisfied: boolean;
+        };
+        /** MapCheckpointView */
+        MapCheckpointView: {
+            /** Actionable */
+            actionable: boolean;
+            branch: components["schemas"]["MapBranchView"] | null;
+            /** Key */
+            key: string;
+            /** Locked Reasons */
+            locked_reasons: components["schemas"]["MapLockedPrerequisiteView"][];
+            /** Mandatory */
+            mandatory: boolean;
+            /** Points Available */
+            points_available: number;
+            /** Points Earned */
+            points_earned: number;
+            /** Points Rule */
+            points_rule: string;
+            /** Policy Version */
+            policy_version: number;
+            /** Position */
+            position: number;
+            /** Purpose */
+            purpose: string;
+            /** Skill */
+            skill: string;
+            /** State */
+            state: string;
+            /** State Label */
+            state_label: string;
+            /** Target Key */
+            target_key: string;
+            /** Target Kind */
+            target_kind: string;
+            /** Title */
+            title: string;
+        };
+        /** MapLockedPrerequisiteView */
+        MapLockedPrerequisiteView: {
+            /** Milestone Key */
+            milestone_key: string;
+            /** Ref */
+            ref: string;
+            /** Title */
+            title: string;
+        };
+        /** MapProgressView */
+        MapProgressView: {
+            /** Completed Mandatory */
+            completed_mandatory: number;
+            /** Percent */
+            percent: number;
+            /** Total Mandatory */
+            total_mandatory: number;
+        };
         /** MarketplaceTaskView */
         MarketplaceTaskView: {
             /** Accepted Terms Version */
@@ -4939,6 +5038,15 @@ export interface components {
             /** Body */
             body: string;
         };
+        /** PrerequisiteFactView */
+        PrerequisiteFactView: {
+            /** Met */
+            met: boolean;
+            /** Milestone Key */
+            milestone_key: string;
+            /** Title */
+            title: string;
+        };
         /** ProfileSkillView */
         ProfileSkillView: {
             /**
@@ -5544,6 +5652,25 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** SkillImpactView */
+        SkillImpactView: {
+            /** Current Level */
+            current_level: string;
+            /** Explanation */
+            explanation: string;
+            /** Fallback */
+            fallback: string | null;
+            /** Forecast Only */
+            forecast_only: boolean;
+            /** Missing Evidence */
+            missing_evidence: string[];
+            /** Projected Level */
+            projected_level: string | null;
+            /** Skill */
+            skill: string;
+            /** Target Level */
+            target_level: string;
+        };
         /** SkillPositionView */
         SkillPositionView: {
             /** Current Level */
@@ -5893,6 +6020,26 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** TrajectoryCheckpointDetailView */
+        TrajectoryCheckpointDetailView: {
+            checkpoint: components["schemas"]["MapCheckpointView"];
+            /** Evidence Refs */
+            evidence_refs: string[];
+            /** Goal */
+            goal: string;
+            /** Outcome */
+            outcome: string;
+            /**
+             * Policy Version
+             * @default 1
+             */
+            policy_version: number;
+            /** Prerequisites */
+            prerequisites: components["schemas"]["PrerequisiteFactView"][];
+            /** Replay */
+            replay: boolean;
+            skill_impact: components["schemas"]["SkillImpactView"];
+        };
         /** TrajectoryGrowthView */
         TrajectoryGrowthView: {
             completion: components["schemas"]["WeightedProgressView"];
@@ -5911,6 +6058,20 @@ export interface components {
             track_key: string;
             /** Track Title */
             track_title: string;
+        };
+        /** TrajectoryMapTrackView */
+        TrajectoryMapTrackView: {
+            /** Checkpoints */
+            checkpoints: components["schemas"]["MapCheckpointView"][];
+            /** Current Key */
+            current_key: string | null;
+            /** Policy Version */
+            policy_version: number;
+            progress: components["schemas"]["MapProgressView"];
+            /** Replacement Reason */
+            replacement_reason: string | null;
+            /** Track Key */
+            track_key: string;
         };
         /** TrophyProofView */
         TrophyProofView: {
@@ -9652,6 +9813,57 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TrackOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    my_trajectory_map_api_v1_me_trajectory_map_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrajectoryMapTrackView"][];
+                };
+            };
+        };
+    };
+    my_trajectory_checkpoint_api_v1_me_trajectory_map_checkpoints__checkpoint_key__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                checkpoint_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrajectoryCheckpointDetailView"];
                 };
             };
             /** @description Validation Error */

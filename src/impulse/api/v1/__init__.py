@@ -20,6 +20,7 @@ from impulse.api.v1.search import router as search_router
 from impulse.api.v1.support import router as support_router
 from impulse.api.v1.work import router as work_router
 from impulse.bootstrap.settings import Settings
+from impulse.trajectory_map import router as trajectory_map_router
 
 router = APIRouter(prefix="/api/v1")
 router.include_router(analytics_router)
@@ -39,6 +40,7 @@ router.include_router(reward_router)
 router.include_router(search_router)
 router.include_router(support_router)
 router.include_router(work_router)
+router.include_router(trajectory_map_router)
 
 
 @router.get("/config", response_model=dict[str, bool | str])

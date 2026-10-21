@@ -4628,6 +4628,185 @@
         "title": "ManagerResultView",
         "type": "object"
       },
+      "MapBranchView": {
+        "properties": {
+          "group_key": {
+            "title": "Group Key",
+            "type": "string"
+          },
+          "member_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Member Keys",
+            "type": "array"
+          },
+          "rule": {
+            "title": "Rule",
+            "type": "string"
+          },
+          "satisfied": {
+            "title": "Satisfied",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "group_key",
+          "member_keys",
+          "satisfied",
+          "rule"
+        ],
+        "title": "MapBranchView",
+        "type": "object"
+      },
+      "MapCheckpointView": {
+        "properties": {
+          "actionable": {
+            "title": "Actionable",
+            "type": "boolean"
+          },
+          "branch": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MapBranchView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "locked_reasons": {
+            "items": {
+              "$ref": "#/components/schemas/MapLockedPrerequisiteView"
+            },
+            "title": "Locked Reasons",
+            "type": "array"
+          },
+          "mandatory": {
+            "title": "Mandatory",
+            "type": "boolean"
+          },
+          "points_available": {
+            "title": "Points Available",
+            "type": "integer"
+          },
+          "points_earned": {
+            "title": "Points Earned",
+            "type": "integer"
+          },
+          "points_rule": {
+            "title": "Points Rule",
+            "type": "string"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "purpose": {
+            "title": "Purpose",
+            "type": "string"
+          },
+          "skill": {
+            "title": "Skill",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "state_label": {
+            "title": "State Label",
+            "type": "string"
+          },
+          "target_key": {
+            "title": "Target Key",
+            "type": "string"
+          },
+          "target_kind": {
+            "title": "Target Kind",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "position",
+          "title",
+          "purpose",
+          "skill",
+          "target_kind",
+          "target_key",
+          "state",
+          "state_label",
+          "mandatory",
+          "actionable",
+          "points_available",
+          "points_earned",
+          "points_rule",
+          "policy_version",
+          "locked_reasons",
+          "branch"
+        ],
+        "title": "MapCheckpointView",
+        "type": "object"
+      },
+      "MapLockedPrerequisiteView": {
+        "properties": {
+          "milestone_key": {
+            "title": "Milestone Key",
+            "type": "string"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "milestone_key",
+          "title",
+          "ref"
+        ],
+        "title": "MapLockedPrerequisiteView",
+        "type": "object"
+      },
+      "MapProgressView": {
+        "properties": {
+          "completed_mandatory": {
+            "title": "Completed Mandatory",
+            "type": "integer"
+          },
+          "percent": {
+            "title": "Percent",
+            "type": "number"
+          },
+          "total_mandatory": {
+            "title": "Total Mandatory",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "completed_mandatory",
+          "total_mandatory",
+          "percent"
+        ],
+        "title": "MapProgressView",
+        "type": "object"
+      },
       "MarketplaceTaskView": {
         "properties": {
           "accepted_terms_version": {
@@ -6438,6 +6617,29 @@
         "title": "PostMessageRequest",
         "type": "object"
       },
+      "PrerequisiteFactView": {
+        "properties": {
+          "met": {
+            "title": "Met",
+            "type": "boolean"
+          },
+          "milestone_key": {
+            "title": "Milestone Key",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "milestone_key",
+          "title",
+          "met"
+        ],
+        "title": "PrerequisiteFactView",
+        "type": "object"
+      },
       "ProfileSkillView": {
         "properties": {
           "origin": {
@@ -8139,6 +8341,71 @@
         "title": "SkillGapView",
         "type": "object"
       },
+      "SkillImpactView": {
+        "properties": {
+          "current_level": {
+            "title": "Current Level",
+            "type": "string"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "fallback": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fallback"
+          },
+          "forecast_only": {
+            "title": "Forecast Only",
+            "type": "boolean"
+          },
+          "missing_evidence": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Evidence",
+            "type": "array"
+          },
+          "projected_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projected Level"
+          },
+          "skill": {
+            "title": "Skill",
+            "type": "string"
+          },
+          "target_level": {
+            "title": "Target Level",
+            "type": "string"
+          }
+        },
+        "required": [
+          "skill",
+          "current_level",
+          "target_level",
+          "projected_level",
+          "forecast_only",
+          "explanation",
+          "missing_evidence",
+          "fallback"
+        ],
+        "title": "SkillImpactView",
+        "type": "object"
+      },
       "SkillPositionView": {
         "properties": {
           "current_level": {
@@ -9123,6 +9390,58 @@
         "title": "TrackView",
         "type": "object"
       },
+      "TrajectoryCheckpointDetailView": {
+        "properties": {
+          "checkpoint": {
+            "$ref": "#/components/schemas/MapCheckpointView"
+          },
+          "evidence_refs": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidence Refs",
+            "type": "array"
+          },
+          "goal": {
+            "title": "Goal",
+            "type": "string"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          },
+          "policy_version": {
+            "default": 1,
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "prerequisites": {
+            "items": {
+              "$ref": "#/components/schemas/PrerequisiteFactView"
+            },
+            "title": "Prerequisites",
+            "type": "array"
+          },
+          "replay": {
+            "title": "Replay",
+            "type": "boolean"
+          },
+          "skill_impact": {
+            "$ref": "#/components/schemas/SkillImpactView"
+          }
+        },
+        "required": [
+          "checkpoint",
+          "goal",
+          "outcome",
+          "prerequisites",
+          "evidence_refs",
+          "skill_impact",
+          "replay"
+        ],
+        "title": "TrajectoryCheckpointDetailView",
+        "type": "object"
+      },
       "TrajectoryGrowthView": {
         "properties": {
           "completion": {
@@ -9188,6 +9507,60 @@
           "next_step_ref"
         ],
         "title": "TrajectoryGrowthView",
+        "type": "object"
+      },
+      "TrajectoryMapTrackView": {
+        "properties": {
+          "checkpoints": {
+            "items": {
+              "$ref": "#/components/schemas/MapCheckpointView"
+            },
+            "title": "Checkpoints",
+            "type": "array"
+          },
+          "current_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Key"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/MapProgressView"
+          },
+          "replacement_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Replacement Reason"
+          },
+          "track_key": {
+            "title": "Track Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_key",
+          "policy_version",
+          "replacement_reason",
+          "current_key",
+          "checkpoints",
+          "progress"
+        ],
+        "title": "TrajectoryMapTrackView",
         "type": "object"
       },
       "TrophyProofView": {
@@ -15191,6 +15564,67 @@
           }
         },
         "summary": "Select Track"
+      }
+    },
+    "/api/v1/me/trajectory-map": {
+      "get": {
+        "operationId": "my_trajectory_map_api_v1_me_trajectory_map_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/TrajectoryMapTrackView"
+                  },
+                  "title": "Response My Trajectory Map Api V1 Me Trajectory Map Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My Trajectory Map"
+      }
+    },
+    "/api/v1/me/trajectory-map/checkpoints/{checkpoint_key}": {
+      "get": {
+        "operationId": "my_trajectory_checkpoint_api_v1_me_trajectory_map_checkpoints__checkpoint_key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "checkpoint_key",
+            "required": true,
+            "schema": {
+              "title": "Checkpoint Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrajectoryCheckpointDetailView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "My Trajectory Checkpoint"
       }
     },
     "/api/v1/me/visibility": {

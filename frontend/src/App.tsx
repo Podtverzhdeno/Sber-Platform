@@ -41,7 +41,7 @@ import {
 } from "./app/theme";
 import { createQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
-import { Bootcamp, DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
+import { Bootcamp, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
 import { BootcampCatalog } from "./features/bootcamp";
 import { EventCatalog } from "./features/ecosystem";
 import { CustomerWorkspace } from "./features/customer";
@@ -57,6 +57,7 @@ import { ParticipantPortfolio, ParticipantRating } from "./features/portfolio";
 import { MentorReviewWorkspace } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
 import { MessagingWorkspace } from "./features/collaboration";
+import { TrajectoryMapPage } from "./features/trajectory-map/trajectory-map";
 import {
   ParticipantAchievements,
   ParticipantBuddy,
@@ -503,7 +504,7 @@ function Workspace({
           actor.active_role === "participant" &&
           (currentSection === "Мой путь" ||
             currentSection === "Моя траектория") ? (
-          <DevelopmentJourney />
+          <TrajectoryMapPage />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Bootcamp" ? (
