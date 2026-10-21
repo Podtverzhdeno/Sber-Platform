@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import os
 from datetime import UTC, datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import httpx
 import pytest
@@ -77,7 +77,7 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
         draft = await client.post(
             "/api/v1/customer/projects/demo-rd-lab/tasks",
             json={
-                "task_key": "postgres-rd",
+                "task_key": f"postgres-rd-{uuid4()}",
                 "title": "PostgreSQL R&D",
                 "problem": "Проверить хранение workflow.",
                 "deliverable": "Рабочий вертикальный срез.",
@@ -293,14 +293,15 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
     persisted_decision = await work_store.acceptance_for_contribution(contribution.id)
     assert persisted_decision is not None
     assert persisted_decision.decision is AcceptanceDecision.REVISION_REQUESTED
-    task_batch = await work_store.tasks_for_ids((task_id, UUID(int=0)))
-    assert set(task_batch) == {task_id}
-    terms_batch = await work_store.latest_terms_for_tasks((task_id, UUID(int=0)))
-    assert terms_batch[task_id].version == 3
+    task_uuid = UUID(task_id)
+    task_batch = await work_store.tasks_for_ids((task_uuid, UUID(int=0)))
+    assert set(task_batch) == {task_uuid}
+    terms_batch = await work_store.latest_terms_for_tasks((task_uuid, UUID(int=0)))
+    assert terms_batch[task_uuid].version == 3
     accepted_batch = await work_store.accepted_terms_versions(
-        started.person_id, (task_id, UUID(int=0))
+        started.person_id, (task_uuid, UUID(int=0))
     )
-    assert accepted_batch == {task_id: 3}
+    assert accepted_batch == {task_uuid: 3}
     contribution_batch = await work_store.contributions_for_assignments(
         (started.id, conflicting_started.id, UUID(int=0))
     )
@@ -430,7 +431,7 @@ async def test_application_withdrawal_is_idempotent_and_blocked_after_acceptance
         draft = await client.post(
             "/api/v1/customer/projects/demo-rd-lab/tasks",
             json={
-                "task_key": "withdraw-rd",
+                "task_key": f"withdraw-rd-{uuid4()}",
                 "title": "PostgreSQL withdrawal",
                 "problem": "Проверить отзыв заявки.",
                 "deliverable": "Работающий срез.",
