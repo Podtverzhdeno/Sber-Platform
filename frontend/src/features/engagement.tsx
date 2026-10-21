@@ -260,7 +260,12 @@ export function TopbarEngagementIndicator() {
               )}
               {!rhythmData.versioned && rhythmData.history_count > 0 && (
                 <p className="engagement-rhythm-hint">
-                  Будущее соглашение ещё не действует; запланировано на {rhythmData.effective_from}.
+                  {(() => {
+                    const plannedFrom = rhythmData.scheduled_from ?? rhythmData.effective_from;
+                    return plannedFrom
+                      ? `Будущее соглашение ещё не действует; запланировано на ${plannedFrom}.`
+                      : "Будущее соглашение ещё не действует.";
+                  })()}
                 </p>
               )}
               <div className="engagement-rhythm-presets">

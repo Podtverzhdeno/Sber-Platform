@@ -419,4 +419,44 @@ describe("TopbarEngagementIndicator", () => {
     expect(screen.queryByText("Недельный ритм")).toBeNull();
     expect(screen.queryByText("Сохранить ритм")).toBeNull();
   });
+
+  it("never claims an active rhythm while the only contract is future-dated", async () => {
+    const fetchMock = installOverview(OVERVIEW);
+    fetchMock.mockImplementation((input: RequestInfo | URL, init?: RequestInit) => {
+      const key = routeKey(input);
+      if ((init?.method ?? "GET") === "POST") {
+        throw new Error("rhythm summary route is GET-only in this test");
+      }
+      const payload =
+        key === "/api/v1/me/engagement/rhythm"
+          ? {
+              versioned: false,
+              history_count: 1,
+              version: null,
+              preset: null,
+              active_days: [],
+              reminder_hour: null,
+              reminder_window_hours: null,
+              effective_from: null,
+              week_start: "2026-10-19",
+              week_end: "2026-10-25",
+              target_days: null,
+              done_days: null,
+              hint: null,
+              scheduled_from: "2026-10-25",
+              scheduled_preset: "weekends",
+            }
+          : OVERVIEW;
+      return new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+    renderIndicator();
+    await screen.findByText("4");
+    openPopover();
+    await screen.findByText(/Будущее соглашение ещё не действует; запланировано на 2026-10-25/);
+    expect(screen.queryByText("из 0 в этой неделе")).toBeNull();
+    expect(screen.getByRole("button", { name: "Сохранить ритм" })).toBeTruthy();
+  });
 });
