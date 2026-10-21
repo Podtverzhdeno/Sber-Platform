@@ -124,6 +124,7 @@ test("trajectory map remains usable in light theme and mobile viewport", async (
   await installApi(page, []);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("button", { name: "Меню", exact: true }).click();
   await page.getByRole("link", { name: "Моя траектория" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.getByRole("button", { name: "Освоить основу. Текущий шаг" }).click();
