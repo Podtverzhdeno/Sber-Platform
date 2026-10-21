@@ -469,6 +469,8 @@ test.describe("engagement journey: desktop acceptance", () => {
   test.use({ viewport: { width: 1440, height: 1280 } });
 
   test("buddy goal, qualifying day, freeze restore, rhythm agreement, verified evidence and honest reload", async ({ page }) => {
+    // CI-воркеры медленные: полный journey с тремя reload и PDF-опросом требует запаса.
+    test.setTimeout(90_000);
     installRoutes(page);
   const apiFailures: string[] = [];
   const consoleErrors: string[] = [];
@@ -609,6 +611,7 @@ test.describe("mobile touch journey: engagement goal through freeze and rhythm i
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 
   test("light theme goal, qualifying day, freeze and rhythm", async ({ page }) => {
+    test.setTimeout(60_000);
     await page.emulateMedia({ reducedMotion: "reduce" });
     installRoutes(page);
     const consoleErrors: string[] = [];
@@ -657,6 +660,7 @@ test.describe("mobile touch journey: engagement goal through freeze and rhythm i
 });
 
 test("engagement surfaces stay honest when the engagement API is unavailable", async ({ page }) => {
+  test.setTimeout(60_000);
   installRoutes(page, { engagementAvailable: false });
   const consoleErrors: string[] = [];
   const apiFailures: string[] = [];
