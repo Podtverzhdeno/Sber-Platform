@@ -40,6 +40,12 @@ from impulse.domain.engagement import (
     weekly_rhythm_projection,
 )
 from impulse.domain.identity import ActorContext, Role
+from impulse.domain.monthly_goal import (
+    MonthlyGoalPlan,
+    MonthlyGoalProjection,
+    build_monthly_goal_projection,
+    month_bounds,
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -360,6 +366,14 @@ class DevelopmentStore(Protocol):
 
     async def save_weekly_rhythm(self, person_id: UUID, rhythm: WeeklyRhythm) -> None: ...
 
+    async def monthly_goal_history(
+        self, person_id: UUID, period: date
+    ) -> tuple[MonthlyGoalPlan, ...]:
+        """Saved goal plans for the period, ascending by plan_version."""
+        ...
+
+    async def save_monthly_goal(self, person_id: UUID, plan: MonthlyGoalPlan) -> None: ...
+
 
 class MemoryDevelopmentStore:
     def __init__(self) -> None:
@@ -430,6 +444,7 @@ class MemoryDevelopmentStore:
         self._freeze: dict[UUID, list[tuple[date | None, str]]] = {}
         self._freeze_exceptions: dict[UUID, list[tuple[date, str, str]]] = {}
         self._weekly_rhythm: dict[UUID, list[WeeklyRhythm]] = {}
+        self._monthly_goals: dict[UUID, list[MonthlyGoalPlan]] = {}
 
     async def tracks(self) -> tuple[TrackRecord, ...]:
         return self._tracks
@@ -545,6 +560,18 @@ class MemoryDevelopmentStore:
     async def save_weekly_rhythm(self, person_id: UUID, rhythm: WeeklyRhythm) -> None:
         self._weekly_rhythm.setdefault(person_id, []).append(rhythm)
 
+    async def monthly_goal_history(
+        self, person_id: UUID, period: date
+    ) -> tuple[MonthlyGoalPlan, ...]:
+        return tuple(
+            plan
+            for plan in self._monthly_goals.get(person_id, ())
+            if plan.period == period
+        )
+
+    async def save_monthly_goal(self, person_id: UUID, plan: MonthlyGoalPlan) -> None:
+        self._monthly_goals.setdefault(person_id, []).append(plan)
+
 
 class DevelopmentService:
     def __init__(
@@ -612,6 +639,111 @@ class DevelopmentService:
                 )
             )
         return tuple(projections)
+
+    async def set_monthly_goal(
+        self,
+        actor: ActorContext,
+        *,
+        track_key: str,
+        milestone_key: str,
+        local_today: date,
+    ) -> MonthlyGoalProjection:
+        """Append a versioned plan for the current month and return its live projection."""
+        self._participant(actor)
+        attempts = await self.store.attempts(actor.person_id)
+        attempt = next(
+            (
+                item
+                for item in attempts
+                if item.track_key == track_key and item.status is TrackStatus.ACTIVE
+            ),
+            None,
+        )
+        roadmap = await self.store.roadmap(track_key)
+        if attempt is None or roadmap is None:
+            raise ApiError(
+                code="MONTHLY_GOAL_TRACK_NOT_ACTIVE",
+                message="Monthly goal requires an active trajectory.",
+                status_code=409,
+            )
+        target = next((item for item in roadmap.milestones if item.key == milestone_key), None)
+        if target is None:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Roadmap checkpoint not found.", status_code=404
+            )
+        period, _ = month_bounds(local_today)
+        history = await self.store.monthly_goal_history(actor.person_id, period)
+        baseline = sum(
+            1
+            for item in roadmap.milestones
+            if item.position <= target.position and item.key in attempt.completed_milestones
+        )
+        plan = MonthlyGoalPlan(
+            period=period,
+            plan_version=len(history) + 1,
+            track_key=track_key,
+            milestone_key=milestone_key,
+            baseline_count=baseline,
+            created_by=str(actor.person_id),
+        )
+        await self.store.save_monthly_goal(actor.person_id, plan)
+        projection = await self.monthly_goal(actor, local_today=local_today)
+        if projection is None:  # pragma: no cover - guarded by the validated roadmap above
+            raise RuntimeError("Saved monthly goal could not be projected")
+        return projection
+
+    async def monthly_goal(
+        self, actor: ActorContext, *, local_today: date
+    ) -> MonthlyGoalProjection | None:
+        """Return the latest current-month plan over current verified facts."""
+        self._participant(actor)
+        period, _ = month_bounds(local_today)
+        history = await self.store.monthly_goal_history(actor.person_id, period)
+        if not history:
+            return None
+        plan = history[-1]
+        roadmap = await self.store.roadmap(plan.track_key)
+        if roadmap is None:
+            return None
+        attempts = await self.store.attempts(actor.person_id)
+        attempt = next((item for item in attempts if item.track_key == plan.track_key), None)
+        confirmed: frozenset[str] = (
+            attempt.completed_milestones if attempt is not None else frozenset()
+        )
+        enrollment_by_course = {
+            item.course_key: item.status for item in await self.store.enrollments(actor.person_id)
+        }
+        submitted = frozenset(
+            milestone.key
+            for milestone in roadmap.milestones
+            if milestone.target_kind == "course"
+            and enrollment_by_course.get(milestone.target_key) is CompletionStatus.REPORTED
+            and milestone.key not in confirmed
+        )
+        published_targets = frozenset(item.key for item in await self.store.courses())
+        rhythm_history = await self.store.weekly_rhythm_history(actor.person_id)
+        active_rhythms = [item for item in rhythm_history if item.effective_from <= local_today]
+        active_days: frozenset[int] = (
+            active_rhythms[-1].active_days if active_rhythms else frozenset()
+        )
+        tracks = {item.key: item.title for item in await self.store.tracks()}
+        return build_monthly_goal_projection(
+            track_key=plan.track_key,
+            track_title=tracks.get(plan.track_key, plan.track_key),
+            requested_target_key=plan.milestone_key,
+            milestones=roadmap.milestones,
+            confirmed=confirmed,
+            submitted=submitted,
+            published_targets=published_targets,
+            baseline_count=plan.baseline_count,
+            plan_version=plan.plan_version,
+            history_count=len(history),
+            rhythm_active_days=active_days,
+            local_today=local_today,
+            timezone=actor.timezone,
+            generated_at=datetime.now(UTC),
+            created_by=plan.created_by,
+        )
 
     async def course_catalog(self, actor: ActorContext) -> tuple[tuple[CourseRecord, str], ...]:
         self._participant(actor)

@@ -591,6 +591,26 @@
           },
           "data_class": {
             "$ref": "#/components/schemas/DataClass"
+          },
+          "draft_version": {
+            "default": 1,
+            "minimum": 1.0,
+            "title": "Draft Version",
+            "type": "integer"
+          },
+          "fields": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "propertyNames": {
+              "enum": [
+                "problem",
+                "deliverable",
+                "criterion"
+              ]
+            },
+            "title": "Fields",
+            "type": "object"
           }
         },
         "required": [
@@ -632,6 +652,11 @@
             ],
             "title": "Disclaimer"
           },
+          "draft_version": {
+            "default": 1,
+            "title": "Draft Version",
+            "type": "integer"
+          },
           "editable": {
             "const": true,
             "default": true,
@@ -650,6 +675,13 @@
             "title": "Notice",
             "type": "string"
           },
+          "patches": {
+            "items": {
+              "$ref": "#/components/schemas/BriefPatchView"
+            },
+            "title": "Patches",
+            "type": "array"
+          },
           "problem": {
             "anyOf": [
               {
@@ -660,6 +692,27 @@
               }
             ],
             "title": "Problem"
+          },
+          "prompt_version": {
+            "default": "customer-brief-prompt-v1",
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "source_version": {
+            "default": "customer-brief-v1",
+            "title": "Source Version",
+            "type": "string"
+          },
+          "suggestion_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suggestion Id"
           }
         },
         "required": [
@@ -668,6 +721,54 @@
           "notice"
         ],
         "title": "BriefDraftView",
+        "type": "object"
+      },
+      "BriefPatchView": {
+        "properties": {
+          "before": {
+            "title": "Before",
+            "type": "string"
+          },
+          "field_version": {
+            "title": "Field Version",
+            "type": "integer"
+          },
+          "prompt_version": {
+            "title": "Prompt Version",
+            "type": "string"
+          },
+          "proposed_text": {
+            "title": "Proposed Text",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "source_version": {
+            "title": "Source Version",
+            "type": "string"
+          },
+          "target_field": {
+            "enum": [
+              "problem",
+              "deliverable",
+              "criterion"
+            ],
+            "title": "Target Field",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_field",
+          "before",
+          "field_version",
+          "proposed_text",
+          "reason",
+          "source_version",
+          "prompt_version"
+        ],
+        "title": "BriefPatchView",
         "type": "object"
       },
       "BuddyActionView": {
@@ -4775,6 +4876,255 @@
         "title": "MetricView",
         "type": "object"
       },
+      "MonthlyGoalContoursView": {
+        "properties": {
+          "baseline": {
+            "title": "Baseline",
+            "type": "integer"
+          },
+          "current": {
+            "title": "Current",
+            "type": "integer"
+          },
+          "projected": {
+            "title": "Projected",
+            "type": "integer"
+          },
+          "target": {
+            "title": "Target",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "baseline",
+          "current",
+          "projected",
+          "target"
+        ],
+        "title": "MonthlyGoalContoursView",
+        "type": "object"
+      },
+      "MonthlyGoalFeasibilityView": {
+        "properties": {
+          "capacity_days": {
+            "title": "Capacity Days",
+            "type": "integer"
+          },
+          "deficit": {
+            "title": "Deficit",
+            "type": "integer"
+          },
+          "feasible": {
+            "title": "Feasible",
+            "type": "boolean"
+          },
+          "known": {
+            "title": "Known",
+            "type": "boolean"
+          },
+          "required_steps": {
+            "title": "Required Steps",
+            "type": "integer"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "known",
+          "capacity_days",
+          "required_steps",
+          "feasible",
+          "deficit",
+          "text"
+        ],
+        "title": "MonthlyGoalFeasibilityView",
+        "type": "object"
+      },
+      "MonthlyGoalStepView": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "mandatory": {
+            "title": "Mandatory",
+            "type": "boolean"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "skill": {
+            "title": "Skill",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "position",
+          "title",
+          "skill",
+          "mandatory",
+          "status",
+          "ref"
+        ],
+        "title": "MonthlyGoalStepView",
+        "type": "object"
+      },
+      "MonthlyGoalView": {
+        "properties": {
+          "assumptions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Assumptions",
+            "type": "array"
+          },
+          "contours": {
+            "$ref": "#/components/schemas/MonthlyGoalContoursView"
+          },
+          "coverage": {
+            "title": "Coverage",
+            "type": "number"
+          },
+          "days_left": {
+            "title": "Days Left",
+            "type": "integer"
+          },
+          "feasibility": {
+            "$ref": "#/components/schemas/MonthlyGoalFeasibilityView"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "goal_ref": {
+            "title": "Goal Ref",
+            "type": "string"
+          },
+          "goal_title": {
+            "title": "Goal Title",
+            "type": "string"
+          },
+          "history_count": {
+            "title": "History Count",
+            "type": "integer"
+          },
+          "missing_mappings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Missing Mappings",
+            "type": "array"
+          },
+          "next_checkpoint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Checkpoint"
+          },
+          "next_checkpoint_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Checkpoint Ref"
+          },
+          "partial_forecast": {
+            "title": "Partial Forecast",
+            "type": "boolean"
+          },
+          "period_end": {
+            "title": "Period End",
+            "type": "string"
+          },
+          "period_start": {
+            "title": "Period Start",
+            "type": "string"
+          },
+          "plan_version": {
+            "title": "Plan Version",
+            "type": "integer"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "remaining": {
+            "title": "Remaining",
+            "type": "integer"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/MonthlyGoalStepView"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "timezone": {
+            "title": "Timezone",
+            "type": "string"
+          },
+          "track_key": {
+            "title": "Track Key",
+            "type": "string"
+          },
+          "track_title": {
+            "title": "Track Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_version",
+          "generated_at",
+          "track_key",
+          "track_title",
+          "goal_title",
+          "goal_ref",
+          "period_start",
+          "period_end",
+          "days_left",
+          "timezone",
+          "plan_version",
+          "history_count",
+          "steps",
+          "contours",
+          "remaining",
+          "next_checkpoint",
+          "next_checkpoint_ref",
+          "feasibility",
+          "partial_forecast",
+          "coverage",
+          "missing_mappings",
+          "assumptions"
+        ],
+        "title": "MonthlyGoalView",
+        "type": "object"
+      },
       "MustTakeView": {
         "properties": {
           "current_level": {
@@ -6380,6 +6730,86 @@
         "title": "PublishPolicyRequest",
         "type": "object"
       },
+      "QuickCardProfileView": {
+        "properties": {
+          "about": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "About"
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "skills": {
+            "items": {
+              "$ref": "#/components/schemas/QuickCardSkillView"
+            },
+            "title": "Skills",
+            "type": "array"
+          },
+          "telegram": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Telegram"
+          },
+          "university": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "University"
+          }
+        },
+        "title": "QuickCardProfileView",
+        "type": "object"
+      },
+      "QuickCardSkillView": {
+        "properties": {
+          "origin": {
+            "title": "Origin",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title",
+          "origin",
+          "verified"
+        ],
+        "title": "QuickCardSkillView",
+        "type": "object"
+      },
       "RatingPolicyView": {
         "properties": {
           "appeal_period_days": {
@@ -7540,6 +7970,28 @@
         "title": "SelectTrackRequest",
         "type": "object"
       },
+      "SetMonthlyGoalRequest": {
+        "properties": {
+          "milestone_key": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Milestone Key",
+            "type": "string"
+          },
+          "track_key": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Track Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_key",
+          "milestone_key"
+        ],
+        "title": "SetMonthlyGoalRequest",
+        "type": "object"
+      },
       "SettlementAttemptView": {
         "properties": {
           "attempt_number": {
@@ -8294,6 +8746,79 @@
           "status"
         ],
         "title": "TeamMemberView",
+        "type": "object"
+      },
+      "TeamQuickCardView": {
+        "properties": {
+          "assignment_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignment Status"
+          },
+          "availability": {
+            "title": "Availability",
+            "type": "string"
+          },
+          "contribution_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contribution Status"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "portfolio_available": {
+            "title": "Portfolio Available",
+            "type": "boolean"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/QuickCardProfileView"
+          },
+          "project_role": {
+            "title": "Project Role",
+            "type": "string"
+          },
+          "responsibility": {
+            "title": "Responsibility",
+            "type": "string"
+          },
+          "task_id": {
+            "format": "uuid",
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "person_id",
+          "task_id",
+          "assignment_status",
+          "contribution_status",
+          "availability",
+          "project_role",
+          "responsibility",
+          "display_name",
+          "portfolio_available",
+          "profile"
+        ],
+        "title": "TeamQuickCardView",
         "type": "object"
       },
       "TeamRequestCommand": {
@@ -13349,6 +13874,86 @@
         "summary": "Report Claim"
       }
     },
+    "/api/v1/me/growth/monthly-goal": {
+      "get": {
+        "operationId": "monthly_goal_api_v1_me_growth_monthly_goal_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/MonthlyGoalView"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Monthly Goal Api V1 Me Growth Monthly Goal Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Monthly Goal"
+      },
+      "post": {
+        "operationId": "set_monthly_goal_api_v1_me_growth_monthly_goal_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetMonthlyGoalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MonthlyGoalView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Monthly Goal"
+      }
+    },
     "/api/v1/me/growth/next-step": {
       "get": {
         "operationId": "growth_next_step_api_v1_me_growth_next_step_get",
@@ -14358,6 +14963,56 @@
           }
         },
         "summary": "Decide Invitation"
+      }
+    },
+    "/api/v1/me/tasks/{task_id}/team/{person_id}/quick-card": {
+      "get": {
+        "operationId": "participant_team_quick_card_api_v1_me_tasks__task_id__team__person_id__quick_card_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Person Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TeamQuickCardView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Participant Team Quick Card"
       }
     },
     "/api/v1/me/tasks/{task_id}/terms-consent": {

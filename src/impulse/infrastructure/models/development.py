@@ -90,3 +90,13 @@ weekly_rhythm_versions = domain_table(
     typed_field("effective_from", Date()),
     uniques=(("person_id", "rhythm_version"),),
 )
+monthly_goal_plans = domain_table(
+    "monthly_goal_plans",
+    uuid_field("person_id", "persons.id"),
+    typed_field("period", Date()),
+    integer_field("plan_version"),
+    string_field("track_key", 96),
+    string_field("milestone_key", 96),
+    integer_field("baseline_count"),
+    uniques=(("person_id", "period", "plan_version"),),
+)

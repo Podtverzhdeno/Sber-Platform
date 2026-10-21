@@ -1407,6 +1407,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/growth/monthly-goal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Monthly Goal */
+        get: operations["monthly_goal_api_v1_me_growth_monthly_goal_get"];
+        put?: never;
+        /** Set Monthly Goal */
+        post: operations["set_monthly_goal_api_v1_me_growth_monthly_goal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/growth/next-step": {
         parameters: {
             query?: never;
@@ -1794,6 +1812,23 @@ export interface paths {
         put?: never;
         /** Decide Invitation */
         post: operations["decide_invitation_api_v1_me_tasks__task_id__invitation_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/tasks/{task_id}/team/{person_id}/quick-card": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Participant Team Quick Card */
+        get: operations["participant_team_quick_card_api_v1_me_tasks__task_id__team__person_id__quick_card_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2777,6 +2812,15 @@ export interface components {
             /** Correlation Id */
             correlation_id: string;
             data_class: components["schemas"]["DataClass"];
+            /**
+             * Draft Version
+             * @default 1
+             */
+            draft_version: number;
+            /** Fields */
+            fields?: {
+                [key: string]: string;
+            };
         };
         /** BriefDraftView */
         BriefDraftView: {
@@ -2786,6 +2830,11 @@ export interface components {
             deliverable?: string | null;
             /** Disclaimer */
             disclaimer?: string | null;
+            /**
+             * Draft Version
+             * @default 1
+             */
+            draft_version: number;
             /**
              * Editable
              * @default true
@@ -2798,8 +2847,42 @@ export interface components {
             kind: string;
             /** Notice */
             notice: string;
+            /** Patches */
+            patches?: components["schemas"]["BriefPatchView"][];
             /** Problem */
             problem?: string | null;
+            /**
+             * Prompt Version
+             * @default customer-brief-prompt-v1
+             */
+            prompt_version: string;
+            /**
+             * Source Version
+             * @default customer-brief-v1
+             */
+            source_version: string;
+            /** Suggestion Id */
+            suggestion_id?: string | null;
+        };
+        /** BriefPatchView */
+        BriefPatchView: {
+            /** Before */
+            before: string;
+            /** Field Version */
+            field_version: number;
+            /** Prompt Version */
+            prompt_version: string;
+            /** Proposed Text */
+            proposed_text: string;
+            /** Reason */
+            reason: string;
+            /** Source Version */
+            source_version: string;
+            /**
+             * Target Field
+             * @enum {string}
+             */
+            target_field: "problem" | "deliverable" | "criterion";
         };
         /** BuddyActionView */
         BuddyActionView: {
@@ -4280,6 +4363,97 @@ export interface components {
             /** Value */
             value: string | null;
         };
+        /** MonthlyGoalContoursView */
+        MonthlyGoalContoursView: {
+            /** Baseline */
+            baseline: number;
+            /** Current */
+            current: number;
+            /** Projected */
+            projected: number;
+            /** Target */
+            target: number;
+        };
+        /** MonthlyGoalFeasibilityView */
+        MonthlyGoalFeasibilityView: {
+            /** Capacity Days */
+            capacity_days: number;
+            /** Deficit */
+            deficit: number;
+            /** Feasible */
+            feasible: boolean;
+            /** Known */
+            known: boolean;
+            /** Required Steps */
+            required_steps: number;
+            /** Text */
+            text: string;
+        };
+        /** MonthlyGoalStepView */
+        MonthlyGoalStepView: {
+            /** Key */
+            key: string;
+            /** Mandatory */
+            mandatory: boolean;
+            /** Position */
+            position: number;
+            /** Ref */
+            ref: string;
+            /** Skill */
+            skill: string;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+        };
+        /** MonthlyGoalView */
+        MonthlyGoalView: {
+            /** Assumptions */
+            assumptions: string[];
+            contours: components["schemas"]["MonthlyGoalContoursView"];
+            /** Coverage */
+            coverage: number;
+            /** Days Left */
+            days_left: number;
+            feasibility: components["schemas"]["MonthlyGoalFeasibilityView"];
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Goal Ref */
+            goal_ref: string;
+            /** Goal Title */
+            goal_title: string;
+            /** History Count */
+            history_count: number;
+            /** Missing Mappings */
+            missing_mappings: string[];
+            /** Next Checkpoint */
+            next_checkpoint: string | null;
+            /** Next Checkpoint Ref */
+            next_checkpoint_ref: string | null;
+            /** Partial Forecast */
+            partial_forecast: boolean;
+            /** Period End */
+            period_end: string;
+            /** Period Start */
+            period_start: string;
+            /** Plan Version */
+            plan_version: number;
+            /** Policy Version */
+            policy_version: number;
+            /** Remaining */
+            remaining: number;
+            /** Steps */
+            steps: components["schemas"]["MonthlyGoalStepView"][];
+            /** Timezone */
+            timezone: string;
+            /** Track Key */
+            track_key: string;
+            /** Track Title */
+            track_title: string;
+        };
         /** MustTakeView */
         MustTakeView: {
             /** Current Level */
@@ -4869,6 +5043,28 @@ export interface components {
             /** Tie Breakers */
             tie_breakers: components["schemas"]["TieBreaker"][];
         };
+        /** QuickCardProfileView */
+        QuickCardProfileView: {
+            /** About */
+            about?: string | null;
+            /** City */
+            city?: string | null;
+            /** Skills */
+            skills?: components["schemas"]["QuickCardSkillView"][];
+            /** Telegram */
+            telegram?: string | null;
+            /** University */
+            university?: string | null;
+        };
+        /** QuickCardSkillView */
+        QuickCardSkillView: {
+            /** Origin */
+            origin: string;
+            /** Title */
+            title: string;
+            /** Verified */
+            verified: boolean;
+        };
         /** RatingPolicyView */
         RatingPolicyView: {
             /** Appeal Period Days */
@@ -5285,6 +5481,13 @@ export interface components {
             /** Track Key */
             track_key: string;
         };
+        /** SetMonthlyGoalRequest */
+        SetMonthlyGoalRequest: {
+            /** Milestone Key */
+            milestone_key: string;
+            /** Track Key */
+            track_key: string;
+        };
         /** SettlementAttemptView */
         SettlementAttemptView: {
             /** Attempt Number */
@@ -5544,6 +5747,34 @@ export interface components {
              */
             person_id: string;
             status: components["schemas"]["AssignmentStatus"];
+        };
+        /** TeamQuickCardView */
+        TeamQuickCardView: {
+            /** Assignment Status */
+            assignment_status: string | null;
+            /** Availability */
+            availability: string;
+            /** Contribution Status */
+            contribution_status: string | null;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Portfolio Available */
+            portfolio_available: boolean;
+            profile: components["schemas"]["QuickCardProfileView"];
+            /** Project Role */
+            project_role: string;
+            /** Responsibility */
+            responsibility: string;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
         };
         /** TeamRequestCommand */
         TeamRequestCommand: {
@@ -8541,6 +8772,61 @@ export interface operations {
             };
         };
     };
+    monthly_goal_api_v1_me_growth_monthly_goal_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonthlyGoalView"] | null;
+                };
+            };
+        };
+    };
+    set_monthly_goal_api_v1_me_growth_monthly_goal_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetMonthlyGoalRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MonthlyGoalView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     growth_next_step_api_v1_me_growth_next_step_get: {
         parameters: {
             query?: never;
@@ -9227,6 +9513,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InvitationView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    participant_team_quick_card_api_v1_me_tasks__task_id__team__person_id__quick_card_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeamQuickCardView"];
                 };
             };
             /** @description Validation Error */

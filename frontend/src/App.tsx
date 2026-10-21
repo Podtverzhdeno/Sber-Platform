@@ -3,6 +3,7 @@ import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantMetricSpark } from "./features/participant-home-spark";
 import { BuddySuggestionCard } from "./features/buddy-suggestion";
 import { ActivityPanel } from "./features/activity-panel";
+import { MonthlyGoalCard } from "./features/monthly-goal-card";
 import { KpiDetailsBody } from "./features/kpi-details";
 import { TopbarEngagementIndicator } from "./features/engagement";
 import {
@@ -792,6 +793,7 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
           />
         </aside>
       </div>
+      <MonthlyGoalCard />
       <div className="dashboard-lower-grid">
         <section className="activity-panel">
           <header>

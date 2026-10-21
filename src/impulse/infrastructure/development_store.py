@@ -24,6 +24,7 @@ from impulse.domain.development import (
     TrackStatus,
 )
 from impulse.domain.engagement import EngagementSource, WeeklyRhythm
+from impulse.domain.monthly_goal import MonthlyGoalPlan
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.development import (
     course_track_links,
@@ -33,6 +34,7 @@ from impulse.infrastructure.models.development import (
     freeze_exceptions,
     learning_days,
     milestones,
+    monthly_goal_plans,
     qualification_events,
     roadmap_versions,
     track_attempts,
@@ -445,5 +447,53 @@ class SqlDevelopmentStore(DevelopmentStore):
                     effective_from=rhythm.effective_from,
                     data_origin=f"weekly_rhythm_v{rhythm.version}",
                     created_by=person_id,
+                )
+            )
+
+    async def monthly_goal_history(
+        self, person_id: UUID, period: date
+    ) -> tuple[MonthlyGoalPlan, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(
+                        monthly_goal_plans.c.plan_version,
+                        monthly_goal_plans.c.period,
+                        monthly_goal_plans.c.track_key,
+                        monthly_goal_plans.c.milestone_key,
+                        monthly_goal_plans.c.baseline_count,
+                        monthly_goal_plans.c.created_by,
+                    )
+                    .where(
+                        monthly_goal_plans.c.person_id == person_id,
+                        monthly_goal_plans.c.period == period,
+                    )
+                    .order_by(monthly_goal_plans.c.plan_version)
+                )
+            ).mappings()
+        return tuple(
+            MonthlyGoalPlan(
+                period=row["period"],
+                plan_version=row["plan_version"],
+                track_key=row["track_key"],
+                milestone_key=row["milestone_key"],
+                baseline_count=row["baseline_count"],
+                created_by=str(row["created_by"]) if row["created_by"] else None,
+            )
+            for row in rows
+        )
+
+    async def save_monthly_goal(self, person_id: UUID, plan: MonthlyGoalPlan) -> None:
+        async with self.database.session() as session:
+            await session.execute(
+                postgres_insert(monthly_goal_plans).values(
+                    person_id=person_id,
+                    period=plan.period,
+                    plan_version=plan.plan_version,
+                    track_key=plan.track_key,
+                    milestone_key=plan.milestone_key,
+                    baseline_count=plan.baseline_count,
+                    created_by=person_id,
+                    data_origin=f"monthly_goal_v{plan.plan_version}",
                 )
             )

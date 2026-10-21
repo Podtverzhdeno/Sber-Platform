@@ -2,18 +2,21 @@
 
 from __future__ import annotations
 
+from datetime import UTC, date, datetime
 from decimal import Decimal
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
-from pydantic import AwareDatetime, BaseModel
+from pydantic import AwareDatetime, BaseModel, Field
 
-from impulse.api.v1.identity import current_session
+from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.competencies import CompetencyService
 from impulse.application.development import DevelopmentService
 from impulse.application.growth import GrowthService
 from impulse.application.identity import AuthenticatedSession
 from impulse.application.work import WorkService
+from impulse.domain.development import local_learning_days
+from impulse.domain.monthly_goal import MonthlyGoalProjection
 from impulse.domain.passport import SkillGapProjection
 from impulse.domain.priority import ScoredStep
 
@@ -125,6 +128,113 @@ class NextStepView(BaseModel):
     skill: SkillGapView | None
 
 
+class SetMonthlyGoalRequest(BaseModel):
+    track_key: str = Field(min_length=1, max_length=96)
+    milestone_key: str = Field(min_length=1, max_length=96)
+
+
+class MonthlyGoalStepView(BaseModel):
+    key: str
+    position: int
+    title: str
+    skill: str
+    mandatory: bool
+    status: str
+    ref: str
+
+
+class MonthlyGoalContoursView(BaseModel):
+    baseline: int
+    current: int
+    projected: int
+    target: int
+
+
+class MonthlyGoalFeasibilityView(BaseModel):
+    known: bool
+    capacity_days: int
+    required_steps: int
+    feasible: bool
+    deficit: int
+    text: str
+
+
+class MonthlyGoalView(BaseModel):
+    policy_version: int
+    generated_at: AwareDatetime
+    track_key: str
+    track_title: str
+    goal_title: str
+    goal_ref: str
+    period_start: str
+    period_end: str
+    days_left: int
+    timezone: str
+    plan_version: int
+    history_count: int
+    steps: list[MonthlyGoalStepView]
+    contours: MonthlyGoalContoursView
+    remaining: int
+    next_checkpoint: str | None
+    next_checkpoint_ref: str | None
+    feasibility: MonthlyGoalFeasibilityView
+    partial_forecast: bool
+    coverage: float
+    missing_mappings: list[str]
+    assumptions: list[str]
+
+
+def _monthly_goal_view(item: MonthlyGoalProjection) -> MonthlyGoalView:
+    target = item.contours.target
+    return MonthlyGoalView(
+        policy_version=item.policy_version,
+        generated_at=item.generated_at,
+        track_key=item.track_key,
+        track_title=item.track_title,
+        goal_title=item.goal_title,
+        goal_ref=item.goal_ref,
+        period_start=item.period_start.isoformat(),
+        period_end=item.period_end.isoformat(),
+        days_left=item.days_left,
+        timezone=item.timezone,
+        plan_version=item.plan_version,
+        history_count=item.history_count,
+        steps=[
+            MonthlyGoalStepView(
+                key=step.key,
+                position=step.position,
+                title=step.title,
+                skill=step.skill,
+                mandatory=step.mandatory,
+                status=step.status,
+                ref=step.ref,
+            )
+            for step in item.steps
+        ],
+        contours=MonthlyGoalContoursView(
+            baseline=item.contours.baseline,
+            current=item.contours.current,
+            projected=item.contours.projected,
+            target=target,
+        ),
+        remaining=max(target - item.contours.current, 0),
+        next_checkpoint=item.next_checkpoint,
+        next_checkpoint_ref=item.next_checkpoint_ref,
+        feasibility=MonthlyGoalFeasibilityView(
+            known=item.feasibility.known,
+            capacity_days=item.feasibility.capacity_days,
+            required_steps=item.feasibility.required_steps,
+            feasible=item.feasibility.feasible,
+            deficit=item.feasibility.deficit,
+            text=item.feasibility.text,
+        ),
+        partial_forecast=item.partial_forecast,
+        coverage=(target - len(item.missing_mappings)) / target if target else 0.0,
+        missing_mappings=list(item.missing_mappings),
+        assumptions=list(item.assumptions),
+    )
+
+
 def _skill_gap_view(item: SkillGapProjection) -> SkillGapView:
     return SkillGapView(
         policy_version=item.policy_version,
@@ -229,6 +339,19 @@ def _request_growth_service(request: Request) -> GrowthService:
     work = request.app.state.work_service
     assert isinstance(work, WorkService)
     return GrowthService(development, competency, work)
+
+
+def _request_development_service(request: Request) -> DevelopmentService:
+    service = request.app.state.development_service
+    assert isinstance(service, DevelopmentService)
+    return service
+
+
+def _local_today(request: Request, timezone: str) -> date:
+    override = getattr(request.app.state, "local_today_override", None)
+    if override is not None:
+        return override
+    return next(iter(local_learning_days((datetime.now(UTC),), timezone)))
 
 
 @router.get("/me/growth/snapshot", response_model=GrowthSnapshotView)
@@ -351,6 +474,34 @@ async def growth_next_step(
             else None
         ),
     )
+
+
+@router.get("/me/growth/monthly-goal", response_model=MonthlyGoalView | None)
+async def monthly_goal(
+    request: Request,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[DevelopmentService, Depends(_request_development_service)],
+) -> MonthlyGoalView | None:
+    local_today = _local_today(request, authenticated.actor.timezone)
+    projection = await service.monthly_goal(authenticated.actor, local_today=local_today)
+    return _monthly_goal_view(projection) if projection is not None else None
+
+
+@router.post("/me/growth/monthly-goal", response_model=MonthlyGoalView)
+async def set_monthly_goal(
+    command: SetMonthlyGoalRequest,
+    request: Request,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[DevelopmentService, Depends(_request_development_service)],
+) -> MonthlyGoalView:
+    local_today = _local_today(request, authenticated.actor.timezone)
+    projection = await service.set_monthly_goal(
+        authenticated.actor,
+        track_key=command.track_key,
+        milestone_key=command.milestone_key,
+        local_today=local_today,
+    )
+    return _monthly_goal_view(projection)
 
 
 def _share(value: Decimal | None) -> float | None:

@@ -134,5 +134,8 @@ Seed использует UUIDv5 namespace и `DEMO_SEED_VERSION`. Каждый 
 - `freeze_days`
 - `freeze_exceptions`
 - `weekly_rhythm_versions`
+- `monthly_goal_plans` — неизменяемые версии месячного плана участника: период,
+  траектория, целевой checkpoint и подтверждённый baseline на момент создания;
+  current/projected/target пересчитываются из roadmap, evidence и действующего ритма
 - `visibility_settings`
 <!-- tables:end -->
