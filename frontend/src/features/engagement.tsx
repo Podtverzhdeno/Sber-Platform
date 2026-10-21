@@ -1,17 +1,32 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ANIMATION_STORAGE_KEY,
   fetchEngagementOverview,
+  fetchFreezeSummary,
+  useFreezeDay,
 } from "./engagement-client";
 import "./engagement.css";
 
 export function TopbarEngagementIndicator() {
   const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
   const indicatorQuery = useQuery({
     queryKey: ["engagement-overview"],
     queryFn: fetchEngagementOverview,
     retry: false,
+  });
+  const freezeQuery = useQuery({
+    queryKey: ["engagement-freeze"],
+    queryFn: fetchFreezeSummary,
+    retry: false,
+  });
+  const freezeUse = useMutation({
+    mutationFn: useFreezeDay,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["engagement-overview"] });
+      void queryClient.invalidateQueries({ queryKey: ["engagement-freeze"] });
+    },
   });
 
   const currentDays = indicatorQuery.data?.current_days ?? 0;
@@ -33,7 +48,14 @@ export function TopbarEngagementIndicator() {
     window.localStorage.setItem(ANIMATION_STORAGE_KEY, String(currentDays));
   }, [loading, currentDays]);
 
-  const calendarCells = qualifiedDates.slice(-56);
+  const frozenDates = indicatorQuery.data?.frozen_dates ?? [];
+  const freezeState = indicatorQuery.data?.freeze_state ?? "idle";
+  const freezeStock = freezeQuery.data?.available ?? 0;
+  const freezeUsable = freezeState === "break" && freezeStock > 0;
+  const mergedDays = Array.from(new Set([...qualifiedDates, ...frozenDates]))
+    .sort()
+    .slice(-56);
+  const qualifiedSet = new Set(qualifiedDates);
 
   return (
     <div className="streak-utility">
@@ -69,13 +91,20 @@ export function TopbarEngagementIndicator() {
             role="img"
             aria-label={`Квалифицированные дни: ${String(qualifiedDates.length)}, лучшая серия ${String(bestDays)} дней`}
           >
-            {calendarCells.length ? (
-              calendarCells.map((day) => (
-                <span className="engagement-day" key={day}>
-                  <i>✓</i>
-                  {day}
-                </span>
-              ))
+            {mergedDays.length ? (
+              mergedDays.map((day) =>
+                qualifiedSet.has(day) ? (
+                  <span className="engagement-day" key={day}>
+                    <i>✓</i>
+                    {day}
+                  </span>
+                ) : (
+                  <span className="engagement-day engagement-day--frozen" key={day}>
+                    <i>❄</i>
+                    {day}
+                  </span>
+                ),
+              )
             ) : (
               <span className="engagement-day engagement-day--empty">
                 <i>·</i>
@@ -91,6 +120,14 @@ export function TopbarEngagementIndicator() {
               </dd>
             </div>
             <div>
+              <dt>Заморозки</dt>
+              <dd>
+                {freezeQuery.isPending
+                  ? "загрузка…"
+                  : `${String(freezeStock)} в запасе · использовано ${String(freezeQuery.data?.consumed_total ?? 0)}`}
+              </dd>
+            </div>
+            <div>
               <dt>Как считается</dt>
               <dd>
                 Один день за первое квалифицируемое действие: прогресс курса, отправка в
@@ -99,6 +136,32 @@ export function TopbarEngagementIndicator() {
               </dd>
             </div>
           </dl>
+          {freezeState === "frozen" && (
+            <p className="engagement-freeze-note" role="status">
+              Вчерашний день закрыт заморозкой; заморозка не считается активностью.
+            </p>
+          )}
+          {freezeUsable && (
+            <section className="engagement-freeze-block">
+              <p>Пропущен вчерашний день. Заморозка может закрыть его один раз.</p>
+              <button
+                type="button"
+                className="streak-freeze-button"
+                disabled={freezeUse.isPending}
+                onClick={() => {
+                  freezeUse.mutate();
+                }}
+              >
+                {freezeUse.isPending ? "Применяем…" : "Использовать заморозку"}
+              </button>
+              {freezeUse.isError && (
+                <p className="engagement-freeze-error" role="alert">
+                  Служебный сбой зафиксирован без расхода заморозки: не удалось применить
+                  заморозку к серии.
+                </p>
+              )}
+            </section>
+          )}
           <p className="engagement-hint">
             Календарь показывает только квалифицированные дни; счёт без входов и сообщений.
           </p>

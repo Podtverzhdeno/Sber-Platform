@@ -65,3 +65,17 @@ qualification_events = domain_table(
     string_field("timezone", 64),
     uniques=(("person_id", "source", "source_ref"),),
 )
+freeze_days = domain_table(
+    "freeze_days",
+    uuid_field("person_id", "persons.id"),
+    typed_field("local_date", Date(), nullable=True),
+    uniques=(),
+)
+freeze_exceptions = domain_table(
+    "freeze_exceptions",
+    uuid_field("person_id", "persons.id"),
+    typed_field("local_date", Date()),
+    string_field("scope", 96),
+    string_field("explanation", 400),
+    uniques=(),
+)

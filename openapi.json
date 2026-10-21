@@ -672,13 +672,108 @@
       },
       "BuddyActionView": {
         "properties": {
+          "available": {
+            "title": "Available",
+            "type": "boolean"
+          },
+          "canonical_path": {
+            "title": "Canonical Path",
+            "type": "string"
+          },
+          "checkpoint_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkpoint Id"
+          },
+          "deadline_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline At"
+          },
+          "effect_state": {
+            "title": "Effect State",
+            "type": "string"
+          },
+          "estimated_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Minutes"
+          },
           "kind": {
             "title": "Kind",
+            "type": "string"
+          },
+          "points": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Points"
+          },
+          "points_note": {
+            "title": "Points Note",
             "type": "string"
           },
           "ref": {
             "title": "Ref",
             "type": "string"
+          },
+          "skill_forecast": {
+            "title": "Skill Forecast",
+            "type": "string"
+          },
+          "stale_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stale Reason"
+          },
+          "target_id": {
+            "title": "Target Id",
+            "type": "string"
+          },
+          "target_kind": {
+            "title": "Target Kind",
+            "type": "string"
+          },
+          "target_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Version"
           },
           "title": {
             "title": "Title",
@@ -688,7 +783,20 @@
         "required": [
           "kind",
           "ref",
-          "title"
+          "title",
+          "target_kind",
+          "target_id",
+          "checkpoint_id",
+          "target_version",
+          "canonical_path",
+          "estimated_minutes",
+          "deadline_at",
+          "points",
+          "points_note",
+          "skill_forecast",
+          "effect_state",
+          "available",
+          "stale_reason"
         ],
         "title": "BuddyActionView",
         "type": "object"
@@ -716,13 +824,21 @@
                 "type": "null"
               }
             ]
+          },
+          "suggestions": {
+            "items": {
+              "$ref": "#/components/schemas/BuddySuggestionView"
+            },
+            "title": "Suggestions",
+            "type": "array"
           }
         },
         "required": [
           "policy_version",
           "ai_model_available",
           "dismissed",
-          "suggestion"
+          "suggestion",
+          "suggestions"
         ],
         "title": "BuddySuggestionStateView",
         "type": "object"
@@ -745,6 +861,10 @@
           },
           "benefit": {
             "title": "Benefit",
+            "type": "string"
+          },
+          "coverage_note": {
+            "title": "Coverage Note",
             "type": "string"
           },
           "explanation": {
@@ -783,6 +903,14 @@
             "title": "Observation",
             "type": "string"
           },
+          "partial": {
+            "title": "Partial",
+            "type": "boolean"
+          },
+          "rank_score": {
+            "title": "Rank Score",
+            "type": "string"
+          },
           "source_categories": {
             "items": {
               "type": "string"
@@ -812,7 +940,10 @@
           "explanation",
           "idle_days",
           "model_called",
-          "auto_enrolled"
+          "auto_enrolled",
+          "rank_score",
+          "partial",
+          "coverage_note"
         ],
         "title": "BuddySuggestionView",
         "type": "object"
@@ -3166,6 +3297,20 @@
             "title": "Current Days",
             "type": "integer"
           },
+          "freeze_state": {
+            "default": "idle",
+            "title": "Freeze State",
+            "type": "string"
+          },
+          "frozen_dates": {
+            "default": [],
+            "items": {
+              "format": "date",
+              "type": "string"
+            },
+            "title": "Frozen Dates",
+            "type": "array"
+          },
           "grace_available": {
             "title": "Grace Available",
             "type": "boolean"
@@ -3724,6 +3869,62 @@
           "skills"
         ],
         "title": "FrameworkReportView",
+        "type": "object"
+      },
+      "FreezeExceptionRequest": {
+        "properties": {
+          "explanation": {
+            "maxLength": 400,
+            "minLength": 4,
+            "title": "Explanation",
+            "type": "string"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "scope": {
+            "maxLength": 96,
+            "minLength": 3,
+            "title": "Scope",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scope",
+          "explanation",
+          "occurred_at"
+        ],
+        "title": "FreezeExceptionRequest",
+        "type": "object"
+      },
+      "FreezeSummaryView": {
+        "properties": {
+          "available": {
+            "title": "Available",
+            "type": "integer"
+          },
+          "consumed_total": {
+            "title": "Consumed Total",
+            "type": "integer"
+          },
+          "granted_total": {
+            "title": "Granted Total",
+            "type": "integer"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "policy_version",
+          "granted_total",
+          "available",
+          "consumed_total"
+        ],
+        "title": "FreezeSummaryView",
         "type": "object"
       },
       "FreshnessView": {
@@ -7660,6 +7861,60 @@
         "title": "SuggestionDismissRequest",
         "type": "object"
       },
+      "SuggestionFeedbackRequest": {
+        "properties": {
+          "action": {
+            "enum": [
+              "dismiss",
+              "snooze",
+              "irrelevant"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "snooze_until": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snooze Until"
+          },
+          "suggestion_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Suggestion Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "suggestion_id",
+          "action"
+        ],
+        "title": "SuggestionFeedbackRequest",
+        "type": "object"
+      },
+      "SuggestionTargetView": {
+        "properties": {
+          "suggestion_id": {
+            "title": "Suggestion Id",
+            "type": "string"
+          },
+          "target": {
+            "$ref": "#/components/schemas/BuddyActionView"
+          }
+        },
+        "required": [
+          "suggestion_id",
+          "target"
+        ],
+        "title": "SuggestionTargetView",
+        "type": "object"
+      },
       "SupportCatalogView": {
         "properties": {
           "models": {
@@ -9047,6 +9302,101 @@
           }
         },
         "summary": "Dismiss Suggestion",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
+    "/api/v1/agents/buddy/suggestion/feedback": {
+      "post": {
+        "operationId": "suggestion_feedback_api_v1_agents_buddy_suggestion_feedback_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SuggestionFeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Suggestion Feedback",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
+    "/api/v1/agents/buddy/suggestion/target": {
+      "get": {
+        "description": "Stale/RBAC recheck immediately before the browser follows a deep link.",
+        "operationId": "resolve_suggestion_target_api_v1_agents_buddy_suggestion_target_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "suggestion_id",
+            "required": true,
+            "schema": {
+              "title": "Suggestion Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestionTargetView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resolve Suggestion Target",
         "tags": [
           "buddy"
         ]
@@ -12382,6 +12732,130 @@
           }
         },
         "summary": "Participant Dispute"
+      }
+    },
+    "/api/v1/me/engagement/freeze": {
+      "get": {
+        "operationId": "freeze_summary_api_v1_me_engagement_freeze_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FreezeSummaryView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Freeze Summary"
+      }
+    },
+    "/api/v1/me/engagement/freeze/service-block": {
+      "post": {
+        "operationId": "freeze_service_block_api_v1_me_engagement_freeze_service_block_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FreezeExceptionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Freeze Service Block Api V1 Me Engagement Freeze Service Block Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Freeze Service Block"
+      }
+    },
+    "/api/v1/me/engagement/freeze/use": {
+      "post": {
+        "operationId": "use_freeze_day_api_v1_me_engagement_freeze_use_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngagementOverviewView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Use Freeze Day"
       }
     },
     "/api/v1/me/engagement/overview": {

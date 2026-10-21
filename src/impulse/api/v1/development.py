@@ -117,6 +117,14 @@ def _service(request: Request) -> DevelopmentService:
     return request.app.state.development_service
 
 
+def _effective_local_today(state: object, timezone: str) -> date:
+    """Test seam: app.state.local_today_override keeps client influence out of the clock."""
+    override = getattr(state, "local_today_override", None)
+    if override is not None:
+        return override
+    return next(iter(local_learning_days((datetime.now(UTC),), timezone)))
+
+
 async def _overview(
     service: DevelopmentService, authenticated: AuthenticatedSession
 ) -> TrackOverview:
@@ -311,10 +319,9 @@ async def record_learning_day(
 async def streak(
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
     service: Annotated[DevelopmentService, Depends(_service)],
+    request: Request,
 ) -> StreakView:
-    local_today = next(
-        iter(local_learning_days((datetime.now(UTC),), authenticated.actor.timezone))
-    )
+    local_today = _effective_local_today(request.app.state, authenticated.actor.timezone)
     return _streak_view(await service.streak(authenticated.actor, local_today=local_today))
 
 
@@ -331,13 +338,19 @@ class EngagementOverviewView(BaseModel):
     reason: str
     today_saved: bool
     grace_available: bool
+    frozen_dates: list[date] = []
+    freeze_state: str = "idle"
 
 
 def _engagement_view(result: object) -> EngagementOverviewView:
-    from impulse.domain.engagement import EngagementCalendar
+    from impulse.domain.engagement import (
+        EngagementCalendar,
+        FrozenEngagementCalendar,
+    )
 
-    if not isinstance(result, EngagementCalendar):
+    if not isinstance(result, (EngagementCalendar, FrozenEngagementCalendar)):
         raise TypeError("Expected EngagementCalendar")
+    frozen = result if isinstance(result, FrozenEngagementCalendar) else None
     return EngagementOverviewView(
         current_days=result.current_days,
         best_days=result.best_days,
@@ -345,6 +358,8 @@ def _engagement_view(result: object) -> EngagementOverviewView:
         reason=result.reason,
         today_saved=result.today_saved,
         grace_available=result.grace_available,
+        frozen_dates=sorted(frozen.frozen_dates) if frozen else [],
+        freeze_state=frozen.freeze_state if frozen else "idle",
     )
 
 
@@ -352,10 +367,9 @@ def _engagement_view(result: object) -> EngagementOverviewView:
 async def engagement_overview(
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
     service: Annotated[DevelopmentService, Depends(_service)],
+    request: Request,
 ) -> EngagementOverviewView:
-    local_today = next(
-        iter(local_learning_days((datetime.now(UTC),), authenticated.actor.timezone))
-    )
+    local_today = _effective_local_today(request.app.state, authenticated.actor.timezone)
     return _engagement_view(await service.engagement(authenticated.actor, local_today=local_today))
 
 
@@ -379,6 +393,59 @@ async def record_qualification(
             command.occurred_at,
         )
     )
+
+
+class FreezeSummaryView(BaseModel):
+    policy_version: int
+    granted_total: int
+    available: int
+    consumed_total: int
+
+
+class FreezeExceptionRequest(BaseModel):
+    scope: str = Field(min_length=3, max_length=96)
+    explanation: str = Field(min_length=4, max_length=400)
+    occurred_at: AwareDatetime
+
+
+@router.get("/me/engagement/freeze", response_model=FreezeSummaryView)
+async def freeze_summary(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+) -> FreezeSummaryView:
+    summary = await service.freeze_summary(authenticated.actor)
+    return FreezeSummaryView(
+        policy_version=int(summary["policy_version"]),
+        granted_total=int(summary["granted_total"]),
+        available=int(summary["available"]),
+        consumed_total=int(summary["consumed_total"]),
+    )
+
+
+@router.post("/me/engagement/freeze/use", response_model=EngagementOverviewView)
+async def use_freeze_day(
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+    request: Request,
+) -> EngagementOverviewView:
+    local_today = _effective_local_today(request.app.state, authenticated.actor.timezone)
+    result = await service.use_freeze_day(authenticated.actor, local_today=local_today)
+    return _engagement_view(result)
+
+
+@router.post("/me/engagement/freeze/service-block")
+async def freeze_service_block(
+    command: FreezeExceptionRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+) -> dict[str, str]:
+    from impulse.domain.development import local_learning_days as to_local_days
+
+    local_date = next(iter(to_local_days((command.occurred_at,), authenticated.actor.timezone)))
+    audit = await service.record_freeze_exception(
+        authenticated.actor, local_date, command.scope, command.explanation
+    )
+    return {"audit": audit}
 
 
 class CertificateCompetencyView(BaseModel):

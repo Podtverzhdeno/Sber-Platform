@@ -5,7 +5,7 @@ from __future__ import annotations
 import secrets
 from collections.abc import Mapping
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Protocol, TypedDict
 from uuid import UUID, uuid4
 
@@ -26,9 +26,13 @@ from impulse.domain.development import (
     select_track,
 )
 from impulse.domain.engagement import (
-    EngagementCalendar,
+    FREEZE_POLICY_VERSION,
     EngagementSource,
+    FreezeInventory,
+    FrozenEngagementCalendar,
     engagement_calendar,
+    frozen_calendar,
+    service_block_audit,
 )
 from impulse.domain.identity import ActorContext, Role
 
@@ -331,6 +335,20 @@ class DevelopmentStore(Protocol):
 
     async def engagement_dates(self, person_id: UUID) -> frozenset[date]: ...
 
+    async def freeze_counts(self, person_id: UUID) -> tuple[int, int, frozenset[date]]:
+        """(granted_total, available, consumed_dates) for versioned freeze policy."""
+        ...
+
+    async def grant_freeze_day(self, person_id: UUID, granted_at: datetime, rule: str) -> None: ...
+
+    async def consume_freeze_day(self, person_id: UUID, local_date: date) -> bool: ...
+
+    async def record_freeze_exception(
+        self, person_id: UUID, local_date: date, scope: str, explanation: str
+    ) -> None: ...
+
+    async def freeze_exceptions(self, person_id: UUID) -> tuple[str, ...]: ...
+
 
 class MemoryDevelopmentStore:
     def __init__(self) -> None:
@@ -398,6 +416,8 @@ class MemoryDevelopmentStore:
         self._seed_person_id: UUID | None = None
         self._days: dict[UUID, frozenset[date]] = {}
         self._engagement: dict[UUID, list[tuple[EngagementSource, str, date]]] = {}
+        self._freeze: dict[UUID, list[tuple[date | None, str]]] = {}
+        self._freeze_exceptions: dict[UUID, list[tuple[date, str, str]]] = {}
 
     async def tracks(self) -> tuple[TrackRecord, ...]:
         return self._tracks
@@ -474,6 +494,40 @@ class MemoryDevelopmentStore:
 
     async def engagement_dates(self, person_id: UUID) -> frozenset[date]:
         return frozenset(entry[2] for entry in self._engagement.get(person_id, ()))
+
+    def first_engagement_person(self) -> UUID:
+        """Test/demo helper: first person that recorded at least one qualification event."""
+        return next(iter(self._engagement))
+
+    async def freeze_counts(self, person_id: UUID) -> tuple[int, int, frozenset[date]]:
+        rows = self._freeze.get(person_id, [])
+        consumed = frozenset(entry[0] for entry in rows if entry[0] is not None)
+        available = sum(1 for entry in rows if entry[0] is None)
+        return len(rows), available, consumed
+
+    async def grant_freeze_day(self, person_id: UUID, granted_at: datetime, rule: str) -> None:
+        self._freeze.setdefault(person_id, []).append((None, granted_at.isoformat()))
+
+    async def consume_freeze_day(self, person_id: UUID, local_date: date) -> bool:
+        rows = self._freeze.setdefault(person_id, [])
+        for index, (consumed_day, _rule) in enumerate(rows):
+            if consumed_day is None:
+                rows[index] = (local_date, _rule)
+                return True
+        return False
+
+    async def record_freeze_exception(
+        self, person_id: UUID, local_date: date, scope: str, explanation: str
+    ) -> None:
+        self._freeze_exceptions.setdefault(person_id, []).append(
+            (local_date, scope, explanation)
+        )
+
+    async def freeze_exceptions(self, person_id: UUID) -> tuple[str, ...]:
+        return tuple(
+            f"{scope}:{explanation}"
+            for _, scope, explanation in self._freeze_exceptions.get(person_id, ())
+        )
 
 
 class DevelopmentService:
@@ -714,11 +768,9 @@ class DevelopmentService:
 
     async def engagement(
         self, actor: ActorContext, *, local_today: date
-    ) -> EngagementCalendar:
-        self._participant(actor)
-        dates = await self.store.learning_dates(actor.person_id)
-        dates |= await self.store.engagement_dates(actor.person_id)
-        return engagement_calendar(dates, local_today=local_today)
+    ) -> FrozenEngagementCalendar:
+        """Engagement with the versioned freeze policy applied (v1 inventory sync included)."""
+        return await self.engagement_with_freeze(actor, local_today=local_today)
 
     async def record_qualification(
         self,
@@ -726,7 +778,7 @@ class DevelopmentService:
         source: EngagementSource,
         source_ref: str,
         occurred_at: datetime,
-    ) -> EngagementCalendar:
+    ) -> FrozenEngagementCalendar:
         """First qualifying action accrues one local day; later events never double-credit."""
         self._participant(actor)
         local_date = next(iter(local_learning_days((occurred_at,), actor.timezone)))
@@ -734,6 +786,66 @@ class DevelopmentService:
             actor.person_id, source, source_ref, local_date, actor.timezone
         )
         return await self.engagement(actor, local_today=local_date)
+
+    @staticmethod
+    async def _sync_freeze_inventory(
+        store: DevelopmentStore, person_id: UUID, inventory: FreezeInventory, best_days: int
+    ) -> None:
+        for _milestone in range(inventory.grants_due(best_days)):
+            await store.grant_freeze_day(
+                person_id, datetime.now(UTC), f"milestone_{FREEZE_POLICY_VERSION}"
+            )
+
+    async def engagement_with_freeze(
+        self, actor: ActorContext, *, local_today: date
+    ) -> FrozenEngagementCalendar:
+        self._participant(actor)
+        dates = await self.store.learning_dates(actor.person_id)
+        dates |= await self.store.engagement_dates(actor.person_id)
+        granted_total, available, consumed = await self.store.freeze_counts(actor.person_id)
+        inventory = FreezeInventory(
+            granted_total=granted_total,
+            available=available,
+            consumed_total=len(consumed),
+            next_grant_best_days=7,
+        )
+        base_calendar = engagement_calendar(dates, local_today=local_today)
+        await self._sync_freeze_inventory(
+            self.store, actor.person_id, inventory, base_calendar.best_days
+        )
+        frozen = frozen_calendar(base_calendar, available, consumed, local_today=local_today)
+        if frozen.freeze_state == "frozen":
+            await self.store.consume_freeze_day(
+                actor.person_id, local_today - timedelta(days=1)
+            )
+        return frozen
+
+    async def use_freeze_day(
+        self, actor: ActorContext, *, local_today: date
+    ) -> FrozenEngagementCalendar:
+        """Manual enablement from the popover: one stock day only when yesterday was missed."""
+        self._participant(actor)
+        return await self.engagement_with_freeze(actor, local_today=local_today)
+
+    async def freeze_summary(self, actor: ActorContext) -> dict[str, int | str]:
+        self._participant(actor)
+        granted_total, available, consumed = await self.store.freeze_counts(actor.person_id)
+        return {
+            "policy_version": FREEZE_POLICY_VERSION,
+            "granted_total": granted_total,
+            "available": available,
+            "consumed_total": len(consumed),
+        }
+
+    async def record_freeze_exception(
+        self, actor: ActorContext, local_date: date, scope: str, explanation: str
+    ) -> str:
+        """Outage/external block: audit-only record, inventory is never spent."""
+        self._participant(actor)
+        await self.store.record_freeze_exception(
+            actor.person_id, local_date, scope, explanation
+        )
+        return service_block_audit(scope=scope, explanation=explanation)
 
     @staticmethod
     def enrollment_rating_eligible(enrollment: EnrollmentRecord) -> bool:

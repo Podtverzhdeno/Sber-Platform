@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from typing import Any
 from uuid import UUID
 
@@ -29,6 +29,8 @@ from impulse.infrastructure.models.development import (
     course_track_links,
     courses,
     enrollments,
+    freeze_days,
+    freeze_exceptions,
     learning_days,
     milestones,
     qualification_events,
@@ -323,3 +325,83 @@ class SqlDevelopmentStore(DevelopmentStore):
                 )
             ).scalars()
             return frozenset(rows)
+
+    async def freeze_counts(self, person_id: UUID) -> tuple[int, int, frozenset[date]]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(freeze_days.c.local_date, freeze_days.c.status).where(
+                        freeze_days.c.person_id == person_id,
+                        freeze_days.c.status.in_(("available", "consumed")),
+                    )
+                )
+            ).mappings()
+        status_by_date: list[tuple[date | None, str]] = [
+            (row["local_date"], row["status"]) for row in rows
+        ]
+        granted = len(status_by_date)
+        available = sum(1 for entry in status_by_date if entry[1] == "available")
+        consumed_dates = frozenset(
+            entry[0]
+            for entry in status_by_date
+            if entry[1] == "consumed" and entry[0] is not None
+        )
+        return granted, available, consumed_dates
+
+    async def grant_freeze_day(self, person_id: UUID, granted_at: datetime, rule: str) -> None:
+        async with self.database.session() as session:
+            await session.execute(
+                postgres_insert(freeze_days)
+                .values(
+                    person_id=person_id,
+                    local_date=None,
+                    status="available",
+                    data_origin=rule,
+                    created_by=person_id,
+                )
+            )
+
+    async def consume_freeze_day(self, person_id: UUID, local_date: date) -> bool:
+        async with self.database.session() as session:
+            candidate = await session.execute(
+                select(freeze_days.c.id)
+                .where(freeze_days.c.person_id == person_id, freeze_days.c.status == "available")
+                .order_by(freeze_days.c.created_at)
+                .limit(1)
+            )
+            row_id = candidate.scalar_one_or_none()
+            if row_id is None:
+                return False
+            await session.execute(
+                freeze_days.update()
+                .where(freeze_days.c.id == row_id)
+                .values(status="consumed", local_date=local_date)
+            )
+            return True
+
+    async def record_freeze_exception(
+        self, person_id: UUID, local_date: date, scope: str, explanation: str
+    ) -> None:
+        async with self.database.session() as session:
+            await session.execute(
+                postgres_insert(freeze_exceptions)
+                .values(
+                    person_id=person_id,
+                    local_date=local_date,
+                    scope=scope,
+                    explanation=explanation,
+                    data_origin="service_block",
+                    created_by=person_id,
+                )
+            )
+
+    async def freeze_exceptions(self, person_id: UUID) -> tuple[str, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(freeze_exceptions.c.scope, freeze_exceptions.c.explanation)
+                    .where(freeze_exceptions.c.person_id == person_id)
+                    .order_by(freeze_exceptions.c.created_at)
+                )
+            ).mappings()
+        return tuple(f"{row['scope']}:{row['explanation']}" for row in rows)

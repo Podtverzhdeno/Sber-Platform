@@ -18,10 +18,15 @@ from impulse.domain.development import (
     select_track,
 )
 from impulse.domain.engagement import (
+    FREEZE_INVENTORY_CAP,
+    FREEZE_POLICY_VERSION,
     EngagementRecord,
     EngagementSource,
+    FreezeInventory,
     engagement_calendar,
     engagement_day,
+    frozen_calendar,
+    service_block_audit,
 )
 
 
@@ -184,3 +189,97 @@ def test_empty_calendar_is_not_zero_streak_lie() -> None:
     assert calendar.current_days == 0
     assert calendar.best_days == 0
     assert "первое квалифицируемое" in calendar.reason
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
+def test_freeze_inventory_grants_every_seven_best_days_capped() -> None:
+    assert FREEZE_POLICY_VERSION == 1
+    inventory = FreezeInventory(
+        granted_total=0, available=0, consumed_total=0, next_grant_best_days=7
+    )
+    assert inventory.grants_due(6) == 0
+    assert inventory.grants_due(7) == 1
+    assert inventory.grants_due(20) == 2
+    stocked = FreezeInventory(
+        granted_total=2, available=1, consumed_total=1, next_grant_best_days=7
+    )
+    assert stocked.grants_due(20) == 0
+    assert FREEZE_INVENTORY_CAP == 3
+    full = FreezeInventory(granted_total=3, available=3, consumed_total=0, next_grant_best_days=7)
+    assert full.grants_due(70) == 0
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
+def test_frozen_calendar_auto_consumes_single_missed_day() -> None:
+    days = frozenset({date(2026, 10, 16), date(2026, 10, 17), date(2026, 10, 18)})
+    calendar = engagement_calendar(days, local_today=date(2026, 10, 20))
+    frozen = frozen_calendar(
+        calendar, available=1, consumed=frozenset(), local_today=date(2026, 10, 20)
+    )
+    assert frozen.freeze_state == "frozen"
+    assert frozen.current_days == 4
+    assert frozen.frozen_dates == frozenset({date(2026, 10, 19)})
+    assert frozen.qualified_dates == days
+    assert frozen.grace_available is True
+    assert "не считается активностью" in frozen.reason
+    extended = engagement_calendar(
+        days | {date(2026, 10, 19)}, local_today=date(2026, 10, 20)
+    )
+    assert extended.current_days == frozen.current_days
+    assert extended.best_days == frozen.best_days
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
+def test_frozen_calendar_without_stock_keeps_honest_break() -> None:
+    days = frozenset({date(2026, 10, 14)})
+    calendar = engagement_calendar(days, local_today=date(2026, 10, 20))
+    frozen = frozen_calendar(
+        calendar, available=0, consumed=frozenset(), local_today=date(2026, 10, 20)
+    )
+    assert frozen.freeze_state == "break"
+    assert "прервана" in frozen.reason
+    assert frozen.current_days == 0
+    assert frozen.frozen_dates == frozenset()
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
+def test_freeze_never_marks_frozen_day_as_activity() -> None:
+    days = frozenset({date(2026, 10, 18)})
+    calendar = engagement_calendar(days, local_today=date(2026, 10, 21))
+    frozen = frozen_calendar(
+        calendar, available=0, consumed=frozenset(), local_today=date(2026, 10, 21)
+    )
+    assert frozen.freeze_state == "break"
+    assert frozen.today_saved is False
+    assert "Служебный сбой" not in frozen.reason
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
+def test_service_block_audit_never_consumes_freeze_stock() -> None:
+    audit = service_block_audit(scope="provider_outage", explanation="LMS недоступен")
+    assert "provider_outage" in audit
+    assert "LMS недоступен" in audit
+    assert "без расхода заморозки" in audit
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
+def test_idle_freeze_state_when_streak_is_alive() -> None:
+    days = frozenset({date(2026, 10, 19)})
+    calendar = engagement_calendar(days, local_today=date(2026, 10, 20))
+    frozen = frozen_calendar(
+        calendar, available=2, consumed=frozenset(), local_today=date(2026, 10, 20)
+    )
+    assert frozen.freeze_state == "idle"
+    assert frozen.current_days == calendar.current_days
+    assert frozen.reason == calendar.reason
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
+def test_out_of_stock_state_for_yesterday_miss() -> None:
+    days = frozenset({date(2026, 10, 18)})
+    calendar = engagement_calendar(days, local_today=date(2026, 10, 20))
+    frozen = frozen_calendar(
+        calendar, available=0, consumed=frozenset(), local_today=date(2026, 10, 20)
+    )
+    assert frozen.freeze_state == "out_of_stock" or frozen.freeze_state == "break"
+    assert frozen.qualified_dates == frozenset({date(2026, 10, 18)})

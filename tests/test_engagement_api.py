@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
+from datetime import UTC, date, datetime
+from uuid import UUID
+
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
@@ -29,6 +33,28 @@ def _client() -> tuple[TestClient, MemoryDevelopmentStore]:
         auth_service=auth,
         development_service=DevelopmentService(store),
     )
+    return TestClient(app), store
+
+
+def _freeze_client() -> tuple[TestClient, MemoryDevelopmentStore]:
+    """Standalone app instance so tests can pin the server-side clock override."""
+    settings = Settings(
+        app_env=AppEnvironment.TEST,
+        demo_mode=True,
+        session_secret=SecretStr("engagement-freeze-test-secret-long-enough"),
+    )
+    auth = DemoAuthService(
+        MemoryIdentityStore(demo_personas()),
+        secret=settings.session_signing_secret(),
+        ttl_seconds=settings.session_ttl_seconds,
+    )
+    store = MemoryDevelopmentStore()
+    app = create_app(
+        settings,
+        auth_service=auth,
+        development_service=DevelopmentService(store),
+    )
+    app.state.local_today_override = date(2026, 10, 22)
     return TestClient(app), store
 
 
@@ -148,3 +174,98 @@ def test_non_participant_cannot_qualify() -> None:
         response = client.get("/api/v1/me/engagement/overview")
     assert response.status_code == 403
     assert response.json()["code"] == "FORBIDDEN"
+
+
+def _seed_inventory(store: MemoryDevelopmentStore, person_id: UUID, count: int) -> None:
+    """Grant stock outside of actor-driven milestones so unittests pin exact inventory."""
+
+    async def seed(count: int) -> None:
+        for _ in range(count):
+            await store.grant_freeze_day(person_id, datetime.now(UTC), "milestone_1")
+
+    asyncio.run(seed(count))
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
+def test_freeze_summary_reports_versioned_policy() -> None:
+    client, _store = _client()
+    with client:
+        csrf = _login(client)
+        client.post(
+            "/api/v1/me/engagement/qualify",
+            json={
+                "source": "course_learning",
+                "source_ref": "course-day-1",
+                "occurred_at": "2026-10-19T21:00:00Z",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        summary = client.get("/api/v1/me/engagement/freeze")
+        assert summary.status_code == 200
+        body = summary.json()
+        assert body["policy_version"] == 1
+        assert body["granted_total"] == 0
+        assert body["available"] == 0
+        assert body["consumed_total"] == 0
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
+def test_freeze_use_applies_yesterday_bridge_once() -> None:
+    client, _store = _freeze_client()
+    with client:
+        csrf = _login(client)
+        for day in ("2026-10-18", "2026-10-19"):
+            client.post(
+                "/api/v1/me/engagement/qualify",
+                json={
+                    "source": "project_submission",
+                    "source_ref": f"project-{day}",
+                    "occurred_at": f"{day}T21:00:00Z",
+                },
+                headers={"X-CSRF-Token": csrf},
+            )
+        # Seed exact freeze stock to simulate milestone-earned inventory.
+        _seed_inventory(_store, _store.first_engagement_person(), 2)
+        result = client.post("/api/v1/me/engagement/freeze/use", headers={"X-CSRF-Token": csrf})
+        assert result.status_code == 200
+        body = result.json()
+        assert body["freeze_state"] == "frozen"
+        assert body["current_days"] == 3
+        assert "2026-10-21" in " ".join(str(item) for item in body["frozen_dates"])
+        summary = client.get("/api/v1/me/engagement/freeze")
+        assert summary.json()["available"] == 1
+        assert summary.json()["consumed_total"] == 1
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
+def test_freeze_service_block_records_audit_without_consumption() -> None:
+    client, _store = _client()
+    with client:
+        csrf = _login(client)
+        client.post(
+            "/api/v1/me/engagement/qualify",
+            json={
+                "source": "course_learning",
+                "source_ref": "course-day-1",
+                "occurred_at": "2026-10-19T21:00:00Z",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        _seed_inventory(_store, _store.first_engagement_person(), 1)
+        response = client.post(
+            "/api/v1/me/engagement/freeze/service-block",
+            json={
+                "scope": "provider_outage",
+                "explanation": "LMS недоступен весь вечер",
+                "occurred_at": "2026-10-20T19:00:00Z",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert response.status_code == 200
+        audit = response.json()["audit"]
+        assert "provider_outage" in audit
+        assert "LMS недоступен" in audit
+        assert "без расхода заморозки" in audit
+        summary = client.get("/api/v1/me/engagement/freeze")
+        assert summary.json()["available"] == 1
+        assert summary.json()["consumed_total"] == 0
