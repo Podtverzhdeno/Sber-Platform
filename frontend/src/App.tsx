@@ -43,7 +43,7 @@ import { createQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
 import { Bootcamp, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
 import { BootcampCatalog } from "./features/bootcamp";
-import { EventCatalog } from "./features/ecosystem";
+import { ParticipantEventCatalog } from "./features/participant-events";
 import { CustomerWorkspace } from "./features/customer";
 import { CustomerScenario } from "./features/customer-scenario";
 import { CustomerPremium } from "./features/customer-premium";
@@ -524,7 +524,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "События" ? (
-          <EventCatalog />
+          <ParticipantEventCatalog />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Задачи" ? (
