@@ -105,11 +105,7 @@ def test_verified_roadmap_fact_moves_current_contour() -> None:
         asyncio.run(
             store.replace_attempts(
                 participant_id,
-                (
-                    TrackAttempt(
-                        "python", 1, TrackStatus.ACTIVE, frozenset({"foundation"})
-                    ),
-                ),
+                (TrackAttempt("python", 1, TrackStatus.ACTIVE, frozenset({"foundation"})),),
             )
         )
         refreshed = client.get("/api/v1/me/growth/monthly-goal")

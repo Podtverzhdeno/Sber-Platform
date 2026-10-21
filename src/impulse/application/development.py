@@ -564,9 +564,7 @@ class MemoryDevelopmentStore:
         self, person_id: UUID, period: date
     ) -> tuple[MonthlyGoalPlan, ...]:
         return tuple(
-            plan
-            for plan in self._monthly_goals.get(person_id, ())
-            if plan.period == period
+            plan for plan in self._monthly_goals.get(person_id, ()) if plan.period == period
         )
 
     async def save_monthly_goal(self, person_id: UUID, plan: MonthlyGoalPlan) -> None:
