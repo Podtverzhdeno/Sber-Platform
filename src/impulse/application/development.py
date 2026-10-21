@@ -26,6 +26,7 @@ from impulse.domain.development import (
     select_track,
 )
 from impulse.domain.engagement import (
+    FREEZE_GRANT_MILESTONE_DAYS,
     FREEZE_POLICY_VERSION,
     EngagementSource,
     FreezeInventory,
@@ -807,17 +808,19 @@ class DevelopmentService:
             granted_total=granted_total,
             available=available,
             consumed_total=len(consumed),
-            next_grant_best_days=7,
+            next_grant_best_days=FREEZE_GRANT_MILESTONE_DAYS,
         )
         base_calendar = engagement_calendar(dates, local_today=local_today)
         await self._sync_freeze_inventory(
             self.store, actor.person_id, inventory, base_calendar.best_days
         )
+        # N2: re-read after the milestone sync so a fresh grant can enable the bridge.
+        _granted, available, consumed = await self.store.freeze_counts(actor.person_id)
+        yesterday = local_today - timedelta(days=1)
         frozen = frozen_calendar(base_calendar, available, consumed, local_today=local_today)
+        # Domain auto_apply already refuses when yesterday was bridged before (no double spend).
         if frozen.freeze_state == "frozen":
-            await self.store.consume_freeze_day(
-                actor.person_id, local_today - timedelta(days=1)
-            )
+            await self.store.consume_freeze_day(actor.person_id, yesterday)
         return frozen
 
     async def use_freeze_day(

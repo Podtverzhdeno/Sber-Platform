@@ -154,6 +154,11 @@ export function TopbarEngagementIndicator() {
               >
                 {freezeUse.isPending ? "Применяем…" : "Использовать заморозку"}
               </button>
+              {freezeUse.isSuccess && (
+                <p className="engagement-freeze-note" role="status">
+                  Заморозка не применяется: серия прервана глубже одного пропущенного дня.
+                </p>
+              )}
               {freezeUse.isError && (
                 <p className="engagement-freeze-error" role="alert">
                   Служебный сбой зафиксирован без расхода заморозки: не удалось применить

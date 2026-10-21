@@ -238,6 +238,37 @@ def test_freeze_use_applies_yesterday_bridge_once() -> None:
 
 
 @pytest.mark.spec("participant-experience/engagement-freeze")
+def test_repeat_overview_never_double_spends_freeze_stock() -> None:
+    """B1: repeated dashboard fetches must not consume a second stock day."""
+    client, _store = _freeze_client()
+    with client:
+        csrf = _login(client)
+        for day in ("2026-10-18", "2026-10-19"):
+            client.post(
+                "/api/v1/me/engagement/qualify",
+                json={
+                    "source": "project_submission",
+                    "source_ref": f"project-{day}",
+                    "occurred_at": f"{day}T21:00:00Z",
+                },
+                headers={"X-CSRF-Token": csrf},
+            )
+        _seed_inventory(_store, _store.first_engagement_person(), 2)
+        first = client.get("/api/v1/me/engagement/overview")
+        assert first.status_code == 200
+        assert first.json()["freeze_state"] == "frozen"
+        second = client.get("/api/v1/me/engagement/overview")
+        assert second.status_code == 200
+        assert second.json()["freeze_state"] == "idle"
+        summary = client.get("/api/v1/me/engagement/freeze")
+        assert summary.json()["available"] == 1
+        assert summary.json()["consumed_total"] == 1
+        third = client.get("/api/v1/me/engagement/overview")
+        assert third.json()["current_days"] == 3
+        assert third.json()["best_days"] == 3
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
 def test_freeze_service_block_records_audit_without_consumption() -> None:
     client, _store = _client()
     with client:

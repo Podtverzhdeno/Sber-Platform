@@ -153,6 +153,22 @@ class FrozenEngagementCalendar:
     consumed_dates: frozenset[date]
 
 
+def _covered_runs(
+    covered: frozenset[date], *, local_today: date
+) -> tuple[int, int]:
+    """Current and best runs over qualified days union persisted freeze days."""
+    if not covered:
+        return 0, 0
+    latest = max(covered)
+    current = 0
+    if (local_today - latest).days <= 1:
+        cursor = latest
+        while cursor in covered:
+            current += 1
+            cursor -= timedelta(days=1)
+    return current, _longest_run(covered)
+
+
 def frozen_calendar(
     calendar: EngagementCalendar,
     available: int,
@@ -163,50 +179,56 @@ def frozen_calendar(
     """Freeze extends the current streak once when yesterday was missed and stock exists.
 
     Freeze days are audit-visible and never count as activity: they are excluded from
-    qualified_dates and appear only in frozen_dates with a dedicated reason.
+    qualified_dates and appear only in frozen_dates with a dedicated reason. Persisted
+    frozen days still carry the streak: runs are computed over qualified dates union
+    frozen dates, so a bridged miss survives the return day.
     """
+    yesterday = local_today - timedelta(days=1)
+    covered = frozenset(calendar.qualified_dates) | frozenset(consumed)
+    covered_current, covered_best = _covered_runs(covered, local_today=local_today)
     latest = max(calendar.qualified_dates, default=None)
-    frozen_dates: frozenset[date] = consumed
-    if latest is None or latest != local_today - timedelta(days=2) or available < 1:
-        if latest is not None and latest != local_today - timedelta(days=2):
-            break_now = (local_today - latest).days > 1
-            return FrozenEngagementCalendar(
-                current_days=calendar.current_days,
-                best_days=calendar.best_days,
-                qualified_dates=calendar.qualified_dates,
-                frozen_dates=frozen_dates,
-                reason=calendar.reason,
-                today_saved=calendar.today_saved,
-                grace_available=calendar.grace_available,
-                freeze_state="break" if break_now else "idle",
-                consumed_dates=consumed,
-            )
+    auto_apply = (
+        latest is not None
+        and latest == local_today - timedelta(days=2)
+        and available >= 1
+        and yesterday not in consumed
+    )
+    if not auto_apply:
+        covered_latest = max(covered, default=None)
+        if covered_latest is None:
+            state = "idle"
+        else:
+            gap_to_covered = (local_today - covered_latest).days
+            if gap_to_covered > 1:
+                state = "out_of_stock" if latest == local_today - timedelta(days=2) else "break"
+            else:
+                state = "idle"
+        reason = (
+            "Серия продолжается за счёт заморозки за пропущенный день."
+            if covered_current > 0 and calendar.current_days == 0
+            else calendar.reason
+        )
         return FrozenEngagementCalendar(
-            current_days=0 if latest is None else calendar.current_days,
-            best_days=calendar.best_days,
+            current_days=covered_current,
+            best_days=max(calendar.best_days, covered_best),
             qualified_dates=calendar.qualified_dates,
-            frozen_dates=frozen_dates,
-            reason=(
-                calendar.reason
-                if latest is not None
-                else "Заморозка доступна после первых квалифицированных дней."
-            ),
+            frozen_dates=frozenset(consumed),
+            reason=reason,
             today_saved=calendar.today_saved,
             grace_available=calendar.grace_available,
-            freeze_state="out_of_stock" if latest is not None else calendar.freeze_state,
+            freeze_state=state,
             consumed_dates=consumed,
         )
-    extended = frozenset(calendar.qualified_dates) | {local_today - timedelta(days=1)}
     days = 0
-    cursor = max(extended | frozen_dates)
-    while cursor in extended or cursor in frozen_dates:
+    cursor = max(covered | {yesterday})
+    while cursor in covered | {yesterday}:
         days += 1
         cursor -= timedelta(days=1)
     return FrozenEngagementCalendar(
         current_days=days,
-        best_days=max(calendar.best_days, days),
+        best_days=max(calendar.best_days, _longest_run(covered | {yesterday})),
         qualified_dates=calendar.qualified_dates,
-        frozen_dates=frozen_dates | {local_today - timedelta(days=1)},
+        frozen_dates=frozenset(consumed) | {yesterday},
         reason=("Вчерашний день закрыт заморозкой; заморозка не считается активностью."),
         today_saved=False,
         grace_available=True,

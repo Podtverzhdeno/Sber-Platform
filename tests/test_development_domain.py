@@ -255,6 +255,54 @@ def test_freeze_never_marks_frozen_day_as_activity() -> None:
 
 
 @pytest.mark.spec("participant-experience/engagement-freeze")
+def test_frozen_calendar_never_reapplies_already_bridged_yesterday() -> None:
+    days = frozenset({date(2026, 10, 18), date(2026, 10, 19)})
+    calendar = engagement_calendar(days, local_today=date(2026, 10, 21))
+    frozen = frozen_calendar(
+        calendar,
+        available=2,
+        consumed=frozenset({date(2026, 10, 20)}),
+        local_today=date(2026, 10, 21),
+    )
+    assert frozen.freeze_state == "idle"
+    assert frozen.current_days == 3
+    assert "заморозки за пропущенный день" in frozen.reason
+    assert frozen.qualified_dates == days
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
+def test_bridge_survives_return_day_without_best_regression() -> None:
+    """B3: freeze contributes durably once the user resumes activity."""
+    before_bridge = engagement_calendar(
+        frozenset({date(2026, 10, 18), date(2026, 10, 19)}), local_today=date(2026, 10, 21)
+    )
+    bridged = frozen_calendar(
+        before_bridge,
+        available=1,
+        consumed=frozenset(),
+        local_today=date(2026, 10, 21),
+    )
+    assert bridged.current_days == 3
+    assert bridged.best_days == 3
+
+    resumed = frozen_calendar(
+        engagement_calendar(
+            frozenset({date(2026, 10, 18), date(2026, 10, 19), date(2026, 10, 21)}),
+            local_today=date(2026, 10, 21),
+        ),
+        available=0,
+        consumed=frozenset({date(2026, 10, 20)}),
+        local_today=date(2026, 10, 21),
+    )
+    assert resumed.current_days == 4
+    assert resumed.best_days == 4
+    assert resumed.freeze_state == "idle"
+    assert resumed.qualified_dates == frozenset(
+        {date(2026, 10, 18), date(2026, 10, 19), date(2026, 10, 21)}
+    )
+
+
+@pytest.mark.spec("participant-experience/engagement-freeze")
 def test_service_block_audit_never_consumes_freeze_stock() -> None:
     audit = service_block_audit(scope="provider_outage", explanation="LMS недоступен")
     assert "provider_outage" in audit

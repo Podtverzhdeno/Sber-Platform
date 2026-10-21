@@ -164,7 +164,7 @@ describe("TopbarEngagementIndicator", () => {
     expect(screen.queryByRole("button", { name: /Использовать заморозку/ })).toBeNull();
   });
 
-  it("offers the freeze button on an honest break and posts csrf when used", async () => {
+  it("keeps the freeze use honest when the server reports the bridge is not eligible", async () => {
     let used = false;
     const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
       const key = routeKey(input);
@@ -173,9 +173,11 @@ describe("TopbarEngagementIndicator", () => {
         return new Response(
           JSON.stringify({
             ...OVERVIEW,
-            current_days: 4,
-            frozen_dates: ["2026-10-21"],
-            freeze_state: "frozen",
+            current_days: 0,
+            today_saved: false,
+            reason: "Серия прервана: последний квалифицированный день был раньше вчерашнего.",
+            frozen_dates: [],
+            freeze_state: "break",
           }),
           { status: 200, headers: { "Content-Type": "application/json" } },
         );
@@ -184,11 +186,11 @@ describe("TopbarEngagementIndicator", () => {
         key === "/api/v1/me/engagement/overview"
           ? {
               ...OVERVIEW,
-              current_days: used ? 4 : 0,
+              current_days: 0,
               today_saved: false,
               reason: "Серия прервана: последний квалифицированный день был раньше вчерашнего.",
-              frozen_dates: used ? ["2026-10-21"] : [],
-              freeze_state: used ? "frozen" : "break",
+              frozen_dates: [],
+              freeze_state: "break",
             }
           : FREEZE;
       return new Response(JSON.stringify(data), {
@@ -202,7 +204,9 @@ describe("TopbarEngagementIndicator", () => {
     openPopover();
     const button = await screen.findByRole("button", { name: /Использовать заморозку/ });
     fireEvent.click(button);
-    await screen.findByText(/заморозка не считается активностью/);
+    await screen.findByText(/серия прервана глубже одного пропущенного дня/);
+    expect(screen.queryByText(/заморозка не считается активностью/)).toBeNull();
+    expect(used).toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/v1/me/engagement/freeze/use",
       expect.objectContaining({
