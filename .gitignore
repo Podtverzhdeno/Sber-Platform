@@ -17,11 +17,13 @@ dist/
 build/
 *.egg-info/
 frontend/node_modules/
+node_modules/
 .railway/node_modules/
 frontend/dist/
 frontend/coverage/
 frontend/playwright-report/
 frontend/test-results/
+test-results/
 .idea/
 .vscode/
 *.iml
@@ -30,4 +32,17 @@ Thumbs.db
 *.db
 *.sqlite3
 logs/
+*.log
 .tmp/
+e1
+tmp-grep*.txt
+
+# Parallel-agent coordination runtime. Templates and CLI sources remain tracked.
+.agents/coordination/.scheduler.lock
+.agents/coordination/archive/
+.agents/coordination/audit/
+.agents/coordination/claims/*.lock/
+.agents/coordination/cli/archive/
+.agents/coordination/cli/audit.log
+.agents/coordination/review-*-evidence.json
+.agents/coordination/handoff-*.json
