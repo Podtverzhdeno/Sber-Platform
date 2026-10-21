@@ -448,6 +448,90 @@ async def freeze_service_block(
     return {"audit": audit}
 
 
+class WeeklyRhythmRequest(BaseModel):
+    preset: str
+    custom_days: list[int] = Field(default_factory=list[int])
+    reminder_hour: int = Field(ge=0, le=23)
+    reminder_window_hours: int = Field(ge=1, le=6)
+    effective_from: date
+
+
+class WeeklyRhythmView(BaseModel):
+    versioned: bool
+    history_count: int
+    version: int | None = None
+    preset: str | None = None
+    active_days: list[int] = []
+    reminder_hour: int | None = None
+    reminder_window_hours: int | None = None
+    effective_from: date | None = None
+    week_start: date | None = None
+    week_end: date | None = None
+    target_days: int | None = None
+    done_days: int | None = None
+    hint: str | None = None
+
+
+def _rhythm_view(result: dict[str, object]) -> WeeklyRhythmView:
+    from impulse.domain.engagement import WeeklyRhythmProjection
+
+    projection = result["projection"]
+    if not isinstance(projection, WeeklyRhythmProjection):
+        return WeeklyRhythmView(
+            versioned=False, history_count=int(str(result["history_count"]))
+        )
+    return WeeklyRhythmView(
+        versioned=True,
+        history_count=int(str(result["history_count"])),
+        version=projection.version,
+        preset=projection.preset,
+        active_days=sorted(projection.active_days),
+        reminder_hour=projection.reminder_hour,
+        reminder_window_hours=projection.reminder_window_hours,
+        effective_from=projection.effective_from,
+        week_start=projection.week_start,
+        week_end=projection.week_end,
+        target_days=projection.target_days,
+        done_days=projection.done_days,
+        hint=projection.hint,
+    )
+
+
+@router.get("/me/engagement/rhythm", response_model=WeeklyRhythmView)
+async def weekly_rhythm_overview(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+    request: Request,
+) -> WeeklyRhythmView:
+    local_today = _effective_local_today(request.app.state, authenticated.actor.timezone)
+    return _rhythm_view(
+        await service.weekly_rhythm_overview(authenticated.actor, local_today=local_today)
+    )
+
+
+@router.post("/me/engagement/rhythm", response_model=WeeklyRhythmView)
+async def save_weekly_rhythm(
+    command: WeeklyRhythmRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+    request: Request,
+) -> WeeklyRhythmView:
+    local_today = _effective_local_today(request.app.state, authenticated.actor.timezone)
+    saved = await service.save_weekly_rhythm(
+        authenticated.actor,
+        preset=command.preset,
+        custom_days=tuple(command.custom_days),
+        reminder_hour=command.reminder_hour,
+        reminder_window_hours=command.reminder_window_hours,
+        effective_from=command.effective_from,
+        local_today=local_today,
+    )
+    overview = await service.weekly_rhythm_snapshot(
+        authenticated.actor, saved, local_today=local_today
+    )
+    return _rhythm_view(overview)
+
+
 class CertificateCompetencyView(BaseModel):
     competency: str
     level: str

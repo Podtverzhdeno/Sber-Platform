@@ -23,10 +23,14 @@ from impulse.domain.engagement import (
     EngagementRecord,
     EngagementSource,
     FreezeInventory,
+    WeeklyRhythm,
+    WeeklyRhythmError,
     engagement_calendar,
     engagement_day,
     frozen_calendar,
+    preset_active_days,
     service_block_audit,
+    weekly_rhythm_projection,
 )
 
 
@@ -320,6 +324,88 @@ def test_idle_freeze_state_when_streak_is_alive() -> None:
     assert frozen.freeze_state == "idle"
     assert frozen.current_days == calendar.current_days
     assert frozen.reason == calendar.reason
+
+
+def _rhythm(
+    preset: str = "workdays",
+    days: frozenset[int] | None = None,
+    reminder_hour: int = 18,
+    window: int = 3,
+    effective_from: date = date(2026, 10, 19),
+    version: int = 1,
+) -> WeeklyRhythm:
+    return WeeklyRhythm(
+        version=version,
+        preset=preset,
+        active_days=days if days is not None else frozenset({1, 2, 3, 4, 5}),
+        reminder_hour=reminder_hour,
+        reminder_window_hours=window,
+        effective_from=effective_from,
+    )
+
+
+@pytest.mark.spec("participant-experience/weekly-rhythm")
+def test_weekly_rhythm_presets_map_iso_weekdays_and_reject_bad_custom() -> None:
+    assert preset_active_days("workdays") == frozenset({1, 2, 3, 4, 5})
+    assert preset_active_days("weekends") == frozenset({6, 7})
+    assert preset_active_days("all_week") == frozenset({1, 2, 3, 4, 5, 6, 7})
+    assert preset_active_days("twice_week") == frozenset({1, 4})
+    assert preset_active_days("custom", [2, 6]) == frozenset({2, 6})
+    with pytest.raises(WeeklyRhythmError) as unknown:
+        preset_active_days("weekdays")
+    assert unknown.value.code == "VALIDATION_ERROR"
+    for bad in ([0, 2], [3, 8], []):
+        with pytest.raises(WeeklyRhythmError):
+            preset_active_days("custom", bad)
+    assert preset_active_days("custom", [1, 1, 2]) == frozenset({1, 2})
+
+
+@pytest.mark.spec("participant-experience/weekly-rhythm")
+def test_weekly_rhythm_validates_reminder_hour_and_window() -> None:
+    with pytest.raises(WeeklyRhythmError):
+        _rhythm(reminder_hour=24)
+    with pytest.raises(WeeklyRhythmError):
+        _rhythm(reminder_hour=-1)
+    with pytest.raises(WeeklyRhythmError):
+        _rhythm(window=0)
+    with pytest.raises(WeeklyRhythmError):
+        _rhythm(window=7)
+
+
+@pytest.mark.spec("participant-experience/weekly-rhythm")
+def test_weekly_rhythm_projection_counts_qualified_only_within_contract_window() -> None:
+    """Rhythm progress: only qualified dates on/after effective_from; never frozen days."""
+    achieved = frozenset(
+        {
+            date(2026, 10, 19),
+            date(2026, 10, 20),
+            date(2026, 10, 21),
+        }
+    )
+    projection = weekly_rhythm_projection(_rhythm(), achieved, local_today=date(2026, 10, 22))
+    assert projection.version == 1
+    assert (projection.week_start, projection.week_end) == (
+        date(2026, 10, 19),
+        date(2026, 10, 25),
+    )
+    assert projection.target_days == 5
+    assert projection.done_days == 3
+    assert "не тождественен серии" in projection.hint
+    late_contract = weekly_rhythm_projection(
+        _rhythm(effective_from=date(2026, 10, 21)), achieved, local_today=date(2026, 10, 22)
+    )
+    assert late_contract.done_days == 1
+    future = weekly_rhythm_projection(
+        _rhythm(effective_from=date(2026, 10, 23)), achieved, local_today=date(2026, 10, 22)
+    )
+    assert future.done_days == 0
+
+
+@pytest.mark.spec("participant-experience/weekly-rhythm")
+def test_weekly_rhythm_projection_ignores_dates_outside_iso_week() -> None:
+    achieved = frozenset({date(2026, 10, 12), date(2026, 10, 18), date(2026, 10, 19)})
+    projection = weekly_rhythm_projection(_rhythm(), achieved, local_today=date(2026, 10, 22))
+    assert projection.done_days == 1
 
 
 @pytest.mark.spec("participant-experience/engagement-freeze")

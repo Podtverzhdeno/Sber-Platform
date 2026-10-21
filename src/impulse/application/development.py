@@ -31,9 +31,13 @@ from impulse.domain.engagement import (
     EngagementSource,
     FreezeInventory,
     FrozenEngagementCalendar,
+    WeeklyRhythm,
+    WeeklyRhythmError,
     engagement_calendar,
     frozen_calendar,
+    preset_active_days,
     service_block_audit,
+    weekly_rhythm_projection,
 )
 from impulse.domain.identity import ActorContext, Role
 
@@ -350,6 +354,12 @@ class DevelopmentStore(Protocol):
 
     async def freeze_exceptions(self, person_id: UUID) -> tuple[str, ...]: ...
 
+    async def weekly_rhythm_history(self, person_id: UUID) -> tuple[WeeklyRhythm, ...]:
+        """All saved rhythm versions, ascending by version."""
+        ...
+
+    async def save_weekly_rhythm(self, person_id: UUID, rhythm: WeeklyRhythm) -> None: ...
+
 
 class MemoryDevelopmentStore:
     def __init__(self) -> None:
@@ -419,6 +429,7 @@ class MemoryDevelopmentStore:
         self._engagement: dict[UUID, list[tuple[EngagementSource, str, date]]] = {}
         self._freeze: dict[UUID, list[tuple[date | None, str]]] = {}
         self._freeze_exceptions: dict[UUID, list[tuple[date, str, str]]] = {}
+        self._weekly_rhythm: dict[UUID, list[WeeklyRhythm]] = {}
 
     async def tracks(self) -> tuple[TrackRecord, ...]:
         return self._tracks
@@ -529,6 +540,12 @@ class MemoryDevelopmentStore:
             f"{scope}:{explanation}"
             for _, scope, explanation in self._freeze_exceptions.get(person_id, ())
         )
+
+    async def weekly_rhythm_history(self, person_id: UUID) -> tuple[WeeklyRhythm, ...]:
+        return tuple(self._weekly_rhythm.get(person_id, ()))
+
+    async def save_weekly_rhythm(self, person_id: UUID, rhythm: WeeklyRhythm) -> None:
+        self._weekly_rhythm.setdefault(person_id, []).append(rhythm)
 
 
 class DevelopmentService:
@@ -849,6 +866,67 @@ class DevelopmentService:
             actor.person_id, local_date, scope, explanation
         )
         return service_block_audit(scope=scope, explanation=explanation)
+
+    async def save_weekly_rhythm(
+        self,
+        actor: ActorContext,
+        *,
+        preset: str,
+        custom_days: tuple[int, ...],
+        reminder_hour: int,
+        reminder_window_hours: int,
+        effective_from: date,
+        local_today: date,
+    ) -> WeeklyRhythm:
+        """Versioned rhythm contract; past effective dates are refused, nothing retroactive."""
+        self._participant(actor)
+        if effective_from < local_today:
+            raise ApiError(
+                code="RETROACTIVE_CONTRACT",
+                message=(
+                    "Дата вступления силы не может быть в прошлом: "
+                    "ритм не задним числом закрывает пропуски."
+                ),
+                status_code=400,
+            )
+        try:
+            active_days = preset_active_days(preset, custom_days)
+            history = await self.store.weekly_rhythm_history(actor.person_id)
+            rhythm = WeeklyRhythm(
+                version=len(history) + 1,
+                preset=preset,
+                active_days=active_days,
+                reminder_hour=reminder_hour,
+                reminder_window_hours=reminder_window_hours,
+                effective_from=effective_from,
+            )
+        except WeeklyRhythmError as error:
+            raise ApiError(code=error.code, message=str(error), status_code=422) from error
+        await self.store.save_weekly_rhythm(actor.person_id, rhythm)
+        return rhythm
+    async def weekly_rhythm_overview(
+        self, actor: ActorContext, *, local_today: date
+    ) -> dict[str, object]:
+        """Current rhythm contract plus its honest within-week progress (не серия)."""
+        self._participant(actor)
+        history = await self.store.weekly_rhythm_history(actor.person_id)
+        current = history[-1] if history else None
+        if current is None or current.effective_from > local_today:
+            return {"versioned": False, "history_count": len(history), "projection": None}
+        return await self.weekly_rhythm_snapshot(actor, current, local_today=local_today)
+
+    async def weekly_rhythm_snapshot(
+        self, actor: ActorContext, rhythm: WeeklyRhythm, *, local_today: date
+    ) -> dict[str, object]:
+        """Echo a specific saved rhythm plus honest within-week progress (не серия)."""
+        self._participant(actor)
+        history = await self.store.weekly_rhythm_history(actor.person_id)
+        dates = await self.store.learning_dates(actor.person_id)
+        dates |= await self.store.engagement_dates(actor.person_id)
+        projection = weekly_rhythm_projection(
+            rhythm, dates, local_today=local_today
+        )
+        return {"versioned": True, "history_count": len(history), "projection": projection}
 
     @staticmethod
     def enrollment_rating_eligible(enrollment: EnrollmentRecord) -> bool:

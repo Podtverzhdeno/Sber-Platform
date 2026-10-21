@@ -8908,6 +8908,185 @@
         "title": "VerifyOfferRequest",
         "type": "object"
       },
+      "WeeklyRhythmRequest": {
+        "properties": {
+          "custom_days": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Custom Days",
+            "type": "array"
+          },
+          "effective_from": {
+            "format": "date",
+            "title": "Effective From",
+            "type": "string"
+          },
+          "preset": {
+            "title": "Preset",
+            "type": "string"
+          },
+          "reminder_hour": {
+            "maximum": 23.0,
+            "minimum": 0.0,
+            "title": "Reminder Hour",
+            "type": "integer"
+          },
+          "reminder_window_hours": {
+            "maximum": 6.0,
+            "minimum": 1.0,
+            "title": "Reminder Window Hours",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "preset",
+          "reminder_hour",
+          "reminder_window_hours",
+          "effective_from"
+        ],
+        "title": "WeeklyRhythmRequest",
+        "type": "object"
+      },
+      "WeeklyRhythmView": {
+        "properties": {
+          "active_days": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Active Days",
+            "type": "array"
+          },
+          "done_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Done Days"
+          },
+          "effective_from": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective From"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint"
+          },
+          "history_count": {
+            "title": "History Count",
+            "type": "integer"
+          },
+          "preset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preset"
+          },
+          "reminder_hour": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reminder Hour"
+          },
+          "reminder_window_hours": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reminder Window Hours"
+          },
+          "target_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Days"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "versioned": {
+            "title": "Versioned",
+            "type": "boolean"
+          },
+          "week_end": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Week End"
+          },
+          "week_start": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Week Start"
+          }
+        },
+        "required": [
+          "versioned",
+          "history_count"
+        ],
+        "title": "WeeklyRhythmView",
+        "type": "object"
+      },
       "WeightedProgressView": {
         "properties": {
           "coverage": {
@@ -12930,6 +13109,78 @@
           }
         },
         "summary": "Record Qualification"
+      }
+    },
+    "/api/v1/me/engagement/rhythm": {
+      "get": {
+        "operationId": "weekly_rhythm_overview_api_v1_me_engagement_rhythm_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeeklyRhythmView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Weekly Rhythm Overview"
+      },
+      "post": {
+        "operationId": "save_weekly_rhythm_api_v1_me_engagement_rhythm_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WeeklyRhythmRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeeklyRhythmView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save Weekly Rhythm"
       }
     },
     "/api/v1/me/event-claims": {

@@ -79,3 +79,14 @@ freeze_exceptions = domain_table(
     string_field("explanation", 400),
     uniques=(),
 )
+weekly_rhythm_versions = domain_table(
+    "weekly_rhythm_versions",
+    uuid_field("person_id", "persons.id"),
+    integer_field("rhythm_version"),
+    string_field("preset", 32),
+    string_field("active_days", 32),
+    integer_field("reminder_hour"),
+    integer_field("reminder_window_hours"),
+    typed_field("effective_from", Date()),
+    uniques=(("person_id", "rhythm_version"),),
+)

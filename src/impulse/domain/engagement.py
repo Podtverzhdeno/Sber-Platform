@@ -242,3 +242,133 @@ def service_block_audit(*, scope: str, explanation: str) -> str:
     return (
         f"Служебный сбой ({scope}) зафиксирован без расхода заморозки: {explanation}"
     )
+
+
+WEEKLY_RHYTHM_PRESET_VERSION = 1
+RHYTHM_NOT_STREAK_HINT = (
+    "Недельный ритм — согласованное расписание; он не тождественен серии и не закрывает пропуски."
+)
+
+
+class WeeklyRhythmError(ValueError):
+    """Domain-level contract violation for weekly rhythm settings."""
+
+    def __init__(self, code: str, message: str) -> None:
+        super().__init__(message)
+        self.code = code
+
+
+WORKDAYS_PRESET = "workdays"
+WEEKENDS_PRESET = "weekends"
+ALL_WEEK_PRESET = "all_week"
+TWICE_WEEK_PRESET = "twice_week"
+CUSTOM_PRESET = "custom"
+WEEKLY_RHYTHM_PRESETS = (
+    WORKDAYS_PRESET,
+    WEEKENDS_PRESET,
+    ALL_WEEK_PRESET,
+    TWICE_WEEK_PRESET,
+    CUSTOM_PRESET,
+)
+
+
+def preset_active_days(
+    preset: str, custom_days: tuple[int, ...] | list[int] = ()
+) -> frozenset[int]:
+    """Versioned rhythm presets v1; custom requires explicit 1..7 ISO weekdays."""
+    known = {
+        WORKDAYS_PRESET: frozenset({1, 2, 3, 4, 5}),
+        WEEKENDS_PRESET: frozenset({6, 7}),
+        ALL_WEEK_PRESET: frozenset({1, 2, 3, 4, 5, 6, 7}),
+        TWICE_WEEK_PRESET: frozenset({1, 4}),
+    }
+    if preset not in WEEKLY_RHYTHM_PRESETS:
+        raise WeeklyRhythmError(
+            "VALIDATION_ERROR",
+            f"Неизвестный пресет недельного ритма: {preset}.",
+        )
+    if preset != CUSTOM_PRESET:
+        return known[preset]
+    days = frozenset(custom_days)
+    if not days or not all(1 <= day <= 7 for day in days) or len(days) > 7:
+        raise WeeklyRhythmError(
+            "VALIDATION_ERROR",
+            "В персональном пресете выберите от 1 до 7 дней ISO-недели.",
+        )
+    return days
+
+
+@dataclass(frozen=True, slots=True)
+class WeeklyRhythm:
+    """Versioned rhythm contract; history keeps every saved version."""
+
+    version: int
+    preset: str
+    active_days: frozenset[int]
+    reminder_hour: int
+    reminder_window_hours: int
+    effective_from: date
+
+    def __post_init__(self) -> None:
+        if self.reminder_hour < 0 or self.reminder_hour > 23:
+            raise WeeklyRhythmError(
+                "VALIDATION_ERROR",
+                "Час напоминания задаётся значением от 0 до 23.",
+            )
+        if self.reminder_window_hours < 1 or self.reminder_window_hours > 6:
+            raise WeeklyRhythmError(
+                "VALIDATION_ERROR",
+                "Окно напоминания задаётся значением от 1 до 6 часов.",
+            )
+        if self.preset == CUSTOM_PRESET and not self.active_days:
+            raise WeeklyRhythmError(
+                "VALIDATION_ERROR",
+                "Персональный пресет требует выбранных дней недели.",
+            )
+
+
+def iso_week_bounds(local_today: date) -> tuple[date, date]:
+    """Monday..Sunday bounds of the ISO week containing local_today."""
+    week_start = local_today - timedelta(days=local_today.weekday())
+    return week_start, week_start + timedelta(days=6)
+
+
+@dataclass(frozen=True, slots=True)
+class WeeklyRhythmProjection:
+    """Weekly rhythm progress: НЕ серия, НЕ verified progress — только договор ритма."""
+    version: int
+    preset: str
+    active_days: frozenset[int]
+    reminder_hour: int
+    reminder_window_hours: int
+    effective_from: date
+    week_start: date
+    week_end: date
+    target_days: int
+    done_days: int
+    hint: str
+
+
+def weekly_rhythm_projection(
+    rhythm: WeeklyRhythm, achieved_dates: frozenset[date], *, local_today: date
+) -> WeeklyRhythmProjection:
+    """Progress counts only qualified dates inside the ISO week, bounded by effective_from."""
+    week_start, week_end = iso_week_bounds(local_today)
+    started = rhythm.effective_from <= local_today
+    week_days = {week_start + timedelta(days=offset) for offset in range(7)}
+    effective_days = {day for day in week_days if day >= rhythm.effective_from}
+    active_in_week = achieved_dates & effective_days
+    done = len(active_in_week) if started else 0
+    return WeeklyRhythmProjection(
+        version=rhythm.version,
+        preset=rhythm.preset,
+        active_days=rhythm.active_days,
+        reminder_hour=rhythm.reminder_hour,
+        reminder_window_hours=rhythm.reminder_window_hours,
+        effective_from=rhythm.effective_from,
+        week_start=week_start,
+        week_end=week_end,
+        target_days=len(rhythm.active_days),
+        done_days=done,
+        hint=RHYTHM_NOT_STREAK_HINT,
+    )

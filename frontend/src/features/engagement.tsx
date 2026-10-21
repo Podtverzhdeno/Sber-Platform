@@ -4,9 +4,45 @@ import {
   ANIMATION_STORAGE_KEY,
   fetchEngagementOverview,
   fetchFreezeSummary,
+  fetchWeeklyRhythm,
+  saveWeeklyRhythm,
   useFreezeDay,
 } from "./engagement-client";
 import "./engagement.css";
+
+const RHYTHM_PRESETS: Readonly<Record<string, string>> = {
+  workdays: "Будни",
+  weekends: "Выходные",
+  all_week: "Вся неделя",
+  twice_week: "Два дня",
+  custom: "Свой список",
+};
+
+const ISO_WEEKDAY_LABELS: Readonly<Record<number, string>> = {
+  1: "Пн",
+  2: "Вт",
+  3: "Ср",
+  4: "Чт",
+  5: "Пт",
+  6: "Сб",
+  7: "Вс",
+};
+
+function serverErrorMessage(error: unknown): string {
+  const raw = error instanceof Error ? error.message : String(error);
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (parsed && typeof parsed === "object" && "message" in parsed) {
+      const message = (parsed as Record<string, unknown>).message;
+      if (typeof message === "string" && message.length > 0) {
+        return message;
+      }
+    }
+  } catch {
+    // non-JSON body: fall through
+  }
+  return "Не удалось сохранить недельный ритм.";
+}
 
 export function TopbarEngagementIndicator() {
   const [open, setOpen] = useState(false);
@@ -26,6 +62,17 @@ export function TopbarEngagementIndicator() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["engagement-overview"] });
       void queryClient.invalidateQueries({ queryKey: ["engagement-freeze"] });
+    },
+  });
+  const rhythmQuery = useQuery({
+    queryKey: ["engagement-rhythm"],
+    queryFn: fetchWeeklyRhythm,
+    retry: false,
+  });
+  const rhythmSave = useMutation({
+    mutationFn: saveWeeklyRhythm,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["engagement-rhythm"] });
     },
   });
 
@@ -56,6 +103,27 @@ export function TopbarEngagementIndicator() {
     .sort()
     .slice(-56);
   const qualifiedSet = new Set(qualifiedDates);
+
+  const rhythmData = rhythmQuery.data ?? null;
+  const [chosenPreset, setChosenPreset] = useState<string | null>(null);
+  const [chosenDays, setChosenDays] = useState<number[] | null>(null);
+  const [chosenHour, setChosenHour] = useState<number | null>(null);
+  const [chosenWindow, setChosenWindow] = useState<number | null>(null);
+  const [chosenEffective, setChosenEffective] = useState<string | null>(null);
+  const preset = chosenPreset ?? (rhythmData?.versioned ? (rhythmData.preset ?? "workdays") : "workdays");
+  const activeDays = chosenDays ?? rhythmData?.active_days ?? [];
+  const reminderHour = chosenHour ?? rhythmData?.reminder_hour ?? 18;
+  const reminderWindow = chosenWindow ?? rhythmData?.reminder_window_hours ?? 3;
+  const effectiveDate = chosenEffective ?? rhythmData?.week_start ?? "";
+  const saveRhythm = () => {
+    rhythmSave.mutate({
+      preset,
+      custom_days: preset === "custom" ? activeDays : [],
+      reminder_hour: reminderHour,
+      reminder_window_hours: reminderWindow,
+      effective_from: effectiveDate,
+    });
+  };
 
   return (
     <div className="streak-utility">
@@ -170,6 +238,138 @@ export function TopbarEngagementIndicator() {
           <p className="engagement-hint">
             Календарь показывает только квалифицированные дни; счёт без входов и сообщений.
           </p>
+          {rhythmData && (
+            <section className="engagement-rhythm-block" aria-label="Недельный ритм">
+              <header>
+                <span>Недельный ритм</span>
+                {rhythmData.versioned && rhythmData.done_days !== null && rhythmData.target_days ? (
+                  <strong>{`${String(rhythmData.done_days)} из ${String(rhythmData.target_days)} в этой неделе`}</strong>
+                ) : (
+                  <strong>не настроен</strong>
+                )}
+              </header>
+              {rhythmData.hint && <p className="engagement-rhythm-hint">{rhythmData.hint}</p>}
+              {!rhythmData.versioned && rhythmData.history_count > 0 && (
+                <p className="engagement-rhythm-hint">
+                  Будущее соглашение ещё не действует; запланировано на {rhythmData.effective_from}.
+                </p>
+              )}
+              <div className="engagement-rhythm-presets">
+                {Object.entries(RHYTHM_PRESETS).map(([presetKey, presetLabel]) => (
+                  <button
+                    type="button"
+                    key={presetKey}
+                    className={
+                      preset === presetKey
+                        ? "engagement-rhythm-chip engagement-rhythm-chip--active"
+                        : "engagement-rhythm-chip"
+                    }
+                    onClick={() => {
+                      setChosenPreset(presetKey);
+                      setChosenDays(
+                        presetKey === "custom"
+                          ? rhythmData.preset === "custom"
+                            ? rhythmData.active_days
+                            : []
+                          : null,
+                      );
+                    }}
+                  >
+                    {presetLabel}
+                  </button>
+                ))}
+              </div>
+              {preset === "custom" && (
+                <div className="engagement-rhythm-days">
+                  {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                    <button
+                      type="button"
+                      key={day}
+                      className={
+                        activeDays.includes(day)
+                          ? "engagement-rhythm-chip engagement-rhythm-chip--active"
+                          : "engagement-rhythm-chip"
+                      }
+                      aria-pressed={activeDays.includes(day)}
+                      onClick={() => {
+                        setChosenDays(
+                          activeDays.includes(day)
+                            ? activeDays.filter((value) => value !== day)
+                            : [...activeDays, day].sort((left, right) => left - right),
+                        );
+                      }}
+                    >
+                      {ISO_WEEKDAY_LABELS[day]}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="engagement-rhythm-schedule">
+                <label>
+                  Напоминание
+                  <select
+                    value={String(reminderHour)}
+                    onChange={(event) => {
+                      setChosenHour(Number(event.target.value));
+                    }}
+                  >
+                    {Array.from({ length: 24 }, (_hour, index) => String(index)).map((hour) => (
+                      <option key={hour} value={hour}>
+                        {`${hour}:00`}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    aria-label="Окно напоминания"
+                    value={String(reminderWindow)}
+                    onChange={(event) => {
+                      setChosenWindow(Number(event.target.value));
+                    }}
+                  >
+                    {[1, 2, 3, 4, 5, 6].map((hours) => (
+                      <option key={hours} value={hours}>
+                        {`+${String(hours)} ч`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Действует с
+                  <input
+                    type="date"
+                    min={rhythmData.week_start ?? undefined}
+                    value={effectiveDate}
+                    onChange={(event) => {
+                      setChosenEffective(event.target.value);
+                    }}
+                  />
+                </label>
+              </div>
+              {rhythmData.versioned && (
+                <p className="engagement-rhythm-version">
+                  {`Соглашение v${String(rhythmData.version ?? 1)}; всего версий ${String(rhythmData.history_count)}`}
+                </p>
+              )}
+              <button
+                type="button"
+                className="streak-freeze-button"
+                disabled={rhythmSave.isPending}
+                onClick={saveRhythm}
+              >
+                {rhythmSave.isPending ? "Сохраняем…" : "Сохранить ритм"}
+              </button>
+              {rhythmSave.isSuccess && (
+                <p className="engagement-rhythm-note" role="status">
+                  {`Соглашение v${String(rhythmSave.data.version ?? 1)} сохранено; начинает действовать с ${rhythmSave.data.effective_from ?? ""}.`}
+                </p>
+              )}
+              {rhythmSave.isError && (
+                <p className="engagement-freeze-error" role="alert">
+                  {serverErrorMessage(rhythmSave.error)}
+                </p>
+              )}
+            </section>
+          )}
         </div>
       )}
     </div>

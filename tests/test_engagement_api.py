@@ -300,3 +300,197 @@ def test_freeze_service_block_records_audit_without_consumption() -> None:
         summary = client.get("/api/v1/me/engagement/freeze")
         assert summary.json()["available"] == 1
         assert summary.json()["consumed_total"] == 0
+
+
+@pytest.mark.spec("participant-experience/weekly-rhythm")
+def test_weekly_rhythm_save_creates_versioned_history() -> None:
+    client, _store = _freeze_client()
+    with client:
+        csrf = _login(client)
+        first = client.post(
+            "/api/v1/me/engagement/rhythm",
+            json={
+                "preset": "workdays",
+                "reminder_hour": 18,
+                "reminder_window_hours": 3,
+                "effective_from": "2026-10-22",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert first.status_code == 200
+        body = first.json()
+        assert body["versioned"] is True
+        assert body["version"] == 1
+        assert body["preset"] == "workdays"
+        assert body["active_days"] == [1, 2, 3, 4, 5]
+        assert body["target_days"] == 5
+        assert body["done_days"] == 0
+        assert body["week_start"] == "2026-10-19"
+        assert body["week_end"] == "2026-10-25"
+        second = client.post(
+            "/api/v1/me/engagement/rhythm",
+            json={
+                "preset": "custom",
+                "custom_days": [2, 4],
+                "reminder_hour": 9,
+                "reminder_window_hours": 2,
+                "effective_from": "2026-10-22",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert second.status_code == 200
+        assert second.json()["version"] == 2
+        assert second.json()["active_days"] == [2, 4]
+        future = client.post(
+            "/api/v1/me/engagement/rhythm",
+            json={
+                "preset": "all_week",
+                "reminder_hour": 8,
+                "reminder_window_hours": 1,
+                "effective_from": "2026-10-25",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert future.status_code == 200
+        assert future.json()["version"] == 3
+        overview = client.get("/api/v1/me/engagement/rhythm")
+        assert overview.status_code == 200
+        state = overview.json()
+        # v3 is future-dated, so the running contract stays v2 and reports it honestly.
+        assert state["versioned"] is False
+        assert state["history_count"] == 3
+
+@pytest.mark.spec("participant-experience/weekly-rhythm")
+def test_weekly_rhythm_rejects_retroactive_effective_date() -> None:
+    client, _store = _freeze_client()
+    with client:
+        csrf = _login(client)
+        client.post(
+            "/api/v1/me/engagement/qualify",
+            json={
+                "source": "course_learning",
+                "source_ref": "course-day-1",
+                "occurred_at": "2026-10-20T10:00:00Z",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        rejected = client.post(
+            "/api/v1/me/engagement/rhythm",
+            json={
+                "preset": "workdays",
+                "reminder_hour": 18,
+                "reminder_window_hours": 3,
+                "effective_from": "2026-10-21",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert rejected.status_code == 400
+        assert rejected.json()["code"] == "RETROACTIVE_CONTRACT"
+        overview = client.get("/api/v1/me/engagement/rhythm")
+        assert overview.json()["versioned"] is False
+        assert overview.json()["history_count"] == 0
+        engagement = client.get("/api/v1/me/engagement/overview")
+        # Backdating a rhythm must not repair the broken streak or invent activity.
+        assert engagement.json()["freeze_state"] == "out_of_stock"
+        assert engagement.json()["current_days"] == 0
+        assert engagement.json()["best_days"] == 1
+
+
+@pytest.mark.spec("participant-experience/weekly-rhythm")
+def test_weekly_rhythm_rejects_unknown_preset_and_bad_custom() -> None:
+    client, _store = _freeze_client()
+    with client:
+        csrf = _login(client)
+        unknown = client.post(
+            "/api/v1/me/engagement/rhythm",
+            json={
+                "preset": "weekdays",
+                "reminder_hour": 18,
+                "reminder_window_hours": 3,
+                "effective_from": "2026-10-22",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert unknown.status_code == 422
+        assert unknown.json()["code"] == "VALIDATION_ERROR"
+        bad_custom = client.post(
+            "/api/v1/me/engagement/rhythm",
+            json={
+                "preset": "custom",
+                "custom_days": [0, 8],
+                "reminder_hour": 18,
+                "reminder_window_hours": 3,
+                "effective_from": "2026-10-22",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert bad_custom.status_code == 422
+        hour = client.post(
+            "/api/v1/me/engagement/rhythm",
+            json={
+                "preset": "workdays",
+                "reminder_hour": 25,
+                "reminder_window_hours": 3,
+                "effective_from": "2026-10-22",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert hour.status_code == 422
+
+
+@pytest.mark.spec("participant-experience/weekly-rhythm")
+def test_weekly_rhythm_stays_distinct_from_streak_and_verified_progress() -> None:
+    """Done rhythm days never repair the streak and never count frozen days."""
+    client, _store = _freeze_client()
+    with client:
+        csrf = _login(client)
+        client.post(
+            "/api/v1/me/engagement/qualify",
+            json={
+                "source": "project_submission",
+                "source_ref": "project-tuesday",
+                "occurred_at": "2026-10-20T10:00:00Z",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        _seed_inventory(_store, _store.first_engagement_person(), 1)
+        # Yesterday-miss fetch applies the auto-bridge while yesterday is still missing.
+        bridged = client.get("/api/v1/me/engagement/overview")
+        assert bridged.json()["freeze_state"] == "frozen"
+        client.post(
+            "/api/v1/me/engagement/qualify",
+            json={
+                "source": "course_learning",
+                "source_ref": "course-today",
+                "occurred_at": "2026-10-22T10:00:00Z",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        saved = client.post(
+            "/api/v1/me/engagement/rhythm",
+            json={
+                "preset": "twice_week",
+                "reminder_hour": 18,
+                "reminder_window_hours": 3,
+                "effective_from": "2026-10-22",
+            },
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert saved.status_code == 200
+        body = saved.json()
+        # Week contract v1: Mon+Thu target; only today (Thu 22) counts inside the contract.
+        assert body["target_days"] == 2
+        assert body["done_days"] == 1
+        assert body["history_count"] == 1
+        engagement = client.get("/api/v1/me/engagement/overview")
+        state = engagement.json()
+        # Streak reached 3 through yesterday's freeze bridge; the rhythm agrees on none of it.
+        assert state["freeze_state"] == "idle"
+        assert state["current_days"] == 3
+        summary = client.get("/api/v1/me/engagement/freeze")
+        # Rhythm progress never mints or spends freeze stock.
+        assert summary.json()["granted_total"] == 1
+        assert summary.json()["consumed_total"] == 1
+        assert summary.json()["available"] == 0
+        rhythm_again = client.get("/api/v1/me/engagement/rhythm")
+        assert rhythm_again.json()["history_count"] == 1

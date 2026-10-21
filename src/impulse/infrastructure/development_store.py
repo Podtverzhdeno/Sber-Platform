@@ -23,7 +23,7 @@ from impulse.domain.development import (
     TrackAttempt,
     TrackStatus,
 )
-from impulse.domain.engagement import EngagementSource
+from impulse.domain.engagement import EngagementSource, WeeklyRhythm
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.development import (
     course_track_links,
@@ -37,6 +37,7 @@ from impulse.infrastructure.models.development import (
     roadmap_versions,
     track_attempts,
     tracks,
+    weekly_rhythm_versions,
 )
 
 
@@ -405,3 +406,51 @@ class SqlDevelopmentStore(DevelopmentStore):
                 )
             ).mappings()
         return tuple(f"{row['scope']}:{row['explanation']}" for row in rows)
+
+    async def weekly_rhythm_history(self, person_id: UUID) -> tuple[WeeklyRhythm, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(
+                        weekly_rhythm_versions.c.rhythm_version,
+                        weekly_rhythm_versions.c.preset,
+                        weekly_rhythm_versions.c.active_days,
+                        weekly_rhythm_versions.c.reminder_hour,
+                        weekly_rhythm_versions.c.reminder_window_hours,
+                        weekly_rhythm_versions.c.effective_from,
+                    )
+                    .where(weekly_rhythm_versions.c.person_id == person_id)
+                    .order_by(weekly_rhythm_versions.c.version)
+                )
+            ).mappings()
+        rhythms = tuple(
+            WeeklyRhythm(
+                version=row["version"],
+                preset=row["preset"],
+                active_days=frozenset(
+                    int(day) for day in row["active_days"].split(",") if day
+                ),
+                reminder_hour=row["reminder_hour"],
+                reminder_window_hours=row["reminder_window_hours"],
+                effective_from=row["effective_from"],
+            )
+            for row in rows
+        )
+        return rhythms
+
+    async def save_weekly_rhythm(self, person_id: UUID, rhythm: WeeklyRhythm) -> None:
+        async with self.database.session() as session:
+            await session.execute(
+                postgres_insert(weekly_rhythm_versions)
+                .values(
+                    person_id=person_id,
+                    rhythm_version=rhythm.version,
+                    preset=rhythm.preset,
+                    active_days=",".join(str(day) for day in sorted(rhythm.active_days)),
+                    reminder_hour=rhythm.reminder_hour,
+                    reminder_window_hours=rhythm.reminder_window_hours,
+                    effective_from=rhythm.effective_from,
+                    data_origin=f"weekly_rhythm_v{rhythm.version}",
+                    created_by=person_id,
+                )
+            )
