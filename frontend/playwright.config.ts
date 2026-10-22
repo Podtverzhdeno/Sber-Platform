@@ -3,6 +3,9 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
+  // Browser scenarios mutate the same seeded personas. Keep CI deterministic
+  // until every scenario owns an isolated database fixture.
+  workers: process.env.CI ? 1 : undefined,
   retries: 0,
   reporter: "line",
   use: {

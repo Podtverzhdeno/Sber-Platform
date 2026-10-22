@@ -14,6 +14,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
+    UV_NO_CACHE=1 \
     PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
@@ -28,7 +29,14 @@ RUN uv sync --frozen --no-dev
 
 COPY --from=frontend-build /build/frontend/dist ./frontend/dist
 
-RUN addgroup --system impulse && adduser --system --ingroup impulse impulse \
+RUN rm -rf \
+        /usr/local/lib/python3.13/ensurepip \
+        /usr/local/lib/python3.13/site-packages/pip \
+        /usr/local/lib/python3.13/site-packages/pip-*.dist-info \
+        /usr/local/bin/pip \
+        /usr/local/bin/pip3 \
+        /usr/local/bin/pip3.13 \
+    && addgroup --system impulse && adduser --system --ingroup impulse impulse \
     && chown -R impulse:impulse /app
 USER impulse
 

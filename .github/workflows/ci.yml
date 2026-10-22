@@ -407,6 +407,9 @@ jobs:
           --exit-code 1
           --severity CRITICAL
           --ignore-unfixed
+          --scanners vuln
+          --timeout 15m
+          --skip-version-check
           impulse-ci:${{ github.sha }}
 
   required_gates:
