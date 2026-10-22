@@ -249,6 +249,7 @@ test.beforeEach(async ({ page }) => {
       next_step: null,
     },
   ] }));
+  await page.route("**/api/v1/me/trajectory-map", (route) => route.fulfill({ json: [] }));
 });
 
 test("logout returns persona picker and allows another role", async ({ page }) => {

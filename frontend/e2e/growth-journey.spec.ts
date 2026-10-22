@@ -258,6 +258,7 @@ function installRoutes(page: Page): void {
   void page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({ json: [] }));
   void page.route("**/api/v1/development/tracks", (route) => route.fulfill({ json: { active_count: 1, max_active: 2, tracks: [{ key: "python", title: "Python-разработчик", status: "active", completed_milestones: ["m1"] }] } }));
   void page.route("**/api/v1/me/roadmaps", (route) => route.fulfill({ json: [{ track_key: "python", policy_version: 1, replacement_reason: null, milestones: [MILESTONE], next_step: MILESTONE }] }));
+  void page.route("**/api/v1/me/trajectory-map", (route) => route.fulfill({ json: [] }));
   void page.route("**/api/v1/bootcamp/certificates/*", (route) => route.fulfill({ json: { ...CERTIFICATE, preview_marking: "Демо · не является официальным сертификатом до подписания" } }));
   void page.route("**/api/v1/project-credentials/*", (route) => route.fulfill({ json: { ...PROJECT_CREDENTIAL, payment_status: "Оплачено" } }));
 }

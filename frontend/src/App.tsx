@@ -41,7 +41,7 @@ import {
 } from "./app/theme";
 import { createQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
-import { Bootcamp, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
+import { Bootcamp, DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
 import { BootcampCatalog } from "./features/bootcamp";
 import { ParticipantEventCatalog } from "./features/participant-events";
 import { CustomerWorkspace } from "./features/customer";
@@ -504,7 +504,10 @@ function Workspace({
           actor.active_role === "participant" &&
           (currentSection === "Мой путь" ||
             currentSection === "Моя траектория") ? (
-          <TrajectoryMapPage />
+          <>
+            <DevelopmentJourney />
+            <TrajectoryMapPage />
+          </>
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Bootcamp" ? (

@@ -7,7 +7,21 @@ const actor = {
   assigned_roles: ["participant"],
   scopes: [],
   consent_scopes: [],
-  navigation: ["Мой путь", "Bootcamp", "Задачи", "События", "Рейтинг", "Аналитика"],
+  navigation: [
+    "Главная",
+    "Моя траектория",
+    "Bootcamp",
+    "Задачи",
+    "Мои проекты",
+    "События",
+    "Рейтинг",
+    "Портфолио",
+    "Достижения",
+    "Аналитика",
+    "Сообщения",
+    "AI-Buddy",
+    "Настройки",
+  ],
   csrf_token: "csrf",
 };
 
@@ -71,6 +85,7 @@ test.beforeEach(async ({ page }) => {
   }));
   await page.route("**/api/v1/competency-evidence", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/trajectory-map", (route) => route.fulfill({ json: [] }));
 });
 
 test("participant activates second track and freezes one only when choosing third", async ({ page }) => {
@@ -85,6 +100,8 @@ test("participant activates second track and freezes one only when choosing thir
   });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
+  // Точка входа «Мой путь» ушла в историю: реальная роль ведёт на «Мою траекторию».
+  await page.getByRole("link", { name: "Моя траектория" }).click();
   await page.getByRole("button", { name: /Аналитик данных/ }).click();
   await expect(page.locator(".track-card").filter({ hasText: "Аналитик данных" })).toContainText("Активно");
   await page.getByRole("button", { name: /Продуктовый аналитик/ }).click();

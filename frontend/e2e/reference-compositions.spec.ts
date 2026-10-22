@@ -399,6 +399,7 @@ async function installParticipantData(page: Page, options: ParticipantMocks = {}
       },
     ],
   }));
+  await page.route("**/api/v1/me/trajectory-map", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/development/courses", (route) => route.fulfill({
     json: [
       { key: "python-base", title: "Основы Python для анализа данных", track_keys: ["python-dev"], recommendation_reason: "Подготовка к первому принятому вкладу.", source_url: "https://education.sber.ru/python-base", availability: "Открыт", access_note: "Доступен по подписке Impulse.", completion_status: "active", rating_eligible: true },
