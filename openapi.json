@@ -97,6 +97,54 @@
         "title": "AcceptanceView",
         "type": "object"
       },
+      "ActiveTaskView": {
+        "properties": {
+          "assignment_id": {
+            "title": "Assignment Id",
+            "type": "string"
+          },
+          "next_action": {
+            "title": "Next Action",
+            "type": "string"
+          },
+          "open_contributions": {
+            "title": "Open Contributions",
+            "type": "integer"
+          },
+          "project_key": {
+            "title": "Project Key",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "task_key": {
+            "title": "Task Key",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "assignment_id",
+          "task_id",
+          "task_key",
+          "project_key",
+          "title",
+          "status",
+          "next_action",
+          "open_contributions"
+        ],
+        "title": "ActiveTaskView",
+        "type": "object"
+      },
       "ActivityBucketView": {
         "properties": {
           "course_checkpoint": {
@@ -1201,6 +1249,101 @@
           "top_grade"
         ],
         "title": "CandidateSummaryView",
+        "type": "object"
+      },
+      "CareerGradeSummaryView": {
+        "properties": {
+          "auto_transition": {
+            "title": "Auto Transition",
+            "type": "boolean"
+          },
+          "catalog_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Version"
+          },
+          "current_grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Grade"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "readiness_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Readiness Percent"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "target_grade": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Grade"
+          }
+        },
+        "required": [
+          "policy_version",
+          "state",
+          "reason",
+          "hint",
+          "catalog_version",
+          "current_grade",
+          "target_grade",
+          "readiness_percent",
+          "auto_transition"
+        ],
+        "title": "CareerGradeSummaryView",
         "type": "object"
       },
       "CaseEvidenceView": {
@@ -3126,6 +3269,34 @@
         "title": "DataClass",
         "type": "string"
       },
+      "DayFocusView": {
+        "properties": {
+          "date": {
+            "title": "Date",
+            "type": "string"
+          },
+          "done": {
+            "title": "Done",
+            "type": "boolean"
+          },
+          "planned": {
+            "title": "Planned",
+            "type": "boolean"
+          },
+          "weekday": {
+            "title": "Weekday",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "weekday",
+          "planned",
+          "done"
+        ],
+        "title": "DayFocusView",
+        "type": "object"
+      },
       "DeadlineChangeDecision": {
         "properties": {
           "approve": {
@@ -3469,6 +3640,89 @@
           "settlement"
         ],
         "title": "DemoSettlementView",
+        "type": "object"
+      },
+      "DevelopmentOverviewView": {
+        "properties": {
+          "active_tasks": {
+            "items": {
+              "$ref": "#/components/schemas/ActiveTaskView"
+            },
+            "title": "Active Tasks",
+            "type": "array"
+          },
+          "actor_timezone": {
+            "title": "Actor Timezone",
+            "type": "string"
+          },
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "concepts": {
+            "$ref": "#/components/schemas/OverviewConceptsView"
+          },
+          "local_today": {
+            "title": "Local Today",
+            "type": "string"
+          },
+          "monthly_plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MonthlyGoalView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "next_outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NextOutcomeView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "overview_version": {
+            "title": "Overview Version",
+            "type": "integer"
+          },
+          "permissions": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "title": "Permissions",
+            "type": "object"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/RoleCardView"
+            },
+            "title": "Roles",
+            "type": "array"
+          },
+          "weekly_focus": {
+            "$ref": "#/components/schemas/WeekFocusView"
+          }
+        },
+        "required": [
+          "overview_version",
+          "as_of",
+          "actor_timezone",
+          "local_today",
+          "permissions",
+          "concepts",
+          "next_outcome",
+          "weekly_focus",
+          "active_tasks",
+          "roles",
+          "monthly_plan"
+        ],
+        "title": "DevelopmentOverviewView",
         "type": "object"
       },
       "DiagnosticsView": {
@@ -5682,6 +5936,74 @@
         "title": "MuteRequest",
         "type": "object"
       },
+      "NextOutcomeView": {
+        "properties": {
+          "milestone_key": {
+            "title": "Milestone Key",
+            "type": "string"
+          },
+          "milestone_position": {
+            "title": "Milestone Position",
+            "type": "integer"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "stale_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stale Reason"
+          },
+          "target_key": {
+            "title": "Target Key",
+            "type": "string"
+          },
+          "target_kind": {
+            "title": "Target Kind",
+            "type": "string"
+          },
+          "target_title": {
+            "title": "Target Title",
+            "type": "string"
+          },
+          "trajectory_key": {
+            "title": "Trajectory Key",
+            "type": "string"
+          },
+          "trajectory_title": {
+            "title": "Trajectory Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_version",
+          "trajectory_key",
+          "trajectory_title",
+          "milestone_key",
+          "milestone_position",
+          "target_kind",
+          "target_key",
+          "target_title",
+          "reasons",
+          "stale_reason"
+        ],
+        "title": "NextOutcomeView",
+        "type": "object"
+      },
       "NextStepView": {
         "properties": {
           "next_available": {
@@ -6078,6 +6400,66 @@
           "supersedes_id"
         ],
         "title": "OperationalCredentialView",
+        "type": "object"
+      },
+      "OverviewConceptView": {
+        "properties": {
+          "canonical_surface": {
+            "title": "Canonical Surface",
+            "type": "string"
+          },
+          "independent": {
+            "default": true,
+            "title": "Independent",
+            "type": "boolean"
+          },
+          "universe_version": {
+            "title": "Universe Version",
+            "type": "string"
+          },
+          "value_state": {
+            "title": "Value State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "universe_version",
+          "canonical_surface",
+          "value_state"
+        ],
+        "title": "OverviewConceptView",
+        "type": "object"
+      },
+      "OverviewConceptsView": {
+        "properties": {
+          "career_grade": {
+            "$ref": "#/components/schemas/CareerGradeSummaryView"
+          },
+          "competency_level": {
+            "$ref": "#/components/schemas/OverviewConceptView"
+          },
+          "rating_xp": {
+            "$ref": "#/components/schemas/OverviewConceptView"
+          },
+          "readiness_percent": {
+            "$ref": "#/components/schemas/OverviewConceptView"
+          },
+          "review_grade": {
+            "$ref": "#/components/schemas/OverviewConceptView"
+          },
+          "stage_progress": {
+            "$ref": "#/components/schemas/OverviewConceptView"
+          }
+        },
+        "required": [
+          "career_grade",
+          "competency_level",
+          "stage_progress",
+          "readiness_percent",
+          "rating_xp",
+          "review_grade"
+        ],
+        "title": "OverviewConceptsView",
         "type": "object"
       },
       "ParticipantAnalyticsView": {
@@ -8142,6 +8524,51 @@
           "metrics"
         ],
         "title": "RoleAnalyticsView",
+        "type": "object"
+      },
+      "RoleCardView": {
+        "properties": {
+          "attempt_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attempt Number"
+          },
+          "completed_milestones": {
+            "title": "Completed Milestones",
+            "type": "integer"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "total_milestones": {
+            "title": "Total Milestones",
+            "type": "integer"
+          },
+          "track_key": {
+            "title": "Track Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_key",
+          "title",
+          "state",
+          "attempt_number",
+          "completed_milestones",
+          "total_milestones"
+        ],
+        "title": "RoleCardView",
         "type": "object"
       },
       "RoundingMode": {
@@ -10362,6 +10789,71 @@
           "basis"
         ],
         "title": "VerifyOfferRequest",
+        "type": "object"
+      },
+      "WeekFocusView": {
+        "properties": {
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/DayFocusView"
+            },
+            "title": "Days",
+            "type": "array"
+          },
+          "done_days": {
+            "title": "Done Days",
+            "type": "integer"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint"
+          },
+          "preset": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preset"
+          },
+          "target_days": {
+            "title": "Target Days",
+            "type": "integer"
+          },
+          "versioned": {
+            "title": "Versioned",
+            "type": "boolean"
+          },
+          "week_end": {
+            "title": "Week End",
+            "type": "string"
+          },
+          "week_start": {
+            "title": "Week Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "week_start",
+          "week_end",
+          "versioned",
+          "preset",
+          "target_days",
+          "done_days",
+          "hint",
+          "days"
+        ],
+        "title": "WeekFocusView",
         "type": "object"
       },
       "WeeklyRhythmRequest": {
@@ -18164,6 +18656,24 @@
           }
         },
         "summary": "Timeline"
+      }
+    },
+    "/api/v1/participant/me/development-overview": {
+      "get": {
+        "operationId": "development_overview_api_v1_participant_me_development_overview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DevelopmentOverviewView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Development Overview"
       }
     },
     "/api/v1/project-credentials/{verification_id}": {

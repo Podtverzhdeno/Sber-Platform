@@ -184,7 +184,7 @@ class MonthlyGoalView(BaseModel):
     assumptions: list[str]
 
 
-def _monthly_goal_view(item: MonthlyGoalProjection) -> MonthlyGoalView:
+def monthly_goal_view(item: MonthlyGoalProjection) -> MonthlyGoalView:
     target = item.contours.target
     return MonthlyGoalView(
         policy_version=item.policy_version,
@@ -484,7 +484,7 @@ async def monthly_goal(
 ) -> MonthlyGoalView | None:
     local_today = _local_today(request, authenticated.actor.timezone)
     projection = await service.monthly_goal(authenticated.actor, local_today=local_today)
-    return _monthly_goal_view(projection) if projection is not None else None
+    return monthly_goal_view(projection) if projection is not None else None
 
 
 @router.post("/me/growth/monthly-goal", response_model=MonthlyGoalView)
@@ -501,7 +501,7 @@ async def set_monthly_goal(
         milestone_key=command.milestone_key,
         local_today=local_today,
     )
-    return _monthly_goal_view(projection)
+    return monthly_goal_view(projection)
 
 
 def _share(value: Decimal | None) -> float | None:
@@ -510,4 +510,4 @@ def _share(value: Decimal | None) -> float | None:
     return float(value.quantize(Decimal("0.001")))
 
 
-__all__ = ["router"]
+__all__ = ["MonthlyGoalView", "router"]

@@ -32,6 +32,7 @@ from impulse.application.development import (
     MemoryDevelopmentStore,
     demo_course_certificate,
 )
+from impulse.application.development_overview import DevelopmentOverviewService
 from impulse.application.ecosystem import EcosystemService, MemoryEcosystemStore
 from impulse.application.identity import DemoAuthService, MemoryIdentityStore, demo_personas
 from impulse.application.messaging import (
@@ -352,6 +353,9 @@ def create_app(
     app.state.database = owned_database
     app.state.auth_service = auth_service
     app.state.development_service = development_service
+    app.state.development_overview_service = DevelopmentOverviewService(
+        development_service, competency_service, work_service
+    )
     app.state.ecosystem_service = ecosystem_service
     app.state.work_service = work_service
     app.state.reward_service = reward_service

@@ -9,8 +9,14 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import AwareDatetime, BaseModel, Field
 
 from impulse.api.errors import ApiError
+from impulse.api.v1.growth import MonthlyGoalView, monthly_goal_view
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.development import DevelopmentService
+from impulse.application.development_overview import (
+    CareerGradeSummary,
+    DevelopmentOverview,
+    DevelopmentOverviewService,
+)
 from impulse.application.identity import AuthenticatedSession
 from impulse.domain.development import CompletionStatus, TrackStatus, local_learning_days
 from impulse.domain.engagement import EngagementSource
@@ -632,3 +638,227 @@ async def verify_certificate(
             status_code=404,
         )
     return _certificate_view(certificate)
+
+
+class OverviewConceptView(BaseModel):
+    universe_version: str
+    canonical_surface: str
+    independent: bool = True
+    value_state: str
+
+
+class CareerGradeSummaryView(BaseModel):
+    policy_version: int
+    state: str
+    reason: str | None
+    hint: str | None
+    catalog_version: int | None
+    current_grade: str | None
+    target_grade: str | None
+    readiness_percent: float | None
+    auto_transition: bool
+
+
+class OverviewConceptsView(BaseModel):
+    career_grade: CareerGradeSummaryView
+    competency_level: OverviewConceptView
+    stage_progress: OverviewConceptView
+    readiness_percent: OverviewConceptView
+    rating_xp: OverviewConceptView
+    review_grade: OverviewConceptView
+
+
+class NextOutcomeView(BaseModel):
+    policy_version: int
+    trajectory_key: str
+    trajectory_title: str
+    milestone_key: str
+    milestone_position: int
+    target_kind: str
+    target_key: str
+    target_title: str
+    reasons: list[str]
+    stale_reason: str | None
+
+
+class RoleCardView(BaseModel):
+    track_key: str
+    title: str
+    state: str
+    attempt_number: int | None
+    completed_milestones: int
+    total_milestones: int
+
+
+class ActiveTaskView(BaseModel):
+    assignment_id: str
+    task_id: str
+    task_key: str
+    project_key: str
+    title: str
+    status: str
+    next_action: str
+    open_contributions: int
+
+
+class DayFocusView(BaseModel):
+    date: str
+    weekday: int
+    planned: bool
+    done: bool
+
+
+class WeekFocusView(BaseModel):
+    week_start: str
+    week_end: str
+    versioned: bool
+    preset: str | None
+    target_days: int
+    done_days: int
+    hint: str | None
+    days: list[DayFocusView]
+
+
+class DevelopmentOverviewView(BaseModel):
+    overview_version: int
+    as_of: AwareDatetime
+    actor_timezone: str
+    local_today: str
+    permissions: dict[str, bool]
+    concepts: OverviewConceptsView
+    next_outcome: NextOutcomeView | None
+    weekly_focus: WeekFocusView
+    active_tasks: list[ActiveTaskView]
+    roles: list[RoleCardView]
+    monthly_plan: MonthlyGoalView | None
+
+
+def _request_overview_service(request: Request) -> DevelopmentOverviewService:
+    service = request.app.state.development_overview_service
+    assert isinstance(service, DevelopmentOverviewService)
+    return service
+
+
+def _career_grade_view(summary: CareerGradeSummary) -> CareerGradeSummaryView:
+    return CareerGradeSummaryView(
+        policy_version=summary.policy_version,
+        state=summary.state,
+        reason=summary.reason,
+        hint=summary.hint,
+        catalog_version=summary.catalog_version,
+        current_grade=summary.current_grade,
+        target_grade=summary.target_grade,
+        readiness_percent=summary.readiness_percent,
+        auto_transition=summary.auto_transition,
+    )
+
+
+def _concept_surface(name: str) -> OverviewConceptView:
+    definitions: dict[str, tuple[str, str]] = {
+        "competency_level": ("competencies-framework-v1", "skill-passport"),
+        "stage_progress": ("growth-milestones-v1", "trajectory-roadmap"),
+        "readiness_percent": ("growth-readiness-v1", "trajectory-roadmap"),
+        "rating_xp": ("reward-ledger-v1", "wallet-recognition"),
+        "review_grade": ("reward-acceptance-v1", "work-acceptance"),
+    }
+    universe, surface = definitions[name]
+    return OverviewConceptView(
+        universe_version=universe,
+        canonical_surface=surface,
+        independent=True,
+        value_state="separate_surface",
+    )
+
+
+def _overview_view(item: DevelopmentOverview) -> DevelopmentOverviewView:
+    block = item.weekly_focus
+    next_outcome = item.next_outcome
+    return DevelopmentOverviewView(
+        overview_version=item.overview_version,
+        as_of=item.generated_at,
+        actor_timezone=item.actor_timezone,
+        local_today=item.local_today.isoformat(),
+        permissions=dict(item.permissions),
+        concepts=OverviewConceptsView(
+            career_grade=_career_grade_view(item.career_grade),
+            competency_level=_concept_surface("competency_level"),
+            stage_progress=_concept_surface("stage_progress"),
+            readiness_percent=_concept_surface("readiness_percent"),
+            rating_xp=_concept_surface("rating_xp"),
+            review_grade=_concept_surface("review_grade"),
+        ),
+        next_outcome=(
+            None
+            if next_outcome is None
+            else NextOutcomeView(
+                policy_version=next_outcome.policy_version,
+                trajectory_key=next_outcome.trajectory_key,
+                trajectory_title=next_outcome.trajectory_title,
+                milestone_key=next_outcome.milestone_key,
+                milestone_position=next_outcome.milestone_position,
+                target_kind=next_outcome.target_kind,
+                target_key=next_outcome.target_key,
+                target_title=next_outcome.target_title,
+                reasons=list(next_outcome.reasons),
+                stale_reason=next_outcome.stale_reason,
+            )
+        ),
+        weekly_focus=WeekFocusView(
+            week_start=block.week_start.isoformat(),
+            week_end=block.week_end.isoformat(),
+            versioned=block.versioned,
+            preset=block.preset,
+            target_days=block.target_days,
+            done_days=block.done_days,
+            hint=block.hint,
+            days=[
+                DayFocusView(
+                    date=day.date.isoformat(),
+                    weekday=day.weekday,
+                    planned=day.planned,
+                    done=day.done,
+                )
+                for day in block.days
+            ],
+        ),
+        active_tasks=[
+            ActiveTaskView(
+                assignment_id=task.assignment_id,
+                task_id=task.task_id,
+                task_key=task.task_key,
+                project_key=task.project_key,
+                title=task.title,
+                status=task.status,
+                next_action=task.next_action,
+                open_contributions=task.open_contributions,
+            )
+            for task in item.active_tasks
+        ],
+        roles=[
+            RoleCardView(
+                track_key=role.track_key,
+                title=role.title,
+                state=role.state,
+                attempt_number=role.attempt_number,
+                completed_milestones=role.completed_milestones,
+                total_milestones=role.total_milestones,
+            )
+            for role in item.roles
+        ],
+        monthly_plan=(
+            None
+            if item.monthly_plan is None
+            else monthly_goal_view(item.monthly_plan)
+        ),
+    )
+
+
+@router.get("/participant/me/development-overview", response_model=DevelopmentOverviewView)
+async def development_overview(
+    request: Request,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[DevelopmentOverviewService, Depends(_request_overview_service)],
+) -> DevelopmentOverviewView:
+    local_today = _effective_local_today(request.app.state, authenticated.actor.timezone)
+    overview = await service.overview(authenticated.actor, local_today=local_today)
+    return _overview_view(overview)
