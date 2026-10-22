@@ -6,11 +6,15 @@ import hashlib
 import json
 from collections import defaultdict
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from time import monotonic
-from typing import cast
+from typing import TYPE_CHECKING, cast
 from urllib.parse import urlparse
 
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
+
+if TYPE_CHECKING:
+    from impulse.infrastructure.rate_limit_store import RateWindowStore
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,10 +49,12 @@ class SecurityMiddleware:
         *,
         allowed_origins: frozenset[str] = frozenset(),
         max_request_bytes: int = 1_048_576,
+        shared_rate_store: RateWindowStore | None = None,
     ) -> None:
         self.app = app
         self.allowed_origins = allowed_origins
         self.max_request_bytes = max_request_bytes
+        self.shared_rate_store = shared_rate_store
         self.limiter = RequestRateLimiter(
             {
                 "auth": RateRule(20),
@@ -89,7 +95,7 @@ class SecurityMiddleware:
             else "unknown"
         )
         actor_key = hashlib.sha256(cookie or remote.encode()).hexdigest()[:16]
-        if not self.limiter.allow(category, actor_key):
+        if not await self._within_rate_limit(category, actor_key):
             await self._reject(send, 429, "RATE_LIMITED", retry_after="60")
             return
 
@@ -108,6 +114,19 @@ class SecurityMiddleware:
             await send(message)
 
         await self.app(scope, receive, secure_send)
+
+    async def _within_rate_limit(self, category: str, actor_key: str) -> bool:
+        rule = self.limiter.rules[category]
+        if self.shared_rate_store is not None:
+            decision = await self.shared_rate_store.slide_window(
+                category,
+                actor_key,
+                window_seconds=rule.window_seconds,
+                limit=rule.limit,
+                now=datetime.now(UTC),
+            )
+            return decision.allowed
+        return self.limiter.allow(category, actor_key)
 
     @staticmethod
     def _same_origin(origin: str, headers: dict[bytes, bytes]) -> bool:

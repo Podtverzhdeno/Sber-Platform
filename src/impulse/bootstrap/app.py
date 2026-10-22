@@ -81,6 +81,7 @@ from impulse.infrastructure.identity_store import SqlIdentityStore
 from impulse.infrastructure.messaging_store import SqlMessagingStore
 from impulse.infrastructure.notifications_store import SqlNotificationsStore
 from impulse.infrastructure.operations_store import SqlOperationsStore
+from impulse.infrastructure.rate_limit_store import SqlRateWindowStore
 from impulse.infrastructure.recognition_store import SqlRecognitionStore
 from impulse.infrastructure.reward_store import SqlRewardStore
 from impulse.infrastructure.talent_store import SqlTalentStore
@@ -140,6 +141,7 @@ def create_app(
             secret=runtime_settings.session_signing_secret(),
             ttl_seconds=runtime_settings.session_ttl_seconds,
         )
+    shared_rate_store = SqlRateWindowStore(owned_database) if owned_database is not None else None
     if buddy_service is None:
         buddy_storage = (
             SqlBuddyStorage(owned_database) if owned_database is not None else MemoryBuddyStorage()
@@ -351,6 +353,7 @@ def create_app(
         SecurityMiddleware,
         allowed_origins=allowed_origins,
         max_request_bytes=runtime_settings.max_request_bytes,
+        shared_rate_store=shared_rate_store,
     )
     install_error_handlers(app)
     app.include_router(health_router)
