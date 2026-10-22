@@ -1,5 +1,6 @@
 ﻿import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
+import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
 import { ParticipantMetricSpark } from "./features/participant-home-spark";
 import { BuddySuggestionCard } from "./features/buddy-suggestion";
 import { ActivityPanel } from "./features/activity-panel";
@@ -733,7 +734,35 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
         >
           Сегодня
         </button>
+        {searchParams.get("v2") === "1" && (
+          <button
+            type="button"
+            className="date-chip date-chip--button"
+            onClick={() => {
+              const next = new URLSearchParams(searchParams);
+              next.delete("v2");
+              setSearchParams(next);
+            }}
+          >
+            Классическая главная
+          </button>
+        )}
       </header>
+      {searchParams.get("v2") === "1" ? (
+        <ParticipantHomeV2
+          onOpenTarget={(kind, key) => {
+            if (kind === "course") {
+              goTo("Bootcamp", `?course=${encodeURIComponent(key)}`);
+            } else {
+              goTo("Задачи");
+            }
+          }}
+          onOpenWorkspace={() => {
+            setProjectOpen(true);
+          }}
+        />
+      ) : (
+        <>
       <section className="metric-grid" aria-label="Ключевые показатели">
         {metrics.map((metric, metricIndex) => {
           const kpiKey = KPI_KEYS[metricIndex] ?? "streak";
@@ -870,6 +899,8 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
           }}
         />
       </div>
+      </>
+      )}
       {kpi !== null && (
         <div className="overlay" role="presentation">
           <section

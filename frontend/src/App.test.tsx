@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
+import { overviewFixture } from "./features/participant-home-v2/fixture";
 
 const personas = [
   { key: "participant-alex", display_name: "Алекс Речной", roles: ["participant"] },
@@ -93,5 +94,44 @@ describe("App", () => {
 
     expect(await screen.findByRole("button", { name: /Алекс Речной/ })).toBeEnabled();
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+  });
+
+  it("renders the home v2 preview under ?v2=1 and returns on toggle", async () => {
+    const actor = {
+      person_id: "00000000-0000-0000-0000-000000000001",
+      display_name: "Алекс Речной",
+      active_role: "participant",
+      assigned_roles: ["participant"],
+      scopes: [],
+      consent_scopes: [],
+      navigation: ["Главная", "Мой путь", "Bootcamp", "Задачи", "Портфолио"],
+      csrf_token: "csrf",
+    };
+    vi.spyOn(globalThis, "fetch").mockImplementation((input, init) => {
+      const url = requestUrl(input);
+      if (url.endsWith("/personas")) {
+        return Promise.resolve(new Response(JSON.stringify(personas), { status: 200 }));
+      }
+      if (url.endsWith("/me")) {
+        return Promise.resolve(new Response(JSON.stringify(actor), { status: 200 }));
+      }
+      if (url.endsWith("/development-overview")) {
+        return Promise.resolve(new Response(JSON.stringify(overviewFixture), { status: 200 }));
+      }
+      if (init?.method !== "GET") {
+        return Promise.resolve(new Response(JSON.stringify({ code: "INTERNAL" }), { status: 500 }));
+      }
+      return Promise.resolve(new Response("{}", { status: 200 }));
+    });
+
+    window.history.pushState({}, "", "/workspace/0?v2=1");
+    render(<App />);
+    expect(await screen.findByTestId("grade-summary")).toBeInTheDocument();
+    expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("not_evaluable");
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Классическая главная" }));
+    expect(screen.queryByTestId("grade-summary")).not.toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Ключевые показатели" })).toBeInTheDocument();
   });
 });
