@@ -22,8 +22,8 @@ export default defineConfig(({ command }) => ({
       "Content-Security-Policy": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' ws:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
     },
     proxy: {
-      "/api": "http://127.0.0.1:8000",
-      "/health": "http://127.0.0.1:8000",
+      "/api": process.env.VITE_API_PROXY_TARGET ?? "http://127.0.0.1:8000",
+      "/health": process.env.VITE_API_PROXY_TARGET ?? "http://127.0.0.1:8000",
     },
   },
   test: {
