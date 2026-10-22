@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { apiRequest, type RuntimeApiPath } from "../api/client";
@@ -66,6 +66,10 @@ export function EventDetailBody({ detail, aggregate }: { detail: EventDetail; ag
 export function ParticipantEventCatalog() {
   const client = useQueryClient();
   const [params, setParams] = useSearchParams();
+  const pendingParams = useRef(new URLSearchParams(params));
+  useEffect(() => {
+    pendingParams.current = new URLSearchParams(params);
+  }, [params]);
   const track = params.get("track") ?? "all";
   const eventType = params.get("type") ?? "all";
   const view = params.get("view") === "list" ? "list" : "cards";
@@ -83,8 +87,19 @@ export function ParticipantEventCatalog() {
     mutationFn: (eventKeyArg: string) => apiRequest<Claim>(`/api/v1/me/events/${encodeURIComponent(eventKeyArg)}/claims` as RuntimeApiPath, { method: "POST", headers: csrfHeaders(), body: JSON.stringify({ claim_type: claimType, result, evidence_url: evidence }) }),
     onSuccess: async () => { setSelectedEvent(null); await client.invalidateQueries({ queryKey: ["event-claims"] }); },
   });
-  const setParam = (key: string, value: string, defaultValue = "all") => { const next = new URLSearchParams(params); if (value === defaultValue) next.delete(key); else next.set(key, value); setParams(next); };
-  const close = () => { const next = new URLSearchParams(params); next.delete("event"); setParams(next); };
+  const setParam = (key: string, value: string, defaultValue = "all") => {
+    const next = new URLSearchParams(pendingParams.current);
+    if (value === defaultValue) next.delete(key);
+    else next.set(key, value);
+    pendingParams.current = next;
+    setParams(next);
+  };
+  const close = () => {
+    const next = new URLSearchParams(pendingParams.current);
+    next.delete("event");
+    pendingParams.current = next;
+    setParams(next);
+  };
   if (events.isLoading) return <StatePanel kind="loading" />;
   if (events.isError || !events.data) return <StatePanel kind="error" action="Обновить" onAction={() => { void events.refetch(); }} />;
   const demoCompleted: EventItem = { key: "mayaki-2025", title: "Маяки 2025", event_type: "Хакатон", organizer: "Сбер", conditions: "Приложите сертификат участника, финалиста или победителя.", source_url: "https://developers.sber.ru/", deadline_at: "2025-09-20T18:00:00Z", status: "completed", track_keys: ["python"], recommendation_reason: "Подтвердите результат и получите постоянные баллы и трофей.", source_checked_at: "2026-09-28T09:00:00Z", source_status: "verified" };
