@@ -157,6 +157,20 @@ COURSES = (
     "Презентация результата",
     "Корпоративная культура",
 )
+DEMO_COURSE_SOURCES = (
+    "https://github.com/Fission-AI/OpenSpec",
+    "https://developers.sber.ru/docs/ru/gigachat/",
+    "https://docs.python.org/3/tutorial/",
+    "https://fastapi.tiangolo.com/ru/tutorial/",
+    "https://postgrespro.ru/docs/postgresql",
+    "https://ru.wikipedia.org/wiki/%D0%90%D0%BD%D0%B0%D0%BB%D0%B8%D0%B7_%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85",
+    "https://ru.wikipedia.org/wiki/%D0%9C%D0%B0%D1%88%D0%B8%D0%BD%D0%BD%D0%BE%D0%B5_%D0%BE%D0%B1%D1%83%D1%87%D0%B5%D0%BD%D0%B8%D0%B5",
+    "https://git-scm.com/book/ru/v2",
+    "https://ru.wikipedia.org/wiki/%D0%A2%D0%B5%D1%81%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5_%D0%BF%D1%80%D0%BE%D0%B3%D1%80%D0%B0%D0%BC%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE_%D0%BE%D0%B1%D0%B5%D1%81%D0%BF%D0%B5%D1%87%D0%B5%D0%BD%D0%B8%D1%8F",
+    "http://www.consultant.ru/document/cons_doc_LAW_61801/",
+    "https://ru.wikipedia.org/wiki/%D0%9F%D1%80%D0%B5%D0%B7%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F",
+    "https://ru.wikipedia.org/wiki/%D0%9A%D0%BE%D1%80%D0%BF%D0%BE%D1%80%D0%B0%D1%82%D0%B8%D0%B2%D0%BD%D0%B0%D1%8F_%D0%BA%D1%83%D0%BB%D1%8C%D1%82%D1%83%D1%80%D0%B0",
+)
 EVENTS = (
     "МАЯКИ: демо",
     "Хакатон данных",
@@ -244,7 +258,7 @@ def build_seed_batches() -> list[SeedBatch]:
             slug=f"demo-course-{index}",
             title=title,
             payload={
-                "source_url": f"https://example.test/courses/demo-course-{index}",
+                "source_url": DEMO_COURSE_SOURCES[index - 1],
                 "availability": "unavailable" if index == 5 else "available",
                 "access_note": (
                     "Внешний курс пока не подключён; доступна исходная ссылка."
