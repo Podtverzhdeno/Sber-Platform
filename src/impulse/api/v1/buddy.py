@@ -82,7 +82,7 @@ async def create_thread(
     authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
     service: Annotated[BuddyConversationService, Depends(_service)],
 ) -> ThreadView:
-    return _thread_view(service.create_thread(authenticated.actor))
+    return _thread_view(await service.create_thread(authenticated.actor))
 
 
 @router.get("/threads/{thread_id}", response_model=ThreadView)
@@ -91,7 +91,7 @@ async def get_thread(
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
     service: Annotated[BuddyConversationService, Depends(_service)],
 ) -> ThreadView:
-    return _thread_view(service.thread(authenticated.actor, thread_id))
+    return _thread_view(await service.thread(authenticated.actor, thread_id))
 
 
 @router.post("/threads/{thread_id}/messages", response_model=MessageView)
@@ -102,7 +102,7 @@ async def add_message(
     service: Annotated[BuddyConversationService, Depends(_service)],
 ) -> MessageView:
     return _message_view(
-        service.add_message(
+        await service.add_message(
             authenticated.actor,
             thread_id,
             client_message_id=body.client_message_id,
@@ -117,7 +117,7 @@ async def cancel_thread(
     authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
     service: Annotated[BuddyConversationService, Depends(_service)],
 ) -> ThreadView:
-    return _thread_view(service.cancel(authenticated.actor, thread_id))
+    return _thread_view(await service.cancel(authenticated.actor, thread_id))
 
 
 @router.post("/threads/{thread_id}/feedback", response_model=FeedbackView)
@@ -127,7 +127,7 @@ async def add_feedback(
     authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
     service: Annotated[BuddyConversationService, Depends(_service)],
 ) -> FeedbackView:
-    result = service.feedback(authenticated.actor, thread_id, rating=body.rating)
+    result = await service.feedback(authenticated.actor, thread_id, rating=body.rating)
     return FeedbackView(id=result.id, rating=result.rating)
 
 
@@ -136,7 +136,7 @@ async def withdraw_memory(
     authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
     service: Annotated[BuddyConversationService, Depends(_service)],
 ) -> None:
-    service.withdraw_memory(authenticated.actor)
+    await service.withdraw_memory(authenticated.actor)
 
 
 @router.get("/threads/{thread_id}/events", response_class=StreamingResponse)
@@ -145,7 +145,7 @@ async def thread_events(
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
     service: Annotated[BuddyConversationService, Depends(_service)],
 ) -> StreamingResponse:
-    thread = service.thread(authenticated.actor, thread_id)
+    thread = await service.thread(authenticated.actor, thread_id)
 
     async def events() -> AsyncIterator[str]:
         safe = json.dumps({"thread_id": str(thread.id), "status": thread.status})
@@ -325,4 +325,4 @@ async def dismiss_suggestion(
     authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
     service: Annotated[BuddyConversationService, Depends(_service)],
 ) -> None:
-    service.dismiss_suggestion(authenticated.actor, body.suggestion_id)
+    await service.dismiss_suggestion(authenticated.actor, body.suggestion_id)

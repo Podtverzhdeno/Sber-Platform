@@ -15,7 +15,7 @@ from impulse.api.request_context import RequestContextMiddleware
 from impulse.api.security import SecurityMiddleware
 from impulse.api.v1 import router as api_v1_router
 from impulse.api.v1.deadline import router as deadline_router
-from impulse.application.buddy import BuddyConversationService
+from impulse.application.buddy import BuddyConversationService, MemoryBuddyStorage
 from impulse.application.competencies import (
     CompetencyService,
     MemoryCompetencyEvidenceStore,
@@ -67,6 +67,7 @@ from impulse.domain.notifications import Notification
 from impulse.events import ParticipantEventsService
 from impulse.events import router as participant_events_router
 from impulse.events.store import MemoryEventDetailStore, SqlEventDetailStore
+from impulse.infrastructure.buddy_store import SqlBuddyStorage
 from impulse.infrastructure.competencies_store import SqlCompetencyEvidenceStore, SqlFrameworkStore
 from impulse.infrastructure.credentials_store import (
     SqlCertificateStore,
@@ -128,7 +129,6 @@ def create_app(
     runtime_settings = settings or Settings()
     configure_logging()
     owned_database: Database | None = None
-    buddy_service = buddy_service or BuddyConversationService()
     if auth_service is None:
         if runtime_settings.database_url is None:
             identity_store = MemoryIdentityStore(demo_personas())
@@ -140,6 +140,11 @@ def create_app(
             secret=runtime_settings.session_signing_secret(),
             ttl_seconds=runtime_settings.session_ttl_seconds,
         )
+    if buddy_service is None:
+        buddy_storage = (
+            SqlBuddyStorage(owned_database) if owned_database is not None else MemoryBuddyStorage()
+        )
+        buddy_service = BuddyConversationService(buddy_storage)
     if development_service is None:
         development_store = (
             SqlDevelopmentStore(owned_database)
