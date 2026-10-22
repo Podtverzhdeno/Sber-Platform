@@ -2515,6 +2515,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/participant/me/development-overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Development Overview */
+        get: operations["development_overview_api_v1_participant_me_development_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/project-credentials/{verification_id}": {
         parameters: {
             query?: never;
@@ -2816,6 +2833,25 @@ export interface components {
             owner_id: string | null;
             /** Reason */
             reason: string;
+        };
+        /** ActiveTaskView */
+        ActiveTaskView: {
+            /** Assignment Id */
+            assignment_id: string;
+            /** Next Action */
+            next_action: string;
+            /** Open Contributions */
+            open_contributions: number;
+            /** Project Key */
+            project_key: string;
+            /** Status */
+            status: string;
+            /** Task Id */
+            task_id: string;
+            /** Task Key */
+            task_key: string;
+            /** Title */
+            title: string;
         };
         /** ActivityBucketView */
         ActivityBucketView: {
@@ -3246,6 +3282,27 @@ export interface components {
             top_grade: string | null;
             /** Verified Courses */
             verified_courses: number;
+        };
+        /** CareerGradeSummaryView */
+        CareerGradeSummaryView: {
+            /** Auto Transition */
+            auto_transition: boolean;
+            /** Catalog Version */
+            catalog_version: number | null;
+            /** Current Grade */
+            current_grade: string | null;
+            /** Hint */
+            hint: string | null;
+            /** Policy Version */
+            policy_version: number;
+            /** Readiness Percent */
+            readiness_percent: number | null;
+            /** Reason */
+            reason: string | null;
+            /** State */
+            state: string;
+            /** Target Grade */
+            target_grade: string | null;
         };
         /** CaseEvidenceView */
         CaseEvidenceView: {
@@ -3887,6 +3944,17 @@ export interface components {
          * @enum {string}
          */
         DataClass: "public" | "demo_synthetic" | "personal_minimal" | "internal_business" | "sensitive_personal" | "secret";
+        /** DayFocusView */
+        DayFocusView: {
+            /** Date */
+            date: string;
+            /** Done */
+            done: boolean;
+            /** Planned */
+            planned: boolean;
+            /** Weekday */
+            weekday: number;
+        };
         /** DeadlineChangeDecision */
         DeadlineChangeDecision: {
             /** Approve */
@@ -4026,6 +4094,32 @@ export interface components {
         DemoSettlementView: {
             claim: components["schemas"]["PayoutClaimView"];
             settlement: components["schemas"]["SettlementAttemptView"];
+        };
+        /** DevelopmentOverviewView */
+        DevelopmentOverviewView: {
+            /** Active Tasks */
+            active_tasks: components["schemas"]["ActiveTaskView"][];
+            /** Actor Timezone */
+            actor_timezone: string;
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+            concepts: components["schemas"]["OverviewConceptsView"];
+            /** Local Today */
+            local_today: string;
+            monthly_plan: components["schemas"]["MonthlyGoalView"] | null;
+            next_outcome: components["schemas"]["NextOutcomeView"] | null;
+            /** Overview Version */
+            overview_version: number;
+            /** Permissions */
+            permissions: {
+                [key: string]: boolean;
+            };
+            /** Roles */
+            roles: components["schemas"]["RoleCardView"][];
+            weekly_focus: components["schemas"]["WeekFocusView"];
         };
         /** DiagnosticsView */
         DiagnosticsView: {
@@ -4848,6 +4942,29 @@ export interface components {
             /** Muted */
             muted: boolean;
         };
+        /** NextOutcomeView */
+        NextOutcomeView: {
+            /** Milestone Key */
+            milestone_key: string;
+            /** Milestone Position */
+            milestone_position: number;
+            /** Policy Version */
+            policy_version: number;
+            /** Reasons */
+            reasons: string[];
+            /** Stale Reason */
+            stale_reason: string | null;
+            /** Target Key */
+            target_key: string;
+            /** Target Kind */
+            target_kind: string;
+            /** Target Title */
+            target_title: string;
+            /** Trajectory Key */
+            trajectory_key: string;
+            /** Trajectory Title */
+            trajectory_title: string;
+        };
         /** NextStepView */
         NextStepView: {
             next_available: components["schemas"]["ScoredStepView"] | null;
@@ -5000,6 +5117,29 @@ export interface components {
             verification_id: string;
             /** Version */
             version: number;
+        };
+        /** OverviewConceptView */
+        OverviewConceptView: {
+            /** Canonical Surface */
+            canonical_surface: string;
+            /**
+             * Independent
+             * @default true
+             */
+            independent: boolean;
+            /** Universe Version */
+            universe_version: string;
+            /** Value State */
+            value_state: string;
+        };
+        /** OverviewConceptsView */
+        OverviewConceptsView: {
+            career_grade: components["schemas"]["CareerGradeSummaryView"];
+            competency_level: components["schemas"]["OverviewConceptView"];
+            rating_xp: components["schemas"]["OverviewConceptView"];
+            readiness_percent: components["schemas"]["OverviewConceptView"];
+            review_grade: components["schemas"]["OverviewConceptView"];
+            stage_progress: components["schemas"]["OverviewConceptView"];
         };
         /** ParticipantAnalyticsView */
         ParticipantAnalyticsView: {
@@ -5737,6 +5877,21 @@ export interface components {
             /** Metrics */
             metrics: components["schemas"]["MetricView"][];
             role: components["schemas"]["Role"];
+        };
+        /** RoleCardView */
+        RoleCardView: {
+            /** Attempt Number */
+            attempt_number: number | null;
+            /** Completed Milestones */
+            completed_milestones: number;
+            /** State */
+            state: string;
+            /** Title */
+            title: string;
+            /** Total Milestones */
+            total_milestones: number;
+            /** Track Key */
+            track_key: string;
         };
         /**
          * RoundingMode
@@ -6563,6 +6718,25 @@ export interface components {
             provider: string;
             /** Source Url */
             source_url: string;
+        };
+        /** WeekFocusView */
+        WeekFocusView: {
+            /** Days */
+            days: components["schemas"]["DayFocusView"][];
+            /** Done Days */
+            done_days: number;
+            /** Hint */
+            hint: string | null;
+            /** Preset */
+            preset: string | null;
+            /** Target Days */
+            target_days: number;
+            /** Versioned */
+            versioned: boolean;
+            /** Week End */
+            week_end: string;
+            /** Week Start */
+            week_start: string;
         };
         /** WeeklyRhythmRequest */
         WeeklyRhythmRequest: {
@@ -11415,6 +11589,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    development_overview_api_v1_participant_me_development_overview_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DevelopmentOverviewView"];
                 };
             };
         };

@@ -1,0 +1,181 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { afterAll, describe, expect, it, vi } from "vitest";
+
+import {
+  TASK_NEXT_ACTION_LABELS,
+  type DevelopmentOverviewView,
+} from "./client";
+import { ParticipantHomeV2Body } from "./page";
+
+const overview: DevelopmentOverviewView = {
+  overview_version: 1,
+  as_of: "2026-10-22T21:00:00Z",
+  actor_timezone: "Europe/Moscow",
+  local_today: "2026-10-20",
+  permissions: { trajectory_switch: true, grade_request: false, share: false },
+  concepts: {
+    career_grade: {
+      policy_version: 1,
+      state: "not_evaluable",
+      reason: "grade_catalog_policy_not_published",
+      hint: "Карьерный грейд станет доступен после публикации каталога",
+      catalog_version: null,
+      current_grade: null,
+      target_grade: null,
+      readiness_percent: null,
+      auto_transition: false,
+    },
+    competency_level: {
+      universe_version: "competencies-framework-v1",
+      canonical_surface: "skill-passport",
+      independent: true,
+      value_state: "separate_surface",
+    },
+    stage_progress: {
+      universe_version: "growth-milestones-v1",
+      canonical_surface: "trajectory-roadmap",
+      independent: true,
+      value_state: "separate_surface",
+    },
+    readiness_percent: {
+      universe_version: "growth-readiness-v1",
+      canonical_surface: "trajectory-roadmap",
+      independent: true,
+      value_state: "separate_surface",
+    },
+    rating_xp: {
+      universe_version: "reward-ledger-v1",
+      canonical_surface: "wallet-recognition",
+      independent: true,
+      value_state: "separate_surface",
+    },
+    review_grade: {
+      universe_version: "reward-acceptance-v1",
+      canonical_surface: "work-acceptance",
+      independent: true,
+      value_state: "separate_surface",
+    },
+  },
+  next_outcome: {
+    policy_version: 1,
+    trajectory_key: "python",
+    trajectory_title: "Python-разработчик",
+    milestone_key: "foundation",
+    milestone_position: 1,
+    target_kind: "course",
+    target_key: "python-base",
+    target_title: "Python: основы",
+    reasons: ["Не выполнен последний обязательный шаг активной траектории"],
+    stale_reason: null,
+  },
+  weekly_focus: {
+    week_start: "2026-10-19",
+    week_end: "2026-10-25",
+    versioned: true,
+    preset: "workdays",
+    target_days: 5,
+    done_days: 2,
+    hint: "напоминание",
+    days: [
+      { date: "2026-10-19", weekday: 1, planned: true, done: false },
+      { date: "2026-10-20", weekday: 2, planned: true, done: true },
+      { date: "2026-10-21", weekday: 3, planned: true, done: false },
+      { date: "2026-10-22", weekday: 4, planned: true, done: false },
+      { date: "2026-10-23", weekday: 5, planned: true, done: false },
+      { date: "2026-10-24", weekday: 6, planned: false, done: false },
+      { date: "2026-10-25", weekday: 7, planned: false, done: false },
+    ],
+  },
+  active_tasks: [
+    {
+      assignment_id: "11111111-1111-4111-8111-111111111111",
+      task_id: "22222222-2222-4222-8222-222222222222",
+      task_key: "demo-task-1",
+      project_key: "semantic-search-rd",
+      title: "Семантический поиск по документам",
+      status: "in_progress",
+      next_action: "send_work",
+      open_contributions: 0,
+    },
+  ],
+  roles: [
+    {
+      track_key: "python",
+      title: "Python-разработчик",
+      state: "active",
+      attempt_number: 2,
+      completed_milestones: 1,
+      total_milestones: 2,
+    },
+  ],
+  monthly_plan: null,
+};
+
+function renderHome(override: Partial<DevelopmentOverviewView> = {}) {
+  const onOpenTarget = vi.fn();
+  const view = render(
+    <QueryClientProvider client={new QueryClient()}>
+      <ParticipantHomeV2Body
+        overview={{ ...overview, ...override }}
+        onOpenTarget={onOpenTarget}
+        onOpenWorkspace={() => undefined}
+        onRetry={() => undefined}
+      />
+    </QueryClientProvider>,
+  );
+  return { view, onOpenTarget };
+}
+
+afterAll(() => {
+  vi.restoreAllMocks();
+});
+
+describe("participant home v2", () => {
+  it("keeps next outcome, grade and weekly focus on one authorized snapshot", () => {
+    renderHome();
+    expect(screen.getByText("Python: основы")).toBeInTheDocument();
+    expect(screen.getByTestId("grade-summary").textContent).toContain("grade_catalog_policy_not_published");
+    expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("not_evaluable");
+    expect(screen.getByTestId("weekly-focus").textContent).toContain("выполнено 2 из 5");
+    const [firstTask] = overview.active_tasks;
+    expect(firstTask === undefined ? "missing" : TASK_NEXT_ACTION_LABELS[firstTask.next_action]).toBe(
+      "Отправить работу",
+    );
+  });
+
+  it("reports the honest not-evaluable grade without fabricated values", () => {
+    renderHome();
+    const grade = screen.getByTestId("grade-summary");
+    expect(grade.textContent).toContain("не вычисляется");
+    expect(grade.textContent).not.toMatch(/готовность: \d/);
+  });
+
+  it("opens the canonical target of the next outcome", () => {
+    const { onOpenTarget } = renderHome();
+    fireEvent.click(screen.getByText("Перейти к шагу"));
+    expect(onOpenTarget).toHaveBeenCalledWith("course", "python-base");
+  });
+
+  it("explains the selected day and marks planned work separately from completion", () => {
+    renderHome();
+    fireEvent.click(screen.getByRole("button", { name: /20 октября/ }));
+    expect(
+      screen.getByText("День подтверждён квалификационным действием."),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /24 октября/ }));
+    expect(screen.getByText("Не запланирован по ритму недели.")).toBeInTheDocument();
+  });
+
+  it("keeps one canonical task row for the next outcome task", () => {
+    const { onOpenTarget } = renderHome();
+    expect(screen.getByText("Семантический поиск по документам")).toBeInTheDocument();
+    fireEvent.click(screen.getByText("Открыть задачу"));
+    expect(onOpenTarget).toHaveBeenCalledWith("task", overview.active_tasks[0]?.task_id);
+  });
+
+  it("renders an explanatory empty state without a next outcome", () => {
+    renderHome({ next_outcome: null });
+    expect(screen.getByText(/Активной траектории нет/)).toBeInTheDocument();
+  });
+});
