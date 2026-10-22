@@ -179,16 +179,25 @@ test("withdraw confirmation revives the apply CTA and allows reapply", async ({ 
   await expect(page.getByRole("heading", { name: "Мои задачи" })).toBeVisible();
   await expect(page.getByText("Ожидает решения")).toBeVisible();
 
-  const withdrawButton = page.getByRole("button", { name: "Отозвать заявку" });
-  await withdrawButton.click();
+  const sentButton = page.getByRole("button", { name: "✓ Заявка отправлена" });
+  await sentButton.click();
   const dialog = page.getByRole("dialog", { name: "Отозвать заявку?" });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText("MVP поиска программ")).toBeVisible();
+  await expect(dialog.getByText(/Текущий статус:.*заявка отправлена/)).toBeVisible();
   await dialog.getByRole("button", { name: "Отмена" }).click();
   await expect(dialog).toBeHidden();
+  await expect(sentButton).toBeFocused();
   expect(withdrawCalls).toBe(0);
 
-  await withdrawButton.click();
+  await sentButton.click();
+  await expect(dialog).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(sentButton).toBeFocused();
+  expect(withdrawCalls).toBe(0);
+
+  await sentButton.click();
   await expect(dialog).toBeVisible();
   await dialog.getByRole("button", { name: "Подтвердить отзыв" }).click();
   await expect(page.getByText("Заявка отозвана")).toBeVisible();
