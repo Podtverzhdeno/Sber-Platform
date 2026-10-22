@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./customer-analytics.css";
+import "./customer-analytics.scss";
 
 const funnelLabels = ["Регистрация", "Квалификация", "Talent Cohort", "Реальные задачи", "Talent Pool", "Интервью"];
 const universities = [

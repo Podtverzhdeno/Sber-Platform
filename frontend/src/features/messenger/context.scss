@@ -1,0 +1,19 @@
+.msg-context { display: flex; flex-direction: column; gap: var(--space-2); width: 300px; max-width: 100%; padding: var(--space-3); border: 1px solid var(--color-surface-raised); border-radius: var(--radius-lg); background: var(--color-surface);; }
+.msg-context__close { align-self: flex-start; border: 1px solid var(--color-surface-raised); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-2); background: transparent; color: var(--color-text); cursor: pointer; font: inherit;; }
+.msg-context__eyebrow, .msg-context__section-title { margin: 0; font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-muted);; }
+.msg-context__title { margin: 0; color: var(--color-text); font-size: 1.05rem; line-height: 1.25;; }
+.msg-context__badge, .msg-context__role { align-self: flex-start; padding: 2px 10px; border-radius: 999px; background: var(--color-surface-raised); color: var(--color-text); font-size: 0.8rem;; }
+.msg-context__role { background: transparent; border: 1px dashed var(--color-surface-raised);; }
+.msg-context__badge--muted { color: var(--color-warning);; }
+.msg-context__section { display: flex; flex-direction: column; gap: var(--space-1); padding-top: var(--space-2); border-top: 1px solid var(--color-surface-raised);; }
+.msg-context__facts { margin: 0; display: grid; gap: var(--space-1);
+  > div { display: flex; justify-content: space-between; gap: var(--space-2); }
+  dt { color: var(--color-muted); font-size: 0.85rem; }
+  dd { margin: 0; color: var(--color-text); font-size: 0.85rem; text-align: right; }
+}
+.msg-context__people { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); color: var(--color-text); font-size: 0.9rem;
+  small { color: var(--color-muted); }
+}
+.msg-context__actions { display: flex; flex-wrap: wrap; gap: var(--space-1);; }
+.msg-context__action { border: 1px solid var(--color-surface-raised); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-2); background: transparent; color: var(--color-text); font: inherit; cursor: pointer;; }
+.msg-context__disclaimer { color: var(--color-muted); font-size: 0.78rem; line-height: 1.35;; }

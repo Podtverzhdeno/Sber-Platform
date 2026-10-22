@@ -8,7 +8,7 @@ import {
   saveWeeklyRhythm,
   useFreezeDay,
 } from "./engagement-client";
-import "./engagement.css";
+import "./engagement.scss";
 
 const RHYTHM_PRESETS: Readonly<Record<string, string>> = {
   workdays: "Будни",

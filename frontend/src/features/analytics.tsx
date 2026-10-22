@@ -1,4 +1,4 @@
-﻿import { useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -6,7 +6,7 @@ import { apiRequest } from "../api/client";
 import { Badge, StatePanel } from "../components/ui";
 import { loadMonthlyGoal, type MonthlyGoalView } from "./monthly-goal-client";
 import { MonthlyGoalDiagram } from "./monthly-goal-card";
-import "./analytics-growth.css";
+import "./analytics-growth.scss";
 
 type Stage = { key: string; title: string; status: "completed" | "in_progress" | "not_started" | "unknown"; completed: boolean; count: number };
 type Earnings = { calculated: string; approved: string; paid: string; failed: string; currency: string | null; unknown_items: number };

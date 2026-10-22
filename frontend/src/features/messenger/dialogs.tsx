@@ -34,7 +34,7 @@ import {
   writeDialogScroll,
   type KeyValueStorage,
 } from "./view-model";
-import "./dialogs.css";
+import "./dialogs.scss";
 
 const windowStorage = (): KeyValueStorage => window.localStorage;
 

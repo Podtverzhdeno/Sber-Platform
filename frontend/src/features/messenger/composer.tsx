@@ -15,7 +15,7 @@ import {
   validateArtifactRef,
 } from "./composer-model";
 import type { ApiParticipantView, KeyValueStorage } from "./view-model";
-import "./composer.css";
+import "./composer.scss";
 
 export type ComposerProps = {
   channelId: string;

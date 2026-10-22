@@ -1,0 +1,22 @@
+// openspec 23.2 — invitation_only candidate picker: compact accessible controls with 40x40 hit area, selected state, selection summary
+.customer-candidates .candidate-summary { display: grid; gap: 8px; margin: 10px 0 14px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--color-border-strong) 70%, transparent); border-radius: 13px; background: color-mix(in srgb, var(--color-surface) 96%, var(--color-border) 4%);; }
+.customer-candidates .candidate-search { display: grid; gap: 5px; max-width: 420px;; }
+.customer-candidates .candidate-search input { min-block-size: 38px;; }
+.customer-candidates .candidate-summary p { margin: 0; font-size: 13px; overflow-wrap: anywhere;; }
+.customer-candidates .candidate-summary [data-testid="selection-count"] { font-weight: 600;; }
+.customer-candidates .candidate-summary [role="alert"] { margin: 0; padding: 8px 11px; border: 1px solid color-mix(in srgb, var(--color-warning) 60%, transparent); border-radius: 10px; background: color-mix(in srgb, var(--color-warning) 12%, transparent); font-size: 12.5px;; }
+.customer-candidates .candidate-row { grid-template-columns: min-content 1fr auto;; }
+.customer-candidates .candidate-select { align-self: center; display: inline-grid; place-items: center; inline-size: 44px; block-size: 44px; cursor: pointer; border-radius: 10px;; }
+.customer-candidates .candidate-select-input { appearance: none; inline-size: 44px; block-size: 44px; margin: 0; border: 1px solid color-mix(in srgb, var(--color-border-strong) 80%, transparent); border-radius: 10px; background: var(--c-rgb081421); cursor: pointer; display: grid; place-items: center;; }
+.customer-candidates .candidate-select-input:checked { border-color: color-mix(in srgb, var(--color-ai) 55%, var(--color-border-strong)); background: linear-gradient(135deg, color-mix(in srgb, var(--color-ai) 24%, transparent), transparent 65%), var(--c-rgb081421); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ai) 35%, transparent);; }
+.customer-candidates .candidate-select-input:focus-visible { outline: 2px solid var(--color-ai); outline-offset: 2px;; }
+.customer-candidates .candidate-mark { grid-area: 1 / 1; font-size: 15px; font-weight: 800; color: var(--color-ai); pointer-events: none;; }
+.customer-candidates .candidate-row small { opacity: 0.8;; }
+@media (prefers-contrast: more) {
+  .customer-candidates .candidate-select-input { border-width: 2px;; }
+  .customer-candidates .candidate-select-input:checked { border-color: var(--color-ai); box-shadow: none;; }
+}
+@media (max-width: 760px) {
+  .customer-candidates .candidate-row { grid-template-columns: min-content 1fr;; }
+  .customer-candidates .candidate-row .row-actions { grid-column: 1 / -1; justify-content: flex-start;; }
+}

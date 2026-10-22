@@ -1,0 +1,29 @@
+.msg-composer { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 1px solid var(--color-surface-raised); border-radius: var(--radius-md); background: var(--color-surface);; }
+.msg-composer--offline { border-style: dashed;; }
+.msg-composer__fieldset { position: relative; display: flex; align-items: flex-end; gap: var(--space-2);; }
+.msg-composer__tools { display: flex; align-items: center; gap: var(--space-1);; }
+.msg-composer__tool { border: 1px solid var(--color-surface-raised); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-2); background: var(--color-bg); color: var(--color-text); cursor: pointer;; }
+.msg-composer__input-shell { position: relative; flex: 1;; }
+.msg-composer__mentions { position: absolute; bottom: calc(100% + var(--space-1)); left: 0; margin: 0; padding: var(--space-1); list-style: none; gap: var(--space-1); display: grid; border: 1px solid var(--color-surface-raised); border-radius: var(--radius-sm); background: var(--color-surface-raised); z-index: 3;
+  button { width: 100%; text-align: left; border: 0; background: transparent; color: var(--color-text); cursor: pointer; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); }
+}
+.msg-composer__textarea { width: 100%; min-height: 64px; max-height: 200px; resize: vertical; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-surface-raised); background: var(--color-bg); color: var(--color-text); font: inherit;; }
+.msg-composer__send { border: 1px solid var(--color-accent); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3); background: var(--color-accent); color: var(--color-bg); font-weight: 700; cursor: pointer;; }
+.msg-composer__send:disabled { opacity: 0.6; cursor: not-allowed;; }
+.msg-composer__panel { display: flex; flex-wrap: wrap; gap: var(--space-1); padding: var(--space-2); border: 1px solid var(--color-surface-raised); border-radius: var(--radius-sm); background: var(--color-surface-raised);; }
+.msg-composer__panel--refs { display: flex; align-items: center;; }
+.msg-composer__ref-input { flex: 1; min-width: 160px; padding: var(--space-1) var(--space-2); border: 1px solid var(--color-surface-raised); border-radius: var(--radius-sm); background: var(--color-bg); color: var(--color-text); font: inherit;; }
+.msg-composer__ref-error { margin: 0; width: 100%; color: var(--color-danger); font-size: 0.85rem;; }
+.msg-composer__refs { display: flex; flex-wrap: wrap; gap: var(--space-1); margin: 0; padding: 0; list-style: none;; }
+.msg-composer__chip { border: 1px solid var(--color-surface-raised); border-radius: 999px; padding: var(--space-1) var(--space-2); background: var(--color-bg); color: var(--color-text); font-size: 0.85rem; cursor: pointer;; }
+.msg-composer__banner { margin: 0; padding: var(--space-1) var(--space-2); display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); border-radius: var(--radius-sm); border: 1px dashed var(--color-surface-raised); background: var(--color-surface-raised); font-size: 0.85rem;; }
+.msg-composer__banner--offline { border-style: solid; color: var(--color-warning);; }
+.msg-composer__chip-action { border: 0; background: transparent; color: var(--color-accent); cursor: pointer; font: inherit; font-weight: 700;; }
+.msg-composer__notice { margin: 0; padding: var(--space-2); border-radius: var(--radius-sm); background: var(--color-surface-raised); color: var(--color-muted); font-size: 0.9rem;; }
+.msg-composer__notice--error { color: var(--color-danger);; }
+.msg-composer__mention-hint { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-muted); font-size: 0.85rem;; }
+.msg-composer__emoji { font-size: 1.1rem; border: 1px solid var(--color-surface-raised); border-radius: var(--radius-sm); padding: var(--space-1) var(--space-2); background: var(--color-bg); color: var(--color-text); cursor: pointer;; }
+.msg-composer__sr-only, .msg-composer__hint-text { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;; }
+@media (prefers-reduced-motion: no-preference) {
+  .msg-composer__tool, .msg-composer__chip, .msg-composer__emoji, .msg-composer__send { transition: background-color 120ms ease;; }
+}

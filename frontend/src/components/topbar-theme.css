@@ -1,4 +1,0 @@
-/* The topbar strip keeps its dark surface in both themes, so its own text
-   must not follow the light theme's dark --color-text (dark-on-dark). */
-.topbar, .top-persona strong { color: #edf7f1; }
-.top-persona small { color: #aabdb4; }

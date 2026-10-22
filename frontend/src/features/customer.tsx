@@ -1,9 +1,9 @@
-﻿import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import { apiRequest, ApiClientError } from "../api/client";
 import { Badge, StatePanel } from "../components/ui";
-import "./customer-ai-provenance.css";
+import "./customer-ai-provenance.scss";
 
 type Task = { id: string; project_key: string; task_key: string; title: string; status: string; nominated_mentor_id: string | null; support_mode: string | null; support_assignee_id: string | null; places: number; demo?: boolean; applications?: number; deadline?: string; base?: string; b?: string; a?: string; application_count?: number | null; assignment_count?: number | null; pending_result_count?: number | null; accepted_result_count?: number | null; deadline_at?: string | null };
 type Application = { id: string; task_id: string; person_id: string; accepted_terms_version: number; status: string; version: number; participant_name?: string | null; verified_case_count?: number | null };

@@ -38,7 +38,7 @@ import {
 } from "./chat-model";
 import { dialogKindLabel, dialogTimeLabel } from "./view-model";
 import type { KeyValueStorage } from "./view-model";
-import "./chat-history.css";
+import "./chat-history.scss";
 
 const windowStorage = (): KeyValueStorage => window.localStorage;
 

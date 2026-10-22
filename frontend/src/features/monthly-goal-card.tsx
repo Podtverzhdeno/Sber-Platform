@@ -5,7 +5,7 @@ import {
   loadMonthlyGoal,
   type MonthlyGoalView,
 } from "./monthly-goal-client";
-import "./monthly-goal.css";
+import "./monthly-goal.scss";
 
 const statusLabels: Record<string, string> = {
   completed: "Подтверждено",

@@ -6,7 +6,7 @@ import {
   reviewStatusLabel,
 } from "./context-model";
 import { dialogTitle, dialogKindLabel, participantRoleLabel } from "./view-model";
-import "./context.css";
+import "./context.scss";
 
 export type ContextPanelProps = {
   channel: ApiChannelView;

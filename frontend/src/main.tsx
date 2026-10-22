@@ -2,8 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import { App } from "./App";
-import "./styles.css";
-import "./components/topbar-theme.css";
+import "./styles.scss";
+import "./components/topbar-theme.scss";
 
 const root = document.getElementById("root");
 

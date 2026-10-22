@@ -11,7 +11,7 @@ import type {
   TrajectoryCheckpointDetailView,
   TrajectoryMapTrackView,
 } from "./types";
-import "./trajectory-map.css";
+import "./trajectory-map.scss";
 
 const MAP_PATH = "/api/v1/me/trajectory-map" as RuntimeApiPath;
 

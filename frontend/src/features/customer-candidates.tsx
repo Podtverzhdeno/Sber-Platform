@@ -3,7 +3,7 @@ import { useState } from "react";
 
 import { apiRequest } from "../api/client";
 import { Badge, StatePanel } from "../components/ui";
-import "./customer-candidates.css";
+import "./customer-candidates.scss";
 
 type Task = {
   id: string;

@@ -1,0 +1,37 @@
+.engagement-flash { position: absolute; right: 0; top: calc(100% + 6px); z-index: 30; padding: 6px 10px; border-radius: 12px; border: 1px solid rgba(255, 210, 122, 0.35); background: rgba(255, 210, 122, 0.12); color: #ffd27a; font-size: 13px; white-space: nowrap; animation: engagement-flash-in 320ms ease-out;; }
+.engagement-calendar { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0;; }
+.engagement-day { display: inline-flex; align-items: center; gap: 4px; padding: 3px 7px; border-radius: 9px; background: rgba(69, 223, 145, 0.12); color: #98edbd; font-size: 12px;; }
+.engagement-day--empty { background: rgba(255, 255, 255, 0.06); color: #aabdb4;; }
+.engagement-day--frozen { background: rgba(102, 168, 255, 0.14); color: #a9c8ff;; }
+.engagement-freeze-note { margin: 6px 0 0; color: #a9c8ff; font-size: 12px;; }
+.engagement-freeze-block { margin: 8px 0 0; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(102, 168, 255, 0.35); background: rgba(102, 168, 255, 0.1); display: grid; gap: 6px;
+  p { margin: 0; color: #a9c8ff; font-size: 12px; }
+}
+.streak-freeze-button { padding: 5px 10px; border-radius: 8px; border: 1px solid rgba(102, 168, 255, 0.5); background: rgba(102, 168, 255, 0.18); color: #dce9ff; font-size: 12px; cursor: pointer;; }
+.streak-freeze-button:disabled { opacity: 0.6; cursor: default;; }
+.engagement-freeze-error { margin: 0; color: #ffb3b3; font-size: 12px;; }
+.engagement-rhythm-block { margin: 8px 0 0; padding: 8px 10px; border-radius: 10px; border: 1px solid rgba(122, 214, 178, 0.35); background: rgba(122, 214, 178, 0.08); display: grid; gap: 6px;; }
+.engagement-rhythm-block header { display: flex; justify-content: space-between; gap: 8px; font-size: 13px;
+  span { color: #d9ecdf; }
+  strong { color: #9fe8c4; font-size: 12px; }
+}
+.engagement-rhythm-hint { margin: 0; color: #aabdb4; font-size: 12px;; }
+.engagement-rhythm-version { margin: 0; color: #aabdb4; font-size: 11px;; }
+.engagement-rhythm-note { margin: 0; color: #9fe8c4; font-size: 12px;; }
+.engagement-rhythm-presets, .engagement-rhythm-days { display: flex; flex-wrap: wrap; gap: 4px;; }
+.engagement-rhythm-chip { padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(122, 214, 178, 0.4); background: rgba(122, 214, 178, 0.1); color: #d9ecdf; font-size: 12px; cursor: pointer;; }
+.engagement-rhythm-chip--active { background: rgba(122, 214, 178, 0.28); color: #ffffff;; }
+.engagement-rhythm-schedule { display: flex; flex-wrap: wrap; gap: 8px;
+  label { display: grid; gap: 3px; color: #aabdb4; font-size: 12px; }
+  select, input { padding: 3px 6px; border-radius: 8px; border: 1px solid rgba(122, 214, 178, 0.4); background: rgba(0, 0, 0, 0.25); color: #edf7f1; font-size: 12px; }
+}
+.engagement-facts { display: grid; gap: 6px; margin: 8px 0 0; font-size: 13px;
+  dt { color: #aabdb4; font-size: 12px; }
+  dd { margin: 2px 0 0; color: #edf7f1; }
+}
+.engagement-hint { margin: 8px 0 0; color: #aabdb4; font-size: 12px;; }
+.engagement-reason { margin: 8px 0 0; color: #edf7f1; font-size: 13px;; }
+@media (prefers-reduced-motion: reduce) {
+  .engagement-flash { animation: none;; }
+}
+@keyframes engagement-flash-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }

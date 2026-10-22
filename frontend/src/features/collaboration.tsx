@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import { apiRequest } from "../api/client";
 import type { RuntimeApiPath } from "../api/client";
 import { StatePanel } from "../components/ui";
-import "./collaboration.css";
+import "./collaboration.scss";
 
 import { ChatHistory } from "./messenger/chat-history";
 import type { PendingMessageOverlay } from "./messenger/chat-history";

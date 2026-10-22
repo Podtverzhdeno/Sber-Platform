@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { apiRequest, type RuntimeApiPath } from "../api/client";
 import { Badge, Card, Modal, SafeExternalLink, StatePanel } from "../components/ui";
-import "./participant-events.css";
+import "./participant-events.scss";
 
 type EventItem = {
   key: string; title: string; event_type: string; organizer: string; conditions: string;
