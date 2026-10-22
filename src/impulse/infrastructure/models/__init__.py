@@ -2,6 +2,7 @@
 
 from impulse.infrastructure.models import (
     assist,
+    buddy,
     competencies,
     credentials,
     development,
@@ -11,6 +12,7 @@ from impulse.infrastructure.models import (
     messaging,
     notifications,
     operations,
+    rate_limit,
     recognition,
     reward,
     talent,
@@ -20,6 +22,7 @@ from impulse.infrastructure.models.base import metadata
 
 __all__ = [
     "assist",
+    "buddy",
     "competencies",
     "credentials",
     "development",
@@ -30,6 +33,7 @@ __all__ = [
     "metadata",
     "notifications",
     "operations",
+    "rate_limit",
     "recognition",
     "reward",
     "talent",
