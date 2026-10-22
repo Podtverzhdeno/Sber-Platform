@@ -38,6 +38,14 @@
 .trajectory-growth-legend .target { border-color: #ffca38; }.trajectory-growth-legend .deficit { border-color: var(--color-danger); }.trajectory-growth-legend .achieved { border-color: var(--color-primary); }.trajectory-growth-legend .unknown { border-color: var(--color-muted); }
 .trajectory-growth-facts > p { margin: 0 0 8px; }
 .trajectory-growth-facts .growth-partial { padding: 9px 11px; border: 1px solid var(--color-warning); border-radius: 9px; color: var(--color-warning); }
+.trajectory-monthly-goal { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--color-border); }
+.trajectory-monthly-goal > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.trajectory-monthly-goal h3 { margin: 2px 0 4px; font-size: clamp(18px, 2.4vw, 24px); }
+.trajectory-monthly-goal small { color: var(--color-muted); }
+.trajectory-monthly-goal-grid { display: grid; grid-template-columns: minmax(220px, .5fr) minmax(0, 1.2fr); gap: 22px; align-items: start; margin-top: 12px; }
+.trajectory-monthly-goal-grid .monthly-goal-diagram { width: 100%; max-width: 220px; }
+.trajectory-monthly-goal-grid ol li { grid-template-columns: 28px minmax(0, 1fr); padding: 8px 10px; }
+@media (max-width: 800px) { .trajectory-monthly-goal-grid { grid-template-columns: 1fr; } }
 .trajectory-growth-facts ul { display: grid; gap: 6px; margin: 12px 0; padding: 0; list-style: none; }
 .trajectory-growth-facts li { display: grid; padding: 0; border: 1px solid var(--color-border); border-left: 3px solid; border-radius: 9px; font-size: 11px; }
 .trajectory-growth-facts li > button { display: grid; grid-template-columns: minmax(120px, 1fr) auto auto; gap: 10px; align-items: start; width: 100%; padding: 9px 10px; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }

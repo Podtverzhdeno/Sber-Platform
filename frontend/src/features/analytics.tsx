@@ -4,6 +4,8 @@ import { useSearchParams } from "react-router-dom";
 
 import { apiRequest } from "../api/client";
 import { Badge, StatePanel } from "../components/ui";
+import { loadMonthlyGoal, type MonthlyGoalView } from "./monthly-goal-client";
+import { MonthlyGoalDiagram } from "./monthly-goal-card";
 import "./analytics-growth.css";
 
 type Stage = { key: string; title: string; status: "completed" | "in_progress" | "not_started" | "unknown"; completed: boolean; count: number };
@@ -177,6 +179,14 @@ function growthLevel(label: string, known: boolean): number | null {
   return growthLevelRank[label.toLowerCase()] ?? null;
 }
 
+const monthlyGoalStatusLabels: Record<string, string> = {
+  completed: "Подтверждено",
+  submitted: "Ожидает проверки",
+  available: "Доступно",
+  locked: "Сначала предыдущий шаг",
+  unknown: "Нет опубликованного mapping",
+};
+
 const drilldownSuggestionNeedle = (suggestion: BuddySuggestionView): string =>
   `${suggestion.observation} ${suggestion.gap} ${suggestion.benefit} ${suggestion.explanation}`.toLowerCase();
 
@@ -223,7 +233,7 @@ function SkillDrilldown({ snapshot, skill, reports, reportsPending, reportsError
   </section>;
 }
 
-export function TrajectoryGrowthAnalytics({ snapshot, selectedTrajectoryKey, onTrajectorySelect, selectedSkillKey, onSkillSelect, reports, reportsPending, reportsError, onRetryReports, buddy, buddyPending }: {
+export function TrajectoryGrowthAnalytics({ snapshot, selectedTrajectoryKey, onTrajectorySelect, selectedSkillKey, onSkillSelect, reports, reportsPending, reportsError, onRetryReports, buddy, buddyPending, goal }: {
   snapshot: GrowthSnapshot;
   selectedTrajectoryKey?: string;
   onTrajectorySelect?: (track: string) => void;
@@ -235,6 +245,7 @@ export function TrajectoryGrowthAnalytics({ snapshot, selectedTrajectoryKey, onT
   onRetryReports?: () => void;
   buddy?: BuddySuggestionStateView;
   buddyPending?: boolean;
+  goal?: MonthlyGoalView | null;
 }) {
   const [localTrajectory, setLocalTrajectory] = useState(snapshot.trajectories[0]?.track_key ?? "");
   const [localSkill, setLocalSkill] = useState<string | null>(null);
@@ -246,6 +257,7 @@ export function TrajectoryGrowthAnalytics({ snapshot, selectedTrajectoryKey, onT
   if (!selected) return <StatePanel kind="empty" />;
   const skills = selected.readiness_skills;
   const drilldownSkill = skills.find((skill) => skill.skill_key === skillKey) ?? null;
+  const activeGoal = goal !== undefined && goal !== null && goal.track_key === selected.track_key ? goal : null;
   const center = 130;
   const radius = 86;
   const point = (index: number, rank: number) => {
@@ -266,6 +278,36 @@ export function TrajectoryGrowthAnalytics({ snapshot, selectedTrajectoryKey, onT
       </svg><div className="trajectory-growth-legend"><span className="target">Цель</span><span className="deficit">Ниже цели</span><span className="achieved">Цель достигнута</span><span className="unknown">Нет данных</span></div></div>
       <div className="trajectory-growth-facts"><p><strong>Прогресс траектории:</strong> {selected.completion.percent === null ? "Недостаточно данных" : `${String(selected.completion.percent)}%`}</p><p><strong>Готовность роли:</strong> {selected.readiness.percent === null ? "Недостаточно данных" : `${String(selected.readiness.percent)}%`}</p>{selected.readiness.partial && <p className="growth-partial" role="status">Охват данных {Math.round(selected.readiness.coverage * 100)}%. Неизвестные уровни не заменены нулём.</p>}<ul aria-label="Числовая альтернатива циклограммы">{skills.map((skill) => { const current = growthLevel(skill.current_level, skill.known); const target = growthLevel(skill.target_level, true); const state = current === null || target === null ? "unknown" : current < target ? "deficit" : "achieved"; return <li className={`growth-skill--${state}`} key={skill.skill_key}><button type="button" aria-expanded={skillKey === skill.skill_key} aria-controls={`drilldown-${skill.skill_key}`} aria-label={`Подробнее о навыке ${skill.title}`} data-testid={`skill-toggle-${skill.skill_key}`} onClick={() => { toggleSkill(skill.skill_key); }}><strong>{skill.title}</strong><span>Сейчас: {current === null ? "нет подтверждённых данных" : skill.current_level}</span><span>Цель: {target === null ? "несовместимая шкала" : skill.target_level}</span></button></li>; })}</ul>{drilldownSkill !== null && <SkillDrilldown key={drilldownSkill.skill_key} snapshot={snapshot} skill={drilldownSkill} reports={reports} reportsPending={reportsPending} reportsError={reportsError} onRetryReports={onRetryReports} buddy={buddy} buddyPending={buddyPending} />}<small>Формулы версии {selected.policy_version}. Снимок {new Date(snapshot.generated_at).toLocaleString("ru-RU")} · {snapshot.actor_timezone}</small></div>
     </div>
+    {activeGoal !== null && <div className="trajectory-monthly-goal" data-testid="trajectory-monthly-goal" aria-label="Прогноз месячной цели по выбранной траектории">
+      <header>
+        <div>
+          <p className="eyebrow">Месячная цель · прогноз</p>
+          <h3>{activeGoal.goal_title}</h3>
+          <small>{String(activeGoal.days_left)} дн. до конца периода · осталось {String(activeGoal.remaining)} checkpoint</small>
+        </div>
+        <Badge tone={activeGoal.feasibility.feasible ? "success" : "warning"}>{activeGoal.feasibility.feasible ? "План выполним" : "План под риском"}</Badge>
+      </header>
+      <div className="trajectory-monthly-goal-grid">
+        <MonthlyGoalDiagram goal={activeGoal} />
+        <div className="monthly-goal-plan">
+          <p className={`monthly-goal-feasibility monthly-goal-feasibility--${activeGoal.feasibility.feasible ? "success" : "risk"}`}>{activeGoal.feasibility.text}</p>
+          {activeGoal.partial_forecast && <p className="monthly-goal-partial">Частичный прогноз · покрытие {Math.round(activeGoal.coverage * 100)}%. Прогноз не изменяет подтверждённый уровень.</p>}
+          <ol>
+            {activeGoal.steps.map((step) => (
+              <li key={step.key} className={`monthly-goal-step--${step.status}`}>
+                <span>{String(step.position)}</span>
+                <div><strong>{step.title}</strong><small>{step.skill} · {monthlyGoalStatusLabels[step.status]}</small></div>
+              </li>
+            ))}
+          </ol>
+          <details>
+            <summary>Как считается прогноз</summary>
+            <ul>{activeGoal.assumptions.map((item) => <li key={item}>{item}</li>)}</ul>
+            <small>Расчёт: {new Date(activeGoal.generated_at).toLocaleString("ru-RU")} · {activeGoal.timezone}</small>
+          </details>
+        </div>
+      </div>
+    </div>}
   </section>;
 }
 
@@ -278,6 +320,7 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
   const growthQuery = useQuery({ queryKey: ["participant-growth-analytics"], queryFn: () => apiRequest<GrowthSnapshot>("/api/v1/me/growth/snapshot"), refetchOnMount: "always" });
   const skillReportsQuery = useQuery({ queryKey: ["participant-skill-reports"], queryFn: () => apiRequest<FrameworkReportView[]>("/api/v1/me/competencies"), refetchOnMount: "always" });
   const buddyQuery = useQuery({ queryKey: ["participant-buddy-drilldown"], queryFn: () => apiRequest<BuddySuggestionStateView>("/api/v1/agents/buddy/suggestion"), refetchOnMount: "always" });
+  const monthlyGoalQuery = useQuery({ queryKey: ["monthly-goal"], queryFn: loadMonthlyGoal, refetchOnMount: "always" });
   const updateParams = (key: string, value: string | null) => { setSearchParams((previous) => { const next = new URLSearchParams(previous); if (value) next.set(key, value); else next.delete(key); return next; }); };
   const urlSkill = searchParams.get("skill");
   const urlTrajectory = searchParams.get("trajectory");
@@ -291,7 +334,7 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
   return <div className="feature-stack participant-analytics analytics-dashboard">
     {query.isError && <div className="demo-fallback-note" role="status"><strong>Демонстрационная аналитика</strong><span>API временно недоступен — показана связанная mock-проекция.</span><button className="secondary-button" type="button" onClick={() => { void query.refetch(); }}>Повторить</button></div>}
     <header className="dashboard-heading"><div><p className="eyebrow">Аналитика · личный путь</p><h1 id="workspace-title">Ваш прогресс и подтверждённый результат</h1><p className="lead">Показываем, как обучение превращается в проекты, оценки и позицию в рейтинге.</p></div><div className="analytics-controls"><label>Период<select defaultValue="90"><option value="30">30 дней</option><option value="90">3 месяца</option><option value="season">Сезон</option></select></label><label>Направление<select defaultValue="all"><option value="all">Все</option><option value="python">Python</option><option value="data">Data</option></select></label><div className="freshness-chip"><span className="fresh-dot" />Обновлено сегодня</div></div></header>
-    {growthQuery.status === "pending" ? <StatePanel kind="loading" /> : growthQuery.status === "error" ? <StatePanel kind="error" action="Повторить аналитику траекторий" onAction={() => { void growthQuery.refetch(); }} /> : <TrajectoryGrowthAnalytics snapshot={growthQuery.data} selectedTrajectoryKey={urlTrajectory ?? undefined} onTrajectorySelect={(track) => { setSearchParams((previous) => { const next = new URLSearchParams(previous); next.set("trajectory", track); next.delete("skill"); return next; }); }} selectedSkillKey={urlSkill ?? undefined} onSkillSelect={(skill) => { updateParams("skill", skill); }} reports={skillReportsQuery.data} reportsPending={skillReportsQuery.isPending} reportsError={skillReportsQuery.isError} onRetryReports={() => { void skillReportsQuery.refetch(); }} buddy={buddyQuery.data ?? undefined} buddyPending={buddyQuery.isPending} />}
+    {growthQuery.status === "pending" ? <StatePanel kind="loading" /> : growthQuery.status === "error" ? <StatePanel kind="error" action="Повторить аналитику траекторий" onAction={() => { void growthQuery.refetch(); }} /> : <TrajectoryGrowthAnalytics snapshot={growthQuery.data} selectedTrajectoryKey={urlTrajectory ?? undefined} onTrajectorySelect={(track) => { setSearchParams((previous) => { const next = new URLSearchParams(previous); next.set("trajectory", track); next.delete("skill"); return next; }); }} selectedSkillKey={urlSkill ?? undefined} onSkillSelect={(skill) => { updateParams("skill", skill); }} reports={skillReportsQuery.data} reportsPending={skillReportsQuery.isPending} reportsError={skillReportsQuery.isError} onRetryReports={() => { void skillReportsQuery.refetch(); }} buddy={buddyQuery.data ?? undefined} buddyPending={buddyQuery.isPending} goal={monthlyGoalQuery.data ?? undefined} />}
     <section className="competency-overview competency-overview--expanded">
       <div className="competency-main">
         <div className="section-heading"><div><p className="eyebrow">Главный результат развития</p><h2>Расширенная матрица · Python-разработчик</h2></div><Badge tone="success">Готовность 72%</Badge></div>

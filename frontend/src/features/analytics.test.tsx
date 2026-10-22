@@ -5,6 +5,7 @@ import { MemoryRouter, useLocation } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 
 import { ParticipantAnalytics, TrajectoryGrowthAnalytics, VerifiedDocumentsPanel } from "./analytics";
+import type { MonthlyGoalView } from "./monthly-goal-client";
 
 const snapshot = {
   snapshot_id: "growth-safe",
@@ -26,7 +27,7 @@ const snapshot = {
     },
     {
       track_key: "data",
-      track_title: "Инженер данных",
+      track_title: "Data-инженер",
       policy_version: 4,
       completion: { percent: 100, coverage: 1, partial: false },
       readiness: { percent: 100, coverage: 1, partial: false },
@@ -37,6 +38,34 @@ const snapshot = {
     },
   ],
 };
+
+const monthlyGoal = {
+  policy_version: 1,
+  generated_at: "2026-10-20T09:30:00Z",
+  track_key: "python",
+  track_title: "Python-разработчик",
+  goal_title: "Довести ИИ-агентов до уверенного уровня",
+  goal_ref: "milestone-ai-agents",
+  period_start: "2026-10-01T00:00:00Z",
+  period_end: "2026-10-31T23:59:59Z",
+  days_left: 9,
+  timezone: "Europe/Moscow",
+  plan_version: 2,
+  history_count: 3,
+  steps: [
+    { key: "checkpoint-1", position: 1, title: "Пройти checkpoint ИИ-агенты", skill: "ИИ-агенты", mandatory: true, status: "completed", ref: "u-1" },
+    { key: "checkpoint-2", position: 2, title: "Сдать второй checkpoint ИИ-агенты", skill: "ИИ-агенты", mandatory: true, status: "available", ref: "u-2" },
+  ],
+  contours: { baseline: 1, current: 1, projected: 2, target: 3 },
+  remaining: 2,
+  next_checkpoint: "2026-10-28",
+  next_checkpoint_ref: "u-2",
+  feasibility: { known: true, capacity_days: 6, required_steps: 6, feasible: true, deficit: 0, text: "План вмещается в ваш ритм." },
+  partial_forecast: true,
+  coverage: 0.75,
+  missing_mappings: [],
+  assumptions: ["Проекция требует подтверждения каждого обязательного шага.", "Темп подсчитан по проверяемым фактам."],
+} satisfies MonthlyGoalView;
 
 describe("trajectory growth analytics", () => {
   it("keeps partial and unknown values distinct from zero and explains contour colors", () => {
@@ -57,6 +86,31 @@ describe("trajectory growth analytics", () => {
     expect(screen.getByText("Готовность роли:").parentElement).toHaveTextContent("100%");
     expect(container.querySelector(".growth-achieved")).toBeInTheDocument();
     expect(container.querySelector(".growth-deficit")).not.toBeInTheDocument();
+  });
+});
+
+describe("trajectory monthly goal projection", () => {
+  it("adds the monthly goal forecast with projected contour and checkpoint plan to the selected trajectory", () => {
+    render(<TrajectoryGrowthAnalytics snapshot={snapshot} goal={monthlyGoal} />);
+    const panel = screen.getByTestId("trajectory-monthly-goal");
+    expect(within(panel).getByRole("heading", { name: "Довести ИИ-агентов до уверенного уровня" })).toBeInTheDocument();
+    expect(within(panel).getByText("План выполним")).toBeInTheDocument();
+    expect(within(panel).getByText("План вмещается в ваш ритм.")).toBeInTheDocument();
+    expect(within(panel).getByText(/покрытие 75%/)).toBeInTheDocument();
+    expect(within(panel).getByLabelText("Текущий, прогнозируемый и целевой контуры")).toBeInTheDocument();
+    expect(within(panel).getByText("Прогноз:")).toBeInTheDocument();
+    expect(panel.querySelector(".monthly-goal-ring--projected")).not.toBeNull();
+    expect(within(panel).getByText("Пройти checkpoint ИИ-агенты")).toBeInTheDocument();
+    expect(within(panel).getByText("Сдать второй checkpoint ИИ-агенты")).toBeInTheDocument();
+    expect(within(panel).getByText("ИИ-агенты · Подтверждено")).toBeInTheDocument();
+    expect(within(panel).getByText("ИИ-агенты · Доступно")).toBeInTheDocument();
+    expect(panel).toHaveTextContent("9 дн. до конца периода");
+  });
+
+  it("stays silent when the projected goal belongs to another trajectory", () => {
+    render(<TrajectoryGrowthAnalytics snapshot={snapshot} goal={{ ...monthlyGoal, track_key: "data" }} />);
+    expect(screen.queryByTestId("trajectory-monthly-goal")).not.toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /Циклограмма траектории/ })).toBeInTheDocument();
   });
 });
 
@@ -234,8 +288,8 @@ describe("trajectory skill drilldown", () => {
   });
 });
 
-type DeepLinkFixture = { journey?: object; snapshot?: object; reports?: object; buddy?: object };
-function deepLinkReply(payload: object, status = 200): Response {
+type DeepLinkFixture = { journey?: object; snapshot?: object; reports?: object; buddy?: object; goal?: object | null };
+function deepLinkReply(payload: object | null, status = 200): Response {
   return new Response(JSON.stringify(payload), { status, headers: { "Content-Type": "application/json" } });
 }
 function installDeepLinkFetch(fixture: DeepLinkFixture) {
@@ -244,6 +298,7 @@ function installDeepLinkFetch(fixture: DeepLinkFixture) {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
     if (url.includes("/me/analytics/journey")) return Promise.resolve(deepLinkReply(fixture.journey ?? journey));
     if (url.includes("/me/growth/snapshot")) return Promise.resolve(deepLinkReply(fixture.snapshot ?? snapshot));
+    if (url.includes("/me/growth/monthly-goal")) return Promise.resolve(deepLinkReply(fixture.goal === undefined ? null : fixture.goal));
     if (url.includes("/me/competencies")) return Promise.resolve(deepLinkReply(fixture.reports ?? drilldownReports));
     if (url.includes("/agents/buddy/suggestion")) return Promise.resolve(deepLinkReply(fixture.buddy ?? drilldownBuddy));
     if (url.includes("/me/bootcamp/certificates") || url.includes("/me/project-credentials")) return Promise.resolve(deepLinkReply([]));
@@ -286,6 +341,22 @@ describe("participant analytics drill-down deep links", () => {
     fireEvent.click(screen.getByRole("button", { name: "Подробнее о навыке Автоматические тесты" }));
     expect(await screen.findByTestId("skill-drilldown")).toBeInTheDocument();
     expect(screen.getByTestId("url-probe")).toHaveTextContent("skill=tests");
+  });
+
+  it("renders the monthly goal projection on the analytics page", async () => {
+    installDeepLinkFetch({ goal: monthlyGoal });
+    renderDeepLink("/analytics");
+    expect(await screen.findByTestId("trajectory-monthly-goal")).toHaveTextContent("Довести ИИ-агентов до уверенного уровня");
+    expect(within(screen.getByTestId("trajectory-monthly-goal")).getByText("Прогноз:")).toBeInTheDocument();
+    expect(screen.getByTestId("skill-toggle-tests")).toBeInTheDocument();
+  });
+
+  it("stays silent when the endpoint reports no monthly goal", async () => {
+    installDeepLinkFetch({});
+    renderDeepLink("/analytics?trajectory=python&skill=tests");
+    await screen.findByTestId("skill-drilldown");
+    expect(screen.queryByTestId("trajectory-monthly-goal")).not.toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /Циклограмма траектории/ })).toBeInTheDocument();
   });
 });
 
