@@ -87,6 +87,11 @@ from impulse.infrastructure.reward_store import SqlRewardStore
 from impulse.infrastructure.talent_store import SqlTalentStore
 from impulse.infrastructure.work_store import SqlWorkStore
 from impulse.integrations import platform_router
+from impulse.integrations.http_gateway import (
+    HttpPlatformGateway,
+    HttpPlatformSyncGateway,
+    PlatformHttpEndpoints,
+)
 from impulse.integrations.runtime import (
     DefaultProjectPlatformConfig,
     FailClosedPlatformGateway,
@@ -276,11 +281,33 @@ def create_app(
     platforms_membership = WorkAssignmentMembership(work_service.store)
     platforms_config = DefaultProjectPlatformConfig()
     platforms_vault = DeploymentSealedVault.from_secret(runtime_settings.platform_sealing_secret())
+    provider_endpoints = PlatformHttpEndpoints(
+        token_urls={key: str(url) for key, url in runtime_settings.platforms_token_urls.items()},
+        item_urls={key: str(url) for key, url in runtime_settings.platforms_item_urls.items()},
+    )
+    connect_gateway: HttpPlatformGateway | FailClosedPlatformGateway = (
+        HttpPlatformGateway(
+            provider_endpoints,
+            dry_run=runtime_settings.platforms_http_dry_run,
+            timeout_seconds=runtime_settings.platforms_http_timeout_seconds,
+        )
+        if runtime_settings.platforms_http_enabled
+        else FailClosedPlatformGateway()
+    )
+    sync_gateway: HttpPlatformSyncGateway | FailClosedPlatformSyncGateway = (
+        HttpPlatformSyncGateway(
+            provider_endpoints,
+            dry_run=runtime_settings.platforms_http_dry_run,
+            timeout_seconds=runtime_settings.platforms_http_timeout_seconds,
+        )
+        if runtime_settings.platforms_http_enabled
+        else FailClosedPlatformSyncGateway()
+    )
     if platforms_service is None:
         platforms_service = PlatformConnectionService(
             platforms_store,
             platforms_vault,
-            FailClosedPlatformGateway(),
+            connect_gateway,
             platforms_membership,
             platforms_config,
         )
@@ -288,7 +315,7 @@ def create_app(
         platforms_sync_service = PlatformSyncService(
             platforms_store,
             MemorySyncStore(),
-            FailClosedPlatformSyncGateway(),
+            sync_gateway,
             TrajectoryCheckpointLocator(development_service),
             platforms_membership,
             platforms_config,

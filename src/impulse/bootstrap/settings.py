@@ -38,6 +38,11 @@ class Settings(BaseSettings):
     session_ttl_seconds: int = Field(default=43_200, ge=300, le=604_800)
     auth_provider_url: AnyHttpUrl | None = None
 
+    platforms_http_enabled: bool = False
+    platforms_http_dry_run: bool = False
+    platforms_http_timeout_seconds: float = Field(default=10.0, gt=0, le=60)
+    platforms_token_urls: dict[str, AnyHttpUrl] = Field(default_factory=dict)
+    platforms_item_urls: dict[str, AnyHttpUrl] = Field(default_factory=dict)
     openrouter_api_key: SecretStr | None = None
     ai_buddy_enabled: bool = False
     ai_mentor_draft_enabled: bool = False
