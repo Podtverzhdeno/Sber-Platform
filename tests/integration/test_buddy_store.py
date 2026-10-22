@@ -6,11 +6,11 @@ import os
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from sqlalchemy import delete
+from sqlalchemy import delete, func, select
 
 from impulse.api.errors import ApiError
 from impulse.application.buddy import BuddyConversationService
-from impulse.bootstrap.demo_seed import demo_id, seed_demo
+from impulse.bootstrap.demo_seed import demo_id, reset_demo_data, seed_demo
 from impulse.domain.identity import ActorContext, Role
 from impulse.infrastructure.buddy_store import SqlBuddyStorage
 from impulse.infrastructure.database import Database, async_database_url
@@ -22,6 +22,7 @@ from impulse.infrastructure.models.buddy import (
     buddy_suggestion_states,
     buddy_threads,
 )
+from impulse.infrastructure.models.identity import persons
 
 pytestmark = pytest.mark.integration
 
@@ -141,3 +142,38 @@ async def test_retention_purge_and_suggestion_states(buddy_database: Database) -
     restarted_states = await storage.suggestion_states(actor.person_id)
     assert "s-1" in restarted_states.dismissed
     assert restarted_states.snoozed_until("s-2") == snoozed_until
+
+
+@pytest.mark.asyncio
+async def test_demo_reset_purges_persona_buddy_rows(buddy_database: Database) -> None:
+    """Runtime buddy rows of demo personas must not block demo reset (FK persons)."""
+    storage = SqlBuddyStorage(buddy_database)
+    actor = participant("participant-alex")
+    service = BuddyConversationService(storage)
+    thread = await service.create_thread(actor)
+    await service.add_message(actor, thread.id, client_message_id="m1", content="демо-данные")
+    await service.feedback(actor, thread.id, rating=3)
+    await storage.block_memory(actor.person_id)
+    await service.dismiss_suggestion(actor, "s-9")
+    await service.withdraw_memory(actor)
+    assert await service.deletion_audits()
+
+    await reset_demo_data(buddy_database, demo_mode=True)
+
+    async with buddy_database.session() as session:
+        for table in (
+            buddy_messages,
+            buddy_feedback,
+            buddy_memory_suppression,
+            buddy_suggestion_states,
+            buddy_deletion_audits,
+            buddy_threads,
+        ):
+            remaining = await session.scalar(select(func.count()).select_from(table))
+            assert remaining == 0
+    await seed_demo(buddy_database)
+    async with buddy_database.session() as session:
+        restored = await session.execute(
+            select(persons.c.id).where(persons.c.id == demo_id("participant-alex"))
+        )
+        assert restored.first() is not None

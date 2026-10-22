@@ -136,6 +136,12 @@ Seed использует UUIDv5 namespace и `DEMO_SEED_VERSION`. Каждый 
 - `weekly_rhythm_versions`
 - `monthly_goal_plans`
 - `visibility_settings`
+- `buddy_threads`
+- `buddy_messages`
+- `buddy_feedback`
+- `buddy_memory_suppression`
+- `buddy_suggestion_states`
+- `buddy_deletion_audits`
 <!-- tables:end -->
 
 `monthly_goal_plans` хранит неизменяемые версии месячного плана участника: период,

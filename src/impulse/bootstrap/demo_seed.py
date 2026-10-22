@@ -23,6 +23,14 @@ from impulse.infrastructure.models.assist import (
     agent_threads,
     human_decisions,
 )
+from impulse.infrastructure.models.buddy import (
+    buddy_deletion_audits,
+    buddy_feedback,
+    buddy_memory_suppression,
+    buddy_messages,
+    buddy_suggestion_states,
+    buddy_threads,
+)
 from impulse.infrastructure.models.competencies import competency_evidence
 from impulse.infrastructure.models.credentials import (
     course_certificates,
@@ -1248,6 +1256,31 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
         await session.execute(
             delete(agent_threads).where(agent_threads.c.owner_id.in_(demo_person_ids))
         )
+        demo_buddy_thread_ids = select(buddy_threads.c.id).where(
+            buddy_threads.c.owner_id.in_(demo_person_ids)
+        )
+        await session.execute(
+            delete(buddy_feedback).where(
+                buddy_feedback.c.actor_id.in_(demo_person_ids)
+                | buddy_feedback.c.thread_id.in_(demo_buddy_thread_ids)
+            )
+        )
+        await session.execute(
+            delete(buddy_messages).where(buddy_messages.c.thread_id.in_(demo_buddy_thread_ids))
+        )
+        await session.execute(
+            delete(buddy_threads).where(buddy_threads.c.owner_id.in_(demo_person_ids))
+        )
+        for buddy_runtime_table, buddy_person_column in (
+            (buddy_memory_suppression, "person_id"),
+            (buddy_suggestion_states, "person_id"),
+            (buddy_deletion_audits, "owner_id"),
+        ):
+            await session.execute(
+                delete(buddy_runtime_table).where(
+                    buddy_runtime_table.c[buddy_person_column].in_(demo_person_ids)
+                )
+            )
         for batch in reversed(batches):
             await session.execute(
                 delete(batch.table).where(batch.table.c.data_origin == "demo_seed")
