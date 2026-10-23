@@ -46,6 +46,13 @@ export const ROLE_STATE_LABELS: Record<string, string | undefined> = {
 
 export const PRIMARY_LABEL = "Основная";
 
+export const MILESTONE_STATE_LABELS: Record<string, string> = {
+  completed: "Пройден",
+  current: "Сейчас",
+  available: "Доступен",
+  locked: "Закрыт",
+};
+
 export function roleStateLabel(state: string): string {
   return ROLE_STATE_LABELS[state] ?? state;
 }

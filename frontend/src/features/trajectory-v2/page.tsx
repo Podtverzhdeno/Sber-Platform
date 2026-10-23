@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { StatePanel } from "../../components/ui";
@@ -9,9 +9,11 @@ import {
   overviewQueryKey,
   roadmapsQueryKey,
   PRIMARY_LABEL,
+  MILESTONE_STATE_LABELS,
   milestoneState,
   roleStateLabel,
 } from "./client";
+import { RoleInfoDialog, StageTaskDrawer } from "./details";
 import type {
   DevelopmentOverviewView,
   MilestoneView,
@@ -19,13 +21,6 @@ import type {
   RoleCardView,
 } from "./client";
 import "./trajectory-v2.scss";
-
-const MILESTONE_STATE_LABELS: Record<string, string> = {
-  completed: "Пройден",
-  current: "Сейчас",
-  available: "Доступен",
-  locked: "Закрыт",
-};
 
 function isSelectedStage(
   stageKey: string | null,
@@ -98,6 +93,32 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   }, [overview, roleParam]);
   const selected = overview.roles.find((role) => role.track_key === selectedKey) ?? null;
   const primaryKey = primaryTrajectoryKey(overview);
+  const selectedRoadmap =
+    selected !== null
+      ? (roadmaps.data?.find((item) => item.track_key === selected.track_key) ?? null)
+      : null;
+  const lastOverlayTriggerRef = useRef<HTMLElement | null>(null);
+  const [roleInfoOpen, setRoleInfoOpen] = useState(false);
+  const [drawerKey, setDrawerKey] = useState<string | null>(null);
+  const snapshotTrigger = () => {
+    lastOverlayTriggerRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  };
+  const openRoleInfo = () => {
+    snapshotTrigger();
+    setDrawerKey(null);
+    setRoleInfoOpen(true);
+  };
+  const openStageDetails = (stageKey: string) => {
+    snapshotTrigger();
+    setRoleInfoOpen(false);
+    setDrawerKey(stageKey);
+  };
+  const closeOverlays = () => {
+    setRoleInfoOpen(false);
+    setDrawerKey(null);
+  };
+  const drawerMilestone = selectedRoadmap?.milestones.find((m) => m.key === drawerKey);
 
   const roleSelected = (trackKey: string) => {
     const next = new URLSearchParams(searchParams);
@@ -150,10 +171,34 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 next.set("stage", stageKey);
                 setSearchParams(next);
               }}
+              onOpenRoleInfo={openRoleInfo}
+              onOpenStageDetails={openStageDetails}
             />
           )}
         </section>
       </div>
+      {roleInfoOpen && selected !== null ? (
+        <RoleInfoDialog
+          role={selected}
+          roadmap={selectedRoadmap}
+          onClose={closeOverlays}
+          triggerRef={lastOverlayTriggerRef}
+        />
+      ) : null}
+      {selectedRoadmap !== null &&
+      selected !== null &&
+      drawerKey !== null &&
+      drawerMilestone !== undefined ? (
+        <StageTaskDrawer
+          key={drawerMilestone.key}
+          milestone={drawerMilestone}
+          state={milestoneState(drawerMilestone, selectedRoadmap.next_step)}
+          role={selected}
+          policyVersion={selectedRoadmap.policy_version}
+          onClose={closeOverlays}
+          triggerRef={lastOverlayTriggerRef}
+        />
+      ) : null}
     </div>
   );
 }
@@ -209,6 +254,8 @@ export function RoleDetailPanel(props: {
   roadmapRetry: () => void;
   stageKey: string | null;
   onStageSelect: (stageKey: string) => void;
+  onOpenRoleInfo: () => void;
+  onOpenStageDetails: (stageKey: string) => void;
 }) {
   const role = props.role;
   return (
@@ -221,6 +268,13 @@ export function RoleDetailPanel(props: {
         <h3>{role.title}</h3>
         <span className="trajectory-v2-role-state">{roleStateLabel(role.state)}</span>
         {props.primary && <span className="trajectory-v2-role-badge">{PRIMARY_LABEL}</span>}
+        <button
+          type="button"
+          className="trajectory-v2-role-info-button"
+          onClick={props.onOpenRoleInfo}
+        >
+          Подробнее о роли
+        </button>
       </header>
       {role.attempt_number === null ? (
         <section aria-label="Прогресс роли">
@@ -246,6 +300,7 @@ export function RoleDetailPanel(props: {
         retry={props.roadmapRetry}
         stageKey={props.stageKey}
         onStageSelect={props.onStageSelect}
+        onOpenDetails={props.onOpenStageDetails}
       />
     </article>
   );
@@ -259,6 +314,7 @@ export function StagePathSection(props: {
   retry: () => void;
   stageKey: string | null;
   onStageSelect: (stageKey: string) => void;
+  onOpenDetails: (stageKey: string) => void;
 }) {
   const { role, roadmap } = props;
   if (props.pending) {
@@ -334,6 +390,7 @@ export function StagePathSection(props: {
           state={milestoneState(visibleMilestone, nextStep)}
           nextStep={nextStep}
           role={role}
+          onOpenDetails={props.onOpenDetails}
         />
       )}
     </section>
@@ -349,6 +406,7 @@ export function StageDetail(props: {
   state: string;
   nextStep: MilestoneView | null;
   role: RoleCardView;
+  onOpenDetails?: (stageKey: string) => void;
 }) {
   const { milestone, nextStep, role } = props;
   return (
@@ -356,6 +414,17 @@ export function StageDetail(props: {
       <header>
         <strong>{milestone.title}</strong>
         <span>{MILESTONE_STATE_LABELS[props.state] ?? props.state}</span>
+        {props.onOpenDetails !== undefined && (
+          <button
+            type="button"
+            className="trajectory-v2-stage-details-button"
+            onClick={() => {
+              props.onOpenDetails?.(milestone.key);
+            }}
+          >
+            Подробнее об этапе
+          </button>
+        )}
       </header>
       <p>{milestone.purpose}</p>
       <dl>
