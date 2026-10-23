@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import type { CatalogItem, CatalogPage } from "../src/features/task-catalog-v2/types";
+import type { CatalogItem, CatalogPage, CatalogTerms } from "../src/features/task-catalog-v2/types";
 
 type Login = { csrf_token: string };
 
@@ -96,7 +96,22 @@ test("real seeded API submits one application and replays its idempotency key", 
   expect(candidate).toBeTruthy();
   if (candidate === undefined) return;
 
+  const termsResponse = await page.context().request.get(
+    `/api/v1/me/task-recommendations/${candidate.task_id}/terms`,
+  );
+  expect(termsResponse.status(), await termsResponse.text()).toBe(200);
+  const terms = (await termsResponse.json()) as CatalogTerms;
+  const preflight = await page.context().request.post(
+    `/api/v1/me/task-recommendations/${candidate.task_id}/terms/revalidate`,
+    {
+      headers: { "X-CSRF-Token": csrf },
+      data: { version_token: terms.version_token, terms_version: terms.terms_version },
+    },
+  );
+  expect(preflight.status(), await preflight.text()).toBe(200);
+
   await openRealCatalog(page);
+  expect(await page.evaluate(() => window.sessionStorage.getItem("impulse_csrf"))).toBe(csrf);
   const search = page.getByLabel("Поиск", { exact: true });
   await search.fill(candidate.title);
   await search.press("Enter");
@@ -127,11 +142,11 @@ test("real seeded API submits one application and replays its idempotency key", 
   );
   await dialog.getByRole("button", { name: "Подтвердить и отправить отклик" }).click();
   const revalidateResponse = await revalidateResponsePromise;
-  expect(revalidateResponse.status()).toBe(200);
+  expect(revalidateResponse.status(), await revalidateResponse.text()).toBe(200);
   const consentResponse = await consentResponsePromise;
-  expect(consentResponse.status()).toBe(200);
+  expect(consentResponse.status(), await consentResponse.text()).toBe(200);
   const applyResponse = await applyResponsePromise;
-  expect([200, 201]).toContain(applyResponse.status());
+  expect([200, 201], await applyResponse.text()).toContain(applyResponse.status());
   const firstApplication = (await applyResponse.json()) as { id: string };
   const idempotencyKey = applyResponse.request().headers()["idempotency-key"];
   expect(idempotencyKey).toBeTruthy();
