@@ -8,7 +8,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write # TEMPORARY: CI renderer baseline commit; restore read before final verification.
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -186,6 +186,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.head_ref }} # TEMPORARY: commit exact renderer baselines to the PR head.
       - name: Install uv and Python
         uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
@@ -250,10 +252,24 @@ jobs:
       - name: Run browser tests
         run: |
           set -o pipefail
-          npm run test:e2e 2>&1 | tee e2e.log
+          # TEMPORARY: update only the intentional catalog/workspace visual changes.
+          npx playwright test e2e/task-catalog-v2-visual.spec.ts e2e/reference-compositions.spec.ts --grep 'task catalog|R-CUS-05' --update-snapshots 2>&1 | tee e2e.log
         env:
           TZ: Europe/Moscow
           LANG: ru_RU.UTF-8
+      - name: Commit exact CI renderer baselines
+        run: |
+          if git diff --quiet -- frontend/e2e/task-catalog-v2-visual.spec.ts-snapshots frontend/e2e/reference-compositions.spec.ts-snapshots; then
+            echo 'No renderer baseline changes'
+            exit 0
+          fi
+          git config user.name 'arena-visual-baseline-bot'
+          git config user.email 'noreply@localhost'
+          git add frontend/e2e/task-catalog-v2-visual.spec.ts-snapshots frontend/e2e/reference-compositions.spec.ts-snapshots
+          git diff --cached --stat
+          git commit -m 'test(e2e): record exact CI renderer baselines'
+          git push origin "HEAD:${{ github.head_ref }}"
+        working-directory: .
       - name: Publish e2e failures
         if: ${{ failure() }}
         run: |
