@@ -73,8 +73,13 @@ export function RoleSummary({ summary }: { summary: RoleSummaryModel }) {
       {summary.grade_state === "known" ? (
         <>
           <p>{summary.current_grade_title} → {summary.target_grade_title}</p>
-          {summary.matrix_skill_count !== null && <p>Навыков в матрице: {summary.matrix_skill_count}</p>}
-          {summary.readiness && <p>Готовность: {summary.readiness.percent}%</p>}
+          <p>Навыков в матрице: {summary.matrix_skill_count ?? "не определено"}</p>
+          {summary.readiness ? (
+            <div>
+              <p>Готовность: {summary.readiness.percent}%</p>
+              <small>{summary.readiness.definition} · {summary.readiness.numerator} из {summary.readiness.denominator}</small>
+            </div>
+          ) : <p>Готовность ещё не рассчитана.</p>}
         </>
       ) : (
         <p>{summary.unavailable_reason}</p>

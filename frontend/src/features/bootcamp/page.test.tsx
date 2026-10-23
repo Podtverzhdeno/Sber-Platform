@@ -152,4 +152,34 @@ describe("BootcampPage composition (BC2-301)", () => {
     expect(continuation).toHaveTextContent("Активного шага пока нет");
     expect(continuation.querySelector("button")).toBeNull();
   });
+
+  it("does not turn unknown role metrics into zero progress", () => {
+    const unknownOverview: BootcampOverview = {
+      ...overview,
+      role_summary: {
+        track_key: "backend",
+        grade_state: "unknown",
+        current_grade_key: null,
+        current_grade_title: null,
+        target_grade_key: null,
+        target_grade_title: null,
+        matrix_skill_count: null,
+        readiness: null,
+        grade_policy: null,
+        unavailable_reason: "Грейд ещё не определён владельцем матрицы.",
+      },
+    };
+    render(<BootcampPage overview={unknownOverview} view="card" onViewChange={vi.fn()} onRoleChange={vi.fn()} onContinue={vi.fn()} onOpenCourse={vi.fn()} onOpenRequirements={vi.fn()} />);
+    const summary = screen.getByRole("region", { name: "Профиль роли" });
+    expect(summary).toHaveTextContent("Грейд ещё не определён владельцем матрицы.");
+    expect(summary).not.toHaveTextContent("0%");
+    expect(summary).not.toHaveTextContent("62%");
+  });
+
+  it("explains known readiness and keeps an unknown count explicit", () => {
+    render(<BootcampPage overview={{ ...overview, role_summary: { ...overview.role_summary, matrix_skill_count: null } }} view="card" onViewChange={vi.fn()} onRoleChange={vi.fn()} onContinue={vi.fn()} onOpenCourse={vi.fn()} onOpenRequirements={vi.fn()} />);
+    const summary = screen.getByRole("region", { name: "Профиль роли" });
+    expect(summary).toHaveTextContent("Навыков в матрице: не определено");
+    expect(summary).toHaveTextContent("requirements · 3 из 4");
+  });
 });
