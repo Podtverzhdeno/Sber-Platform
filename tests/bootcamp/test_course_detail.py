@@ -106,9 +106,7 @@ def test_missing_published_version_is_explicitly_not_evaluable() -> None:
 
 def test_trusted_reviews_are_kept_and_empty_state_stays_explained() -> None:
     with_reviews = build_course_detail(_version(), reviews=(_review(),))
-    assert tuple(review.author_role for review in with_reviews.reviews) == (
-        "проверенный участник",
-    )
+    assert tuple(review.author_role for review in with_reviews.reviews) == ("проверенный участник",)
     assert with_reviews.reviews_unavailable_reason is None
     empty = build_course_detail(_version())
     assert empty.reviews == ()

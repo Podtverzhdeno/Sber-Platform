@@ -135,9 +135,7 @@ class BootcampLearningCommandService:
                 status_code=409,
             )
         enrollment_id = current.enrollment_id or uuid4()
-        fingerprint = ":".join(
-            (str(actor.person_id), course_key, course_version, action.value)
-        )
+        fingerprint = ":".join((str(actor.person_id), course_key, course_version, action.value))
         result = LearningCommandResult(
             command_id=uuid4(),
             person_id=actor.person_id,

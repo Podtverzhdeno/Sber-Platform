@@ -141,9 +141,7 @@ class CourseDetail:
             if self.unavailable_reason is None or not self.unavailable_reason.strip():
                 raise ValueError("Unknown course detail requires an explicit reason")
         if self.next_checkpoint_note is not None and self.next_checkpoint_key is not None:
-            raise ValueError(
-                "A pending checkpoint and an all-done note cannot be present together"
-            )
+            raise ValueError("A pending checkpoint and an all-done note cannot be present together")
         if self.reviews and self.reviews_unavailable_reason is not None:
             raise ValueError("Reviews present but a reviews-unavailable reason is set")
 

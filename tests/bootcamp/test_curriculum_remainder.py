@@ -135,9 +135,7 @@ def test_absent_policy_is_explicitly_not_evaluable() -> None:
 
 
 def test_duplicate_current_evidence_is_rejected() -> None:
-    duplicate = _evidence(
-        "course-openspec", "openspec-sdd", "course-v3", RequirementState.VERIFIED
-    )
+    duplicate = _evidence("course-openspec", "openspec-sdd", "course-v3", RequirementState.VERIFIED)
     with pytest.raises(ValueError, match="at most one"):
         build_curriculum_remainder(_policy(), evidence=(duplicate, duplicate))
 

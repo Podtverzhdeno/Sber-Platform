@@ -262,9 +262,7 @@ class CourseSnapshot:
             or self.card.must_take is not None
             or self.card.recommendation_reason
         ):
-            raise ValueError(
-                "Overview CourseCard must be role-neutral; use CourseRoleContext"
-            )
+            raise ValueError("Overview CourseCard must be role-neutral; use CourseRoleContext")
         has_evidence = self.card.verified_evidence is not None
         if has_evidence != (self.evidence_provenance is not None):
             raise ValueError("Verified evidence and its provenance must appear together")

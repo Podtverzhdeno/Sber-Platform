@@ -179,9 +179,8 @@ class DevelopmentOverviewService:
         _plans, result = await self._growth.next_step(actor)
         items = await self._work.participant_work(actor)
         store = self._development.store
-        achieved = (
-            await store.learning_dates(actor.person_id)
-            | await store.engagement_dates(actor.person_id)
+        achieved = await store.learning_dates(actor.person_id) | await store.engagement_dates(
+            actor.person_id
         )
         rhythm_history = await store.weekly_rhythm_history(actor.person_id)
         attempts = await store.attempts(actor.person_id)

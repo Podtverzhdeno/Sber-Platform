@@ -845,11 +845,7 @@ def _overview_view(item: DevelopmentOverview) -> DevelopmentOverviewView:
             )
             for role in item.roles
         ],
-        monthly_plan=(
-            None
-            if item.monthly_plan is None
-            else monthly_goal_view(item.monthly_plan)
-        ),
+        monthly_plan=(None if item.monthly_plan is None else monthly_goal_view(item.monthly_plan)),
     )
 
 

@@ -164,9 +164,10 @@ def test_overview_keeps_role_scoped_facts_and_course_identity_separate() -> None
     assert tuple(role.track_key for role in overview.roles) == ("python", "product")
     assert overview.role_summary.track_key == "python"
     assert overview.courses[0].card.track_keys == ("python", "product")
-    assert tuple(
-        context.track_key for context in overview.courses[0].role_contexts
-    ) == ("python", "product")
+    assert tuple(context.track_key for context in overview.courses[0].role_contexts) == (
+        "python",
+        "product",
+    )
     assert overview.courses[0].role_contexts[0].reasons != (
         overview.courses[0].role_contexts[1].reasons
     )
