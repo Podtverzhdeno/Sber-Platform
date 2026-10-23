@@ -226,18 +226,62 @@ class StagePlanProjection:
 
 
 @dataclass(frozen=True, slots=True)
+class BenefitEligibilityRule:
+    """Structured eligibility rule behind a conditional benefit (TC-014).
+
+    ``rule_kind`` carries the machine-meaningful gate: ``ALWAYS`` benefit is
+    granted unconditionally, ``CONDITIONAL`` reads the human rule, requires
+    verified evidence, and holds only while an INVITATION gate is open.
+    """
+
+    rule_kind: str
+    condition: str
+    evidence_refs: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.rule_kind not in (
+            "always",
+            "conditional",
+            "evidence_required",
+            "invitation_required",
+        ):
+            raise CatalogContractError(
+                "Benefit rule kind must be always, conditional, evidence_required "
+                "or invitation_required."
+            )
+        if not self.condition.strip():
+            raise CatalogContractError("Benefit rule requires an explicit condition.")
+        if self.rule_kind == "evidence_required" and not self.evidence_refs:
+            raise CatalogContractError("Evidence-backed benefit rule must reference evidence.")
+
+
+@dataclass(frozen=True, slots=True)
 class ConditionalBenefit:
     code: str
     label: str
     state: BenefitState
     condition: str
     sources: tuple[ProjectionSource, ...]
+    benefit_type: str = "other"
+    eligibility: BenefitEligibilityRule | None = None
 
     def __post_init__(self) -> None:
         if not self.code.strip() or not self.label.strip() or not self.condition.strip():
             raise CatalogContractError("Benefit requires code, label and explicit condition.")
         if not self.sources:
             raise CatalogContractError("Benefit must be backed by an authoritative source.")
+        if self.benefit_type not in (
+            "compensation",
+            "learning",
+            "support",
+            "portfolio",
+            "mentorship",
+            "other",
+        ):
+            raise CatalogContractError(
+                "Benefit type must be compensation, learning, support, portfolio, "
+                "mentorship or other."
+            )
 
 
 @dataclass(frozen=True, slots=True)

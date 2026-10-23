@@ -102,6 +102,9 @@ class CatalogBenefitView(BaseModel):
     label: str
     state: BenefitState
     condition: str
+    benefit_type: str
+    rule_kind: str | None
+    evidence_refs: tuple[str, ...]
 
 
 class CatalogProjectionSourceView(BaseModel):
@@ -227,6 +230,9 @@ def _recommendation_item(item: TaskRecommendationProjection) -> CatalogRecommend
                 label=benefit.label,
                 state=benefit.state,
                 condition=benefit.condition,
+                benefit_type=benefit.benefit_type,
+                rule_kind=benefit.eligibility.rule_kind if benefit.eligibility else None,
+                evidence_refs=benefit.eligibility.evidence_refs if benefit.eligibility else (),
             )
             for benefit in item.benefits
         ],
