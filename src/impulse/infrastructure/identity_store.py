@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 from datetime import UTC, datetime
+from typing import cast
 from uuid import UUID
 
 from sqlalchemy import delete, func, insert, select, update
@@ -11,6 +12,7 @@ from sqlalchemy.dialects.postgresql import insert as postgres_insert
 
 from impulse.api.errors import ApiError
 from impulse.application.identity import (
+    CustomerVerificationState,
     IdentityStore,
     ParticipantProfile,
     PersonaRecord,
@@ -35,6 +37,19 @@ from impulse.infrastructure.models.identity import (
 from impulse.infrastructure.models.insight import audit_entries, domain_events
 
 
+def _customer_verification(
+    payload: object, data_origin: object
+) -> CustomerVerificationState | None:
+    raw: object = None
+    if isinstance(payload, dict):
+        raw = cast(dict[str, object], payload).get("customer_verification")
+    if raw == "demo" or raw == "unverified" or raw == "verified":
+        return cast(CustomerVerificationState, raw)
+    # Existing demo rows predate the explicit field. Keep their honest demo
+    # label while allowing an explicit authoritative state to take precedence.
+    return "demo" if data_origin == "demo_seed" else None
+
+
 class SqlIdentityStore(IdentityStore):
     def __init__(self, database: Database) -> None:
         self.database = database
@@ -47,6 +62,8 @@ class SqlIdentityStore(IdentityStore):
                         persons.c.id,
                         persons.c.external_key,
                         persons.c.display_name,
+                        persons.c.payload,
+                        persons.c.data_origin,
                         actor_roles.c.role,
                         actor_roles.c.program_key,
                     )
@@ -56,8 +73,17 @@ class SqlIdentityStore(IdentityStore):
                 )
             ).all()
         grouped: dict[UUID, PersonaRecord] = {}
-        for person_id, external_key, display_name, role, program_key in rows:
+        for (
+            person_id,
+            external_key,
+            display_name,
+            payload,
+            data_origin,
+            role,
+            program_key,
+        ) in rows:
             parsed_role = Role(role)
+            customer_verification = _customer_verification(payload, data_origin)
             current = grouped.get(person_id)
             if current is None:
                 grouped[person_id] = PersonaRecord(
@@ -66,6 +92,7 @@ class SqlIdentityStore(IdentityStore):
                     display_name=display_name,
                     roles=(parsed_role,),
                     program_key=program_key,
+                    customer_verification=customer_verification,
                 )
             else:
                 grouped[person_id] = PersonaRecord(
@@ -74,6 +101,7 @@ class SqlIdentityStore(IdentityStore):
                     display_name=current.display_name,
                     roles=(*current.roles, parsed_role),
                     program_key=current.program_key,
+                    customer_verification=current.customer_verification,
                 )
         ordered: list[PersonaRecord] = []
         for persona in grouped.values():
@@ -90,6 +118,7 @@ class SqlIdentityStore(IdentityStore):
                     display_name=persona.display_name,
                     roles=roles,
                     program_key=persona.program_key,
+                    customer_verification=persona.customer_verification,
                 )
             )
         return tuple(ordered)

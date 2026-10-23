@@ -7,7 +7,7 @@ import secrets
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
-from typing import Protocol
+from typing import Literal, Protocol
 from uuid import UUID, uuid4
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -26,6 +26,8 @@ from impulse.domain.identity import (
 
 SESSION_COOKIE = "impulse_session"
 
+CustomerVerificationState = Literal["demo", "unverified", "verified"]
+
 
 @dataclass(frozen=True, slots=True)
 class PersonaRecord:
@@ -34,6 +36,9 @@ class PersonaRecord:
     display_name: str
     roles: tuple[Role, ...]
     program_key: str = "impulse-demo"
+    # Authoritative customer state; None keeps the legacy environment fallback
+    # for synthetic stores that do not persist customer verification.
+    customer_verification: CustomerVerificationState | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -459,12 +464,14 @@ def demo_personas() -> tuple[PersonaRecord, ...]:
             "customer-roman",
             "Роман Заказчик",
             (Role.CUSTOMER,),
+            customer_verification="demo",
         ),
         PersonaRecord(
             identifier("manager-olga"),
             "manager-olga",
             "Ольга Руководитель",
             (Role.MANAGER, Role.CUSTOMER),
+            customer_verification="unverified",
         ),
         PersonaRecord(identifier("hr-nina"), "hr-nina", "Нина HR", (Role.HR,)),
         PersonaRecord(

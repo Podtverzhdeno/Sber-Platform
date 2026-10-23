@@ -16,6 +16,7 @@ from impulse.application.development import (
     MemoryDevelopmentStore,
 )
 from impulse.application.identity import MemoryIdentityStore, demo_personas
+from impulse.application.task_catalog import CustomerVerification
 from impulse.application.task_catalog_matching import TaskCatalogProjectionService
 from impulse.application.work import (
     CatalogStage,
@@ -25,6 +26,7 @@ from impulse.application.work import (
     TermsRecord,
     WorkService,
 )
+from impulse.bootstrap.demo_seed import demo_id
 from impulse.domain.development import TrackAttempt, TrackStatus
 from impulse.domain.identity import ActorContext, Role
 from impulse.domain.reward import CompensationTerms, RoundingMode
@@ -43,7 +45,7 @@ async def test_canonical_projection_separates_plan_terms_and_participant_snapsho
             title="Synthetic catalog task",
             aggregate=TaskAggregate(
                 task_id=task_id,
-                customer_id=uuid4(),
+                customer_id=demo_id("manager-olga"),
                 status=TaskStatus.PUBLISHED,
                 brief=TaskBrief(
                     problem="Validate a reproducible result with synthetic data.",
@@ -115,6 +117,26 @@ async def test_canonical_projection_separates_plan_terms_and_participant_snapsho
     item, terms = pairs[0]
     assert item.task_id == task_id
     assert terms.acceptance_criteria == ("Reproducible result",)
+    # An explicit customer record wins over the environment-wide demo fallback.
+    assert item.customer.verification is CustomerVerification.UNVERIFIED
+    verified_identity = MemoryIdentityStore(
+        tuple(
+            replace(persona, customer_verification="verified")
+            if persona.key == "manager-olga"
+            else persona
+            for persona in demo_personas()
+        )
+    )
+    verified_projection = TaskCatalogProjectionService(
+        work,
+        development,
+        verified_identity,
+        demo_mode=True,
+        now_provider=lambda: now,
+    )
+    assert (await verified_projection.projections(actor))[0].customer.verification is (
+        CustomerVerification.VERIFIED
+    )
     assert [stage.position for stage in item.stage_plan.stages] == [1, 2, 3, 4, 5]
     assert all(stage.state.value == "planned" for stage in item.stage_plan.stages)
     assert any(benefit.condition == "Feedback after acceptance" for benefit in item.benefits)

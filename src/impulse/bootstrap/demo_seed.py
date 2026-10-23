@@ -194,7 +194,18 @@ EVENTS = (
 
 def build_seed_batches() -> list[SeedBatch]:
     person_rows = [
-        demo_row(key, display_name=name, external_key=f"demo:{key}")
+        demo_row(
+            key,
+            display_name=name,
+            external_key=f"demo:{key}",
+            payload=(
+                {"customer_verification": "unverified"}
+                if key == "manager-olga"
+                else {"customer_verification": "demo"}
+                if key == "customer-roman"
+                else {}
+            ),
+        )
         for key, name, _role in PERSONAS
     ]
     role_rows = [
@@ -429,6 +440,27 @@ def _demo_benefit_descriptions(index: int) -> list[str]:
     return list(conditions[: 1 + (index - 1) % len(conditions)])
 
 
+def _demo_operational_checkpoints(index: int) -> list[dict[str, object]]:
+    """Canonical assigned-work checkpoints; never consumed as a catalog plan."""
+    if index != 1:
+        return []
+    titles = (
+        "Проверить исходные данные",
+        "Согласовать прототип",
+        "Измерить результат",
+        "Провести независимую проверку",
+        "Передать результат",
+    )
+    return [
+        {
+            "key": f"assigned-quality-{position}",
+            "title": title,
+            "status": "accepted" if position <= 2 else "planned",
+        }
+        for position, title in enumerate(titles, start=1)
+    ]
+
+
 def _catalog_seed_time() -> datetime:
     return datetime.now(UTC)
 
@@ -498,7 +530,7 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
         demo_row(
             f"task:{index}",
             project_id=project_row["id"],
-            customer_id=demo_id("customer-roman"),
+            customer_id=demo_id("manager-olga" if index == 12 else "customer-roman"),
             task_key=f"demo-task-{index}",
             status=status,
             payload={
@@ -508,7 +540,9 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
                 "competency_tags": list(catalog_specs[index - 1][0]),
                 "catalog": {
                     "direction_keys": list(catalog_specs[index - 1][1]),
-                    "prerequisite_tags": [],
+                    "prerequisite_tags": (
+                        ["catalog-quality-unmet-prerequisite"] if index == 12 else []
+                    ),
                     "difficulty": catalog_specs[index - 1][2],
                     "duration_minutes": 480 + index * 60,
                     "work_format": catalog_specs[index - 1][3],
@@ -517,9 +551,13 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
                         "Актуальная траектория и подтверждённые компетенции",
                         "Готовность выполнить опубликованный результат",
                     ],
-                    "portfolio_permission": "conditional",
+                    "portfolio_permission": "none" if index == 12 else "conditional",
                     "stage_plan": _demo_stage_plan(index),
-                    "benefit_descriptions": _demo_benefit_descriptions(index),
+                    "benefit_descriptions": (
+                        ["Обратная связь предоставляется только после проверки результата."]
+                        if index == 12
+                        else _demo_benefit_descriptions(index)
+                    ),
                 },
                 "brief": {
                     "problem": (
@@ -540,9 +578,15 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
                         "Только синтетические и обезличенные демонстрационные данные."
                     ),
                     "ip_terms": (
-                        "Результат доступен заказчику, авторство сохраняется в портфолио участника."
+                        "Публикация результата в портфолио запрещена условиями заказчика."
+                        if index == 12
+                        else (
+                            "Результат доступен заказчику, авторство сохраняется "
+                            "в портфолио участника."
+                        )
                     ),
                 },
+                "checkpoints": _demo_operational_checkpoints(index),
                 "nominated_mentor_id": None,
                 "support": {
                     "mode": "mentor",

@@ -536,9 +536,13 @@ class TaskCatalogProjectionService:
                     id=task.aggregate.customer_id,
                     display_name=customer_name,
                     verification=(
-                        CustomerVerification.DEMO
-                        if self._demo_mode
-                        else CustomerVerification.UNVERIFIED
+                        CustomerVerification(customer.customer_verification)
+                        if customer is not None and customer.customer_verification is not None
+                        else (
+                            CustomerVerification.DEMO
+                            if self._demo_mode
+                            else CustomerVerification.UNVERIFIED
+                        )
                     ),
                 ),
                 brief_summary=task.aggregate.brief.problem or "Описание не указано заказчиком.",
