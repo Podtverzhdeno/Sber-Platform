@@ -366,4 +366,35 @@ describe("Bootcamp catalog states and filters (22.15)", () => {
     await screen.findByText("Здесь пока пусто");
     expect(screen.queryByTestId(/course-/)).not.toBeInTheDocument();
   });
+
+  it("renders a deep-linked course first and marks it", async () => {
+    installFetch();
+    renderCatalog("/workspace/3?course=agent-development");
+
+    await screen.findByTestId("course-openspec-sdd");
+    expect(await screen.findByTestId("deeplink-agent-development")).toBeInTheDocument();
+    const grid = screen.getByTestId("course-agent-development").closest(".course-grid");
+    const firstCard = grid?.firstElementChild;
+    expect(firstCard).toHaveAttribute("data-testid", "course-agent-development");
+  });
+
+  it("keeps the deep-linked card filtered out honestly when filters exclude it", async () => {
+    installFetch();
+    renderCatalog("/workspace/3?relevance=relevant&course=greenhouse-esg");
+
+    await screen.findByTestId("course-python-base");
+    expect(screen.queryByTestId("course-greenhouse-esg")).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/скрыт текущими фильтрами/),
+    ).toBeInTheDocument();
+  });
+
+  it("reports an unknown deep-linked course key without a fake card", async () => {
+    installFetch();
+    renderCatalog("/workspace/3?course=ghost-course");
+
+    await screen.findByTestId("course-openspec-sdd");
+    expect(screen.getByText(/не найден в актуальном каталоге/)).toBeInTheDocument();
+    expect(screen.queryByTestId("course-ghost-course")).not.toBeInTheDocument();
+  });
 });

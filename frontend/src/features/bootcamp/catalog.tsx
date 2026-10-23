@@ -293,6 +293,12 @@ export function BootcampCatalog({
     .filter((card) => relevanceFilter !== "relevant" || card.relevant)
     .filter((card) => trackFilter === "all" || card.track_keys.includes(trackFilter));
   const relevanceOnly = relevanceFilter === "relevant";
+  const deepLinkedKey = searchParams.get("course");
+  const deepLinked =
+    deepLinkedKey !== null ? (catalog.data.find((card) => card.key === deepLinkedKey) ?? null) : null;
+  const passesFilters = (card: CourseCardState) => visible.includes(card);
+  const orderedVisible = deepLinked && passesFilters(deepLinked) ? ([deepLinked, ...visible.filter((card) => card !== deepLinked)]) : visible;
+  const deepLinkFilteredOut = deepLinked !== null && !passesFilters(deepLinked);
 
   return (
     <div className="feature-stack" data-reference="R-PAR-03">
@@ -304,6 +310,17 @@ export function BootcampCatalog({
           там, где курс действительно доступен.
         </p>
       </section>
+      {deepLinkedKey !== null && deepLinked === null && (
+        <p className="notice" role="status">
+          Курс по ссылке «{deepLinkedKey}» не найден в актуальном каталоге.
+        </p>
+      )}
+      {deepLinkFilteredOut && (
+        <p className="notice" role="status">
+          Курс по ссылке «{deepLinkedKey}» скрыт текущими фильтрами; выберите «Все курсы», чтобы
+          увидеть его.
+        </p>
+      )}
       <Card title={`Серия: ${String(streak.data.current_days)} дн.`}>
         <p>{streak.data.reason}</p>
         <small>Один локальный день учитывается один раз — клики не увеличивают серию.</small>
@@ -317,9 +334,14 @@ export function BootcampCatalog({
       />
       {view === "card" ? (
         <div className="course-grid">
-          {visible.map((card) => (
+          {orderedVisible.map((card) => (
             <article className="ui-card" key={card.key} data-testid={`course-${card.key}`}>
               <h2>{card.title}</h2>
+              {deepLinkedKey === card.key && (
+                <p className="notice" data-testid={`deeplink-${card.key}`}>
+                  Курс открыт по прямой ссылке
+                </p>
+              )}
               <CardExplanation card={card} relevanceOnly={relevanceOnly} />
               <CardStates card={card} />
               <CardActions card={card} />
@@ -328,9 +350,14 @@ export function BootcampCatalog({
         </div>
       ) : (
         <ul className="course-rows" aria-label="Каталог Bootcamp списком">
-          {visible.map((card) => (
+          {orderedVisible.map((card) => (
             <li className="course-row" key={card.key} data-testid={`course-${card.key}`}>
               <strong>{card.title}</strong>
+              {deepLinkedKey === card.key && (
+                <p className="notice" data-testid={`deeplink-${card.key}`}>
+                  Курс открыт по прямой ссылке
+                </p>
+              )}
               <CardExplanation card={card} relevanceOnly={relevanceOnly} />
               <CardStates card={card} />
               <CardActions card={card} />
