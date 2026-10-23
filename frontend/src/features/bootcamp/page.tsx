@@ -7,6 +7,28 @@ export type CourseSnapshot = components["schemas"]["CourseSnapshot"];
 type ContinueLearningModel = components["schemas"]["ContinueLearning"];
 type RoleSummaryModel = components["schemas"]["RoleSummary"];
 type CurriculumModel = components["schemas"]["CurriculumRemainder"];
+type RoleOption = components["schemas"]["RoleOption"];
+
+export function RoleSwitcher({
+  roles,
+  selectedTrackKey,
+  onChange,
+}: {
+  roles: RoleOption[];
+  selectedTrackKey: string;
+  onChange: (trackKey: string) => void;
+}) {
+  return (
+    <label className="bootcamp-role-switcher">
+      Роль
+      <select value={selectedTrackKey} onChange={(event) => { onChange(event.target.value); }}>
+        {roles.map((role) => (
+          <option key={role.track_key} value={role.track_key}>{role.title}</option>
+        ))}
+      </select>
+    </label>
+  );
+}
 
 export function ContinueLearning({
   item,
@@ -103,29 +125,31 @@ export function CatalogToolbar({
   );
 }
 
-function CourseFacts({ course }: { course: CourseSnapshot }) {
+function CourseFacts({ course, trackKey }: { course: CourseSnapshot; trackKey: string }) {
+  const context = course.role_contexts.find((item) => item.track_key === trackKey);
   return (
     <>
       <h3>{course.card.title}</h3>
       <p>{course.card.access_note}</p>
       <p>Статус: {course.card.completion_state}</p>
+      {context?.reasons.map((reason) => <p key={reason}>{reason}</p>)}
     </>
   );
 }
 
-export function CourseCard({ course, onOpen }: { course: CourseSnapshot; onOpen: (key: string) => void }) {
+export function CourseCard({ course, trackKey, onOpen }: { course: CourseSnapshot; trackKey: string; onOpen: (key: string) => void }) {
   return (
     <article className="ui-card" data-course-key={course.card.key}>
-      <CourseFacts course={course} />
+      <CourseFacts course={course} trackKey={trackKey} />
       <button type="button" onClick={() => { onOpen(course.card.key); }}>Подробнее</button>
     </article>
   );
 }
 
-export function CourseListRow({ course, onOpen }: { course: CourseSnapshot; onOpen: (key: string) => void }) {
+export function CourseListRow({ course, trackKey, onOpen }: { course: CourseSnapshot; trackKey: string; onOpen: (key: string) => void }) {
   return (
     <li className="course-row" data-course-key={course.card.key}>
-      <CourseFacts course={course} />
+      <CourseFacts course={course} trackKey={trackKey} />
       <button type="button" onClick={() => { onOpen(course.card.key); }}>Подробнее</button>
     </li>
   );
@@ -139,6 +163,7 @@ export function BootcampPage({
   overview,
   view,
   onViewChange,
+  onRoleChange,
   onContinue,
   onOpenCourse,
   onOpenRequirements,
@@ -147,6 +172,7 @@ export function BootcampPage({
   overview: BootcampOverview;
   view: "card" | "list";
   onViewChange: (view: "card" | "list") => void;
+  onRoleChange: (trackKey: string) => void;
   onContinue: (courseKey: string) => void;
   onOpenCourse: (courseKey: string) => void;
   onOpenRequirements: () => void;
@@ -160,23 +186,26 @@ export function BootcampPage({
       <header>
         <p className="eyebrow">Bootcamp</p>
         <h1 id="workspace-title">Развивайтесь в выбранной роли</h1>
+        <RoleSwitcher roles={overview.roles} selectedTrackKey={overview.selected_track_key} onChange={onRoleChange} />
       </header>
-      <ContinueLearning item={overview.continue_learning} courseTitle={continueTitle} onContinue={onContinue} />
-      <RoleSummary summary={overview.role_summary} />
-      <GradeRequirements curriculum={overview.curriculum} onOpen={onOpenRequirements} />
-      <section aria-labelledby="course-catalog-title">
+      <div key={`${overview.selected_track_key}:${overview.snapshot_version}`} data-role-projection={overview.selected_track_key}>
+        <ContinueLearning item={overview.continue_learning} courseTitle={continueTitle} onContinue={onContinue} />
+        <RoleSummary summary={overview.role_summary} />
+        <GradeRequirements curriculum={overview.curriculum} onOpen={onOpenRequirements} />
+        <section aria-labelledby="course-catalog-title">
         <h2 id="course-catalog-title">Каталог курсов</h2>
         <CatalogToolbar view={view} onViewChange={onViewChange} />
         {view === "card" ? (
           <div className="course-grid">
-            {overview.courses.map((course) => <CourseCard course={course} key={course.card.key} onOpen={onOpenCourse} />)}
+            {overview.courses.map((course) => <CourseCard course={course} trackKey={overview.selected_track_key} key={course.card.key} onOpen={onOpenCourse} />)}
           </div>
         ) : (
           <ul className="course-rows" aria-label="Каталог Bootcamp списком">
-            {overview.courses.map((course) => <CourseListRow course={course} key={course.card.key} onOpen={onOpenCourse} />)}
+            {overview.courses.map((course) => <CourseListRow course={course} trackKey={overview.selected_track_key} key={course.card.key} onOpen={onOpenCourse} />)}
           </ul>
         )}
-      </section>
+        </section>
+      </div>
       <BootcampDrawers>{drawers}</BootcampDrawers>
     </div>
   );

@@ -8,5 +8,6 @@ export {
   CourseListRow,
   GradeRequirements,
   RoleSummary,
+  RoleSwitcher,
 } from "./page";
 export type { BootcampOverview, CourseSnapshot } from "./page";

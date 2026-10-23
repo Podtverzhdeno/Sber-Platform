@@ -85,7 +85,7 @@ describe("BootcampPage composition (BC2-301)", () => {
     const onContinue = vi.fn();
     const onOpenCourse = vi.fn();
     const onOpenRequirements = vi.fn();
-    render(<BootcampPage overview={overview} view="card" onViewChange={onViewChange} onContinue={onContinue} onOpenCourse={onOpenCourse} onOpenRequirements={onOpenRequirements} drawers={<aside>Детали курса</aside>} />);
+    render(<BootcampPage overview={overview} view="card" onViewChange={onViewChange} onRoleChange={vi.fn()} onContinue={onContinue} onOpenCourse={onOpenCourse} onOpenRequirements={onOpenRequirements} drawers={<aside>Детали курса</aside>} />);
 
     expect(screen.getByRole("region", { name: "Python" })).toHaveTextContent("Следующий шаг");
     expect(screen.getByRole("heading", { name: "Профиль роли" })).toBeInTheDocument();
@@ -103,8 +103,32 @@ describe("BootcampPage composition (BC2-301)", () => {
   });
 
   it("renders list rows from the same canonical courses", () => {
-    render(<BootcampPage overview={overview} view="list" onViewChange={vi.fn()} onContinue={vi.fn()} onOpenCourse={vi.fn()} onOpenRequirements={vi.fn()} />);
+    render(<BootcampPage overview={overview} view="list" onViewChange={vi.fn()} onRoleChange={vi.fn()} onContinue={vi.fn()} onOpenCourse={vi.fn()} onOpenRequirements={vi.fn()} />);
     expect(screen.getByRole("list", { name: "Каталог Bootcamp списком" })).toHaveTextContent("Python");
     expect(screen.getAllByText("Python")).toHaveLength(2);
+  });
+
+  it("requests a role change and replaces the complete role projection", () => {
+    const onRoleChange = vi.fn();
+    const props = { view: "card" as const, onViewChange: vi.fn(), onRoleChange, onContinue: vi.fn(), onOpenCourse: vi.fn(), onOpenRequirements: vi.fn() };
+    const { rerender } = render(<BootcampPage overview={{ ...overview, roles: [...overview.roles, { track_key: "data", title: "Data", state: "unselected", roadmap: fact }] }} {...props} />);
+    fireEvent.change(screen.getByLabelText("Роль"), { target: { value: "data" } });
+    expect(onRoleChange).toHaveBeenCalledWith("data");
+
+    const dataOverview: BootcampOverview = {
+      ...overview,
+      snapshot_version: "snapshot-2",
+      selected_track_key: "data",
+      roles: [...overview.roles, { track_key: "data", title: "Data", state: "active", roadmap: fact }],
+      continue_learning: null,
+      role_summary: { ...overview.role_summary, track_key: "data", current_grade_title: "Data Junior", target_grade_title: "Data Middle" },
+      curriculum: { ...overview.curriculum, requirements: [] },
+      courses: [],
+    };
+    rerender(<BootcampPage overview={dataOverview} {...props} />);
+    expect(screen.getByText("Data Junior", { exact: false })).toBeInTheDocument();
+    expect(screen.queryByText("Junior → Middle")).not.toBeInTheDocument();
+    expect(screen.queryByText("Python")).not.toBeInTheDocument();
+    expect(screen.getByText("Активного шага пока нет. Выберите курс в каталоге.")).toBeInTheDocument();
   });
 });
