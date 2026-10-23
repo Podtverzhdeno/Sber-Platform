@@ -9,7 +9,11 @@ async function login(page: Page): Promise<Login> {
     data: { persona_key: "participant-alex" },
   });
   expect(response.status()).toBe(200);
-  return (await response.json()) as Login;
+  const login = (await response.json()) as Login;
+  await page.addInitScript((csrfToken) => {
+    window.sessionStorage.setItem("impulse_csrf", csrfToken);
+  }, login.csrf_token);
+  return login;
 }
 
 async function realCatalog(page: Page): Promise<CatalogPage> {
@@ -105,12 +109,27 @@ test("real seeded API submits one application and replays its idempotency key", 
   await expect(dialog).toBeVisible();
   await expect(dialog.locator(".eyebrow")).toContainText(`версия ${String(candidate.terms_version)}`);
   await dialog.getByRole("checkbox").check();
+  const revalidateResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST" &&
+      new URL(response.url()).pathname ===
+        `/api/v1/me/task-recommendations/${candidate.task_id}/terms/revalidate`,
+  );
+  const consentResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST" &&
+      new URL(response.url()).pathname === `/api/v1/me/tasks/${candidate.task_id}/terms-consent`,
+  );
   const applyResponsePromise = page.waitForResponse(
     (response) =>
       response.request().method() === "POST" &&
       new URL(response.url()).pathname === `/api/v1/me/tasks/${candidate.task_id}/applications`,
   );
   await dialog.getByRole("button", { name: "Подтвердить и отправить отклик" }).click();
+  const revalidateResponse = await revalidateResponsePromise;
+  expect(revalidateResponse.status()).toBe(200);
+  const consentResponse = await consentResponsePromise;
+  expect(consentResponse.status()).toBe(200);
   const applyResponse = await applyResponsePromise;
   expect([200, 201]).toContain(applyResponse.status());
   const firstApplication = (await applyResponse.json()) as { id: string };
