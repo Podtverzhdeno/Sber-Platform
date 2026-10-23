@@ -15,7 +15,8 @@ from decimal import Decimal
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, Response
+from fastapi.responses import JSONResponse
 from pydantic import AwareDatetime, BaseModel
 
 from impulse.api.errors import ApiError
@@ -297,6 +298,11 @@ class CatalogTermsView(BaseModel):
     data_constraints: str | None
 
 
+class RevalidateRequest(BaseModel):
+    version_token: str | None = None
+    terms_version: int | None = None
+
+
 def _terms_service(request: Request) -> Any:
     service = getattr(request.app.state, "task_catalog_terms_service", None)
     if service is None:
@@ -306,6 +312,50 @@ def _terms_service(request: Request) -> Any:
 
 def _safe_not_found(exc: Exception) -> ApiError:
     return ApiError(code="RESOURCE_NOT_FOUND", message=str(exc), status_code=404)
+
+
+def _marker_header(marker: Any) -> str:
+    return marker.token
+
+
+@router.get(
+    "/me/task-recommendations/{task_id}/terms",
+    response_model=CatalogTermsView,
+    status_code=200,
+)
+async def task_recommendation_terms(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[Any, Depends(_terms_service)],
+    task_id: UUID,
+) -> Response:
+    from impulse.application.task_catalog_visibility import TaskVisibilityError
+    from impulse.application.task_concurrency import marker_for
+
+    try:
+        projection, terms = await service.pair(authenticated.actor, task_id)
+    except TaskVisibilityError as exc:
+        raise _safe_not_found(exc) from exc
+    marker = marker_for(terms, projection)
+    payload = CatalogTermsView(
+        task_id=terms.task_id,
+        terms_version=terms.terms_version,
+        brief_version=terms.brief_version,
+        deliverable=terms.deliverable,
+        prerequisites=list(terms.prerequisites),
+        selection_criteria=list(terms.selection_criteria),
+        support_model=terms.support_model,
+        ip_terms=terms.ip_terms,
+        portfolio_permission=terms.portfolio_permission,
+        paid=terms.paid,
+        payout_condition=terms.payout_condition,
+        deadline_at=terms.deadline_at,
+        data_constraints=terms.data_constraints,
+    )
+    return JSONResponse(
+        status_code=200,
+        content=payload.model_dump(mode="json", exclude_none=False),
+        headers={"ETag": _marker_header(marker)},
+    )
 
 
 @router.get("/me/task-recommendations/{task_id}", response_model=CatalogRecommendationItemView)
@@ -323,30 +373,27 @@ async def task_recommendation_detail(
     return _recommendation_item(item)
 
 
-@router.get("/me/task-recommendations/{task_id}/terms", response_model=CatalogTermsView)
-async def task_recommendation_terms(
+@router.post("/me/task-recommendations/{task_id}/terms/revalidate", status_code=200)
+async def task_recommendation_terms_revalidate(
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
     service: Annotated[Any, Depends(_terms_service)],
     task_id: UUID,
-) -> CatalogTermsView:
+    request_body: RevalidateRequest | None = None,
+) -> Response:
     from impulse.application.task_catalog_visibility import TaskVisibilityError
+    from impulse.application.task_concurrency import TermsChangedConflict
 
+    body = request_body or RevalidateRequest()
     try:
-        terms = await service.terms(authenticated.actor, task_id)
+        marker = await service.revalidate(
+            authenticated.actor, task_id, body.version_token, body.terms_version
+        )
     except TaskVisibilityError as exc:
         raise _safe_not_found(exc) from exc
-    return CatalogTermsView(
-        task_id=terms.task_id,
-        terms_version=terms.terms_version,
-        brief_version=terms.brief_version,
-        deliverable=terms.deliverable,
-        prerequisites=list(terms.prerequisites),
-        selection_criteria=list(terms.selection_criteria),
-        support_model=terms.support_model,
-        ip_terms=terms.ip_terms,
-        portfolio_permission=terms.portfolio_permission,
-        paid=terms.paid,
-        payout_condition=terms.payout_condition,
-        deadline_at=terms.deadline_at,
-        data_constraints=terms.data_constraints,
+    except TermsChangedConflict as exc:
+        raise ApiError(code="TERMS_CHANGED", message=str(exc), status_code=409) from exc
+    return JSONResponse(
+        status_code=200,
+        content={"task_id": str(task_id), "terms_version": marker.terms_version},
+        headers={"ETag": _marker_header(marker)},
     )

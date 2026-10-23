@@ -18,6 +18,12 @@ from impulse.api.errors import ApiError
 from impulse.application.task_catalog import CatalogContractError, TaskRecommendationProjection
 from impulse.application.task_catalog_page import TaskCatalogPageService
 from impulse.application.task_catalog_visibility import TaskVisibilityError
+from impulse.application.task_concurrency import (
+    CatalogTermsMarker,
+    TermsChangedConflict,
+    marker_for,
+    parse_submitted_token,
+)
 from impulse.domain.identity import ActorContext, Role
 
 
@@ -51,6 +57,8 @@ class TaskTermsSnapshot:
     def __post_init__(self) -> None:
         if self.terms_version < 1 or self.brief_version < 1:
             raise TaskTermsError("Terms and brief versions must be positive integers.")
+        if self.deadline_at is not None and self.deadline_at.tzinfo is None:
+            raise TaskTermsError("Catalog deadlines must be timezone-aware.")
         if not self.deliverable.strip():
             raise TaskTermsError("Terms snapshot requires an explicit deliverable.")
         if not self.support_model.strip():
@@ -93,13 +101,40 @@ class TaskDetailReadService:
         self._role(actor, Role.PARTICIPANT)
         return await self._page_service.require_visible(actor, task_id)
 
-    async def terms(self, actor: ActorContext, task_id: UUID) -> TaskTermsSnapshot:
+    async def pair(
+        self, actor: ActorContext, task_id: UUID
+    ) -> tuple[TaskRecommendationProjection, TaskTermsSnapshot]:
         self._role(actor, Role.PARTICIPANT)
         projection = await self._page_service.require_visible(actor, task_id)
         for item, terms in await self._terms_provider(actor):
             if item.task_id == projection.task_id:
-                return terms
+                return projection, terms
         raise TaskVisibilityError("Задача недоступна или не существует.")
+
+    async def terms(self, actor: ActorContext, task_id: UUID) -> TaskTermsSnapshot:
+        return (await self.pair(actor, task_id))[1]
+
+    async def revalidate(
+        self,
+        actor: ActorContext,
+        task_id: UUID,
+        submitted_token: str | None = None,
+        submitted_terms_version: int | None = None,
+    ) -> CatalogTermsMarker:
+        """Pre-apply guard: drift against the submitted marker is TERMS_CHANGED."""
+        projection, terms = await self.pair(actor, task_id)
+        marker = marker_for(terms, projection)
+        if submitted_terms_version is not None and submitted_terms_version != marker.terms_version:
+            raise TermsChangedConflict(
+                "Условия изменились. Откройте актуальную версию и подтвердите её."
+            )
+        if submitted_token is not None:
+            normalized = parse_submitted_token(submitted_token)
+            if normalized != marker.token:
+                raise TermsChangedConflict(
+                    "Условия изменились. Откройте актуальную версию и подтвердите её."
+                )
+        return marker
 
 
 __all__ = ["TaskDetailReadService", "TaskTermsError", "TaskTermsSnapshot"]
