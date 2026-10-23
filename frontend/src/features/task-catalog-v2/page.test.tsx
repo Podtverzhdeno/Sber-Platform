@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -129,6 +129,35 @@ describe("task catalog v2", () => {
     expect(screen.getByText(/Алгоритм: task-match-v1 · расчёт:/)).toBeInTheDocument();
   });
 
+  it("removes a cached deep-linked detail when the server revokes access", async () => {
+    let removed = false;
+    fetchMock.mockImplementation((input, init) => {
+      const path = requestPath(input);
+      if (path.startsWith("/api/v1/me/task-recommendations?")) {
+        return Promise.resolve(json(catalogPage([])));
+      }
+      if (path.endsWith(`/${catalogItem.task_id}`)) {
+        return Promise.resolve(
+          removed
+            ? json({ code: "RESOURCE_NOT_FOUND", message: "Unavailable" }, 404)
+            : json(catalogItem),
+        );
+      }
+      return defaultFetch(input, init);
+    });
+    const { client } = renderCatalog(`/workspace/2?task=${catalogItem.task_id}`);
+    expect(await screen.findByRole("heading", { name: catalogItem.title })).toBeInTheDocument();
+
+    removed = true;
+    await act(async () => {
+      await client.invalidateQueries({ queryKey: ["task-catalog-v2-detail"] });
+    });
+
+    expect(await screen.findByText("Раздел недоступен")).toBeInTheDocument();
+    expect(screen.queryByText(catalogItem.title)).not.toBeInTheDocument();
+    expect(screen.queryByText(catalogItem.brief_summary)).not.toBeInTheDocument();
+  });
+
   it("shares only a canonical task URL without private filter text", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, "clipboard", {
@@ -242,6 +271,36 @@ describe("task catalog v2", () => {
     const refreshed = await screen.findByRole("checkbox", { name: /версии 4/ });
     await waitFor(() => { expect(refreshed).not.toBeChecked(); });
     expect(fetchMock.mock.calls.some(([input]) => requestPath(input).endsWith("/terms-consent"))).toBe(false);
+  });
+
+  it("removes cached conditions when the terms endpoint revokes access", async () => {
+    let revoked = false;
+    fetchMock.mockImplementation((input, init) => {
+      const path = requestPath(input);
+      if (path.endsWith("/terms") && (init?.method ?? "GET") === "GET") {
+        return Promise.resolve(
+          revoked
+            ? json({ code: "RESOURCE_NOT_FOUND", message: "Unavailable" }, 404)
+            : json(catalogTerms),
+        );
+      }
+      return defaultFetch(input, init);
+    });
+    const { client } = renderCatalog();
+    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Условия и отклик" }));
+    const dialog = await screen.findByRole("dialog");
+    expect(await within(dialog).findByText(catalogTerms.deliverable)).toBeInTheDocument();
+
+    revoked = true;
+    await act(async () => {
+      await client.invalidateQueries({ queryKey: ["task-catalog-v2-terms"] });
+    });
+
+    expect(await within(dialog).findByText("Раздел недоступен")).toBeInTheDocument();
+    expect(within(dialog).queryByText(catalogTerms.deliverable)).not.toBeInTheDocument();
+    expect(within(dialog).queryByText(new RegExp(catalogItem.title))).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
   it("serializes direction, skill and timeframe filters into the server query", async () => {

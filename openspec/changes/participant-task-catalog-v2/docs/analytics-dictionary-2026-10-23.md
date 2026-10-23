@@ -4,7 +4,8 @@
 
 ## Envelope and storage
 
-- Endpoint: `POST /api/v1/me/task-recommendations/analytics/events`, participant session + CSRF, HTTP `202`.
+- Endpoint: `POST /api/v1/me/task-recommendations/analytics/events`, participant session + CSRF, HTTP `202` for admitted events.
+- Каждый переданный `task_id` перед append проверяется через тот же visible-catalog authority, что detail/terms. Для removed, foreign или иначе недоступной задачи возвращается safe `404 RESOURCE_NOT_FOUND`; event и технический ID не записываются.
 - `event_id` — UUID, создаётся браузером. Server key: `task-catalog:{person_id}:{event_id}`. Одинаковый UUID и payload идемпотентны; другой payload с тем же UUID получает `409 ANALYTICS_EVENT_CONFLICT`.
 - SQL sink использует существующий append-only `domain_events` (`event_type=task_catalog.<event_name>`, `schema_version=1`); новой таблицы и migration для analytics не требуется. Memory sink используется только в memory runtime/tests.
 - Server записывает receive timestamp. Client timestamp, arbitrary properties и request URL не принимаются. Analytics failure не блокирует каталог, условия или отклик.

@@ -1467,9 +1467,31 @@ class WorkService:
             )
         )
 
+    async def _tasks_in_actor_program(
+        self, actor: ActorContext, tasks: tuple[TaskRecord, ...]
+    ) -> tuple[TaskRecord, ...]:
+        """Resolve tenancy from canonical customer/persona program membership.
+
+        Isolated synthetic WorkService tests may omit the identity adapter. The
+        runtime always attaches it; when present, an unknown customer is closed
+        rather than falling back to a demo-wide tenancy assumption.
+        """
+        if self.consent_store is None or not tasks:
+            return tasks
+        customer_ids = tuple({item.aggregate.customer_id for item in tasks})
+        customers = await asyncio.gather(
+            *(self.consent_store.get_persona_by_id(person_id) for person_id in customer_ids)
+        )
+        allowed = {
+            person_id
+            for person_id, customer in zip(customer_ids, customers, strict=True)
+            if customer is not None and customer.program_key == actor.program_key
+        }
+        return tuple(item for item in tasks if item.aggregate.customer_id in allowed)
+
     async def marketplace(self, actor: ActorContext) -> tuple[MarketplaceTask, ...]:
         self._role(actor, Role.PARTICIPANT)
-        published = await self.store.published_tasks()
+        published = await self._tasks_in_actor_program(actor, await self.store.published_tasks())
         task_ids = tuple({item.aggregate.task_id for item in published})
         invitation_ids = tuple(
             {item.aggregate.task_id for item in published if item.mode is TaskMode.INVITATION_ONLY}
@@ -1502,6 +1524,10 @@ class WorkService:
         self._role(actor, Role.PARTICIPANT)
         task = await self._required(task_id)
         if task.aggregate.status.value != "published":
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        if not await self._tasks_in_actor_program(actor, (task,)):
             raise ApiError(
                 code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
             )

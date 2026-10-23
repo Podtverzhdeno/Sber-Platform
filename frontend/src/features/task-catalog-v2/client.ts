@@ -34,15 +34,23 @@ export function loadCatalogPage(
   if (filters.timeframe) params.set("timeframe", filters.timeframe);
   if (filters.saved) params.set("saved", "true");
   if (cursor !== null) params.set("cursor", cursor);
-  return apiRequest<CatalogPage>(`/api/v1/me/task-recommendations?${params.toString()}`);
+  return apiRequest<CatalogPage>(`/api/v1/me/task-recommendations?${params.toString()}`, {
+    cache: "no-store",
+  });
 }
 
 export function loadCatalogDetail(taskId: string): Promise<CatalogItem> {
-  return apiRequest<CatalogItem>(`/api/v1/me/task-recommendations/${taskId}`);
+  // TanStack Query owns staleness/invalidation. Bypass the legacy read cache so
+  // a forced refresh can observe revoked access instead of replaying a payload.
+  return apiRequest<CatalogItem>(`/api/v1/me/task-recommendations/${taskId}`, {
+    cache: "no-store",
+  });
 }
 
 export function loadCatalogTerms(taskId: string): Promise<CatalogTerms> {
-  return apiRequest<CatalogTerms>(`/api/v1/me/task-recommendations/${taskId}/terms`);
+  return apiRequest<CatalogTerms>(`/api/v1/me/task-recommendations/${taskId}/terms`, {
+    cache: "no-store",
+  });
 }
 
 function applicationIdempotencyKey(taskId: string, termsVersion: number): string {

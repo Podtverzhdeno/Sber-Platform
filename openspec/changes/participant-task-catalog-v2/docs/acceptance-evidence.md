@@ -24,7 +24,7 @@ Green runs `39953411624` and `39972818614` belong only to `0da29382a06a27b0a348e
 | AT-05 | `task-workspace-page.test.tsx` checks 2/5 plus 40%. The canonical assigned demo task now has five server checkpoints, exactly two accepted; the real journey requires 2/5 and 40% in the canonical workspace while catalog stages remain a plan. | Exact 2/5 is covered by the real seeded path; independent visual review remains open. |
 | AT-06 | Real journey compares ordered titles in cards/list/cards. Component tests preserve filters and selection while switching. | Covered on the seeded path. |
 | AT-07 | Component/mocked tests check the honest empty state. Real journey submits a no-match search, checks the empty heading and resets filters to the full API result. | Covered on the seeded path. |
-| AT-08 | Visibility/terms contract tests require indistinguishable safe not-found responses. Real journey requests a foreign ID and checks the payload for private fields. | Revoked-consent/other-tenant/removed-task combinations remain in the broader TC-044 review, not claimed by this single journey. |
+| AT-08 | Visibility/terms contract tests require indistinguishable safe not-found responses. Canonical projection tests reject another program before catalog/detail access; analytics tests reject an unavailable task without appending its ID. Real journey requests a foreign ID and checks the payload for private fields. | Automated paths do not replace the independent TC-044 review or operational DOM/log inspection. |
 | AT-09 | Component test checks trap/Escape/focus return; mocked browser runs modal accessibility checks. Real journey closes conditions with Escape, verifies trigger focus and reopens before apply. | Covered on the seeded path; independent keyboard walkthrough remains TC-043. |
 | AT-10 | Contract/API tests cover stale marker/version drift. A real journey uses the customer terms API to publish v2/v3, opens the participant dialog at v3, publishes v4 while it is open, requires typed conflict/new v4/reset consent and verifies no application before explicit v4 consent. | Covered through real customer and participant sessions; exact-head browser execution remains a reviewer gate. |
 | AT-11 | `test_task_catalog_idempotency.py` covers replay/conflicting key. Real journey submits once and replays the same HTTP idempotency key, asserting the same application ID. | Covered on the seeded path; parallel-load race testing belongs to backend/CI integration evidence. |
@@ -38,7 +38,18 @@ Green runs `39953411624` and `39972818614` belong only to `0da29382a06a27b0a348e
 | AT-19 | Backend regression suppresses portfolio benefits at `none`. The seeded edge task has authoritative `portfolio_permission=none`, consistent IP/benefit text, and the real journey checks that no portfolio benefit reaches its API projection or detail. | Covered on the real forbidden-portfolio path. |
 | AT-20 | Matching/projection tests cover prerequisite gaps. The seeded edge task publishes an unmet prerequisite while offering qualitative growth; the real journey checks explicit limitation/no apply CTA and direct server apply returns `PREREQUISITES_NOT_MET`. | Covered on the real ineligible-prerequisite path. |
 | AT-21 | Match badge has an explicit text/ARIA equivalent; component and mocked axe checks cover accessible meaning without colour. | Automated axe is not an independent screen-reader walkthrough; no real assistive-technology evidence is claimed. |
-| AT-22 | Real journey opens a selected task in list view and checks safe foreign-ID behaviour; mocked browser covers stale deep-link fallback. | Covered on the seeded valid/foreign paths; broader revoked/removed states remain TC-044. |
+| AT-22 | Real journey opens a selected task in list view and checks safe foreign-ID behaviour; mocked browser covers stale deep-link fallback. A component regression now proves that a forced detail refresh observes revocation and removes the cached title/brief instead of rendering it after a 404. | Covered on the seeded valid/foreign paths and the component revoked-cache path; independent review remains separate. |
+
+## TC-044 automated privacy/RBAC scope
+
+The continuation adds focused implementation evidence without declaring the security task approved:
+
+- `WorkService.marketplace` resolves customer/persona program membership before invitation, terms or matching reads; `task_detail` applies the same program boundary, so apply, terms consent and bookmark inherit the safe-404 authority. `test_projection_service.py` reproduces a foreign-program actor and verifies both an empty catalog and safe detail denial.
+- The analytics endpoint resolves every supplied `task_id` through the same visible-catalog authority before append. `test_task_catalog_analytics_api.py` retains the visible-task idempotency path and verifies that an unavailable ID gets safe 404 with an empty analytics sink.
+- Catalog list/detail/terms reads bypass the legacy secondary read cache; TanStack Query remains the staleness owner. A denied detail refetch suppresses both cached and list-provided detail data. A denied terms refetch likewise removes cached conditions, the task-named heading and the consent form. Component regressions start with permitted projections, revoke them server-side, and require private fields to leave the DOM.
+- Existing API journeys continue to cover revoked invitations, closed tasks, removed/unknown IDs and fresh terms consent after version drift. These are distinct from inventing a new global-consent policy for self-owned recommendations.
+
+No production log inspection, packet capture or independent privacy acceptance is claimed by these tests.
 
 ## TC-047 disposition
 

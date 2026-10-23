@@ -92,12 +92,14 @@ async def test_canonical_projection_separates_plan_terms_and_participant_snapsho
     )
     await store.add_terms(terms_record)
     work = WorkService(store)
+    identity = MemoryIdentityStore(demo_personas())
+    work.consent_store = identity
     development_store = MemoryDevelopmentStore()
     development = DevelopmentService(development_store, MemoryCertificateStore())
     service = TaskCatalogProjectionService(
         work,
         development,
-        MemoryIdentityStore(demo_personas()),
+        identity,
         demo_mode=True,
         now_provider=lambda: now,
     )
@@ -107,7 +109,7 @@ async def test_canonical_projection_separates_plan_terms_and_participant_snapsho
         active_role=Role.PARTICIPANT,
         assigned_roles=(Role.PARTICIPANT,),
         scopes=frozenset(),
-        program_key="synthetic",
+        program_key="impulse-demo",
         consent_scopes=frozenset(),
     )
 
@@ -117,6 +119,13 @@ async def test_canonical_projection_separates_plan_terms_and_participant_snapsho
     item, terms = pairs[0]
     assert item.task_id == task_id
     assert terms.acceptance_criteria == ("Reproducible result",)
+
+    foreign_actor = replace(actor, program_key="another-program")
+    assert await service.pairs(foreign_actor) == ()
+    with pytest.raises(ApiError) as foreign_detail:
+        await work.task_detail(foreign_actor, task_id)
+    assert foreign_detail.value.status_code == 404
+    assert foreign_detail.value.message == "Resource not found."
     # An explicit customer record wins over the environment-wide demo fallback.
     assert item.customer.verification is CustomerVerification.UNVERIFIED
     verified_identity = MemoryIdentityStore(

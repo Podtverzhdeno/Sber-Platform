@@ -357,7 +357,15 @@ async def record_task_catalog_analytics(
     command: CatalogAnalyticsRequest,
     authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
     service: Annotated[TaskCatalogAnalyticsService, Depends(_analytics_service)],
+    catalog_service: Annotated[TaskCatalogPageService, Depends(_service)],
 ) -> CatalogAnalyticsReceiptView:
+    if command.task_id is not None:
+        from impulse.application.task_catalog_visibility import TaskVisibilityError
+
+        try:
+            await catalog_service.require_visible(authenticated.actor, command.task_id)
+        except TaskVisibilityError as exc:
+            raise _safe_not_found(exc) from exc
     receipt = await service.record(
         authenticated.actor,
         CatalogAnalyticsCommand(

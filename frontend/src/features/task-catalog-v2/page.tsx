@@ -8,6 +8,7 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import { ApiClientError } from "../../api/client";
 import { StatePanel } from "../../components/ui";
 import { trackCatalogEvent } from "./analytics";
 import {
@@ -374,7 +375,11 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
     staleTime: 30_000,
     gcTime: 300_000,
   });
-  const selected = selectedFromCatalog ?? detail.data;
+  const detailAccessDenied =
+    detail.error instanceof ApiClientError && [403, 404].includes(detail.error.status);
+  // A denied refetch revokes the cached projection immediately; transient
+  // offline/server failures may still render explicitly stale catalog data.
+  const selected = detailAccessDenied ? undefined : (selectedFromCatalog ?? detail.data);
   const totals = catalog.data?.pages[0];
 
   useEffect(() => {

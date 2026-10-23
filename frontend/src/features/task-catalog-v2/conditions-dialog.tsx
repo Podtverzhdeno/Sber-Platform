@@ -49,10 +49,15 @@ export function ConditionsDialog(props: {
     staleTime: 0,
     refetchOnMount: "always",
   });
+  const termsAccessDenied =
+    terms.error instanceof ApiClientError && [403, 404].includes(terms.error.status);
+  // An authorization failure revokes previously loaded conditions rather than
+  // leaving a private terms snapshot and consent form active in the dialog.
+  const termsData = termsAccessDenied ? undefined : terms.data;
   const apply = useMutation({
     mutationFn: async () => {
-      if (terms.data === undefined) throw new Error("Terms are not loaded");
-      await acceptCurrentTermsAndApply(task.task_id, terms.data);
+      if (termsData === undefined) throw new Error("Terms are not loaded");
+      await acceptCurrentTermsAndApply(task.task_id, termsData);
     },
     onMutate: () => {
       setActionError(null);
@@ -67,7 +72,7 @@ export function ConditionsDialog(props: {
       props.onApplicationResult?.(result);
       setActionError(catalogErrorMessage(error));
       if (error instanceof ApiClientError && error.code === "TERMS_CHANGED") {
-        setTermsChangedFrom(terms.data?.terms_version ?? null);
+        setTermsChangedFrom(termsData?.terms_version ?? null);
         setConsent(false);
         client.removeQueries({ queryKey: ["task-catalog-v2-terms", task.task_id] });
         void terms.refetch();
@@ -137,8 +142,10 @@ export function ConditionsDialog(props: {
       >
         <header>
           <div>
-            <p className="eyebrow">Актуальные условия · версия {terms.data?.terms_version ?? "…"}</p>
-            <h2 id={titleId}>Участие в задаче «{task.title}»</h2>
+            <p className="eyebrow">Актуальные условия · версия {termsData?.terms_version ?? "…"}</p>
+            <h2 id={titleId}>
+              {termsAccessDenied ? "Условия участия недоступны" : `Участие в задаче «${task.title}»`}
+            </h2>
           </div>
           <button
             ref={closeRef}
@@ -156,60 +163,66 @@ export function ConditionsDialog(props: {
         {terms.isPending ? <StatePanel kind="loading" /> : null}
         {terms.isError ? (
           <StatePanel
-            kind={terms.error instanceof TypeError || !navigator.onLine ? "offline" : "error"}
+            kind={
+              termsAccessDenied
+                ? "restricted"
+                : terms.error instanceof TypeError || !navigator.onLine
+                  ? "offline"
+                  : "error"
+            }
             action="Повторить загрузку условий"
             onAction={() => {
               void terms.refetch();
             }}
           />
         ) : null}
-        {terms.data !== undefined ? (
+        {termsData !== undefined ? (
           <div className="catalog-v2-terms-grid">
             <section>
               <h3>Результат</h3>
-              <p>{notProvided(terms.data.deliverable)}</p>
+              <p>{notProvided(termsData.deliverable)}</p>
             </section>
             <section>
               <h3>Критерии приёмки</h3>
-              {terms.data.acceptance_criteria.length ? (
-                <ul>{terms.data.acceptance_criteria.map((item) => <li key={item}>{item}</li>)}</ul>
+              {termsData.acceptance_criteria.length ? (
+                <ul>{termsData.acceptance_criteria.map((item) => <li key={item}>{item}</li>)}</ul>
               ) : <p>Критерии приёмки не опубликованы.</p>}
             </section>
             <section>
               <h3>Требования к участнику</h3>
-              {terms.data.prerequisites.length ? (
-                <ul>{terms.data.prerequisites.map((item) => <li key={item}>{item}</li>)}</ul>
+              {termsData.prerequisites.length ? (
+                <ul>{termsData.prerequisites.map((item) => <li key={item}>{item}</li>)}</ul>
               ) : <p>Дополнительные prerequisites не опубликованы.</p>}
             </section>
             <section>
               <h3>Критерии отбора</h3>
-              {terms.data.selection_criteria.length ? (
-                <ul>{terms.data.selection_criteria.map((item) => <li key={item}>{item}</li>)}</ul>
+              {termsData.selection_criteria.length ? (
+                <ul>{termsData.selection_criteria.map((item) => <li key={item}>{item}</li>)}</ul>
               ) : <p>Критерии отбора не опубликованы.</p>}
             </section>
             <section>
               <h3>Срок и поддержка</h3>
-              <p>{formatDeadline(terms.data.deadline_at)}</p>
-              <p>Длительность: {formatMinutes(terms.data.duration_minutes)}</p>
-              <p>Нагрузка в неделю: {formatMinutes(terms.data.weekly_workload_minutes)}</p>
-              <p>Поддержка: {notProvided(terms.data.support_model)}</p>
+              <p>{formatDeadline(termsData.deadline_at)}</p>
+              <p>Длительность: {formatMinutes(termsData.duration_minutes)}</p>
+              <p>Нагрузка в неделю: {formatMinutes(termsData.weekly_workload_minutes)}</p>
+              <p>Поддержка: {notProvided(termsData.support_model)}</p>
             </section>
             <section>
               <h3>Данные и интеллектуальная собственность</h3>
-              <p>{terms.data.data_constraints ?? "Ограничения данных не указаны."}</p>
-              <p>{notProvided(terms.data.ip_terms)}</p>
+              <p>{termsData.data_constraints ?? "Ограничения данных не указаны."}</p>
+              <p>{notProvided(termsData.ip_terms)}</p>
             </section>
             <section>
               <h3>Оплата и портфолио</h3>
-              <p>{terms.data.paid ? "Участие оплачивается." : "Оплата не предусмотрена."}</p>
-              <p>{terms.data.payout_condition ?? "Условие выплаты не указано."}</p>
-              <p>Портфолио: {terms.data.portfolio_permission}.</p>
+              <p>{termsData.paid ? "Участие оплачивается." : "Оплата не предусмотрена."}</p>
+              <p>{termsData.payout_condition ?? "Условие выплаты не указано."}</p>
+              <p>Портфолио: {termsData.portfolio_permission}.</p>
             </section>
           </div>
         ) : null}
         {actionError !== null ? <p className="catalog-v2-action-error" role="alert">{actionError}</p> : null}
-        {termsChangedFrom !== null ? <p className="catalog-v2-terms-changed" role="status">Версия {termsChangedFrom} больше не действует. Сейчас открыта версия {terms.data?.terms_version ?? "…"}; согласие нужно подтвердить заново.</p> : null}
-        {terms.data !== undefined ? (
+        {termsChangedFrom !== null ? <p className="catalog-v2-terms-changed" role="status">Версия {termsChangedFrom} больше не действует. Сейчас открыта версия {termsData?.terms_version ?? "…"}; согласие нужно подтвердить заново.</p> : null}
+        {termsData !== undefined ? (
           <form
             className="catalog-v2-consent"
             onSubmit={(event) => {
@@ -226,7 +239,7 @@ export function ConditionsDialog(props: {
                   setConsent(event.target.checked);
                 }}
               />
-              Я прочитал(а) условия версии {terms.data.terms_version} и подтверждаю их перед откликом.
+              Я прочитал(а) условия версии {termsData.terms_version} и подтверждаю их перед откликом.
             </label>
             <button type="submit" className="catalog-v2-primary" disabled={!consent || apply.isPending}>
               {apply.isPending ? "Проверяем и отправляем…" : "Подтвердить и отправить отклик"}
