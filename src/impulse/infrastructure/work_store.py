@@ -894,10 +894,12 @@ class SqlWorkStore(WorkStore):
         async with self.database.session() as session:
             row = (
                 await session.execute(
-                    select(applications).where(
+                    select(applications)
+                    .where(
                         applications.c.person_id == person_id,
                         applications.c.task_id == task_id,
                     )
+                    .with_for_update()
                 )
             ).one_or_none()
             if row is None:

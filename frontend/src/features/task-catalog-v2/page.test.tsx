@@ -353,4 +353,3 @@ describe("task catalog v2", () => {
     expect(trigger).toHaveFocus();
   });
 });
-

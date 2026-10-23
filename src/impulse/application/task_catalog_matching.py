@@ -458,15 +458,21 @@ class TaskCatalogProjectionService:
             terms = marketplace_item.terms
             task_id = task.aggregate.task_id
             assigned_count = assignment_counts.get(task_id, 0)
-            if terms.deadline_at <= now or assigned_count >= task.places:
-                # Closed and full tasks are not admitted into the public catalog.
-                continue
             application = applications.get(task_id)
             assignment = assignment_by_task.get(task_id)
+            deadline_passed = terms.deadline_at <= now
+            task_full = assigned_count >= task.places
+            if (deadline_passed or task_full) and application is None and assignment is None:
+                # Closed and full tasks are not admitted into the public catalog.
+                continue
             missing_prerequisites = tuple(
                 sorted(_normalized(task.catalog.prerequisite_tags) - context.verified_tags)
             )
             reason_codes: list[str] = []
+            if deadline_passed:
+                reason_codes.append("TASK_DEADLINE_PASSED")
+            if task_full:
+                reason_codes.append("TASK_FULL")
             if missing_prerequisites:
                 reason_codes.append("PREREQUISITES_NOT_MET")
             if (

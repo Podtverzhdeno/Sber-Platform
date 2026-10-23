@@ -16,7 +16,7 @@ from impulse.application.development import (
     MemoryDevelopmentStore,
 )
 from impulse.application.identity import MemoryIdentityStore, demo_personas
-from impulse.application.task_catalog import CustomerVerification
+from impulse.application.task_catalog import ApplicationState, CustomerVerification
 from impulse.application.task_catalog_matching import TaskCatalogProjectionService
 from impulse.application.work import (
     CatalogStage,
@@ -56,7 +56,7 @@ async def test_canonical_projection_separates_plan_terms_and_participant_snapsho
                     ip_terms="Participant authorship is preserved",
                 ),
             ),
-            places=2,
+            places=1,
             competency_tags=("python",),
             catalog=TaskCatalogMetadata(
                 direction_keys=("python",),
@@ -175,7 +175,29 @@ async def test_canonical_projection_separates_plan_terms_and_participant_snapsho
     without_portfolio = (await service.projections(actor))[0]
     assert all(benefit.benefit_type != "portfolio" for benefit in without_portfolio.benefits)
 
+    await store.accept_terms(actor.person_id, task_id, terms_record.version)
+    application = await store.apply(
+        actor.person_id,
+        task_id,
+        terms_record.version,
+        "assigned-catalog-0001",
+    )
+    assignment = await store.accept_application(
+        application.id,
+        expected_version=application.version,
+        places=1,
+    )
+    assigned_item = (await service.projections(actor))[0]
+    assert assigned_item.application_state is ApplicationState.ASSIGNED
+    assert assigned_item.assignment_id == assignment.id
+
     await store.add_terms(replace(terms_record, version=2, deadline_at=now - timedelta(seconds=1)))
+    expired_assigned_item = (await service.projections(actor))[0]
+    assert expired_assigned_item.application_state is ApplicationState.ASSIGNED
+    assert expired_assigned_item.eligibility.reason_codes == (
+        "TASK_DEADLINE_PASSED",
+        "TASK_FULL",
+    )
     with pytest.raises(ApiError) as expired:
         await work.apply(actor, task_id, "expired-application-0001")
     assert expired.value.code == "TASK_DEADLINE_PASSED"
