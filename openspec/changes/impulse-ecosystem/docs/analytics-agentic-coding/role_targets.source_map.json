@@ -1,0 +1,209 @@
+{
+  "source_documents": {
+    "pdf": "Итоговая_методология.pdf, §4.2–4.4",
+    "text": "AI_PDLC_матрица_компетенций.txt §§1.9,2.9,3.9"
+  },
+  "competency_scale_key": "agentic_coding_1_4",
+  "skills": [
+    {
+      "key": "prompting",
+      "display_name": "Постановка задач агенту"
+    },
+    {
+      "key": "prompt_engineering",
+      "display_name": "Определение правил работы агента"
+    },
+    {
+      "key": "context_management",
+      "display_name": "Формирование контекста"
+    },
+    {
+      "key": "tools_mcp",
+      "display_name": "Разработка и интеграция инструментов (Tools/MCP)"
+    },
+    {
+      "key": "creating_skills",
+      "display_name": "Создание и применение навыков (Skills)"
+    },
+    {
+      "key": "agents_team",
+      "display_name": "Управление командой агентов / субагентов"
+    }
+  ],
+  "roles": {
+    "developer": {
+      "display_name": "Разработчик",
+      "skills": [
+        {
+          "skill_key": "prompting",
+          "pdf_l1_target": 3,
+          "txt_junior": 3,
+          "txt_middle": 3,
+          "txt_senior": 4,
+          "requires_methodology_resolution": false
+        },
+        {
+          "skill_key": "prompt_engineering",
+          "pdf_l1_target": 4,
+          "txt_junior": 3,
+          "txt_middle": 4,
+          "txt_senior": 4,
+          "requires_methodology_resolution": false
+        },
+        {
+          "skill_key": "context_management",
+          "pdf_l1_target": 3,
+          "txt_junior": 2,
+          "txt_middle": 3,
+          "txt_senior": 3,
+          "requires_methodology_resolution": false
+        },
+        {
+          "skill_key": "tools_mcp",
+          "pdf_l1_target": 2,
+          "txt_junior": 2,
+          "txt_middle": 2,
+          "txt_senior": 3,
+          "requires_methodology_resolution": false
+        },
+        {
+          "skill_key": "creating_skills",
+          "pdf_l1_target": 3,
+          "txt_junior": 2,
+          "txt_middle": 3,
+          "txt_senior": 4,
+          "requires_methodology_resolution": true
+        },
+        {
+          "skill_key": "agents_team",
+          "pdf_l1_target": 2,
+          "txt_junior": 1,
+          "txt_middle": 2,
+          "txt_senior": 3,
+          "requires_methodology_resolution": false
+        }
+      ],
+      "source_conflicts": [
+        "creating_skills level 3: regular skill invocation 3/month in TXT vs PDF phase-one one qualifying digital manifestation (requires versioned resolution)"
+      ]
+    },
+    "qa": {
+      "display_name": "Тестировщик",
+      "skills": [
+        {
+          "skill_key": "prompting",
+          "pdf_l1_target": 3,
+          "txt_junior": 2,
+          "txt_middle": 3,
+          "txt_senior": 4,
+          "requires_methodology_resolution": false
+        },
+        {
+          "skill_key": "prompt_engineering",
+          "pdf_l1_target": 2,
+          "txt_junior": 1,
+          "txt_middle": null,
+          "txt_senior": null,
+          "requires_methodology_resolution": true
+        },
+        {
+          "skill_key": "context_management",
+          "pdf_l1_target": 2,
+          "txt_junior": 2,
+          "txt_middle": 2,
+          "txt_senior": 3,
+          "requires_methodology_resolution": false
+        },
+        {
+          "skill_key": "tools_mcp",
+          "pdf_l1_target": 2,
+          "txt_junior": 2,
+          "txt_middle": 2,
+          "txt_senior": 3,
+          "requires_methodology_resolution": false
+        },
+        {
+          "skill_key": "creating_skills",
+          "pdf_l1_target": 2,
+          "txt_junior": 2,
+          "txt_middle": 2,
+          "txt_senior": 3,
+          "requires_methodology_resolution": false
+        },
+        {
+          "skill_key": "agents_team",
+          "pdf_l1_target": 2,
+          "txt_junior": 1,
+          "txt_middle": 2,
+          "txt_senior": 3,
+          "requires_methodology_resolution": false
+        }
+      ],
+      "source_conflicts": [
+        "prompt_engineering: PDF=2, TXT narrative theory=1 and middle table not required"
+      ]
+    },
+    "analyst": {
+      "display_name": "Аналитик",
+      "skills": [
+        {
+          "skill_key": "prompting",
+          "pdf_l1_target": 3,
+          "txt_junior": 2,
+          "txt_middle": 3,
+          "txt_senior": 4,
+          "requires_methodology_resolution": false
+        },
+        {
+          "skill_key": "prompt_engineering",
+          "pdf_l1_target": null,
+          "txt_junior": 1,
+          "txt_middle": null,
+          "txt_senior": null,
+          "requires_methodology_resolution": true
+        },
+        {
+          "skill_key": "context_management",
+          "pdf_l1_target": 3,
+          "txt_junior": 2,
+          "txt_middle": 3,
+          "txt_senior": 3,
+          "requires_methodology_resolution": true
+        },
+        {
+          "skill_key": "tools_mcp",
+          "pdf_l1_target": 2,
+          "txt_junior": 2,
+          "txt_middle": 2,
+          "txt_senior": 3,
+          "requires_methodology_resolution": false
+        },
+        {
+          "skill_key": "creating_skills",
+          "pdf_l1_target": 2,
+          "txt_junior": 2,
+          "txt_middle": 2,
+          "txt_senior": 3,
+          "requires_methodology_resolution": false
+        },
+        {
+          "skill_key": "agents_team",
+          "pdf_l1_target": 2,
+          "txt_junior": 1,
+          "txt_middle": 2,
+          "txt_senior": 3,
+          "requires_methodology_resolution": false
+        }
+      ],
+      "source_conflicts": [
+        "prompt_engineering: PDF omitted; TXT theory=1 and middle table not required",
+        "context_management: PDF and TXT middle summary=3; TXT detailed block marks level 2 as target"
+      ]
+    }
+  },
+  "warnings": [
+    "Unresolved source conflicts prevent unauthorised L1 decisions",
+    "Source describes employee internal certification; Impulse student learning profile is separate",
+    "SDD is monitoring only (not an L1 required skill)"
+  ]
+}
