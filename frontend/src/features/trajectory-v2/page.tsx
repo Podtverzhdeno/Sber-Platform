@@ -3,9 +3,40 @@ import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { StatePanel } from "../../components/ui";
-import { loadDevelopmentOverview, overviewQueryKey, PRIMARY_LABEL, roleStateLabel } from "./client";
-import type { DevelopmentOverviewView, RoleCardView } from "./client";
+import {
+  loadDevelopmentOverview,
+  loadRoadmaps,
+  overviewQueryKey,
+  roadmapsQueryKey,
+  PRIMARY_LABEL,
+  milestoneState,
+  roleStateLabel,
+} from "./client";
+import type {
+  DevelopmentOverviewView,
+  MilestoneView,
+  RoadmapView,
+  RoleCardView,
+} from "./client";
 import "./trajectory-v2.scss";
+
+const MILESTONE_STATE_LABELS: Record<string, string> = {
+  completed: "Пройден",
+  current: "Сейчас",
+  available: "Доступен",
+  locked: "Закрыт",
+};
+
+function isSelectedStage(
+  stageKey: string | null,
+  milestones: { key: string }[],
+  currentKey: string,
+): string {
+  if (stageKey !== null && milestones.some((m) => m.key === stageKey)) return stageKey;
+  return currentKey;
+}
+
+
 
 /**
  * Trajectory v2 master-detail shell (participant-home-trajectory-grades 5.1).
@@ -52,6 +83,10 @@ export function TrajectoryV2() {
 export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const { overview } = props;
   const [searchParams, setSearchParams] = useSearchParams();
+  const roadmaps = useQuery({
+    queryKey: roadmapsQueryKey,
+    queryFn: loadRoadmaps,
+  });
   const roleParam = searchParams.get("role");
   const selectedKey = useMemo(() => {
     const paramRole = overview.roles.find((role) => role.track_key === roleParam);
@@ -100,7 +135,22 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           {selected === null ? (
             <p role="status">Роли пока не связаны с траекторией.</p>
           ) : (
-            <RoleDetail role={selected} primary={selected.track_key === primaryKey} />
+            <RoleDetailPanel
+              role={selected}
+              primary={selected.track_key === primaryKey}
+              roadmap={roadmaps.data?.find((item) => item.track_key === selected.track_key) ?? null}
+              roadmapPending={roadmaps.isPending}
+              roadmapError={roadmaps.isError}
+              roadmapRetry={() => {
+                void roadmaps.refetch();
+              }}
+              stageKey={searchParams.get("stage")}
+              onStageSelect={(stageKey) => {
+                const next = new URLSearchParams(searchParams);
+                next.set("stage", stageKey);
+                setSearchParams(next);
+              }}
+            />
           )}
         </section>
       </div>
@@ -150,10 +200,23 @@ export function RoleCardOverview(props: {
   );
 }
 
-export function RoleDetail(props: { role: RoleCardView; primary: boolean }) {
+export function RoleDetailPanel(props: {
+  role: RoleCardView;
+  primary: boolean;
+  roadmap: RoadmapView | null;
+  roadmapPending: boolean;
+  roadmapError: boolean;
+  roadmapRetry: () => void;
+  stageKey: string | null;
+  onStageSelect: (stageKey: string) => void;
+}) {
   const role = props.role;
   return (
-    <article className="trajectory-v2-role-detail" data-testid="trajectory-role-detail" data-role-key={role.track_key}>
+    <article
+      className="trajectory-v2-role-detail"
+      data-testid="trajectory-role-detail"
+      data-role-key={role.track_key}
+    >
       <header>
         <h3>{role.title}</h3>
         <span className="trajectory-v2-role-state">{roleStateLabel(role.state)}</span>
@@ -169,10 +232,169 @@ export function RoleDetail(props: { role: RoleCardView; primary: boolean }) {
         </section>
       ) : (
         <section aria-label="Прогресс роли">
-          <p>Этапов пройдено: {role.completed_milestones} из {role.total_milestones}.</p>
+          <p>
+            Этапов пройдено: {role.completed_milestones} из {role.total_milestones}.
+          </p>
           <small>Попытка {role.attempt_number}.</small>
         </section>
       )}
+      <StagePathSection
+        role={role}
+        roadmap={props.roadmap}
+        pending={props.roadmapPending}
+        error={props.roadmapError}
+        retry={props.roadmapRetry}
+        stageKey={props.stageKey}
+        onStageSelect={props.onStageSelect}
+      />
     </article>
+  );
+}
+
+export function StagePathSection(props: {
+  role: RoleCardView;
+  roadmap: RoadmapView | null;
+  pending: boolean;
+  error: boolean;
+  retry: () => void;
+  stageKey: string | null;
+  onStageSelect: (stageKey: string) => void;
+}) {
+  const { role, roadmap } = props;
+  if (props.pending) {
+    return (
+      <div className="trajectory-v2-stage-block" aria-busy="true" data-testid="trajectory-stages">
+        <StatePanel kind="loading" />
+      </div>
+    );
+  }
+  if (props.error) {
+    return (
+      <div className="trajectory-v2-stage-block" data-testid="trajectory-stages">
+        <p className="trajectory-v2-failure-note" role="status">
+          Не удалось загрузить карту этапов.
+        </p>
+        <button type="button" onClick={props.retry}>
+          Повторить
+        </button>
+      </div>
+    );
+  }
+  if (roadmap === null) {
+    return (
+      <div className="trajectory-v2-stage-block" data-testid="trajectory-stages">
+        <p role="status">Карта этапов для этой роли пока не опубликована.</p>
+      </div>
+    );
+  }
+  if (roadmap.track_key !== role.track_key) {
+    return (
+      <div className="trajectory-v2-stage-block" data-testid="trajectory-stages">
+        <p role="status">Карта этапов не соответствует выбранной роли; снимок обновляется.</p>
+      </div>
+    );
+  }
+  const nextStep = roadmap.next_step;
+  const currentKey = nextStep?.key ?? roadmapsDefaultKey(roadmap);
+  const visibleStageKey = isSelectedStage(props.stageKey, roadmap.milestones, currentKey);
+  const visibleMilestone = roadmap.milestones.find((m) => m.key === visibleStageKey);
+  return (
+    <section className="trajectory-v2-stage-block" aria-label="Этапы" data-testid="trajectory-stages">
+      <header>
+        <h4>Этапы</h4>
+        <small>
+          политика v{roadmap.policy_version}
+          {roadmap.replacement_reason ? ` · ${roadmap.replacement_reason}` : ""}
+        </small>
+      </header>
+      <ol className="trajectory-v2-stage-path">
+        {roadmap.milestones.map((milestone) => {
+          const state = milestoneState(milestone, nextStep);
+          return (
+            <li key={milestone.key}>
+              <button
+                type="button"
+                className="trajectory-v2-stage"
+                aria-pressed={milestone.key === visibleStageKey}
+                data-stage-state={state}
+                onClick={() => {
+                  props.onStageSelect(milestone.key);
+                }}
+              >
+                <strong>{milestone.title}</strong>
+                <span>{MILESTONE_STATE_LABELS[state] ?? state}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+      {visibleMilestone === undefined ? null : (
+        <StageDetail
+          milestone={visibleMilestone}
+          state={milestoneState(visibleMilestone, nextStep)}
+          nextStep={nextStep}
+          role={role}
+        />
+      )}
+    </section>
+  );
+}
+
+function roadmapsDefaultKey(roadmap: RoadmapView): string {
+  return roadmap.next_step?.key ?? roadmap.milestones[0]?.key ?? "";
+}
+
+export function StageDetail(props: {
+  milestone: MilestoneView;
+  state: string;
+  nextStep: MilestoneView | null;
+  role: RoleCardView;
+}) {
+  const { milestone, nextStep, role } = props;
+  return (
+    <section className="trajectory-v2-stage-detail" data-testid="trajectory-stage-detail" data-stage-key={milestone.key}>
+      <header>
+        <strong>{milestone.title}</strong>
+        <span>{MILESTONE_STATE_LABELS[props.state] ?? props.state}</span>
+      </header>
+      <p>{milestone.purpose}</p>
+      <dl>
+        <div>
+          <dt>Навык</dt>
+          <dd>{milestone.skill}</dd>
+        </div>
+        <div>
+          <dt>Цель</dt>
+          <dd>
+            {milestone.target_kind === "course"
+              ? `Курс · ${milestone.target_key}`
+              : milestone.target_kind === "task"
+                ? `Задача · ${milestone.target_key}`
+                : milestone.target_kind}
+          </dd>
+        </div>
+        <div>
+          <dt>Позиция</dt>
+          <dd>{milestone.position}</dd>
+        </div>
+      </dl>
+      {props.state === "locked" ? (
+        <p className="trajectory-v2-stage-note" role="status">
+          {nextStep === null
+            ? "Этап недоступен: сервер не разрешает переход дальше."
+            : `Этап откроется после завершения «${nextStep.title}». Первый разрешённый шаг — «${nextStep.title}».`}
+        </p>
+      ) : null}
+      {props.state === "available" && role.attempt_number === null ? (
+        <p className="trajectory-v2-stage-note" role="status">
+          Прогресс по этапам появится после выбора траектории; каталог цели указан выше.
+        </p>
+      ) : null}
+      {props.state === "current" && role.attempt_number !== null ? (
+        <p className="trajectory-v2-stage-note" role="status">
+          Первый разрешённый шаг этой траектории — текущий этап «{milestone.title}».
+        </p>
+      ) : null}
+    </section>
   );
 }
