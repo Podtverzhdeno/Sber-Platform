@@ -21,7 +21,7 @@
 
 ## 2. Pure frontend model
 
-- [ ] BC2-201 Реализовать parser/serializer URL для `view`, `track`, независимых `relevance` и `category`, `q`, `level`, `course` с legacy compatibility и popstate tests.
+- [x] BC2-201 Реализовать parser/serializer URL для `view`, `track`, независимых `relevance` и `category`, `q`, `level`, `course` с legacy compatibility и popstate tests.
 - [ ] BC2-202 Реализовать pure selectors категорий/search/filters/stable order; отдельный выделенный фильтр «Актуальные» SHALL учитывать relevance, availability, prerequisites и freshness, а card/list SHALL возвращать одинаковые keys.
 - [ ] BC2-203 Реализовать action selector для access/learning/completion/recommendation; locked/reported/verified/rejected SHALL не получать ложный CTA.
 - [ ] BC2-204 Реализовать query/cache слой: один overview request, без refetch на card/list/локальный filter; versioned lazy detail.
