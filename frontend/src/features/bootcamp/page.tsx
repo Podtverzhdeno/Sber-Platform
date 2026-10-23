@@ -96,19 +96,34 @@ export function GradeRequirements({
   onOpen: () => void;
 }) {
   const remaining = curriculum.requirements.filter((item) => item.state !== "verified");
+  const courses = remaining.filter((item) => item.kind === "course");
+  const practical = remaining.filter((item) => item.kind !== "course");
+  const pluralCategory = new Intl.PluralRules("ru-RU").select(courses.length);
+  const courseWord = pluralCategory === "one" ? "курс" : pluralCategory === "few" ? "курса" : "курсов";
+  let title = "Все требования подтверждены";
+  let copy = "Платформа автоматически оформляет следующий разрешённый грейд. Обновлять или отправлять данные повторно не нужно.";
+  let actionLabel: string | null = null;
+  if (curriculum.state !== "known") {
+    title = "Требования к следующему грейду пока не опубликованы";
+    copy = curriculum.unavailable_reason ?? "Мы не можем рассчитать остаток или обещать повышение до публикации правил.";
+  } else if (courses.length > 0 && practical.length > 0) {
+    title = "До следующего грейда осталось выполнить требования";
+    copy = "Курсы закрывают учебную часть. Новый грейд будет присвоен автоматически, когда платформа проверит все требования действующей программы.";
+    actionLabel = "Посмотреть требования";
+  } else if (courses.length > 0) {
+    title = `Осталось ${String(courses.length)} ${courseWord}`;
+    copy = "После проверки последнего курса платформа пересчитает готовность. При 100% следующий разрешённый грейд присваивается автоматически.";
+    actionLabel = "Посмотреть курсы";
+  } else if (practical.length > 0) {
+    title = "Учебная часть завершена";
+    copy = "Чтобы завершить переход, закройте оставшиеся практические требования и дождитесь проверки evidence.";
+    actionLabel = "Открыть практические требования";
+  }
   return (
     <section aria-labelledby="grade-requirements-title" className="ui-card">
-      <h2 id="grade-requirements-title">Требования к следующему грейду</h2>
-      {curriculum.state !== "known" ? (
-        <p>{curriculum.unavailable_reason}</p>
-      ) : remaining.length === 0 ? (
-        <p>Опубликованные требования выполнены.</p>
-      ) : (
-        <>
-          <p>Осталось требований: {remaining.length}</p>
-          <button type="button" onClick={onOpen}>Посмотреть требования</button>
-        </>
-      )}
+      <h2 id="grade-requirements-title">{title}</h2>
+      <p>{copy}</p>
+      {actionLabel && <button type="button" onClick={onOpen}>{actionLabel}</button>}
     </section>
   );
 }

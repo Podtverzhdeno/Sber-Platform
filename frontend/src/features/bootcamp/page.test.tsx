@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { BootcampOverview } from "./page";
@@ -12,6 +12,10 @@ const fact = {
   stale: false,
   stale_reason: null,
 };
+
+function requirement(key: string, kind: "course" | "project") {
+  return { key, title: key, kind, state: "open" as const, source_key: key, source_version: "1", allowed_action: "open" };
+}
 
 const overview: BootcampOverview = {
   schema_version: "2.0",
@@ -89,11 +93,11 @@ describe("BootcampPage composition (BC2-301)", () => {
 
     expect(screen.getByRole("region", { name: "Python" })).toHaveTextContent("Следующий шаг");
     expect(screen.getByRole("heading", { name: "Профиль роли" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Требования к следующему грейду" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Учебная часть завершена" })).toBeInTheDocument();
     expect(screen.getByText("Детали курса")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Продолжить курс" }));
-    fireEvent.click(screen.getByRole("button", { name: "Посмотреть требования" }));
+    fireEvent.click(screen.getByRole("button", { name: "Открыть практические требования" }));
     fireEvent.click(screen.getByRole("button", { name: "Подробнее" }));
     fireEvent.click(screen.getByRole("button", { name: "Список" }));
     expect(onContinue).toHaveBeenCalledWith("python");
@@ -181,5 +185,37 @@ describe("BootcampPage composition (BC2-301)", () => {
     const summary = screen.getByRole("region", { name: "Профиль роли" });
     expect(summary).toHaveTextContent("Навыков в матрице: не определено");
     expect(summary).toHaveTextContent("requirements · 3 из 4");
+  });
+
+  it("renders the approved remaining-course copy without promising a grade", () => {
+    const courseRequirements = {
+      ...overview.curriculum,
+      requirements: [
+        requirement("course-1", "course"),
+        requirement("course-2", "course"),
+      ],
+    };
+    render(<BootcampPage overview={{ ...overview, curriculum: courseRequirements }} view="card" onViewChange={vi.fn()} onRoleChange={vi.fn()} onContinue={vi.fn()} onOpenCourse={vi.fn()} onOpenRequirements={vi.fn()} />);
+    const hero = screen.getByRole("region", { name: "Осталось 2 курса" });
+    expect(hero).toHaveTextContent("После проверки последнего курса");
+    expect(hero).not.toHaveTextContent("получите грейд");
+    expect(screen.getByRole("button", { name: "Посмотреть курсы" })).toBeInTheDocument();
+  });
+
+  it("distinguishes mixed, complete and unpublished curriculum states", () => {
+    const baseProps = { view: "card" as const, onViewChange: vi.fn(), onRoleChange: vi.fn(), onContinue: vi.fn(), onOpenCourse: vi.fn(), onOpenRequirements: vi.fn() };
+    const course = requirement("course", "course");
+    const project = requirement("project", "project");
+    const { rerender } = render(<BootcampPage overview={{ ...overview, curriculum: { ...overview.curriculum, requirements: [course, project] } }} {...baseProps} />);
+    expect(screen.getByRole("heading", { name: "До следующего грейда осталось выполнить требования" })).toBeInTheDocument();
+
+    rerender(<BootcampPage overview={{ ...overview, curriculum: { ...overview.curriculum, requirements: [] } }} {...baseProps} />);
+    expect(screen.getByRole("heading", { name: "Все требования подтверждены" })).toBeInTheDocument();
+    const completeHero = screen.getByRole("region", { name: "Все требования подтверждены" });
+    expect(within(completeHero).queryByRole("button")).not.toBeInTheDocument();
+
+    rerender(<BootcampPage overview={{ ...overview, curriculum: { state: "not_evaluable", current_grade_key: null, target_grade_key: null, policy_version: null, curriculum_version: null, requirements: [], provenance: null, unavailable_reason: "Политика ещё не опубликована." } }} {...baseProps} />);
+    expect(screen.getByRole("heading", { name: "Требования к следующему грейду пока не опубликованы" })).toBeInTheDocument();
+    expect(screen.getByText("Политика ещё не опубликована.")).toBeInTheDocument();
   });
 });
