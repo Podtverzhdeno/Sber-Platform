@@ -1,11 +1,14 @@
-"""Server-side page contract for the participant task recommendation catalog (TC-008).
+"""Server-side page contract for the participant task recommendation catalog (TC-008, TC-009).
 
 Pure query/paging semantics over :class:`TaskRecommendationProjection` items.
 No storage access and no matching policy: the projection supplier stays an
 explicit callable, so the recommendation lane can replace the interim default
 ordering without touching this contract. Ordering keys are composed only from
 stable comparable primitives (ints, ISO strings, stable task IDs) so a cursor
-round-trips through JSON without recomputing any projection.
+round-trips through JSON without recomputing any projection. Visibility
+admission (TC-009) runs before counts: an invisible task never reaches
+``total_found``, ``total_available`` or any page window and resolves through a
+safe typed not-found.
 """
 
 from __future__ import annotations
@@ -15,8 +18,9 @@ import binascii
 import json
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
-from datetime import UTC
+from datetime import UTC, datetime
 from typing import Any, cast
+from uuid import UUID
 
 from impulse.api.errors import ApiError
 from impulse.application.task_catalog import (
@@ -24,6 +28,12 @@ from impulse.application.task_catalog import (
     EligibilityStatus,
     MatchStatus,
     TaskRecommendationProjection,
+)
+from impulse.application.task_catalog_visibility import (
+    TaskVisibilityError,
+    TaskVisibilitySnapshot,
+    deadline_cutoff,
+    open_snapshot,
 )
 from impulse.domain.identity import ActorContext, Role
 
@@ -219,13 +229,35 @@ _KEY_SHAPES = {
 }
 
 ProjectionProvider = Callable[[ActorContext], Awaitable[Sequence[TaskRecommendationProjection]]]
+AdmissionGate = Callable[
+    [ActorContext, TaskRecommendationProjection],
+    Awaitable[TaskVisibilitySnapshot | None],
+]
+
+_SAFE_NOT_FOUND_MESSAGE = "Задача недоступна или не существует."
 
 
 class TaskCatalogPageService:
-    """Participant-scoped catalog page service over an explicit projection provider."""
+    """Participant-scoped catalog page service over an explicit projection provider.
 
-    def __init__(self, provider: ProjectionProvider) -> None:
+    Optional ``admission_gate`` supplies per-task visibility snapshots (TC-009:
+    published / tenant / program / invitation / deadline / quota). Invisible
+    tasks are dropped before counts so ``total_found`` and ``total_available``
+    never reveal hidden artifacts. Without a gate the default stage keeps every
+    task admitted, except that a projection-visible deadline closed by the
+    injected clock excludes the task when ``now_provider`` is configured.
+    """
+
+    def __init__(
+        self,
+        provider: ProjectionProvider,
+        *,
+        admission_gate: AdmissionGate | None = None,
+        now_provider: Callable[[], datetime] | None = None,
+    ) -> None:
         self._provider = provider
+        self._admission_gate = admission_gate
+        self._now_provider = now_provider
 
     @staticmethod
     def _role(actor: ActorContext, role: Role) -> None:
@@ -234,10 +266,35 @@ class TaskCatalogPageService:
                 code="FORBIDDEN", message="Действие недоступно для роли.", status_code=403
             )
 
+    async def _admitted(
+        self, actor: ActorContext
+    ) -> list[tuple[TaskRecommendationProjection, TaskVisibilitySnapshot | None]]:
+        items = await self._provider(actor)
+        snapshots: list[TaskVisibilitySnapshot | None] = []
+        for item in items:
+            if self._admission_gate is not None:
+                gate_snapshot = await self._admission_gate(actor, item)
+            elif self._now_provider is not None and item.deadline_at is not None:
+                gate_snapshot = open_snapshot(
+                    item.deadline_at, deadline_cutoff(self._now_provider())
+                )
+            else:
+                gate_snapshot = None
+            snapshots.append(gate_snapshot)
+        return list(zip(items, snapshots, strict=True))
+
     async def page(self, actor: ActorContext, query: CatalogQuery) -> CatalogPage:
         self._role(actor, Role.PARTICIPANT)
-        try:
-            items = await self._provider(actor)
-        except CatalogContractError:
-            raise
-        return build_catalog_page(items, query)
+        admissions = await self._admitted(actor)
+        visible = tuple(item for item, gate in admissions if gate is None or gate.is_visible())
+        return build_catalog_page(visible, query)
+
+    async def require_visible(
+        self, actor: ActorContext, task_id: UUID
+    ) -> TaskRecommendationProjection:
+        """Safe-404 authority: hidden and unknown task ids resolve identically."""
+        self._role(actor, Role.PARTICIPANT)
+        for item, gate in await self._admitted(actor):
+            if item.task_id == task_id and (gate is None or gate.is_visible()):
+                return item
+        raise TaskVisibilityError(_SAFE_NOT_FOUND_MESSAGE)
