@@ -16,6 +16,7 @@ from impulse.application.reward import (
     WorkReviewEvidenceProvider,
 )
 from impulse.application.work import WorkService
+from impulse.bootstrap import demo_seed
 from impulse.bootstrap.app import create_app
 from impulse.bootstrap.demo_seed import demo_id, reset_demo_data, seed_demo
 from impulse.bootstrap.settings import AppEnvironment, Settings
@@ -26,6 +27,12 @@ from impulse.infrastructure.reward_store import SqlRewardStore
 from impulse.infrastructure.work_store import SqlWorkStore
 
 pytestmark = pytest.mark.integration
+
+
+@pytest.fixture(autouse=True)
+def _historical_task_clock(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep these historical mentor/messaging fixtures on their original timeline."""
+    monkeypatch.setattr(demo_seed, "_catalog_seed_time", lambda: demo_seed.DEMO_NOW)
 
 
 def integration_url() -> str:

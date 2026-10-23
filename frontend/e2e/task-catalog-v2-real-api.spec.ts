@@ -93,7 +93,9 @@ test("real seeded API submits one application and replays its idempotency key", 
   if (candidate === undefined) return;
 
   await openRealCatalog(page);
-  await page.getByLabel("Поиск", { exact: true }).fill(candidate.title);
+  const search = page.getByLabel("Поиск", { exact: true });
+  await search.fill(candidate.title);
+  await search.press("Enter");
   const card = page.locator('[role="listitem"]').filter({ hasText: candidate.title });
   await expect(card).toBeVisible();
   await expect(page.locator('[role="listitem"]')).toHaveCount(1);

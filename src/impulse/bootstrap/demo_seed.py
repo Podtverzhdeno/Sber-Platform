@@ -429,10 +429,14 @@ def _demo_benefit_descriptions(index: int) -> list[str]:
     return list(conditions[: 1 + (index - 1) % len(conditions)])
 
 
+def _catalog_seed_time() -> datetime:
+    return datetime.now(UTC)
+
+
 def build_work_and_rating_batches() -> list[SeedBatch]:
     # Keep the synthetic catalog discoverable whenever a demo environment is
     # seeded.  Historical learning/rating events intentionally retain DEMO_NOW.
-    catalog_seeded_at = datetime.now(UTC)
+    catalog_seeded_at = _catalog_seed_time()
     rubric_row = demo_row(
         "rubric:5plus",
         id=DEFAULT_REVIEW_RUBRIC.rubric_id,
