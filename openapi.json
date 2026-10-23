@@ -623,6 +623,74 @@
         "title": "AuthorshipDisputeRequest",
         "type": "object"
       },
+      "BootcampOverviewV2": {
+        "properties": {
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "continue_learning": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ContinueLearning"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "courses": {
+            "items": {
+              "$ref": "#/components/schemas/CourseSnapshot"
+            },
+            "title": "Courses",
+            "type": "array"
+          },
+          "curriculum": {
+            "$ref": "#/components/schemas/CurriculumRemainder"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "role_summary": {
+            "$ref": "#/components/schemas/RoleSummary"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/RoleOption"
+            },
+            "title": "Roles",
+            "type": "array"
+          },
+          "schema_version": {
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "selected_track_key": {
+            "title": "Selected Track Key",
+            "type": "string"
+          },
+          "snapshot_version": {
+            "title": "Snapshot Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "snapshot_version",
+          "as_of",
+          "data_origin",
+          "selected_track_key",
+          "roles",
+          "continue_learning",
+          "role_summary",
+          "curriculum",
+          "courses"
+        ],
+        "title": "BootcampOverviewV2",
+        "type": "object"
+      },
       "BriefDraftRequest": {
         "properties": {
           "brief": {
@@ -2311,6 +2379,82 @@
         "title": "ConsentView",
         "type": "object"
       },
+      "ContinueLearning": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "checkpoint_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkpoint Key"
+          },
+          "course_key": {
+            "title": "Course Key",
+            "type": "string"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "last_meaningful_activity_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Meaningful Activity At"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProgressMetric"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reason_code": {
+            "title": "Reason Code",
+            "type": "string"
+          },
+          "selection_provenance": {
+            "$ref": "#/components/schemas/VersionedFact"
+          }
+        },
+        "required": [
+          "course_key",
+          "checkpoint_key",
+          "action",
+          "reason_code",
+          "progress",
+          "deadline",
+          "last_meaningful_activity_at",
+          "selection_provenance"
+        ],
+        "title": "ContinueLearning",
+        "type": "object"
+      },
       "ContributionDecisionRequest": {
         "properties": {
           "deadline_at": {
@@ -2448,6 +2592,105 @@
           "occurred_at"
         ],
         "title": "CorrectScoreRequest",
+        "type": "object"
+      },
+      "CourseCard": {
+        "properties": {
+          "access_note": {
+            "title": "Access Note",
+            "type": "string"
+          },
+          "access_state": {
+            "title": "Access State",
+            "type": "string"
+          },
+          "completion_state": {
+            "title": "Completion State",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "must_take": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MustTakeReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pending_verification_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pending Verification Note"
+          },
+          "recommendation_reason": {
+            "title": "Recommendation Reason",
+            "type": "string"
+          },
+          "relevance_reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Relevance Reasons",
+            "type": "array"
+          },
+          "relevant": {
+            "title": "Relevant",
+            "type": "boolean"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "track_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Track Keys",
+            "type": "array"
+          },
+          "verified_evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified Evidence"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "track_keys",
+          "source_url",
+          "access_state",
+          "access_note",
+          "completion_state",
+          "relevant",
+          "relevance_reasons",
+          "must_take",
+          "pending_verification_note",
+          "verified_evidence",
+          "recommendation_reason"
+        ],
+        "title": "CourseCard",
         "type": "object"
       },
       "CourseCardView": {
@@ -2664,6 +2907,157 @@
         "title": "CourseCyclePointView",
         "type": "object"
       },
+      "CourseDetail": {
+        "properties": {
+          "course_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Key"
+          },
+          "course_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Version"
+          },
+          "evidence_requirements": {
+            "items": {
+              "$ref": "#/components/schemas/PublishedEvidenceRequirement"
+            },
+            "title": "Evidence Requirements",
+            "type": "array"
+          },
+          "modules": {
+            "items": {
+              "$ref": "#/components/schemas/PublishedModule"
+            },
+            "title": "Modules",
+            "type": "array"
+          },
+          "next_checkpoint_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Checkpoint Key"
+          },
+          "next_checkpoint_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Checkpoint Note"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
+          },
+          "prerequisites": {
+            "items": {
+              "$ref": "#/components/schemas/PublishedPrerequisite"
+            },
+            "title": "Prerequisites",
+            "type": "array"
+          },
+          "provenance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VersionedFact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reviews": {
+            "items": {
+              "$ref": "#/components/schemas/TrustedReview"
+            },
+            "title": "Reviews",
+            "type": "array"
+          },
+          "reviews_unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviews Unavailable Reason"
+          },
+          "state": {
+            "$ref": "#/components/schemas/KnowledgeState"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unavailable Reason"
+          }
+        },
+        "required": [
+          "state",
+          "course_key",
+          "title",
+          "course_version",
+          "outcome",
+          "modules",
+          "next_checkpoint_key",
+          "next_checkpoint_note",
+          "evidence_requirements",
+          "prerequisites",
+          "reviews",
+          "reviews_unavailable_reason",
+          "provenance",
+          "unavailable_reason"
+        ],
+        "title": "CourseDetail",
+        "type": "object"
+      },
       "CourseDetailView": {
         "properties": {
           "access_note": {
@@ -2815,6 +3209,115 @@
           "cycle"
         ],
         "title": "CourseDetailView",
+        "type": "object"
+      },
+      "CourseRoleContext": {
+        "properties": {
+          "must_take": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MustTakeReason"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/VersionedFact"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "relevant": {
+            "title": "Relevant",
+            "type": "boolean"
+          },
+          "track_key": {
+            "title": "Track Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_key",
+          "relevant",
+          "reasons",
+          "must_take",
+          "provenance"
+        ],
+        "title": "CourseRoleContext",
+        "type": "object"
+      },
+      "CourseSnapshot": {
+        "properties": {
+          "access_policy_version": {
+            "title": "Access Policy Version",
+            "type": "string"
+          },
+          "allowed_actions": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Allowed Actions",
+            "type": "array"
+          },
+          "card": {
+            "$ref": "#/components/schemas/CourseCard"
+          },
+          "checkpoint_provenance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VersionedFact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "course_version": {
+            "title": "Course Version",
+            "type": "string"
+          },
+          "enrollment_provenance": {
+            "$ref": "#/components/schemas/VersionedFact"
+          },
+          "evidence_provenance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VersionedFact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "freshness": {
+            "$ref": "#/components/schemas/VersionedFact"
+          },
+          "role_contexts": {
+            "items": {
+              "$ref": "#/components/schemas/CourseRoleContext"
+            },
+            "title": "Role Contexts",
+            "type": "array"
+          }
+        },
+        "required": [
+          "card",
+          "course_version",
+          "access_policy_version",
+          "freshness",
+          "enrollment_provenance",
+          "checkpoint_provenance",
+          "evidence_provenance",
+          "allowed_actions",
+          "role_contexts"
+        ],
+        "title": "CourseSnapshot",
         "type": "object"
       },
       "CourseView": {
@@ -3133,6 +3636,145 @@
         "title": "CriterionAssessmentView",
         "type": "object"
       },
+      "CurriculumRemainder": {
+        "properties": {
+          "current_grade_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Grade Key"
+          },
+          "curriculum_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Curriculum Version"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "provenance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VersionedFact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "requirements": {
+            "items": {
+              "$ref": "#/components/schemas/CurriculumRequirement"
+            },
+            "title": "Requirements",
+            "type": "array"
+          },
+          "state": {
+            "$ref": "#/components/schemas/KnowledgeState"
+          },
+          "target_grade_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Grade Key"
+          },
+          "unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unavailable Reason"
+          }
+        },
+        "required": [
+          "state",
+          "current_grade_key",
+          "target_grade_key",
+          "policy_version",
+          "curriculum_version",
+          "requirements",
+          "provenance",
+          "unavailable_reason"
+        ],
+        "title": "CurriculumRemainder",
+        "type": "object"
+      },
+      "CurriculumRequirement": {
+        "properties": {
+          "allowed_action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allowed Action"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/RequirementKind"
+          },
+          "source_key": {
+            "title": "Source Key",
+            "type": "string"
+          },
+          "source_version": {
+            "title": "Source Version",
+            "type": "string"
+          },
+          "state": {
+            "$ref": "#/components/schemas/RequirementState"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "kind",
+          "state",
+          "source_key",
+          "source_version",
+          "allowed_action"
+        ],
+        "title": "CurriculumRequirement",
+        "type": "object"
+      },
       "CursorPage_EventView_": {
         "additionalProperties": false,
         "properties": {
@@ -3267,6 +3909,15 @@
           "secret"
         ],
         "title": "DataClass",
+        "type": "string"
+      },
+      "DataOrigin": {
+        "enum": [
+          "production",
+          "demo_seed",
+          "test_fixture"
+        ],
+        "title": "DataOrigin",
         "type": "string"
       },
       "DayFocusView": {
@@ -4983,6 +5634,15 @@
         "title": "IssueCredentialRequest",
         "type": "object"
       },
+      "KnowledgeState": {
+        "enum": [
+          "known",
+          "unknown",
+          "not_evaluable"
+        ],
+        "title": "KnowledgeState",
+        "type": "string"
+      },
       "LeaderboardEntryView": {
         "properties": {
           "anonymized": {
@@ -5044,6 +5704,74 @@
           "anonymized"
         ],
         "title": "LeaderboardEntryView",
+        "type": "object"
+      },
+      "LearningAction": {
+        "enum": [
+          "start",
+          "continue"
+        ],
+        "title": "LearningAction",
+        "type": "string"
+      },
+      "LearningCommandBody": {
+        "properties": {
+          "course_version": {
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Course Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "course_version"
+        ],
+        "title": "LearningCommandBody",
+        "type": "object"
+      },
+      "LearningCommandResult": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/LearningAction"
+          },
+          "command_id": {
+            "format": "uuid",
+            "title": "Command Id",
+            "type": "string"
+          },
+          "course_key": {
+            "title": "Course Key",
+            "type": "string"
+          },
+          "course_version": {
+            "title": "Course Version",
+            "type": "string"
+          },
+          "enrollment_id": {
+            "format": "uuid",
+            "title": "Enrollment Id",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "replayed": {
+            "default": false,
+            "title": "Replayed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "command_id",
+          "person_id",
+          "course_key",
+          "course_version",
+          "action",
+          "enrollment_id"
+        ],
+        "title": "LearningCommandResult",
         "type": "object"
       },
       "LearningDayRequest": {
@@ -5871,6 +6599,58 @@
           "assumptions"
         ],
         "title": "MonthlyGoalView",
+        "type": "object"
+      },
+      "MustTakeReason": {
+        "properties": {
+          "current_known": {
+            "title": "Current Known",
+            "type": "boolean"
+          },
+          "current_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Level"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "projected_impact": {
+            "title": "Projected Impact",
+            "type": "string"
+          },
+          "skill": {
+            "title": "Skill",
+            "type": "string"
+          },
+          "target_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Level"
+          }
+        },
+        "required": [
+          "skill",
+          "current_level",
+          "target_level",
+          "current_known",
+          "projected_impact",
+          "explanation"
+        ],
+        "title": "MustTakeReason",
         "type": "object"
       },
       "MustTakeView": {
@@ -7382,6 +8162,39 @@
         "title": "ProfileSkillView",
         "type": "object"
       },
+      "ProgressMetric": {
+        "properties": {
+          "definition": {
+            "title": "Definition",
+            "type": "string"
+          },
+          "denominator": {
+            "title": "Denominator",
+            "type": "integer"
+          },
+          "numerator": {
+            "title": "Numerator",
+            "type": "integer"
+          },
+          "percent": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Percent",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/VersionedFact"
+          }
+        },
+        "required": [
+          "numerator",
+          "denominator",
+          "percent",
+          "definition",
+          "provenance"
+        ],
+        "title": "ProgressMetric",
+        "type": "object"
+      },
       "ProjectCompetencyView": {
         "properties": {
           "competency": {
@@ -7693,6 +8506,81 @@
         "title": "PublishPolicyRequest",
         "type": "object"
       },
+      "PublishedEvidenceRequirement": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "description"
+        ],
+        "title": "PublishedEvidenceRequirement",
+        "type": "object"
+      },
+      "PublishedModule": {
+        "properties": {
+          "checkpoint_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checkpoint Key"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "position"
+        ],
+        "title": "PublishedModule",
+        "type": "object"
+      },
+      "PublishedPrerequisite": {
+        "properties": {
+          "course_key": {
+            "title": "Course Key",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "course_key",
+          "title"
+        ],
+        "title": "PublishedPrerequisite",
+        "type": "object"
+      },
       "QuickCardProfileView": {
         "properties": {
           "about": {
@@ -7988,6 +8876,29 @@
         },
         "title": "ReportClaimRequest",
         "type": "object"
+      },
+      "RequirementKind": {
+        "enum": [
+          "course",
+          "project",
+          "checkpoint",
+          "competency",
+          "evidence"
+        ],
+        "title": "RequirementKind",
+        "type": "string"
+      },
+      "RequirementState": {
+        "enum": [
+          "open",
+          "reported",
+          "verified",
+          "rejected",
+          "revoked",
+          "unknown"
+        ],
+        "title": "RequirementState",
+        "type": "string"
       },
       "ResolveReviewAppealRequest": {
         "properties": {
@@ -8569,6 +9480,150 @@
           "total_milestones"
         ],
         "title": "RoleCardView",
+        "type": "object"
+      },
+      "RoleOption": {
+        "properties": {
+          "roadmap": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VersionedFact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/TrackSelectionState"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "track_key": {
+            "title": "Track Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_key",
+          "title",
+          "state",
+          "roadmap"
+        ],
+        "title": "RoleOption",
+        "type": "object"
+      },
+      "RoleSummary": {
+        "properties": {
+          "current_grade_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Grade Key"
+          },
+          "current_grade_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Grade Title"
+          },
+          "grade_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VersionedFact"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "grade_state": {
+            "$ref": "#/components/schemas/KnowledgeState"
+          },
+          "matrix_skill_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matrix Skill Count"
+          },
+          "readiness": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ProgressMetric"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "target_grade_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Grade Key"
+          },
+          "target_grade_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Grade Title"
+          },
+          "track_key": {
+            "title": "Track Key",
+            "type": "string"
+          },
+          "unavailable_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unavailable Reason"
+          }
+        },
+        "required": [
+          "track_key",
+          "grade_state",
+          "current_grade_key",
+          "current_grade_title",
+          "target_grade_key",
+          "target_grade_title",
+          "matrix_skill_count",
+          "readiness",
+          "grade_policy",
+          "unavailable_reason"
+        ],
+        "title": "RoleSummary",
         "type": "object"
       },
       "RoundingMode": {
@@ -10330,6 +11385,15 @@
         "title": "TrackOverview",
         "type": "object"
       },
+      "TrackSelectionState": {
+        "enum": [
+          "active",
+          "paused",
+          "unselected"
+        ],
+        "title": "TrackSelectionState",
+        "type": "string"
+      },
       "TrackStatus": {
         "enum": [
           "active",
@@ -10601,6 +11665,33 @@
         "title": "TrustedIntervalView",
         "type": "object"
       },
+      "TrustedReview": {
+        "properties": {
+          "author_role": {
+            "title": "Author Role",
+            "type": "string"
+          },
+          "comment": {
+            "title": "Comment",
+            "type": "string"
+          },
+          "provenance": {
+            "$ref": "#/components/schemas/VersionedFact"
+          },
+          "verdict": {
+            "title": "Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "author_role",
+          "verdict",
+          "comment",
+          "provenance"
+        ],
+        "title": "TrustedReview",
+        "type": "object"
+      },
       "UpdateParticipantProfileRequest": {
         "properties": {
           "about": {
@@ -10789,6 +11880,50 @@
           "basis"
         ],
         "title": "VerifyOfferRequest",
+        "type": "object"
+      },
+      "VersionedFact": {
+        "properties": {
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "data_origin": {
+            "$ref": "#/components/schemas/DataOrigin"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "stale": {
+            "default": false,
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "stale_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stale Reason"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "version",
+          "as_of",
+          "data_origin"
+        ],
+        "title": "VersionedFact",
         "type": "object"
       },
       "WeekFocusView": {
@@ -14480,6 +15615,186 @@
           }
         },
         "summary": "Issue Certificate"
+      }
+    },
+    "/api/v1/me/bootcamp/courses/{course_key}": {
+      "get": {
+        "operationId": "bootcamp_course_detail_v2_api_v1_me_bootcamp_courses__course_key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_key",
+            "required": true,
+            "schema": {
+              "title": "Course Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "course_version",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Course Version"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CourseDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Bootcamp Course Detail V2",
+        "tags": [
+          "bootcamp"
+        ]
+      }
+    },
+    "/api/v1/me/bootcamp/courses/{course_key}/{action}": {
+      "post": {
+        "operationId": "bootcamp_learning_command_api_v1_me_bootcamp_courses__course_key___action__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_key",
+            "required": true,
+            "schema": {
+              "title": "Course Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "action",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LearningAction"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 200,
+              "minLength": 1,
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearningCommandBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearningCommandResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Bootcamp Learning Command",
+        "tags": [
+          "bootcamp"
+        ]
+      }
+    },
+    "/api/v1/me/bootcamp/overview": {
+      "get": {
+        "operationId": "bootcamp_overview_v2_api_v1_me_bootcamp_overview_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "track",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Track"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BootcampOverviewV2"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Bootcamp Overview V2",
+        "tags": [
+          "bootcamp"
+        ]
       }
     },
     "/api/v1/me/competencies": {
