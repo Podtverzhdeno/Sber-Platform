@@ -145,6 +145,9 @@ def _overview(*, origin: DataOrigin = DataOrigin.PRODUCTION) -> BootcampOverview
     )
 
 
+overview_fixture = _overview
+
+
 def test_overview_is_immutable_and_versioned() -> None:
     overview = _overview()
 

@@ -13,6 +13,7 @@ from typing import Annotated, Protocol
 from fastapi import APIRouter, Depends, Header, Query, Request
 from pydantic import BaseModel, Field
 
+from impulse.api.errors import ApiError
 from impulse.api.v1.identity import current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.bootcamp.catalog import CourseCard
@@ -24,6 +25,7 @@ from impulse.bootcamp.commands import (
 from impulse.bootcamp.detail import CourseDetail
 from impulse.bootcamp.overview import BootcampOverviewV2
 from impulse.bootcamp.service import BootcampCatalogService
+from impulse.domain.identity import ActorContext, Role
 
 router = APIRouter(tags=["bootcamp"])
 
@@ -102,8 +104,6 @@ def _catalog_service(request: Request) -> BootcampCatalogService:
 def _v2_service(request: Request) -> BootcampV2ProjectionService:
     service = getattr(request.app.state, "bootcamp_v2_service", None)
     if service is None:
-        from impulse.api.errors import ApiError
-
         raise ApiError(
             code="BOOTCAMP_PROVIDER_UNAVAILABLE",
             message="Данные Bootcamp временно недоступны.",
@@ -116,8 +116,6 @@ def _v2_service(request: Request) -> BootcampV2ProjectionService:
 def _learning_commands(request: Request) -> BootcampLearningCommandService:
     service = getattr(request.app.state, "bootcamp_learning_commands", None)
     if service is None:
-        from impulse.api.errors import ApiError
-
         raise ApiError(
             code="BOOTCAMP_COMMANDS_UNAVAILABLE",
             message="Действия Bootcamp временно недоступны.",
@@ -125,6 +123,11 @@ def _learning_commands(request: Request) -> BootcampLearningCommandService:
             retryable=True,
         )
     return service
+
+
+def _participant(actor: ActorContext) -> None:
+    if actor.active_role is not Role.PARTICIPANT:
+        raise ApiError(code="NOT_FOUND", message="Данные Bootcamp не найдены.", status_code=404)
 
 
 @router.get(
@@ -145,6 +148,7 @@ async def bootcamp_overview_v2(
     service: Annotated[BootcampV2ProjectionService, Depends(_v2_service)],
     track: Annotated[str | None, Query(max_length=120)] = None,
 ) -> BootcampOverviewV2:
+    _participant(authenticated.actor)
     return await service.overview(authenticated.actor.person_id, track)
 
 
@@ -155,6 +159,7 @@ async def bootcamp_course_detail_v2(
     service: Annotated[BootcampV2ProjectionService, Depends(_v2_service)],
     course_version: Annotated[str | None, Query(max_length=120)] = None,
 ) -> CourseDetail:
+    _participant(authenticated.actor)
     return await service.detail(authenticated.actor.person_id, course_key, course_version)
 
 
