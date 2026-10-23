@@ -11,3 +11,4 @@ export {
   RoleSwitcher,
 } from "./page";
 export type { BootcampOverview, CourseSnapshot } from "./page";
+export type { CatalogToolbarState } from "./page";

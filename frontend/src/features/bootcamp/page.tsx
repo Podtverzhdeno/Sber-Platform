@@ -129,23 +129,65 @@ export function GradeRequirements({
 }
 
 export function CatalogToolbar({
-  view,
-  onViewChange,
+  state,
+  roles = [],
+  categories = [],
+  levels = [],
+  onChange,
+  onReset,
 }: {
-  view: "card" | "list";
-  onViewChange: (view: "card" | "list") => void;
+  state: CatalogToolbarState;
+  roles?: RoleOption[];
+  categories?: { key: string; label: string; count: number }[];
+  levels?: string[];
+  onChange: (change: Partial<CatalogToolbarState>) => void;
+  onReset: () => void;
 }) {
   return (
-    <div className="catalog-toolbar" role="group" aria-label="Вид каталога">
-      <button type="button" aria-pressed={view === "card"} onClick={() => { onViewChange("card"); }}>
-        Карточки
-      </button>
-      <button type="button" aria-pressed={view === "list"} onClick={() => { onViewChange("list"); }}>
-        Список
-      </button>
+    <div className="catalog-toolbar">
+      <div className="catalog-relevance" role="group" aria-label="Актуальность">
+        <button type="button" aria-pressed={state.relevance === "all"} onClick={() => { onChange({ relevance: "all" }); }}>Все</button>
+        <button type="button" aria-pressed={state.relevance === "relevant"} onClick={() => { onChange({ relevance: "relevant" }); }}>Актуальные</button>
+      </div>
+      <div className="catalog-categories" aria-label="Категории">
+        {categories.map((category) => (
+          <button type="button" key={category.key} aria-pressed={state.category === category.key} onClick={() => { onChange({ category: category.key }); }}>
+            {category.label} <span aria-label={`${String(category.count)} курсов`}>{category.count}</span>
+          </button>
+        ))}
+      </div>
+      <label>Поиск<input type="search" value={state.query} onChange={(event) => { onChange({ query: event.target.value }); }} /></label>
+      <label>
+        Направление
+        <select value={state.track} onChange={(event) => { onChange({ track: event.target.value }); }}>
+          <option value="all">Все направления</option>
+          {roles.map((role) => <option value={role.track_key} key={role.track_key}>{role.title}</option>)}
+        </select>
+      </label>
+      <label>
+        Уровень
+        <select value={state.level} onChange={(event) => { onChange({ level: event.target.value }); }}>
+          <option value="all">Все уровни</option>
+          {levels.map((level) => <option value={level} key={level}>{level}</option>)}
+        </select>
+      </label>
+      <button type="button" onClick={onReset}>Сбросить</button>
+      <div role="group" aria-label="Вид каталога">
+        <button type="button" aria-pressed={state.view === "card"} onClick={() => { onChange({ view: "card" }); }}>Карточки</button>
+        <button type="button" aria-pressed={state.view === "list"} onClick={() => { onChange({ view: "list" }); }}>Список</button>
+      </div>
     </div>
   );
 }
+
+export type CatalogToolbarState = {
+  relevance: "all" | "relevant";
+  category: string;
+  query: string;
+  track: string;
+  level: string;
+  view: "card" | "list";
+};
 
 function CourseFacts({ course, trackKey }: { course: CourseSnapshot; trackKey: string }) {
   const context = course.role_contexts.find((item) => item.track_key === trackKey);
@@ -190,6 +232,10 @@ export function BootcampPage({
   onOpenCourse,
   onOpenRequirements,
   drawers,
+  toolbarState,
+  onToolbarChange,
+  onToolbarReset,
+  levelOptions = [],
 }: {
   overview: BootcampOverview;
   view: "card" | "list";
@@ -199,10 +245,25 @@ export function BootcampPage({
   onOpenCourse: (courseKey: string) => void;
   onOpenRequirements: () => void;
   drawers?: ReactNode;
+  toolbarState?: CatalogToolbarState;
+  onToolbarChange?: (change: Partial<CatalogToolbarState>) => void;
+  onToolbarReset?: () => void;
+  levelOptions?: string[];
 }) {
   const continueTitle = overview.continue_learning === null
     ? null
     : (overview.courses.find((course) => course.card.key === overview.continue_learning?.course_key)?.card.title ?? null);
+  const effectiveToolbar: CatalogToolbarState = toolbarState ?? { relevance: "all", category: "all", query: "", track: "all", level: "all", view };
+  const categoryOptions = [
+    { key: "all", label: "Все курсы", count: overview.courses.length },
+    { key: "role", label: "Для моей роли", count: overview.courses.filter((course) => course.role_contexts.some((context) => context.track_key === overview.selected_track_key && context.relevant)).length },
+    { key: "progress", label: "В процессе", count: overview.courses.filter((course) => course.card.completion_state === "in_progress" || course.card.completion_state === "reported").length },
+    { key: "completed", label: "Завершённые", count: overview.courses.filter((course) => course.card.completion_state === "verified").length },
+  ];
+  const changeToolbar = (change: Partial<CatalogToolbarState>) => {
+    onToolbarChange?.(change);
+    if (change.view) onViewChange(change.view);
+  };
   return (
     <div className="feature-stack" data-reference="BC-R01">
       <header>
@@ -216,7 +277,7 @@ export function BootcampPage({
         <GradeRequirements curriculum={overview.curriculum} onOpen={onOpenRequirements} />
         <section aria-labelledby="course-catalog-title">
         <h2 id="course-catalog-title">Каталог курсов</h2>
-        <CatalogToolbar view={view} onViewChange={onViewChange} />
+        <CatalogToolbar state={effectiveToolbar} roles={overview.roles} categories={categoryOptions} levels={levelOptions} onChange={changeToolbar} onReset={() => { onToolbarReset?.(); }} />
         {view === "card" ? (
           <div className="course-grid">
             {overview.courses.map((course) => <CourseCard course={course} trackKey={overview.selected_track_key} key={course.card.key} onOpen={onOpenCourse} />)}

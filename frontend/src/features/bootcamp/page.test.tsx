@@ -2,7 +2,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { BootcampOverview } from "./page";
-import { BootcampPage } from "./page";
+import { BootcampPage, CatalogToolbar } from "./page";
 
 const fact = {
   source: "test",
@@ -217,5 +217,40 @@ describe("BootcampPage composition (BC2-301)", () => {
     rerender(<BootcampPage overview={{ ...overview, curriculum: { state: "not_evaluable", current_grade_key: null, target_grade_key: null, policy_version: null, curriculum_version: null, requirements: [], provenance: null, unavailable_reason: "Политика ещё не опубликована." } }} {...baseProps} />);
     expect(screen.getByRole("heading", { name: "Требования к следующему грейду пока не опубликованы" })).toBeInTheDocument();
     expect(screen.getByText("Политика ещё не опубликована.")).toBeInTheDocument();
+  });
+});
+
+describe("CatalogToolbar (BC2-306)", () => {
+  it("exposes independent filters, server-derived counts, reset and view controls", () => {
+    const onChange = vi.fn();
+    const onReset = vi.fn();
+    render(
+      <CatalogToolbar
+        state={{ relevance: "all", category: "all", query: "", track: "all", level: "all", view: "card" }}
+        roles={overview.roles}
+        categories={[{ key: "all", label: "Все курсы", count: 8 }, { key: "role", label: "Для моей роли", count: 3 }]}
+        levels={["Начальный", "Продвинутый"]}
+        onChange={onChange}
+        onReset={onReset}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Актуальные" }));
+    fireEvent.click(screen.getByRole("button", { name: /Для моей роли/ }));
+    fireEvent.change(screen.getByRole("searchbox", { name: "Поиск" }), { target: { value: "python" } });
+    fireEvent.change(screen.getByLabelText("Направление"), { target: { value: "backend" } });
+    fireEvent.change(screen.getByLabelText("Уровень"), { target: { value: "Продвинутый" } });
+    fireEvent.click(screen.getByRole("button", { name: "Список" }));
+    fireEvent.click(screen.getByRole("button", { name: "Сбросить" }));
+
+    expect(screen.getByLabelText("8 курсов")).toBeInTheDocument();
+    expect(screen.getByLabelText("3 курсов")).toBeInTheDocument();
+    expect(onChange).toHaveBeenNthCalledWith(1, { relevance: "relevant" });
+    expect(onChange).toHaveBeenNthCalledWith(2, { category: "role" });
+    expect(onChange).toHaveBeenNthCalledWith(3, { query: "python" });
+    expect(onChange).toHaveBeenNthCalledWith(4, { track: "backend" });
+    expect(onChange).toHaveBeenNthCalledWith(5, { level: "Продвинутый" });
+    expect(onChange).toHaveBeenNthCalledWith(6, { view: "list" });
+    expect(onReset).toHaveBeenCalledOnce();
   });
 });
