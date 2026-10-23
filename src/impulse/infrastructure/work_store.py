@@ -268,6 +268,7 @@ class SqlWorkStore(WorkStore):
             tasks.c.task_key,
             tasks.c.status,
             tasks.c.payload,
+            tasks.c.created_at,
             projects.c.project_key,
         ).join(projects, projects.c.id == tasks.c.project_id)
 
