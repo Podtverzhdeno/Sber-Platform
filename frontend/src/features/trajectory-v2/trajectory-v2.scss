@@ -405,3 +405,108 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+.trajectory-v2-actions {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trajectory-v2-actions > button:first-child {
+  padding: 4px 12px;
+  border: 1px solid var(--color-border, #e2e2e2);
+  color: var(--color-text, #1a1a1a);
+  background: transparent;
+  cursor: pointer;
+}
+
+.trajectory-v2-actions ul {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 40;
+
+  display: grid;
+  gap: 2px;
+
+  min-width: 260px;
+
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--color-border, #e2e2e2);
+
+  list-style: none;
+  background: var(--color-surface, #fff);
+}
+
+.trajectory-v2-actions button[role="menuitem"] {
+  width: 100%;
+
+  text-align: left;
+  color: var(--color-text, #1a1a1a);
+
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.trajectory-v2-actions button[role="menuitem"]:hover,
+.trajectory-v2-actions button[role="menuitem"]:focus-visible {
+  color: var(--color-primary, #19a6a6);
+  background: color-mix(in srgb, var(--color-primary, #19a6a6) 12%, transparent);
+}
+
+.trajectory-v2-pin-badge {
+  border-radius: 10px;
+  padding: 2px 10px;
+  font-size: 12px;
+
+  color: var(--color-text, #1a1a1a);
+  border: 1px solid var(--color-primary, #19a6a6);
+}
+
+.trajectory-v2-compare {
+  display: grid;
+  gap: 12px;
+
+  padding: 16px;
+  border: 1px solid var(--color-border, #e2e2e2);
+
+  background: var(--color-surface, #fff);
+}
+
+.trajectory-v2-compare header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.trajectory-v2-compare h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.trajectory-v2-compare table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.trajectory-v2-compare th,
+.trajectory-v2-compare td {
+  border: 1px solid var(--color-border, #e2e2e2);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.trajectory-v2-compare-note {
+  color: var(--color-muted, #666);
+  margin: 0;
+}
+
+.trajectory-v2-action-status {
+  margin: 0;
+  color: var(--color-info, #595aeb);
+}

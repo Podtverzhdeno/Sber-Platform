@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { StatePanel } from "../../components/ui";
 import {
+  copyText,
   loadDevelopmentOverview,
   loadRoadmaps,
   overviewQueryKey,
@@ -11,8 +12,11 @@ import {
   PRIMARY_LABEL,
   MILESTONE_STATE_LABELS,
   milestoneState,
+  readPinnedTrack,
   roleStateLabel,
+  writePinnedTrack,
 } from "./client";
+import { RoleComparePanel, TrajectoryActions } from "./actions";
 import { RoleInfoDialog, StageTaskDrawer } from "./details";
 import type {
   DevelopmentOverviewView,
@@ -100,6 +104,10 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const lastOverlayTriggerRef = useRef<HTMLElement | null>(null);
   const [roleInfoOpen, setRoleInfoOpen] = useState(false);
   const [drawerKey, setDrawerKey] = useState<string | null>(null);
+  const [pinnedTrack, setPinnedTrack] = useState<string | null>(() => readPinnedTrack());
+  const [hiddenUnselected, setHiddenUnselected] = useState(false);
+  const [actionFeedback, setActionFeedback] = useState<string | null>(null);
+  const [compareTarget, setCompareTarget] = useState<string | null>(null);
   const snapshotTrigger = () => {
     lastOverlayTriggerRef.current =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -119,6 +127,65 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     setDrawerKey(null);
   };
   const drawerMilestone = selectedRoadmap?.milestones.find((m) => m.key === drawerKey);
+  const visibleRoles = useMemo(() => {
+    const filtered = overview.roles.filter(
+      (role) =>
+        !hiddenUnselected || role.track_key === selectedKey || role.state !== "unselected",
+    );
+    if (pinnedTrack === null) return filtered;
+    return [...filtered].sort(
+      (left, right) =>
+        Number(right.track_key === pinnedTrack) - Number(left.track_key === pinnedTrack),
+    );
+  }, [overview.roles, hiddenUnselected, selectedKey, pinnedTrack]);
+  const togglePin = (trackKey: string) => {
+    const next = pinnedTrack === trackKey ? null : trackKey;
+    setPinnedTrack(next);
+    writePinnedTrack(next);
+    setActionFeedback(
+      next === null
+        ? "Роль откреплена; локальный приоритет снят."
+        : "Роль закреплена сверху списка (локальный приоритет, сохраняется в браузере).",
+    );
+  };
+  const copyShareLink = (trackKey: string) => {
+    const url = new URL(window.location.href);
+    url.search = `?role=${encodeURIComponent(trackKey)}`;
+    void copyText(url.toString()).then((ok) => {
+      setActionFeedback(
+        ok
+          ? "Скопирована общедоступная ссылка: только выбранный трек, без персональных данных."
+          : "Буфер обмена недоступен: скопируйте адрес страницы вручную.",
+      );
+    });
+  };
+  const internalShare = () => {
+    setActionFeedback(
+      "Внутренние recipient-scoped ссылки недоступны: сервис обмена не подключён.",
+    );
+  };
+  const configurePath = () => {
+    setActionFeedback(
+      "Конфигурирование пути недоступно: параметры дорожной карты меняет только серверная политика.",
+    );
+  };
+  const toggleHiddenUnselected = () => {
+    const nextHidden = !hiddenUnselected;
+    setHiddenUnselected(nextHidden);
+    setActionFeedback(
+      nextHidden
+        ? "Не выбранные роли скрыты; выбранные роли остаются видимыми."
+        : "Не выбранные роли снова показаны.",
+    );
+  };
+  const compareRoles = (trackKey: string | null) => {
+    setCompareTarget(trackKey);
+    setActionFeedback(
+      trackKey === null
+        ? "Сравнение недоступно: в снимке нет второй роли."
+        : "Сравнение открыто для выбранной пары ролей.",
+    );
+  };
 
   const roleSelected = (trackKey: string) => {
     const next = new URLSearchParams(searchParams);
@@ -138,12 +205,13 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
       <div className="trajectory-v2-columns">
         <nav className="trajectory-v2-roles" aria-label="Роли">
           <ul>
-            {overview.roles.map((role) => (
+            {visibleRoles.map((role) => (
               <li key={role.track_key}>
                 <RoleCardOverview
                   role={role}
                   primary={role.track_key === primaryKey}
                   selected={role.track_key === selectedKey}
+                  pinned={role.track_key === pinnedTrack}
                   onSelect={() => {
                     roleSelected(role.track_key);
                   }}
@@ -156,8 +224,9 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           {selected === null ? (
             <p role="status">Роли пока не связаны с траекторией.</p>
           ) : (
-            <RoleDetailPanel
-              role={selected}
+            <>
+              <RoleDetailPanel
+                role={selected}
               primary={selected.track_key === primaryKey}
               roadmap={roadmaps.data?.find((item) => item.track_key === selected.track_key) ?? null}
               roadmapPending={roadmaps.isPending}
@@ -173,7 +242,46 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               }}
               onOpenRoleInfo={openRoleInfo}
               onOpenStageDetails={openStageDetails}
-            />
+              pinned={pinnedTrack === selected.track_key}
+              hiddenUnselected={hiddenUnselected}
+              otherRoles={overview.roles.filter((item) => item.track_key !== selected.track_key)}
+              compareTarget={compareTarget}
+              feedback={actionFeedback}
+              compare={compareRoles}
+              copyLink={() => {
+                copyShareLink(selected.track_key);
+              }}
+              internalShare={internalShare}
+              togglePin={() => {
+                togglePin(selected.track_key);
+              }}
+              toggleHiddenUnselected={toggleHiddenUnselected}
+              configurePath={configurePath}
+              clearFeedback={() => {
+                setActionFeedback(null);
+              }}
+              />
+              {compareTarget !== null ? (
+                <RoleComparePanel
+                  roles={overview.roles}
+                  roadmaps={roadmaps.data ?? []}
+                  trackA={selected.track_key}
+                  trackB={compareTarget}
+                  onClose={() => {
+                    setCompareTarget(null);
+                  }}
+                />
+              ) : null}
+              {actionFeedback !== null ? (
+                <p
+                  className="trajectory-v2-action-status"
+                  role="status"
+                  data-testid="trajectory-action-status"
+                >
+                  {actionFeedback}
+                </p>
+              ) : null}
+            </>
           )}
         </section>
       </div>
@@ -217,6 +325,7 @@ export function RoleCardOverview(props: {
   role: RoleCardView;
   primary: boolean;
   selected: boolean;
+  pinned: boolean;
   onSelect: () => void;
 }) {
   const { role } = props;
@@ -224,6 +333,8 @@ export function RoleCardOverview(props: {
     <button
       type="button"
       className="trajectory-v2-role-card"
+      data-testid="trajectory-role-card"
+      data-role-key={role.track_key}
       aria-pressed={props.selected}
       onClick={() => {
         props.onSelect();
@@ -232,6 +343,7 @@ export function RoleCardOverview(props: {
       <strong>{role.title}</strong>
       <span className="trajectory-v2-role-state">{roleStateLabel(role.state)}</span>
       {props.primary && <span className="trajectory-v2-role-badge">{PRIMARY_LABEL}</span>}
+      {props.pinned && <span className="trajectory-v2-pin-badge">Закреплена</span>}
       {role.attempt_number !== null && (
         <span>попытка {role.attempt_number}</span>
       )}
@@ -256,6 +368,18 @@ export function RoleDetailPanel(props: {
   onStageSelect: (stageKey: string) => void;
   onOpenRoleInfo: () => void;
   onOpenStageDetails: (stageKey: string) => void;
+  pinned: boolean;
+  hiddenUnselected: boolean;
+  otherRoles: RoleCardView[];
+  compareTarget: string | null;
+  feedback: string | null;
+  compare: (trackKey: string | null) => void;
+  copyLink: () => void;
+  internalShare: () => void;
+  togglePin: () => void;
+  toggleHiddenUnselected: () => void;
+  configurePath: () => void;
+  clearFeedback: () => void;
 }) {
   const role = props.role;
   return (
@@ -275,6 +399,21 @@ export function RoleDetailPanel(props: {
         >
           Подробнее о роли
         </button>
+        <TrajectoryActions
+          role={role}
+          pinned={props.pinned}
+          hiddenUnselected={props.hiddenUnselected}
+          otherRoles={props.otherRoles}
+          compareTarget={props.compareTarget}
+          feedback={props.feedback}
+          compare={props.compare}
+          copyLink={props.copyLink}
+          internalShare={props.internalShare}
+          togglePin={props.togglePin}
+          toggleHiddenUnselected={props.toggleHiddenUnselected}
+          configurePath={props.configurePath}
+          clearFeedback={props.clearFeedback}
+        />
       </header>
       {role.attempt_number === null ? (
         <section aria-label="Прогресс роли">
