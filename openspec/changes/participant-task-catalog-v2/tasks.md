@@ -29,7 +29,7 @@ Lane `task-recommendation-api`; depends on TC-001–TC-004. Write scope: new/exp
 
 - [x] TC-007 Define one typed task recommendation projection for cards/list/detail; match is structured evidence, not a bare number.
 - [x] TC-008 Extend/reuse catalog endpoint with server filters, stable sorting, cursor/pagination, `total_found`, `total_available` and RBAC.
-- [ ] TC-009 Enforce published/tenant/program/invitation/deadline/quota visibility before counts and safe-404 foreign IDs.
+- [x] TC-009 Enforce published/tenant/program/invitation/deadline/quota visibility before counts and safe-404 foreign IDs.
 - [x] TC-013 Define versioned stage-plan contract with arbitrary ordered stages, duration, short description and expected evidence; no assignment checkpoints.
 - [ ] TC-014 Define conditional benefit contract with type, eligibility rule, source and potential/actual state. Depends on TC-006.
 - [ ] TC-015 Add/reuse permitted recommendation-detail and terms read contract separated from private project state. Depends on TC-006, TC-007.
