@@ -584,3 +584,92 @@ test("real server keeps equal-score ordering stable across requests, cards and l
   await page.getByRole("button", { name: "Карточки", exact: true }).click();
   await expect(page.locator('[role="listitem"] h2')).toHaveText(expectedTitles);
 });
+
+test("real server preserves canonical state during the v2 flag rollback rehearsal", async ({ page }) => {
+  test.setTimeout(90_000);
+  const { csrf_token: csrf } = await login(page);
+  const catalog = await realCatalog(page);
+  const candidate = catalog.items.find(
+    (item) =>
+      item.title === "Детекция аномалий в сетевом трафике" &&
+      item.application_state === "none" &&
+      item.allowed_actions.includes("apply"),
+  );
+  expect(candidate).toBeTruthy();
+  if (candidate === undefined) return;
+
+  const termsResponse = await page.context().request.get(
+    `/api/v1/me/task-recommendations/${candidate.task_id}/terms`,
+  );
+  expect(termsResponse.status(), await termsResponse.text()).toBe(200);
+  const terms = (await termsResponse.json()) as CatalogTerms;
+  const consent = await page.context().request.post(
+    `/api/v1/me/tasks/${candidate.task_id}/terms-consent`,
+    {
+      headers: { "X-CSRF-Token": csrf },
+      data: { terms_version: terms.terms_version },
+    },
+  );
+  expect(consent.status(), await consent.text()).toBe(200);
+  const apply = await page.context().request.post(
+    `/api/v1/me/tasks/${candidate.task_id}/applications`,
+    {
+      headers: { "X-CSRF-Token": csrf, "Idempotency-Key": `rollback-${String(Date.now())}` },
+    },
+  );
+  expect([200, 201], await apply.text()).toContain(apply.status());
+  const application = (await apply.json()) as { id: string };
+
+  type CanonicalState = {
+    acceptedTermsVersion: number | null;
+    termsVersion: number;
+    applicationIds: string[];
+  };
+  const readCanonicalState = async (): Promise<CanonicalState> => {
+    const response = await page.context().request.get(`/api/v1/me/tasks/${candidate.task_id}`);
+    expect(response.status(), await response.text()).toBe(200);
+    const body = (await response.json()) as {
+      accepted_terms_version: number | null;
+      terms: { version: number };
+      applications: { id: string }[];
+    };
+    return {
+      acceptedTermsVersion: body.accepted_terms_version,
+      termsVersion: body.terms.version,
+      applicationIds: body.applications.map((item) => item.id).sort(),
+    };
+  };
+  const beforeRollback = await readCanonicalState();
+  expect(beforeRollback.acceptedTermsVersion).toBe(terms.terms_version);
+  expect(beforeRollback.applicationIds).toContain(application.id);
+
+  const configResponse = await page.context().request.get("/api/v1/config");
+  expect(configResponse.status(), await configResponse.text()).toBe(200);
+  const config = (await configResponse.json()) as Record<string, unknown>;
+  // Only the public browser flag is substituted. Catalog, work and identity
+  // calls continue to use the real seeded backend and canonical stored state.
+  await page.route("**/api/v1/config", (route) =>
+    route.fulfill({ json: { ...config, task_catalog_v2_enabled: false } }),
+  );
+  await page.goto("/");
+  await page.getByRole("link", { name: "Задачи", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Задачи для вашего развития", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Задачи для вашего следующего результата" }),
+  ).toHaveCount(0);
+  await expect(page.locator(".participant-work--catalog")).toContainText(candidate.title);
+
+  const marketplaceResponse = await page.context().request.get("/api/v1/marketplace/tasks");
+  expect(marketplaceResponse.status(), await marketplaceResponse.text()).toBe(200);
+  const marketplace = (await marketplaceResponse.json()) as {
+    task: { id: string };
+    terms: { version: number };
+    accepted_terms_version: number | null;
+  }[];
+  const legacyProjection = marketplace.find((item) => item.task.id === candidate.task_id);
+  expect(legacyProjection?.accepted_terms_version).toBe(beforeRollback.acceptedTermsVersion);
+  expect(legacyProjection?.terms.version).toBe(beforeRollback.termsVersion);
+  expect(await readCanonicalState()).toEqual(beforeRollback);
+});

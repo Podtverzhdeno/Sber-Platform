@@ -42,7 +42,7 @@ Green runs `39953411624` and `39972818614` belong only to `0da29382a06a27b0a348e
 
 ## TC-047 disposition
 
-The matrix provides evidence for every AT identifier, but **does not declare TC-047 complete**. The real-API spec now implements the previously missing automatable scenarios: qualitative forecast, exact 2/5 checkpoints, online v3→v4 terms drift, deadline expiry, before/after non-mutation snapshots, authoritative unverified customer, equal-score pair, forbidden portfolio and failed prerequisite. These are seven real-server journeys in total and must execute successfully on the exact PR head; local editor/static checks are not browser evidence.
+The matrix provides evidence for every AT identifier, but **does not declare TC-047 complete**. The real-API spec now implements the previously missing automatable scenarios: qualitative forecast, exact 2/5 checkpoints, online v3→v4 terms drift, deadline expiry, before/after non-mutation snapshots, authoritative unverified customer, equal-score pair, forbidden portfolio and failed prerequisite. These are seven AT-focused real-server journeys and must execute successfully on the exact PR head; local editor/static checks are not browser evidence. The separate release-safety journey below does not change the AT-01–AT-22 count.
 
 Independent screen-reader execution (AT-21) remains outside automated Playwright evidence, and the broader TC-043/TC-044 review dependencies are not collapsed into these journeys. The reviewer must decide whether the exact-head evidence is sufficient before checking TC-047. The author has not made that decision unilaterally.
 
@@ -83,7 +83,21 @@ Review the intentional UI differences: customer-state text, plan-state text, acc
 
 ## Release handoff boundaries
 
-- `task_catalog_v2_enabled` is the rollback surface; rollback rehearsal must show that v2 can be disabled without deleting applications or accepted terms.
+### Automated feature-flag rollback rehearsal
+
+The final real-server journey in `frontend/e2e/task-catalog-v2-real-api.spec.ts` creates canonical terms consent and an application, then substitutes **only the browser's public `/config` response** with `task_catalog_v2_enabled=false`. It verifies the legacy participant catalog renders while the real marketplace projection and canonical task detail retain the same terms version, accepted terms version and application ID. This exercises the frontend rollback path against real server state; it is not represented as a production restart, infrastructure failover or database restore.
+
+### Owner-run release and rollback checklist
+
+The following evidence remains an owner/release-reviewer responsibility and must be tied to the exact deployed Commit SHA:
+
+1. Require the complete exact-SHA CI run, including clean PostgreSQL migration/seed, browser, Docker and security gates. Do not reuse this document or a previous SHA as release evidence.
+2. Create the approved PostgreSQL backup before release and restore it to an isolated environment. Compare stable identifiers and counts for `applications`, `task_terms_versions` and `task_bookmarks`; record the backup/restore evidence without secrets or personal payloads. The author has not run a production backup or restore.
+3. Roll out the additive catalog migration with the v2 UI disabled, run health/readiness and legacy-catalog smoke checks, then enable `task_catalog_v2_enabled` only after the release owner accepts the smoke evidence.
+4. For UI rollback, set `TASK_CATALOG_V2_ENABLED=false` through the deployment configuration and restart the affected frontend-serving process. Verify `/api/v1/config` reports false, the legacy catalog renders, and canonical application IDs plus accepted/current terms versions are unchanged. A UI rollback must not drop tables or delete applications, consents or bookmarks.
+5. Review application and analytics logs for the release SHA. Catalog analytics must not contain titles, briefs, search text, URLs or person IDs; private/removed task details must remain absent from responses, DOM and analytics. Operational log review remains separate from automated payload assertions.
+6. Run the approved post-deploy smoke plan: live/ready health, public flags, participant authentication, catalog list/detail/terms reads, an existing application's canonical state and the flag-off legacy path. Do not create real production applications merely for smoke testing. Any mismatch in authorization, persisted state or health is a rollback criterion.
+
 - No production deployment, release approval, task-checkbox approval or self-review is authorized by this document.
 - Official career-grade names/count/source remain unavailable; career grade stays `not_evaluable`, and dependent tasks remain blocked.
-- TC-052 still requires an exact-SHA full CI run, clean migration/seed evidence, backup/rollback and feature-flag rehearsal, logging/privacy review and a post-deploy smoke plan. Product acceptance and the independent reviewer remain external gates.
+- TC-052 is not declared complete by the author. Exact-head automated evidence can cover CI, clean migration/seed and the browser flag path; backup/restore, operational logging/privacy review, product acceptance and the owner's release decision remain external gates.
