@@ -430,6 +430,9 @@ def _demo_benefit_descriptions(index: int) -> list[str]:
 
 
 def build_work_and_rating_batches() -> list[SeedBatch]:
+    # Keep the synthetic catalog discoverable whenever a demo environment is
+    # seeded.  Historical learning/rating events intentionally retain DEMO_NOW.
+    catalog_seeded_at = datetime.now(UTC)
     rubric_row = demo_row(
         "rubric:5plus",
         id=DEFAULT_REVIEW_RUBRIC.rubric_id,
@@ -528,7 +531,7 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
                         "Ключевые метрики и ограничения описаны",
                         "Личный вклад каждого участника подтверждён",
                     ],
-                    "deadline_at": (DEMO_NOW + timedelta(days=14 + index)).isoformat(),
+                    "deadline_at": (catalog_seeded_at + timedelta(days=14 + index)).isoformat(),
                     "data_constraints": (
                         "Только синтетические и обезличенные демонстрационные данные."
                     ),
@@ -550,7 +553,7 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
             f"terms:{index}:1",
             task_id=demo_id(f"task:{index}"),
             terms_version=1,
-            deadline_at=DEMO_NOW + timedelta(days=14 + index),
+            deadline_at=catalog_seeded_at + timedelta(days=14 + index),
             status="published",
             payload={
                 "deliverable": "Репозиторий, прототип, отчёт и презентация результата.",
