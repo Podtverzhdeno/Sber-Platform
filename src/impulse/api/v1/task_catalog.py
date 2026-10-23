@@ -1,16 +1,18 @@
-"""Participant task recommendation catalog page API (TC-008).
+"""Participant task recommendation catalog page API (TC-008, TC-015).
 
 One page endpoint over the authoritative task recommendation projection:
 server filters, stable documented ordering, keyset cursor pagination and
-honest totals. Router registration into the shared app stays with the
-task-catalog-integration lane.
+honest totals. TC-015 adds the permitted detail read and the explicit
+participation-terms read; both enforce object-level visibility through the
+TC-009 safe-404 authority and carry no private project state. Router
+registration into the shared app stays with the task-catalog-integration lane.
 """
 
 from __future__ import annotations
 
 from datetime import datetime
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -276,4 +278,75 @@ async def task_recommendations(
         total_found=page.total_found,
         total_available=page.total_available,
         next_cursor=page.next_cursor,
+    )
+
+
+class CatalogTermsView(BaseModel):
+    task_id: UUID
+    terms_version: int
+    brief_version: int
+    deliverable: str
+    prerequisites: list[str]
+    selection_criteria: list[str]
+    support_model: str
+    ip_terms: str
+    portfolio_permission: str
+    paid: bool
+    payout_condition: str | None
+    deadline_at: datetime | None
+    data_constraints: str | None
+
+
+def _terms_service(request: Request) -> Any:
+    service = getattr(request.app.state, "task_catalog_terms_service", None)
+    if service is None:
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404)
+    return service
+
+
+def _safe_not_found(exc: Exception) -> ApiError:
+    return ApiError(code="RESOURCE_NOT_FOUND", message=str(exc), status_code=404)
+
+
+@router.get("/me/task-recommendations/{task_id}", response_model=CatalogRecommendationItemView)
+async def task_recommendation_detail(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[TaskCatalogPageService, Depends(_service)],
+    task_id: UUID,
+) -> CatalogRecommendationItemView:
+    from impulse.application.task_catalog_visibility import TaskVisibilityError
+
+    try:
+        item = await service.require_visible(authenticated.actor, task_id)
+    except TaskVisibilityError as exc:
+        raise _safe_not_found(exc) from exc
+    return _recommendation_item(item)
+
+
+@router.get("/me/task-recommendations/{task_id}/terms", response_model=CatalogTermsView)
+async def task_recommendation_terms(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[Any, Depends(_terms_service)],
+    task_id: UUID,
+) -> CatalogTermsView:
+    from impulse.application.task_catalog_visibility import TaskVisibilityError
+
+    try:
+        terms = await service.terms(authenticated.actor, task_id)
+    except TaskVisibilityError as exc:
+        raise _safe_not_found(exc) from exc
+    return CatalogTermsView(
+        task_id=terms.task_id,
+        terms_version=terms.terms_version,
+        brief_version=terms.brief_version,
+        deliverable=terms.deliverable,
+        prerequisites=list(terms.prerequisites),
+        selection_criteria=list(terms.selection_criteria),
+        support_model=terms.support_model,
+        ip_terms=terms.ip_terms,
+        portfolio_permission=terms.portfolio_permission,
+        paid=terms.paid,
+        payout_condition=terms.payout_condition,
+        deadline_at=terms.deadline_at,
+        data_constraints=terms.data_constraints,
     )
