@@ -56,7 +56,9 @@ export function ContinueLearning({
           Пройдено {item.progress.numerator} из {item.progress.denominator} · {item.progress.percent}%
         </p>
       )}
+      {!item.progress && <p>Прогресс пока не рассчитан.</p>}
       {item.checkpoint_key && <p>Checkpoint: {item.checkpoint_key}</p>}
+      {item.deadline && <p>Срок: <time dateTime={item.deadline}>{new Date(item.deadline).toLocaleDateString("ru-RU")}</time></p>}
       <button type="button" onClick={() => { onContinue(item.course_key); }}>
         {item.action}
       </button>

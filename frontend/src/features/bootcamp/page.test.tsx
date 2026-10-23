@@ -131,4 +131,25 @@ describe("BootcampPage composition (BC2-301)", () => {
     expect(screen.queryByText("Python")).not.toBeInTheDocument();
     expect(screen.getByText("Активного шага пока нет. Выберите курс в каталоге.")).toBeInTheDocument();
   });
+
+  it("shows an honest continuation state with exactly one primary action", () => {
+    const onContinue = vi.fn();
+    const continuationFixture = overview.continue_learning;
+    if (continuationFixture === null) throw new Error("continuation fixture is required");
+    render(<BootcampPage overview={{ ...overview, continue_learning: { ...continuationFixture, progress: null, deadline: "2026-11-01T00:00:00Z" } }} view="card" onViewChange={vi.fn()} onRoleChange={vi.fn()} onContinue={onContinue} onOpenCourse={vi.fn()} onOpenRequirements={vi.fn()} />);
+    const continuation = screen.getByRole("region", { name: "Python" });
+    expect(continuation).toHaveTextContent("Прогресс пока не рассчитан.");
+    expect(continuation).toHaveTextContent("Checkpoint: functions");
+    expect(continuation.querySelector("time")).toHaveAttribute("datetime", "2026-11-01T00:00:00Z");
+    expect(continuation.querySelectorAll("button")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить курс" }));
+    expect(onContinue).toHaveBeenCalledOnce();
+  });
+
+  it("shows a continuation empty state without an inert action", () => {
+    render(<BootcampPage overview={{ ...overview, continue_learning: null }} view="card" onViewChange={vi.fn()} onRoleChange={vi.fn()} onContinue={vi.fn()} onOpenCourse={vi.fn()} onOpenRequirements={vi.fn()} />);
+    const continuation = screen.getByRole("region", { name: "Продолжить обучение" });
+    expect(continuation).toHaveTextContent("Активного шага пока нет");
+    expect(continuation.querySelector("button")).toBeNull();
+  });
 });
