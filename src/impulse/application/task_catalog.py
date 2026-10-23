@@ -134,10 +134,15 @@ class MatchProjection:
     calculated_at: datetime
     reasons: tuple[MatchReason, ...] = ()
     missing_factors: tuple[str, ...] = ()
+    growth_fit_percent: Decimal | None = None
 
     def __post_init__(self) -> None:
         if not Decimal("0") <= self.coverage <= Decimal("1"):
             raise CatalogContractError("Match coverage must be within 0..1.")
+        if self.growth_fit_percent is not None and not (
+            Decimal("0") <= self.growth_fit_percent <= Decimal("100")
+        ):
+            raise CatalogContractError("Growth fit percent must be within 0..100.")
         if not self.source_snapshot_version.strip():
             raise CatalogContractError("Match source snapshot version is required.")
         if self.status is MatchStatus.CALCULATED:
@@ -312,6 +317,13 @@ class TaskRecommendationProjection:
     allowed_actions: frozenset[CatalogAction]
     sources: tuple[ProjectionSource, ...]
     generated_at: datetime
+    bookmarked: bool = False
+    application_id: UUID | None = None
+    assignment_id: UUID | None = None
+    direction_keys: tuple[str, ...] = ()
+    weekly_workload_minutes: int | None = None
+    created_at: datetime | None = None
+    support_model: str | None = None
 
     def __post_init__(self) -> None:
         if self.schema_version != TASK_CATALOG_SCHEMA_VERSION:
@@ -324,6 +336,8 @@ class TaskRecommendationProjection:
             raise CatalogContractError("Task title and permitted brief summary are required.")
         if self.duration_minutes is not None and self.duration_minutes < 1:
             raise CatalogContractError("Known task duration must be positive.")
+        if self.weekly_workload_minutes is not None and self.weekly_workload_minutes < 1:
+            raise CatalogContractError("Known weekly workload must be positive.")
         if self.places_total < 1:
             raise CatalogContractError("Published task must have at least one place.")
         if (

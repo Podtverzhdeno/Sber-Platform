@@ -58,6 +58,13 @@ from impulse.application.reward import (
 )
 from impulse.application.search import SearchService
 from impulse.application.talent import MemoryTalentStore, TalentService
+from impulse.application.task_catalog_analytics import (
+    MemoryCatalogAnalyticsStore,
+    TaskCatalogAnalyticsService,
+)
+from impulse.application.task_catalog_matching import TaskCatalogProjectionService
+from impulse.application.task_catalog_page import TaskCatalogPageService
+from impulse.application.task_terms_read import TaskDetailReadService
 from impulse.application.work import MemoryWorkStore, WorkService
 from impulse.bootcamp import catalog_router as bootcamp_catalog_router
 from impulse.bootstrap.demo_seed import demo_id
@@ -69,6 +76,7 @@ from impulse.events import ParticipantEventsService
 from impulse.events import router as participant_events_router
 from impulse.events.store import MemoryEventDetailStore, SqlEventDetailStore
 from impulse.infrastructure.buddy_store import SqlBuddyStorage
+from impulse.infrastructure.catalog_analytics_store import SqlCatalogAnalyticsStore
 from impulse.infrastructure.competencies_store import SqlCompetencyEvidenceStore, SqlFrameworkStore
 from impulse.infrastructure.credentials_store import (
     SqlCertificateStore,
@@ -358,6 +366,23 @@ def create_app(
     )
     app.state.ecosystem_service = ecosystem_service
     app.state.work_service = work_service
+    catalog_projection = TaskCatalogProjectionService(
+        work_service,
+        development_service,
+        auth_service.store,
+        demo_mode=runtime_settings.demo_mode,
+    )
+    app.state.task_catalog_projection_service = catalog_projection
+    app.state.task_catalog_service = TaskCatalogPageService(catalog_projection.projections)
+    app.state.task_catalog_terms_service = TaskDetailReadService(
+        app.state.task_catalog_service, catalog_projection.pairs
+    )
+    catalog_analytics_store = (
+        SqlCatalogAnalyticsStore(owned_database)
+        if owned_database is not None
+        else MemoryCatalogAnalyticsStore()
+    )
+    app.state.task_catalog_analytics_service = TaskCatalogAnalyticsService(catalog_analytics_store)
     app.state.reward_service = reward_service
     app.state.project_credential_service = project_credential_service
     app.state.recognition_service = recognition_service

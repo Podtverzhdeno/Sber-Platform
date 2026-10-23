@@ -123,6 +123,7 @@ Seed использует UUIDv5 namespace и `DEMO_SEED_VERSION`. Каждый 
 - `settlement_attempts`
 - `standings`
 - `talent_pipeline_events`
+- `task_bookmarks`
 - `task_invitations`
 - `task_terms_versions`
 - `tasks`

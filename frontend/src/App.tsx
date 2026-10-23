@@ -1,6 +1,7 @@
-﻿import { QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
+import { TaskCatalogV2 } from "./features/task-catalog-v2/page";
 import { ParticipantMetricSpark } from "./features/participant-home-spark";
 import { BuddySuggestionCard } from "./features/buddy-suggestion";
 import { ActivityPanel } from "./features/activity-panel";
@@ -87,7 +88,7 @@ type Actor = {
   navigation: string[];
   csrf_token?: string | null;
 };
-type PublicConfig = { honor_board_enabled?: boolean; demo_mode?: boolean };
+type PublicConfig = { honor_board_enabled?: boolean; demo_mode?: boolean; task_catalog_v2_enabled?: boolean };
 
 type SearchItem = { kind: string; meta: string; ref: string; title: string };
 type SearchResults = { items: SearchItem[] };
@@ -391,11 +392,13 @@ function LoginScreen({
 function Workspace({
   actor,
   honorBoardEnabled,
+  taskCatalogV2Enabled,
   mockCustomer,
   onSwitchRole,
 }: {
   actor: Actor;
   honorBoardEnabled: boolean;
+  taskCatalogV2Enabled: boolean;
   mockCustomer: boolean;
   onSwitchRole: (role: Role) => void;
 }) {
@@ -409,6 +412,7 @@ function Workspace({
   const currentSection = allowed ? navigation[sectionIndex] : null;
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   return (
     <section
       className={`workspace${navigationOpen ? " workspace--nav-open" : ""}`}
@@ -532,7 +536,18 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Задачи" ? (
-          <ParticipantTasks view="catalog" />
+          taskCatalogV2Enabled ? (
+            <TaskCatalogV2
+              onOpenWorkspace={(assignmentId) => {
+                const projectIndex = navigation.indexOf("Мои проекты");
+                if (projectIndex >= 0) {
+                  void navigate(`/workspace/${String(projectIndex)}?project=${encodeURIComponent(assignmentId)}`);
+                }
+              }}
+            />
+          ) : (
+            <ParticipantTasks view="catalog" />
+          )
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Мои проекты" ? (
@@ -1704,6 +1719,9 @@ function ImpulseApp() {
                     mockCustomer={configQuery.data?.demo_mode === true}
                     honorBoardEnabled={
                       configQuery.data?.honor_board_enabled === true
+                    }
+                    taskCatalogV2Enabled={
+                      configQuery.data?.task_catalog_v2_enabled === true
                     }
                     onSwitchRole={(role) => {
                       void switchRole(role);

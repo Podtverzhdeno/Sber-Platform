@@ -100,6 +100,7 @@ from impulse.infrastructure.models.work import (
     contributions,
     deadline_requests,
     projects,
+    task_bookmarks,
     task_terms_versions,
     tasks,
 )
@@ -394,6 +395,40 @@ def build_seed_batches() -> list[SeedBatch]:
     return batches + build_work_and_rating_batches()
 
 
+def _demo_stage_plan(index: int) -> list[dict[str, object]]:
+    """Synthetic 3/5/7-stage customer plans; never operational task progress."""
+    count = (3, 5, 7)[(index - 1) % 3]
+    definitions = (
+        ("discovery", "Исследование", "Уточнить гипотезу, ограничения и критерии результата."),
+        ("design", "План решения", "Согласовать подход и проверяемые этапы работы."),
+        ("prototype", "Прототип", "Подготовить воспроизводимый рабочий результат."),
+        ("validation", "Проверка", "Проверить результат на синтетических данных."),
+        ("review", "Разбор", "Получить обратную связь и зафиксировать изменения."),
+        ("evidence", "Личный вклад", "Подготовить артефакты и описание личного вклада."),
+        ("handoff", "Передача", "Передать результат на независимую приёмку."),
+    )
+    return [
+        {
+            "key": key,
+            "title": title,
+            "summary": summary,
+            "estimated_minutes": 60 * position if position % 2 else None,
+        }
+        for position, (key, title, summary) in enumerate(definitions[:count], start=1)
+    ]
+
+
+def _demo_benefit_descriptions(index: int) -> list[str]:
+    """Explicit synthetic conditions, not granted skills, rewards or experience."""
+    conditions = (
+        "Развитие компетенции возможно только после проверки личного результата.",
+        "Реальный кейс можно добавить в портфолио после приёмки и с учётом условий ИС.",
+        "Командный опыт подтверждается только фактическим участием в назначенной команде.",
+        "Обратная связь предоставляется после проверки результата заказчиком или ментором.",
+    )
+    return list(conditions[: 1 + (index - 1) % len(conditions)])
+
+
 def build_work_and_rating_batches() -> list[SeedBatch]:
     rubric_row = demo_row(
         "rubric:5plus",
@@ -436,6 +471,22 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
         ("Benchmark моделей распознавания документов", "published", 3, "Исследование · CV"),
         ("Анализ факторов удержания пользователей", "published", 4, "Аналитика · Product"),
     )
+    # Synthetic demo facts are persisted in the canonical task payload.  They
+    # are deliberately not an official competency/grade catalog.
+    catalog_specs = (
+        (("python", "recommender-systems"), ("ml", "python"), "intermediate", "remote"),
+        (("python", "llm"), ("python", "ml"), "intermediate", "hybrid"),
+        (("python", "computer-vision"), ("ml", "data"), "advanced", "remote"),
+        (("python", "analytics"), ("data",), "beginner", "remote"),
+        (("python", "security"), ("python", "ml"), "advanced", "hybrid"),
+        (("python", "data-analysis"), ("data", "ml"), "intermediate", "remote"),
+        (("python", "nlp"), ("python", "ml"), "intermediate", "remote"),
+        (("sql", "analytics"), ("data", "product"), "beginner", "hybrid"),
+        (("python", "data-analysis"), ("data", "ml"), "intermediate", "remote"),
+        (("python", "product-analytics"), ("python", "product"), "beginner", "remote"),
+        (("python", "computer-vision"), ("ml", "data"), "advanced", "onsite"),
+        (("sql", "product-analytics"), ("data", "product"), "intermediate", "hybrid"),
+    )
     task_rows = [
         demo_row(
             f"task:{index}",
@@ -447,6 +498,22 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
                 "title": title,
                 "places": places,
                 "category": category,
+                "competency_tags": list(catalog_specs[index - 1][0]),
+                "catalog": {
+                    "direction_keys": list(catalog_specs[index - 1][1]),
+                    "prerequisite_tags": [],
+                    "difficulty": catalog_specs[index - 1][2],
+                    "duration_minutes": 480 + index * 60,
+                    "work_format": catalog_specs[index - 1][3],
+                    "weekly_workload_minutes": 240,
+                    "selection_criteria": [
+                        "Актуальная траектория и подтверждённые компетенции",
+                        "Готовность выполнить опубликованный результат",
+                    ],
+                    "portfolio_permission": "conditional",
+                    "stage_plan": _demo_stage_plan(index),
+                    "benefit_descriptions": _demo_benefit_descriptions(index),
+                },
                 "brief": {
                     "problem": (
                         "Проверить бизнес-гипотезу и подготовить воспроизводимый "
@@ -1184,6 +1251,12 @@ async def reset_demo_data(database: Database, *, demo_mode: bool) -> None:
             delete(assignments).where(
                 assignments.c.person_id.in_(demo_person_ids),
                 assignments.c.data_origin == "demo_runtime",
+            )
+        )
+        await session.execute(
+            delete(task_bookmarks).where(
+                task_bookmarks.c.person_id.in_(demo_person_ids),
+                task_bookmarks.c.data_origin == "demo_runtime",
             )
         )
         await session.execute(

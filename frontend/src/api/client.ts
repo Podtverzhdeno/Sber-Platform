@@ -29,6 +29,10 @@ export type RuntimeApiPath =
   | `/api/v1/mentor/reviews/${string}/${"propose" | "confirm" | "publish"}`
   | `/api/v1/me/notifications/${string}/read`
   | `/api/v1/me/tasks/${string}`
+  | "/api/v1/me/task-recommendations"
+  | "/api/v1/me/task-recommendations/analytics/events"
+  | `/api/v1/me/task-recommendations?${string}`
+  | `/api/v1/me/task-recommendations/${string}`
   | `/api/v1/me/messaging/channels/${string}`
   | `/api/v1/me/messaging/channels/${string}/messages`
   | `/api/v1/me/messaging/channels/${string}/context`

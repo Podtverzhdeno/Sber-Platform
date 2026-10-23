@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import asyncio
+import re
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Protocol
 from uuid import UUID, uuid4
 
@@ -37,6 +38,37 @@ from impulse.domain.work import (
 
 
 @dataclass(frozen=True, slots=True)
+class CatalogStage:
+    """Customer-authored planning stage, separate from operational checkpoints."""
+
+    key: str
+    title: str
+    summary: str
+    estimated_minutes: int | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class TaskCatalogMetadata:
+    """Optional public catalog facts stored with the canonical task aggregate.
+
+    Empty/zero mappings are never replaced by client-side demo values.  A legacy
+    task has no additional prerequisites by default, while unknown format,
+    difficulty and workload remain ``None`` and reduce matching coverage.
+    """
+
+    direction_keys: tuple[str, ...] = ()
+    prerequisite_tags: tuple[str, ...] = ()
+    difficulty: str | None = None
+    duration_minutes: int | None = None
+    work_format: str | None = None
+    weekly_workload_minutes: int | None = None
+    selection_criteria: tuple[str, ...] = ()
+    portfolio_permission: str = "none"
+    stage_plan: tuple[CatalogStage, ...] = ()
+    benefit_descriptions: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
 class TaskRecord:
     project_key: str
     task_key: str
@@ -46,6 +78,8 @@ class TaskRecord:
     mode: TaskMode = TaskMode.OPEN
     competency_tags: tuple[str, ...] = ()
     case_rubric: CaseRubric | None = None
+    catalog: TaskCatalogMetadata = field(default_factory=TaskCatalogMetadata)
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 @dataclass(frozen=True, slots=True)
@@ -87,6 +121,7 @@ class ApplicationRecord:
     accepted_terms_version: int
     status: ApplicationStatus
     version: int = 1
+    idempotency_key: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -287,6 +322,14 @@ class WorkStore(Protocol):
     async def accepted_terms_versions(
         self, person_id: UUID, task_ids: Sequence[UUID]
     ) -> dict[UUID, int | None]: ...
+    async def applications_for_person_tasks(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> dict[UUID, ApplicationRecord]: ...
+    async def assignment_counts_for_tasks(self, task_ids: Sequence[UUID]) -> dict[UUID, int]: ...
+    async def bookmarked_task_ids(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> frozenset[UUID]: ...
+    async def set_task_bookmark(self, person_id: UUID, task_id: UUID, saved: bool) -> bool: ...
     async def invitation(self, task_id: UUID, person_id: UUID) -> InvitationRecord | None: ...
     async def invitations_for_person_tasks(
         self, person_id: UUID, task_ids: Sequence[UUID]
@@ -304,7 +347,11 @@ class WorkStore(Protocol):
     ) -> InvitationRecord: ...
     async def accept_terms(self, person_id: UUID, task_id: UUID, version: int) -> None: ...
     async def apply(
-        self, person_id: UUID, task_id: UUID, terms_version: int
+        self,
+        person_id: UUID,
+        task_id: UUID,
+        terms_version: int,
+        idempotency_key: str | None = None,
     ) -> ApplicationRecord: ...
     async def applications(self, task_id: UUID) -> tuple[ApplicationRecord, ...]: ...
     async def application(self, application_id: UUID) -> ApplicationRecord | None: ...
@@ -370,6 +417,7 @@ class MemoryWorkStore:
         self._records: dict[UUID, TaskRecord] = {}
         self._terms: dict[UUID, tuple[TermsRecord, ...]] = {}
         self._acceptances: dict[tuple[UUID, UUID], int] = {}
+        self._bookmarks: set[tuple[UUID, UUID]] = set()
         self._applications: dict[UUID, ApplicationRecord] = {}
         self._invitations: dict[tuple[UUID, UUID], InvitationRecord] = {}
         self._team_requests: dict[UUID, tuple[TeamRequestRecord, ...]] = {}
@@ -551,10 +599,52 @@ class MemoryWorkStore:
             if owner == person_id and task_id in identifiers
         }
 
+    async def applications_for_person_tasks(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> dict[UUID, ApplicationRecord]:
+        identifiers = set(task_ids)
+        return {
+            item.task_id: item
+            for item in self._applications.values()
+            if item.person_id == person_id and item.task_id in identifiers
+        }
+
+    async def assignment_counts_for_tasks(self, task_ids: Sequence[UUID]) -> dict[UUID, int]:
+        identifiers = set(task_ids)
+        counts = {task_id: 0 for task_id in identifiers}
+        for item in self._assignments.values():
+            if item.task_id in identifiers:
+                counts[item.task_id] += 1
+        return counts
+
+    async def bookmarked_task_ids(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> frozenset[UUID]:
+        identifiers = set(task_ids)
+        return frozenset(
+            task_id
+            for owner, task_id in self._bookmarks
+            if owner == person_id and task_id in identifiers
+        )
+
+    async def set_task_bookmark(self, person_id: UUID, task_id: UUID, saved: bool) -> bool:
+        key = (person_id, task_id)
+        if saved:
+            self._bookmarks.add(key)
+        else:
+            self._bookmarks.discard(key)
+        return saved
+
     async def accept_terms(self, person_id: UUID, task_id: UUID, version: int) -> None:
         self._acceptances[(person_id, task_id)] = version
 
-    async def apply(self, person_id: UUID, task_id: UUID, terms_version: int) -> ApplicationRecord:
+    async def apply(
+        self,
+        person_id: UUID,
+        task_id: UUID,
+        terms_version: int,
+        idempotency_key: str | None = None,
+    ) -> ApplicationRecord:
         matching = [
             record
             for record in self._applications.values()
@@ -562,6 +652,16 @@ class MemoryWorkStore:
         ]
         current = matching[-1] if matching else None
         if current is not None:
+            if (
+                idempotency_key is not None
+                and current.idempotency_key is not None
+                and current.idempotency_key != idempotency_key
+            ):
+                raise ApiError(
+                    code="IDEMPOTENCY_KEY_REUSED",
+                    message="Ключ идемпотентности уже использован для другого отклика.",
+                    status_code=409,
+                )
             if current.status is ApplicationStatus.APPLIED:
                 return current
             if current.status is ApplicationStatus.TERMS_ACCEPTED:
@@ -572,6 +672,7 @@ class MemoryWorkStore:
                     terms_version,
                     ApplicationStatus.APPLIED,
                     current.version + 1,
+                    idempotency_key or current.idempotency_key,
                 )
                 self._applications[current.id] = updated
                 return updated
@@ -583,12 +684,18 @@ class MemoryWorkStore:
                     terms_version,
                     ApplicationStatus.APPLIED,
                     current.version + 1,
+                    idempotency_key or current.idempotency_key,
                 )
                 self._applications[current.id] = record
                 return record
             return current
         record = ApplicationRecord(
-            uuid4(), task_id, person_id, terms_version, ApplicationStatus.APPLIED
+            uuid4(),
+            task_id,
+            person_id,
+            terms_version,
+            ApplicationStatus.APPLIED,
+            idempotency_key=idempotency_key,
         )
         self._applications[record.id] = record
         return record
@@ -604,6 +711,7 @@ class MemoryWorkStore:
             current.accepted_terms_version,
             status,
             current.version + 1,
+            current.idempotency_key,
         )
         self._applications[application_id] = updated
         return updated
@@ -636,6 +744,7 @@ class MemoryWorkStore:
             application.accepted_terms_version,
             status,
             application.version + 1,
+            application.idempotency_key,
         )
         assignment = AssignmentRecord(
             uuid4(),
@@ -909,6 +1018,7 @@ class WorkService:
         mode: TaskMode = TaskMode.OPEN,
         competency_tags: tuple[str, ...] = (),
         case_rubric: CaseRubric | None = None,
+        catalog: TaskCatalogMetadata | None = None,
     ) -> TaskRecord:
         self._role(actor, Role.CUSTOMER)
         normalized_tags = tuple(
@@ -935,6 +1045,7 @@ class WorkService:
                 mode,
                 normalized_tags,
                 case_rubric,
+                catalog or TaskCatalogMetadata(),
             )
         )
         if brief.deadline_at is not None:
@@ -1623,8 +1734,45 @@ class WorkService:
         await self.store.accept_terms(actor.person_id, task_id, terms_version)
         return MarketplaceTask(detail.task, detail.terms, terms_version)
 
-    async def apply(self, actor: ActorContext, task_id: UUID) -> ApplicationRecord:
+    async def apply(
+        self, actor: ActorContext, task_id: UUID, idempotency_key: str | None = None
+    ) -> ApplicationRecord:
+        if (
+            idempotency_key is not None
+            and re.fullmatch(r"[A-Za-z0-9._:-]{8,128}", idempotency_key) is None
+        ):
+            raise ApiError(
+                code="INVALID_IDEMPOTENCY_KEY",
+                message="Ключ идемпотентности должен содержать 8–128 безопасных символов.",
+                status_code=422,
+            )
         detail = await self.task_detail(actor, task_id)
+        now = datetime.now(UTC)
+        if detail.terms.deadline_at <= now:
+            raise ApiError(
+                code="TASK_DEADLINE_PASSED",
+                message="Срок отклика на задачу истёк.",
+                status_code=409,
+            )
+        if len(await self.store.assignments_for_task(task_id)) >= detail.task.places:
+            raise ApiError(code="TASK_FULL", message="Места задачи уже заняты.", status_code=409)
+        prerequisites = frozenset(tag.casefold() for tag in detail.task.catalog.prerequisite_tags)
+        if prerequisites:
+            fresh_since = now - timedelta(days=365)
+            verified_tags = frozenset(
+                tag.casefold()
+                for evidence in await self._case_evidence(actor.person_id)
+                if evidence.submitted_at >= fresh_since
+                for tag in evidence.competency_tags
+            )
+            missing = tuple(sorted(prerequisites - verified_tags))
+            if missing:
+                raise ApiError(
+                    code="PREREQUISITES_NOT_MET",
+                    message="Для отклика нужны подтверждённые компетенции: " + ", ".join(missing),
+                    status_code=409,
+                    field_errors={"prerequisites": list(missing)},
+                )
         if detail.task.mode is TaskMode.INVITATION_ONLY:
             invitation = await self.store.invitation(task_id, actor.person_id)
             if invitation is None or invitation.status != "accepted":
@@ -1645,7 +1793,14 @@ class WorkService:
                 message="Подтвердите актуальную версию условий перед откликом.",
                 status_code=409,
             )
-        return await self.store.apply(actor.person_id, task_id, detail.terms.version)
+        return await self.store.apply(
+            actor.person_id, task_id, detail.terms.version, idempotency_key
+        )
+
+    async def set_task_bookmark(self, actor: ActorContext, task_id: UUID, saved: bool) -> bool:
+        """Idempotent participant bookmark over the same visible task authority."""
+        await self.task_detail(actor, task_id)
+        return await self.store.set_task_bookmark(actor.person_id, task_id, saved)
 
     async def withdraw_application(
         self, actor: ActorContext, application_id: UUID

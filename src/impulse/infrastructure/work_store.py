@@ -8,7 +8,7 @@ from decimal import Decimal
 from typing import Any, cast
 from uuid import UUID, uuid4
 
-from sqlalchemy import func, select, update
+from sqlalchemy import delete, func, select, update
 from sqlalchemy.dialects.postgresql import insert
 
 from impulse.api.errors import ApiError
@@ -17,10 +17,12 @@ from impulse.application.work import (
     ApplicationRecord,
     AssignmentRecord,
     CandidateReservation,
+    CatalogStage,
     CheckpointRecord,
     ContributionRecord,
     DisputeRecord,
     InvitationRecord,
+    TaskCatalogMetadata,
     TaskRecord,
     TeamArtifactRecord,
     TeamRequestRecord,
@@ -57,6 +59,7 @@ from impulse.infrastructure.models.work import (
     candidate_reservations,
     contributions,
     projects,
+    task_bookmarks,
     task_invitations,
     task_terms_versions,
     tasks,
@@ -75,6 +78,26 @@ def _payload(record: TaskRecord) -> dict[str, object]:
         "places": record.places,
         "mode": record.mode.value,
         "competency_tags": list(record.competency_tags),
+        "catalog": {
+            "direction_keys": list(record.catalog.direction_keys),
+            "prerequisite_tags": list(record.catalog.prerequisite_tags),
+            "difficulty": record.catalog.difficulty,
+            "duration_minutes": record.catalog.duration_minutes,
+            "work_format": record.catalog.work_format,
+            "weekly_workload_minutes": record.catalog.weekly_workload_minutes,
+            "selection_criteria": list(record.catalog.selection_criteria),
+            "portfolio_permission": record.catalog.portfolio_permission,
+            "benefit_descriptions": list(record.catalog.benefit_descriptions),
+            "stage_plan": [
+                {
+                    "key": stage.key,
+                    "title": stage.title,
+                    "summary": stage.summary,
+                    "estimated_minutes": stage.estimated_minutes,
+                }
+                for stage in record.catalog.stage_plan
+            ],
+        },
         "case_rubric": (
             {
                 "version": record.case_rubric.version,
@@ -118,6 +141,64 @@ def _payload(record: TaskRecord) -> dict[str, object]:
             else None
         ),
     }
+
+
+def _catalog_strings(value: object) -> tuple[str, ...]:
+    if not isinstance(value, list | tuple):
+        return ()
+    values = cast(list[object] | tuple[object, ...], value)
+    return tuple(str(item) for item in values)
+
+
+def _catalog_int(value: object) -> int | None:
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        raise ValueError("Catalog numeric fields must be integers")
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        return int(value)
+    raise ValueError("Catalog numeric fields must be integers")
+
+
+def _catalog_metadata(payload: dict[str, object]) -> TaskCatalogMetadata:
+    raw = payload.get("catalog")
+    if not isinstance(raw, dict):
+        return TaskCatalogMetadata()
+    data = cast(dict[str, object], raw)
+    raw_stages = data.get("stage_plan", [])
+    stages: list[CatalogStage] = []
+    if isinstance(raw_stages, list):
+        for raw_stage in cast(list[object], raw_stages):
+            if not isinstance(raw_stage, dict):
+                continue
+            stage = cast(dict[str, object], raw_stage)
+            minutes = stage.get("estimated_minutes")
+            stages.append(
+                CatalogStage(
+                    key=str(stage.get("key", "")),
+                    title=str(stage.get("title", "")),
+                    summary=str(stage.get("summary", "")),
+                    estimated_minutes=_catalog_int(minutes),
+                )
+            )
+    duration = data.get("duration_minutes")
+    workload = data.get("weekly_workload_minutes")
+    difficulty = data.get("difficulty")
+    work_format = data.get("work_format")
+    return TaskCatalogMetadata(
+        direction_keys=_catalog_strings(data.get("direction_keys", [])),
+        prerequisite_tags=_catalog_strings(data.get("prerequisite_tags", [])),
+        difficulty=str(difficulty) if difficulty is not None else None,
+        duration_minutes=_catalog_int(duration),
+        work_format=str(work_format) if work_format is not None else None,
+        weekly_workload_minutes=_catalog_int(workload),
+        selection_criteria=_catalog_strings(data.get("selection_criteria", [])),
+        portfolio_permission=str(data.get("portfolio_permission", "none")),
+        stage_plan=tuple(stages),
+        benefit_descriptions=_catalog_strings(data.get("benefit_descriptions", [])),
+    )
 
 
 def _record(row: Any) -> TaskRecord:
@@ -170,6 +251,8 @@ def _record(row: Any) -> TaskRecord:
             if isinstance(payload.get("case_rubric"), dict)
             else None
         ),
+        catalog=_catalog_metadata(payload),
+        created_at=row.created_at,
     )
 
 
@@ -486,6 +569,76 @@ class SqlWorkStore(WorkStore):
             accepted.setdefault(task_id, version)
         return accepted
 
+    async def applications_for_person_tasks(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> dict[UUID, ApplicationRecord]:
+        identifiers = tuple(set(task_ids))
+        if not identifiers:
+            return {}
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(applications).where(
+                        applications.c.person_id == person_id,
+                        applications.c.task_id.in_(identifiers),
+                    )
+                )
+            ).all()
+        return {row.task_id: self._application(row) for row in rows}
+
+    async def assignment_counts_for_tasks(self, task_ids: Sequence[UUID]) -> dict[UUID, int]:
+        identifiers = tuple(set(task_ids))
+        if not identifiers:
+            return {}
+        async with self.database.sessions() as session:
+            rows = (
+                await session.execute(
+                    select(assignments.c.task_id, func.count(assignments.c.id))
+                    .where(assignments.c.task_id.in_(identifiers))
+                    .group_by(assignments.c.task_id)
+                )
+            ).all()
+        counts = {task_id: 0 for task_id in identifiers}
+        counts.update({row.task_id: int(row[1]) for row in rows})
+        return counts
+
+    async def bookmarked_task_ids(
+        self, person_id: UUID, task_ids: Sequence[UUID]
+    ) -> frozenset[UUID]:
+        identifiers = tuple(set(task_ids))
+        if not identifiers:
+            return frozenset()
+        async with self.database.sessions() as session:
+            rows = await session.scalars(
+                select(task_bookmarks.c.task_id).where(
+                    task_bookmarks.c.person_id == person_id,
+                    task_bookmarks.c.task_id.in_(identifiers),
+                )
+            )
+            return frozenset(rows.all())
+
+    async def set_task_bookmark(self, person_id: UUID, task_id: UUID, saved: bool) -> bool:
+        async with self.database.session() as session:
+            if saved:
+                await session.execute(
+                    insert(task_bookmarks)
+                    .values(
+                        task_id=task_id,
+                        person_id=person_id,
+                        created_by=person_id,
+                        data_origin="demo_runtime",
+                    )
+                    .on_conflict_do_nothing(constraint="uq_task_bookmarks_task_id_person_id")
+                )
+            else:
+                await session.execute(
+                    delete(task_bookmarks).where(
+                        task_bookmarks.c.person_id == person_id,
+                        task_bookmarks.c.task_id == task_id,
+                    )
+                )
+        return saved
+
     @staticmethod
     def _invitation(row: Any) -> InvitationRecord:
         return InvitationRecord(
@@ -727,9 +880,16 @@ class SqlWorkStore(WorkStore):
             row.accepted_terms_version,
             ApplicationStatus(row.status),
             row.version,
+            row.payload.get("idempotency_key"),
         )
 
-    async def apply(self, person_id: UUID, task_id: UUID, terms_version: int) -> ApplicationRecord:
+    async def apply(
+        self,
+        person_id: UUID,
+        task_id: UUID,
+        terms_version: int,
+        idempotency_key: str | None = None,
+    ) -> ApplicationRecord:
         async with self.database.session() as session:
             row = (
                 await session.execute(
@@ -746,6 +906,16 @@ class SqlWorkStore(WorkStore):
                     status_code=409,
                 )
             record = self._application(row)
+            if (
+                idempotency_key is not None
+                and record.idempotency_key is not None
+                and record.idempotency_key != idempotency_key
+            ):
+                raise ApiError(
+                    code="IDEMPOTENCY_KEY_REUSED",
+                    message="Ключ идемпотентности уже использован для другого отклика.",
+                    status_code=409,
+                )
             if record.status is ApplicationStatus.TERMS_ACCEPTED:
                 try:
                     await mutate_with_history(
@@ -753,7 +923,13 @@ class SqlWorkStore(WorkStore):
                         table=applications,
                         entity_id=record.id,
                         expected_version=record.version,
-                        changes={"status": ApplicationStatus.APPLIED.value},
+                        changes={
+                            "status": ApplicationStatus.APPLIED.value,
+                            "payload": {
+                                **row.payload,
+                                "idempotency_key": idempotency_key or record.idempotency_key,
+                            },
+                        },
                         actor_id=person_id,
                         action="application.applied",
                         event_key=f"application:{record.id}:applied:v{record.version}",
@@ -769,6 +945,7 @@ class SqlWorkStore(WorkStore):
                     record.accepted_terms_version,
                     ApplicationStatus.APPLIED,
                     record.version + 1,
+                    idempotency_key or record.idempotency_key,
                 )
             if record.status in {ApplicationStatus.WITHDRAWN, ApplicationStatus.REJECTED}:
                 try:
@@ -780,6 +957,10 @@ class SqlWorkStore(WorkStore):
                         changes={
                             "status": ApplicationStatus.APPLIED.value,
                             "accepted_terms_version": terms_version,
+                            "payload": {
+                                **row.payload,
+                                "idempotency_key": idempotency_key or record.idempotency_key,
+                            },
                         },
                         actor_id=person_id,
                         action="application.reapplied",
@@ -796,6 +977,7 @@ class SqlWorkStore(WorkStore):
                     terms_version,
                     ApplicationStatus.APPLIED,
                     record.version + 1,
+                    idempotency_key or record.idempotency_key,
                 )
             return record
 
@@ -835,6 +1017,7 @@ class SqlWorkStore(WorkStore):
                 record.accepted_terms_version,
                 status,
                 record.version + 1,
+                record.idempotency_key,
             )
 
     async def applications(self, task_id: UUID) -> tuple[ApplicationRecord, ...]:

@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Header, Request
 from pydantic import AnyHttpUrl, AwareDatetime, BaseModel, Field
 
 from impulse.api.errors import ApiError
@@ -20,6 +20,7 @@ from impulse.application.work import (
     AssignmentRecord,
     CandidateMatch,
     CandidateReservation,
+    CatalogStage,
     CheckpointRecord,
     ContributionRecord,
     CustomerTaskDetail,
@@ -28,6 +29,7 @@ from impulse.application.work import (
     ManagerOverview,
     MarketplaceTask,
     ParticipantTaskDetail,
+    TaskCatalogMetadata,
     TaskRecord,
     TeamArtifactRecord,
     TeamRequestRecord,
@@ -74,6 +76,62 @@ class CaseRubricRequest(BaseModel):
     defense: str = Field(min_length=1, max_length=1000)
 
 
+class CatalogStageRequest(BaseModel):
+    key: str = Field(min_length=1, max_length=96)
+    title: str = Field(min_length=1, max_length=200)
+    summary: str = Field(min_length=1, max_length=2000)
+    estimated_minutes: int | None = Field(default=None, ge=1, le=100_000)
+
+
+class TaskCatalogMetadataRequest(BaseModel):
+    direction_keys: list[str] = Field(default_factory=list, max_length=20)
+    prerequisite_tags: list[str] = Field(default_factory=list, max_length=20)
+    difficulty: Literal["beginner", "intermediate", "advanced"] | None = None
+    duration_minutes: int | None = Field(default=None, ge=1, le=100_000)
+    work_format: Literal["remote", "hybrid", "onsite"] | None = None
+    weekly_workload_minutes: int | None = Field(default=None, ge=1, le=10_000)
+    selection_criteria: list[str] = Field(default_factory=list, max_length=30)
+    portfolio_permission: Literal["none", "restricted", "conditional", "full"] = "none"
+    stage_plan: list[CatalogStageRequest] = Field(
+        default_factory=list[CatalogStageRequest], max_length=30
+    )
+    benefit_descriptions: list[str] = Field(default_factory=list, max_length=20)
+
+    def to_domain(self) -> TaskCatalogMetadata:
+        return TaskCatalogMetadata(
+            direction_keys=tuple(
+                dict.fromkeys(
+                    item.strip().casefold() for item in self.direction_keys if item.strip()
+                )
+            ),
+            prerequisite_tags=tuple(
+                dict.fromkeys(
+                    item.strip().casefold() for item in self.prerequisite_tags if item.strip()
+                )
+            ),
+            difficulty=self.difficulty,
+            duration_minutes=self.duration_minutes,
+            work_format=self.work_format,
+            weekly_workload_minutes=self.weekly_workload_minutes,
+            selection_criteria=tuple(
+                item.strip() for item in self.selection_criteria if item.strip()
+            ),
+            portfolio_permission=self.portfolio_permission,
+            stage_plan=tuple(
+                CatalogStage(
+                    key=item.key,
+                    title=item.title,
+                    summary=item.summary,
+                    estimated_minutes=item.estimated_minutes,
+                )
+                for item in self.stage_plan
+            ),
+            benefit_descriptions=tuple(
+                item.strip() for item in self.benefit_descriptions if item.strip()
+            ),
+        )
+
+
 class CreateTaskRequest(BaseModel):
     task_key: str = Field(min_length=1, max_length=96)
     title: str = Field(min_length=1, max_length=200)
@@ -89,6 +147,7 @@ class CreateTaskRequest(BaseModel):
     competency_tags: list[str] = Field(default_factory=list, max_length=20)
     allowed_artifacts: list[str] = Field(default_factory=list, max_length=10)
     case_rubric: CaseRubricRequest | None = None
+    catalog: TaskCatalogMetadataRequest | None = None
     compensation: CompensationRequest
 
 
@@ -229,6 +288,7 @@ class TaskView(BaseModel):
     mode: TaskMode = TaskMode.OPEN
     competency_tags: list[str] = Field(default_factory=list)
     case_rubric: CaseRubricRequest | None = None
+    catalog: TaskCatalogMetadataRequest = Field(default_factory=TaskCatalogMetadataRequest)
     application_count: int | None = None
     assignment_count: int | None = None
     pending_result_count: int | None = None
@@ -558,6 +618,7 @@ def _view(record: TaskRecord) -> TaskView:
             if record.case_rubric
             else None
         ),
+        catalog=TaskCatalogMetadataRequest.model_validate(record.catalog, from_attributes=True),
     )
 
 
@@ -1080,6 +1141,7 @@ async def create_task(
             case_rubric=(
                 CaseRubric(**command.case_rubric.model_dump()) if command.case_rubric else None
             ),
+            catalog=command.catalog.to_domain() if command.catalog is not None else None,
         )
     )
 
@@ -1296,8 +1358,9 @@ async def apply_to_task(
     task_id: UUID,
     authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
     service: Annotated[WorkService, Depends(_service)],
+    idempotency_key: Annotated[str | None, Header(alias="Idempotency-Key", max_length=128)] = None,
 ) -> ApplicationView:
-    return _application_view(await service.apply(authenticated.actor, task_id))
+    return _application_view(await service.apply(authenticated.actor, task_id, idempotency_key))
 
 
 @router.post("/me/applications/{application_id}/withdraw", response_model=ApplicationView)

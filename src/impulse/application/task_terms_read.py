@@ -67,10 +67,8 @@ class TaskTermsSnapshot:
             raise TaskTermsError(
                 "Portfolio permission must be none, restricted, conditional or full."
             )
-        if not self.prerequisites:
-            raise TaskTermsError("Terms snapshot requires an explicit prerequisites list.")
-        if not self.selection_criteria:
-            raise TaskTermsError("Terms snapshot requires explicit selection criteria.")
+        # Empty tuples are authoritative "none published" states.  The UI must
+        # say so explicitly instead of inventing prerequisite/selection rules.
         _require_paid_condition(self.paid, self.payout_condition)
 
 

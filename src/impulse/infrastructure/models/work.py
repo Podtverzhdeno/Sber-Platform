@@ -37,6 +37,12 @@ applications = domain_table(
     integer_field("accepted_terms_version"),
     uniques=(("task_id", "person_id"),),
 )
+task_bookmarks = domain_table(
+    "task_bookmarks",
+    uuid_field("task_id", "tasks.id"),
+    uuid_field("person_id", "persons.id"),
+    uniques=(("task_id", "person_id"),),
+)
 task_invitations = domain_table(
     "task_invitations",
     uuid_field("task_id", "tasks.id"),

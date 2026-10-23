@@ -2,7 +2,10 @@ import { existsSync } from "node:fs";
 import { readFile, readdir } from "node:fs/promises";
 
 const html = await readFile(new URL("../dist/index.html", import.meta.url), "utf8");
-const styles = await readFile(new URL("../src/styles.css", import.meta.url), "utf8");
+const stylesPath = existsSync(new URL("../src/styles.css", import.meta.url))
+  ? "../src/styles.css"
+  : "../src/styles.scss";
+const styles = await readFile(new URL(stylesPath, import.meta.url), "utf8");
 
 const failures = [];
 if (!html.includes("Content-Security-Policy")) failures.push("CSP meta is missing");

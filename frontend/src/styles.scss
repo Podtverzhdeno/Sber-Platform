@@ -2432,3 +2432,5 @@ tbody tr:hover, tbody tr:focus-within { background: var(--c-rgb2f95ff_a05);; }
 .ctw-card [data-testid="platform-connect-form"] input, .ctw-card [data-testid="platform-challenge"] input { min-height: 42px; padding: 9px 11px; border: 1px solid var(--color-border-strong); border-radius: 9px; color: var(--color-text); background: var(--color-surface-1);; }
 // WCAG AA: white text needs the stronger teal on selected catalog controls.
 :root[data-theme='light'] .catalog-segments button[aria-pressed="true"] { background: var(--color-primary-strong);; }
+// TC-043: keep the shared sign-out control legible on the light workspace surface.
+:root[data-theme='light'] .ghost-button { color: var(--color-text);; }

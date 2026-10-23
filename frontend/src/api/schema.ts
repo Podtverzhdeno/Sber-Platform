@@ -1767,6 +1767,108 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/task-recommendations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Task Recommendations */
+        get: operations["task_recommendations_api_v1_me_task_recommendations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/task-recommendations/analytics/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record Task Catalog Analytics */
+        post: operations["record_task_catalog_analytics_api_v1_me_task_recommendations_analytics_events_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/task-recommendations/{task_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Task Recommendation Detail */
+        get: operations["task_recommendation_detail_api_v1_me_task_recommendations__task_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/task-recommendations/{task_id}/bookmark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save Task Bookmark */
+        put: operations["save_task_bookmark_api_v1_me_task_recommendations__task_id__bookmark_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/task-recommendations/{task_id}/terms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Task Recommendation Terms */
+        get: operations["task_recommendation_terms_api_v1_me_task_recommendations__task_id__terms_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/task-recommendations/{task_id}/terms/revalidate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Task Recommendation Terms Revalidate */
+        post: operations["task_recommendation_terms_revalidate_api_v1_me_task_recommendations__task_id__terms_revalidate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/tasks/{task_id}": {
         parameters: {
             query?: never;
@@ -2959,6 +3061,11 @@ export interface components {
             source_type: string;
         };
         /**
+         * ApplicationState
+         * @enum {string}
+         */
+        ApplicationState: "none" | "submitted" | "under_review" | "accepted" | "assigned" | "closed" | "unavailable";
+        /**
          * ApplicationStatus
          * @enum {string}
          */
@@ -3047,6 +3154,26 @@ export interface components {
             deadline_at: string;
             /** Reason */
             reason: string;
+        };
+        /**
+         * BenefitState
+         * @enum {string}
+         */
+        BenefitState: "potential" | "actual" | "unavailable";
+        /** BookmarkRequest */
+        BookmarkRequest: {
+            /** Saved */
+            saved: boolean;
+        };
+        /** BookmarkView */
+        BookmarkView: {
+            /** Saved */
+            saved: boolean;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
         };
         /** BriefDraftRequest */
         BriefDraftRequest: {
@@ -3384,6 +3511,296 @@ export interface components {
             title: string;
             /** Version */
             version: number;
+        };
+        /**
+         * CatalogAction
+         * @enum {string}
+         */
+        CatalogAction: "open_conditions" | "apply" | "withdraw" | "open_application" | "open_workspace" | "bookmark" | "share";
+        /** CatalogAnalyticsReceiptView */
+        CatalogAnalyticsReceiptView: {
+            /** Duplicate */
+            duplicate: boolean;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+        };
+        /** CatalogAnalyticsRequest */
+        CatalogAnalyticsRequest: {
+            /** Algorithm Version */
+            algorithm_version?: string | null;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            event_name: components["schemas"]["CatalogEventName"];
+            result?: components["schemas"]["CatalogApplicationResult"] | null;
+            /** Snapshot Version */
+            snapshot_version?: string | null;
+            /** Task Id */
+            task_id?: string | null;
+            /** Terms Version */
+            terms_version?: number | null;
+            /** View */
+            view?: string | null;
+        };
+        /**
+         * CatalogApplicationResult
+         * @enum {string}
+         */
+        CatalogApplicationResult: "success" | "error" | "terms_changed" | "offline";
+        /** CatalogBenefitView */
+        CatalogBenefitView: {
+            /** Benefit Type */
+            benefit_type: string;
+            /** Code */
+            code: string;
+            /** Condition */
+            condition: string;
+            /** Evidence Refs */
+            evidence_refs: string[];
+            /** Label */
+            label: string;
+            /** Rule Kind */
+            rule_kind: string | null;
+            state: components["schemas"]["BenefitState"];
+        };
+        /** CatalogCustomerView */
+        CatalogCustomerView: {
+            /** Display Name */
+            display_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            verification: components["schemas"]["CustomerVerification"];
+        };
+        /** CatalogEligibilityView */
+        CatalogEligibilityView: {
+            /** Missing Prerequisites */
+            missing_prerequisites: string[];
+            /** Reason Codes */
+            reason_codes: string[];
+            status: components["schemas"]["EligibilityStatus"];
+        };
+        /**
+         * CatalogEventName
+         * @enum {string}
+         */
+        CatalogEventName: "catalog_view" | "task_select" | "conditions_open" | "application_result" | "growth_expand" | "view_change";
+        /** CatalogMatchReasonView */
+        CatalogMatchReasonView: {
+            /** Code */
+            code: string;
+            /** Label */
+            label: string;
+        };
+        /** CatalogMatchView */
+        CatalogMatchView: {
+            /** Algorithm Version */
+            algorithm_version: string | null;
+            /**
+             * Calculated At
+             * Format: date-time
+             */
+            calculated_at: string;
+            /** Coverage */
+            coverage: string;
+            /** Growth Fit Percent */
+            growth_fit_percent: string | null;
+            /** Missing Factors */
+            missing_factors: string[];
+            /** Percent */
+            percent: string | null;
+            /** Reasons */
+            reasons: components["schemas"]["CatalogMatchReasonView"][];
+            /** Source Snapshot Version */
+            source_snapshot_version: string;
+            status: components["schemas"]["MatchStatus"];
+        };
+        /** CatalogPageView */
+        CatalogPageView: {
+            /** Items */
+            items: components["schemas"]["CatalogRecommendationItemView"][];
+            /** Next Cursor */
+            next_cursor: string | null;
+            /** Snapshot At */
+            snapshot_at: string | null;
+            /** Total Available */
+            total_available: number;
+            /** Total Calculated */
+            total_calculated: number;
+            /** Total Found */
+            total_found: number;
+            /** Total Saved */
+            total_saved: number;
+        };
+        /** CatalogProjectionSourceView */
+        CatalogProjectionSourceView: {
+            /** Kind */
+            kind: string;
+            /** Observed At */
+            observed_at?: string | null;
+            /** Ref */
+            ref: string;
+            /** Version */
+            version: string;
+        };
+        /** CatalogRecommendationItemView */
+        CatalogRecommendationItemView: {
+            /** Allowed Actions */
+            allowed_actions: components["schemas"]["CatalogAction"][];
+            /** Application Id */
+            application_id: string | null;
+            application_state: components["schemas"]["ApplicationState"];
+            /** Assignment Id */
+            assignment_id: string | null;
+            /** Benefits */
+            benefits: components["schemas"]["CatalogBenefitView"][];
+            /** Bookmarked */
+            bookmarked: boolean;
+            /** Brief Summary */
+            brief_summary: string;
+            /** Brief Version */
+            brief_version: number;
+            /** Competency Tags */
+            competency_tags: string[];
+            /** Created At */
+            created_at: string | null;
+            customer: components["schemas"]["CatalogCustomerView"];
+            /** Deadline At */
+            deadline_at: string | null;
+            /** Difficulty */
+            difficulty: string | null;
+            /** Direction Keys */
+            direction_keys: string[];
+            /** Duration Minutes */
+            duration_minutes: number | null;
+            eligibility: components["schemas"]["CatalogEligibilityView"];
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            match: components["schemas"]["CatalogMatchView"];
+            /** Places Available */
+            places_available: number | null;
+            /** Places Total */
+            places_total: number;
+            /** Skill Impact */
+            skill_impact: components["schemas"]["CatalogSkillImpactView"][];
+            /** Snapshot Version */
+            snapshot_version: string;
+            /** Sources */
+            sources: components["schemas"]["CatalogProjectionSourceView"][];
+            stage_plan: components["schemas"]["CatalogStagePlanView"];
+            /** Support Model */
+            support_model: string | null;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+            /** Terms Version */
+            terms_version: number;
+            /** Title */
+            title: string;
+            /** Weekly Workload Minutes */
+            weekly_workload_minutes: number | null;
+            /** Work Format */
+            work_format: string | null;
+        };
+        /** CatalogSkillImpactView */
+        CatalogSkillImpactView: {
+            /** Current Level */
+            current_level: string | null;
+            /** Explanation */
+            explanation: string;
+            /** Model Version */
+            model_version: string | null;
+            /** Projected Level */
+            projected_level: string | null;
+            /** Skill Id */
+            skill_id: string;
+            status: components["schemas"]["ForecastStatus"];
+            /** Title */
+            title: string;
+            /** Verification Required */
+            verification_required: boolean;
+        };
+        /** CatalogStagePlanItemView */
+        CatalogStagePlanItemView: {
+            /** Estimated Minutes */
+            estimated_minutes: number | null;
+            /** Key */
+            key: string;
+            /** Position */
+            position: number;
+            state: components["schemas"]["StagePlanState"];
+            /** Summary */
+            summary: string;
+            /** Title */
+            title: string;
+        };
+        /** CatalogStagePlanView */
+        CatalogStagePlanView: {
+            /** Stages */
+            stages: components["schemas"]["CatalogStagePlanItemView"][];
+            /** Version */
+            version: number;
+        };
+        /** CatalogStageRequest */
+        CatalogStageRequest: {
+            /** Estimated Minutes */
+            estimated_minutes?: number | null;
+            /** Key */
+            key: string;
+            /** Summary */
+            summary: string;
+            /** Title */
+            title: string;
+        };
+        /** CatalogTermsView */
+        CatalogTermsView: {
+            /** Brief Version */
+            brief_version: number;
+            /** Data Constraints */
+            data_constraints: string | null;
+            /** Deadline At */
+            deadline_at: string | null;
+            /** Deliverable */
+            deliverable: string;
+            /** Duration Minutes */
+            duration_minutes: number | null;
+            /** Ip Terms */
+            ip_terms: string;
+            /** Paid */
+            paid: boolean;
+            /** Payout Condition */
+            payout_condition: string | null;
+            /** Portfolio Permission */
+            portfolio_permission: string;
+            /** Prerequisites */
+            prerequisites: string[];
+            /** Selection Criteria */
+            selection_criteria: string[];
+            /** Support Model */
+            support_model: string;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+            /** Terms Version */
+            terms_version: number;
+            /** Version Token */
+            version_token: string;
+            /** Weekly Workload Minutes */
+            weekly_workload_minutes: number | null;
         };
         /** CertificateCompetencyView */
         CertificateCompetencyView: {
@@ -3852,6 +4269,7 @@ export interface components {
             /** Allowed Artifacts */
             allowed_artifacts?: string[];
             case_rubric?: components["schemas"]["CaseRubricRequest"] | null;
+            catalog?: components["schemas"]["TaskCatalogMetadataRequest"] | null;
             compensation: components["schemas"]["CompensationRequest"];
             /** Competency Tags */
             competency_tags?: string[];
@@ -3939,6 +4357,11 @@ export interface components {
             task: components["schemas"]["TaskView"];
             terms: components["schemas"]["TermsView"] | null;
         };
+        /**
+         * CustomerVerification
+         * @enum {string}
+         */
+        CustomerVerification: "verified" | "unverified" | "demo";
         /**
          * DataClass
          * @enum {string}
@@ -4201,6 +4624,11 @@ export interface components {
             /** Unknown Items */
             unknown_items: number;
         };
+        /**
+         * EligibilityStatus
+         * @enum {string}
+         */
+        EligibilityStatus: "eligible" | "ineligible" | "unknown";
         /** EngagementOverviewView */
         EngagementOverviewView: {
             /** Best Days */
@@ -4377,6 +4805,11 @@ export interface components {
             /** Rating */
             rating: number;
         };
+        /**
+         * ForecastStatus
+         * @enum {string}
+         */
+        ForecastStatus: "calculated" | "qualitative" | "insufficient_data";
         /** FrameworkReportView */
         FrameworkReportView: {
             /**
@@ -4738,6 +5171,11 @@ export interface components {
             task: components["schemas"]["TaskView"];
             terms: components["schemas"]["TermsView"];
         };
+        /**
+         * MatchStatus
+         * @enum {string}
+         */
+        MatchStatus: "calculated" | "insufficient_data" | "not_applicable";
         /** MentorQueueItemView */
         MentorQueueItemView: {
             /** Artifact Keys */
@@ -5704,6 +6142,13 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /** RevalidateRequest */
+        RevalidateRequest: {
+            /** Terms Version */
+            terms_version?: number | null;
+            /** Version Token */
+            version_token?: string | null;
+        };
         /** ReviewAppealResultView */
         ReviewAppealResultView: {
             appeal: components["schemas"]["ReviewAppealView"];
@@ -6150,6 +6595,11 @@ export interface components {
             /** Skill Title */
             skill_title: string;
         };
+        /**
+         * StagePlanState
+         * @enum {string}
+         */
+        StagePlanState: "planned" | "locked";
         /** StandingView */
         StandingView: {
             /** Earliest Achievement */
@@ -6337,6 +6787,33 @@ export interface components {
             /** Verified Courses */
             verified_courses: string[];
         };
+        /** TaskCatalogMetadataRequest */
+        TaskCatalogMetadataRequest: {
+            /** Benefit Descriptions */
+            benefit_descriptions?: string[];
+            /** Difficulty */
+            difficulty?: ("beginner" | "intermediate" | "advanced") | null;
+            /** Direction Keys */
+            direction_keys?: string[];
+            /** Duration Minutes */
+            duration_minutes?: number | null;
+            /**
+             * Portfolio Permission
+             * @default none
+             * @enum {string}
+             */
+            portfolio_permission: "none" | "restricted" | "conditional" | "full";
+            /** Prerequisite Tags */
+            prerequisite_tags?: string[];
+            /** Selection Criteria */
+            selection_criteria?: string[];
+            /** Stage Plan */
+            stage_plan?: components["schemas"]["CatalogStageRequest"][];
+            /** Weekly Workload Minutes */
+            weekly_workload_minutes?: number | null;
+            /** Work Format */
+            work_format?: ("remote" | "hybrid" | "onsite") | null;
+        };
         /**
          * TaskMode
          * @enum {string}
@@ -6356,6 +6833,7 @@ export interface components {
             /** Assignment Count */
             assignment_count?: number | null;
             case_rubric?: components["schemas"]["CaseRubricRequest"] | null;
+            catalog?: components["schemas"]["TaskCatalogMetadataRequest"];
             /** Competency Tags */
             competency_tags?: string[];
             /** Deadline At */
@@ -10125,6 +10603,216 @@ export interface operations {
             };
         };
     };
+    task_recommendations_api_v1_me_task_recommendations_get: {
+        parameters: {
+            query?: {
+                q?: string | null;
+                competency?: string[] | null;
+                difficulty?: string | null;
+                work_format?: string | null;
+                customer?: string | null;
+                direction?: string | null;
+                timeframe?: string | null;
+                saved?: boolean | null;
+                sort?: string;
+                page_size?: number;
+                cursor?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogPageView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_task_catalog_analytics_api_v1_me_task_recommendations_analytics_events_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CatalogAnalyticsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogAnalyticsReceiptView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    task_recommendation_detail_api_v1_me_task_recommendations__task_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogRecommendationItemView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_task_bookmark_api_v1_me_task_recommendations__task_id__bookmark_put: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BookmarkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookmarkView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    task_recommendation_terms_api_v1_me_task_recommendations__task_id__terms_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogTermsView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    task_recommendation_terms_revalidate_api_v1_me_task_recommendations__task_id__terms_revalidate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                task_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RevalidateRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     participant_task_detail_api_v1_me_tasks__task_id__get: {
         parameters: {
             query?: never;
@@ -10160,6 +10848,7 @@ export interface operations {
         parameters: {
             query?: never;
             header?: {
+                "Idempotency-Key"?: string | null;
                 "X-CSRF-Token"?: string | null;
             };
             path: {

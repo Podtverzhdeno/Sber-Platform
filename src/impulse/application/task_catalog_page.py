@@ -18,7 +18,7 @@ import binascii
 import json
 from collections.abc import Awaitable, Callable, Sequence
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, cast
 from uuid import UUID
 
@@ -40,7 +40,16 @@ from impulse.domain.identity import ActorContext, Role
 MATCH_SORT = "match-default"
 DEADLINE_SORT = "deadline"
 DURATION_SORT = "duration"
-TASK_CATALOG_SORT_OPTIONS = (MATCH_SORT, DEADLINE_SORT, DURATION_SORT)
+NEWEST_SORT = "newest"
+SKILL_GROWTH_SORT = "skill-growth"
+TASK_CATALOG_SORT_OPTIONS = (
+    MATCH_SORT,
+    DEADLINE_SORT,
+    DURATION_SORT,
+    NEWEST_SORT,
+    SKILL_GROWTH_SORT,
+)
+TIMEFRAME_OPTIONS = {"7d": 7, "30d": 30, "90d": 90}
 
 DEFAULT_PAGE_SIZE = 24
 MAX_PAGE_SIZE = 50
@@ -62,6 +71,9 @@ class CatalogQuery:
     difficulty: str | None = None
     work_format: str | None = None
     customer: str | None = None
+    direction: str | None = None
+    timeframe: str | None = None
+    saved: bool | None = None
     sort: str = MATCH_SORT
     page_size: int = DEFAULT_PAGE_SIZE
     cursor: str | None = None
@@ -72,6 +84,10 @@ class CatalogQuery:
         for tag in self.competency:
             if not tag.strip() or len(tag) > 64:
                 raise CatalogQueryError("Competency filter requires non-empty tags.")
+        if self.direction is not None and len(self.direction) > 64:
+            raise CatalogQueryError("Direction filter must not exceed 64 characters.")
+        if self.timeframe is not None and self.timeframe not in TIMEFRAME_OPTIONS:
+            raise CatalogQueryError("Unsupported deadline timeframe; expected 7d, 30d or 90d.")
         if self.sort not in TASK_CATALOG_SORT_OPTIONS:
             raise CatalogQueryError(
                 "Unsupported catalog ordering key; expected one of "
@@ -93,6 +109,9 @@ class CatalogQuery:
                 "difficulty": self.difficulty,
                 "work_format": self.work_format,
                 "customer": self.customer,
+                "direction": self.direction,
+                "timeframe": self.timeframe,
+                "saved": self.saved,
                 "sort": self.sort,
             },
             ensure_ascii=False,
@@ -102,12 +121,15 @@ class CatalogQuery:
 
 @dataclass(frozen=True, slots=True)
 class CatalogPage:
-    """One immutable page of the authoritative catalog ordering."""
+    """One immutable page plus truthful aggregate KPI facts from one snapshot."""
 
     items: tuple[TaskRecommendationProjection, ...]
     total_found: int
     total_available: int
     next_cursor: str | None
+    total_saved: int = 0
+    total_calculated: int = 0
+    snapshot_at: datetime | None = None
 
 
 def _cursor_sort_key(item: TaskRecommendationProjection, sort: str) -> tuple[Any, ...]:
@@ -121,6 +143,16 @@ def _cursor_sort_key(item: TaskRecommendationProjection, sort: str) -> tuple[Any
         return (0 if deadline is not None else 1, deadline_key, task_id)
     if sort == DURATION_SORT:
         return (item.duration_minutes or _MATCH_MAX_BUCKET, task_id)
+    if sort == NEWEST_SORT:
+        if item.created_at is None:
+            return (1, 0, task_id)
+        timestamp = int(item.created_at.astimezone(UTC).timestamp() * 1_000_000)
+        return (0, -timestamp, task_id)
+    if sort == SKILL_GROWTH_SORT:
+        growth = item.match.growth_fit_percent
+        if growth is None:
+            return (1, 0, task_id)
+        return (0, -int(growth * _MATCH_PRECISION), task_id)
     match = item.match
     if match.status is MatchStatus.CALCULATED and match.percent is not None:
         bucket = _MATCH_MAX_BUCKET - int(match.percent * _MATCH_PRECISION)
@@ -178,6 +210,20 @@ def _matches_filters(item: TaskRecommendationProjection, query: CatalogQuery) ->
         presentation = item.customer.display_name.casefold()
         if query.customer.casefold() not in presentation:
             return False
+    if query.direction:
+        directions = {value.casefold() for value in item.direction_keys}
+        if query.direction.casefold() not in directions:
+            return False
+    if query.timeframe:
+        if item.deadline_at is None:
+            return False
+        days = TIMEFRAME_OPTIONS[query.timeframe]
+        if item.deadline_at < item.generated_at or item.deadline_at > item.generated_at + timedelta(
+            days=days
+        ):
+            return False
+    if query.saved is not None and item.bookmarked is not query.saved:
+        return False
     return True
 
 
@@ -203,8 +249,11 @@ def build_catalog_page(
         after_key = tuple(segments)
     matched: list[TaskRecommendationProjection] = []
     for item in ordered:
-        if after_key is not None and _cursor_sort_key(item, query.sort) <= after_key:
-            continue
+        try:
+            if after_key is not None and _cursor_sort_key(item, query.sort) <= after_key:
+                continue
+        except TypeError as exc:
+            raise CatalogQueryError("Catalog cursor key has invalid ordering values.") from exc
         matched.append(item)
     window = tuple(matched[: query.page_size])
     has_more = len(matched) > len(window)
@@ -219,6 +268,13 @@ def build_catalog_page(
             1 for item in items if item.eligibility.status is EligibilityStatus.ELIGIBLE
         ),
         next_cursor=next_cursor,
+        total_saved=sum(1 for item in items if item.bookmarked),
+        total_calculated=sum(
+            1
+            for item in items
+            if item.match.status is MatchStatus.CALCULATED and item.match.percent is not None
+        ),
+        snapshot_at=max((item.generated_at for item in items), default=None),
     )
 
 
@@ -226,6 +282,8 @@ _KEY_SHAPES = {
     MATCH_SORT: 4,
     DEADLINE_SORT: 3,
     DURATION_SORT: 2,
+    NEWEST_SORT: 3,
+    SKILL_GROWTH_SORT: 3,
 }
 
 ProjectionProvider = Callable[[ActorContext], Awaitable[Sequence[TaskRecommendationProjection]]]

@@ -56,6 +56,7 @@ class Settings(BaseSettings):
     ai_max_steps_per_run: int = Field(default=8, ge=1, le=50)
     ai_timeout_seconds: float = Field(default=30, ge=1, le=120)
     honor_board_enabled: bool = False
+    task_catalog_v2_enabled: bool = True
 
     langfuse_enabled: bool = False
     langfuse_public_key: SecretStr | None = None
@@ -118,6 +119,7 @@ class Settings(BaseSettings):
             "ai_operator_triage_enabled": self.ai_operator_triage_enabled,
             "ai_customer_brief_enabled": self.ai_customer_brief_enabled,
             "honor_board_enabled": self.honor_board_enabled,
+            "task_catalog_v2_enabled": self.task_catalog_v2_enabled,
         }
 
     def session_signing_secret(self) -> str:

@@ -18,6 +18,7 @@ from impulse.api.v1.recognition import router as recognition_router
 from impulse.api.v1.reward import router as reward_router
 from impulse.api.v1.search import router as search_router
 from impulse.api.v1.support import router as support_router
+from impulse.api.v1.task_catalog import router as task_catalog_router
 from impulse.api.v1.work import router as work_router
 from impulse.bootstrap.settings import Settings
 from impulse.trajectory_map import router as trajectory_map_router
@@ -39,6 +40,7 @@ router.include_router(recognition_router)
 router.include_router(reward_router)
 router.include_router(search_router)
 router.include_router(support_router)
+router.include_router(task_catalog_router)
 router.include_router(work_router)
 router.include_router(trajectory_map_router)
 

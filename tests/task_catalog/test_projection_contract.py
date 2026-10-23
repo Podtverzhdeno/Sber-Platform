@@ -152,6 +152,12 @@ def test_calculated_match_is_bounded(value: Decimal) -> None:
         replace(match(), percent=value)
 
 
+@pytest.mark.parametrize("value", [Decimal("-0.01"), Decimal("100.01")])
+def test_growth_fit_is_bounded_and_optional(value: Decimal) -> None:
+    with pytest.raises(CatalogContractError, match=r"0\.\.100"):
+        replace(match(), growth_fit_percent=value)
+
+
 def test_insufficient_match_is_not_serialized_as_zero() -> None:
     insufficient = match(status=MatchStatus.INSUFFICIENT_DATA)
 

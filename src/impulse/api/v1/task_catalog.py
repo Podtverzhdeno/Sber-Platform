@@ -17,10 +17,10 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 from fastapi.responses import JSONResponse
-from pydantic import AwareDatetime, BaseModel
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 from impulse.api.errors import ApiError
-from impulse.api.v1.identity import current_session
+from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.application.task_catalog import (
     ApplicationState,
@@ -34,12 +34,19 @@ from impulse.application.task_catalog import (
     StagePlanState,
     TaskRecommendationProjection,
 )
+from impulse.application.task_catalog_analytics import (
+    CatalogAnalyticsCommand,
+    CatalogApplicationResult,
+    CatalogEventName,
+    TaskCatalogAnalyticsService,
+)
 from impulse.application.task_catalog_page import (
     DEFAULT_PAGE_SIZE,
     MAX_PAGE_SIZE,
     TASK_CATALOG_SORT_OPTIONS,
     TaskCatalogPageService,
 )
+from impulse.application.work import WorkService
 
 router = APIRouter()
 
@@ -64,6 +71,7 @@ class CatalogMatchView(BaseModel):
     calculated_at: datetime
     reasons: list[CatalogMatchReasonView]
     missing_factors: list[str]
+    growth_fit_percent: Decimal | None
 
 
 class CatalogEligibilityView(BaseModel):
@@ -138,6 +146,13 @@ class CatalogRecommendationItemView(BaseModel):
     allowed_actions: list[CatalogAction]
     sources: list[CatalogProjectionSourceView]
     generated_at: datetime
+    bookmarked: bool
+    application_id: UUID | None
+    assignment_id: UUID | None
+    direction_keys: list[str]
+    weekly_workload_minutes: int | None
+    created_at: datetime | None
+    support_model: str | None
 
 
 class CatalogPageView(BaseModel):
@@ -145,6 +160,9 @@ class CatalogPageView(BaseModel):
     total_found: int
     total_available: int
     next_cursor: str | None
+    total_saved: int
+    total_calculated: int
+    snapshot_at: datetime | None
 
 
 def _service(request: Request) -> TaskCatalogPageService:
@@ -196,6 +214,7 @@ def _recommendation_item(item: TaskRecommendationProjection) -> CatalogRecommend
             calculated_at=match.calculated_at,
             reasons=[_match_reason(reason) for reason in match.reasons],
             missing_factors=list(match.missing_factors),
+            growth_fit_percent=match.growth_fit_percent,
         ),
         skill_impact=[
             CatalogSkillImpactView(
@@ -248,6 +267,13 @@ def _recommendation_item(item: TaskRecommendationProjection) -> CatalogRecommend
             for source in item.sources
         ],
         generated_at=item.generated_at,
+        bookmarked=item.bookmarked,
+        application_id=item.application_id,
+        assignment_id=item.assignment_id,
+        direction_keys=list(item.direction_keys),
+        weekly_workload_minutes=item.weekly_workload_minutes,
+        created_at=item.created_at,
+        support_model=item.support_model,
     )
 
 
@@ -260,6 +286,9 @@ async def task_recommendations(
     difficulty: Annotated[str | None, Query(max_length=48)] = None,
     work_format: Annotated[str | None, Query(max_length=48)] = None,
     customer: Annotated[str | None, Query(max_length=120)] = None,
+    direction: Annotated[str | None, Query(max_length=64)] = None,
+    timeframe: Annotated[str | None, Query(max_length=8)] = None,
+    saved: Annotated[bool | None, Query()] = None,
     sort: Annotated[str, Query()] = TASK_CATALOG_SORT_OPTIONS[0],
     page_size: Annotated[int, Query(ge=1, le=MAX_PAGE_SIZE)] = DEFAULT_PAGE_SIZE,
     cursor: Annotated[str | None, Query()] = None,
@@ -273,6 +302,9 @@ async def task_recommendations(
             difficulty=difficulty,
             work_format=work_format,
             customer=customer,
+            direction=direction,
+            timeframe=timeframe,
+            saved=saved,
             sort=sort,
             page_size=page_size,
             cursor=cursor,
@@ -285,13 +317,70 @@ async def task_recommendations(
         total_found=page.total_found,
         total_available=page.total_available,
         next_cursor=page.next_cursor,
+        total_saved=page.total_saved,
+        total_calculated=page.total_calculated,
+        snapshot_at=page.snapshot_at,
     )
+
+
+class CatalogAnalyticsRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    event_id: UUID
+    event_name: CatalogEventName
+    task_id: UUID | None = None
+    view: str | None = Field(default=None, max_length=8)
+    result: CatalogApplicationResult | None = None
+    algorithm_version: str | None = Field(default=None, max_length=64)
+    snapshot_version: str | None = Field(default=None, max_length=128)
+    terms_version: int | None = Field(default=None, ge=1)
+
+
+class CatalogAnalyticsReceiptView(BaseModel):
+    event_id: UUID
+    duplicate: bool
+
+
+def _analytics_service(request: Request) -> TaskCatalogAnalyticsService:
+    service = getattr(request.app.state, "task_catalog_analytics_service", None)
+    if not isinstance(service, TaskCatalogAnalyticsService):
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404)
+    return service
+
+
+@router.post(
+    "/me/task-recommendations/analytics/events",
+    response_model=CatalogAnalyticsReceiptView,
+    status_code=202,
+)
+async def record_task_catalog_analytics(
+    command: CatalogAnalyticsRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[TaskCatalogAnalyticsService, Depends(_analytics_service)],
+) -> CatalogAnalyticsReceiptView:
+    receipt = await service.record(
+        authenticated.actor,
+        CatalogAnalyticsCommand(
+            event_id=command.event_id,
+            event_name=command.event_name,
+            task_id=command.task_id,
+            view=command.view,
+            result=command.result,
+            algorithm_version=command.algorithm_version,
+            snapshot_version=command.snapshot_version,
+            terms_version=command.terms_version,
+        ),
+    )
+    return CatalogAnalyticsReceiptView(event_id=receipt.event_id, duplicate=receipt.duplicate)
 
 
 class CatalogTermsView(BaseModel):
     task_id: UUID
     terms_version: int
     brief_version: int
+    version_token: str
+    duration_minutes: int | None
+    weekly_workload_minutes: int | None
     deliverable: str
     prerequisites: list[str]
     selection_criteria: list[str]
@@ -346,6 +435,9 @@ async def task_recommendation_terms(
         task_id=terms.task_id,
         terms_version=terms.terms_version,
         brief_version=terms.brief_version,
+        version_token=marker.token,
+        duration_minutes=projection.duration_minutes,
+        weekly_workload_minutes=projection.weekly_workload_minutes,
         deliverable=terms.deliverable,
         prerequisites=list(terms.prerequisites),
         selection_criteria=list(terms.selection_criteria),
@@ -403,3 +495,33 @@ async def task_recommendation_terms_revalidate(
         content={"task_id": str(task_id), "terms_version": marker.terms_version},
         headers={"ETag": _marker_header(marker)},
     )
+
+
+class BookmarkRequest(BaseModel):
+    saved: bool
+
+
+class BookmarkView(BaseModel):
+    task_id: UUID
+    saved: bool
+
+
+def _work_service(request: Request) -> WorkService:
+    service = getattr(request.app.state, "work_service", None)
+    if not isinstance(service, WorkService):
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404)
+    return service
+
+
+@router.put(
+    "/me/task-recommendations/{task_id}/bookmark",
+    response_model=BookmarkView,
+)
+async def save_task_bookmark(
+    task_id: UUID,
+    command: BookmarkRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_work_service)],
+) -> BookmarkView:
+    saved = await service.set_task_bookmark(authenticated.actor, task_id, command.saved)
+    return BookmarkView(task_id=task_id, saved=saved)

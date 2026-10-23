@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+import base64
+import json
+from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from uuid import UUID, uuid4
 
@@ -180,6 +183,15 @@ def test_cursor_locked_to_query_fingerprint() -> None:
         )
 
 
+def test_cursor_with_wrong_ordering_primitive_is_a_client_error() -> None:
+    query = CatalogQuery(sort="duration", page_size=2)
+    payload = {"key": json.dumps(["not-a-number", "task-101"]), "fp": query.fingerprint}
+    cursor = base64.urlsafe_b64encode(json.dumps(payload).encode()).decode().rstrip("=")
+
+    with pytest.raises(CatalogQueryError, match="ordering values"):
+        build_catalog_page(items(), CatalogQuery(sort="duration", page_size=2, cursor=cursor))
+
+
 def test_filters_narrow_without_losing_totals_semantics() -> None:
     page = build_catalog_page(
         items(),
@@ -221,3 +233,68 @@ def test_identical_queries_return_identical_ordered_ids() -> None:
     assert [item.task_id for item in first.items] == [item.task_id for item in second.items]
     assert len(first.items) == 4
     assert uuid4()  # sanity: UUID helper still valid
+
+
+def test_direction_timeframe_saved_filters_and_snapshot_kpis() -> None:
+    source_items = items()
+    customized = tuple(
+        replace(
+            item,
+            direction_keys=("python",) if index == 0 else ("ml",),
+            bookmarked=index == 0,
+        )
+        for index, item in enumerate(source_items)
+    )
+
+    page = build_catalog_page(
+        customized,
+        CatalogQuery(direction="PYTHON", timeframe="30d", saved=True, page_size=10),
+    )
+
+    assert [item.task_id for item in page.items] == [UUID(int=101)]
+    assert page.total_found == 1
+    assert page.total_available == 3
+    assert page.total_saved == 1
+    assert page.total_calculated == 3
+    assert page.snapshot_at == NOW
+
+
+def test_newest_and_growth_sort_have_stable_cursor_shapes() -> None:
+    source_items = items()
+    customized = tuple(
+        replace(
+            item,
+            created_at=NOW + timedelta(days=index),
+            match=replace(
+                item.match,
+                growth_fit_percent=Decimal(value) if value is not None else None,
+            ),
+        )
+        for index, (item, value) in enumerate(
+            zip(source_items, ("50", "20", "80", None), strict=True)
+        )
+    )
+
+    newest = build_catalog_page(customized, CatalogQuery(sort="newest", page_size=4))
+    assert [item.task_id for item in newest.items] == [
+        UUID(int=104),
+        UUID(int=103),
+        UUID(int=102),
+        UUID(int=101),
+    ]
+
+    first = build_catalog_page(customized, CatalogQuery(sort="skill-growth", page_size=2))
+    assert [item.task_id for item in first.items] == [UUID(int=103), UUID(int=101)]
+    assert first.next_cursor is not None
+    second = build_catalog_page(
+        customized,
+        CatalogQuery(sort="skill-growth", page_size=2, cursor=first.next_cursor),
+    )
+    assert [item.task_id for item in second.items] == [UUID(int=102), UUID(int=104)]
+
+
+def test_timeframe_rejects_unknown_windows_and_excludes_missing_deadlines() -> None:
+    with pytest.raises(CatalogQueryError):
+        CatalogQuery(timeframe="1y")
+    page = build_catalog_page(items(), CatalogQuery(timeframe="7d", page_size=10))
+    assert page.items == ()
