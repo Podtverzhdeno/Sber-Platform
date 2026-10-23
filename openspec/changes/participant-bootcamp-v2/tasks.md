@@ -14,7 +14,7 @@
 - [x] BC2-101 Реализовать immutable/versioned `BootcampOverviewV2` с role switch data, continue-learning, role summary, curriculum remainder, courses, freshness и `data_origin`; contract tests SHALL запрещать fixture defaults.
 - [x] BC2-102 Реализовать детерминированный selector продолжения обучения и tests для checkpoint/deadline/recent-progress/tie/empty.
 - [x] BC2-103 Реализовать curriculum remainder по published policy version, включая course и non-course requirements; tests SHALL покрыть `2→1→0`, revoke и отсутствие policy.
-- [ ] BC2-104 Расширить course detail projection published modules, outcome, next checkpoint, evidence requirements, prerequisites и trusted reviews/empty state.
+- [x] BC2-104 Расширить course detail projection published modules, outcome, next checkpoint, evidence requirements, prerequisites и trusted reviews/empty state.
 - [ ] BC2-105 Реализовать server-side start/continue prerequisite/version/RBAC recheck и idempotency; stale/repeated/foreign requests SHALL быть безопасны.
 - [ ] BC2-106 Добавить overview/detail endpoints, OpenAPI snapshot и generated frontend types без ручного drift.
 - [ ] BC2-107 Добавить API tests для двух ролей, общего курса без дубля, reported/rejected/revoked, stale snapshot, foreign IDs и отсутствующего provider.
