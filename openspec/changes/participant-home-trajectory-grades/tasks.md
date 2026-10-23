@@ -111,22 +111,22 @@
 
 ## 5. Interactive trajectory v2
 
-- [ ] 5.1 Реализовать role selector и master-detail shell для primary/active/paused/unselected roles с быстрым cache-backed переключением.
+- [x] 5.1 Реализовать role selector и master-detail shell для primary/active/paused/unselected roles с быстрым cache-backed переключением.
   - Lane: `trajectory-v2`
   - Depends on: 1.3, 2.3, Sass migration approved
   - Write scope: новый trajectory-v2 shell/role components/styles/tests; route registry исключён
   - Acceptance: unselected role не получает фиктивный персональный прогресс; две активные траектории не смешиваются
-- [ ] 5.2 Реализовать data-driven stage path, stage selection и task rows для completed/current/available/locked states.
+- [x] 5.2 Реализовать data-driven stage path, stage selection и task rows для completed/current/available/locked states.
   - Lane: `trajectory-v2`
   - Depends on: 5.1
   - Write scope: trajectory-v2 stage/task components/styles/tests
   - Acceptance: число этапов не захардкожено; stage progress визуально и семантически отделён от grade readiness
-- [ ] 5.3 Реализовать task/evidence drawer и role-info dialog с шестью source-backed sections, focus trap и focus restoration.
+- [x] 5.3 Реализовать task/evidence drawer и role-info dialog с шестью source-backed sections, focus trap и focus restoration.
   - Lane: `trajectory-v2-details`
   - Depends on: 5.1, 5.2
   - Write scope: новые detail/dialog components/styles/tests
   - Acceptance: completed task ведёт к evidence/result; canonical role version показана; Escape и keyboard tabs работают
-- [ ] 5.4 Реализовать context menu: compare, pin/unpin, share, hide/show unselected и configure path, без inert actions.
+- [x] 5.4 Реализовать context menu: compare, pin/unpin, share, hide/show unselected и configure path, без inert actions.
   - Lane: `trajectory-v2-actions`
   - Depends on: 5.1, 0.4
   - Write scope: trajectory action components, command adapters and tests

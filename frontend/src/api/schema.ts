@@ -1117,6 +1117,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/bootcamp/courses/{course_key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bootcamp Course Detail V2 */
+        get: operations["bootcamp_course_detail_v2_api_v1_me_bootcamp_courses__course_key__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/bootcamp/courses/{course_key}/{action}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bootcamp Learning Command */
+        post: operations["bootcamp_learning_command_api_v1_me_bootcamp_courses__course_key___action__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/bootcamp/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bootcamp Overview V2 */
+        get: operations["bootcamp_overview_v2_api_v1_me_bootcamp_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/competencies": {
         parameters: {
             query?: never;
@@ -3175,6 +3226,28 @@ export interface components {
              */
             task_id: string;
         };
+        /** BootcampOverviewV2 */
+        BootcampOverviewV2: {
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+            continue_learning: components["schemas"]["ContinueLearning"] | null;
+            /** Courses */
+            courses: components["schemas"]["CourseSnapshot"][];
+            curriculum: components["schemas"]["CurriculumRemainder"];
+            data_origin: components["schemas"]["DataOrigin"];
+            role_summary: components["schemas"]["RoleSummary"];
+            /** Roles */
+            roles: components["schemas"]["RoleOption"][];
+            /** Schema Version */
+            schema_version: string;
+            /** Selected Track Key */
+            selected_track_key: string;
+            /** Snapshot Version */
+            snapshot_version: string;
+        };
         /** BriefDraftRequest */
         BriefDraftRequest: {
             /** Brief */
@@ -4053,6 +4126,23 @@ export interface components {
             granted_scopes: components["schemas"]["ConsentScope"][];
             scope: components["schemas"]["ConsentScope"];
         };
+        /** ContinueLearning */
+        ContinueLearning: {
+            /** Action */
+            action: string;
+            /** Checkpoint Key */
+            checkpoint_key: string | null;
+            /** Course Key */
+            course_key: string;
+            /** Deadline */
+            deadline: string | null;
+            /** Last Meaningful Activity At */
+            last_meaningful_activity_at: string | null;
+            progress: components["schemas"]["ProgressMetric"] | null;
+            /** Reason Code */
+            reason_code: string;
+            selection_provenance: components["schemas"]["VersionedFact"];
+        };
         /** ContributionDecisionRequest */
         ContributionDecisionRequest: {
             /** Deadline At */
@@ -4104,6 +4194,34 @@ export interface components {
             points_delta: number | string;
             /** Reason */
             reason: string;
+        };
+        /** CourseCard */
+        CourseCard: {
+            /** Access Note */
+            access_note: string;
+            /** Access State */
+            access_state: string;
+            /** Completion State */
+            completion_state: string;
+            /** Key */
+            key: string;
+            must_take: components["schemas"]["MustTakeReason"] | null;
+            /** Pending Verification Note */
+            pending_verification_note: string | null;
+            /** Recommendation Reason */
+            recommendation_reason: string;
+            /** Relevance Reasons */
+            relevance_reasons: string[];
+            /** Relevant */
+            relevant: boolean;
+            /** Source Url */
+            source_url: string;
+            /** Title */
+            title: string;
+            /** Track Keys */
+            track_keys: string[];
+            /** Verified Evidence */
+            verified_evidence: string | null;
         };
         /** CourseCardView */
         CourseCardView: {
@@ -4180,6 +4298,35 @@ export interface components {
             /** Target Level */
             target_level: string;
         };
+        /** CourseDetail */
+        CourseDetail: {
+            /** Course Key */
+            course_key: string | null;
+            /** Course Version */
+            course_version: string | null;
+            /** Evidence Requirements */
+            evidence_requirements: components["schemas"]["PublishedEvidenceRequirement"][];
+            /** Modules */
+            modules: components["schemas"]["PublishedModule"][];
+            /** Next Checkpoint Key */
+            next_checkpoint_key: string | null;
+            /** Next Checkpoint Note */
+            next_checkpoint_note: string | null;
+            /** Outcome */
+            outcome: string | null;
+            /** Prerequisites */
+            prerequisites: components["schemas"]["PublishedPrerequisite"][];
+            provenance: components["schemas"]["VersionedFact"] | null;
+            /** Reviews */
+            reviews: components["schemas"]["TrustedReview"][];
+            /** Reviews Unavailable Reason */
+            reviews_unavailable_reason: string | null;
+            state: components["schemas"]["KnowledgeState"];
+            /** Title */
+            title: string | null;
+            /** Unavailable Reason */
+            unavailable_reason: string | null;
+        };
         /** CourseDetailView */
         CourseDetailView: {
             /** Access Note */
@@ -4214,6 +4361,33 @@ export interface components {
             verified: boolean;
             /** Workload Hours */
             workload_hours: number | null;
+        };
+        /** CourseRoleContext */
+        CourseRoleContext: {
+            must_take: components["schemas"]["MustTakeReason"] | null;
+            provenance: components["schemas"]["VersionedFact"];
+            /** Reasons */
+            reasons: string[];
+            /** Relevant */
+            relevant: boolean;
+            /** Track Key */
+            track_key: string;
+        };
+        /** CourseSnapshot */
+        CourseSnapshot: {
+            /** Access Policy Version */
+            access_policy_version: string;
+            /** Allowed Actions */
+            allowed_actions: string[];
+            card: components["schemas"]["CourseCard"];
+            checkpoint_provenance: components["schemas"]["VersionedFact"] | null;
+            /** Course Version */
+            course_version: string;
+            enrollment_provenance: components["schemas"]["VersionedFact"];
+            evidence_provenance: components["schemas"]["VersionedFact"] | null;
+            freshness: components["schemas"]["VersionedFact"];
+            /** Role Contexts */
+            role_contexts: components["schemas"]["CourseRoleContext"][];
         };
         /** CourseView */
         CourseView: {
@@ -4320,6 +4494,38 @@ export interface components {
             /** Finding */
             finding: string;
         };
+        /** CurriculumRemainder */
+        CurriculumRemainder: {
+            /** Current Grade Key */
+            current_grade_key: string | null;
+            /** Curriculum Version */
+            curriculum_version: string | null;
+            /** Policy Version */
+            policy_version: string | null;
+            provenance: components["schemas"]["VersionedFact"] | null;
+            /** Requirements */
+            requirements: components["schemas"]["CurriculumRequirement"][];
+            state: components["schemas"]["KnowledgeState"];
+            /** Target Grade Key */
+            target_grade_key: string | null;
+            /** Unavailable Reason */
+            unavailable_reason: string | null;
+        };
+        /** CurriculumRequirement */
+        CurriculumRequirement: {
+            /** Allowed Action */
+            allowed_action: string | null;
+            /** Key */
+            key: string;
+            kind: components["schemas"]["RequirementKind"];
+            /** Source Key */
+            source_key: string;
+            /** Source Version */
+            source_version: string;
+            state: components["schemas"]["RequirementState"];
+            /** Title */
+            title: string;
+        };
         /** CursorPage[EventView] */
         CursorPage_EventView_: {
             /**
@@ -4367,6 +4573,11 @@ export interface components {
          * @enum {string}
          */
         DataClass: "public" | "demo_synthetic" | "personal_minimal" | "internal_business" | "sensitive_personal" | "secret";
+        /**
+         * DataOrigin
+         * @enum {string}
+         */
+        DataOrigin: "production" | "demo_seed" | "test_fixture";
         /** DayFocusView */
         DayFocusView: {
             /** Date */
@@ -5006,6 +5217,11 @@ export interface components {
             /** Correction Reason */
             correction_reason?: string | null;
         };
+        /**
+         * KnowledgeState
+         * @enum {string}
+         */
+        KnowledgeState: "known" | "unknown" | "not_evaluable";
         /** LeaderboardEntryView */
         LeaderboardEntryView: {
             /** Anonymized */
@@ -5024,6 +5240,44 @@ export interface components {
             successful_projects: number;
             /** Trophies */
             trophies: components["schemas"]["TrophyProofView"][];
+        };
+        /**
+         * LearningAction
+         * @enum {string}
+         */
+        LearningAction: "start" | "continue";
+        /** LearningCommandBody */
+        LearningCommandBody: {
+            /** Course Version */
+            course_version: string;
+        };
+        /** LearningCommandResult */
+        LearningCommandResult: {
+            action: components["schemas"]["LearningAction"];
+            /**
+             * Command Id
+             * Format: uuid
+             */
+            command_id: string;
+            /** Course Key */
+            course_key: string;
+            /** Course Version */
+            course_version: string;
+            /**
+             * Enrollment Id
+             * Format: uuid
+             */
+            enrollment_id: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /**
+             * Replayed
+             * @default false
+             */
+            replayed: boolean;
         };
         /** LearningDayRequest */
         LearningDayRequest: {
@@ -5358,6 +5612,21 @@ export interface components {
             track_key: string;
             /** Track Title */
             track_title: string;
+        };
+        /** MustTakeReason */
+        MustTakeReason: {
+            /** Current Known */
+            current_known: boolean;
+            /** Current Level */
+            current_level: string | null;
+            /** Explanation */
+            explanation: string;
+            /** Projected Impact */
+            projected_impact: string;
+            /** Skill */
+            skill: string;
+            /** Target Level */
+            target_level: string | null;
         };
         /** MustTakeView */
         MustTakeView: {
@@ -5916,6 +6185,18 @@ export interface components {
             /** Verified */
             verified: boolean;
         };
+        /** ProgressMetric */
+        ProgressMetric: {
+            /** Definition */
+            definition: string;
+            /** Denominator */
+            denominator: number;
+            /** Numerator */
+            numerator: number;
+            /** Percent */
+            percent: string;
+            provenance: components["schemas"]["VersionedFact"];
+        };
         /** ProjectCompetencyView */
         ProjectCompetencyView: {
             /** Competency */
@@ -6025,6 +6306,33 @@ export interface components {
             /** Tie Breakers */
             tie_breakers: components["schemas"]["TieBreaker"][];
         };
+        /** PublishedEvidenceRequirement */
+        PublishedEvidenceRequirement: {
+            /** Description */
+            description: string;
+            /** Key */
+            key: string;
+            /** Title */
+            title: string;
+        };
+        /** PublishedModule */
+        PublishedModule: {
+            /** Checkpoint Key */
+            checkpoint_key?: string | null;
+            /** Key */
+            key: string;
+            /** Position */
+            position: number;
+            /** Title */
+            title: string;
+        };
+        /** PublishedPrerequisite */
+        PublishedPrerequisite: {
+            /** Course Key */
+            course_key: string;
+            /** Title */
+            title: string;
+        };
         /** QuickCardProfileView */
         QuickCardProfileView: {
             /** About */
@@ -6123,6 +6431,16 @@ export interface components {
              */
             claim_type: "participation" | "winner" | "prize";
         };
+        /**
+         * RequirementKind
+         * @enum {string}
+         */
+        RequirementKind: "course" | "project" | "checkpoint" | "competency" | "evidence";
+        /**
+         * RequirementState
+         * @enum {string}
+         */
+        RequirementState: "open" | "reported" | "verified" | "rejected" | "revoked" | "unknown";
         /** ResolveReviewAppealRequest */
         ResolveReviewAppealRequest: {
             /** Assessments */
@@ -6337,6 +6655,35 @@ export interface components {
             total_milestones: number;
             /** Track Key */
             track_key: string;
+        };
+        /** RoleOption */
+        RoleOption: {
+            roadmap: components["schemas"]["VersionedFact"] | null;
+            state: components["schemas"]["TrackSelectionState"];
+            /** Title */
+            title: string;
+            /** Track Key */
+            track_key: string;
+        };
+        /** RoleSummary */
+        RoleSummary: {
+            /** Current Grade Key */
+            current_grade_key: string | null;
+            /** Current Grade Title */
+            current_grade_title: string | null;
+            grade_policy: components["schemas"]["VersionedFact"] | null;
+            grade_state: components["schemas"]["KnowledgeState"];
+            /** Matrix Skill Count */
+            matrix_skill_count: number | null;
+            readiness: components["schemas"]["ProgressMetric"] | null;
+            /** Target Grade Key */
+            target_grade_key: string | null;
+            /** Target Grade Title */
+            target_grade_title: string | null;
+            /** Track Key */
+            track_key: string;
+            /** Unavailable Reason */
+            unavailable_reason: string | null;
         };
         /**
          * RoundingMode
@@ -7004,6 +7351,11 @@ export interface components {
             tracks: components["schemas"]["TrackView"][];
         };
         /**
+         * TrackSelectionState
+         * @enum {string}
+         */
+        TrackSelectionState: "active" | "paused" | "unselected";
+        /**
          * TrackStatus
          * @enum {string}
          */
@@ -7096,6 +7448,16 @@ export interface components {
              * Format: date-time
              */
             start: string;
+        };
+        /** TrustedReview */
+        TrustedReview: {
+            /** Author Role */
+            author_role: string;
+            /** Comment */
+            comment: string;
+            provenance: components["schemas"]["VersionedFact"];
+            /** Verdict */
+            verdict: string;
         };
         /** UpdateParticipantProfileRequest */
         UpdateParticipantProfileRequest: {
@@ -7196,6 +7558,26 @@ export interface components {
             provider: string;
             /** Source Url */
             source_url: string;
+        };
+        /** VersionedFact */
+        VersionedFact: {
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+            data_origin: components["schemas"]["DataOrigin"];
+            /** Source */
+            source: string;
+            /**
+             * Stale
+             * @default false
+             */
+            stale: boolean;
+            /** Stale Reason */
+            stale_reason?: string | null;
+            /** Version */
+            version: string;
         };
         /** WeekFocusView */
         WeekFocusView: {
@@ -9392,6 +9774,108 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CourseCertificateView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    bootcamp_course_detail_v2_api_v1_me_bootcamp_courses__course_key__get: {
+        parameters: {
+            query?: {
+                course_version?: string | null;
+            };
+            header?: never;
+            path: {
+                course_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    bootcamp_learning_command_api_v1_me_bootcamp_courses__course_key___action__post: {
+        parameters: {
+            query?: never;
+            header: {
+                "Idempotency-Key": string;
+            };
+            path: {
+                course_key: string;
+                action: components["schemas"]["LearningAction"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LearningCommandBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearningCommandResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    bootcamp_overview_v2_api_v1_me_bootcamp_overview_get: {
+        parameters: {
+            query?: {
+                track?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BootcampOverviewV2"];
                 };
             };
             /** @description Validation Error */
