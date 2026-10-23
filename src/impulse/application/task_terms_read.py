@@ -53,6 +53,7 @@ class TaskTermsSnapshot:
     payout_condition: str | None
     deadline_at: datetime | None
     data_constraints: str | None = None
+    acceptance_criteria: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if self.terms_version < 1 or self.brief_version < 1:

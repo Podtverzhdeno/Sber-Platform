@@ -113,6 +113,7 @@ export const catalogTerms: CatalogTerms = {
   duration_minutes: 540,
   weekly_workload_minutes: 240,
   deliverable: "Репозиторий, прототип и отчёт.",
+  acceptance_criteria: ["Результат воспроизводится по инструкции", "Личный вклад подтверждён"],
   prerequisites: [],
   selection_criteria: ["Подтверждённые компетенции"],
   support_model: "mentor",

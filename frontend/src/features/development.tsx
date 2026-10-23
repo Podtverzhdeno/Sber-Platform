@@ -57,6 +57,10 @@ export function DevelopmentJourney() {
     mutationFn: ({ trackKey, freezeTrackKey }: { trackKey: string; freezeTrackKey?: string }) => apiRequest<TrackOverview>("/api/v1/me/tracks", { method: "POST", headers: csrfHeaders(), body: JSON.stringify({ track_key: trackKey, freeze_track_key: freezeTrackKey }) }),
     onSuccess: async () => {
       setPendingTrack(null);
+      // A trajectory is a matching input, not just a development-page filter.
+      // Remove cached scores so the old role snapshot cannot render as current.
+      client.removeQueries({ queryKey: ["task-catalog-v2"] });
+      client.removeQueries({ queryKey: ["task-catalog-v2-detail"] });
       await Promise.all([client.invalidateQueries({ queryKey: ["tracks"] }), client.invalidateQueries({ queryKey: ["roadmaps"] })]);
     },
   });

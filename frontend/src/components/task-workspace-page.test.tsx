@@ -146,7 +146,10 @@ describe("workspace team and metric drill-down (openspec 22.23)", () => {
     team: [{ person_id: "00000000-0000-0000-0000-000000000002", display_name: "Мария Воронова", status: "submitted" }],
     checkpoints: [
       { key: "research", title: "Исследование", status: "completed" },
+      { key: "prototype", title: "Прототип", status: "accepted" },
       { key: "api", title: "API", status: "in_progress" },
+      { key: "testing", title: "Тестирование", status: "planned" },
+      { key: "defense", title: "Защита", status: "locked" },
     ],
     contributions: [{ id: "contribution-1", version: 2, personal_summary: "API готов", artifact_keys: ["openapi-v2"], status: "submitted" }],
     feedback: [{ contribution_id: "contribution-1", contribution_version: 2, review_version: 1, grade: "B", explanation: "Нужен benchmark", status: "draft" }],
@@ -173,6 +176,8 @@ describe("workspace team and metric drill-down (openspec 22.23)", () => {
   it("explains numerator, denominator, freshness and object-backed metric rows including non-inert zero states", () => {
     render(<TaskWorkspacePage mode="participant" title="Проект" taskId="00000000-0000-0000-0000-000000000100" description="Описание" deadline="12 мая" tags={["API"]} workspace={workspace} onMessage={() => undefined} onPrimaryAction={() => undefined} />);
 
+    expect(screen.getByRole("heading", { name: "40% выполнено" })).toBeInTheDocument();
+    expect(screen.getByText("2 / 5")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Выполнено этапов" }));
     const stages = screen.getByRole("dialog", { name: "Расчёт ключевой метрики" });
     expect(stages).toHaveTextContent("Числитель — завершённые checkpoint-и");
@@ -183,5 +188,17 @@ describe("workspace team and metric drill-down (openspec 22.23)", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Есть блокеры" }));
     expect(screen.getByRole("dialog", { name: "Расчёт ключевой метрики" })).toHaveTextContent("Активных блокеров нет");
+  });
+
+  it("does not invent progress or metric values before the server snapshot arrives", () => {
+    renderWorkspace("task-without-snapshot");
+
+    expect(screen.getByRole("heading", { name: "Прогресс уточняется" })).toBeInTheDocument();
+    expect(screen.queryByText("68% выполнено")).not.toBeInTheDocument();
+    expect(screen.queryByText("2 / 5")).not.toBeInTheDocument();
+    expect(screen.getByText("Прогресс появится после загрузки checkpoint-ов рабочей области.")).toBeInTheDocument();
+    const values = document.querySelectorAll(".ctw-metrics dd");
+    expect(values).toHaveLength(4);
+    for (const value of values) expect(value).toHaveTextContent("—");
   });
 });

@@ -112,6 +112,7 @@ def _terms(label: str) -> TaskTermsSnapshot:
         terms_version=4,
         brief_version=3,
         deliverable="MVP семантического индекса",
+        acceptance_criteria=("Воспроизводимый результат", "Подтверждённый личный вклад"),
         prerequisites=("python >= 3.12",),
         selection_criteria=("Публичное резюме",),
         support_model="mentor_weekly",
@@ -195,6 +196,10 @@ def test_terms_endpoint_loads_current_versions() -> None:
     payload = response.json()
     assert payload["terms_version"] == 4
     assert payload["brief_version"] == 3
+    assert payload["acceptance_criteria"] == [
+        "Воспроизводимый результат",
+        "Подтверждённый личный вклад",
+    ]
     assert payload["portfolio_permission"] == "conditional"
     assert payload["paid"] is True
     assert payload["payout_condition"] == "После приёмки личного вклада."

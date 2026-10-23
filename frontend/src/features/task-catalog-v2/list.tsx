@@ -15,6 +15,7 @@ export function TaskCatalogList(props: {
   difficultyLabel: (value: string | null) => string;
   formatLabel: (value: string | null) => string;
   applicationLabel: (item: CatalogItem) => string;
+  customerLabel: (item: CatalogItem) => string;
 }) {
   return (
     <div className="catalog-v2-results catalog-v2-results--list catalog-v2-table" role="table" aria-label="Список рекомендованных задач">
@@ -60,7 +61,7 @@ export function TaskCatalogList(props: {
           >
             <span role="cell" className="catalog-v2-table-task">
               <strong>{item.title}</strong>
-              <small>{item.customer.display_name} · {props.applicationLabel(item)}</small>
+              <small>{props.customerLabel(item)} · {props.applicationLabel(item)}</small>
               <small>{item.competency_tags.join(" · ") || "Компетенции не указаны"}</small>
             </span>
             <span role="cell">{props.matchBadge(item)}</span>

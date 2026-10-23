@@ -89,6 +89,23 @@ describe("task catalog v2", () => {
     expect(screen.getByText(/не обещает отбор, оффер или найм/)).toBeInTheDocument();
   });
 
+  it("labels an unverified customer without a verified-partner badge", async () => {
+    const unverified = {
+      ...catalogItem,
+      customer: { ...catalogItem.customer, verification: "unverified" as const },
+    };
+    fetchMock.mockImplementation((input, init) => {
+      const path = requestPath(input);
+      if (path.startsWith("/api/v1/me/task-recommendations?")) {
+        return Promise.resolve(json(catalogPage([unverified])));
+      }
+      return defaultFetch(input, init);
+    });
+    renderCatalog();
+    expect(await screen.findByText(/Заказчик не верифицирован/)).toBeInTheDocument();
+    expect(screen.queryByText(/Проверенный заказчик/)).not.toBeInTheDocument();
+  });
+
   it("uses the same projection in list layout and opens its detail", async () => {
     renderCatalog("/workspace/2?catalog_view=list");
     expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
@@ -106,6 +123,10 @@ describe("task catalog v2", () => {
     expect(await screen.findByRole("heading", { name: "Почему задача рекомендована" })).toBeInTheDocument();
     expect(document.querySelector(".catalog-v2-match-ring-value")).not.toBeNull();
     expect(screen.getAllByText(catalogItem.title).length).toBeGreaterThan(1);
+    expect(screen.getAllByText(/R&D лаборатория · Демо-заказчик/).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Запланировано · Длительность не указана/)).toBeInTheDocument();
+    expect(screen.getByText(catalogItem.match.source_snapshot_version)).toBeInTheDocument();
+    expect(screen.getByText(/Алгоритм: task-match-v1 · расчёт:/)).toBeInTheDocument();
   });
 
   it("shares only a canonical task URL without private filter text", async () => {
@@ -170,6 +191,10 @@ describe("task catalog v2", () => {
     fireEvent.click(screen.getByRole("button", { name: "Условия и отклик" }));
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
     expect(await screen.findByText(catalogTerms.deliverable)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Критерии приёмки" })).toBeInTheDocument();
+    for (const criterion of catalogTerms.acceptance_criteria) {
+      expect(screen.getByText(criterion)).toBeInTheDocument();
+    }
     expect(screen.getByText(/Нагрузка в неделю: 4 ч 0 мин/)).toBeInTheDocument();
     const submit = screen.getByRole("button", { name: "Подтвердить и отправить отклик" });
     expect(submit).toBeDisabled();

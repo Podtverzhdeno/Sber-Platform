@@ -2514,6 +2514,13 @@
       },
       "CatalogTermsView": {
         "properties": {
+          "acceptance_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acceptance Criteria",
+            "type": "array"
+          },
           "brief_version": {
             "title": "Brief Version",
             "type": "integer"
@@ -2630,6 +2637,7 @@
           "duration_minutes",
           "weekly_workload_minutes",
           "deliverable",
+          "acceptance_criteria",
           "prerequisites",
           "selection_criteria",
           "support_model",

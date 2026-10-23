@@ -52,6 +52,11 @@ const applicationLabels = {
   closed: "Участие завершено",
   unavailable: "Действие недоступно",
 } as const;
+const customerVerificationLabels = {
+  verified: "Проверенный заказчик",
+  unverified: "Заказчик не верифицирован",
+  demo: "Демо-заказчик",
+} as const;
 const missingFactorLabels: Record<string, string> = {
   ROLE_REQUIREMENTS: "не выбрана или не сопоставлена траектория",
   VERIFIED_COMPETENCIES: "нет актуальных подтверждений",
@@ -77,6 +82,17 @@ function formatDeadline(value: string | null): string {
   return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric" }).format(
     new Date(value),
   );
+}
+
+function formatCalculatedAt(value: string): string {
+  return new Intl.DateTimeFormat("ru-RU", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function customerLabel(item: CatalogItem): string {
+  return `${item.customer.display_name} · ${customerVerificationLabels[item.customer.verification]}`;
 }
 
 function isOfflineError(error: unknown): boolean {
@@ -157,7 +173,7 @@ function TaskSummary(props: {
     >
       <header>
         <div>
-          <p className="eyebrow">{item.customer.display_name}</p>
+          <p className="eyebrow">{customerLabel(item)}</p>
           <h2>{item.title}</h2>
         </div>
         <MatchBadge item={item} />
@@ -230,6 +246,7 @@ function TaskDetail(props: {
         <section>
           <h3>Факты и ограничения</h3>
           <dl className="catalog-v2-facts">
+            <div><dt>Заказчик</dt><dd>{customerLabel(item)}</dd></div>
             <div><dt>Формат</dt><dd>{item.work_format === null ? "Не указан" : formatLabels[item.work_format] ?? item.work_format}</dd></div>
             <div><dt>Сложность</dt><dd>{item.difficulty === null ? "Не указана" : difficultyLabels[item.difficulty] ?? item.difficulty}</dd></div>
             <div><dt>Длительность</dt><dd>{formatDuration(item.duration_minutes)}</dd></div>
@@ -244,7 +261,8 @@ function TaskDetail(props: {
           {item.match.reasons.length ? (
             <ul>{item.match.reasons.map((reason) => <li key={reason.code}>{reason.label}</li>)}</ul>
           ) : <p>Причины появятся после накопления достаточного coverage.</p>}
-          <small>Алгоритм: {item.match.algorithm_version ?? "не рассчитан"}. Это не вероятность отбора или найма.</small>
+          <small>Алгоритм: {item.match.algorithm_version ?? "не рассчитан"} · расчёт: {formatCalculatedAt(item.match.calculated_at)}. Это не вероятность отбора или найма.</small>
+          <small className="catalog-v2-match-snapshot">Снимок входных данных: <code>{item.match.source_snapshot_version}</code></small>
         </section>
         <section>
           <h3>Вклад в развитие</h3>
@@ -280,7 +298,7 @@ function TaskDetail(props: {
         <section>
           <h3>План участия</h3>
           {item.stage_plan.stages.length ? (
-            <ol>{item.stage_plan.stages.map((stage) => <li key={stage.key}><strong>{stage.title}</strong><p>{stage.summary}</p><small>{formatDuration(stage.estimated_minutes)}</small></li>)}</ol>
+            <ol>{item.stage_plan.stages.map((stage) => <li key={stage.key}><strong>{stage.title}</strong><p>{stage.summary}</p><small>{stage.state === "locked" ? "Заблокировано в плане" : "Запланировано"} · {formatDuration(stage.estimated_minutes)}</small></li>)}</ol>
           ) : <p>Заказчик не опубликовал ориентировочный план. Это не операционный прогресс задачи.</p>}
         </section>
         <section>
@@ -537,6 +555,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
             difficultyLabel={(value) => value === null ? "Не указана" : difficultyLabels[value] ?? value}
             formatLabel={(value) => value === null ? "Не указан" : formatLabels[value] ?? value}
             applicationLabel={(item) => applicationLabels[item.application_state]}
+            customerLabel={customerLabel}
           />
         ) : (
           <div className="catalog-v2-results catalog-v2-results--cards" role="list" aria-label="Рекомендованные задачи">

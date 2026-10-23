@@ -3839,6 +3839,8 @@ export interface components {
         };
         /** CatalogTermsView */
         CatalogTermsView: {
+            /** Acceptance Criteria */
+            acceptance_criteria: string[];
             /** Brief Version */
             brief_version: number;
             /** Data Constraints */

@@ -119,6 +119,7 @@ export type CatalogTerms = {
   duration_minutes: number | null;
   weekly_workload_minutes: number | null;
   deliverable: string;
+  acceptance_criteria: string[];
   prerequisites: string[];
   selection_criteria: string[];
   support_model: string;

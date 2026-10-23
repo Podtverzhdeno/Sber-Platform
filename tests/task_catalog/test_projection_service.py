@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from uuid import uuid4
 
 import pytest
 
+from impulse.api.errors import ApiError
 from impulse.application.development import (
     DevelopmentService,
     MemoryCertificateStore,
@@ -23,13 +25,14 @@ from impulse.application.work import (
     TermsRecord,
     WorkService,
 )
+from impulse.domain.development import TrackAttempt, TrackStatus
 from impulse.domain.identity import ActorContext, Role
 from impulse.domain.reward import CompensationTerms, RoundingMode
 from impulse.domain.work import TaskAggregate, TaskBrief, TaskStatus
 
 
 @pytest.mark.asyncio
-async def test_canonical_store_projection_keeps_stage_and_conditional_benefit_facts() -> None:
+async def test_canonical_projection_separates_plan_terms_and_participant_snapshots() -> None:
     now = datetime(2026, 10, 23, 12, 0, tzinfo=UTC)
     task_id = uuid4()
     store = MemoryWorkStore()
@@ -67,28 +70,28 @@ async def test_canonical_store_projection_keeps_stage_and_conditional_benefit_fa
             ),
         )
     )
-    await store.add_terms(
-        TermsRecord(
-            task_id=task_id,
-            version=1,
-            deadline_at=now + timedelta(days=14),
-            deliverable="Repository and report",
-            acceptance_criteria=("Reproducible result",),
-            support_mode="mentor",
-            compensation=CompensationTerms(
-                paid=False,
-                base_amount_per_assignee=None,
-                currency=None,
-                a_multiplier=Decimal("2"),
-                quantum=Decimal("0.01"),
-                rounding_mode=RoundingMode.HALF_UP,
-                policy_version=1,
-                payout_condition="No monetary compensation; feedback requires acceptance.",
-            ),
-        )
+    terms_record = TermsRecord(
+        task_id=task_id,
+        version=1,
+        deadline_at=now + timedelta(days=14),
+        deliverable="Repository and report",
+        acceptance_criteria=("Reproducible result",),
+        support_mode="mentor",
+        compensation=CompensationTerms(
+            paid=False,
+            base_amount_per_assignee=None,
+            currency=None,
+            a_multiplier=Decimal("2"),
+            quantum=Decimal("0.01"),
+            rounding_mode=RoundingMode.HALF_UP,
+            policy_version=1,
+            payout_condition="No monetary compensation; feedback requires acceptance.",
+        ),
     )
+    await store.add_terms(terms_record)
     work = WorkService(store)
-    development = DevelopmentService(MemoryDevelopmentStore(), MemoryCertificateStore())
+    development_store = MemoryDevelopmentStore()
+    development = DevelopmentService(development_store, MemoryCertificateStore())
     service = TaskCatalogProjectionService(
         work,
         development,
@@ -106,14 +109,42 @@ async def test_canonical_store_projection_keeps_stage_and_conditional_benefit_fa
         consent_scopes=frozenset(),
     )
 
-    items = await service.projections(actor)
+    pairs = await service.pairs(actor)
 
-    assert len(items) == 1
-    item = items[0]
+    assert len(pairs) == 1
+    item, terms = pairs[0]
     assert item.task_id == task_id
+    assert terms.acceptance_criteria == ("Reproducible result",)
     assert [stage.position for stage in item.stage_plan.stages] == [1, 2, 3, 4, 5]
     assert all(stage.state.value == "planned" for stage in item.stage_plan.stages)
     assert any(benefit.condition == "Feedback after acceptance" for benefit in item.benefits)
     assert item.skill_impact[0].verification_required is True
     assert item.match.missing_factors == ("FORMAT_FIT",)
     assert item.match.percent != Decimal("100")  # No participant evidence is invented.
+
+    previous_snapshot = item.match.source_snapshot_version
+    previous_percent = item.match.percent
+    await development_store.replace_attempts(
+        actor.person_id,
+        (TrackAttempt("data", 1, TrackStatus.ACTIVE),),
+    )
+    changed = (await service.projections(actor))[0]
+    assert changed.match.source_snapshot_version != previous_snapshot
+    assert changed.match.percent != previous_percent
+    assert changed.match.reasons[0].source_refs[0].ref == changed.match.source_snapshot_version
+
+    current_task = await store.get(task_id)
+    assert current_task is not None
+    await store.save(
+        replace(
+            current_task,
+            catalog=replace(current_task.catalog, portfolio_permission="none"),
+        )
+    )
+    without_portfolio = (await service.projections(actor))[0]
+    assert all(benefit.benefit_type != "portfolio" for benefit in without_portfolio.benefits)
+
+    await store.add_terms(replace(terms_record, version=2, deadline_at=now - timedelta(seconds=1)))
+    with pytest.raises(ApiError) as expired:
+        await work.apply(actor, task_id, "expired-application-0001")
+    assert expired.value.code == "TASK_DEADLINE_PASSED"

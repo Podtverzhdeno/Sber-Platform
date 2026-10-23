@@ -170,6 +170,12 @@ export function ConditionsDialog(props: {
               <p>{notProvided(terms.data.deliverable)}</p>
             </section>
             <section>
+              <h3>Критерии приёмки</h3>
+              {terms.data.acceptance_criteria.length ? (
+                <ul>{terms.data.acceptance_criteria.map((item) => <li key={item}>{item}</li>)}</ul>
+              ) : <p>Критерии приёмки не опубликованы.</p>}
+            </section>
+            <section>
               <h3>Требования к участнику</h3>
               {terms.data.prerequisites.length ? (
                 <ul>{terms.data.prerequisites.map((item) => <li key={item}>{item}</li>)}</ul>

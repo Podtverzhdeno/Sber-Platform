@@ -580,6 +580,7 @@ class TaskCatalogProjectionService:
                 payout_condition=terms.compensation.payout_condition,
                 deadline_at=terms.deadline_at,
                 data_constraints=task.aggregate.brief.data_constraints or None,
+                acceptance_criteria=terms.acceptance_criteria,
             )
             result.append((projection, terms_snapshot))
         return tuple(result)

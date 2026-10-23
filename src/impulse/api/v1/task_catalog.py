@@ -382,6 +382,7 @@ class CatalogTermsView(BaseModel):
     duration_minutes: int | None
     weekly_workload_minutes: int | None
     deliverable: str
+    acceptance_criteria: list[str]
     prerequisites: list[str]
     selection_criteria: list[str]
     support_model: str
@@ -439,6 +440,7 @@ async def task_recommendation_terms(
         duration_minutes=projection.duration_minutes,
         weekly_workload_minutes=projection.weekly_workload_minutes,
         deliverable=terms.deliverable,
+        acceptance_criteria=list(terms.acceptance_criteria),
         prerequisites=list(terms.prerequisites),
         selection_criteria=list(terms.selection_criteria),
         support_model=terms.support_model,
