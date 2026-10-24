@@ -82,6 +82,31 @@ describe("ContextPanel", () => {
     expect(openedTask[0]).toBe("task-1");
   });
 
+  it("сообщество отображает реальные роли модераторов, материалы и полный список", () => {
+    const community: ApiChannelView = {
+      ...channel,
+      kind: "community",
+      task_id: null,
+      title: "Маяки",
+      participants: [
+        { id: "u1", display_name: "Анна", role: "admin" },
+        { id: "u2", display_name: "Иван", role: "moderator" },
+        { id: "u3", display_name: "Елена", role: "member" },
+        { id: "u4", display_name: "Роман", role: "member" },
+        { id: "u5", display_name: "Мария", role: "member" },
+      ],
+    };
+    render(<ContextPanel channel={community} viewerId="u3" open messageRefs={["files/guide.pdf"]} />);
+    expect(screen.getByRole("region", { name: "Администраторы и модераторы" })).toHaveTextContent("Анна");
+    expect(screen.getByRole("region", { name: "Администраторы и модераторы" })).toHaveTextContent("Иван");
+    expect(screen.getByRole("region", { name: "Полезные материалы" })).toHaveTextContent("1");
+    expect(screen.getAllByTestId("context-participant")).toHaveLength(4);
+    fireEvent.click(screen.getByRole("button", { name: "Все" }));
+    expect(screen.getAllByTestId("context-participant")).toHaveLength(5);
+    fireEvent.click(screen.getByRole("button", { name: "Свернуть" }));
+    expect(screen.getAllByTestId("context-participant")).toHaveLength(4);
+  });
+
   it("свёрнутая панель не рендерится", () => {
     render(<ContextPanel {...baseProps()} open={false} />);
     expect(screen.queryByText("Контекст")).toBeNull();
