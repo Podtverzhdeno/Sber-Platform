@@ -226,6 +226,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           <p className="trajectory-v2-intro">Строй свою карьерную историю в Сбере — от обучения к реальным проектам</p>
           <small>Данные обновлены: {formatAsOf(overview.as_of)}</small>
         </div>
+        <div className="trajectory-v2-hero-graphic" aria-hidden="true"><span>⚑</span></div>
       </header>
       <div className="trajectory-v2-columns">
         <nav className="trajectory-v2-roles" aria-label="Роли">
