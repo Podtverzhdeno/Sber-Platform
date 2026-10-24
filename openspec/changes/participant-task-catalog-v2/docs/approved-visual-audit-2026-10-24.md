@@ -10,7 +10,7 @@ Review comparison is to Linux Playwright screenshots saved from workflow **40112
 
 | Priority | Approved PNG | Observed implementation | Acceptance action |
 |---|---|---|---|
-| P1 | `03` ten compact rows; reference first desktop row spans ~60 px (347–407) | Real 2-task mock renders first row approx 150 px tall and second ~115 px, many wrapped labels | Test with 10 synthetic entries; aim at 60–85px average desktop height, hard ceiling 110px. Keep title/company/benefit/explanation legible, not clipped or overflowing |
+| P1 | `03` ten compact rows; reference first desktop row spans ~60 px (347–407) | Real 2-task mock renders first row approx 150 px tall and second ~115 px, many wrapped labels | Test with 10 synthetic entries; aim at 60–85px average desktop height, hard ceiling 90px. Keep title/company/benefit/explanation legible, not clipped or overflowing |
 | P1 | `01` five horizontal planned stages fully visible in bottom detail pane | Existing fixture has just one stage and proves no five-stage layout geometry | Test with exactly five neutral planned/locked stages and 4 potential benefits, no fake completion, never add “Итог” |
 | P1 | `02` modal focused in center, approximately 657/1672 = 39% of screenshot width and height approx 716 px | Current implementation sample modal ~780/1440 = 54% viewport width and nearly 860px tall | Reduce padding and section heights where possible, keep version/consent, avoid showing demo data as authentic. Respect legible 14px body and scroll accessibility over pixel imitation |
 | P1 | `02` four top facts, two-column content and dual footer actions | Current has four facts and two columns; legal safety text and consent correctly present | Preserve idempotent submit, keyboard Escape/focus trap, consent checkbox, version-drift handling while tightening visual layout |
@@ -29,3 +29,7 @@ The geometry spec asserts: desktop four KPIs in one row; detail right of discove
 ## Release and coordination
 
 The UI implementation branch `codex/task-catalog-visual-polish-20261024` currently has an active `IN_PROGRESS` claim covering React/SCSS/tests. This independent QA lane MUST NOT modify those files; author or assigned integrator reconciles the findings. Do not rewrite screenshot baselines to suppress visual failures. No main merge, no feature-flag activation and no Railway deployment are authorized by this audit.
+
+## Measured fidelity CI — exact synthetic task volume
+
+One-off GitHub Actions run `40114313661` ran all three new Playwright checks on 1672×941. Cards/detail **PASS** with four KPIs, five planned stages, four conditional benefits and no horizontal overflow; modal **PASS** with four facts, six disclosure sections, two actions and disabled submit before consent. Dense list **FAIL**: all ten measured rows were `111, 111, 111, 111, 111, 111, 111, 111, 111, 110` pixels. Approved PNG #03 is approximately 60px/row at its source canvas. New 90px max per row offers reasonable tolerance for real text but still requires author to compress roughly 20% relative to the current browser rendering (source exact density is more demanding). Do not remove this assertion merely to restore CI.
