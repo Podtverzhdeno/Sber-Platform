@@ -48,6 +48,23 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
   await expect(page.locator(".catalog-v2-kpi")).toHaveCount(4);
   await expect(page.locator(".catalog-v2-stage-track li")).toHaveCount(5);
   await expect(page.locator(".catalog-v2-benefits-section li")).toHaveCount(4);
+  // Every branded source mark in approved 01/03 must be the original SVG
+  // from Impulse_Tasks_UI (1); it is shown only with an explicit demo label.
+  const sourceMarks = [
+    "sber", "t-bank", "astra", "yandex", "red-mad-robot",
+    "gazprom-neft", "sber", "vk", "positive-technologies", "tinkoff",
+  ];
+  const logos = page.locator(".catalog-v2-card .catalog-v2-brand-logo");
+  await expect(logos).toHaveCount(sourceMarks.length);
+  for (const [index, name] of sourceMarks.entries()) {
+    await expect(logos.nth(index)).toHaveAttribute("src", `/task-catalog/brands/${name}.svg`);
+  }
+  await expect.poll(async () => logos.evaluateAll((imgs) => imgs.every((item) => {
+    const image = item as HTMLImageElement;
+    return image.complete && image.naturalWidth === 64 && image.naturalHeight === 64;
+  }))).toBe(true);
+  await expect(page.locator(".catalog-v2-card").first()).toContainText("Демо-заказчик");
+
   if (process.env.CAPTURE_APPROVED_TASKS === "1") await page.screenshot({ path: "test-results/approved-geometry-cards.png", fullPage: true, animations: "disabled" });
   await expect(page.getByRole("heading", { name: "Развитие твоих навыков" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Что ты получишь" })).toBeVisible();
@@ -161,6 +178,8 @@ test("approved intermediate desktop list preserves two-column readability withou
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.getByRole("button", { name: "Список" }).click();
   await expect(page.locator(".catalog-v2-table-row")).toHaveCount(10);
+  await expect(page.locator(".catalog-v2-table-row .catalog-v2-brand-logo")).toHaveCount(10);
+
   const shape = await page.evaluate(() => {
     const head = document.querySelector(".catalog-v2-table-head");
     const row = document.querySelector(".catalog-v2-table-row");
@@ -216,6 +235,8 @@ test("approved terms modal: four top fact cards, two-column content, two actions
   await expect(modal).toBeVisible();
   if (process.env.CAPTURE_APPROVED_TASKS === "1") await page.screenshot({ path: "test-results/approved-geometry-conditions.png", fullPage: false, animations: "disabled" });
   await expect(modal.getByRole("heading", { name: "Условия участия" })).toBeVisible();
+  await expect(modal.locator(".catalog-v2-conditions-avatar .catalog-v2-brand-logo")).toHaveAttribute("src", "/task-catalog/brands/sber.svg");
+
   await expect(modal.locator(".catalog-v2-conditions-stats > div")).toHaveCount(4);
   await expect(modal.locator(".catalog-v2-terms-grid > section")).toHaveCount(6);
   const confirm = modal.getByRole("button", { name: "Подтвердить и отправить отклик" });
