@@ -83,6 +83,7 @@ export function ParticipantHomeV2Body(props: {
   onRetry: () => void;
 }) {
   const { overview } = props;
+  const nextOutcome = overview.next_outcome;
   const [panel, setPanel] = useState<HomePanel>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
@@ -92,8 +93,12 @@ export function ParticipantHomeV2Body(props: {
   const heroKind = recommendedTask ? "task" : overview.next_outcome?.target_kind ?? null;
   const heroKey = recommendedTask?.task_id ?? overview.next_outcome?.target_key ?? null;
   const heroTitle = recommendedTask?.title ?? overview.next_outcome?.target_title ?? null;
+  const openNext = () => {
+    if (nextOutcome !== null) props.onOpenTarget(nextOutcome.target_kind, nextOutcome.target_key);
+  };
   const openHero = () => {
     if (heroKind !== null && heroKey !== null) props.onOpenTarget(heroKind, heroKey);
+    else props.onOpenWorkspace("trajectory");
   };
   const openPanel = (next: Exclude<HomePanel, null>) => {
     if (document.activeElement instanceof HTMLElement) returnFocusRef.current = document.activeElement;
@@ -146,40 +151,40 @@ export function ParticipantHomeV2Body(props: {
               {recommendedTask && <span><Clock3 size={16} />{TASK_NEXT_ACTION_LABELS[recommendedTask.next_action] ?? recommendedTask.status}</span>}
             </div>
             <div className="home-v2-hero-actions">
-              <button type="button" className="home-v2-primary" disabled={heroKind === null} onClick={openHero}>{heroKind === null ? "Выбрать траекторию" : "Продолжить задачу"}<ArrowRight size={18} /></button>
-              {overview.next_outcome && <button type="button" className="home-v2-text-action" onClick={() => props.onOpenTarget(overview.next_outcome!.target_kind, overview.next_outcome!.target_key)}>Следующий шаг</button>}
+              <button type="button" className="home-v2-primary" onClick={openHero}>{heroKind === null ? "Выбрать траекторию" : "Продолжить задачу"}<ArrowRight size={18} /></button>
+              {overview.next_outcome && <button type="button" className="home-v2-text-action" onClick={openNext}>Следующий шаг</button>}
             </div>
           </div>
           {grade.state !== "not_evaluable" && grade.target_grade !== null && (
-            <button className="home-v2-hero-gain" type="button" onClick={() => openPanel("grade-details")}><TrendingUp size={23}/><span>Открыть требования следующего грейда</span></button>
+            <button className="home-v2-hero-gain" type="button" onClick={() => { openPanel("grade-details"); }}><TrendingUp size={23}/><span>Открыть требования следующего грейда</span></button>
           )}
         </section>
 
-        <GradeSummaryPanel grade={grade} hint={overview.concepts} roleTitle={activeRole?.title ?? null} onOpenLevels={() => openPanel("levels")} onOpenDetails={() => openPanel("grade-details")} />
+        <GradeSummaryPanel grade={grade} hint={overview.concepts} roleTitle={activeRole?.title ?? null} onOpenLevels={() => { openPanel("levels"); }} onOpenDetails={() => { openPanel("grade-details"); }} />
         <WeeklyFocusPanel focus={overview.weekly_focus} today={overview.local_today} />
       </div>
 
       <div className="home-v2-bottom-grid">
         <div className="home-v2-work-column">
-          <NextOutcomePanel outcome={overview.next_outcome} onOpenTarget={props.onOpenTarget} onRetry={props.onRetry} onOpenGrade={() => openPanel("grade-details")} gradeAvailable={grade.state !== "not_evaluable" && grade.target_grade !== null} />
-          <ActiveTasksPanel tasks={overview.active_tasks} onOpenTarget={props.onOpenTarget} onOpenAll={() => props.onOpenTarget("tasks", "")} />
+          <NextOutcomePanel outcome={overview.next_outcome} onOpenTarget={props.onOpenTarget} onRetry={props.onRetry} onOpenGrade={() => { openPanel("grade-details"); }} gradeAvailable={grade.state !== "not_evaluable" && grade.target_grade !== null} />
+          <ActiveTasksPanel tasks={overview.active_tasks} onOpenTarget={props.onOpenTarget} onOpenAll={() => { props.onOpenTarget("tasks", ""); }} />
         </div>
         <div className="home-v2-insights-column">
           <section className="home-v2-block home-v2-buddy">
-            <header><h2><Sparkles size={23} />AI Buddy <span className="home-v2-beta">Бета</span></h2><button type="button" className="home-v2-inline-link" onClick={() => props.onOpenTarget("course", overview.next_outcome?.target_key ?? "")} disabled={overview.next_outcome?.target_kind !== "course"}>Открыть <ArrowRight size={16}/></button></header>
+            <header><h2><Sparkles size={23} />AI Buddy <span className="home-v2-beta">Бета</span></h2><button type="button" className="home-v2-inline-link" onClick={openNext} disabled={nextOutcome === null}>Открыть <ArrowRight size={16}/></button></header>
             <div className="home-v2-buddy-content">
               <img src={BUDDY_ART} alt="AI Buddy" />
               <div><p>{overview.next_outcome ? "Твой следующий шаг по траектории уже определён." : "Выбери роль и траекторию, чтобы получать подсказки по развитию."}</p>
-                {overview.next_outcome && <button type="button" className="home-v2-buddy-tip" onClick={() => props.onOpenTarget(overview.next_outcome!.target_kind, overview.next_outcome!.target_key)}><BookOpen size={22}/><span><strong>Материалы и задания</strong><small>{overview.next_outcome.target_title}</small></span><ChevronRight size={15}/></button>}
+                {overview.next_outcome && <button type="button" className="home-v2-buddy-tip" onClick={openNext}><BookOpen size={22}/><span><strong>Материалы и задания</strong><small>{overview.next_outcome.target_title}</small></span><ChevronRight size={15}/></button>}
               </div>
             </div>
             <p className="home-v2-buddy-footnote">Подсказка составлена из текущей траектории, не является оценкой навыков</p>
           </section>
           <section className="home-v2-block home-v2-passport" aria-label="Мой скилл-паспорт">
-            <header><h2>Мой скилл-паспорт</h2><button type="button" className="home-v2-inline-link" onClick={() => props.onOpenWorkspace("skills")}>Все навыки <ArrowRight size={16}/></button></header>
+            <header><h2>Мой скилл-паспорт</h2><button type="button" className="home-v2-inline-link" onClick={() => { props.onOpenWorkspace("skills"); }}>Все навыки <ArrowRight size={16}/></button></header>
             <div className="home-v2-passport-row"><span className="home-v2-skill-icon"><ShieldCheck size={21}/></span><span><strong>Подтверждённые компетенции</strong><small>Факты обучения и выполнения задач</small></span></div>
             <div className="home-v2-passport-message">Показатели навыков доступны в полном скилл-паспорте после проверки результатов. Неоценённые навыки не получают вымышленные проценты.</div>
-            <button type="button" className="home-v2-passport-open" onClick={() => props.onOpenWorkspace("skills")}>Перейти в скилл-паспорт <ArrowRight size={16}/></button>
+            <button type="button" className="home-v2-passport-open" onClick={() => { props.onOpenWorkspace("skills"); }}>Перейти в скилл-паспорт <ArrowRight size={16}/></button>
           </section>
         </div>
       </div>
@@ -198,14 +203,14 @@ export function ParticipantHomeV2Body(props: {
                 {grade.state === "not_evaluable" ? (
                   <section className="home-v2-grade-unavailable" role="status"><LockKeyhole size={25}/><strong>Каталог грейдов пока не опубликован</strong><span>Поэтому мы не показываем фиктивные грейды 5–6, проценты готовности или достижения.</span></section>
                 ) : <div className="home-v2-grade-timeline">
-                  {grade.target_grade !== null && <button type="button" onClick={() => setPanel("grade-details")}><span className="home-v2-grade-dot target"></span><strong>Грейд {String(grade.target_grade)}</strong><small>Следующая цель</small><ChevronRight size={18}/></button>}
-                  {grade.current_grade !== null && <button type="button" onClick={() => setPanel("grade-details")}><span className="home-v2-grade-dot current"></span><strong>Грейд {String(grade.current_grade)}</strong><small>Текущий</small><ChevronRight size={18}/></button>}
+                  {grade.target_grade !== null && <button type="button" onClick={() => { setPanel("grade-details"); }}><span className="home-v2-grade-dot target"></span><strong>Грейд {grade.target_grade}</strong><small>Следующая цель</small><ChevronRight size={18}/></button>}
+                  {grade.current_grade !== null && <button type="button" onClick={() => { setPanel("grade-details"); }}><span className="home-v2-grade-dot current"></span><strong>Грейд {grade.current_grade}</strong><small>Текущий</small><ChevronRight size={18}/></button>}
                 </div>}
                 {activeRole && <div className="home-v2-drawer-note">Активная роль: {activeRole.title}</div>}
               </div>
             ) : (
               <div className="home-v2-drawer-body">
-                <button className="home-v2-drawer-back" type="button" onClick={() => setPanel("levels")}>← Все грейды</button>
+                <button className="home-v2-drawer-back" type="button" onClick={() => { setPanel("levels"); }}>← Все грейды</button>
                 <div className="home-v2-grade-detail-hero"><span className="home-v2-drawer-eyebrow">Следующий уровень</span><h2>{grade.target_grade === null ? "Требования ещё не опубликованы" : `Грейд ${String(grade.target_grade)}`}</h2><p>{activeRole?.title ?? "Траектория развития"}</p></div>
                 {grade.state === "not_evaluable" ? <section className="home-v2-grade-unavailable" role="status"><LockKeyhole size={25}/><strong>Оценка грейда недоступна</strong><span>Данные о готовности, компетенциях и критериях не утверждены. Демонстрационные 88% здесь намеренно не используются.</span></section> : (
                   <section className="home-v2-grade-progress"><Target size={24}/><div><strong>Готовность к следующему уровню</strong><span>{grade.readiness_percent === null ? "Требует проверки" : `${String(grade.readiness_percent)}% по действующей политике`}</span>{grade.readiness_percent !== null && <div className="home-v2-grade-track"><span style={{ width: `${String(grade.readiness_percent)}%` }}/></div>}</div></section>
@@ -213,7 +218,7 @@ export function ParticipantHomeV2Body(props: {
                 <h3>Что нужно для перехода</h3>
                 <div className="home-v2-grade-requirement"><ClipboardCheck size={21}/><div><strong>Практический результат</strong><small>Выполнить этап траектории и подтвердить личный вклад</small></div></div>
                 <div className="home-v2-grade-requirement"><FileCheck2 size={21}/><div><strong>Проверенные компетенции</strong><small>Решение принимается после проверки артефактов, а не по XP</small></div></div>
-                {overview.next_outcome && <button type="button" className="home-v2-primary home-v2-grade-button" onClick={() => { closePanel(); props.onOpenTarget(overview.next_outcome!.target_kind, overview.next_outcome!.target_key); }}>Перейти к следующему шагу <ArrowRight size={17}/></button>}
+                {overview.next_outcome && <button type="button" className="home-v2-primary home-v2-grade-button" onClick={() => { closePanel(); openNext(); }}>Перейти к следующему шагу <ArrowRight size={17}/></button>}
               </div>
             )}
           </div>
@@ -238,7 +243,7 @@ export function NextOutcomePanel(props: {
         <div className="home-v2-outcome-empty" role="status"><p>Активной траектории нет, поэтому обязательный следующий шаг не вычислен. Выберите траекторию в разделе траекторий.</p><button type="button" onClick={props.onRetry}>Обновить</button></div>
       ) : (
         <div className="home-v2-outcome-main"><span className="home-v2-outcome-symbol"><FileCheck2 size={32}/></span><div className="home-v2-outcome-content"><h3>{outcome.target_kind === "task" ? "Пройти задание" : "Продолжить обучение"}</h3><p>{outcome.target_title}</p>{outcome.stale_reason && <small role="status">{outcome.stale_reason}</small>}</div>
-          <div className="home-v2-outcome-actions"><button type="button" className="home-v2-primary" onClick={() => props.onOpenTarget(outcome.target_kind, outcome.target_key)}>Перейти к шагу <ArrowRight size={17}/></button>{props.gradeAvailable && props.onOpenGrade && <button type="button" className="home-v2-secondary" onClick={props.onOpenGrade}>Посмотреть программу уровня</button>}</div>
+          <div className="home-v2-outcome-actions"><button type="button" className="home-v2-primary" onClick={() => { props.onOpenTarget(outcome.target_kind, outcome.target_key); }}>Перейти к шагу <ArrowRight size={17}/></button>{props.gradeAvailable && props.onOpenGrade && <button type="button" className="home-v2-secondary" onClick={props.onOpenGrade}>Посмотреть программу уровня</button>}</div>
         </div>
       )}
     </section>
@@ -283,7 +288,7 @@ export function WeeklyFocusPanel(props: {
       <div className="home-v2-week-days" role="group" aria-label="Дни недели">
         {focus.days.map((item) => {
           const active = selected === item.date;
-          return <button type="button" key={item.date} aria-pressed={active} aria-label={formatDayLabel(item.date)} onClick={() => setSelected(item.date)} className={`home-v2-day${item.done ? " home-v2-day--done" : ""}${item.planned ? " home-v2-day--planned" : ""}${active ? " home-v2-day--selected" : ""}`}><span>{formatWeekdayShort(item.date)}</span><small>{new Intl.DateTimeFormat("ru-RU",{day:"numeric",month:"short"}).format(new Date(`${item.date}T00:00:00`))}</small>{item.done ? <Check size={17}/> : <Circle size={17}/>}</button>;
+          return <button type="button" key={item.date} aria-pressed={active} aria-label={formatDayLabel(item.date)} onClick={() => { setSelected(item.date); }} className={`home-v2-day${item.done ? " home-v2-day--done" : ""}${item.planned ? " home-v2-day--planned" : ""}${active ? " home-v2-day--selected" : ""}`}><span>{formatWeekdayShort(item.date)}</span><small>{new Intl.DateTimeFormat("ru-RU",{day:"numeric",month:"short"}).format(new Date(`${item.date}T00:00:00`))}</small>{item.done ? <Check size={17}/> : <Circle size={17}/>}</button>;
         })}
       </div>
       {day && <div className="home-v2-week-day-detail" role="status"><span className="home-v2-week-target"><Target size={25}/></span><div><strong>{focus.hint ?? "План недели"}</strong><p>{day.done ? "День подтверждён квалификационным действием." : day.planned ? "Запланирован по ритму недели, выполнение пока не подтверждено." : "Не запланирован по ритму недели."}</p></div><ChevronRight size={16}/></div>}
@@ -310,7 +315,7 @@ export function ActiveTasksPanel(props: {
     <section className="home-v2-block home-v2-tasks" data-testid="active-tasks">
       <header><h2><BriefcaseBusiness size={21}/>Активные задачи</h2>{props.onOpenAll && <button type="button" className="home-v2-inline-link" onClick={props.onOpenAll}>Все задачи <ArrowRight size={16}/></button>}</header>
       {tasks.length === 0 ? <p className="home-v2-tasks-empty" role="status">Активных задач нет. Доступные задачи открываются из раздела задач.</p> :
-        <ul className="home-v2-task-list">{tasks.slice(0,4).map((task) => <li key={task.assignment_id}><article><span className="home-v2-task-check"><CheckCircle2 size={25}/></span><div className="home-v2-task-copy"><strong>{task.title}</strong><div className="home-v2-task-tags"><span>{TASK_NEXT_ACTION_LABELS[task.next_action] ?? task.status}</span>{task.open_contributions > 0 && <span>Отправок: {String(task.open_contributions)}</span>}</div></div><button type="button" className="home-v2-task-open" onClick={() => props.onOpenTarget("task",task.task_id)}>Открыть задачу <ArrowRight size={15}/></button></article></li>)}</ul>}
+        <ul className="home-v2-task-list">{tasks.slice(0,4).map((task) => <li key={task.assignment_id}><article><span className="home-v2-task-check"><CheckCircle2 size={25}/></span><div className="home-v2-task-copy"><strong>{task.title}</strong><div className="home-v2-task-tags"><span>{TASK_NEXT_ACTION_LABELS[task.next_action] ?? task.status}</span>{task.open_contributions > 0 && <span>Отправок: {String(task.open_contributions)}</span>}</div></div><button type="button" className="home-v2-task-open" onClick={() => { props.onOpenTarget("task",task.task_id); }}>Открыть задачу <ArrowRight size={15}/></button></article></li>)}</ul>}
     </section>
   );
 }
