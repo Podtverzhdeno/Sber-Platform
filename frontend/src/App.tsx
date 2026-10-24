@@ -2,6 +2,7 @@ import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
 import { HomeNavigationIcon } from "./features/participant-home-v2/nav-icon";
+import { MessagesNavigationIcon } from "./features/messenger/navigation-icons";
 import { Bell, Gift, Search } from "lucide-react";
 import { BootcampV2Route } from "./features/bootcamp/route-v2";
 import { TrajectoryV2 } from "./features/trajectory-v2/page";
@@ -471,7 +472,7 @@ function Workspace({
               }}
             >
               <span className="nav-icon" aria-hidden="true">
-                {isParticipantHome ? <HomeNavigationIcon section={item} /> : navigationIcons[item] ?? "•"}
+                {isMessageRoute ? <MessagesNavigationIcon section={item} /> : isParticipantHome ? <HomeNavigationIcon section={item} /> : navigationIcons[item] ?? "•"}
               </span>
               <span>{item}</span>
             </NavLink>
