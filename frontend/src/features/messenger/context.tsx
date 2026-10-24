@@ -1,3 +1,4 @@
+import { Bell, BellOff, FileText, Link2, Users } from "lucide-react";
 import type { ApiChannelView } from "./contracts";
 import {
   type ChannelWorkContextView,
@@ -17,6 +18,8 @@ export type ContextPanelProps = {
   onOpenMeeting?: () => void;
   onOpenReview?: () => void;
   onClose?: () => void;
+  onToggleMute?: () => void;
+  messageRefs?: string[];
   className?: string;
 };
 
@@ -29,6 +32,8 @@ export function ContextPanel({
   onOpenMeeting,
   onOpenReview,
   onClose,
+  onToggleMute,
+  messageRefs = [],
   className,
 }: ContextPanelProps) {
   if (!open) return null;
@@ -46,16 +51,30 @@ export function ContextPanel({
         </button>
       )}
       <p className="msg-context__eyebrow">Контекст</p>
-      <h2 className="msg-context__title">{dialogTitle(channel, viewerId)}</h2>
-      <span className={`msg-context__badge${channel.muted ? " msg-context__badge--muted" : ""}`}>
-        {dialogKindLabel(channel.kind)}
-      </span>
-      {roleInChannel !== null && (
-        <span className="msg-context__role" data-testid="context-your-role">
-          ваша роль: {participantRoleLabel(roleInChannel)}
+      <div className="msg-context__profile">
+        <span className="msg-context__avatar" aria-hidden="true">
+          {channel.title.trim().toLowerCase() === "маяки"
+            ? <img src="/messages-reference/mayaki-avatar.svg" alt="" />
+            : (dialogTitle(channel, viewerId).trim()[0] ?? "Ч").toUpperCase()}
         </span>
-      )}
+        <div className="msg-context__identity">
+          <h2 className="msg-context__title">{dialogTitle(channel, viewerId)}</h2>
+          <span className={`msg-context__badge${channel.muted ? " msg-context__badge--muted" : ""}`}>
+            {dialogKindLabel(channel.kind)}
+          </span>
+          {roleInChannel !== null && (
+            <span className="msg-context__role" data-testid="context-your-role">
+              ваша роль: {participantRoleLabel(roleInChannel)}
+            </span>
+          )}
+        </div>
+        <span className="msg-context__online" role="status">{channel.status === "active" ? "● Активен" : "Закрыт"}</span>
+      </div>
+      <section className="msg-context__section msg-context__about" aria-label="О чате">
+        <h3 className="msg-context__section-title">{channel.kind === "community" ? "О сообществе" : "О чате"}</h3>
       <dl className="msg-context__facts">
+        <div><dt>Тип чата</dt><dd>{dialogKindLabel(channel.kind)}</dd></div>
+        <div><dt>Создан</dt><dd>{new Intl.DateTimeFormat("ru-RU", {day:"numeric",month:"long",year:"numeric"}).format(new Date(channel.created_at))}</dd></div>
         <div>
           <dt>Непрочитанных</dt>
           <dd>{String(channel.unread)}</dd>
@@ -69,8 +88,10 @@ export function ContextPanel({
           <dd>{String(channel.participants.length)}</dd>
         </div>
       </dl>
+      </section>
       <section className="msg-context__section" aria-label="Задача">
-        <h3 className="msg-context__section-title">Задача</h3>
+        <h3 className="msg-context__section-title">Связанные объекты</h3>
+
         <dl className="msg-context__facts">
           <div>
             <dt>Проект</dt>
@@ -98,8 +119,28 @@ export function ContextPanel({
           </dl>
         )}
       </section>
+      <section className="msg-context__section msg-context__files" aria-label="Связанные файлы">
+        <h3 className="msg-context__section-title"><FileText size={17}/>Связанные файлы <span>{String(messageRefs.length)}</span></h3>
+        {messageRefs.length === 0 ? (
+          <p className="msg-context__no-files">В этом диалоге ещё нет прикреплённых файлов</p>
+        ) : (
+          <ul className="msg-context__file-list">
+            {Array.from(new Set(messageRefs)).map((ref) => (
+              <li key={ref}>
+                <FileText size={20} aria-hidden="true"/>
+                <span title={ref}>{ref.split("/").pop() || ref}</span>
+                <button type="button" aria-label={`Скопировать ссылку на файл ${ref.split("/").pop() || ref}`} onClick={() => {
+                  if (typeof navigator.clipboard !== "undefined") {
+                    void navigator.clipboard.writeText(ref);
+                  }
+                }}><Link2 size={16}/></button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
       <section className="msg-context__section" aria-label="Участники">
-        <h3 className="msg-context__section-title">Участники</h3>
+        <h3 className="msg-context__section-title"><Users size={17}/>Участники <span>{String(channel.participants.length)}</span></h3>
         <ul className="msg-context__people">
           {channel.participants.map((person) => (
             <li key={person.id} data-testid="context-participant">
@@ -134,6 +175,12 @@ export function ContextPanel({
             </button>
           )}
         </div>
+      )}
+      {onToggleMute && (
+        <button type="button" className="msg-context__notification-action" onClick={onToggleMute}>
+          {channel.muted ? <Bell size={17}/> : <BellOff size={17}/>}
+          {channel.muted ? "Включить уведомления" : "Отключить уведомления"}
+        </button>
       )}
       <small className="msg-context__disclaimer" data-testid="context-disclaimer">
         Сообщения не изменяют официальные статусы: формальные приёмка вклада,
