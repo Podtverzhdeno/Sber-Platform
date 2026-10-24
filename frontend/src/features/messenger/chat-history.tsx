@@ -432,7 +432,7 @@ export function ChatHistory({
                 >
                   {row.authorId !== viewerId && (
                     <span className="msg-chat__sender-avatar" aria-hidden="true">
-                      {row.authorName.trim().charAt(0).toUpperCase() || "?"}
+                      {(row.authorName ?? "").trim().charAt(0).toUpperCase() || "?"}
                     </span>
                   )}
                   <span className="msg-chat__group-author" aria-hidden="true">
