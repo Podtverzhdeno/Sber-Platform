@@ -262,6 +262,7 @@ function CourseDetails({
   ] as const;
   return <div className="bc-panel-content" data-reference="BC-R03">
     <div className="bc-panel-kicker">BOOTCAMP · КУРС</div>
+    <div className="bc-drawer-hero"><CourseCover title={card.title} /><div><span className="bc-drawer-label">ПРОГРАММА ОБУЧЕНИЯ</span><strong>{card.title}</strong></div></div>
     <h2 className="bc-detail-title">{detail?.title ?? card.title}</h2>
     <CardStates card={card} />
     <div className="bc-detail-tabs" role="tablist" aria-label="Информация о курсе">
@@ -340,7 +341,7 @@ function RecommendationDetails({ card, track }: { card: CourseCardState; track: 
   return <div className="bc-panel-content" data-reference="BC-R04">
     <p className="bc-panel-kicker">ПОЧЕМУ РЕКОМЕНДОВАН</p>
     <p className="bc-muted">Направление: {track === "all" ? "все активные" : track}</p>
-    <h3>{card.title}</h3>
+    <div className="bc-drawer-hero"><CourseCover title={card.title} /><h3>{card.title}</h3></div>
     <p>{card.recommendation_reason || "Персональная рекомендация для курса не опубликована."}</p>
     {card.relevance_reasons.length > 0 && <ul>{card.relevance_reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>}
     {card.must_take ? <section className="bc-impact">
@@ -358,6 +359,7 @@ function RequirementsDetails({ cards, onSelect }: { cards: CourseCardState[]; on
   const pending = cards.filter((card) => card.must_take && card.completion_state !== "verified");
   return <div className="bc-panel-content" data-reference="BC-R05">
     <p className="bc-panel-kicker">ОБЯЗАТЕЛЬНОЕ ОБУЧЕНИЕ</p>
+    <h2 className="bc-drawer-heading">Обязательные курсы</h2>
     <p>Здесь показаны курсы, отмеченные как обязательные в текущем каталоге. Полный набор требований к грейду определяется отдельно опубликованной программой и проверкой практических результатов.</p>
     {pending.length === 0 ? <p className="bc-muted">Незавершённых обязательных курсов в текущем каталоге нет. Статус готовности к грейду здесь не рассчитан.</p> :
       <ol className="bc-requirements-list">{pending.map((card) =>
