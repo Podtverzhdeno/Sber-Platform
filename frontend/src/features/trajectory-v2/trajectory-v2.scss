@@ -1133,3 +1133,202 @@
   transform:skewX(-8deg);
 }
 @media(max-width:760px){.trajectory-v2-grades-dialog{min-height:0}.trajectory-v2-grade-explanation-graphic{display:none}}
+
+
+/* 2026-10-25 fidelity pass: geometry measured against 1672 × 941 source PNG.
+   Use the source's 2.27/.94 split rather than approximating it as 65/35. */
+@media (min-width: 901px) {
+  .workspace-content .trajectory-v2-columns {
+    grid-template-columns: minmax(0, 2.27fr) minmax(305px, .94fr);
+    column-gap: 16px;
+  }
+}
+.workspace-content .trajectory-v2-role-detail {
+  min-height: 249px;
+}
+.workspace-content .trajectory-v2-role-stack {
+  gap: 12px;
+}
+.workspace-content .trajectory-v2-stage-detail {
+  min-height: 299px;
+  background: linear-gradient(160deg, #072033, #081b2c);
+  border-color: #17506e;
+}
+.workspace-content .trajectory-v2-reference-sidebar {
+  gap: 12px;
+}
+.workspace-content .trajectory-v2-reference-sidebar > section {
+  padding: 14px;
+  border-radius: 12px;
+}
+.workspace-content .trajectory-v2-grade-panel {
+  min-height: 225px;
+}
+.workspace-content .trajectory-v2-stage-header {
+  margin-bottom: 8px;
+}
+.workspace-content .trajectory-v2-grade-ring {
+  background: #081e31;
+}
+.workspace-content .trajectory-v2-role-dialog {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  width: min(920px, calc(100vw - 48px));
+  min-height: min(850px, calc(100vh - 70px));
+  padding: 26px 28px;
+}
+.workspace-content .trajectory-v2-role-dialog .trajectory-v2-role-tabs {
+  display:flex;
+  flex-wrap:nowrap;
+  gap:0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  border-bottom: 1px solid #28536c;
+}
+.workspace-content .trajectory-v2-role-dialog .trajectory-v2-role-tabs button {
+  display: block;
+  flex: 0 0 auto;
+  padding: 13px 13px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  outline: none;
+  border-radius: 0;
+  background: transparent;
+  color: #b3c3d9;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.workspace-content .trajectory-v2-role-dialog .trajectory-v2-role-tabs button[aria-selected="true"] {
+  border-color: #10e7e2;
+  outline: none;
+  color: #20e4e9;
+  background: transparent;
+}
+.workspace-content .trajectory-v2-role-dialog .trajectory-v2-role-intro-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.workspace-content .trajectory-v2-role-dialog .trajectory-v2-role-intro-hero {
+  min-height: 140px;
+}
+.workspace-content .trajectory-v2-role-dialog .trajectory-v2-role-intro-card {
+  min-height: 204px;
+}
+.workspace-content .trajectory-v2-role-dialog .trajectory-v2-role-intro-card ul {
+  list-style-type: "✓  ";
+  padding-left: 18px;
+}
+.workspace-content .trajectory-v2-role-dialog .trajectory-v2-role-intro-card li::marker {
+  color: #0de6da;
+}
+.workspace-content .trajectory-v2-role-dialog .trajectory-v2-role-panel {
+  gap: 11px;
+  padding: 0;
+}
+.workspace-content .trajectory-v2-grades-dialog {
+  width: min(1038px, calc(100vw - 40px));
+  min-height: min(671px, calc(100vh - 80px));
+  padding: 24px 27px;
+}
+.workspace-content .trajectory-v2-grades-layout {
+  grid-template-columns: 350px minmax(0, 1fr);
+  gap: 16px;
+}
+.workspace-content .trajectory-v2-grades-layout .trajectory-v2-grade-option {
+  min-height: 71px;
+}
+.workspace-content .trajectory-v2-grade-explanation {
+  min-height: 480px;
+}
+.workspace-content .trajectory-v2-grade-explanation-head {
+  min-height: 105px;
+  position: relative;
+  isolation:isolate;
+  overflow: hidden;
+  margin: -18px -18px 12px;
+  padding: 19px;
+}
+.workspace-content .trajectory-v2-grade-explanation-head::before {
+  content: "";
+  position:absolute;
+  width:185px;height:95px;right:0;bottom:0;z-index:-1;
+  background:linear-gradient(145deg,#0c3761,#0a2340);
+  clip-path:polygon(0 100%,28% 44%,46% 79%,66% 13%,83% 67%,100% 33%,100% 100%);
+}
+.workspace-content .trajectory-v2-grade-explanation-head::after {
+  content: "";
+  position:absolute;
+  width:160px;height:4px;right:7px;bottom:32px;z-index:-1;
+  background:linear-gradient(90deg,transparent,#16e3fe,#93eaff);
+  transform:rotate(-27deg);
+  filter:drop-shadow(0 0 6px #20aeff);
+}
+@media (max-width: 760px) {
+  .workspace-content .trajectory-v2-role-dialog {
+    min-height:0;
+    padding:18px 14px;
+    width:calc(100vw - 20px);
+  }
+  .workspace-content .trajectory-v2-role-dialog .trajectory-v2-role-intro-grid {grid-template-columns:1fr}
+  .workspace-content .trajectory-v2-role-dialog .trajectory-v2-role-intro-card {min-height:0}
+  .workspace-content .trajectory-v2-grades-dialog {min-height:0}
+  .workspace-content .trajectory-v2-grades-layout {grid-template-columns:1fr}
+  .workspace-content .trajectory-v2-grade-explanation {min-height:0}
+}
+/* On the trajectory route only, the mobile header follows the actual source:
+   menu, search, notifications, profile; hide desktop-only utilities. */
+@media (max-width: 660px) {
+  .page-shell:has(.trajectory-v2) .topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 64px;
+    padding-left: 55px;
+    padding-right: 10px;
+  }
+  .page-shell:has(.trajectory-v2) .topbar .global-search {
+    display: block;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+  .page-shell:has(.trajectory-v2) .topbar .header-actions {
+    flex: 0 0 auto;
+    gap: 10px;
+  }
+  .page-shell:has(.trajectory-v2) .topbar .theme-utility,
+  .page-shell:has(.trajectory-v2) .topbar .streak-utility,
+  .page-shell:has(.trajectory-v2) .topbar .ranking-wrapper,
+  .page-shell:has(.trajectory-v2) .topbar .ghost-button {
+    display: none;
+  }
+  .page-shell:has(.trajectory-v2) .topbar .top-persona > span:last-child { display: none }
+  .page-shell:has(.trajectory-v2) .topbar .top-persona {
+    display: flex;
+    width: 35px;
+    margin: 0;
+    padding: 0;
+  }
+  .page-shell:has(.trajectory-v2) .workspace-content > .mobile-menu {
+    position: fixed;
+    z-index: 110;
+    top: 11px;
+    left: 8px;
+    width: 39px;
+    height: 43px;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    box-shadow: none;
+    background: transparent;
+    overflow: hidden;
+    font-size: 0;
+  }
+  .page-shell:has(.trajectory-v2) .workspace-content > .mobile-menu span {
+    font-size: 20px;
+  }
+}
