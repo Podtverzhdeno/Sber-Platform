@@ -1,0 +1,21 @@
+# Claim AN-05-UI-20261024
+
+- task_id: AN-05-UI-20261024
+- session_id: gpt6-20261024-1731-analytics-visual
+- status: IN_PROGRESS
+- started_at: 2026-10-24T17:31:00+03:00
+- heartbeat_at: 2026-10-24T17:31:00+03:00
+- base_revision: dbdadba02850997b93299a36fbb7b5c8709b0bff
+- depends_on: [22.8, 22.10, 30.10]
+- write_scope:
+  - frontend/src/features/analytics.tsx
+  - frontend/src/features/analytics-growth.scss
+  - frontend/src/features/analytics.test.tsx
+  - .agents/coordination/claims/AN-05-UI-20261024.lock/status.md
+- verification:
+  - npm run typecheck
+  - npm run lint
+  - npm test
+  - npm run build
+- progress: Visual regression analysis from seven user screenshots and main source. No shared file changes.
+- blockers: Original 1:1 design reference PNG not accessible; browser live session blocked by provider credits/auth
