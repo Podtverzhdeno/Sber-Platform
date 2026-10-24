@@ -226,6 +226,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
   const [period, setPeriod] = useState(8);
   const [openDetail, setOpenDetail] = useState<string | null>(null);
   const [showCriteria, setShowCriteria] = useState(false);
+  const [showAllEvidence, setShowAllEvidence] = useState(false);
   const profileQuery = useQuery({ queryKey: ["agentic-coding-profile", role], queryFn: () => apiRequest<AgenticServerProfile>(("/api/v1/me/agentic-coding/profile?role_key=" + role) as `/api/v1/me/agentic-coding/profile?${string}`) });
   const growthQuery = useQuery({ queryKey: ["participant-growth-analytics"], queryFn: () => apiRequest<Snapshot>("/api/v1/me/growth/snapshot") });
   const journeyQuery = useQuery({ queryKey: ["participant-analytics"], queryFn: () => apiRequest<Journey>("/api/v1/me/analytics/journey") });
@@ -302,7 +303,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
     {layout === "evidence" && <>
       <div className="ref-v3-main">
         <section className="ref-panel ref-v3-chart"><div className="ref-card-title"><div><span className="ref-cap">ВАШ ПРОФИЛЬ</span><h2>Компетенции Agentic Coding</h2></div></div><Controls role={role} setRole={setRole} chart={chart} setChart={setChart} /><SkillsVisual skills={skills} chart={chart} series={series} /></section>
-        <section className="ref-panel ref-v3-evidence"><div className="ref-card-title"><div><span className="ref-cap">ПОДТВЕРЖДЕНИЕ</span><h2>Каждый уровень — с доказательством</h2><p>Откуда взялась оценка и какой источник её подтверждает</p></div></div>
+        <section className="ref-panel ref-v3-evidence"><div className="ref-card-title"><div><span className="ref-cap">ПОДТВЕРЖДЕНИЕ</span><h2>Каждый уровень — с доказательством</h2><p>Откуда взялась оценка и какой источник её подтверждает</p></div><button type="button" className="ref-small-link" onClick={() => { setShowAllEvidence(true); }}>Все доказательства ↗</button></div>
           <div className="ref-evidence-count"><div><b>{qualifiedSourceCount ?? "—"}</b><span>квалифицированных источников</span></div><div><b>{known.length ? met.length : "—"}</b><span>компетенции достигли цели</span></div></div><div className="ref-all-evidence"><QualifiedEvidenceList skills={skills} limit={skills.length} /></div><div className="ref-warning"><strong>Как определяется уровень?</strong><p>По разрешённым цифровым следам и утверждённым требованиям роли. Курсы и тесты сами по себе не присваивают L1.</p></div>
         </section>
       </div>
@@ -322,6 +323,12 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
         <p>Событий из разрешённого источника: {detailed.evidence_count}. {detailed.unresolved_methodology ? "Есть нерешённое расхождение методологии." : "Неподтверждённый уровень не является нулём."}</p>
         <a className="ref-primary-cta" href={tasksUrl}>Перейти к задачам →</a>
       </div>}
+    </Modal>
+    <Modal title="Все квалифицированные доказательства Agentic Coding" open={showAllEvidence} onClose={() => { setShowAllEvidence(false); }}>
+      <div className="ref-modal-content">
+        <p>Уровни показываются только по данным источника Agentic Coding, а не по общей активности.</p>
+        <QualifiedEvidenceList skills={skills} limit={skills.length} />
+      </div>
     </Modal>
     <Modal title="Условия Agentic Coding L1" open={showCriteria} onClose={() => { setShowCriteria(false); }}>
       <div className="ref-modal-content"><span className="ref-cap">СЕРТИФИКАЦИЯ</span>
