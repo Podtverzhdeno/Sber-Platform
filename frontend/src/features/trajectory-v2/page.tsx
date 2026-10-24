@@ -479,6 +479,7 @@ export function RoleDetailPanel(props: {
 }) {
   const role = props.role;
   return (
+    <div className="trajectory-v2-role-stack">
     <article
       className="trajectory-v2-role-detail"
       data-testid="trajectory-role-detail"
@@ -529,9 +530,22 @@ export function RoleDetailPanel(props: {
         stageKey={props.stageKey}
         onStageSelect={props.onStageSelect}
         onOpenDetails={props.onOpenStageDetails}
+        showDetails={false}
       />
     </article>
+    <SelectedStageCard role={role} roadmap={props.roadmap} stageKey={props.stageKey} onOpenDetails={props.onOpenStageDetails}/>
+    </div>
   );
+}
+
+function SelectedStageCard(props: { role: RoleCardView; roadmap: RoadmapView | null; stageKey: string | null; onOpenDetails: (stageKey: string) => void }) {
+  const { roadmap, role } = props;
+  if (roadmap === null || roadmap.track_key !== role.track_key) return null;
+  const currentKey = roadmap.next_step?.key ?? roadmap.milestones[0]?.key ?? "";
+  const activeKey = isSelectedStage(props.stageKey, roadmap.milestones, currentKey);
+  const active = roadmap.milestones.find((milestone) => milestone.key === activeKey);
+  if (active === undefined) return null;
+  return <StageDetail milestone={active} state={milestoneState(active, roadmap.next_step)} nextStep={roadmap.next_step} role={role} onOpenDetails={props.onOpenDetails}/>;
 }
 
 export function StagePathSection(props: {
@@ -543,6 +557,7 @@ export function StagePathSection(props: {
   stageKey: string | null;
   onStageSelect: (stageKey: string) => void;
   onOpenDetails: (stageKey: string) => void;
+  showDetails?: boolean;
 }) {
   const { role, roadmap } = props;
   if (props.pending) {
@@ -612,7 +627,7 @@ export function StagePathSection(props: {
           );
         })}
       </ol>
-      {visibleMilestone === undefined ? null : (
+      {visibleMilestone === undefined || props.showDetails === false ? null : (
         <StageDetail
           milestone={visibleMilestone}
           state={milestoneState(visibleMilestone, nextStep)}
