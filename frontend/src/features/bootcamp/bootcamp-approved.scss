@@ -169,3 +169,21 @@
 @media(max-width:680px) {
   .bc-approved .bc-role-switch-row select { flex:1 1 100%; width:100%; }
 }
+
+/* WCAG 2.2 AA: active segmented choices need strong foreground/background contrast in BOTH themes. */
+.bc-approved .bootcamp-catalog-toolbar .catalog-segments button[aria-pressed="true"],
+.bc-approved .bootcamp-catalog-toolbar .bc-category-row button[aria-pressed="true"] {
+  color: var(--on-brand-ink);
+  background: var(--color-primary);
+}
+.bc-approved .bootcamp-catalog-toolbar .catalog-segments button[aria-pressed="true"]:hover,
+.bc-approved .bootcamp-catalog-toolbar .bc-category-row button[aria-pressed="true"]:hover {
+  color: var(--on-brand-ink);
+  background: var(--color-primary-strong);
+}
+.bc-approved .bootcamp-course-card > .notice {
+  font-size: .78rem;
+  margin: 0;
+  padding: 10px;
+  border-radius: 9px;
+}
