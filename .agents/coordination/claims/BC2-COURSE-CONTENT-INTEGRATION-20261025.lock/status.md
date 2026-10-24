@@ -1,0 +1,15 @@
+# Claim BC2-COURSE-CONTENT-INTEGRATION-20261025
+- task_id: BC2-COURSE-CONTENT-INTEGRATION-20261025
+- session_id: gpt6-20261025-bootcamp-lesson-wiring
+- status: IN_PROGRESS
+- base_revision: 383e17f7a431c3d63b14807ddff3791a73ea78df
+- depends_on: [BC2-COURSE-CONTENT-20261025]
+- lane: bootcamp-course-content-integration
+- write_scope:
+  - frontend/src/features/bootcamp/catalog.tsx
+  - frontend/src/features/bootcamp/route-v2.tsx
+  - .agents/coordination/claims/BC2-COURSE-CONTENT-INTEGRATION-20261025.lock/status.md
+- shared_files: [frontend/src/features/bootcamp/catalog.tsx, frontend/src/features/bootcamp/route-v2.tsx]
+- verification: course modal opens 4 substantive lessons, no grade/XP spoofing, unit and lint, browser interaction
+- progress: isolated 12-course 48-lesson library implemented; wiring both catalog versions
+- blockers: full visual acceptance of unrelated PR52/PR53 pending
