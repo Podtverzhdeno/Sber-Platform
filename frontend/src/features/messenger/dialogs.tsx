@@ -18,6 +18,7 @@ import {
 } from "react";
 
 import type { ApiChannelView } from "./contracts";
+import { referenceAvatarFor, referenceAvatarSpriteIndexFor } from "./reference-avatars";
 import {
   getDialogDraftsSnapshot,
   hydrateDialogDrafts,
@@ -98,7 +99,7 @@ export function DialogList({
   );
   const contacts = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    return contactsOfChannels(channels, viewerId).filter((contact) =>
+    return contactsOfChannels(channels.filter((channel) => !channel.id.startsWith("reference:")), viewerId).filter((contact) =>
       normalized ? contact.display_name.toLowerCase().includes(normalized) : true,
     );
   }, [channels, viewerId, query]);
@@ -137,27 +138,14 @@ export function DialogList({
       className={"msg-dialog-list" + (className ? ` ${className}` : "")}
       aria-label="Список диалогов"
     >
-      <div className="msg-dialog-list__top">
-        <label className="msg-dialog-list__search">
-          <span className="msg-dialog-list__sr-only">Поиск диалогов</span>
-          <span className="msg-dialog-list__search-field">
-            <Search aria-hidden="true" size={15} />
-            <input
-              type="search"
-              value={query}
-              placeholder="Имя, задача или текст"
-              aria-label="Поиск диалогов"
-              onChange={(event) => {
-                setQuery(event.target.value);
-              }}
-            />
-          </span>
-        </label>
+      <div className="msg-dialog-list__heading">
+        <div><h1 id="workspace-title">Сообщения</h1><p className="msg-dialog-list__subtitle">Диалоги и сообщества</p></div>
         <div className="msg-dialog-list__create">
           <button
             type="button"
             className="msg-dialog-list__create-button"
             disabled={contacts.length === 0}
+            aria-label="Создать диалог"
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             title={
@@ -170,7 +158,7 @@ export function DialogList({
             }}
           >
             <Plus aria-hidden="true" size={15} />
-            Создать диалог
+            Создать чат
           </button>
           {menuOpen && contacts.length > 0 && (
             <div
@@ -202,6 +190,23 @@ export function DialogList({
           )}
         </div>
       </div>
+      <div className="msg-dialog-list__top">
+        <label className="msg-dialog-list__search">
+          <span className="msg-dialog-list__sr-only">Поиск диалогов</span>
+          <span className="msg-dialog-list__search-field">
+            <Search aria-hidden="true" size={15} />
+            <input
+              type="search"
+              value={query}
+              placeholder="Поиск диалогов…"
+              aria-label="Поиск диалогов"
+              onChange={(event) => {
+                setQuery(event.target.value);
+              }}
+            />
+          </span>
+        </label>
+      </div>
       <div
         className="msg-dialog-list__tabs"
         role="tablist"
@@ -226,13 +231,14 @@ export function DialogList({
             key={item}
             type="button"
             role="tab"
+            aria-label={item}
             aria-selected={tab === item}
             className={tab === item ? "active" : ""}
             onClick={() => {
               setTab(item);
             }}
           >
-            {item}
+            {item}{item === "Все" && <span className="msg-dialog-list__count">{rows.length}</span>}
           </button>
         ))}
       </div>
@@ -291,6 +297,7 @@ export function DialogList({
               visible.map((row) => (
                 <li
                   key={row.channel.id}
+                  data-kind={row.channel.kind}
                   className={
                     "msg-dialog-list__row-item" +
                     (row.selected ? " selected" : "") +
@@ -305,8 +312,8 @@ export function DialogList({
                       onSelect(row.channel.id);
                     }}
                   >
-                    <span className="msg-dialog-list__avatar" aria-hidden="true">
-                      {row.initial}
+                    <span className="msg-dialog-list__avatar" aria-hidden="true" data-reference-tone={referenceAvatarFor(row.channel.id)?.tone} data-reference-index={referenceAvatarSpriteIndexFor(row.channel.id) ?? undefined}>
+                      {referenceAvatarFor(row.channel.id)?.glyph ?? row.initial}
                     </span>
                     <span className="msg-dialog-list__row-text">
                       <span className="msg-dialog-list__row-title">

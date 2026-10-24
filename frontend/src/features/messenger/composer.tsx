@@ -1,3 +1,4 @@
+import { AtSign, Paperclip, Send, Smile } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 
@@ -26,6 +27,7 @@ export type ComposerProps = {
   sendState: ComposerSendState;
   connectionState: ComposerConnectionState;
   replySummary?: { id: string; summary: string } | null;
+  readOnlyReason?: string;
   onSend: (payload: ComposerSendPayload) => void;
   onClearReply?: () => void;
   className?: string;
@@ -49,6 +51,7 @@ export function Composer({
   sendState,
   connectionState,
   replySummary = null,
+  readOnlyReason,
   onSend,
   onClearReply,
   className,
@@ -198,12 +201,26 @@ export function Composer({
     .filter(Boolean)
     .join(" ");
 
+  if (!canSend && readOnlyReason) {
+    return (
+      <div className={composerClasses + " msg-composer--reference"} role="region" aria-label="Композер демо-переписки">
+        <div className="msg-composer__reference-row">
+          <Paperclip aria-hidden="true" size={19}/>
+          <Smile aria-hidden="true" size={19}/>
+          <input type="text" disabled placeholder="Напишите сообщение..." aria-label="Демонстрационный чат — отправка недоступна"/>
+          <AtSign aria-hidden="true" size={19}/>
+          <button type="button" disabled aria-label="Отправка доступна только в реальном чате"><Send aria-hidden="true" size={18}/></button>
+        </div>
+        <p className="msg-composer__reference-hint">{readOnlyReason}</p>
+      </div>
+    );
+  }
+
   if (!canSend) {
     return (
       <div className={composerClasses} role="region" aria-label="Композер сообщения">
         <p className="msg-composer__notice" data-testid="composer-readonly">
-          Отправка недоступна: у вас отозвано право писать в этот чат.
-          История сообщений сохранена.
+          {readOnlyReason ?? "Отправка недоступна: у вас отозвано право писать в этот чат. История сообщений сохранена."}
         </p>
       </div>
     );
@@ -251,7 +268,7 @@ export function Composer({
               setEmojiOpen((current) => !current);
             }}
           >
-            🙂
+            <Smile aria-hidden="true" size={19} />
           </button>
           <button
             type="button"
@@ -263,12 +280,17 @@ export function Composer({
               setRefsOpen((current) => !current);
             }}
           >
-            📎
+            <Paperclip aria-hidden="true" size={19} />
           </button>
-          <div className="msg-composer__mention-hint">
-            <span aria-hidden="true">@</span>
-            <span className="msg-composer__hint-text">упомянуть</span>
-          </div>
+          <button
+            type="button"
+            className="msg-composer__mention-hint"
+            aria-label="Упомянуть участника"
+            title="Упомянуть участника"
+            onClick={() => { insertAtCaret("@"); }}
+          >
+            <AtSign aria-hidden="true" size={19} />
+          </button>
         </div>
         <div className="msg-composer__input-shell">
           {mentionCandidates.length > 0 && (
@@ -306,7 +328,8 @@ export function Composer({
               updateDraft(event.target.value);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Напишите сообщение… Enter — отправить, Shift+Enter — новая строка, @ — упоминание"
+            placeholder="Напишите сообщение…"
+            title="Enter — отправить, Shift+Enter — новая строка, @ — упоминание"
             className="msg-composer__textarea"
             data-testid="composer-textarea"
           />
@@ -317,7 +340,8 @@ export function Composer({
           disabled={sendDisabled}
           data-testid="composer-send"
         >
-          {sendState === "sending" ? "Отправляем…" : "Отправить"}
+          <Send aria-hidden="true" size={19} />
+          <span className="msg-composer__send-label">{sendState === "sending" ? "Отправляем…" : "Отправить"}</span>
         </button>
       </form>
       {emojiOpen && (
