@@ -249,3 +249,66 @@
 .analytics-reference .ref-all-evidence:focus-within {outline:1px solid #18e1e6}
 
 .analytics-reference .ref-project-disclaimer {color:#9bb9c7;font-size:10px;line-height:1.45;margin:0 0 9px}
+
+
+/*
+ * Canonical Analytics PNG: 1600px viewport, 205px sidebar,
+ * 65px topbar, 22px content gutters. Scope shell corrections to this
+ * route only; existing participant routes retain their original shell.
+ */
+@media (min-width: 1024px) {
+  body:has(.analytics-reference) .workspace { padding-left:205px; }
+  body:has(.analytics-reference) .workspace > .sidebar { width:205px; padding-right:11px; padding-left:11px; }
+  body:has(.analytics-reference) .topbar { left:205px; min-height:65px; height:65px; padding-right:21px; padding-left:21px; }
+  body:has(.analytics-reference) .workspace-content { padding:0; }
+}
+@media (min-width: 1381px) {
+  .analytics-reference {
+    position:relative;
+    padding:15px 22px 17px;
+    gap:13px;
+    min-height:calc(100vh - 65px);
+  }
+  .analytics-reference .ref-pages {
+    position:absolute;
+    top:14px;
+    left:calc(50% - 68px);
+    z-index:2;
+    width:max-content;
+    max-width:310px;
+    padding:2px;
+    border:1px solid #194056;
+    border-radius:9px;
+    background:rgba(5,20,33,.94);
+    box-shadow:0 2px 10px rgba(0,0,0,.09);
+  }
+  .analytics-reference .ref-pages button {
+    padding:6px 8px;
+    font-size:10px;
+  }
+  .analytics-reference .ref-page-header { min-height:71px; }
+  .analytics-reference .ref-kpi { height:94px; }
+  .analytics-reference .ref-v1-middle,
+  .analytics-reference .ref-v3-main { margin-top:17px; }
+  .analytics-reference .ref-v1-middle { height:441px; min-height:441px; }
+  .analytics-reference .ref-v1-bottom { height:255px; min-height:255px; }
+  .analytics-reference .ref-v3-main { height:424px; min-height:424px; }
+  .analytics-reference .ref-v3-evidence { min-height:0; }
+  .analytics-reference .ref-v3-evidence .ref-all-evidence {
+    max-height:147px;
+    min-height:0;
+    overflow-y:auto;
+  }
+  .analytics-reference .ref-v3-bottom { height:304px; min-height:304px; }
+  .analytics-reference .ref-layout-path .ref-page-header { min-height:81px; }
+  .analytics-reference.ref-layout-path .ref-page-header { min-height:81px; }
+  .analytics-reference .ref-path-hero { height:199px; min-height:199px; }
+  .analytics-reference .ref-route { height:106px; min-height:106px; }
+  .analytics-reference .ref-v2-main { height:379px; min-height:379px; }
+  .analytics-reference .ref-v2-bottom { height:278px; min-height:278px; }
+  .analytics-reference .ref-v2-main .ref-matrix-list { overflow:auto; min-height:0; }
+}
+@media (max-width: 1380px) {
+  /* On narrower layouts the accessible view selector remains in flow. */
+  .analytics-reference .ref-pages {position:static;}
+}
