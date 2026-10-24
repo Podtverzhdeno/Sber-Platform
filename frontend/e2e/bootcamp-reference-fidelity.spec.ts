@@ -11,7 +11,7 @@ const captures = [
 ];
 
 for (const viewport of captures) {
-  test(`Bootcamp reference fidelity ${viewport.width}x${viewport.height}`, async ({ page }) => {
+  test(`Bootcamp reference fidelity ${String(viewport.width)}x${String(viewport.height)}`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto("/");
     await page.locator('[data-persona="participant-alex"]').click();
@@ -21,27 +21,27 @@ for (const viewport of captures) {
     const shell = page.locator(".bc-reference-root");
     await expect(shell).toBeVisible();
     await expect(shell.locator(".course-card").first()).toBeVisible();
-    await page.screenshot({ path: `test-results/bc-ref-${viewport.width}-cards.png`, animations: "disabled" });
+    await page.screenshot({ path: `test-results/bc-ref-${String(viewport.width)}-cards.png`, animations: "disabled" });
 
     await shell.locator(".view-toggle").getByRole("button", { name: "Список" }).click();
     await expect(shell.locator(".course-row").first()).toBeVisible();
-    await page.screenshot({ path: `test-results/bc-ref-${viewport.width}-list.png`, animations: "disabled" });
+    await page.screenshot({ path: `test-results/bc-ref-${String(viewport.width)}-list.png`, animations: "disabled" });
 
     await shell.locator(".view-toggle").getByRole("button", { name: "Карточки" }).click();
     await shell.locator(".course-card .course-bottom .btn").first().click();
     await expect(shell.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
-    await page.screenshot({ path: `test-results/bc-ref-${viewport.width}-course.png`, animations: "disabled" });
+    await page.screenshot({ path: `test-results/bc-ref-${String(viewport.width)}-course.png`, animations: "disabled" });
     await page.keyboard.press("Escape");
     await expect(shell.getByRole("dialog")).toHaveCount(0);
 
     await shell.locator(".course-card .course-bottom .text-link").first().click();
     await expect(shell.getByRole("dialog", { name: "Почему рекомендован" })).toBeVisible();
-    await page.screenshot({ path: `test-results/bc-ref-${viewport.width}-why.png`, animations: "disabled" });
+    await page.screenshot({ path: `test-results/bc-ref-${String(viewport.width)}-why.png`, animations: "disabled" });
     await page.keyboard.press("Escape");
 
     await shell.locator(".grade-highlight .rainbow-btn").click();
     await expect(shell.getByRole("dialog", { name: "Требования к обучению" })).toBeVisible();
-    await page.screenshot({ path: `test-results/bc-ref-${viewport.width}-required.png`, animations: "disabled" });
+    await page.screenshot({ path: `test-results/bc-ref-${String(viewport.width)}-required.png`, animations: "disabled" });
     await page.keyboard.press("Escape");
     await expect(shell.getByRole("dialog")).toHaveCount(0);
 
