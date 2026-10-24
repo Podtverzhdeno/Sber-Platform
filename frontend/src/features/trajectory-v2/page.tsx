@@ -26,6 +26,14 @@ import type {
 } from "./client";
 import "./trajectory-v2.scss";
 
+/** Approved presentation-only catalogue additions. These entries carry no user progress,
+ * and are never sent to the server or treated as active trajectories. */
+const EXTRA_CATALOG_ROLES: ReadonlyArray<{ track_key: string; title: string }> = [
+  { track_key: "catalog-backend-reference", title: "Backend-разработчик" },
+  { track_key: "catalog-design-reference", title: "UX/UI-дизайнер" },
+  { track_key: "catalog-manager-reference", title: "Менеджер проекта" },
+];
+
 function isSelectedStage(
   stageKey: string | null,
   milestones: { key: string }[],
@@ -98,16 +106,31 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     const idx = navigation.data?.navigation.indexOf("Портфолио") ?? -1;
     if (idx >= 0) window.location.assign(`/workspace/${String(idx)}`);
   };
+  const catalogueRoles = useMemo<RoleCardView[]>(() => {
+    const existing = [...overview.roles];
+    for (const candidate of EXTRA_CATALOG_ROLES) {
+      if (existing.some((role) => role.title.toLowerCase() === candidate.title.toLowerCase())) continue;
+      existing.push({
+        track_key: candidate.track_key,
+        title: candidate.title,
+        state: "unselected",
+        attempt_number: null,
+        completed_milestones: 0,
+        total_milestones: 0,
+      });
+    }
+    return existing;
+  }, [overview.roles]);
   const roleParam = searchParams.get("role");
   const selectedKey = useMemo(() => {
-    const paramRole = overview.roles.find((role) => role.track_key === roleParam);
+    const paramRole = catalogueRoles.find((role) => role.track_key === roleParam);
     if (paramRole) return paramRole.track_key;
     const outcomeKey = overview.next_outcome?.trajectory_key;
-    return outcomeKey !== undefined && overview.roles.some((role) => role.track_key === outcomeKey)
+    return outcomeKey !== undefined && catalogueRoles.some((role) => role.track_key === outcomeKey)
       ? outcomeKey
-      : (overview.roles[0]?.track_key ?? null);
-  }, [overview, roleParam]);
-  const selected = overview.roles.find((role) => role.track_key === selectedKey) ?? null;
+      : (catalogueRoles[0]?.track_key ?? null);
+  }, [catalogueRoles, overview.next_outcome, roleParam]);
+  const selected = catalogueRoles.find((role) => role.track_key === selectedKey) ?? null;
   const primaryKey = primaryTrajectoryKey(overview);
   const selectedRoadmap =
     selected !== null
@@ -141,7 +164,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   };
   const drawerMilestone = selectedRoadmap?.milestones.find((m) => m.key === drawerKey);
   const visibleRoles = useMemo(() => {
-    const filtered = overview.roles.filter(
+    const filtered = catalogueRoles.filter(
       (role) =>
         !hiddenUnselected || role.track_key === selectedKey || role.state !== "unselected",
     );
@@ -150,7 +173,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
       (left, right) =>
         Number(right.track_key === pinnedTrack) - Number(left.track_key === pinnedTrack),
     );
-  }, [overview.roles, hiddenUnselected, selectedKey, pinnedTrack]);
+  }, [catalogueRoles, hiddenUnselected, selectedKey, pinnedTrack]);
   const togglePin = (trackKey: string) => {
     const next = pinnedTrack === trackKey ? null : trackKey;
     setPinnedTrack(next);
@@ -246,7 +269,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               onOpenStageDetails={openStageDetails}
               pinned={pinnedTrack === selected.track_key}
               hiddenUnselected={hiddenUnselected}
-              otherRoles={overview.roles.filter((item) => item.track_key !== selected.track_key)}
+              otherRoles={catalogueRoles.filter((item) => item.track_key !== selected.track_key)}
               compareTarget={compareTarget}
               feedback={actionFeedback}
               compare={compareRoles}
