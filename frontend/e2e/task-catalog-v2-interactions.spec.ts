@@ -202,6 +202,45 @@ test.describe("task catalog interactive controls and motion", () => {
     await expect(page.locator('[role="listitem"]')).toHaveCount(2);
   });
 
+  test("filter state survives reload and remains identical between cards and list", async ({ page }) => {
+    await openCatalog(page);
+    await page.getByRole("button", { name: "Все фильтры" }).click();
+    await page.getByLabel("Направление", { exact: true }).fill("ml");
+    await page.getByLabel("Навык", { exact: true }).fill("Python");
+    await page.getByLabel("Сложность", { exact: true }).selectOption("intermediate");
+    await page.getByRole("button", { name: "Список" }).click();
+    await expect.poll(() => new URL(page.url()).searchParams.get("competency")).toBe("Python");
+    await page.reload();
+    await expect(page.getByRole("button", { name: "Список" })).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("button", { name: "Все фильтры" }).click();
+    await expect(page.getByLabel("Навык", { exact: true })).toHaveValue("Python");
+    await expect(page.getByLabel("Направление", { exact: true })).toHaveValue("ml");
+    await expect(page.getByLabel("Сложность", { exact: true })).toHaveValue("intermediate");
+    await page.getByRole("button", { name: "Карточки" }).click();
+    await expect(page).toHaveURL(/catalog_view=cards/);
+    await expect.poll(() => new URL(page.url()).searchParams.get("competency")).toBe("Python");
+  });
+
+  test("terms dialog traps keyboard focus at both ends and returns focus on Escape", async ({ page }) => {
+    await openCatalog(page);
+    const open = page.locator(".catalog-v2-card").first().getByRole("button", { name: "Условия и отклик" });
+    await open.hover();
+    await open.click();
+    const modal = page.getByRole("dialog");
+    await expect(modal).toBeVisible();
+    const first = modal.getByRole("button", { name: "Закрыть условия" });
+    const last = modal.getByRole("button", { name: "Закрыть", exact: true });
+    await expect(last).toBeVisible();
+    await first.focus();
+    await page.keyboard.press("Shift+Tab");
+    await expect(last).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(first).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(modal).toHaveCount(0);
+    await expect(open).toBeFocused();
+  });
+
   test("read-only terms button opens modal, but blocked user cannot apply", async ({ page }) => {
     const readOnly: CatalogItem = {
       ...catalogItem,
