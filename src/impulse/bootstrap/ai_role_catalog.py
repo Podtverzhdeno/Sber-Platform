@@ -7,9 +7,9 @@ learning activities, which are *planned actions*, never fabricated completions.
 
 from __future__ import annotations
 
-# ruff: noqa: E501 -- long text inside the JSON curriculum is user-facing copy.
-
 import json
+
+# ruff: noqa: E501 -- long text inside the JSON curriculum is user-facing copy.
 
 AI_ROLE_PROFILES: dict[str, dict] = json.loads(r"""{
   "product": {
