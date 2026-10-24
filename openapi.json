@@ -13679,6 +13679,13 @@
       },
       "impulse__api__v1__development__MilestoneView": {
         "properties": {
+          "acceptance": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acceptance",
+            "type": "array"
+          },
           "activities": {
             "items": {
               "type": "string"
@@ -13702,9 +13709,35 @@
             "default": null,
             "title": "Deliverable"
           },
+          "estimated_hours": {
+            "anyOf": [
+              {
+                "maximum": 80,
+                "minimum": 1,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Estimated Hours"
+          },
           "key": {
             "title": "Key",
             "type": "string"
+          },
+          "lab": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Lab"
           },
           "position": {
             "title": "Position",
@@ -13725,6 +13758,13 @@
           "target_kind": {
             "title": "Target Kind",
             "type": "string"
+          },
+          "theory": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Theory",
+            "type": "array"
           },
           "title": {
             "title": "Title",
