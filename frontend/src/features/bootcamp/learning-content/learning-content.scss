@@ -45,3 +45,34 @@
 @media(max-width:750px){.bc-learning__body{grid-template-columns:minmax(0,1fr)}.bc-learning__toc{position:static}.bc-learning__toc ol{grid-template-columns:repeat(2,minmax(0,1fr))}.bc-learning__header h3{font-size:20px}}
 @media(max-width:440px){.bc-learning__header{flex-direction:column;padding:14px}.bc-learning__meta{text-align:left;display:flex;gap:8px}.bc-learning__toc ol{grid-template-columns:1fr}.bc-learning__lesson{padding:14px}.bc-learning__navigation button{padding:8px;font-size:12px}}
 @media(prefers-reduced-motion:reduce){.bc-learning *{scroll-behavior:auto!important;transition:none!important}}
+
+/* Course orientation and final project are editorial, not LMS certification. */
+.bc-learning__orientation{border:1px solid #24556a;border-radius:12px;padding:15px 17px;background:#08253a;color:#cde1ef;display:grid;gap:9px}
+.bc-learning__orientation-head{display:flex;align-items:flex-start;flex-wrap:wrap;gap:10px 28px;font-size:13px}
+.bc-learning__orientation-head strong{color:#f0f8ff}
+.bc-learning__orientation details{border-top:1px solid #1a4a60;padding-top:9px}
+.bc-learning__orientation summary{font-weight:680;color:#8beaf1;cursor:pointer;font-size:13px}
+.bc-learning__orientation ul{margin:10px 0 1px;padding-left:20px}
+.bc-learning__orientation li{margin:5px 0;font-size:12px}
+.bc-learning__view-switch{display:flex;gap:8px;flex-wrap:wrap}
+.bc-learning__view-switch button{cursor:pointer;padding:10px 15px;border:1px solid #286276;border-radius:10px;background:#092a40;color:#d5e9f6;font-weight:750}
+.bc-learning__view-switch button[aria-pressed="true"]{background:linear-gradient(110deg,#11d9c7,#14bed7);color:#04293a;border-color:#0fecdc}
+.bc-learning__view-switch button:hover{border-color:#22d8db}
+.bc-learning__capstone{min-width:0;padding:21px;border:1px solid #20516a;border-radius:14px;background:linear-gradient(145deg,#0a2a3f,#071d30);display:grid;gap:20px}
+.bc-learning__capstone h4{font-size:23px;line-height:1.3;margin:0 0 8px;color:#f3fbff}
+.bc-learning__capstone h5{font-size:16px;margin:0 0 11px;color:#f3f9ff}
+.bc-learning__capstone p{color:#c4d8e8;margin:0;line-height:1.55}
+.bc-learning__capstone section{border-top:1px solid #235169;padding-top:17px}
+.bc-learning__capstone ol,.bc-learning__capstone ul{padding-left:25px;margin:0;color:#cedfee;display:grid;gap:10px}
+.bc-learning__capstone li{padding-left:3px;line-height:1.5}
+.bc-learning__capstone li::marker{color:#31e5d9}
+.bc-learning__capstone table{border-collapse:collapse;width:100%;table-layout:fixed;text-align:left;color:#c7dbeb;font-size:12px}
+.bc-learning__capstone th,.bc-learning__capstone td{padding:10px;border-bottom:1px solid #26546c;vertical-align:top;overflow-wrap:anywhere}
+.bc-learning__capstone th{color:#76e6e9;background:#093344;font-weight:780}
+.bc-learning__capstone th:nth-child(2),.bc-learning__capstone td:nth-child(2){width:60px;text-align:center;font-variant-numeric:tabular-nums}
+.bc-learning__capstone th:first-child{width:27%}
+.bc-learning__capstone .bc-learning__review-note{margin-top:12px;font-size:12px;color:#e2c78b}
+.bc-learning__back{justify-self:start;padding:10px 14px;border:1px solid #19b7c4;border-radius:9px;background:#0c3b4f;color:#b6fcfa;cursor:pointer;font-weight:700}
+.bc-learning__back:hover{background:#104d61}
+.bc-learning__view-switch button:focus-visible,.bc-learning__back:focus-visible,.bc-learning__orientation summary:focus-visible{outline:2px solid #18f4e4;outline-offset:2px}
+@media(max-width:600px){.bc-learning__capstone{padding:14px}.bc-learning__capstone h4{font-size:20px}.bc-learning__capstone table{font-size:11px}.bc-learning__capstone th,.bc-learning__capstone td{padding:7px 5px}.bc-learning__capstone th:first-child{width:30%}.bc-learning__orientation{padding:12px}.bc-learning__view-switch button{padding:9px 11px;font-size:12px}}
