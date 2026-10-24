@@ -307,6 +307,7 @@ function CourseDetails({
   ] as const;
   return <div className="bc-panel-content" data-reference="BC-R03">
     <div className="bc-panel-kicker">BOOTCAMP · КУРС</div>
+    <h2 className="bc-detail-title">{card.title}</h2>
     <CardStates card={card} />
     <div className="bc-detail-tabs" role="tablist" aria-label="Информация о курсе">
       {tabs.map((item) => <button key={item.key} type="button" role="tab" aria-selected={tab === item.key}
