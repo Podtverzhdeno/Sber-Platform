@@ -152,7 +152,7 @@
   p {margin:8px 0 0;font-size:11.5px;line-height:1.45;color:#bcd0e5;}
   &>svg {color:#04dbe9;}
 }
-.home-v2-bottom-grid {display:grid;grid-template-columns:minmax(0,1.98fr) minmax(0,1fr);align-items:start;gap:15px;}
+.home-v2-bottom-grid {display:grid;grid-template-columns:minmax(0,1.81fr) minmax(0,1fr);align-items:start;gap:16px;}
 .home-v2-work-column,.home-v2-insights-column {display:flex;flex-direction:column;gap:14px;min-width:0;}
 .home-v2-next-outcome {border-color:#05dbe8;min-height:157px;padding:13px 15px;}
 .home-v2-next-outcome>header {gap:10px;margin-bottom:13px;}
@@ -322,4 +322,56 @@
 }
 @media(prefers-reduced-motion:reduce) {
   .home-v2 *, .home-v2 *::before, .home-v2 *::after {transition:none!important;animation:none!important;}
+}
+
+/* Desktop shell geometry is specific to the approved home screen.
+   The sidebar and topbar of Trajectory, Tasks, Bootcamp, etc. retain their
+   existing shell dimensions. At 1448px the artwork starts at x=252/y=111. */
+@media (min-width: 1400px) {
+  .page-shell:has(.home-v2) {
+    background:radial-gradient(circle at 51% -28%,#06436d 0%,#051626 38%,#03111d 90%);
+  }
+  .page-shell:has(.home-v2) .workspace {
+    padding:94px 13px 0 236px;
+    min-height:100vh;
+    background:linear-gradient(180deg,#051827 0%,#031420 100%);
+  }
+  .page-shell:has(.home-v2) .sidebar {
+    top:13px;
+    bottom:13px;
+    left:13px;
+    width:223px;
+    padding:17px 11px 25px 8px;
+    border:1px solid #17344a;
+    border-radius:16px 0 0 16px;
+    background:linear-gradient(170deg,#031425 0%,#041423 70%,#05182a 100%);
+  }
+  .page-shell:has(.home-v2) .sidebar-brand {
+    min-height:56px;
+    font-size:24px;
+    border-bottom:0;
+  }
+  .page-shell:has(.home-v2) .topbar {
+    top:13px;
+    right:13px;
+    left:236px;
+    min-height:81px;
+    padding:0 15px 0 21px;
+    border:1px solid #16334a;
+    border-left:0;
+    border-radius:0 16px 0 0;
+    background:#051727;
+    backdrop-filter:none;
+  }
+  .page-shell:has(.home-v2) .workspace-content {
+    padding:16px 15px 80px;
+    border-right:1px solid #0a2b40;
+    background:linear-gradient(180deg,#051827 0%,#031420 100%);
+  }
+  .page-shell:has(.home-v2) .global-search {
+    height:43px;
+    max-width:525px;
+    border-radius:8px;
+    background:linear-gradient(95deg,#0a2137,#0b223a);
+  }
 }
