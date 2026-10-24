@@ -2888,3 +2888,81 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
 @media (prefers-reduced-motion: reduce) {
   .catalog-v2-card .catalog-v2-card-actions { transition: none; }
 }
+
+/* Source card #01: explainability stays available, not repeated as two
+   paragraphs inside every skill row. Benefits remain conditional and truthful. */
+.catalog-v2-growth-caveat {
+  margin: 7px 0 3px !important;
+  font-size: 0.68rem !important;
+  line-height: 1.35;
+  color: var(--catalog-muted);
+}
+
+.catalog-v2-growth-explanations {
+  padding: 5px 0 2px;
+  color: var(--catalog-muted);
+  font-size: 0.7rem;
+}
+
+.catalog-v2-growth-explanations summary {
+  cursor: pointer;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  color: var(--catalog-ink);
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+.catalog-v2-growth-explanations ul {
+  padding: 8px 0 2px 15px;
+  margin: 0;
+}
+
+.catalog-v2-growth-explanations li {
+  margin-bottom: 8px;
+}
+
+.catalog-v2-growth-explanations li strong {
+  display: block;
+  font-size: 0.7rem;
+}
+
+.catalog-v2-growth-explanations li p,
+.catalog-v2-growth-explanations li small {
+  margin: 3px 0;
+  line-height: 1.4;
+  font-size: 0.68rem;
+  color: var(--catalog-muted);
+}
+
+.catalog-v2-benefits-section > ul { gap: 6px; }
+
+.catalog-v2-benefits-section > ul > li {
+  padding: 6px 7px;
+  align-items: center;
+  gap: 7px;
+}
+
+.catalog-v2-benefit-icon {
+  width: 29px;
+  height: 29px;
+}
+
+.catalog-v2-benefits-section li p {
+  max-width: 100%;
+  margin: 2px 0 !important;
+  font-size: 0.66rem;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalog-v2-benefits-section li small {
+  display: block;
+  line-height: 1.2;
+  color: var(--catalog-muted);
+}
