@@ -55,7 +55,7 @@ describe("source-first trajectory layout", () => {
     expect(screen.getByRole("complementary", { name: "Грейд и компетенции" })).toBeInTheDocument();
     expect(screen.getByText("Путь освоения роли")).toBeInTheDocument();
     const stage = screen.getByRole("region", { name: "Этап выбранной роли" });
-    expect(within(stage).getByText("Продуктовые гипотезы")).toBeInTheDocument();
+    expect(within(stage).getByRole("heading", { name: "Продуктовые гипотезы" })).toBeInTheDocument();
   });
 
   it("does not invent grade numbers, XP, verified tasks or skill levels", () => {
