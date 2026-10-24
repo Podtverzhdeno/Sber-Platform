@@ -37,7 +37,7 @@ import {
   writePinnedMessageId,
   type ReactionRecord,
 } from "./chat-model";
-import { dialogKindLabel, dialogTimeLabel } from "./view-model";
+import { dialogKindLabel, dialogTimeLabel, participantRoleLabel } from "./view-model";
 import type { KeyValueStorage } from "./view-model";
 import "./chat-history.scss";
 
@@ -437,8 +437,24 @@ export function ChatHistory({
                     (row.authorId !== null && row.authorId === viewerId ? "outgoing" : "incoming")
                   }
                 >
-                  <span className="msg-chat__group-author" aria-hidden="true">
-                    {row.authorId === viewerId ? "Вы" : row.authorName}
+                  <span className="msg-chat__group-author">
+                    {row.authorId !== viewerId && (
+                      <span className="msg-chat__group-avatar" aria-hidden="true">
+                        {channel?.kind === "community" && channel.title.trim().toLowerCase() === "маяки" && /^анна ковал[её]ва$/iu.test(row.authorName)
+                          ? <img src="/messages-reference/anna-avatar.svg" alt="" />
+                          : channel?.kind === "community" && channel.title.trim().toLowerCase() === "маяки" && row.authorName === "Дмитрий Соколов"
+                            ? <img src="/messages-reference/dmitry-avatar.svg" alt="" />
+                            : channel?.kind === "community" && channel.title.trim().toLowerCase() === "маяки" && row.authorName === "Мария Лебедева"
+                              ? <img src="/messages-reference/maria-avatar.svg" alt="" />
+                              : row.authorName.trim().slice(0,1).toUpperCase()}
+                      </span>
+                    )}
+                    <span>{row.authorId === viewerId ? "Вы" : row.authorName}</span>
+                    {row.authorId !== viewerId && channel?.participants.find((person) => person.id === row.authorId) !== undefined && (
+                      <small className="msg-chat__author-role">
+                        {participantRoleLabel(channel.participants.find((person) => person.id === row.authorId)?.role ?? "member")}
+                      </small>
+                    )}
                   </span>
                   {row.items.map((item) => {
                     const extra = item as ChatMessageExtra;
