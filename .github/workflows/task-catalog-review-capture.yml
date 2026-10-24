@@ -1,5 +1,6 @@
 name: Temporary approved-task visual review
 # Capture after CSS specificity/ring fixes
+# Final review state: compact secondary matching disclosure
 on:
   push:
     branches: [codex/task-catalog-visual-polish-20261024]
