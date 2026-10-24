@@ -157,6 +157,24 @@ describe("participant home v2", () => {
     expect(onOpenTarget).toHaveBeenCalledWith("course", "python-base");
   });
 
+  it("uses the real target kind for the hero CTA, without inventing XP or duration", () => {
+    const { onOpenTarget } = renderHome({ active_tasks: [] });
+    fireEvent.click(screen.getByRole("button", { name: /Продолжить обучение/ }));
+    expect(onOpenTarget).toHaveBeenCalledWith("course", "python-base");
+    const nextStep = screen.getByTestId("next-outcome-course");
+    expect(nextStep).toHaveTextContent("Этап 1");
+    expect(nextStep).toHaveTextContent("Python-разработчик");
+    expect(nextStep).not.toHaveTextContent("+250 XP");
+    expect(nextStep).not.toHaveTextContent("1,5 часа");
+    expect(nextStep).toHaveTextContent("К выполнению");
+  });
+
+  it("retains task wording when a real active task is recommended", () => {
+    const { onOpenTarget } = renderHome();
+    fireEvent.click(screen.getByRole("button", { name: /Продолжить задачу/ }));
+    expect(onOpenTarget).toHaveBeenCalledWith("task", overview.active_tasks[0]?.task_id);
+  });
+
   it("explains the selected day and marks planned work separately from completion", () => {
     renderHome();
     fireEvent.click(screen.getByRole("button", { name: /20 октября/ }));
