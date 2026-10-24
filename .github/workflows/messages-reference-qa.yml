@@ -39,8 +39,8 @@ jobs:
         run: npx eslint src/features/collaboration.tsx src/features/messenger e2e/messages-reference.spec.ts --max-warnings 0
       - name: Test API-driven messaging interactions
         run: npx vitest run src/features/collaboration.test.tsx src/features/messenger
-      - name: Build production bundle
-        run: npm run build
+      - name: Build Vite production bundle (typecheck follows browser acceptance)
+        run: npx vite build
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Verify reference views, geometry and clickable actions
