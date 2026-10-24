@@ -283,12 +283,21 @@ function TaskDetail(props: {
                         <span><small>После задачи · прогноз</small><b>{impact.projected_level ?? "Без числового прогноза"}</b>{projected !== null ? <span className="catalog-v2-skill-bar catalog-v2-skill-bar--forecast"><i style={{ width: String(projected) + "%" }} /></span> : null}</span>
                       </div>
                       <span className="catalog-v2-growth-delta">{delta === null ? "Не рассчитан" : (delta > 0 ? "+" : "") + String(delta) + "%"}</span>
-                      <p>{impact.explanation}</p>
-                      <small>{impact.status === "calculated" ? "Потенциальный рост рассчитан; необходима верификация." : "Потенциальный рост пока не рассчитан."} {impact.verification_required ? "Навык не подтверждается автоматически." : "Статус проверки не указан."}</small>
                     </li>
                   );
                 })}
               </ul>
+              <p className="catalog-v2-growth-caveat">Прогноз не подтверждает навык автоматически. Итоговый результат проверяется после выполнения задачи.</p>
+              <details className="catalog-v2-growth-explanations">
+                <summary>Пояснения к прогнозу навыков</summary>
+                <ul>{item.skill_impact.map((impact) => (
+                  <li key={impact.skill_id}>
+                    <strong>{impact.title}</strong>
+                    <p>{impact.explanation}</p>
+                    <small>{impact.status === "calculated" ? "Потенциальный рост рассчитан; необходима верификация." : "Потенциальный рост пока не рассчитан."} {impact.verification_required ? "Навык не подтверждается автоматически." : "Статус проверки не указан."}</small>
+                  </li>
+                ))}</ul>
+              </details>
             </div>
           ) : <p>Компетенции для прогноза не опубликованы; числовой рост не рассчитывается.</p> : null}
         </section>
