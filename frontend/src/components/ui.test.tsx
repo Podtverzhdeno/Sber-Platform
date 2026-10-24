@@ -41,4 +41,33 @@ describe("UI foundation", () => {
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
     expect(screen.getByRole("dialog", { name: "Детали" })).toHaveAttribute("aria-modal", "true");
   });
+  it("cycles focus within a dialog and returns it to the opener", () => {
+    const close = vi.fn();
+    const dialog = (open: boolean) => (
+      <>
+        <button type="button">Открыть параметры</button>
+        <Modal title="Параметры" open={open} onClose={close}>
+          <button type="button">Первое действие</button>
+          <button type="button">Последнее действие</button>
+        </Modal>
+      </>
+    );
+    const { rerender } = render(dialog(false));
+    const opener = screen.getByRole("button", { name: "Открыть параметры" });
+    opener.focus();
+    rerender(dialog(true));
+    const modal = screen.getByRole("dialog", { name: "Параметры" });
+    const closer = screen.getByRole("button", { name: "Закрыть" });
+    const last = screen.getByRole("button", { name: "Последнее действие" });
+    expect(closer).toHaveFocus();
+    expect(document.body.style.overflow).toBe("hidden");
+    fireEvent.keyDown(modal, { key: "Tab", shiftKey: true });
+    expect(last).toHaveFocus();
+    fireEvent.keyDown(modal, { key: "Tab" });
+    expect(closer).toHaveFocus();
+    rerender(dialog(false));
+    expect(opener).toHaveFocus();
+    expect(document.body.style.overflow).not.toBe("hidden");
+  });
+
 });
