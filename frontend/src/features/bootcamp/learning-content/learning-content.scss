@@ -76,3 +76,16 @@
 .bc-learning__back:hover{background:#104d61}
 .bc-learning__view-switch button:focus-visible,.bc-learning__back:focus-visible,.bc-learning__orientation summary:focus-visible{outline:2px solid #18f4e4;outline-offset:2px}
 @media(max-width:600px){.bc-learning__capstone{padding:14px}.bc-learning__capstone h4{font-size:20px}.bc-learning__capstone table{font-size:11px}.bc-learning__capstone th,.bc-learning__capstone td{padding:7px 5px}.bc-learning__capstone th:first-child{width:30%}.bc-learning__orientation{padding:12px}.bc-learning__view-switch button{padding:9px 11px;font-size:12px}}
+
+/* Optional local knowledge checkpoints — no certification state. */
+.bc-learning__knowledge{border-radius:12px;border:1px solid #285d73;background:#092d42;padding:15px;margin-top:20px}
+.bc-learning__knowledge h5{margin:4px 0 8px}
+.bc-learning__knowledge p{margin:0 0 12px;color:#d2e2ee}
+.bc-learning__knowledge-options{display:grid;gap:7px}
+.bc-learning__knowledge-options button{text-align:left;padding:10px 12px;border:1px solid #28576d;border-radius:8px;background:#091f30;color:#d7e6f0;cursor:pointer;font:inherit;line-height:1.4}
+.bc-learning__knowledge-options button span{font-weight:800;color:#43dce7;margin-right:6px}
+.bc-learning__knowledge-options button[aria-pressed="true"]{border-color:#18d4d0;background:#124e5b;color:#f6ffff}
+.bc-learning__knowledge-options button:hover{border-color:#3dbfd0}
+.bc-learning__knowledge-options button:focus-visible{outline:2px solid #2de9e3;outline-offset:2px}
+.bc-learning__knowledge .bc-learning__knowledge-feedback{margin:11px 0 0;padding:12px;border-radius:8px;background:#104157;color:#c4eef4}
+.bc-learning__knowledge-feedback strong{color:#eeffff}
