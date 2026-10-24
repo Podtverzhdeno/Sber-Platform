@@ -132,7 +132,7 @@ function TargetRadar({ targets, onSelect }: { targets: readonly (number | null)[
         if (!skill) return null;
         return <g key={skill.key} className="agentic-radar-control" role="button" tabIndex={0}
           aria-label={skill.label + ". Цель " + String(level) + " из 4. Подробнее"}
-          onClick={() => onSelect(skill.key)}
+          onClick={() => { onSelect(skill.key); }}
           onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onSelect(skill.key); } }}>
           <circle className="agentic-radar-hit" cx={pos.x} cy={pos.y} r="16" />
           <circle className="agentic-target-dot" cx={pos.x} cy={pos.y} r="5" />
@@ -216,7 +216,7 @@ function CertificationPanel({ role, targets, conflicts }: {
       <span>Нужна утверждённая версия правил для роли «{role.name}»</span>
     </p>}
     <button className="agentic-cert-button" type="button" aria-expanded={expanded} aria-controls="agentic-cert-details"
-      onClick={() => setExpanded((value) => !value)}>{expanded ? "Скрыть условия" : "Посмотреть условия сертификации"} <span aria-hidden="true">↗</span></button>
+      onClick={() => { setExpanded((value) => !value); }}>{expanded ? "Скрыть условия" : "Посмотреть условия сертификации"} <span aria-hidden="true">↗</span></button>
     {expanded && <div id="agentic-cert-details" className="agentic-cert-details">
       <strong>Что требуется</strong>
       <ol>
@@ -240,7 +240,7 @@ export function AgenticCodingProfile() {
   const activeIndex = SKILLS.findIndex((item) => item.key === activeSkill);
   const target = activeIndex >= 0 ? profile.target[activeIndex] ?? null : null;
   const hasConflict = profile.conflicts.includes(activeIndex);
-  const closeDetail = () => setActiveSkill(null);
+  const closeDetail = () => { setActiveSkill(null); };
 
   return <section className="agentic-profile" aria-labelledby="agentic-profile-title" data-testid="agentic-profile">
     <header className="agentic-profile-heading">
@@ -256,23 +256,23 @@ export function AgenticCodingProfile() {
       </label>
     </header>
     <div className="agentic-slice-tabs" role="group" aria-label="Тип компетенций">
-      <button type="button" aria-pressed={slice === "practical"} onClick={() => setSlice("practical")}>AI-навыки · практика <span>6</span></button>
-      <button type="button" aria-pressed={slice === "technical"} onClick={() => setSlice("technical")}>Технические</button>
-      <button type="button" aria-pressed={slice === "soft"} onClick={() => setSlice("soft")}>Гибкие</button>
+      <button type="button" aria-pressed={slice === "practical"} onClick={() => { setSlice("practical"); }}>AI-навыки · практика <span>6</span></button>
+      <button type="button" aria-pressed={slice === "technical"} onClick={() => { setSlice("technical"); }}>Технические</button>
+      <button type="button" aria-pressed={slice === "soft"} onClick={() => { setSlice("soft"); }}>Гибкие</button>
     </div>
     {slice !== "practical" ? <div className="agentic-slice-empty" role="status">
       <strong>{slice === "technical" ? "Технические компетенции" : "Гибкие навыки"}</strong>
       <p>{slice === "technical" ? "Проверенные технические навыки по выбранной траектории доступны в блоке «Аналитика траектории» ниже. Они не являются частью сертификации Agentic Coding." : "Отдельная модель оценки гибких навыков пока не подключена. События работы ИИ-агентов не используются для их автоматического подтверждения."}</p>
-      <button type="button" onClick={() => setSlice("practical")}>Вернуться к AI-навыкам</button>
+      <button type="button" onClick={() => { setSlice("practical"); }}>Вернуться к AI-навыкам</button>
     </div> : <>
       <div className="agentic-profile-main">
         <div className="agentic-profile-chart">
           <div className="agentic-chart-title">
             <div><span className="agentic-overline">Целевой профиль · {profile.name}</span><h3>6 компетенций <span className="agentic-chart-subtitle">/ шкала 1–4</span></h3></div>
             <div role="group" aria-label="Вид диаграммы" className="agentic-chart-modes">
-              <button type="button" aria-pressed={view === "radar"} onClick={() => setView("radar")}>Циклограмма</button>
-              <button type="button" aria-pressed={view === "bars"} onClick={() => setView("bars")}>Полосы</button>
-              <button type="button" aria-pressed={view === "table"} onClick={() => setView("table")}>Таблица</button>
+              <button type="button" aria-pressed={view === "radar"} onClick={() => { setView("radar"); }}>Циклограмма</button>
+              <button type="button" aria-pressed={view === "bars"} onClick={() => { setView("bars"); }}>Полосы</button>
+              <button type="button" aria-pressed={view === "table"} onClick={() => { setView("table"); }}>Таблица</button>
             </div>
           </div>
           <div className="agentic-legend" aria-label="Обозначения">
@@ -283,7 +283,7 @@ export function AgenticCodingProfile() {
           {view === "radar" && <div className="agentic-visual-layout">
             <TargetRadar targets={profile.target} onSelect={setActiveSkill} />
             <div className="agentic-axis-list" aria-label="Значения целевого профиля">
-              {SKILLS.map((item, index) => <button type="button" key={item.key} onClick={() => setActiveSkill(item.key)}
+              {SKILLS.map((item, index) => <button type="button" key={item.key} onClick={() => { setActiveSkill(item.key); }}
                 className="agentic-skill-row" data-testid={"agentic-skill-" + item.key}>
                 <span className="agentic-skill-label">{String(index + 1).padStart(2, "0")} <strong>{item.label}</strong></span>
                 <span className="agentic-skill-current">Подтверждено: нет данных</span>
@@ -293,7 +293,7 @@ export function AgenticCodingProfile() {
             </div>
           </div>}
           {view === "bars" && <div className="agentic-bars" aria-label="Целевые уровни по навыкам">
-            {SKILLS.map((item, index) => <button type="button" key={item.key} className="agentic-bar-row" onClick={() => setActiveSkill(item.key)}>
+            {SKILLS.map((item, index) => <button type="button" key={item.key} className="agentic-bar-row" onClick={() => { setActiveSkill(item.key); }}>
               <span>{item.label}</span><span className="agentic-bar-track">
                 {profile.target[index] !== null && <i style={{ width: String((profile.target[index] ?? 0) * 25) + "%" }} />}
               </span><strong>{profile.target[index] === null ? "—" : String(profile.target[index]) + "/4"}</strong><small>Подтверждено: нет данных</small>
@@ -301,7 +301,7 @@ export function AgenticCodingProfile() {
           </div>}
           {view === "table" && <div className="agentic-table-scroll"><table className="agentic-table">
             <thead><tr><th scope="col">Навык</th><th scope="col">Подтверждено</th><th scope="col">Цель</th><th scope="col">Детали</th></tr></thead>
-            <tbody>{SKILLS.map((item, index) => <tr key={item.key}><th scope="row">{item.label}</th><td>Нет данных</td><td>{profile.target[index] === null ? "Не задана" : String(profile.target[index]) + "/4"}</td><td><button type="button" onClick={() => setActiveSkill(item.key)} aria-label={"Подробнее: " + item.label}>Открыть ↗</button></td></tr>)}</tbody>
+            <tbody>{SKILLS.map((item, index) => <tr key={item.key}><th scope="row">{item.label}</th><td>Нет данных</td><td>{profile.target[index] === null ? "Не задана" : String(profile.target[index]) + "/4"}</td><td><button type="button" onClick={() => { setActiveSkill(item.key); }} aria-label={"Подробнее: " + item.label}>Открыть ↗</button></td></tr>)}</tbody>
           </table></div>}
           <div className="agentic-methodology-note"><span>i</span>
             <p>Цели приведены по методологии Agentic Coding. Отсутствие цифровых следов — не уровень 0 и не провал сертификации.</p></div>
