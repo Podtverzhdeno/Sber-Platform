@@ -1,0 +1,40 @@
+name: Temporary task source-size firstfold review
+on:
+  push:
+    branches:
+      - codex/task-catalog-firstfold-inspect-20261024
+    paths:
+      - .github/workflows/task-firstfold-source-qa.yml
+permissions:
+  contents: read
+jobs:
+  source-firstfold:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Source-size stage and sticky footer check
+        env:
+          CAPTURE_APPROVED_TASKS: "1"
+          TZ: Europe/Moscow
+          LANG: ru_RU.UTF-8
+        run: npx playwright test e2e/task-catalog-approved-geometry.spec.ts --grep "approved cards composition" --workers=1 --reporter=line
+      - name: Store source screenshot and failure evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: approved-firstfold-after-sticky
+          path: |
+            frontend/test-results/approved-geometry-cards.png
+            frontend/test-results/task-catalog-approved-*/
+          retention-days: 7
+          if-no-files-found: ignore
