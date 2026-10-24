@@ -22,7 +22,7 @@ jobs:
           package-manager-cache: false
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - name: Render exactly 1672x941 source-geometry scenes
+      - name: Capture approved layout after compact-card adjustments
         env:
           CAPTURE_APPROVED_TASKS: "1"
           TZ: Europe/Moscow
