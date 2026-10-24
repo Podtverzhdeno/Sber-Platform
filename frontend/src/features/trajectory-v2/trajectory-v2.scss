@@ -965,3 +965,14 @@
   .workspace-content .trajectory-v2-grade-body {grid-template-columns:100px minmax(0,1fr)}
   .workspace-content .trajectory-v2-heading {margin-bottom:14px}
 }
+
+
+/* Source SVG profession palette, independent of server role keys. */
+.workspace-content .trajectory-v2-role-icon[data-glyph="product"] {background:#3d1a70;color:#b68afb}
+.workspace-content .trajectory-v2-role-icon[data-glyph="ml"] {background:#074579;color:#38aefc}
+.workspace-content .trajectory-v2-role-icon[data-glyph="python"] {background:#1a4385;color:#a0bdfd}
+.workspace-content .trajectory-v2-role-icon[data-glyph="data"] {background:#112d48;color:#589bd1}
+.workspace-content .trajectory-v2-role-icon[data-glyph="backend"],
+.workspace-content .trajectory-v2-role-icon[data-glyph="design"],
+.workspace-content .trajectory-v2-role-icon[data-glyph="manager"] {background:#1a2936;color:#9babbf}
+.workspace-content .trajectory-v2-role-card[data-role-state="unselected"] .trajectory-v2-role-icon {background:#1d2935;color:#738497}
