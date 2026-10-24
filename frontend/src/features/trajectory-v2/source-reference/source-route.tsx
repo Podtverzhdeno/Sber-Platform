@@ -166,6 +166,7 @@ export function SourceTrajectoryBody({ overview }: { overview: DevelopmentOvervi
     />}
     {roleInfoOpen && role && <RoleInfoDialog
       role={role} roadmap={roadmap}
+      primary={role.track_key === overview.next_outcome?.trajectory_key}
       onClose={() => { setRoleInfoOpen(false); }}
       triggerRef={lastTrigger}
     />}
