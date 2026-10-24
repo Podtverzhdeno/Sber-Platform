@@ -1,4 +1,4 @@
-import { Box, MessageCircle, Radio, UsersRound } from "lucide-react";
+import { Box, Radio, UsersRound } from "lucide-react";
 
 type ReferenceKind = "trophy" | "school" | "team" | "ai" | "cat" | "technology" | "pulse" | "community" | null;
 
