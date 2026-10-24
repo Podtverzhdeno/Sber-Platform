@@ -1519,3 +1519,58 @@
   .sberchat-shell .msg-chat__header { min-height: 62px; height: 62px; }
   .sberchat-shell .msg-chat__scroll { padding-inline: 10px; }
 }
+
+
+/* Approved context structures: 03 personal and 01 community PNGs */
+.sberchat-shell .msg-context__description { margin: 8px 18px 14px; color: var(--ref-muted); font-size: 12px; line-height: 1.55; }
+.sberchat-shell .msg-context__about-heading { font-size: 12px; font-weight: 750; color: var(--ref-fg); padding: 11px 18px 5px; margin: 0; border-top: 1px solid var(--ref-line); }
+.sberchat-shell .msg-context__intro-actions { display: flex; gap: 8px; align-items: center; margin: 2px 18px 16px; }
+.sberchat-shell .msg-context__intro-actions button {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  height: 41px; min-width: 0; flex: 1; border-radius: 10px;
+  border: 1px solid var(--ref-accent); color: var(--ref-fg); background: transparent;
+  font-weight: 650; font-size: 12px;
+}
+.sberchat-shell .msg-context__intro-actions button:disabled { opacity: .75; cursor: not-allowed; }
+.sberchat-shell .msg-context__intro-actions > span { font-size: 10px; color: var(--ref-accent); }
+.sberchat-shell .ref-context-linked button, .sberchat-shell .ref-context-linked__item,
+.sberchat-shell .ref-context-resource, .sberchat-shell .ref-context-files li {
+  display: flex; align-items: center; gap: 11px;
+  width: 100%; min-height: 42px;
+  padding: 8px 10px; margin: 5px 0;
+  border-radius: 9px; border: 1px solid var(--ref-line);
+  background: color-mix(in srgb, var(--ref-fg) 3%, var(--ref-surface));
+  color: var(--ref-fg); text-align: left; font: inherit; font-size: 11.5px;
+}
+.sberchat-shell .ref-context-linked button:disabled { cursor: default; }
+.sberchat-shell .ref-context-linked button:not(:disabled) { cursor: pointer; }
+.sberchat-shell .ref-context-linked button:not(:disabled):hover { border-color: var(--ref-accent); }
+.sberchat-shell .ref-context-linked button svg, .sberchat-shell .ref-context-resource svg { color: #27baff; flex: 0 0 auto; }
+.sberchat-shell .ref-context-linked button span, .sberchat-shell .ref-context-linked__item span { flex: 1; min-width: 0; }
+.sberchat-shell .ref-context-linked strong { display: block; font-size: 11.5px; overflow-wrap: anywhere; }
+.sberchat-shell .ref-context-linked small { display: block; color: var(--ref-muted); font-size: 10px; }
+.sberchat-shell .ref-context-placeholder-text { color: var(--ref-muted); font-size: 11px; margin: 8px 0; }
+.sberchat-shell .ref-context-resources .ref-context-resource { border: 0; background: color-mix(in srgb, var(--ref-accent) 5%, var(--ref-surface)); }
+.sberchat-shell .ref-context-files ul, .sberchat-shell .ref-context-community ul { padding: 0; margin: 5px 0; list-style: none; }
+.sberchat-shell .ref-context-files li { overflow: hidden; }
+.sberchat-shell .ref-context-files li svg { flex: 0 0 auto; color: #32b1e9; }
+.sberchat-shell .ref-context-files li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sberchat-shell .ref-context-files .msg-context__section-title small { color: var(--ref-muted); padding: 2px 6px; border-radius: 50%; background: var(--ref-line); font-size: 10px; }
+.sberchat-shell .ref-context-community li { display: flex; align-items: center; gap: 11px; font-size: 11.5px; margin: 7px 0; }
+.sberchat-shell .ref-context-user-icon { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%; background: #153e5f; color: #d4f4ff; font-weight: 750; }
+.sberchat-shell .msg-chat__pinned--approved {
+  display: flex; gap: 12px; align-items: center;
+  margin: 8px 14px 2px;
+  padding: 10px 13px; border: 1px solid color-mix(in srgb, var(--ref-accent) 29%, var(--ref-line));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--ref-accent) 5%, var(--ref-bg));
+  color: var(--ref-accent);
+}
+.sberchat-shell .msg-chat__pinned--approved > div { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.sberchat-shell .msg-chat__pinned--approved strong { font-size: 11px; font-weight: 750; }
+.sberchat-shell .msg-chat__pinned--approved span { color: var(--ref-fg); font-size: 11px; }
+.sberchat-shell .msg-chat__preview-notice { margin: 0; padding: 3px 15px; color: var(--ref-muted); font-size: 10px; text-align: center; }
+@media (max-width: 959px) {
+  .sberchat-shell .msg-context__description { margin-inline: 14px; }
+  .sberchat-shell .msg-context__about-heading { padding-inline: 14px; }
+}
