@@ -362,6 +362,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   const selectedTaskId = searchParams.get("task");
   const [searchInput, setSearchInput] = useState(filters.q);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+  const [previewDismissed, setPreviewDismissed] = useState(false);
   const inspectorRef = useRef<HTMLElement>(null);
   const [conditionsTask, setConditionsTask] = useState<CatalogItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -380,6 +381,11 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
     }
     return Array.from(byId.values());
   }, [catalog.data]);
+  // A read-only preview uses the first authorized catalog projection, without
+  // creating a URL selection, requesting private detail or recording task progress.
+  const previewItem = selectedTaskId === null && layout === "cards" && !previewDismissed
+    ? items[0]
+    : undefined;
   const selectedFromCatalog = items.find((item) => item.task_id === selectedTaskId);
   const detail = useQuery({
     queryKey: [
@@ -397,6 +403,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   // A denied refetch revokes the cached projection immediately; transient
   // offline/server failures may still render explicitly stale catalog data.
   const selected = detailAccessDenied ? undefined : (selectedFromCatalog ?? detail.data);
+  const displayedDetail = selected ?? previewItem;
   const totals = catalog.data?.pages[0];
 
   useEffect(() => {
@@ -627,7 +634,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
                 <TaskSummary
                   item={item}
                   layout="cards"
-                  selected={selectedTaskId === item.task_id}
+                  selected={selectedTaskId === item.task_id || previewItem?.task_id === item.task_id}
                   bookmarkPending={bookmark.isPending && bookmark.variables.taskId === item.task_id}
                   onOpen={() => { openTask(item); }}
                   onConditions={() => { openConditions(item); }}
@@ -641,19 +648,19 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
       )}
       {catalog.hasNextPage ? <button type="button" className="catalog-v2-more" disabled={catalog.isFetchingNextPage} onClick={() => { void catalog.fetchNextPage(); }}>{catalog.isFetchingNextPage ? "Загружаем…" : "Показать ещё"}</button> : null}
         </div>
-        <aside ref={inspectorRef} className="catalog-v2-inspector" aria-label="Панель выбранной задачи">
+        <aside ref={inspectorRef} className="catalog-v2-inspector" aria-label={selectedTaskId === null && previewItem !== undefined ? "Предпросмотр рекомендованной задачи" : "Панель выбранной задачи"}>
       {selectedTaskId !== null && detail.isPending && selected === undefined ? <StatePanel kind="loading" /> : null}
       {selectedTaskId !== null && detail.isError && selected === undefined ? <StatePanel kind={isOfflineError(detail.error) ? "offline" : "restricted"} action="Закрыть" onAction={() => { updateParams({ task: null }); }} /> : null}
-      {selected !== undefined ? (
+      {displayedDetail !== undefined ? (
         <TaskDetail
-          key={selected.task_id}
-          item={selected}
+          key={displayedDetail.task_id}
+          item={displayedDetail}
           withdrawPending={withdraw.isPending}
-          onClose={() => { updateParams({ task: null }); }}
-          onConditions={() => { openConditions(selected); }}
+          onClose={() => { setPreviewDismissed(true); updateParams({ task: null }); }}
+          onConditions={() => { openConditions(displayedDetail); }}
           onWorkspace={props.onOpenWorkspace}
           onWithdraw={(applicationId) => { withdraw.mutate(applicationId); }}
-          onGrowthExpand={() => { trackCatalogEvent({ eventName: "growth_expand", task: selected }); }}
+          onGrowthExpand={() => { trackCatalogEvent({ eventName: "growth_expand", task: displayedDetail }); }}
         />
       ) : selectedTaskId === null && items.length > 0 ? (
         <div className="catalog-v2-inspector-empty">
