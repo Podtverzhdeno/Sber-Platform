@@ -503,3 +503,13 @@
   .page-shell:has(.home-v2) .global-search {margin-left:46px;width:min(214px,calc(100vw - 174px));}
   .page-shell:has(.home-v2) .global-search input::placeholder {color:#8aabc8;opacity:1;}
 }
+
+
+/* Close the desktop Buddy height gap reported by the 1448px browser contract:
+   avoid letting long text/controls make the 197px card 217px tall. */
+@media (min-width:1051px) {
+  .home-v2-buddy>header {margin-bottom:2px;}
+  .home-v2-buddy-content {min-height:97px;}
+  .home-v2-buddy-tip {padding:4px 7px;}
+  .home-v2-buddy-footnote {height:37px;min-height:37px;margin-top:3px;}
+}
