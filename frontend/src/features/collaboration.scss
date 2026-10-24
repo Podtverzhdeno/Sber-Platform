@@ -1802,3 +1802,51 @@
 :root[data-theme="light"] .sberchat-shell .msg-dialog-list__row-item.selected .msg-dialog-list__row {
   background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
 }
+
+
+/* Pixel geometry of empty illustration: source ZIP styles.css lines 95–97. */
+.sberchat-shell .ref-empty-state__art {
+  position: relative;
+  width: 250px;
+  height: 180px;
+  margin-bottom: 18px;
+  filter: none;
+}
+.sberchat-shell .ref-empty-state__bubble {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border-radius: 26px;
+  background: linear-gradient(135deg,rgba(36,230,238,.9),rgba(46,116,255,.75));
+  box-shadow: 0 0 50px rgba(36,230,238,.18), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.sberchat-shell .ref-empty-state__bubble--main {
+  width: 122px;
+  height: 86px;
+  left: 66px;
+  top: 48px;
+  font-size: 42px;
+  color: #eaffff;
+  letter-spacing: normal;
+}
+.sberchat-shell .ref-empty-state__bubble--main::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  bottom: -14px;
+  width: 18px;
+  height: 18px;
+  background: inherit;
+  clip-path: polygon(0 0,100% 0,0 100%);
+}
+.sberchat-shell .ref-empty-state__bubble--back {
+  width: 96px;
+  height: 72px;
+  left: 122px;
+  top: 28px;
+  opacity: .18;
+  border: 1px solid rgba(36,230,238,.5);
+}
+@media (max-width:480px) {
+ .sberchat-shell .ref-empty-state__art { transform: scale(.8); margin-block: -10px; }
+}
