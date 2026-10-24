@@ -2,7 +2,7 @@
 
 - task_id: task-catalog-real-api-regression-20261024
 - session_id: gpt6-20261024-followup-real-api
-- status: REVIEW
+- status: RELEASED
 - base_revision: 21f55b637160d3580d6fcad4524e23d1f071ccfb
 - dependencies: participant task catalog versioned projection
 - write_scope:
@@ -20,3 +20,10 @@
 - The temporary auto-refresh workflow was deleted after committing the images, so future PR CI MUST compare against fixed baselines
 - Latest full CI and independent reviewer remain release/merge acceptance gates
 - Original approved ZIP absent, therefore exact pixel identity to the archived mockups is NOT independently proven; the semantic contract is checked against OpenSpec
+
+## Coordination release after merged PR #23
+
+- integration_commit: `952d1189dc98ca317d824c7ba6f9be0b9f96c989`
+- exact_head_ci: `40101877786`, required-gates SUCCESS
+- disposition: historic author write-scope released because PR #23 was merged into main and no longer has pending writes; original-image product acceptance remains OPEN, not self-approved
+- reviewer_work: further visual fidelity requires separate fresh claim and product approval; old status must not block follow-up after merge
