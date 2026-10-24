@@ -57,7 +57,7 @@ async function openCatalog(page: Page, theme: "light" | "dark"): Promise<void> {
     await expect(menu).toHaveAttribute("aria-expanded", "true");
   }
   await page.getByRole("link", { name: "Задачи", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Задачи для вашего следующего результата" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
   await expect(page.locator(".catalog-v2-card")).toHaveCount(2);
   await page.evaluate(() => document.fonts.ready);
 }
