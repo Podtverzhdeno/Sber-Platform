@@ -102,7 +102,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     queryFn: () => apiRequest<{ navigation: string[] }>("/api/v1/me"),
   });
   const goToPortfolio = () => {
-    const idx = navigation.data?.navigation.indexOf("Портфолио") ?? -1;
+    const idx = (navigation.data?.navigation ?? []).indexOf("Портфолио");
     if (idx >= 0) window.location.assign(`/workspace/${String(idx)}`);
   };
   const catalogueRoles = useMemo<RoleCardView[]>(() => {
@@ -334,7 +334,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         <section className="trajectory-v2-passport-panel">
           <header>
             <h3>Мой скилл-паспорт</h3>
-            {navigation.data?.navigation.includes("Портфолио") && (
+            {(navigation.data?.navigation ?? []).includes("Портфолио") && (
               <button type="button" onClick={goToPortfolio}>Открыть →</button>
             )}
           </header>
