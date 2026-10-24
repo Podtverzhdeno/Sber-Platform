@@ -1,0 +1,122 @@
+/* Task catalogue micro-interactions. Layered over the approved source
+   geometry without changing the existing API-backed layout. */
+@media (hover: hover) and (pointer: fine) {
+  .catalog-v2 .catalog-v2-card {
+    will-change: transform;
+    transition: transform 210ms cubic-bezier(.2,.75,.25,1),
+      border-color 210ms ease, box-shadow 230ms ease, background-color 210ms ease;
+  }
+  .catalog-v2 .catalog-v2-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--catalog-highlight, #22e6d0);
+    box-shadow: 0 0 0 1px rgb(34 230 208 / 19%),
+      0 12px 32px rgb(0 0 0 / 22%),
+      0 0 24px rgb(34 230 208 / 9%);
+  }
+  .catalog-v2 .catalog-v2-card[data-selected="true"]:hover {
+    box-shadow: 0 0 0 1px var(--catalog-highlight, #22e6d0),
+      0 14px 36px rgb(0 0 0 / 27%),
+      0 0 30px rgb(34 230 208 / 15%);
+  }
+  .catalog-v2 .catalog-v2-card:hover .catalog-v2-customer-avatar,
+  .catalog-v2 .catalog-v2-card:hover .catalog-v2-brand-logo {
+    transform: scale(1.045);
+  }
+  .catalog-v2 .catalog-v2-card:hover .catalog-v2-tags li {
+    border-color: rgb(34 230 208 / 24%);
+  }
+  .catalog-v2 .catalog-v2-table-row {
+    transition: border-color 170ms ease, background-color 170ms ease,
+      box-shadow 170ms ease;
+  }
+  .catalog-v2 .catalog-v2-table-row:hover {
+    background: var(--catalog-soft);
+    box-shadow: inset 3px 0 var(--catalog-highlight, #22e6d0);
+  }
+  .catalog-v2 .catalog-v2-benefits-section > ul > li {
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+  .catalog-v2 .catalog-v2-benefits-section > ul > li:hover {
+    transform: translateX(3px);
+    border-color: rgb(34 230 208 / 32%);
+    box-shadow: 0 5px 14px rgb(0 0 0 / 11%);
+  }
+  .catalog-v2 .catalog-v2-stage-track > li:hover .catalog-v2-stage-index {
+    transform: translateY(-2px) scale(1.06);
+    border-color: var(--catalog-highlight, #22e6d0);
+    box-shadow: 0 0 16px rgb(34 230 208 / 20%);
+  }
+  .catalog-v2 button:not(:disabled):hover,
+  .catalog-v2-conditions button:not(:disabled):hover {
+    transform: translateY(-1px);
+  }
+  .catalog-v2 button:not(:disabled):active,
+  .catalog-v2-conditions button:not(:disabled):active {
+    transform: translateY(0) scale(.98);
+  }
+  .catalog-v2 .catalog-v2-primary:not(:disabled):hover,
+  .catalog-v2-conditions .catalog-v2-primary:not(:disabled):hover {
+    filter: brightness(1.07);
+    box-shadow: 0 5px 22px rgb(34 230 208 / 19%);
+  }
+}
+
+/* Keep controls discoverable even without a hover pointer.
+   The card remains fully clickable, but its explicit actions are focusable. */
+.catalog-v2 .catalog-v2-customer-avatar,
+.catalog-v2 .catalog-v2-brand-logo,
+.catalog-v2 .catalog-v2-stage-index {
+  transition: transform 200ms cubic-bezier(.2,.75,.25,1),
+    border-color 200ms ease, box-shadow 200ms ease;
+}
+.catalog-v2 .catalog-v2-tags li {
+  transition: border-color 180ms ease;
+}
+.catalog-v2 button,
+.catalog-v2-conditions button {
+  transition: transform 180ms ease, box-shadow 180ms ease,
+    border-color 180ms ease, background-color 180ms ease, filter 180ms ease;
+}
+.catalog-v2 .catalog-v2-card:focus-visible,
+.catalog-v2 .catalog-v2-table-row:focus-visible {
+  outline: 2px solid var(--catalog-highlight, #22e6d0);
+  outline-offset: 3px;
+}
+.catalog-v2 .catalog-v2-card:focus-within {
+  border-color: var(--catalog-highlight, #22e6d0);
+}
+
+/* At desktop source size, actions still animate into place, but are not
+   completely hidden: the explicit "Подробнее" control is discoverable. */
+@media (min-width: 1550px) and (hover: hover) {
+  .catalog-v2 .catalog-v2-card .catalog-v2-card-actions {
+    opacity: .75;
+    pointer-events: auto;
+    transform: translateY(2px);
+    transition: opacity 170ms ease, transform 170ms ease,
+      border-color 170ms ease, box-shadow 170ms ease;
+  }
+  .catalog-v2 .catalog-v2-card:hover .catalog-v2-card-actions,
+  .catalog-v2 .catalog-v2-card:focus-within .catalog-v2-card-actions {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* No hover animation on touch. No movement at all for reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .catalog-v2 .catalog-v2-card,
+  .catalog-v2 .catalog-v2-table-row,
+  .catalog-v2 .catalog-v2-benefits-section > ul > li,
+  .catalog-v2 .catalog-v2-customer-avatar,
+  .catalog-v2 .catalog-v2-brand-logo,
+  .catalog-v2 .catalog-v2-stage-index,
+  .catalog-v2 .catalog-v2-tags li,
+  .catalog-v2 .catalog-v2-card .catalog-v2-card-actions,
+  .catalog-v2 button,
+  .catalog-v2-conditions button {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}
