@@ -2,7 +2,7 @@
 
 - task_id: task-catalog-approved-layout-20261024
 - session_id: gpt6-20261024-1529-task-ui
-- status: REVIEW
+- status: IN_PROGRESS
 - base_revision: 087abc78705eb6ea77eafcc9a698ff5c35cbf84d
 - started_at: 2026-10-24T15:29:00+03:00
 - heartbeat_at: 2026-10-24T15:29:00+03:00
@@ -14,7 +14,7 @@
   - frontend/src/features/task-catalog-v2/page.test.tsx
   - .agents/coordination/claims/task-catalog-approved-layout-20261024.lock/status.md
 - acceptance: approved cards-detail composition, stage-plan-only visual, restrained skill growth, responsive list and preserved controls; typecheck, tests, screenshots in independent CI/review
-- progress: implemented split catalog/inspector UI, compact neutral stage track, skill growth, responsive mobile/tablet list and component test coverage; latest CI ongoing; independent approval pending
+- progress: follow-up CI repairs for contrast and documented view semantics; pending independent review
 - blockers: exact source PNG archive unavailable in connected files; semantic fidelity is guided by registered OpenSpec specification
 
 ## Handoff (2026-10-24)
