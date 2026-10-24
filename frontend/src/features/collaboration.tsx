@@ -9,7 +9,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import { apiRequest } from "../api/client";
 import type { RuntimeApiPath } from "../api/client";
 import { StatePanel } from "../components/ui";
-import { ArrowRight, FileText, FolderOpen, MessageCircle, MessagesSquare, Plus, Settings2, Users } from "lucide-react";
+import { ArrowRight, FileText, FolderOpen, MessageCircle, Plus, Settings2, Users } from "lucide-react";
 import "./collaboration.scss";
 
 import { ChatHistory } from "./messenger/chat-history";
@@ -445,7 +445,7 @@ export function MessagingWorkspace({
         {chatVisible && !selected && (
           <section className="chat-thread ref-chat-empty" aria-label="Выбор диалога" data-testid="messenger-empty-state">
             <div className="ref-empty-state">
-              <div className="ref-empty-state__art" aria-hidden="true"><MessagesSquare size={104} strokeWidth={1.1} /><span>•••</span></div>
+              <div className="ref-empty-state__art" aria-hidden="true"><span className="ref-empty-state__bubble ref-empty-state__bubble--back" /><span className="ref-empty-state__bubble ref-empty-state__bubble--main">•••</span></div>
               <h2>Выберите диалог или сообщество</h2>
               <p>Слева вы можете открыть личный чат, рабочую группу или сообщество</p>
               <div className="ref-empty-state__actions">
