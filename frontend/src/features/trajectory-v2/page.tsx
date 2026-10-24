@@ -400,6 +400,8 @@ export function RoleCardOverview(props: {
       className="trajectory-v2-role-card"
       data-testid="trajectory-role-card"
       data-role-key={role.track_key}
+      data-role-state={role.state}
+      data-primary={props.primary}
       aria-pressed={props.selected}
       onClick={() => {
         props.onSelect();
