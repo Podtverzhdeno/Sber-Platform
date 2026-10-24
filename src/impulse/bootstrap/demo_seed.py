@@ -12,6 +12,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from impulse.application.notifications import DEMO_NOTIFICATION_SCRIPTS
+from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
 from impulse.application.reward import DEFAULT_REVIEW_RUBRIC
 from impulse.bootstrap.settings import Settings
 from impulse.infrastructure.database import Database
@@ -150,84 +151,12 @@ PERSONAS = (
     ("hr-nina", "Нина HR", "hr"),
     ("operator-pavel", "Павел Оператор", "operator"),
 )
-TRACKS = (
-    ("python", "Python-разработчик"),
-    ("data", "Аналитик данных"),
-    ("product", "Продуктовый аналитик"),
-    ("ml", "ML-инженер"),
-    ("backend", "Backend-разработчик"),
-    ("design", "UX/UI-дизайнер"),
-    ("manager", "Менеджер проекта"),
+# Stable keys keep existing track IDs, attempts, progress and deep links intact.
+TRACKS = tuple(
+    (slug, str(profile["title"]))
+    for slug, profile in AI_ROLE_PROFILES.items()
 )
 
-# The seven-stage routes are demo catalog data, not a career grade policy.
-# Every task/course target refers to an existing synthetic published catalog key.
-# Only a selected attempt can have completed stages; all other roles show catalog only.
-DEMO_ROUTE_STAGES: dict[str, tuple[tuple[str, str, str, str, str], ...]] = {
-    "product": (
-        ("База и основы", "Разобраться в продуктовой разработке и задачах команды.", "Product fundamentals", "course", "demo-course-1"),
-        ("Исследование пользователей", "Изучить пользователей и сформулировать потребности.", "User research", "course", "demo-course-6"),
-        ("Продуктовые гипотезы", "Сформулировать проверяемую продуктовую гипотезу.", "Hypothesis validation", "task", "demo-task-8"),
-        ("Метрики и приоритизация", "Выбрать метрики и обосновать приоритеты.", "Product metrics", "task", "demo-task-12"),
-        ("Реальные задачи и проекты", "Внести проверяемый личный вклад в продукт.", "Product delivery", "task", "demo-task-10"),
-        ("Подтверждение компетенций", "Собрать цифровые доказательства выполненной работы.", "Evidence", "course", "demo-course-11"),
-        ("Новые возможности", "Подготовить карьерную траекторию на основании результатов.", "Communication", "course", "demo-course-12"),
-    ),
-    "ml": (
-        ("База и основы", "Изучить основы агентных приложений и моделей.", "AI fundamentals", "course", "demo-course-1"),
-        ("Python и данные", "Реализовать обработку данных для обучения моделей.", "Python", "course", "demo-course-3"),
-        ("Обучение модели", "Изучить подходы к обучению и оценке моделей.", "Machine learning", "course", "demo-course-7"),
-        ("Исследование качества", "Сравнить воспроизводимые ML-метрики.", "Evaluation", "task", "demo-task-1"),
-        ("Эксперименты", "Проверить гипотезы на синтетических данных.", "Experimentation", "task", "demo-task-11"),
-        ("Интеграция решения", "Подготовить рабочую интеграцию и тесты.", "Deployment", "task", "demo-task-2"),
-        ("Результат и развитие", "Подготовить артефакты и получить обратную связь.", "Evidence", "course", "demo-course-11"),
-    ),
-    "python": (
-        ("База и основы", "Изучить основы программирования.", "Python", "course", "demo-course-1"),
-        ("Разработка на Python", "Подготовить первый самостоятельный модуль.", "Python development", "course", "demo-course-3"),
-        ("Разработка API", "Создать API и определить контракты интеграции.", "API design", "course", "demo-course-4"),
-        ("Хранение данных", "Подключить SQL и обработку транзакций.", "Databases", "course", "demo-course-5"),
-        ("Тестирование и CI", "Проверить систему автоматизированными тестами.", "Testing", "course", "demo-course-9"),
-        ("Работа в команде", "Принять участие в проекте и ревью.", "Teamwork", "task", "demo-task-2"),
-        ("Подтверждение навыков", "Подготовить проверяемые результаты.", "Evidence", "task", "demo-task-10"),
-    ),
-    "data": (
-        ("База и основы", "Изучить способы обработки данных.", "Data basics", "course", "demo-course-1"),
-        ("SQL и запросы", "Освоить аналитические SQL-запросы.", "SQL", "course", "demo-course-5"),
-        ("Очистка данных", "Подготовить набор данных к анализу.", "Data cleaning", "task", "demo-task-4"),
-        ("Метрики", "Проанализировать бизнес-показатели.", "Metrics", "task", "demo-task-8"),
-        ("Визуализация", "Построить понятный дашборд.", "Visualization", "task", "demo-task-12"),
-        ("Валидация", "Оценить корректность выводов.", "Validation", "course", "demo-course-9"),
-        ("Презентация", "Защитить результаты анализа.", "Communication", "course", "demo-course-11"),
-    ),
-    "backend": (
-        ("База и основы", "Изучить контракты сервисов.", "API architecture", "course", "demo-course-1"),
-        ("Backend-разработка", "Написать серверную бизнес-логику.", "Backend", "course", "demo-course-4"),
-        ("База данных", "Смоделировать хранение.", "SQL", "course", "demo-course-5"),
-        ("Интеграции", "Подключить внешнее API.", "Integration", "task", "demo-task-2"),
-        ("Тестирование", "Зафиксировать проверяемые сценарии.", "Testing", "course", "demo-course-9"),
-        ("Надёжность", "Исследовать безопасность и отказоустойчивость.", "Reliability", "course", "demo-course-10"),
-        ("Проект", "Представить рабочий результат.", "Delivery", "task", "demo-task-10"),
-    ),
-    "design": (
-        ("База и основы", "Изучить пользовательский опыт.", "UX basics", "course", "demo-course-1"),
-        ("Исследование", "Понять пользователей и их задачи.", "User research", "course", "demo-course-6"),
-        ("Информационная архитектура", "Построить карту экранов.", "Information architecture", "task", "demo-task-10"),
-        ("Прототипирование", "Собрать интерактивный прототип.", "Prototyping", "task", "demo-task-8"),
-        ("Тестирование решений", "Проверить прототип на сценариях.", "Usability", "course", "demo-course-9"),
-        ("Работа с командой", "Согласовать требования и реализацию.", "Collaboration", "course", "demo-course-8"),
-        ("Кейс для портфолио", "Описать выполненную работу и доказательства.", "Evidence", "course", "demo-course-11"),
-    ),
-    "manager": (
-        ("База и основы", "Освоить постановку задач.", "Planning", "course", "demo-course-1"),
-        ("Цели и ограничения", "Определить критерии успеха.", "Requirements", "course", "demo-course-6"),
-        ("Планирование", "Сформировать этапы и зависимости.", "Delivery planning", "task", "demo-task-10"),
-        ("Работа с командой", "Координировать участников.", "Teamwork", "course", "demo-course-8"),
-        ("Управление рисками", "Проверить ограничения проекта.", "Risks", "course", "demo-course-10"),
-        ("Контроль результата", "Проверить метрики и качество.", "Quality", "task", "demo-task-8"),
-        ("Презентация результата", "Защитить итог работы.", "Communication", "course", "demo-course-11"),
-    ),
-}
 COURSES = (
     "OpenSpec и SDD",
     "Агентная разработка",
@@ -339,16 +268,17 @@ def build_seed_batches() -> list[SeedBatch]:
             milestone_key="start-bootcamp" if position == 1 else f"stage-{position}",
             position=position,
             payload={
-                "title": title,
-                "purpose": purpose,
-                "skill": skill,
-                "target_kind": target_kind,
-                "target_key": target_key,
+                "title": stage["title"],
+                "purpose": stage["purpose"],
+                "skill": stage["skill"],
+                "target_kind": stage["target_kind"],
+                "target_key": stage["target_key"],
+                "activities": stage["activities"],
+                "deliverable": stage["deliverable"],
             },
         )
         for slug, _title in TRACKS
-        for position, (title, purpose, skill, target_kind, target_key)
-        in enumerate(DEMO_ROUTE_STAGES[slug], start=1)
+        for position, stage in enumerate(AI_ROLE_PROFILES[slug]["stages"], start=1)
     ]
     course_rows = [
         demo_row(
