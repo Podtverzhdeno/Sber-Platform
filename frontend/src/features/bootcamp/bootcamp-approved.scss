@@ -123,3 +123,31 @@
  .bc-grade-banner button { width:100%; }
 }
 @media(prefers-reduced-motion:reduce) { .bc-approved *, .bc-approved *::before { scroll-behavior:auto!important; transition:none!important; animation:none!important; } }
+
+/* Single scrollable content region while the shared overlay locks document scroll. */
+.bc-approved .overlay-panel--drawer {
+  max-height: 100dvh;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+.bc-approved .overlay-panel--drawer > header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--color-surface, #0b1726);
+}
+.bc-approved .bc-certificate {
+  display: grid;
+  justify-items: start;
+  gap: 10px;
+  padding: 15px;
+  border: 1px solid var(--color-border, #1c3147);
+  border-radius: 12px;
+  background: var(--color-surface-raised, #0e1d2f);
+}
+.bc-approved .bc-certificate h3 { margin: 0; }
+.bc-approved .bc-certificate button { min-height: 44px; }
+.bc-approved .bc-certificate a { color: var(--color-primary, #22e6d0); }
