@@ -159,6 +159,26 @@ class SqlDevelopmentStore(DevelopmentStore):
                         if row["payload"].get("deliverable")
                         else None
                     ),
+                    theory=tuple(
+                        str(topic)
+                        for topic in row["payload"].get("theory", [])
+                        if isinstance(topic, str)
+                    ),
+                    lab=(
+                        str(row["payload"]["lab"])
+                        if row["payload"].get("lab")
+                        else None
+                    ),
+                    acceptance=tuple(
+                        str(check)
+                        for check in row["payload"].get("acceptance", [])
+                        if isinstance(check, str)
+                    ),
+                    estimated_hours=(
+                        int(row["payload"]["estimated_hours"])
+                        if isinstance(row["payload"].get("estimated_hours"), int)
+                        else None
+                    ),
                 )
                 for row in rows
             )
