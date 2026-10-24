@@ -884,3 +884,61 @@
 .sberchat-reference .msg-chat__group.outgoing .msg-chat__group-author {
   justify-content:flex-end;color:#bfe6ff;
 }
+
+
+/* The original Messages PNG has a small bottom-left collapse control, not the
+   cross-product promotional card. Collapse is fully interactive and scoped. */
+.page-shell:has(.sberchat-reference) .messages-sidebar-collapse {
+  width:42px;height:42px;min-height:42px;margin:auto 6px 6px;
+  display:grid;place-items:center;border:1px solid #20466a;
+  border-radius:11px;background:#061c2f;color:#c3def8;
+  cursor:pointer;font-size:24px;line-height:1;
+  transition:background .18s,color .18s,border-color .18s,transform .18s;
+}
+.page-shell:has(.sberchat-reference) .messages-sidebar-collapse:hover {
+  background:#0b3551;border-color:#06dbe8;color:#f4ffff;transform:translateX(-2px);
+}
+.page-shell:has(.sberchat-reference) .sidebar-brand strong {
+  font-size:19px;font-weight:750;letter-spacing:-.5px;text-transform:lowercase;
+}
+.page-shell:has(.sberchat-reference) .sidebar nav .nav-icon {
+  display:grid;place-items:center;width:24px;height:24px;flex:none;
+  font-size:0;
+}
+.page-shell:has(.sberchat-reference) .sidebar nav .nav-icon svg {width:20px;height:20px;}
+.page-shell:has(.sberchat-reference) .sidebar nav a {
+  gap:10px;min-height:48px;padding-left:15px;color:#a5c3df;font-size:13px;
+}
+.page-shell:has(.sberchat-reference) .sidebar nav a.active {
+  color:#24f0f2;border-radius:7px;
+  background:linear-gradient(100deg,#052e4d,#061f36);
+  box-shadow:inset 3px 0 0 #1cebe9;
+}
+@media(min-width:960px) {
+  .page-shell:has(.sberchat-reference) .workspace.workspace--messages-compact {
+    padding-left:80px;
+  }
+  .page-shell:has(.sberchat-reference) .workspace--messages-compact .sidebar {
+    width:80px;padding-left:8px;padding-right:8px;
+  }
+  .page-shell:has(.sberchat-reference) .workspace--messages-compact .sidebar-brand {
+    justify-content:center;padding-left:0;padding-right:0;
+  }
+  .page-shell:has(.sberchat-reference) .workspace--messages-compact .sidebar-brand strong,
+  .page-shell:has(.sberchat-reference) .workspace--messages-compact .sidebar nav a>span:last-child {
+    display:none;
+  }
+  .page-shell:has(.sberchat-reference) .workspace--messages-compact .sidebar nav a {
+    justify-content:center;padding:0;
+  }
+  .page-shell:has(.sberchat-reference) .workspace--messages-compact .messages-sidebar-collapse {
+    margin-left:auto;margin-right:auto;
+  }
+  .page-shell:has(.sberchat-reference) .workspace--messages-compact .topbar {left:80px;}
+  .page-shell:has(.sberchat-reference) .workspace--messages-compact .workspace-content > .sberchat-reference {
+    left:80px;right:0;
+  }
+  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .workspace--messages-compact .workspace-content > .sberchat-reference {
+    right:44px;
+  }
+}
