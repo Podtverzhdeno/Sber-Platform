@@ -66,9 +66,12 @@ afterEach(() => {
   window.localStorage.clear();
 });
 
-function mockMessagingApi(channels: ChannelFixture[] = [channelFixture]) {
+function mockMessagingApi(channels: ChannelFixture[] = [channelFixture], demoMode = false) {
   vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
     const path = input instanceof Request ? new URL(input.url).pathname : String(input);
+    if (path === "/api/v1/config") {
+      return Promise.resolve(new Response(JSON.stringify({ demo_mode: demoMode }), { status: 200 }));
+    }
     if (path === "/api/v1/me/messaging/channels") {
       return Promise.resolve(new Response(JSON.stringify(channels), { status: 200 }));
     }
@@ -117,6 +120,13 @@ describe("SberChat-style messenger shell", () => {
     mockMessagingApi();
     renderWorkspace();
 
+    expect(await screen.findByText("Выберите диалог или сообщество")).toBeInTheDocument();
+    expect(screen.getByText("Здесь появится контекст диалога")).toBeInTheDocument();
+    const listBefore = screen.getByRole("complementary", { name: "Список диалогов" });
+    const rowToOpen = within(listBefore).getAllByRole("button", { name: /Команда проекта Альфа/ })
+      .find((element) => element.classList.contains("msg-dialog-list__row"));
+    if (!rowToOpen) throw new Error("Диалог не найден");
+    fireEvent.click(rowToOpen);
     expect((await screen.findAllByText("Проверяемый статус проекта")).length).toBeGreaterThan(0);
     const container = document.querySelector('[data-visual-reference="R-MSG-01"]');
     expect(container).not.toBeNull();
@@ -172,6 +182,11 @@ describe("SberChat-style messenger shell", () => {
   it("Escape закрывает поиск в чате и очищает запрос", async () => {
     mockMessagingApi();
     renderWorkspace();
+    await screen.findByText("Выберите диалог или сообщество");
+    const row = screen.getAllByRole("button", { name: /Команда проекта Альфа/ })
+      .find((element) => element.classList.contains("msg-dialog-list__row"));
+    if (!row) throw new Error("Диалог не найден");
+    fireEvent.click(row);
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Поиск в чате" })).toBeTruthy();
     });
@@ -183,6 +198,21 @@ describe("SberChat-style messenger shell", () => {
     await waitFor(() => {
       expect(screen.queryByRole("searchbox", { name: "Поиск по сообщениям чата" })).toBeNull();
     });
+  });
+
+  it("reference demo: Mayaki uses approved community layout but cannot write to the API", async () => {
+    window.history.replaceState({}, "", "/workspace/10?messages_preview=1");
+    mockMessagingApi([channelFixture], true);
+    renderWorkspace();
+    const mayaki = await screen.findByText("Маяки");
+    const button = mayaki.closest("button");
+    if (!button) throw new Error("Маяки отсутствуют");
+    fireEvent.click(button);
+    expect(await screen.findByText("Закреплённое сообщение")).toBeInTheDocument();
+    expect(screen.getByText("Календарь мероприятий на осень 2026 — возможности, стажировки, митапы")).toBeInTheDocument();
+    expect(screen.getByText("Администраторы и модераторы")).toBeInTheDocument();
+    expect(screen.getByText(/сообщения здесь не сохраняются/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Отправить" })).not.toBeInTheDocument();
   });
 
   it("глубокая ссылка ?task=<task_id> открывает чат команды задачи, а не первый диалог", async () => {
