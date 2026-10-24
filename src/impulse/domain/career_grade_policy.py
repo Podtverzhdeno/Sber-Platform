@@ -194,6 +194,7 @@ def calculate_grade_readiness(
         )
 
     qualified: dict[str, tuple[str, ...]] = {}
+    statuses: dict[str, str] = {}
     for requirement in policy.requirements:
         matching = tuple(
             item
@@ -222,13 +223,23 @@ def calculate_grade_readiness(
             }
         )
         qualified[requirement.key] = tuple(good)
+        if good:
+            statuses[requirement.key] = "verified"
+        elif revocations:
+            statuses[requirement.key] = "revoked"
+        elif any(item.state is EvidenceState.REPORTED for item in matching):
+            statuses[requirement.key] = "reported"
+        elif any(item.state is EvidenceState.REJECTED for item in matching):
+            statuses[requirement.key] = "rejected"
+        else:
+            statuses[requirement.key] = "not_verified"
 
     positions = tuple(
         RequirementPosition(
             key=requirement.key,
             title=requirement.title,
             weight=requirement.weight,
-            state="verified" if qualified[requirement.key] else "not_verified",
+            state=statuses[requirement.key],
             verified_sources=qualified[requirement.key],
         )
         for requirement in policy.requirements
