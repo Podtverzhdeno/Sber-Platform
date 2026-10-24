@@ -1340,7 +1340,10 @@ function ImpulseApp() {
   }
 
   useEffect(() => {
-    if (meQuery.data && !explicitSignOut.current) setActor(meQuery.data);
+    if (meQuery.data && !explicitSignOut.current) {
+      if (meQuery.data.csrf_token) sessionStorage.setItem("impulse_csrf", meQuery.data.csrf_token);
+      setActor(meQuery.data);
+    }
   }, [meQuery.data]);
 
   async function login(personaKey: string) {
