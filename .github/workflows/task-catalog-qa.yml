@@ -40,6 +40,8 @@ jobs:
           package-manager-cache: false
       - name: Install frontend dependencies
         run: npm ci
+      - name: Verify OpenAPI type generation
+        run: npm run api:check
       - name: Validate Task Catalog lint
         run: npx eslint src/features/task-catalog-v2 e2e/task-catalog-v2-interactions.spec.ts e2e/task-catalog-approved-geometry.spec.ts e2e/task-catalog-approved-visual-fixture.ts --max-warnings 0
       - name: Run Tasks unit tests
@@ -88,5 +90,9 @@ jobs:
           enable-cache: true
       - name: Install pinned backend dependencies
         run: uv sync --frozen
+      - name: Verify Tasks backend formatting and lint
+        run: |
+          uv run ruff format --check src/impulse/application/task_catalog_page.py src/impulse/api/v1/task_catalog.py tests/task_catalog/test_catalog_page_contract.py tests/test_task_catalog_api.py
+          uv run ruff check src/impulse/application/task_catalog_page.py src/impulse/api/v1/task_catalog.py tests/task_catalog/test_catalog_page_contract.py tests/test_task_catalog_api.py
       - name: Exercise real API filters and cursor contracts
         run: uv run pytest -q tests/task_catalog/test_catalog_page_contract.py tests/test_task_catalog_api.py tests/task_catalog/test_visibility_contract.py
