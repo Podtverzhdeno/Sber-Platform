@@ -19,6 +19,9 @@ for (const viewport of viewports) {
     await page.setViewportSize(viewport);
     await page.goto("/");
     await page.locator('[data-persona="participant-alex"]').click();
+    if (viewport.width < 1024) {
+      await page.getByRole("button", { name: "Меню", exact: true }).click();
+    }
     await page.getByRole("link", { name: "Bootcamp" }).click();
 
     const shell = page.locator('[data-reference="BC-R01"]');
@@ -50,6 +53,7 @@ for (const viewport of viewports) {
     const toggle = shell.getByRole("group", { name: "Вид каталога" });
     await toggle.getByRole("button", { name: "Список" }).click();
     await expect(page).toHaveURL(/view=list/);
+    await expect(shell.getByRole("list", { name: "Каталог Bootcamp списком" })).toBeVisible();
     const keysInList = await shell.locator(".bootcamp-course-row").evaluateAll((nodes) =>
       nodes.map((element) => element.getAttribute("data-testid")),
     );
