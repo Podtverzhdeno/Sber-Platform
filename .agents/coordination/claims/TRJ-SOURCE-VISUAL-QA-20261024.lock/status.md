@@ -1,0 +1,14 @@
+# Claim TRJ-SOURCE-VISUAL-QA-20261024
+- task_id: TRJ-SOURCE-VISUAL-QA-20261024
+- session_id: gpt6-20261024-source-visual-qa
+- status: IN_PROGRESS
+- started_at: 2026-10-24T23:12:00+03:00
+- heartbeat_at: 2026-10-24T23:12:00+03:00
+- base_revision: 863c4f9dd4e1f39eda0a3cc4561b76f64dae2945
+- lane: trajectory-source-visual-qa
+- depends_on: [TRJ-SOURCE-ATOMIC-PORT-20261024]
+- write_scope:
+  - frontend/e2e/trajectory-source-preview.spec.ts
+  - .agents/coordination/claims/TRJ-SOURCE-VISUAL-QA-20261024.lock/status.md
+- verification: Playwright screenshots at exact screenshot source viewports
+- blockers: original author PNG not stored in repo; independent pixel diff pending
