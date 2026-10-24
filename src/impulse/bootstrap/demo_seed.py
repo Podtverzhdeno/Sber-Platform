@@ -1203,6 +1203,27 @@ async def _insert_batches(session: AsyncSession, batches: list[SeedBatch]) -> No
     for batch in batches:
         if not batch.rows:
             continue
+        if batch.table is track_attempts:
+            # Never add default selections to a participant who has already
+            # chosen a role. Otherwise a legacy user with two active tracks
+            # could gain a third just because a new demo catalog was deployed.
+            participant_ids = {row["person_id"] for row in batch.rows}
+            existing_participants = set(
+                (
+                    await session.execute(
+                        select(track_attempts.c.person_id)
+                        .distinct()
+                        .where(track_attempts.c.person_id.in_(participant_ids))
+                    )
+                ).scalars()
+            )
+            remaining = [
+                row for row in batch.rows
+                if row["person_id"] not in existing_participants
+            ]
+            if not remaining:
+                continue
+            batch = SeedBatch(batch.table, remaining)
         if batch.table is messaging_channels:
             for row in batch.rows:
                 existing_id = await session.scalar(
