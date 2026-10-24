@@ -488,7 +488,7 @@ export const courseBlueprints: readonly CourseBlueprint[] = [
         {
           "criterion": "Коммуникация",
           "weight": 20,
-          "pass": "PR самодостаточен"
+          "pass": "PR содержит контекст, доказательства проверки и план отката"
         }
       ]
     }
