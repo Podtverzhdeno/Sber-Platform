@@ -49,8 +49,10 @@ const grade = {
   hint: "Остался 1 шаг",
   reason: null,
 };
+const baselineNextOutcome = overviewFixture.next_outcome;
+if (baselineNextOutcome === null) throw new Error("Preview fixture must have next_outcome");
 const nextOutcome = {
-  ...overviewFixture.next_outcome!,
+  ...baselineNextOutcome,
   trajectory_key: "product",
   trajectory_title: "Продуктовый аналитик",
   milestone_key: "stage-3",
