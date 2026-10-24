@@ -1,0 +1,16 @@
+# Claim BC2-COURSE-CONTENT-20261025
+- task_id: BC2-COURSE-CONTENT-20261025
+- session_id: gpt6-20261025-course-lesson-content
+- status: IN_PROGRESS
+- started_at: 2026-10-25T10:00:00+01:00
+- heartbeat_at: 2026-10-25T10:00:00+01:00
+- base_revision: 79810f202094d87ac671c6e9ba640ee5fef0e302
+- depends_on: [BC2-003]
+- lane: bootcamp-learning-content
+- write_scope:
+  - frontend/src/features/bootcamp/learning-content/**
+  - .agents/coordination/claims/BC2-COURSE-CONTENT-20261025.lock/status.md
+- shared_files: []
+- verification: 12-course content coverage, TypeScript, component unit tests, standalone integration handoff
+- progress: locating authoritative catalog keys and content rendering interfaces
+- blockers: canonical frontend routing and existing bootcamp files require separate integration scope
