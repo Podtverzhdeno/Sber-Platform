@@ -3430,3 +3430,21 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
   border-color: transparent;
   background: transparent;
 }
+
+/* UI (1) source benefit symbols: Skill Passport / Case / Teamwork / Mentor. */
+.catalog-v2 .catalog-v2-benefit-icon[data-tone="violet"] {
+  color: #a99bff;
+  background: rgb(128 104 255 / 18%);
+}
+.catalog-v2 .catalog-v2-benefit-icon[data-tone="blue"] {
+  color: #63adff;
+  background: rgb(47 149 255 / 16%);
+}
+.catalog-v2 .catalog-v2-benefit-icon[data-tone="teal"] {
+  color: var(--catalog-highlight);
+  background: rgb(34 230 208 / 12%);
+}
+.catalog-v2 .catalog-v2-benefit-icon[data-tone="amber"] {
+  color: #e5aa1b;
+  background: rgb(245 179 1 / 14%);
+}
