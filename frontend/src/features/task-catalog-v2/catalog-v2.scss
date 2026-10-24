@@ -3208,3 +3208,11 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
     padding-top: 5px !important;
   }
 }
+
+
+/* Full state remains one text node for AT; the duplicate compact duration is
+   decorative and shown only on wide source-viewport layouts. */
+.catalog-v2-stage-duration { display: none; }
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2-stage-duration { display: inline; }
+}
