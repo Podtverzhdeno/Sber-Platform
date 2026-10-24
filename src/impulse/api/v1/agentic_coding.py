@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, cast
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, Response
 
 from impulse.agentic_coding import QualifiedEvidence, RoleProfile, evaluate_profile
 from impulse.api.errors import ApiError
@@ -18,9 +18,11 @@ router = APIRouter(tags=["agentic-coding"])
 @router.get("/me/agentic-coding/profile", response_model=RoleProfile)
 async def agentic_coding_profile(
     request: Request,
+    response: Response,
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
     role_key: Annotated[Literal["developer", "analyst", "qa"], Query()] = "developer",
 ) -> RoleProfile:
+    response.headers["Cache-Control"] = "private, no-store"
     if authenticated.actor.active_role is not Role.PARTICIPANT:
         raise ApiError(code="NOT_FOUND", message="Профиль не найден.", status_code=404)
     # No trusted source integration yet. Never promote generic course completions
