@@ -1670,7 +1670,11 @@ function ImpulseApp() {
               </div>
               <div className="top-persona">
                 <span className="mini-avatar" aria-hidden="true">
-                  {actor.display_name.slice(0, 1)}
+                  {actor.active_role === "participant" && configQuery.data?.demo_mode === true ? (
+                    <img src="/home-reference/avatar.svg" alt="" className="home-reference-avatar" />
+                  ) : (
+                    actor.display_name.slice(0, 1)
+                  )}
                 </span>
                 <span>
                   <strong>{actor.display_name}</strong>
