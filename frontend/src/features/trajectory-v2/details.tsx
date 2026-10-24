@@ -125,7 +125,7 @@ export function StageTaskDrawer(props: {
             {milestone.lab && (
               <div>
                 <h4>Практикум</h4>
-                {milestone.lab.split("\\n\\n").map((paragraph, index) => <p key={`${String(index)}-${paragraph}`}>{paragraph}</p>)}
+                {milestone.lab.split("\n\n").map((paragraph, index) => <p key={`${String(index)}-${paragraph}`}>{paragraph}</p>)}
               </div>
             )}
             {milestone.acceptance && milestone.acceptance.length > 0 && (
