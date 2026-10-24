@@ -7,7 +7,11 @@ import { AnalyticsReference } from "./analytics-reference";
 
 vi.mock("../api/client", () => ({ apiRequest: vi.fn() }));
 
-const roleSkills = ["prompting", "prompt_engineering", "context_management", "tools_mcp", "creating_skills", "agents_team"].map((key, i) => ({
+type ReferenceSkillFixture = {
+  key: string; title: string; target_level: number | undefined; current_level: number | null;
+  evidence_count: number; data_state: string; unresolved_methodology: boolean;
+};
+const roleSkills: ReferenceSkillFixture[] = ["prompting", "prompt_engineering", "context_management", "tools_mcp", "creating_skills", "agents_team"].map((key, i) => ({
   key, title: key, target_level: [3, 4, 3, 2, 3, 2][i], current_level: null,
   evidence_count: 0, data_state: "unknown", unresolved_methodology: false,
 }));
@@ -23,7 +27,7 @@ const snapshot = {
 };
 const journey = { stages: [{ key: "verified_experience", title: "Принятые результаты", count: 0, status: "not_started" }],
   generated_at: "2026-10-24T12:00:00Z", successful: false, next_action: "Продолжить" };
-function mockApi(skills = roleSkills) {
+function mockApi(skills: ReferenceSkillFixture[] = roleSkills) {
   vi.mocked(apiRequest).mockImplementation(async (path: string) => {
     await Promise.resolve();
     if (path.includes("/agentic-coding/profile")) return { ...profile, skills };
@@ -32,7 +36,7 @@ function mockApi(skills = roleSkills) {
     throw new Error("unexpected endpoint " + path);
   });
 }
-function open(url = "/workspace/9", skills = roleSkills) {
+function open(url = "/workspace/9", skills: ReferenceSkillFixture[] = roleSkills) {
   vi.clearAllMocks(); mockApi(skills);
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[url]}>
@@ -93,7 +97,7 @@ describe("three canonical analytics reference layouts", () => {
 
   it("shows measured zero of six rather than missing when all low levels are verified", async () => {
     open("/workspace/9", roleSkills.map((skill) => ({ ...skill, current_level: 1, data_state: "verified", evidence_count: 1 })));
-    await waitFor(() => expect(screen.getAllByText("0 / 6").length).toBeGreaterThan(0));
+    await waitFor(() => { expect(screen.getAllByText("0 / 6").length).toBeGreaterThan(0); });
   });
 
   it("opens per-skill details and certification terms without issuing a badge", () => {
