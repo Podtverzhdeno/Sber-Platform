@@ -129,6 +129,12 @@ describe("SberChat-style messenger shell", () => {
       expect(screen.queryByRole("complementary", { name: "Контекст диалога" })).not.toBeInTheDocument();
     });
     expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(document.querySelector(".messenger-shell")).toHaveClass("messenger-shell--no-context");
+    fireEvent.click(toggle);
+    await waitFor(() => {
+      expect(screen.getByRole("complementary", { name: "Контекст диалога" })).toBeInTheDocument();
+    });
+    expect(document.querySelector(".messenger-shell")).not.toHaveClass("messenger-shell--no-context");
   });
 
   it("mobile single-pane: выбор диалога открывает чат, назад возвращается к списку", async () => {

@@ -9,7 +9,7 @@ export default defineRailway(() => {
     build: { buildEnvironment: "V3", builder: "DOCKERFILE", dockerfilePath: "Dockerfile" },
     healthcheck: "/health/ready",
     healthcheckTimeout: 300,
-    preDeploy: "alembic upgrade head && impulse-demo-seed",
+    preDeploy: "python -m impulse.bootstrap.predeploy",
     replicas: { "iad": 1 },
     networking: { privateNetworkEndpoint: "sber-platform" },
   });
