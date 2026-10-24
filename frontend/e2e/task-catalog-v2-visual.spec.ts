@@ -76,3 +76,45 @@ for (const viewport of viewports) {
     }
   });
 }
+
+/* Additional composition captures. These are implementation-regression images;
+   the original approved ZIP images remain the product visual reference. */
+for (const viewport of [
+  { width: 1440, height: 900 },
+  { width: 390, height: 844 },
+] as const) {
+  test.describe(`task catalog composition ${String(viewport.width)}x${String(viewport.height)}`, () => {
+    test.use({ viewport: { width: viewport.width, height: viewport.height }, reducedMotion: "reduce" });
+    for (const theme of ["light", "dark"] as const) {
+      test(`selected cards and detail · ${theme}`, async ({ page }) => {
+        await openCatalog(page, theme);
+        await page.getByRole("button", { name: "Подробнее" }).first().click();
+        await expect(page.getByRole("heading", { name: "Этапы задачи" })).toBeVisible();
+        await expect(page).toHaveScreenshot(
+          `task-catalog-detail-${String(viewport.width)}x${String(viewport.height)}-${theme}.png`,
+          { animations: "disabled", fullPage: true, maxDiffPixelRatio: 0.01 },
+        );
+      });
+
+      test(`list composition · ${theme}`, async ({ page }) => {
+        await openCatalog(page, theme);
+        await page.getByRole("button", { name: "Список" }).click();
+        await expect(page.getByRole("table", { name: "Список рекомендованных задач" })).toBeVisible();
+        await expect(page).toHaveScreenshot(
+          `task-catalog-list-${String(viewport.width)}x${String(viewport.height)}-${theme}.png`,
+          { animations: "disabled", fullPage: true, maxDiffPixelRatio: 0.01 },
+        );
+      });
+
+      test(`conditions modal · ${theme}`, async ({ page }) => {
+        await openCatalog(page, theme);
+        await page.getByRole("button", { name: "Условия и отклик" }).first().click();
+        await expect(page.getByRole("dialog")).toBeVisible();
+        await expect(page).toHaveScreenshot(
+          `task-catalog-conditions-${String(viewport.width)}x${String(viewport.height)}-${theme}.png`,
+          { animations: "disabled", maxDiffPixelRatio: 0.01 },
+        );
+      });
+    }
+  });
+}
