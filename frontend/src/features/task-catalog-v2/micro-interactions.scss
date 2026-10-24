@@ -273,3 +273,43 @@
 @media (max-width: 680px) {
   .catalog-v2 .catalog-v2-secondary-filters .catalog-v2-toggle-filter { flex: 1 1 132px; }
 }
+
+/* FIX: Tasks detail benefit-card containment
+   At ~1538px viewport the right inspector is still two-column. Long
+   benefit conditions previously had a desktop-only nowrap/ellipsis rule,
+   allowing flex min-content to extend behind the inspector boundary.
+   Keep the full condition visible at every breakpoint. */
+.catalog-v2 .catalog-v2-detail,
+.catalog-v2 .catalog-v2-detail-grid,
+.catalog-v2 .catalog-v2-detail-grid > section,
+.catalog-v2 .catalog-v2-benefits-section,
+.catalog-v2 .catalog-v2-benefits-section > ul,
+.catalog-v2 .catalog-v2-benefits-section > ul > li {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.catalog-v2 .catalog-v2-detail-grid .catalog-v2-benefits-section > ul {
+  grid-template-columns: minmax(0, 1fr);
+}
+.catalog-v2 .catalog-v2-benefits-section > ul > li > div {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 100%;
+}
+.catalog-v2 .catalog-v2-benefits-section > ul > li > .catalog-v2-benefit-icon {
+  flex: 0 0 29px;
+}
+.catalog-v2 .catalog-v2-benefits-section li strong,
+.catalog-v2 .catalog-v2-benefits-section li p,
+.catalog-v2 .catalog-v2-benefits-section li small {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+.catalog-v2 .catalog-v2-benefits-section li p {
+  overflow: visible;
+}
