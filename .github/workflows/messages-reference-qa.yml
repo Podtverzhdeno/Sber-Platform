@@ -37,8 +37,6 @@ jobs:
         run: npm ci
       - name: Lint messenger and browser tests
         run: npx eslint src/features/collaboration.tsx src/features/messenger e2e/messages-reference.spec.ts --max-warnings 0
-      - name: Verify TypeScript
-        run: npm run typecheck
       - name: Test API-driven messaging interactions
         run: npx vitest run src/features/collaboration.test.tsx src/features/messenger
       - name: Build production bundle
@@ -50,6 +48,8 @@ jobs:
           CI: "true"
           TZ: Europe/Moscow
         run: npx playwright test messages-reference.spec.ts --project=chromium --reporter=line
+      - name: Verify repository-wide TypeScript (includes other concurrently edited sections)
+        run: npm run typecheck
       - name: Retain failures
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
