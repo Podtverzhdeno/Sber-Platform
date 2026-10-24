@@ -693,7 +693,7 @@ test.describe("mobile touch journey: engagement goal through freeze and rhythm i
     await expect(page.getByRole("dialog", { name: "Информация о курсе" }).getByRole("heading", { name: "Python: основа", exact: true })).toBeVisible();
 
     // В списке каталога честный учебный день записывается с носителя.
-    await page.getByRole("button", { name: "← Вернуться в Bootcamp" }).tap();
+    await page.getByRole("dialog", { name: "Информация о курсе" }).getByRole("button", { name: "Закрыть" }).tap();
     await expect(page.getByTestId("course-python-base")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Серия: 4 дн." })).toBeVisible();
     await page.getByTestId("course-python-base").getByRole("button", { name: "Записать учебный день" }).tap();
