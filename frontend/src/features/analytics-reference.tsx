@@ -181,20 +181,27 @@ function SkillRows({ skills, openSkill }: { skills: Skill[]; openSkill: (key: st
 function EvidenceList({ events, emptyText = "Подтверждённые цифровые следы пока не поступили", limit = 3 }: { events: EventView[]; emptyText?: string; limit?: number }) {
   if (events.length === 0) return <div className="ref-evidence-empty" role="status">{emptyText}</div>;
   return <div className="ref-evidence-list">{events.slice(0, limit).map((event, index) => <div className="ref-evidence-row" key={event.source_ref + String(index)}>
-    <span className="ref-evidence-icon">✓</span><div><b>{event.title || "Подтверждённое действие"}</b><small>{event.source_kind} · {new Date(event.occurred_at).toLocaleDateString("ru-RU")}</small></div><em>Источник</em>
+    <span className="ref-evidence-icon">✓</span><div><b>{event.title || "Зарегистрированное действие"}</b><small>{event.source_kind} · {new Date(event.occurred_at).toLocaleDateString("ru-RU")}</small></div><em>Активность</em>
   </div>)}</div>;
 }
-function Kpis({ skills, ready, events, accepted, variant }: { skills: Skill[]; ready: number | null; events: EventView[]; accepted: number | null; variant: LayoutKey }) {
+function QualifiedEvidenceList({ skills, limit = 3 }: { skills: Skill[]; limit?: number }) {
+  const qualified = skills.filter((skill) => skill.current_level !== null && skill.evidence_count > 0);
+  if (qualified.length === 0) return <div className="ref-evidence-empty" role="status">Проверенных цифровых следов для уровней Agentic Coding пока нет. Проектная активность не является их заменой.</div>;
+  return <div className="ref-evidence-list">{qualified.slice(0, limit).map((skill) => <div className="ref-evidence-row" key={skill.key}>
+    <span className="ref-evidence-icon">✓</span><div><b>{skill.title}</b><small>Подтверждённый уровень {pString(skill.current_level)} · квалифицированных источников: {skill.evidence_count}</small></div><em>Проверено</em>
+  </div>)}</div>;
+}
+function Kpis({ skills, ready, sourceCount, accepted, variant }: { skills: Skill[]; ready: number | null; sourceCount: number | null; accepted: number | null; variant: LayoutKey }) {
   const required = skills.filter((skill) => skill.target_level !== null);
   const met = required.filter((skill) => skill.current_level !== null && skill.current_level >= (skill.target_level ?? 5)).length;
   const cards = variant === "evidence"
     ? [["Подтверждённые навыки", met ? String(met) + " / " + String(required.length) : "—", "По методологии L1", "✓"],
-       ["Основания профиля", events.length ? String(events.length) : "—", "Проверяемые цифровые события", "▤"],
+       ["Основания профиля", sourceCount === null ? "—" : String(sourceCount), "Квалифицированные Agentic источники", "▤"],
        ["Результаты в проектах", accepted === null ? "—" : String(accepted), "Принятые результаты", "◉"],
        ["Готовность профиля", ready === null ? "—" : String(ready) + "%", "Только подтверждённые уровни", "↗"]]
     : [["Готовность профиля", ready === null ? "—" : String(ready) + "%", "На основе проверенных требований", "◉"],
        ["Требования выполнены", met ? String(met) + " / " + String(required.length) : "—", "Нет данных ≠ нулевой уровень", "◎"],
-       ["Подтверждённый опыт", events.length ? String(events.length) : "—", "Источники в Skill Passport", "▤"],
+       ["Подтверждённый опыт", sourceCount === null ? "—" : String(sourceCount), "Источник Agentic Coding", "▤"],
        ["Принятые результаты", accepted === null ? "—" : String(accepted), "С проверенным вкладом", "✓"]];
   return <div className="ref-kpis">{cards.map(([label, value, detail, icon], i) => <article className={"ref-kpi ref-kpi-" + String(i)} key={label}><span>{label}</span><b>{value}</b><small>{detail}</small><i aria-hidden="true">{icon}</i></article>)}</div>;
 }
@@ -230,6 +237,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
   const ready = verified && known.length === required.length && required.length > 0
     ? Math.round(required.reduce((sum, skill) => sum + Math.min((skill.current_level ?? 0) / (skill.target_level ?? 1), 1), 0) / required.length * 100) : null;
   const accepted = journeyQuery.data?.stages.find((stage) => stage.key === "verified_experience")?.count ?? null;
+  const qualifiedSourceCount = trustedProfile(profileQuery.data, role) ? profileQuery.data?.known_evidence_count ?? null : null;
   const events = growthQuery.data?.freshness.known ? (growthQuery.data.events ?? []).filter((event) => Boolean(event.source_kind && event.source_ref)) : [];
   const series = monthSeries(growthQuery.data, period);
   const gap = skills.filter((skill) => skill.target_level !== null && (skill.current_level === null || skill.current_level < skill.target_level));
@@ -256,7 +264,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
     {growthQuery.isError && <div className="ref-alert" role="alert">Историю цифровых следов загрузить не удалось. Это не означает отсутствие подтверждений. <button type="button" onClick={() => { void growthQuery.refetch(); }}>Повторить</button></div>}
     {journeyQuery.isPending && <p className="ref-loading" role="status">Загружаются принятые результаты и путь участника…</p>}
     {journeyQuery.isError && <div className="ref-alert" role="alert">Источник принятых результатов недоступен. Отсутствующее значение не является нулём. <button type="button" onClick={() => { void journeyQuery.refetch(); }}>Повторить</button></div>}
-    {layout !== "path" && <Kpis skills={skills} ready={ready} events={events} accepted={accepted} variant={layout} />}
+    {layout !== "path" && <Kpis skills={skills} ready={ready} sourceCount={qualifiedSourceCount} accepted={accepted} variant={layout} />}
     {layout === "passport" && <>
       <div className="ref-v1-middle">
         <Matrix className="ref-primary-matrix" title="Матрица навыков Agentic Coding" subtitle="Сравнение вашего профиля с требованиями L1 · 6 компетенций" skills={skills} role={role} setRole={setRole} chart={chart} setChart={setChart} series={series} openSkill={setOpenDetail} />
@@ -264,14 +272,14 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
           <div className="ref-big-value">{ready === null ? "—" : String(ready) + "%"} <span>готовность к целевому профилю</span></div>
           <div className="ref-progress"><i style={{ width: String(ready ?? 0) + "%" }} /></div>
           <div className="ref-passport-info"><span>Уровень компетенций <b>1—4</b></span><span>Методология <b>Agentic Coding</b></span><span>Состояние <b>{known.length ? "Частичные данные" : "Нет подтверждений"}</b></span></div>
-          <div className="ref-passport-summary"><span>Цифровые следы <b>{events.length || "—"}</b></span><span>Требования <b>{met.length} / {required.length}</b></span></div>
+          <div className="ref-passport-summary"><span>Цифровые следы <b>{qualifiedSourceCount ?? "—"}</b></span><span>Требования <b>{met.length} / {required.length}</b></span></div>
           <button className="ref-primary-cta" type="button" onClick={() => { setShowCriteria(true); }}>Открыть Skill Passport ↗</button>
           <small className="ref-disclaimer">Корпоративный L1 не выдаётся платформой Impulse</small>
         </aside>
       </div>
       <div className="ref-v1-bottom">
         <section className="ref-panel ref-action"><span className="ref-cap">ВАШ СЛЕДУЮЩИЙ ШАГ</span><h2>{focus ? "Подтвердить: " + focusTitle : "Продолжайте развитие навыков"}</h2><p>{focus ? PRACTICES[focus.key] : "Целевые уровни проверены. Дальнейший прогресс зависит от новых результатов."}</p><span className="ref-step-meta">{focus ? "Сейчас: " + pString(focus.current_level) + " / " + pString(focus.target_level) : "Нет открытых пробелов"}</span><a className="ref-primary-cta" href={tasksUrl}>Перейти к заданиям →</a></section>
-        <section className="ref-panel ref-bottom-evidence"><div className="ref-card-title"><div><span className="ref-cap">ОСНОВАНИЯ УРОВНЕЙ</span><h2>Последние подтверждения</h2></div><button type="button" className="ref-small-link" onClick={() => { setLayout("evidence"); }}>Все события ↗</button></div><EvidenceList events={events} /></section>
+        <section className="ref-panel ref-bottom-evidence"><div className="ref-card-title"><div><span className="ref-cap">ОСНОВАНИЯ УРОВНЕЙ</span><h2>Последние подтверждения</h2></div><button type="button" className="ref-small-link" onClick={() => { setLayout("evidence"); }}>Все события ↗</button></div><QualifiedEvidenceList skills={skills} /></section>
         <section className="ref-panel ref-bottom-chart"><div className="ref-card-title"><div><span className="ref-cap">ДИНАМИКА</span><h2>Развитие за {period} месяцев</h2></div></div><HistoryChart series={series} mode="line" /></section>
       </div>
     </>}
@@ -287,7 +295,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
         <Matrix className="ref-path-matrix" title={"Ваш профиль — " + ROLES[role]} skills={skills} role={role} setRole={setRole} chart={chart} setChart={setChart} series={series} openSkill={setOpenDetail} />
       </div>
       <div className="ref-v2-bottom">
-        <section className="ref-panel ref-history"><div className="ref-card-title"><div><span className="ref-cap">ПРОВЕРЯЕМЫЙ РЕЗУЛЬТАТ</span><h2>История подтверждения</h2></div></div><EvidenceList events={events} /></section>
+        <section className="ref-panel ref-history"><div className="ref-card-title"><div><span className="ref-cap">ПРОВЕРЯЕМЫЙ РЕЗУЛЬТАТ</span><h2>История подтверждения</h2></div></div><QualifiedEvidenceList skills={skills} /></section>
         <section className="ref-panel ref-practice"><span className="ref-cap">ПОДХОДЯЩАЯ ПРАКТИКА</span><h2>{focusTitle}</h2><p>{focus ? PRACTICES[focus.key] : "Сверьте текущие навыки с требованиями целевого профиля"}</p><div className="ref-practice-steps"><span>① Подготовьте результат</span><span>② Выполните действие</span><span>③ Передайте evidence на проверку</span></div><a className="ref-primary-cta" href={tasksUrl}>Открыть практику →</a></section>
       </div>
     </>}
@@ -295,13 +303,13 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
       <div className="ref-v3-main">
         <section className="ref-panel ref-v3-chart"><div className="ref-card-title"><div><span className="ref-cap">ВАШ ПРОФИЛЬ</span><h2>Компетенции Agentic Coding</h2></div></div><Controls role={role} setRole={setRole} chart={chart} setChart={setChart} /><SkillsVisual skills={skills} chart={chart} series={series} /></section>
         <section className="ref-panel ref-v3-evidence"><div className="ref-card-title"><div><span className="ref-cap">ПОДТВЕРЖДЕНИЕ</span><h2>Каждый уровень — с доказательством</h2><p>Откуда взялась оценка и какой источник её подтверждает</p></div></div>
-          <div className="ref-evidence-count"><div><b>{events.length || "—"}</b><span>действительных источников</span></div><div><b>{known.length ? met.length : "—"}</b><span>компетенции достигли цели</span></div></div><div className="ref-all-evidence"><EvidenceList events={events} limit={events.length} /></div><div className="ref-warning"><strong>Как определяется уровень?</strong><p>По разрешённым цифровым следам и утверждённым требованиям роли. Курсы и тесты сами по себе не присваивают L1.</p></div>
+          <div className="ref-evidence-count"><div><b>{qualifiedSourceCount ?? "—"}</b><span>квалифицированных источников</span></div><div><b>{known.length ? met.length : "—"}</b><span>компетенции достигли цели</span></div></div><div className="ref-all-evidence"><QualifiedEvidenceList skills={skills} limit={skills.length} /></div><div className="ref-warning"><strong>Как определяется уровень?</strong><p>По разрешённым цифровым следам и утверждённым требованиям роли. Курсы и тесты сами по себе не присваивают L1.</p></div>
         </section>
       </div>
       <div className="ref-section-intro"><div><span className="ref-cap">ОТ ДЕЙСТВИЙ К РЕЗУЛЬТАТУ</span><h2>Не только баллы: что изменилось в вашей работе</h2></div><span>Период: {period} месяцев</span></div>
       <div className="ref-v3-bottom">
         <section className="ref-panel ref-evidence-bars"><div className="ref-card-title"><div><span className="ref-cap">ДИНАМИКА</span><h2>Как копятся цифровые доказательства</h2></div></div><HistoryChart series={series} /></section>
-        <section className="ref-panel ref-projects"><div className="ref-card-title"><div><span className="ref-cap">ПРАКТИКА</span><h2>Результаты и навыки</h2></div></div><EvidenceList events={events} emptyText="Нет подтверждённых проектных цифровых следов" /></section>
+        <section className="ref-panel ref-projects"><div className="ref-card-title"><div><span className="ref-cap">ПРАКТИКА</span><h2>Результаты и навыки</h2></div></div><p className="ref-project-disclaimer">Учебные и проектные действия. Они не подтверждают уровень Agentic Coding без отдельной квалификации.</p><EvidenceList events={events} emptyText="Нет зарегистрированной проектной активности" /></section>
         <section className="ref-panel ref-growth"><span className="ref-cap">ТОЧКА РОСТА</span><span className="ref-growth-icon">◎</span><h2>{focus ? "Следующее подтверждение — " + focusTitle : "Следующий шаг развития"}</h2><p>{focus ? "Сейчас " + pString(focus.current_level) + " / " + pString(focus.target_level) + ". Нужно дополнительное подтверждение." : "Продолжайте документировать результаты."}</p><div className="ref-progress"><i style={{ width: String(focus && focus.current_level !== null && focus.target_level !== null && focus.target_level > 0 ? focus.current_level / focus.target_level * 100 : 0) + "%" }} /></div><a className="ref-primary-cta" href={tasksUrl}>Посмотреть план →</a></section>
       </div>
     </>}
