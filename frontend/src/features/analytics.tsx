@@ -23,7 +23,7 @@ type WeeklyActivity = { label: string; count: number };
 
 /** Counts observed events, not guessed engagement. Align weeks to the actor's local Monday. */
 function weeklyActivityFromSnapshot(snapshot: GrowthSnapshot | undefined): { observed: boolean; weeks: WeeklyActivity[] } {
-  if (!snapshot || !snapshot.freshness.known || !Array.isArray(snapshot.events)) return { observed: false, weeks: [] };
+  if (!snapshot || !snapshot.freshness.known || !Array.isArray(snapshot.events) || snapshot.events.length === 0) return { observed: false, weeks: [] };
   let formatter: Intl.DateTimeFormat;
   try {
     formatter = new Intl.DateTimeFormat("en-US", { timeZone: snapshot.actor_timezone, year: "numeric", month: "2-digit", day: "2-digit" });
@@ -339,7 +339,7 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
           <div className="analytics-funnel" data-testid="analytics-live-funnel">{data.stages.map((stage) => <div key={stage.key} className={`analytics-funnel-stage analytics-funnel-stage--${stage.status}`} style={{ width: `${String(journeyMax === 0 ? 100 : Math.max(42, Math.round(stage.count / journeyMax * 100)))}%` }}>
             <span>{stage.title}</span><strong>{stage.count}</strong><small>{stage.status === "completed" ? "Завершено" : stage.status === "in_progress" ? "В работе" : stage.status === "not_started" ? "Не начато" : "Нет данных"}</small>
           </div>)}</div>}
-        <p className="analytics-chart-provenance">{query.isError ? "Источник пути недоступен" : `Источник: путь участника · срез ${new Date(data.generated_at).toLocaleString("ru-RU")}`}. Значения отражают количество событий или объектов на этапе, а не сопоставимую конверсию когорты.</p>
+        <p className="analytics-chart-provenance">{!query.data ? "Источник пути недоступен: данные ещё не получены" : `Источник: путь участника · срез ${new Date(data.generated_at).toLocaleString("ru-RU")}`}. Значения отражают количество событий или объектов на этапе, а не сопоставимую конверсию когорты.</p>
       </section>
       <section className="analytics-panel activity-chart-panel">
         <div className="section-heading"><div><p className="eyebrow">Динамика</p><h2>Активность по неделям</h2></div><Badge>{activitySnapshot.observed ? "8 недель · факты" : "Источники активности"}</Badge></div>

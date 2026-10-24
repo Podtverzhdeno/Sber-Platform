@@ -374,6 +374,17 @@ describe("participant analytics chart rendering", () => {
     expect(chart.querySelectorAll("svg rect")).toHaveLength(2);
   });
 
+  it("does not interpret an empty event feed as eight weeks of observed zeros", async () => {
+    installDeepLinkFetch({ snapshot: {
+      ...snapshot, events: [], freshness: { known: true, latest_observed_at: "2026-10-20T09:00:00Z" },
+    } });
+    renderDeepLink("/analytics");
+    const chart = await screen.findByRole("img", { name: /Активность не подтверждена/ });
+    expect(chart.querySelectorAll("svg rect")).toHaveLength(0);
+    expect(screen.getByText("Среднее: нет данных")).toBeInTheDocument();
+    expect(screen.getByText(/Нет проверяемой истории событий/)).toBeInTheDocument();
+  });
+
   it("never turns invalid timezone into invented zero activity", async () => {
     installDeepLinkFetch({ snapshot: { ...snapshot, events: [], actor_timezone: "invalid/TZ" } });
     renderDeepLink("/analytics");
