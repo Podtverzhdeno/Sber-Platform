@@ -22,7 +22,7 @@ jobs:
           package-manager-cache: false
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - name: Validate source-size hover detail and capture approved layout
+      - name: Verify reference-sized cards list and terms with accessible match ring
         env:
           CAPTURE_APPROVED_TASKS: "1"
           TZ: Europe/Moscow
