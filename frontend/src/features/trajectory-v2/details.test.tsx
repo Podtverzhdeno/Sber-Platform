@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, getByRole, queryByRole, getAllByRole, getByText } from "@testing-library/react";
 import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -119,7 +119,7 @@ afterEach(() => {
 describe("trajectory v2 task/evidence drawer", () => {
   it("opens from the stage with server-derived facts and a course continuation", async () => {
     shell("/workspace/1", [roadmapWithNext]);
-    fireEvent.click(await within(screen.getByTestId("trajectory-stage-detail")).findByRole("button", { name: /Продолжить|Посмотреть/ }));
+    fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
     const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
     expect(drawer.getAttribute("aria-modal")).toBe("true");
     expect(drawer.textContent).toContain("Курс · python-api");
@@ -128,30 +128,30 @@ describe("trajectory v2 task/evidence drawer", () => {
     expect(drawer.textContent).toContain("python-web");
     expect(drawer.textContent).toContain("Этап ещё не завершён");
     expect(
-      await within(drawer).findByRole("button", { name: "Открыть курс" }),
+      await waitFor(() => getByRole(drawer, "button", { name: "Открыть курс" })),
     ).toHaveAttribute("type", "button");
   });
 
 
   it("uses the authenticated role navigation rather than hard-coded workspace indexes", async () => {
     shell("/workspace/1", [roadmapWithNext], ["Главная", "Задачи", "Мой путь", "Bootcamp"]);
-    fireEvent.click(await within(screen.getByTestId("trajectory-stage-detail")).findByRole("button", { name: /Продолжить|Посмотреть/ }));
+    fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
     const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
-    fireEvent.click(await within(drawer).findByRole("button", { name: "Открыть курс" }));
+    fireEvent.click(await waitFor(() => getByRole(drawer, "button", { name: "Открыть курс" })));
     expect(screen.getByTestId("route-probe")).toHaveTextContent("/workspace/3?course=python-api");
   });
 
   it("does not offer navigation to a section absent from the authorized role", async () => {
     shell("/workspace/1", [roadmapWithNext], ["Главная", "Мой путь", "Задачи"]);
-    fireEvent.click(await within(screen.getByTestId("trajectory-stage-detail")).findByRole("button", { name: /Продолжить|Посмотреть/ }));
+    fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
     const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
-    expect(await within(drawer).findByText("Раздел «Bootcamp» недоступен для текущей роли.")).toBeInTheDocument();
-    expect(within(drawer).queryByRole("button", { name: "Открыть курс" })).toBeNull();
+    expect(await waitFor(() => getByText(drawer, "Раздел «Bootcamp» недоступен для текущей роли."))).toBeInTheDocument();
+    expect(queryByRole(drawer, "button", { name: "Открыть курс" })).toBeNull();
   });
 
   it("closes on Escape and restores focus to the initiating task trigger", async () => {
     shell("/workspace/1", [roadmapWithNext]);
-    const trigger = await within(screen.getByTestId("trajectory-stage-detail")).findByRole("button", { name: /Продолжить|Посмотреть/ });
+    const trigger = await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ }));
     trigger.focus();
     fireEvent.click(trigger);
     await waitFor(() => {
@@ -169,17 +169,17 @@ describe("trajectory v2 task/evidence drawer", () => {
   it("keeps Tab cycling inside the drawer", async () => {
     shell("/workspace/1", [roadmapWithNext]);
     fireEvent.click(await screen.findByRole("button", { name: /Фундамент/ }));
-    const open = within(screen.getByTestId("trajectory-stage-detail")).getByRole("button", { name: /Продолжить|Посмотреть/ });
+    const open = getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ });
     open.focus();
     fireEvent.click(open);
     await waitFor(() => {
       expect(screen.getByTestId("trajectory-drawer-overlay")).toBeInTheDocument();
     });
     const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
-    const continueButton = await within(drawer).findByRole("button", { name: /Открыть/ });
+    const continueButton = await waitFor(() => getByRole(drawer, "button", { name: /Открыть/ }));
     continueButton.focus();
     fireEvent.keyDown(drawer, { key: "Tab" });
-    expect(document.activeElement).toBe(within(drawer).getAllByRole("button", { name: "Закрыть" })[0]);
+    expect(document.activeElement).toBe(getAllByRole(drawer, "button", { name: "Закрыть" })[0]);
     fireEvent.keyDown(drawer, { key: "Escape" });
     await waitFor(() => {
       expect(screen.queryByTestId("trajectory-drawer-overlay")).toBeNull();
@@ -188,14 +188,14 @@ describe("trajectory v2 task/evidence drawer", () => {
 
   it("keeps role/stage context for an unselected role without inert actions", async () => {
     shell("/workspace/1?role=product", [roadmapWithNext, productRoadmap]);
-    fireEvent.click(await within(screen.getByTestId("trajectory-stage-detail")).findByRole("button", { name: /Продолжить|Посмотреть/ }));
+    fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
     const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
     expect(
       drawer.textContent,
     ).toContain(
       "Роль не выбрана: доступ к цели появится после входа в каталог траекторий",
     );
-    expect(within(drawer).queryByRole("button", { name: /Открыть/ })).toBeNull();
+    expect(queryByRole(drawer, "button", { name: /Открыть/ })).toBeNull();
   });
 
   it("labels task continuation as result for a completed stage", async () => {
@@ -235,7 +235,7 @@ describe("trajectory v2 task/evidence drawer", () => {
     );
     const drawer = screen.getByRole("dialog", { name: "✓ Этап пройден" });
     expect(drawer.textContent).toContain("Задача · demo-task-1");
-    expect(await within(drawer).findByRole("button", { name: "Открыть результат" })).toBeVisible();
+    expect(await waitFor(() => getByRole(drawer, "button", { name: "Открыть результат" }))).toBeVisible();
   });
 });
 
