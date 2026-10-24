@@ -1,3 +1,4 @@
+import { FileText } from "lucide-react";
 import type { ApiChannelView } from "./contracts";
 import {
   type ChannelWorkContextView,
@@ -12,6 +13,7 @@ export type ContextPanelProps = {
   channel: ApiChannelView;
   viewerId: string | null;
   workContext?: ChannelWorkContextView;
+  artifactRefs?: readonly string[];
   open: boolean;
   onOpenTask?: (taskId: string) => void;
   onOpenMeeting?: () => void;
@@ -24,6 +26,7 @@ export function ContextPanel({
   channel,
   viewerId,
   workContext = null,
+  artifactRefs = [],
   open,
   onOpenTask,
   onOpenMeeting,
@@ -45,16 +48,25 @@ export function ContextPanel({
           <span className="sr-only">К чату</span>
         </button>
       )}
-      <p className="msg-context__eyebrow">Контекст</p>
-      <h2 className="msg-context__title">{dialogTitle(channel, viewerId)}</h2>
-      <span className={`msg-context__badge${channel.muted ? " msg-context__badge--muted" : ""}`}>
-        {dialogKindLabel(channel.kind)}
-      </span>
-      {roleInChannel !== null && (
-        <span className="msg-context__role" data-testid="context-your-role">
-          ваша роль: {participantRoleLabel(roleInChannel)}
+      <div className="msg-context__heading">
+        <p className="msg-context__eyebrow">Контекст</p>
+      </div>
+      <div className="msg-context__profile">
+        <span className="msg-context__avatar" aria-hidden="true">
+          {dialogTitle(channel, viewerId).trim().charAt(0).toUpperCase() || "?"}
         </span>
-      )}
+        <div className="msg-context__profile-copy">
+          <h2 className="msg-context__title">{dialogTitle(channel, viewerId)}</h2>
+          <span className={`msg-context__badge${channel.muted ? " msg-context__badge--muted" : ""}`}>
+            {dialogKindLabel(channel.kind)}
+          </span>
+          {roleInChannel !== null && (
+            <span className="msg-context__role" data-testid="context-your-role">
+              ваша роль: {participantRoleLabel(roleInChannel)}
+            </span>
+          )}
+        </div>
+      </div>
       <dl className="msg-context__facts">
         <div>
           <dt>Непрочитанных</dt>
@@ -98,13 +110,31 @@ export function ContextPanel({
           </dl>
         )}
       </section>
+      {artifactRefs.length > 0 && (
+        <section className="msg-context__section" aria-label="Связанные артефакты">
+          <h3 className="msg-context__section-title">Связанные артефакты <span>{String(artifactRefs.length)}</span></h3>
+          <ul className="msg-context__artifacts">
+            {artifactRefs.map((ref) => (
+              <li key={ref}>
+                <FileText aria-hidden="true" size={17} />
+                <span title={ref}>{ref}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <section className="msg-context__section" aria-label="Участники">
         <h3 className="msg-context__section-title">Участники</h3>
         <ul className="msg-context__people">
           {channel.participants.map((person) => (
             <li key={person.id} data-testid="context-participant">
-              <span>{person.display_name || "Без имени"}</span>
-              <small> · {participantRoleLabel(person.role)}</small>
+              <span className="msg-context__member-avatar" aria-hidden="true">
+                {person.display_name.trim().charAt(0).toUpperCase() || "?"}
+              </span>
+              <span className="msg-context__member-copy">
+                <span>{person.display_name || "Без имени"}</span>
+                <small> · {participantRoleLabel(person.role)}</small>
+              </span>
             </li>
           ))}
         </ul>

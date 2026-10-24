@@ -216,6 +216,11 @@ export function MessagingWorkspace({
   const lastPageSize =
     messagesQuery.data?.pages[messagesQuery.data.pages.length - 1]?.length ?? 0;
 
+  const contextArtifacts = useMemo(
+    () => [...new Set(messages.flatMap((message) => message.artifact_refs))].slice(0, 12),
+    [messages],
+  );
+
   const contextQuery = useQuery({
     queryKey: ["messaging-work-context", selected?.id],
     queryFn: () =>
@@ -410,21 +415,6 @@ export function MessagingWorkspace({
       data-reference={reference}
       data-visual-reference="R-MSG-01"
     >
-      <header className="messenger-heading">
-        <div>
-          <h1 id="workspace-title">Сообщения</h1>
-          <small>Диалоги и рабочие группы</small>
-        </div>
-        {isOnline ? (
-          <span className="workspace-online-badge" aria-live="polite">
-            В сети
-          </span>
-        ) : (
-          <span className="workspace-online-badge" data-badge="offline">
-            Нет соединения
-          </span>
-        )}
-      </header>
       <div
         className={`messenger-shell${isNarrow ? ` messenger-shell--${mobilePane}` : ""}${!isNarrow && !contextVisible ? " messenger-shell--no-context" : ""}`}
         data-pane={isNarrow ? mobilePane : "desktop"}
@@ -496,6 +486,7 @@ export function MessagingWorkspace({
             channel={selected}
             viewerId={personId}
             workContext={contextQuery.data ?? null}
+            artifactRefs={contextArtifacts}
             open={contextVisible}
             onClose={isNarrow ? () => { setMobilePane("chat"); } : undefined}
             onOpenTask={(taskId) => {

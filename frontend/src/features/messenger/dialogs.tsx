@@ -137,27 +137,14 @@ export function DialogList({
       className={"msg-dialog-list" + (className ? ` ${className}` : "")}
       aria-label="Список диалогов"
     >
-      <div className="msg-dialog-list__top">
-        <label className="msg-dialog-list__search">
-          <span className="msg-dialog-list__sr-only">Поиск диалогов</span>
-          <span className="msg-dialog-list__search-field">
-            <Search aria-hidden="true" size={15} />
-            <input
-              type="search"
-              value={query}
-              placeholder="Имя, задача или текст"
-              aria-label="Поиск диалогов"
-              onChange={(event) => {
-                setQuery(event.target.value);
-              }}
-            />
-          </span>
-        </label>
+      <div className="msg-dialog-list__heading">
+        <h1 id="workspace-title">Сообщения</h1>
         <div className="msg-dialog-list__create">
           <button
             type="button"
             className="msg-dialog-list__create-button"
             disabled={contacts.length === 0}
+            aria-label="Создать диалог"
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             title={
@@ -170,7 +157,7 @@ export function DialogList({
             }}
           >
             <Plus aria-hidden="true" size={15} />
-            Создать диалог
+            Создать чат
           </button>
           {menuOpen && contacts.length > 0 && (
             <div
@@ -201,6 +188,23 @@ export function DialogList({
             </div>
           )}
         </div>
+      </div>
+      <div className="msg-dialog-list__top">
+        <label className="msg-dialog-list__search">
+          <span className="msg-dialog-list__sr-only">Поиск диалогов</span>
+          <span className="msg-dialog-list__search-field">
+            <Search aria-hidden="true" size={15} />
+            <input
+              type="search"
+              value={query}
+              placeholder="Поиск диалогов…"
+              aria-label="Поиск диалогов"
+              onChange={(event) => {
+                setQuery(event.target.value);
+              }}
+            />
+          </span>
+        </label>
       </div>
       <div
         className="msg-dialog-list__tabs"
