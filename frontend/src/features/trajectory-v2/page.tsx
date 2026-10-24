@@ -13,7 +13,6 @@ import {
   MILESTONE_STATE_LABELS,
   milestoneState,
   readPinnedTrack,
-  roleStateLabel,
   writePinnedTrack,
 } from "./client";
 import { RoleComparePanel, TrajectoryActions } from "./actions";
