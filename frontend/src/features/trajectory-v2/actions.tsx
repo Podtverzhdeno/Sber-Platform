@@ -13,7 +13,6 @@ export type TrajectoryActionsProps = {
   compareTarget: string | null;
   feedback: string | null;
   compare: (trackKey: string | null) => void;
-  copyLink: () => void;
   internalShare: () => void;
   togglePin: () => void;
   toggleHiddenUnselected: () => void;
@@ -123,21 +122,10 @@ export function TrajectoryActions(props: TrajectoryActionsProps) {
                 type="button"
                 role="menuitem"
                 onClick={() => {
-                  run(props.copyLink);
-                }}
-              >
-                Скопировать общедоступную ссылку
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={() => {
                   run(props.internalShare);
                 }}
               >
-                Внутренняя ссылка…
+                Поделиться внутри Impulse…
               </button>
             </li>
             <li>
