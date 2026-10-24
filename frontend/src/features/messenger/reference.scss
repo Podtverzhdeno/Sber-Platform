@@ -942,3 +942,55 @@
     right:44px;
   }
 }
+
+
+/* Approved mockup's named dialog badges (the Mayaki lighthouse is sourced
+   directly from the original PNG; other recognized communities have semantic
+   symbols rather than misleading generic initials). */
+.sberchat-reference .msg-reference-avatar {
+  position:relative;display:grid;place-items:center;
+  isolation:isolate;color:#e8f8ff;
+  border-radius:50%;overflow:hidden;
+}
+.sberchat-reference .msg-reference-avatar--trophy {
+  background:linear-gradient(145deg,#a72a25 0%,#401821 54%,#180f1c);
+  border-color:#8a3d29;
+}
+.sberchat-reference .msg-reference-avatar--school {
+  background:linear-gradient(155deg,#088990,#054353 70%,#073044);
+  border-color:#167d84;
+}
+.sberchat-reference .msg-reference-avatar--team {
+  background:linear-gradient(140deg,#123b68,#09233e);
+  border-color:#2a6991;
+}
+.sberchat-reference .msg-reference-avatar--ai {
+  background:linear-gradient(140deg,#ba41ff,#7621bb 60%,#33167b);
+  border-color:#b05af7;
+}
+.sberchat-reference .msg-reference-avatar--cat {
+  background:linear-gradient(130deg,#00bc75,#4dffa1);
+  border-color:#4cffb9;
+}
+.sberchat-reference .msg-reference-avatar--technology {
+  background:linear-gradient(150deg,#062a49,#046aa2);
+  border-color:#0aabe7;color:#16d9fe;
+}
+.sberchat-reference .msg-reference-avatar--pulse {
+  background:linear-gradient(150deg,#073b69,#04213c);
+  border-color:#127fcd;color:#17dff5;
+}
+.sberchat-reference .msg-reference-avatar-symbol {
+  display:grid;place-items:center;font-size:27px;line-height:1;
+}
+.sberchat-reference .msg-reference-avatar-symbol.school {
+  font-size:24px;letter-spacing:-3px;font-weight:900;color:#d9fefa;
+}
+.sberchat-reference .msg-reference-avatar-symbol.ai {
+  display:flex;flex-direction:column;
+  transform:rotate(-17deg);
+  font-weight:900;font-size:35px;line-height:.8;color:#fff;
+}
+.sberchat-reference .msg-reference-avatar-symbol.ai small {
+  font-size:7px;letter-spacing:1.3px;font-weight:900;line-height:1.2;
+}
