@@ -645,3 +645,68 @@
 .sberchat-reference .msg-context__copy-status {min-height:1em;margin:6px 0 0;color:#20e5ce;font-size:11px;}
 .sberchat-reference .msg-context__moderators .msg-context__people li {padding:8px 1px;border-bottom:1px solid #173e55;}
 .sberchat-reference .msg-context__materials {padding-bottom:4px;}
+
+
+/* Each supplied PNG was exported with its own canvas proportions.
+   Empty (1448×1086): sidebar 164, topbar 70, list 367, context 298,
+   and a 44px right breathing gutter.
+   Mayaki (1448×1086): sidebar 156, topbar 64, list 334, context 352.
+   Direct (1672×941): sidebar 172, topbar 69, list 391, context 357.
+   These are state-scoped to Messages only; other routes are untouched. */
+@media (min-width: 1400px) {
+  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .workspace {
+    padding-left:164px;
+    padding-top:70px;
+  }
+  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .sidebar {width:164px;}
+  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .topbar {
+    left:164px;height:70px;min-height:70px;
+  }
+  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .workspace-content {
+    padding:0;
+  }
+  .messenger-page.sberchat-reference[data-message-state="empty"] {
+    height:calc(100dvh - 70px);
+    width:calc(100% - 44px);
+    overflow:hidden;border-radius:0 14px 14px 0;
+    border:1px solid #123251;border-left:0;
+  }
+  .messenger-page.sberchat-reference[data-message-state="empty"] > .messenger-shell {
+    grid-template-columns:367px minmax(0,1fr) 298px;
+  }
+
+  .page-shell:has(.sberchat-reference[data-message-state="community"]) .workspace {
+    padding-left:156px;padding-top:64px;
+  }
+  .page-shell:has(.sberchat-reference[data-message-state="community"]) .sidebar {width:156px;}
+  .page-shell:has(.sberchat-reference[data-message-state="community"]) .topbar {
+    left:156px;height:64px;min-height:64px;
+  }
+  .messenger-page.sberchat-reference[data-message-state="community"] {
+    width:100%;height:calc(100dvh - 64px);
+  }
+  .messenger-page.sberchat-reference[data-message-state="community"] > .messenger-shell {
+    grid-template-columns:334px minmax(0,1fr) 352px;
+  }
+}
+@media (min-width: 1600px) {
+  .page-shell:has(.sberchat-reference[data-message-state="direct"]) .workspace {
+    padding-left:172px;padding-top:69px;
+  }
+  .page-shell:has(.sberchat-reference[data-message-state="direct"]) .sidebar {width:172px;}
+  .page-shell:has(.sberchat-reference[data-message-state="direct"]) .topbar {
+    left:172px;height:69px;min-height:69px;
+  }
+  .messenger-page.sberchat-reference[data-message-state="direct"] {
+    width:100%;height:calc(100dvh - 69px);
+  }
+  .messenger-page.sberchat-reference[data-message-state="direct"] > .messenger-shell {
+    grid-template-columns:391px minmax(0,1fr) 357px;
+  }
+}
+/* Keep original list and details genuinely scrollable in constrained heights. */
+.messenger-page.sberchat-reference .messenger-shell > :is(.msg-dialog-list,.chat-thread,.msg-context,.msg-reference-context-empty) {
+  min-height:0;
+  overflow:hidden;
+}
+.messenger-page.sberchat-reference .messenger-shell > .msg-reference-context-empty {overflow-y:auto;}
