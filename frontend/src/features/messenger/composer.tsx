@@ -1,3 +1,4 @@
+import { AtSign, Paperclip, Send, Smile } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 
@@ -244,18 +245,6 @@ export function Composer({
           <button
             type="button"
             className="msg-composer__tool"
-            aria-expanded={emojiOpen}
-            aria-label="Эмодзи"
-            onClick={(event) => {
-              event.preventDefault();
-              setEmojiOpen((current) => !current);
-            }}
-          >
-            🙂
-          </button>
-          <button
-            type="button"
-            className="msg-composer__tool"
             aria-expanded={refsOpen}
             aria-label="Вложения"
             onClick={(event) => {
@@ -263,12 +252,31 @@ export function Composer({
               setRefsOpen((current) => !current);
             }}
           >
-            📎
+            <Paperclip size={20} aria-hidden="true" />
           </button>
-          <div className="msg-composer__mention-hint">
-            <span aria-hidden="true">@</span>
-            <span className="msg-composer__hint-text">упомянуть</span>
-          </div>
+          <button
+            type="button"
+            className="msg-composer__tool"
+            aria-expanded={emojiOpen}
+            aria-label="Эмодзи"
+            onClick={(event) => {
+              event.preventDefault();
+              setEmojiOpen((current) => !current);
+            }}
+          >
+            <Smile size={20} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            className="msg-composer__tool msg-composer__mention"
+            aria-label="Упомянуть участника"
+            onClick={() => {
+              insertAtCaret("@");
+              setMentionQuery("");
+            }}
+          >
+            <AtSign size={20} aria-hidden="true" />
+          </button>
         </div>
         <div className="msg-composer__input-shell">
           {mentionCandidates.length > 0 && (
@@ -306,7 +314,7 @@ export function Composer({
               updateDraft(event.target.value);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Напишите сообщение… Enter — отправить, Shift+Enter — новая строка, @ — упоминание"
+            placeholder="Напишите сообщение..."
             className="msg-composer__textarea"
             data-testid="composer-textarea"
           />
@@ -317,7 +325,8 @@ export function Composer({
           disabled={sendDisabled}
           data-testid="composer-send"
         >
-          {sendState === "sending" ? "Отправляем…" : "Отправить"}
+          {sendState === "sending" ? <span className="msg-composer__send-progress">Отправляем…</span> : <Send size={21} aria-hidden="true" />}
+          <span className="sr-only">{sendState === "sending" ? "Отправляем…" : "Отправить"}</span>
         </button>
       </form>
       {emojiOpen && (
