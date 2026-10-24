@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
 import secrets
 from collections.abc import Callable
 from dataclasses import dataclass, replace
@@ -232,6 +233,7 @@ class DemoAuthService:
     ) -> None:
         self.store = store
         self.ttl_seconds = ttl_seconds
+        self._csrf_secret = secret.encode("utf-8")
         self._now = now or (lambda: datetime.now(UTC))
         self._signer = URLSafeTimedSerializer(secret_key=secret, salt="impulse-session-v1")
 
@@ -288,10 +290,26 @@ class DemoAuthService:
         actor = await self._actor(persona, session.active_role, correlation_id=correlation_id)
         return AuthenticatedSession(actor=actor, session=session)
 
+    def recoverable_csrf_token(self, authenticated: AuthenticatedSession) -> str:
+        """Session-scoped CSRF for same-origin /me; never expose the cookie secret.
+
+        The persisted original random token remains valid. This HMAC variant
+        lets the SPA recover after reload/new tab without disabling CSRF.
+        """
+        digest = authenticated.session.token_digest
+        return hmac.new(
+            self._csrf_secret,
+            f"impulse-csrf-v2:{digest}".encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
+
     async def require_csrf(self, authenticated: AuthenticatedSession, csrf: str | None) -> None:
-        if csrf is None or not secrets.compare_digest(
+        recovered = self.recoverable_csrf_token(authenticated)
+        stored_matches = csrf is not None and secrets.compare_digest(
             authenticated.session.csrf_digest, self._digest(csrf)
-        ):
+        )
+        recovered_matches = csrf is not None and secrets.compare_digest(recovered, csrf)
+        if not stored_matches and not recovered_matches:
             raise ApiError(
                 code="CSRF_INVALID",
                 message="Проверка запроса не пройдена.",
