@@ -102,6 +102,19 @@ describe("three canonical analytics reference layouts", () => {
     await waitFor(() => { expect(screen.getAllByText("0 / 6").length).toBeGreaterThan(0); });
   });
 
+  it("displays a completed-profile outcome instead of claiming every skill is unverified", async () => {
+    open("/workspace/9?view=path", roleSkills.map((skill) => ({
+      ...skill,
+      current_level: skill.target_level ?? null,
+      data_state: "verified",
+      evidence_count: 2,
+    })));
+    await waitFor(() => {
+      expect(screen.getByText("Целевой профиль достигнут")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("Все требования требуют подтверждения")).not.toBeInTheDocument();
+  });
+
   it("opens per-skill details and certification terms without issuing a badge", () => {
     open();
     fireEvent.click(screen.getByRole("button", { name: /Постановка задач агенту/ }));
