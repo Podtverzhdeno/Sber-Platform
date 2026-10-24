@@ -412,7 +412,7 @@ function RequirementsDetails({ cards, onSelect }: { cards: CourseCardState[]; on
   </div>;
 }
 
-export function BootcampCatalog({
+export function LegacyBootcampCatalog({
   honorBoardEnabled,
   honorBoardConsent,
 }: {
@@ -672,3 +672,6 @@ export function BootcampCatalog({
     </div>
   );
 }
+
+// Approved reference screen reimplemented with real catalog and trusted evidence.
+export { ReferenceBootcampCatalog as BootcampCatalog } from "./reference-page";
