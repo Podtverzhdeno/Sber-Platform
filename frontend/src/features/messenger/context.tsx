@@ -91,9 +91,10 @@ export function ContextPanel({
         </div>
         <div>
           <dt>Участников</dt>
-          <dd>{String(channel.participants.length)}</dd>
+          <dd>{isCommunity && isReferencePreview ? "248" : String(channel.participants.length)}</dd>
         </div>
       </dl>
+      {!isCommunity && (channel.task_id !== null || workContext !== null) && (
       <section className="msg-context__section" aria-label="Задача">
         <h3 className="msg-context__section-title">Задача</h3>
         <dl className="msg-context__facts">
@@ -123,6 +124,7 @@ export function ContextPanel({
           </dl>
         )}
       </section>
+      )}
       {isCommunity && isReferencePreview && (
         <section className="msg-context__section ref-context-community" aria-label="Администраторы и модераторы">
           <h3 className="msg-context__section-title">Администраторы и модераторы</h3>
@@ -160,7 +162,7 @@ export function ContextPanel({
           </ul>
         ) : <p className="ref-context-placeholder-text">Общих файлов пока нет</p>}
       </section>
-            <section className="msg-context__section" aria-label="Участники">
+      <section className="msg-context__section" aria-label="Участники">
         <h3 className="msg-context__section-title">Участники</h3>
         <ul className="msg-context__people">
           {channel.participants.map((person) => (
