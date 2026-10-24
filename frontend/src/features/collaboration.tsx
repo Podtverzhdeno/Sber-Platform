@@ -410,7 +410,7 @@ export function MessagingWorkspace({
   const recentChannel = [...channels].sort((a, b) =>
     (b.last_message?.created_at ?? b.created_at).localeCompare(a.last_message?.created_at ?? a.created_at)
   )[0] ?? null;
-  const mayakiChannel = channels.find((channel) => channel.title?.trim().toLowerCase() === "маяки") ?? null;
+  const mayakiChannel = channels.find((channel) => channel.title.trim().toLowerCase() === "маяки") ?? null;
   const openCreate = () => {
     setCreateSignal((current) => current + 1);
     if (isNarrow) setMobilePane("list");
@@ -464,7 +464,7 @@ export function MessagingWorkspace({
         {chatVisible && (
           <section className="chat-thread" aria-label="Текущий чат">
             {selected ? <ChatHistory
-              channel={selected ?? null}
+              channel={selected}
               viewerId={personId}
               messages={messages}
               pendingMessages={pending}
@@ -472,7 +472,7 @@ export function MessagingWorkspace({
               isLoadingInitial={messagesQuery.isLoading}
               isPaginating={messagesQuery.isFetchingNextPage}
               hasMoreOlder={lastPageSize >= 50}
-              canSend={selected?.sender_enabled ?? true}
+              canSend={selected.sender_enabled}
               onLoadOlder={() => {
                 void messagesQuery.fetchNextPage();
               }}
@@ -482,7 +482,7 @@ export function MessagingWorkspace({
               onRetryPending={retryPending}
               connectionState={connectionState}
               storage={storage}
-              ariaLabel={`Текущий чат · ${selected ? channelTitleFallback(selected, personId) : "нет диалога"}`}
+              ariaLabel={`Текущий чат · ${channelTitleFallback(selected, personId)}`}
               contextOpen={contextVisible}
               onToggleContext={() => {
                 if (isNarrow) {
