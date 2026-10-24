@@ -54,8 +54,14 @@ jobs:
           git add frontend/e2e/task-catalog-v2-visual.spec.ts-snapshots/
           if ! git diff --cached --quiet; then
             git commit -m "test(tasks): update approved-reference implementation screenshots"
-            git fetch origin codex/task-catalog-visual-polish-20261024
-            git rebase origin/codex/task-catalog-visual-polish-20261024
-            git push origin HEAD:codex/task-catalog-visual-polish-20261024
+            for attempt in 1 2 3 4 5; do
+              git fetch origin codex/task-catalog-visual-polish-20261024
+              git rebase origin/codex/task-catalog-visual-polish-20261024
+              if git push origin HEAD:codex/task-catalog-visual-polish-20261024; then
+                exit 0
+              fi
+              sleep 2
+            done
+            exit 1
           fi
         working-directory: .
