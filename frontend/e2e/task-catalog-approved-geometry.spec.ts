@@ -81,12 +81,23 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
   // without requiring the participant to scroll through repetitive forecast copy.
   const firstFold = await page.evaluate(() => {
     const stage = document.querySelector(".catalog-v2-stage-section")?.getBoundingClientRect();
-    const actions = document.querySelector(".catalog-v2-detail-footer")?.getBoundingClientRect();
-    return { stageTop: stage?.top ?? Infinity, actionBottom: actions?.bottom ?? Infinity };
+    const footer = document.querySelector(".catalog-v2-detail-footer")?.getBoundingClientRect();
+    const mentor = document.querySelector(".catalog-v2-detail-footer .catalog-v2-support-section")?.getBoundingClientRect();
+    return {
+      stageTop: stage?.top ?? Infinity,
+      stageBottom: stage?.bottom ?? Infinity,
+      footerTop: footer?.top ?? -1,
+      footerBottom: footer?.bottom ?? Infinity,
+      mentorTop: mentor?.top ?? -1,
+      mentorBottom: mentor?.bottom ?? Infinity,
+    };
   });
   console.info("[catalog-approved-first-fold]", firstFold);
   expect(firstFold.stageTop).toBeLessThan(880);
-  expect(firstFold.actionBottom).toBeLessThanOrEqual(941);
+  expect(firstFold.footerBottom).toBeLessThanOrEqual(941);
+  expect(firstFold.stageBottom).toBeLessThanOrEqual(firstFold.footerTop + 1);
+  expect(firstFold.mentorTop).toBeGreaterThanOrEqual(firstFold.footerTop);
+  expect(firstFold.mentorBottom).toBeLessThanOrEqual(firstFold.footerBottom + 1);
 
   const firstCard = page.locator(".catalog-v2-card").first();
   const actions = firstCard.locator(".catalog-v2-card-actions");
