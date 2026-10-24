@@ -101,6 +101,8 @@ test.describe("user-approved messaging visual scenarios", () => {
     await expect(page.locator(".msg-chat__bubble")).toHaveCount(5);
     await expect(page.locator(".msg-context__description")).toBeVisible();
     await expect(page.locator(".ref-context-files li")).toHaveCount(3);
+    await expect(page.locator(".ref-context-files")).toContainText("248 КБ · 20 окт, 09:28");
+    await expect(page.locator(".ref-context-files .ref-context-file-badge").first()).toHaveText("xlsx");
     await expect(page.getByText(/сообщения здесь не сохраняются/)).toBeVisible();
     await page.setViewportSize({ width: 1672, height: 941 });
     await page.evaluate(() => document.fonts.ready);
@@ -131,6 +133,8 @@ test.describe("user-approved messaging visual scenarios", () => {
     await expect(page.getByText("Администраторы и модераторы")).toBeVisible();
     await expect(page.locator(".msg-chat__reference-media")).toBeVisible();
     await expect(page.locator(".ref-context-files li")).toHaveCount(3);
+    await expect(page.locator(".ref-context-files")).toContainText("2.4 МБ · 20 окт, 09:24");
+    await expect(page.locator(".ref-context-files .ref-context-file-badge").first()).toHaveText("pdf");
     await expect(page.locator(".msg-composer__reference-row button")).toBeDisabled();
     await screenshotCandidate(page, "messages-01-mayaki-approved.png");
     await page.screenshot({ path: "test-results/messages-01-full-page-1448x1086.png", animations: "disabled" });
