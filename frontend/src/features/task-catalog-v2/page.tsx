@@ -330,27 +330,13 @@ function TaskDetail(props: {
           ) : <p>Заказчик не опубликовал ориентировочный план. Прогресс появляется только после назначения.</p>}
         </section>
 
+      </div>
+      <footer className="catalog-v2-detail-footer">
         <section className="catalog-v2-support-section">
           <Users size={24} aria-hidden="true" />
           <div><strong>Поддержка и ментор</strong><p>{item.support_model === "none" || item.support_model === "self_service" ? "Сопровождение не предусмотрено" : item.support_model && item.support_model !== "not_provided" ? supportLabels[item.support_model] ?? item.support_model : "Ментор и формат поддержки пока не опубликованы"}</p></div>
         </section>
-
-        <section className="catalog-v2-reasons-section">
-          <details className="catalog-v2-reasons-disclosure">
-            <summary><h3>Почему подходит</h3><ChevronDown size={15} aria-hidden="true" /></summary>
-            {item.match.reasons.length > 0 ? (
-              <ul>{item.match.reasons.map((reason) => <li key={reason.code}>{reason.label}</li>)}</ul>
-            ) : <p>Причины появятся после накопления достаточного coverage.</p>}
-            <details className="catalog-v2-provenance">
-              <summary>Как рассчитана релевантность</summary>
-              <p>Алгоритм: {item.match.algorithm_version ?? "не рассчитан"} · расчёт: {formatCalculatedAt(item.match.calculated_at)}. Это не вероятность отбора или найма.</p>
-              <p className="catalog-v2-match-snapshot">Снимок входных данных: <code>{item.match.source_snapshot_version}</code></p>
-            </details>
-            {item.eligibility.missing_prerequisites.length > 0 ? <p>Нужны подтверждения: {item.eligibility.missing_prerequisites.join(", ")}</p> : null}
-          </details>
-        </section>
-      </div>
-      <footer className="catalog-v2-detail-footer">
+        <div className="catalog-v2-detail-footer-controls">
         <small>Условия v{item.terms_version} · Отклик не означает назначение</small>
         <div className="catalog-v2-detail-actions">
           {canSeeConditions ? <button type="button" onClick={props.onConditions}>Посмотреть условия</button> : null}
@@ -368,7 +354,22 @@ function TaskDetail(props: {
             ) : <button type="button" onClick={() => { setConfirmWithdraw(true); }}>Отозвать отклик</button>
           ) : null}
         </div>
+        </div>
       </footer>
+        <section className="catalog-v2-reasons-section">
+          <details className="catalog-v2-reasons-disclosure">
+            <summary><h3>Почему подходит</h3><ChevronDown size={15} aria-hidden="true" /></summary>
+            {item.match.reasons.length > 0 ? (
+              <ul>{item.match.reasons.map((reason) => <li key={reason.code}>{reason.label}</li>)}</ul>
+            ) : <p>Причины появятся после накопления достаточного coverage.</p>}
+            <details className="catalog-v2-provenance">
+              <summary>Как рассчитана релевантность</summary>
+              <p>Алгоритм: {item.match.algorithm_version ?? "не рассчитан"} · расчёт: {formatCalculatedAt(item.match.calculated_at)}. Это не вероятность отбора или найма.</p>
+              <p className="catalog-v2-match-snapshot">Снимок входных данных: <code>{item.match.source_snapshot_version}</code></p>
+            </details>
+            {item.eligibility.missing_prerequisites.length > 0 ? <p>Нужны подтверждения: {item.eligibility.missing_prerequisites.join(", ")}</p> : null}
+          </details>
+        </section>
     </section>
   );
 }
