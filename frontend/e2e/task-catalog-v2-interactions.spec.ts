@@ -92,7 +92,7 @@ test.describe("task catalog interactive controls and motion", () => {
     await page.getByRole("button", { name: "Показать сравнение уровней" }).click();
     await expect(page.getByRole("button", { name: "Скрыть сравнение уровней" })).toHaveAttribute("aria-expanded", "true");
 
-    await page.getByRole("button", { name: "Посмотреть условия" }).click();
+    await page.getByRole("button", { name: "Посмотреть условия", exact: true }).click();
     const modal = page.getByRole("dialog");
     await expect(modal).toBeVisible();
     await expect(modal.getByRole("button", { name: "Подтвердить и отправить отклик" })).toBeDisabled();
@@ -136,8 +136,10 @@ test.describe("task catalog interactive controls and motion", () => {
     await search.fill("Прототип");
     await page.getByRole("button", { name: "Найти" }).click();
     await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("Прототип");
-    await page.getByRole("checkbox", { name: "Только сохранённые" }).check();
+    const saved = page.getByRole("checkbox", { name: "Только сохранённые" });
+    await saved.click();
     await expect.poll(() => new URL(page.url()).searchParams.get("saved")).toBe("true");
+    await expect(saved).toBeChecked();
     await page.getByRole("button", { name: "Сбросить фильтры" }).click();
     await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBeNull();
     await expect.poll(() => new URL(page.url()).searchParams.get("saved")).toBeNull();
