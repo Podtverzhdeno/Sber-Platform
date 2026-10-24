@@ -15,6 +15,7 @@ const participant = {
 };
 
 async function openCatalog(page: Page, items: CatalogItem[] = [catalogItem, insufficientItem]) {
+  let demoAuthenticated = false;
   // All endpoints not explicitly mocked below return a deterministic 404;
   // this suite is an isolated browser contract and does not depend on a running backend.
   await page.route("**/api/v1/**", (route) => route.fulfill({ status: 404, json: { code: "NOT_MOCKED" } }));
@@ -27,8 +28,13 @@ async function openCatalog(page: Page, items: CatalogItem[] = [catalogItem, insu
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [
     { key: "participant-synthetic", display_name: participant.display_name, roles: ["participant"] },
   ] }));
-  await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
-  await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: participant }));
+  await page.route("**/api/v1/me", (route) => route.fulfill(demoAuthenticated
+    ? { json: participant }
+    : { status: 401, json: { code: "AUTH_REQUIRED" } }));
+  await page.route("**/api/v1/auth/demo-login", (route) => {
+    demoAuthenticated = true;
+    return route.fulfill({ json: participant });
+  });
   await page.route("**/api/v1/development/tracks", (route) => route.fulfill({ json: {
     active_count: 1, max_active: 2, tracks: [],
   } }));
