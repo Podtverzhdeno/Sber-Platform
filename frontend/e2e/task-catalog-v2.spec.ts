@@ -44,7 +44,7 @@ async function openCatalog(
   await page.goto("/");
   await page.locator('[data-persona="participant-synthetic"]').click();
   await page.getByRole("link", { name: "Задачи" }).click();
-  await expect(page.getByRole("heading", { name: "Задачи для вашего следующего результата" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
 }
 
 test("catalog filters, view parity and one idempotent apply", async ({ page }) => {
@@ -63,11 +63,11 @@ test("catalog filters, view parity and one idempotent apply", async ({ page }) =
     await route.fulfill({ json: { id: "00000000-0000-0000-0000-000000000704", status: "applied" } });
   });
 
-  // Advanced controls are deliberately hidden until requested in both desktop and mobile.
+  // Desktop reference exposes primary filters immediately; disclosure opens search and saved filters.
   const advanced = page.locator(".catalog-v2-filter-expander");
   await expect(advanced).toHaveAccessibleName("Все фильтры");
   await expect(advanced).toHaveAttribute("aria-expanded", "false");
-  await expect(page.getByLabel("Навык", { exact: true })).toBeHidden();
+  await expect(page.getByLabel("Навык", { exact: true })).toBeVisible();
   await advanced.click();
   await expect(advanced).toHaveAttribute("aria-expanded", "true");
   await page.getByLabel("Навык", { exact: true }).fill("python");
@@ -186,7 +186,7 @@ test("foreign deep link is safe and mobile list has no page overflow", async ({ 
   await page.route("**/api/v1/me/task-recommendations/00000000-0000-0000-0000-000000000999", (route) => route.fulfill({ status: 404, json: { code: "RESOURCE_NOT_FOUND", message: "Задача недоступна или не существует." } }));
   await page.route("**/api/v1/me", (route) => route.fulfill({ json: participant }));
   await page.goto("/workspace/1?task=00000000-0000-0000-0000-000000000999&catalog_view=list");
-  await expect(page.getByText("Задачи для вашего следующего результата")).toBeVisible();
+  await expect(page.getByText("Задачи для твоего развития")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Раздел недоступен" })).toBeVisible();
   await expect(page.getByText("private-brief-not-for-catalog")).toHaveCount(0);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
