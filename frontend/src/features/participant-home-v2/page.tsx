@@ -161,7 +161,7 @@ export function ParticipantHomeV2Body(props: {
               {recommendedTask && <span><Clock3 size={16} />{TASK_NEXT_ACTION_LABELS[recommendedTask.next_action] ?? recommendedTask.status}</span>}
             </div>
             <div className="home-v2-hero-actions">
-              <button type="button" className="home-v2-primary" onClick={openHero}>{heroKind === null ? "Выбрать траекторию" : "Продолжить задачу"}<ArrowRight size={18} /></button>
+              <button type="button" className="home-v2-primary" onClick={openHero}>{heroKind === "task" ? "Продолжить задачу" : heroKind === "course" ? "Продолжить обучение" : "Выбрать траекторию"}<ArrowRight size={18} /></button>
               {overview.next_outcome && <button type="button" className="home-v2-text-action" onClick={openNext}>Следующий шаг</button>}
             </div>
           </div>
@@ -176,7 +176,7 @@ export function ParticipantHomeV2Body(props: {
 
       <div className="home-v2-bottom-grid">
         <div className="home-v2-work-column">
-          <NextOutcomePanel outcome={overview.next_outcome} onOpenTarget={props.onOpenTarget} onRetry={props.onRetry} onOpenGrade={() => { openPanel("grade-details"); }} gradeAvailable={grade.state !== "not_evaluable" && grade.target_grade !== null} />
+          <NextOutcomePanel outcome={overview.next_outcome} onOpenTarget={props.onOpenTarget} onRetry={props.onRetry} onOpenGrade={() => { openPanel("grade-details"); }} onOpenTrajectory={() => { props.onOpenWorkspace("trajectory"); }} gradeAvailable={grade.state !== "not_evaluable" && grade.target_grade !== null} />
           <ActiveTasksPanel tasks={overview.active_tasks} onOpenTarget={props.onOpenTarget} onOpenAll={() => { props.onOpenTarget("tasks", ""); }} />
         </div>
         <div className="home-v2-insights-column">
@@ -256,17 +256,19 @@ export function NextOutcomePanel(props: {
   onOpenTarget: OpenTarget;
   onRetry: () => void;
   onOpenGrade?: () => void;
+  onOpenTrajectory?: () => void;
   gradeAvailable?: boolean;
 }) {
   const outcome = props.outcome;
   return (
     <section className="home-v2-block home-v2-next-outcome" data-testid={outcome ? `next-outcome-${outcome.target_kind}` : undefined}>
-      <header><h2><ClipboardCheck size={23}/>Следующий шаг</h2>{outcome && <span className="home-v2-state">В процессе</span>}</header>
+      <header><h2><ClipboardCheck size={23}/>Следующий шаг</h2>{outcome && <span className="home-v2-state">К выполнению</span>}</header>
       {outcome === null ? (
         <div className="home-v2-outcome-empty" role="status"><p>Активной траектории нет, поэтому обязательный следующий шаг не вычислен. Выберите траекторию в разделе траекторий.</p><button type="button" onClick={props.onRetry}>Обновить</button></div>
       ) : (
         <div className="home-v2-outcome-main"><span className="home-v2-outcome-symbol"><FileCheck2 size={32}/></span><div className="home-v2-outcome-content"><h3>{outcome.target_kind === "task" ? "Пройти задание" : "Продолжить обучение"}</h3><p>{outcome.target_title}</p>{outcome.stale_reason && <small role="status">{outcome.stale_reason}</small>}</div>
-          <div className="home-v2-outcome-actions"><button type="button" className="home-v2-primary" onClick={() => { props.onOpenTarget(outcome.target_kind, outcome.target_key); }}>Перейти к шагу <ArrowRight size={17}/></button>{props.gradeAvailable && props.onOpenGrade && <button type="button" className="home-v2-secondary" onClick={props.onOpenGrade}>Посмотреть программу уровня</button>}</div>
+          <div className="home-v2-outcome-stats"><span><Target size={17}/>Этап {String(outcome.milestone_position)}</span><span><Layers3 size={17}/>{outcome.trajectory_title}</span></div>
+          <div className="home-v2-outcome-actions"><button type="button" className="home-v2-primary" onClick={() => { props.onOpenTarget(outcome.target_kind, outcome.target_key); }}>Перейти к шагу <ArrowRight size={17}/></button>{props.gradeAvailable && props.onOpenGrade ? <button type="button" className="home-v2-secondary" onClick={props.onOpenGrade}>Программа уровня</button> : props.onOpenTrajectory && <button type="button" className="home-v2-secondary" onClick={props.onOpenTrajectory}>Моя траектория</button>}</div>
         </div>
       )}
     </section>
