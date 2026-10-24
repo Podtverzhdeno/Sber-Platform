@@ -181,7 +181,7 @@ export function ParticipantHomeV2Body(props: {
         </div>
         <div className="home-v2-insights-column">
           <section className="home-v2-block home-v2-buddy">
-            <header><h2><Sparkles size={23} />AI Buddy <span className="home-v2-beta">Бета</span></h2><button type="button" className="home-v2-inline-link" onClick={openNext} disabled={nextOutcome === null}>Открыть <ArrowRight size={16}/></button></header>
+            <header><h2><Sparkles size={23} />AI Buddy <span className="home-v2-beta">Бета</span></h2><button type="button" className="home-v2-inline-link" onClick={() => { props.onOpenWorkspace("buddy"); }} disabled={!props.buddyAvailable}>Открыть <ArrowRight size={16}/></button></header>
             <div className="home-v2-buddy-content">
               <img src={BUDDY_ART} alt="AI Buddy" />
               <div><p>{overview.next_outcome ? "Твой следующий шаг по траектории уже определён." : "Выбери роль и траекторию, чтобы получать подсказки по развитию."}</p>
@@ -306,10 +306,31 @@ export function WeeklyFocusPanel(props: {
 }) {
   const { focus } = props;
   const [selected, setSelected] = useState<string | null>(props.today ?? focus.days[0]?.date ?? null);
+  const [planOpen, setPlanOpen] = useState(false);
+  const planTriggerRef = useRef<HTMLButtonElement>(null);
+  const planCloseRef = useRef<HTMLButtonElement>(null);
   const day = focus.days.find((item) => item.date === selected) ?? null;
+
+  const closePlan = () => {
+    setPlanOpen(false);
+    planTriggerRef.current?.focus({ preventScroll: true });
+  };
+  useEffect(() => {
+    if (planOpen) planCloseRef.current?.focus({ preventScroll: true });
+  }, [planOpen]);
+
   return (
     <section className="home-v2-block home-v2-weekly" data-testid="weekly-focus">
-      <header><h2>На этой неделе</h2><small>{focus.versioned ? `выполнено ${String(focus.done_days)} из ${String(focus.target_days)}` : "Ритм недели не настроен"}</small></header>
+      <header>
+        <h2>На этой неделе</h2>
+        <button
+          type="button"
+          className="home-v2-inline-link"
+          ref={planTriggerRef}
+          onClick={() => { setPlanOpen(true); }}
+          aria-haspopup="dialog"
+        >План недели <ArrowRight size={16}/></button>
+      </header>
       <div className="home-v2-week-days" role="group" aria-label="Дни недели">
         {focus.days.map((item) => {
           const active = selected === item.date;
@@ -317,6 +338,21 @@ export function WeeklyFocusPanel(props: {
         })}
       </div>
       {day && <div className="home-v2-week-day-detail" role="status"><span className="home-v2-week-target"><Target size={25}/></span><div><strong>{focus.hint ?? "План недели"}</strong><p>{day.done ? "День подтверждён квалификационным действием." : day.planned ? "Запланирован по ритму недели, выполнение пока не подтверждено." : "Не запланирован по ритму недели."}</p></div><ChevronRight size={16}/></div>}
+      {planOpen && (
+        <div className="home-v2-week-dialog-layer">
+          <button className="home-v2-week-dialog-backdrop" type="button" aria-label="Закрыть план недели" onClick={closePlan}/>
+          <section className="home-v2-week-dialog" role="dialog" aria-modal="true" aria-labelledby="home-week-plan-title" onKeyDown={(event) => {
+            if (event.key === "Escape") {event.preventDefault(); closePlan();}
+            if (event.key === "Tab") {event.preventDefault(); planCloseRef.current?.focus();}
+          }}>
+            <header><div><small>Текущая неделя</small><h2 id="home-week-plan-title">План недели</h2></div><button type="button" ref={planCloseRef} aria-label="Закрыть" onClick={closePlan}><X size={21}/></button></header>
+            <p role="status">{focus.versioned ? `Выполнено ${String(focus.done_days)} из ${String(focus.target_days)} запланированных дней` : "План на эту неделю ещё не настроен"}</p>
+            <div className="home-v2-week-dialog-days">
+              {focus.days.map((item) => <div key={item.date}><span>{formatWeekdayShort(item.date)} · {formatDayLabel(item.date)}</span><strong className={item.done ? "home-v2-week-done" : ""}>{item.done ? "Выполнено" : item.planned ? "Запланировано" : "Без плана"}</strong></div>)}
+            </div>
+          </section>
+        </div>
+      )}
     </section>
   );
 }
