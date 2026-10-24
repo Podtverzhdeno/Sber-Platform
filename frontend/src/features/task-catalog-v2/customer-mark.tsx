@@ -28,7 +28,7 @@ const aliases: Readonly<Record<string, PrototypeBrand>> = {
 export function prototypeBrandForCustomer(customer: CatalogItem["customer"]): PrototypeBrand | null {
   if (customer.verification !== "verified") return null;
   const name = customer.display_name.trim().toLocaleLowerCase("ru-RU")
-    .replace(/[\\s_.\\-–—]+/g, " ").trim();
+    .replace(/[\s_.–—-]+/g, " ").trim();
   return aliases[name] ?? null;
 }
 
