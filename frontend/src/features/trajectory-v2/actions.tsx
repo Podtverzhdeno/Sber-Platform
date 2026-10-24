@@ -25,6 +25,7 @@ export function TrajectoryActions(props: TrajectoryActionsProps) {
   const [open, setOpen] = useState(false);
   const [chooserOpen, setChooserOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -45,6 +46,7 @@ export function TrajectoryActions(props: TrajectoryActionsProps) {
   const closeMenu = () => {
     setOpen(false);
     setChooserOpen(false);
+    triggerRef.current?.focus();
   };
   const run = (action: () => void) => {
     action();
@@ -79,6 +81,7 @@ export function TrajectoryActions(props: TrajectoryActionsProps) {
       onKeyDown={onKeyDown}
     >
       <button
+        ref={triggerRef}
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
@@ -98,6 +101,7 @@ export function TrajectoryActions(props: TrajectoryActionsProps) {
                 onClick={() => {
                   if (props.otherRoles.length === 0) {
                     props.compare(null);
+                    closeMenu();
                     return;
                   }
                   setChooserOpen(true);
