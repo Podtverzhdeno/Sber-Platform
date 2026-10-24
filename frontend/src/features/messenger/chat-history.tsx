@@ -506,9 +506,10 @@ export function ChatHistory({
                           )}
                         </div>
                         {item.id === "reference:mayaki-message-1" && (
-                          <div className="msg-chat__reference-media" aria-label="Карьера в IT: от обучения к возможностям">
-                            <span className="msg-chat__reference-media-icon" aria-hidden="true">✦</span>
-                            <span><strong>Карьера в IT: от обучения к возможностям</strong><small>Серия встреч · Октябрь 2026</small></span>
+                          <div className="msg-chat__reference-media">
+                            <img src="/messages-reference/mayaki-promo.webp"
+                              alt="Карьера в IT: от обучения к возможностям — серия встреч, октябрь 2026"
+                              loading="lazy" />
                           </div>
                         )}
                         {item.id === "reference:mayaki-message-3" && (
