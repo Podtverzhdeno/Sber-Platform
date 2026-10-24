@@ -1,4 +1,4 @@
-import { Bell, BellOff, FileText, Link2, Users } from "lucide-react";
+import { Bell, BellOff, FileText, Link2, Users, X } from "lucide-react";
 import type { ApiChannelView } from "./contracts";
 import {
   type ChannelWorkContextView,
@@ -46,7 +46,7 @@ export function ContextPanel({
     <aside className={classes} id="messenger-context-panel" aria-label="Контекст диалога">
       {onClose !== undefined && (
         <button type="button" className="msg-context__close" onClick={onClose}>
-          ←
+          <X size={19} aria-hidden="true" />
           <span className="sr-only">К чату</span>
         </button>
       )}
