@@ -65,6 +65,11 @@ async function expectReferenceRect(
 test("desktop home tracks original ZIP card geometry at 1448px", async ({ page }) => {
   await page.setViewportSize({ width: 1448, height: 1057 });
   await openReferenceHome(page);
+  const portrait = page.locator(".home-reference-avatar");
+  await expect(portrait, "The original portrait should be visible for a demo participant").toHaveAttribute("src", "/home-reference/avatar.svg");
+  await expect.poll(async () => portrait.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth === 92)).toBe(true);
+  await expect(page.getByPlaceholder("Поиск по задачам, навыкам, проектам...")).toBeVisible();
+  await expect(page.locator(".home-search-shortcut")).toHaveText("⌘ K");
   await expectReferenceRect(page, ".home-v2-hero", { x: 252, y: 111, width: 566, height: 310 });
   await expectReferenceRect(page, ".home-v2-grade", { x: 829, y: 111, width: 264, height: 310 });
   await expectReferenceRect(page, ".home-v2-weekly", { x: 1104, y: 111, width: 315, height: 310 });
