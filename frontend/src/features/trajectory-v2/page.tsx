@@ -843,11 +843,30 @@ export function StageDetail(props: {
         </div>
         <span className="trajectory-v2-task-status">{props.state === "completed" ? "Завершено" : props.state === "locked" ? "Недоступно" : "К выполнению"}</span>
         {canOpen ? (
-          <button type="button" className={props.state === "completed" ? "trajectory-v2-task-action" : "trajectory-v2-task-action is-primary"} onClick={() => props.onOpenDetails?.(milestone.key)}>
-            {props.state === "completed" ? "Посмотреть" : "Продолжить"} →
+          <button type="button" className={props.state === "completed" || role.attempt_number === null ? "trajectory-v2-task-action" : "trajectory-v2-task-action is-primary"} onClick={() => props.onOpenDetails?.(milestone.key)}>
+            {role.attempt_number === null || props.state === "completed" ? "Посмотреть" : "Продолжить"} →
           </button>
         ) : null}
       </div>
+      {milestone.activities && milestone.activities.length > 0 && (
+        <div className="trajectory-v2-activities" data-testid="trajectory-stage-activities">
+          <h4>Что предстоит сделать</h4>
+          <ol>
+            {milestone.activities.map((activity, index) => (
+              <li key={activity}>
+                <span className="trajectory-v2-activity-order" aria-hidden="true">{index + 1}</span>
+                <span>{activity}</span>
+              </li>
+            ))}
+          </ol>
+          {milestone.deliverable && (
+            <p className="trajectory-v2-deliverable">
+              <strong>Результат:</strong> {milestone.deliverable}
+            </p>
+          )}
+          <small>Подзадачи — план этапа; выполнение подтверждается отдельно</small>
+        </div>
+      )}
       <details className="trajectory-v2-stage-more">
         <summary>Подробнее об этапе</summary>
         <dl>
