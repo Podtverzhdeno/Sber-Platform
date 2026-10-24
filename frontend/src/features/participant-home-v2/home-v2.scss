@@ -351,6 +351,16 @@
     font-size:24px;
     border-bottom:0;
   }
+  .page-shell:has(.home-v2) .brand-mark {
+    width:38px;
+    height:38px;
+    flex:none;
+    border-radius:0;
+    background:transparent url("/home-reference/brand-symbol.svg") center / contain no-repeat;
+    box-shadow:none;
+    color:transparent;
+    font-size:0;
+  }
   .page-shell:has(.home-v2) .topbar {
     top:13px;
     right:13px;
