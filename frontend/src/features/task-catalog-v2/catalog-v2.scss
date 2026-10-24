@@ -727,6 +727,16 @@
   }
 }
 
+/* Advanced controls remain grid children on desktop, but collapse below search
+   on mobile to preserve the first-screen task discovery. */
+.catalog-v2-advanced-filters {
+  display: contents;
+}
+
+.catalog-v2-filter-expander {
+  display: none;
+}
+
 /* Approved task-catalog composition: compact discovery + focused details.
    All shades inherit semantic theme tokens; stages are planned, never completed. */
 .catalog-v2 {
@@ -773,7 +783,7 @@
   padding: 14px;
 }
 
-.catalog-v2-filters label:first-child {
+.catalog-v2-filters > label:first-child {
   grid-column: span 2;
 }
 
@@ -1284,7 +1294,29 @@
 }
 
 @media (max-width: 680px) {
-  .catalog-v2-filters label:first-child {
+  .catalog-v2-filters > label:first-child {
+    grid-column: auto;
+  }
+
+  .catalog-v2-filter-expander {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .catalog-v2-advanced-filters[data-open="false"] {
+    display: none;
+  }
+
+  .catalog-v2-advanced-filters[data-open="true"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .catalog-v2-advanced-filters .catalog-v2-saved-filter {
     grid-column: auto;
   }
 
