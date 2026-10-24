@@ -405,10 +405,10 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   useEffect(() => {
     if (
       selectedTaskId === null ||
-      catalog.isPending
+      catalog.isPending ||
+      typeof window.matchMedia !== "function"
     ) return;
-    const isStacked = typeof window.matchMedia === "function" &&
-      window.matchMedia("(max-width: 1050px)").matches;
+    const isStacked = window.matchMedia("(max-width: 1050px)").matches;
     if (!isStacked && layout !== "list") return;
     // On a stacked layout the inspector is below every card, so opening a card
     // must reveal its detail instead of leaving the participant above the fold.
