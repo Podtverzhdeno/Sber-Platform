@@ -586,3 +586,28 @@
 .trajectory-v2-intro {margin:5px 0;color:var(--trj-muted);font-size:13px}
 @media(max-width:1100px){.trajectory-v2-columns {grid-template-columns:minmax(0,1fr)}.trajectory-v2-roles,.trajectory-v2-detail,.trajectory-v2-reference-sidebar{grid-column:1}.trajectory-v2-reference-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}.trajectory-v2-passport-panel{grid-column:1/-1}}
 @media(max-width:650px){.trajectory-v2-reference-sidebar{grid-template-columns:1fr}.trajectory-v2-passport-panel{grid-column:auto}.trajectory-v2-grade-body{grid-template-columns:105px minmax(0,1fr)}}
+
+
+/* TRJ-SCREEN-01 role journey: circular seven-step pathway */
+.trajectory-v2-stage-path{position:relative;align-items:start;gap:0}
+.trajectory-v2-stage-path>li{position:relative;min-width:0}
+.trajectory-v2-stage-path>li:not(:last-child)::after{content:"";position:absolute;top:22px;left:66%;width:68%;border-top:3px dashed #245875;pointer-events:none}
+.trajectory-v2-stage-path>li:has([data-stage-state="completed"]):not(:last-child)::after{border-top:3px solid var(--trj-teal)}
+.trajectory-v2-stage {position:relative;z-index:1;display:flex;flex-direction:column-reverse;align-items:center;justify-content:flex-end;gap:11px;min-height:103px;padding:0 5px;background:transparent!important;border:0!important;outline:0!important;box-shadow:none!important;color:var(--trj-muted);text-align:center}
+.trajectory-v2-stage::after{content:"🔒";order:1;display:grid;place-items:center;width:37px;height:37px;border-radius:50%;border:3px solid #315d79;background:#071d30;font-size:14px;color:#7c9bb7}
+.trajectory-v2-stage[data-stage-state="completed"]::after{content:"✓";background:#06d8c9;border-color:#21f1dc;color:#002c34;font-size:23px;font-weight:800}
+.trajectory-v2-stage[data-stage-state="current"]::after{content:"●";background:#085e9a;border-color:#36b8ff;color:#fff;box-shadow:0 0 0 5px #082d4b;font-size:16px}
+.trajectory-v2-stage[data-stage-state="available"]::after{content:"○";color:#2caaf6}
+.trajectory-v2-stage strong {font-size:12px;font-weight:500;max-width:125px;color:inherit}
+.trajectory-v2-stage[data-stage-state="current"] strong{color:#f3f8ff;font-weight:800}
+.trajectory-v2-stage>span{font-weight:700;font-size:11px;color:var(--trj-text)}
+.trajectory-v2-stage[data-stage-state="locked"]{opacity:1}
+.trajectory-v2-stage[data-stage-state="locked"] strong{color:#8da6bf}
+.trajectory-v2-stage:focus-visible{outline:2px solid var(--trj-teal)!important;border-radius:10px}
+.trajectory-v2-overlay{background:rgba(0,9,19,.73);backdrop-filter:blur(5px)}
+.trajectory-v2-drawer{background:#061e30;color:#eff8ff;border-left:1px solid #216081;box-shadow:-16px 0 38px #0008;width:min(100%,500px)}
+.trajectory-v2-role-dialog{background:#071c2e;color:#eff8ff;border:1px solid #1a567b;border-radius:17px;max-width:min(900px,94vw)}
+.trajectory-v2-drawer h2,.trajectory-v2-role-dialog h2{color:#eff8ff}
+.trajectory-v2-drawer-close{border-radius:9px;background:#12364d;color:#d9edff;border:1px solid #24536c}
+.trajectory-v2-drawer-facts>div{border-color:#1c455f}
+@media(max-width:700px){.trajectory-v2-stage-path{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:16px}.trajectory-v2-stage-path>li::after{display:none}}
