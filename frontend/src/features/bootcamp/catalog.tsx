@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { apiRequest, retrySafeRead, RuntimeApiPath } from "../../api/client";
 import { Badge, Card, Drawer, SafeExternalLink, StatePanel } from "../../components/ui";
+import { CourseLearningContent } from "./learning-content/CourseLearningContent";
 import "./bootcamp-ux.scss";
 import "./bootcamp-approved.scss";
 
@@ -298,7 +299,7 @@ function CourseDetails({
   certificatesLoading: boolean; certificateError: boolean; issuing: boolean;
   issueError: boolean; onIssue: (key: string) => void;
 }) {
-  const [tab, setTab] = useState<"about" | "program" | "skills" | "reviews">("about");
+  const [tab, setTab] = useState<"about" | "program" | "skills" | "reviews">("program");
   const tabs = [
     { key: "about", label: "О курсе" },
     { key: "program", label: "Программа" },
@@ -339,6 +340,7 @@ function CourseDetails({
               <p>Подробный состав модулей ещё не опубликован провайдером.</p>}
           </> : <p>{detailError ? "Подтверждённая программа временно недоступна: сведения не переданы источником обучения." : "Сведения не переданы источником обучения."}</p>}
         {card.access_state === "available" && <SafeExternalLink href={card.source_url}>Перейти к программе ↗</SafeExternalLink>}
+        <CourseLearningContent courseKey={card.key} courseTitle={card.title} sourceUrl={card.source_url} />
       </>}
       {tab === "skills" && <>
         <h3>Развитие навыков</h3>
