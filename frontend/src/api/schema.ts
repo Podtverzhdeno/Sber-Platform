@@ -7768,6 +7768,8 @@ export interface components {
         };
         /** MilestoneView */
         impulse__api__v1__development__MilestoneView: {
+            /** Acceptance */
+            acceptance?: string[];
             /** Activities */
             activities?: string[];
             /** Completed */
@@ -7777,8 +7779,18 @@ export interface components {
              * @default null
              */
             deliverable: string | null;
+            /**
+             * Estimated Hours
+             * @default null
+             */
+            estimated_hours: number | null;
             /** Key */
             key: string;
+            /**
+             * Lab
+             * @default null
+             */
+            lab: string | null;
             /** Position */
             position: number;
             /** Purpose */
@@ -7789,6 +7801,8 @@ export interface components {
             target_key: string;
             /** Target Kind */
             target_kind: string;
+            /** Theory */
+            theory?: string[];
             /** Title */
             title: string;
         };
