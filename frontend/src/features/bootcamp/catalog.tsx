@@ -672,3 +672,6 @@ export function BootcampCatalog({
     </div>
   );
 }
+
+// Approved reference screen reimplemented with real catalog and trusted evidence.
+export { ReferenceBootcampCatalog } from "./reference-page";
