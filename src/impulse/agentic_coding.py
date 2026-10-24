@@ -5,6 +5,7 @@ certification policy. The legacy basic/confident competency scale is separate.
 A verified source must be explicitly injected; demo competency rows are not
 translated into Agentic Coding levels. No direct user mutation endpoints exist.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -42,11 +43,13 @@ CONFLICT_KEYS: dict[str, frozenset[str]] = {
     "qa": frozenset({"prompt_engineering"}),
 }
 
+
 class VerificationStatus(StrEnum):
     VERIFIED = "verified"
     REPORTED = "reported"
     REJECTED = "rejected"
     REVOKED = "revoked"
+
 
 @dataclass(frozen=True, slots=True)
 class QualifiedEvidence:
@@ -74,6 +77,7 @@ class QualifiedEvidence:
         if not self.source_ref or not self.framework_version:
             raise ValueError("Qualification needs source and framework version")
 
+
 @dataclass(frozen=True, slots=True)
 class SkillPosition:
     key: str
@@ -83,6 +87,7 @@ class SkillPosition:
     evidence_count: int
     data_state: str
     unresolved_methodology: bool
+
 
 @dataclass(frozen=True, slots=True)
 class RoleProfile:
@@ -98,9 +103,13 @@ class RoleProfile:
     known_evidence_count: int
     data_origin: str
 
+
 def evaluate_profile(
-    person_id: UUID, role_key: str, rows: tuple[QualifiedEvidence, ...] = (),
-    *, as_of: datetime | None = None,
+    person_id: UUID,
+    role_key: str,
+    rows: tuple[QualifiedEvidence, ...] = (),
+    *,
+    as_of: datetime | None = None,
 ) -> RoleProfile:
     if role_key not in ROLE_TARGETS:
         raise ValueError("Unknown Agentic Coding role")
@@ -150,8 +159,15 @@ def evaluate_profile(
         else "not_connected",
     )
 
+
 __all__ = [
-    "QualifiedEvidence", "RoleProfile", "SkillPosition", "VerificationStatus",
-    "SOURCE_MAP_VERSION", "SCALE_KEY", "SKILLS", "ROLE_TARGETS",
+    "QualifiedEvidence",
+    "RoleProfile",
+    "SkillPosition",
+    "VerificationStatus",
+    "SOURCE_MAP_VERSION",
+    "SCALE_KEY",
+    "SKILLS",
+    "ROLE_TARGETS",
     "evaluate_profile",
 ]
