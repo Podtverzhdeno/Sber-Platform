@@ -108,8 +108,8 @@ export function AgenticCodingProfile({ activeRole, onRoleChange, serverProfile, 
     && serverProfile.framework_version === "agentic-coding-source-map-2026-10-23"
     ? serverProfile : null;
   const authoritative = AGENTIC_SKILLS.map((skill) => certified?.skills.find((item) => item.key === skill.key));
-  const target = AGENTIC_SKILLS.map((skill, index) => authoritative[index]?.target_level ?? profile.target[index] ?? null);
-  const current = AGENTIC_SKILLS.map((skill, index) => {
+  const target = AGENTIC_SKILLS.map((_, index) => authoritative[index]?.target_level ?? profile.target[index] ?? null);
+  const current = AGENTIC_SKILLS.map((_, index) => {
     const item = authoritative[index];
     return item?.data_state === "verified" && typeof item.current_level === "number" ? item.current_level : null;
   });
