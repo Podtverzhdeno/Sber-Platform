@@ -33,11 +33,12 @@ const roadmap: RoadmapView = {
     target_kind: "task",
     target_key: `qa-task-${String(index + 1)}`,
     completed: index < 2,
+    deliverable: null,
   })),
   next_step: {
     key: "stage-3", position: 3, title: "Продуктовые гипотезы",
     purpose: "Формулирование и проверка гипотез по результатам исследований",
-    skill: "Продуктовое мышление", target_kind: "task", target_key: "qa-task-3", completed: false,
+    skill: "Продуктовое мышление", target_kind: "task", target_key: "qa-task-3", completed: false, deliverable: null,
   },
 };
 const grade = {
