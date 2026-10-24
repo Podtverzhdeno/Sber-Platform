@@ -1,0 +1,104 @@
+---
+name: Temporary SberChat Linux snapshot refresh — reference fidelity
+
+on:
+  push:
+    branches:
+      - fix/messenger-sberchat-db-bootstrap-20261024
+    paths:
+      - .github/workflows/refresh-sberchat-snapshots.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-sberchat-snapshots:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      APP_ENV: test
+      TZ: Europe/Moscow
+      LANG: ru_RU.UTF-8
+      CI: "true"
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - name: Install backend and migrate test database
+        run: |
+          uv sync --frozen
+          uv run alembic upgrade head
+          uv run impulse-demo-seed
+          nohup uv run uvicorn impulse.main:app --host 127.0.0.1 --port 8000 --app-dir . > /tmp/backend.log 2>&1 &
+          for attempt in $(seq 1 45); do
+            if curl --fail --silent http://127.0.0.1:8000/health/ready >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/backend.log
+          exit 1
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install browser and CI fonts
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-core fonts-liberation fontconfig
+          fc-cache -f
+      - name: Regenerate only nine changed SberChat snapshots
+        working-directory: frontend
+        run: >
+          npx playwright test e2e/messenger-visual.spec.ts
+          e2e/reference-compositions.spec.ts
+          --grep "R-MSG-01|R-PAR-07 participant messaging send|R-MEN-05 mentor messaging send|R-CUS-09 customer messaging send"
+          --update-snapshots
+      - name: Upload candidate screenshots for review
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: messenger-updated-baselines
+          path: |
+            frontend/e2e/messenger-visual.spec.ts-snapshots/
+            frontend/e2e/reference-compositions.spec.ts-snapshots/r-par-07-desktop-chromium-linux.png
+            frontend/e2e/reference-compositions.spec.ts-snapshots/r-men-05-desktop-chromium-linux.png
+            frontend/e2e/reference-compositions.spec.ts-snapshots/r-cus-09-desktop-chromium-linux.png
+          retention-days: 14
+      - name: Commit updated baselines to PR
+        run: |
+          git add frontend/e2e/messenger-visual.spec.ts-snapshots/
+          git add frontend/e2e/reference-compositions.spec.ts-snapshots/r-par-07-desktop-chromium-linux.png
+          git add frontend/e2e/reference-compositions.spec.ts-snapshots/r-men-05-desktop-chromium-linux.png
+          git add frontend/e2e/reference-compositions.spec.ts-snapshots/r-cus-09-desktop-chromium-linux.png
+          git diff --cached --name-only
+          git diff --cached --quiet && { echo "No screenshot changes were generated"; exit 1; }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "test(messenger): refresh reviewed Linux baselines for nine redesigned states"
+          git push origin HEAD:fix/messenger-sberchat-db-bootstrap-20261024
