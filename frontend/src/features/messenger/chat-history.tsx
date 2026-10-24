@@ -23,6 +23,7 @@ import {
 } from "react";
 
 import type { ApiChannelView, ApiMessageView } from "./contracts";
+import { isReferenceChannel, referencePinnedMessage } from "./reference-fixtures";
 import {
   CHAT_REACTION_EMOJIS,
   buildChatRows,
@@ -369,6 +370,15 @@ export function ChatHistory({
         </div>
       )}
 
+      {channel?.id === "reference:mayaki" && (
+        <div className="msg-chat__pinned msg-chat__pinned--approved">
+          <Pin aria-hidden="true" size={18} />
+          <div><strong>Закреплённое сообщение</strong><span>{referencePinnedMessage}</span></div>
+        </div>
+      )}
+      {isReferenceChannel(channel?.id) && (
+        <p className="msg-chat__preview-notice" role="status">Демо-переписка по утверждённому макету. Данные не отправляются в API.</p>
+      )}
       {connectionState !== "online" && (
         <div className="msg-chat__banner" role="status">
           <CloudOff aria-hidden="true" size={14} />
@@ -433,7 +443,10 @@ export function ChatHistory({
                     (row.authorId !== null && row.authorId === viewerId ? "outgoing" : "incoming")
                   }
                 >
-                  <span className="msg-chat__group-author" aria-hidden="true">
+                  {row.authorId !== viewerId && (
+                     <span className="msg-chat__group-avatar" aria-hidden="true">{row.authorName?.trim().charAt(0).toUpperCase() || "?"}</span>
+                   )}
+                   <span className="msg-chat__group-author" aria-hidden="true">
                     {row.authorId === viewerId ? "Вы" : row.authorName}
                   </span>
                   {row.items.map((item) => {
