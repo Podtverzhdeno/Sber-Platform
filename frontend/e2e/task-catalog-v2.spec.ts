@@ -63,7 +63,7 @@ test("catalog filters, view parity and one idempotent apply", async ({ page }) =
     await route.fulfill({ json: { id: "00000000-0000-0000-0000-000000000704", status: "applied" } });
   });
 
-  await page.getByLabel("Навык").fill("python");
+  await page.getByLabel("Навык", { exact: true }).fill("python");
   await expect(page.getByRole("button", { name: /Сбросить фильтр Навык/ })).toBeVisible();
   await page.getByRole("button", { name: "Список" }).click();
   await expect(page.getByRole("table", { name: "Список рекомендованных задач" })).toBeVisible();
@@ -157,11 +157,11 @@ test("120-task catalog keeps detail lazy and warm by id and snapshot", async ({ 
   await expect(page.locator('[role="listitem"]')).toHaveCount(120);
 
   await page.getByRole("button", { name: "Подробнее" }).first().click();
-  await expect(page.getByRole("heading", { name: "Почему задача рекомендована" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Почему подходит" })).toBeVisible();
   await page.getByRole("button", { name: "Закрыть детали" }).click();
   const warmStarted = Date.now();
   await page.getByRole("button", { name: "Подробнее" }).first().click();
-  await expect(page.getByRole("heading", { name: "Почему задача рекомендована" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Почему подходит" })).toBeVisible();
   const warmMs = Date.now() - warmStarted;
 
   expect(detailRequests).toHaveLength(1);
@@ -182,6 +182,30 @@ test("foreign deep link is safe and mobile list has no page overflow", async ({ 
   await expect(page.getByText("Задачи для вашего следующего результата")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Раздел недоступен" })).toBeVisible();
   await expect(page.getByText("private-brief-not-for-catalog")).toHaveCount(0);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+  expect(overflow).toBe(false);
+});
+
+test("mobile collapses secondary filters and reveals opened task detail", async ({ page }) => {
+  await openCatalog(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const expander = page.getByRole("button", { name: "Все фильтры" });
+  await expect(expander).toBeVisible();
+  await expect(expander).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByLabel("Навык", { exact: true })).toBeHidden();
+  await expander.click();
+  await expect(page.getByLabel("Навык", { exact: true })).toBeVisible();
+  await page.getByLabel("Навык", { exact: true }).fill("python");
+  await expect(page.getByRole("button", { name: /Сбросить фильтр Навык/ })).toBeVisible();
+  await page.getByRole("button", { name: "Скрыть фильтры" }).click();
+  await expect(page.getByLabel("Навык", { exact: true })).toBeHidden();
+
+  await page.getByRole("button", { name: "Подробнее" }).first().click();
+  await expect(page.getByRole("heading", { name: "Этапы задачи" })).toBeVisible();
+  await expect(page.getByText(/Это план, а не прогресс/)).toBeVisible();
+  await expect.poll(() =>
+    page.locator(".catalog-v2-inspector").evaluate((node) => node.getBoundingClientRect().top),
+  ).toBeLessThan(844);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
   expect(overflow).toBe(false);
 });

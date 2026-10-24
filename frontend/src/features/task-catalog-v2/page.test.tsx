@@ -120,7 +120,7 @@ describe("task catalog v2", () => {
     const detailButton = screen.getAllByRole("button", { name: "Подробнее" })[0];
     if (detailButton === undefined) throw new Error("Detail button is missing");
     fireEvent.click(detailButton);
-    expect(await screen.findByRole("heading", { name: "Почему задача рекомендована" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Почему подходит" })).toBeInTheDocument();
     expect(document.querySelector(".catalog-v2-match-ring-value")).not.toBeNull();
     expect(screen.getAllByText(catalogItem.title).length).toBeGreaterThan(1);
     expect(screen.getAllByText(/R&D лаборатория · Демо-заказчик/).length).toBeGreaterThan(0);
@@ -325,9 +325,9 @@ describe("task catalog v2", () => {
     const detailButton = screen.getAllByRole("button", { name: "Подробнее" })[0];
     if (detailButton === undefined) throw new Error("Detail button is missing");
     fireEvent.click(detailButton);
-    expect(await screen.findByRole("heading", { name: "Почему задача рекомендована" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Почему подходит" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Список" }));
-    expect(screen.getByRole("heading", { name: "Почему задача рекомендована" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Почему подходит" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Список" })).toHaveAttribute("aria-pressed", "true");
   });
 
@@ -338,7 +338,7 @@ describe("task catalog v2", () => {
     expect(row).toBeDefined();
     if (row === undefined) return;
     fireEvent.keyDown(row, { key: "Enter" });
-    expect(await screen.findByRole("heading", { name: "Почему задача рекомендована" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Почему подходит" })).toBeInTheDocument();
     expect(row).toHaveAttribute("aria-selected", "true");
   });
 
@@ -352,4 +352,32 @@ describe("task catalog v2", () => {
     await waitFor(() => { expect(screen.queryByRole("dialog")).not.toBeInTheDocument(); });
     expect(trigger).toHaveFocus();
   });
+  it("keeps catalog and selected detail in separate regions with a neutral stage plan", async () => {
+    renderCatalog();
+    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    const workspace = document.querySelector(".catalog-v2-workspace");
+    expect(workspace).not.toBeNull();
+    expect(workspace).toHaveAttribute("data-layout", "cards");
+    expect(screen.getByRole("heading", { name: "Выберите задачу" })).toBeInTheDocument();
+    const detailButton = screen.getAllByRole("button", { name: "Подробнее" })[0];
+    if (detailButton === undefined) throw new Error("Detail button is missing");
+    fireEvent.click(detailButton);
+    expect(await screen.findByRole("heading", { name: "Этапы задачи" })).toBeInTheDocument();
+    const plannedStages = document.querySelectorAll(".catalog-v2-stage-track li");
+    expect(plannedStages.length).toBe(catalogItem.stage_plan.stages.length);
+    expect(screen.getByText(/Это план, а не прогресс/)).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Итог" })).not.toBeInTheDocument();
+    expect(document.querySelector(".catalog-v2-skill-transition")).not.toBeNull();
+    expect(screen.getByText("Прогноз после проверки")).toBeInTheDocument();
+  });
+
+  it("provides readable mobile list labels without changing task ordering", async () => {
+    renderCatalog("/workspace/2?catalog_view=list");
+    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    const first = document.querySelector(".catalog-v2-table-row");
+    expect(first?.querySelector('[data-label="Релевантность"]')).not.toBeNull();
+    expect(first?.querySelector('[data-label="Отклик до"]')).not.toBeNull();
+    expect(first?.querySelector('[data-label="Действия"]')).not.toBeNull();
+  });
+
 });
