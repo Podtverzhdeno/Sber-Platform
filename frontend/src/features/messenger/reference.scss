@@ -710,3 +710,76 @@
   overflow:hidden;
 }
 .messenger-page.sberchat-reference .messenger-shell > .msg-reference-context-empty {overflow-y:auto;}
+
+
+/* The composer is an active set of four tools, not static reference glyphs:
+   📎 opens artifact references, 😀 opens emoji, @ inserts a mention, ➤ sends. */
+.sberchat-reference .msg-composer {
+  border:0;
+  border-top:1px solid #123550;
+  border-radius:0;
+  background:#041523;
+  padding:7px 12px 9px;
+}
+.sberchat-reference .msg-composer__fieldset {
+  display:flex;align-items:center;gap:9px;
+}
+.sberchat-reference .msg-composer__tools {
+  display:flex;align-items:center;gap:5px;
+}
+.sberchat-reference .msg-composer__tool {
+  display:grid;place-items:center;
+  height:36px;width:34px;padding:0;
+  background:transparent;color:#a7cae8;border:0;border-radius:8px;
+  cursor:pointer;
+  transition:color .18s ease,background .18s ease,transform .18s ease;
+}
+.sberchat-reference .msg-composer__tool:hover {
+  color:#16f0f1;background:#0a2c44;transform:translateY(-1px);
+}
+.sberchat-reference .msg-composer__tool:focus-visible {
+  outline:2px solid #08e7f0;outline-offset:1px;
+}
+.sberchat-reference .msg-composer__input-shell {
+  display:flex;min-width:0;flex:1 1 auto;align-items:center;
+  border:1px solid #1a5873;border-radius:9px;background:#061b2d;
+}
+.sberchat-reference .msg-composer__textarea {
+  resize:none;width:100%;min-height:42px;max-height:130px;
+  height:42px;overflow-y:auto;padding:12px 10px;
+  border:0;border-radius:8px;background:transparent;
+  color:#f1f9ff;font-size:12px;line-height:1.45;
+}
+.sberchat-reference .msg-composer__textarea:focus {outline:0;box-shadow:none;}
+.sberchat-reference .msg-composer__input-shell:focus-within {border-color:#0eb7d2;box-shadow:0 0 0 2px #07e4f51c;}
+.sberchat-reference .msg-composer__textarea::placeholder {color:#92adcb;opacity:1;}
+.sberchat-reference .msg-composer__send {
+  display:grid;place-items:center;flex:none;
+  width:45px;height:45px;min-height:45px;padding:0;
+  border:1px solid #00d9dc;border-radius:9px;
+  background:linear-gradient(135deg,#11edee,#02b6ca);color:#02243c;
+  cursor:pointer;box-shadow:0 3px 16px #02cbcf25;
+  transition:filter .16s ease,transform .16s ease,box-shadow .16s ease;
+}
+.sberchat-reference .msg-composer__send:hover:not(:disabled) {
+  filter:brightness(1.12);transform:translateY(-1px);
+  box-shadow:0 0 18px #0cebed63;
+}
+.sberchat-reference .msg-composer__send:disabled {opacity:.52;box-shadow:none;cursor:not-allowed;}
+.sberchat-reference .msg-composer__send-progress {font-size:9px;font-weight:700;}
+.sberchat-reference .msg-composer__panel {
+  border:1px solid #165a78;border-radius:9px;
+  background:#092a43;color:#d6ebfb;
+}
+.sberchat-reference .msg-composer__emoji {
+  border-color:#215679;border-radius:8px;
+  transition:background .16s,transform .16s;
+}
+.sberchat-reference .msg-composer__emoji:hover {background:#184665;transform:scale(1.08);}
+@media(max-width:520px) {
+  .sberchat-reference .msg-composer {padding:7px 6px;}
+  .sberchat-reference .msg-composer__fieldset {gap:4px;}
+  .sberchat-reference .msg-composer__tools {gap:1px;}
+  .sberchat-reference .msg-composer__tool {width:28px;}
+  .sberchat-reference .msg-composer__send {width:40px;height:42px;min-height:42px;}
+}
