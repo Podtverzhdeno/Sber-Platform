@@ -845,3 +845,42 @@
 .sberchat-reference .msg-chat__artifact-status {
   grid-column:2/4;color:#42efca;font-size:10px;
 }
+
+
+/* Community message atoms: exact author headshots where the reference supplied
+   them, initials for unknown users, and actual API role rather than fake badges. */
+.sberchat-reference .msg-chat__group {
+  position:relative;
+  margin-bottom:16px;
+}
+.sberchat-reference .msg-chat__group.incoming {
+  padding-left:47px;
+  align-self:flex-start;
+}
+.sberchat-reference .msg-chat__group.outgoing {
+  padding-left:0;
+}
+.sberchat-reference .msg-chat__group-author {
+  position:relative;display:flex;align-items:center;gap:8px;
+  min-height:22px;margin:0 0 5px 8px;
+  color:#24cef6;font-size:12px;line-height:1.15;
+}
+.sberchat-reference .msg-chat__group-avatar {
+  position:absolute;left:-54px;top:-3px;
+  display:grid;place-items:center;
+  width:40px;height:40px;overflow:hidden;flex:none;
+  border:1px solid #1a506b;border-radius:50%;
+  color:#eefaff;background:linear-gradient(140deg,#093049,#123d5e);
+  font-weight:750;font-size:19px;
+}
+.sberchat-reference .msg-chat__group-avatar img {
+  width:100%;height:100%;object-fit:cover;border-radius:50%;
+}
+.sberchat-reference .msg-chat__author-role {
+  display:inline-flex;align-items:center;padding:3px 8px;
+  border-radius:999px;background:#0c3550;
+  font-size:10px;color:#a8d4f8;font-weight:550;
+}
+.sberchat-reference .msg-chat__group.outgoing .msg-chat__group-author {
+  justify-content:flex-end;color:#bfe6ff;
+}
