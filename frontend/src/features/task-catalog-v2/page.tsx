@@ -213,6 +213,12 @@ function TaskSummary(props: {
   );
 }
 
+function skillPercent(level: string | null): number | null {
+  if (level === null || !/^\\d+(?:[.,]\\d+)?%$/.test(level.trim())) return null;
+  const value = Number(level.replace("%", "").replace(",", "."));
+  return Number.isFinite(value) && value >= 0 && value <= 100 ? value : null;
+}
+
 function TaskDetail(props: {
   item: CatalogItem;
   withdrawPending: boolean;
@@ -226,76 +232,82 @@ function TaskDetail(props: {
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
   const [growthExpanded, setGrowthExpanded] = useState(true);
   const canApply = item.allowed_actions.includes("apply") && item.eligibility.status === "eligible";
+  const canSeeConditions = item.allowed_actions.includes("open_conditions") || canApply;
+  const shownBenefits = item.benefits.filter((benefit) => benefit.state !== "unavailable");
   return (
     <section className="catalog-v2-detail" aria-labelledby="catalog-detail-title">
-      <header>
-        <div>
-          <p className="eyebrow">Детали задачи · условия v{item.terms_version}</p>
+      <header className="catalog-v2-detail-header">
+        <span className="catalog-v2-detail-avatar" aria-hidden="true"><BriefcaseBusiness size={25} /></span>
+        <div className="catalog-v2-detail-identity">
+          <p className="catalog-v2-detail-customer">
+            {item.customer.display_name}
+            <span className="catalog-v2-customer-verified">{customerVerificationLabels[item.customer.verification]}</span>
+          </p>
           <h2 id="catalog-detail-title">{item.title}</h2>
+          <p className="catalog-v2-detail-description">{item.brief_summary}</p>
+          <ul className="catalog-v2-tags" aria-label="Компетенции">
+            {item.competency_tags.map((tag) => <li key={tag}>{tag}</li>)}
+          </ul>
         </div>
-        <MatchBadge item={item} showRing />
-        <button type="button" aria-label="Закрыть детали" onClick={props.onClose}>×</button>
+        <div className="catalog-v2-detail-score"><MatchBadge item={item} showRing /><small>Соответствие твоей траектории</small></div>
+        <button type="button" className="catalog-v2-detail-close" aria-label="Закрыть детали" onClick={props.onClose}>×</button>
       </header>
-      <p>{item.brief_summary}</p>
+
+      <dl className="catalog-v2-detail-factrail">
+        <div><ChartNoAxesColumnIncreasing size={23} aria-hidden="true" /><span><dt>Уровень</dt><dd>{item.difficulty === null ? "Не указана" : difficultyLabels[item.difficulty] ?? item.difficulty}</dd></span></div>
+        <div><Clock3 size={23} aria-hidden="true" /><span><dt>Срок</dt><dd>{formatDuration(item.duration_minutes)}</dd></span></div>
+        <div><Laptop2 size={23} aria-hidden="true" /><span><dt>Формат</dt><dd>{item.work_format === null ? "Не указан" : formatLabels[item.work_format] ?? item.work_format}</dd></span></div>
+        <div><Users size={23} aria-hidden="true" /><span><dt>Команда</dt><dd>{item.places_available ?? "—"} свободных из {item.places_total}</dd></span></div>
+      </dl>
+
       <div className="catalog-v2-detail-grid">
-        <section>
-          <h3>Факты и ограничения</h3>
-          <dl className="catalog-v2-facts">
-            <div><dt>Заказчик</dt><dd>{customerLabel(item)}</dd></div>
-            <div><dt>Формат</dt><dd>{item.work_format === null ? "Не указан" : formatLabels[item.work_format] ?? item.work_format}</dd></div>
-            <div><dt>Сложность</dt><dd>{item.difficulty === null ? "Не указана" : difficultyLabels[item.difficulty] ?? item.difficulty}</dd></div>
-            <div><dt>Длительность</dt><dd>{formatDuration(item.duration_minutes)}</dd></div>
-            <div><dt>Нагрузка в неделю</dt><dd>{item.weekly_workload_minutes === null ? "Не указана" : formatDuration(item.weekly_workload_minutes)}</dd></div>
-            <div><dt>Поддержка / ментор</dt><dd>{item.support_model ?? "Модель поддержки не опубликована"}</dd></div>
-            <div><dt>Команда</dt><dd>{item.places_available ?? "—"} свободных мест из {item.places_total}</dd></div>
-            <div><dt>Ограничения</dt><dd>{item.eligibility.missing_prerequisites.length ? `Нужны: ${item.eligibility.missing_prerequisites.join(", ")}` : "Дополнительные ограничения не опубликованы"}</dd></div>
-          </dl>
-        </section>
-        <section>
-          <h3>Почему подходит</h3>
-          {item.match.reasons.length ? (
-            <ul>{item.match.reasons.map((reason) => <li key={reason.code}>{reason.label}</li>)}</ul>
-          ) : <p>Причины появятся после накопления достаточного coverage.</p>}
-          <details className="catalog-v2-provenance">
-            <summary>Как рассчитана релевантность</summary>
-            <p>Алгоритм: {item.match.algorithm_version ?? "не рассчитан"} · расчёт: {formatCalculatedAt(item.match.calculated_at)}. Это не вероятность отбора или найма.</p>
-            <p className="catalog-v2-match-snapshot">Снимок входных данных: <code>{item.match.source_snapshot_version}</code></p>
-          </details>
-        </section>
         <section className="catalog-v2-growth-section">
-          <h3>Развитие навыков</h3>
-          <button
-            type="button"
-            aria-expanded={growthExpanded}
-            onClick={() => {
+          <div className="catalog-v2-section-heading">
+            <h3>Развитие твоих навыков</h3>
+            <button type="button" aria-expanded={growthExpanded} onClick={() => {
               if (!growthExpanded) props.onGrowthExpand();
               setGrowthExpanded((value) => !value);
-            }}
-          >
-            {growthExpanded ? "Скрыть сравнение уровней" : "Показать сравнение уровней"}
-          </button>
-          {growthExpanded ? (
-            item.skill_impact.length ? (
+            }}>{growthExpanded ? "Скрыть сравнение уровней" : "Показать сравнение уровней"}</button>
+          </div>
+          {growthExpanded ? item.skill_impact.length > 0 ? (
+            <div className="catalog-v2-growth-table">
+              <div className="catalog-v2-growth-head"><span>Навык</span><span>Сейчас</span><span>Прогноз после проверки</span><span>Прирост</span></div>
               <ul className="catalog-v2-growth-list" aria-label="Сравнение текущего и потенциального уровня">
-                {item.skill_impact.map((impact) => (
-                  <li key={impact.skill_id}>
-                    <strong>{impact.title}</strong>
-                    <div className="catalog-v2-skill-transition">
-                      <span><small>Текущий уровень</small><b>{impact.current_level ?? "Нет подтверждённого уровня"}</b></span>
-                      <span className="catalog-v2-skill-arrow" aria-hidden="true">→</span>
-                      <span><small>Прогноз после проверки</small><b>{impact.projected_level ?? "Без числового прогноза"}</b></span>
-                    </div>
-                    <p>{impact.explanation}</p>
-                    <small>{impact.status === "calculated" ? "Потенциальный рост рассчитан; необходима верификация." : "Потенциальный рост пока не рассчитан."} {impact.verification_required ? "Навык не подтверждается автоматически." : "Статус проверки не указан."}</small>
-                  </li>
-                ))}
+                {item.skill_impact.map((impact) => {
+                  const current = skillPercent(impact.current_level);
+                  const projected = impact.status === "calculated" ? skillPercent(impact.projected_level) : null;
+                  const delta = current !== null && projected !== null ? projected - current : null;
+                  return (
+                    <li key={impact.skill_id}>
+                      <strong>{impact.title}</strong>
+                      <div className="catalog-v2-skill-transition">
+                        <span><small>Текущий уровень</small><b>{impact.current_level ?? "Нет подтверждённого уровня"}</b>{current !== null ? <span className="catalog-v2-skill-bar"><i style={{ width: String(current) + "%" }} /></span> : null}</span>
+                        <span className="catalog-v2-skill-arrow" aria-hidden="true">→</span>
+                        <span><small>После задачи · прогноз</small><b>{impact.projected_level ?? "Без числового прогноза"}</b>{projected !== null ? <span className="catalog-v2-skill-bar catalog-v2-skill-bar--forecast"><i style={{ width: String(projected) + "%" }} /></span> : null}</span>
+                      </div>
+                      <span className="catalog-v2-growth-delta">{delta === null ? "Не рассчитан" : (delta > 0 ? "+" : "") + String(delta) + "%"}</span>
+                      <p>{impact.explanation}</p>
+                      <small>{impact.status === "calculated" ? "Потенциальный рост рассчитан; необходима верификация." : "Потенциальный рост пока не рассчитан."} {impact.verification_required ? "Навык не подтверждается автоматически." : "Статус проверки не указан."}</small>
+                    </li>
+                  );
+                })}
               </ul>
-            ) : <p>Компетенции для прогноза не опубликованы; числовой рост не рассчитывается.</p>
-          ) : null}
+            </div>
+          ) : <p>Компетенции для прогноза не опубликованы; числовой рост не рассчитывается.</p> : null}
         </section>
+
+        <section className="catalog-v2-benefits-section">
+          <h3>Что ты получишь</h3>
+          {shownBenefits.length > 0 ? (
+            <ul>{shownBenefits.map((benefit) => (
+              <li key={benefit.code}><span className="catalog-v2-benefit-icon"><Award size={19} aria-hidden="true" /></span><div><strong>{benefit.label}</strong><p>{benefit.condition}</p><small>{benefit.state === "potential" ? "При выполнении условия" : "Подтверждённое условие"}</small></div></li>
+            ))}</ul>
+          ) : <p>Дополнительные преимущества не опубликованы.</p>}
+        </section>
+
         <section className="catalog-v2-stage-section">
           <div className="catalog-v2-section-heading"><h3>Этапы задачи</h3><span>План до начала работы</span></div>
-          {item.stage_plan.stages.length ? (
+          {item.stage_plan.stages.length > 0 ? (
             <>
               <ol className="catalog-v2-stage-track">{item.stage_plan.stages.map((stage, index) => (
                 <li key={stage.key} data-state={stage.state}>
@@ -311,29 +323,43 @@ function TaskDetail(props: {
             </>
           ) : <p>Заказчик не опубликовал ориентировочный план. Прогресс появляется только после назначения.</p>}
         </section>
-        <section className="catalog-v2-benefits-section">
-          <h3>Что даст участие</h3>
-          {item.benefits.length ? (
-            <ul>{item.benefits.map((benefit) => <li key={benefit.code}><strong>{benefit.label}</strong><p>{benefit.condition}</p><small>{benefit.state === "potential" ? "При выполнении условия" : benefit.state}</small></li>)}</ul>
-          ) : <p>Дополнительные преимущества не опубликованы.</p>}
+
+        <section className="catalog-v2-support-section">
+          <Users size={24} aria-hidden="true" />
+          <div><strong>Поддержка и ментор</strong><p>{item.support_model && item.support_model !== "not_provided" ? item.support_model : "Ментор и формат поддержки пока не опубликованы"}</p></div>
+        </section>
+
+        <section className="catalog-v2-reasons-section">
+          <h3>Почему подходит</h3>
+          {item.match.reasons.length > 0 ? (
+            <ul>{item.match.reasons.map((reason) => <li key={reason.code}>{reason.label}</li>)}</ul>
+          ) : <p>Причины появятся после накопления достаточного coverage.</p>}
+          <details className="catalog-v2-provenance">
+            <summary>Как рассчитана релевантность</summary>
+            <p>Алгоритм: {item.match.algorithm_version ?? "не рассчитан"} · расчёт: {formatCalculatedAt(item.match.calculated_at)}. Это не вероятность отбора или найма.</p>
+            <p className="catalog-v2-match-snapshot">Снимок входных данных: <code>{item.match.source_snapshot_version}</code></p>
+          </details>
+          {item.eligibility.missing_prerequisites.length > 0 ? <p>Нужны подтверждения: {item.eligibility.missing_prerequisites.join(", ")}</p> : null}
         </section>
       </div>
-      <footer>
-        {item.assignment_id !== null && item.allowed_actions.includes("open_workspace") ? (
-          <button type="button" className="catalog-v2-primary" onClick={() => { props.onWorkspace(item.assignment_id as string); }}>
-            Перейти в рабочую область
-          </button>
-        ) : null}
-        {canApply ? <button type="button" className="catalog-v2-primary" onClick={(event) => { event.currentTarget.focus(); props.onConditions(); }}>Посмотреть условия и откликнуться</button> : null}
-        {item.application_id !== null && item.allowed_actions.includes("withdraw") ? (
-          confirmWithdraw ? (
-            <span className="catalog-v2-withdraw-confirm" role="group" aria-label="Подтверждение отзыва">
-              <span>Отозвать отправленный отклик?</span>
-              <button type="button" disabled={props.withdrawPending} onClick={() => { props.onWithdraw(item.application_id as string); }}>Да, отозвать</button>
-              <button type="button" disabled={props.withdrawPending} onClick={() => { setConfirmWithdraw(false); }}>Оставить</button>
-            </span>
-          ) : <button type="button" onClick={() => { setConfirmWithdraw(true); }}>Отозвать отклик</button>
-        ) : null}
+      <footer className="catalog-v2-detail-footer">
+        <small>Условия v{item.terms_version} · Отклик не означает назначение</small>
+        <div className="catalog-v2-detail-actions">
+          {canSeeConditions ? <button type="button" onClick={props.onConditions}>Посмотреть условия</button> : null}
+          {canApply ? <button type="button" className="catalog-v2-primary" aria-label="Посмотреть условия и откликнуться" onClick={(event) => { event.currentTarget.focus(); props.onConditions(); }}>Откликнуться</button> : null}
+          {item.assignment_id !== null && item.allowed_actions.includes("open_workspace") ? (
+            <button type="button" className="catalog-v2-primary" onClick={() => { props.onWorkspace(item.assignment_id as string); }}>Перейти в рабочую область</button>
+          ) : null}
+          {item.application_id !== null && item.allowed_actions.includes("withdraw") ? (
+            confirmWithdraw ? (
+              <span className="catalog-v2-withdraw-confirm" role="group" aria-label="Подтверждение отзыва">
+                <span>Отозвать отправленный отклик?</span>
+                <button type="button" disabled={props.withdrawPending} onClick={() => { props.onWithdraw(item.application_id as string); }}>Да, отозвать</button>
+                <button type="button" disabled={props.withdrawPending} onClick={() => { setConfirmWithdraw(false); }}>Оставить</button>
+              </span>
+            ) : <button type="button" onClick={() => { setConfirmWithdraw(true); }}>Отозвать отклик</button>
+          ) : null}
+        </div>
       </footer>
     </section>
   );
