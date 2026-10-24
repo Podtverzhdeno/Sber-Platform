@@ -861,3 +861,30 @@
  .workspace-content .trajectory-v2-role-intro-hero{grid-column:1}
  .workspace-content .trajectory-v2-chart-bars{display:none}
 }
+
+
+/* Core source composition: separate stacked journey/stage cards and seven-node route */
+.workspace-content .trajectory-v2-role-stack{display:grid;width:100%;min-width:0;gap:15px}
+.workspace-content .trajectory-v2-role-stack>.trajectory-v2-role-detail{min-height:225px;overflow:visible}
+.workspace-content .trajectory-v2-role-stack>.trajectory-v2-stage-detail{width:100%;box-sizing:border-box}
+.workspace-content .trajectory-v2-stage-path{grid-template-columns:repeat(7,minmax(0,1fr));width:100%;margin:0;padding:9px 0 0;list-style:none}
+.workspace-content .trajectory-v2-stage-path .trajectory-v2-stage{display:grid!important;grid-template-rows:44px 18px auto;gap:2px;align-items:start;justify-items:center;min-height:106px;padding:0 4px;text-align:center;border:0!important;background:transparent!important;box-shadow:none!important;outline:0!important;cursor:pointer}
+.workspace-content .trajectory-v2-stage-path .trajectory-v2-stage::after{content:none!important;display:none!important}
+.workspace-content .trajectory-v2-milestone-node{display:grid;place-items:center;box-sizing:border-box;width:42px;height:42px;border:3px solid #315d7a;border-radius:50%;background:#071b2b;color:#8ea6bf;font-size:16px}
+.workspace-content .trajectory-v2-stage[data-stage-state="completed"] .trajectory-v2-milestone-node{background:#0bdfcf;border-color:#09f3e8;color:#003032;font-size:26px;font-weight:800}
+.workspace-content .trajectory-v2-stage[data-stage-state="current"] .trajectory-v2-milestone-node{background:#0f6ca8;border-color:#32b7ff;color:#e9f8ff;box-shadow:0 0 0 4px #073b60}
+.workspace-content .trajectory-v2-stage[data-stage-state="available"] .trajectory-v2-milestone-node{border-color:#2475a8;color:#41c2ff}
+.workspace-content .trajectory-v2-stage[data-stage-state="unpublished"]{opacity:.45;cursor:default}
+.workspace-content .trajectory-v2-stage[data-stage-state="unpublished"] .trajectory-v2-milestone-title{font-style:italic}
+.workspace-content .trajectory-v2-stage .trajectory-v2-milestone-position{font-size:12px;line-height:18px;font-weight:800;color:#dce9f9}
+.workspace-content .trajectory-v2-stage .trajectory-v2-milestone-title{max-width:115px;font-size:10px;line-height:1.17;font-weight:500;word-break:normal;color:#b2c5d8}
+.workspace-content .trajectory-v2-stage[data-stage-state="current"] .trajectory-v2-milestone-title{font-weight:800;color:#eaf4ff}
+.workspace-content .trajectory-v2-stage-path>li:not(:last-child)::after{top:20px;left:64%;width:72%;border-top:3px dashed #265779}
+.workspace-content .trajectory-v2-stage-path>li:has(.trajectory-v2-stage[data-stage-state="completed"]):not(:last-child)::after{border-top-style:solid;border-color:#0dbaae}
+.workspace-content .trajectory-v2-heading{position:relative;overflow:visible}
+.workspace-content .trajectory-v2-hero-graphic{position:relative;align-self:center;flex:0 0 205px;width:205px;height:90px;overflow:hidden;border-radius:12px;background:radial-gradient(circle at 79% 20%,#1d72a5 0,#0a2b50 20%,transparent 52%)}
+.workspace-content .trajectory-v2-hero-graphic::before{content:"";position:absolute;inset:auto 0 0;height:73px;background:linear-gradient(145deg,#183d59,#061a35);clip-path:polygon(0 100%,25% 45%,43% 78%,62% 17%,83% 67%,100% 34%,100% 100%)}
+.workspace-content .trajectory-v2-hero-graphic::after{content:"";position:absolute;bottom:3px;left:20px;width:185px;height:4px;border-radius:60%;background:linear-gradient(90deg,transparent,#16e3fe,#93eaff);transform:rotate(-26deg);filter:drop-shadow(0 0 7px #20aeff)}
+.workspace-content .trajectory-v2-hero-graphic span{position:absolute;z-index:1;right:29px;top:15px;color:#48d7ff;font-size:25px}
+@media(max-width:1170px){.workspace-content .trajectory-v2-roles ul{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:690px){.workspace-content .trajectory-v2-hero-graphic{display:none}.workspace-content .trajectory-v2-stage-path{grid-template-columns:repeat(7,90px);overflow-x:auto}.workspace-content .trajectory-v2-stage-path>li::after{display:none}}
