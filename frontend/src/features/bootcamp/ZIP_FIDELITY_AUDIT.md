@@ -39,3 +39,6 @@ Direct pixel comparison of ZIP `references/*.png` vs its own `previews/1448_*.pn
 These metrics are for the **provided prototype screenshots**, not the integrated React app. They show the archive implementation itself is not pixel-identical to its source artwork. Pixel differences include antialiasing, icons, fonts and geometry. A matching full production page still needs equal viewport/browser/font settings and new production screenshots before a 1:1 claim is defensible.
 
 Environment limitation: external git clone from the execution container failed due to DNS, so this run did not execute frontend typecheck, production visual regression or CI.
+
+## Follow-up QA artifact, 2026-10-24
+Five side-by-side comparisons and amplified diff PNGs were generated from the supplied ZIP offline HTML previews vs source PNGs at 1448×1086. Updated measured per-screen results: BC-R01 24.69 MAE / 22.69% changed pixels; BC-R02 24.99 / 22.61%; BC-R03 19.81 / 19.82%; BC-R04 22.25 / 20.21%; BC-R05 17.24 / 20.21%. They confirm that the source prototype is not pixel-identical with approved PNG references. These are not React screenshots. The six-width offline test passed. React build and production visual E2E remain unverified; do not merge for pixel-perfect signoff solely on these results.
