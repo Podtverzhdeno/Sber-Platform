@@ -68,10 +68,10 @@ const completionLabels: Partial<
 
 function LevelLine({ mustTake }: { mustTake: MustTake }) {
   const current = mustTake.current_level ?? "уровень ещё не зафиксирован";
-  const target = mustTake.target_level ?? "уверенный";
+  const target = mustTake.target_level;
   return (
     <p>
-      Навык «{mustTake.skill}»: сейчас «{current}», целевой уровень «{target}».
+      Навык «{mustTake.skill}»: сейчас «{current}», {target ? <>целевой уровень «{target}»</> : "целевой уровень ещё не опубликован"}.
     </p>
   );
 }
