@@ -428,7 +428,9 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               <div className="trajectory-v2-grades-symbol" aria-hidden="true">▥</div>
               <div>
                 <h2>Все грейды роли «{selected?.title ?? "Моя роль"}»</h2>
-                <p>Изучай уровни и свой путь профессионального развития</p>
+                <p>{overview.concepts.career_grade.catalog_version === null
+                  ? "Демонстрационная структура уровней — официальный каталог пока не опубликован"
+                  : "Изучай уровни и свой путь профессионального развития"}</p>
               </div>
               <button type="button" aria-label="Закрыть" onClick={() => { setGradesOpen(false); }}>✕</button>
             </header>
