@@ -392,7 +392,7 @@ export function MessagingWorkspace({
   if (channelsQuery.isError) {
     return (
       <div
-        className="messenger-page sberchat-shell"
+        className="messenger-page sberchat-shell sberchat-reference"
         data-reference={reference}
         data-visual-reference="R-MSG-01"
       >
@@ -426,7 +426,7 @@ export function MessagingWorkspace({
 
   return (
     <div
-      className="messenger-page sberchat-shell"
+      className="messenger-page sberchat-shell sberchat-reference"
       data-reference={reference}
       data-visual-reference="R-MSG-01"
     >
