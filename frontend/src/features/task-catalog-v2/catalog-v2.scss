@@ -211,7 +211,9 @@
 .catalog-v2-match {
   flex: none;
   padding: 5px 9px;
-  color: var(--color-success, #237a50);
+  /* Foreground follows the semantic text token: success green fails 4.5:1
+     against the dark theme card (#0b1726) at this text size. */
+  color: var(--catalog-ink);
   font-size: 0.78rem;
   font-weight: 650;
   background: var(--color-success-bg, transparent);
