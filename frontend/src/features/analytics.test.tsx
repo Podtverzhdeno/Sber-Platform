@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 
-import { ParticipantAnalytics, TrajectoryGrowthAnalytics, VerifiedDocumentsPanel } from "./analytics";
+import { ParticipantAnalytics, TrajectoryGrowthAnalytics, VerifiedDocumentsPanel, weeklyActivityFromSnapshot } from "./analytics";
 import type { MonthlyGoalView } from "./monthly-goal-client";
 
 const snapshot = {
@@ -357,14 +357,69 @@ function renderDeepLink(url: string) {
 }
 
 describe("participant analytics chart rendering", () => {
-  it("renders real SVG bars for the weekly activity demo instead of relying on percentage CSS heights", async () => {
-    installDeepLinkFetch({});
+  it("buckets observed actions by Monday in the actor's timezone", () => {
+    const result = weeklyActivityFromSnapshot({
+      ...snapshot,
+      events: [
+        { occurred_at: "2026-10-18T21:05:00Z", kind: "course", title: "A", source_kind: "course", source_ref: "1" },
+        { occurred_at: "2026-10-18T20:55:00Z", kind: "course", title: "B", source_kind: "course", source_ref: "2" },
+        { occurred_at: "2026-09-01T11:00:00Z", kind: "course", title: "C", source_kind: "course", source_ref: "3" },
+        { occurred_at: "not-a-date", kind: "course", title: "D", source_kind: "course", source_ref: "4" },
+      ],
+    });
+    expect(result.observed).toBe(true);
+    expect(result.weeks).toHaveLength(8);
+    expect(result.weeks[7]?.count).toBe(1);
+    expect(result.weeks[6]?.count).toBe(1);
+    expect(result.weeks.reduce((sum, week) => sum + week.count, 0)).toBe(2);
+  });
+
+  it("never turns unknown or invalid timezones into invented zero activity", () => {
+    expect(weeklyActivityFromSnapshot(snapshot)).toEqual({ observed: false, weeks: [] });
+    expect(weeklyActivityFromSnapshot({ ...snapshot, events: [], freshness: { known: false, latest_observed_at: null } })).toEqual({ observed: false, weeks: [] });
+    expect(weeklyActivityFromSnapshot({ ...snapshot, events: [], actor_timezone: "invalid/TZ" })).toEqual({ observed: false, weeks: [] });
+  });
+
+  it("renders SVG bars only for real weekly events, and uses authoritative journey stages", async () => {
+    installDeepLinkFetch({
+      snapshot: {
+        ...snapshot,
+        events: [
+          { occurred_at: "2026-10-18T21:05:00Z", kind: "course", title: "A", source_kind: "course", source_ref: "1" },
+          { occurred_at: "2026-10-18T20:55:00Z", kind: "project", title: "B", source_kind: "project", source_ref: "2" },
+        ],
+      },
+      journey: {
+        stages: [
+          { key: "direction", title: "Направление выбрано", count: 2, status: "completed", completed: true },
+          { key: "learning", title: "Обучение подтверждено", count: 1, status: "completed", completed: true },
+          { key: "practice", title: "Реальный проект", count: 1, status: "in_progress", completed: false },
+          { key: "verified_experience", title: "Опыт подтверждён", count: 0, status: "not_started", completed: false },
+        ],
+        successful: false, next_action: "Продолжите проект", freshness: "fresh", generated_at: "2026-10-20T10:00:00Z",
+        earnings: { calculated: "0", approved: "0", paid: "0", failed: "0", currency: null, unknown_items: 0 },
+      },
+    });
     const { container } = renderDeepLink("/analytics");
-    expect(await screen.findByTestId("skill-toggle-api")).toBeInTheDocument();
-    const chart = screen.getByRole("img", { name: /Активность по восьми неделям/ });
-    expect(chart).toHaveAccessibleName(/неделя 8 — 94 действий/);
-    expect(chart.querySelectorAll("svg rect")).toHaveLength(8);
+    const funnel = await screen.findByTestId("analytics-live-funnel");
+    expect(within(funnel).getByText("Направление выбрано")).toBeInTheDocument();
+    expect(within(funnel).getByText("Опыт подтверждён")).toBeInTheDocument();
+    expect(within(funnel).getByText("В работе")).toBeInTheDocument();
+    const chart = screen.getByRole("img", { name: /Подтверждённые события по восьми неделям/ });
+    expect(chart).toHaveAccessibleName(/неделя 8 — 1 действий/);
+    expect(chart.querySelectorAll("svg rect")).toHaveLength(2);
     expect(container.querySelector(".analytics-demo-notice")).toBeInTheDocument();
+    expect(screen.queryByText("42% до результата")).not.toBeInTheDocument();
+  });
+
+  it("shows an explicit no-evidence state instead of fictional bars", async () => {
+    installDeepLinkFetch({});
+    renderDeepLink("/analytics");
+    await screen.findByTestId("analytics-live-funnel");
+    const chart = screen.getByRole("img", { name: /Активность не подтверждена/ });
+    expect(chart.querySelectorAll("svg rect")).toHaveLength(0);
+    expect(screen.getByText(/Нет проверяемой истории событий/)).toBeInTheDocument();
+    expect(screen.getByText("Среднее: нет данных")).toBeInTheDocument();
   });
 });
 
