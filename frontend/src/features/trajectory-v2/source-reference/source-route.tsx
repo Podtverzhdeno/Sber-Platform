@@ -16,6 +16,7 @@ import {
 } from "../client";
 import { RoleInfoDialog, StageTaskDrawer } from "../details";
 import { SourceTrajectoryLayout } from "./source-layout";
+import { sourceCatalogueRoles } from "./source-catalog";
 import { verifiedTasksForStage, type ParticipantWorkItem } from "./source-work";
 
 import type { DevelopmentOverviewView } from "../client";
@@ -56,19 +57,21 @@ export function SourceTrajectoryBody({ overview }: { overview: DevelopmentOvervi
   const [feedback, setFeedback] = useState<string | null>(null);
   const lastTrigger = useRef<HTMLElement | null>(null);
 
+  const catalogueRoles = useMemo(() => sourceCatalogueRoles(overview.roles), [overview.roles]);
+
   const selectedKey = useMemo(() => {
     const requested = params.get("role");
-    if (overview.roles.some(role => role.track_key === requested)) return requested;
+    if (catalogueRoles.some(role => role.track_key === requested)) return requested;
     const primary = overview.next_outcome?.trajectory_key;
-    return overview.roles.find(role => role.track_key === primary)?.track_key ?? overview.roles[0]?.track_key ?? null;
-  }, [overview.roles, overview.next_outcome, params]);
+    return catalogueRoles.find(role => role.track_key === primary)?.track_key ?? catalogueRoles[0]?.track_key ?? null;
+  }, [catalogueRoles, overview.next_outcome, params]);
 
-  const role = overview.roles.find(item => item.track_key === selectedKey) ?? null;
+  const role = catalogueRoles.find(item => item.track_key === selectedKey) ?? null;
   const roadmap = roadmaps.data?.find(item => item.track_key === selectedKey) ?? null;
   const selectedStageKey = params.get("stage");
   const stageForWork = roadmap?.milestones.find(item => item.key === selectedStageKey) ?? roadmap?.next_step ?? roadmap?.milestones[0] ?? null;
   const authorizedTasks = verifiedTasksForStage(stageForWork, work.data);
-  const visibleRoles = overview.roles.filter(item => !hiddenUnselected || item.state !== "unselected" || item.track_key === selectedKey);
+  const visibleRoles = catalogueRoles.filter(item => !hiddenUnselected || item.state !== "unselected" || item.track_key === selectedKey);
   const drawerMilestone = roadmap?.milestones.find(item => item.key === drawerKey) ?? null;
 
   const updateSelection = (update: { role?: string; stage?: string }) => {
@@ -114,7 +117,7 @@ export function SourceTrajectoryBody({ overview }: { overview: DevelopmentOvervi
     writePinnedTrack(next);
     setFeedback(next ? "Роль закреплена в этом браузере" : "Роль откреплена");
   };
-  const otherRoles = overview.roles.filter(item => item.track_key !== role?.track_key);
+  const otherRoles = catalogueRoles.filter(item => item.track_key !== role?.track_key);
   const actions = role ? <TrajectoryActions
     role={role}
     pinned={pinned === role.track_key}
@@ -160,7 +163,7 @@ export function SourceTrajectoryBody({ overview }: { overview: DevelopmentOvervi
     {work.isError && <p role="status">История назначений сейчас недоступна — показана только цель этапа</p>}
     {feedback !== null && <p role="status" className="trajectory-v2-action-status">{feedback}</p>}
     {compareTarget && role && <RoleComparePanel
-      roles={overview.roles} roadmaps={roadmaps.data ?? []}
+      roles={catalogueRoles} roadmaps={roadmaps.data ?? []}
       trackA={role.track_key} trackB={compareTarget}
       onClose={() => { setCompareTarget(null); }}
     />}
