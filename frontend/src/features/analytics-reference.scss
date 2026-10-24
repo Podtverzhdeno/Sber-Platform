@@ -288,8 +288,9 @@
   }
   .analytics-reference .ref-page-header { min-height:71px; }
   .analytics-reference .ref-kpi { height:94px; }
+  /* The reference's 14px row gap already spaces these grids; no extra top margin. */
   .analytics-reference .ref-v1-middle,
-  .analytics-reference .ref-v3-main { margin-top:17px; }
+  .analytics-reference .ref-v3-main { margin-top:0; }
   .analytics-reference .ref-v1-middle { height:441px; min-height:441px; }
   .analytics-reference .ref-v1-bottom { height:255px; min-height:255px; }
   .analytics-reference .ref-v3-main { height:424px; min-height:424px; }
@@ -300,10 +301,10 @@
     overflow-y:auto;
   }
   .analytics-reference .ref-v3-bottom { height:304px; min-height:304px; }
-  .analytics-reference.ref-layout-evidence .ref-section-intro { min-height:50px; }
+  .analytics-reference.ref-layout-evidence .ref-section-intro { min-height:43px; }
   .analytics-reference.ref-layout-path { gap:14px; }
-  .analytics-reference.ref-layout-path .ref-page-header { min-height:81px; }
-  .analytics-reference.ref-layout-passport .ref-v1-bottom { margin-top:2px; }
+  .analytics-reference.ref-layout-path .ref-page-header { min-height:72px; }
+  .analytics-reference.ref-layout-passport .ref-v1-bottom { margin-top:0; }
   .analytics-reference .ref-path-hero { height:199px; min-height:199px; }
   .analytics-reference .ref-route { height:106px; min-height:106px; }
   .analytics-reference .ref-v2-main { height:379px; min-height:379px; }
