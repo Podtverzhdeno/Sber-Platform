@@ -12,10 +12,11 @@ const actor = {
 };
 
 test("opt-in trajectory v2 is API-backed and legacy route stays available", async ({ page }) => {
+  let loggedIn = false;
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: { demo_mode: true } }));
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: actor.display_name, roles: ["participant"] }] }));
-  await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
-  await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: actor }));
+  await page.route("**/api/v1/me", (route) => loggedIn ? route.fulfill({ json: actor }) : route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
+  await page.route("**/api/v1/auth/demo-login", (route) => { loggedIn = true; return route.fulfill({ json: actor }); });
   await page.route("**/api/v1/participant/me/development-overview", (route) => route.fulfill({ status: 503, json: { code: "SERVICE_UNAVAILABLE" } }));
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
