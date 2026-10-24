@@ -653,7 +653,8 @@ class MemoryWorkStore:
         current = matching[-1] if matching else None
         if current is not None:
             if (
-                idempotency_key is not None
+                current.status not in {ApplicationStatus.WITHDRAWN, ApplicationStatus.REJECTED}
+                and idempotency_key is not None
                 and current.idempotency_key is not None
                 and current.idempotency_key != idempotency_key
             ):

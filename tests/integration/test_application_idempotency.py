@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import httpx
 import pytest
@@ -61,7 +61,7 @@ async def test_repeated_application_post_returns_same_record() -> None:
         draft = await client.post(
             "/api/v1/customer/projects/demo-rd-lab/tasks",
             json={
-                "task_key": "idempotent-rd",
+                "task_key": f"idempotent-rd-{uuid4().hex}",
                 "title": "Идемпотентный отклик",
                 "problem": "Повторный запрос не должен создавать вторую запись.",
                 "deliverable": "Один отклик на участника и задачу.",
@@ -128,6 +128,18 @@ async def test_repeated_application_post_returns_same_record() -> None:
         assert first.status_code == 200
         application_id = first.json()["id"]
         assert first.json()["status"] == "applied"
+
+        consent_replay = await client.post(
+            f"/api/v1/me/tasks/{task_id}/terms-consent",
+            json={"terms_version": terms_version},
+            headers={"X-CSRF-Token": participant_csrf},
+        )
+        assert consent_replay.status_code == 200
+        async with database.sessions() as session:
+            status_after_consent = await session.scalar(
+                select(applications.c.status).where(applications.c.id == UUID(application_id))
+            )
+        assert status_after_consent == "applied"
 
         retry = await client.post(
             f"/api/v1/me/tasks/{task_id}/applications",
