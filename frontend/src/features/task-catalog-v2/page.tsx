@@ -5,7 +5,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { ApiClientError } from "../../api/client";
@@ -361,6 +361,8 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   const layout: CatalogLayout = searchParams.get("catalog_view") === "list" ? "list" : "cards";
   const selectedTaskId = searchParams.get("task");
   const [searchInput, setSearchInput] = useState(filters.q);
+  const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
+  const inspectorRef = useRef<HTMLElement>(null);
   const [conditionsTask, setConditionsTask] = useState<CatalogItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const client = useQueryClient();
@@ -400,6 +402,20 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   useEffect(() => {
     setSearchInput(filters.q);
   }, [filters.q]);
+  useEffect(() => {
+    if (
+      selectedTaskId === null ||
+      catalog.isPending ||
+      typeof window.matchMedia !== "function" ||
+      !window.matchMedia("(max-width: 1050px)").matches
+    ) return;
+    // On a stacked layout the inspector is below every card, so opening a card
+    // must reveal its detail instead of leaving the participant above the fold.
+    inspectorRef.current?.scrollIntoView?.({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "start",
+    });
+  }, [selectedTaskId, catalog.isPending]);
 
   const updateParams = (patch: Record<string, string | null>, clearSelection = false) => {
     const next = new URLSearchParams(searchParams);
@@ -520,6 +536,21 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
         }}
       >
         <label>Поиск<input value={searchInput} onChange={(event) => { setSearchInput(event.target.value); }} placeholder="Название, результат или компетенция" /></label>
+        <button
+          type="button"
+          className="catalog-v2-filter-expander"
+          aria-expanded={advancedFiltersOpen}
+          aria-controls="catalog-v2-advanced-filters"
+          onClick={() => { setAdvancedFiltersOpen((value) => !value); }}
+        >
+          {advancedFiltersOpen ? "Скрыть фильтры" : "Все фильтры"}
+          {activeFilterChips.length > 0 ? ` · ${String(activeFilterChips.length)}` : ""}
+        </button>
+        <div
+          id="catalog-v2-advanced-filters"
+          className="catalog-v2-advanced-filters"
+          data-open={advancedFiltersOpen}
+        >
         <label>Навык<input value={filters.competency} onChange={(event) => { updateParams({ competency: event.target.value }, true); }} placeholder="Например, python" /></label>
         <label>Направление<input value={filters.direction} onChange={(event) => { updateParams({ direction: event.target.value }, true); }} placeholder="Ключ траектории" /></label>
         <label>Заказчик<input value={filters.customer} onChange={(event) => { updateParams({ customer: event.target.value }, true); }} placeholder="Название заказчика" /></label>
@@ -528,6 +559,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
         <label>Срок<select value={filters.timeframe} onChange={(event) => { updateParams({ timeframe: event.target.value }, true); }}><option value="">Любой</option><option value="7d">Ближайшие 7 дней</option><option value="30d">Ближайшие 30 дней</option><option value="90d">Ближайшие 90 дней</option></select></label>
         <label>Сортировка<select value={filters.sort} onChange={(event) => { updateParams({ sort: event.target.value }, true); }}><option value="match-default">По релевантности</option><option value="deadline">По сроку</option><option value="duration">По длительности</option><option value="newest">Сначала новые</option><option value="skill-growth">По соответствию росту</option></select></label>
         <label className="catalog-v2-saved-filter"><input type="checkbox" checked={filters.saved} onChange={(event) => { updateParams({ saved: event.target.checked ? "true" : null }, true); }} />Только сохранённые</label>
+        </div>
         <button type="submit">Найти</button>
         <button type="button" onClick={() => { updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, sort: null }, true); }}>Сбросить</button>
         <div className="catalog-v2-layout" role="group" aria-label="Вид каталога">
@@ -600,7 +632,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
       )}
       {catalog.hasNextPage ? <button type="button" className="catalog-v2-more" disabled={catalog.isFetchingNextPage} onClick={() => { void catalog.fetchNextPage(); }}>{catalog.isFetchingNextPage ? "Загружаем…" : "Показать ещё"}</button> : null}
         </div>
-        <aside className="catalog-v2-inspector" aria-label="Панель выбранной задачи">
+        <aside ref={inspectorRef} className="catalog-v2-inspector" aria-label="Панель выбранной задачи">
       {selectedTaskId !== null && detail.isPending && selected === undefined ? <StatePanel kind="loading" /> : null}
       {selectedTaskId !== null && detail.isError && selected === undefined ? <StatePanel kind={isOfflineError(detail.error) ? "offline" : "restricted"} action="Закрыть" onAction={() => { updateParams({ task: null }); }} /> : null}
       {selected !== undefined ? (
