@@ -510,3 +510,54 @@
   margin: 0;
   color: var(--color-info, #595aeb);
 }
+
+
+/* Trajectory visual alignment — approved TRJ-SCREEN-01 desktop/mobile.
+   Keeps server-backed role, milestone and verification data intact. */
+.trajectory-v2 {
+  --trj-bg: #031323;
+  --trj-panel: #071d30;
+  --trj-panel-raised: #09273c;
+  --trj-line: #16405c;
+  --trj-text: #f0f7ff;
+  --trj-muted: #a0b8ce;
+  --trj-teal: #12ddd2;
+  --trj-blue: #2c9ef4;
+  color: var(--trj-text);
+  gap: 16px;
+  padding: 6px 0 24px;
+}
+.trajectory-v2-heading {align-items:center; min-height:72px}
+.trajectory-v2-heading h2 {font-size:30px; font-weight:800; letter-spacing:-.035em; color:var(--trj-text)}
+.trajectory-v2-heading small {color:var(--trj-muted)}
+.trajectory-v2-heading .eyebrow {display:none}
+.trajectory-v2-columns {display:grid;grid-template-columns:minmax(0,1fr);gap:15px}
+.trajectory-v2-roles ul {grid-template-columns:repeat(7,minmax(0,1fr));gap:9px}
+.trajectory-v2-role-card {min-height:146px;height:100%;position:relative;align-content:center;justify-items:center;text-align:center;gap:12px;padding:16px 8px;border:1px solid #21374a;border-radius:13px;background:#071927;color:var(--trj-text);transition:border-color .18s,background .18s,transform .18s}
+.trajectory-v2-role-card:hover {border-color:var(--trj-blue);transform:translateY(-2px)}
+.trajectory-v2-role-card[aria-pressed="true"] {border:2px solid var(--trj-teal);outline:none;background:linear-gradient(145deg,#063d47,#062433);box-shadow:0 0 0 2px #0a6c76}
+.trajectory-v2-role-card[data-role-key*="ml"],.trajectory-v2-role-card[data-role-key*="python"] {border-color:#13588d;background:#071e35}
+.trajectory-v2-role-card strong {font-size:13px;line-height:1.3}
+.trajectory-v2-role-state {color:var(--trj-muted);font-size:11px}
+.trajectory-v2-role-card small {color:var(--trj-muted);font-size:11px}
+.trajectory-v2-role-badge {background:#46320a;color:#ffcd56;border:1px solid #906110;font-size:10px}
+.trajectory-v2-role-card[data-role-key*="unselected"] {opacity:.65}
+.trajectory-v2-role-detail {background:var(--trj-panel);color:var(--trj-text);border:1px solid var(--trj-line);border-left:3px solid var(--trj-blue);border-radius:14px;padding:18px;gap:16px}
+.trajectory-v2-role-detail header {gap:12px}
+.trajectory-v2-role-detail h3 {font-size:21px;color:var(--trj-text);font-weight:800}
+.trajectory-v2-role-detail button:not(.trajectory-v2-stage) {border-radius:9px;cursor:pointer}
+.trajectory-v2-role-info-button {background:#042a41!important;border:1px solid #087fa9!important;color:#20daf4!important;padding:9px 13px!important}
+.trajectory-v2-stage-block {gap:14px}
+.trajectory-v2-stage-block h4 {font-size:16px;color:var(--trj-text)}
+.trajectory-v2-stage-path {grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.trajectory-v2-stage {min-height:100px;align-content:start;justify-items:center;text-align:center;gap:10px;border-radius:11px;background:#071f32;color:#d8e8f6;border:1px solid var(--trj-line);font-size:12px;padding:12px 6px}
+.trajectory-v2-stage strong {font-size:12px;line-height:1.3}
+.trajectory-v2-stage[data-stage-state="completed"] {border-color:var(--trj-teal);background:#07373b}
+.trajectory-v2-stage[data-stage-state="current"] {border-color:var(--trj-blue);background:#0c3558;outline:1px solid var(--trj-blue);outline-offset:0}
+.trajectory-v2-stage[data-stage-state="locked"] {opacity:.63;color:var(--trj-muted)}
+.trajectory-v2-stage-detail {background:var(--trj-panel-raised);border:1px solid var(--trj-line);border-radius:12px;padding:16px;color:var(--trj-text)}
+.trajectory-v2-actions>button {background:#092b3f;color:#e8f7ff;border:1px solid #145473;border-radius:8px}
+.trajectory-v2 .trajectory-v2-unselected-note {color:var(--trj-muted)}
+@media(max-width:1250px){.trajectory-v2-roles ul{grid-template-columns:repeat(4,minmax(0,1fr))}.trajectory-v2-stage-path{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:700px){.trajectory-v2-heading h2{font-size:25px}.trajectory-v2-roles ul{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:3px 2px 12px}.trajectory-v2-role-card{min-width:155px;scroll-snap-align:start}.trajectory-v2-stage-path{grid-template-columns:repeat(2,minmax(0,1fr))}.trajectory-v2-role-detail{padding:13px}.trajectory-v2-role-detail h3{font-size:18px}}
+@media(prefers-reduced-motion:reduce){.trajectory-v2-role-card{transition:none}.trajectory-v2-role-card:hover{transform:none}}
