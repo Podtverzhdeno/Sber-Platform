@@ -152,7 +152,7 @@ test("real seeded API preserves card/list order and opens the canonical assigned
   await page.goto(`${taskPath}?task=${planned.task_id}`);
   const plannedDetail = page.locator(".catalog-v2-detail");
   await expect(page.locator("#catalog-detail-title")).toHaveText(planned.title);
-  await expect(plannedDetail.locator(".catalog-v2-facts")).toContainText(
+  await expect(plannedDetail.locator(".catalog-v2-detail-customer")).toContainText(
     customerStateLabels[planned.customer.verification],
   );
   await expect(plannedDetail.getByText(/Запланировано ·/).first()).toBeVisible();
