@@ -65,6 +65,45 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
       const geometry = await Promise.all((geometrySelectors[view] ?? []).map(async (selector) => ({
         selector, rect: await root.locator(selector).boundingBox(),
       })));
+      // Exact rectangles measured in the user-supplied HTML at 1600px.
+      // Live data can differ; these structural proportions must remain stable.
+      if (viewport.name === "desktop-1600") {
+        const goldenByView: Record<string, Record<string, [number, number, number, number]>> = {
+          passport: {
+            ".ref-primary-matrix": [227, 288, 879, 441],
+            ".ref-passport": [1120, 288, 458, 441],
+            ".ref-action": [227, 743, 407, 255],
+            ".ref-bottom-evidence": [648, 743, 460, 255],
+            ".ref-bottom-chart": [1122, 743, 456, 255],
+          },
+          path: {
+            ".ref-path-hero": [227, 174, 1351, 199],
+            ".ref-gaps": [227, 507, 616, 379],
+            ".ref-path-matrix": [857, 507, 721, 379],
+            ".ref-history": [227, 900, 669, 278],
+            ".ref-practice": [910, 900, 669, 278],
+          },
+          evidence: {
+            ".ref-v3-chart": [227, 288, 669, 424],
+            ".ref-v3-evidence": [910, 288, 669, 424],
+            ".ref-evidence-bars": [227, 788, 455, 304],
+            ".ref-projects": [696, 788, 505, 304],
+            ".ref-growth": [1214, 788, 364, 304],
+          },
+        };
+        const golden = goldenByView[view] ?? {};
+        for (const { selector, rect } of geometry) {
+          expect(rect, selector + " should be rendered").not.toBeNull();
+          const expected = golden[selector];
+          if (!rect || !expected) throw new Error("Missing golden coordinates for " + selector);
+          for (const [metric, actual, position] of [
+            ["x", rect.x, 0], ["y", rect.y, 1],
+            ["width", rect.width, 2], ["height", rect.height, 3],
+          ] as const) {
+            expect(Math.abs(actual - expected[position]), selector + "." + metric).toBeLessThanOrEqual(3);
+          }
+        }
+      }
       await writeFile(testInfo.outputPath("analytics-" + view + "-" + viewport.name + ".geometry.json"), JSON.stringify({ viewport, view, geometry }, null, 2), "utf8");
       await page.screenshot({ path: testInfo.outputPath("analytics-" + view + "-" + viewport.name + ".png"), fullPage: true, animations: "disabled" });
     }
