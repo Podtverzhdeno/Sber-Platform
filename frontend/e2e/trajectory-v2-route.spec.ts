@@ -74,6 +74,7 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   const rightRail = page.locator(".trajectory-v2-reference-sidebar");
   await expect(page.locator(".trajectory-v2-role-card")).toHaveCount(7);
   await expect(stageCard).toBeVisible();
+  await page.screenshot({ path: "test-results/trajectory-v2-desktop-candidate.png", fullPage: true, animations: "disabled" });
   const [h,r,left,stage,right] = await Promise.all([heading,rolesGrid,roleCard,stageCard,rightRail].map(x => x.boundingBox()));
   expect(h && r && left && stage && right).toBeTruthy();
   if (!h || !r || !left || !stage || !right) return;
@@ -90,6 +91,7 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await page.getByRole("button", { name: "Закрыть" }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator(".trajectory-v2-role-card").first()).toBeVisible();
+  await page.screenshot({ path: "test-results/trajectory-v2-mobile-candidate.png", fullPage: true, animations: "disabled" });
   await expect(stageCard).toBeVisible();
   const [mobileLeft, mobileRight] = await Promise.all([stageCard.boundingBox(),rightRail.boundingBox()]);
   expect(mobileLeft && mobileRight).toBeTruthy();
