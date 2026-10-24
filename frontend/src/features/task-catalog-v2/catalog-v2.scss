@@ -797,7 +797,9 @@
 }
 
 .catalog-v2-layout button[aria-pressed="true"] {
-  color: var(--catalog-accent);
+  /* The active teal fails WCAG AA for 16px text on light surfaces.
+     Keep teal for border/underline and use semantic foreground for text. */
+  color: var(--catalog-ink);
   font-weight: 700;
   border-color: var(--catalog-accent);
   box-shadow: inset 0 -2px var(--catalog-accent);
