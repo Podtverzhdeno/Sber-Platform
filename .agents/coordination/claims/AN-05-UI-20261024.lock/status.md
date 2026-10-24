@@ -2,9 +2,9 @@
 
 - task_id: AN-05-UI-20261024
 - session_id: gpt6-20261024-1731-analytics-visual
-- status: REVIEW
+- status: RELEASED
 - started_at: 2026-10-24T17:31:00+03:00
-- heartbeat_at: 2026-10-24T18:02:00+03:00
+- heartbeat_at: 2026-10-24T18:15:00+03:00
 - base_revision: dbdadba02850997b93299a36fbb7b5c8709b0bff
 - depends_on: [22.8, 22.10, 30.10]
 - write_scope:
@@ -21,3 +21,6 @@
 - changed_files: frontend/src/features/analytics.tsx; frontend/src/features/analytics-growth.scss; frontend/src/features/analytics.test.tsx
 - acceptance: pending independent final diff review and original mockup visual comparison, do not self-merge or deploy without acceptance.
 - blockers: Original 1:1 design reference PNG not accessible; browser live session blocked by provider credits/auth
+
+- merge: PR #32 squash-merged to main at 74bf37c39c9c594dae7e70e6a6f7edac8c170dba; CI 40104953388 all required gates success; independent Codex latest code review 40494cf: no findings. Write-scope released.
+- visual_acceptance: Exact original reference PNG unavailable, so pixel-perfect match remains unproven; production deployment not executed.
