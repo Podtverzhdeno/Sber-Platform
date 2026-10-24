@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Award, Bookmark, BriefcaseBusiness, ChartNoAxesColumnIncreasing, ChevronDown, ClipboardList, Clock3, Info, Laptop2, LayoutGrid, List, Search, Share2, SlidersHorizontal, Sparkles, Users } from "lucide-react";
+import { Award, Bookmark, ChartNoAxesColumnIncreasing, ChevronDown, ClipboardList, Clock3, Info, Laptop2, LayoutGrid, List, Search, Share2, SlidersHorizontal, Sparkles, Users } from "lucide-react";
 
 import { ApiClientError } from "../../api/client";
 import { StatePanel } from "../../components/ui";
@@ -21,6 +21,7 @@ import {
   withdrawCatalogApplication,
 } from "./client";
 import { ConditionsDialog } from "./conditions-dialog";
+import { CustomerMark } from "./customer-mark";
 import { TaskCatalogList } from "./list";
 import type {
   CatalogFilters,
@@ -174,7 +175,7 @@ function TaskSummary(props: {
       }}
     >
       <header className="catalog-v2-card-top">
-        <span className="catalog-v2-customer-avatar" aria-hidden="true"><BriefcaseBusiness size={21} /></span>
+        <span className="catalog-v2-customer-avatar" aria-hidden="true"><CustomerMark customer={item.customer} size={21} /></span>
         <div className="catalog-v2-card-identity">
           {props.topRanked ? <span className="catalog-v2-top-match"><Sparkles size={12} aria-hidden="true" /> Топ-совпадение</span> : null}
           <small title={customerLabel(item)}>{customerLabel(item)}</small>
@@ -234,7 +235,7 @@ function TaskDetail(props: {
   return (
     <section className="catalog-v2-detail" aria-labelledby="catalog-detail-title">
       <header className="catalog-v2-detail-header">
-        <span className="catalog-v2-detail-avatar" aria-hidden="true"><BriefcaseBusiness size={25} /></span>
+        <span className="catalog-v2-detail-avatar" aria-hidden="true"><CustomerMark customer={item.customer} size={25} /></span>
         <div className="catalog-v2-detail-identity">
           <p className="catalog-v2-detail-customer">
             {item.customer.display_name}
