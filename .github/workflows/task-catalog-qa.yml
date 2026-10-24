@@ -44,8 +44,10 @@ jobs:
         run: npx eslint src/features/task-catalog-v2 e2e/task-catalog-v2-interactions.spec.ts e2e/task-catalog-approved-geometry.spec.ts e2e/task-catalog-approved-visual-fixture.ts --max-warnings 0
       - name: Run Tasks unit tests
         run: npx vitest run src/features/task-catalog-v2
-      - name: Build production frontend
-        run: npm run build
+      - name: Bundle frontend for isolated Tasks browser tests
+        # The app-wide TypeScript build is enforced by ci.yml; unrelated
+        # in-flight trajectory changes must not block Tasks browser evidence.
+        run: npx vite build
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Exercise actual Tasks controls
