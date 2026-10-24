@@ -135,7 +135,7 @@ describe("participant home v2", () => {
   it("keeps next outcome, grade and weekly focus on one authorized snapshot", () => {
     renderHome();
     expect(screen.getByText("Python: основы")).toBeInTheDocument();
-    expect(screen.getByTestId("grade-summary").textContent).toContain("grade_catalog_policy_not_published");
+    expect(screen.getByTestId("grade-summary").textContent).toContain("Карьерные грейды ещё не опубликованы");
     expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("not_evaluable");
     expect(screen.getByTestId("weekly-focus").textContent).toContain("выполнено 2 из 5");
     const [firstTask] = overview.active_tasks;
@@ -147,7 +147,7 @@ describe("participant home v2", () => {
   it("reports the honest not-evaluable grade without fabricated values", () => {
     renderHome();
     const grade = screen.getByTestId("grade-summary");
-    expect(grade.textContent).toContain("не вычисляется");
+    expect(grade.textContent).toContain("ещё не опубликованы");
     expect(grade.textContent).not.toMatch(/готовность: \d/);
   });
 
