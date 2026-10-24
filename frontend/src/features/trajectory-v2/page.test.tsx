@@ -143,7 +143,7 @@ describe("trajectory v2 stage path", () => {
     expect(stages[0]).toHaveAttribute("data-stage-state", "completed");
     expect(stages[1]).toHaveAttribute("data-stage-state", "current");
     expect(stages[2]).toHaveAttribute("data-stage-state", "locked");
-    expect(screen.getByTestId("trajectory-stages").textContent).toContain("политика v1");
+    expect(screen.getByTestId("trajectory-stages").textContent).toContain("1 завершено · 3 этапов");
     fetchSpy.mockRestore();
   });
 
