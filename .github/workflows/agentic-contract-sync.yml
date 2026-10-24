@@ -1,0 +1,43 @@
+name: Temporary Agentic Contract Regeneration
+on:
+  push:
+    branches:
+      - codex/agentic-server-profile-20261024
+permissions:
+  contents: write
+jobs:
+  sync:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true
+      - name: Install uv
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.13"
+      - name: Install backend dependencies
+        run: uv sync --frozen
+      - name: Generate OpenAPI
+        run: uv run python -m impulse.quality.openapi_contract
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install frontend dependencies
+        run: npm ci --prefix frontend
+      - name: Generate TypeScript API schema
+        run: npm run api:generate --prefix frontend
+      - name: Commit ONLY generated contracts on integration branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add openapi.json frontend/src/api/schema.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(api): synchronize Agentic Coding OpenAPI and TypeScript contracts"
+            git push origin HEAD:codex/agentic-server-profile-20261024
+          fi
