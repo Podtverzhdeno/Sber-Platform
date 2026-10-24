@@ -213,7 +213,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
   const [params, setParams] = useSearchParams();
   const requested = params.get("view");
   const layout: LayoutKey = requested === "path" || requested === "evidence" ? requested : "passport";
-  const setLayout = (key: LayoutKey) => setParams((previous) => { const next = new URLSearchParams(previous); next.set("view", key); return next; });
+  const setLayout = (key: LayoutKey) => { setParams((previous) => { const next = new URLSearchParams(previous); next.set("view", key); return next; }); };
   const [role, setRole] = useState<RoleKey>("developer");
   const [chart, setChart] = useState<ChartKey>("radar");
   const [period, setPeriod] = useState(3);
