@@ -93,7 +93,7 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await page.screenshot({ path: "test-results/trajectory-v2-desktop-candidate.png", fullPage: true, animations: "disabled" });
   await page.locator('[data-testid="trajectory-user-statistics"] summary').click();
   await expect(page.getByText("Курсов подтверждено")).toBeVisible();
-  await expect(page.getByText("R&D лаборатория — демо")).toBeVisible();
+  await expect(page.getByText(/R&D лаборатория — демо/)).toBeVisible();
   await page.screenshot({ path: "test-results/trajectory-v2-statistics-candidate.png", animations: "disabled" });
   await page.locator('[data-testid="trajectory-user-statistics"] summary').click();
 
