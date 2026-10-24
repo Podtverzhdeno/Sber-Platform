@@ -330,25 +330,41 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               <small>{overview.concepts.career_grade.hint ?? overview.concepts.career_grade.reason ?? "По проверенным результатам"}</small>
             </div>
           </div>
-          <p>{overview.concepts.career_grade.state === "ready" ? "Прогресс подтверждён" : "Грейд рассчитывается по серверной политике и проверенным результатам"}</p>
+          <div className="trajectory-v2-grade-callout">
+            <span aria-hidden="true" className="trajectory-v2-grade-callout-icon">⌁</span>
+            <span>{overview.concepts.career_grade.state === "ready"
+              ? (overview.next_outcome !== null ? `Заверши текущий шаг «${overview.next_outcome.target_title}», чтобы приблизиться к следующему грейду. После проверки прогресс обновится.` : "Прогресс рассчитывается по проверенным результатам")
+              : "Грейд рассчитывается по серверной политике и проверенным результатам"}</span>
+          </div>
         </section>
         <section className="trajectory-v2-next-panel">
-          <header><h3>Следующий шаг</h3><span>{overview.next_outcome?.trajectory_title ?? "Маршрут"}</span></header>
-          <strong>{overview.next_outcome?.target_title ?? "Следующий шаг пока не назначен"}</strong>
-          <p>{overview.next_outcome?.stale_reason ?? "Продолжайте маршрут после подтверждения результата"}</p>
-          {overview.next_outcome !== null && <button type="button" onClick={() => {
-            const outcome = overview.next_outcome;
-            if (outcome === null) return;
-            snapshotTrigger();
-            if (outcome.trajectory_key !== selectedKey) {
-              const nextParams = new URLSearchParams(searchParams);
-              nextParams.set("role", outcome.trajectory_key);
-              nextParams.set("stage", outcome.milestone_key);
-              setSearchParams(nextParams);
-            }
-            setRoleInfoOpen(false);
-            setDrawerKey(outcome.milestone_key);
-          }}>Посмотреть →</button>}
+          <header>
+            <h3>Следующий шаг</h3>
+            <span>{overview.next_outcome?.trajectory_title ?? "Маршрут"}</span>
+          </header>
+          <div className="trajectory-v2-next-task">
+            <span className="trajectory-v2-next-task-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M5 2h10l4 4v16H5zM15 2v5h4M9 11h6M9 15h6M9 19h4"/></svg>
+            </span>
+            <div className="trajectory-v2-next-task-description">
+              <strong>{overview.next_outcome?.target_title ?? "Следующий шаг пока не назначен"}</strong>
+              <small>{overview.next_outcome?.target_kind === "task" ? "Практическая задача" : overview.next_outcome?.target_kind === "course" ? "Обучение" : "Маршрут"}
+                {overview.next_outcome?.stale_reason ? ` · ${overview.next_outcome.stale_reason}` : ""}</small>
+            </div>
+            {overview.next_outcome !== null && <button type="button" aria-label="Посмотреть следующий шаг" onClick={() => {
+              const outcome = overview.next_outcome;
+              if (outcome === null) return;
+              snapshotTrigger();
+              if (outcome.trajectory_key !== selectedKey) {
+                const nextParams = new URLSearchParams(searchParams);
+                nextParams.set("role", outcome.trajectory_key);
+                nextParams.set("stage", outcome.milestone_key);
+                setSearchParams(nextParams);
+              }
+              setRoleInfoOpen(false);
+              setDrawerKey(outcome.milestone_key);
+            }}>→</button>}
+          </div>
         </section>
         <section className="trajectory-v2-passport-panel">
           <header>
