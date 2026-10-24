@@ -114,15 +114,60 @@ async function openNav(page: Page): Promise<void> {
   await page.getByRole("link", { name: "Сообщения" }).click();
 }
 
-async function openMessenger(page: Page): Promise<void> {
+async function openMessenger(page: Page, selectChat = false): Promise<void> {
   await page.goto("/");
   await page.locator('[data-persona="participant-ilya"]').click();
   await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
   await openNav(page);
   await expect(page.locator(".messenger-shell")).toBeVisible();
   await expect(page.locator(".msg-dialog-list__row").first()).toBeVisible();
+  if (selectChat) {
+    await page.locator(".msg-dialog-list__row").first().click();
+    await expect(page.getByRole("region", { name: "Текущий чат", exact: true })).toBeVisible();
+  }
   await page.evaluate(() => document.fonts.ready);
 }
+
+test.describe("R-MSG-01 reference geometry and bubble density", () => {
+  test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
+
+  test("maintains the three-pane reference composition without inflated message bubbles", async ({ page }) => {
+    messageRoutes(page);
+    await openMessenger(page, true);
+
+    const shell = page.locator(".messenger-shell");
+    const dialogList = page.locator(".msg-dialog-list");
+    const chat = page.locator(".chat-thread");
+    const context = page.locator(".msg-context");
+
+    await expect(dialogList.getByRole("heading", { name: "Сообщения" })).toBeVisible();
+    await expect(dialogList.getByRole("button", { name: "Создать диалог" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Упомянуть участника" })).toBeVisible();
+    await expect(context.locator(".msg-context__profile")).toBeVisible();
+
+    const [layoutBox, listBox, chatBox, contextBox, bubbleBox] = await Promise.all([
+      shell.boundingBox(),
+      dialogList.boundingBox(),
+      chat.boundingBox(),
+      context.boundingBox(),
+      page.locator(".msg-chat__bubble").first().boundingBox(),
+    ]);
+    expect(layoutBox).not.toBeNull();
+    expect(listBox).not.toBeNull();
+    expect(chatBox).not.toBeNull();
+    expect(contextBox).not.toBeNull();
+    expect(bubbleBox).not.toBeNull();
+    if (!layoutBox || !listBox || !chatBox || !contextBox || !bubbleBox) return;
+
+    expect(listBox.width / layoutBox.width).toBeGreaterThan(0.22);
+    expect(listBox.width / layoutBox.width).toBeLessThan(0.33);
+    expect(contextBox.width / layoutBox.width).toBeGreaterThan(0.17);
+    expect(contextBox.width / layoutBox.width).toBeLessThan(0.28);
+    expect(Math.abs(listBox.y - chatBox.y)).toBeLessThan(3);
+    expect(Math.abs(listBox.y - contextBox.y)).toBeLessThan(3);
+    expect(bubbleBox.height).toBeLessThan(110);
+  });
+});
 
 test.describe("R-MSG-01 visual baselines light/dark 1440x900", () => {
   test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
@@ -132,7 +177,7 @@ test.describe("R-MSG-01 visual baselines light/dark 1440x900", () => {
       window.localStorage.setItem("impulse-theme", "light");
     });
     messageRoutes(page);
-    await openMessenger(page);
+    await openMessenger(page, true);
     await expect(page.locator(".messenger-shell")).toHaveScreenshot(
       "messenger-desktop-light-1440x900.png",
     );
@@ -140,7 +185,7 @@ test.describe("R-MSG-01 visual baselines light/dark 1440x900", () => {
 
   test("desktop dark", async ({ page }) => {
     messageRoutes(page);
-    await openMessenger(page);
+    await openMessenger(page, true);
     await expect(page.locator(".messenger-shell")).toHaveScreenshot(
       "messenger-desktop-dark-1440x900.png",
     );
