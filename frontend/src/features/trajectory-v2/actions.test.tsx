@@ -49,6 +49,7 @@ const pythonRoadmap: RoadmapView = {
       target_kind: "course",
       target_key: "python-base",
       completed: true,
+      deliverable: null,
     },
     {
       key: "api",
@@ -59,6 +60,7 @@ const pythonRoadmap: RoadmapView = {
       target_kind: "course",
       target_key: "python-api",
       completed: false,
+      deliverable: null,
     },
   ],
   next_step: null,
@@ -78,6 +80,7 @@ const dataRoadmap: RoadmapView = {
       target_kind: "course",
       target_key: "data-sql",
       completed: false,
+      deliverable: null,
     },
     {
       key: "data-model",
@@ -88,6 +91,7 @@ const dataRoadmap: RoadmapView = {
       target_kind: "task",
       target_key: "demo-task-1",
       completed: false,
+      deliverable: null,
     },
     {
       key: "data-viz",
@@ -98,6 +102,7 @@ const dataRoadmap: RoadmapView = {
       target_kind: "course",
       target_key: "data-viz",
       completed: false,
+      deliverable: null,
     },
   ],
   next_step: null,
