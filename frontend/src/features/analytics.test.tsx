@@ -89,6 +89,34 @@ describe("trajectory growth analytics", () => {
   });
 });
 
+describe("analytics visual integrity with sparse data", () => {
+  it("does not render an empty radar when no competency axes exist", () => {
+    const empty = {
+      ...snapshot,
+      trajectories: [{
+        ...snapshot.trajectories[0],
+        readiness_skills: [],
+        completion: { percent: 100, coverage: 1, partial: false },
+        readiness: { percent: 0, coverage: 0, partial: true },
+      }],
+    };
+    const { container } = render(<TrajectoryGrowthAnalytics snapshot={empty} />);
+    expect(screen.getByTestId("trajectory-growth-overview")).toBeInTheDocument();
+    expect(screen.getByText("Прогресс пути")).toBeInTheDocument();
+    expect(screen.getByText("Готовность к роли")).toBeInTheDocument();
+    expect(screen.getByText(/Циклограмма появится/)).toBeInTheDocument();
+    expect(container.querySelector(".trajectory-growth-radar svg")).not.toBeInTheDocument();
+    expect(screen.getByText(/Это не означает, что все навыки равны нулю/)).toBeInTheDocument();
+  });
+
+  it("avoids a degenerate radar polygon when the trajectory has only two skills", () => {
+    const { container } = render(<TrajectoryGrowthAnalytics snapshot={snapshot} />);
+    expect(screen.getByTestId("trajectory-growth-overview")).toBeInTheDocument();
+    expect(container.querySelector(".trajectory-growth-radar svg")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Подробнее о навыке Проектирование API" })).toBeInTheDocument();
+  });
+});
+
 describe("trajectory monthly goal projection", () => {
   it("adds the monthly goal forecast with projected contour and checkpoint plan to the selected trajectory", () => {
     render(<TrajectoryGrowthAnalytics snapshot={snapshot} goal={monthlyGoal} />);
@@ -313,6 +341,18 @@ function renderDeepLink(url: string) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[url]}><DeepLinkProbe /><ParticipantAnalytics /></MemoryRouter></QueryClientProvider>);
 }
+
+describe("participant analytics chart rendering", () => {
+  it("renders real SVG bars for the weekly activity demo instead of relying on percentage CSS heights", async () => {
+    installDeepLinkFetch({});
+    const { container } = renderDeepLink("/analytics");
+    expect(await screen.findByTestId("skill-toggle-api")).toBeInTheDocument();
+    const chart = screen.getByRole("img", { name: /Активность по восьми неделям/ });
+    expect(chart).toHaveAccessibleName(/неделя 8 — 94 действий/);
+    expect(chart.querySelectorAll("svg rect")).toHaveLength(8);
+    expect(container.querySelector(".analytics-demo-notice")).toBeInTheDocument();
+  });
+});
 
 describe("participant analytics drill-down deep links", () => {
   it("restores drilldown from a stable deep link and serializes trajectory and skill selection", async () => {
