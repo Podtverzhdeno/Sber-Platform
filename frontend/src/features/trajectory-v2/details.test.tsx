@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
-import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { MemoryRouter, Route, Routes, useLocation } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { overviewFixture } from "../participant-home-v2/fixture";
@@ -86,16 +86,26 @@ const productRoadmap: RoadmapView = {
   milestones: roadmapFixture.milestones.map((m) => ({ ...m, key: `product-${m.key}` })),
 };
 
-function shell(url: string, roadmaps: RoadmapView[]): void {
-  vi.spyOn(globalThis, "fetch").mockImplementation(() =>
-    Promise.resolve(new Response(JSON.stringify(roadmaps), { status: 200 })),
+function RouteProbe() {
+  const location = useLocation();
+  return <span data-testid="route-probe">{location.pathname}{location.search}</span>;
+}
+
+const DEFAULT_NAVIGATION = ["Главная", "Мой путь", "Bootcamp", "Задачи", "Аналитика"];
+
+function shell(url: string, roadmaps: RoadmapView[], navigation = DEFAULT_NAVIGATION): void {
+  vi.spyOn(globalThis, "fetch").mockImplementation((input) =>
+    Promise.resolve(new Response(
+      JSON.stringify(String(input) === "/api/v1/me" ? { navigation } : roadmaps),
+      { status: 200 },
+    )),
   );
   const overview: DevelopmentOverviewView = { ...overviewFixture, roles: rolesFixture };
   render(
     <QueryClientProvider client={new QueryClient()}>
       <MemoryRouter initialEntries={[url]}>
         <Routes>
-          <Route path="/workspace/:section" element={<TrajectoryV2Body overview={overview} />} />
+          <Route path="/workspace/:section" element={<><TrajectoryV2Body overview={overview} /><RouteProbe /></>} />
         </Routes>
       </MemoryRouter>
     </QueryClientProvider>,
@@ -118,8 +128,25 @@ describe("trajectory v2 task/evidence drawer", () => {
     expect(drawer.textContent).toContain("Навык: python-web");
     expect(drawer.textContent).toContain("Этап не завершён");
     expect(
-      within(drawer).getByRole("button", { name: "Открыть курс" }),
+      await within(drawer).findByRole("button", { name: "Открыть курс" }),
     ).toHaveAttribute("type", "button");
+  });
+
+
+  it("uses the authenticated role navigation rather than hard-coded workspace indexes", async () => {
+    shell("/workspace/1", [roadmapWithNext], ["Главная", "Задачи", "Мой путь", "Bootcamp"]);
+    fireEvent.click(await screen.findByRole("button", { name: "Подробнее об этапе" }));
+    const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
+    fireEvent.click(await within(drawer).findByRole("button", { name: "Открыть курс" }));
+    expect(screen.getByTestId("route-probe")).toHaveTextContent("/workspace/3?course=python-api");
+  });
+
+  it("does not offer navigation to a section absent from the authorized role", async () => {
+    shell("/workspace/1", [roadmapWithNext], ["Главная", "Мой путь", "Задачи"]);
+    fireEvent.click(await screen.findByRole("button", { name: "Подробнее об этапе" }));
+    const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
+    expect(await within(drawer).findByText("Раздел «Bootcamp» недоступен для текущей роли.")).toBeInTheDocument();
+    expect(within(drawer).queryByRole("button", { name: "Открыть курс" })).toBeNull();
   });
 
   it("closes on Escape and restores focus to the initiating task trigger", async () => {
@@ -149,7 +176,7 @@ describe("trajectory v2 task/evidence drawer", () => {
       expect(screen.getByTestId("trajectory-drawer-overlay")).toBeInTheDocument();
     });
     const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
-    const continueButton = within(drawer).getByRole("button", { name: /Открыть/ });
+    const continueButton = await within(drawer).findByRole("button", { name: /Открыть/ });
     continueButton.focus();
     fireEvent.keyDown(drawer, { key: "Tab" });
     expect(document.activeElement).toBe(within(drawer).getByRole("button", { name: "Закрыть" }));
@@ -171,7 +198,7 @@ describe("trajectory v2 task/evidence drawer", () => {
     expect(within(drawer).queryByRole("button", { name: /Открыть/ })).toBeNull();
   });
 
-  it("labels task continuation as result for a completed stage", () => {
+  it("labels task continuation as result for a completed stage", async () => {
     const milestone: NonNullable<RoadmapView["milestones"][number]> = {
       key: "capstone",
       position: 3,
@@ -182,6 +209,9 @@ describe("trajectory v2 task/evidence drawer", () => {
       target_key: "demo-task-1",
       completed: true,
     };
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ navigation: DEFAULT_NAVIGATION }), { status: 200 }),
+    );
     render(
       <QueryClientProvider client={new QueryClient()}>
         <MemoryRouter initialEntries={["/workspace/1"]}>
@@ -205,7 +235,7 @@ describe("trajectory v2 task/evidence drawer", () => {
     );
     const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
     expect(drawer.textContent).toContain("Задача · demo-task-1");
-    expect(drawer.textContent).toContain("Открыть результат");
+    expect(await within(drawer).findByRole("button", { name: "Открыть результат" })).toBeVisible();
   });
 });
 
