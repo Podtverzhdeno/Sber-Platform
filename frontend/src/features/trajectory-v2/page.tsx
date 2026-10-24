@@ -369,6 +369,15 @@ export function RoleCardOverview(props: {
         props.onSelect();
       }}
     >
+      <span className="trajectory-v2-role-icon" aria-hidden="true">
+        {role.title.toLowerCase().includes("python") || role.title.toLowerCase().includes("разработ") ? (
+          <svg viewBox="0 0 32 32" fill="none"><path d="m12 7-8 9 8 9M20 7l8 9-8 9M18 5l-4 22" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        ) : role.title.toLowerCase().includes("ml") || role.title.toLowerCase().includes("инженер") ? (
+          <svg viewBox="0 0 32 32" fill="none"><path d="m16 3 12 7v13l-12 7L4 23V10L16 3zm0 13 12-6M16 16 4 10m12 6v14" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/></svg>
+        ) : (
+          <svg viewBox="0 0 32 32" fill="none"><path d="M5 26V16m7 10V9m7 17V5m7 21V13" stroke="currentColor" strokeWidth="3.8" strokeLinecap="round"/></svg>
+        )}
+      </span>
       <strong>{role.title}</strong>
       <span className="trajectory-v2-role-state">{roleStateLabel(role.state)}</span>
       {props.primary && <span className="trajectory-v2-role-badge">{PRIMARY_LABEL}</span>}
