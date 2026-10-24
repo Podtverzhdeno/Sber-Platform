@@ -75,9 +75,7 @@ def test_no_approved_policy_never_calculates_or_grants_grade() -> None:
 
 def test_weighted_readiness_is_complementary_and_only_verified_counts() -> None:
     item = evidence("course")
-    result = calculate_grade_readiness(
-        PERSON, "agent-developer", policy(), (item,), as_of=NOW
-    )
+    result = calculate_grade_readiness(PERSON, "agent-developer", policy(), (item,), as_of=NOW)
     assert result.state == "known"
     assert result.completed_percent == Decimal(200) / Decimal(3)
     assert result.completed_percent + result.remaining_percent == Decimal(100)
@@ -88,9 +86,7 @@ def test_weighted_readiness_is_complementary_and_only_verified_counts() -> None:
 
 def test_last_verified_evidence_proposes_transition_but_does_not_grant() -> None:
     rows = (evidence("course"), evidence("project", source_ref="accepted:002"))
-    result = calculate_grade_readiness(
-        PERSON, "agent-developer", policy(), rows, as_of=NOW
-    )
+    result = calculate_grade_readiness(PERSON, "agent-developer", policy(), rows, as_of=NOW)
     assert result.completed_percent == Decimal(100)
     assert result.remaining_percent == Decimal(0)
     assert result.ready_for_atomic_transition
@@ -110,18 +106,14 @@ def test_cross_person_role_version_and_untrusted_evidence_never_count() -> None:
         evidence("course", trusted=False),
         evidence("project", state=EvidenceState.REPORTED),
     )
-    result = calculate_grade_readiness(
-        PERSON, "agent-developer", policy(), rows, as_of=NOW
-    )
+    result = calculate_grade_readiness(PERSON, "agent-developer", policy(), rows, as_of=NOW)
     assert result.completed_percent == Decimal(0)
     assert not result.ready_for_atomic_transition
 
 
 def test_revocation_blocks_prior_verified_evidence() -> None:
     rows = (evidence("course"), evidence("course", state=EvidenceState.REVOKED))
-    result = calculate_grade_readiness(
-        PERSON, "agent-developer", policy(), rows, as_of=NOW
-    )
+    result = calculate_grade_readiness(PERSON, "agent-developer", policy(), rows, as_of=NOW)
     assert result.completed_percent == Decimal(0)
     assert result.requirements[0].verified_sources == ()
 
