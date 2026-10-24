@@ -54,6 +54,11 @@ describe("source-first trajectory layout", () => {
     expect(screen.getAllByRole("button", { name: /Продуктовый аналитик|ML-инженер|Аналитик данных/ })).toHaveLength(3);
     expect(screen.getByRole("complementary", { name: "Грейд и компетенции" })).toBeInTheDocument();
     expect(screen.getByText("Путь освоения роли")).toBeInTheDocument();
+    const path = screen.getByRole("list", { name: "Этапы развития роли" });
+    expect(within(path).getAllByRole("listitem")).toHaveLength(7);
+    expect(within(path).getAllByText("Не опубликован")).toHaveLength(4);
+    expect(within(path).getAllByRole("button")).toHaveLength(3);
+    expect(path.getAttribute("style")).toContain("--completed-width: 17%");
     const stage = screen.getByRole("region", { name: "Этап выбранной роли" });
     expect(within(stage).getByRole("heading", { name: "Продуктовые гипотезы" })).toBeInTheDocument();
   });
