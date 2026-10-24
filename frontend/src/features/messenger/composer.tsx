@@ -27,6 +27,7 @@ export type ComposerProps = {
   sendState: ComposerSendState;
   connectionState: ComposerConnectionState;
   replySummary?: { id: string; summary: string } | null;
+  readOnlyReason?: string;
   onSend: (payload: ComposerSendPayload) => void;
   onClearReply?: () => void;
   className?: string;
@@ -50,6 +51,7 @@ export function Composer({
   sendState,
   connectionState,
   replySummary = null,
+  readOnlyReason,
   onSend,
   onClearReply,
   className,
@@ -203,8 +205,7 @@ export function Composer({
     return (
       <div className={composerClasses} role="region" aria-label="Композер сообщения">
         <p className="msg-composer__notice" data-testid="composer-readonly">
-          Отправка недоступна: у вас отозвано право писать в этот чат.
-          История сообщений сохранена.
+          {readOnlyReason ?? "Отправка недоступна: у вас отозвано право писать в этот чат. История сообщений сохранена."}
         </p>
       </div>
     );
