@@ -339,9 +339,9 @@ body:has(.analytics-reference) .overlay {z-index:10050;}
   letter-spacing: -.55px;
 }
 
-/* The content-fit header was 8px taller than the approved HTML at 1600px.
-   Match the source header's compact vertical rhythm without clipping text. */
+/* Match the reference spacing between header and first content row.
+   Keep heading intrinsic typography intact; a content-fit flex header
+   must not grow the KPI/grid offset beyond the approved 1600px geometry. */
 @media (min-width: 1520px) {
-  .workspace-content .analytics-reference .ref-page-header h1 {margin-top:2px;}
-  .workspace-content .analytics-reference .ref-page-header p {margin-top:2px;}
+  .analytics-reference .ref-page-header { margin-bottom:-8px; }
 }
