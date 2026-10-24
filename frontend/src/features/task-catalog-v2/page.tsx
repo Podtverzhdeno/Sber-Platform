@@ -398,6 +398,10 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const [previewDismissed, setPreviewDismissed] = useState(false);
   const inspectorRef = useRef<HTMLElement>(null);
+  // React Router navigation is asynchronous; keep the newest filter state
+  // synchronously to avoid losing earlier filters during fast interactions.
+  const paramsRef = useRef(new URLSearchParams(searchParams));
+  useEffect(() => { paramsRef.current = new URLSearchParams(paramsRef.current); }, [searchParams]);
   const [conditionsTask, setConditionsTask] = useState<CatalogItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const client = useQueryClient();
@@ -479,12 +483,13 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   }, [selectedTaskId, catalog.isPending, layout]);
 
   const updateParams = (patch: Record<string, string | null>, clearSelection = false) => {
-    const next = new URLSearchParams(searchParams);
+    const next = new URLSearchParams(paramsRef.current);
     for (const [key, value] of Object.entries(patch)) {
       if (value === null || value === "") next.delete(key);
       else next.set(key, value);
     }
     if (clearSelection) next.delete("task");
+    paramsRef.current = next;
     setSearchParams(next);
   };
   const refresh = async () => {
@@ -533,8 +538,9 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
 
   const openTask = (item: CatalogItem) => {
     trackCatalogEvent({ eventName: "task_select", task: item });
-    const next = new URLSearchParams(searchParams);
+    const next = new URLSearchParams(paramsRef.current);
     next.set("task", item.task_id);
+    paramsRef.current = next;
     setSearchParams(next);
   };
   const openConditions = (item: CatalogItem) => {
