@@ -192,7 +192,7 @@ export function ChatHistory({
     anchorHeightRef.current = pane.scrollHeight;
     if (wasAtBottomRef.current && !isReferenceChannel(channel?.id)) scrollToBottom();
     loadingOlderRef.current = false;
-  }, [messages, pendingMessages, scrollToBottom]);
+  }, [messages, pendingMessages, scrollToBottom, channel?.id]);
 
   useEffect(() => {
     const top = visibleMessages.length > 0 ? (visibleMessages[visibleMessages.length - 1]?.sequence ?? 0) : 0;

@@ -21,4 +21,4 @@ const avatars: Readonly<Record<string, ReferenceAvatar>> = {
 };
 
 export const referenceAvatarFor = (channelId: string): ReferenceAvatar | null =>
-  Object.prototype.hasOwnProperty.call(avatars, channelId) ? avatars[channelId] : null;
+  avatars[channelId] ?? null;
