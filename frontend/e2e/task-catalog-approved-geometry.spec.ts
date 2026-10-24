@@ -77,6 +77,17 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
   expect(geometry.kpiLastTop).toBeCloseTo(geometry.kpiTop, 0);
   expect(geometry.stageWidth).toBeGreaterThan(250);
   expect(geometry.hasOverflow).toBe(false);
+  // The approved 1672×941 preview includes all five stages and lower actions
+  // without requiring the participant to scroll through repetitive forecast copy.
+  const firstFold = await page.evaluate(() => {
+    const stage = document.querySelector(".catalog-v2-stage-section")?.getBoundingClientRect();
+    const actions = document.querySelector(".catalog-v2-detail-footer")?.getBoundingClientRect();
+    return { stageTop: stage?.top ?? Infinity, actionBottom: actions?.bottom ?? Infinity };
+  });
+  console.info("[catalog-approved-first-fold]", firstFold);
+  expect(firstFold.stageTop).toBeLessThan(880);
+  expect(firstFold.actionBottom).toBeLessThanOrEqual(1010);
+
   const firstCard = page.locator(".catalog-v2-card").first();
   const actions = firstCard.locator(".catalog-v2-card-actions");
   await expect(actions).toHaveCSS("opacity", "0");
