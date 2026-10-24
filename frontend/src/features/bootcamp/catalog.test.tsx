@@ -437,7 +437,7 @@ describe("Bootcamp catalog states and filters (22.15)", () => {
     let dialog = await screen.findByRole("dialog", { name: "Информация о курсе" });
     expect(dialog).toHaveTextContent("OpenSpec");
     fireEvent.click(within(dialog).getByRole("tab", { name: "Программа" }));
-    expect(within(dialog).getByText(/не переданы источником обучения/)).toBeInTheDocument();
+    expect(await within(dialog).findByText(/не переданы источником обучения/)).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("tab", { name: "Навыки" }));
     expect(within(dialog).getByText(/Прогноз не равен подтверждённому уровню/)).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole("button", { name: "Почему рекомендован" }));
