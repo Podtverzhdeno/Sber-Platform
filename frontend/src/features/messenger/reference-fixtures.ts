@@ -26,7 +26,7 @@ const me={id:id("me"),display_name:"Алекс Речной",role:"member"};
 export const referenceChannels:ApiChannelView[]=examples.map(([key,title,peer,preview,stamp,unread,kind])=>({
  id:id(key),kind,title,status:"preview",task_id:null,role:"viewer",muted:false,sender_enabled:false,unread,
  created_at:base+"07:00:00+03:00",
- participants:[me,{id:id(key+"-peer"),display_name:peer,role:kind==="personal"&&key==="mentor"?"mentor":"member"}],
+ participants:[me,{id:id(key+"-peer"),display_name:peer,role:"member"}],
  last_message:{id:id(key+"-last"),author_id:id(key+"-peer"),author_name:peer,kind:"text",body:preview,artifact_refs:[],sequence:1,created_at:base+stamp+":00+03:00"}
 }));
 const msg=(key:string,n:number,name:string,clock:string,body:string,artifact_refs:string[]=[]):ApiMessageView=>({
@@ -51,4 +51,10 @@ export const referencePinnedMessage="Календарь мероприятий �
 export const referenceDescriptions:Record<string,string>={
  [id("mentor")]:"Наставник по продуктовой аналитике. Помогает с методологией, экспериментами и карьерным развитием.",
  [id("mayaki")]:"Сообщество студентов, которые развиваются, создают проекты и находят возможности вместе. Маяки — это люди, идеи и движение вперёд."
+};
+
+/** Context file list from approved app.js, preview-only: these are labels, not downloads. */
+export const referenceSharedFiles:Record<string,string[]> = {
+  [id("mentor")]:["Метрики_эксперимента.xlsx","Итоговая_методология.pdf","Презентация_эксперимента.pptx"],
+  [id("mayaki")]:["Программа_Карьера_в_IT.pdf","Гайд_Стажировки_2026.pdf","Презентация_Маяки.pptx"],
 };
