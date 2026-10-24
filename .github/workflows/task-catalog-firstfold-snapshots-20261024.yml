@@ -1,0 +1,58 @@
+name: Temporary final task-catalog first-fold baselines
+on:
+  push:
+    branches:
+      - codex/task-catalog-visual-polish-20261024
+    paths:
+      - .github/workflows/task-catalog-firstfold-snapshots-20261024.yml
+permissions:
+  contents: write
+jobs:
+  reviewed-playwright-baselines:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact task catalog integration branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: codex/task-catalog-visual-polish-20261024
+          persist-credentials: true
+      - name: Install Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Match Linux release-runner screenshot fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-core fonts-liberation fontconfig
+          fc-cache -f
+      - name: Capture twenty fixed cards/list/terms light-dark viewport snapshots
+        env:
+          TZ: Europe/Moscow
+          LANG: ru_RU.UTF-8
+        run: npx playwright test e2e/task-catalog-v2-visual.spec.ts --workers=1 --update-snapshots --reporter=line
+      - name: Upload images for independent visual review
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: task-catalog-nonoverlap-fixed-regression-baselines
+          path: frontend/e2e/task-catalog-v2-visual.spec.ts-snapshots/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Commit only screenshot baselines on feature branch
+        working-directory: .
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/e2e/task-catalog-v2-visual.spec.ts-snapshots/
+          if ! git diff --cached --quiet; then
+            git commit -m "test(tasks): update fixed visual snapshots after nonoverlapping first-fold design"
+            git fetch origin codex/task-catalog-visual-polish-20261024
+            git rebase origin/codex/task-catalog-visual-polish-20261024
+            git push origin HEAD:codex/task-catalog-visual-polish-20261024
+          fi
