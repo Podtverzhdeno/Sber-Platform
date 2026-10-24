@@ -321,7 +321,8 @@ test("real seeded API separates match snapshots after a trajectory change", asyn
     const card = page.locator('[role="listitem"]').filter({ hasText: candidate.title });
     await expect(card).toBeVisible();
     await card.getByRole("button", { name: "Подробнее" }).click();
-    // The provenance was intentionally moved into an expandable explanation.
+    // Matching factors and calculation provenance are now two nested disclosures.
+    await page.locator(".catalog-v2-reasons-disclosure > summary").click();
     const provenance = page.locator(".catalog-v2-provenance");
     await provenance.locator("summary").click();
     const snapshot = provenance.locator(".catalog-v2-match-snapshot code");
