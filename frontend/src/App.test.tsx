@@ -96,7 +96,7 @@ describe("App", () => {
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
   });
 
-  it("renders the home v2 preview under ?v2=1 and returns on toggle", async () => {
+  it("renders the approved home by default and preserves explicit legacy rollback", async () => {
     const actor = {
       person_id: "00000000-0000-0000-0000-000000000001",
       display_name: "Алекс Речной",
@@ -124,14 +124,17 @@ describe("App", () => {
       return Promise.resolve(new Response("{}", { status: 200 }));
     });
 
-    window.history.pushState({}, "", "/workspace/0?v2=1");
+    window.history.pushState({}, "", "/workspace/0");
     render(<App />);
     expect(await screen.findByTestId("grade-summary")).toBeInTheDocument();
     expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("not_evaluable");
     expect(screen.getByRole("navigation")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Классическая главная" }));
-    expect(screen.queryByTestId("grade-summary")).not.toBeInTheDocument();
-    expect(screen.getByRole("region", { name: "Ключевые показатели" })).toBeInTheDocument();
+    window.history.pushState({}, "", "/workspace/0?v2=0");
+    fireEvent.popState(window);
+    await waitFor(() => {
+      expect(screen.queryByTestId("grade-summary")).not.toBeInTheDocument();
+      expect(screen.getByRole("region", { name: "Ключевые показатели" })).toBeInTheDocument();
+    });
   });
 });
