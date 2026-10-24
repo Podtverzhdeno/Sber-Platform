@@ -151,6 +151,15 @@ describe("Composer", () => {
     expect(onSend).not.toHaveBeenCalled();
   });
 
+  it("кнопка @ действительно запускает выбор участника без ручного ввода", () => {
+    renderComposer();
+    fireEvent.click(screen.getByRole("button", { name: "Упомянуть участника" }));
+    expect(textarea().value).toBe("@");
+    const mentions = screen.getByRole("listbox", { name: "Упоминания" });
+    fireEvent.click(within(mentions).getByRole("option", { name: "@Ментор Е" }));
+    expect(textarea().value).toBe("@Ментор Е ");
+  });
+
   it("@-упоминание открывает список и вставляет имя", () => {
     const { onSend } = renderComposer();
     fireEvent.change(textarea(), { target: { value: "@ал" } });
