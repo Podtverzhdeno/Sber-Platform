@@ -1259,6 +1259,29 @@ async def _insert_batches(session: AsyncSession, batches: list[SeedBatch]) -> No
             statement = statement.on_conflict_do_nothing(
                 index_elements=[learning_days.c.enrollment_id, learning_days.c.local_date]
             )
+        elif batch.table is track_attempts:
+            # Runtime selection creates a different UUID for the same natural key.
+            # Preserve ALL existing attempts, including completed milestones and
+            # active/frozen status: the seeder must not undo participant actions.
+            statement = statement.on_conflict_do_nothing()
+        elif batch.table is enrollments:
+            # A reported/verified course attempt may already exist under a
+            # runtime UUID. Do not overwrite that record or its verification.
+            # Existing synthetic enrollments can still receive curriculum
+            # updates when the source owns the row.
+            statement = statement.on_conflict_do_update(
+                index_elements=[
+                    enrollments.c.person_id,
+                    enrollments.c.course_id,
+                    enrollments.c.attempt_number,
+                ],
+                set_={
+                    "status": statement.excluded.status,
+                    "data_origin": statement.excluded.data_origin,
+                    "provenance": statement.excluded.provenance,
+                },
+                where=enrollments.c.data_origin == "demo_seed",
+            )
         else:
             update_values = {
                 key: getattr(statement.excluded, key) for key in batch.rows[0] if key != "id"
