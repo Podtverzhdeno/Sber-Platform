@@ -1217,10 +1217,7 @@ async def _insert_batches(session: AsyncSession, batches: list[SeedBatch]) -> No
                     )
                 ).scalars()
             )
-            remaining = [
-                row for row in batch.rows
-                if row["person_id"] not in existing_participants
-            ]
+            remaining = [row for row in batch.rows if row["person_id"] not in existing_participants]
             if not remaining:
                 continue
             batch = SeedBatch(batch.table, remaining)
