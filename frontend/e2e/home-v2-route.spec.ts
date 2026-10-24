@@ -27,11 +27,11 @@ test("home v2 avoids redundant welcome hero and preserves legacy rollback", asyn
   );
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.goto("/workspace/0?v2=1");
-  await expect(page.getByRole("button", { name: "Классическая главная" })).toBeVisible();
+  await page.goto("/workspace/0");
   await expect(page.getByRole("heading", { name: /Добро пожаловать/ })).toHaveCount(0);
   await expect(page.getByText("Не удалось загрузить обзор развития.")).toBeVisible();
-  await page.getByRole("button", { name: "Классическая главная" }).click();
-  await expect(page).not.toHaveURL(/v2=1/);
+  await page.goto("/workspace/0?v2=0");
   await expect(page.getByRole("heading", { name: /Добро пожаловать/ })).toBeVisible();
+  await page.goto("/workspace/0");
+  await expect(page.getByText("Не удалось загрузить обзор развития.")).toBeVisible();
 });
