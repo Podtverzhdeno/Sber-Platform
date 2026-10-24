@@ -2,7 +2,7 @@
 
 - task_id: task-catalog-approved-layout-20261024
 - session_id: gpt6-20261024-1529-task-ui
-- status: IN_PROGRESS
+- status: REVIEW
 - base_revision: 087abc78705eb6ea77eafcc9a698ff5c35cbf84d
 - started_at: 2026-10-24T15:29:00+03:00
 - heartbeat_at: 2026-10-24T15:29:00+03:00
@@ -24,3 +24,12 @@
 - Frontend quality/lint, backend checks, OpenSpec, Docker and security gates previously passed on implementation revision; exact final revision CI still required
 - Browser screenshots previously baselined for older UI; do not rebaseline before checking original approved PNG
 - Reviewer MUST inspect original approved design archive for 1:1 visual acceptance; approved PNG hashes recorded in OpenSpec prototype-intake.md
+
+## Final handoff (2026-10-24)
+
+- Product and test changes limited to PR #23; no production deployment, feature flag rollout, direct main mutation or migrations
+- Browser E2E corrections for provenance accordion and qualitative projected growth; WCAG contrast fixes dark badge/light selected layout
+- Eight 1440/1280/768/390 light/dark screenshots regenerated using Linux Playwright with matching fonts, UTC-independent TZ and locale; GitHub Actions visual refresh run #40101562982 succeeded
+- The temporary auto-refresh workflow was deleted after committing the images, so future PR CI MUST compare against fixed baselines
+- Latest full CI and independent reviewer remain release/merge acceptance gates
+- Original approved ZIP absent, therefore exact pixel identity to the archived mockups is NOT independently proven; the semantic contract is checked against OpenSpec
