@@ -74,6 +74,17 @@ class OpenPersonalRequest(BaseModel):
     peer_id: UUID
 
 
+class CreateGroupRequest(BaseModel):
+    title: str = Field(min_length=2, max_length=120)
+    peer_ids: list[UUID] = Field(min_length=1, max_length=24)
+
+
+class ContactView(BaseModel):
+    id: UUID
+    display_name: str
+    role: str
+
+
 class ReadMessageRequest(BaseModel):
     message_id: UUID
 
@@ -154,6 +165,54 @@ async def channels(
         names = await _persona_names(request, [peer.person_id for peer in peers])
         result.append(_channel_view(summary, names, peers))
     return result
+
+
+@router.get("/me/messaging/contacts", response_model=list[ContactView])
+async def contact_directory(
+    request: Request,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+) -> list[ContactView]:
+    """The demo directory is explicit; no global enumeration of private users."""
+    if not request.app.state.settings.demo_mode:
+        return []
+    records = await request.app.state.auth_service.store.list_personas()
+    return sorted(
+        [
+            ContactView(id=item.person_id, display_name=item.display_name,
+                        role=item.roles[0].value if item.roles else "participant")
+            for item in records
+            if item.person_id != authenticated.actor.person_id
+            and item.program_key == "impulse-demo"
+        ],
+        key=lambda item: item.display_name.casefold(),
+    )
+
+
+@router.post("/me/messaging/channels/group", response_model=ChannelView, status_code=201)
+async def create_group(
+    command: CreateGroupRequest,
+    request: Request,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[MessagingService, Depends(_service)],
+) -> ChannelView:
+    if not request.app.state.settings.demo_mode:
+        raise ApiError("GROUP_CREATION_UNAVAILABLE", "Создание группы недоступно.", 403)
+    allowed = {
+        item.person_id
+        for item in await request.app.state.auth_service.store.list_personas()
+        if item.program_key == "impulse-demo"
+    }
+    if any(peer not in allowed for peer in command.peer_ids):
+        raise ApiError("MESSAGE_GROUP_PEER_INVALID", "Участник не найден.", 422)
+    channel = await service.create_group(
+        authenticated.actor, command.title, tuple(command.peer_ids)
+    )
+    summary = await service.channel_view(authenticated.actor, channel.id)
+    if summary is None:
+        raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
+    peers = await service.channel_participants(authenticated.actor, channel.id)
+    names = await _persona_names(request, [peer.person_id for peer in peers])
+    return _channel_view(summary, names, peers)
 
 
 @router.post("/me/messaging/channels/personal", response_model=ChannelView)
