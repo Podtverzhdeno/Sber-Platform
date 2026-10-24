@@ -21,13 +21,15 @@ test("forensic Bootcamp five screens at 1448x1086", async ({ page }) => {
   await page.screenshot({ path: "test-results/forensic-bc-r02-list.png", animations: "disabled" });
 
   await view.getByRole("button", { name: "Карточки" }).click();
-  await page.locator('[data-reference="BC-R01"]').getByRole("button", { name: "Подробнее →" }).first().click();
+  const agentCourse = page.getByTestId("course-agent-development");
+  await expect(agentCourse).toBeVisible();
+  await agentCourse.getByRole("button", { name: "Подробнее →" }).click();
   await expect(page.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
   await page.evaluate(() => { window.scrollTo(0, 0); });
   await page.screenshot({ path: "test-results/forensic-bc-r03-course.png", animations: "disabled" });
   await page.getByRole("dialog", { name: "Информация о курсе" }).getByRole("button", { name: "Закрыть" }).click();
 
-  await page.locator('[data-reference="BC-R01"]').getByRole("button", { name: "Почему рекомендован" }).first().click();
+  await agentCourse.getByRole("button", { name: "Почему рекомендован" }).click();
   await expect(page.getByRole("dialog", { name: "Почему рекомендован" })).toBeVisible();
   await page.evaluate(() => { window.scrollTo(0, 0); });
   await page.screenshot({ path: "test-results/forensic-bc-r04-why.png", animations: "disabled" });
