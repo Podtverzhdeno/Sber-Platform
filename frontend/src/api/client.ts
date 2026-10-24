@@ -88,6 +88,7 @@ export class ApiClientError extends Error {
 
 const READ_CACHE_TTL_MS = 30_000;
 const VOLATILE_READ_PATHS = [
+  "/api/v1/me/agentic-coding/profile",
   "/api/v1/me/messaging/",
   "/api/v1/me/notifications",
 ] as const;
