@@ -117,7 +117,20 @@ def evaluate_profile(
     current_time = as_of or datetime.now(UTC)
     if current_time.tzinfo is None or current_time.utcoffset() is None:
         raise ValueError("Snapshot date must be timezone-aware")
-    current: dict[str, list[QualifiedEvidence]] = {key: [] for key in SKILL_KEYS}
+    current: dict[str, dict[str, QualifiedEvidence]] = {key: {} for key in SKILL_KEYS}
+    # A later trusted revocation is a tombstone for the entire evidence source.
+    # It must invalidate an earlier verified event instead of being ignored.
+    withdrawn = frozenset(
+        (row.skill_key, row.source_ref)
+        for row in rows
+        if row.person_id == person_id
+        and row.role_key == role_key
+        and row.framework_version == SOURCE_MAP_VERSION
+        and row.skill_key in SKILL_KEYS
+        and row.status is VerificationStatus.REVOKED
+        and row.trusted
+        and row.observed_at <= current_time
+    )
     for row in rows:
         # Strict source, identity, role, freshness and verification boundaries.
         if row.person_id != person_id or row.role_key != role_key:
@@ -126,15 +139,23 @@ def evaluate_profile(
             continue
         if row.status is not VerificationStatus.VERIFIED or not row.trusted:
             continue
-        if row.revoked_at is not None or row.observed_at > current_time:
+        if (
+            row.revoked_at is not None
+            or row.observed_at > current_time
+            or (row.skill_key, row.source_ref) in withdrawn
+        ):
             continue
-        current[row.skill_key].append(row)
+        # One independently qualified source counts once. The latest verified
+        # state wins if duplicate versions of the same source are present.
+        previous = current[row.skill_key].get(row.source_ref)
+        if previous is None or row.observed_at > previous.observed_at:
+            current[row.skill_key][row.source_ref] = row
     skills = tuple(
         SkillPosition(
             key=key,
             title=title,
             target_level=ROLE_TARGETS[role_key][index],
-            current_level=max((e.level for e in current[key]), default=None),
+            current_level=max((e.level for e in current[key].values()), default=None),
             evidence_count=len(current[key]),
             data_state="verified" if current[key] else "not_connected",
             unresolved_methodology=key in CONFLICT_KEYS[role_key],
