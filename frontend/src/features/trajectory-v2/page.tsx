@@ -185,9 +185,9 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     <div className="trajectory-v2" data-reference="R-PAR-02" data-as-of={overview.as_of}>
       <header className="trajectory-v2-heading">
         <div>
-          <p className="eyebrow">Предпросмотр интерактивного маршрута</p>
           <h2>Моя траектория</h2>
-          <small>Снимок авторизованных данных от {formatAsOf(overview.as_of)}</small>
+          <p className="trajectory-v2-intro">Строй свою карьерную историю в Сбере — от обучения к реальным проектам</p>
+          <small>Данные обновлены: {formatAsOf(overview.as_of)}</small>
         </div>
       </header>
       <div className="trajectory-v2-columns">
