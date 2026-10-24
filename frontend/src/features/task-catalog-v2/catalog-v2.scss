@@ -3343,3 +3343,14 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
     flex-wrap: wrap;
   }
 }
+
+
+/* The moved explainability section previously inherited grid-column: 2 from
+   the inner detail matrix and silently created an implicit second column in
+   the outer detail grid. Keep the outer detail strictly single-column. */
+.catalog-v2-detail {
+  grid-template-columns: minmax(0, 1fr);
+}
+.catalog-v2-detail > .catalog-v2-reasons-section {
+  grid-column: 1;
+}
