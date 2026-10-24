@@ -90,3 +90,66 @@ test("mobile home tracks original ZIP card ordering and artwork at 390px", async
     .poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
     .toBe(true);
 });
+
+
+const intermediateViewports = [
+  {
+    name: "1280px desktop wrap",
+    width: 1280,
+    expected: [
+      [".home-v2-hero", 235, 111, 626, 310],
+      [".home-v2-grade", 872, 111, 379, 310],
+      [".home-v2-weekly", 235, 432, 1016, 160],
+      [".home-v2-next-outcome", 235, 608, 600, 187],
+      [".home-v2-tasks", 235, 811, 600, 305],
+      [".home-v2-buddy", 851, 608, 400, 197],
+    ],
+  },
+  {
+    name: "1024px tablet",
+    width: 1024,
+    expected: [
+      [".home-v2-hero", 219, 111, 459, 310],
+      [".home-v2-grade", 689, 111, 306, 310],
+      [".home-v2-weekly", 219, 432, 776, 173],
+      [".home-v2-next-outcome", 219, 621, 776, 172],
+      [".home-v2-tasks", 219, 809, 776, 305],
+      [".home-v2-buddy", 219, 1130, 380, 262],
+    ],
+  },
+  {
+    name: "768px tablet",
+    width: 768,
+    expected: [
+      [".home-v2-hero", 16, 84, 410, 300],
+      [".home-v2-grade", 437, 84, 315, 300],
+      [".home-v2-weekly", 16, 395, 736, 173],
+      [".home-v2-next-outcome", 16, 584, 736, 172],
+      [".home-v2-tasks", 16, 772, 736, 305],
+    ],
+  },
+  {
+    name: "360px narrow mobile",
+    width: 360,
+    expected: [
+      [".home-v2-hero", 11, 76, 338, 355],
+      [".home-v2-grade", 11, 443, 338, 291],
+      [".home-v2-weekly", 11, 746, 338, 261],
+      [".home-v2-next-outcome", 11, 1020, 338, 220],
+      [".home-v2-tasks", 11, 1252, 338, 334],
+    ],
+  },
+] as const;
+
+for (const scenario of intermediateViewports) {
+  test(`home geometry follows ZIP at ${scenario.name}`, async ({ page }) => {
+    await page.setViewportSize({ width: scenario.width, height: 920 });
+    await openReferenceHome(page);
+    for (const [selector, x, y, width, height] of scenario.expected) {
+      await expectReferenceRect(page, selector, { x, y, width, height }, 14);
+    }
+    await expect
+      .poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
+      .toBe(true);
+  });
+}
