@@ -65,6 +65,6 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
     await root.getByRole("group", { name: "Вид диаграммы" }).getByRole("button", { name: "Гистограмма" }).click();
     await expect(root.locator(".ref-skill-bars")).toBeVisible();
     await root.getByRole("group", { name: "Вид диаграммы" }).getByRole("button", { name: "Тренд" }).click();
-    await expect(root.getByText(/Нет достаточной истории цифровых следов/)).toBeVisible();
+    await expect(root.locator(".ref-trend svg")).toBeVisible();
   });
 }
