@@ -85,10 +85,10 @@ describe("Agentic Coding source-derived profile", () => {
   it("restores focus to the radar SVG control after opening by Enter", () => {
     render(<AgenticCodingProfile />);
     const control = screen.getByTestId("agentic-target-radar").querySelector<SVGElement>(".agentic-radar-control");
-    expect(control).not.toBeNull();
-    control?.focus();
+    if (control === null) throw new Error("Focusable radar control not found");
+    control.focus();
     expect(document.activeElement).toBe(control);
-    fireEvent.keyDown(control!, { key: "Enter" });
+    fireEvent.keyDown(control, { key: "Enter" });
     expect(screen.getByRole("dialog")).toBeInTheDocument();
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
