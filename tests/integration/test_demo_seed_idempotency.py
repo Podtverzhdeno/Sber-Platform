@@ -47,8 +47,6 @@ async def test_reseed_preserves_runtime_attempt_and_course_completion() -> None:
             await session.execute(
                 delete(track_attempts).where(
                     track_attempts.c.person_id == alex_id,
-                    track_attempts.c.track_id == python_id,
-                    track_attempts.c.attempt_number == 1,
                 )
             )
             await session.execute(
@@ -98,6 +96,15 @@ async def test_reseed_preserves_runtime_attempt_and_course_completion() -> None:
                     enrollments.c.attempt_number == 1,
                 )
             )
+        # A legacy user with one existing selection must not silently gain
+        # two more "active" roles just because the catalog gained them.
+        async with database.sessions() as session:
+            all_attempts = (
+                await session.execute(
+                    select(track_attempts.c.id).where(track_attempts.c.person_id == alex_id)
+                )
+            ).all()
+        assert len(all_attempts) == 1
         assert len(attempts) == 1
         assert attempts[0].id == runtime_attempt_id
         assert attempts[0].status == "active"
