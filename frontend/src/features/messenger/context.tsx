@@ -129,7 +129,7 @@ export function ContextPanel({
           {channel.participants.map((person) => (
             <li key={person.id} data-testid="context-participant">
               <span className="msg-context__member-avatar" aria-hidden="true">
-                {(person.display_name ?? "").trim().charAt(0).toUpperCase() || "?"}
+                {(person as { display_name?: string }).display_name?.trim().charAt(0).toUpperCase() || "?"}
               </span>
               <span className="msg-context__member-copy">
                 <span>{person.display_name || "Без имени"}</span>
