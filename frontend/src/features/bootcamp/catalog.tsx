@@ -525,32 +525,45 @@ export function BootcampCatalog({
       </div>
       <div className="bc-overview-grid">
         <section className="bc-continue ui-card" aria-labelledby="bc-continue-title">
-          <p className="bc-panel-kicker">ПРОДОЛЖИТЬ ОБУЧЕНИЕ</p>
-          <h2 id="bc-continue-title">{nextCourse?.completion_state === "reported" ? "Продолжить обучение" : nextCourse ? "Начните с подходящего курса" : "Выберите следующий шаг"}</h2>
-          <div className="bc-next-course">{nextCourse && <CourseCover title={nextCourse.title} />}<p className="bc-overview-course">{nextCourse?.title ?? "Доступный курс пока не определён"}</p></div>
-          <p className="bc-muted">Прогресс и контрольные точки появятся после подключения подтверждённого источника LMS</p>
-          {nextCourse ? <button type="button" onClick={() => { openPanel("detail", nextCourse.key); }}>Перейти к курсу →</button> :
-            <button type="button" className="secondary-button" onClick={() => { resetFilters(); document.getElementById("bc-catalog-title")?.scrollIntoView({ behavior: "smooth" }); }}>Смотреть каталог →</button>}
-        </section>
-        <section className="bc-role-card ui-card" aria-labelledby="bc-role-title">
-          <p className="bc-panel-kicker">МОЯ РОЛЬ</p>
-          <h2 id="bc-role-title">{selectedRoleTitle}</h2>
-          <p className="bc-muted">Карьерный грейд: не определён — требуется опубликованная политика</p>
-          <div className="bc-role-metrics">
-            <div><strong>{catalog.data.filter(forTrack).length}</strong><span>курсов</span></div>
-            <div><strong>{catalog.data.filter((card) => forTrack(card) && card.completion_state === "verified").length}</strong><span>подтверждено</span></div>
-            <div><strong>{pendingRequired.length}</strong><span>ожидают прохождения</span></div>
+          <h2 id="bc-continue-title">Продолжить обучение <span aria-hidden="true">›</span></h2>
+          <div className="bc-continue-inner">
+            <div className="bc-next-course">
+              {nextCourse && <CourseCover title={nextCourse.title} />}
+              <div className="bc-continue-copy">
+                <h3>{nextCourse?.title ?? "Выберите следующий курс"}</h3>
+                <p>{nextCourse?.recommendation_reason || "Перейдите к каталогу и выберите подходящий курс"}</p>
+                {nextCourse && <SkillChips card={nextCourse} />}
+              </div>
+            </div>
+            <div className="bc-continue-right">
+              <p className="bc-muted">{nextCourse?.completion_state === "reported" ? "Результат отправлен на проверку" : "Прогресс модулей появится после подключения LMS"}</p>
+              {nextCourse ? <button type="button" onClick={() => { openPanel("detail", nextCourse.key); }}>Продолжить →</button> :
+                <button type="button" onClick={() => { resetFilters(); document.getElementById("bc-catalog-title")?.scrollIntoView({ behavior: "smooth" }); }}>Смотреть каталог →</button>}
+            </div>
           </div>
-          <small className="bc-muted">Число курсов не является процентом готовности к грейду</small>
         </section>
-      </div>
-      <section className="bc-grade-banner" aria-labelledby="bc-grade-title">
-        <div><p className="bc-panel-kicker">♛ ДО СЛЕДУЮЩЕГО ГРЕЙДА</p>
-          <h2 id="bc-grade-title">{pendingRequired.length > 0 ? `Осталось ${pendingRequired.length} ${pendingRequired.length % 10 === 1 && pendingRequired.length % 100 !== 11 ? "обязательный курс" : [2, 3, 4].includes(pendingRequired.length % 10) && ![12, 13, 14].includes(pendingRequired.length % 100) ? "обязательных курса" : "обязательных курсов"}` : "Требования к грейду"}</h2>
-          <p>{pendingRequired.length > 0 ? "Просмотрите ещё не подтверждённые учебные требования. Дополнительно могут потребоваться практика и проверка результатов." : "Полный список требований и степень готовности появятся после публикации политики. Отсутствие курсов здесь не означает присвоение грейда."}</p>
+        <div className="bc-overview-right">
+          <section className="bc-role-card ui-card" aria-labelledby="bc-role-title">
+            <h2 id="bc-role-title">Моя роль: {selectedRoleTitle} <span aria-hidden="true">›</span></h2>
+            <div className="bc-role-metrics">
+              <div><strong>{catalog.data.filter(forTrack).length}</strong><span>курсов в каталоге</span></div>
+              <div><strong>{catalog.data.filter((card) => forTrack(card) && card.completion_state === "verified").length}</strong><span>подтверждено</span></div>
+            </div>
+            <small className="bc-muted">Грейд и доля освоенных навыков появятся после публикации матрицы и подтверждения результатов</small>
+          </section>
+          <section className="bc-grade-banner" aria-labelledby="bc-grade-title">
+            <div className="bc-grade-copy">
+              <p className="bc-panel-kicker">♛ ДО СЛЕДУЮЩЕГО ГРЕЙДА</p>
+              <h2 id="bc-grade-title">{pendingRequired.length > 0 ? `Осталось ${pendingRequired.length} ${pendingRequired.length % 10 === 1 && pendingRequired.length % 100 !== 11 ? "обязательный курс" : [2, 3, 4].includes(pendingRequired.length % 10) && ![12, 13, 14].includes(pendingRequired.length % 100) ? "обязательных курса" : "обязательных курсов"}` : "Требования к грейду"}</h2>
+              <p>{pendingRequired.length > 0 ? "Завершите обязательные курсы и подтвердите результаты обучения" : "Опубликованных незакрытых учебных требований сейчас нет"}</p>
+              <div className="bc-grade-mini">
+                {pendingRequired.slice(0,2).map((card) => <button key={card.key} type="button" onClick={() => { openPanel("detail",card.key); }}><CourseCover title={card.title} /><span>{card.title}</span><span aria-hidden="true">↗</span></button>)}
+              </div>
+            </div>
+            <button className="bc-grade-action" type="button" onClick={() => { openPanel("requirements"); }}>Посмотреть курсы →</button>
+          </section>
         </div>
-        <button type="button" onClick={() => { openPanel("requirements"); }}>Посмотреть курсы →</button>
-      </section>
+      </div>
       <h2 className="bc-catalog-title" id="bc-catalog-title">Каталог курсов <span>{catalog.data.length}</span></h2>
       <CatalogFilters
         searchParams={searchParams}
