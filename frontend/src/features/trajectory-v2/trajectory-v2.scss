@@ -647,3 +647,36 @@
 .trajectory-v2-skill-list progress{width:100%;height:7px;accent-color:#08ddc8}
 .trajectory-v2-skill-list small{font-size:11px;text-align:right;color:#c5dfef}
 .trajectory-v2-passport-disclaimer{display:block;color:#7995a9;font-size:10px;line-height:1.3}
+
+
+/* TRJ-SCREEN-01 active stage card with one real, actionable goal */
+.trajectory-v2-stage-detail{display:grid;gap:10px;background:#071e30;border:1px solid #16658c;border-radius:13px;padding:15px}
+.trajectory-v2-stage-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.trajectory-v2-stage-header>div:first-child{min-width:0}
+.trajectory-v2-stage-header small{font-size:11px;color:#99b6cb}
+.trajectory-v2-stage-header h3{margin:4px 0 2px;font-size:20px;font-weight:800;letter-spacing:-.025em;color:#f0f7ff}
+.trajectory-v2-stage-header p{font-size:12px;color:#a6bbd0;margin:0}
+.trajectory-v2-stage-progress{display:grid;gap:7px;flex:0 0 210px;text-align:right}
+.trajectory-v2-stage-progress progress{width:100%;height:8px;accent-color:#18e9d4}
+.trajectory-v2-stage-state{justify-self:end;border:1px solid #7a5b14;border-radius:100px;background:#443016;color:#ffbd40;padding:3px 9px;font-size:11px;font-weight:750}
+.trajectory-v2-stage-state[data-state="completed"]{background:#06403e;color:#10ebd3;border-color:#0bb2b4}
+.trajectory-v2-stage-state[data-state="locked"]{background:#132838;color:#95aabc;border-color:#284d64}
+.trajectory-v2-task-row{display:flex;align-items:center;gap:10px;border:1px solid #135776;background:#0a2a40;border-radius:11px;padding:10px 12px;min-height:55px}
+.trajectory-v2-task-row[data-state="completed"]{background:#0b3444}
+.trajectory-v2-task-check{flex:0 0 26px;width:26px;height:26px;border:2px solid #93bace;border-radius:50%;display:grid;place-items:center;font-weight:900;color:#072d32}
+.trajectory-v2-task-row[data-state="completed"] .trajectory-v2-task-check{background:#10e6d7;border-color:#10e6d7}
+.trajectory-v2-task-row[data-state="locked"] .trajectory-v2-task-check{font-size:12px;border-color:#42617b}
+.trajectory-v2-task-copy{flex:1;min-width:0;display:grid;gap:2px}
+.trajectory-v2-task-copy strong{font-size:13px;color:#e9f5ff}
+.trajectory-v2-task-copy small{font-size:10px;color:#8caec5}
+.trajectory-v2-task-status{font-size:11px;color:#39ebd7;white-space:nowrap}
+.trajectory-v2-task-row:not([data-state="completed"]) .trajectory-v2-task-status{color:#ffcb5f}
+.trajectory-v2-task-action{border:1px solid #254e69;border-radius:9px;padding:8px 15px;color:#d0e4f4;background:#0b2538;font-size:12px;font-weight:800;white-space:nowrap;cursor:pointer}
+.trajectory-v2-task-action.is-primary{background:#08d9dc;color:#042532;border-color:#1bf9f0}
+.trajectory-v2-stage-more{font-size:12px;color:#94b4c7}
+.trajectory-v2-stage-more summary{cursor:pointer;color:#77dbe9}
+.trajectory-v2-stage-more dl{display:flex;flex-wrap:wrap;gap:12px;margin:9px 0}
+.trajectory-v2-stage-more dl>div{display:grid;gap:3px;padding:7px 9px;background:#09283a;border-radius:8px}
+.trajectory-v2-stage-more dt{color:#8ca7bb}
+.trajectory-v2-stage-more dd{margin:0}
+@media(max-width:700px){.trajectory-v2-stage-header{display:grid}.trajectory-v2-stage-progress{flex:auto;min-width:0;width:100%;text-align:left}.trajectory-v2-stage-state{justify-self:start}.trajectory-v2-task-row{flex-wrap:wrap}.trajectory-v2-task-status{margin-left:36px}.trajectory-v2-task-action{margin-left:auto}}
