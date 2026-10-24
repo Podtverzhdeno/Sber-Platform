@@ -69,3 +69,6 @@
   .agentic-bar-row > span { grid-column: 1/-1; }
 }
 @media(prefers-reduced-motion: reduce) { .agentic-chart-modes button { transition: none; } }
+
+.agentic-current-line { stroke: #18c996; stroke-width: 3.5; stroke-linecap: round; }
+.agentic-current-dot { fill: #19d39c; stroke: var(--color-surface-raised); stroke-width: 2; }
