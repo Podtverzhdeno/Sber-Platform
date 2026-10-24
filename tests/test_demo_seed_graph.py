@@ -89,3 +89,56 @@ def test_seed_tasks_and_compensation_follow_current_domain_values() -> None:
         else:
             assert compensation["base_amount"] is None
             assert compensation["currency"] is None
+
+
+def test_demo_alex_has_seven_real_role_catalogs_and_distinct_progress() -> None:
+    """Seven stage plans must be stored in PostgreSQL, never JSX stand-ins."""
+    rows = _rows()
+    tracks = {row["slug"]: row for row in rows["tracks"]}
+    assert len(tracks) == 7
+    roadmap_by_slug = {
+        slug: next(row for row in rows["roadmap_versions"] if row["track_id"] == track["id"])
+        for slug, track in tracks.items()
+    }
+    for slug, roadmap in roadmap_by_slug.items():
+        stages = [
+            row for row in rows["milestones"] if row["roadmap_version_id"] == roadmap["id"]
+        ]
+        assert [row["position"] for row in stages] == list(range(1, 8)), slug
+        assert stages[0]["id"] == demo_id(f"milestone:{slug}:start")
+        assert all(item["payload"]["target_key"] for item in stages)
+
+    alex = [
+        row for row in rows["track_attempts"]
+        if row["person_id"] == demo_id("participant-alex")
+    ]
+    assert {row["status"] for row in alex} == {"active", "frozen"}
+    assert len([row for row in alex if row["status"] == "active"]) == 2
+    completed_by_track = {
+        next(slug for slug, track in tracks.items() if track["id"] == row["track_id"]):
+        len(row["payload"]["completed_milestones"])
+        for row in alex
+    }
+    assert completed_by_track == {"product": 2, "ml": 3, "python": 2}
+
+
+def test_demo_alex_learning_and_competencies_use_stable_evidence() -> None:
+    rows = _rows()
+    person_id = demo_id("participant-alex")
+    enrollments = [
+        row for row in rows["enrollments"]
+        if row["person_id"] == person_id and row["status"] == "verified"
+    ]
+    assert len(enrollments) >= 6
+    assert len(rows["learning_days"]) >= 10
+    assert all(row["data_origin"] == "demo_seed" for row in rows["learning_days"])
+
+    definitions = {row["competency_key"]: row for row in rows["competency_definitions"]}
+    evidence = rows["competency_evidence"]
+    assert len(evidence) == 5
+    for item in evidence:
+        assert item["person_id"] == person_id
+        assert item["source_kind"] == "course"
+        assert item["provenance"]["synthetic"] is True
+        sources = definitions[item["competency_key"]]["payload"]["evidence_sources"]
+        assert ["course", item["source_ref"]] in sources
