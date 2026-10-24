@@ -1438,3 +1438,18 @@
 .trajectory-v2-statistics-section ul {margin:8px 0 0;padding-left:16px;display:grid;gap:5px;color:#aec4d9;font-size:11px}
 .trajectory-v2-stats-origin {color:#ffc77c!important;font-size:10px!important;margin:8px 0!important}
 .trajectory-v2-stats-caveat {color:#859bb0!important;font-size:10px!important;line-height:1.4!important}
+
+
+/* AI role curriculum: stage substeps are plans, not fabricated completion events. */
+.trajectory-v2-activities {padding:14px;border:1px solid #245471;border-radius:11px;background:#0a293d}
+.trajectory-v2-activities h4 {margin:0 0 12px;color:#eaf7ff;font-size:14px;font-weight:800}
+.trajectory-v2-activities ol {display:grid;gap:9px;list-style:none;margin:0;padding:0}
+.trajectory-v2-activities li {display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.4;color:#c5d9e7}
+.trajectory-v2-activity-order {display:grid;place-items:center;flex:0 0 24px;width:24px;height:24px;border:1px solid #2477a1;border-radius:7px;background:#0b3956;color:#63deed;font-size:11px;font-weight:800}
+.trajectory-v2-deliverable {margin:13px 0 6px!important;padding:10px 12px;border-left:3px solid #12d9ce;border-radius:6px;background:#0b3545;color:#d0f5f0!important;font-size:12px!important}
+.trajectory-v2-deliverable strong {color:#2ce5d7}
+.trajectory-v2-activities>small {color:#88a8c0;font-size:10px}
+.trajectory-v2-drawer-activities ol {display:grid;gap:10px;padding-left:19px;margin:0 0 13px;color:#bed4e8;font-size:12px;line-height:1.5}
+.trajectory-v2-drawer-activities li::marker {color:#12e3d6;font-weight:700}
+.trajectory-v2-drawer-activities p strong {color:#1be2d7}
+.trajectory-v2-role-card strong {overflow-wrap:break-word}
