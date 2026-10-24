@@ -556,3 +556,6 @@
 .sberchat-reference .msg-context__notification-action:hover {
   transform:translateY(-1px);border-color:#08e7ed;background:#0a4254;
 }
+
+.sberchat-reference .msg-chat__avatar {overflow:hidden;}
+.sberchat-reference .msg-chat__avatar img {width:100%;height:100%;object-fit:cover;border-radius:50%;}
