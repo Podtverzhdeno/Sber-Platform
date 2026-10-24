@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { writeFile } from "node:fs/promises";
 
 const actor = {
   person_id: "00000000-0000-0000-0000-000000000001",
@@ -56,6 +57,15 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow).toBeLessThanOrEqual(2);
       await page.evaluate(async () => { await document.fonts.ready; });
+      const geometrySelectors: Record<string, string[]> = {
+        passport: [".ref-primary-matrix", ".ref-passport", ".ref-action", ".ref-bottom-evidence", ".ref-bottom-chart"],
+        path: [".ref-path-hero", ".ref-gaps", ".ref-path-matrix", ".ref-history", ".ref-practice"],
+        evidence: [".ref-v3-chart", ".ref-v3-evidence", ".ref-evidence-bars", ".ref-projects", ".ref-growth"],
+      };
+      const geometry = await Promise.all((geometrySelectors[view] ?? []).map(async (selector) => ({
+        selector, rect: await root.locator(selector).boundingBox(),
+      })));
+      await writeFile(testInfo.outputPath("analytics-" + view + "-" + viewport.name + ".geometry.json"), JSON.stringify({ viewport, view, geometry }, null, 2), "utf8");
       await page.screenshot({ path: testInfo.outputPath("analytics-" + view + "-" + viewport.name + ".png"), fullPage: true, animations: "disabled" });
     }
     await root.getByRole("button", { name: "Мой маршрут" }).click();
