@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { prototypeBrandForCustomer } from "./customer-mark";
+import { prototypeBrandForCustomer } from "./customer-brand";
 import type { CatalogItem } from "./types";
 
 function customer(display_name: string, verification: CatalogItem["customer"]["verification"]) {
