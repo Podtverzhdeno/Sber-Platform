@@ -199,17 +199,39 @@ def test_every_catalog_filter_controls_real_api_results() -> None:
     api = _client(Role.PARTICIPANT)
     cases = (
         ({"q": "task-102"}, ["Задача task-102"]),
-        ({"competency": "python"}, ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"]),
+        (
+            {"competency": "python"},
+            ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"],
+        ),
         ({"competency": "unknown-skill"}, []),
-        ({"difficulty": "middle"}, ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"]),
+        (
+            {"difficulty": "middle"},
+            ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"],
+        ),
         ({"difficulty": "advanced"}, []),
-        ({"customer": "АТЛАС"}, ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"]),
-        ({"work_format": "remote"}, ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"]),
+        (
+            {"customer": "АТЛАС"},
+            ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"],
+        ),
+        (
+            {"work_format": "remote"},
+            ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"],
+        ),
         ({"work_format": "hybrid"}, []),
         ({"direction": "ml"}, []),
         ({"timeframe": "7d"}, []),
         ({"saved": "true"}, []),
-        ({"sort": "match-default", "q": "task-102", "competency": "python", "difficulty": "middle", "customer": "атлас", "work_format": "remote"}, ["Задача task-102"]),
+        (
+            {
+                "sort": "match-default",
+                "q": "task-102",
+                "competency": "python",
+                "difficulty": "middle",
+                "customer": "атлас",
+                "work_format": "remote",
+            },
+            ["Задача task-102"],
+        ),
     )
     for params, expected_titles in cases:
         response = api.get("/api/v1/me/task-recommendations", params=params)
@@ -229,4 +251,3 @@ def test_every_catalog_filter_controls_real_api_results() -> None:
     invalid = api.get("/api/v1/me/task-recommendations", params={"timeframe": "14d"})
     assert invalid.status_code == 422
     assert invalid.json()["code"] == "CATALOG_QUERY_INVALID"
-
