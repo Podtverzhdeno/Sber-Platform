@@ -247,7 +247,7 @@ export function ChatHistory({
     >
       <header className="msg-chat__header" aria-label="Заголовок чата">
         <span className="msg-chat__avatar" aria-hidden="true">
-          {channelInitial(channel)}
+          {channel?.title.trim().toLowerCase() === "маяки" ? <img src="/messages-reference/mayaki-avatar.svg" alt="" /> : channelInitial(channel)}
         </span>
         <span className="msg-chat__header-title">
           <strong>{channelTitle}</strong>
