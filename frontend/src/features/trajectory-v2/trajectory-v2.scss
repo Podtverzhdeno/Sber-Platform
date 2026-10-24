@@ -623,3 +623,6 @@
 .trajectory-v2-grades-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #24506a;border-radius:11px;padding:14px 16px;background:#0a293e}
 .trajectory-v2-grades-list li[data-current="true"]{border-color:#00d9d0;background:#074247}
 .trajectory-v2-grades-list span{color:#a8c0d4;font-size:12px}
+
+.trajectory-v2-grades-list>p{margin:0;border:1px solid #24506a;border-radius:11px;padding:14px 16px;background:#0a293e;color:#bcd2e4;line-height:1.5}
+.trajectory-v2-grades-list>p strong{color:#f0f7ff}
