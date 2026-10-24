@@ -23,7 +23,7 @@ const roadmap: RoadmapView = {
   next_step: { key: "hypotheses", position: 2, title: "Продуктовые гипотезы", purpose: "Проверить гипотезы", skill: "Продукт", target_kind: "task", target_key: "task-1", completed: false },
 };
 
-function renderSource(options: { grade?: typeof overviewFixture.concepts.career_grade } = {}) {
+function renderSource(options: { grade?: typeof overviewFixture.concepts.career_grade; stageTasks?: [] } = {}) {
   const onOpenTask = vi.fn();
   const onSelectRole = vi.fn();
   render(<SourceTrajectoryLayout
@@ -35,6 +35,7 @@ function renderSource(options: { grade?: typeof overviewFixture.concepts.career_
     grade={options.grade ?? overviewFixture.concepts.career_grade}
     nextOutcome={overviewFixture.next_outcome}
     competencies={[]}
+    stageTasks={options.stageTasks}
     onSelectRole={onSelectRole}
     onSelectStage={vi.fn()}
     onOpenRole={vi.fn()}
@@ -69,6 +70,12 @@ describe("source-first trajectory layout", () => {
     expect(screen.getByText("Проверяем")).toBeInTheDocument();
     expect(screen.getByText(/детализация отдельных заданий пока недоступна/)).toBeInTheDocument();
     expect(screen.queryByText(/150 XP|88%|12%|Грейд 5/)).not.toBeInTheDocument();
+  });
+
+  it("keeps the roadmap target actionable when the authorized work list is empty", () => {
+    renderSource({ stageTasks: [] });
+    expect(screen.getByRole("button", { name: /Продолжить/ })).toBeInTheDocument();
+    expect(screen.getByText(/Показана цель этапа из дорожной карты/)).toBeInTheDocument();
   });
 
   it("routes the authorized roadmap goal through callback, never performs a fake completion", () => {
