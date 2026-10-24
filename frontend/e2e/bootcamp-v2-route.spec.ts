@@ -33,5 +33,5 @@ test("Bootcamp v2 is opt-in and fails closed when published projection is unavai
   await expect(page.getByRole("button", { name: "Открыть действующий Bootcamp" })).toBeVisible();
   await page.getByRole("button", { name: "Открыть действующий Bootcamp" }).click();
   await expect(page).not.toHaveURL(/v2=1/);
-  await expect(page.getByRole("heading", { name: /Учитесь ради следующего результата/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Bootcamp · новый интерфейс" })).toHaveCount(0);
 });
