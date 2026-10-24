@@ -129,6 +129,7 @@ test("approved list density: ten test rows remain scannable without horizontal o
   // A 64px ceiling follows the approved 60px row rhythm with a little room for real text,
   // without cutting off full text in the selected detail panel.
   expect(data.heights.every((height) => height <= 64), `Row heights: ${data.heights.join(", ")}`).toBe(true);
+  expect(data.lastBottom, "All ten approved list rows must fit into the 1672×941 first viewport").toBeLessThanOrEqual(941);
   expect(data.columnCount).toBeGreaterThanOrEqual(8);
   expect(data.overflow).toBe(false);
   await expect(page.locator(".catalog-v2-table-match .catalog-v2-match-ring")).toHaveCount(10);
