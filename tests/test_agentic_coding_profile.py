@@ -100,7 +100,6 @@ def client() -> TestClient:
     )
 
 
-
 def test_revocation_tombstone_blocks_prior_verified_level() -> None:
     active = evidence(level=4)
     revoked = evidence(level=4, status=VerificationStatus.REVOKED)
