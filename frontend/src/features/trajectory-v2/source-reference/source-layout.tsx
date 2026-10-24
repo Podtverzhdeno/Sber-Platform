@@ -123,7 +123,7 @@ function RoleRoadmap({ roadmap, selectedStageKey, onSelectStage }: {
   const completed = roadmap.milestones.filter(stage => stage.completed).length;
   return <>
     <div className="path-label">Путь освоения роли <span className="path-explainer">{completed} завершено · {roadmap.milestones.length} этапов</span></div>
-    <div className="roadmap-steps" style={{ "--stage-count": Math.max(1, roadmap.milestones.length) } as CSSProperties} role="list" aria-label="Этапы развития роли">
+    <div className="roadmap-steps" style={{ "--stage-count": Math.max(7, roadmap.milestones.length) } as CSSProperties} role="list" aria-label="Этапы развития роли">
       {roadmap.milestones.map(stage => {
         const state = milestoneState(stage, roadmap.next_step);
         return <button
@@ -138,6 +138,20 @@ function RoleRoadmap({ roadmap, selectedStageKey, onSelectStage }: {
           <strong>{stage.position}</strong>
           <span>{stage.title}</span>
         </button>;
+      })}
+      {Array.from({ length: Math.max(0, 7 - roadmap.milestones.length) }, (_, index) => {
+        const position = roadmap.milestones.length + index + 1;
+        return <span
+          key={`unpublished-${String(position)}`}
+          className="milestone future unpublished"
+          role="listitem"
+          aria-label={`Этап ${String(position)} не опубликован`}
+          data-stage-state="unpublished"
+        >
+          <span className="milestone-circle"><SourceIcon name="lock" /></span>
+          <strong>{position}</strong>
+          <span>Не опубликован</span>
+        </span>;
       })}
     </div>
   </>;
