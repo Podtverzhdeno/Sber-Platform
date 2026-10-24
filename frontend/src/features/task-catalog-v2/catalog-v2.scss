@@ -3407,14 +3407,9 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
 }
 
 
-/* Preserve readable small-text hierarchy after first-fold compression. The
-   previous values produced 9-10px microcopy at the 1672px reference size. */
+/* Compact source-width stepper: use readable labels while retaining the
+   verified height of the skill comparison and published-benefit rail. */
 @media (min-width: 1550px) and (min-height: 850px) {
-  .catalog-v2-stage-content strong { font-size: 0.72rem; line-height: 1.12; }
-  .catalog-v2-stage-content small { font-size: 0.65rem; line-height: 1.1; }
-  .catalog-v2-plan-note { font-size: 0.64rem !important; line-height: 1.2; }
-  .catalog-v2-skill-transition b { font-size: 0.66rem; line-height: 1.2; }
-  .catalog-v2-skill-transition small { font-size: 0.61rem; line-height: 1.14; }
-  .catalog-v2-benefits-section li strong { font-size: 0.7rem; line-height: 1.2; }
-  .catalog-v2-benefits-section li p { font-size: 0.64rem; line-height: 1.22; }
+  .catalog-v2-stage-content strong { font-size: 0.7rem; line-height: 1.1; }
+  .catalog-v2-stage-content small { font-size: 0.63rem; line-height: 1.08; }
 }
