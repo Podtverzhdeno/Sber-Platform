@@ -44,7 +44,11 @@ async function openApprovedPreview(page: Page): Promise<void> {
   const menu = page.getByRole("button", { name: "Меню", exact: true });
   if (await menu.isVisible().catch(() => false)) await menu.click();
   await page.getByRole("link", { name: "Сообщения", exact: true }).click();
-  await expect(page.getByTestId("messenger-empty-state")).toBeVisible();
+  if ((page.viewportSize()?.width ?? 1440) >= 960) {
+    await expect(page.getByTestId("messenger-empty-state")).toBeVisible();
+  } else {
+    await expect(page.locator(".msg-dialog-list")).toBeVisible();
+  }
   await expect(page.locator(".msg-dialog-list__row").first()).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
 }
