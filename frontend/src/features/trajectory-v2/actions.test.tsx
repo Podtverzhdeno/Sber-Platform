@@ -186,24 +186,20 @@ describe("trajectory v2 context actions", () => {
     expect(screen.queryByTestId("trajectory-compare")).toBeNull();
   });
 
-  it("share copies only the role deep link when clipboard is available", async () => {
+  it("offers no public anonymous share, even when clipboard is available", async () => {
     shell("/workspace/1");
     await waitFor(() => {
       expect(screen.getByTestId("trajectory-actions")).toBeInTheDocument();
     });
     const writeText = vi.fn<(text: string) => Promise<void>>().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, "clipboard", {
-      value: { writeText },
-      configurable: true,
-    });
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
     openActionsMenu();
-    clickMenuItem("Скопировать общедоступную ссылку");
-    expect(writeText).toHaveBeenCalledWith(expect.stringContaining("role=python"));
-    await waitFor(() => {
-      expect(screen.getByTestId("trajectory-action-status").textContent).toContain(
-        "Скопирована общедоступная ссылка",
-      );
-    });
+    expect(screen.queryByRole("menuitem", { name: /общедоступную ссылку/ })).toBeNull();
+    clickMenuItem("Поделиться внутри Impulse…");
+    expect(screen.getByTestId("trajectory-action-status")).toHaveTextContent(
+      "Сервис внутреннего обмена пока не подключён",
+    );
+    expect(writeText).not.toHaveBeenCalled();
   });
 
   it("internal share and configure path explain unavailability instead of staying inert", async () => {
@@ -212,32 +208,15 @@ describe("trajectory v2 context actions", () => {
       expect(screen.getByTestId("trajectory-actions")).toBeInTheDocument();
     });
     openActionsMenu();
-    clickMenuItem("Внутренняя ссылка…");
+    clickMenuItem("Поделиться внутри Impulse…");
     expect(screen.getByTestId("trajectory-action-status").textContent).toContain(
-      "Внутренние recipient-scoped ссылки недоступны",
+      "Сервис внутреннего обмена пока не подключён",
     );
     openActionsMenu();
     clickMenuItem("Настроить путь");
     expect(screen.getByTestId("trajectory-action-status").textContent).toContain(
       "Конфигурирование пути недоступно",
     );
-  });
-
-  it("share reports honest failure when the clipboard is unavailable", async () => {
-    shell("/workspace/1");
-    await waitFor(() => {
-      expect(screen.getByTestId("trajectory-actions")).toBeInTheDocument();
-    });
-    if ("clipboard" in navigator) {
-      Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
-    }
-    openActionsMenu();
-    clickMenuItem("Скопировать общедоступную ссылку");
-    await waitFor(() => {
-      expect(screen.getByTestId("trajectory-action-status").textContent).toContain(
-        "Буфер обмена недоступен",
-      );
-    });
   });
 
   it("hides unselected roles and brings them back", async () => {

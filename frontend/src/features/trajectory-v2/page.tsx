@@ -4,7 +4,6 @@ import { useSearchParams } from "react-router-dom";
 
 import { StatePanel } from "../../components/ui";
 import {
-  copyText,
   loadDevelopmentOverview,
   loadRoadmaps,
   overviewQueryKey,
@@ -148,20 +147,9 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         : "Роль закреплена сверху списка (локальный приоритет, сохраняется в браузере).",
     );
   };
-  const copyShareLink = (trackKey: string) => {
-    const url = new URL(window.location.href);
-    url.search = `?role=${encodeURIComponent(trackKey)}`;
-    void copyText(url.toString()).then((ok) => {
-      setActionFeedback(
-        ok
-          ? "Скопирована общедоступная ссылка: только выбранный трек, без персональных данных."
-          : "Буфер обмена недоступен: скопируйте адрес страницы вручную.",
-      );
-    });
-  };
   const internalShare = () => {
     setActionFeedback(
-      "Внутренние recipient-scoped ссылки недоступны: сервис обмена не подключён.",
+      "Доступ по ссылке возможен только для конкретного получателя с ограниченным сроком и отзывом. Сервис внутреннего обмена пока не подключён.",
     );
   };
   const configurePath = () => {
@@ -248,9 +236,6 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               compareTarget={compareTarget}
               feedback={actionFeedback}
               compare={compareRoles}
-              copyLink={() => {
-                copyShareLink(selected.track_key);
-              }}
               internalShare={internalShare}
               togglePin={() => {
                 togglePin(selected.track_key);
@@ -374,7 +359,6 @@ export function RoleDetailPanel(props: {
   compareTarget: string | null;
   feedback: string | null;
   compare: (trackKey: string | null) => void;
-  copyLink: () => void;
   internalShare: () => void;
   togglePin: () => void;
   toggleHiddenUnselected: () => void;
@@ -407,7 +391,6 @@ export function RoleDetailPanel(props: {
           compareTarget={props.compareTarget}
           feedback={props.feedback}
           compare={props.compare}
-          copyLink={props.copyLink}
           internalShare={props.internalShare}
           togglePin={props.togglePin}
           toggleHiddenUnselected={props.toggleHiddenUnselected}
