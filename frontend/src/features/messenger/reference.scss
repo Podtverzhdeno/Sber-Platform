@@ -1021,3 +1021,26 @@
 .sberchat-reference[data-message-state="empty"] .msg-dialog-list__row-text {
   gap:2px;
 }
+
+
+/* Reaction toolbar must float on hover/focus, not reserve 30px inside every
+   bubble. The prior block flow pushed opening reference messages offscreen. */
+.sberchat-reference .msg-chat__bubble {position:relative;}
+.sberchat-reference .msg-chat__actions {
+  position:absolute;top:-33px;right:7px;z-index:4;
+  display:flex;align-items:center;gap:4px;
+  padding:3px 5px;border:1px solid #17506b;
+  border-radius:8px;background:#082841;
+  box-shadow:0 8px 18px #001624b0;
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .17s ease,visibility .17s ease;
+}
+.sberchat-reference .msg-chat__actions .msg-chat__action {
+  opacity:1;width:26px;height:26px;flex:none;
+}
+.sberchat-reference .msg-chat__bubble:hover .msg-chat__actions,
+.sberchat-reference .msg-chat__group:focus-within .msg-chat__actions {
+  opacity:1;visibility:visible;pointer-events:auto;
+}
+.sberchat-reference .msg-chat__bubble-body {line-height:1.42;}
+.sberchat-reference .msg-chat__meta {margin-top:4px;justify-content:flex-end;}
