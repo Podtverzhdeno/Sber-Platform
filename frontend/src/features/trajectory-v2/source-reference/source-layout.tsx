@@ -123,7 +123,7 @@ function RoleRoadmap({ roadmap, selectedStageKey, onSelectStage }: {
   const completed = roadmap.milestones.filter(stage => stage.completed).length;
   return <>
     <div className="path-label">Путь освоения роли <span className="path-explainer">{completed} завершено · {roadmap.milestones.length} этапов</span></div>
-    <div className="roadmap-steps" style={{ "--stage-count": Math.max(7, roadmap.milestones.length) } as CSSProperties} role="list" aria-label="Этапы развития роли">
+    <div className="roadmap-steps" style={{ "--stage-count": Math.max(7, roadmap.milestones.length), "--completed-width": `${String(Math.round(100 * completed / Math.max(1, Math.max(7, roadmap.milestones.length) - 1)))}%` } as CSSProperties} role="list" aria-label="Этапы развития роли">
       {roadmap.milestones.map(stage => {
         const state = milestoneState(stage, roadmap.next_step);
         return <button
