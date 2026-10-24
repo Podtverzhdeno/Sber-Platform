@@ -270,6 +270,31 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           )}
         </section>
       </div>
+      <aside className="trajectory-v2-reference-sidebar" aria-label="Карьерный прогресс и следующий шаг">
+        <section className="trajectory-v2-grade-panel">
+          <header><h3>Твой грейд</h3><span>Карьерный уровень</span></header>
+          <div className="trajectory-v2-grade-body">
+            <div className="trajectory-v2-grade-ring"><strong>{overview.concepts.career_grade.current_grade === null ? "—" : `Грейд ${overview.concepts.career_grade.current_grade}`}</strong><small>{selected?.title ?? "Моя роль"}</small></div>
+            <div className="trajectory-v2-grade-progress">
+              <small>До следующего грейда</small>
+              <strong>{overview.concepts.career_grade.readiness_percent === null ? "Проверяем" : `${String(100 - overview.concepts.career_grade.readiness_percent)}%`}</strong>
+              <progress max={100} value={overview.concepts.career_grade.readiness_percent ?? 0} aria-label="Готовность к следующему грейду" />
+              <small>{overview.concepts.career_grade.hint ?? overview.concepts.career_grade.reason ?? "По проверенным результатам"}</small>
+            </div>
+          </div>
+          <p>{overview.concepts.career_grade.state === "ready" ? "Прогресс подтверждён" : "Грейд рассчитывается по серверной политике и проверенным результатам"}</p>
+        </section>
+        <section className="trajectory-v2-next-panel">
+          <header><h3>Следующий шаг</h3><span>{overview.next_outcome?.trajectory_title ?? "Маршрут"}</span></header>
+          <strong>{overview.next_outcome?.target_title ?? "Следующий шаг пока не назначен"}</strong>
+          <p>{overview.next_outcome?.stale_reason ?? "Продолжайте маршрут после подтверждения результата"}</p>
+          {overview.next_outcome !== null && <button type="button" onClick={() => openStageDetails(overview.next_outcome!.milestone_key)}>Посмотреть →</button>}
+        </section>
+        <section className="trajectory-v2-passport-panel">
+          <header><h3>Мой скилл-паспорт</h3></header>
+          <p>Подтверждённые компетенции и цифровые следы доступны в разделе портфолио. Учебный прогресс не является подтверждённым уровнем компетенции.</p>
+        </section>
+      </aside>
       {roleInfoOpen && selected !== null ? (
         <RoleInfoDialog
           role={selected}
