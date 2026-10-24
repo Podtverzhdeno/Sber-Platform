@@ -476,6 +476,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
       {roleInfoOpen && selected !== null ? (
         <RoleInfoDialog
           role={selected}
+          primary={selected.track_key === primaryKey}
           roadmap={selectedRoadmap}
           onClose={closeOverlays}
           triggerRef={lastOverlayTriggerRef}
