@@ -805,3 +805,43 @@
     width:auto;height:auto;min-height:0;
   }
 }
+
+
+/* Structured file cards: no invented KB/MB or fake download buttons. */
+.sberchat-reference .msg-chat__artifact-refs {
+  display:grid;gap:7px;list-style:none;margin:11px 0 0;padding:0;
+}
+.sberchat-reference .msg-chat__artifact-ref {
+  position:relative;display:grid;grid-template-columns:40px minmax(0,1fr) 30px;
+  align-items:center;gap:9px;min-height:54px;
+  padding:7px 9px;border-radius:10px;
+  border:1px solid #155873;
+  background:linear-gradient(110deg,#06364d,#05253d);
+}
+.sberchat-reference .msg-chat__artifact-icon {
+  display:grid;place-items:center;width:35px;height:40px;
+  border-radius:7px;background:#082d45;
+  color:#f4fbff;
+}
+.sberchat-reference .msg-chat__artifact-label {
+  min-width:0;display:grid;gap:5px;text-align:left;
+}
+.sberchat-reference .msg-chat__artifact-label strong {
+  display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:12px;font-weight:700;color:#f0f9ff;
+}
+.sberchat-reference .msg-chat__artifact-label small {
+  color:#98b8d9;font-size:10.5px;
+}
+.sberchat-reference .msg-chat__artifact-action {
+  display:grid;place-items:center;width:30px;height:30px;
+  border:0;border-radius:8px;background:transparent;
+  color:#c7dfff;cursor:pointer;text-decoration:none;
+  transition:background .17s,color .17s,transform .17s;
+}
+.sberchat-reference .msg-chat__artifact-action:hover {
+  color:#1afff4;background:#0d4961;transform:translateY(-1px);
+}
+.sberchat-reference .msg-chat__artifact-status {
+  grid-column:2/4;color:#42efca;font-size:10px;
+}
