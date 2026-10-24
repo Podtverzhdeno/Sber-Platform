@@ -50,6 +50,7 @@ const roadmapFixture: RoadmapView = {
       target_kind: "course",
       target_key: "python-base",
       completed: true,
+      deliverable: null,
     },
     {
       key: "api",
@@ -60,6 +61,7 @@ const roadmapFixture: RoadmapView = {
       target_kind: "course",
       target_key: "python-api",
       completed: false,
+      deliverable: null,
     },
     {
       key: "capstone",
@@ -70,6 +72,7 @@ const roadmapFixture: RoadmapView = {
       target_kind: "task",
       target_key: "demo-task-1",
       completed: false,
+      deliverable: null,
     },
   ],
   next_step: null,
@@ -208,6 +211,7 @@ describe("trajectory v2 task/evidence drawer", () => {
       target_kind: "task",
       target_key: "demo-task-1",
       completed: true,
+      deliverable: null,
     };
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ navigation: DEFAULT_NAVIGATION }), { status: 200 }),
