@@ -2,7 +2,7 @@ import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
 import { HomeNavigationIcon } from "./features/participant-home-v2/nav-icon";
-import { Gift } from "lucide-react";
+import { Bell, Gift, Search } from "lucide-react";
 import { BootcampV2Route } from "./features/bootcamp/route-v2";
 import { TrajectoryV2 } from "./features/trajectory-v2/page";
 import { TaskCatalogV2 } from "./features/task-catalog-v2/page";
@@ -1492,7 +1492,7 @@ function ImpulseApp() {
         {actor ? (
           <>
             <div className="global-search">
-              <span aria-hidden="true">⌕</span>
+              <span aria-hidden="true" className="home-search-icon"><Search size={19} /></span>
               <label className="sr-only" htmlFor="global-search">
                 Глобальный поиск
               </label>
@@ -1508,9 +1508,10 @@ function ImpulseApp() {
                   setSearch(event.target.value);
                   setSearchOpen(true);
                 }}
-                placeholder="Поиск по задачам, курсам, людям и сообщениям…"
+                placeholder={actor.active_role === "participant" ? "Поиск по задачам, навыкам, проектам..." : "Поиск по задачам, курсам, людям и сообщениям…"}
                 autoComplete="off"
               />
+              {actor.active_role === "participant" && <kbd className="home-search-shortcut" aria-hidden="true">⌘ K</kbd>}
               {searchOpen && search.trim().length > 1 && (
                 <div
                   className="global-search-results"
@@ -1583,7 +1584,7 @@ function ImpulseApp() {
                     setSearchOpen(false);
                   }}
                 >
-                  ♢
+                  {actor.active_role === "participant" ? <Bell size={24} aria-hidden="true" /> : "♢"}
                   {unreadCount > 0 && (
                     <i aria-hidden="true">{unreadCount}</i>
                   )}
