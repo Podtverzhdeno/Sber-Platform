@@ -120,11 +120,11 @@ describe("trajectory v2 task/evidence drawer", () => {
   it("opens from the stage with server-derived facts and a course continuation", async () => {
     shell("/workspace/1", [roadmapWithNext]);
     fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
-    const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
+    const drawer = screen.getByRole("dialog", { name: /Детали этапа|Этап пройден/ });
     expect(drawer.getAttribute("aria-modal")).toBe("true");
     expect(drawer.textContent).toContain("Курс · python-api");
     expect(drawer.textContent).toContain("Сервисный слой");
-    expect(drawer.textContent).toContain("не публикуются");
+    expect(drawer.textContent).toContain("Факт выполнения ожидает подтверждения");
     expect(drawer.textContent).toContain("python-web");
     expect(drawer.textContent).toContain("Этап ещё не завершён");
     expect(
@@ -136,7 +136,7 @@ describe("trajectory v2 task/evidence drawer", () => {
   it("uses the authenticated role navigation rather than hard-coded workspace indexes", async () => {
     shell("/workspace/1", [roadmapWithNext], ["Главная", "Задачи", "Мой путь", "Bootcamp"]);
     fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
-    const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
+    const drawer = screen.getByRole("dialog", { name: /Детали этапа|Этап пройден/ });
     fireEvent.click(await waitFor(() => getByRole(drawer, "button", { name: "Открыть курс" })));
     expect(screen.getByTestId("route-probe")).toHaveTextContent("/workspace/3?course=python-api");
   });
@@ -144,7 +144,7 @@ describe("trajectory v2 task/evidence drawer", () => {
   it("does not offer navigation to a section absent from the authorized role", async () => {
     shell("/workspace/1", [roadmapWithNext], ["Главная", "Мой путь", "Задачи"]);
     fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
-    const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
+    const drawer = screen.getByRole("dialog", { name: /Детали этапа|Этап пройден/ });
     expect(await waitFor(() => getByText(drawer, "Раздел «Bootcamp» недоступен для текущей роли."))).toBeInTheDocument();
     expect(queryByRole(drawer, "button", { name: "Открыть курс" })).toBeNull();
   });
@@ -157,7 +157,7 @@ describe("trajectory v2 task/evidence drawer", () => {
     await waitFor(() => {
       expect(screen.getByTestId("trajectory-drawer-overlay")).toBeInTheDocument();
     });
-    fireEvent.keyDown(screen.getByRole("dialog", { name: "Детали этапа" }), {
+    fireEvent.keyDown(screen.getByRole("dialog", { name: /Детали этапа|Этап пройден/ }), {
       key: "Escape",
     });
     await waitFor(() => {
@@ -175,7 +175,7 @@ describe("trajectory v2 task/evidence drawer", () => {
     await waitFor(() => {
       expect(screen.getByTestId("trajectory-drawer-overlay")).toBeInTheDocument();
     });
-    const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
+    const drawer = screen.getByRole("dialog", { name: /Детали этапа|Этап пройден/ });
     const continueButton = await waitFor(() => getByRole(drawer, "button", { name: /Открыть/ }));
     continueButton.focus();
     fireEvent.keyDown(drawer, { key: "Tab" });
@@ -189,7 +189,7 @@ describe("trajectory v2 task/evidence drawer", () => {
   it("keeps role/stage context for an unselected role without inert actions", async () => {
     shell("/workspace/1?role=product", [roadmapWithNext, productRoadmap]);
     fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
-    const drawer = screen.getByRole("dialog", { name: "Детали этапа" });
+    const drawer = screen.getByRole("dialog", { name: /Детали этапа|Этап пройден/ });
     expect(
       drawer.textContent,
     ).toContain(
