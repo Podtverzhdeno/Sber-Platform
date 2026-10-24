@@ -3216,3 +3216,34 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
 @media (min-width: 1550px) and (min-height: 850px) {
   .catalog-v2-stage-duration { display: inline; }
 }
+
+
+/* The approved first screen keeps the primary decision actions in view.
+   Sticky actions move only within the selected task detail; no information is
+   removed, and they return to the normal document flow on narrow screens. */
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2-detail-footer {
+    position: sticky;
+    z-index: 3;
+    bottom: 0;
+    padding: 7px 0 2px !important;
+    background: var(--catalog-surface);
+    box-shadow: 0 -5px 10px -9px rgb(0 0 0 / 25%);
+  }
+
+  .catalog-v2-support-section {
+    min-height: 30px;
+    padding-block: 3px !important;
+  }
+  .catalog-v2-reasons-disclosure > summary {
+    min-height: 30px;
+  }
+  .catalog-v2-stage-track > li .catalog-v2-stage-content {
+    gap: 2px;
+    padding-top: 3px;
+  }
+  .catalog-v2-detail-grid .catalog-v2-stage-track {
+    padding-top: 5px;
+    padding-bottom: 0;
+  }
+}
