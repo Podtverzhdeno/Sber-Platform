@@ -251,3 +251,19 @@ def test_every_catalog_filter_controls_real_api_results() -> None:
     invalid = api.get("/api/v1/me/task-recommendations", params={"timeframe": "14d"})
     assert invalid.status_code == 422
     assert invalid.json()["code"] == "CATALOG_QUERY_INVALID"
+
+
+def test_product_filter_parameters_are_enforced_by_real_http_api() -> None:
+    api = _client(Role.PARTICIPANT)
+    scenarios = (
+        ({"mentored": "true"}, 0),
+        ({"portfolio": "true"}, 0),
+        ({"available": "true"}, 3),
+        ({"available": "false"}, 1),
+        ({"mentored": "true", "portfolio": "true"}, 0),
+    )
+    for params, count in scenarios:
+        response = api.get("/api/v1/me/task-recommendations", params=params)
+        assert response.status_code == 200, (params, response.text)
+        assert response.json()["total_found"] == count
+        assert len(response.json()["items"]) == count

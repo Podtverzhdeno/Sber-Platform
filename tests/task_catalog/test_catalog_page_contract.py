@@ -13,7 +13,9 @@ import pytest
 
 from impulse.application.task_catalog import (
     ApplicationState,
+    BenefitState,
     CatalogAction,
+    ConditionalBenefit,
     CustomerSummary,
     CustomerVerification,
     EligibilityProjection,
@@ -298,3 +300,47 @@ def test_timeframe_rejects_unknown_windows_and_excludes_missing_deadlines() -> N
         CatalogQuery(timeframe="1y")
     page = build_catalog_page(items(), CatalogQuery(timeframe="7d", page_size=10))
     assert page.items == ()
+
+
+def test_product_filters_for_mentor_portfolio_and_open_application() -> None:
+    """Filter the authoritative projection before pagination, not the first UI page."""
+    base = items()
+    mentor = replace(base[0], support_model="mentor_review")
+    portfolio = replace(
+        base[1],
+        benefits=(
+            ConditionalBenefit(
+                code="portfolio-case",
+                label="Кейс в портфолио",
+                state=BenefitState.POTENTIAL,
+                condition="Только после приёмки результата",
+                sources=(source(),),
+                benefit_type="portfolio",
+            ),
+        ),
+    )
+    closed = replace(
+        base[2],
+        application_state=ApplicationState.SUBMITTED,
+        allowed_actions=frozenset({CatalogAction.OPEN_CONDITIONS}),
+    )
+    catalog = (mentor, portfolio, closed, base[3])
+    def titles(**params: bool) -> list[str]:
+        page = build_catalog_page(catalog, CatalogQuery(page_size=10, **params))
+        return [item.title for item in page.items]
+
+    assert titles(mentored=True) == [mentor.title]
+    assert titles(portfolio=True) == [portfolio.title]
+    assert titles(available=True) == [portfolio.title, mentor.title]
+    assert titles(available=False) == [closed.title, base[3].title]
+    assert titles(mentored=True, portfolio=True) == []
+    assert titles(mentored=False, portfolio=False, available=True) == []
+    assert build_catalog_page(catalog, CatalogQuery(mentored=True)).total_found == 1
+
+    first = build_catalog_page(catalog, CatalogQuery(mentored=True, page_size=1))
+    if first.next_cursor is not None:
+        with pytest.raises(CatalogQueryError, match="different query"):
+            build_catalog_page(
+                catalog,
+                CatalogQuery(mentored=False, page_size=1, cursor=first.next_cursor),
+            )

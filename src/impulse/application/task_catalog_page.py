@@ -24,6 +24,9 @@ from uuid import UUID
 
 from impulse.api.errors import ApiError
 from impulse.application.task_catalog import (
+    ApplicationState,
+    BenefitState,
+    CatalogAction,
     CatalogContractError,
     EligibilityStatus,
     MatchStatus,
@@ -74,6 +77,9 @@ class CatalogQuery:
     direction: str | None = None
     timeframe: str | None = None
     saved: bool | None = None
+    mentored: bool | None = None
+    portfolio: bool | None = None
+    available: bool | None = None
     sort: str = MATCH_SORT
     page_size: int = DEFAULT_PAGE_SIZE
     cursor: str | None = None
@@ -112,6 +118,9 @@ class CatalogQuery:
                 "direction": self.direction,
                 "timeframe": self.timeframe,
                 "saved": self.saved,
+                "mentored": self.mentored,
+                "portfolio": self.portfolio,
+                "available": self.available,
                 "sort": self.sort,
             },
             ensure_ascii=False,
@@ -223,6 +232,22 @@ def _matches_filters(item: TaskRecommendationProjection, query: CatalogQuery) ->
         ):
             return False
     if query.saved is not None and item.bookmarked is not query.saved:
+        return False
+    has_mentor = item.support_model in {"mentor", "mentor_review", "team_review"}
+    if query.mentored is not None and has_mentor is not query.mentored:
+        return False
+    portfolio_potential = any(
+        benefit.benefit_type == "portfolio" and benefit.state is not BenefitState.UNAVAILABLE
+        for benefit in item.benefits
+    )
+    if query.portfolio is not None and portfolio_potential is not query.portfolio:
+        return False
+    can_apply = (
+        item.eligibility.status is EligibilityStatus.ELIGIBLE
+        and item.application_state is ApplicationState.NONE
+        and CatalogAction.APPLY in item.allowed_actions
+    )
+    if query.available is not None and can_apply is not query.available:
         return False
     return True
 
