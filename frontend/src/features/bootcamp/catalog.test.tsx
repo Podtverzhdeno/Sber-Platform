@@ -397,4 +397,52 @@ describe("Bootcamp catalog states and filters (22.15)", () => {
     expect(screen.getByText(/не найден в актуальном каталоге/)).toBeInTheDocument();
     expect(screen.queryByTestId("course-ghost-course")).not.toBeInTheDocument();
   });
+  it("restores the approved category state and keeps selected direction on reset", async () => {
+    installFetch();
+    renderCatalog("/workspace/3?track=python&category=required&view=list");
+    await screen.findByTestId("course-openspec-sdd");
+    expect(screen.queryByTestId("course-greenhouse-esg")).not.toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "Каталог Bootcamp списком" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Сбросить" }));
+    await waitFor(() => {
+      expect(screen.getByTestId("route").textContent).toContain("track=python");
+      expect(screen.getByTestId("route").textContent).not.toContain("category=required");
+    });
+    expect(screen.getByLabelText("Уровень курса")).toBeDisabled();
+    expect(screen.getByText(/не является процентом готовности к грейду/)).toBeInTheDocument();
+  });
+
+  it("opens an accessible course detail drawer, switches tabs, and explains recommendation", async () => {
+    installFetch();
+    renderCatalog("/workspace/3");
+    const card = await screen.findByTestId("course-openspec-sdd");
+    fireEvent.click(within(card).getByRole("button", { name: "Подробнее →" }));
+    let dialog = await screen.findByRole("dialog", { name: "Информация о курсе" });
+    expect(dialog).toHaveTextContent("OpenSpec");
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Программа" }));
+    expect(within(dialog).getByText(/не переданы источником обучения/)).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Навыки" }));
+    expect(within(dialog).getByText(/Прогноз не равен подтверждённому уровню/)).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Почему рекомендован" }));
+    dialog = await screen.findByRole("dialog", { name: "Почему рекомендован" });
+    expect(within(dialog).getByText(/Ожидаемое развитие навыка/)).toBeInTheDocument();
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.getByTestId("route").textContent).not.toContain("course=");
+  });
+
+  it("shows only unfinished course requirements and no fabricated grade readiness", async () => {
+    installFetch();
+    renderCatalog("/workspace/3");
+    await screen.findByTestId("course-openspec-sdd");
+    fireEvent.click(screen.getByRole("button", { name: "Посмотреть требования →" }));
+    const dialog = await screen.findByRole("dialog", { name: "Требования к обучению" });
+    expect(dialog).toHaveTextContent("OpenSpec и SDD");
+    expect(dialog).not.toHaveTextContent("Отчётность ESG");
+    expect(dialog).toHaveTextContent("Полный набор требований к грейду");
+    fireEvent.click(within(dialog).getAllByRole("button", { name: "Посмотреть →" })[0]!);
+    expect(await screen.findByRole("dialog", { name: "Информация о курсе" })).toBeInTheDocument();
+  });
+
 });
