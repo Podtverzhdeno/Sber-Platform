@@ -7772,8 +7772,11 @@ export interface components {
             activities?: string[];
             /** Completed */
             completed: boolean;
-            /** Deliverable */
-            deliverable?: string | null;
+            /**
+             * Deliverable
+             * @default null
+             */
+            deliverable: string | null;
             /** Key */
             key: string;
             /** Position */

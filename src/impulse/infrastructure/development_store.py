@@ -150,12 +150,14 @@ class SqlDevelopmentStore(DevelopmentStore):
                     target_kind=str(row["payload"].get("target_kind", "course")),
                     target_key=str(row["payload"].get("target_key", "demo-course-1")),
                     activities=tuple(
-                        str(item) for item in row["payload"].get("activities", [])
+                        str(item)
+                        for item in row["payload"].get("activities", [])
                         if isinstance(item, str)
                     ),
                     deliverable=(
                         str(row["payload"]["deliverable"])
-                        if row["payload"].get("deliverable") else None
+                        if row["payload"].get("deliverable")
+                        else None
                     ),
                 )
                 for row in rows

@@ -234,11 +234,13 @@ async def roadmap_catalog(
                 policy_version=projection.policy_version,
                 replacement_reason=projection.replacement_reason,
                 milestones=[
-                    _milestone_view(item, projection.completed_keys) for item in projection.milestones
+                    _milestone_view(item, projection.completed_keys)
+                    for item in projection.milestones
                 ],
                 next_step=(
                     _milestone_view(projection.next_step, projection.completed_keys)
-                    if projection.next_step is not None else None
+                    if projection.next_step is not None
+                    else None
                 ),
             )
         )

@@ -152,10 +152,7 @@ PERSONAS = (
     ("operator-pavel", "Павел Оператор", "operator"),
 )
 # Stable keys keep existing track IDs, attempts, progress and deep links intact.
-TRACKS = tuple(
-    (slug, str(profile["title"]))
-    for slug, profile in AI_ROLE_PROFILES.items()
-)
+TRACKS = tuple((slug, str(profile["title"])) for slug, profile in AI_ROLE_PROFILES.items())
 
 COURSES = (
     "OpenSpec и SDD",

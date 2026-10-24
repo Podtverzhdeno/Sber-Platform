@@ -645,7 +645,9 @@ class DevelopmentService:
         and frozen roles may display only this participant's own progress.
         """
         self._participant(actor)
-        attempts = {attempt.track_key: attempt for attempt in await self.store.attempts(actor.person_id)}
+        attempts = {
+            attempt.track_key: attempt for attempt in await self.store.attempts(actor.person_id)
+        }
         result: list[RoadmapProjection] = []
         for track in await self.store.tracks():
             record = await self.store.roadmap(track.key)

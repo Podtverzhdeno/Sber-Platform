@@ -4,11 +4,12 @@ Role keys remain stable (legacy deep links and participant progress).
 All published stages contain one canonical course/task target and three
 learning activities, which are *planned actions*, never fabricated completions.
 """
+
 from __future__ import annotations
 
 import json
 
-AI_ROLE_PROFILES: dict[str, dict] = json.loads(r'''{
+AI_ROLE_PROFILES: dict[str, dict] = json.loads(r"""{
   "product": {
     "title": "AI Architect",
     "description": "Проектирует надёжные корпоративные AI-системы, определяет границы сервисов, интеграции и критерии качества.",
@@ -688,10 +689,12 @@ AI_ROLE_PROFILES: dict[str, dict] = json.loads(r'''{
       }
     ]
   }
-}''')
+}""")
+
 
 def role_title(track_key: str) -> str:
     return str(AI_ROLE_PROFILES[track_key]["title"])
+
 
 def role_description(track_key: str) -> str:
     return str(AI_ROLE_PROFILES[track_key]["description"])
