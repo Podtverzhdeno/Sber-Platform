@@ -1373,3 +1373,52 @@
     font-size:10px;
   }
 }
+
+
+@media (max-width: 660px) {
+  .workspace-content .trajectory-v2-role-card strong {
+    font-size: 11px;
+    min-height: 25px;
+    max-width:100%;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .workspace-content .trajectory-v2-detail-controls {
+    display:flex;
+    justify-content:flex-end;
+    width:100%;
+    margin-top:8px;
+  }
+  .workspace-content .trajectory-v2-role-detail {
+    padding: 14px 14px 10px;
+    gap: 8px;
+  }
+  .workspace-content .trajectory-v2-stage-block {
+    gap: 7px;
+  }
+  .workspace-content .trajectory-v2-stage-path {
+    padding-top: 3px;
+    padding-bottom: 0;
+  }
+  .page-shell:has(.trajectory-v2) .topbar .top-persona,
+  .page-shell:has(.trajectory-v2) .topbar .mini-avatar {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    max-width: 34px;
+    max-height: 34px;
+    overflow: hidden;
+    border-radius: 50%;
+  }
+  .page-shell:has(.trajectory-v2) .topbar .top-persona img,
+  .page-shell:has(.trajectory-v2) .topbar .mini-avatar img {
+    width:100%;height:100%;object-fit:cover;
+  }
+  .page-shell:has(.trajectory-v2) .topbar .global-search input::placeholder {
+    font-size:11px;
+    color:#819db7;
+    opacity:1;
+  }
+}
