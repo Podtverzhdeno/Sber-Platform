@@ -41,8 +41,8 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
     { track_key: "data", title: "Аналитик данных", state: "unselected", attempt_number: null, completed_milestones: 0, total_milestones: 0 },
   ];
   const milestones = ["База и основы", "Исследование пользователей", "Продуктовые гипотезы", "Метрики и приоритизация", "Реальные задачи и проекты", "Подтверждение компетенций", "Новые возможности"].map((title, index) => ({
-    key: `m${index+1}`, position: index+1, title, purpose: `Практика: ${title}`,
-    skill: "Аналитика данных", target_kind: "task", target_key: `reference-task-${index+1}`, completed: index < 2,
+    key: `m${String(index+1)}`, position: index+1, title, purpose: `Практика: ${title}`,
+    skill: "Аналитика данных", target_kind: "task", target_key: `reference-task-${String(index+1)}`, completed: index < 2,
   }));
   const overview = {
     as_of: "2026-10-24T19:00:00Z",
