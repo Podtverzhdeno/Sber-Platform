@@ -1,0 +1,58 @@
+name: AI Career Trajectory QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/impulse/bootstrap/ai_role_catalog.py"
+      - "src/impulse/bootstrap/demo_seed.py"
+      - "src/impulse/application/development.py"
+      - "src/impulse/infrastructure/development_store.py"
+      - "src/impulse/api/v1/development.py"
+      - "frontend/src/features/trajectory-v2/**"
+      - "frontend/src/api/schema.ts"
+      - "frontend/e2e/trajectory-v2-route.spec.ts"
+      - "tests/test_demo_seed_graph.py"
+      - "openapi.json"
+      - ".github/workflows/ai-trajectory-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ai-career-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  python-catalog:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Check Python formatting and lint
+        run: |
+          uv run ruff format --check src/impulse/bootstrap/ai_role_catalog.py src/impulse/bootstrap/demo_seed.py src/impulse/application/development.py src/impulse/infrastructure/development_store.py src/impulse/api/v1/development.py
+          uv run ruff check src/impulse/bootstrap/ai_role_catalog.py src/impulse/bootstrap/demo_seed.py src/impulse/application/development.py src/impulse/infrastructure/development_store.py src/impulse/api/v1/development.py
+      - name: Validate seven AI role catalog and graph
+        run: uv run pytest -q tests/test_demo_seed_graph.py tests/task_catalog/test_demo_seed.py
+  types-and-lint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - name: Verify API contract, lint and TypeScript
+        run: |
+          npm run api:check
+          npm run lint
+          npm run typecheck
