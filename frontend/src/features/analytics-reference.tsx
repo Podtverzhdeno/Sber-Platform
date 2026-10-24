@@ -64,19 +64,33 @@ function trustedProfile(profile: AgenticServerProfile | undefined, role: RoleKey
 function pString(level: number | null): string { return level === null ? "—" : String(level); }
 function monthSeries(snapshot: Snapshot | undefined, period: number): { name: string; total: number; verified: number }[] | null {
   if (!snapshot?.freshness.known || !snapshot.events?.length) return null;
-  const now = new Date(snapshot.generated_at);
-  if (!Number.isFinite(now.getTime())) return null;
+  let dateParts: Intl.DateTimeFormat;
+  try {
+    dateParts = new Intl.DateTimeFormat("en-US", { timeZone: snapshot.actor_timezone, year: "numeric", month: "numeric" });
+  } catch {
+    return null;
+  }
+  const localYearMonth = (dateString: string): { year: number; month: number } | null => {
+    const date = new Date(dateString);
+    if (!Number.isFinite(date.getTime())) return null;
+    const parts = dateParts.formatToParts(date);
+    const year = Number(parts.find((part) => part.type === "year")?.value ?? NaN);
+    const month = Number(parts.find((part) => part.type === "month")?.value ?? NaN);
+    return Number.isFinite(year) && Number.isFinite(month) ? { year, month } : null;
+  };
+  const current = localYearMonth(snapshot.generated_at);
+  if (current === null) return null;
   const result = Array.from({ length: period }, (_, i) => {
-    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - period + i + 1, 1));
-    return { name: monthShort[d.getUTCMonth()] ?? "", year: d.getUTCFullYear(), month: d.getUTCMonth(), total: 0, verified: 0 };
+    const d = new Date(Date.UTC(current.year, current.month - period + i, 1));
+    return { name: monthShort[d.getUTCMonth()] ?? "", year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, total: 0, verified: 0 };
   });
   for (const event of snapshot.events) {
-    const d = new Date(event.occurred_at);
-    if (!Number.isFinite(d.getTime())) continue;
-    const month = result.find((bucket) => bucket.year === d.getUTCFullYear() && bucket.month === d.getUTCMonth());
-    if (month) {
-      month.total += 1;
-      if (event.source_ref && event.source_kind) month.verified += 1;
+    const recorded = localYearMonth(event.occurred_at);
+    if (recorded === null) continue;
+    const bucket = result.find((item) => item.year === recorded.year && item.month === recorded.month);
+    if (bucket) {
+      bucket.total += 1;
+      if (event.source_ref && event.source_kind) bucket.verified += 1;
     }
   }
   return result.map(({ name, total, verified }) => ({ name, total, verified }));
