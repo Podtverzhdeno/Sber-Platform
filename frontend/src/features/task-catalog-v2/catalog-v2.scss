@@ -3047,3 +3047,16 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
     line-height: 1.4;
   }
 }
+
+
+/* On narrow screens the help trigger is left-aligned; anchor its floating
+   explanation to that same edge so no guidance gets clipped off-screen. */
+@media (max-width: 680px) {
+  .catalog-v2-help > p {
+    left: 0;
+    right: auto;
+    width: min(320px, calc(100vw - 28px));
+    max-width: calc(100vw - 28px);
+    overflow-wrap: anywhere;
+  }
+}
