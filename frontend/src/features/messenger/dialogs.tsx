@@ -34,6 +34,7 @@ import {
   writeDialogScroll,
   type KeyValueStorage,
 } from "./view-model";
+import { DialogAvatar } from "./dialog-avatar";
 import "./dialogs.scss";
 
 const windowStorage = (): KeyValueStorage => window.localStorage;
@@ -349,9 +350,7 @@ export function DialogList({
                       onSelect(row.channel.id);
                     }}
                   >
-                    <span className="msg-dialog-list__avatar" aria-hidden="true">
-                      {row.title.trim().toLowerCase() === "маяки" ? <img src="/messages-reference/mayaki-avatar.svg" alt="" /> : row.initial}
-                    </span>
+                    <DialogAvatar title={row.title} initials={row.initial} />
                     <span className="msg-dialog-list__row-text">
                       <span className="msg-dialog-list__row-title">
                         <strong>{row.title}</strong>
