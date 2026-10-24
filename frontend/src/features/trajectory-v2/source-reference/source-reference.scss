@@ -1,0 +1,197 @@
+/* Source-first port. Measurements and palette are taken from source
+   styles.css in the user-provided Impulse Trajectory ZIP, not approximated
+   from the current production screenshot. Scoped to avoid workspace leaks. */
+.trj-source {
+  --bg:#04111e;--surface:#071b2d;--surface-raised:#0a2136;
+  --border:#17364d;--border-strong:#20637a;--text:#f2f6fc;
+  --muted:#a0b5ce;--turquoise:#16f0e6;--aqua:#08cddc;
+  --blue:#2999ff;--amber:#f6bc3e;--danger:#ff465d;
+  --radius:14px;
+  color:var(--text);font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  min-width:0;width:100%;max-width:100%;padding:0 0 20px;
+}
+.trj-source,.trj-source *,.trj-source *::before,.trj-source *::after{box-sizing:border-box}
+.trj-source button{font:inherit;cursor:pointer;color:inherit}
+.trj-source button:focus-visible{outline:2px solid var(--turquoise);outline-offset:3px}
+.trj-source svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.7;flex-shrink:0}
+.trj-source h1,.trj-source h2,.trj-source h3,.trj-source h4,.trj-source p{margin-top:0}
+.trj-source .heading-row{display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:102px;overflow:hidden;margin:0 0 15px}
+.trj-source .heading-copy h1{font-size:31px;letter-spacing:-.04em;line-height:1.13;margin:0 0 6px;font-weight:800;color:#f2f6fc}
+.trj-source .heading-copy p{font-size:13px;color:#a5c0d7;margin:0;line-height:1.4}
+.trj-source .hero-graphic{position:relative;flex:0 0 205px;align-self:center;height:90px;overflow:hidden;border-radius:12px;background:radial-gradient(circle at 79% 20%,#1d72a5 0,#0a2b50 20%,transparent 52%)}
+.trj-source .hero-graphic::before{content:"";position:absolute;inset:auto 0 0;height:73px;background:linear-gradient(145deg,#183d59,#061a35);clip-path:polygon(0 100%,25% 45%,43% 78%,62% 17%,83% 67%,100% 34%,100% 100%)}
+.trj-source .hero-graphic::after{content:"";position:absolute;bottom:3px;left:20px;width:185px;height:4px;border-radius:60%;background:linear-gradient(90deg,transparent,#16e3fe,#93eaff);transform:rotate(-26deg);filter:drop-shadow(0 0 7px #20aeff)}
+.trj-source .hero-graphic .flag{position:absolute;z-index:1;right:29px;top:15px;color:#48d7ff;font-size:25px}
+.trj-source .card{border:1px solid var(--border);border-radius:var(--radius);background:linear-gradient(145deg,#071c2e,#071827 95%);box-shadow:inset 0 1px #ffffff05}
+.trj-source .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid #17586f;border-radius:9px;background:#0a2a3c;color:#d9f4ff;padding:9px 14px;min-height:39px;font-weight:670;font-size:12px;transition:transform .12s,background .15s,border-color .15s,box-shadow .15s;white-space:nowrap}
+.trj-source .btn svg{height:17px;width:17px}
+.trj-source .btn:hover{border-color:#1ee5e8;background:#0b3a50;box-shadow:0 0 16px #0de8ff17}
+.trj-source .btn.primary{background:linear-gradient(110deg,#0af4e3,#0acddc);color:#042439;border-color:#20f7e6;font-weight:800;box-shadow:0 0 21px #00ffee1e}
+.trj-source .btn.neutral{background:#071b2b;color:#c7ddec;border-color:#26435a}
+.trj-source .btn.outline{background:#052032;color:#49dbf2;border-color:#188cc4}
+.trj-source .btn.square{min-width:42px;padding:9px}
+.trj-source .pill{display:inline-flex;align-items:center;gap:5px;border:1px solid #1c5464;background:#0a343f;border-radius:999px;padding:4px 10px;font-size:11px;color:#2cffe5;font-weight:650}
+.trj-source .pill.amber{border-color:#785821;background:#352819;color:#ffc84d}
+.trj-source .pill.gray{border-color:#254154;background:#112637;color:#b2c4d4}
+.trj-source .text-link{border:0;background:transparent;color:#31d4f9;font-weight:670;padding:5px 0;display:inline-flex;gap:7px;align-items:center;font-size:12px}
+.trj-source .text-link svg{width:15px;height:15px}
+.trj-source .badge-icon{display:grid;place-items:center;border-radius:12px;background:linear-gradient(145deg,#432076,#201a49);color:#ab8aff;width:50px;height:50px;flex-shrink:0}
+.trj-source .badge-icon svg{width:30px;height:30px;stroke-width:2.5}
+.trj-source .badge-icon.ml{background:linear-gradient(145deg,#073b76,#063157);color:#24a1ff}
+.trj-source .badge-icon.python{background:linear-gradient(145deg,#142e70,#092d52);color:#76bcff}
+.trj-source .badge-icon.gray{background:linear-gradient(145deg,#1b3448,#13273c);color:#8298b2;filter:grayscale(.55)}
+/* Source: renderRoleCard => .roles-grid / .role-card */
+.trj-source .roles-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;margin-bottom:17px}
+.trj-source .role-card{position:relative;text-align:center;padding:13px 8px 11px;background:linear-gradient(145deg,#081c2d,#071626);border:1px solid #1c374e;border-radius:12px;min-height:155px;min-width:0;display:block;transition:transform .16s,border-color .16s,box-shadow .16s}
+.trj-source .role-card:hover{transform:translateY(-2px);border-color:#2f7e9a}
+.trj-source .role-card .badge-icon{margin:0 auto 9px;width:48px;height:48px}
+.trj-source .role-card .badge-icon svg{width:29px;height:29px}
+.trj-source .role-card strong{font-size:13px;font-weight:740;line-height:1.14;display:flex;align-items:center;justify-content:center;min-height:31px;max-width:100%;overflow-wrap:anywhere}
+.trj-source .role-card .role-caption{display:block;margin-top:10px;color:#a0b7cc;font-size:11px}
+.trj-source .role-card .role-checked{position:absolute;right:9px;top:8px;color:#052e39;background:var(--turquoise);border-radius:50%;width:23px;height:23px;display:grid;place-items:center}
+.trj-source .role-checked svg{width:15px;height:15px;stroke-width:3}
+.trj-source .role-card.primary{border-color:#0ffbe4;background:radial-gradient(circle at 35% 5%,#12485070,transparent 52%),linear-gradient(135deg,#092b37,#041b2b);box-shadow:0 0 0 1px #01a99a,0 0 18px #00dac824}
+.trj-source .role-card.active{border-color:#205a8a}
+.trj-source .role-card.paused{border-color:#244360}
+.trj-source .role-card.disabled{filter:saturate(.42);opacity:.68}
+.trj-source .role-card.disabled:hover{opacity:.9}
+.trj-source .role-card .mini-track{height:7px;border-radius:8px;background:#193347;overflow:hidden;margin:9px 4px 0}
+.trj-source .role-card .mini-track>div{height:100%;border-radius:8px;background:#238ffc}
+.trj-source .role-card.primary .mini-track>div{background:linear-gradient(90deg,#0eeead,#21d4d8)}
+.trj-source .role-card.disabled .role-caption{color:#8396ad}
+/* Source: renderMain => two stacks */
+.trj-source .content-columns{display:grid;grid-template-columns:minmax(0,2.27fr) minmax(305px,.94fr);align-items:start;gap:16px}
+.trj-source .left-stack,.trj-source .right-stack{min-width:0;display:grid;gap:12px;align-content:start}
+.trj-source .role-detail{position:relative;border-left:3px solid #168ce3;min-height:249px;overflow:visible}
+.trj-source .role-detail-header{padding:15px 17px 10px;position:relative}
+.trj-source .role-heading{display:flex;gap:15px;align-items:flex-start}
+.trj-source .role-heading .badge-icon{width:52px;height:52px}
+.trj-source .role-heading-copy{min-width:0;flex:1}
+.trj-source .role-heading h2{font-size:21px;margin:0 0 4px;line-height:1.25;display:inline;letter-spacing:-.028em}
+.trj-source .role-heading p{font-size:12px;color:#a5b7ce;margin:3px 0 0;max-width:625px}
+.trj-source .role-heading .pill{margin-left:8px;vertical-align:middle}
+.trj-source .role-heading-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
+.trj-source .path-label{padding:3px 17px 0;font-weight:780;font-size:16px}
+.trj-source .path-explainer{font-size:11px;color:#81a6bf;font-weight:450;margin-left:9px}
+.trj-source .roadmap-steps{display:grid;grid-template-columns:repeat(var(--stage-count,7),minmax(0,1fr));margin-top:14px;padding:0 20px 21px;position:relative;gap:2px}
+.trj-source .roadmap-steps::before{position:absolute;content:"";height:4px;top:18px;left:7%;right:7%;background:linear-gradient(90deg,#1affc8 0%,#0befd8 26%,#245879 26%,#245879 100%);opacity:.75}
+.trj-source .roadmap-steps::after{position:absolute;content:"";top:18px;left:36%;right:7%;height:4px;background:repeating-linear-gradient(90deg,#031d30 0 6px,transparent 6px 12px)}
+.trj-source .milestone{position:relative;display:flex;align-items:center;flex-direction:column;gap:5px;z-index:1;text-align:center;border:0;background:transparent;padding:0 3px;min-width:0}
+.trj-source .milestone .milestone-circle{position:relative;display:grid;place-items:center;background:#0a1d31;border:3px solid #24506b;color:#769cbd;width:43px;height:43px;border-radius:50%;font-size:17px;font-weight:750}
+.trj-source .milestone.completed .milestone-circle{background:#05d9c0;border-color:#09efd5;color:#00333a;box-shadow:0 0 15px #01e0cb33}
+.trj-source .milestone.completed svg{stroke-width:3}
+.trj-source .milestone.current .milestone-circle{border:4px solid #279fff;box-shadow:0 0 0 4px #1478db31,0 0 20px #107cfa35;background:#0f4f81;color:#bdeeff}
+.trj-source .milestone .current-dot{display:block;width:10px;height:10px;background:#39b4ff;border-radius:50%}
+.trj-source .milestone strong{font-size:12px;margin-top:4px;color:#d9eafa}
+.trj-source .milestone span:last-child{font-size:11px;line-height:1.27;color:#b1c4da;max-width:105px}
+.trj-source .milestone.future span:last-child{color:#a0afc6}
+.trj-source .milestone.current span:last-child{color:#f2f9ff;font-weight:700}
+.trj-source .role-empty{padding:20px;color:#a1b5cd}
+.trj-source .role-empty h3{color:var(--text);margin-bottom:8px}
+/* Source: renderStage / renderTaskRow */
+.trj-source .stage-card{min-height:299px;overflow:hidden;padding:13px 16px 14px;background:linear-gradient(160deg,#072033,#081b2c);border-color:#17506e}
+.trj-source .stage-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:7px}
+.trj-source .stage-card .subhead{font-size:12px;color:#9bafc9}
+.trj-source .stage-card h3{font-size:22px;letter-spacing:-.03em;margin:2px 0}
+.trj-source .stage-card p{font-size:12px;line-height:1.4;color:#abc2d5;margin:0;max-width:470px}
+.trj-source .stage-progress{min-width:266px;max-width:320px;width:33%;flex-shrink:0}
+.trj-source .stage-progress .stage-portion{display:flex;justify-content:space-between;color:#c3d0e5;font-size:12px;margin:6px 0 5px}
+.trj-source .progress-rail{height:10px;background:#183149;border-radius:20px;overflow:hidden;position:relative;min-width:0}
+.trj-source .progress-rail .progress-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,#0fe8b8,#10dfe1);box-shadow:0 0 16px #16fff76b;transition:width .2s}
+.trj-source .stage-list{display:grid;gap:5px;margin-top:10px}
+.trj-source .task-row{display:flex;align-items:center;gap:11px;border:1px solid #123c51;background:linear-gradient(90deg,#093246,#081d30);border-radius:10px;min-height:56px;padding:8px 13px}
+.trj-source .task-row.current{border-color:#168cae;background:linear-gradient(90deg,#0a3044,#0b1d30)}
+.trj-source .task-row .task-bullet{display:grid;place-items:center;flex-shrink:0;border-radius:50%;height:26px;width:26px;border:2px solid #afcbdd;color:#abc3db}
+.trj-source .task-row .task-bullet.done{background:#07e2d8;border-color:#0af0e4;color:#032333}
+.trj-source .task-row .task-bullet svg{width:17px;height:17px;stroke-width:3}
+.trj-source .task-main{min-width:0;flex:1}
+.trj-source .task-main strong{font-size:13px;font-weight:680;line-height:1.2;display:block}
+.trj-source .task-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.trj-source .task-tags span{border-radius:20px;background:#0d3048;color:#a9c6e0;padding:2px 8px;font-size:10px;white-space:nowrap}
+.trj-source .task-state{display:flex;align-items:center;gap:6px;font-size:11px;color:#0ef2d8;margin-right:9px;white-space:nowrap}
+.trj-source .task-state.pending{color:var(--danger)}
+.trj-source .task-row>.btn{min-width:116px;padding:7px 11px;min-height:36px}
+.trj-source .task-row>.btn.primary{min-width:152px}
+.trj-source .stage-truth-note{display:block;margin-top:12px;font-size:10px;color:#8cacc5}
+/* Source: renderGradeCard/renderNextCard/renderSkills */
+.trj-source .grade-card{padding:15px 15px 12px;min-height:225px}
+.trj-source .section-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.trj-source .section-head h3{font-size:17px;margin:0;letter-spacing:-.025em}
+.trj-source .grade-metrics{display:flex;align-items:center;gap:17px}
+.trj-source .grade-ring{position:relative;height:112px;width:112px;flex-shrink:0;border-radius:50%;background:conic-gradient(#18eedb 0 var(--grade-progress),#193f5c var(--grade-progress) 100%);display:grid;place-items:center;transform:rotate(-8deg)}
+.trj-source .grade-ring::before{content:"";position:absolute;inset:10px;background:#081e31;border-radius:50%}
+.trj-source .grade-ring-inner{position:relative;z-index:1;transform:rotate(8deg);text-align:center;display:grid;justify-items:center}
+.trj-source .grade-ring-inner strong{font-size:17px;line-height:1.1}
+.trj-source .grade-ring-inner small{font-size:10px;line-height:1.25;color:#a8bfcb;margin-top:5px}
+.trj-source .grade-data{min-width:0;flex:1}
+.trj-source .grade-data .to-grade{font-size:11px;color:#a4bad1}
+.trj-source .grade-data .remaining{font-size:30px;line-height:1.2;font-weight:820}
+.trj-source .grade-data .progress-rail{height:9px;margin:5px 0 7px}
+.trj-source .grade-data .remain-steps{color:#b6c6d8;font-size:12px}
+.trj-source .grade-hint{display:flex;align-items:center;gap:11px;border:1px solid #166086;border-radius:10px;background:linear-gradient(145deg,#062639,#082035);padding:12px;margin-top:12px;color:#c3dcf0;font-size:12px;line-height:1.4}
+.trj-source .hint-icon{flex-shrink:0;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#074681;color:#00ecf7}
+.trj-source .hint-icon svg{width:19px}
+.trj-source .next-card,.trj-source .skills-card{padding:12px 14px}
+.trj-source .next-row{display:flex;gap:10px;align-items:center;background:#062335;border:1px solid #13516a;border-left:3px solid #02d8e8;border-radius:9px;padding:11px}
+.trj-source .next-icon{display:grid;place-items:center;flex:0 0 36px;height:36px;background:#064b5d;color:#02e2ef;border:1px solid #0c92a4;border-radius:8px}
+.trj-source .next-data{flex:1;min-width:0}
+.trj-source .next-data strong{font-size:12px;line-height:1.2}
+.trj-source .next-data p{font-size:11px;color:#9ebbd5;margin:3px 0 0}
+.trj-source .next-data .next-reason{font-size:10px;color:#a4bdd1}
+.trj-source .next-row .btn{flex-shrink:0;border-radius:50%;width:38px;height:38px}
+.trj-source .skills-card .skill-row{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(55px,110px) 64px;align-items:center;gap:8px;margin:6px 0;font-size:11px}
+.trj-source .skill-row .skill-logo{display:grid;place-items:center;width:27px;height:27px;border-radius:8px;background:#0066f4;color:#fff}
+.trj-source .skill-logo.gold{background:#e59a08}
+.trj-source .skill-logo.purple{background:#8a3ee5}
+.trj-source .skill-logo.indigo{background:#7444ca}
+.trj-source .skill-logo svg{width:18px;height:18px}
+.trj-source .skill-row strong{font-size:11px;white-space:nowrap;text-align:right;font-weight:500}
+.trj-source .skills-card .progress-rail{height:7px}
+.trj-source .empty-message{padding:10px;color:#a0b5ce;font-size:12px}
+.trj-source .source-note{font-size:10px;color:#8da4b9;display:block;margin-top:10px}
+@media(max-width:1430px){
+ .trj-source .roles-grid{gap:7px}
+ .trj-source .role-card{padding:12px 5px}
+ .trj-source .role-card strong{font-size:12px}
+ .trj-source .content-columns{grid-template-columns:minmax(0,1.9fr) minmax(290px,.87fr)}
+ .trj-source .stage-progress{min-width:205px}
+ .trj-source .milestone span:last-child{font-size:10px}
+}
+@media(max-width:1140px){
+ .trj-source .roles-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .trj-source .role-card{min-height:142px}
+ .trj-source .content-columns{grid-template-columns:minmax(0,1fr)}
+ .trj-source .right-stack{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+ .trj-source .skills-card{grid-column:1/-1}
+ .trj-source .role-detail{min-height:260px}
+ .trj-source .stage-progress{max-width:260px}
+}
+@media(max-width:660px){
+ .trj-source .roles-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .trj-source .heading-copy h1{font-size:29px}
+ .trj-source .hero-graphic{display:none}
+ .trj-source .role-heading{flex-wrap:wrap}
+ .trj-source .role-heading-actions{margin:3px 0 0;width:100%;justify-content:flex-end}
+ .trj-source .roadmap-steps{overflow-x:auto;grid-template-columns:repeat(var(--stage-count,7),96px);padding-bottom:24px}
+ .trj-source .roadmap-steps::before,.trj-source .roadmap-steps::after{display:none}
+ .trj-source .stage-top{display:block}
+ .trj-source .stage-progress{margin-top:12px;max-width:none;width:100%;min-width:0}
+ .trj-source .task-row{flex-wrap:wrap}
+ .trj-source .task-row>.btn{margin-left:auto}
+ .trj-source .task-state{margin-left:40px}
+ .trj-source .right-stack{grid-template-columns:1fr}
+ .trj-source .skills-card{grid-column:auto}
+}
+@media(max-width:420px){
+ .trj-source .role-heading h2{font-size:19px}
+ .trj-source .grade-metrics{gap:8px}
+ .trj-source .grade-ring{width:93px;height:93px}
+ .trj-source .grade-ring-inner strong{font-size:15px}
+ .trj-source .grade-data .remaining{font-size:26px}
+ .trj-source .stage-card{padding:10px}
+ .trj-source .task-row{padding:8px}
+ .trj-source .task-row>.btn.primary{min-width:134px}
+}
+@media(prefers-reduced-motion:reduce){
+ .trj-source *,.trj-source *::before,.trj-source *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
