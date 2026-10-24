@@ -1,0 +1,43 @@
+name: Bootcamp Curriculum QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/bootcamp/learning-content/**"
+      - "frontend/e2e/bootcamp-learning-content.spec.ts"
+      - ".github/workflows/bootcamp-curriculum-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bootcamp-curriculum-qa-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  curriculum:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Lint curriculum and browser test
+        run: npx eslint src/features/bootcamp/learning-content e2e/bootcamp-learning-content.spec.ts --max-warnings 0
+      - name: Type-check all imports and contracts
+        run: npm run typecheck
+      - name: Test 12 x 8 lessons and capstones
+        run: npx vitest run src/features/bootcamp/learning-content/course-learning.test.tsx
+      - name: Build production frontend
+        run: npm run build
