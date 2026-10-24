@@ -151,6 +151,7 @@ function TaskSummary(props: {
   item: CatalogItem;
   layout: CatalogLayout;
   selected: boolean;
+  topRanked?: boolean;
   bookmarkPending: boolean;
   onOpen: () => void;
   onConditions: () => void;
@@ -159,62 +160,54 @@ function TaskSummary(props: {
 }) {
   const { item } = props;
   const canApply = item.allowed_actions.includes("apply") && item.eligibility.status === "eligible";
+  const canSeeConditions = item.allowed_actions.includes("open_conditions") || canApply;
   return (
     <article
-      className={`catalog-v2-card catalog-v2-card--${props.layout}`}
+      className="catalog-v2-card catalog-v2-card--cards"
       tabIndex={0}
-      aria-label={`Задача: ${item.title}`}
+      aria-label={"Задача: " + item.title}
       data-selected={props.selected}
+      onClick={(event) => {
+        if (event.target instanceof Element && event.target.closest("button")) return;
+        props.onOpen();
+      }}
       onKeyDown={(event) => {
         if (event.target !== event.currentTarget) return;
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          props.onOpen();
-        }
+        if (event.key === "Enter" || event.key === " ") { event.preventDefault(); props.onOpen(); }
       }}
     >
-      <header>
-        <div>
-          <p className="eyebrow">{customerLabel(item)}</p>
+      <header className="catalog-v2-card-top">
+        <span className="catalog-v2-customer-avatar" aria-hidden="true"><BriefcaseBusiness size={21} /></span>
+        <div className="catalog-v2-card-identity">
+          {props.topRanked ? <span className="catalog-v2-top-match"><Sparkles size={12} aria-hidden="true" /> Топ-совпадение</span> : null}
+          <small title={customerLabel(item)}>{item.customer.display_name}</small>
           <h2>{item.title}</h2>
         </div>
-        <MatchBadge item={item} />
-      </header>
-      <p className="catalog-v2-brief">{item.brief_summary}</p>
-      <ul className="catalog-v2-tags" aria-label="Компетенции">
-        {item.competency_tags.map((tag) => <li key={tag}>{tag}</li>)}
-      </ul>
-      <dl className="catalog-v2-facts">
-        <div><dt>Формат</dt><dd>{item.work_format === null ? "Не указан" : formatLabels[item.work_format] ?? item.work_format}</dd></div>
-        <div><dt>Сложность</dt><dd>{item.difficulty === null ? "Не указана" : difficultyLabels[item.difficulty] ?? item.difficulty}</dd></div>
-        <div><dt>Нагрузка</dt><dd>{formatDuration(item.duration_minutes)}</dd></div>
-        <div><dt>Места</dt><dd>{item.places_available ?? "—"} из {item.places_total}</dd></div>
-        <div><dt>Отклик до</dt><dd>{formatDeadline(item.deadline_at)}</dd></div>
-      </dl>
-      <p className={`catalog-v2-state catalog-v2-state--${item.application_state}`}>
-        {applicationLabels[item.application_state]}
-      </p>
-      {item.eligibility.missing_prerequisites.length ? (
-        <p className="catalog-v2-eligibility">
-          Нужны подтверждения: {item.eligibility.missing_prerequisites.join(", ")}
-        </p>
-      ) : null}
-      <footer>
-        <button type="button" onClick={props.onOpen}>Подробнее</button>
-        {item.allowed_actions.includes("open_conditions") || canApply ? (
-          <button type="button" className="catalog-v2-primary" disabled={!canApply} onClick={(event) => { event.currentTarget.focus(); props.onConditions(); }}>
-            Условия и отклик
-          </button>
-        ) : null}
-        <button
-          type="button"
-          aria-pressed={item.bookmarked}
-          disabled={props.bookmarkPending}
-          onClick={props.onBookmark}
-        >
-          {props.bookmarkPending ? "Сохраняем…" : item.bookmarked ? "Сохранено" : "Сохранить"}
+        <div className="catalog-v2-card-match"><MatchBadge item={item} /></div>
+        <button type="button" className="catalog-v2-card-bookmark" disabled={props.bookmarkPending}
+          aria-label={item.bookmarked ? "Сохранено" : "Сохранить"}
+          aria-pressed={item.bookmarked} onClick={props.onBookmark}>
+          <Bookmark size={19} fill={item.bookmarked ? "currentColor" : "none"} aria-hidden="true" />
         </button>
-        {item.allowed_actions.includes("share") ? <button type="button" onClick={props.onShare}>Поделиться</button> : null}
+      </header>
+      <ul className="catalog-v2-tags" aria-label="Компетенции">
+        {item.competency_tags.slice(0, 3).map((tag) => <li key={tag}>{tag}</li>)}
+      </ul>
+      <dl className="catalog-v2-card-quickfacts">
+        <div><dt><ChartNoAxesColumnIncreasing size={15} aria-hidden="true" /> Сложность</dt><dd>{item.difficulty === null ? "Не указана" : difficultyLabels[item.difficulty] ?? item.difficulty}</dd></div>
+        <div><dt><Clock3 size={15} aria-hidden="true" /> Срок</dt><dd>{formatDuration(item.duration_minutes)}</dd></div>
+        <div><dt><Laptop2 size={15} aria-hidden="true" /> Формат</dt><dd>{item.work_format === null ? "Не указан" : formatLabels[item.work_format] ?? item.work_format}</dd></div>
+      </dl>
+      {item.application_state !== "none" ? <p className="catalog-v2-card-status">{applicationLabels[item.application_state]}</p> : null}
+      {item.eligibility.missing_prerequisites.length > 0 ? (
+        <p className="catalog-v2-eligibility">Нужны подтверждения: {item.eligibility.missing_prerequisites.join(", ")}</p>
+      ) : null}
+      <footer className="catalog-v2-card-actions">
+        <button type="button" onClick={props.onOpen}>Подробнее <ChevronDown size={14} aria-hidden="true" /></button>
+        {canSeeConditions ? <button type="button" className="catalog-v2-primary" disabled={!canApply}
+          onClick={(event) => { event.currentTarget.focus(); props.onConditions(); }}>Условия и отклик</button> : null}
+        {item.allowed_actions.includes("share") ? <button type="button" aria-label="Поделиться"
+          className="catalog-v2-card-share" onClick={props.onShare}><Share2 size={16} aria-hidden="true" /></button> : null}
       </footer>
     </article>
   );
@@ -649,11 +642,12 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
           />
         ) : (
           <div className="catalog-v2-results catalog-v2-results--cards" role="list" aria-label="Рекомендованные задачи">
-            {items.map((item) => (
+            {items.map((item, index) => (
               <div role="listitem" key={item.task_id}>
                 <TaskSummary
                   item={item}
                   layout="cards"
+                  topRanked={index === 0 && filters.sort === "match-default" && item.match.status === "calculated"}
                   selected={selectedTaskId === item.task_id || previewItem?.task_id === item.task_id}
                   bookmarkPending={bookmark.isPending && bookmark.variables.taskId === item.task_id}
                   onOpen={() => { openTask(item); }}
