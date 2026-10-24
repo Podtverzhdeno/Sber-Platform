@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { CourseLearningContent } from "./CourseLearningContent";
 import { learningPrograms, learningProgramFor } from "./programs";
 import { courseBlueprints } from "./course-blueprints";
+import { allKnowledgeChecks } from "./knowledge-checks";
 
 describe("Bootcamp editorial course curriculum", () => {
   it("contains exactly twelve catalog courses and eight concrete lessons per course", () => {
@@ -57,6 +58,33 @@ describe("Bootcamp editorial course curriculum", () => {
     fireEvent.click(screen.getByRole("button", { name: "Вернуться к урокам" }));
     expect(screen.getByRole("heading", { name: "Операции агента и границы автономности" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Шаги обучения" })).toBeInTheDocument();
+  });
+
+  it("offers two meaningful comprehension prompts per course tied to published lesson IDs", () => {
+    const checks = allKnowledgeChecks();
+    expect(checks).toHaveLength(24);
+    for (const { courseKey, check } of checks) {
+      const program = learningProgramFor(courseKey);
+      expect(program?.units.some(item => item.id === check.unitId)).toBe(true);
+      expect(check.options).toHaveLength(3);
+      expect(check.correctIndex).toBeGreaterThanOrEqual(0);
+      expect(check.correctIndex).toBeLessThan(3);
+      expect(check.explanation.length).toBeGreaterThan(40);
+      expect(new Set(check.options).size).toBe(3);
+    }
+  });
+
+  it("gives case-based feedback and allows correction without marking official completion", () => {
+    render(<CourseLearningContent courseKey="demo-course-1" />);
+    const nav = screen.getByRole("navigation", { name: "Шаги обучения" });
+    fireEvent.click(within(nav).getByRole("button", { name: /Проверка и управление изменением/ }));
+    const group = screen.getByRole("group", { name: "Варианты ответа" });
+    expect(within(group).getAllByRole("button")).toHaveLength(3);
+    fireEvent.click(within(group).getByRole("button", { name: /Проверить только HTTP 200/ }));
+    expect(screen.getByRole("status")).toHaveTextContent("Ещё раз проверьте логику");
+    fireEvent.click(within(group).getByRole("button", { name: /Дважды вызвать POST/ }));
+    expect(screen.getByRole("status")).toHaveTextContent("Верно");
+    expect(screen.getByText(/не начисляют XP/)).toBeInTheDocument();
   });
 
   it("has working navigation and reveals real exercise expectations without awarding grade", () => {
