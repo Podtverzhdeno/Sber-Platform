@@ -1,0 +1,24 @@
+# Claim task-catalog-visual-polish-20261024
+
+- task_id: task-catalog-visual-polish-20261024
+- session_id: gpt6-20261024-1812-visual-polish
+- status: IN_PROGRESS
+- started_at: 2026-10-24T18:12:00+03:00
+- heartbeat_at: 2026-10-24T18:12:00+03:00
+- base_revision: d663bb9757656bb7dd0515a63c4f942ff2c2e5df
+- depends_on: [merged task catalog PR #23]
+- write_scope:
+  - frontend/src/features/task-catalog-v2/page.tsx
+  - frontend/src/features/task-catalog-v2/catalog-v2.scss
+  - frontend/src/features/task-catalog-v2/list.tsx
+  - frontend/e2e/task-catalog-v2.spec.ts
+  - .agents/coordination/claims/task-catalog-visual-polish-20261024.lock/status.md
+- shared_files: []
+- verification:
+  - npm run lint
+  - npm run typecheck
+  - npm test
+  - npm run build
+  - Playwright task catalog browser suite
+- progress: investigating original source archive availability and auditing live user screenshots; no production deployment
+- blockers: exact approved PNG/HTML reference ZIP was delivered in previous conversation but binary is not mounted / discoverable in this session; pixel-exact source comparison not possible
