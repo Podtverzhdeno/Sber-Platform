@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#04101f"><meta name="description" content="Интерактивный дизайн-прототип Impulse Bootcamp: карточки, список, детальная информация о курсах, рекомендации и обязательные курсы"><title>Impulse · Bootcamp</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" class="icon-defs" width="0" height="0"><defs>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.7"/><path d="m16 16 5 5"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-8 9 8v11H3V10Z"/><path d="M9 21v-8h6v8"/></symbol>
+<symbol id="i-route" viewBox="0 0 24 24"><circle cx="12" cy="4" r="2"/><circle cx="5" cy="20" r="2"/><circle cx="19" cy="20" r="2"/><path d="M12 6v5M5 18l7-7 7 7"/></symbol>
+<symbol id="i-school" viewBox="0 0 24 24"><path d="m2 9 10-5 10 5-10 5L2 9ZM6 12v6c4 3 8 3 12 0v-6M22 9v8"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></symbol>
+<symbol id="i-tasks" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="17" rx="2"/><path d="M8 5V3h8v2M8 13l3 3 5-5"/></symbol>
+<symbol id="i-brief" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="15" rx="2"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 11h18"/></symbol>
+<symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 4h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-6 3V6a2 2 0 0 1 2-2Z"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 6h7l2 3h9v12H3V6Z"/></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 3h10v7c0 5-2 7-5 7s-5-2-5-7V3ZM7 6H3v2c0 4 2 6 5 6M17 6h4v2c0 4-2 6-5 6M12 17v4M7 21h10"/></symbol>
+<symbol id="i-bars" viewBox="0 0 24 24"><path d="M4 21v-6h4v6M10 21V9h4v12M16 21V3h4v18"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 2.8 7.2L22 12l-7.2 2.8L12 22l-2.8-7.2L2 12l7.2-2.8L12 2Z"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M11 2h2l1 3 3 1 3-1 1 2-2 3v4l2 3-2 2-3-1-2 1-1 3h-2l-1-3-3-1-3 1-1-2 2-3v-4L3 7l2-2 3 1 2-1 1-3Z"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-7-7 7 7-7 7"/></symbol>
+<symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5 19 19M19 5 5 19"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5h7a3 3 0 0 1 3 3v13a4 4 0 0 0-3-2H4V5ZM20 5h-4a3 3 0 0 0-3 3v13a4 4 0 0 1 3-2h4V5Z"/></symbol>
+<symbol id="i-doc" viewBox="0 0 24 24"><path d="M5 2h10l5 5v15H5V2Z"/><path d="M15 2v5h5M9 12h7M9 16h7"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h12M9 12h12M9 18h12"/><path d="M3 6h1M3 12h1M3 18h1"/></symbol>
+<symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="13" rx="3"/><path d="M12 4v4M9 4h6M8 13h2M14 13h2M10 17h4"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 10v7M12 7h.01"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 22C4 19 5 13 10 8c0 3 2 4 2 4 3-4 2-7 0-10 9 7 12 15 4 20"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M3 5h18l-7 8v6l-4 2v-8L3 5Z"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 1v3M12 20v3M1 12h3M20 12h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 16A9 9 0 0 1 8 4 9 9 0 1 0 20 16Z"/></symbol>
+</defs></svg>
+<div id="app" class="app">
+ <aside id="sidebar" class="sidebar" aria-label="Основная навигация">
+  <a href="#/bootcamp" class="brand" aria-label="Impulse — Bootcamp"><span class="brand-shape" aria-hidden="true">▹</span><span>Impulse</span></a>
+  <nav id="side-links"></nav>
+  <div class="sidebar-help"><span class="gift-icon">🎁</span><div><strong>Твой прогресс влияет на возможности</strong><p>Выполняй курсы, задачи и развивай навыки вместе с Impulse.</p></div></div>
+ </aside>
+ <div class="mobile-shade" id="mobile-shade" hidden></div>
+ <div class="app-main">
+  <header class="topbar"><div class="topbar-start"><button class="icon-button mobile-menu" id="menu-open" type="button" aria-label="Открыть меню">☰</button><label class="top-search"><svg class="icon"><use href="#i-search"/></svg><input id="global-search" placeholder="Поиск по курсам, задачам, навыкам..." aria-label="Поиск по курсам"><kbd>⌘ K</kbd></label></div><div class="top-actions"><button class="icon-button" id="theme-toggle" title="Переключить тему" aria-label="Переключить тему"><svg class="icon"><use href="#i-moon"/></svg></button><span class="top-mini" title="Серия обучения в демонстрационном режиме">🔥 <b>0</b></span><span class="top-rank"><svg class="icon"><use href="#i-trophy"/></svg><span><b>3 место</b><small>450 баллов</small></span></span><button class="icon-button" id="notifications" aria-label="Уведомления"><svg class="icon"><use href="#i-chat"/></svg><i class="notification-dot"></i></button><div class="profile"><span class="profile-avatar">А</span><span><b>Алексей Смирнов</b><small>Участник</small></span><span class="chevron-small">⌄</span></div></div></header>
+  <main id="main-content" class="content"><div class="page-heading"><div><h1>Bootcamp</h1><p>Обучение для твоей роли и реальных проектов</p></div><span class="streak-pill" title="Серия обучения: 0 дней. В этом прототипе попап серии отключён">🔥 <b>Серия: 0 дней</b></span></div>
+   <div class="role-tabs" id="role-tabs" role="group" aria-label="Выбранная роль"></div>
+   <section class="top-panels"><div class="continue-panel"><div class="section-heading"><h2>Продолжить обучение</h2><svg class="icon"><use href="#i-chevron"/></svg></div><div id="continue-course"></div></div><div class="right-panels"><button class="role-summary" id="role-summary" aria-label="Открыть мою траекторию"><div class="summary-copy"><h2 id="summary-role">Моя роль: Разработчик ИИ-агентов</h2><div class="summary-tags"><span id="summary-grade">♛ Грейд 5</span><span id="summary-skills">▦ Матрица: 6 навыков</span></div></div><div class="ring" style="--pct:62"><strong id="ring-value">62%</strong><small>Навыков<br>освоено</small></div></button><section class="grade-highlight" aria-labelledby="grade-title"><div class="grade-glow"></div><img class="trophy-art" src="assets/trophy.svg" alt="" aria-hidden="true"><div class="grade-content"><div class="grade-overline"><span class="crown-glyph">♛</span> До следующего грейда</div><h2 id="grade-title">Осталось <em id="remaining-count">2</em> обязательных курса</h2><p>Заверши их, чтобы двигаться дальше<br>и получить новый грейд!</p><div id="remaining-mini" class="remaining-mini"></div></div><button type="button" class="btn rainbow-btn" id="show-required">Посмотреть курсы <svg class="icon"><use href="#i-arrow"/></svg></button></section></div></section>
+   <section class="catalog"><div class="catalog-tabs-bar"><div class="catalog-tabs" id="catalog-tabs" role="group" aria-label="Категории курсов"></div><div class="view-toggle" role="group" aria-label="Представление курсов"><button type="button" id="view-card" class="view-button" aria-pressed="true"><svg class="icon"><use href="#i-grid"/></svg> Карточки</button><button type="button" id="view-list" class="view-button" aria-pressed="false"><svg class="icon"><use href="#i-list"/></svg> Список</button></div></div>
+    <div class="catalog-filters"><label class="course-search"><svg class="icon"><use href="#i-search"/></svg><input id="course-search" placeholder="Поиск по названию курса, навыку или технологии..." aria-label="Поиск по курсам"></label><label class="filter-select"><small>Направление</small><select id="direction-filter" aria-label="Направление"><option value="all">Все направления</option><option value="ai">Разработчик ИИ-агентов</option><option value="product">Продуктовый аналитик</option></select></label><label class="filter-select"><small>Уровень</small><select id="level-filter" aria-label="Уровень сложности"><option value="all">Все уровни</option><option value="basic">Базовый</option><option value="advanced">Продвинутый</option></select></label></div>
+    <div class="catalog-status" id="catalog-status" role="status" aria-live="polite"></div><div id="catalog-results"></div>
+   </section>
+  </main>
+ </div>
+</div>
+<div id="overlay" class="overlay" hidden><div class="overlay-scrim" data-action="close"></div><section id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-kicker" tabindex="-1"><header class="drawer-header"><span id="drawer-kicker">Детали</span><button type="button" class="icon-button close-button" data-action="close" aria-label="Закрыть окно"><svg class="icon"><use href="#i-close"/></svg></button></header><div id="drawer-body"></div></section></div>
+<div id="toast" role="status" aria-live="polite" class="toast" hidden></div>
+<script src="app.js" defer></script></body></html>
