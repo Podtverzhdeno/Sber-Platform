@@ -26,6 +26,7 @@ import type {
 import { ContextPanel } from "./messenger/context";
 import type { ChannelWorkContextView } from "./messenger/context-model";
 import { DialogList } from "./messenger/dialogs";
+import { EmptyChatState, EmptyContextPlaceholder } from "./messenger/reference-states";
 import type { KeyValueStorage } from "./messenger/view-model";
 
 export type Role =
@@ -131,6 +132,8 @@ export function MessagingWorkspace({
   });
   const [mobilePane, setMobilePane] = useState<MobilePane>("list");
   const [contextOpen, setContextOpen] = useState(true);
+  const [createSignal, setCreateSignal] = useState(0);
+  const [findSignal, setFindSignal] = useState(0);
   const [pending, setPending] = useState<PendingMessageOverlay[]>([]);
   const [replyId, setReplyId] = useState<string | null>(null);
   const openedPeerRef = useRef("");
@@ -141,7 +144,7 @@ export function MessagingWorkspace({
     (requestedChannel !== null && UUID_PATTERN.test(requestedChannel)
       ? channels.find((item) => item.id === requestedChannel)
       : undefined) ??
-    (channels.length ? channels[0] : undefined);
+    undefined;
 
   // Глубокая ссылка ?task=<task_id>: открываем чат команды этой задачи,
   // когда он появится в списке каналов; явный ?channel= приоритетнее.
@@ -184,6 +187,7 @@ export function MessagingWorkspace({
 
   const selectChannel = (channelId: string) => {
     setSelectedId(channelId);
+    setContextOpen(true);
     setReplyId(null);
     setPending([]);
     if (isNarrow) setMobilePane("chat");
@@ -319,6 +323,8 @@ export function MessagingWorkspace({
     })
       .then((channel) => {
         setSelectedId(channel.id);
+        setContextOpen(true);
+        if (isNarrow) setMobilePane("chat");
         return client.invalidateQueries({ queryKey: ["messaging-channels"] });
       })
       .catch(() => {});
@@ -400,6 +406,19 @@ export function MessagingWorkspace({
     );
   }
 
+  const recentChannel = [...channels].sort((a, b) =>
+    (b.last_message?.created_at ?? b.created_at).localeCompare(a.last_message?.created_at ?? a.created_at)
+  )[0] ?? null;
+  const mayakiChannel = channels.find((channel) => channel.title?.trim().toLowerCase() === "маяки") ?? null;
+  const openCreate = () => {
+    setCreateSignal((current) => current + 1);
+    if (isNarrow) setMobilePane("list");
+  };
+  const findMayaki = () => {
+    setFindSignal((current) => current + 1);
+    if (isNarrow) setMobilePane("list");
+  };
+
   const chatVisible = !isNarrow || mobilePane === "chat";
   const listVisible = !isNarrow || mobilePane === "list";
   const contextVisible = selected ? (!isNarrow ? contextOpen : mobilePane === "context") : false;
@@ -434,6 +453,8 @@ export function MessagingWorkspace({
             channels={channels}
             viewerId={personId}
             selectedId={selected?.id ?? null}
+            createSignal={createSignal}
+            findSignal={findSignal}
             onSelect={selectChannel}
             onCreateDialog={createDialog}
             storage={storage}
@@ -441,7 +462,7 @@ export function MessagingWorkspace({
         )}
         {chatVisible && (
           <section className="chat-thread" aria-label="Текущий чат">
-            <ChatHistory
+            {selected ? <ChatHistory
               channel={selected ?? null}
               viewerId={personId}
               messages={messages}
@@ -470,10 +491,11 @@ export function MessagingWorkspace({
                 setContextOpen((current) => !current);
               }}
               headerExtra={headerExtra}
-            />
-            {!selected ? (
-              <StatePanel kind="empty" />
-            ) : (
+            /> : (
+              <EmptyChatState recent={recentChannel} mayaki={mayakiChannel}
+                onOpen={selectChannel} onCreate={openCreate} onFindCommunity={findMayaki}/>
+            )}
+            {selected && (
               <Composer
                 channelId={selected.id}
                 participants={selected.participants}
@@ -491,6 +513,7 @@ export function MessagingWorkspace({
             )}
           </section>
         )}
+        {(!isNarrow && selected === undefined) && <EmptyContextPlaceholder />}
         {contextVisible && selected && (
           <ContextPanel
             channel={selected}
