@@ -48,6 +48,7 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
     const root = page.getByTestId("analytics-reference");
     await expect(root).toBeVisible();
     await expect(page.getByRole("heading", { name: "Ваш Skill Passport" })).toBeVisible();
+    const geometryViolations: string[] = [];
     for (const [view, title] of [
       ["passport", "Ваш Skill Passport"], ["path", "Маршрут к вашей следующей цели"], ["evidence", "Результаты, которым можно доверять"]
     ] as const) {
@@ -93,20 +94,39 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
         };
         const golden = goldenByView[view] ?? {};
         for (const { selector, rect } of geometry) {
-          expect(rect, selector + " should be rendered").not.toBeNull();
           const expected = golden[selector];
-          if (rect === null) throw new Error("Missing rendered rectangle for " + selector);
+          if (rect === null || expected === undefined) {
+            geometryViolations.push(view + " " + selector + " is missing its rectangle or reference");
+            continue;
+          }
           for (const [metric, actual, position] of [
             ["x", rect.x, 0], ["y", rect.y, 1],
             ["width", rect.width, 2], ["height", rect.height, 3],
           ] as const) {
-            expect(Math.abs(actual - expected[position]), selector + "." + metric).toBeLessThanOrEqual(3);
+            const delta = Math.abs(actual - expected[position]);
+            if (delta > 3) geometryViolations.push(view + " " + selector + "." + metric + ": expected " + String(expected[position]) + ", got " + String(actual) + ", delta " + String(delta));
           }
         }
       }
-      await writeFile(testInfo.outputPath("analytics-" + view + "-" + viewport.name + ".geometry.json"), JSON.stringify({ viewport, view, geometry }, null, 2), "utf8");
+      const headerStats = await root.locator(".ref-page-header").evaluate((el) => {
+        const style = window.getComputedStyle(el);
+        const heading = el.querySelector("h1");
+        const paragraph = el.querySelector("p");
+        return {
+          header: el.getBoundingClientRect().toJSON(),
+          marginBottom: style.marginBottom,
+          headerHeight: style.height,
+          heading: heading?.getBoundingClientRect().toJSON(),
+          paragraph: paragraph?.getBoundingClientRect().toJSON(),
+          gap: window.getComputedStyle(el.parentElement as Element).gap,
+        };
+      });
+      const diagnostics = { viewport, view, geometry, headerStats };
+      console.log("ANALYTICS_GEOMETRY", JSON.stringify(diagnostics));
+      await writeFile(testInfo.outputPath("analytics-" + view + "-" + viewport.name + ".geometry.json"), JSON.stringify(diagnostics, null, 2), "utf8");
       await page.screenshot({ path: testInfo.outputPath("analytics-" + view + "-" + viewport.name + ".png"), fullPage: true, animations: "disabled" });
     }
+    expect(geometryViolations, "Canonical analytics layout must stay within 3px of every reference rectangle").toEqual([]);
     await root.getByRole("button", { name: "Мой маршрут" }).click();
     await root.getByRole("group", { name: "Профессиональная группа" }).getByRole("button", { name: "Аналитик" }).click();
     await root.getByRole("group", { name: "Вид диаграммы" }).getByRole("button", { name: "Гистограмма" }).click();
