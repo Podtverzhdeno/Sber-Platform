@@ -2352,3 +2352,10 @@
 .sberchat-shell .ref-context-files .ref-context-file-download { flex:0 0 15px; color:#b9dafa; }
 :root[data-theme="light"] .sberchat-shell .ref-context-files .ref-context-file-row { background:var(--color-surface); }
 :root[data-theme="light"] .sberchat-shell .ref-context-files .ref-context-file-name { color:var(--color-text); }
+
+/* Approved 01.png: genuine raster portraits for synthetic Mayaki participants only. */
+:root .sberchat-shell :is(.msg-chat__group-avatar, .ref-context-user-icon)[data-reference-person] { background-image:url("/messages-reference/people.webp"); background-size:400% 100%; background-repeat:no-repeat; color:transparent; }
+:root .sberchat-shell :is(.msg-chat__group-avatar, .ref-context-user-icon)[data-reference-person="0"] { background-position:0.00000% center; }
+:root .sberchat-shell :is(.msg-chat__group-avatar, .ref-context-user-icon)[data-reference-person="1"] { background-position:33.33333% center; }
+:root .sberchat-shell :is(.msg-chat__group-avatar, .ref-context-user-icon)[data-reference-person="2"] { background-position:66.66667% center; }
+:root .sberchat-shell :is(.msg-chat__group-avatar, .ref-context-user-icon)[data-reference-person="3"] { background-position:100.00000% center; }

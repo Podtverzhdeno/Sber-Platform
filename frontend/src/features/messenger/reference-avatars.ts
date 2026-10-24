@@ -37,3 +37,13 @@ export const referenceAvatarSpriteIndexFor = (channelId: string): number | null 
   const index = referenceSpriteOrder.indexOf(channelId as (typeof referenceSpriteOrder)[number]);
   return index < 0 ? null : index;
 };
+
+/** Four portraits cropped from the provided 01.png mockup. Only preview conversations use them. */
+export const referencePersonIndex = (name: string | null | undefined): number | null => {
+  if (!name) return null;
+  if (name.startsWith("Анна")) return 0;
+  if (name.startsWith("Дмитрий")) return 1;
+  if (name.startsWith("Мария")) return 2;
+  if (name.startsWith("Иван")) return 3;
+  return null;
+};

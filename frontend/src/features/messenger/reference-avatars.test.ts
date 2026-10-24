@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { referenceAvatarFor, referenceAvatarSpriteIndexFor } from "./reference-avatars";
+import { referenceAvatarFor, referenceAvatarSpriteIndexFor, referencePersonIndex } from "./reference-avatars";
 
 describe("approved Messages ZIP avatar identity", () => {
   it("reproduces the distinct community icons from app.js", () => {
@@ -22,4 +22,11 @@ describe("approved Messages ZIP avatar identity", () => {
     expect(referenceAvatarSpriteIndexFor("real-channel-id")).toBeNull();
   });
 
+  it("keeps cropped photo identities out of API-backed chats", () => {
+    expect(referencePersonIndex("Анна Ковалёва")).toBe(0);
+    expect(referencePersonIndex("Дмитрий Соколов")).toBe(1);
+    expect(referencePersonIndex("Мария Лебедева")).toBe(2);
+    expect(referencePersonIndex("Иван Петров")).toBe(3);
+    expect(referencePersonIndex("Реальный собеседник")).toBeNull();
+  });
 });

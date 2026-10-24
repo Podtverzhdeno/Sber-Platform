@@ -1,6 +1,6 @@
 import type { ApiChannelView } from "./contracts";
 import { referenceDescriptions } from "./reference-fixtures";
-import { referenceAvatarFor, referenceAvatarSpriteIndexFor } from "./reference-avatars";
+import { referenceAvatarFor, referenceAvatarSpriteIndexFor, referencePersonIndex } from "./reference-avatars";
 import { Download, FileText, FolderOpen, Link2, Users } from "lucide-react";
 import {
   type ChannelWorkContextView,
@@ -157,7 +157,7 @@ export function ContextPanel({
           <h3 className="msg-context__section-title">Администраторы и модераторы</h3>
           <ul>
             {["Анна Ковалева · Администратор", "Иван Петров · Модератор", "Мария Лебедева · Модератор"].map((name)=>(
-              <li key={name}><span className="ref-context-user-icon">{name.charAt(0)}</span><span>{name}</span></li>
+              <li key={name}><span className="ref-context-user-icon" data-reference-person={channel.id === "reference:mayaki" ? (referencePersonIndex(name) ?? undefined) : undefined}>{name.charAt(0)}</span><span>{name}</span></li>
             ))}
           </ul>
         </section>

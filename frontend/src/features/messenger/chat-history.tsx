@@ -26,7 +26,7 @@ import {
 
 import type { ApiChannelView, ApiMessageView } from "./contracts";
 import { isReferenceChannel, referencePinnedMessage } from "./reference-fixtures";
-import { referenceAvatarFor, referenceAvatarSpriteIndexFor } from "./reference-avatars";
+import { referenceAvatarFor, referenceAvatarSpriteIndexFor, referencePersonIndex } from "./reference-avatars";
 import {
   CHAT_REACTION_EMOJIS,
   buildChatRows,
@@ -464,7 +464,7 @@ export function ChatHistory({
                   }
                 >
                   {row.authorId !== viewerId && (
-                     <span className="msg-chat__group-avatar" aria-hidden="true">{row.authorName?.trim().charAt(0).toUpperCase() || "?"}</span>
+                     <span className="msg-chat__group-avatar" aria-hidden="true" data-reference-person={channel?.id === "reference:mayaki" ? (referencePersonIndex(row.authorName) ?? undefined) : undefined}>{row.authorName?.trim().charAt(0).toUpperCase() || "?"}</span>
                    )}
                    <span className="msg-chat__group-author" aria-hidden="true">
                     {row.authorId === viewerId ? (isReferenceChannel(channel?.id) ? "Алекс Речной" : "Вы") : row.authorName}
