@@ -207,7 +207,7 @@ for (const viewport of [
     const htmlOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(htmlOverflow).toBeLessThanOrEqual(2);
     await page.evaluate(async () => { await document.fonts.ready; });
-    const screenshot = await page.screenshot({ animations: "disabled", fullPage: true });
+    const screenshot = await page.screenshot({ path: testInfo.outputPath(`analytics-candidate-${viewport.name}.png`), animations: "disabled", fullPage: true });
     await testInfo.attach(`analytics-candidate-${viewport.name}`, { body: screenshot, contentType: "image/png" });
   });
 }
