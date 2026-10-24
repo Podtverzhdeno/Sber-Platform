@@ -487,8 +487,8 @@ export function BootcampCatalog({
     setSearchParams(next);
   }
 
-  if (catalog.isLoading || streak.isLoading) return <StatePanel kind="loading" />;
-  if (catalog.isError || streak.isError || !catalog.data || !streak.data) {
+  if (catalog.isLoading && !catalog.data) return <StatePanel kind="loading" />;
+  if (!catalog.data) {
     return (
       <StatePanel
         kind="error"
@@ -507,13 +507,14 @@ export function BootcampCatalog({
   const category = searchParams.get("category") ?? "all";
   const query = (searchParams.get("q") ?? "").trim().toLocaleLowerCase("ru-RU");
   const trackOptions = [...new Set(catalog.data.flatMap((card) => card.track_keys))];
+  const setTrack = (track: string) => { updateFilter("track", track); };
   const relevantCount = catalog.data.filter((card) => card.relevant).length;
   const forTrack = (card: CourseCardState) => trackFilter === "all" || card.track_keys.includes(trackFilter);
   const categoryCounts = [
     { key: "all", label: "Все курсы", count: catalog.data.filter(forTrack).length },
     { key: "role", label: "Для моей роли", count: catalog.data.filter((card) => forTrack(card) && card.relevant).length },
     { key: "required", label: "Обязательные", count: catalog.data.filter((card) => forTrack(card) && card.must_take !== null).length },
-    { key: "progress", label: "В процессе", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "reported").length },
+    { key: "progress", label: "На проверке", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "reported").length },
     { key: "completed", label: "Завершённые", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "verified").length },
   ];
   const pendingRequired = catalog.data.filter((card) => forTrack(card) && card.must_take && card.completion_state !== "verified");
@@ -544,7 +545,7 @@ export function BootcampCatalog({
         <div className="bootcamp-hero-pulse" aria-label="Состояние обучения">
           <strong>{String(catalog.data.filter((card) => card.completion_state === "verified").length)}</strong>
           <span>подтверждённых курсов</span>
-          <h2 className="bootcamp-streak-heading">Серия: {String(streak.data.current_days)} дн.</h2>
+          <h2 className="bootcamp-streak-heading">{streak.data ? `Серия: ${String(streak.data.current_days)} дн.` : "Серия: данные недоступны"}</h2>
         </div>
       </header>
       {deepLinkedKey !== null && deepLinked === null && (
@@ -558,6 +559,16 @@ export function BootcampCatalog({
           увидеть его.
         </p>
       )}
+      {catalog.isError && <p className="notice" role="status">Показаны сохранённые данные каталога. Обновление временно недоступно. <button type="button" onClick={() => { void catalog.refetch(); }}>Повторить</button></p>}
+      {streak.isError && <p className="notice" role="status">Серия обучения временно недоступна. Каталог продолжает работать.</p>}
+      <div className="bc-role-switch-row">
+        <label htmlFor="bc-selected-track">Выбранная траектория</label>
+        <select id="bc-selected-track" value={trackFilter} onChange={(event) => { setTrack(event.target.value); }}>
+          <option value="all">Все активные направления</option>
+          {trackOptions.map((key) => <option key={key} value={key}>{key}</option>)}
+        </select>
+        <span className="bc-muted">Каталог и требования обновляются для выбранной траектории</span>
+      </div>
       <div className="bc-overview-grid">
         <section className="bc-continue ui-card" aria-labelledby="bc-continue-title">
           <p className="bc-panel-kicker">СЛЕДУЮЩЕЕ ДЕЙСТВИЕ</p>
