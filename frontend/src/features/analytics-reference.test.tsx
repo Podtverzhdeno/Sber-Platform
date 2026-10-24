@@ -91,6 +91,11 @@ describe("three canonical analytics reference layouts", () => {
     expect(screen.queryByText("81%")).not.toBeInTheDocument();
   });
 
+  it("shows measured zero of six rather than missing when all low levels are verified", async () => {
+    open("/workspace/9", roleSkills.map((skill) => ({ ...skill, current_level: 1, data_state: "verified", evidence_count: 1 })));
+    await waitFor(() => expect(screen.getAllByText("0 / 6").length).toBeGreaterThan(0));
+  });
+
   it("opens per-skill details and certification terms without issuing a badge", () => {
     open();
     fireEvent.click(screen.getByRole("button", { name: /Постановка задач агенту/ }));
