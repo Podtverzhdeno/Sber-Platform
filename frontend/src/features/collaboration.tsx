@@ -446,7 +446,7 @@ export function MessagingWorkspace({
         )}
       </header>
       <div
-        className={`messenger-shell${isNarrow ? ` messenger-shell--${mobilePane}` : ""}${!isNarrow && !contextVisible ? " messenger-shell--no-context" : ""}`}
+        className={`messenger-shell${isNarrow ? ` messenger-shell--${mobilePane}` : ""}${!isNarrow && !contextVisible && selected !== undefined ? " messenger-shell--no-context" : ""}`}
         data-pane={isNarrow ? mobilePane : "desktop"}
       >
         {listVisible && (
