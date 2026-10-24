@@ -287,7 +287,7 @@ export function Composer({
             className="msg-composer__mention-hint"
             aria-label="Упомянуть участника"
             title="Упомянуть участника"
-            onClick={() => insertAtCaret("@")}
+            onClick={() => { insertAtCaret("@"); }}
           >
             <AtSign aria-hidden="true" size={19} />
           </button>
