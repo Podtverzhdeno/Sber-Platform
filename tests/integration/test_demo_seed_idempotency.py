@@ -8,11 +8,20 @@ from __future__ import annotations
 import os
 from uuid import uuid4
 
+import httpx
 import pytest
+from pydantic import SecretStr
 from sqlalchemy import delete, insert, select, update
 
+from impulse.application.development import DevelopmentService
+from impulse.application.identity import DemoAuthService
+from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
+from impulse.bootstrap.app import create_app
 from impulse.bootstrap.demo_seed import demo_id, seed_demo
+from impulse.bootstrap.settings import AppEnvironment, Settings
 from impulse.infrastructure.database import Database, async_database_url
+from impulse.infrastructure.development_store import SqlDevelopmentStore
+from impulse.infrastructure.identity_store import SqlIdentityStore
 from impulse.infrastructure.models.development import enrollments, track_attempts
 
 pytestmark = pytest.mark.integration
@@ -97,5 +106,60 @@ async def test_reseed_preserves_runtime_attempt_and_course_completion() -> None:
             "stage-2",
         ]
         assert completion == "reported"
+    finally:
+        await database.close()
+
+
+@pytest.mark.asyncio
+async def test_postgresql_api_returns_all_detailed_ai_paths_for_unselected_roles() -> None:
+    url = os.environ.get("TEST_DATABASE_URL")
+    if url is None:
+        pytest.skip("TEST_DATABASE_URL is required")
+
+    database = Database(async_database_url(url))
+    try:
+        await seed_demo(database)
+        settings = Settings(
+            app_env=AppEnvironment.TEST,
+            demo_mode=True,
+            session_secret=SecretStr("ai-catalog-integration-secret-long-enough"),
+        )
+        auth = DemoAuthService(
+            SqlIdentityStore(database),
+            secret=settings.session_signing_secret(),
+            ttl_seconds=settings.session_ttl_seconds,
+        )
+        app = create_app(
+            settings,
+            auth_service=auth,
+            development_service=DevelopmentService(SqlDevelopmentStore(database)),
+        )
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app), base_url="http://testserver"
+        ) as client:
+            logged_in = await client.post(
+                "/api/v1/auth/demo-login",
+                json={"persona_key": "participant-alex"},
+            )
+            assert logged_in.status_code == 200
+            response = await client.get("/api/v1/me/roadmap-catalog")
+            tracks_response = await client.get("/api/v1/development/tracks")
+        assert response.status_code == 200, response.text
+        assert tracks_response.status_code == 200, tracks_response.text
+        items = {entry["track_key"]: entry for entry in response.json()}
+        titles = {
+            track["key"]: track["title"]
+            for track in tracks_response.json()["tracks"]
+        }
+        assert set(items) == set(AI_ROLE_PROFILES) == set(titles)
+        for key, plan in items.items():
+            assert titles[key] == AI_ROLE_PROFILES[key]["title"]
+            assert len(plan["milestones"]) == 7
+            assert all(len(stage["activities"]) == 3 for stage in plan["milestones"])
+            assert all(stage["deliverable"] for stage in plan["milestones"])
+            assert [stage["position"] for stage in plan["milestones"]] == list(
+                range(1, 8)
+            )
+        assert all(not step["completed"] for step in items["data"]["milestones"])
     finally:
         await database.close()
