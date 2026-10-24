@@ -1805,29 +1805,29 @@
 
 /* Approved Messages ZIP: preserve meaningful reference icons from app.js.
    Scoped to synthetic reference IDs via data-reference-tone; live dialogs unchanged. */
-.sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone] {
+:root .sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone] {
   border: 0;
   font-family: inherit;
   font-weight: 800;
   color: #f7fdff;
 }
-.sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="blue"] {
+:root .sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="blue"] {
   background: linear-gradient(135deg, #0ba8ff, #3d54ff);
 }
-.sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="orange"] {
+:root .sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="orange"] {
   background: linear-gradient(135deg, #ffbb00, #e66a00);
 }
-.sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="green"] {
+:root .sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="green"] {
   background: linear-gradient(135deg, #00c96f, #7bffaf);
   color: #072414;
 }
-.sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="purple"] {
+:root .sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="purple"] {
   background: linear-gradient(135deg, #7c37ff, #e557ff);
 }
-.sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="teal"] {
+:root .sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="teal"] {
   background: linear-gradient(135deg, #0db0a8, #2df0ff);
   color: #06202c;
 }
-.sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="neutral"] {
+:root .sberchat-shell :is(.msg-dialog-list__avatar, .msg-chat__avatar, .msg-context__avatar)[data-reference-tone="neutral"] {
   background: linear-gradient(145deg, #1b3552, #0b2039);
 }
