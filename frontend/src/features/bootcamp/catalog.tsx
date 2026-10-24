@@ -224,6 +224,24 @@ function CatalogFilters({
 }
 
 
+function courseVisual(title: string): { glyph: string; color: string } {
+  const name = title.toLocaleLowerCase("ru-RU");
+  if (name.includes("python")) return { glyph: "Py", color: "blue" };
+  if (name.includes("git")) return { glyph: "◆", color: "red" };
+  if (name.includes("fastapi")) return { glyph: "ϟ", color: "green" };
+  if (name.includes("openspec") || name.includes("sdd")) return { glyph: "▤", color: "blue" };
+  if (name.includes("агент") || name.includes("llm")) return { glyph: "✧", color: "purple" };
+  return { glyph: "▣", color: "blue" };
+}
+function CourseCover({ title }: { title: string }) {
+  const visual = courseVisual(title);
+  return <span className={`bc-course-icon bc-course-icon--${visual.color}`} aria-hidden="true">{visual.glyph}</span>;
+}
+function SkillChips({ card }: { card: CourseCardState }) {
+  const skills = [card.must_take?.skill, ...card.track_keys].filter((skill): skill is string => Boolean(skill)).slice(0, 3);
+  return <div className="bc-skill-chips">{skills.map((skill) => <span key={skill} title={skill}>{skill}</span>)}</div>;
+}
+
 type CatalogPanel = "detail" | "reason" | "requirements";
 
 function CourseDetails({
@@ -506,7 +524,7 @@ export function BootcampCatalog({
         <section className="bc-continue ui-card" aria-labelledby="bc-continue-title">
           <p className="bc-panel-kicker">ПРОДОЛЖИТЬ ОБУЧЕНИЕ</p>
           <h2 id="bc-continue-title">{nextCourse?.completion_state === "reported" ? "Продолжить обучение" : nextCourse ? "Начните с подходящего курса" : "Выберите следующий шаг"}</h2>
-          <p className="bc-overview-course">{nextCourse?.title ?? "Доступный курс пока не определён"}</p>
+          <div className="bc-next-course">{nextCourse && <CourseCover title={nextCourse.title} />}<p className="bc-overview-course">{nextCourse?.title ?? "Доступный курс пока не определён"}</p></div>
           <p className="bc-muted">Прогресс и контрольные точки появятся после подключения подтверждённого источника LMS</p>
           {nextCourse ? <button type="button" onClick={() => { openPanel("detail", nextCourse.key); }}>Перейти к курсу →</button> :
             <button type="button" className="secondary-button" onClick={() => { resetFilters(); document.getElementById("bc-catalog-title")?.scrollIntoView({ behavior: "smooth" }); }}>Смотреть каталог →</button>}
@@ -524,7 +542,7 @@ export function BootcampCatalog({
         </section>
       </div>
       <section className="bc-grade-banner" aria-labelledby="bc-grade-title">
-        <div><p className="bc-panel-kicker">ДО СЛЕДУЮЩЕГО ГРЕЙДА</p>
+        <div><p className="bc-panel-kicker">♛ ДО СЛЕДУЮЩЕГО ГРЕЙДА</p>
           <h2 id="bc-grade-title">{pendingRequired.length > 0 ? `Осталось ${pendingRequired.length} ${pendingRequired.length % 10 === 1 && pendingRequired.length % 100 !== 11 ? "обязательный курс" : [2, 3, 4].includes(pendingRequired.length % 10) && ![12, 13, 14].includes(pendingRequired.length % 100) ? "обязательных курса" : "обязательных курсов"}` : "Требования к грейду"}</h2>
           <p>{pendingRequired.length > 0 ? "Просмотрите ещё не подтверждённые учебные требования. Дополнительно могут потребоваться практика и проверка результатов." : "Полный список требований и степень готовности появятся после публикации политики. Отсутствие курсов здесь не означает присвоение грейда."}</p>
         </div>
@@ -546,13 +564,14 @@ export function BootcampCatalog({
           {orderedVisible.map((card) => (
             <article className="ui-card bootcamp-course-card" key={card.key} data-required={card.must_take !== null} data-access={card.access_state} data-testid={`course-${card.key}`}>
               <div className="bc-course-labels"><span>{card.must_take ? "НУЖНО ДЛЯ РОЛИ" : card.relevant ? "РЕКОМЕНДОВАН" : "ОБУЧЕНИЕ"}</span><span aria-hidden="true">{card.access_state === "available" ? "↗" : "🔒"}</span></div>
-              <h2>{card.title}</h2>
+              <div className="bc-course-heading"><CourseCover title={card.title} /><h2>{card.title}</h2></div>
               {deepLinkedKey === card.key && (
                 <p className="notice" data-testid={`deeplink-${card.key}`}>
                   Курс открыт по прямой ссылке
                 </p>
               )}
               <p className="bc-course-summary">{card.recommendation_reason || "Описание ещё не опубликовано"}</p>
+              <SkillChips card={card} />
               <CardStates card={card} />
               {card.pending_verification_note && <p className="notice" role="status">{card.pending_verification_note}</p>}
               <details className="bc-explain"><summary>{card.must_take ? "Навык и требования" : "Обоснование курса"}</summary><CardExplanation card={card} relevanceOnly={relevanceOnly} /></details>
@@ -564,7 +583,7 @@ export function BootcampCatalog({
         <ul className="course-rows" aria-label="Каталог Bootcamp списком">
           {orderedVisible.map((card) => (
             <li className="course-row bootcamp-course-row" key={card.key} data-required={card.must_take !== null} data-access={card.access_state} data-testid={`course-${card.key}`}>
-              <div className="bc-list-heading"><span className="bc-panel-kicker">{card.must_take ? "ОБЯЗАТЕЛЬНЫЙ" : card.relevant ? "ДЛЯ МОЕЙ РОЛИ" : "ОБУЧЕНИЕ"}</span><strong>{card.title}</strong><small>{card.recommendation_reason || "Описание не опубликовано"}</small></div>
+              <div className="bc-list-heading"><span className="bc-panel-kicker">{card.must_take ? "ОБЯЗАТЕЛЬНЫЙ" : card.relevant ? "ДЛЯ МОЕЙ РОЛИ" : "ОБУЧЕНИЕ"}</span><div className="bc-course-heading"><CourseCover title={card.title} /><strong>{card.title}</strong></div><small>{card.recommendation_reason || "Описание не опубликовано"}</small><SkillChips card={card} /></div>
               {deepLinkedKey === card.key && (
                 <p className="notice" data-testid={`deeplink-${card.key}`}>
                   Курс открыт по прямой ссылке
