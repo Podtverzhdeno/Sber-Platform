@@ -1,14 +1,15 @@
 # Claim task-catalog-visual-review-20261024
 
 - task_id: task-catalog-visual-review-20261024
-- session_id: gpt6-20261024-1812-visual-e2e
-- status: REVIEW
+- session_id: gpt6-20261024-approved-ref-verification
+- status: IN_PROGRESS
 - started_at: 2026-10-24T18:12:00+03:00
 - heartbeat_at: 2026-10-24T18:12:00+03:00
 - base_revision: 6a6a38352745468971f520a72a2a2e72595e7f09
 - depends_on: [task-catalog-visual-polish-20261024]
 - write_scope:
   - frontend/e2e/task-catalog-v2-visual.spec.ts
+  - frontend/e2e/task-catalog-v2-real-api.spec.ts
   - frontend/e2e/task-catalog-v2-visual.spec.ts-snapshots/
   - .github/workflows/task-catalog-review-capture.yml
   - .agents/coordination/claims/task-catalog-visual-review-20261024.lock/status.md
@@ -24,3 +25,7 @@
 - implemented: compact search toolbar, progressive advanced filters, first-task read-only preview, tighter cards/list, accessible icon actions, responsive list and KPI corrections
 - automated_quality: screenshot-generation test passed; exact final PR CI still pending
 - disposition: REVIEW, no checkbox updates, no production deploy, no feature-flag changes, no claim of exact reference match
+
+## Scope continuation after owner's upload
+- reference originals arrived as bytes; replace obsolete browser assertions and regenerated snapshot baselines only after visual inspection
+- independent product parity against original 01, 02, 03 is now possible; source demo numbers must not be reproduced as real facts
