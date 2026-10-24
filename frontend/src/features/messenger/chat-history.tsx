@@ -37,7 +37,7 @@ import {
   writePinnedMessageId,
   type ReactionRecord,
 } from "./chat-model";
-import { dialogKindLabel, dialogTimeLabel } from "./view-model";
+import { dialogKindLabel, dialogTimeLabel, dialogTitle } from "./view-model";
 import type { KeyValueStorage } from "./view-model";
 import "./chat-history.scss";
 
