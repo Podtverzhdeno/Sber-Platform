@@ -443,10 +443,7 @@ export function RoleInfoDialog(props: {
                   : milestones.slice(Math.max(0,role.completed_milestones),role.completed_milestones+4).map((item) => <li key={item.key}>{item.title}</li>)}</ul>
                 {!isProductRole && milestones.length === 0 && <p>Следующие этапы ещё не определены.</p>}
               </section>
-              {isProductRole && <section className="trajectory-v2-role-suitability">
-                <h3>Кому подойдёт эта роль</h3>
-                <p>{PRODUCT_REFERENCE_ROLE.suitable}</p>
-              </section>}
+
             </div>
           ) : sectionContent}
         </div>
