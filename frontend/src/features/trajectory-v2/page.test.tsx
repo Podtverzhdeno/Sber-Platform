@@ -50,6 +50,7 @@ const roadmapFixture: RoadmapView = {
       target_kind: "course",
       target_key: "python-base",
       completed: true,
+      deliverable: null,
     },
     {
       key: "api",
@@ -60,6 +61,7 @@ const roadmapFixture: RoadmapView = {
       target_kind: "course",
       target_key: "python-api",
       completed: false,
+      deliverable: null,
     },
     {
       key: "capstone",
@@ -70,6 +72,7 @@ const roadmapFixture: RoadmapView = {
       target_kind: "task",
       target_key: "demo-task-1",
       completed: false,
+      deliverable: null,
     },
   ],
   next_step: null,
