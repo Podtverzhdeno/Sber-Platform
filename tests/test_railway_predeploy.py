@@ -31,7 +31,7 @@ def test_predeploy_migrates_before_optional_seed(
         calls.append("seed")
 
     monkeypatch.setattr(predeploy.command, "upgrade", upgrade)
-    monkeypatch.setattr(predeploy, "_seed_and_verify", seed)
+    monkeypatch.setattr(predeploy, "seed_and_verify", seed)
     predeploy.main()
 
     assert calls == (["migrations", "seed"] if demo_mode else ["migrations"])
@@ -66,7 +66,7 @@ async def test_demo_seed_fails_closed_if_catalog_missing(
     monkeypatch.setattr(predeploy, "Database", FakeDatabase)
     monkeypatch.setattr(predeploy, "seed_demo", seed)
     with pytest.raises(RuntimeError, match="catalog is missing"):
-        await predeploy._seed_and_verify("postgresql+asyncpg://test:test@localhost/test")
+        await predeploy.seed_and_verify("postgresql+asyncpg://test:test@localhost/test")
     assert closed == [True]
 
 
@@ -88,5 +88,5 @@ async def test_demo_seed_verifies_twelve_tasks(
 
     monkeypatch.setattr(predeploy, "Database", FakeDatabase)
     monkeypatch.setattr(predeploy, "seed_demo", seed)
-    await predeploy._seed_and_verify("postgresql+asyncpg://test:test@localhost/test")
+    await predeploy.seed_and_verify("postgresql+asyncpg://test:test@localhost/test")
     assert closed == [True]
