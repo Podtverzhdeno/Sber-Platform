@@ -26,10 +26,11 @@ const actor = {
 };
 
 test.beforeEach(async ({ page }) => {
+  let loggedIn = false;
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: { honor_board_enabled: true } }));
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: "Алекс Речной", roles: ["participant"] }] }));
-  await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
-  await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: actor }));
+  await page.route("**/api/v1/me", (route) => loggedIn ? route.fulfill({ json: actor }) : route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
+  await page.route("**/api/v1/auth/demo-login", (route) => { loggedIn = true; return route.fulfill({ json: actor }); });
   await page.route("**/api/v1/me/roadmaps", (route) => route.fulfill({ json: [{ track_key: "python", policy_version: 1, replacement_reason: null, milestones: [{ key: "foundation", position: 1, title: "Основа", purpose: "Подготовиться к проекту", skill: "Python", target_kind: "course", target_key: "python-base", completed: false }], next_step: { key: "foundation", position: 1, title: "Основа", purpose: "Подготовиться к проекту", skill: "Python", target_kind: "course", target_key: "python-base", completed: false } }] }));
   await page.route("**/api/v1/me/growth/snapshot", (route) => route.fulfill({
     json: {
@@ -102,6 +103,7 @@ test("participant activates second track and freezes one only when choosing thir
   await page.locator('[data-persona="participant-alex"]').click();
   // Точка входа «Мой путь» ушла в историю: реальная роль ведёт на «Мою траекторию».
   await page.getByRole("link", { name: "Моя траектория" }).click();
+  await page.goto("/workspace/1?classic=1");
   await page.getByRole("button", { name: /Аналитик данных/ }).click();
   await expect(page.locator(".track-card").filter({ hasText: "Аналитик данных" })).toContainText("Активно");
   await page.getByRole("button", { name: /Продуктовый аналитик/ }).click();
