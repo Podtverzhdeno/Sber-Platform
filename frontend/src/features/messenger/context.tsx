@@ -76,6 +76,9 @@ export function ContextPanel({
               ваша роль: {participantRoleLabel(roleInChannel)}
             </span>
           )}
+          {isReferencePreview && (
+            <span className="msg-context__reference-online"><span aria-hidden="true" />В сети</span>
+          )}
         </div>
       </div>
       {description && <p className="msg-context__description">{description}</p>}
@@ -157,7 +160,16 @@ export function ContextPanel({
             <span><small>Задача</small><strong>{workContext.task_title}</strong></span>
           </button>
         ) : isReferencePreview && channel.id === "reference:mentor" ? (
-          <div className="ref-context-linked__item"><FolderOpen size={17} /><span><small>Пример проекта</small><strong>Эксперимент с рекомендателем</strong></span></div>
+          <div className="ref-context-linked__preview">
+            <div className="ref-context-linked__item">
+              <FolderOpen size={17} aria-hidden="true" />
+              <span><small>Проект · пример</small><strong>Эксперимент с рекомендателем</strong></span>
+            </div>
+            <div className="ref-context-linked__item">
+              <FileText size={17} aria-hidden="true" />
+              <span><small>Задача · пример</small><strong>Анализ метрик эксперимента</strong></span>
+            </div>
+          </div>
         ) : <p className="ref-context-placeholder-text">Связанные объекты пока отсутствуют</p>}
       </section>
       {isCommunity && isReferencePreview && (
