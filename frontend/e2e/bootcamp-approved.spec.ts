@@ -15,7 +15,7 @@ const viewports = [
 ] as const;
 
 for (const viewport of viewports) {
-  test(`Bootcamp approved layout, filters and dialog at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+  test(`Bootcamp approved layout, filters and dialog at ${String(viewport.width)}x${String(viewport.height)}`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto("/");
     await page.locator('[data-persona="participant-alex"]').click();
@@ -75,7 +75,7 @@ for (const viewport of viewports) {
     await expect(page).not.toHaveURL(/course=/);
 
     await page.screenshot({
-      path: `test-results/bootcamp-approved-${viewport.width}x${viewport.height}.png`,
+      path: `test-results/bootcamp-approved-${String(viewport.width)}x${String(viewport.height)}.png`,
       fullPage: true,
       animations: "disabled",
     });
