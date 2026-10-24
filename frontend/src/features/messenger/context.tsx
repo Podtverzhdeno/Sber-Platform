@@ -93,6 +93,7 @@ export function ContextPanel({
           <dt>Участников</dt>
           <dd>{isCommunity && isReferencePreview ? "248" : String(channel.participants.length)}</dd>
         </div>
+        {isReferencePreview && <div><dt>Создан</dt><dd>20 октября 2026</dd></div>}
       </dl>
       {!isCommunity && (channel.task_id !== null || workContext !== null) && (
       <section className="msg-context__section" aria-label="Задача">
