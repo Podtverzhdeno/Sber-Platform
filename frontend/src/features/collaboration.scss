@@ -617,3 +617,1188 @@
     scroll-behavior: auto !important;
   }
 }
+
+
+/* Reference fidelity pass — Impulse Messages source layouts (2026-10-23).
+   Desktop: dialog rail (~27%), conversation (~50%), contextual inspector (~23%).
+   These are presentation rules only: data and access remain API-driven. */
+.sberchat-shell {
+  --msg-panel: var(--color-surface);
+  --msg-panel-elevated: var(--color-surface-raised, var(--color-surface));
+  --msg-line: color-mix(in srgb, var(--color-text) 10%, transparent);
+  --msg-chat-bg: color-mix(in srgb, var(--color-bg) 95%, var(--color-surface));
+  --msg-bubble-border: color-mix(in srgb, var(--color-text) 8%, transparent);
+  --msg-bubble-in: color-mix(in srgb, var(--color-surface-raised, var(--color-surface)) 94%, var(--color-bg));
+  --msg-bubble-out: color-mix(in srgb, var(--color-accent) 23%, var(--color-surface));
+  --msg-active: color-mix(in srgb, var(--color-accent) 11%, var(--color-surface));
+  --msg-hover: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+  height: calc(100dvh - 100px);
+  max-height: none;
+  min-height: 570px;
+  border-radius: 0;
+  border: 1px solid var(--msg-line);
+  box-shadow: none;
+  background: var(--msg-chat-bg);
+}
+.sberchat-shell .messenger-shell {
+  grid-template-columns: minmax(300px, 27%) minmax(0, 1fr) minmax(260px, 22.5%);
+  width: 100%;
+}
+.sberchat-shell .messenger-shell--no-context {
+  grid-template-columns: minmax(300px, 27%) minmax(0, 1fr);
+}
+.sberchat-shell .msg-dialog-list {
+  background: var(--msg-panel);
+}
+.sberchat-shell .msg-dialog-list__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: 0 0 auto;
+  min-height: 64px;
+  padding: 12px 16px 9px;
+  border-bottom: 0;
+}
+.sberchat-shell .msg-dialog-list__heading h1 {
+  margin: 0;
+  color: var(--msg-text);
+  font-size: 21px;
+  line-height: 1.2;
+  letter-spacing: -.025em;
+  font-weight: 730;
+}
+.sberchat-shell .msg-dialog-list__heading .msg-dialog-list__create-button {
+  display: inline-flex;
+  gap: 7px;
+  width: auto;
+  min-width: 0;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  border: 1px solid var(--msg-line);
+  border-radius: 9px;
+  background: transparent;
+}
+.sberchat-shell .msg-dialog-list__heading .msg-dialog-list__create-button svg {
+  width: 16px;
+  height: 16px;
+}
+.sberchat-shell .msg-dialog-list__top {
+  min-height: 56px;
+  padding: 5px 16px 10px;
+}
+.sberchat-shell .msg-dialog-list__search-field {
+  height: 41px;
+  border-color: var(--msg-line);
+  border-radius: 9px;
+  background: var(--msg-chat-bg);
+}
+.sberchat-shell .msg-dialog-list__search-field input {
+  font-size: 13px;
+}
+.sberchat-shell .msg-dialog-list__tabs {
+  min-height: 42px;
+  gap: 21px;
+  padding: 0 17px;
+}
+.sberchat-shell .msg-dialog-list__tabs button {
+  height: 42px;
+  font-size: 13px;
+}
+.sberchat-shell .msg-dialog-list__rows {
+  padding: 0 5px;
+}
+.sberchat-shell .msg-dialog-list__row-item {
+  border-bottom: 1px solid var(--msg-line);
+}
+.sberchat-shell .msg-dialog-list__row {
+  min-height: 70px;
+  padding: 10px 8px;
+  gap: 11px;
+  border-left-width: 3px;
+  border-radius: 8px;
+}
+.sberchat-shell .msg-dialog-list__row-item.selected .msg-dialog-list__row {
+  border-left-color: var(--color-accent);
+  background: var(--msg-active);
+}
+.sberchat-shell .msg-dialog-list__avatar {
+  width: 45px;
+  height: 45px;
+  flex-basis: 45px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 20%, var(--msg-line));
+  background: color-mix(in srgb, var(--color-accent) 7%, var(--msg-panel));
+  font-size: 15px;
+}
+.sberchat-shell .msg-dialog-list__row-title strong {
+  font-size: 13px;
+  line-height: 1.3;
+  font-weight: 680;
+}
+.sberchat-shell .msg-dialog-list__preview {
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+.sberchat-shell .msg-dialog-list__kind {
+  font-size: 10.5px;
+}
+.sberchat-shell .msg-dialog-list__meta {
+  font-size: 10.5px;
+  min-width: 37px;
+}
+.sberchat-shell .msg-dialog-list__unread {
+  background: #15a8ef;
+  color: #fff;
+  border-radius: 999px;
+}
+.sberchat-shell .msg-chat__header {
+  min-height: 75px;
+  padding: 11px 17px;
+  gap: 13px;
+}
+.sberchat-shell .msg-chat__avatar {
+  width: 49px;
+  height: 49px;
+  flex-basis: 49px;
+  border: 1px solid var(--msg-line);
+  background: color-mix(in srgb, var(--color-accent) 9%, var(--msg-panel));
+}
+.sberchat-shell .msg-chat__header-title strong {
+  font-size: 14px;
+  font-weight: 690;
+}
+.sberchat-shell .msg-chat__header-title small {
+  font-size: 11.5px;
+}
+.sberchat-shell .msg-chat__header-actions {
+  gap: 2px;
+}
+.sberchat-shell .msg-chat__header-action {
+  width: 34px;
+  height: 34px;
+}
+.sberchat-shell .msg-chat__scroll {
+  padding: 19px 17px 14px;
+  background: var(--msg-chat-bg);
+}
+.sberchat-shell .msg-chat__rows {
+  gap: 16px;
+}
+.sberchat-shell .msg-chat__group {
+  max-width: min(77%, 530px);
+  gap: 3px;
+}
+.sberchat-shell .msg-chat__group-author {
+  margin: 0 0 1px;
+  padding-inline: 9px;
+  color: var(--color-accent);
+  font-size: 11px;
+}
+.sberchat-shell .msg-chat__bubble {
+  position: relative;
+  gap: 4px;
+  width: fit-content;
+  min-height: 0;
+  max-width: 100%;
+  padding: 9px 12px 6px;
+  border-radius: 4px 12px 12px 12px;
+  border-color: var(--msg-bubble-border);
+  background: var(--msg-bubble-in);
+  box-shadow: none;
+}
+.sberchat-shell .msg-chat__group.outgoing .msg-chat__bubble {
+  border-radius: 12px 4px 12px 12px;
+  background: var(--msg-bubble-out);
+}
+.sberchat-shell .msg-chat__bubble-body {
+  font-size: 13px;
+  line-height: 1.4;
+}
+.sberchat-shell .msg-chat__meta {
+  margin-top: 3px;
+  font-size: 10px;
+}
+.sberchat-shell .msg-chat__delivered {
+  color: var(--color-accent);
+}
+.sberchat-shell .msg-chat__reactions:empty {
+  display: none;
+}
+/* Actions must NOT occupy 30-50px inside every message when idle:
+   this caused the oversized, almost-empty bubbles in the live screenshot. */
+.sberchat-shell .msg-chat__actions {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 4px);
+  z-index: 2;
+  display: flex;
+  flex-wrap: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  padding: 3px;
+  border: 1px solid var(--msg-line);
+  border-radius: 8px;
+  background: var(--msg-panel);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 15%);
+}
+.sberchat-shell .msg-chat__bubble:hover .msg-chat__actions,
+.sberchat-shell .msg-chat__bubble:focus-within .msg-chat__actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sberchat-shell .msg-chat__action { opacity: 1; }
+.sberchat-shell .msg-composer {
+  min-height: 71px;
+  padding: 8px 12px;
+  background: var(--msg-panel);
+}
+.sberchat-shell .msg-composer__fieldset {
+  align-items: center;
+  gap: 8px;
+}
+.sberchat-shell .msg-composer__tools {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.sberchat-shell .msg-composer__tool,
+.sberchat-shell .msg-composer__mention-hint {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 33px;
+  width: 33px;
+  height: 36px;
+  min-width: 33px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--msg-muted);
+  cursor: pointer;
+}
+.sberchat-shell .msg-composer__tool:hover,
+.sberchat-shell .msg-composer__mention-hint:hover {
+  background: var(--msg-hover);
+  color: var(--color-accent);
+}
+.sberchat-shell .msg-composer__input-shell {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.sberchat-shell .msg-composer__textarea {
+  width: 100%;
+  min-height: 45px;
+  height: 45px;
+  max-height: 120px;
+  padding: 12px;
+  border: 1px solid var(--msg-line);
+  border-radius: 9px;
+  background: var(--msg-chat-bg);
+  font-size: 12px;
+  line-height: 1.5;
+  resize: vertical;
+}
+.sberchat-shell .msg-composer__send {
+  display: inline-grid;
+  place-items: center;
+  align-self: center;
+  flex: 0 0 45px;
+  min-width: 45px;
+  width: 45px;
+  height: 45px;
+  min-height: 45px;
+  padding: 0;
+  border-radius: 10px;
+}
+.sberchat-shell .msg-composer__send-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.sberchat-shell .msg-context {
+  gap: 0;
+  padding: 0 17px 16px;
+  background: var(--msg-panel);
+}
+.sberchat-shell .msg-context__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  border-bottom: 1px solid var(--msg-line);
+}
+.sberchat-shell .msg-context__eyebrow {
+  font-size: 11px;
+  letter-spacing: .04em;
+  font-weight: 650;
+  text-transform: none;
+  color: var(--msg-text);
+}
+.sberchat-shell .msg-context__profile {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0 12px;
+  border-bottom: 1px solid var(--msg-line);
+}
+.sberchat-shell .msg-context__avatar,
+.sberchat-shell .msg-context__member-avatar {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 24%, var(--msg-line));
+  background: color-mix(in srgb, var(--color-accent) 9%, var(--msg-panel-elevated));
+  color: var(--msg-text);
+  font-size: 17px;
+  font-weight: 700;
+}
+.sberchat-shell .msg-context__profile-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.sberchat-shell .msg-context__title {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 680;
+  overflow-wrap: anywhere;
+}
+.sberchat-shell .msg-context__badge,
+.sberchat-shell .msg-context__role {
+  font-size: 10px;
+  padding: 4px 8px;
+}
+.sberchat-shell .msg-context > .msg-context__facts {
+  padding: 4px 0 10px;
+  border-bottom: 1px solid var(--msg-line);
+}
+.sberchat-shell .msg-context__facts { gap: 0; }
+.sberchat-shell .msg-context__facts > div {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+  padding: 5px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--msg-line) 50%, transparent);
+}
+.sberchat-shell .msg-context__facts > div:last-child { border-bottom: 0; }
+.sberchat-shell .msg-context__facts dt {
+  flex: 0 1 auto;
+  font-size: 11px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.sberchat-shell .msg-context__facts dd {
+  flex: 0 1 auto;
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 620;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.sberchat-shell .msg-context__section {
+  gap: 4px;
+  padding-top: 11px;
+  margin-top: 0;
+  border-top: 0;
+  border-bottom: 1px solid var(--msg-line);
+  padding-bottom: 10px;
+}
+.sberchat-shell .msg-context__section-title {
+  margin: 0 0 7px;
+  font-size: 11px;
+}
+.sberchat-shell .msg-context__people { gap: 8px; }
+.sberchat-shell .msg-context__people li {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+}
+.sberchat-shell .msg-context__member-avatar {
+  width: 29px;
+  height: 29px;
+  font-size: 11px;
+}
+.sberchat-shell .msg-context__member-copy {
+  min-width: 0;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.sberchat-shell .msg-context__member-copy small {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+}
+.sberchat-shell .msg-context__disclaimer {
+  display: block;
+  margin-top: 12px;
+  font-size: 10px;
+  line-height: 1.5;
+}
+:root[data-theme="light"] .sberchat-shell {
+  --msg-chat-bg: #f2f3f5;
+  --msg-bubble-in: #fff;
+  --msg-bubble-out: #dbf2dc;
+  --msg-active: #d8efe3;
+  --msg-hover: #edf5f0;
+  --msg-line: #dfe4e7;
+}
+@media (max-width: 1280px) and (min-width: 960px) {
+  .sberchat-shell .messenger-shell {
+    grid-template-columns: minmax(250px, 26%) minmax(0, 1fr) minmax(225px, 23%);
+  }
+  .sberchat-shell .messenger-shell--no-context {
+    grid-template-columns: minmax(250px, 26%) minmax(0, 1fr);
+  }
+  .sberchat-shell .msg-dialog-list__heading { padding-inline: 12px; }
+  .sberchat-shell .msg-dialog-list__heading h1 { font-size: 18px; }
+  .sberchat-shell .msg-dialog-list__heading .msg-dialog-list__create-button {
+    font-size: 11px;
+    padding: 0 8px;
+  }
+  .sberchat-shell .msg-context { padding-inline: 12px; }
+}
+@media (max-width: 959px) {
+  .sberchat-shell {
+    height: calc(100dvh - 112px);
+    min-height: 470px;
+    border-radius: 10px;
+  }
+  .sberchat-shell .messenger-shell,
+  .sberchat-shell .messenger-shell--no-context {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sberchat-shell .msg-dialog-list__heading {
+    min-height: 60px;
+    padding: 12px 14px;
+  }
+  .sberchat-shell .msg-dialog-list__top {
+    padding-inline: 14px;
+  }
+  .sberchat-shell .msg-chat__scroll {
+    padding: 16px 12px;
+  }
+  .sberchat-shell .msg-context { padding-inline: 14px; }
+}
+@media (max-width: 480px) {
+  .sberchat-shell .msg-dialog-list__heading h1 { font-size: 19px; }
+  .sberchat-shell .msg-dialog-list__heading .msg-dialog-list__create-button {
+    font-size: 11px;
+    padding-inline: 8px;
+  }
+  .sberchat-shell .msg-dialog-list__row { min-height: 69px; }
+  .sberchat-shell .msg-chat__header { min-height: 62px; padding: 8px 11px; }
+  .sberchat-shell .msg-chat__avatar { width: 38px; height: 38px; flex-basis: 38px; }
+  .sberchat-shell .msg-chat__header-actions { gap: 0; }
+  .sberchat-shell .msg-chat__header-action { width: 30px; height: 34px; }
+  .sberchat-shell .msg-chat__group { max-width: 91%; }
+  .sberchat-shell .msg-composer { min-height: 62px; padding: 6px; }
+  .sberchat-shell .msg-composer__tools { gap: 0; }
+  .sberchat-shell .msg-composer__tool,
+  .sberchat-shell .msg-composer__mention-hint { width: 30px; min-width: 30px; flex-basis: 30px; }
+  .sberchat-shell .msg-composer__textarea { height: 42px; min-height: 42px; }
+  .sberchat-shell .msg-composer__send { flex-basis: 42px; width: 42px; min-width: 42px; height: 42px; min-height: 42px; }
+}
+
+
+/* Approved Impulse_Messages ZIP — geometric pass against 01/02/03 reference PNGs.
+   This section overrides the earlier generic SberChat approximation.
+   Keep API content and the product shell outside the messenger untouched. */
+.sberchat-shell {
+  --ref-bg: var(--color-bg, #040d17);
+  --ref-surface: var(--color-surface, #061424);
+  --ref-line: color-mix(in srgb, var(--color-accent, #24e6ee) 11%, var(--color-bg, #040d17));
+  --ref-accent: var(--color-accent, #24e6ee);
+  --ref-fg: var(--color-text, #ecf5ff);
+  --ref-muted: var(--color-muted, #94b5d5);
+  width: 100%;
+  height: calc(100dvh - 86px);
+  min-height: 580px;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+  background: var(--ref-bg);
+}
+.sberchat-shell .messenger-shell {
+  height: 100%;
+  grid-template-columns: minmax(320px, 28%) minmax(0, 1fr) minmax(290px, 23%);
+  background: var(--ref-bg);
+}
+.sberchat-shell .messenger-shell--no-context {
+  grid-template-columns: minmax(320px, 28%) minmax(0, 1fr);
+}
+.sberchat-shell .msg-dialog-list {
+  border-right: 1px solid var(--ref-line);
+  background: linear-gradient(180deg, var(--ref-surface), var(--ref-bg) 73%);
+}
+.sberchat-shell .msg-dialog-list__heading {
+  min-height: 72px;
+  padding: 11px 13px 4px 16px;
+  align-items: flex-start;
+  gap: 8px;
+}
+.sberchat-shell .msg-dialog-list__heading h1 {
+  margin: 0;
+  padding: 3px 0 0;
+  font-size: 24px;
+  font-weight: 750;
+  letter-spacing: -.035em;
+  line-height: 1.08;
+}
+.sberchat-shell .msg-dialog-list__heading .msg-dialog-list__subtitle {
+  margin: 4px 0 0;
+  color: var(--ref-muted);
+  font-size: 13px;
+  line-height: 1.3;
+}
+.sberchat-shell .msg-dialog-list__heading .msg-dialog-list__create-button {
+  font-size: 13px;
+  width: auto;
+  min-width: 120px;
+  height: 40px;
+  gap: 8px;
+  padding: 0 11px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid var(--ref-line);
+  color: var(--ref-fg);
+  font-weight: 650;
+  white-space: nowrap;
+}
+.sberchat-shell .msg-dialog-list__heading .msg-dialog-list__create-button svg {
+  width: 17px;
+  height: 17px;
+}
+.sberchat-shell .msg-dialog-list__top {
+  min-height: 58px;
+  border-bottom: 0;
+  padding: 2px 14px 10px;
+}
+.sberchat-shell .msg-dialog-list__search-field {
+  height: 42px;
+  border: 1px solid var(--ref-line);
+  background: color-mix(in srgb, var(--ref-bg) 93%, var(--ref-surface));
+  border-radius: 10px;
+  gap: 11px;
+  padding-inline: 12px;
+}
+.sberchat-shell .msg-dialog-list__search-field input { color: var(--ref-fg); font-size: 13px; }
+.sberchat-shell .msg-dialog-list__search-field svg { width: 17px; height: 17px; color: var(--ref-muted); }
+.sberchat-shell .msg-dialog-list__tabs {
+  min-height: 45px;
+  padding: 0 15px;
+  gap: 14px;
+  background: transparent;
+  border-bottom: 1px solid var(--ref-line);
+}
+.sberchat-shell .msg-dialog-list__tabs button {
+  height: 45px;
+  font-size: 13px;
+  padding: 0 7px;
+  font-weight: 500;
+}
+.sberchat-shell .msg-dialog-list__tabs button.active {
+  color: var(--ref-accent);
+  border-bottom-color: var(--ref-accent);
+  border-bottom-width: 3px;
+  font-weight: 750;
+}
+.sberchat-shell .msg-dialog-list__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 5px;
+  margin-left: 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ref-accent) 44%, var(--ref-surface));
+  color: var(--ref-fg);
+  font-weight: 700;
+  font-size: 11px;
+}
+.sberchat-shell .msg-dialog-list__rows { display: block; }
+.sberchat-shell .msg-dialog-list__row-item { border-bottom: 1px solid var(--ref-line); }
+.sberchat-shell .msg-dialog-list__row {
+  min-height: 67px;
+  gap: 12px;
+  padding: 9px 12px 9px 14px;
+  align-items: center;
+}
+.sberchat-shell .msg-dialog-list__row-item.selected .msg-dialog-list__row {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--ref-accent) 16%, var(--ref-bg)), color-mix(in srgb, var(--ref-accent) 7%, var(--ref-bg)));
+  box-shadow: inset 4px 0 0 var(--ref-accent);
+}
+.sberchat-shell .msg-dialog-list__row:hover { background: color-mix(in srgb, var(--ref-accent) 7%, var(--ref-bg)); }
+.sberchat-shell .msg-dialog-list__avatar {
+  width: 48px; height: 48px; flex-basis: 48px;
+  border-radius: 50%;
+  font-size: 20px; font-weight: 730;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--ref-accent) 12%, var(--ref-surface)), color-mix(in srgb, var(--ref-accent) 2%, var(--ref-bg)));
+  border: 1px solid color-mix(in srgb, var(--ref-accent) 20%, var(--ref-line));
+}
+.sberchat-shell .msg-dialog-list__row-title strong {
+  font-size: 13px; font-weight: 720; line-height: 1.2;
+}
+.sberchat-shell .msg-dialog-list__preview {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ref-muted);
+}
+.sberchat-shell .msg-dialog-list__kind { display: none; }
+.sberchat-shell .msg-dialog-list__meta {
+  gap: 4px;
+  font-size: 11px;
+  color: var(--ref-muted);
+}
+.sberchat-shell .msg-dialog-list__unread {
+  display: inline-grid; place-items: center;
+  min-width: 22px; min-height: 22px; height: 22px;
+  font-size: 12px;
+  border-radius: 999px;
+  background: #1aaaff;
+  color: #05111d;
+  font-weight: 800;
+}
+.sberchat-shell .msg-dialog-list__pinflag { color: #77c5f7; }
+.sberchat-shell .msg-dialog-list__row-actions { z-index: 1; }
+.sberchat-shell .chat-thread {
+  border-right: 1px solid var(--ref-line);
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--ref-accent) 3%, var(--ref-bg)), var(--ref-bg) 73%);
+}
+.sberchat-shell .msg-chat { background: transparent; }
+.sberchat-shell .msg-chat__header {
+  min-height: 75px;
+  height: 75px;
+  flex: 0 0 auto;
+  padding: 9px 16px 9px 18px;
+  border-bottom: 1px solid var(--ref-line);
+  background: color-mix(in srgb, var(--ref-surface) 84%, var(--ref-bg));
+}
+.sberchat-shell .msg-chat__avatar {
+  width: 50px; height: 50px; flex-basis: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0a3254, #102b47);
+  border: 1px solid var(--ref-line);
+  font-size: 21px; font-weight: 760;
+}
+.sberchat-shell .msg-chat__header-title strong {
+  font-size: 16px; font-weight: 750;
+}
+.sberchat-shell .msg-chat__header-title small {
+  margin-top: 4px; color: var(--ref-muted); font-size: 12px;
+}
+.sberchat-shell .msg-chat__header-actions { gap: 7px; }
+.sberchat-shell .msg-chat__header-action {
+  width: 32px; height: 40px;
+  border-radius: 8px;
+  color: color-mix(in srgb, var(--ref-fg) 75%, var(--ref-muted));
+}
+.sberchat-shell .msg-chat__header-action svg { width: 19px; height: 19px; }
+.sberchat-shell .msg-chat__scroll { padding: 14px 19px 18px; }
+.sberchat-shell .msg-chat__rows { gap: 12px; }
+.sberchat-shell .msg-chat__divider {
+  position: relative;
+  margin: 6px auto 12px;
+  padding: 5px 12px;
+  background: color-mix(in srgb, var(--ref-surface) 86%, var(--ref-bg));
+  border-radius: 20px;
+  color: var(--ref-muted);
+  font-size: 11px;
+}
+.sberchat-shell .msg-chat__group { max-width: 78%; gap: 4px; }
+.sberchat-shell .msg-chat__group.incoming { padding-left: 42px; position: relative; }
+.sberchat-shell .msg-chat__group-avatar {
+  position: absolute;
+  left: 0; top: 1px;
+  display: grid; place-items: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: #0d2b47; border: 1px solid var(--ref-line);
+  color: var(--ref-fg);
+  font-weight: 700; font-size: 14px;
+}
+.sberchat-shell .msg-chat__group-author {
+  color: var(--ref-accent);
+  font-size: 12px; font-weight: 700;
+  margin: 0 9px 1px;
+}
+.sberchat-shell .msg-chat__group.outgoing .msg-chat__group-author { color: var(--ref-muted); }
+.sberchat-shell .msg-chat__bubble {
+  border-radius: 13px;
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--ref-line) 80%, transparent);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--ref-accent) 6%, var(--ref-surface)), var(--ref-surface));
+  gap: 4px;
+}
+.sberchat-shell .msg-chat__group.outgoing .msg-chat__bubble {
+  background: linear-gradient(155deg, color-mix(in srgb, var(--ref-accent) 23%, var(--ref-surface)), color-mix(in srgb, var(--ref-accent) 11%, var(--ref-surface)));
+}
+.sberchat-shell .msg-chat__bubble-body { font-size: 13px; line-height: 1.42; white-space: pre-wrap; overflow-wrap: anywhere; }
+.sberchat-shell .msg-chat__meta { align-self: flex-end; margin-top: 5px; font-size: 10.5px; color: var(--ref-muted); }
+.sberchat-shell .msg-chat__delivered { color: #16dcec; }
+.sberchat-shell .msg-chat__artifact-refs { margin-top: 7px; flex-direction: column; flex-wrap: nowrap; }
+.sberchat-shell .msg-chat__artifact-ref {
+  width: 100%; padding: 9px 10px;
+  background: color-mix(in srgb, var(--ref-bg) 66%, var(--ref-surface));
+  border: 1px solid var(--ref-line); border-radius: 9px; font-size: 12px;
+}
+.sberchat-shell .msg-composer {
+  padding: 10px 12px 12px;
+  min-height: 72px;
+  border-top: 1px solid var(--ref-line);
+  background: color-mix(in srgb, var(--ref-surface) 75%, var(--ref-bg));
+}
+.sberchat-shell .msg-composer__fieldset { gap: 8px; align-items: center; }
+.sberchat-shell .msg-composer__tools { gap: 4px; }
+.sberchat-shell .msg-composer__tool,
+.sberchat-shell .msg-composer__mention-hint {
+  width: 32px; height: 42px; min-width: 32px; flex-basis: 32px;
+  background: transparent;
+  border: 0;
+  color: #a9c8e6;
+}
+.sberchat-shell .msg-composer__input-shell { flex: 1; min-width: 0; }
+.sberchat-shell .msg-composer__textarea {
+  height: 49px; min-height: 49px; padding: 14px 12px;
+  border: 1px solid color-mix(in srgb, var(--ref-accent) 26%, var(--ref-line));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--ref-bg) 90%, var(--ref-surface));
+  color: var(--ref-fg);
+  font-size: 12px;
+}
+.sberchat-shell .msg-composer__send {
+  width: 46px; flex-basis: 46px; min-width: 46px;
+  height: 46px; min-height: 46px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, #1ff2e4, #04a7da);
+  color: #031521;
+}
+.sberchat-shell .msg-composer__send-label { display: none; }
+.sberchat-shell .msg-context,
+.sberchat-shell .ref-empty-context {
+  padding: 0;
+  overflow-y: auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: linear-gradient(180deg, var(--ref-surface), var(--ref-bg) 75%);
+}
+.sberchat-shell .msg-context__heading {
+  min-height: 53px;
+  height: 53px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--ref-line);
+  display: flex; align-items: center;
+}
+.sberchat-shell .msg-context__eyebrow { font-size: 12px; font-weight: 670; }
+.sberchat-shell .msg-context__profile { padding: 15px 18px 9px; border-bottom: 0; }
+.sberchat-shell .msg-context__avatar { width: 53px; height: 53px; flex-basis: 53px; }
+.sberchat-shell .msg-context__title { font-size: 15px; font-weight: 740; }
+.sberchat-shell .msg-context__badge,
+.sberchat-shell .msg-context__role { font-size: 11px; }
+.sberchat-shell .msg-context__facts { padding-inline: 18px; }
+.sberchat-shell .msg-context__facts > div { min-height: 39px; }
+.sberchat-shell .msg-context__facts dt,
+.sberchat-shell .msg-context__facts dd { font-size: 11px; }
+.sberchat-shell .msg-context__section { padding: 12px 18px; }
+.sberchat-shell .msg-context__section-title { color: var(--ref-fg); font-size: 13px; }
+.sberchat-shell .msg-context__people { gap: 10px; }
+.sberchat-shell .msg-context__member-avatar { width: 34px; height: 34px; }
+.sberchat-shell .msg-context__disclaimer { padding: 14px 18px; }
+.sberchat-shell .ref-chat-empty { display: grid; place-items: center; overflow-y: auto; }
+.sberchat-shell .ref-empty-state {
+  width: min(100%, 560px);
+  margin: auto;
+  padding: 26px 24px;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+}
+.sberchat-shell .ref-empty-state__art {
+  position: relative;
+  width: 190px; height: 154px;
+  display: grid; place-items: center;
+  color: #1ab8e9;
+  filter: drop-shadow(0 5px 27px rgb(16 190 230 / 23%));
+}
+.sberchat-shell .ref-empty-state__art span {
+  position: absolute;
+  top: 60px; left: 79px;
+  color: #bbf8ff; font-size: 18px; letter-spacing: 4px;
+}
+.sberchat-shell .ref-empty-state h2 { margin: 14px 0 10px; font-size: clamp(19px, 2vw, 25px); font-weight: 760; }
+.sberchat-shell .ref-empty-state > p {
+  max-width: 425px;
+  margin: 0 0 28px; font-size: 14px; line-height: 1.55; color: var(--ref-muted);
+}
+.sberchat-shell .ref-empty-state__actions { width: 100%; display: grid; gap: 11px; }
+.sberchat-shell .ref-empty-state__actions button {
+  display: grid; align-items: center;
+  grid-template-columns: 46px 1fr 18px;
+  gap: 14px; text-align: left;
+  padding: 12px 17px;
+  min-height: 78px;
+  border-radius: 11px;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--ref-accent) 5%, var(--ref-surface)), var(--ref-bg));
+  border: 1px solid color-mix(in srgb, var(--ref-accent) 40%, var(--ref-line));
+  color: var(--ref-fg);
+  cursor: pointer;
+}
+.sberchat-shell .ref-empty-state__actions button:disabled { cursor: not-allowed; opacity: .53; }
+.sberchat-shell .ref-empty-state__actions button:hover:not(:disabled) { background: color-mix(in srgb, var(--ref-accent) 9%, var(--ref-surface)); }
+.sberchat-shell .ref-empty-state__actions strong { display: block; font-size: 14px; }
+.sberchat-shell .ref-empty-state__actions small { display: block; color: var(--ref-muted); margin-top: 4px; font-size: 12px; }
+.sberchat-shell .ref-empty-state__action-icon {
+  width: 46px; height: 46px; border: 1px solid var(--ref-line); border-radius: 50%;
+  display: grid; place-items: center; background: #0d2949; font-weight: 740; font-size: 19px;
+}
+.sberchat-shell .ref-empty-state__action-icon--blue { background: #10568e; color: #baf9ff; }
+.sberchat-shell .ref-empty-state__action-icon--teal { background: #063c45; color: var(--ref-accent); border-radius: 10px; }
+.sberchat-shell .ref-empty-context > header {
+  height: 53px; padding: 17px 18px; border-bottom: 1px solid var(--ref-line);
+  color: var(--ref-muted); font-size: 12px; font-weight: 700;
+}
+.sberchat-shell .ref-empty-context__body {
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  padding: 42px 16px 22px;
+  color: var(--ref-muted);
+}
+.sberchat-shell .ref-empty-context__body > svg { opacity: .4; color: #409ddd; margin-bottom: 14px; }
+.sberchat-shell .ref-empty-context h2 { margin: 0 0 10px; font-size: 17px; line-height: 1.35; color: var(--ref-fg); }
+.sberchat-shell .ref-empty-context p { margin: 0 0 18px; font-size: 12px; line-height: 1.55; }
+.sberchat-shell .ref-empty-context__skeleton {
+  display: flex; align-items: flex-start; gap: 13px;
+  width: 100%; padding: 13px; margin-bottom: 10px;
+  border: 1px solid var(--ref-line); border-radius: 9px;
+  text-align: left; background: color-mix(in srgb, var(--ref-fg) 2%, var(--ref-bg));
+}
+.sberchat-shell .ref-empty-context__skeleton > div { flex: 1; min-width: 0; }
+.sberchat-shell .ref-empty-context__skeleton strong { font-size: 10px; font-weight: 600; }
+.sberchat-shell .ref-empty-context__skeleton i {
+  display: block; height: 9px; border-radius: 6px; margin-top: 8px;
+  background: color-mix(in srgb, var(--ref-muted) 16%, transparent);
+}
+.sberchat-shell .ref-empty-context__skeleton i:last-child { width: 70%; }
+@media (max-width: 1200px) and (min-width: 960px) {
+  .sberchat-shell .messenger-shell { grid-template-columns: minmax(250px, 28%) minmax(0, 1fr) minmax(220px, 23%); }
+  .sberchat-shell .msg-dialog-list__heading h1 { font-size: 20px; }
+  .sberchat-shell .msg-dialog-list__heading .msg-dialog-list__create-button { min-width: 40px; font-size: 0; }
+}
+@media (max-width: 959px) {
+  .sberchat-shell { height: calc(100dvh - 105px); min-height: 470px; }
+  .sberchat-shell .messenger-shell, .sberchat-shell .messenger-shell--no-context { grid-template-columns: minmax(0,1fr); }
+  .sberchat-shell .ref-empty-context { display: none; }
+  .sberchat-shell .ref-chat-empty { display: none; }
+  .sberchat-shell .messenger-shell[data-pane="chat"] .ref-chat-empty { display: grid; }
+  .sberchat-shell .msg-dialog-list__heading .msg-dialog-list__create-button { font-size: 12px; }
+}
+@media (max-width: 480px) {
+  .sberchat-shell .msg-dialog-list__heading { padding-inline: 12px; }
+  .sberchat-shell .msg-dialog-list__heading h1 { font-size: 20px; }
+  .sberchat-shell .msg-dialog-list__heading .msg-dialog-list__create-button { min-width: 40px; font-size: 0; }
+  .sberchat-shell .ref-empty-state { padding: 15px; }
+  .sberchat-shell .ref-empty-state > p { font-size: 12px; }
+  .sberchat-shell .ref-empty-state__actions button { min-height: 69px; padding: 9px; }
+  .sberchat-shell .msg-chat__header { min-height: 62px; height: 62px; }
+  .sberchat-shell .msg-chat__scroll { padding-inline: 10px; }
+}
+
+
+/* Approved context structures: 03 personal and 01 community PNGs */
+.sberchat-shell .msg-context__description { margin: 8px 18px 14px; color: var(--ref-muted); font-size: 12px; line-height: 1.55; }
+.sberchat-shell .msg-context__about-heading { font-size: 12px; font-weight: 750; color: var(--ref-fg); padding: 11px 18px 5px; margin: 0; border-top: 1px solid var(--ref-line); }
+.sberchat-shell .msg-context__intro-actions { display: flex; gap: 8px; align-items: center; margin: 2px 18px 16px; }
+.sberchat-shell .msg-context__intro-actions button {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  height: 41px; min-width: 0; flex: 1; border-radius: 10px;
+  border: 1px solid var(--ref-accent); color: var(--ref-fg); background: transparent;
+  font-weight: 650; font-size: 12px;
+}
+.sberchat-shell .msg-context__intro-actions button:disabled { opacity: .75; cursor: not-allowed; }
+.sberchat-shell .msg-context__intro-actions > span { font-size: 10px; color: var(--ref-accent); }
+.sberchat-shell .ref-context-linked button, .sberchat-shell .ref-context-linked__item,
+.sberchat-shell .ref-context-resource, .sberchat-shell .ref-context-files li {
+  display: flex; align-items: center; gap: 11px;
+  width: 100%; min-height: 42px;
+  padding: 8px 10px; margin: 5px 0;
+  border-radius: 9px; border: 1px solid var(--ref-line);
+  background: color-mix(in srgb, var(--ref-fg) 3%, var(--ref-surface));
+  color: var(--ref-fg); text-align: left; font: inherit; font-size: 11.5px;
+}
+.sberchat-shell .ref-context-linked button:disabled { cursor: default; }
+.sberchat-shell .ref-context-linked button:not(:disabled) { cursor: pointer; }
+.sberchat-shell .ref-context-linked button:not(:disabled):hover { border-color: var(--ref-accent); }
+.sberchat-shell .ref-context-linked button svg, .sberchat-shell .ref-context-resource svg { color: #27baff; flex: 0 0 auto; }
+.sberchat-shell .ref-context-linked button span, .sberchat-shell .ref-context-linked__item span { flex: 1; min-width: 0; }
+.sberchat-shell .ref-context-linked strong { display: block; font-size: 11.5px; overflow-wrap: anywhere; }
+.sberchat-shell .ref-context-linked small { display: block; color: var(--ref-muted); font-size: 10px; }
+.sberchat-shell .ref-context-placeholder-text { color: var(--ref-muted); font-size: 11px; margin: 8px 0; }
+.sberchat-shell .ref-context-resources .ref-context-resource { border: 0; background: color-mix(in srgb, var(--ref-accent) 5%, var(--ref-surface)); }
+.sberchat-shell .ref-context-files ul, .sberchat-shell .ref-context-community ul { padding: 0; margin: 5px 0; list-style: none; }
+.sberchat-shell .ref-context-files li { overflow: hidden; }
+.sberchat-shell .ref-context-files li svg { flex: 0 0 auto; color: #32b1e9; }
+.sberchat-shell .ref-context-files li span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sberchat-shell .ref-context-files .msg-context__section-title small { color: var(--ref-muted); padding: 2px 6px; border-radius: 50%; background: var(--ref-line); font-size: 10px; }
+.sberchat-shell .ref-context-community li { display: flex; align-items: center; gap: 11px; font-size: 11.5px; margin: 7px 0; }
+.sberchat-shell .ref-context-user-icon { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 50%; background: #153e5f; color: #d4f4ff; font-weight: 750; }
+.sberchat-shell .msg-chat__pinned--approved {
+  display: flex; gap: 12px; align-items: center;
+  margin: 8px 14px 2px;
+  padding: 10px 13px; border: 1px solid color-mix(in srgb, var(--ref-accent) 29%, var(--ref-line));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--ref-accent) 5%, var(--ref-bg));
+  color: var(--ref-accent);
+}
+.sberchat-shell .msg-chat__pinned--approved > div { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+.sberchat-shell .msg-chat__pinned--approved strong { font-size: 11px; font-weight: 750; }
+.sberchat-shell .msg-chat__pinned--approved span { color: var(--ref-fg); font-size: 11px; }
+.sberchat-shell .msg-chat__preview-notice { margin: 0; padding: 3px 15px; color: var(--ref-muted); font-size: 10px; text-align: center; }
+@media (max-width: 959px) {
+  .sberchat-shell .msg-context__description { margin-inline: 14px; }
+  .sberchat-shell .msg-context__about-heading { padding-inline: 14px; }
+}
+
+/* Read-only reference composer retains the visual input geometry without fake persistence. */
+.sberchat-shell .msg-composer--reference { display: block; padding: 8px 12px 8px; min-height: 80px; }
+.sberchat-shell .msg-composer__reference-row {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; min-height: 45px;
+  color: var(--ref-muted);
+}
+.sberchat-shell .msg-composer__reference-row > svg { flex: 0 0 auto; }
+.sberchat-shell .msg-composer__reference-row input {
+  width: 100%; flex: 1; min-width: 0;
+  height: 45px; padding: 0 13px; border-radius: 9px;
+  border: 1px solid var(--ref-line);
+  background: color-mix(in srgb, var(--ref-bg) 90%, var(--ref-surface));
+  color: var(--ref-muted); font: inherit; font-size: 12px;
+}
+.sberchat-shell .msg-composer__reference-row button {
+  flex: 0 0 45px; width: 45px; height: 45px;
+  border: none; border-radius: 10px; display: grid; place-items: center;
+  background: linear-gradient(135deg, #1ff2e4, #04a7da);
+  color: #031521;
+  opacity: .72; cursor: not-allowed;
+}
+.sberchat-shell .msg-composer__reference-hint { font-size: 10px; line-height: 1.2; color: var(--ref-muted); margin: 4px 0 0 68px; }
+@media (max-width: 480px) { .sberchat-shell .msg-composer__reference-row { gap: 6px; } .sberchat-shell .msg-composer__reference-hint { margin-left: 0; } }
+
+/* Reference-only labels for communities and demonstrative post reactions. */
+.sberchat-shell .msg-dialog-list__row-item[data-kind="community"] .msg-dialog-list__kind {
+  display: block; color: #76c5f8; font-size: 10px; line-height: 1.15;
+}
+.sberchat-shell .msg-dialog-list__row-item[data-kind="community"] .msg-dialog-list__avatar {
+  background: linear-gradient(135deg, #0a4d7c, #0876c1);
+  color: #e4faff; border-color: #227fc0;
+}
+.sberchat-shell .msg-dialog-list__row-item[data-kind="community"]:nth-child(4n+2) .msg-dialog-list__avatar {
+  background: linear-gradient(135deg, #772c6e, #ec9135);
+}
+.sberchat-shell .msg-chat__reference-reactions { display: flex; gap: 6px; padding-top: 4px; }
+.sberchat-shell .msg-chat__reference-reactions > span {
+  display: inline-flex; align-items: center; border-radius: 999px; gap: 4px;
+  border: 1px solid var(--ref-line); background: #0d2c4a; color: #d1eaff;
+  padding: 3px 7px; font-size: 10px;
+}
+.sberchat-shell .msg-chat__header-action:disabled { opacity: .65; cursor: not-allowed; }
+
+
+/* Geometry and type sourced verbatim from approved ZIP styles.css, then scoped to React.
+   Source: .messages-layout / .panel-header / .tabs / .dialog-item /
+   .chat-header / .bubble-card / .composer / .context-header. */
+@media (min-width: 1381px) {
+  .sberchat-shell .messenger-shell {
+    grid-template-columns: 370px minmax(0, 1fr) 390px;
+  }
+  .sberchat-shell .messenger-shell--no-context {
+    grid-template-columns: 370px minmax(0, 1fr);
+  }
+}
+@media (min-width: 1121px) and (max-width: 1380px) {
+  .sberchat-shell .messenger-shell {
+    grid-template-columns: 340px minmax(0, 1fr) 340px;
+  }
+  .sberchat-shell .messenger-shell--no-context {
+    grid-template-columns: 340px minmax(0, 1fr);
+  }
+}
+@media (min-width: 960px) and (max-width: 1120px) {
+  .sberchat-shell .messenger-shell {
+    grid-template-columns: 320px minmax(0, 1fr);
+  }
+  .sberchat-shell .msg-context { display: none; }
+}
+@media (min-width: 1381px) {
+  .sberchat-shell .msg-dialog-list__heading h1 { font-size: 28px; line-height: 1.1; }
+  .sberchat-shell .msg-dialog-list__heading .msg-dialog-list__subtitle { font-size: 16px; margin-top: 6px; }
+  .sberchat-shell .msg-dialog-list__heading { padding: 12px 14px 8px; min-height: 82px; }
+  .sberchat-shell .msg-dialog-list__heading .msg-dialog-list__create-button {
+    height: 50px; padding-inline: 14px; min-width: 130px; border-radius: 14px;
+    font-size: 13px;
+  }
+  .sberchat-shell .msg-dialog-list__top { padding: 8px 14px; min-height: 64px; }
+  .sberchat-shell .msg-dialog-list__search-field { height: 48px; border-radius: 14px; padding-inline: 16px; }
+  .sberchat-shell .msg-dialog-list__search-field input { font-size: 15px; }
+  .sberchat-shell .msg-dialog-list__tabs { gap: 24px; padding: 8px 18px 10px; min-height: 57px; }
+  .sberchat-shell .msg-dialog-list__tabs button { height: 40px; padding: 8px 0; font-size: 18px; }
+  .sberchat-shell .msg-dialog-list__tabs button.active { color: var(--ref-fg); }
+  .sberchat-shell .msg-dialog-list__count { min-width: 28px; height: 28px; font-size: 15px; padding-inline: 10px; }
+  .sberchat-shell .msg-dialog-list__row {
+    min-height: 85px; padding: 14px 16px; gap: 14px;
+  }
+  .sberchat-shell .msg-dialog-list__avatar { width: 54px; height: 54px; flex-basis: 54px; font-size: 20px; }
+  .sberchat-shell .msg-dialog-list__row-title strong { font-size: 17px; font-weight: 800; }
+  .sberchat-shell .msg-dialog-list__preview { font-size: 14px; margin-top: 6px; line-height: 1.4; }
+  .sberchat-shell .msg-dialog-list__kind { font-size: 13px; }
+  .sberchat-shell .msg-dialog-list__meta { font-size: 14px; gap: 12px; }
+  .sberchat-shell .msg-dialog-list__unread { min-width: 28px; height: 28px; font-size: 14px; }
+  .sberchat-shell .msg-chat__header { min-height: 76px; height: 76px; padding: 0 18px; gap: 14px; }
+  .sberchat-shell .msg-chat__header-title strong { font-size: 18px; font-weight: 800; }
+  .sberchat-shell .msg-chat__header-title small { font-size: 13px; margin-top: 5px; }
+  .sberchat-shell .msg-chat__header-action { width: 34px; height: 42px; }
+  .sberchat-shell .msg-chat__header-action svg { width: 22px; height: 22px; }
+  .sberchat-shell .msg-chat__scroll { padding: 10px 18px 12px; }
+  .sberchat-shell .msg-chat__rows { gap: 18px; }
+  .sberchat-shell .msg-chat__group { max-width: min(78%, 680px); gap: 5px; }
+  .sberchat-shell .msg-chat__group.incoming { padding-left: 56px; }
+  .sberchat-shell .msg-chat__group-avatar { width: 44px; height: 44px; }
+  .sberchat-shell .msg-chat__group-author { margin-left: 10px; margin-bottom: 5px; font-size: 15px; }
+  .sberchat-shell .msg-chat__bubble {
+    padding: 16px 18px; border-radius: 22px; gap: 6px;
+    background: linear-gradient(180deg,#0c2742,#0a2036);
+    border-color: rgba(78,166,227,.14);
+    box-shadow: 0 12px 40px rgb(0 0 0 / 28%), inset 0 1px 0 rgb(255 255 255 / 3%);
+  }
+  .sberchat-shell .msg-chat__group.outgoing .msg-chat__bubble { background: linear-gradient(180deg,#0d3657,#0e2c47); }
+  .sberchat-shell .msg-chat__bubble-body { font-size: 16px; line-height: 1.38; }
+  .sberchat-shell .msg-chat__meta { font-size: 14px; margin-top: 8px; }
+  .sberchat-shell .msg-chat__divider { margin: 14px auto 22px; padding: 7px 16px; }
+  .sberchat-shell .msg-chat__artifact-ref { padding: 12px; border-radius: 16px; font-size: 14px; }
+  .sberchat-shell .msg-composer { min-height: 80px; padding: 12px 18px 16px; }
+  .sberchat-shell .msg-composer__textarea { height: 52px; min-height: 52px; border-radius: 16px; padding: 14px 16px; }
+  .sberchat-shell .msg-composer__send { min-width: 58px; flex-basis: 58px; width: 58px; height: 52px; min-height: 52px; border-radius: 16px; }
+  .sberchat-shell .msg-composer__tool, .sberchat-shell .msg-composer__mention-hint { width: 42px; height: 42px; min-width: 42px; flex-basis: 42px; }
+  .sberchat-shell .msg-context__heading { min-height: 76px; height: 76px; padding-inline: 18px; }
+  .sberchat-shell .msg-context__eyebrow { font-size: 18px; text-transform: uppercase; letter-spacing: .03em; }
+  .sberchat-shell .msg-context__profile { padding: 18px; }
+  .sberchat-shell .msg-context__title { font-size: 18px; font-weight: 800; }
+  .sberchat-shell .msg-context__description { margin: 18px 18px 16px; font-size: 15px; }
+  .sberchat-shell .msg-context__about-heading, .sberchat-shell .msg-context__section-title { font-size: 17px; font-weight: 800; }
+  .sberchat-shell .msg-context__facts dt, .sberchat-shell .msg-context__facts dd { font-size: 14px; }
+  .sberchat-shell .msg-context__section { padding: 16px 18px; }
+  .sberchat-shell .ref-empty-context > header { height: 76px; font-size: 18px; padding: 25px 18px; }
+  .sberchat-shell .ref-empty-context__body { padding-top: 54px; }
+  .sberchat-shell .ref-empty-context h2 { font-size: 24px; }
+  .sberchat-shell .ref-empty-context p { font-size: 16px; }
+  .sberchat-shell .ref-empty-context__skeleton { min-height: 90px; margin-bottom: 18px; padding: 18px; border-radius: 18px; }
+  .sberchat-shell .ref-empty-state { width: min(100%, 600px); padding: 32px 26px; }
+  .sberchat-shell .ref-empty-state__art { width: 250px; height: 180px; }
+  .sberchat-shell .ref-empty-state__art svg { width: 122px; height: 102px; }
+  .sberchat-shell .ref-empty-state__art span { top: 72px; left: 108px; }
+  .sberchat-shell .ref-empty-state h2 { font-size: 28px; }
+  .sberchat-shell .ref-empty-state > p { font-size: 18px; max-width: 560px; }
+  .sberchat-shell .ref-empty-state__actions { gap: 16px; width: min(100%,520px); }
+  .sberchat-shell .ref-empty-state__actions button { min-height: 92px; grid-template-columns: 52px 1fr 22px; padding: 18px; border-radius: 18px; }
+  .sberchat-shell .ref-empty-state__actions strong { font-size: 17px; }
+  .sberchat-shell .ref-empty-state__actions small { font-size: 14px; margin-top: 6px; }
+  .sberchat-shell .ref-empty-state__action-icon { width: 52px; height: 52px; }
+}
+
+
+/* Structured Mayaki event/link previews derived from approved app.js messageHTML. */
+.sberchat-shell .msg-chat__reference-role {
+  display: inline-flex;
+  margin-left: 8px; padding: 3px 10px;
+  border-radius: 999px; background: #113857; color: #9ed0ff;
+  font-size: 12px; font-weight: 600; vertical-align: middle;
+}
+.sberchat-shell .msg-chat__reference-media,
+.sberchat-shell .msg-chat__reference-link {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 12px; padding: 12px;
+  border: 1px solid rgb(255 255 255 / 7%); border-radius: 16px;
+  background: rgb(255 255 255 / 5%); color: #ecf5ff;
+}
+.sberchat-shell .msg-chat__reference-media-icon,
+.sberchat-shell .msg-chat__reference-link > span:first-child {
+  flex: 0 0 58px; width: 58px; height: 58px;
+  display: grid; place-items: center; border-radius: 12px;
+  background: linear-gradient(135deg, #083b68, #16c1ff);
+  color: #fff; font-size: 28px; font-weight: 800;
+}
+.sberchat-shell .msg-chat__reference-media > span:last-child,
+.sberchat-shell .msg-chat__reference-link > span:last-child { flex: 1; min-width: 0; }
+.sberchat-shell .msg-chat__reference-media strong,
+.sberchat-shell .msg-chat__reference-link strong { display: block; font-size: 14px; line-height: 1.4; }
+.sberchat-shell .msg-chat__reference-media small,
+.sberchat-shell .msg-chat__reference-link small { display: block; color: #98b8d7; font-size: 12px; margin-top: 5px; }
+@media (max-width: 480px) {
+  .sberchat-shell .msg-chat__reference-media-icon,
+  .sberchat-shell .msg-chat__reference-link > span:first-child { flex-basis: 42px; width: 42px; height: 42px; }
+  .sberchat-shell .msg-chat__reference-media,
+  .sberchat-shell .msg-chat__reference-link { padding: 9px; gap: 8px; }
+  .sberchat-shell .msg-chat__reference-media strong,
+  .sberchat-shell .msg-chat__reference-link strong { font-size: 12px; }
+}
+
+
+/* Parity with Impulse light theme: source PNGs are dark; keep exact geometry
+   but use semantic colours when the user's product theme is light. */
+:root[data-theme="light"] .sberchat-shell {
+  --ref-bg: var(--color-bg);
+  --ref-surface: var(--color-surface);
+  --ref-line: var(--color-border);
+  --ref-accent: var(--color-accent);
+  --ref-fg: var(--color-text);
+  --ref-muted: var(--color-muted);
+}
+:root[data-theme="light"] .sberchat-shell .msg-dialog-list,
+:root[data-theme="light"] .sberchat-shell .msg-context,
+:root[data-theme="light"] .sberchat-shell .ref-empty-context {
+  background: linear-gradient(180deg, var(--color-surface), var(--color-bg));
+}
+:root[data-theme="light"] .sberchat-shell .msg-chat__bubble {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: 0 5px 24px rgb(20 57 89 / 8%);
+}
+:root[data-theme="light"] .sberchat-shell .msg-chat__group.outgoing .msg-chat__bubble {
+  background: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface));
+}
+:root[data-theme="light"] .sberchat-shell .msg-chat__avatar,
+:root[data-theme="light"] .sberchat-shell .msg-chat__group-avatar,
+:root[data-theme="light"] .sberchat-shell .ref-empty-state__action-icon {
+  background: color-mix(in srgb, var(--color-accent) 15%, var(--color-surface));
+  color: var(--color-text);
+}
+:root[data-theme="light"] .sberchat-shell .msg-chat__reference-media,
+:root[data-theme="light"] .sberchat-shell .msg-chat__reference-link,
+:root[data-theme="light"] .sberchat-shell .msg-chat__reference-reactions > span {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+:root[data-theme="light"] .sberchat-shell .msg-chat__reference-media strong,
+:root[data-theme="light"] .sberchat-shell .msg-chat__reference-link strong { color: var(--color-text); }
+:root[data-theme="light"] .sberchat-shell .msg-composer__reference-row input { background: var(--color-bg); }
+:root[data-theme="light"] .sberchat-shell .msg-dialog-list__row-item.selected .msg-dialog-list__row {
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+}
