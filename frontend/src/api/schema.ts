@@ -1801,6 +1801,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/roadmap-catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Roadmap Catalog */
+        get: operations["roadmap_catalog_api_v1_me_roadmap_catalog_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/roadmaps": {
         parameters: {
             query?: never;
@@ -7751,8 +7768,12 @@ export interface components {
         };
         /** MilestoneView */
         impulse__api__v1__development__MilestoneView: {
+            /** Activities */
+            activities?: string[];
             /** Completed */
             completed: boolean;
+            /** Deliverable */
+            deliverable?: string | null;
             /** Key */
             key: string;
             /** Position */
@@ -11138,6 +11159,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RewardWorkspaceItemView"][];
+                };
+            };
+        };
+    };
+    roadmap_catalog_api_v1_me_roadmap_catalog_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoadmapView"][];
                 };
             };
         };
