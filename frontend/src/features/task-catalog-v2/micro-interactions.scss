@@ -89,16 +89,25 @@
 /* At desktop source size, actions still animate into place, but are not
    completely hidden: the explicit "Подробнее" control is discoverable. */
 @media (min-width: 1550px) and (hover: hover) {
+  /* The bookmark is at the right edge of the card. Leave an exclusive
+     58px lane for it; the floating action tray cannot sit above it. */
+  .catalog-v2 .catalog-v2-card .catalog-v2-card-bookmark {
+    position: relative;
+    z-index: 4;
+  }
   .catalog-v2 .catalog-v2-card .catalog-v2-card-actions {
-    opacity: .75;
-    pointer-events: auto;
-    transform: translateY(2px);
+    right: 58px;
+    bottom: 7px;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
     transition: opacity 170ms ease, transform 170ms ease,
       border-color 170ms ease, box-shadow 170ms ease;
   }
   .catalog-v2 .catalog-v2-card:hover .catalog-v2-card-actions,
   .catalog-v2 .catalog-v2-card:focus-within .catalog-v2-card-actions {
     opacity: 1;
+    pointer-events: auto;
     transform: translateY(0);
   }
 }
