@@ -264,6 +264,27 @@ test.describe("task catalog interactive controls and motion", () => {
     await expect(open).toBeFocused();
   });
 
+  test("mobile advanced product filters remain tappable and never overflow", async ({ page }) => {
+    await openCatalog(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole("button", { name: "Все фильтры" }).click();
+    for (const [name, param] of [
+      ["С ментором", "mentored"],
+      ["Для портфолио", "portfolio"],
+      ["Открыт отклик", "available"],
+    ] as const) {
+      const toggle = page.getByRole("checkbox", { name });
+      await expect(toggle).toBeVisible();
+      await toggle.click();
+      await expect.poll(() => new URL(page.url()).searchParams.get(param)).toBe("true");
+      await expect(toggle).toBeChecked();
+    }
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+    await page.getByRole("button", { name: "Список" }).click();
+    await expect(page).toHaveURL(/catalog_view=list/);
+    await expect.poll(() => new URL(page.url()).searchParams.get("portfolio")).toBe("true");
+  });
+
   test("read-only terms button opens modal, but blocked user cannot apply", async ({ page }) => {
     const readOnly: CatalogItem = {
       ...catalogItem,
