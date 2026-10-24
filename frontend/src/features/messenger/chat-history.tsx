@@ -7,6 +7,8 @@ import {
   PanelRight,
   Pin,
   PinOff,
+  Phone,
+  Video,
   RotateCcw,
   Search,
   Users,
@@ -236,10 +238,7 @@ export function ChatHistory({
     actionButtons[next]?.focus();
   };
 
-  const channelTitle =
-    channel?.title ||
-    (channel?.participants.map((person) => person.display_name) ?? []).join(", ") ||
-    "Чат";
+  const channelTitle = channel ? dialogTitle(channel, viewerId) : "Чат";
 
   return (
     <section
@@ -255,8 +254,8 @@ export function ChatHistory({
           <small>
             {(channel ? dialogKindLabel(channel.kind) : "Чат")}
             {" · "}
-            {canSend ? "активен" : "недоступен для записей"}
-            {(channel?.participants.length ?? 0) > 2
+            {isReferenceChannel(channel?.id) ? "демонстрация" : canSend ? "активен" : "недоступен для записей"}
+            {channel?.id === "reference:mayaki" ? " · 248 участников" : (channel?.participants.length ?? 0) > 2
               ? ` · ${String((channel?.participants.length ?? 1) - 1)} участников`
               : ""}
             {channel?.muted ? " · уведомления отключены" : ""}
@@ -281,6 +280,12 @@ export function ChatHistory({
           >
             <Search aria-hidden="true" size={15} />
             <span className="sr-only">{searchOpen ? "Скрыть поиск в чате" : "Поиск в чате"}</span>
+          </button>
+          <button type="button" className="msg-chat__header-action" disabled title="Голосовые звонки пока недоступны" aria-label="Голосовые звонки пока недоступны">
+            <Phone aria-hidden="true" size={18} />
+          </button>
+          <button type="button" className="msg-chat__header-action" disabled title="Видеозвонки пока недоступны" aria-label="Видеозвонки пока недоступны">
+            <Video aria-hidden="true" size={18} />
           </button>
           {!searchOpen && channel !== null && channel.participants.length > 0 && (
             <span
@@ -502,6 +507,9 @@ export function ChatHistory({
                             </span>
                           )}
                         </small>
+                        {item.id === "reference:mayaki-message-2" && (
+                          <div className="msg-chat__reference-reactions" aria-label="Пример реакций из утверждённого макета"><span>💗 12</span><span>👍 5</span></div>
+                        )}
                         <div className="msg-chat__reactions">
                           {Object.entries(perMessage).map(([emoji, authors]) => (
                             <button
