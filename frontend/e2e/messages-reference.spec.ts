@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { referenceChannels, referenceMessagesByChannel, referenceIds } from "./messages-reference-fixtures";
 
 const actor = {
   person_id: "00000000-0000-0000-0000-000000000001",
@@ -10,31 +11,16 @@ const actor = {
   navigation: ["Главная", "Сообщения", "Задачи"],
   csrf_token: "messages-reference",
 };
-const elenaId = "00000000-0000-4000-8000-000000000102";
-const mayakiId = "00000000-0000-4000-8000-000000000103";
-const teamId = "00000000-0000-4000-8000-000000000104";
+const elenaId=referenceIds.mentor;
+const mayakiId=referenceIds.mayaki;
 const makeMessage = (id: string, body: string, author_name = "Елена Наставник") => ({
   id, author_id: "00000000-0000-4000-8000-000000000005", author_name,
   kind: "text", body, artifact_refs: [], sequence: 1,
   created_at: "2026-10-20T09:14:00Z",
 });
-const contacts = [
-  { id: "00000000-0000-4000-8000-000000000005", display_name: "Елена Наставник", role: "member" },
-  { id: actor.person_id, display_name: "Алекс Речной", role: "member" },
-];
-const channel = (id: string, kind: string, title: string, body: string) => ({
-  id,kind,title,status:"active",task_id:kind==="task_team"?"task-01":null,
-  role:"member",muted:false,sender_enabled:true,unread:0,participants:contacts,
-  last_message:makeMessage("msg-"+id,body),created_at:"2026-10-20T08:00:00Z",
-});
-
 async function openMessages(page: Page) {
   let loggedIn = false;
-  const channels = [
-    channel(elenaId,"personal","Елена Наставник","Отлично! Тогда согласовываем…"),
-    channel(mayakiId,"community","Маяки","Календарь мероприятий на осень 2026"),
-    channel(teamId,"task_team","Команда задачи","Обновил статусы в задаче"),
-  ];
+  const channels=referenceChannels;
   const sentMessages: string[] = [];
   await page.route("**/api/v1/config", route => route.fulfill({json:{demo_mode:true}}));
   await page.route("**/api/v1/auth/personas", route => route.fulfill({
@@ -60,7 +46,8 @@ async function openMessages(page: Page) {
       sentMessages.push(payload.body);
       return route.fulfill({json:makeMessage("sent-"+String(sentMessages.length),payload.body,"Алекс Речной")});
     }
-    return route.fulfill({json:[makeMessage("msg-"+String(id),id===mayakiId?"Календарь мероприятий на осень 2026":id===elenaId?"Привет! Проверь метрики эксперимента":"Задача в работе")]});
+    const fixture=referenceMessagesByChannel[String(id)];
+    return route.fulfill({json:fixture ?? [makeMessage("msg-"+String(id),"Задача в работе")]});
   });
   await page.route("**/api/v1/me/messaging/channels/*/mute", route => route.fulfill({json:{...channels[0],muted:true}}));
   await page.route("**/api/v1/me/messaging/channels/*/read", route => route.fulfill({json:channels[0]}));
