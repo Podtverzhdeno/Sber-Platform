@@ -24,6 +24,7 @@ from impulse.domain.work import (
 
 class ChannelKind(StrEnum):
     PERSONAL = "personal"
+    COMMUNITY = "community"
     TASK_TEAM = "task_team"
     CUSTOMER = "customer"
     OPERATOR_CASE = "operator_case"
@@ -617,6 +618,28 @@ class MessagingService:
         await self.store.upsert_membership(
             channel.id, peer_id, MemberRole.MEMBER, sender_enabled=True
         )
+        return channel
+
+    async def create_group(
+        self,
+        actor_context: ActorContext,
+        title: str,
+        peer_ids: tuple[UUID, ...],
+    ) -> Channel:
+        """Create a persistent group with only validated directory members."""
+        normalized = title.strip()
+        if not 2 <= len(normalized) <= 120:
+            raise ApiError("MESSAGE_GROUP_TITLE_INVALID", "Укажите название чата (2–120 символов).", 422)
+        peers = tuple(dict.fromkeys(peer_ids))
+        if not peers or len(peers) > 24 or actor_context.person_id in peers:
+            raise ApiError("MESSAGE_GROUP_MEMBERS_INVALID", "Выберите от 1 до 24 других участников.", 422)
+        channel = await self.store.ensure_channel(
+            ChannelKind.COMMUNITY, f"group:{uuid4()}", title=normalized
+        )
+        for person_id in (actor_context.person_id, *peers):
+            await self.store.upsert_membership(
+                channel.id, person_id, MemberRole.MEMBER, sender_enabled=True
+            )
         return channel
 
     async def channel_work_context(
