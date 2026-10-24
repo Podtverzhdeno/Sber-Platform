@@ -242,3 +242,16 @@
     line-height: 1.4;
   }
 }
+
+
+/* Source-card compact rhythm at 1672×941: the selected task keeps its
+   emphasis; unselected rows follow the ~118px rhythm of reference #01. */
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2 .catalog-v2-discovery .catalog-v2-results--cards {
+    gap: 8px;
+  }
+  .catalog-v2 .catalog-v2-card[data-selected="false"] {
+    gap: 5px;
+    padding-block: 8px;
+  }
+}
