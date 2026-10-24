@@ -10,6 +10,8 @@
   - frontend/src/features/agentic-coding-profile.scss
   - frontend/src/features/agentic-coding-profile.test.tsx
   - frontend/src/features/analytics.tsx
+  - frontend/src/features/analytics-growth.scss
+  - frontend/src/features/analytics.test.tsx
 - shared_files: []
 - verification:
   - frontend typecheck, lint, unit tests, Playwright on exact PR revision
