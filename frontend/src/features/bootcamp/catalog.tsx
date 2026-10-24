@@ -307,7 +307,7 @@ function CourseDetails({
   ] as const;
   return <div className="bc-panel-content" data-reference="BC-R03">
     <div className="bc-panel-kicker">BOOTCAMP · КУРС</div>
-    <h2 className="bc-detail-title">{card.title}</h2>
+    <h2 className="bc-detail-title">{detail?.title ?? card.title}</h2>
     <CardStates card={card} />
     <div className="bc-detail-tabs" role="tablist" aria-label="Информация о курсе">
       {tabs.map((item) => <button key={item.key} type="button" role="tab" aria-selected={tab === item.key}
@@ -621,6 +621,7 @@ export function BootcampCatalog({
               )}
               <p className="bc-course-summary">{card.recommendation_reason || "Описание ещё не опубликовано"}</p>
               <CardStates card={card} />
+              {card.pending_verification_note && <p className="notice" role="status">{card.pending_verification_note}</p>}
               <details className="bc-explain"><summary>{card.must_take ? "Навык и требования" : "Обоснование курса"}</summary><CardExplanation card={card} relevanceOnly={relevanceOnly} /></details>
               <div className="bc-open-actions"><button type="button" onClick={() => { openPanel("detail", card.key); }}>Подробнее →</button><button className="secondary-button" type="button" onClick={() => { openPanel("reason", card.key); }}>Почему рекомендован</button></div>
               <CardActions card={card} />
@@ -638,6 +639,7 @@ export function BootcampCatalog({
                 </p>
               )}
               <CardStates card={card} />
+              {card.pending_verification_note && <p className="notice" role="status">{card.pending_verification_note}</p>}
               <details className="bc-explain"><summary>Основание рекомендации</summary><CardExplanation card={card} relevanceOnly={relevanceOnly} /></details>
               <div className="bc-open-actions"><button type="button" onClick={() => { openPanel("detail", card.key); }}>Подробнее →</button><button type="button" className="secondary-button" onClick={() => { openPanel("reason", card.key); }}>Почему рекомендован</button></div>
               <CardActions card={card} />
