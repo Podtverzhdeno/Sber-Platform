@@ -16,6 +16,7 @@ import {
 } from "../client";
 import { RoleInfoDialog, StageTaskDrawer } from "../details";
 import { SourceTrajectoryLayout } from "./source-layout";
+import { verifiedTasksForStage, type ParticipantWorkItem } from "./source-work";
 
 import type { DevelopmentOverviewView } from "../client";
 import "../trajectory-v2.scss";
@@ -43,6 +44,7 @@ export function SourceTrajectoryBody({ overview }: { overview: DevelopmentOvervi
     }>("/api/v1/me/talent-passport"),
   });
   const me = useQuery({ queryKey: ["me"], queryFn: () => apiRequest<{ navigation: string[] }>("/api/v1/me") });
+  const work = useQuery({ queryKey: ["participant-work"], queryFn: () => apiRequest<ParticipantWorkItem[]>("/api/v1/me/work") });
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const [roleInfoOpen, setRoleInfoOpen] = useState(false);
@@ -64,6 +66,8 @@ export function SourceTrajectoryBody({ overview }: { overview: DevelopmentOvervi
   const role = overview.roles.find(item => item.track_key === selectedKey) ?? null;
   const roadmap = roadmaps.data?.find(item => item.track_key === selectedKey) ?? null;
   const selectedStageKey = params.get("stage");
+  const stageForWork = roadmap?.milestones.find(item => item.key === selectedStageKey) ?? roadmap?.next_step ?? roadmap?.milestones[0] ?? null;
+  const authorizedTasks = verifiedTasksForStage(stageForWork, work.data);
   const visibleRoles = overview.roles.filter(item => !hiddenUnselected || item.state !== "unselected" || item.track_key === selectedKey);
   const drawerMilestone = roadmap?.milestones.find(item => item.key === drawerKey) ?? null;
 
@@ -140,6 +144,7 @@ export function SourceTrajectoryBody({ overview }: { overview: DevelopmentOvervi
       grade={overview.concepts.career_grade}
       nextOutcome={overview.next_outcome}
       competencies={passport.data?.skills ?? []}
+      stageTasks={authorizedTasks && authorizedTasks.length > 0 ? authorizedTasks : undefined}
       onSelectRole={(key) => { updateSelection({ role: key }); }}
       onSelectStage={(key) => { updateSelection({ stage: key }); }}
       onOpenRole={showRoleInfo}
@@ -152,6 +157,7 @@ export function SourceTrajectoryBody({ overview }: { overview: DevelopmentOvervi
     />
     {roadmaps.isError && <p role="status">Не удалось загрузить дорожные карты — {String(roadmaps.error)}</p>}
     {passport.isError && <p role="status">Не удалось получить подтверждённые компетенции</p>}
+    {work.isError && <p role="status">История назначений сейчас недоступна — показана только цель этапа</p>}
     {feedback !== null && <p role="status" className="trajectory-v2-action-status">{feedback}</p>}
     {compareTarget && role && <RoleComparePanel
       roles={overview.roles} roadmaps={roadmaps.data ?? []}
