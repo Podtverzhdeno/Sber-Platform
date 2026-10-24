@@ -498,7 +498,7 @@ export function ChatHistory({
                           </ul>
                         )}
                         <small className="msg-chat__meta">
-                          <time dateTime={item.created_at}>{dialogTimeLabel(item.created_at)}</time>
+                          <time dateTime={item.created_at}>{isReferenceChannel(channel?.id) ? item.created_at.slice(11, 16) : dialogTimeLabel(item.created_at)}</time>
                           {extra.edited && <span className="msg-chat__edited"> · изменено</span>}
                           {isLastOutgoing && (
                             <span className="msg-chat__delivered" title="Доставлено">
