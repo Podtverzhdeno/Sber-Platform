@@ -1,3 +1,4 @@
+import { AtSign, Paperclip, Send, Smile } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 
@@ -251,7 +252,7 @@ export function Composer({
               setEmojiOpen((current) => !current);
             }}
           >
-            🙂
+            <Smile aria-hidden="true" size={19} />
           </button>
           <button
             type="button"
@@ -263,12 +264,17 @@ export function Composer({
               setRefsOpen((current) => !current);
             }}
           >
-            📎
+            <Paperclip aria-hidden="true" size={19} />
           </button>
-          <div className="msg-composer__mention-hint">
-            <span aria-hidden="true">@</span>
-            <span className="msg-composer__hint-text">упомянуть</span>
-          </div>
+          <button
+            type="button"
+            className="msg-composer__mention-hint"
+            aria-label="Упомянуть участника"
+            title="Упомянуть участника"
+            onClick={() => insertAtCaret("@")}
+          >
+            <AtSign aria-hidden="true" size={19} />
+          </button>
         </div>
         <div className="msg-composer__input-shell">
           {mentionCandidates.length > 0 && (
@@ -306,7 +312,8 @@ export function Composer({
               updateDraft(event.target.value);
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Напишите сообщение… Enter — отправить, Shift+Enter — новая строка, @ — упоминание"
+            placeholder="Напишите сообщение…"
+            title="Enter — отправить, Shift+Enter — новая строка, @ — упоминание"
             className="msg-composer__textarea"
             data-testid="composer-textarea"
           />
@@ -317,7 +324,8 @@ export function Composer({
           disabled={sendDisabled}
           data-testid="composer-send"
         >
-          {sendState === "sending" ? "Отправляем…" : "Отправить"}
+          <Send aria-hidden="true" size={19} />
+          <span className="msg-composer__send-label">{sendState === "sending" ? "Отправляем…" : "Отправить"}</span>
         </button>
       </form>
       {emojiOpen && (
