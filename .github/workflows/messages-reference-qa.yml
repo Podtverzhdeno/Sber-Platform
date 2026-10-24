@@ -51,11 +51,11 @@ jobs:
         run: npx playwright test messages-reference.spec.ts --project=chromium --reporter=line
       - name: Strict TypeScript check for messages and imported API contracts
         run: npx tsc -p tsconfig.messages.json --noEmit --pretty false
-      - name: Retain failures
-        if: failure()
+      - name: Archive visual evidence and failures
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: messages-reference-failure-evidence
+          name: messages-reference-visual-evidence
           path: |
             frontend/test-results/
             frontend/playwright-report/
