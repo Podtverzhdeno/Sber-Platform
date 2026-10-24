@@ -568,3 +568,17 @@
 }
 .page-shell:has(.home-v2) .sidebar-nudge-title svg {flex:none;color:#02e6e8;}
 .page-shell:has(.home-v2) .sidebar-nudge>span:last-child {color:#b9cce4;font-size:12.5px;line-height:1.55;}
+
+
+/* At 768px the reference keeps the weekly calendar and recommendation
+   side-by-side; stacking them made the weekly card 249px instead of 173px. */
+@media (min-width:631px) and (max-width:790px) {
+  .home-v2-weekly {
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,.78fr);
+    gap:9px 18px;align-items:center;min-height:173px;
+    padding:13px 18px;
+  }
+  .home-v2-weekly>header {grid-column:1/-1;margin:0;}
+  .home-v2-week-days {max-width:610px;}
+  .home-v2-week-day-detail {margin:0;}
+}
