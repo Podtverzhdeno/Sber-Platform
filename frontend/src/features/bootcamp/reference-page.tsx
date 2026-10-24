@@ -61,6 +61,7 @@ type Detail = {
 };
 type Streak = { current_days: number; qualified_dates: string[]; reason: string };
 type Certificate = { certificate_id: string; verification_id: string; course_title: string };
+type TrackOverview = { tracks: { key: string; title: string; status: "active" | "frozen" | null }[] };
 const EMPTY_COURSES: Course[] = [];
 type Category = "role" | "all" | "in_progress" | "completed";
 type Drawer = "detail" | "why" | "required" | "role";
@@ -104,8 +105,8 @@ function Tile({ title }: { title: string }) {
   const letters = initials(title);
   return <span className={`tile-icon ${v.tone}`} aria-hidden="true">{letters ? <b style={{ fontSize: letters === "◆" || letters === "ϟ" ? 29 : 19 }}>{letters}</b> : <Glyph name={v.glyph} />}</span>;
 }
-function RoleTitle({ track }: { track: string }) {
-  return <>{track.replace(/[_-]/g, " ")}</>;
+function RoleTitle({ track, title }: { track: string; title?: string }) {
+  return <>{title ?? track.replace(/[_-]/g, " ")}</>;
 }
 function Badge({ course }: { course: Course }) {
   if (course.access_state === "prerequisite_not_met") return <span className="status-chip locked"><Glyph name="lock" /> Заблокирован</span>;
@@ -130,7 +131,7 @@ function isInProgress() {
   return false;
 }
 
-export function ReferenceBootcampCatalog(props: { honorBoardEnabled: boolean; honorBoardConsent: boolean }) {
+export function ReferenceBootcampCatalog(props: { honorBoardEnabled: boolean; honorBoardConsent: boolean; navigation?: string[] }) {
   const client = useQueryClient();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
@@ -146,6 +147,7 @@ export function ReferenceBootcampCatalog(props: { honorBoardEnabled: boolean; ho
   const mainRef = useRef<HTMLDivElement | null>(null);
 
   const catalog = useQuery({ queryKey: ["bootcamp-catalog"], queryFn: () => apiRequest<Course[]>("/api/v1/me/bootcamp/catalog"), retry: retrySafeRead });
+  const publishedTracks = useQuery({ queryKey: ["tracks"], queryFn: () => apiRequest<TrackOverview>("/api/v1/development/tracks"), retry: retrySafeRead });
   const streak = useQuery({ queryKey: ["streak"], queryFn: () => apiRequest<Streak>("/api/v1/me/learning/streak"), retry: retrySafeRead });
   const detail = useQuery({
     queryKey: ["course-detail", chosenKey],
@@ -182,7 +184,26 @@ export function ReferenceBootcampCatalog(props: { honorBoardEnabled: boolean; ho
   });
 
   const courses = catalog.data ?? EMPTY_COURSES;
-  const tracks = useMemo(() => [...new Set(courses.flatMap((course) => course.track_keys))], [courses]);
+  const catalogTracks = useMemo(() => [...new Set(courses.flatMap((course) => course.track_keys))], [courses]);
+  const activeTracks = publishedTracks.data?.tracks.filter((item) => item.status === "active").map((item) => item.key) ?? [];
+  const tracks = activeTracks.length ? activeTracks : catalogTracks;
+  const trackTitles = new Map(publishedTracks.data?.tracks.map((item) => [item.key, item.title]) ?? []);
+  const navEntries = props.navigation
+    ? props.navigation.map((label, index) => ({
+      label,
+      target: `/workspace/${String(index)}`,
+      glyph: navLinks.find((item) => item.label === label)?.glyph ?? "doc",
+    }))
+    : navLinks;
+  function routeFor(label: string, fallback: string) {
+    const index = props.navigation?.indexOf(label) ?? -1;
+    if (index >= 0) return `/workspace/${String(index)}`;
+    if (label === "Моя траектория") {
+      const alias = props.navigation?.indexOf("Мой путь") ?? -1;
+      if (alias >= 0) return `/workspace/${String(alias)}`;
+    }
+    return fallback;
+  }
   const role = params.get("role") && tracks.includes(params.get("role") ?? "") ? params.get("role") ?? "" : tracks[0] ?? "all";
   const category: Category = (["role", "all", "in_progress", "completed"] as const).includes(params.get("category") as Category)
     ? params.get("category") as Category : "role";
@@ -249,8 +270,8 @@ export function ReferenceBootcampCatalog(props: { honorBoardEnabled: boolean; ho
     <a className="bc-skip" href="#bc-reference-content">Перейти к содержимому Bootcamp</a>
     <div className="app">
       <aside className={`sidebar ${menu ? "is-open" : ""}`} aria-label="Основная навигация">
-        <button type="button" className="brand bc-navigation-button" aria-label="Impulse, главная" onClick={() => { switchNav("/workspace/0"); }}><span className="brand-shape" aria-hidden="true">▹</span><span>Impulse</span></button>
-        <nav>{navLinks.map((entry) => <button type="button" key={entry.label} onClick={() => { switchNav(entry.target); }}
+        <button type="button" className="brand bc-navigation-button" aria-label="Impulse, главная" onClick={() => { switchNav(routeFor("Главная","/workspace/0")); }}><span className="brand-shape" aria-hidden="true">▹</span><span>Impulse</span></button>
+        <nav>{navEntries.map((entry) => <button type="button" key={entry.label} onClick={() => { switchNav(entry.target); }}
           className={`nav-link bc-navigation-button ${entry.label === "Bootcamp" ? "active" : ""} ${entry.label === "AI Buddy" ? "ai-link" : ""}`}
           aria-current={entry.label === "Bootcamp" ? "page" : undefined}>
           <Glyph name={entry.glyph} /><span>{entry.label}</span>
@@ -265,15 +286,15 @@ export function ReferenceBootcampCatalog(props: { honorBoardEnabled: boolean; ho
           </div>
           <div className="top-actions"><button className="icon-button" type="button" title="Переключить тему" aria-label="Переключить тему" onClick={() => { setLight((v) => !v); }}><Glyph name={light ? "sun" : "moon"}/></button>
             <span className="top-mini" title="Подтверждённые дни обучения">🔥 <b>{streak.data?.current_days ?? "—"}</b></span>
-            <button className="top-rank" type="button" onClick={() => { switchNav("/workspace/7"); }}><Glyph name="trophy" /><span><b>Мои достижения</b><small>Подтверждённые результаты</small></span></button>
-            <button className="icon-button" type="button" aria-label="Уведомления" onClick={() => { switchNav("/workspace/5"); }}><Glyph name="chat" /></button>
-            <button type="button" className="profile bc-navigation-button" onClick={() => { switchNav("/workspace/10"); }}><span className="profile-avatar">У</span><span><b>Участник</b><small>Личный кабинет</small></span><span className="chevron-small">⌄</span></button>
+            <button className="top-rank" type="button" onClick={() => { switchNav(routeFor("Достижения","/workspace/7")); }}><Glyph name="trophy" /><span><b>Мои достижения</b><small>Подтверждённые результаты</small></span></button>
+            <button className="icon-button" type="button" aria-label="Уведомления" onClick={() => { switchNav(routeFor("Сообщения","/workspace/5")); }}><Glyph name="chat" /></button>
+            <button type="button" className="profile bc-navigation-button" onClick={() => { switchNav(routeFor("Настройки","/workspace/10")); }}><span className="profile-avatar">У</span><span><b>Участник</b><small>Личный кабинет</small></span><span className="chevron-small">⌄</span></button>
           </div>
         </header>
         <main id="bc-reference-content" className="content">
           <div className="page-heading"><div><h1>Bootcamp</h1><p>Обучение для твоей роли и реальных проектов</p></div><span className="streak-pill">🔥 <b>Серия: {streak.data?.current_days ?? "—"} дней</b></span></div>
           <div className="role-tabs" role="group" aria-label="Выбранная роль">{tracks.length ? tracks.map((track, index) => <button type="button" className="role-tab" key={track} aria-pressed={role === track}
-            onClick={() => { setFilter("role", track); }}><Glyph name={index === 0 ? "bot" : "bars"}/><RoleTitle track={track}/></button>) : <span className="role-tab" aria-disabled="true">Траектории пока не опубликованы</span>}</div>
+            onClick={() => { setFilter("role", track); }}><Glyph name={index === 0 ? "bot" : "bars"}/><RoleTitle track={track} title={trackTitles.get(track)}/></button>) : <span className="role-tab" aria-disabled="true">Траектории пока не опубликованы</span>}</div>
           <section className="top-panels" aria-label="Продолжение обучения и развитие">
             <div className="continue-panel"><div className="section-heading"><h2>Продолжить обучение</h2><Glyph name="chevron" /></div>
               <div className="continue-inner"><div className="continue-info">{currentCourse && <Tile title={currentCourse.title}/>}<div>
@@ -287,7 +308,7 @@ export function ReferenceBootcampCatalog(props: { honorBoardEnabled: boolean; ho
               </div>
             </div>
             <div className="right-panels">
-              <button className="role-summary" type="button" onClick={() => { open("role"); }} aria-label="Открыть мою траекторию"><div className="summary-copy"><h2>Моя роль: <RoleTitle track={role}/></h2><div className="summary-tags"><span>♛ Грейд не определён</span><span>▦ Матрица: нет данных</span></div></div>
+              <button className="role-summary" type="button" onClick={() => { open("role"); }} aria-label="Открыть мою траекторию"><div className="summary-copy"><h2>Моя роль: <RoleTitle track={role} title={trackTitles.get(role)}/></h2><div className="summary-tags"><span>♛ Грейд не определён</span><span>▦ Матрица: нет данных</span></div></div>
                 <div className="ring" data-unknown="true" style={{"--pct":0} as CSSProperties}><strong>—</strong><small>Навыков<br/>освоено</small></div></button>
               <section className="grade-highlight" aria-labelledby="bc-grade-title" data-unverified="true"><div className="grade-glow" /><img className="trophy-art" src="/bootcamp-reference/assets/trophy.svg" alt="" aria-hidden="true"/>
                 <div className="grade-content"><div className="grade-overline"><span className="crown-glyph">♛</span> До следующего грейда</div>
@@ -378,9 +399,9 @@ export function ReferenceBootcampCatalog(props: { honorBoardEnabled: boolean; ho
             <div className="drawer-section"><h3>Что нужно завершить</h3><div className="drawer-card"><h4>Прогресс обязательных курсов каталога</h4><span>{courses.filter((c) => (role === "all" || c.track_keys.includes(role)) && c.must_take && c.completion_state === "verified").length} подтверждено из {courses.filter((c) => (role === "all" || c.track_keys.includes(role)) && c.must_take).length}</span>
               <span className="track"><i style={{width: `${String(courses.filter((c) => (role === "all" || c.track_keys.includes(role)) && c.must_take && c.completion_state === "verified").length / Math.max(1, courses.filter((c) => (role === "all" || c.track_keys.includes(role)) && c.must_take).length) * 100)}%`}} /></span></div>
               {courseRequired.length ? courseRequired.map((course) => <div className="requirement-course" key={course.key}><Tile title={course.title}/><div><strong>{course.title}</strong><small>{course.must_take?.skill}</small><p>{course.must_take?.explanation}</p></div><button type="button" className="btn" onClick={() => { open("detail", course.key); }}>Открыть курс <Glyph name="arrow"/></button></div>) : <p>Нет незавершённых обязательных курсов в текущем каталоге.</p>}
-              <div className="proof-note">Завершение всех курсов само по себе не означает присвоение грейда.</div><button type="button" className="btn secondary" onClick={() => { switchNav("/workspace/1"); }}>Открыть мою траекторию <Glyph name="arrow"/></button>
+              <div className="proof-note">Завершение всех курсов само по себе не означает присвоение грейда.</div><button type="button" className="btn secondary" onClick={() => { switchNav(routeFor("Моя траектория","/workspace/1")); }}>Открыть мою траекторию <Glyph name="arrow"/></button>
             </div></div>}
-          {drawer === "role" && <div className="drawer-hero"><div className="badge-row"><span className="status-chip recommended">Моя траектория</span></div><h2><RoleTitle track={role}/></h2><p>Уровень и подтверждённая матрица компетенций ещё не опубликованы для расчёта.</p><button type="button" className="btn" onClick={() => { switchNav("/workspace/1"); }}>Открыть траекторию <Glyph name="arrow"/></button></div>}
+          {drawer === "role" && <div className="drawer-hero"><div className="badge-row"><span className="status-chip recommended">Моя траектория</span></div><h2><RoleTitle track={role} title={trackTitles.get(role)}/></h2><p>Уровень и подтверждённая матрица компетенций ещё не опубликованы для расчёта.</p><button type="button" className="btn" onClick={() => { switchNav(routeFor("Моя траектория","/workspace/1")); }}>Открыть траекторию <Glyph name="arrow"/></button></div>}
         </div>
       </section>
     </div>
