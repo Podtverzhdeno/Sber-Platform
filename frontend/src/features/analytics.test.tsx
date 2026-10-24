@@ -363,7 +363,7 @@ describe("participant analytics chart rendering", () => {
       events: [
         { occurred_at: "2026-10-18T21:05:00Z", kind: "course", title: "A", source_kind: "course", source_ref: "1" },
         { occurred_at: "2026-10-18T20:55:00Z", kind: "course", title: "B", source_kind: "course", source_ref: "2" },
-        { occurred_at: "2026-09-01T11:00:00Z", kind: "course", title: "C", source_kind: "course", source_ref: "3" },
+        { occurred_at: "2026-08-01T11:00:00Z", kind: "course", title: "C", source_kind: "course", source_ref: "3" },
         { occurred_at: "not-a-date", kind: "course", title: "D", source_kind: "course", source_ref: "4" },
       ],
     }});
