@@ -102,6 +102,14 @@ export function StageTaskDrawer(props: {
           <h3>Описание</h3>
           <p>{milestone.purpose}</p>
         </section>
+        {milestone.activities && milestone.activities.length > 0 && (
+          <section className="trajectory-v2-drawer-section trajectory-v2-drawer-activities">
+            <h3>План выполнения</h3>
+            <ol>{milestone.activities.map((item) => <li key={item}>{item}</li>)}</ol>
+            {milestone.deliverable && <p><strong>Ожидаемый результат:</strong> {milestone.deliverable}</p>}
+            <small>Эти действия не считаются завершёнными без проверки этапа.</small>
+          </section>
+        )}
         <section className="trajectory-v2-drawer-section">
           <h3>Что было сделано</h3>
           <p>{completed
