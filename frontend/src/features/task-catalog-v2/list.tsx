@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Award, Bookmark, BriefcaseBusiness, CalendarDays, ChevronRight, Share2 } from "lucide-react";
+import { Award, Bookmark, CalendarDays, ChevronRight, Share2 } from "lucide-react";
 import type { CatalogItem } from "./types";
+import { CustomerMark } from "./customer-mark";
 
 export function TaskCatalogList(props: {
   items: CatalogItem[];
@@ -65,7 +66,7 @@ export function TaskCatalogList(props: {
           >
             <span role="cell" className="catalog-v2-table-number" data-label="№">{index + 1}</span>
             <span role="cell" className="catalog-v2-table-task" data-label="Задача">
-              <span className="catalog-v2-table-avatar" aria-hidden="true"><BriefcaseBusiness size={20} /></span>
+              <span className="catalog-v2-table-avatar" aria-hidden="true"><CustomerMark customer={item.customer} size={20} /></span>
               <span className="catalog-v2-table-task-text"><strong>{item.title}</strong>
                 <small>{props.applicationLabel(item)}</small></span>
             </span>
