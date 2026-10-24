@@ -103,7 +103,7 @@ export function MessagingWorkspace({
 }: {
   role: Role;
   personId: string | null;
-  quickTargets?: { review?: number; plan?: number };
+  quickTargets?: { review?: number; plan?: number; task?: number };
 }) {
   const client = useQueryClient();
   const channelsQuery = useQuery({
@@ -524,9 +524,11 @@ export function MessagingWorkspace({
             onClose={() => { if (isNarrow) setMobilePane("chat"); else setContextOpen(false); }}
             onToggleMute={() => { toggleMute.mutate(!selected.muted); }}
             messageRefs={messages.flatMap((message) => message.artifact_refs)}
-            onOpenTask={(taskId) => {
-              navigateClient(`/workspace/1?task=${encodeURIComponent(taskId)}`);
-            }}
+            onOpenTask={quickTargets?.task !== undefined && quickTargets.task >= 0
+              ? (taskId) => {
+                  navigateClient(`/workspace/${String(quickTargets.task)}?task=${encodeURIComponent(taskId)}`);
+                }
+              : undefined}
             onOpenMeeting={
               role === "mentor" && quickTargets && quickTargets.plan !== undefined && quickTargets.plan >= 0
                 ? () => {
