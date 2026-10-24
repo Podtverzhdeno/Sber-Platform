@@ -1249,6 +1249,36 @@
   .catalog-v2-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  /* Tablet content width is smaller than viewport width inside the shell.
+     Collapse the list before its five desktop columns can overflow. */
+  .catalog-v2-table {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .catalog-v2-table-head {
+    display: none;
+  }
+
+  .catalog-v2-table-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+    background: var(--catalog-surface);
+    border: 1px solid var(--catalog-border);
+    border-radius: 14px;
+  }
+
+  .catalog-v2-table-row [role="cell"][data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 3px;
+    color: var(--catalog-muted);
+    font-size: 0.72rem;
+    font-weight: 650;
+  }
 }
 
 @media (max-width: 680px) {
