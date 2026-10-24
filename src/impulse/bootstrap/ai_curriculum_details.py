@@ -245,7 +245,7 @@ AI_CURRICULUM_DETAILS: dict[str, list[dict[str, object]]] = json.loads(r"""{
       "lab": "Протестируй поиск корпоративного агента для трёх tenant-контекстов и документов с PII.",
       "acceptance": [
         "Отсутствуют чужие результаты в 15 cross-tenant проверках",
-        "PII маскируется в логах",
+        "PII маскируется в логах и не попадает в трассировку агента",
         "Есть тест удаления документа из индекса"
       ],
       "estimated_hours": 10
@@ -470,7 +470,7 @@ AI_CURRICULUM_DETAILS: dict[str, list[dict[str, object]]] = json.loads(r"""{
       "lab": "Подготовь canary 10% → 50% → 100% с условиями остановки и rollback.",
       "acceptance": [
         "Заданы конкретные exit-criteria",
-        "Есть dashboard и runbook",
+        "Подготовлены dashboard с порогами и операционный runbook",
         "Подготовлен релизный протокол с ограничениями"
       ],
       "estimated_hours": 12
@@ -605,7 +605,7 @@ AI_CURRICULUM_DETAILS: dict[str, list[dict[str, object]]] = json.loads(r"""{
       "acceptance": [
         "Есть data inventory и карта доступов",
         "Набор валидации включает ошибки и исключения",
-        "Указан baseline без AI"
+        "Указан измеримый baseline без применения AI"
       ],
       "estimated_hours": 8
     },
