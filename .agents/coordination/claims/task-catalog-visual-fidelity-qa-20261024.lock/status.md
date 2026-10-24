@@ -1,0 +1,14 @@
+# task-catalog-visual-fidelity-qa-20261024
+- session_id: gpt6-20261024-1937-fidelity-qa
+- status: IN_PROGRESS
+- base_revision: 281f8bfa976e05e62b0d8ac1bd649eddbf37ca7d
+- depends_on: [task-catalog-visual-polish-20261024]
+- write_scope:
+  - frontend/e2e/task-catalog-approved-geometry.spec.ts
+  - frontend/e2e/task-catalog-approved-visual-fixture.ts
+  - openspec/changes/participant-task-catalog-v2/docs/approved-visual-audit-2026-10-24.md
+  - .agents/coordination/claims/task-catalog-visual-fidelity-qa-20261024.lock/status.md
+- shared_files: []
+- verification: scoped Playwright composition and semantics tests against synthetic-only source-faithful fixture, independent comparison against original PNG
+- blockers: task catalog React/SCSS are owned by active UI claim and cannot be edited in this QA branch; no main changes and no production deployment
+- started_at: 2026-10-24T19:37:00+03:00
