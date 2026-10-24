@@ -3060,3 +3060,151 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
     overflow-wrap: anywhere;
   }
 }
+
+
+/*
+ * Approved source 01 uses one-screen composition at 1672×941.
+ * Compact the large-desktop preview only; full source copy remains in DOM,
+ * screen-reader accessible and visible in the mobile/tablet layout.
+ * No skill level or eligibility forecast is synthesized by these rules.
+ */
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2 { gap: 10px; }
+
+  .catalog-v2-detail {
+    gap: 7px;
+    padding: 11px 13px;
+  }
+
+  .catalog-v2-detail .catalog-v2-detail-header { gap: 7px; }
+  .catalog-v2-detail-identity h2 {
+    margin-bottom: 4px;
+    font-size: 1.12rem;
+    line-height: 1.18;
+  }
+  .catalog-v2-detail-customer { margin-bottom: 3px; }
+  .catalog-v2-detail-description {
+    margin-bottom: 4px;
+    line-height: 1.3;
+    font-size: 0.75rem;
+  }
+  .catalog-v2-detail .catalog-v2-tags li { padding: 2px 6px; }
+  .catalog-v2-detail-score .catalog-v2-match-visual svg {
+    width: 56px;
+    height: 56px;
+  }
+
+  .catalog-v2-detail-factrail {
+    padding: 6px 0;
+    gap: 5px;
+  }
+  .catalog-v2-detail .catalog-v2-detail-grid { gap: 6px 10px; }
+  .catalog-v2-detail-grid h3 {
+    margin-bottom: 5px;
+    font-size: 0.81rem;
+  }
+  .catalog-v2-growth-section .catalog-v2-section-heading button {
+    min-height: 25px;
+    padding: 3px 6px;
+  }
+  .catalog-v2-growth-head { padding: 3px 5px 4px; }
+  .catalog-v2-growth-list > li {
+    padding: 4px 5px;
+    gap: 4px;
+  }
+  .catalog-v2-skill-transition > span:not(.catalog-v2-skill-arrow) {
+    min-height: 0;
+    padding: 4px 5px;
+    gap: 2px;
+  }
+  .catalog-v2-skill-transition small {
+    font-size: 0.59rem;
+    line-height: 1.08;
+  }
+  .catalog-v2-skill-transition b {
+    font-size: 0.62rem;
+    line-height: 1.13;
+  }
+  .catalog-v2-growth-caveat {
+    margin: 4px 0 2px !important;
+    font-size: 0.61rem !important;
+    line-height: 1.25 !important;
+  }
+  .catalog-v2-growth-explanations { padding: 0; }
+  .catalog-v2-growth-explanations summary {
+    min-height: 19px;
+    font-size: 0.65rem;
+  }
+
+  .catalog-v2-benefits-section {
+    padding-left: 8px !important;
+  }
+  .catalog-v2-benefits-section > ul { gap: 4px; }
+  .catalog-v2-benefits-section > ul > li {
+    padding: 4px 5px;
+    gap: 5px;
+    align-items: center;
+    border-radius: 7px;
+  }
+  .catalog-v2-benefit-icon {
+    width: 25px;
+    height: 25px;
+    border-radius: 6px;
+  }
+  .catalog-v2-benefit-icon svg { width: 16px; height: 16px; }
+  .catalog-v2-benefits-section li strong {
+    font-size: 0.66rem;
+    line-height: 1.15;
+  }
+  .catalog-v2-benefits-section li p {
+    margin: 2px 0 !important;
+    font-size: 0.61rem;
+    line-height: 1.18;
+  }
+  /* The published condition already qualifies the potential benefit.
+     Preserve complete state text for screen readers without duplicating it. */
+  .catalog-v2-benefits-section li small {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    white-space: nowrap;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+  }
+  .catalog-v2-stage-section { padding-top: 2px !important; }
+  .catalog-v2-detail-grid .catalog-v2-stage-track { padding: 7px 0 3px; }
+  .catalog-v2-stage-track > li .catalog-v2-stage-content p,
+  .catalog-v2-stage-track > li .catalog-v2-stage-state {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    white-space: nowrap;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+  }
+  .catalog-v2-stage-content strong {
+    line-height: 1.16;
+    font-size: 0.68rem;
+  }
+  .catalog-v2-stage-content small {
+    font-size: 0.64rem;
+    line-height: 1.2;
+  }
+  .catalog-v2-plan-note {
+    font-size: 0.64rem !important;
+    line-height: 1.2;
+    margin: 2px 0 !important;
+  }
+  .catalog-v2-support-section {
+    padding-block: 6px;
+  }
+  .catalog-v2-detail-footer {
+    padding-top: 5px !important;
+  }
+}
