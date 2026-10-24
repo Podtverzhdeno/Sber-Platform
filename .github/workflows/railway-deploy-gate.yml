@@ -1,0 +1,61 @@
+name: Railway deploy gate (every 30 minutes)
+
+# Railway watches only /.railway-manual-deploy-trigger, not every push.
+# A scheduled GitHub Actions run advances that file only when main has new
+# source changes. This publishes the latest main state at most once per slot
+# without requiring a Railway API token or writing any database data.
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+permissions:
+  contents: write
+concurrency:
+  group: railway-deploy-gate-main
+  cancel-in-progress: false
+jobs:
+  publish-latest:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Publish only if source changed since last slot
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Concurrent feature work can update main between fetch and push.
+          # Rebase by re-reading main rather than overwriting anyone's commits.
+          for attempt in 1 2 3 4 5; do
+            git fetch --quiet origin main
+            git checkout -B railway-deploy-gate origin/main
+
+            # Exclude the marker commit itself. Otherwise the next scheduled
+            # run would see its own prior deploy as a fresh code change.
+            latest_source="$(git log -1 --format=%H -- . ':(exclude).railway-manual-deploy-trigger')"
+            previous_source="$(cat .railway-manual-deploy-trigger 2>/dev/null || true)"
+            if [ -z "$latest_source" ] || [ "$latest_source" = "$previous_source" ]; then
+              echo "No new source changes; no Railway deployment."
+              exit 0
+            fi
+
+            printf '%s\n' "$latest_source" > .railway-manual-deploy-trigger
+            git add -f .railway-manual-deploy-trigger
+            git commit -m "chore(railway): release latest main on 30-minute schedule"
+            if git push origin HEAD:main; then
+              echo "Railway deployment trigger created for source $latest_source"
+              exit 0
+            fi
+
+            echo "main advanced during publish; retrying ($attempt/5)."
+            sleep 3
+          done
+          echo "::error::main kept advancing; retry on the next schedule."
+          exit 1
