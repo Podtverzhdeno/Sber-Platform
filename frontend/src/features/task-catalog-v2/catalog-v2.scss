@@ -2578,3 +2578,52 @@
   .catalog-v2-table-row { grid-template-columns: minmax(0, 1fr); }
   .catalog-v2-table-row [role="cell"] { grid-column: 1 / -1; }
 }
+
+/* Specificity reconciliation with the original catalog styles.
+   Without this, legacy full-width section placement defeats the approved
+   two-column skill/benefit composition, and legacy cards defeat the timeline. */
+@media (min-width: 1051px) {
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-growth-section { grid-column: 1; }
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-benefits-section { grid-column: 2; }
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-stage-section { grid-column: 1 / -1; }
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-support-section { grid-column: 1; }
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-reasons-section { grid-column: 2; }
+}
+.catalog-v2-detail-grid .catalog-v2-growth-list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.catalog-v2-detail-grid .catalog-v2-stage-track > li {
+  flex: 1 0 105px;
+  max-width: none;
+  min-width: 105px;
+  gap: 3px;
+  padding: 0 6px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.catalog-v2-match-ring {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+.catalog-v2-match-ring svg { grid-area: 1 / 1; }
+.catalog-v2-match-ring strong {
+  grid-area: 1 / 1;
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+}
+.catalog-v2-detail-score .catalog-v2-match { font-size: 0; }
+.catalog-v2-table-match .catalog-v2-match-ring strong { font-size: 0.58rem; }
+@media (max-width: 680px) {
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-growth-section,
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-benefits-section,
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-stage-section,
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-support-section,
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-reasons-section { grid-column: 1 / -1; }
+}
