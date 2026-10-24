@@ -6,6 +6,10 @@ on:
     paths:
       - "src/impulse/bootstrap/demo_seed.py"
       - "tests/test_demo_seed_graph.py"
+      - "tests/integration/test_demo_seed_idempotency.py"
+      - "src/impulse/bootstrap/ai_role_catalog.py"
+      - "src/impulse/application/development.py"
+      - "src/impulse/api/v1/development.py"
       - ".github/workflows/demo-statistics-qa.yml"
   workflow_dispatch:
 
