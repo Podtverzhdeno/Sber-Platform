@@ -332,7 +332,7 @@ function TaskDetail(props: {
 
         <section className="catalog-v2-support-section">
           <Users size={24} aria-hidden="true" />
-          <div><strong>Поддержка и ментор</strong><p>{item.support_model && item.support_model !== "not_provided" ? supportLabels[item.support_model] ?? item.support_model : "Ментор и формат поддержки пока не опубликованы"}</p></div>
+          <div><strong>Поддержка и ментор</strong><p>{item.support_model === "none" || item.support_model === "self_service" ? "Сопровождение не предусмотрено" : item.support_model && item.support_model !== "not_provided" ? supportLabels[item.support_model] ?? item.support_model : "Ментор и формат поддержки пока не опубликованы"}</p></div>
         </section>
 
         <section className="catalog-v2-reasons-section">
@@ -437,7 +437,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   const averageMatch = scoredItems.length
     ? Math.round(scoredItems.reduce((sum, item) => sum + Number(item.match.percent), 0) / scoredItems.length)
     : null;
-  const mentoredCount = items.filter((item) => item.support_model !== null && item.support_model !== "not_provided" && item.support_model.trim().length > 0).length;
+  const mentoredCount = items.filter((item) => item.support_model === "mentor" || item.support_model === "mentor_review" || item.support_model === "team_review").length;
   const portfolioCount = items.filter((item) => item.benefits.some((benefit) => benefit.state !== "unavailable" && (benefit.benefit_type.toLowerCase().includes("portfolio") || benefit.code.toLowerCase().includes("portfolio")))).length;
 
   useEffect(() => {
