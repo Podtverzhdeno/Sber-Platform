@@ -142,4 +142,16 @@ describe("typed API client policy", () => {
     client.clear();
   });
 
+  it("does not reuse Agentic Coding evidence when a verification is revoked", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify({ skills: [{ current_level: 3 }] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ skills: [{ current_level: null }] }), { status: 200 }));
+    const path = "/api/v1/me/agentic-coding/profile?role_key=developer" as const;
+    await expect(apiRequest<{ skills: Array<{ current_level: number | null }> }>(path))
+      .resolves.toEqual({ skills: [{ current_level: 3 }] });
+    await expect(apiRequest<{ skills: Array<{ current_level: number | null }> }>(path))
+      .resolves.toEqual({ skills: [{ current_level: null }] });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
 });
