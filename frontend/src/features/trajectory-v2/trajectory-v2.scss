@@ -1073,3 +1073,32 @@
   .workspace-content .trajectory-v2-role-tabs{overflow-x:auto;flex-wrap:nowrap}
   .workspace-content .trajectory-v2-role-intro-grid>section:not(.trajectory-v2-role-intro-hero){min-height:0}
 }
+
+/* Reference catalogue copy lives in the role modal, never in verified personal results. */
+.workspace-content .trajectory-v2-role-suitability {
+  grid-column:1/-1;min-height:100px;padding:16px 18px;
+  border:1px solid #1e506b;border-radius:11px;background:#0b293e;
+}
+.workspace-content .trajectory-v2-role-suitability h3 {
+  margin:0 0 9px;font-size:16px;font-weight:800;color:#eef7ff;
+}
+.workspace-content .trajectory-v2-role-suitability p {
+  margin:0;color:#b7c9d9;font-size:13px;line-height:1.5;
+}
+.workspace-content .trajectory-v2-role-intro-card ul {
+  padding:0;margin:0;display:grid;gap:5px;list-style:none;
+}
+.workspace-content .trajectory-v2-role-intro-card li{
+  position:relative;padding-left:20px;margin:0;list-style:none;
+  color:#c1d4e5;font-size:12px;line-height:1.5;
+}
+.workspace-content .trajectory-v2-role-intro-card li::before {
+  content:"✓";position:absolute;left:1px;top:0;color:#09eedb;
+}
+.workspace-content .trajectory-v2-role-skill-chips span {
+  background:#12354c;border:1px solid #245773;
+  border-radius:12px;padding:6px 10px;font-size:11px;color:#cce2f2;
+}
+@media(max-width:690px){
+  .workspace-content .trajectory-v2-role-suitability{grid-column:1}
+}
