@@ -511,7 +511,7 @@ function Workspace({
           actor.active_role === "participant" &&
           (currentSection === "Мой путь" ||
             currentSection === "Моя траектория") ? (
-          searchParams.get("legacy") === "1" ? (
+          (searchParams.get("legacy") === "1" || searchParams.has("view") || searchParams.has("track") || searchParams.has("pane")) ? (
             <>
               <DevelopmentJourney />
               <TrajectoryMapPage />
