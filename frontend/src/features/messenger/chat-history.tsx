@@ -23,6 +23,7 @@ import {
 } from "react";
 
 import { AttachmentCard } from "./attachment-card";
+import { MayakiEventPreview } from "./mayaki-event-preview";
 import type { ApiChannelView, ApiMessageView } from "./contracts";
 import {
   CHAT_REACTION_EMOJIS,
@@ -489,6 +490,7 @@ export function ChatHistory({
                             ),
                           )}
                         </div>
+                        {channel?.title.trim().toLowerCase() === "маяки" && item.body.includes("Карьера в IT: от обучения к возможностям") && <MayakiEventPreview />}
                         {item.artifact_refs.length > 0 && (
                           <ul className="msg-chat__artifact-refs">
                             {item.artifact_refs.map((ref) => <AttachmentCard key={ref} reference={ref} />)}
