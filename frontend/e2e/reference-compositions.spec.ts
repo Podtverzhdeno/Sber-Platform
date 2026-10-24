@@ -753,6 +753,7 @@ test("R-PAR-07 participant messaging send", async ({ page }) => {
   await openWorkspace(page, participantBase.key);
   await page.getByRole("link", { name: "Сообщения", exact: true }).click();
   await expect(page.locator('[data-reference="R-PAR-07"]')).toBeVisible();
+  await page.locator(".msg-dialog-list__row").first().click();
   await page.getByTestId("composer-textarea").fill("Принял правки по чеклисту, обновляю артефакт.");
   await page.getByTestId("composer-send").click();
   await expect(page.locator(".msg-chat__rows").getByText("Принял правки по чеклисту, обновляю артефакт.", { exact: true })).toBeVisible();
@@ -857,6 +858,7 @@ test("R-MEN-05 mentor messaging send", async ({ page }) => {
   await openWorkspace(page, "mentor-elena");
   await page.getByRole("link", { name: "Сообщения", exact: true }).click();
   await expect(page.locator('[data-reference="R-MEN-05"]')).toBeVisible();
+  await page.locator(".msg-dialog-list__row").first().click();
   await page.getByTestId("composer-textarea").fill("Проверил evidence, отправляю rubric-комментарий.");
   await page.getByTestId("composer-send").click();
   await expect(page.locator(".msg-chat__rows").getByText("Проверил evidence, отправляю rubric-комментарий.", { exact: true })).toBeVisible();
@@ -965,6 +967,7 @@ test("R-CUS-05 task detail acceptance", async ({ page }) => {
   await page.getByRole("button", { name: "Ответить" }).click();
   await expect(page).toHaveURL(/workspace\/7\?task=/);
   await expect(page.locator('[data-reference="R-CUS-09"]')).toBeVisible();
+  await page.locator(".msg-dialog-list__row").first().click();
 });
 
 test("R-CUS-06 analytics period control", async ({ page }) => {
