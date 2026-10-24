@@ -96,7 +96,7 @@ const DEFAULT_NAVIGATION = ["Главная", "Мой путь", "Bootcamp", "З
 function shell(url: string, roadmaps: RoadmapView[], navigation = DEFAULT_NAVIGATION): void {
   vi.spyOn(globalThis, "fetch").mockImplementation((input) =>
     Promise.resolve(new Response(
-      JSON.stringify(String(input) === "/api/v1/me" ? { navigation } : roadmaps),
+      JSON.stringify((typeof input === "string" ? input : input.url) === "/api/v1/me" ? { navigation } : roadmaps),
       { status: 200 },
     )),
   );
