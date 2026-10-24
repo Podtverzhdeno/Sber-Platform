@@ -50,6 +50,7 @@ const BUDDY_ART = "/home-reference/buddy.svg";
 export function ParticipantHomeV2(props: {
   onOpenTarget: OpenTarget;
   onOpenWorkspace: (canonicalPath?: string) => void;
+  buddyAvailable?: boolean;
 }) {
   const overview = useQuery({
     queryKey: overviewQueryKey,
@@ -74,6 +75,7 @@ export function ParticipantHomeV2(props: {
       overview={overview.data}
       onOpenTarget={props.onOpenTarget}
       onOpenWorkspace={props.onOpenWorkspace}
+      buddyAvailable={props.buddyAvailable}
       onRetry={() => { void overview.refetch(); }}
     />
   );
@@ -83,6 +85,7 @@ export function ParticipantHomeV2Body(props: {
   overview: DevelopmentOverviewView;
   onOpenTarget: OpenTarget;
   onOpenWorkspace: (canonicalPath?: string) => void;
+  buddyAvailable?: boolean;
   onRetry: () => void;
 }) {
   const { overview } = props;
@@ -185,7 +188,7 @@ export function ParticipantHomeV2Body(props: {
                 {overview.next_outcome && <button type="button" className="home-v2-buddy-tip" onClick={openNext}><BookOpen size={22}/><span><strong>Материалы и задания</strong><small>{overview.next_outcome.target_title}</small></span><ChevronRight size={15}/></button>}
               </div>
             </div>
-            <button type="button" className="home-v2-buddy-footnote" onClick={() => { props.onOpenWorkspace("buddy"); }}>Задать вопрос или попросить совет… <Send size={19} /></button>
+            <button type="button" className="home-v2-buddy-footnote" onClick={() => { props.onOpenWorkspace("buddy"); }} disabled={!props.buddyAvailable} title={props.buddyAvailable ? undefined : "AI Buddy недоступен для текущей роли"}>Задать вопрос или попросить совет… <Send size={19} /></button>
           </section>
           <section className="home-v2-block home-v2-passport" aria-label="Мой скилл-паспорт">
             <header><h2>Мой скилл-паспорт</h2><button type="button" className="home-v2-inline-link" onClick={() => { props.onOpenWorkspace("skills"); }}>Все навыки <ArrowRight size={16}/></button></header>
