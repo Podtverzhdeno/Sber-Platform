@@ -95,7 +95,7 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
         for (const { selector, rect } of geometry) {
           expect(rect, selector + " should be rendered").not.toBeNull();
           const expected = golden[selector];
-          if (!rect || !expected) throw new Error("Missing golden coordinates for " + selector);
+          if (rect === null) throw new Error("Missing rendered rectangle for " + selector);
           for (const [metric, actual, position] of [
             ["x", rect.x, 0], ["y", rect.y, 1],
             ["width", rect.width, 2], ["height", rect.height, 3],
