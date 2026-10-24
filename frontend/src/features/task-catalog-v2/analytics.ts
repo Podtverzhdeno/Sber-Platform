@@ -41,7 +41,7 @@ export function trackCatalogEvent(input: CatalogAnalyticsInput): void {
     if (pendingKeys.has(dedupeKey) || completedKeys.has(dedupeKey)) return;
     pendingKeys.add(dedupeKey);
   }
-  let eventId = eventIds.get(dedupeKey);
+  let eventId = input.dedupeKey === undefined ? undefined : eventIds.get(dedupeKey);
   if (eventId === undefined) {
     const createdEventId = newEventId();
     if (createdEventId === null) {
@@ -49,7 +49,7 @@ export function trackCatalogEvent(input: CatalogAnalyticsInput): void {
       return;
     }
     eventId = createdEventId;
-    eventIds.set(dedupeKey, eventId);
+    if (input.dedupeKey !== undefined) eventIds.set(dedupeKey, eventId);
   }
   const body = {
     event_id: eventId,
