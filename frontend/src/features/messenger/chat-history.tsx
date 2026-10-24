@@ -453,6 +453,9 @@ export function ChatHistory({
                    )}
                    <span className="msg-chat__group-author" aria-hidden="true">
                     {row.authorId === viewerId ? "Вы" : row.authorName}
+                    {channel?.id === "reference:mayaki" && (row.authorName === "Анна Ковалёва" || row.authorName === "Иван Петров") && (
+                      <span className="msg-chat__reference-role">{row.authorName === "Анна Ковалёва" ? "Администратор" : "Модератор"}</span>
+                    )}
                   </span>
                   {row.items.map((item) => {
                     const extra = item as ChatMessageExtra;
@@ -487,7 +490,19 @@ export function ChatHistory({
                             ),
                           )}
                         </div>
-                        {item.artifact_refs.length > 0 && (
+                        {item.id === "reference:mayaki-message-1" && (
+                          <div className="msg-chat__reference-media" aria-label="Карьера в IT: от обучения к возможностям">
+                            <span className="msg-chat__reference-media-icon" aria-hidden="true">✦</span>
+                            <span><strong>Карьера в IT: от обучения к возможностям</strong><small>Серия встреч · Октябрь 2026</small></span>
+                          </div>
+                        )}
+                        {item.id === "reference:mayaki-message-3" && (
+                          <div className="msg-chat__reference-link" aria-label="Демонстрационная карточка ссылки">
+                            <span aria-hidden="true">↗</span>
+                            <span><strong>Возможности для студентов — октябрь 2026</strong><small>Документ с актуальными стажировками, грантами и конкурсами</small><small>docs.google.com · демонстрация</small></span>
+                          </div>
+                        )}
+                                                {item.artifact_refs.length > 0 && (
                           <ul className="msg-chat__artifact-refs">
                             {item.artifact_refs.map((ref) => (
                               <li key={ref} className="msg-chat__artifact-ref">
@@ -507,7 +522,10 @@ export function ChatHistory({
                             </span>
                           )}
                         </small>
-                        {item.id === "reference:mayaki-message-2" && (
+                        {item.id === "reference:mayaki-message-4" && (
+                          <div className="msg-chat__reference-reactions" aria-label="Пример реакций из утверждённого макета"><span>🔥 8</span><span>👏 3</span></div>
+                        )}
+                                                {item.id === "reference:mayaki-message-2" && (
                           <div className="msg-chat__reference-reactions" aria-label="Пример реакций из утверждённого макета"><span>💗 12</span><span>👍 5</span></div>
                         )}
                         <div className="msg-chat__reactions">
