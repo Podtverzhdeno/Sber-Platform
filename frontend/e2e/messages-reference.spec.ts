@@ -97,9 +97,9 @@ test("messages empty state uses reference three-column composition at 1448px",as
       return {selector,x:r.x,y:r.y,width:r.width,height:r.height,display:css.display,position:css.position,flex:css.flex,gridTemplateRows:css.gridTemplateRows,minHeight:css.minHeight,heightCss:css.height,overflow:css.overflow};
     });
   })));
-  await expectRect(page,".msg-dialog-list",{x:156,y:65,width:334,height:1021},12);
-  await expectRect(page,".chat-thread",{x:490,y:65,width:606,height:1021},14);
-  await expectRect(page,".msg-reference-context-empty",{x:1096,y:65,width:352,height:1021},14);
+  await expectRect(page,".msg-dialog-list",{x:164,y:70,width:367,height:1016},12);
+  await expectRect(page,".chat-thread",{x:531,y:70,width:575,height:1016},14);
+  await expectRect(page,".msg-reference-context-empty",{x:1106,y:70,width:298,height:1016},14);
   await expect(page.locator(".msg-reference-empty__bubble.front")).toBeVisible();
 });
 
@@ -109,6 +109,10 @@ test("quick actions, search, tabs, context, mute, chat input operate end to end"
   await page.getByRole("button",{name:/Перейти в Маяки/}).click();
   await expect(page.locator(".msg-chat__header-title")).toContainText("Маяки");
   await expect(page.locator(".msg-chat__avatar img")).toHaveAttribute("src","/messages-reference/mayaki-avatar.svg");
+  await expect(page.locator(".messenger-page")).toHaveAttribute("data-message-state","community");
+  await expectRect(page,".msg-dialog-list",{x:156,y:64,width:334,height:1022},12);
+  await expectRect(page,".chat-thread",{x:490,y:64,width:606,height:1022},14);
+  await expectRect(page,".msg-context",{x:1096,y:64,width:352,height:1022},14);
   await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toContainText("Маяки");
   await page.getByRole("button",{name:"Скрыть информацию о чате"}).click();
   await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toHaveCount(0);
@@ -131,6 +135,22 @@ test("quick actions, search, tabs, context, mute, chat input operate end to end"
   await expect(page.getByRole("tab",{name:"Архив"})).toHaveAttribute("aria-selected","true");
   await page.getByRole("tab",{name:/Все/}).click();
   await expect(page.getByRole("tab",{name:/Все/})).toHaveAttribute("aria-selected","true");
+});
+
+test("direct chat follows 1672px personal PNG geometry with working editor",async ({page})=>{
+  await page.setViewportSize({width:1672,height:941});
+  await openMessages(page);
+  await page.getByRole("button",{name:/Открыть последний чат/}).click();
+  await expect(page.locator(".messenger-page")).toHaveAttribute("data-message-state","direct");
+  await expect(page.locator(".msg-chat__header-title")).toContainText("Елена Наставник");
+  await expectRect(page,".msg-dialog-list",{x:172,y:69,width:391,height:872},12);
+  await expectRect(page,".chat-thread",{x:563,y:69,width:752,height:872},14);
+  await expectRect(page,".msg-context",{x:1315,y:69,width:357,height:872},14);
+  await page.getByRole("button",{name:"Поиск в чате"}).click();
+  await expect(page.getByRole("searchbox",{name:"Поиск по сообщениям чата"})).toBeVisible();
+  await page.getByRole("searchbox",{name:"Поиск по сообщениям чата"}).fill("Проверь");
+  await page.getByRole("searchbox",{name:"Поиск по сообщениям чата"}).press("Escape");
+  await expect(page.getByRole("searchbox",{name:"Поиск по сообщениям чата"})).toHaveCount(0);
 });
 
 test("mobile messages open real dialog and return to list",async ({page})=>{
