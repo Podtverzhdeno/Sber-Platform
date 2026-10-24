@@ -1,0 +1,89 @@
+/* Isolated live Bootcamp catalog improvements. All theme colors use platform tokens. */
+.bootcamp-experience {
+  --bc-border: var(--color-border);
+  --bc-surface: var(--color-surface);
+  --bc-muted: var(--color-muted);
+  --bc-accent: var(--color-primary);
+  gap: 20px;
+}
+.bootcamp-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  border: 1px solid var(--bc-border);
+  border-radius: 18px;
+  padding: 22px 24px;
+  background: linear-gradient(112deg, var(--color-surface) 42%, var(--color-surface-raised) 100%);
+}
+.bootcamp-hero h1 { margin: 0 0 8px; font-size: clamp(1.9rem, 3.2vw, 2.75rem); line-height: 1.1; }
+.bootcamp-hero .lead { margin: 0; font-size: 0.98rem; max-width: 62ch; }
+.bootcamp-hero-pulse {
+  display: grid;
+  min-width: 170px;
+  justify-items: end;
+  gap: 3px;
+  text-align: right;
+  border-left: 1px solid var(--bc-border);
+  padding-left: 24px;
+}
+.bootcamp-hero-pulse strong { font-size: 2.1rem; line-height: 1; color: var(--bc-accent); }
+.bootcamp-hero-pulse span { font-weight: 650; }
+.bootcamp-hero-pulse small { color: var(--bc-muted); }
+.bootcamp-role-glance { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; }
+.bootcamp-role-glance > div {
+  display: grid; gap: 7px; border: 1px solid var(--bc-border);
+  background: var(--bc-surface); border-radius: 15px; padding: 16px 18px; min-width: 0;
+}
+.bootcamp-role-glance span { font-size: .82rem; color: var(--bc-muted); }
+.bootcamp-role-glance strong { font-size: clamp(1rem,1.4vw,1.32rem); }
+.bootcamp-catalog-toolbar {
+  display: flex; flex-wrap: wrap; align-items: end; column-gap: 12px;
+  row-gap: 9px; padding: 15px; border: 1px solid var(--bc-border);
+  border-radius: 16px; background: var(--bc-surface);
+}
+.bootcamp-filter-hint { order: 10; width: 100%; margin: 0; font-size: .81rem; color: var(--bc-muted); }
+.bootcamp-query,.bootcamp-catalog-toolbar .catalog-filter {
+  display: grid; gap: 6px; min-width: 150px; font-size: .78rem; color: var(--bc-muted);
+}
+.bootcamp-query { flex: 1 1 230px; }
+.bootcamp-query input,.bootcamp-catalog-toolbar select {
+  width: 100%; min-height: 42px; border: 1px solid var(--bc-border);
+  background: var(--color-surface-raised); color: var(--color-text);
+  border-radius: 10px; padding: 8px 12px; font: inherit; font-size: .9rem;
+}
+.bootcamp-catalog-summary { margin: 0; font-size: .82rem; color: var(--bc-muted); align-self: center; }
+.bootcamp-experience .course-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+.bootcamp-experience .bootcamp-course-card {
+  display: flex; flex-direction: column; min-width: 0; min-height: 300px;
+  border-radius: 15px; padding: 19px;
+  border: 1px solid var(--bc-border); overflow-wrap: anywhere;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+.bootcamp-course-card:hover,.bootcamp-course-row:hover {
+  border-color: var(--bc-accent);
+  box-shadow: 0 0 0 1px var(--bc-accent);
+}
+.bootcamp-experience .bootcamp-course-card[data-required="true"] { border-color: var(--bc-accent); }
+.bootcamp-course-card h2 { font-size: 1.1rem; line-height: 1.3; margin: 0 0 12px; }
+.bootcamp-course-card > p { font-size: .88rem; margin: 6px 0; }
+.bootcamp-experience .bootcamp-course-card .course-actions { margin-top: auto; padding-top: 15px; }
+.bootcamp-course-card .course-actions button:first-child { font-weight: 750; }
+.bootcamp-course-card[data-access="prerequisite_not_met"] { opacity: .85; }
+.bootcamp-course-row { border: 1px solid var(--bc-border); border-radius: 14px; padding: 18px; margin-bottom: 10px; }
+.bootcamp-experience .bootcamp-course-row strong { font-size: 1.02rem; }
+.bootcamp-experience .bootcamp-course-row .course-actions { margin-top: 12px; }
+@media(max-width:1240px) {
+  .bootcamp-experience .course-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:760px) {
+  .bootcamp-hero { align-items: start; flex-direction: column; }
+  .bootcamp-hero-pulse { border-left: 0; border-top: 1px solid var(--bc-border); padding: 12px 0 0; justify-items: start; text-align: left; width: 100%; }
+  .bootcamp-role-glance { grid-template-columns: 1fr; }
+  .bootcamp-experience .course-grid { grid-template-columns: 1fr; }
+  .bootcamp-catalog-toolbar > * { flex: 1 1 100%; }
+  .bootcamp-catalog-toolbar .catalog-segments { flex: 0 1 auto; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .bootcamp-experience .bootcamp-course-card { transition: none; }
+}
