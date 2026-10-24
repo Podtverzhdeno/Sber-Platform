@@ -888,3 +888,40 @@
 .workspace-content .trajectory-v2-hero-graphic span{position:absolute;z-index:1;right:29px;top:15px;color:#48d7ff;font-size:25px}
 @media(max-width:1170px){.workspace-content .trajectory-v2-roles ul{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:690px){.workspace-content .trajectory-v2-hero-graphic{display:none}.workspace-content .trajectory-v2-stage-path{grid-template-columns:repeat(7,90px);overflow-x:auto}.workspace-content .trajectory-v2-stage-path>li::after{display:none}}
+
+
+/* TRJ-SCREEN-05: grades list and selected-grade detail */
+.trajectory-v2-grades-dialog{box-sizing:border-box;width:min(1024px,calc(100vw - 32px));max-height:89vh;overflow-y:auto}
+.trajectory-v2-grades-heading{display:flex;align-items:center;gap:13px;margin-bottom:20px}
+.trajectory-v2-grades-heading>div:nth-child(2){min-width:0;flex:1}
+.trajectory-v2-grades-heading h2{font-size:24px;margin:0 0 4px;font-weight:800}
+.trajectory-v2-grades-heading p{font-size:12px;color:#aabed3;margin:0}
+.trajectory-v2-grades-symbol{width:49px;height:49px;border-radius:11px;background:#442078;color:#c7a4ff;display:grid;place-items:center;font-size:24px}
+.trajectory-v2-grades-layout{display:grid;grid-template-columns:minmax(260px,345px) minmax(0,1fr);gap:16px}
+.trajectory-v2-grades-layout>.trajectory-v2-grades-list{display:grid;gap:7px;align-content:start}
+.trajectory-v2-grade-option{width:100%;min-height:74px;display:flex;align-items:center;text-align:left;gap:12px;border:1px solid #1d4963;border-radius:11px;background:#082138;padding:11px 13px;color:#edf7ff;cursor:pointer}
+.trajectory-v2-grade-option[aria-pressed="true"]{border-color:#0fe9e2;background:linear-gradient(90deg,#074350,#092839)}
+.trajectory-v2-grade-option>span:nth-child(2){display:grid;gap:4px;flex:1}
+.trajectory-v2-grade-option strong{font-size:15px}
+.trajectory-v2-grade-option small{font-size:10px;color:#adc5d6}
+.trajectory-v2-grade-dot{width:30px;height:30px;display:grid;place-items:center;flex-shrink:0;border-radius:50%;border:2px solid #52738d;background:#0c2436;color:#c1d7e8;font-size:12px}
+.trajectory-v2-grade-option[aria-pressed="true"] .trajectory-v2-grade-dot{border-color:#35bbff;box-shadow:0 0 0 3px #0d4569}
+.trajectory-v2-grade-explanation{min-width:0;padding:18px;border:1px solid #1a5170;border-radius:12px;background:linear-gradient(155deg,#0b2941,#071b2c)}
+.trajectory-v2-grade-explanation-head{display:flex;justify-content:space-between;gap:12px;min-height:60px}
+.trajectory-v2-grade-explanation h3{margin:0 0 6px;font-size:24px}
+.trajectory-v2-grade-explanation-head span{display:inline-block;font-size:11px;padding:4px 9px;background:#064448;color:#2af8e0;border-radius:20px}
+.trajectory-v2-grade-explanation-graphic{font-size:23px;color:#51cfff}
+.trajectory-v2-grade-explanation>strong{font-size:13px}
+.trajectory-v2-grade-explanation>p{color:#b5c9dd;font-size:12px;margin:8px 0 14px}
+.trajectory-v2-grade-explanation-progress{display:grid;grid-template-columns:95px minmax(0,1fr);gap:14px;align-items:center;margin:13px 0}
+.trajectory-v2-grade-explanation-progress .trajectory-v2-grade-ring{width:94px;height:94px;border-width:8px}
+.trajectory-v2-grade-explanation-progress .trajectory-v2-grade-ring strong{font-size:12px}
+.trajectory-v2-grade-explanation-progress>div:nth-child(2){display:grid;gap:7px}
+.trajectory-v2-grade-explanation-progress>div:nth-child(2)>strong{font-size:29px}
+.trajectory-v2-grade-explanation-progress small{color:#a7bdcf;font-size:11px}
+.trajectory-v2-grade-explanation-progress progress{height:9px;width:100%;accent-color:#12e9d8}
+.trajectory-v2-grade-expectations{border-top:1px solid #225473;padding-top:15px}
+.trajectory-v2-grade-expectations h4{font-size:17px;margin:0 0 9px}
+.trajectory-v2-grade-expectations p{color:#adc3d6;font-size:12px;line-height:1.5}
+.trajectory-v2-grade-next-note{margin-top:17px;padding:13px;border:1px solid #1c6785;border-radius:10px;background:#0a2b40;color:#d1e9f4;font-size:12px}
+@media(max-width:760px){.trajectory-v2-grades-layout{grid-template-columns:1fr}.trajectory-v2-grades-heading h2{font-size:20px}.trajectory-v2-grades-layout>.trajectory-v2-grades-list{grid-template-columns:repeat(2,minmax(0,1fr))}.trajectory-v2-grade-option{min-height:64px;padding:9px}.trajectory-v2-grade-option small{font-size:9px}}
