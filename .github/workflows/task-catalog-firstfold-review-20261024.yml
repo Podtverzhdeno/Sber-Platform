@@ -1,4 +1,4 @@
-name: Isolated approved tasks first-fold QA
+name: Task catalog true first-fold nonoverlap QA
 on:
   push:
     branches: [codex/task-catalog-firstfold-verification-20261024]
@@ -13,8 +13,10 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - name: Checkout PR 35 mirror branch
+      - name: Checkout exact PR 35 first-fold fix
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: be60986e92b8462ecc3e54091e793ca3cfd2e091
       - name: Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -36,26 +38,3 @@ jobs:
           path: frontend/test-results/approved-geometry-*.png
           retention-days: 14
           if-no-files-found: warn
-  main-analytics-baseline:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - name: Checkout unchanged main SHA
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: 0e5d790746dc5f35131a6721aa16d7f982dd9e75
-      - name: Node
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: "24"
-          package-manager-cache: false
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - name: Verify main analytics-reference geometry independently
-        env:
-          TZ: Europe/Moscow
-          LANG: ru_RU.UTF-8
-        run: npx playwright test e2e/analytics-reference.spec.ts --grep desktop-1600 --workers=1 --reporter=line
