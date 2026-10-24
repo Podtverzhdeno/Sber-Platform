@@ -125,9 +125,9 @@ test("mobile messages open real dialog and return to list",async ({page})=>{
   await page.setViewportSize({width:390,height:844});
   await openMessages(page);
   await expect(page.getByRole("complementary",{name:"Список диалогов"})).toBeVisible();
-  await expect(page.getByRole("region",{name:"Текущий чат"})).toHaveCount(0);
+  await expect(page.locator(".chat-thread")).toHaveCount(0);
   await page.getByRole("button",{name:/Маяки/}).first().click();
-  await expect(page.getByRole("region",{name:"Текущий чат"})).toBeVisible();
+  await expect(page.locator(".chat-thread")).toBeVisible();
   await page.getByRole("button",{name:"К списку диалогов"}).click();
   await expect(page.getByRole("complementary",{name:"Список диалогов"})).toBeVisible();
   await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
