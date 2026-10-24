@@ -52,6 +52,8 @@ class MilestoneView(BaseModel):
     target_kind: str
     target_key: str
     completed: bool
+    activities: list[str] = Field(default_factory=list)
+    deliverable: str | None = None
 
 
 class RoadmapView(BaseModel):
@@ -186,6 +188,8 @@ def _milestone_view(item: object, completed_keys: frozenset[str]) -> MilestoneVi
         target_kind=item.target_kind,
         target_key=item.target_key,
         completed=item.key in completed_keys,
+        activities=list(item.activities),
+        deliverable=item.deliverable,
     )
 
 
@@ -210,6 +214,31 @@ async def roadmaps(
                     _milestone_view(next_step, projection.completed_keys)
                     if next_step is not None
                     else None
+                ),
+            )
+        )
+    return result
+
+
+@router.get("/me/roadmap-catalog", response_model=list[RoadmapView])
+async def roadmap_catalog(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+) -> list[RoadmapView]:
+    """All role roadmaps; only the authenticated participant's completions appear."""
+    result: list[RoadmapView] = []
+    for projection in await service.catalog_roadmaps(authenticated.actor):
+        result.append(
+            RoadmapView(
+                track_key=projection.track_key,
+                policy_version=projection.policy_version,
+                replacement_reason=projection.replacement_reason,
+                milestones=[
+                    _milestone_view(item, projection.completed_keys) for item in projection.milestones
+                ],
+                next_step=(
+                    _milestone_view(projection.next_step, projection.completed_keys)
+                    if projection.next_step is not None else None
                 ),
             )
         )
