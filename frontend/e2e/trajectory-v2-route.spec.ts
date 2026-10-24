@@ -87,10 +87,13 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Все уровни →" }).click();
   await expect(page.locator(".trajectory-v2-grade-option")).toHaveCount(6);
-});
-
-test("trajectory mobile retains reachable roles and the stage card", async ({ page }) => {
+  await page.getByRole("button", { name: "Закрыть" }).click();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/workspace/1?legacy=1");
-  await expect(page.locator(".trajectory-v2")).toHaveCount(0);
+  await expect(page.locator(".trajectory-v2-role-card").first()).toBeVisible();
+  await expect(stageCard).toBeVisible();
+  const [mobileLeft, mobileRight] = await Promise.all([stageCard.boundingBox(),rightRail.boundingBox()]);
+  expect(mobileLeft && mobileRight).toBeTruthy();
+  if (!mobileLeft || !mobileRight) return;
+  expect(mobileRight.y).toBeGreaterThanOrEqual(mobileLeft.y+mobileLeft.height-2);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(391);
 });
