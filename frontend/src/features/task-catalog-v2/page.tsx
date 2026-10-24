@@ -321,16 +321,18 @@ function TaskDetail(props: {
         </section>
 
         <section className="catalog-v2-reasons-section">
-          <h3>Почему подходит</h3>
-          {item.match.reasons.length > 0 ? (
-            <ul>{item.match.reasons.map((reason) => <li key={reason.code}>{reason.label}</li>)}</ul>
-          ) : <p>Причины появятся после накопления достаточного coverage.</p>}
-          <details className="catalog-v2-provenance">
-            <summary>Как рассчитана релевантность</summary>
-            <p>Алгоритм: {item.match.algorithm_version ?? "не рассчитан"} · расчёт: {formatCalculatedAt(item.match.calculated_at)}. Это не вероятность отбора или найма.</p>
-            <p className="catalog-v2-match-snapshot">Снимок входных данных: <code>{item.match.source_snapshot_version}</code></p>
+          <details className="catalog-v2-reasons-disclosure">
+            <summary><h3>Почему подходит</h3><ChevronDown size={15} aria-hidden="true" /></summary>
+            {item.match.reasons.length > 0 ? (
+              <ul>{item.match.reasons.map((reason) => <li key={reason.code}>{reason.label}</li>)}</ul>
+            ) : <p>Причины появятся после накопления достаточного coverage.</p>}
+            <details className="catalog-v2-provenance">
+              <summary>Как рассчитана релевантность</summary>
+              <p>Алгоритм: {item.match.algorithm_version ?? "не рассчитан"} · расчёт: {formatCalculatedAt(item.match.calculated_at)}. Это не вероятность отбора или найма.</p>
+              <p className="catalog-v2-match-snapshot">Снимок входных данных: <code>{item.match.source_snapshot_version}</code></p>
+            </details>
+            {item.eligibility.missing_prerequisites.length > 0 ? <p>Нужны подтверждения: {item.eligibility.missing_prerequisites.join(", ")}</p> : null}
           </details>
-          {item.eligibility.missing_prerequisites.length > 0 ? <p>Нужны подтверждения: {item.eligibility.missing_prerequisites.join(", ")}</p> : null}
         </section>
       </div>
       <footer className="catalog-v2-detail-footer">
