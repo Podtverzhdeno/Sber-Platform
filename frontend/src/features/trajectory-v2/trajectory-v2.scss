@@ -680,3 +680,26 @@
 .trajectory-v2-stage-more dt{color:#8ca7bb}
 .trajectory-v2-stage-more dd{margin:0}
 @media(max-width:700px){.trajectory-v2-stage-header{display:grid}.trajectory-v2-stage-progress{flex:auto;min-width:0;width:100%;text-align:left}.trajectory-v2-stage-state{justify-self:start}.trajectory-v2-task-row{flex-wrap:wrap}.trajectory-v2-task-status{margin-left:36px}.trajectory-v2-task-action{margin-left:auto}}
+
+
+/* TRJ-SCREEN-02 — reference right-side task drawer */
+.trajectory-v2-overlay{position:fixed;inset:0;z-index:1000;display:flex;justify-content:flex-end;background:rgba(0,8,16,.78);backdrop-filter:blur(5px)}
+.trajectory-v2-drawer{box-sizing:border-box;position:relative;display:flex;flex-direction:column;width:min(498px,100vw);max-width:none;height:100vh;max-height:100vh;overflow-y:auto;padding:26px 26px 24px;background:#071b2c;border:1px solid #235b7b;border-radius:16px 0 0 16px;color:#eff5ff}
+.trajectory-v2-drawer-heading{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.trajectory-v2-drawer-heading small{display:block;color:#1de5db;font-weight:700;font-size:12px}
+.trajectory-v2-drawer-heading h2{font-size:25px;line-height:1.2;font-weight:800;margin:10px 0 8px;color:#f2f8ff}
+.trajectory-v2-drawer-heading .trajectory-v2-drawer-tag{display:inline-block;padding:4px 9px;border-radius:99px;background:#0b3552;border:1px solid #23668b;color:#60c0ff;font-size:11px;margin:0 6px 0 0}
+.trajectory-v2-drawer-heading .trajectory-v2-drawer-close{position:static;flex:0 0 36px;font-size:19px;padding:6px}
+.trajectory-v2-drawer-section{border-top:1px solid #22506a;padding:14px 0}
+.trajectory-v2-drawer-section h3{margin:0 0 9px;font-size:15px;font-weight:800;color:#eaf4ff}
+.trajectory-v2-drawer-section p{margin:0;font-size:13px;line-height:1.55;color:#acc3d7}
+.trajectory-v2-drawer-section small{display:block;font-size:11px;color:#88a9c0;margin-top:8px}
+.trajectory-v2-drawer-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:7px 0 13px}
+.trajectory-v2-drawer-metrics>div{padding:12px;min-height:85px;background:#0a2e46;border:1px solid #235475;border-radius:11px;display:flex;flex-direction:column;gap:6px}
+.trajectory-v2-drawer-metrics small{color:#9fb8cf;font-size:11px}
+.trajectory-v2-drawer-metrics strong{color:#f2f9ff;font-size:16px}
+.trajectory-v2-drawer-footer{margin-top:auto;padding-top:17px;display:flex;gap:10px;align-items:center}
+.trajectory-v2-drawer-footer>button{flex:1;min-height:37px;border-radius:9px;background:#0b2336;border:1px solid #26506a;color:#d9e8f5;cursor:pointer}
+.trajectory-v2-drawer-footer>button:last-child{background:#09dbdf;border-color:#0aece3;color:#042632;font-weight:800}
+.trajectory-v2-drawer-footer>p{font-size:11px;color:#a8bed2}
+@media(max-width:560px){.trajectory-v2-drawer{border-radius:0;padding:20px 15px}.trajectory-v2-drawer-heading h2{font-size:22px}.trajectory-v2-drawer-metrics{grid-template-columns:1fr 1fr}}
