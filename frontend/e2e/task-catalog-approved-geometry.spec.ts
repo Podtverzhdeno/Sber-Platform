@@ -165,6 +165,15 @@ test("mobile benefits wrap customer conditions without horizontal overflow", asy
   expect(geometry.wraps).toBe(true);
   expect(geometry.withinCard).toBe(true);
   expect(geometry.overflow).toBe(false);
+
+  await page.locator(".catalog-v2-help summary").click();
+  const helpPanel = page.locator(".catalog-v2-help > p");
+  await expect(helpPanel).toBeVisible();
+  const helpRect = await helpPanel.boundingBox();
+  expect(helpRect).not.toBeNull();
+  if (helpRect === null) return;
+  expect(helpRect.x).toBeGreaterThanOrEqual(0);
+  expect(helpRect.x + helpRect.width).toBeLessThanOrEqual(390);
 });
 
 test("approved terms modal: four top fact cards, two-column content, two actions and consent safety", async ({ page }) => {
