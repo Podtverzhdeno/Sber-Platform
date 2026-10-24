@@ -401,7 +401,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   // React Router navigation is asynchronous; keep the newest filter state
   // synchronously to avoid losing earlier filters during fast interactions.
   const paramsRef = useRef(new URLSearchParams(searchParams));
-  useEffect(() => { paramsRef.current = new URLSearchParams(paramsRef.current); }, [searchParams]);
+  useEffect(() => { paramsRef.current = new URLSearchParams(searchParams); }, [searchParams]);
   const [conditionsTask, setConditionsTask] = useState<CatalogItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const client = useQueryClient();
