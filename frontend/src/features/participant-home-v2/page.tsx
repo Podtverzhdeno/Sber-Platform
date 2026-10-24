@@ -112,7 +112,7 @@ export function ParticipantHomeV2Body(props: {
   };
   const closePanel = () => {
     setPanel(null);
-    window.requestAnimationFrame(() => returnFocusRef.current?.focus());
+    returnFocusRef.current?.focus({ preventScroll: true });
   };
 
   useEffect(() => {
