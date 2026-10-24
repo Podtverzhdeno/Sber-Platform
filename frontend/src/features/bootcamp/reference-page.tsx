@@ -196,7 +196,7 @@ export function ReferenceBootcampCatalog(props: { honorBoardEnabled: boolean; ho
   const roleCourses = courses.filter((course) => (role === "all" || course.track_keys.includes(role)) && course.relevant);
   const filtered = courses.filter((course) => {
     if (category === "role" && !(course.relevant && (role === "all" || course.track_keys.includes(role)))) return false;
-    if (category === "in_progress" && !isInProgress(course)) return false;
+    if (category === "in_progress" && !isInProgress()) return false;
     if (category === "completed" && course.completion_state !== "verified") return false;
     if (direction !== "all" && !course.track_keys.includes(direction)) return false;
     if (query && ![course.title, reason(course), course.must_take?.skill ?? "", ...course.relevance_reasons].join(" ").toLocaleLowerCase("ru-RU").includes(query.toLocaleLowerCase("ru-RU"))) return false;
