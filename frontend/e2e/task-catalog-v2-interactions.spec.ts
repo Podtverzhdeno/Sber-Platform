@@ -15,6 +15,9 @@ const participant = {
 };
 
 async function openCatalog(page: Page, items: CatalogItem[] = [catalogItem, insufficientItem]) {
+  // All endpoints not explicitly mocked below return a deterministic 404;
+  // this suite is an isolated browser contract and does not depend on a running backend.
+  await page.route("**/api/v1/**", (route) => route.fulfill({ status: 404, json: { code: "NOT_MOCKED" } }));
   await page.route("**/api/v1/me/**", (route) => route.fulfill({
     status: 404, json: { code: "NOT_MOCKED" },
   }));
