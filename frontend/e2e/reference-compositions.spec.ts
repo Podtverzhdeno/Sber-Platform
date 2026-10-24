@@ -683,6 +683,7 @@ test("R-PAR-02 journey composition and mentor consultation", async ({ page }) =>
   await installParticipantData(page);
   await openWorkspace(page, participantBase.key);
   await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
+  await page.goto("/workspace/1?legacy=1");
   await expect(page.locator('[data-reference="R-PAR-02"]')).toBeVisible();
   await screenshot(page, "R-PAR-02");
   await page.getByRole("button", { name: "Получить рекомендацию ментора" }).click();
