@@ -52,6 +52,8 @@ jobs:
           git add frontend/e2e/task-catalog-v2-visual.spec.ts-snapshots/
           if ! git diff --cached --quiet; then
             git commit -m "test(tasks): baseline responsive implementation compositions"
+            git fetch origin codex/task-catalog-visual-polish-20261024
+            git rebase origin/codex/task-catalog-visual-polish-20261024
             git push origin HEAD:codex/task-catalog-visual-polish-20261024
           fi
         working-directory: .
