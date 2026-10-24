@@ -118,6 +118,18 @@ def test_revocation_blocks_prior_verified_evidence() -> None:
     assert result.requirements[0].verified_sources == ()
 
 
+
+def test_pending_rejected_and_revoked_are_visible_but_not_verified() -> None:
+    rows = (
+        evidence("course", state=EvidenceState.REPORTED),
+        evidence("project", state=EvidenceState.REJECTED, source_ref="rejected:01"),
+    )
+    state = calculate_grade_readiness(PERSON, "agent-developer", policy(), rows, as_of=NOW)
+    assert [position.state for position in state.requirements] == ["reported", "rejected"]
+    assert state.completed_percent == Decimal(0)
+    assert not state.ready_for_atomic_transition
+
+
 def test_policy_not_effective_or_wrong_track_does_not_return_readiness() -> None:
     result = calculate_grade_readiness(
         PERSON,
