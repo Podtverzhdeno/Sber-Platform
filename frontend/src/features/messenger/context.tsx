@@ -1,6 +1,6 @@
 import type { ApiChannelView } from "./contracts";
 import { referenceDescriptions } from "./reference-fixtures";
-import { FileText, FolderOpen, Link2, Pin, Users } from "lucide-react";
+import { FileText, FolderOpen, Link2, Users } from "lucide-react";
 import {
   type ChannelWorkContextView,
   contextDateLabel,
