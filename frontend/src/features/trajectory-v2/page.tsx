@@ -322,7 +322,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         <section className="trajectory-v2-grade-panel">
           <header><h3>Твой грейд</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => { gradeTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setGradesOpen(true); }}>Все уровни →</button></header>
           <div className="trajectory-v2-grade-body">
-            <div className="trajectory-v2-grade-ring"><strong>{overview.concepts.career_grade.current_grade === null ? "—" : `Грейд ${overview.concepts.career_grade.current_grade}`}</strong><small>{selected?.title ?? "Моя роль"}</small></div>
+            <div className="trajectory-v2-grade-ring" style={{ background: `conic-gradient(#0de5d6 0 ${String(overview.concepts.career_grade.readiness_percent ?? 0)}%, #204a68 ${String(overview.concepts.career_grade.readiness_percent ?? 0)}% 100%)` }}><strong>{overview.concepts.career_grade.current_grade === null ? "—" : `Грейд ${overview.concepts.career_grade.current_grade}`}</strong><small>{selected?.title ?? "Моя роль"}</small></div>
             <div className="trajectory-v2-grade-progress">
               <small>До следующего грейда</small>
               <strong>{overview.concepts.career_grade.readiness_percent === null ? "Проверяем" : `${String(100 - overview.concepts.career_grade.readiness_percent)}%`}</strong>
@@ -455,7 +455,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 <strong>{["База и основы","Исследование пользователей","Продуктовые гипотезы","Метрики и приоритизация","Реальные задачи и проекты","Подтверждение компетенций"][gradeFocus-1]}</strong>
                 <p>Описание уровней приведено для ознакомления с макетом. Официальная политика и требования к этому уровню пока не опубликованы.</p>
                 <div className="trajectory-v2-grade-explanation-progress">
-                  <div className="trajectory-v2-grade-ring"><strong>{overview.concepts.career_grade.current_grade === String(gradeFocus) ? `Грейд ${String(gradeFocus)}` : "—"}</strong></div>
+                  <div className="trajectory-v2-grade-ring" style={{ background: `conic-gradient(#0de5d6 0 ${String(overview.concepts.career_grade.current_grade === String(gradeFocus) ? overview.concepts.career_grade.readiness_percent ?? 0 : 0)}%, #204a68 ${String(overview.concepts.career_grade.current_grade === String(gradeFocus) ? overview.concepts.career_grade.readiness_percent ?? 0 : 0)}% 100%)` }}><strong>{overview.concepts.career_grade.current_grade === String(gradeFocus) ? `Грейд ${String(gradeFocus)}` : "—"}</strong></div>
                   <div>
                     <small>До следующего грейда</small>
                     <strong>{overview.concepts.career_grade.current_grade === String(gradeFocus) && overview.concepts.career_grade.readiness_percent !== null ? `${String(100-overview.concepts.career_grade.readiness_percent)}%` : "Проверяем"}</strong>
