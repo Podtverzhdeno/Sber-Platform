@@ -245,5 +245,17 @@ describe("trajectory v2 context actions", () => {
     openActionsMenu();
     fireEvent.keyDown(screen.getByTestId("trajectory-actions"), { key: "Escape" });
     expect(screen.queryByTestId("trajectory-actions-menu")).toBeNull();
+    expect(screen.getByRole("button", { name: "Действия роли" })).toHaveFocus();
+  });
+
+  it("restores focus to actions trigger after a selected action", async () => {
+    shell("/workspace/1");
+    await waitFor(() => {
+      expect(screen.getByTestId("trajectory-actions")).toBeInTheDocument();
+    });
+    openActionsMenu();
+    clickMenuItem("Настроить путь");
+    expect(screen.queryByTestId("trajectory-actions-menu")).toBeNull();
+    expect(screen.getByRole("button", { name: "Действия роли" })).toHaveFocus();
   });
 });
