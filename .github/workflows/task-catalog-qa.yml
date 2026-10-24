@@ -6,6 +6,8 @@ on:
     paths:
       - "frontend/src/features/task-catalog-v2/**"
       - "frontend/e2e/task-catalog-v2-interactions.spec.ts"
+      - "frontend/e2e/task-catalog-approved-geometry.spec.ts"
+      - "frontend/e2e/task-catalog-approved-visual-fixture.ts"
       - ".github/workflows/task-catalog-qa.yml"
   workflow_dispatch:
 
@@ -35,7 +37,9 @@ jobs:
       - name: Install frontend dependencies
         run: npm ci
       - name: Validate Task Catalog lint
-        run: npx eslint src/features/task-catalog-v2 e2e/task-catalog-v2-interactions.spec.ts --max-warnings 0
+        run: npx eslint src/features/task-catalog-v2 e2e/task-catalog-v2-interactions.spec.ts e2e/task-catalog-approved-geometry.spec.ts e2e/task-catalog-approved-visual-fixture.ts --max-warnings 0
+      - name: Run Tasks unit tests
+        run: npx vitest run src/features/task-catalog-v2
       - name: Build production frontend
         run: npm run build
       - name: Install Chromium
@@ -46,8 +50,15 @@ jobs:
           TZ: Europe/Moscow
           LANG: ru_RU.UTF-8
         run: npx playwright test task-catalog-v2-interactions.spec.ts --project=chromium --reporter=line
-      - name: Upload browser failure evidence
-        if: failure()
+      - name: Verify approved Tasks geometry at reference viewport
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+          LANG: ru_RU.UTF-8
+          CAPTURE_APPROVED_TASKS: "1"
+        run: npx playwright test task-catalog-approved-geometry.spec.ts --project=chromium --reporter=line
+      - name: Upload Tasks visual and failure evidence
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: tasks-ui-qa-evidence
