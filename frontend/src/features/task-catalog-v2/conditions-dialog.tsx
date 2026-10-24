@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
-import { Award, BriefcaseBusiness, CalendarDays, ClipboardCheck, Clock3, FileText, Laptop2, ShieldCheck, Users } from "lucide-react";
+import { Award, CalendarDays, ClipboardCheck, Clock3, FileText, Laptop2, ShieldCheck, Users } from "lucide-react";
 
 import { ApiClientError } from "../../api/client";
 import { StatePanel } from "../../components/ui";
@@ -11,6 +11,7 @@ import {
 } from "./client";
 import type { CatalogApplicationResult } from "./analytics";
 import type { CatalogItem } from "./types";
+import { CustomerMark } from "./customer-mark";
 
 const supportModelLabels: Record<string, string> = {
   mentor_review: "Проверка результата ментором",
@@ -150,7 +151,7 @@ export function ConditionsDialog(props: {
         aria-describedby={descriptionId}
       >
         <header className="catalog-v2-conditions-header">
-          <span className="catalog-v2-conditions-avatar" aria-hidden="true"><BriefcaseBusiness size={26} /></span>
+          <span className="catalog-v2-conditions-avatar" aria-hidden="true"><CustomerMark customer={task.customer} size={26} /></span>
           <div>
             <h2 id={titleId}>{termsAccessDenied ? "Условия участия недоступны" : "Условия участия"}</h2>
             <strong>{termsAccessDenied ? "Доступ к задаче ограничен" : task.title}</strong>
