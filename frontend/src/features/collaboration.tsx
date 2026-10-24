@@ -27,6 +27,7 @@ import type {
 import { ContextPanel } from "./messenger/context";
 import type { ChannelWorkContextView } from "./messenger/context-model";
 import { DialogList } from "./messenger/dialogs";
+import { isReferenceChannel, referenceChannels, referenceMessages } from "./messenger/reference-fixtures";
 import type { KeyValueStorage } from "./messenger/view-model";
 
 export type Role =
@@ -109,7 +110,21 @@ export function MessagingWorkspace({
     queryKey: ["messaging-channels"],
     queryFn: () => apiRequest<ChannelView[]>("/api/v1/me/messaging/channels"),
   });
-  const channels = useMemo(() => channelsQuery.data ?? [], [channelsQuery.data]);
+  const runtimeConfig = useQuery({
+    queryKey: ["messages-reference-runtime"],
+    queryFn: () => apiRequest<{ demo_mode: boolean }>("/api/v1/config"),
+    retry: false,
+  });
+  const useReferencePreview = role === "participant" && (
+    runtimeConfig.data?.demo_mode === true ||
+    new URLSearchParams(window.location.search).get("messages_preview") === "1"
+  );
+  const channels = useMemo(() => {
+    const live = channelsQuery.data ?? [];
+    if (!useReferencePreview) return live;
+    const names = new Set(live.map((channel) => channel.title.trim().toLocaleLowerCase("ru-RU")));
+    return [...live, ...referenceChannels.filter((channel) => !names.has(channel.title.trim().toLocaleLowerCase("ru-RU")))];
+  }, [channelsQuery.data, useReferencePreview]);
   const isOnline = useSyncExternalStore(subscribeOnline, onlineSnapshot, onlineSnapshot);
   const isNarrow = useSyncExternalStore(subscribeNarrow, narrowSnapshot, narrowSnapshot);
 
@@ -190,6 +205,7 @@ export function MessagingWorkspace({
     if (isNarrow) setMobilePane("chat");
   };
 
+  const selectedIsReference = isReferenceChannel(selected?.id);
   const messagesQuery = useInfiniteQuery({
     queryKey: ["messaging-messages", selected?.id],
     queryFn: ({ pageParam }: { pageParam: number | undefined }) => {
@@ -208,11 +224,11 @@ export function MessagingWorkspace({
             lastPage[0]?.sequence ?? Number.POSITIVE_INFINITY,
           )
         : undefined,
-    enabled: Boolean(selected?.id),
+    enabled: Boolean(selected?.id) && !selectedIsReference,
   });
   const messages = useMemo(
-    () => messagesQuery.data?.pages.flat() ?? [],
-    [messagesQuery.data],
+    () => selectedIsReference ? (referenceMessages[selected?.id ?? ""] ?? []) : (messagesQuery.data?.pages.flat() ?? []),
+    [messagesQuery.data, selected?.id, selectedIsReference],
   );
   const lastPageSize =
     messagesQuery.data?.pages[messagesQuery.data.pages.length - 1]?.length ?? 0;
@@ -227,7 +243,7 @@ export function MessagingWorkspace({
   });
 
   useEffect(() => {
-    if (!selected || selected.unread <= 0 || !selected.last_message) return;
+    if (!selected || selectedIsReference || selected.unread <= 0 || !selected.last_message) return;
     void apiRequest<ChannelView>(
       `/api/v1/me/messaging/channels/${selected.id}/read`,
       {
@@ -243,7 +259,7 @@ export function MessagingWorkspace({
         ]),
       )
       .catch(() => {});
-  }, [client, selected]);
+  }, [client, selected, selectedIsReference]);
 
   const sendMessage = useMutation({
     mutationFn: (payload: ComposerSendPayload) =>
@@ -276,7 +292,7 @@ export function MessagingWorkspace({
   });
 
   const submitSend = (payload: ComposerSendPayload) => {
-    if (!selected || !selected.sender_enabled) return;
+    if (!selected || selectedIsReference || !selected.sender_enabled) return;
     const optimisticId = `pending-${String(Date.now())}`;
     setPending((current) => [
       ...current,
@@ -356,7 +372,7 @@ export function MessagingWorkspace({
           <span className="sr-only">К списку диалогов</span>
         </button>
       )}
-      <button
+      {!selectedIsReference && <button
         type="button"
         className="msg-chat__header-action"
         aria-pressed={selected.muted}
@@ -368,7 +384,7 @@ export function MessagingWorkspace({
         <span className="sr-only">
           {selected.muted ? "Включить уведомления" : "Заглушить чат"}
         </span>
-      </button>
+      </button>}
     </>
   ) : null;
 
@@ -449,14 +465,14 @@ export function MessagingWorkspace({
           <section className="chat-thread" aria-label="Текущий чат">
             <ChatHistory
               channel={selected ?? null}
-              viewerId={personId}
+              viewerId={selectedIsReference ? "reference:me" : personId}
               messages={messages}
               pendingMessages={pending}
               replySummaries={{}}
-              isLoadingInitial={messagesQuery.isLoading}
+              isLoadingInitial={!selectedIsReference && messagesQuery.isLoading}
               isPaginating={messagesQuery.isFetchingNextPage}
               hasMoreOlder={lastPageSize >= 50}
-              canSend={selected?.sender_enabled ?? true}
+              canSend={selectedIsReference || (selected?.sender_enabled ?? true)}
               onLoadOlder={() => {
                 void messagesQuery.fetchNextPage();
               }}
@@ -482,6 +498,7 @@ export function MessagingWorkspace({
                 participants={selected.participants}
                 storage={storage}
                 canSend={selected.sender_enabled}
+                readOnlyReason={selectedIsReference ? "Демонстрация утверждённого макета — сообщения здесь не сохраняются и не отправляются." : undefined}
                 sending={sendMessage.isPending}
                 sendState={sendState}
                 connectionState={connectionState}
@@ -512,8 +529,10 @@ export function MessagingWorkspace({
         {contextVisible && selected && (
           <ContextPanel
             channel={selected}
-            viewerId={personId}
+            viewerId={selectedIsReference ? "reference:me" : personId}
             workContext={contextQuery.data ?? null}
+            isReferencePreview={selectedIsReference}
+            sharedFiles={[...new Set(messages.flatMap((message) => message.artifact_refs))]}
             open={contextVisible}
             onClose={isNarrow ? () => { setMobilePane("chat"); } : undefined}
             onOpenTask={(taskId) => {
