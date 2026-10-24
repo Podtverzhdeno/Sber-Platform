@@ -228,20 +228,28 @@ export function deriveDialogRows(input: {
   const rows = input.channels
     .filter((channel) => channel.status === "active" || (channel.status === "preview" && channel.id.startsWith("reference:")))
     .map((channel) => deriveDialogRow({ ...input, channel }));
-  const approvedOrder = ["mentor", "roman", "proto", "mayaki", "aidev", "sberkot", "zlata", "news", "curator", "taskteam", "common", "grants", "school21"];
+  // The three approved ZIP screenshots show different demo dialog arrangements:
+  // 02: no selection, 01: Mayaki community, 03: Elena direct chat.
+  // Keep reference fixtures presentation-only; live channels still use normal sorting.
+  const baseOrder = ["mentor", "roman", "proto", "mayaki", "aidev", "sberkot", "zlata", "grants", "school21", "news", "curator", "taskteam", "common"];
+  const mayakiOrder = ["mayaki", "grants", "school21", "mentor", "roman", "proto", "aidev", "sberkot", "zlata", "news", "curator", "taskteam", "common"];
+  const directOrder = ["mentor", "roman", "proto", "aidev", "sberkot", "zlata", "news", "curator", "taskteam", "common", "mayaki", "grants", "school21"];
+  const approvedOrder = input.selectedId === "reference:mayaki"
+    ? mayakiOrder
+    : input.selectedId === "reference:mentor"
+      ? directOrder
+      : baseOrder;
   return rows.sort((a, b) => {
     const aPreview = a.channel.id.startsWith("reference:");
     const bPreview = b.channel.id.startsWith("reference:");
+    if (aPreview !== bPreview) return aPreview ? 1 : -1;
+    if (a.archived !== b.archived) return a.archived ? 1 : -1;
+    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
     if (aPreview && bPreview) {
-      if (a.channel.id === "reference:mayaki" && a.selected) return -1;
-      if (b.channel.id === "reference:mayaki" && b.selected) return 1;
       const aIndex = approvedOrder.indexOf(a.channel.id.slice("reference:".length));
       const bIndex = approvedOrder.indexOf(b.channel.id.slice("reference:".length));
       if (aIndex !== bIndex) return aIndex - bIndex;
     }
-    if (aPreview !== bPreview) return aPreview ? 1 : -1;
-    if (a.archived !== b.archived) return a.archived ? 1 : -1;
-    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
     if (a.mention !== b.mention) return a.mention ? -1 : 1;
     if (Boolean(a.unread) !== Boolean(b.unread)) return a.unread ? -1 : 1;
     return timeDesc(a, b);
