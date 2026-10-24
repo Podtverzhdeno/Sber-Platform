@@ -319,3 +319,54 @@ def test_certificates_rbac_requires_participant_role() -> None:
         listed = client.get("/api/v1/me/bootcamp/certificates")
         assert listed.status_code == 403
         assert listed.json()["code"] == "FORBIDDEN"
+
+
+@pytest.mark.spec("career-roadmap/catalog-is-not-personal-progress")
+def test_roadmap_catalog_includes_unselected_role_with_detailed_plan() -> None:
+    client, store = _client()
+    store.install_roadmap(
+        RoadmapRecord(
+            "data",
+            1,
+            (
+                RoadmapMilestone(
+                    "data-step-1",
+                    1,
+                    "AI Data Foundations",
+                    "Построить воспроизводимый конвейер данных.",
+                    "Data engineering",
+                    "course",
+                    "demo-course-1",
+                    activities=(
+                        "Описать источники данных",
+                        "Построить первую трансформацию",
+                        "Проверить схему и тесты",
+                    ),
+                    deliverable="Схема данных и тестируемый ETL",
+                ),
+            ),
+        )
+    )
+    with client:
+        _login(client)
+        response = client.get("/api/v1/me/roadmap-catalog")
+
+    assert response.status_code == 200
+    catalog = {item["track_key"]: item for item in response.json()}
+    assert "data" in catalog
+    stage = catalog["data"]["milestones"][0]
+    assert stage["title"] == "AI Data Foundations"
+    assert len(stage["activities"]) == 3
+    assert stage["deliverable"] == "Схема данных и тестируемый ETL"
+    assert stage["completed"] is False
+    assert catalog["data"]["next_step"]["key"] == "data-step-1"
+
+
+@pytest.mark.spec("career-roadmap/catalog-forbids-other-roles")
+def test_roadmap_catalog_is_participant_scoped() -> None:
+    client, _store = _client()
+    with client:
+        _login(client, "mentor-elena")
+        response = client.get("/api/v1/me/roadmap-catalog")
+    assert response.status_code == 403
+    assert response.json()["code"] == "FORBIDDEN"
