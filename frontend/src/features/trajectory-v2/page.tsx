@@ -600,10 +600,9 @@ export function StagePathSection(props: {
   return (
     <section className="trajectory-v2-stage-block" aria-label="Этапы" data-testid="trajectory-stages">
       <header>
-        <h4>Этапы</h4>
+        <h4>Путь освоения роли</h4>
         <small>
-          политика v{roadmap.policy_version}
-          {roadmap.replacement_reason ? ` · ${roadmap.replacement_reason}` : ""}
+          {role.completed_milestones} завершено · {roadmap.milestones.length} этапов
         </small>
       </header>
       <ol className="trajectory-v2-stage-path">
@@ -620,9 +619,22 @@ export function StagePathSection(props: {
                   props.onStageSelect(milestone.key);
                 }}
               >
-                <strong>{milestone.title}</strong>
-                <span>{MILESTONE_STATE_LABELS[state] ?? state}</span>
+                <span className="trajectory-v2-milestone-node" aria-hidden="true">{state === "completed" ? "✓" : state === "current" ? "◉" : state === "locked" ? "♙" : String(milestone.position)}</span>
+                <strong className="trajectory-v2-milestone-position">{milestone.position}</strong>
+                <span className="trajectory-v2-milestone-title">{milestone.title}</span>
               </button>
+            </li>
+          );
+        })}
+        {Array.from({ length: Math.max(0, 7 - roadmap.milestones.length) }, (_, index) => {
+          const slot = roadmap.milestones.length + index + 1;
+          return (
+            <li key={`unpublished-${slot}`} className="trajectory-v2-unpublished-stage" aria-label={`Этап ${slot} пока не опубликован`}>
+              <div className="trajectory-v2-stage" data-stage-state="unpublished">
+                <span className="trajectory-v2-milestone-node" aria-hidden="true">♙</span>
+                <strong className="trajectory-v2-milestone-position">{slot}</strong>
+                <span className="trajectory-v2-milestone-title">Не опубликован</span>
+              </div>
             </li>
           );
         })}
