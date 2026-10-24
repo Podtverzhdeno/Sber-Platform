@@ -1626,3 +1626,27 @@
     padding: 22px;
   }
 }
+
+/* Breakpoint invariants are last: desktop refinement must not undo stacked
+   tablet list layout or turn a desktop flex-basis into mobile panel height. */
+@media (max-width: 1050px) {
+  .catalog-v2-heading .catalog-v2-totals {
+    flex: 0 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .catalog-v2-table-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .catalog-v2-table-head {
+    display: none;
+  }
+
+  .catalog-v2-advanced-filters[data-open="true"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
