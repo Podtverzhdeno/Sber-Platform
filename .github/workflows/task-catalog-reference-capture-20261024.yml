@@ -1,0 +1,37 @@
+name: Temporary task catalog reference capture
+on:
+  push:
+    branches:
+      - codex/task-catalog-visual-polish-20261024
+    paths:
+      - .github/workflows/task-catalog-reference-capture-20261024.yml
+permissions:
+  contents: read
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Render exactly 1672x941 source-geometry scenes
+        env:
+          CAPTURE_APPROVED_TASKS: "1"
+          TZ: Europe/Moscow
+          LANG: ru_RU.UTF-8
+        run: npx playwright test e2e/task-catalog-approved-geometry.spec.ts --workers=1 --reporter=line
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: approved-reference-current-1672
+          path: frontend/test-results/approved-geometry-*.png
+          if-no-files-found: error
+          retention-days: 14
