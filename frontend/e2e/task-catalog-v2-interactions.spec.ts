@@ -176,12 +176,15 @@ test.describe("task catalog interactive controls and motion", () => {
     await ensureParam("work_format", "remote");
     await page.getByLabel("Срок", { exact: true }).selectOption("30d");
     await ensureParam("timeframe", "30d");
-    await page.getByRole("checkbox", { name: "С ментором" }).check();
+    await page.getByRole("checkbox", { name: "С ментором" }).click();
     await ensureParam("mentored", "true");
-    await page.getByRole("checkbox", { name: "Для портфолио" }).check();
+    await expect(page.getByRole("checkbox", { name: "С ментором" })).toBeChecked();
+    await page.getByRole("checkbox", { name: "Для портфолио" }).click();
     await ensureParam("portfolio", "true");
-    await page.getByRole("checkbox", { name: "Открыт отклик" }).check();
+    await expect(page.getByRole("checkbox", { name: "Для портфолио" })).toBeChecked();
+    await page.getByRole("checkbox", { name: "Открыт отклик" }).click();
     await ensureParam("available", "true");
+    await expect(page.getByRole("checkbox", { name: "Открыт отклик" })).toBeChecked();
     await page.getByLabel("Сортировка", { exact: true }).selectOption("deadline");
     await ensureParam("sort", "deadline");
 
