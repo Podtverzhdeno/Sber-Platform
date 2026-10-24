@@ -223,7 +223,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
   const setLayout = (key: LayoutKey) => { setParams((previous) => { const next = new URLSearchParams(previous); next.set("view", key); return next; }); };
   const [role, setRole] = useState<RoleKey>("developer");
   const [chart, setChart] = useState<ChartKey>("radar");
-  const [period, setPeriod] = useState(3);
+  const [period, setPeriod] = useState(8);
   const [openDetail, setOpenDetail] = useState<string | null>(null);
   const [showCriteria, setShowCriteria] = useState(false);
   const profileQuery = useQuery({ queryKey: ["agentic-coding-profile", role], queryFn: () => apiRequest<AgenticServerProfile>(("/api/v1/me/agentic-coding/profile?role_key=" + role) as `/api/v1/me/agentic-coding/profile?${string}`) });
