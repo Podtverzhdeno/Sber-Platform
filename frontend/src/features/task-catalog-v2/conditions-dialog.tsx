@@ -154,8 +154,12 @@ export function ConditionsDialog(props: {
           <div>
             <h2 id={titleId}>{termsAccessDenied ? "Условия участия недоступны" : "Условия участия"}</h2>
             <strong>{termsAccessDenied ? "Доступ к задаче ограничен" : task.title}</strong>
-            <p>{task.customer.display_name} · версия условий {termsData?.terms_version ?? "…"}</p>
-            <ul className="catalog-v2-tags" aria-label="Компетенции задачи">{task.competency_tags.slice(0, 5).map((tag) => <li key={tag}>{tag}</li>)}</ul>
+            {!termsAccessDenied ? (
+              <>
+                <p>{task.customer.display_name} · версия условий {termsData?.terms_version ?? "…"}</p>
+                <ul className="catalog-v2-tags" aria-label="Компетенции задачи">{task.competency_tags.slice(0, 5).map((tag) => <li key={tag}>{tag}</li>)}</ul>
+              </>
+            ) : null}
           </div>
           <button ref={closeRef} type="button" aria-label="Закрыть условия"
             disabled={apply.isPending} onClick={props.onClose}>×</button>
