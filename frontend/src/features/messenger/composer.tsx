@@ -201,6 +201,21 @@ export function Composer({
     .filter(Boolean)
     .join(" ");
 
+  if (!canSend && readOnlyReason) {
+    return (
+      <div className={composerClasses + " msg-composer--reference"} role="region" aria-label="Композер демо-переписки">
+        <div className="msg-composer__reference-row">
+          <Paperclip aria-hidden="true" size={19}/>
+          <Smile aria-hidden="true" size={19}/>
+          <input type="text" disabled placeholder="Напишите сообщение..." aria-label="Демонстрационный чат — отправка недоступна"/>
+          <AtSign aria-hidden="true" size={19}/>
+          <button type="button" disabled aria-label="Отправка доступна только в реальном чате"><Send aria-hidden="true" size={18}/></button>
+        </div>
+        <p className="msg-composer__reference-hint">{readOnlyReason}</p>
+      </div>
+    );
+  }
+
   if (!canSend) {
     return (
       <div className={composerClasses} role="region" aria-label="Композер сообщения">
