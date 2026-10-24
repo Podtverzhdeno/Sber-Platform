@@ -69,12 +69,14 @@ const monthlyGoal = {
 
 describe("trajectory growth analytics", () => {
   it("keeps partial and unknown values distinct from zero and explains contour colors", () => {
+    const baseline = snapshot.trajectories[0];
+    if (baseline === undefined) throw new Error("Missing baseline trajectory");
     const radarSnapshot = {
       ...snapshot,
       trajectories: [{
-        ...snapshot.trajectories[0],
+        ...baseline,
         readiness_skills: [
-          ...snapshot.trajectories[0].readiness_skills,
+          ...baseline.readiness_skills,
           { skill_key: "ops", title: "Сопровождение", current_level: "базовый", target_level: "уверенный", known: true },
         ],
       }],
@@ -101,10 +103,12 @@ describe("trajectory growth analytics", () => {
 
 describe("analytics visual integrity with sparse data", () => {
   it("does not render an empty radar when no competency axes exist", () => {
+    const baseline = snapshot.trajectories[0];
+    if (baseline === undefined) throw new Error("Missing baseline trajectory");
     const empty = {
       ...snapshot,
       trajectories: [{
-        ...snapshot.trajectories[0],
+        ...baseline,
         readiness_skills: [],
         completion: { percent: 100, coverage: 1, partial: false },
         readiness: { percent: 0, coverage: 0, partial: true },
