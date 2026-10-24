@@ -25,14 +25,6 @@ import type {
 } from "./client";
 import "./trajectory-v2.scss";
 
-/** Approved presentation-only catalogue additions. These entries carry no user progress,
- * and are never sent to the server or treated as active trajectories. */
-const EXTRA_CATALOG_ROLES: ReadonlyArray<{ track_key: string; title: string }> = [
-  { track_key: "catalog-backend-reference", title: "Backend-разработчик" },
-  { track_key: "catalog-design-reference", title: "UX/UI-дизайнер" },
-  { track_key: "catalog-manager-reference", title: "Менеджер проекта" },
-];
-
 function isSelectedStage(
   stageKey: string | null,
   milestones: { key: string }[],
@@ -93,6 +85,11 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     queryKey: roadmapsQueryKey,
     queryFn: loadRoadmaps,
   });
+  const roadmapCatalog = useQuery({
+    queryKey: ["trajectory-roadmap-catalog"],
+    queryFn: () => apiRequest<RoadmapView[]>("/api/v1/me/roadmap-catalog"),
+    retry: false,
+  });
   const passport = useQuery({
     queryKey: ["talent-passport"],
     queryFn: () => apiRequest<{ verified_courses: string[]; skills: { key: string; practical_level: string; confirmed_case_count: number }[]; cases: { contribution_id: string; submitted_at: string; reviewer_id: string }[] }>("/api/v1/me/talent-passport"),
@@ -114,21 +111,9 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     const idx = (navigation.data?.navigation ?? []).indexOf("Портфолио");
     if (idx >= 0) window.location.assign(`/workspace/${String(idx)}`);
   };
-  const catalogueRoles = useMemo<RoleCardView[]>(() => {
-    const existing = [...overview.roles];
-    for (const candidate of EXTRA_CATALOG_ROLES) {
-      if (existing.some((role) => role.title.toLowerCase() === candidate.title.toLowerCase())) continue;
-      existing.push({
-        track_key: candidate.track_key,
-        title: candidate.title,
-        state: "unselected",
-        attempt_number: null,
-        completed_milestones: 0,
-        total_milestones: 0,
-      });
-    }
-    return existing;
-  }, [overview.roles]);
+  // All cards come from the authorized server catalog; never invent
+  // frontend-only roles or progress for unselected tracks.
+  const catalogueRoles = overview.roles;
   const roleParam = searchParams.get("role");
   const selectedKey = useMemo(() => {
     const paramRole = catalogueRoles.find((role) => role.track_key === roleParam);
@@ -150,7 +135,9 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const primaryKey = primaryTrajectoryKey(overview);
   const selectedRoadmap =
     selected !== null
-      ? (roadmaps.data?.find((item) => item.track_key === selected.track_key) ?? null)
+      ? (roadmapCatalog.data?.find((item) => item.track_key === selected.track_key)
+        ?? roadmaps.data?.find((item) => item.track_key === selected.track_key)
+        ?? null)
       : null;
   const lastOverlayTriggerRef = useRef<HTMLElement | null>(null);
   const [roleInfoOpen, setRoleInfoOpen] = useState(false);
@@ -281,11 +268,12 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               <RoleDetailPanel
                 role={selected}
               primary={selected.track_key === primaryKey}
-              roadmap={roadmaps.data?.find((item) => item.track_key === selected.track_key) ?? null}
-              roadmapPending={roadmaps.isPending}
-              roadmapError={roadmaps.isError}
+              roadmap={selectedRoadmap}
+              roadmapPending={roadmapCatalog.isPending && roadmaps.isPending}
+              roadmapError={roadmapCatalog.isError && roadmaps.isError}
               roadmapRetry={() => {
                 void roadmaps.refetch();
+                void roadmapCatalog.refetch();
               }}
               stageKey={searchParams.get("stage")}
               onStageSelect={(stageKey) => {
@@ -579,23 +567,23 @@ export function RoleCardOverview(props: {
       }}
     >
       <span className="trajectory-v2-role-icon" aria-hidden="true" data-glyph={
-        role.title.toLowerCase().includes("продукт") ? "product" :
-        role.title.toLowerCase().includes("ml") ? "ml" :
-        role.title.toLowerCase().includes("python") ? "python" :
-        role.title.toLowerCase().includes("backend") ? "backend" :
-        role.title.toLowerCase().includes("ux") || role.title.toLowerCase().includes("дизайн") ? "design" :
-        role.title.toLowerCase().includes("менеджер") ? "manager" : "data"
+        role.track_key === "product" ? "product" :
+        role.track_key === "ml" ? "ml" :
+        role.track_key === "python" ? "security" :
+        role.track_key === "backend" ? "backend" :
+        role.track_key === "design" ? "agent" :
+        role.track_key === "manager" ? "manager" : "data"
       }>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-          {role.title.toLowerCase().includes("продукт") || role.title.toLowerCase().includes("аналитик") ? (
+          {role.track_key === "product" || role.track_key === "data" ? (
             <path d="M4 20V13m6 7V8m6 12V4m5 16v-10" strokeWidth="3"/>
-          ) : role.title.toLowerCase().includes("ml") ? (
+          ) : role.track_key === "ml" ? (
             <path d="m12 2 9 5v10l-9 5-9-5V7zM3 7l9 5 9-5M12 12v10"/>
-          ) : role.title.toLowerCase().includes("python") ? (
+          ) : role.track_key === "python" ? (
             <path d="m8 5-6 7 6 7m8-14 6 7-6 7m-3-16-2 18"/>
-          ) : role.title.toLowerCase().includes("backend") ? (
+          ) : role.track_key === "backend" ? (
             <path d="M5 2h10l4 4v16H5zM15 2v5h4M9 11h6M9 15h6M9 19h4"/>
-          ) : role.title.toLowerCase().includes("ux") || role.title.toLowerCase().includes("дизайн") ? (
+          ) : role.track_key === "design" ? (
             <path d="m12 2 2.3 7.7L22 12l-7.7 2.3L12 22l-2.3-7.7L2 12l7.7-2.3z"/>
           ) : (
             <><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M9 7V4h6v3m-12 6h18m-11 0v2h4v-2"/></>
@@ -656,9 +644,7 @@ export function RoleDetailPanel(props: {
               <h3>{role.title}</h3>
               {props.primary && <span className="trajectory-v2-role-badge">{PRIMARY_LABEL}</span>}
             </div>
-            <p>{role.title.toLowerCase().includes("продукт")
-              ? "Исследуй пользователей, находи точки роста и влияй на продуктовые решения через данные."
-              : role.attempt_number === null
+            <p>{role.attempt_number === null
                 ? "Познакомься с профессией и выбери направление развития."
                 : `Путь освоения роли · ${String(role.completed_milestones)} из ${String(role.total_milestones)} этапов пройдено`}</p>
           </div>
