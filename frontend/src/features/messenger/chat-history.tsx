@@ -22,6 +22,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { AttachmentCard } from "./attachment-card";
 import type { ApiChannelView, ApiMessageView } from "./contracts";
 import {
   CHAT_REACTION_EMOJIS,
@@ -474,12 +475,7 @@ export function ChatHistory({
                         </div>
                         {item.artifact_refs.length > 0 && (
                           <ul className="msg-chat__artifact-refs">
-                            {item.artifact_refs.map((ref) => (
-                              <li key={ref} className="msg-chat__artifact-ref">
-                                <span aria-hidden="true">📎</span>
-                                <span>{ref}</span>
-                              </li>
-                            ))}
+                            {item.artifact_refs.map((ref) => <AttachmentCard key={ref} reference={ref} />)}
                           </ul>
                         )}
                         <small className="msg-chat__meta">
