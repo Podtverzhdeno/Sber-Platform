@@ -1720,3 +1720,40 @@
   .sberchat-shell .ref-empty-state__actions small { font-size: 14px; margin-top: 6px; }
   .sberchat-shell .ref-empty-state__action-icon { width: 52px; height: 52px; }
 }
+
+
+/* Structured Mayaki event/link previews derived from approved app.js messageHTML. */
+.sberchat-shell .msg-chat__reference-role {
+  display: inline-flex;
+  margin-left: 8px; padding: 3px 10px;
+  border-radius: 999px; background: #113857; color: #9ed0ff;
+  font-size: 12px; font-weight: 600; vertical-align: middle;
+}
+.sberchat-shell .msg-chat__reference-media,
+.sberchat-shell .msg-chat__reference-link {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 12px; padding: 12px;
+  border: 1px solid rgb(255 255 255 / 7%); border-radius: 16px;
+  background: rgb(255 255 255 / 5%); color: #ecf5ff;
+}
+.sberchat-shell .msg-chat__reference-media-icon,
+.sberchat-shell .msg-chat__reference-link > span:first-child {
+  flex: 0 0 58px; width: 58px; height: 58px;
+  display: grid; place-items: center; border-radius: 12px;
+  background: linear-gradient(135deg, #083b68, #16c1ff);
+  color: #fff; font-size: 28px; font-weight: 800;
+}
+.sberchat-shell .msg-chat__reference-media > span:last-child,
+.sberchat-shell .msg-chat__reference-link > span:last-child { flex: 1; min-width: 0; }
+.sberchat-shell .msg-chat__reference-media strong,
+.sberchat-shell .msg-chat__reference-link strong { display: block; font-size: 14px; line-height: 1.4; }
+.sberchat-shell .msg-chat__reference-media small,
+.sberchat-shell .msg-chat__reference-link small { display: block; color: #98b8d7; font-size: 12px; margin-top: 5px; }
+@media (max-width: 480px) {
+  .sberchat-shell .msg-chat__reference-media-icon,
+  .sberchat-shell .msg-chat__reference-link > span:first-child { flex-basis: 42px; width: 42px; height: 42px; }
+  .sberchat-shell .msg-chat__reference-media,
+  .sberchat-shell .msg-chat__reference-link { padding: 9px; gap: 8px; }
+  .sberchat-shell .msg-chat__reference-media strong,
+  .sberchat-shell .msg-chat__reference-link strong { font-size: 12px; }
+}
