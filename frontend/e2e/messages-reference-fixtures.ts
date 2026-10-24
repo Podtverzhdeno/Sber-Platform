@@ -14,6 +14,9 @@ const members=[
 {id:"member-maria",display_name:"Мария Лебедева",role:"moderator"},
 {id:"member-dmitry",display_name:"Дмитрий Соколов",role:"member"},
 ...participants,
+...Array.from({length:242},(_,index)=>({
+ id:`reference-member-${String(index+1)}`,display_name:`Тестовый участник ${String(index+1)}`,role:"member",
+})),
 ];
 const baseTime="2026-10-20T";
 const msg=(id:string,author_id:string,author_name:string,body:string,time:string,artifact_refs:string[]=[])=>({
