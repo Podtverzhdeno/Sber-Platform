@@ -74,6 +74,23 @@ test.describe("user-approved messaging visual scenarios", () => {
     await expect(page.getByText("Здесь появится контекст диалога")).toBeVisible();
     await expect(page.getByRole("button", { name: /Перейти в Маяки/ })).toBeEnabled();
     await expect(page.locator(".messenger-shell")).toHaveAttribute("data-pane", "desktop");
+    // Grounded reference geometry in 02.png at 1448×1086: 367px dialog list,
+    // 341px context inspector, 65px shared top shell and 237px first row.
+    const [dialogBox, inspectorBox, rowBox] = await Promise.all([
+      page.locator(".msg-dialog-list").boundingBox(),
+      page.getByTestId("messenger-empty-context").boundingBox(),
+      page.locator(".msg-dialog-list__row").first().boundingBox(),
+    ]);
+    expect(dialogBox).not.toBeNull();
+    expect(inspectorBox).not.toBeNull();
+    expect(rowBox).not.toBeNull();
+    if (dialogBox && inspectorBox && rowBox) {
+      expect(Math.abs(dialogBox.width - 367)).toBeLessThanOrEqual(3);
+      expect(Math.abs(inspectorBox.width - 341)).toBeLessThanOrEqual(3);
+      expect(Math.abs(dialogBox.y - 65)).toBeLessThanOrEqual(8);
+      expect(Math.abs(rowBox.y - 237)).toBeLessThanOrEqual(14);
+      expect(rowBox.height).toBeLessThanOrEqual(74);
+    }
     await screenshotCandidate(page, "messages-02-empty-approved.png");
     await page.screenshot({ path: "test-results/messages-02-full-page-1448x1086.png", animations: "disabled" });
   });
@@ -87,6 +104,16 @@ test.describe("user-approved messaging visual scenarios", () => {
     await expect(page.getByText(/сообщения здесь не сохраняются/)).toBeVisible();
     await page.setViewportSize({ width: 1672, height: 941 });
     await page.evaluate(() => document.fonts.ready);
+    const [dialogBox, inspectorBox] = await Promise.all([
+      page.locator(".msg-dialog-list").boundingBox(),
+      page.locator(".msg-context").boundingBox(),
+    ]);
+    expect(dialogBox).not.toBeNull();
+    expect(inspectorBox).not.toBeNull();
+    if (dialogBox && inspectorBox) {
+      expect(Math.abs(dialogBox.width - 395)).toBeLessThanOrEqual(4);
+      expect(Math.abs(inspectorBox.width - 357)).toBeLessThanOrEqual(4);
+    }
     await screenshotCandidate(page, "messages-03-elena-approved.png");
     await page.screenshot({ path: "test-results/messages-03-full-page-1672x941.png", animations: "disabled" });
   });
