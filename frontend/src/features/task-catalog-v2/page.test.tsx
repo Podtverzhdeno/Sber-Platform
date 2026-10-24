@@ -359,7 +359,9 @@ describe("task catalog v2", () => {
     expect(workspace).not.toBeNull();
     expect(workspace).toHaveAttribute("data-layout", "cards");
     expect(screen.getByRole("heading", { name: "Выберите задачу" })).toBeInTheDocument();
-    fireEvent.click(screen.getAllByRole("button", { name: "Подробнее" })[0]!);
+    const detailButton = screen.getAllByRole("button", { name: "Подробнее" })[0];
+    if (detailButton === undefined) throw new Error("Detail button is missing");
+    fireEvent.click(detailButton);
     expect(await screen.findByRole("heading", { name: "Этапы задачи" })).toBeInTheDocument();
     const plannedStages = document.querySelectorAll(".catalog-v2-stage-track li");
     expect(plannedStages.length).toBe(catalogItem.stage_plan.stages.length);
