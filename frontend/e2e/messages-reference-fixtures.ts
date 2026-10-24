@@ -41,7 +41,7 @@ c("curator","personal","Алексей Куратор","Хорошо, жду р�
 c(referenceIds.team,"task_team","Команда задачи","Обновил статусы в задаче","Елена Наставник","07:26",0),
 c("impulse-general","community","Импульс — Общий чат","Коллеги, завтра встреча","Анна","07:12",3,members),
 ];
-export const referenceMessagesByChannel:Record<string,ReturnType<typeof msg>[]>={
+export const referenceMessagesByChannel:Partial<Record<string,ReturnType<typeof msg>[]>>={
 [mayaki]:[
 msg("mayaki-1","member-anna","Анна Ковалёва","Друзья! Напоминаю, что на этой неделе стартует серия встреч «Карьера в IT: от обучения к возможностям».\n\nБудут спикеры из Яндекса, Сбера и Т-Банка. Подробности в прикреплённом посте 👇","09:24",["Программа_Карьера_в_IT.pdf"]),
 msg("mayaki-2","member-dmitry","Дмитрий Соколов","Очень крутая инициатива! Уже зарегистрировался. Такие встречи реально помогают понять, куда двигаться дальше 🎯","10:03"),
