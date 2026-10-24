@@ -1,0 +1,14 @@
+# task-catalog-firstfold-verification-20261024
+- task_id: task-catalog-firstfold-verification-20261024
+- session_id: gpt6-20261024-2027-isolated-browser-review
+- status: IN_PROGRESS
+- base_revision: 4e15f2f8c0c5b9be8b32f529872c6d01e5666fa8
+- depends_on: [task-catalog-desktop-firstfold-20261024, approved reference 01]
+- write_scope:
+  - .github/workflows/task-catalog-firstfold-review-20261024.yml
+  - .agents/coordination/claims/task-catalog-firstfold-verification-20261024.lock/status.md
+- shared_files: []
+- tasks: screenshot source-size 1672x941 cards/list/terms from PR #35 without mutating PR branch; test analytics-reference desktop-1600 independently on main to isolate unrelated main CI failure
+- verification: Linux Chromium no mock business data in runtime; fixtures remain test-only, PNGs uploaded to workflow artifact
+- blockers: source reference contains demo brands/skills but matching production data differs; only structural fidelity can be established
+- deployment: forbidden, main: read-only
