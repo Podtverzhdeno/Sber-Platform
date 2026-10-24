@@ -405,17 +405,18 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   useEffect(() => {
     if (
       selectedTaskId === null ||
-      catalog.isPending ||
-      typeof window.matchMedia !== "function" ||
-      !window.matchMedia("(max-width: 1050px)").matches
+      catalog.isPending
     ) return;
+    const isStacked = typeof window.matchMedia === "function" &&
+      window.matchMedia("(max-width: 1050px)").matches;
+    if (!isStacked && layout !== "list") return;
     // On a stacked layout the inspector is below every card, so opening a card
     // must reveal its detail instead of leaving the participant above the fold.
     inspectorRef.current?.scrollIntoView({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
       block: "start",
     });
-  }, [selectedTaskId, catalog.isPending]);
+  }, [selectedTaskId, catalog.isPending, layout]);
 
   const updateParams = (patch: Record<string, string | null>, clearSelection = false) => {
     const next = new URLSearchParams(searchParams);
@@ -585,7 +586,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
       {catalog.isError ? <StatePanel kind="stale" action="Повторить" onAction={() => { void catalog.refetch(); }} /> : null}
       {notice !== null ? <p className="catalog-v2-notice" role="status">{notice}<button type="button" aria-label="Закрыть уведомление" onClick={() => { setNotice(null); }}>×</button></p> : null}
       {catalog.isRefetching ? <p className="catalog-v2-refresh" role="status">Обновляем авторитетный снимок…</p> : null}
-      <div className="catalog-v2-workspace" data-layout={layout}>
+      <div className="catalog-v2-workspace" data-layout={layout} data-has-selection={selectedTaskId !== null}>
         <div className="catalog-v2-discovery">
       {items.length === 0 ? (
         <section className="catalog-v2-empty">
