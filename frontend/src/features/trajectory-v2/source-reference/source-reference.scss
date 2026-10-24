@@ -74,8 +74,8 @@
 .trj-source .path-label{padding:3px 17px 0;font-weight:780;font-size:16px}
 .trj-source .path-explainer{font-size:11px;color:#81a6bf;font-weight:450;margin-left:9px}
 .trj-source .roadmap-steps{display:grid;grid-template-columns:repeat(var(--stage-count,7),minmax(0,1fr));margin-top:14px;padding:0 20px 21px;position:relative;gap:2px}
-.trj-source .roadmap-steps::before{position:absolute;content:"";height:4px;top:18px;left:7%;right:7%;background:linear-gradient(90deg,#1affc8 0%,#0befd8 26%,#245879 26%,#245879 100%);opacity:.75}
-.trj-source .roadmap-steps::after{position:absolute;content:"";top:18px;left:36%;right:7%;height:4px;background:repeating-linear-gradient(90deg,#031d30 0 6px,transparent 6px 12px)}
+.trj-source .roadmap-steps::before{position:absolute;content:"";height:4px;top:18px;left:7%;right:7%;background:linear-gradient(90deg,#1affc8 0%,#0befd8 var(--completed-width,0%),#245879 var(--completed-width,0%),#245879 100%);opacity:.75}
+.trj-source .roadmap-steps::after{position:absolute;content:"";top:18px;left:max(7%,var(--completed-width,0%));right:7%;height:4px;background:repeating-linear-gradient(90deg,#031d30 0 6px,transparent 6px 12px)}
 .trj-source .milestone{position:relative;display:flex;align-items:center;flex-direction:column;gap:5px;z-index:1;text-align:center;border:0;background:transparent;padding:0 3px;min-width:0}
 .trj-source .milestone .milestone-circle{position:relative;display:grid;place-items:center;background:#0a1d31;border:3px solid #24506b;color:#769cbd;width:43px;height:43px;border-radius:50%;font-size:17px;font-weight:750}
 .trj-source .milestone.completed .milestone-circle{background:#05d9c0;border-color:#09efd5;color:#00333a;box-shadow:0 0 15px #01e0cb33}
@@ -195,3 +195,8 @@
 @media(prefers-reduced-motion:reduce){
  .trj-source *,.trj-source *::before,.trj-source *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 }
+
+/* Source-based sparse roadmap: render approved geometry without inventing future stages. */
+.trj-source .milestone.unpublished{opacity:.43;pointer-events:none;cursor:default}
+.trj-source .milestone.unpublished .milestone-circle{border-color:#29435a;background:#071725;color:#8b9dad}
+.trj-source .milestone.unpublished span:last-child{font-style:italic;color:#8a9db5}
