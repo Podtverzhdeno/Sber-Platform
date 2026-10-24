@@ -3247,3 +3247,99 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
     padding-bottom: 0;
   }
 }
+
+
+/* Approved first fold: support and actions share one real layout row.
+   Do not float a sticky button bar over stages or authoritative mentor text. */
+.catalog-v2-detail-footer {
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.catalog-v2-detail-footer .catalog-v2-support-section {
+  flex: 1 1 170px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 0 !important;
+  border: 0;
+}
+
+.catalog-v2-detail-footer .catalog-v2-support-section svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.catalog-v2-detail-footer .catalog-v2-support-section p {
+  margin: 2px 0 0;
+  color: var(--catalog-muted);
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.catalog-v2-detail-footer-controls {
+  flex: 0 1 auto;
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  min-width: 0;
+}
+.catalog-v2-detail-footer-controls > small {
+  color: var(--catalog-muted);
+  font-size: 0.64rem;
+  line-height: 1.25;
+}
+
+.catalog-v2-detail > .catalog-v2-reasons-section {
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2-detail-footer {
+    position: static;
+    bottom: auto;
+    z-index: auto;
+    box-shadow: none;
+    padding: 5px 0 !important;
+    gap: 8px;
+    background: transparent;
+  }
+  .catalog-v2-detail-footer .catalog-v2-support-section {
+    min-height: 28px;
+  }
+  .catalog-v2-detail-footer .catalog-v2-detail-actions {
+    gap: 5px;
+    flex-wrap: nowrap;
+  }
+  .catalog-v2-detail-footer .catalog-v2-detail-actions button {
+    min-height: 38px;
+    padding: 5px 9px;
+    min-width: 122px;
+  }
+  .catalog-v2-detail > .catalog-v2-reasons-section {
+    margin-top: 0;
+  }
+  .catalog-v2-detail > .catalog-v2-reasons-section .catalog-v2-reasons-disclosure > summary {
+    min-height: 25px;
+  }
+}
+
+@media (max-width: 900px) {
+  .catalog-v2-detail-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .catalog-v2-detail-footer-controls {
+    justify-items: stretch;
+  }
+  .catalog-v2-detail-footer-controls > small { text-align: left; }
+  .catalog-v2-detail-footer .catalog-v2-detail-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
