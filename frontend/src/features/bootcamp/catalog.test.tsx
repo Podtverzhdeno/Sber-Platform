@@ -441,7 +441,9 @@ describe("Bootcamp catalog states and filters (22.15)", () => {
     expect(dialog).toHaveTextContent("OpenSpec и SDD");
     expect(dialog).not.toHaveTextContent("Отчётность ESG");
     expect(dialog).toHaveTextContent("Полный набор требований к грейду");
-    fireEvent.click(within(dialog).getAllByRole("button", { name: "Посмотреть →" })[0]!);
+    const firstCourseButton = within(dialog).getAllByRole("button", { name: "Посмотреть →" })[0];
+    if (firstCourseButton === undefined) throw new Error("No course action in requirements");
+    fireEvent.click(firstCourseButton);
     expect(await screen.findByRole("dialog", { name: "Информация о курсе" })).toBeInTheDocument();
   });
 
