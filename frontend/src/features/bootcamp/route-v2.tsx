@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 
@@ -55,10 +55,7 @@ export function BootcampV2Route() {
     level: state.level ?? "all",
     view: state.view,
   };
-  const visibleCourses = useMemo(
-    () => query.data ? selectedCourses(query.data, toolbar) : [],
-    [query.data, toolbar.relevance, toolbar.category, toolbar.query, toolbar.track, toolbar.level, toolbar.view],
-  );
+  const visibleCourses = query.data ? selectedCourses(query.data, toolbar) : [];
   const editUrl = (patch: Record<string, string | null>) => {
     const next = new URLSearchParams(params);
     for (const [key, value] of Object.entries(patch)) {
