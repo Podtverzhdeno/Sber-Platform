@@ -64,6 +64,22 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await page.route("**/api/v1/participant/me/development-overview", route => route.fulfill({ json: overview }));
   await page.route("**/api/v1/me/roadmaps", route => route.fulfill({ json: [{ track_key: "product", policy_version: 1, replacement_reason: null, milestones, next_step: milestones[2] }] }));
   await page.route("**/api/v1/me/talent-passport", route => route.fulfill({ json: { verified_courses: [], cases: [], skills: [{ key: "Аналитика данных", practical_level: "verified", confirmed_case_count: 3 }, { key: "Коммуникация", practical_level: "verified", confirmed_case_count: 2 }] } }));
+  await page.route("**/api/v1/me/portfolio", route => route.fulfill({ json: {
+    demo_data: true,
+    person_id: actor.person_id,
+    display_name: actor.display_name,
+    courses: [
+      { key: "demo-course-1", title: "OpenSpec и SDD", status: "verified" },
+      { key: "demo-course-2", title: "Агентная разработка", status: "verified" },
+      { key: "demo-course-3", title: "Python: основа", status: "verified" },
+    ],
+    contributions: [{ contribution_id: "00000000-0000-0000-0000-000000000022", project_title: "R&D лаборатория — демо", grade: "B", verification_status: "verified" }],
+    credentials: [],
+    trophies: [],
+    offers: [],
+    visibility: {},
+  } }));
+
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.goto("/workspace/1");
@@ -75,6 +91,12 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await expect(page.locator(".trajectory-v2-role-card")).toHaveCount(7);
   await expect(stageCard).toBeVisible();
   await page.screenshot({ path: "test-results/trajectory-v2-desktop-candidate.png", fullPage: true, animations: "disabled" });
+  await page.locator('[data-testid="trajectory-user-statistics"] summary').click();
+  await expect(page.getByText("Курсов подтверждено")).toBeVisible();
+  await expect(page.getByText("R&D лаборатория — демо")).toBeVisible();
+  await page.screenshot({ path: "test-results/trajectory-v2-statistics-candidate.png", animations: "disabled" });
+  await page.locator('[data-testid="trajectory-user-statistics"] summary').click();
+
   const [h,r,left,stage,right] = await Promise.all([heading,rolesGrid,roleCard,stageCard,rightRail].map(x => x.boundingBox()));
   expect(h && r && left && stage && right).toBeTruthy();
   if (!h || !r || !left || !stage || !right) return;
