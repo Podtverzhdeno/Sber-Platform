@@ -7,6 +7,8 @@ import {
   PanelRight,
   Pin,
   PinOff,
+  Phone,
+  Video,
   RotateCcw,
   Search,
   Users,
@@ -23,6 +25,7 @@ import {
 } from "react";
 
 import type { ApiChannelView, ApiMessageView } from "./contracts";
+import { isReferenceChannel, referencePinnedMessage } from "./reference-fixtures";
 import {
   CHAT_REACTION_EMOJIS,
   buildChatRows,
@@ -36,7 +39,7 @@ import {
   writePinnedMessageId,
   type ReactionRecord,
 } from "./chat-model";
-import { dialogKindLabel, dialogTimeLabel } from "./view-model";
+import { dialogKindLabel, dialogTimeLabel, dialogTitle } from "./view-model";
 import type { KeyValueStorage } from "./view-model";
 import "./chat-history.scss";
 
@@ -235,10 +238,7 @@ export function ChatHistory({
     actionButtons[next]?.focus();
   };
 
-  const channelTitle =
-    channel?.title ||
-    (channel?.participants.map((person) => person.display_name) ?? []).join(", ") ||
-    "Чат";
+  const channelTitle = channel ? dialogTitle(channel, viewerId) : "Чат";
 
   return (
     <section
@@ -254,8 +254,8 @@ export function ChatHistory({
           <small>
             {(channel ? dialogKindLabel(channel.kind) : "Чат")}
             {" · "}
-            {canSend ? "активен" : "недоступен для записей"}
-            {(channel?.participants.length ?? 0) > 2
+            {isReferenceChannel(channel?.id) ? "демонстрация" : canSend ? "активен" : "недоступен для записей"}
+            {channel?.id === "reference:mayaki" ? " · 248 участников" : (channel?.participants.length ?? 0) > 2
               ? ` · ${String((channel?.participants.length ?? 1) - 1)} участников`
               : ""}
             {channel?.muted ? " · уведомления отключены" : ""}
@@ -280,6 +280,12 @@ export function ChatHistory({
           >
             <Search aria-hidden="true" size={15} />
             <span className="sr-only">{searchOpen ? "Скрыть поиск в чате" : "Поиск в чате"}</span>
+          </button>
+          <button type="button" className="msg-chat__header-action" disabled title="Голосовые звонки пока недоступны" aria-label="Голосовые звонки пока недоступны">
+            <Phone aria-hidden="true" size={18} />
+          </button>
+          <button type="button" className="msg-chat__header-action" disabled title="Видеозвонки пока недоступны" aria-label="Видеозвонки пока недоступны">
+            <Video aria-hidden="true" size={18} />
           </button>
           {!searchOpen && channel !== null && channel.participants.length > 0 && (
             <span
@@ -369,6 +375,15 @@ export function ChatHistory({
         </div>
       )}
 
+      {channel?.id === "reference:mayaki" && (
+        <div className="msg-chat__pinned msg-chat__pinned--approved">
+          <Pin aria-hidden="true" size={18} />
+          <div><strong>Закреплённое сообщение</strong><span>{referencePinnedMessage}</span></div>
+        </div>
+      )}
+      {isReferenceChannel(channel?.id) && (
+        <p className="msg-chat__preview-notice" role="status">Демо-переписка по утверждённому макету. Данные не отправляются в API.</p>
+      )}
       {connectionState !== "online" && (
         <div className="msg-chat__banner" role="status">
           <CloudOff aria-hidden="true" size={14} />
@@ -433,8 +448,14 @@ export function ChatHistory({
                     (row.authorId !== null && row.authorId === viewerId ? "outgoing" : "incoming")
                   }
                 >
-                  <span className="msg-chat__group-author" aria-hidden="true">
+                  {row.authorId !== viewerId && (
+                     <span className="msg-chat__group-avatar" aria-hidden="true">{row.authorName?.trim().charAt(0).toUpperCase() || "?"}</span>
+                   )}
+                   <span className="msg-chat__group-author" aria-hidden="true">
                     {row.authorId === viewerId ? "Вы" : row.authorName}
+                    {channel?.id === "reference:mayaki" && (row.authorName === "Анна Ковалёва" || row.authorName === "Иван Петров") && (
+                      <span className="msg-chat__reference-role">{row.authorName === "Анна Ковалёва" ? "Администратор" : "Модератор"}</span>
+                    )}
                   </span>
                   {row.items.map((item) => {
                     const extra = item as ChatMessageExtra;
@@ -469,7 +490,19 @@ export function ChatHistory({
                             ),
                           )}
                         </div>
-                        {item.artifact_refs.length > 0 && (
+                        {item.id === "reference:mayaki-message-1" && (
+                          <div className="msg-chat__reference-media" aria-label="Карьера в IT: от обучения к возможностям">
+                            <span className="msg-chat__reference-media-icon" aria-hidden="true">✦</span>
+                            <span><strong>Карьера в IT: от обучения к возможностям</strong><small>Серия встреч · Октябрь 2026</small></span>
+                          </div>
+                        )}
+                        {item.id === "reference:mayaki-message-3" && (
+                          <div className="msg-chat__reference-link" aria-label="Демонстрационная карточка ссылки">
+                            <span aria-hidden="true">↗</span>
+                            <span><strong>Возможности для студентов — октябрь 2026</strong><small>Документ с актуальными стажировками, грантами и конкурсами</small><small>docs.google.com · демонстрация</small></span>
+                          </div>
+                        )}
+                                                {item.artifact_refs.length > 0 && (
                           <ul className="msg-chat__artifact-refs">
                             {item.artifact_refs.map((ref) => (
                               <li key={ref} className="msg-chat__artifact-ref">
@@ -480,7 +513,7 @@ export function ChatHistory({
                           </ul>
                         )}
                         <small className="msg-chat__meta">
-                          <time dateTime={item.created_at}>{dialogTimeLabel(item.created_at)}</time>
+                          <time dateTime={item.created_at}>{isReferenceChannel(channel?.id) ? item.created_at.slice(11, 16) : dialogTimeLabel(item.created_at)}</time>
                           {extra.edited && <span className="msg-chat__edited"> · изменено</span>}
                           {isLastOutgoing && (
                             <span className="msg-chat__delivered" title="Доставлено">
@@ -489,6 +522,12 @@ export function ChatHistory({
                             </span>
                           )}
                         </small>
+                        {item.id === "reference:mayaki-message-4" && (
+                          <div className="msg-chat__reference-reactions" aria-label="Пример реакций из утверждённого макета"><span>🔥 8</span><span>👏 3</span></div>
+                        )}
+                                                {item.id === "reference:mayaki-message-2" && (
+                          <div className="msg-chat__reference-reactions" aria-label="Пример реакций из утверждённого макета"><span>💗 12</span><span>👍 5</span></div>
+                        )}
                         <div className="msg-chat__reactions">
                           {Object.entries(perMessage).map(([emoji, authors]) => (
                             <button
