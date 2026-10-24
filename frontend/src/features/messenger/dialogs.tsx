@@ -74,6 +74,8 @@ export function DialogList({
     getDialogDraftsSnapshot,
   );
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const handledCreateSignal = useRef(0);
 
   useEffect(() => {
     hydrateDialogDrafts(storage, true);
@@ -108,11 +110,16 @@ export function DialogList({
   }, [channels, viewerId, query]);
 
   useEffect(() => {
-    if (createSignal === 0) return;
+    if (createSignal === 0 || handledCreateSignal.current === createSignal) return;
+    handledCreateSignal.current = createSignal;
     setTab("Контакты");
     setQuery("");
     setMenuOpen(contactsOfChannels(channels, viewerId).length > 0);
   }, [createSignal, channels, viewerId]);
+
+  useEffect(() => {
+    if (menuOpen) menuRef.current?.focus();
+  }, [menuOpen]);
 
   useEffect(() => {
     if (findSignal === 0) return;
@@ -210,6 +217,8 @@ export function DialogList({
           {menuOpen && contacts.length > 0 && (
             <div
               className="msg-dialog-list__create-menu"
+              ref={menuRef}
+              tabIndex={-1}
               role="menu"
               aria-label="Контакты для нового диалога"
               onKeyDown={(event) => {
