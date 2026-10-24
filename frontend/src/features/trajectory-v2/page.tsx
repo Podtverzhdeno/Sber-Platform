@@ -469,14 +469,29 @@ export function RoleCardOverview(props: {
         props.onSelect();
       }}
     >
-      <span className="trajectory-v2-role-icon" aria-hidden="true">
-        {role.title.toLowerCase().includes("python") || role.title.toLowerCase().includes("разработ") ? (
-          <svg viewBox="0 0 32 32" fill="none"><path d="m12 7-8 9 8 9M20 7l8 9-8 9M18 5l-4 22" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        ) : role.title.toLowerCase().includes("ml") || role.title.toLowerCase().includes("инженер") ? (
-          <svg viewBox="0 0 32 32" fill="none"><path d="m16 3 12 7v13l-12 7L4 23V10L16 3zm0 13 12-6M16 16 4 10m12 6v14" stroke="currentColor" strokeWidth="2.5" strokeLinejoin="round"/></svg>
-        ) : (
-          <svg viewBox="0 0 32 32" fill="none"><path d="M5 26V16m7 10V9m7 17V5m7 21V13" stroke="currentColor" strokeWidth="3.8" strokeLinecap="round"/></svg>
-        )}
+      <span className="trajectory-v2-role-icon" aria-hidden="true" data-glyph={
+        role.title.toLowerCase().includes("продукт") ? "product" :
+        role.title.toLowerCase().includes("ml") ? "ml" :
+        role.title.toLowerCase().includes("python") ? "python" :
+        role.title.toLowerCase().includes("backend") ? "backend" :
+        role.title.toLowerCase().includes("ux") || role.title.toLowerCase().includes("дизайн") ? "design" :
+        role.title.toLowerCase().includes("менеджер") ? "manager" : "data"
+      }>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          {role.title.toLowerCase().includes("продукт") || role.title.toLowerCase().includes("аналитик") ? (
+            <path d="M4 20V13m6 7V8m6 12V4m5 16v-10" strokeWidth="3"/>
+          ) : role.title.toLowerCase().includes("ml") ? (
+            <path d="m12 2 9 5v10l-9 5-9-5V7zM3 7l9 5 9-5M12 12v10"/>
+          ) : role.title.toLowerCase().includes("python") ? (
+            <path d="m8 5-6 7 6 7m8-14 6 7-6 7m-3-16-2 18"/>
+          ) : role.title.toLowerCase().includes("backend") ? (
+            <path d="M5 2h10l4 4v16H5zM15 2v5h4M9 11h6M9 15h6M9 19h4"/>
+          ) : role.title.toLowerCase().includes("ux") || role.title.toLowerCase().includes("дизайн") ? (
+            <path d="m12 2 2.3 7.7L22 12l-7.7 2.3L12 22l-2.3-7.7L2 12l7.7-2.3z"/>
+          ) : (
+            <><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M9 7V4h6v3m-12 6h18m-11 0v2h4v-2"/></>
+          )}
+        </svg>
       </span>
       {props.primary && <span className="trajectory-v2-primary-check" aria-label="Основная роль">✓</span>}
       <strong>{role.title}</strong>
