@@ -222,3 +222,23 @@
   line-height: 1;
   pointer-events: none;
 }
+
+
+/* Original UI (1) typography metrics: page 28px, detail title 20px,
+   source desc 13.5px. These are desktop-only to preserve mobile wrapping. */
+@media (min-width: 1550px) {
+  .catalog-v2 .catalog-v2-heading h1 {
+    font-size: 28px;
+    line-height: 1.15;
+    letter-spacing: -.01em;
+  }
+  .catalog-v2 .catalog-v2-detail .catalog-v2-detail-identity h2 {
+    font-size: 20px;
+    line-height: 1.25;
+    letter-spacing: -.01em;
+  }
+  .catalog-v2 .catalog-v2-detail-description {
+    font-size: 13.5px;
+    line-height: 1.4;
+  }
+}
