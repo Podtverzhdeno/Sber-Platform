@@ -4,10 +4,13 @@ test("all twelve Bootcamp courses open four real lessons with working navigation
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const bootcampPath = new URL(page.url()).pathname;
+  await expect(page.getByRole("heading", { name: /Bootcamp/ })).toBeVisible();
 
   for (let index = 1; index <= 12; index++) {
     const key = `demo-course-${String(index)}`;
-    await page.goto(`/workspace/2?course=${key}`);
+    await page.goto(`${bootcampPath}?course=${encodeURIComponent(key)}`);
     const drawer = page.getByRole("dialog", { name: "Информация о курсе" });
     await expect(drawer).toBeVisible();
     await drawer.getByRole("button", { name: /Открыть уроки и практику/ }).click();
@@ -26,7 +29,10 @@ test("Bootcamp mobile lesson reader fits the viewport and keeps navigation opera
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.goto("/workspace/2?course=demo-course-3");
+  await page.getByRole("button", { name: "Меню", exact: true }).click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const bootcampPath = new URL(page.url()).pathname;
+  await page.goto(`${bootcampPath}?course=demo-course-3`);
   const drawer = page.getByRole("dialog", { name: "Информация о курсе" });
   await drawer.getByRole("button", { name: /Открыть уроки и практику/ }).click();
   await expect(drawer.getByRole("heading", { name: "Типы и выражения" })).toBeVisible();
