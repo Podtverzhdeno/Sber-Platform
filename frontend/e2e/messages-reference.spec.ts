@@ -180,7 +180,7 @@ test("composer toolbar icons open genuine attachment, emoji and mention controls
   await page.setViewportSize({width:1448,height:1086});
   await openMessages(page);
   await page.getByRole("button",{name:/Открыть последний чат/}).click();
-  await page.getByRole("button",{name:"Вложения"}).click();
+  await page.locator(".msg-composer").getByRole("button",{name:"Вложения"}).click();
   await expect(page.getByTestId("composer-attachments")).toBeVisible();
   await page.getByRole("button",{name:"Эмодзи"}).click();
   await expect(page.getByRole("dialog",{name:"Эмодзи"})).toBeVisible();
