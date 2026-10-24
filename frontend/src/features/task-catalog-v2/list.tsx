@@ -33,7 +33,7 @@ export function TaskCatalogList(props: {
         <span role="columnheader">Действия</span>
       </div>
       {props.items.map((item, index) => {
-        const canApply = item.allowed_actions.includes("apply") && item.eligibility.status === "eligible";
+        const canApply = item.allowed_actions.includes("apply") && item.eligibility.status === "eligible" && item.application_state === "none";
         const benefit = item.benefits.find((value) => value.state !== "unavailable");
         const reason = item.match.reasons[0];
         return (
@@ -96,7 +96,7 @@ export function TaskCatalogList(props: {
               {canApply ? <button type="button" className="catalog-v2-list-apply" onClick={() => { props.onConditions(item); }}>Отклик</button> : null}
               <button type="button" className="catalog-v2-icon-action" aria-label={item.bookmarked ? "Сохранено" : "Сохранить"}
                 title={item.bookmarked ? "Удалить из сохранённых" : "Сохранить задачу"} aria-pressed={item.bookmarked}
-                disabled={props.bookmarkPendingId === item.task_id} onClick={() => { props.onBookmark(item); }}>
+                disabled={props.bookmarkPendingId === item.task_id || !item.allowed_actions.includes("bookmark")} onClick={() => { props.onBookmark(item); }}>
                 <Bookmark size={17} fill={item.bookmarked ? "currentColor" : "none"} aria-hidden="true" />
               </button>
               {item.allowed_actions.includes("share") ? <button type="button" className="catalog-v2-icon-action" aria-label="Поделиться" title="Скопировать ссылку" onClick={() => { props.onShare(item); }}><Share2 size={17} aria-hidden="true" /></button> : null}
