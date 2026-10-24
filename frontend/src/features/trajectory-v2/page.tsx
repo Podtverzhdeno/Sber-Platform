@@ -283,7 +283,6 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
             </>
           )}
         </section>
-      </div>
       <aside className="trajectory-v2-reference-sidebar" aria-label="Карьерный прогресс и следующий шаг">
         <section className="trajectory-v2-grade-panel">
           <header><h3>Твой грейд</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => { setGradesOpen(true); }}>Все уровни →</button></header>
@@ -332,6 +331,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           <small className="trajectory-v2-passport-disclaimer">Полоса отражает число подтверждённых кейсов относительно других навыков, не оценку уровня компетенции.</small>
         </section>
       </aside>
+      </div>
       {gradesOpen && (
         <div className="trajectory-v2-overlay" onClick={() => { setGradesOpen(false); }}>
           <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => { event.stopPropagation(); }}>
