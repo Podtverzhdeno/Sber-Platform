@@ -63,6 +63,7 @@ export type RuntimeApiPath =
   | `/api/v1/customer/applications/${string}/accept`
   | `/api/v1/customer/deadline-requests/${string}/decision`
   | `/api/v1/customer/tasks/${string}/deadline-requests`
+  | `/api/v1/me/bootcamp/courses/${string}`
   | "/api/v1/me/bootcamp/certificates"
   | `/api/v1/me/bootcamp/certificates/${string}`
   | `/api/v1/bootcamp/certificates/${string}`

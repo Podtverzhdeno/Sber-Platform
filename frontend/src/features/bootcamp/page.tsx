@@ -236,6 +236,7 @@ export function BootcampPage({
   onToolbarChange,
   onToolbarReset,
   levelOptions = [],
+  visibleCourses,
 }: {
   overview: BootcampOverview;
   view: "card" | "list";
@@ -249,6 +250,7 @@ export function BootcampPage({
   onToolbarChange?: (change: Partial<CatalogToolbarState>) => void;
   onToolbarReset?: () => void;
   levelOptions?: string[];
+  visibleCourses?: BootcampOverview["courses"];
 }) {
   const continueTitle = overview.continue_learning === null
     ? null
@@ -280,11 +282,11 @@ export function BootcampPage({
         <CatalogToolbar state={effectiveToolbar} roles={overview.roles} categories={categoryOptions} levels={levelOptions} onChange={changeToolbar} onReset={() => { onToolbarReset?.(); }} />
         {view === "card" ? (
           <div className="course-grid">
-            {overview.courses.map((course) => <CourseCard course={course} trackKey={overview.selected_track_key} key={course.card.key} onOpen={onOpenCourse} />)}
+            {(visibleCourses ?? overview.courses).map((course) => <CourseCard course={course} trackKey={overview.selected_track_key} key={course.card.key} onOpen={onOpenCourse} />)}
           </div>
         ) : (
           <ul className="course-rows" aria-label="Каталог Bootcamp списком">
-            {overview.courses.map((course) => <CourseListRow course={course} trackKey={overview.selected_track_key} key={course.card.key} onOpen={onOpenCourse} />)}
+            {(visibleCourses ?? overview.courses).map((course) => <CourseListRow course={course} trackKey={overview.selected_track_key} key={course.card.key} onOpen={onOpenCourse} />)}
           </ul>
         )}
         </section>
