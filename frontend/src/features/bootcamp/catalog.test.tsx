@@ -210,6 +210,18 @@ afterEach(() => {
 });
 
 describe("Bootcamp catalog states and filters (22.15)", () => {
+  it("does not invent a competency target when the provider omits it", async () => {
+    const noTarget = cards.map((card) => card.key === "openspec-sdd"
+      ? { ...card, must_take: { ...mustTake, target_level: null } }
+      : card);
+    installFetch(noTarget);
+    renderCatalog("/workspace/3");
+
+    const card = await screen.findByTestId("course-openspec-sdd");
+    fireEvent.click(within(card).getByText("Навык и требования"));
+    expect(within(card).getByText(/целевой уровень ещё не опубликован/)).toBeVisible();
+  });
+
   it("explains must-take on an available recommended course", async () => {
     installFetch();
     renderCatalog("/workspace/3");
