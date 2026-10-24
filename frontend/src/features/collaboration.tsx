@@ -429,6 +429,7 @@ export function MessagingWorkspace({
       className="messenger-page sberchat-shell sberchat-reference"
       data-reference={reference}
       data-visual-reference="R-MSG-01"
+      data-message-state={selected === undefined ? "empty" : selected.kind === "community" ? "community" : "direct"}
     >
       <header className="messenger-heading">
         <div>
