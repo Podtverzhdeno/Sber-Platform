@@ -32,6 +32,17 @@ type CourseCardState = {
 };
 
 type Streak = { current_days: number; qualified_dates: string[]; reason: string };
+type CourseDetail = {
+  course_key: string; title: string; source_url: string; availability: string;
+  access_note: string; enrollment_status: string | null; verified: boolean;
+  specialization: string | null; program_version: string | null;
+  workload_hours: number | null; program_competencies: string[][];
+  objective: string | null; milestone_title: string | null; next_step: string | null;
+  artifact: string | null;
+  cycle: { competency: string; current_level: string; projected_level: string; target_level: string; projected_confirmed: boolean; evidence: string }[];
+};
+type CourseCertificate = { certificate_id: string; verification_id: string; course_title: string };
+
 
 const CATALOG_PATH: RuntimeApiPath = "/api/v1/me/bootcamp/catalog";
 
@@ -278,7 +289,15 @@ function CatalogFilters({
 
 type CatalogPanel = "detail" | "reason" | "requirements";
 
-function CourseDetails({ card, onReason }: { card: CourseCardState; onReason: () => void }) {
+function CourseDetails({
+  card, onReason, detail, loading, detailError, certificate, certificatesLoading,
+  certificateError, issuing, issueError, onIssue,
+}: {
+  card: CourseCardState; onReason: () => void; detail: CourseDetail | null;
+  loading: boolean; detailError: boolean; certificate: CourseCertificate | null;
+  certificatesLoading: boolean; certificateError: boolean; issuing: boolean;
+  issueError: boolean; onIssue: (key: string) => void;
+}) {
   const [tab, setTab] = useState<"about" | "program" | "skills" | "reviews">("about");
   const tabs = [
     { key: "about", label: "О курсе" },
@@ -296,7 +315,10 @@ function CourseDetails({ card, onReason }: { card: CourseCardState; onReason: ()
     <div role="tabpanel" className="bc-detail-tabpanel">
       {tab === "about" && <>
         <h3>Для чего нужен курс</h3>
-        <p>{card.recommendation_reason || "Описание цели пока не опубликовано."}</p>
+        <p>{detail?.objective ?? card.recommendation_reason ?? "Описание цели пока не опубликовано."}</p>
+        {detail?.milestone_title && <p>Этап траектории: {detail.milestone_title}</p>}
+        {detail?.next_step && <p>Следующий шаг: {detail.next_step}</p>}
+        {detail?.artifact && <p>Проверяемый результат: {detail.artifact}</p>}
         <h3>Результат и подтверждение</h3>
         {card.verified_evidence ? <p>Подтверждённый результат: {card.verified_evidence}</p> :
           <p>{card.pending_verification_note || "Освоение курса и подтверждение компетенции — разные этапы. Основание для подтверждения появится после проверки результата."}</p>}
@@ -304,11 +326,27 @@ function CourseDetails({ card, onReason }: { card: CourseCardState; onReason: ()
       </>}
       {tab === "program" && <>
         <h3>Программа курса</h3>
-        <p>Состав модулей и контрольные точки не переданы источником обучения. Достоверная программа доступна у провайдера курса.</p>
+        {loading ? <p role="status">Загружаем опубликованную программу курса…</p> :
+          detail ? <>
+            {detail.program_version && <p>Версия программы: {detail.program_version}</p>}
+            {detail.workload_hours !== null && <p>Объём обучения: {detail.workload_hours} ч</p>}
+            {detail.milestone_title && <p>Контрольный этап: {detail.milestone_title}</p>}
+            {detail.next_step && <p>Следующий шаг: {detail.next_step}</p>}
+            {detail.program_competencies.length > 0 && <ul>{detail.program_competencies.map((group, index) =>
+              <li key={index}>{group.join(" · ")}</li>)}</ul>}
+            {!detail.milestone_title && !detail.next_step && detail.program_competencies.length === 0 &&
+              <p>Подробный состав модулей ещё не опубликован провайдером.</p>}
+          </> : <p>{detailError ? "Подтверждённая программа временно недоступна: сведения не переданы источником обучения." : "Сведения не переданы источником обучения."}</p>}
         {card.access_state === "available" && <SafeExternalLink href={card.source_url}>Перейти к программе ↗</SafeExternalLink>}
       </>}
       {tab === "skills" && <>
         <h3>Развитие навыков</h3>
+        {detail?.cycle.map((point) =>
+          <div className="bc-impact" key={point.competency}>
+            <strong>{point.competency}</strong>
+            <p>Подтверждено: {point.current_level}; прогноз: {point.projected_level}; цель: {point.target_level}</p>
+            <small>{point.projected_confirmed ? "Проверено по результату курса" : "Ожидает подтверждения"} · {point.evidence}</small>
+          </div>)}
         {card.must_take ? <>
           <strong>{card.must_take.skill}</strong>
           <p>Текущий уровень: {card.must_take.current_level ?? "не подтверждён"}</p>
@@ -322,6 +360,18 @@ function CourseDetails({ card, onReason }: { card: CourseCardState; onReason: ()
         <p>Подтверждённых отзывов по этому курсу пока нет.</p>
       </>}
     </div>
+    <section className="bc-certificate">
+      <h3>Сертификат завершения курса</h3>
+      {certificate ? <a href={`/verify/${encodeURIComponent(certificate.verification_id)}`}>Открыть выданный сертификат →</a> :
+       card.completion_state === "verified" ? (
+         certificatesLoading ? <p role="status">Проверяем наличие сертификата…</p> :
+         certificateError ? <p role="alert">Не удалось проверить наличие сертификата. Повторите попытку позже.</p> :
+         <button type="button" disabled={issuing} onClick={() => { onIssue(card.key); }}>
+           {issuing ? "Выдаём сертификат…" : "Получить сертификат"}
+         </button>
+       ) : <p className="bc-muted">Сертификат можно запросить после подтверждённого завершения курса.</p>}
+      {issueError && <p role="alert">Сертификат не выдан. Повторите запрос позже.</p>}
+    </section>
     <div className="bc-panel-footer">
       <button type="button" className="secondary-button" onClick={onReason}>Почему рекомендован</button>
       {card.access_state === "available" && <SafeExternalLink href={card.source_url}>Открыть курс ↗</SafeExternalLink>}
@@ -379,6 +429,31 @@ export function BootcampCatalog({
     retry: retrySafeRead,
   });
   const [searchParams, setSearchParams] = useSearchParams();
+  const selectedCourseKey = searchParams.get("course");
+  const activePanel = searchParams.get("panel") ?? "detail";
+  const showDetail = selectedCourseKey !== null && activePanel === "detail";
+  const detailQuery = useQuery({
+    queryKey: ["course-detail", selectedCourseKey],
+    queryFn: () => apiRequest<CourseDetail>(`/api/v1/me/courses/${encodeURIComponent(selectedCourseKey ?? "")}/detail`),
+    enabled: showDetail,
+    retry: retrySafeRead,
+  });
+  const certificatesQuery = useQuery({
+    queryKey: ["certificates"],
+    queryFn: () => apiRequest<CourseCertificate[]>("/api/v1/me/bootcamp/certificates"),
+    enabled: showDetail,
+    retry: retrySafeRead,
+  });
+  const issueCertificate = useMutation({
+    mutationFn: (courseKey: string) =>
+      apiRequest<CourseCertificate>(`/api/v1/me/bootcamp/certificates/${encodeURIComponent(courseKey)}`, {
+        method: "POST", headers: csrfHeaders(),
+      }),
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ["certificates"] });
+      await client.invalidateQueries({ queryKey: ["bootcamp-catalog"] });
+    },
+  });
 
   function openPanel(panel: CatalogPanel, courseKey?: string) {
     const next = new URLSearchParams(searchParams);
@@ -558,9 +633,15 @@ export function BootcampCatalog({
         </ul>
       )}
       {visible.length === 0 && <StatePanel kind="empty" />}
-      <Drawer title={panel === "reason" ? "Почему рекомендован" : "Информация о курсе"} open={deepLinked !== null && panel !== "requirements"} onClose={closePanel}>
+      <Drawer key={`${panel}:${deepLinked?.key ?? ""}`} title={panel === "reason" ? "Почему рекомендован" : "Информация о курсе"} open={deepLinked !== null && panel !== "requirements"} onClose={closePanel}>
         {deepLinked && (panel === "reason" ? <RecommendationDetails card={deepLinked} track={selectedRoleTitle} /> :
-          <CourseDetails key={deepLinked.key} card={deepLinked} onReason={() => { openPanel("reason", deepLinked.key); }} />)}
+          <CourseDetails key={deepLinked.key} card={deepLinked}
+            detail={detailQuery.data ?? null} loading={detailQuery.isPending} detailError={detailQuery.isError}
+            certificate={certificatesQuery.data?.find((item) => item.course_title === deepLinked.title) ?? null}
+            certificatesLoading={certificatesQuery.isPending} certificateError={certificatesQuery.isError}
+            issuing={issueCertificate.isPending} issueError={issueCertificate.isError}
+            onIssue={(courseKey) => { issueCertificate.mutate(courseKey); }}
+            onReason={() => { openPanel("reason", deepLinked.key); }} />)}
       </Drawer>
       <Drawer title="Требования к обучению" open={panel === "requirements"} onClose={closePanel}>
         <RequirementsDetails cards={catalog.data.filter(forTrack)} onSelect={(key) => { openPanel("detail", key); }} />
