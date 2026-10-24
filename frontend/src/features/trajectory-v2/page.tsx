@@ -461,31 +461,36 @@ export function RoleDetailPanel(props: {
       data-testid="trajectory-role-detail"
       data-role-key={role.track_key}
     >
-      <header>
-        <h3>{role.title}</h3>
-        <span className="trajectory-v2-role-state">{roleStateLabel(role.state)}</span>
-        {props.primary && <span className="trajectory-v2-role-badge">{PRIMARY_LABEL}</span>}
-        <button
-          type="button"
-          className="trajectory-v2-role-info-button"
-          onClick={props.onOpenRoleInfo}
-        >
-          Подробнее о роли
-        </button>
-        <TrajectoryActions
-          role={role}
-          pinned={props.pinned}
-          hiddenUnselected={props.hiddenUnselected}
-          otherRoles={props.otherRoles}
-          compareTarget={props.compareTarget}
-          feedback={props.feedback}
-          compare={props.compare}
-          internalShare={props.internalShare}
-          togglePin={props.togglePin}
-          toggleHiddenUnselected={props.toggleHiddenUnselected}
-          configurePath={props.configurePath}
-          clearFeedback={props.clearFeedback}
-        />
+      <header className="trajectory-v2-detail-heading">
+        <div className="trajectory-v2-detail-identity">
+          <span className="trajectory-v2-detail-icon" aria-hidden="true">▥</span>
+          <div>
+            <div className="trajectory-v2-detail-title">
+              <h3>{role.title}</h3>
+              {props.primary && <span className="trajectory-v2-role-badge">{PRIMARY_LABEL}</span>}
+            </div>
+            <p>{role.attempt_number === null
+              ? "Познакомься с профессией и выбери направление развития."
+              : `Путь освоения роли · ${role.completed_milestones} из ${role.total_milestones} этапов пройдено`}</p>
+          </div>
+        </div>
+        <div className="trajectory-v2-detail-controls">
+          <button type="button" className="trajectory-v2-role-info-button" onClick={props.onOpenRoleInfo}>О роли →</button>
+          <TrajectoryActions
+            role={role}
+            pinned={props.pinned}
+            hiddenUnselected={props.hiddenUnselected}
+            otherRoles={props.otherRoles}
+            compareTarget={props.compareTarget}
+            feedback={props.feedback}
+            compare={props.compare}
+            internalShare={props.internalShare}
+            togglePin={props.togglePin}
+            toggleHiddenUnselected={props.toggleHiddenUnselected}
+            configurePath={props.configurePath}
+            clearFeedback={props.clearFeedback}
+          />
+        </div>
       </header>
       {role.attempt_number === null ? (
         <section aria-label="Прогресс роли">
