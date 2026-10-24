@@ -756,3 +756,117 @@
   .home-v2-week-dialog {padding:15px;}
   .home-v2-week-dialog-days>div {padding:10px 8px;font-size:11px;}
 }
+
+
+/* Approved 22 Oct ZIP drawers.css: precise 456px grade drawer, 49px
+   breadcrumb toolbar and subdued full-screen backdrop. Real grade data only. */
+body:has(.home-v2-drawer-layer) {overflow:hidden;}
+.home-v2-drawer-backdrop {
+  background:rgba(0,6,14,.50);
+  backdrop-filter:blur(1.5px);
+}
+.home-v2-drawer {
+  width:min(456px,100vw);
+  border:1px solid #24506c;
+  border-right:0;
+  border-radius:15px 0 0 15px;
+  background:linear-gradient(155deg,#071c2e 0%,#051626 63%,#051827 100%);
+  box-shadow:-25px 0 75px #000a15d0,inset 1px 0 #147d9955;
+  overscroll-behavior:contain;scrollbar-color:#24536a transparent;scrollbar-width:thin;
+}
+.home-v2-drawer-top {
+  min-height:49px;
+  padding:8px 20px 2px 23px;
+  border-bottom:0;
+  color:#829eb9;
+  font-size:11px;letter-spacing:.015em;font-weight:550;
+}
+.home-v2-drawer-close {
+  flex:none;width:37px;height:37px;
+  border:1px solid transparent;border-radius:9px;
+  color:#e4f0ff;background:transparent;
+  transition:color .18s,background .18s,border-color .18s,transform .18s;
+}
+.home-v2-drawer-close:hover {
+  color:#05e5e9;border-color:#1f6d84;background:#0d3044;transform:rotate(90deg);
+}
+.home-v2-drawer-body {padding:2px 21px 30px 23px;}
+.home-v2-drawer-eyebrow {
+  display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:750;color:#5ee1de;margin:0 0 5px;
+}
+.home-v2-drawer-body h2 {
+  font-size:28px;letter-spacing:-.03em;margin:0 0 10px;
+  font-weight:780;line-height:1.2;
+}
+.home-v2-drawer-body>p {
+  font-size:12.5px;color:#9fb7d1;line-height:1.55;margin:0 0 16px;
+}
+.home-v2-grade-unavailable {
+  margin:13px 0;
+  border-color:#174560;
+  background:linear-gradient(135deg,#0b293e,#071d31);
+  border-radius:11px;padding:18px;
+  gap:9px;color:#abc7dd;
+}
+.home-v2-grade-unavailable svg {color:#05d8e4;}
+.home-v2-grade-unavailable strong {font-size:14px;}
+.home-v2-grade-unavailable span {font-size:12px;line-height:1.55;}
+.home-v2-grade-timeline {
+  position:relative;display:grid;gap:10px;margin:4px 0 0;
+  padding:0 0 0 31px;border-left:0;
+}
+.home-v2-grade-timeline::before {
+  content:"";position:absolute;top:16px;bottom:27px;left:10px;width:2px;
+  border-radius:10px;
+  background:linear-gradient(to bottom,#6534c1,#12d9ee 60%,#0b846c);
+}
+.home-v2-grade-timeline button {
+  position:relative;display:grid;
+  grid-template-columns:1fr auto 16px;gap:9px;align-items:center;
+  width:100%;min-height:101px;
+  padding:13px 14px;border:1px solid #1b425f;
+  border-radius:11px;background:#081d31;color:#f6faff;
+  transition:transform .17s ease,background .17s ease,border-color .17s ease,box-shadow .17s ease;
+}
+.home-v2-grade-timeline button:hover {transform:translateX(-3px);background:#0a2941;border-color:#1bd7e1;box-shadow:0 0 17px #04dcf21d;}
+.home-v2-grade-timeline button:has(.home-v2-grade-dot.target) {background:linear-gradient(130deg,#15183b,#171e36);border-color:#7845e9;}
+.home-v2-grade-timeline button:has(.home-v2-grade-dot.current) {background:linear-gradient(130deg,#07334a,#092438);border:2px solid #00dbe9;box-shadow:0 0 14px #00dff332;}
+.home-v2-grade-timeline button strong {font-size:15px;font-weight:800;}
+.home-v2-grade-timeline button small {font-size:10px;color:#c9dbec;}
+.home-v2-grade-dot {
+  position:absolute;left:-31px;top:50%;transform:translateY(-50%);
+  width:21px;height:21px;z-index:2;
+  border:2px solid #346077;border-radius:50%;
+  background:#0a2235;box-shadow:0 0 0 4px #061727;
+}
+.home-v2-grade-dot.target {border-color:#9e59ff;background:#7a3edf;box-shadow:0 0 0 4px #071626,0 0 17px #973efe91;}
+.home-v2-grade-dot.current {border-color:#09eaf2;background:#05cedb;box-shadow:0 0 0 5px #07384a,0 0 16px #00ecffba;}
+.home-v2-drawer-note {margin:15px 0 0;color:#7495aa;font-size:10px;line-height:1.5;}
+.home-v2-grade-detail-hero {
+  position:relative;min-height:140px;padding:20px 10px 24px 1px;
+  margin-top:-2px;overflow:hidden;border-radius:8px;isolation:isolate;background:none;
+}
+.home-v2-grade-detail-hero::before {
+  content:"";position:absolute;z-index:-1;inset:-10px -30px -10px 20%;
+  background:linear-gradient(90deg,#071d2f 0%,#071d2f00 80%),
+   url("/home-reference/mountain-path.svg") center 52% / cover no-repeat;
+  opacity:.65;
+}
+.home-v2-grade-detail-hero h2 {font-size:22px;line-height:1.18;margin:13px 0 9px;max-width:410px;text-shadow:0 2px 12px #001020;}
+.home-v2-grade-progress {
+  grid-template-columns:42px minmax(0,1fr);gap:12px;padding:13px 12px;
+  border-color:#096b8a;border-radius:9px;
+  background:linear-gradient(125deg,#053548,#062235);
+}
+@media(max-width:850px) and (min-width:601px) {.home-v2-drawer {width:min(540px,calc(100vw - 26px));}}
+@media(max-width:600px) {
+  .home-v2-drawer {width:100%;border-radius:0;border-left:0;}
+  .home-v2-drawer-top {min-height:50px;padding:7px 15px 0;}
+  .home-v2-drawer-body {padding:7px 14px 30px;}
+  .home-v2-grade-timeline button {min-height:96px;}
+}
+@media(max-width:375px) {
+  .home-v2-drawer-body {padding:7px 11px 28px;}
+  .home-v2-grade-timeline button strong {font-size:14px;}
+}
