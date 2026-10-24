@@ -43,6 +43,8 @@ export type DialogListProps = {
   viewerId: string | null;
   viewerName?: string | null;
   selectedId: string | null;
+  createSignal?: number;
+  findSignal?: number;
   onSelect: (channelId: string) => void;
   onCreateDialog?: (peerId: string) => void;
   /** Test seam: deterministic dm state in jsdom. */
@@ -55,6 +57,8 @@ export function DialogList({
   viewerId,
   viewerName = null,
   selectedId,
+  createSignal = 0,
+  findSignal = 0,
   onSelect,
   onCreateDialog,
   storage = windowStorage(),
@@ -103,6 +107,20 @@ export function DialogList({
     );
   }, [channels, viewerId, query]);
 
+  useEffect(() => {
+    if (createSignal === 0) return;
+    setTab("Контакты");
+    setQuery("");
+    setMenuOpen(contactsOfChannels(channels, viewerId).length > 0);
+  }, [createSignal, channels, viewerId]);
+
+  useEffect(() => {
+    if (findSignal === 0) return;
+    setTab("Все");
+    setQuery("Маяки");
+    setMenuOpen(false);
+  }, [findSignal]);
+
   const onScroll = () => {
     if (scrollRef.current) writeDialogScroll(storage, scrollRef.current.scrollTop);
   };
@@ -137,6 +155,22 @@ export function DialogList({
       className={"msg-dialog-list" + (className ? ` ${className}` : "")}
       aria-label="Список диалогов"
     >
+      <div className="msg-dialog-list__heading">
+        <div><h2>Сообщения</h2><p>Диалоги и сообщества</p></div>
+        <button
+          type="button"
+          className="msg-dialog-list__create-button msg-dialog-list__create-button--header"
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          onClick={() => {
+            setTab("Контакты");
+            setQuery("");
+            setMenuOpen((open) => !open);
+          }}
+        >
+          <Plus aria-hidden="true" size={17}/> Создать чат
+        </button>
+      </div>
       <div className="msg-dialog-list__top">
         <label className="msg-dialog-list__search">
           <span className="msg-dialog-list__sr-only">Поиск диалогов</span>
@@ -145,7 +179,7 @@ export function DialogList({
             <input
               type="search"
               value={query}
-              placeholder="Имя, задача или текст"
+              placeholder="Поиск диалогов..."
               aria-label="Поиск диалогов"
               onChange={(event) => {
                 setQuery(event.target.value);
@@ -232,7 +266,7 @@ export function DialogList({
               setTab(item);
             }}
           >
-            {item}
+            {item}{item === "Все" && <span className="msg-dialog-list__count">{String(rows.length)}</span>}
           </button>
         ))}
       </div>
