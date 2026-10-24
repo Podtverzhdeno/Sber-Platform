@@ -45,16 +45,25 @@ export function ContextPanel({
           <span className="sr-only">К чату</span>
         </button>
       )}
-      <p className="msg-context__eyebrow">Контекст</p>
-      <h2 className="msg-context__title">{dialogTitle(channel, viewerId)}</h2>
-      <span className={`msg-context__badge${channel.muted ? " msg-context__badge--muted" : ""}`}>
-        {dialogKindLabel(channel.kind)}
-      </span>
-      {roleInChannel !== null && (
-        <span className="msg-context__role" data-testid="context-your-role">
-          ваша роль: {participantRoleLabel(roleInChannel)}
+      <div className="msg-context__heading">
+        <p className="msg-context__eyebrow">Контекст</p>
+      </div>
+      <div className="msg-context__profile">
+        <span className="msg-context__avatar" aria-hidden="true">
+          {dialogTitle(channel, viewerId).trim().charAt(0).toUpperCase() || "?"}
         </span>
-      )}
+        <div className="msg-context__profile-copy">
+          <h2 className="msg-context__title">{dialogTitle(channel, viewerId)}</h2>
+          <span className={`msg-context__badge${channel.muted ? " msg-context__badge--muted" : ""}`}>
+            {dialogKindLabel(channel.kind)}
+          </span>
+          {roleInChannel !== null && (
+            <span className="msg-context__role" data-testid="context-your-role">
+              ваша роль: {participantRoleLabel(roleInChannel)}
+            </span>
+          )}
+        </div>
+      </div>
       <dl className="msg-context__facts">
         <div>
           <dt>Непрочитанных</dt>
@@ -103,8 +112,13 @@ export function ContextPanel({
         <ul className="msg-context__people">
           {channel.participants.map((person) => (
             <li key={person.id} data-testid="context-participant">
-              <span>{person.display_name || "Без имени"}</span>
-              <small> · {participantRoleLabel(person.role)}</small>
+              <span className="msg-context__member-avatar" aria-hidden="true">
+                {person.display_name.trim().charAt(0).toUpperCase() || "?"}
+              </span>
+              <span className="msg-context__member-copy">
+                <span>{person.display_name || "Без имени"}</span>
+                <small> · {participantRoleLabel(person.role)}</small>
+              </span>
             </li>
           ))}
         </ul>
