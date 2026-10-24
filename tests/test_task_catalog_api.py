@@ -192,3 +192,41 @@ def test_page_size_bound_mirrors_contract() -> None:
     api = _client(Role.PARTICIPANT)
     assert api.get("/api/v1/me/task-recommendations", params={"page_size": 51}).status_code == 422
     assert api.get("/api/v1/me/task-recommendations", params={"page_size": 1}).status_code == 200
+
+
+def test_every_catalog_filter_controls_real_api_results() -> None:
+    """The filter bar must narrow actual server data, not just rewrite URL params."""
+    api = _client(Role.PARTICIPANT)
+    cases = (
+        ({"q": "task-102"}, ["Задача task-102"]),
+        ({"competency": "python"}, ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"]),
+        ({"competency": "unknown-skill"}, []),
+        ({"difficulty": "middle"}, ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"]),
+        ({"difficulty": "advanced"}, []),
+        ({"customer": "АТЛАС"}, ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"]),
+        ({"work_format": "remote"}, ["Задача task-102", "Задача task-103", "Задача task-101", "Задача task-104"]),
+        ({"work_format": "hybrid"}, []),
+        ({"direction": "ml"}, []),
+        ({"timeframe": "7d"}, []),
+        ({"saved": "true"}, []),
+        ({"sort": "match-default", "q": "task-102", "competency": "python", "difficulty": "middle", "customer": "атлас", "work_format": "remote"}, ["Задача task-102"]),
+    )
+    for params, expected_titles in cases:
+        response = api.get("/api/v1/me/task-recommendations", params=params)
+        assert response.status_code == 200, (params, response.text)
+        payload = response.json()
+        assert [item["title"] for item in payload["items"]] == expected_titles, params
+        assert payload["total_found"] == len(expected_titles), params
+        # Available tasks are counted over the authorized catalog, not
+        # recalculated as a misleading number for every local filter.
+        assert payload["total_available"] == 3, params
+
+    for sort in ("deadline", "duration", "newest", "skill-growth"):
+        response = api.get("/api/v1/me/task-recommendations", params={"sort": sort})
+        assert response.status_code == 200, (sort, response.text)
+        assert response.json()["total_found"] == 4
+
+    invalid = api.get("/api/v1/me/task-recommendations", params={"timeframe": "14d"})
+    assert invalid.status_code == 422
+    assert invalid.json()["code"] == "CATALOG_QUERY_INVALID"
+
