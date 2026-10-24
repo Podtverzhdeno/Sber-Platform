@@ -84,9 +84,9 @@ describe("task catalog v2", () => {
     expect(screen.getAllByText("84% релевантности").length).toBeGreaterThan(0);
     expect(screen.getByText("Недостаточно данных")).toBeInTheDocument();
     expect(screen.queryByText("0% релевантности")).not.toBeInTheDocument();
-    expect(screen.getByText("доступно для отклика · из 2")).toBeInTheDocument();
-    expect(screen.getByText(/Период: без ограничения/)).toBeInTheDocument();
-    expect(screen.getByText(/не обещает отбор, оффер или найм/)).toBeInTheDocument();
+    expect(screen.getByText("Для отклика · из 2 найденных")).toBeInTheDocument();
+    expect(screen.getByText(/По 1 из 2 загруженных/)).toBeInTheDocument();
+    expect(screen.getByText(/Релевантность не означает вероятность отбора/)).toBeInTheDocument();
   });
 
   it("labels an unverified customer without a verified-partner badge", async () => {
@@ -219,12 +219,13 @@ describe("task catalog v2", () => {
     expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: "Условия и отклик" }));
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
-    expect(await screen.findByText(catalogTerms.deliverable)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogTerms.deliverable)).length).toBeGreaterThan(0);
     expect(screen.getByRole("heading", { name: "Критерии приёмки" })).toBeInTheDocument();
     for (const criterion of catalogTerms.acceptance_criteria) {
       expect(screen.getByText(criterion)).toBeInTheDocument();
     }
-    expect(screen.getByText(/Нагрузка в неделю: 4 ч 0 мин/)).toBeInTheDocument();
+    expect(screen.getByText("Нагрузка в неделю")).toBeInTheDocument();
+    expect(screen.getByText("4 ч 0 мин")).toBeInTheDocument();
     const submit = screen.getByRole("button", { name: "Подтвердить и отправить отклик" });
     expect(submit).toBeDisabled();
     fireEvent.click(screen.getByRole("checkbox", { name: /Я прочитал/ }));
@@ -290,7 +291,7 @@ describe("task catalog v2", () => {
     expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: "Условия и отклик" }));
     const dialog = await screen.findByRole("dialog");
-    expect(await within(dialog).findByText(catalogTerms.deliverable)).toBeInTheDocument();
+    expect((await within(dialog).findAllByText(catalogTerms.deliverable)).length).toBeGreaterThan(0);
 
     revoked = true;
     await act(async () => {
@@ -298,7 +299,7 @@ describe("task catalog v2", () => {
     });
 
     expect(await within(dialog).findByText("Раздел недоступен")).toBeInTheDocument();
-    expect(within(dialog).queryByText(catalogTerms.deliverable)).not.toBeInTheDocument();
+    expect(within(dialog).queryAllByText(catalogTerms.deliverable)).toHaveLength(0);
     expect(within(dialog).queryByText(new RegExp(catalogItem.title))).not.toBeInTheDocument();
     expect(within(dialog).queryByRole("checkbox")).not.toBeInTheDocument();
   });
@@ -377,8 +378,8 @@ describe("task catalog v2", () => {
     renderCatalog("/workspace/2?catalog_view=list");
     expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     const first = document.querySelector(".catalog-v2-table-row");
-    expect(first?.querySelector('[data-label="Релевантность"]')).not.toBeNull();
-    expect(first?.querySelector('[data-label="Отклик до"]')).not.toBeNull();
+    expect(first?.querySelector('[data-label="Соответствие"]')).not.toBeNull();
+    expect(first?.querySelector('[data-label="Срок"]')).not.toBeNull();
     expect(first?.querySelector('[data-label="Действия"]')).not.toBeNull();
   });
 
