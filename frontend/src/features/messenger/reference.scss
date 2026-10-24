@@ -783,3 +783,25 @@
   .sberchat-reference .msg-composer__tool {width:28px;}
   .sberchat-reference .msg-composer__send {width:40px;height:42px;min-height:42px;}
 }
+
+
+/* Resolve fixed-position shell rule inherited from the previous messenger UI.
+   Use PNG-specific viewport insets so the actual canvas (not just columns)
+   starts at the right point. No override outside the Messages section. */
+@media (min-width: 1400px) {
+  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .workspace-content > .sberchat-reference[data-message-state="empty"] {
+    inset:70px 44px 0 164px;
+    width:auto;height:auto;min-height:0;
+    border-radius:0 14px 14px 0;
+  }
+  .page-shell:has(.sberchat-reference[data-message-state="community"]) .workspace-content > .sberchat-reference[data-message-state="community"] {
+    inset:64px 0 0 156px;
+    width:auto;height:auto;min-height:0;
+  }
+}
+@media (min-width: 1600px) {
+  .page-shell:has(.sberchat-reference[data-message-state="direct"]) .workspace-content > .sberchat-reference[data-message-state="direct"] {
+    inset:69px 0 0 172px;
+    width:auto;height:auto;min-height:0;
+  }
+}
