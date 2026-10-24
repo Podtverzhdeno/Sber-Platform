@@ -416,12 +416,14 @@ function Workspace({
     sectionIndex < navigation.length;
   const currentSection = allowed ? navigation[sectionIndex] : null;
   const [navigationOpen, setNavigationOpen] = useState(false);
+  const [messagesSidebarCollapsed, setMessagesSidebarCollapsed] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const isParticipantHome = actor.active_role === "participant" && currentSection === "Главная" && searchParams.get("v2") !== "0";
+  const isMessageRoute = currentSection === "Сообщения";
   return (
     <section
-      className={`workspace${navigationOpen ? " workspace--nav-open" : ""}`}
+      className={`workspace${navigationOpen ? " workspace--nav-open" : ""}${isMessageRoute && messagesSidebarCollapsed ? " workspace--messages-compact" : ""}`}
       aria-labelledby="workspace-title"
     >
       <aside className="sidebar" aria-label="Боковая панель">
@@ -475,7 +477,17 @@ function Workspace({
             </NavLink>
           ))}
         </nav>
-        {isParticipantHome ? (
+        {isMessageRoute ? (
+          <button
+            className="messages-sidebar-collapse"
+            type="button"
+            aria-label={messagesSidebarCollapsed ? "Развернуть навигацию" : "Свернуть навигацию"}
+            aria-expanded={!messagesSidebarCollapsed}
+            onClick={() => { setMessagesSidebarCollapsed((value) => !value); }}
+          >
+            <span aria-hidden="true">{messagesSidebarCollapsed ? "›" : "‹"}</span>
+          </button>
+        ) : isParticipantHome ? (
           <button
             type="button"
             className="sidebar-message sidebar-nudge"
