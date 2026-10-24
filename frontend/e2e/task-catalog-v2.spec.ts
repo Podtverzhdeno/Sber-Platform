@@ -63,7 +63,7 @@ test("catalog filters, view parity and one idempotent apply", async ({ page }) =
     await route.fulfill({ json: { id: "00000000-0000-0000-0000-000000000704", status: "applied" } });
   });
 
-  await page.getByLabel("Навык").fill("python");
+  await page.getByLabel("Навык", { exact: true }).fill("python");
   await expect(page.getByRole("button", { name: /Сбросить фильтр Навык/ })).toBeVisible();
   await page.getByRole("button", { name: "Список" }).click();
   await expect(page.getByRole("table", { name: "Список рекомендованных задач" })).toBeVisible();
@@ -192,13 +192,13 @@ test("mobile collapses secondary filters and reveals opened task detail", async 
   const expander = page.getByRole("button", { name: "Все фильтры" });
   await expect(expander).toBeVisible();
   await expect(expander).toHaveAttribute("aria-expanded", "false");
-  await expect(page.getByLabel("Навык")).toBeHidden();
+  await expect(page.getByLabel("Навык", { exact: true })).toBeHidden();
   await expander.click();
-  await expect(page.getByLabel("Навык")).toBeVisible();
-  await page.getByLabel("Навык").fill("python");
+  await expect(page.getByLabel("Навык", { exact: true })).toBeVisible();
+  await page.getByLabel("Навык", { exact: true }).fill("python");
   await expect(page.getByRole("button", { name: /Сбросить фильтр Навык/ })).toBeVisible();
   await page.getByRole("button", { name: "Скрыть фильтры" }).click();
-  await expect(page.getByLabel("Навык")).toBeHidden();
+  await expect(page.getByLabel("Навык", { exact: true })).toBeHidden();
 
   await page.getByRole("button", { name: "Подробнее" }).first().click();
   await expect(page.getByRole("heading", { name: "Этапы задачи" })).toBeVisible();
