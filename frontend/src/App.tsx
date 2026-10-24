@@ -764,9 +764,11 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
           }}
           onOpenWorkspace={(destination) => {
             if (destination === "trajectory") {
-              goTo("Моя траектория");
-            } else {
+              goTo(actor.navigation.includes("Моя траектория") ? "Моя траектория" : "Мой путь");
+            } else if (actor.navigation.includes("Портфолио")) {
               goTo("Портфолио");
+            } else {
+              goTo(actor.navigation.includes("Моя траектория") ? "Моя траектория" : "Мой путь");
             }
           }}
         />
