@@ -1,6 +1,8 @@
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
+import { HomeNavigationIcon } from "./features/participant-home-v2/nav-icon";
+import { Gift } from "lucide-react";
 import { BootcampV2Route } from "./features/bootcamp/route-v2";
 import { TrajectoryV2 } from "./features/trajectory-v2/page";
 import { TaskCatalogV2 } from "./features/task-catalog-v2/page";
@@ -415,6 +417,7 @@ function Workspace({
   const [navigationOpen, setNavigationOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const isParticipantHome = actor.active_role === "participant" && currentSection === "Главная" && searchParams.get("v2") !== "0";
   return (
     <section
       className={`workspace${navigationOpen ? " workspace--nav-open" : ""}`}
@@ -465,22 +468,35 @@ function Workspace({
               }}
             >
               <span className="nav-icon" aria-hidden="true">
-                {navigationIcons[item] ?? "•"}
+                {isParticipantHome ? <HomeNavigationIcon section={item} /> : navigationIcons[item] ?? "•"}
               </span>
               <span>{item}</span>
             </NavLink>
           ))}
         </nav>
-        <div className="sidebar-message">
-          <span className="sidebar-art" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-          </span>
-          <strong>Развиваем технологии вместе</strong>
-          <span>Реальные задачи, обучение и подтверждённый опыт</span>
-          <small>СБЕР</small>
-        </div>
+        {isParticipantHome ? (
+          <button
+            type="button"
+            className="sidebar-message sidebar-nudge"
+            onClick={() => {
+              const taskIndex = navigation.indexOf("Задачи");
+              const trajectoryIndex = navigation.findIndex((item) => item === "Моя траектория" || item === "Мой путь");
+              const destination = taskIndex >= 0 ? taskIndex : trajectoryIndex;
+              if (destination >= 0) void navigate(`/workspace/${String(destination)}`);
+            }}
+            disabled={!navigation.some((item) => item === "Задачи" || item === "Моя траектория" || item === "Мой путь")}
+          >
+            <span className="sidebar-nudge-title"><Gift size={29} /><strong>Твой прогресс открывает новые возможности</strong></span>
+            <span>Выполняй задачи, развивай навыки, получай новые возможности в Impulse.</span>
+          </button>
+        ) : (
+          <div className="sidebar-message">
+            <span className="sidebar-art" aria-hidden="true"><i /><i /><i /></span>
+            <strong>Развиваем технологии вместе</strong>
+            <span>Реальные задачи, обучение и подтверждённый опыт</span>
+            <small>СБЕР</small>
+          </div>
+        )}
       </aside>
       <div className="workspace-content">
         <button
