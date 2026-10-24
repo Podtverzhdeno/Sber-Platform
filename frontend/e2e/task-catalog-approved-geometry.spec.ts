@@ -96,11 +96,12 @@ test("approved list density: ten test rows remain scannable without horizontal o
     };
   });
   // Approved 1672px reference rows are ~60px high, and ten fit on screen.
-  // A 90px ceiling allows longer real labels and accessible touch controls,
-  // while still rejecting the current measured 110–111px rows.
-  expect(data.heights.every((height) => height <= 90), `Row heights: ${data.heights.join(", ")}`).toBe(true);
+  // A 68px ceiling matches the approved 60px source rhythm while preserving 40px actions,
+  // without cutting off full text in the selected detail panel.
+  expect(data.heights.every((height) => height <= 68), `Row heights: ${data.heights.join(", ")}`).toBe(true);
   expect(data.columnCount).toBeGreaterThanOrEqual(8);
   expect(data.overflow).toBe(false);
+  await expect(page.locator(".catalog-v2-table-match .catalog-v2-match-ring")).toHaveCount(10);
   await expect(page.locator(".catalog-v2-table-benefit")).toHaveCount(10);
   await expect(page.locator(".catalog-v2-table-reason")).toHaveCount(10);
 });
