@@ -192,12 +192,12 @@ function StageDrawerContinuation(props: {
 }
 
 const ROLE_INFO_SECTIONS: readonly { id: string; title: string }[] = [
-  { id: "purpose", title: "Назначение роли" },
-  { id: "responsibilities", title: "Ответственность" },
+  { id: "purpose", title: "О роли" },
+  { id: "responsibilities", title: "Чем занимается" },
   { id: "competencies", title: "Компетенции" },
-  { id: "representative", title: "Представительные задачи" },
-  { id: "development", title: "Ожидания развития" },
-  { id: "entry", title: "Вход и переходы" },
+  { id: "representative", title: "Примеры задач" },
+  { id: "development", title: "Следующий грейд" },
+  { id: "entry", title: "Кому подойдёт" },
 ] as const;
 
 /** Role-information dialog with six source-backed sections (5.3). */
@@ -328,7 +328,13 @@ export function RoleInfoDialog(props: {
         <button type="button" className="trajectory-v2-drawer-close" onClick={props.onClose}>
           Закрыть
         </button>
-        <h2 id="trajectory-role-dialog-title">Роль: {role.title}</h2>
+        <div className="trajectory-v2-role-modal-heading">
+          <span className="trajectory-v2-role-modal-icon" aria-hidden="true">▥</span>
+          <div>
+            <h2 id="trajectory-role-dialog-title">{role.title}</h2>
+            <p>{role.title.toLowerCase().includes("продуктов") ? "Исследуй пользователей, находи точки роста и влияй на продуктовые решения через данные." : `Освой ${String(role.total_milestones)} этапов профессии: от обучения до проектной практики.`}</p>
+          </div>
+        </div>
         <small>
           {roadmap === null
             ? "Снимок дорожной карты недоступен."
@@ -368,7 +374,39 @@ export function RoleInfoDialog(props: {
           className="trajectory-v2-role-panel"
           tabIndex={0}
         >
-          {sectionContent}
+          {active === 0 ? (
+            <div className="trajectory-v2-role-intro-grid">
+              <section className="trajectory-v2-role-intro-hero">
+                <div>
+                  <h3>О роли</h3>
+                  <p>{role.title.toLowerCase().includes("продуктов")
+                    ? "Продуктовый аналитик соединяет данные, пользователей и продуктовые решения. Он исследует поведение аудитории, проверяет гипотезы и помогает команде выбирать изменения на основе фактов."
+                    : `Дорожная карта роли «${role.title}» включает ${String(milestones.length)} последовательных этапов обучения и практики.`}</p>
+                </div>
+                <div className="trajectory-v2-chart-bars" aria-hidden="true"><i/><i/><i/><i/></div>
+              </section>
+              <section className="trajectory-v2-role-intro-card">
+                <h3>Чем занимается</h3>
+                <ul>{milestones.slice(0,5).map((item) => <li key={item.key}>{item.purpose}</li>)}</ul>
+                {milestones.length === 0 && <p>Подробности будут доступны после публикации дорожной карты.</p>}
+              </section>
+              <section className="trajectory-v2-role-intro-card">
+                <h3>Ключевые компетенции</h3>
+                <div className="trajectory-v2-role-skill-chips">{skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
+                {skills.length === 0 && <p>Компетенции появятся после публикации дорожной карты.</p>}
+              </section>
+              <section className="trajectory-v2-role-intro-card">
+                <h3>Примеры задач</h3>
+                <ul>{taskStages.slice(0,4).map((item) => <li key={item.key}>{item.title}</li>)}</ul>
+                {taskStages.length === 0 && <p>Проверяемые задачи пока не опубликованы.</p>}
+              </section>
+              <section className="trajectory-v2-role-intro-card">
+                <h3>Что откроется дальше</h3>
+                <ul>{milestones.slice(Math.max(0,role.completed_milestones),role.completed_milestones+4).map((item) => <li key={item.key}>{item.title}</li>)}</ul>
+                {milestones.length === 0 && <p>Следующие этапы ещё не определены.</p>}
+              </section>
+            </div>
+          ) : sectionContent}
         </div>
       </div>
     </div>
