@@ -13,7 +13,7 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: "Алекс Речной", roles: ["participant"] }] }));
   await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
   await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: actor }));
-  await page.route("**/api/v1/me/agentic-coding/profile**", (route) => {
+  await page.route("**/api/v1/me/agentic-coding/profile**", async (route) => {
     const role = new URL(route.request().url()).searchParams.get("role_key") ?? "developer";
     const target = role === "analyst" ? [3, null, 3, 2, 2, 2] : role === "qa" ? [3, 2, 2, 2, 2, 2] : [3, 4, 3, 2, 3, 2];
     const keys = ["prompting", "prompt_engineering", "context_management", "tools_mcp", "creating_skills", "agents_team"];
