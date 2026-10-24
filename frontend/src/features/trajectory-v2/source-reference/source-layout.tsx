@@ -51,7 +51,7 @@ export interface SourceTrajectoryLayoutProps {
   onOpenPassport: () => void;
 }
 
-type Glyph = "bars" | "cube" | "code" | "doc" | "spark" | "briefcase" | "check" | "lock" | "arrow" | "route";
+type Glyph = "bars" | "cube" | "code" | "doc" | "chart" | "task" | "spark" | "briefcase" | "check" | "lock" | "arrow" | "route";
 
 function SourceIcon({ name, className = "" }: { name: Glyph; className?: string }) {
   const paths: Record<Glyph, ReactNode> = {
@@ -59,6 +59,8 @@ function SourceIcon({ name, className = "" }: { name: Glyph; className?: string 
     cube: <><path d="m12 2 9 5v10l-9 5-9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></>,
     code: <path d="m8 5-6 7 6 7m8-14 6 7-6 7m-3-16-2 18"/>,
     doc: <><path d="M5 2h10l4 4v16H5z"/><path d="M15 2v5h4M9 11h6M9 15h6M9 19h4"/></>,
+    chart: <path d="M5 21V12m7 9V4m7 17v-7"/>,
+    task: <path d="M5 4h14v16H5zM8 9h8M8 13h8M8 17h5M9 4V2m6 2V2"/>,
     spark: <path d="m12 2 2.3 7.7L22 12l-7.7 2.3L12 22l-2.3-7.7L2 12l7.7-2.3z"/>,
     briefcase: <><rect x="3" y="7" width="18" height="14" rx="2"/><path d="M9 7V4h6v3m-12 6h18m-11 0v2h4v-2"/></>,
     check: <path d="m5 12 5 5L20 7"/>,
@@ -73,9 +75,10 @@ function roleGlyph(title: string): Glyph {
   const lower = title.toLocaleLowerCase("ru-RU");
   if (lower.includes("ml") || lower.includes("инженер")) return "cube";
   if (lower.includes("python") || lower.includes("разработчик")) return "code";
-  if (lower.includes("backend") || lower.includes("бэкенд")) return "doc";
+  if (lower.includes("backend") || lower.includes("бэкенд")) return "task";
   if (lower.includes("ux") || lower.includes("дизайн")) return "spark";
   if (lower.includes("менеджер")) return "briefcase";
+  if (lower.includes("аналитик данных") || lower.includes("data analyst")) return "chart";
   return "bars";
 }
 
