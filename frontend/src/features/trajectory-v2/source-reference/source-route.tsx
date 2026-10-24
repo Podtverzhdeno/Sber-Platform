@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState, type RefObject } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { apiRequest } from "../../../api/client";
@@ -17,7 +17,8 @@ import {
 import { RoleInfoDialog, StageTaskDrawer } from "../details";
 import { SourceTrajectoryLayout } from "./source-layout";
 
-import type { DevelopmentOverviewView, RoleCardView } from "../client";
+import type { DevelopmentOverviewView } from "../client";
+import "../trajectory-v2.scss";
 
 /** Route-ready adapter. Switch from the legacy body only after the integration
  * lane is free and screenshot approval has been completed. */
@@ -174,19 +175,16 @@ export function SourceTrajectoryBody({ overview }: { overview: DevelopmentOvervi
     {gradeDialogOpen && <SourceGradePolicyDialog
       grade={overview.concepts.career_grade}
       onClose={() => { setGradeDialogOpen(false); lastTrigger.current?.focus(); }}
-      triggerRef={lastTrigger}
     />}
   </div>;
 }
 
-function SourceGradePolicyDialog({ grade, onClose, triggerRef }: {
+function SourceGradePolicyDialog({ grade, onClose }: {
   grade: DevelopmentOverviewView["concepts"]["career_grade"];
   onClose: () => void;
-  triggerRef: RefObject<HTMLElement | null>;
 }) {
   // Grade catalog remains unavailable unless server publishes it.
   // No invented 1..6 array; use established server projection only.
-  void triggerRef;
   return <div className="trajectory-v2-overlay" onClick={onClose}>
     <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => { event.stopPropagation(); }} onKeyDown={(event) => {
       if (event.key === "Escape") onClose();
