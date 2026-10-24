@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.messages.tsbuildinfo"
+  },
+  "include": [
+    "src/features/collaboration.tsx",
+    "src/features/collaboration.test.tsx",
+    "src/features/messenger/**/*.ts",
+    "src/features/messenger/**/*.tsx"
+  ]
+}
