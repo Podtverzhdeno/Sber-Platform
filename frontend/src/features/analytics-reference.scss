@@ -330,3 +330,11 @@ body:has(.analytics-reference) .overlay {z-index:10050;}
     min-height:71px;
   }
 }
+
+/* Override .workspace-content h1 from the host shell; the canonical design uses
+   a compact 29px title, not the global 36px dashboard heading. */
+.workspace-content .analytics-reference .ref-page-header h1 {
+  font-size: clamp(23px, 2.2vw, 29px);
+  line-height: 1.18;
+  letter-spacing: -.55px;
+}
