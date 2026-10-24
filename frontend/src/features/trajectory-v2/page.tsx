@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { StatePanel } from "../../components/ui";
@@ -144,6 +144,13 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [compareTarget, setCompareTarget] = useState<string | null>(null);
   const [gradesOpen, setGradesOpen] = useState(false);
+  const gradeDialogRef = useRef<HTMLElement | null>(null);
+  const gradeTriggerRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!gradesOpen) return;
+    gradeDialogRef.current?.focus();
+    return () => { gradeTriggerRef.current?.focus(); };
+  }, [gradesOpen]);
   const [gradeFocus, setGradeFocus] = useState<number>(() => {
     const candidate = Number(overview.concepts.career_grade.current_grade);
     return Number.isInteger(candidate) && candidate >= 1 && candidate <= 6 ? candidate : 1;
@@ -313,7 +320,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         </section>
       <aside className="trajectory-v2-reference-sidebar" aria-label="Карьерный прогресс и следующий шаг">
         <section className="trajectory-v2-grade-panel">
-          <header><h3>Твой грейд</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => { setGradesOpen(true); }}>Все уровни →</button></header>
+          <header><h3>Твой грейд</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => { gradeTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setGradesOpen(true); }}>Все уровни →</button></header>
           <div className="trajectory-v2-grade-body">
             <div className="trajectory-v2-grade-ring"><strong>{overview.concepts.career_grade.current_grade === null ? "—" : `Грейд ${overview.concepts.career_grade.current_grade}`}</strong><small>{selected?.title ?? "Моя роль"}</small></div>
             <div className="trajectory-v2-grade-progress">
@@ -362,7 +369,33 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
       </div>
       {gradesOpen && (
         <div className="trajectory-v2-overlay" onClick={() => { setGradesOpen(false); }}>
-          <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => { event.stopPropagation(); }}>
+          <section
+            ref={gradeDialogRef}
+            className="trajectory-v2-grades-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Все уровни"
+            tabIndex={-1}
+            onClick={(event) => { event.stopPropagation(); }}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.stopPropagation();
+                setGradesOpen(false);
+              } else if (event.key === "Tab") {
+                const nodes = gradeDialogRef.current?.querySelectorAll<HTMLElement>("button:not([disabled]),a[href],[tabindex]:not([tabindex='-1'])");
+                if (!nodes || nodes.length === 0) return;
+                const first = nodes[0], last = nodes[nodes.length - 1];
+                if (!first || !last) return;
+                if (event.shiftKey && document.activeElement === first) {
+                  event.preventDefault();
+                  last.focus();
+                } else if (!event.shiftKey && document.activeElement === last) {
+                  event.preventDefault();
+                  first.focus();
+                }
+              }
+            }}
+          >
             <header className="trajectory-v2-grades-heading">
               <div className="trajectory-v2-grades-symbol" aria-hidden="true">▥</div>
               <div>
