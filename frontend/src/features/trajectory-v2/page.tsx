@@ -301,14 +301,16 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => event.stopPropagation()}>
             <header><h2>Все уровни</h2><button type="button" aria-label="Закрыть" onClick={() => setGradesOpen(false)}>✕</button></header>
             <p>Грейд определяется подтверждёнными результатами и действующей политикой оценки.</p>
-            <ol className="trajectory-v2-grades-list">
-              {Array.from({ length: 6 }, (_, index) => index + 1).map((grade) => {
-                const isCurrent = overview.concepts.career_grade.current_grade === String(grade);
-                const isTarget = overview.concepts.career_grade.target_grade === String(grade);
-                return <li key={grade} data-current={isCurrent}><strong>Грейд {grade}</strong><span>{isCurrent ? "Текущий уровень" : isTarget ? "Следующий уровень" : "Условия определяются политикой оценки"}</span></li>;
-              })}
-            </ol>
-            <small>Версия политики: {overview.concepts.career_grade.policy_version}. Точный каталог условий недоступен в текущем снимке.</small>
+            <div className="trajectory-v2-grades-list" role="status">
+              <p>Полный перечень грейдов пока не опубликован. Условия и количество уровней появятся после утверждения карьерной политики.</p>
+              {overview.concepts.career_grade.current_grade !== null && (
+                <p><strong>Текущий грейд:</strong> {overview.concepts.career_grade.current_grade}</p>
+              )}
+              {overview.concepts.career_grade.target_grade !== null && (
+                <p><strong>Целевой грейд:</strong> {overview.concepts.career_grade.target_grade}</p>
+              )}
+            </div>
+            <small>Версия политики: {overview.concepts.career_grade.policy_version ?? "не опубликована"}. Точный каталог условий недоступен в текущем снимке.</small>
           </section>
         </div>
       )}
