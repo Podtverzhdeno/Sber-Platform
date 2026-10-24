@@ -89,6 +89,24 @@ describe("task catalog v2", () => {
     expect(screen.getByText(/Релевантность не означает вероятность отбора/)).toBeInTheDocument();
   });
 
+  it("does not treat unsupported or self-service tasks as mentored support", async () => {
+    const unsupported = { ...catalogItem, support_model: "none" };
+    const selfService = { ...insufficientItem, support_model: "self_service" };
+    fetchMock.mockImplementation((input, init) => {
+      const path = requestPath(input);
+      if (path.startsWith("/api/v1/me/task-recommendations?")) {
+        return Promise.resolve(json(catalogPage([unsupported, selfService])));
+      }
+      return defaultFetch(input, init);
+    });
+    renderCatalog();
+    await screen.findAllByText(catalogItem.title);
+    const kpi = screen.getByText("с поддержкой").closest(".catalog-v2-kpi");
+    if (!(kpi instanceof HTMLElement)) throw new Error("Support KPI missing");
+    expect(within(kpi).getByText("0")).toBeInTheDocument();
+    expect(screen.getByText("Сопровождение не предусмотрено")).toBeInTheDocument();
+  });
+
   it("labels an unverified customer without a verified-partner badge", async () => {
     const unverified = {
       ...catalogItem,
