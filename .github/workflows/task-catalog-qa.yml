@@ -9,6 +9,10 @@ on:
       - "frontend/e2e/task-catalog-approved-geometry.spec.ts"
       - "frontend/e2e/task-catalog-approved-visual-fixture.ts"
       - ".github/workflows/task-catalog-qa.yml"
+      - "src/impulse/api/v1/task_catalog.py"
+      - "src/impulse/application/task_catalog_page.py"
+      - "tests/task_catalog/test_catalog_page_contract.py"
+      - "tests/test_task_catalog_api.py"
   workflow_dispatch:
 
 permissions:
@@ -67,3 +71,20 @@ jobs:
             frontend/playwright-report/
           if-no-files-found: ignore
           retention-days: 7
+
+  tasks-backend-filters:
+    name: Tasks API filtering and pagination
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Python and uv
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - name: Install pinned backend dependencies
+        run: uv sync --frozen
+      - name: Exercise real API filters and cursor contracts
+        run: uv run pytest -q tests/task_catalog/test_catalog_page_contract.py tests/test_task_catalog_api.py tests/task_catalog/test_visibility_contract.py
