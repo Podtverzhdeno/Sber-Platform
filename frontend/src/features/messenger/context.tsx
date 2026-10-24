@@ -73,7 +73,13 @@ export function ContextPanel({
         </div>
       </div>
       {description && <p className="msg-context__description">{description}</p>}
-      {isCommunity && isReferencePreview && (
+      {isReferencePreview && !isCommunity && (
+        <div className="msg-context__intro-actions">
+          <button type="button" disabled title="Профиль доступен после подключения соответствующего API">Профиль</button>
+          <span>Демо</span>
+        </div>
+      )}
+            {isCommunity && isReferencePreview && (
         <div className="msg-context__intro-actions">
           <button type="button" disabled title="Приглашения доступны после подключения API сообщества"><Users size={17} /> Пригласить участников</button>
           <span>Демо</span>
@@ -81,19 +87,20 @@ export function ContextPanel({
       )}
       <h3 className="msg-context__about-heading">{isCommunity ? "О сообществе" : "О чате"}</h3>
       <dl className="msg-context__facts">
-        <div>
-          <dt>Непрочитанных</dt>
-          <dd>{String(channel.unread)}</dd>
-        </div>
-        <div>
-          <dt>Статус</dt>
-          <dd>{isReferencePreview ? "демо" : channel.status === "active" ? "активен" : "закрыт"}</dd>
-        </div>
-        <div>
-          <dt>Участников</dt>
-          <dd>{isCommunity && isReferencePreview ? "248" : String(channel.participants.length)}</dd>
-        </div>
-        {isReferencePreview && <div><dt>Создан</dt><dd>20 октября 2026</dd></div>}
+        {isReferencePreview ? (
+          <>
+            <div><dt>Тип</dt><dd>{isCommunity ? "Сообщество" : "Личный чат"}</dd></div>
+            <div><dt>Участников</dt><dd>{isCommunity ? "248" : "2"}</dd></div>
+            <div><dt>Создано</dt><dd>{isCommunity ? "12 марта 2024" : "20 октября 2026"}</dd></div>
+            <div><dt>{isCommunity ? "Ссылка" : "Уведомления"}</dt><dd>{isCommunity ? "t.me/impulse_mayaki" : "Включены"}</dd></div>
+          </>
+        ) : (
+          <>
+            <div><dt>Непрочитанных</dt><dd>{String(channel.unread)}</dd></div>
+            <div><dt>Статус</dt><dd>{channel.status === "active" ? "активен" : "закрыт"}</dd></div>
+            <div><dt>Участников</dt><dd>{String(channel.participants.length)}</dd></div>
+          </>
+        )}
       </dl>
       {!isCommunity && (channel.task_id !== null || workContext !== null) && (
       <section className="msg-context__section" aria-label="Задача">
@@ -150,7 +157,7 @@ export function ContextPanel({
       {isCommunity && isReferencePreview && (
         <section className="msg-context__section ref-context-resources" aria-label="Полезные материалы">
           <h3 className="msg-context__section-title">Полезные материалы</h3>
-          {["Календарь мероприятий", "Возможности для студентов", "Гайд: как попасть на стажировку"].map((name)=>(
+          {["Календарь мероприятий", "Возможности для студентов", "Гайд: как попасть на стажировку", "Записи прошедших встреч"].map((name)=>(
             <div className="ref-context-resource" key={name}><Link2 size={17} aria-hidden="true" /><span>{name}</span></div>
           ))}
         </section>
