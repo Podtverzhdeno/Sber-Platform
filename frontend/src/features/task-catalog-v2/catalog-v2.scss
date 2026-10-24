@@ -2838,3 +2838,53 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
     padding-inline: 16px;
   }
 }
+
+/* Final source-viewport density: match compact 60px list rows and the
+   approved hover-to-inspect card pattern. Secondary commands remain
+   keyboard discoverable and reachable via the selected detail panel. */
+@media (min-width: 1550px) {
+  .catalog-v2-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 11px 14px;
+  }
+
+  .catalog-v2-card .catalog-v2-card-actions {
+    position: absolute;
+    z-index: 2;
+    right: 10px;
+    bottom: 7px;
+    display: flex;
+    padding: 4px;
+    border: 1px solid var(--catalog-border);
+    border-radius: 9px;
+    background: var(--catalog-surface);
+    box-shadow: 0 4px 14px rgb(0 0 0 / 14%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease;
+  }
+
+  .catalog-v2-card:hover .catalog-v2-card-actions,
+  .catalog-v2-card:focus-within .catalog-v2-card-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .catalog-v2-card .catalog-v2-card-quickfacts {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1121px) {
+  .catalog-v2-table-row {
+    min-height: 58px;
+    padding-block: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-v2-card .catalog-v2-card-actions { transition: none; }
+}
