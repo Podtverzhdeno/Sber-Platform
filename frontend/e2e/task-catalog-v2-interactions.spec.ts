@@ -223,8 +223,10 @@ test.describe("task catalog interactive controls and motion", () => {
 
   test("terms dialog traps keyboard focus at both ends and returns focus on Escape", async ({ page }) => {
     await openCatalog(page);
-    const open = page.locator(".catalog-v2-card").first().getByRole("button", { name: "Условия и отклик" });
-    await open.hover();
+    const card = page.locator(".catalog-v2-card").first();
+    const open = card.getByRole("button", { name: "Условия и отклик" });
+    await card.hover();
+    await expect(card.locator(".catalog-v2-card-actions")).toHaveCSS("opacity", "1");
     await open.click();
     const modal = page.getByRole("dialog");
     await expect(modal).toBeVisible();
