@@ -213,8 +213,12 @@ async def demo_login(
 @router.get("/me", response_model=ActorView)
 async def me(
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[DemoAuthService, Depends(_service)],
+    response: Response,
 ) -> ActorView:
-    return _actor_view(authenticated)
+    # Same-origin JSON, never cache an authenticated CSRF token.
+    response.headers["Cache-Control"] = "no-store, private"
+    return _actor_view(authenticated, service.recoverable_csrf_token(authenticated))
 
 
 @router.get("/me/profile", response_model=ParticipantProfileView)
