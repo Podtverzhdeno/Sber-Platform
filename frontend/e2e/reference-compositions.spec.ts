@@ -699,11 +699,12 @@ test("R-PAR-03 bootcamp course detail and return", async ({ page }) => {
   await installParticipantData(page);
   await page.goto("/workspace/2?course=python-base");
   await page.locator(`[data-persona="${participantBase.key}"]`).click();
-  await expect(page.locator('[data-reference="R-PAR-03"]')).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Основы Python для анализа данных" })).toBeVisible();
+  await expect(page.locator('[data-reference="BC-R01"]')).toBeVisible();
+  const courseDrawer = page.getByRole("dialog", { name: "Информация о курсе" });
+  await expect(courseDrawer.getByRole("heading", { name: "Основы Python для анализа данных" })).toBeVisible();
   await screenshot(page, "R-PAR-03");
-  await page.getByRole("button", { name: "← Вернуться в Bootcamp" }).click();
-  await expect(page.getByRole("heading", { name: "Учитесь ради следующего результата" })).toBeVisible();
+  await courseDrawer.getByRole("button", { name: "Закрыть" }).click();
+  await expect(page.getByRole("heading", { name: /Bootcamp.*Развитие навыков/ })).toBeVisible();
 });
 
 test("R-PAR-04 task catalog filter", async ({ page }) => {
