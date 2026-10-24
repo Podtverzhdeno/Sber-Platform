@@ -86,7 +86,7 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
   });
   console.info("[catalog-approved-first-fold]", firstFold);
   expect(firstFold.stageTop).toBeLessThan(880);
-  expect(firstFold.actionBottom).toBeLessThanOrEqual(1010);
+  expect(firstFold.actionBottom).toBeLessThanOrEqual(941);
 
   const firstCard = page.locator(".catalog-v2-card").first();
   const actions = firstCard.locator(".catalog-v2-card-actions");
