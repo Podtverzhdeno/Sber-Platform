@@ -314,3 +314,18 @@
   /* On narrower layouts the accessible view selector remains in flow. */
   .analytics-reference .ref-pages {position:static;}
 }
+
+/* Keep L1/skill proof dialogs above the fixed header (z=20) and sidebar (z=30). */
+body:has(.analytics-reference) .overlay {z-index:10050;}
+/* At intermediate desktop widths, retain the selector as a proper layout row. */
+@media (min-width:1381px) and (max-width:1519px) {
+  .analytics-reference .ref-pages {
+    position:static;
+    width:max-content;
+    max-width:100%;
+    margin:0;
+  }
+  .analytics-reference .ref-page-header {
+    min-height:71px;
+  }
+}
