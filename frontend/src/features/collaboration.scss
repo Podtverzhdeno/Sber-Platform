@@ -1574,3 +1574,28 @@
   .sberchat-shell .msg-context__description { margin-inline: 14px; }
   .sberchat-shell .msg-context__about-heading { padding-inline: 14px; }
 }
+
+/* Read-only reference composer retains the visual input geometry without fake persistence. */
+.sberchat-shell .msg-composer--reference { display: block; padding: 8px 12px 8px; min-height: 80px; }
+.sberchat-shell .msg-composer__reference-row {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; min-height: 45px;
+  color: var(--ref-muted);
+}
+.sberchat-shell .msg-composer__reference-row > svg { flex: 0 0 auto; }
+.sberchat-shell .msg-composer__reference-row input {
+  width: 100%; flex: 1; min-width: 0;
+  height: 45px; padding: 0 13px; border-radius: 9px;
+  border: 1px solid var(--ref-line);
+  background: color-mix(in srgb, var(--ref-bg) 90%, var(--ref-surface));
+  color: var(--ref-muted); font: inherit; font-size: 12px;
+}
+.sberchat-shell .msg-composer__reference-row button {
+  flex: 0 0 45px; width: 45px; height: 45px;
+  border: none; border-radius: 10px; display: grid; place-items: center;
+  background: linear-gradient(135deg, #1ff2e4, #04a7da);
+  color: #031521;
+  opacity: .72; cursor: not-allowed;
+}
+.sberchat-shell .msg-composer__reference-hint { font-size: 10px; line-height: 1.2; color: var(--ref-muted); margin: 4px 0 0 68px; }
+@media (max-width: 480px) { .sberchat-shell .msg-composer__reference-row { gap: 6px; } .sberchat-shell .msg-composer__reference-hint { margin-left: 0; } }
