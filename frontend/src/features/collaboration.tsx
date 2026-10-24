@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
-import { apiRequest } from "../api/client";
+import { apiRequest, ApiClientError } from "../api/client";
 import type { RuntimeApiPath } from "../api/client";
 import { StatePanel } from "../components/ui";
 import "./collaboration.scss";
@@ -111,6 +111,19 @@ export function MessagingWorkspace({
     queryFn: () => apiRequest<ChannelView[]>("/api/v1/me/messaging/channels"),
   });
   const channels = useMemo(() => channelsQuery.data ?? [], [channelsQuery.data]);
+  const contactsQuery = useQuery({
+    queryKey: ["messaging-contacts"],
+    queryFn: () => apiRequest<Array<{id:string;display_name:string;role:string}>>("/api/v1/me/messaging/contacts"),
+    staleTime: 60_000,
+  });
+  const [actionError, setActionError] = useState("");
+  const actionErrorText = (error: unknown): string =>
+    error instanceof ApiClientError
+      ? error.code === "CSRF_INVALID"
+        ? "Сессия устарела. Обновите страницу для восстановления защиты и повторите действие."
+        : error.message
+      : "Не удалось выполнить действие. Проверьте соединение и повторите.";
+
   const isOnline = useSyncExternalStore(subscribeOnline, onlineSnapshot, onlineSnapshot);
   const isNarrow = useSyncExternalStore(subscribeNarrow, narrowSnapshot, narrowSnapshot);
 
@@ -315,20 +328,42 @@ export function MessagingWorkspace({
     },
   });
 
-  const createDialog = (peerId: string) => {
-    if (!UUID_PATTERN.test(peerId)) return;
-    void apiRequest<ChannelView>("/api/v1/me/messaging/channels/personal", {
-      method: "POST",
-      headers: csrfHeaders(),
-      body: JSON.stringify({ peer_id: peerId }),
-    })
-      .then((channel) => {
-        setSelectedId(channel.id);
-        setContextOpen(true);
-        if (isNarrow) setMobilePane("chat");
-        return client.invalidateQueries({ queryKey: ["messaging-channels"] });
-      })
-      .catch(() => {});
+  const createDialog = async (peerId: string): Promise<void> => {
+    if (!UUID_PATTERN.test(peerId)) {
+      setActionError("Неверный идентификатор контакта.");
+      return;
+    }
+    setActionError("");
+    try {
+      const channel = await apiRequest<ChannelView>("/api/v1/me/messaging/channels/personal", {
+        method: "POST", headers: csrfHeaders(),
+        body: JSON.stringify({peer_id:peerId}),
+      });
+      setSelectedId(channel.id);
+      setContextOpen(true);
+      setMobilePane("chat");
+      await client.invalidateQueries({queryKey:["messaging-channels"]});
+    } catch (error) {
+      setActionError(actionErrorText(error));
+      throw error;
+    }
+  };
+
+  const createGroup = async (title: string, peerIds: string[]): Promise<void> => {
+    setActionError("");
+    try {
+      const channel = await apiRequest<ChannelView>("/api/v1/me/messaging/channels/group", {
+        method:"POST", headers:csrfHeaders(),
+        body:JSON.stringify({title,peer_ids:peerIds}),
+      });
+      setSelectedId(channel.id);
+      setContextOpen(true);
+      setMobilePane("chat");
+      await client.invalidateQueries({queryKey:["messaging-channels"]});
+    } catch(error) {
+      setActionError(actionErrorText(error));
+      throw error;
+    }
   };
 
   const sendState: ComposerSendState = sendMessage.isError
@@ -455,6 +490,9 @@ export function MessagingWorkspace({
         {listVisible && (
           <DialogList
             channels={channels}
+            directoryContacts={contactsQuery.data ?? []}
+            actionError={actionError}
+            onCreateGroup={createGroup}
             viewerId={personId}
             selectedId={selected?.id ?? null}
             createSignal={createSignal}
