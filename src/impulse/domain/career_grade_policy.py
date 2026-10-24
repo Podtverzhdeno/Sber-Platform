@@ -218,7 +218,7 @@ def calculate_grade_readiness(
                 item.source_ref
                 for item in matching
                 if item.state is EvidenceState.VERIFIED
-                and item.revoked_at is None
+                and (item.revoked_at is None or item.revoked_at > as_of)
                 and item.source_ref not in revocations
             }
         )
