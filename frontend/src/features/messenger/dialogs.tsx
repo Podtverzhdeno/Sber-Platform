@@ -160,12 +160,13 @@ export function DialogList({
         <button
           type="button"
           className="msg-dialog-list__create-button msg-dialog-list__create-button--header"
-          aria-haspopup="menu"
-          aria-expanded={menuOpen}
+          aria-haspopup={contacts.length > 0 ? "menu" : undefined}
+          aria-expanded={contacts.length > 0 ? menuOpen : undefined}
           onClick={() => {
             setTab("Контакты");
             setQuery("");
-            setMenuOpen((open) => !open);
+            if (contacts.length > 0) setMenuOpen((open) => !open);
+            else setMenuOpen(false);
           }}
         >
           <Plus aria-hidden="true" size={17}/> Создать чат
@@ -214,7 +215,7 @@ export function DialogList({
               onKeyDown={(event) => {
                 if (event.key === "Escape") {
                   setMenuOpen(false);
-                  (event.currentTarget.previousElementSibling as HTMLButtonElement | null)?.focus();
+                  event.currentTarget.closest(".msg-dialog-list")?.querySelector<HTMLButtonElement>(".msg-dialog-list__create-button--header")?.focus();
                 }
               }}
             >
