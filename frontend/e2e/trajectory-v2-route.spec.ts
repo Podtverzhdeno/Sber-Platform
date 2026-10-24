@@ -11,7 +11,7 @@ const actor = {
   csrf_token: "csrf-preview",
 };
 
-test("opt-in trajectory v2 is API-backed and legacy route stays available", async ({ page }) => {
+test("trajectory v2 is default and legacy route stays available", async ({ page }) => {
   let loggedIn = false;
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: { demo_mode: true } }));
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: actor.display_name, roles: ["participant"] }] }));
@@ -21,11 +21,11 @@ test("opt-in trajectory v2 is API-backed and legacy route stays available", asyn
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
 
-  await page.goto("/workspace/1?v2=1");
+  await page.goto("/workspace/1");
   await expect(page.locator(".trajectory-v2")).toBeVisible();
   await expect(page.getByText("Не удалось загрузить траекторию.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Повторить" })).toBeVisible();
 
-  await page.goto("/workspace/1");
+  await page.goto("/workspace/1?legacy=1");
   await expect(page.locator(".trajectory-v2")).toHaveCount(0);
 });
