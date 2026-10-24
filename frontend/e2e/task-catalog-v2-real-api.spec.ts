@@ -134,10 +134,11 @@ test("real seeded API preserves card/list order and opens the canonical assigned
   await page.getByRole("button", { name: "Список", exact: true }).click();
   const rows = page.locator(".catalog-v2-table-row");
   await expect(rows).toHaveCount(expectedTitles.length);
-  await expect(rows.locator(".catalog-v2-table-task > strong")).toHaveText(expectedTitles);
+  await expect(rows.locator(".catalog-v2-table-task-text > strong")).toHaveText(expectedTitles);
   await page.getByRole("button", { name: "Карточки", exact: true }).click();
   await expect(page.locator('[role="listitem"] h2')).toHaveText(expectedTitles);
 
+  await page.getByRole("button", { name: "Все фильтры" }).click();
   const search = page.getByLabel("Поиск", { exact: true });
   await search.fill("no-such-real-catalog-task-000000");
   await search.press("Enter");
@@ -223,6 +224,7 @@ test("real seeded API submits one application and replays its idempotency key", 
 
   await openRealCatalog(page);
   expect(await page.evaluate(() => window.sessionStorage.getItem("impulse_csrf"))).toBe(csrf);
+  await page.getByRole("button", { name: "Все фильтры" }).click();
   const search = page.getByLabel("Поиск", { exact: true });
   await search.fill(candidate.title);
   await search.press("Enter");
@@ -409,6 +411,7 @@ test("real server requires fresh consent after v3 to v4 terms drift", async ({ p
     await reviseTerms(customer, candidate.task_id, customerDetail.terms.deadline_at, 3);
 
     await openRealCatalog(page);
+    await page.getByRole("button", { name: "Все фильтры" }).click();
     const search = page.getByLabel("Поиск", { exact: true });
     await search.fill(candidate.title);
     await search.press("Enter");
@@ -451,6 +454,7 @@ test("real server rejects an expired application and refreshes to an honest empt
     const beforeIds = await applicationIds(customer, candidate.task_id);
 
     await openRealCatalog(page);
+    await page.getByRole("button", { name: "Все фильтры" }).click();
     const search = page.getByLabel("Поиск", { exact: true });
     await search.fill(candidate.title);
     await search.press("Enter");
@@ -515,6 +519,7 @@ test("real server exposes qualitative growth, unverified customer and hard eligi
   }
 
   await openRealCatalog(page);
+  await page.getByRole("button", { name: "Все фильтры" }).click();
   const search = page.getByLabel("Поиск", { exact: true });
   await search.fill(candidate.title);
   await search.press("Enter");
@@ -584,7 +589,7 @@ test("real server keeps equal-score ordering stable across requests, cards and l
   await page.getByRole("button", { name: "Список", exact: true }).click();
   const rows = page.locator(".catalog-v2-table-row");
   await expect(rows).toHaveCount(2);
-  await expect(rows.locator(".catalog-v2-table-task > strong")).toHaveText(expectedTitles);
+  await expect(rows.locator(".catalog-v2-table-task-text > strong")).toHaveText(expectedTitles);
   await page.getByRole("button", { name: "Карточки", exact: true }).click();
   await expect(page.locator('[role="listitem"] h2')).toHaveText(expectedTitles);
 });
