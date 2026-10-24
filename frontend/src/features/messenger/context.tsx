@@ -76,6 +76,12 @@ export function ContextPanel({
         </div>
         <span className="msg-context__online" role="status">{channel.status === "active" ? "● Активен" : "Закрыт"}</span>
       </div>
+      {channel.kind === "community" && channel.title.trim().toLowerCase() === "маяки" && (
+        <p className="msg-context__description">
+          Сообщество студентов, которые развиваются, создают проекты и находят возможности вместе.
+          Маяки — это люди, идеи и движение вперёд.
+        </p>
+      )}
       <section className="msg-context__section msg-context__about" aria-label="О чате">
         <h3 className="msg-context__section-title">{channel.kind === "community" ? "О сообществе" : "О чате"}</h3>
       <dl className="msg-context__facts">
