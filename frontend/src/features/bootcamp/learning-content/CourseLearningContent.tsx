@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { learningProgramFor } from "./programs";
 import { blueprintFor } from "./course-blueprints";
+import { knowledgeCheckFor } from "./knowledge-checks";
 import "./learning-content.scss";
 
 type Props = {
@@ -18,6 +19,7 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
   const [opened, setOpened] = useState<ReadonlySet<string>>(() => new Set());
   const [checks, setChecks] = useState<ReadonlySet<string>>(() => new Set());
   const [showExpected, setShowExpected] = useState(false);
+  const [knowledgeAnswers, setKnowledgeAnswers] = useState<Record<string, number>>({});
 
   useEffect(() => {
     setCurrent(0);
@@ -25,9 +27,11 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
     setOpened(new Set());
     setChecks(new Set());
     setShowExpected(false);
+    setKnowledgeAnswers({});
   }, [courseKey]);
 
   const unit = program?.units[current];
+  const knowledgeCheck = unit ? knowledgeCheckFor(courseKey, unit.id) : null;
   const totalMinutes = useMemo(
     () => program?.units.reduce((sum, item) => sum + item.minutes, 0) ?? 0,
     [program],
@@ -174,6 +178,31 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
             </button>
             {showExpected && <p className="bc-learning__expected" role="status">{unit.expected}</p>}
           </div>
+          {knowledgeCheck && (
+            <section className="bc-learning__knowledge" aria-label="Проверка понимания">
+              <span className="bc-learning__eyebrow">Контрольная точка · без официальной оценки</span>
+              <h5>Проверьте понимание на примере</h5>
+              <p>{knowledgeCheck.question}</p>
+              <div className="bc-learning__knowledge-options" role="group" aria-label="Варианты ответа">
+                {knowledgeCheck.options.map((option, index) => (
+                  <button
+                    type="button"
+                    key={option}
+                    aria-pressed={knowledgeAnswers[unit.id] === index}
+                    onClick={() => { setKnowledgeAnswers(previous => ({ ...previous, [unit.id]: index })); }}
+                  >
+                    <span>{String(index + 1)}.</span> {option}
+                  </button>
+                ))}
+              </div>
+              {knowledgeAnswers[unit.id] !== undefined && (
+                <p className="bc-learning__knowledge-feedback" role="status">
+                  <strong>{knowledgeAnswers[unit.id] === knowledgeCheck.correctIndex ? "Верно." : "Ещё раз проверьте логику."}</strong>{" "}
+                  {knowledgeCheck.explanation}
+                </p>
+              )}
+            </section>
+          )}
           <div className="bc-learning__navigation">
             <button type="button" disabled={current === 0} onClick={() => { selectUnit(current - 1); }}>Предыдущий урок</button>
             <span>{String(current + 1)} / {String(program.units.length)}</span>
