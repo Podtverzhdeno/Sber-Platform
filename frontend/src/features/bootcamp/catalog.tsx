@@ -476,8 +476,8 @@ export function BootcampCatalog({
       <header className="bootcamp-hero">
         <div>
           <p className="eyebrow">ВАША ТРАЕКТОРИЯ · ОБУЧЕНИЕ</p>
-          <h1 id="workspace-title">Bootcamp <span className="bc-title-mark">/ Развитие навыков</span></h1>
-          <p className="lead">Курсы, которые помогают двигаться к следующему профессиональному результату</p>
+          <h1 id="workspace-title">Bootcamp</h1>
+          <p className="lead">Обучение для твоей роли и реальных проектов</p>
         </div>
         <div className="bootcamp-hero-pulse" aria-label="Состояние обучения">
           <strong>{String(catalog.data.filter((card) => card.completion_state === "verified").length)}</strong>
@@ -498,17 +498,13 @@ export function BootcampCatalog({
       )}
       {catalog.isError && <p className="notice" role="status">Показаны сохранённые данные каталога. Обновление временно недоступно. <button type="button" onClick={() => { void catalog.refetch(); }}>Повторить</button></p>}
       {streak.isError && <p className="notice" role="status">Серия обучения временно недоступна. Каталог продолжает работать.</p>}
-      <div className="bc-role-switch-row">
-        <label htmlFor="bc-selected-track">Выбранная траектория</label>
-        <select id="bc-selected-track" value={trackFilter} onChange={(event) => { setTrack(event.target.value); }}>
-          <option value="all">Все активные направления</option>
-          {trackOptions.map((key) => <option key={key} value={key}>{key}</option>)}
-        </select>
-        <span className="bc-muted">Каталог и требования обновляются для выбранной траектории</span>
+      <div className="bc-role-switch-row" role="group" aria-label="Выбор профессиональной роли">
+        {trackOptions.map((key) => <button key={key} type="button" aria-pressed={trackFilter === key || (trackFilter === "all" && key === trackOptions[0])} onClick={() => { setTrack(key); }}>{key}</button>)}
+        {trackOptions.length === 0 && <span className="bc-muted">Активные траектории пока не найдены</span>}
       </div>
       <div className="bc-overview-grid">
         <section className="bc-continue ui-card" aria-labelledby="bc-continue-title">
-          <p className="bc-panel-kicker">СЛЕДУЮЩЕЕ ДЕЙСТВИЕ</p>
+          <p className="bc-panel-kicker">ПРОДОЛЖИТЬ ОБУЧЕНИЕ</p>
           <h2 id="bc-continue-title">{nextCourse?.completion_state === "reported" ? "Продолжить обучение" : nextCourse ? "Начните с подходящего курса" : "Выберите следующий шаг"}</h2>
           <p className="bc-overview-course">{nextCourse?.title ?? "Доступный курс пока не определён"}</p>
           <p className="bc-muted">Прогресс и контрольные точки появятся после подключения подтверждённого источника LMS</p>
@@ -528,11 +524,11 @@ export function BootcampCatalog({
         </section>
       </div>
       <section className="bc-grade-banner" aria-labelledby="bc-grade-title">
-        <div><p className="bc-panel-kicker">ПУТЬ К СЛЕДУЮЩЕМУ ГРЕЙДУ</p>
-          <h2 id="bc-grade-title">{pendingRequired.length > 0 ? "Остались обязательные курсы" : "Требования к грейду"}</h2>
+        <div><p className="bc-panel-kicker">ДО СЛЕДУЮЩЕГО ГРЕЙДА</p>
+          <h2 id="bc-grade-title">{pendingRequired.length > 0 ? `Осталось ${pendingRequired.length} обязательных курса` : "Требования к грейду"}</h2>
           <p>{pendingRequired.length > 0 ? "Просмотрите ещё не подтверждённые учебные требования. Дополнительно могут потребоваться практика и проверка результатов." : "Полный список требований и степень готовности появятся после публикации политики. Отсутствие курсов здесь не означает присвоение грейда."}</p>
         </div>
-        <button type="button" onClick={() => { openPanel("requirements"); }}>Посмотреть требования →</button>
+        <button type="button" onClick={() => { openPanel("requirements"); }}>Посмотреть курсы →</button>
       </section>
       <h2 className="bc-catalog-title" id="bc-catalog-title">Каталог курсов <span>{catalog.data.length}</span></h2>
       <CatalogFilters
@@ -549,7 +545,7 @@ export function BootcampCatalog({
         <div className="course-grid">
           {orderedVisible.map((card) => (
             <article className="ui-card bootcamp-course-card" key={card.key} data-required={card.must_take !== null} data-access={card.access_state} data-testid={`course-${card.key}`}>
-              <div className="bc-course-labels"><span>{card.must_take ? "ОБЯЗАТЕЛЬНЫЙ" : card.relevant ? "ДЛЯ МОЕЙ РОЛИ" : "ОБУЧЕНИЕ"}</span><span aria-hidden="true">{card.access_state === "available" ? "↗" : "🔒"}</span></div>
+              <div className="bc-course-labels"><span>{card.must_take ? "НУЖНО ДЛЯ РОЛИ" : card.relevant ? "РЕКОМЕНДОВАН" : "ОБУЧЕНИЕ"}</span><span aria-hidden="true">{card.access_state === "available" ? "↗" : "🔒"}</span></div>
               <h2>{card.title}</h2>
               {deepLinkedKey === card.key && (
                 <p className="notice" data-testid={`deeplink-${card.key}`}>
