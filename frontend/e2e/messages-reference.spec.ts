@@ -8,7 +8,7 @@ const actor = {
   assigned_roles: ["participant"],
   scopes: [],
   consent_scopes: [],
-  navigation: ["Главная", "Сообщения", "Задачи"],
+  navigation: ["Главная", "Задачи", "Проекты", "Курсы", "Сообщения", "Команда", "База знаний", "Аналитика", "Настройки"],
   csrf_token: "messages-reference",
 };
 const makeMessage = (id: string, body: string, author_name = "Елена Наставник") => ({
@@ -49,9 +49,10 @@ async function openMessages(page: Page) {
   });
   await page.route("**/api/v1/me/messaging/channels/*/mute", route => route.fulfill({json:{...channels[0],muted:true}}));
   await page.route("**/api/v1/me/messaging/channels/*/read", route => route.fulfill({json:channels[0]}));
+  await page.clock.install({ time: new Date("2026-10-20T14:00:00+03:00") });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.goto("/workspace/1");
+  await page.goto("/workspace/4");
   await expect(page.getByRole("complementary",{name:"Список диалогов"})).toBeVisible();
   return {sentMessages};
 }
