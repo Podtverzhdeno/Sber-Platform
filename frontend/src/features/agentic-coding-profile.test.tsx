@@ -66,6 +66,7 @@ describe("Agentic Coding source-derived profile", () => {
   it("renders the skill inspector above the application and traps keyboard focus", () => {
     render(<AgenticCodingProfile />);
     const trigger = screen.getByTestId("agentic-skill-prompting");
+    trigger.focus(); // Simulate opening the inspector via keyboard; click alone does not move focus in jsdom.
     fireEvent.click(trigger);
     const dialog = screen.getByRole("dialog");
     expect(dialog.closest(".agentic-profile")).toBeNull();
