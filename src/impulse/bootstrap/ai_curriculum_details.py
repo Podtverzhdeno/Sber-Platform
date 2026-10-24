@@ -521,7 +521,7 @@ AI_CURRICULUM_DETAILS: dict[str, list[dict[str, object]]] = json.loads(r"""{
         "Memory TTL, summarization и retrieval",
         "PII in conversational state"
       ],
-      "lab": "Добавь session memory с TTL и отдельную базу знаний для агента.",
+      "lab": "Добавь session memory с TTL и отдельную базу знаний для агента; проверь изоляцию двух пользователей и удаление истории.",
       "acceptance": [
         "Не смешиваются пользовательские сессии",
         "Есть кнопка очистки памяти и тест удаления",
