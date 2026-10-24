@@ -22,7 +22,7 @@ type GrowthSnapshot = { snapshot_id: string; generated_at: string; actor_timezon
 type WeeklyActivity = { label: string; count: number };
 
 /** Counts observed events, not guessed engagement. Align weeks to the actor's local Monday. */
-export function weeklyActivityFromSnapshot(snapshot: GrowthSnapshot | undefined): { observed: boolean; weeks: WeeklyActivity[] } {
+function weeklyActivityFromSnapshot(snapshot: GrowthSnapshot | undefined): { observed: boolean; weeks: WeeklyActivity[] } {
   if (!snapshot || !snapshot.freshness.known || !Array.isArray(snapshot.events)) return { observed: false, weeks: [] };
   let formatter: Intl.DateTimeFormat;
   try {
