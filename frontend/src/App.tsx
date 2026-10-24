@@ -511,13 +511,13 @@ function Workspace({
           actor.active_role === "participant" &&
           (currentSection === "Мой путь" ||
             currentSection === "Моя траектория") ? (
-          searchParams.get("v2") === "1" ? (
-            <TrajectoryV2 />
-          ) : (
+          searchParams.get("legacy") === "1" ? (
             <>
               <DevelopmentJourney />
               <TrajectoryMapPage />
             </>
+          ) : (
+            <TrajectoryV2 />
           )
         ) : allowed &&
           actor.active_role === "participant" &&
