@@ -2778,3 +2778,63 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
     align-content: center;
   }
 }
+
+/* Approved 1672px reference: 10 results occupy approximately 600px.
+   Preserve 40px controls while eliminating artificial row min-height. */
+@media (min-width: 1121px) {
+  .catalog-v2-table-row {
+    min-height: 60px;
+    padding-block: 5px;
+  }
+}
+
+/* At the source width, compact task cards align the mini-facts and the
+   existing functional actions on one line, instead of adding a fourth row.
+   On smaller screens keep the familiar stacked CTA layout. */
+@media (min-width: 1550px) {
+  .catalog-v2-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-content: start;
+    column-gap: 8px;
+    row-gap: 8px;
+  }
+
+  .catalog-v2-card > header,
+  .catalog-v2-card > .catalog-v2-tags,
+  .catalog-v2-card > .catalog-v2-card-status,
+  .catalog-v2-card > .catalog-v2-eligibility {
+    grid-column: 1 / -1;
+  }
+
+  .catalog-v2-card .catalog-v2-card-quickfacts {
+    grid-column: 1;
+    grid-row: 3;
+    align-self: end;
+    gap: 4px 8px;
+  }
+
+  .catalog-v2-card .catalog-v2-card-actions {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: end;
+    justify-self: end;
+    padding-top: 0;
+    border-top: 0;
+    gap: 4px;
+  }
+
+  .catalog-v2-card .catalog-v2-card-actions button {
+    min-height: 36px;
+    padding: 5px 7px;
+    white-space: nowrap;
+  }
+}
+
+/* Keep modal content readable while moving toward source modal proportions. */
+@media (min-width: 900px) {
+  .catalog-v2-conditions {
+    width: min(720px, calc(100vw - 36px));
+    padding-inline: 16px;
+  }
+}
