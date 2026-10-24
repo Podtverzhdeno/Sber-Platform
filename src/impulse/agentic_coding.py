@@ -58,6 +58,7 @@ class QualifiedEvidence:
     The consuming API is read-only. A user-submitted course or an unverified
     project is never qualified simply because it exists in a legacy ledger.
     """
+
     person_id: UUID
     role_key: str
     skill_key: str
