@@ -19,7 +19,9 @@ const NAV_PATHS = {
 } as const;
 
 export function HomeNavigationIcon({ section }: { section: string }) {
-  const icon = NAV_PATHS[section as keyof typeof NAV_PATHS] ?? "circle";
+  const icon = Object.prototype.hasOwnProperty.call(NAV_PATHS, section)
+    ? NAV_PATHS[section as keyof typeof NAV_PATHS]
+    : "circle";
   return (
     <svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       {icon === "house" && <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z" />}
