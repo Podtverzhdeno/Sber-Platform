@@ -414,19 +414,17 @@ export function RoleCardOverview(props: {
           <svg viewBox="0 0 32 32" fill="none"><path d="M5 26V16m7 10V9m7 17V5m7 21V13" stroke="currentColor" strokeWidth="3.8" strokeLinecap="round"/></svg>
         )}
       </span>
+      {props.primary && <span className="trajectory-v2-primary-check" aria-label="Основная роль">✓</span>}
       <strong>{role.title}</strong>
-      <span className="trajectory-v2-role-state">{roleStateLabel(role.state)}</span>
-      {props.primary && <span className="trajectory-v2-role-badge">{PRIMARY_LABEL}</span>}
-      {props.pinned && <span className="trajectory-v2-pin-badge">Закреплена</span>}
-      {role.attempt_number !== null && (
-        <span>попытка {role.attempt_number}</span>
+      {role.attempt_number !== null ? (
+        <>
+          <progress max={Math.max(1,role.total_milestones)} value={Math.min(role.total_milestones,role.completed_milestones)} aria-label="Прогресс этапов роли" />
+          <small>{role.completed_milestones} из {role.total_milestones} этапов{role.state === "paused" ? " · пауза" : ""}</small>
+        </>
+      ) : (
+        <small className="trajectory-v2-role-unselected">Не выбрана</small>
       )}
-      {role.attempt_number !== null && (
-        <small>
-          этапы: {role.completed_milestones} из {role.total_milestones}
-        </small>
-      )}
-      {role.attempt_number === null && <small>этапов в каталоге: {role.total_milestones}</small>}
+      {props.pinned && <span className="trajectory-v2-role-pinned" aria-label="Закреплена">◆</span>}
     </button>
   );
 }
