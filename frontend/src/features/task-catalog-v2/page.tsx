@@ -126,17 +126,13 @@ function MatchBadge({ item, showRing = false }: { item: CatalogItem; showRing?: 
   const ringPercent = Math.min(100, Math.max(0, Number(item.match.percent)));
   return (
     <span className="catalog-v2-match-visual">
-      <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false">
-        <circle className="catalog-v2-match-ring-track" cx="22" cy="22" r="18" pathLength="100" />
-        <circle
-          className="catalog-v2-match-ring-value"
-          cx="22"
-          cy="22"
-          r="18"
-          pathLength="100"
-          strokeDasharray={`${String(ringPercent)} 100`}
-        />
-      </svg>
+      <span className="catalog-v2-match-ring">
+        <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false">
+          <circle className="catalog-v2-match-ring-track" cx="22" cy="22" r="18" pathLength="100" />
+          <circle className="catalog-v2-match-ring-value" cx="22" cy="22" r="18" pathLength="100" strokeDasharray={`${String(ringPercent)} 100`} />
+        </svg>
+        <strong aria-hidden="true">{percent}%</strong>
+      </span>
       {badge}
     </span>
   );
@@ -175,7 +171,7 @@ function TaskSummary(props: {
         <span className="catalog-v2-customer-avatar" aria-hidden="true"><BriefcaseBusiness size={21} /></span>
         <div className="catalog-v2-card-identity">
           {props.topRanked ? <span className="catalog-v2-top-match"><Sparkles size={12} aria-hidden="true" /> Топ-совпадение</span> : null}
-          <small title={customerLabel(item)}>{item.customer.display_name}</small>
+          <small title={customerLabel(item)}>{customerLabel(item)}</small>
           <h2>{item.title}</h2>
         </div>
         <div className="catalog-v2-card-match"><MatchBadge item={item} /></div>
