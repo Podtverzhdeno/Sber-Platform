@@ -561,3 +561,28 @@
 @media(max-width:1250px){.trajectory-v2-roles ul{grid-template-columns:repeat(4,minmax(0,1fr))}.trajectory-v2-stage-path{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:700px){.trajectory-v2-heading h2{font-size:25px}.trajectory-v2-roles ul{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:3px 2px 12px}.trajectory-v2-role-card{min-width:155px;scroll-snap-align:start}.trajectory-v2-stage-path{grid-template-columns:repeat(2,minmax(0,1fr))}.trajectory-v2-role-detail{padding:13px}.trajectory-v2-role-detail h3{font-size:18px}}
 @media(prefers-reduced-motion:reduce){.trajectory-v2-role-card{transition:none}.trajectory-v2-role-card:hover{transform:none}}
+
+
+/* Reference TRJ-SCREEN-01: full-width role chooser, left roadmap, right grade rail */
+.trajectory-v2-columns {grid-template-columns:minmax(0,1fr) minmax(300px,364px);align-items:start}
+.trajectory-v2-roles {grid-column:1/-1}
+.trajectory-v2-detail {grid-column:1;min-width:0}
+.trajectory-v2-reference-sidebar {grid-column:2;display:grid;gap:12px;color:var(--trj-text)}
+.trajectory-v2-reference-sidebar>section {padding:16px;border:1px solid var(--trj-line);border-radius:14px;background:var(--trj-panel)}
+.trajectory-v2-reference-sidebar header {display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:12px}
+.trajectory-v2-reference-sidebar h3 {margin:0;font-size:17px;color:var(--trj-text)}
+.trajectory-v2-reference-sidebar header span {font-size:11px;color:var(--trj-teal)}
+.trajectory-v2-grade-body {display:grid;grid-template-columns:112px minmax(0,1fr);align-items:center;gap:12px}
+.trajectory-v2-grade-ring {width:108px;height:108px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border-radius:50%;border:9px solid var(--trj-teal);background:#06344b;text-align:center}
+.trajectory-v2-grade-ring strong {font-size:17px}
+.trajectory-v2-grade-ring small {font-size:10px;line-height:1.2;color:var(--trj-muted)}
+.trajectory-v2-grade-progress {display:grid;gap:7px}
+.trajectory-v2-grade-progress>strong {font-size:30px;line-height:1}
+.trajectory-v2-grade-progress small {font-size:11px;color:var(--trj-muted)}
+.trajectory-v2-grade-progress progress {width:100%;height:8px;accent-color:var(--trj-teal)}
+.trajectory-v2-reference-sidebar p {font-size:12px;line-height:1.55;color:var(--trj-muted);margin:12px 0 0}
+.trajectory-v2-next-panel>strong {display:block;font-size:14px}
+.trajectory-v2-next-panel button {margin-top:12px;border:1px solid var(--trj-teal);background:var(--trj-teal);color:#06222a;font-weight:700;padding:10px 14px;border-radius:9px;cursor:pointer}
+.trajectory-v2-intro {margin:5px 0;color:var(--trj-muted);font-size:13px}
+@media(max-width:1100px){.trajectory-v2-columns {grid-template-columns:minmax(0,1fr)}.trajectory-v2-roles,.trajectory-v2-detail,.trajectory-v2-reference-sidebar{grid-column:1}.trajectory-v2-reference-sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}.trajectory-v2-passport-panel{grid-column:1/-1}}
+@media(max-width:650px){.trajectory-v2-reference-sidebar{grid-template-columns:1fr}.trajectory-v2-passport-panel{grid-column:auto}.trajectory-v2-grade-body{grid-template-columns:105px minmax(0,1fr)}}
