@@ -188,4 +188,27 @@ test.describe("task catalog interactive controls and motion", () => {
     await card.getByRole("button", { name: /Подробнее/ }).click();
     await expect(page).toHaveURL(new RegExp(`task=${catalogItem.task_id}`));
   });
+  test("mobile card, conditions and list actions remain reachable without horizontal overflow", async ({ page }) => {
+    await openCatalog(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    const card = page.locator(".catalog-v2-card").first();
+    await expect(card).toBeVisible();
+    const openTerms = card.getByRole("button", { name: "Условия и отклик" });
+    await expect(openTerms).toBeVisible();
+    await openTerms.click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible();
+    await dialog.getByRole("button", { name: "Закрыть условия" }).click();
+    await expect(dialog).toHaveCount(0);
+
+    await page.getByRole("button", { name: "Список" }).click();
+    const rows = page.locator(".catalog-v2-table-row");
+    await expect(rows).toHaveCount(2);
+    await rows.first().getByRole("button", { name: "Подробнее" }).click();
+    await expect(page.getByRole("heading", { name: "Этапы задачи" })).toBeVisible();
+    const hasOverflow = await page.evaluate(() =>
+      document.documentElement.scrollWidth > window.innerWidth + 1);
+    expect(hasOverflow).toBe(false);
+  });
+
 });
