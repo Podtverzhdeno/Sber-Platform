@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { apiRequest } from "../../../api/client";
@@ -195,8 +195,10 @@ function SourceGradePolicyDialog({ grade, onClose }: {
 }) {
   // Grade catalog remains unavailable unless server publishes it.
   // No invented 1..6 array; use established server projection only.
+  const dialogRef = useRef<HTMLElement | null>(null);
+  useEffect(() => { dialogRef.current?.focus(); }, []);
   return <div className="trajectory-v2-overlay" onClick={onClose}>
-    <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => { event.stopPropagation(); }} onKeyDown={(event) => {
+    <section ref={dialogRef} tabIndex={-1} className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => { event.stopPropagation(); }} onKeyDown={(event) => {
       if (event.key === "Escape") onClose();
     }}>
       <header><h2>Все уровни</h2><button type="button" aria-label="Закрыть" onClick={onClose}>×</button></header>
