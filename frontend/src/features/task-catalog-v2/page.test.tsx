@@ -84,7 +84,7 @@ describe("task catalog v2", () => {
     expect(screen.getAllByText("84% релевантности").length).toBeGreaterThan(0);
     expect(screen.getByText("Недостаточно данных")).toBeInTheDocument();
     expect(screen.queryByText("0% релевантности")).not.toBeInTheDocument();
-    expect(screen.getByText("Для отклика · из 2 найденных")).toBeInTheDocument();
+    expect(screen.getByText("Доступно для отклика во всём каталоге")).toBeInTheDocument();
     expect(screen.getByText(/По 1 из 2 загруженных/)).toBeInTheDocument();
     expect(screen.getByText(/Релевантность не означает вероятность отбора/)).toBeInTheDocument();
   });
