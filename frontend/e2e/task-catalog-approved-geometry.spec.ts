@@ -261,7 +261,8 @@ test("benefit cards and full conditions remain inside the detail at screenshot d
         const content = box.querySelector<HTMLElement>(":scope > div:not(.catalog-v2-benefit-icon)");
         if (!content || !within(content.getBoundingClientRect(), card)) faults.push(`content ${String(index)} outside card`);
         if (content && content.scrollWidth > content.clientWidth + 1) faults.push(`content ${String(index)} overflows`);
-        for (const text of box.querySelectorAll<HTMLElement>("strong, p, small")) {
+        const textNodes: HTMLElement[] = Array.from(box.querySelectorAll<HTMLElement>("strong, p, small"));
+        for (const text of textNodes) {
           if (getComputedStyle(text).whiteSpace !== "normal") faults.push(`card ${String(index)} has nowrap text`);
           if (!within(text.getBoundingClientRect(), card)) faults.push(`card ${String(index)} text extends beyond border`);
           if (text.scrollWidth > text.clientWidth + 1) faults.push(`card ${String(index)} text overflows`);
