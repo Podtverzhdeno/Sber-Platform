@@ -230,6 +230,7 @@ export function DialogList({
             key={item}
             type="button"
             role="tab"
+            aria-label={item}
             aria-selected={tab === item}
             className={tab === item ? "active" : ""}
             onClick={() => {
