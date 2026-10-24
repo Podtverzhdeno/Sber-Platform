@@ -101,6 +101,12 @@ test.describe("task catalog interactive controls and motion", () => {
 
   test("list view row, keyboard and controls preserve filters and selected task", async ({ page }) => {
     await openCatalog(page);
+    let secondBookmarkSaved: boolean | undefined;
+    await page.route(`**/api/v1/me/task-recommendations/${insufficientItem.task_id}/bookmark`, (route) => {
+      const body = route.request().postDataJSON() as { saved: boolean };
+      secondBookmarkSaved = body.saved;
+      return route.fulfill({ json: { task_id: insufficientItem.task_id, saved: body.saved } });
+    });
     await page.getByRole("button", { name: "Список" }).click();
     const table = page.getByRole("table", { name: "Список рекомендованных задач" });
     await expect(table).toBeVisible();
@@ -113,10 +119,25 @@ test.describe("task catalog interactive controls and motion", () => {
     await page.keyboard.press("ArrowDown");
     await expect(rows.nth(1)).toBeFocused();
     await rows.nth(1).getByRole("button", { name: "Сохранено" }).click();
+    await expect.poll(() => secondBookmarkSaved).toBe(false);
     await expect(page).toHaveURL(new RegExp(`task=${catalogItem.task_id}`));
     await page.getByRole("button", { name: "Карточки" }).click();
     await expect(page).toHaveURL(/catalog_view=cards/);
     await expect(page).toHaveURL(new RegExp(`task=${catalogItem.task_id}`));
+  });
+
+  test("search, saved filter and reset buttons update the server-bound URL", async ({ page }) => {
+    await openCatalog(page);
+    await page.getByRole("button", { name: "Все фильтры" }).click();
+    const search = page.getByLabel("Поиск", { exact: true });
+    await search.fill("Прототип");
+    await page.getByRole("button", { name: "Найти" }).click();
+    await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("Прототип");
+    await page.getByRole("checkbox", { name: "Только сохранённые" }).check();
+    await expect.poll(() => new URL(page.url()).searchParams.get("saved")).toBe("true");
+    await page.getByRole("button", { name: "Сбросить фильтры" }).click();
+    await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBeNull();
+    await expect.poll(() => new URL(page.url()).searchParams.get("saved")).toBeNull();
   });
 
   test("read-only terms button opens modal, but blocked user cannot apply", async ({ page }) => {
