@@ -98,6 +98,7 @@ test("mounted trajectory map keeps deep links, Back/reload and read-only progres
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Моя траектория" }).click();
+  await page.goto("/workspace/1?legacy=1");
   await expect(page.getByTestId("trajectory-map")).toBeVisible();
 
   const step = page.getByRole("button", { name: "Освоить основу. Текущий шаг" });
