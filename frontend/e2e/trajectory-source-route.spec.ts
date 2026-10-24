@@ -68,11 +68,32 @@ test("source-driven trajectory renders approved catalog and sparse stage truth f
 
   await source.getByRole("button", { name: /^О роли/ }).click();
   await expect(page.getByRole("dialog", { name: /Python-разработчик/ })).toBeVisible();
+  await test.info().attach("TRJ-SCREEN-03-role-info-react", {
+    body: await page.screenshot({ animations: "disabled" }), contentType: "image/png",
+  });
   await page.keyboard.press("Escape");
 
   await source.getByRole("button", { name: /Все уровни/ }).click();
   await expect(page.getByRole("dialog", { name: "Все уровни" })).toBeVisible();
   await expect(page.getByText(/Полный каталог уровней/)).toBeVisible();
+  await test.info().attach("TRJ-SCREEN-05-grades-react", {
+    body: await page.screenshot({ animations: "disabled" }), contentType: "image/png",
+  });
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Все уровни" })).toHaveCount(0);
+
+  await source.getByRole("button", { name: "Действия роли" }).click();
+  await expect(page.getByRole("menu", { name: "Действия роли" })).toBeVisible();
+  await test.info().attach("TRJ-SCREEN-04-more-menu-react", {
+    body: await page.screenshot({ animations: "disabled" }), contentType: "image/png",
+  });
+  await page.keyboard.press("Escape");
+
+  await source.getByRole("button", { name: "Продолжить" }).click();
+  await expect(page.locator(".trajectory-v2-drawer")).toBeVisible();
+  await test.info().attach("TRJ-SCREEN-02-view-task-react", {
+    body: await page.screenshot({ animations: "disabled" }), contentType: "image/png",
+  });
   await page.keyboard.press("Escape");
 });
 
