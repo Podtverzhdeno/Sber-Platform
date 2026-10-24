@@ -330,7 +330,7 @@ def build_seed_batches() -> list[SeedBatch]:
     ]
     milestone_rows = [
         demo_row(
-            f"milestone:{slug}:{position}",
+            f"milestone:{slug}:start" if position == 1 else f"milestone:{slug}:{position}",
             roadmap_version_id=demo_id(f"roadmap:{slug}:1"),
             milestone_key="start-bootcamp" if position == 1 else f"stage-{position}",
             position=position,
