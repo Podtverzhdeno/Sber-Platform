@@ -168,6 +168,45 @@ test("mobile messages open real dialog and return to list",async ({page})=>{
   await expect.poll(()=>page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
 });
 
+test("pin, archive, restore and contact menu all perform real state transitions",async ({page})=>{
+  await page.setViewportSize({width:1448,height:1086});
+  await openMessages(page);
+  const pin=page.getByRole("button",{name:"Закрепить диалог «Маяки»"});
+  await pin.click();
+  await expect(page.getByRole("button",{name:"Открепить диалог «Маяки»"})).toHaveAttribute("aria-pressed","true");
+  await page.getByRole("button",{name:"Открепить диалог «Маяки»"}).click();
+  await expect(pin).toHaveAttribute("aria-pressed","false");
+  await page.getByRole("button",{name:"Перенести «Елена Наставник» в архив"}).click();
+  await page.getByRole("tab",{name:"Архив"}).click();
+  await expect(page.getByRole("button",{name:"Вернуть «Елена Наставник» из архива"})).toBeVisible();
+  await page.getByRole("button",{name:"Вернуть «Елена Наставник» из архива"}).click();
+  await page.getByRole("tab",{name:/Все/}).click();
+  await expect(page.getByRole("button",{name:/Елена Наставник/}).first()).toBeVisible();
+  const creator=page.getByRole("button",{name:"Создать чат"});
+  await creator.click();
+  await expect(page.getByRole("menu",{name:"Контакты для нового диалога"})).toBeVisible();
+  await page.getByRole("menu",{name:"Контакты для нового диалога"}).press("Escape");
+  await expect(page.getByRole("menu",{name:"Контакты для нового диалога"})).toHaveCount(0);
+  await expect(creator).toBeFocused();
+});
+
+test("composer toolbar icons open genuine attachment, emoji and mention controls",async ({page})=>{
+  await page.setViewportSize({width:1448,height:1086});
+  await openMessages(page);
+  await page.getByRole("button",{name:/Открыть последний чат/}).click();
+  await page.getByRole("button",{name:"Вложения"}).click();
+  await expect(page.getByTestId("composer-attachments")).toBeVisible();
+  await page.getByRole("button",{name:"Эмодзи"}).click();
+  await expect(page.getByRole("dialog",{name:"Эмодзи"})).toBeVisible();
+  await page.getByRole("button",{name:"Вставить 🙏"}).click();
+  await expect(page.getByTestId("composer-textarea")).toHaveValue("🙏");
+  await page.getByRole("button",{name:"Упомянуть участника"}).click();
+  await expect(page.getByRole("listbox",{name:"Упоминания"})).toBeVisible();
+  await page.getByRole("option",{name:"@Елена Наставник"}).click();
+  await expect(page.getByTestId("composer-textarea")).toHaveValue("🙏@Елена Наставник ");
+  await expect(page.getByTestId("composer-send")).toBeEnabled();
+});
+
 test("create chat opens real contacts rather than an empty decorative modal",async ({page})=>{
   await page.setViewportSize({width:1448,height:1086});
   await openMessages(page);
