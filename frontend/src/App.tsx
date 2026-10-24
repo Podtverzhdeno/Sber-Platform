@@ -762,8 +762,12 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
               goTo("Задачи");
             }
           }}
+          buddyAvailable={actor.navigation.some((section) => section === "AI Buddy" || section === "AI-Buddy")}
           onOpenWorkspace={(destination) => {
-            if (destination === "trajectory") {
+            if (destination === "buddy") {
+              const buddySection = actor.navigation.find((section) => section === "AI Buddy" || section === "AI-Buddy");
+              if (buddySection) goTo(buddySection);
+            } else if (destination === "trajectory") {
               goTo(actor.navigation.includes("Моя траектория") ? "Моя траектория" : "Мой путь");
             } else if (actor.navigation.includes("Портфолио")) {
               goTo("Портфолио");
