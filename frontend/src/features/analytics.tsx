@@ -6,7 +6,7 @@ import { apiRequest } from "../api/client";
 import { Badge, StatePanel } from "../components/ui";
 import { loadMonthlyGoal, type MonthlyGoalView } from "./monthly-goal-client";
 import { MonthlyGoalDiagram } from "./monthly-goal-card";
-import { AgenticCodingProfile } from "./agentic-coding-profile";
+import { ConnectedAgenticCodingProfile } from "./agentic-coding-profile";
 import "./analytics-growth.scss";
 
 type Stage = { key: string; title: string; status: "completed" | "in_progress" | "not_started" | "unknown"; completed: boolean; count: number };
@@ -269,7 +269,7 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
     {query.isError && <div className="demo-fallback-note" role="status"><strong>Демонстрационная аналитика</strong><span>API временно недоступен — показана связанная mock-проекция.</span><button className="secondary-button" type="button" onClick={() => { void query.refetch(); }}>Повторить</button></div>}
     <header className="dashboard-heading"><div><p className="eyebrow">Аналитика · личный путь</p><h1 id="workspace-title">Ваш прогресс и подтверждённый результат</h1><p className="lead">Показываем, как обучение превращается в проекты, оценки и позицию в рейтинге.</p></div><div className="analytics-controls"><label>Период<select defaultValue="90"><option value="30">30 дней</option><option value="90">3 месяца</option><option value="season">Сезон</option></select></label><label>Направление<select defaultValue="all"><option value="all">Все</option><option value="python">Python</option><option value="data">Data</option></select></label><div className="freshness-chip"><span className="fresh-dot" />Обновлено сегодня</div></div></header>
     {growthQuery.status === "pending" ? <StatePanel kind="loading" /> : growthQuery.status === "error" ? <StatePanel kind="error" action="Повторить аналитику траекторий" onAction={() => { void growthQuery.refetch(); }} /> : <TrajectoryGrowthAnalytics snapshot={growthQuery.data} selectedTrajectoryKey={urlTrajectory ?? undefined} onTrajectorySelect={(track) => { setSearchParams((previous) => { const next = new URLSearchParams(previous); next.set("trajectory", track); next.delete("skill"); return next; }); }} selectedSkillKey={urlSkill ?? undefined} onSkillSelect={(skill) => { updateParams("skill", skill); }} reports={skillReportsQuery.data} reportsPending={skillReportsQuery.isPending} reportsError={skillReportsQuery.isError} onRetryReports={() => { void skillReportsQuery.refetch(); }} buddy={buddyQuery.data ?? undefined} buddyPending={buddyQuery.isPending} goal={monthlyGoalQuery.data ?? undefined} />}
-    <AgenticCodingProfile />
+    <ConnectedAgenticCodingProfile />
     <section className="analytics-panel" aria-label="Проверяемые документы и развитие">
       <VerifiedDocumentsPanel />
       <div className="analytics-demo-plan">
