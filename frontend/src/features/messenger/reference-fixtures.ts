@@ -30,7 +30,7 @@ export const referenceChannels:ApiChannelView[]=examples.map(([key,title,peer,pr
  last_message:{id:id(key+"-last"),author_id:id(key+"-peer"),author_name:peer,kind:"text",body:preview,artifact_refs:[],sequence:1,created_at:base+stamp+":00+03:00"}
 }));
 const msg=(key:string,n:number,name:string,clock:string,body:string,artifact_refs:string[]=[]):ApiMessageView=>({
- id:id(`${key}-message-${n}`),author_id:name==="Алекс Речной"?id("me"):id(name),author_name:name,kind:"text",body,artifact_refs,sequence:n,created_at:base+clock+":00+03:00"
+ id:id(`${key}-message-${String(n)}`),author_id:name==="Алекс Речной"?id("me"):id(name),author_name:name,kind:"text",body,artifact_refs,sequence:n,created_at:base+clock+":00+03:00"
 });
 export const referenceMessages:Record<string,ApiMessageView[]>={
  [id("mentor")]:[
