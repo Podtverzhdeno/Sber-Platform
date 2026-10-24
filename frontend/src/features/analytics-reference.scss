@@ -237,3 +237,13 @@
  .analytics-reference .ref-v2-main .ref-skill-row {grid-template-columns:17px minmax(0,1fr) 35px}
 }
 @media(prefers-reduced-motion:reduce){.analytics-reference *{animation:none!important;transition:none!important}}
+
+/* Reference overlays use the shared accessible Modal implementation. */
+.ref-modal-content {display:grid;gap:12px;color:var(--color-text);font-size:13px;line-height:1.55}
+.ref-modal-content h3 {font-size:20px;margin:0;color:var(--color-text)}
+.ref-modal-content p {margin:0;color:var(--color-muted)}
+.ref-modal-content .ref-primary-cta {max-width:100%;margin-top:8px}
+.analytics-reference .ref-loading {border:1px solid #24495a;background:#0b2738;border-radius:8px;color:#9bbfd1;padding:9px 13px;font-size:11px}
+.analytics-reference .ref-all-evidence {max-height:310px;overflow-y:auto;padding:0 15px;scrollbar-color:#236077 #081e2c}
+.analytics-reference .ref-all-evidence .ref-evidence-list {padding:0}
+.analytics-reference .ref-all-evidence:focus-within {outline:1px solid #18e1e6}
