@@ -129,7 +129,6 @@ def test_pending_rejected_and_revoked_are_visible_but_not_verified() -> None:
     assert not state.ready_for_atomic_transition
 
 
-
 def test_scheduled_revocation_applies_only_after_effective_time() -> None:
     row = GradeEvidence(
         person_id=PERSON,
@@ -143,9 +142,7 @@ def test_scheduled_revocation_applies_only_after_effective_time() -> None:
         observed_at=NOW - timedelta(hours=1),
         revoked_at=NOW + timedelta(hours=1),
     )
-    before = calculate_grade_readiness(
-        PERSON, "agent-developer", policy(), (row,), as_of=NOW
-    )
+    before = calculate_grade_readiness(PERSON, "agent-developer", policy(), (row,), as_of=NOW)
     after = calculate_grade_readiness(
         PERSON, "agent-developer", policy(), (row,), as_of=NOW + timedelta(hours=2)
     )
