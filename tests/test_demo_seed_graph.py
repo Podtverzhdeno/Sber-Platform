@@ -110,9 +110,7 @@ def test_demo_alex_has_seven_real_role_catalogs_and_distinct_progress() -> None:
         for slug, track in tracks.items()
     }
     for slug, roadmap in roadmap_by_slug.items():
-        stages = [
-            row for row in rows["milestones"] if row["roadmap_version_id"] == roadmap["id"]
-        ]
+        stages = [row for row in rows["milestones"] if row["roadmap_version_id"] == roadmap["id"]]
         assert [row["position"] for row in stages] == list(range(1, 8)), slug
         assert stages[0]["id"] == demo_id(f"milestone:{slug}:start")
         assert all(item["payload"]["target_key"] for item in stages)
@@ -121,14 +119,14 @@ def test_demo_alex_has_seven_real_role_catalogs_and_distinct_progress() -> None:
         assert all(item["payload"]["title"] for item in stages)
 
     alex = [
-        row for row in rows["track_attempts"]
-        if row["person_id"] == demo_id("participant-alex")
+        row for row in rows["track_attempts"] if row["person_id"] == demo_id("participant-alex")
     ]
     assert {row["status"] for row in alex} == {"active", "frozen"}
     assert len([row for row in alex if row["status"] == "active"]) == 2
     completed_by_track = {
-        next(slug for slug, track in tracks.items() if track["id"] == row["track_id"]):
-        len(row["payload"]["completed_milestones"])
+        next(slug for slug, track in tracks.items() if track["id"] == row["track_id"]): len(
+            row["payload"]["completed_milestones"]
+        )
         for row in alex
     }
     assert completed_by_track == {"product": 2, "ml": 3, "python": 2}
@@ -138,7 +136,8 @@ def test_demo_alex_learning_and_competencies_use_stable_evidence() -> None:
     rows = _rows()
     person_id = demo_id("participant-alex")
     enrollments = [
-        row for row in rows["enrollments"]
+        row
+        for row in rows["enrollments"]
         if row["person_id"] == person_id and row["status"] == "verified"
     ]
     assert len(enrollments) >= 6
