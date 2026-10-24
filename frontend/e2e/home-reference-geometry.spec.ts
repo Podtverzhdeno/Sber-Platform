@@ -158,3 +158,40 @@ for (const scenario of intermediateViewports) {
       .toBe(true);
   });
 }
+
+
+test("grade drawer matches the source 456px geometry and restores focus at desktop", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1057 });
+  await openReferenceHome(page);
+  const trigger = page.getByRole("button", { name: /Все уровни/ });
+  await trigger.click();
+  const drawer = page.getByRole("dialog", { name: "Карта уровней" });
+  await expect(drawer).toBeVisible();
+  const box = await drawer.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box?.width).toBe(456);
+  expect(box?.x).toBe(992);
+  await expect(drawer.getByText("Каталог грейдов пока не опубликован")).toBeVisible();
+  await expect(page.locator("body")).toHaveCSS("overflow", "hidden");
+  await page.keyboard.press("Escape");
+  await expect(drawer).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+});
+
+test("grade drawer fills mobile without losing Escape or the approved mountain art", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openReferenceHome(page);
+  await page.getByRole("button", { name: /Все уровни/ }).click();
+  const drawer = page.getByRole("dialog", { name: "Карта уровней" });
+  await expect(drawer).toBeVisible();
+  const box = await drawer.boundingBox();
+  expect(box?.width).toBe(390);
+  expect(box?.x).toBe(0);
+  await page.keyboard.press("Escape");
+  await expect(drawer).toHaveCount(0);
+  await page.getByRole("button", { name: /Следующий уровень/ }).click();
+  const gradeDetails = page.getByRole("dialog", { name: "Требования следующего грейда" });
+  await expect(gradeDetails).toBeVisible();
+  await expect(gradeDetails.locator(".home-v2-grade-detail-hero")).toHaveCSS("background-image", "none");
+  await expect(gradeDetails.locator(".home-v2-grade-detail-hero")).toBeVisible();
+});
