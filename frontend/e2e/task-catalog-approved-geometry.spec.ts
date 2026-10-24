@@ -243,7 +243,7 @@ test("benefit cards and full conditions remain inside the detail at screenshot d
       const detail = document.querySelector<HTMLElement>(".catalog-v2-detail");
       const section = document.querySelector<HTMLElement>(".catalog-v2-benefits-section");
       const list = section?.querySelector<HTMLElement>("ul");
-      const boxes = Array.from(section?.querySelectorAll<HTMLElement>(":scope > ul > li") ?? []);
+      const boxes: HTMLElement[] = section ? Array.from(section.querySelectorAll<HTMLElement>(":scope > ul > li")) : [];
       const within = (inner: DOMRect, outer: DOMRect) =>
         inner.left >= outer.left - 1 && inner.right <= outer.right + 1;
       if (!detail || !section || !list || boxes.length !== 4) return {
@@ -256,15 +256,15 @@ test("benefit cards and full conditions remain inside the detail at screenshot d
       if (!within(list.getBoundingClientRect(), section.getBoundingClientRect())) faults.push("benefit list extends beyond section");
       for (const [index, box] of boxes.entries()) {
         const card = box.getBoundingClientRect();
-        if (!within(card, list.getBoundingClientRect())) faults.push(`card ${index} outside list`);
-        if (box.scrollWidth > box.clientWidth + 1) faults.push(`card ${index} scrolls horizontally`);
+        if (!within(card, list.getBoundingClientRect())) faults.push(`card ${String(index)} outside list`);
+        if (box.scrollWidth > box.clientWidth + 1) faults.push(`card ${String(index)} scrolls horizontally`);
         const content = box.querySelector<HTMLElement>(":scope > div:not(.catalog-v2-benefit-icon)");
-        if (!content || !within(content.getBoundingClientRect(), card)) faults.push(`content ${index} outside card`);
-        if (content && content.scrollWidth > content.clientWidth + 1) faults.push(`content ${index} overflows`);
+        if (!content || !within(content.getBoundingClientRect(), card)) faults.push(`content ${String(index)} outside card`);
+        if (content && content.scrollWidth > content.clientWidth + 1) faults.push(`content ${String(index)} overflows`);
         for (const text of box.querySelectorAll<HTMLElement>("strong, p, small")) {
-          if (getComputedStyle(text).whiteSpace !== "normal") faults.push(`card ${index} has nowrap text`);
-          if (!within(text.getBoundingClientRect(), card)) faults.push(`card ${index} text extends beyond border`);
-          if (text.scrollWidth > text.clientWidth + 1) faults.push(`card ${index} text overflows`);
+          if (getComputedStyle(text).whiteSpace !== "normal") faults.push(`card ${String(index)} has nowrap text`);
+          if (!within(text.getBoundingClientRect(), card)) faults.push(`card ${String(index)} text extends beyond border`);
+          if (text.scrollWidth > text.clientWidth + 1) faults.push(`card ${String(index)} text overflows`);
         }
       }
       return {
@@ -273,8 +273,8 @@ test("benefit cards and full conditions remain inside the detail at screenshot d
         pageOverflow: document.documentElement.scrollWidth > innerWidth + 1,
       };
     });
-    expect(geometry.faults, `Benefit overflow at ${viewport.width}x${viewport.height}`).toEqual([]);
-    expect(geometry.pageOverflow, `Page overflow at ${viewport.width}x${viewport.height}`).toBe(false);
+    expect(geometry.faults, `Benefit overflow at ${String(viewport.width)}x${String(viewport.height)}`).toEqual([]);
+    expect(geometry.pageOverflow, `Page overflow at ${String(viewport.width)}x${String(viewport.height)}`).toBe(false);
     if (viewport.width === 1538 && process.env.CAPTURE_APPROVED_TASKS === "1") {
       await page.screenshot({ path: "test-results/benefits-fixed-1538x960.png", animations: "disabled", fullPage: false });
     }
