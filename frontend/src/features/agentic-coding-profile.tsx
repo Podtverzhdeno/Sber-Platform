@@ -198,7 +198,7 @@ function SkillDetail({ skill, target, currentLevel, roleName, conflict, onClose 
   const closeButton = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
   useEffect(() => {
-    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previous = document.activeElement;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     closeButton.current?.focus();
@@ -220,7 +220,7 @@ function SkillDetail({ skill, target, currentLevel, roleName, conflict, onClose 
     return () => {
       document.removeEventListener("keydown", handleKey);
       document.body.style.overflow = originalOverflow;
-      if (previous?.isConnected) previous.focus();
+      if (previous?.isConnected && typeof (previous as HTMLElement).focus === "function") (previous as HTMLElement).focus();
     };
   }, [onClose]);
   const levelDescriptions = [

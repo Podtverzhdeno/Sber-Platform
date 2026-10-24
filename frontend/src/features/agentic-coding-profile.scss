@@ -201,6 +201,11 @@
   .agentic-cert-count strong { font-size: 36px; }
   .agentic-chart-modes { width: 100%; }
   .agentic-chart-modes button { flex: 1; min-width: 0; padding-inline: 4px; }
+  .agentic-bar-row { grid-template-columns: minmax(0, 1fr) auto; gap: 8px; padding: 10px; }
+  .agentic-bar-row > span:first-child { grid-column: 1 / -1; min-width: 0; overflow-wrap: anywhere; }
+  .agentic-bar-track { grid-column: 1; min-width: 0; }
+  .agentic-bar-row > strong { grid-column: 2; text-align: right; }
+  .agentic-bar-row > small { grid-column: 1 / -1; min-width: 0; overflow-wrap: anywhere; }
   .agentic-detail-stats { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .agentic-profile *, .agentic-detail-overlay * { animation: none !important; transition: none !important; } }

@@ -82,6 +82,19 @@ describe("Agentic Coding source-derived profile", () => {
     expect(document.body.style.overflow).not.toBe("hidden");
   });
 
+  it("restores focus to the radar SVG control after opening by Enter", () => {
+    render(<AgenticCodingProfile />);
+    const control = screen.getByTestId("agentic-target-radar").querySelector<SVGElement>(".agentic-radar-control");
+    expect(control).not.toBeNull();
+    control?.focus();
+    expect(document.activeElement).toBe(control);
+    fireEvent.keyDown(control!, { key: "Enter" });
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(document.activeElement).toBe(control);
+  });
+
   it("uses distinct prompting levels and telemetry for analysts and QA", () => {
     render(<AgenticCodingProfile />);
     fireEvent.change(screen.getByLabelText("Профессиональная группа"), { target: { value: "analyst" } });
