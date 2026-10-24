@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { apiRequest, retrySafeRead, RuntimeApiPath } from "../../api/client";
 import { Badge, Card, SafeExternalLink, StatePanel } from "../../components/ui";
+import "./bootcamp-ux.scss";
 
 type MustTake = {
   skill: string;
@@ -186,8 +187,9 @@ function CatalogFilters({
   const relevanceFilter = searchParams.get("relevance") ?? "all";
   const trackFilter = searchParams.get("track") ?? "all";
   const view = searchParams.get("view") ?? "card";
+  const query = searchParams.get("q") ?? "";
   return (
-    <>
+    <div className="bootcamp-catalog-toolbar">
       <div role="group" aria-label="Фильтр актуальности" className="catalog-segments">
         <button
           type="button"
@@ -204,11 +206,19 @@ function CatalogFilters({
           Актуальные
         </button>
       </div>
-      <p className="muted">
-        Актуальные — курсы, доступные сейчас и связанные с активной траекторией
-        и незакрытым пробелом навыков; карточка каждого курса объясняет, почему
-        он попал в выборку.
+      <p className="bootcamp-filter-hint">
+        Актуальные — доступные курсы, связанные с выбранной траекторией и дефицитами навыков.
       </p>
+      <label className="bootcamp-query" htmlFor="bootcamp-search-course">
+        Поиск курса
+        <input
+          id="bootcamp-search-course"
+          type="search"
+          placeholder="Название курса или навык"
+          value={query}
+          onChange={(event) => { updateFilter("q", event.target.value); }}
+        />
+      </label>
       <label className="catalog-filter">
         Направление
         <select value={trackFilter} onChange={(event) => { updateFilter("track", event.target.value); }}>
@@ -236,10 +246,10 @@ function CatalogFilters({
           Список
         </button>
       </div>
-      <p aria-live="polite">
-        Актуальных курсов: {relevantCount} из {totalCount}
+      <p className="bootcamp-catalog-summary" aria-live="polite">
+        Актуальные: {relevantCount} из {totalCount}
       </p>
-    </>
+    </div>
   );
 }
 
@@ -287,11 +297,13 @@ export function BootcampCatalog({
   const relevanceFilter = searchParams.get("relevance") ?? "all";
   const trackFilter = searchParams.get("track") ?? "all";
   const view = searchParams.get("view") ?? "card";
+  const query = (searchParams.get("q") ?? "").trim().toLocaleLowerCase("ru-RU");
   const trackOptions = [...new Set(catalog.data.flatMap((card) => card.track_keys))];
   const relevantCount = catalog.data.filter((card) => card.relevant).length;
   const visible = catalog.data
     .filter((card) => relevanceFilter !== "relevant" || card.relevant)
-    .filter((card) => trackFilter === "all" || card.track_keys.includes(trackFilter));
+    .filter((card) => trackFilter === "all" || card.track_keys.includes(trackFilter))
+    .filter((card) => !query || [card.title, card.recommendation_reason, card.must_take?.skill ?? ""].some((value) => value.toLocaleLowerCase("ru-RU").includes(query)));
   const relevanceOnly = relevanceFilter === "relevant";
   const deepLinkedKey = searchParams.get("course");
   const deepLinked =
@@ -301,15 +313,19 @@ export function BootcampCatalog({
   const deepLinkFilteredOut = deepLinked !== null && !passesFilters(deepLinked);
 
   return (
-    <div className="feature-stack" data-reference="R-PAR-03">
-      <section>
-        <p className="eyebrow">Bootcamp</p>
-        <h1 id="workspace-title">Учитесь ради следующего результата</h1>
-        <p className="lead">
-          Карточки честно разделяют доступ, завершение и «Надо пройти»: кнопки появляются только
-          там, где курс действительно доступен.
-        </p>
-      </section>
+    <div className="feature-stack bootcamp-experience" data-reference="R-PAR-03">
+      <header className="bootcamp-hero">
+        <div>
+          <p className="eyebrow">Ваша траектория развития</p>
+          <h1 id="workspace-title">Bootcamp</h1>
+          <p className="lead">Выбирайте обучение под свою роль и продолжайте с того места, где остановились.</p>
+        </div>
+        <div className="bootcamp-hero-pulse" aria-label="Состояние обучения">
+          <strong>{String(catalog.data.filter((card) => card.completion_state === "verified").length)}</strong>
+          <span>подтверждённых курсов</span>
+          <small>Серия обучения: {String(streak.data.current_days)} дн.</small>
+        </div>
+      </header>
       {deepLinkedKey !== null && deepLinked === null && (
         <p className="notice" role="status">
           Курс по ссылке «{deepLinkedKey}» не найден в актуальном каталоге.
@@ -321,10 +337,11 @@ export function BootcampCatalog({
           увидеть его.
         </p>
       )}
-      <Card title={`Серия: ${String(streak.data.current_days)} дн.`}>
-        <p>{streak.data.reason}</p>
-        <small>Один локальный день учитывается один раз — клики не увеличивают серию.</small>
-      </Card>
+      <div className="bootcamp-role-glance">
+        <div><span>Для выбранной роли</span><strong>{String(catalog.data.filter((card) => card.must_take !== null).length)} обязательных</strong></div>
+        <div><span>Актуальны сейчас</span><strong>{String(relevantCount)} курсов</strong></div>
+        <div><span>Подтверждено</span><strong>{String(catalog.data.filter((card) => card.completion_state === "verified").length)} завершений</strong></div>
+      </div>
       <CatalogFilters
         searchParams={searchParams}
         updateFilter={updateFilter}
@@ -335,7 +352,7 @@ export function BootcampCatalog({
       {view === "card" ? (
         <div className="course-grid">
           {orderedVisible.map((card) => (
-            <article className="ui-card" key={card.key} data-testid={`course-${card.key}`}>
+            <article className="ui-card bootcamp-course-card" key={card.key} data-required={card.must_take !== null} data-access={card.access_state} data-testid={`course-${card.key}`}>
               <h2>{card.title}</h2>
               {deepLinkedKey === card.key && (
                 <p className="notice" data-testid={`deeplink-${card.key}`}>
@@ -351,7 +368,7 @@ export function BootcampCatalog({
       ) : (
         <ul className="course-rows" aria-label="Каталог Bootcamp списком">
           {orderedVisible.map((card) => (
-            <li className="course-row" key={card.key} data-testid={`course-${card.key}`}>
+            <li className="course-row bootcamp-course-row" key={card.key} data-required={card.must_take !== null} data-access={card.access_state} data-testid={`course-${card.key}`}>
               <strong>{card.title}</strong>
               {deepLinkedKey === card.key && (
                 <p className="notice" data-testid={`deeplink-${card.key}`}>
