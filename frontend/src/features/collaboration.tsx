@@ -10,6 +10,7 @@ import { apiRequest } from "../api/client";
 import type { RuntimeApiPath } from "../api/client";
 import { StatePanel } from "../components/ui";
 import "./collaboration.scss";
+import "./messenger/reference.scss";
 
 import { ChatHistory } from "./messenger/chat-history";
 import type { PendingMessageOverlay } from "./messenger/chat-history";
@@ -380,7 +381,7 @@ export function MessagingWorkspace({
   if (channelsQuery.isPending) {
     return (
       <div
-        className="messenger-page sberchat-shell"
+        className="messenger-page sberchat-shell sberchat-reference"
         data-reference={reference}
         data-visual-reference="R-MSG-01"
       >
