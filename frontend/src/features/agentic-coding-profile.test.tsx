@@ -77,4 +77,34 @@ describe("Agentic Coding source-derived profile", () => {
     expect(otherRows[0]?.querySelector("td")?.textContent).toBe("Нет данных");
   });
 
+  it("keeps explicitly undefined policy targets unknown instead of synthesizing an L1 threshold", () => {
+    const source: AgenticServerProfile = {
+      role_key: "developer",
+      role_title: "Разработчик",
+      profile_scope: "impulse_learning",
+      scale_key: "agentic_coding_1_4",
+      framework_version: "agentic-coding-source-map-2026-10-23",
+      as_of: "2026-10-24T12:00:00Z",
+      known_evidence_count: 0,
+      certification_state: "not_evaluable",
+      certification_reason: "policy not published",
+      data_origin: "not_connected",
+      skills: [{
+        key: "prompt_engineering",
+        title: "Правила работы агента",
+        target_level: null,
+        current_level: null,
+        evidence_count: 0,
+        data_state: "not_connected",
+        unresolved_methodology: true,
+      }],
+    };
+    render(<AgenticCodingProfile serverProfile={source} serverStatus="ready" />);
+    const panel = screen.getByTestId("agentic-profile");
+    fireEvent.click(within(panel).getByRole("button", { name: "Таблица" }));
+    const rows = within(panel).getByRole("table").querySelectorAll("tbody tr");
+    expect(rows[1]?.querySelector("td:last-child")?.textContent).toBe("Не задана");
+  });
+
+
 });
