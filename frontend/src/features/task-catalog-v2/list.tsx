@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Bookmark, Share2 } from "lucide-react";
 import type { CatalogItem } from "./types";
 
 export function TaskCatalogList(props: {
@@ -74,8 +75,8 @@ export function TaskCatalogList(props: {
             <span role="cell" className="catalog-v2-table-actions" data-label="Действия">
               <button type="button" onClick={() => { props.onOpen(item); }}>Подробнее</button>
               {item.allowed_actions.includes("open_conditions") || canApply ? <button type="button" className="catalog-v2-primary" disabled={!canApply} onClick={(event) => { event.currentTarget.focus(); props.onConditions(item); }}>Отклик</button> : null}
-              <button type="button" aria-pressed={item.bookmarked} disabled={props.bookmarkPendingId === item.task_id} onClick={() => { props.onBookmark(item); }}>{item.bookmarked ? "Сохранено" : "Сохранить"}</button>
-              {item.allowed_actions.includes("share") ? <button type="button" onClick={() => { props.onShare(item); }}>Поделиться</button> : null}
+              <button type="button" className="catalog-v2-icon-action" aria-label={item.bookmarked ? "Сохранено" : "Сохранить"} title={item.bookmarked ? "Удалить из сохранённых" : "Сохранить задачу"} aria-pressed={item.bookmarked} disabled={props.bookmarkPendingId === item.task_id} onClick={() => { props.onBookmark(item); }}><Bookmark size={17} fill={item.bookmarked ? "currentColor" : "none"} aria-hidden="true" /></button>
+              {item.allowed_actions.includes("share") ? <button type="button" className="catalog-v2-icon-action" aria-label="Поделиться" title="Скопировать ссылку" onClick={() => { props.onShare(item); }}><Share2 size={17} aria-hidden="true" /></button> : null}
             </span>
           </div>
         );
