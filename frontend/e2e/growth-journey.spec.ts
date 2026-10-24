@@ -332,7 +332,7 @@ test("participant growth journey: theme, passport project, evidence checkpoint, 
   await expect(page.getByTestId("cycle-readiness")).toContainText("66%");
 
   // Аналитика: документы с credential проекта; публичная проверка + §Печать / PDF.
-  await page.goto("/workspace/9");
+  await page.goto("/workspace/9?legacy=1");
   const documents = page.getByTestId("document-item");
   await expect(documents.filter({ hasText: "Проверка прототипа на данных" })).toBeVisible();
   await documents.filter({ hasText: "Проверка прототипа на данных" }).getByRole("button", { name: "Проверить" }).click();
@@ -392,7 +392,7 @@ test.describe("mobile touch journey: theme, project evidence and readiness in li
   await page.getByTestId("trajectory-open-detail-python").tap();
   await expect(page.getByTestId("cycle-readiness")).toContainText("66%");
 
-  await page.goto("/workspace/9");
+  await page.goto("/workspace/9?legacy=1");
   const documents = page.getByTestId("document-item");
   await expect(documents.filter({ hasText: "Проверка прототипа на данных" })).toBeVisible();
   await documents.filter({ hasText: "Проверка прототипа на данных" }).getByRole("button", { name: "Проверить" }).tap();

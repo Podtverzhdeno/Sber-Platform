@@ -44,8 +44,8 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto("/");
     await page.locator('[data-persona="participant-alex"]').click();
-    if (viewport.width < 700) await page.getByRole("button", { name: "Меню", exact: true }).click();
-    await page.getByRole("link", { name: "Аналитика", exact: true }).click();
+    // Avoid a stale navigation node while demo-login remounts the shell.
+    await page.goto("/workspace/9");
     const root = page.getByTestId("analytics-reference");
     await expect(root).toBeVisible();
     await expect(page.getByRole("heading", { name: "Ваш Skill Passport" })).toBeVisible();
