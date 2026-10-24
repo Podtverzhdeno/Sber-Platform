@@ -1,7 +1,7 @@
 import type { ApiChannelView } from "./contracts";
 import { referenceDescriptions } from "./reference-fixtures";
 import { referenceAvatarFor, referenceAvatarSpriteIndexFor } from "./reference-avatars";
-import { FileText, FolderOpen, Link2, Users } from "lucide-react";
+import { Download, FileText, FolderOpen, Link2, Users } from "lucide-react";
 import {
   type ChannelWorkContextView,
   contextDateLabel,
@@ -10,6 +10,16 @@ import {
 } from "./context-model";
 import { dialogTitle, dialogKindLabel, participantRoleLabel } from "./view-model";
 import "./context.scss";
+
+
+const referenceFileDetails: Readonly<Record<string, string>> = {
+  "Программа_Карьера_в_IT.pdf": "2.4 МБ · 20 окт, 09:24",
+  "Гайд_Стажировки_2026.pdf": "5.1 МБ · 18 окт, 14:32",
+  "Презентация_Маяки.pptx": "12.3 МБ · 12 окт, 16:20",
+  "Метрики_эксперимента.xlsx": "248 КБ · 20 окт, 09:28",
+  "Итоговая_методология.pdf": "5.6 МБ · 20 окт, 10:15",
+  "Презентация_эксперимента.pptx": "12.4 МБ · 20 окт, 11:03",
+};
 
 export type ContextPanelProps = {
   channel: ApiChannelView;
@@ -184,7 +194,10 @@ export function ContextPanel({
         <h3 className="msg-context__section-title">Связанные файлы {sharedFiles.length > 0 && <small>{sharedFiles.length}</small>}</h3>
         {sharedFiles.length ? (
           <ul>
-            {sharedFiles.map((file)=> <li key={file}><FileText aria-hidden="true" size={18}/><span title={file}>{file}</span></li>)}
+            {sharedFiles.map((file) => (<li key={file} className={isReferencePreview ? "ref-context-file-row" : undefined}>
+{isReferencePreview ? <span className="ref-context-file-badge" data-type={file.split(".").at(-1)?.toLowerCase()} aria-hidden="true">{file.split(".").at(-1)}</span> : <FileText aria-hidden="true" size={18} />}
+<span title={file} className="ref-context-file-name">{file}{isReferencePreview && referenceFileDetails[file] && <small className="ref-context-file-meta">{referenceFileDetails[file]}</small>}</span>
+{isReferencePreview && <Download size={15} aria-hidden="true" className="ref-context-file-download" />}</li>))}
           </ul>
         ) : <p className="ref-context-placeholder-text">Общих файлов пока нет</p>}
       </section>
