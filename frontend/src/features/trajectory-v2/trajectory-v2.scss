@@ -1102,3 +1102,34 @@
 @media(max-width:690px){
   .workspace-content .trajectory-v2-role-suitability{grid-column:1}
 }
+
+/* Ring fill comes from the authorized grade readiness, not demo progress. */
+.workspace-content .trajectory-v2-grade-ring,.trajectory-v2-grade-explanation-progress .trajectory-v2-grade-ring{
+  position:relative;isolation:isolate;box-sizing:border-box;
+  padding:10px;border:0!important;overflow:hidden;
+}
+.workspace-content .trajectory-v2-grade-ring::before,.trajectory-v2-grade-explanation-progress .trajectory-v2-grade-ring::before{
+  content:"";position:absolute;z-index:-1;inset:9px;border-radius:50%;background:#073147;
+}
+.workspace-content .trajectory-v2-grade-ring strong,.workspace-content .trajectory-v2-grade-ring small,
+.trajectory-v2-grade-explanation-progress .trajectory-v2-grade-ring strong{
+  position:relative;z-index:1;
+}
+.trajectory-v2-grades-dialog{min-height:660px}
+.trajectory-v2-grade-explanation-graphic{
+  position:relative;width:174px;height:103px;flex:0 0 174px;
+  border-radius:10px;overflow:hidden;font-size:0;color:transparent;
+  background:radial-gradient(circle at 76% 20%,#1b6a9d 0,#0b385c 24%,transparent 66%);
+}
+.trajectory-v2-grade-explanation-graphic::before{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:73px;
+  clip-path:polygon(0 100%,27% 48%,43% 75%,62% 18%,82% 67%,100% 34%,100% 100%);
+  background:linear-gradient(130deg,#1b4562,#071b37);
+}
+.trajectory-v2-grade-explanation-graphic::after{
+  content:"⚑";position:absolute;right:22px;top:8px;color:#4bddff;
+  font-size:22px;text-shadow:0 0 10px #0af2fa;
+  border-bottom:3px solid #05dafa;padding-bottom:39px;
+  transform:skewX(-8deg);
+}
+@media(max-width:760px){.trajectory-v2-grades-dialog{min-height:0}.trajectory-v2-grade-explanation-graphic{display:none}}
