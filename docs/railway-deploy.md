@@ -15,9 +15,12 @@
    Checklist намеренно не содержит значений. Секреты задаются только в Railway UI, а
    production credentials помечаются sealed.
 
-5. Применить staged changes. Перед развёртыванием `railway.toml` выполняет миграции и
-   идемпотентно обновляет демонстрационные данные. Команда запуска образа запускает только
-   web-процесс: миграции не дублируются при каждом restart контейнера.
+5. Применить staged changes. Перед развёртыванием Railway выполняет одну команду
+   `python -m impulse.bootstrap.predeploy`: Alembic `upgrade head`, затем — **только при**
+   `DEMO_MODE=true` — идемпотентный demo seed и проверку наличия не менее 12 синтетических
+   задач. Если миграции, seed или проверка не удались, pre-deploy завершается ошибкой и
+   новый deployment не должен заменять работающее приложение. При `DEMO_MODE=false`
+   приложение не наполняется синтетическими данными. Миграции не дублируются при restart.
 6. В `Settings -> Networking` сервиса приложения нажать `Generate Domain`. Полученный
    HTTPS URL является ссылкой для демонстрации продукта.
 
@@ -48,3 +51,35 @@ docker compose up --build
 После запуска приложение доступно на `http://localhost:8000`. Остановка без удаления
 данных: `docker compose down`. Команда `docker compose down -v` удаляет и локальную
 демонстрационную базу, поэтому её следует применять осознанно.
+
+## Когда у участника пустой каталог задач
+
+Пустой каталог не равнозначен пустой базе: проверить нужно отдельно схему, seed,
+подключение к правильному Postgres service и фильтры доступа/deadline. На Railway
+в pre-deploy логах ожидаются строки `Alembic migrations completed` и (в demo mode)
+`Demo data verified: 12 task rows`. Команды **не содержат** секретов.
+
+В PostgreSQL Data → Query (только чтение) проверить:
+
+```sql
+SELECT version_num FROM alembic_version;
+SELECT status, data_origin, COUNT(*)
+FROM tasks
+GROUP BY status, data_origin
+ORDER BY status, data_origin;
+SELECT COUNT(*) AS published_demo_tasks
+FROM tasks
+WHERE status = 'published' AND data_origin = 'demo_seed';
+SELECT COUNT(*) AS published_demo_terms
+FROM task_terms_versions
+WHERE status = 'published' AND data_origin = 'demo_seed';
+```
+
+Ожидаемая ревизия при этой версии кода: `20261023_0027`; при включённом DEMO_MODE
+ожидаются 12 опубликованных demo-задач и 12 опубликованных demo-условий. Затем
+проверить `/api/v1/me/task-recommendations` под синтетическим участником, без
+обхода авторизации. Readiness проверяет подключение к БД, а не наличие задач.
+
+Если demo mode выключен, запуск `impulse-demo-seed` запрещён. Не выполнять
+`impulse-demo-reset`, `alembic downgrade`, `DROP` или `TRUNCATE` ради ремонта
+пустого каталога. Перед новым deploy — backup/restore point и сверка среды.
