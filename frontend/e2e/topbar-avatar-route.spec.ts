@@ -4,13 +4,14 @@ async function openParticipantTrajectory(page: import("@playwright/test").Page) 
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.goto("/workspace/1?source=1");
-  await expect(page.locator(".topbar .top-persona")).toBeVisible();
+  await expect(page.locator(".topbar")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Моя траектория" })).toBeVisible();
 }
 
 test("demo avatar never overflows its circular shell or overlaps the person's name", async ({ page }) => {
   await page.setViewportSize({ width: 1672, height: 941 });
   await openParticipantTrajectory(page);
+  await expect(page.locator(".topbar .top-persona")).toBeVisible();
   const avatar = page.locator(".topbar .mini-avatar");
   const image = avatar.locator("img.home-reference-avatar");
   const label = page.locator(".topbar .top-persona > span:last-child");
