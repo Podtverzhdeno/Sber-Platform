@@ -25,6 +25,7 @@ const journey = { stages: [{ key: "verified_experience", title: "Приняты�
   generated_at: "2026-10-24T12:00:00Z", successful: false, next_action: "Продолжить" };
 function mockApi(skills = roleSkills) {
   vi.mocked(apiRequest).mockImplementation(async (path: string) => {
+    await Promise.resolve();
     if (path.includes("/agentic-coding/profile")) return { ...profile, skills };
     if (path.includes("/growth/snapshot")) return snapshot;
     if (path.includes("/analytics/journey")) return journey;
@@ -54,14 +55,14 @@ describe("three canonical analytics reference layouts", () => {
     expect(container.querySelector(".ref-kpi")?.textContent).not.toContain("81%");
   });
 
-  it("changes between the three exact structural compositions", async () => {
+  it("changes between the three exact structural compositions", () => {
     const { container } = open();
     fireEvent.click(screen.getByRole("button", { name: "Мой маршрут" }));
     expect(screen.getByRole("heading", { name: "Маршрут к вашей следующей цели" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /навыка до целевого профиля|Открытые требования/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "История подтверждения" })).toBeInTheDocument();
     expect(container.querySelector(".ref-route-steps")?.children).toHaveLength(4);
-    fireEvent.click(screen.getByRole("button", { name: "Результаты", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: /^Результаты$/ }));
     expect(screen.getByRole("heading", { name: "Результаты, которым можно доверять" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Каждый уровень — с доказательством" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Как копятся цифровые доказательства" })).toBeInTheDocument();
@@ -90,7 +91,7 @@ describe("three canonical analytics reference layouts", () => {
     expect(screen.queryByText("81%")).not.toBeInTheDocument();
   });
 
-  it("opens per-skill details and certification terms without issuing a badge", async () => {
+  it("opens per-skill details and certification terms without issuing a badge", () => {
     open();
     fireEvent.click(screen.getByRole("button", { name: /Постановка задач агенту/ }));
     expect(screen.getByRole("dialog", { name: /Подтверждение навыка/ })).toBeInTheDocument();
