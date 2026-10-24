@@ -136,13 +136,14 @@ export function ContextPanel({
                 <FileText size={20} aria-hidden="true"/>
                 <span title={ref}>{ref.split("/").pop() || ref}</span>
                 <button type="button" aria-label={`Скопировать ссылку или идентификатор файла ${ref.split("/").pop() || ref}`} onClick={() => {
-                  if (navigator.clipboard?.writeText === undefined) {
-                    setCopyStatus("unavailable");
-                    return;
-                  }
-                  void navigator.clipboard.writeText(ref)
-                    .then(() => { setCopyStatus("copied"); })
-                    .catch(() => { setCopyStatus("unavailable"); });
+                  void (async () => {
+                    try {
+                      await navigator.clipboard.writeText(ref);
+                      setCopyStatus("copied");
+                    } catch {
+                      setCopyStatus("unavailable");
+                    }
+                  })();
                 }}><Link2 size={16}/></button>
               </li>
             ))}
