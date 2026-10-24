@@ -195,7 +195,7 @@ export function deriveDialogRow(input: {
     initial: (dialogTitle(channel, viewerId).trim()[0] ?? "к").toUpperCase(),
     lastSender,
     preview: draft ? singleLine(draft) : last ? singleLine(last.body) : null,
-    timeLabel: last ? dialogTimeLabel(last.created_at, input.now) : "",
+    timeLabel: last ? channel.id.startsWith("reference:") ? last.created_at.slice(11, 16) : dialogTimeLabel(last.created_at, input.now) : "",
     timeIso: last ? last.created_at : channel.created_at,
     unread: channel.unread,
     muted: channel.muted,
