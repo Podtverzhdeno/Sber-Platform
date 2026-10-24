@@ -513,3 +513,14 @@
   .home-v2-buddy-tip {padding:4px 7px;}
   .home-v2-buddy-footnote {height:37px;min-height:37px;margin-top:3px;}
 }
+
+
+/* Reference widths between desktop and mobile:
+   1280px wraps next-step actions and the narrower layouts place both
+   insights cards in a two-column row beneath Tasks. */
+@media (min-width:1041px) and (max-width:1399px) {
+  .home-v2-next-outcome {min-height:187px;}
+}
+@media (min-width:631px) and (max-width:1040px) {
+  .home-v2-buddy,.home-v2-passport {min-height:262px;}
+}
