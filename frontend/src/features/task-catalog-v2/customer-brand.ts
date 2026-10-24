@@ -18,7 +18,9 @@ const aliases: Readonly<Record<string, PrototypeBrand>> = {
 };
 
 export function prototypeBrandForCustomer(customer: CatalogItem["customer"]): PrototypeBrand | null {
-  if (customer.verification !== "verified") return null;
+  // Named demo fixtures are explicitly marked "Демо-заказчик" throughout the UI.
+  // Unknown and unverified customer names never gain an implied brand identity.
+  if (customer.verification !== "verified" && customer.verification !== "demo") return null;
   const name = customer.display_name.trim().toLocaleLowerCase("ru-RU")
     .replace(/[\s_.–—-]+/g, " ").trim();
   return aliases[name] ?? null;

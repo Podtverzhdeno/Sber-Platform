@@ -14,9 +14,10 @@ describe("verified catalog customer logo port from UI (1)", () => {
     expect(prototypeBrandForCustomer(customer("Газпром нефть", "verified"))).toBe("gazprom-neft");
   });
 
-  it("keeps a neutral icon for demos and unverified customers", () => {
-    expect(prototypeBrandForCustomer(customer("Сбер", "demo"))).toBeNull();
+  it("shows exact source SVGs in explicitly labeled demo examples but not unverified records", () => {
+    expect(prototypeBrandForCustomer(customer("Сбер", "demo"))).toBe("sber");
     expect(prototypeBrandForCustomer(customer("Яндекс", "unverified"))).toBeNull();
+    expect(prototypeBrandForCustomer(customer("Сбер R&D лаборатория", "demo"))).toBeNull();
   });
 
   it("never infers a real company from a partial name or supplied path", () => {

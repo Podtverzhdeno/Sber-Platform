@@ -4,7 +4,7 @@ import { prototypeBrandForCustomer } from "./customer-brand";
 
 /**
  * Display the original SVG from Impulse_Tasks_UI (1).zip unchanged.
- * A brand mark is used only for an API-verified, exactly matched customer.
+ * A brand mark is used only for an exactly matched verified customer or\n * an explicitly labeled demo fixture. Unverified names stay neutral.
  */
 export function CustomerMark({
   customer,

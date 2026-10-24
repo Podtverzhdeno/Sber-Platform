@@ -6,6 +6,13 @@
 import { catalogItem, catalogPage, catalogTerms } from "../src/features/task-catalog-v2/fixture";
 import type { CatalogItem } from "../src/features/task-catalog-v2/types";
 
+// Visual-only company samples copied from the approved mock (not a list of real partners).
+// The API projection below retains verification="demo" in every record.
+const referenceCustomers = [
+  "Сбер", "Т-Банк", "Astra", "Яндекс", "red_mad_robot",
+  "Газпром нефть", "Сбер", "VK", "Positive Technologies", "Тинькофф",
+] as const;
+
 const taskTitles = [
   "Прототип рекомендательной системы для статей",
   "MVP чат-ассистента внутренних знаний",
@@ -38,7 +45,7 @@ export const approvedGeometryTasks: CatalogItem[] = taskTitles.map((title, index
   ...catalogItem,
   task_id: `00000000-0000-4000-8000-${String(index + 300).padStart(12, "0")}`,
   title,
-  customer: { ...catalogItem.customer, id: `00000000-0000-4000-8000-${String(index + 400).padStart(12, "0")}`, display_name: `Тестовый заказчик ${String(index + 1)}`, verification: "demo" },
+  customer: { ...catalogItem.customer, id: `00000000-0000-4000-8000-${String(index + 400).padStart(12, "0")}`, display_name: referenceCustomers[index], verification: "demo" },
   brief_summary: "Синтетическая задача для проверки верстки и навигации каталога",
   competency_tags: index % 2 ? ["Python", "Аналитика", "SQL"] : ["ML", "Python", "NLP"],
   match: { ...catalogItem.match, percent: (90 - index * 4).toFixed(2) },
