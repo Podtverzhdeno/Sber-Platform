@@ -44,8 +44,12 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.goto("/");
     await page.locator('[data-persona="participant-alex"]').click();
-    // Avoid a stale navigation node while demo-login remounts the shell.
-    await page.goto("/workspace/9");
+    // Demo login is in-memory; a full reload would discard the actor because /me is mocked 401.
+    await expect(page.getByRole("navigation", { name: "Навигация роли" })).toBeVisible();
+    await page.evaluate(() => {
+      window.history.pushState({}, "", "/workspace/9");
+      window.dispatchEvent(new PopStateEvent("popstate"));
+    });
     const root = page.getByTestId("analytics-reference");
     await expect(root).toBeVisible();
     await expect(page.getByRole("heading", { name: "Ваш Skill Passport" })).toBeVisible();
