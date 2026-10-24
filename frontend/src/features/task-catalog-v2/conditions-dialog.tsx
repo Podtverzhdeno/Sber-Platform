@@ -12,6 +12,14 @@ import {
 import type { CatalogApplicationResult } from "./analytics";
 import type { CatalogItem } from "./types";
 
+const supportModelLabels: Record<string, string> = {
+  mentor_review: "Проверка результата ментором",
+  mentor: "Поддержка ментора",
+  team_review: "Проверка результата командой",
+  self_service: "Самостоятельная работа",
+};
+const formatModel = (value: string) => supportModelLabels[value] ?? notProvided(value);
+
 const notProvided = (value: string) =>
   value === "not_provided" || !value.trim() ? "Не указано заказчиком" : value;
 
@@ -192,9 +200,9 @@ export function ConditionsDialog(props: {
               </section>
               <section>
                 <h3><Laptop2 size={19} aria-hidden="true" /> Формат работы</h3>
-                <p>{task.work_format ?? "Формат не указан"}</p>
+                <p>{task.work_format === "remote" ? "Удалённо" : task.work_format === "hybrid" ? "Гибрид" : task.work_format === "onsite" ? "На площадке" : task.work_format ?? "Формат не указан"}</p>
                 <p>Дедлайн отклика: {formatDeadline(termsData.deadline_at)}</p>
-                <p>Поддержка: {notProvided(termsData.support_model)}</p>
+                <p>Поддержка: {formatModel(termsData.support_model)}</p>
               </section>
               <section>
                 <h3><Award size={19} aria-hidden="true" /> Критерии отбора</h3>
@@ -202,7 +210,7 @@ export function ConditionsDialog(props: {
               </section>
               <section className="catalog-v2-terms-support">
                 <h3><Users size={19} aria-hidden="true" /> Поддержка</h3>
-                <p>{notProvided(termsData.support_model)}</p>
+                <p>{formatModel(termsData.support_model)}</p>
               </section>
               <section className="catalog-v2-terms-disclosure">
                 <h3><ShieldCheck size={19} aria-hidden="true" /> Условия использования результата</h3>
