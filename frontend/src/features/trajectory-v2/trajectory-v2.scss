@@ -925,3 +925,17 @@
 .trajectory-v2-grade-expectations p{color:#adc3d6;font-size:12px;line-height:1.5}
 .trajectory-v2-grade-next-note{margin-top:17px;padding:13px;border:1px solid #1c6785;border-radius:10px;background:#0a2b40;color:#d1e9f4;font-size:12px}
 @media(max-width:760px){.trajectory-v2-grades-layout{grid-template-columns:1fr}.trajectory-v2-grades-heading h2{font-size:20px}.trajectory-v2-grades-layout>.trajectory-v2-grades-list{grid-template-columns:repeat(2,minmax(0,1fr))}.trajectory-v2-grade-option{min-height:64px;padding:9px}.trajectory-v2-grade-option small{font-size:9px}}
+
+
+/* 901–1140 CSS px: preserve reference columns and seven cards when the
+   browser is zoomed. Stack only when the actual content becomes too narrow. */
+@media(min-width:901px) and (max-width:1140px){
+ .workspace-content .trajectory-v2-columns{grid-template-columns:minmax(0,1fr) minmax(270px,315px)}
+ .workspace-content .trajectory-v2-roles{grid-column:1/-1;grid-row:1}
+ .workspace-content .trajectory-v2-roles ul{grid-template-columns:repeat(7,minmax(0,1fr))}
+ .workspace-content .trajectory-v2-detail{grid-column:1;grid-row:2}
+ .workspace-content .trajectory-v2-reference-sidebar{grid-column:2;grid-row:2;grid-template-columns:1fr}
+ .workspace-content .trajectory-v2-passport-panel{grid-column:auto}
+ .workspace-content .trajectory-v2-role-card{min-height:132px;padding:10px 3px}
+ .workspace-content .trajectory-v2-role-card strong{font-size:11px}
+}
