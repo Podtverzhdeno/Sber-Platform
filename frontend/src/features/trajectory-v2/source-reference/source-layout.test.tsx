@@ -16,11 +16,11 @@ const roadmap: RoadmapView = {
   policy_version: 1,
   replacement_reason: null,
   milestones: [
-    { key: "intro", position: 1, title: "База и основы", purpose: "База", skill: "Бизнес-анализ", target_kind: "course", target_key: "course-1", completed: true, deliverable: null },
-    { key: "hypotheses", position: 2, title: "Продуктовые гипотезы", purpose: "Проверить гипотезы", skill: "Продукт", target_kind: "task", target_key: "task-1", completed: false, deliverable: null },
-    { key: "project", position: 3, title: "Реальный проект", purpose: "Практика", skill: "Продукт", target_kind: "task", target_key: "task-2", completed: false, deliverable: null },
+    { key: "intro", position: 1, title: "База и основы", purpose: "База", skill: "Бизнес-анализ", target_kind: "course", target_key: "course-1", completed: true, deliverable: null, lab: null, estimated_hours: null },
+    { key: "hypotheses", position: 2, title: "Продуктовые гипотезы", purpose: "Проверить гипотезы", skill: "Продукт", target_kind: "task", target_key: "task-1", completed: false, deliverable: null, lab: null, estimated_hours: null },
+    { key: "project", position: 3, title: "Реальный проект", purpose: "Практика", skill: "Продукт", target_kind: "task", target_key: "task-2", completed: false, deliverable: null, lab: null, estimated_hours: null },
   ],
-  next_step: { key: "hypotheses", position: 2, title: "Продуктовые гипотезы", purpose: "Проверить гипотезы", skill: "Продукт", target_kind: "task", target_key: "task-1", completed: false, deliverable: null },
+  next_step: { key: "hypotheses", position: 2, title: "Продуктовые гипотезы", purpose: "Проверить гипотезы", skill: "Продукт", target_kind: "task", target_key: "task-1", completed: false, deliverable: null, lab: null, estimated_hours: null },
 };
 
 function renderSource(options: { grade?: typeof overviewFixture.concepts.career_grade; stageTasks?: [] } = {}) {
