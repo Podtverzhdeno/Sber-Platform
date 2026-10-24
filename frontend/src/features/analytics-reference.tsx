@@ -205,13 +205,13 @@ function Kpis({ skills, ready, sourceCount, accepted, variant }: { skills: Skill
        ["Принятые результаты", accepted === null ? "—" : String(accepted), "С проверенным вкладом", "✓"]];
   return <div className="ref-kpis">{cards.map(([label, value, detail, icon], i) => <article className={"ref-kpi ref-kpi-" + String(i)} key={label}><span>{label}</span><b>{value}</b><small>{detail}</small><i aria-hidden="true">{icon}</i></article>)}</div>;
 }
-function Matrix({ title, subtitle, skills, role, setRole, chart, setChart, series, openSkill, className = "" }: {
+function Matrix({ title, subtitle, skills, role, setRole, chart, setChart, series, openSkill, className = "", onCriteria }: {
   title: string; subtitle?: string; skills: Skill[]; role: RoleKey; setRole: (role: RoleKey) => void;
   chart: ChartKey; setChart: (chart: ChartKey) => void; series: ReturnType<typeof monthSeries>;
-  openSkill: (key: string) => void; className?: string;
+  openSkill: (key: string) => void; className?: string; onCriteria?: () => void;
 }) {
   return <section className={"ref-panel ref-matrix " + className}>
-    <div className="ref-card-title"><div><span className="ref-cap">ГЛАВНЫЙ РЕЗУЛЬТАТ</span><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div></div>
+    <div className="ref-card-title"><div><span className="ref-cap">ГЛАВНЫЙ РЕЗУЛЬТАТ</span><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{onCriteria && <button className="ref-small-link" type="button" onClick={() => { onCriteria(); }}>Как считается ↗</button>}</div>
     <Controls role={role} setRole={setRole} chart={chart} setChart={setChart} />
     <div className="ref-matrix-grid"><SkillsVisual skills={skills} chart={chart} series={series} /><div className="ref-matrix-list"><h3>Что уже подтверждено</h3><p>Текущий / целевой уровень</p><SkillRows skills={skills} openSkill={openSkill} /></div></div>
   </section>;
@@ -267,7 +267,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
     {layout !== "path" && <Kpis skills={skills} ready={ready} sourceCount={qualifiedSourceCount} accepted={accepted} variant={layout} />}
     {layout === "passport" && <>
       <div className="ref-v1-middle">
-        <Matrix className="ref-primary-matrix" title="Матрица навыков Agentic Coding" subtitle="Сравнение вашего профиля с требованиями L1 · 6 компетенций" skills={skills} role={role} setRole={setRole} chart={chart} setChart={setChart} series={series} openSkill={setOpenDetail} />
+        <Matrix className="ref-primary-matrix" title="Матрица навыков Agentic Coding" subtitle="Сравнение вашего профиля с требованиями L1 · 6 компетенций" skills={skills} role={role} setRole={setRole} chart={chart} setChart={setChart} series={series} openSkill={setOpenDetail} onCriteria={() => { setShowCriteria(true); }} />
         <aside className="ref-panel ref-passport"><span className="ref-cap">ВАШ ЦИФРОВОЙ ПРОФИЛЬ</span><div className="ref-passport-top"><span className="ref-passport-crest">◇</span><div><h2>Skill Passport</h2><p>{ROLES[role]} · Agentic Coding</p></div></div>
           <div className="ref-big-value">{ready === null ? "—" : String(ready) + "%"} <span>готовность к целевому профилю</span></div>
           <div className="ref-progress"><i style={{ width: String(ready ?? 0) + "%" }} /></div>
