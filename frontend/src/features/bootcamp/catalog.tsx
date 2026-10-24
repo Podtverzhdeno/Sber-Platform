@@ -525,7 +525,7 @@ export function BootcampCatalog({
       </div>
       <section className="bc-grade-banner" aria-labelledby="bc-grade-title">
         <div><p className="bc-panel-kicker">ДО СЛЕДУЮЩЕГО ГРЕЙДА</p>
-          <h2 id="bc-grade-title">{pendingRequired.length > 0 ? `Осталось ${pendingRequired.length} обязательных курса` : "Требования к грейду"}</h2>
+          <h2 id="bc-grade-title">{pendingRequired.length > 0 ? `Осталось ${pendingRequired.length} ${pendingRequired.length % 10 === 1 && pendingRequired.length % 100 !== 11 ? "обязательный курс" : [2, 3, 4].includes(pendingRequired.length % 10) && ![12, 13, 14].includes(pendingRequired.length % 100) ? "обязательных курса" : "обязательных курсов"}` : "Требования к грейду"}</h2>
           <p>{pendingRequired.length > 0 ? "Просмотрите ещё не подтверждённые учебные требования. Дополнительно могут потребоваться практика и проверка результатов." : "Полный список требований и степень готовности появятся после публикации политики. Отсутствие курсов здесь не означает присвоение грейда."}</p>
         </div>
         <button type="button" onClick={() => { openPanel("requirements"); }}>Посмотреть курсы →</button>
