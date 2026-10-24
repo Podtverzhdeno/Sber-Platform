@@ -411,7 +411,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
     ) return;
     // On a stacked layout the inspector is below every card, so opening a card
     // must reveal its detail instead of leaving the participant above the fold.
-    inspectorRef.current?.scrollIntoView?.({
+    inspectorRef.current?.scrollIntoView({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
       block: "start",
     });
