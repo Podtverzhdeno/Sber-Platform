@@ -87,3 +87,28 @@
   .trajectory-growth-facts li > button { grid-template-columns:1fr; }
   .trajectory-growth-analytics select { min-width:0;width:100%; }
 }
+
+/* Reviewed radar semantics: orange is the target, green is the current profile.
+ * Differences are described numerically, never communicated by red sectors. */
+.trajectory-growth-radar {
+  min-width: 0;
+  svg {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    margin-inline: auto;
+  }
+}
+.growth-target {
+  stroke: #ffb449;
+  fill: rgb(255 180 73 / 9%);
+}
+.growth-deficit { stroke: var(--color-primary); }
+.growth-deficit-fill { fill: var(--color-primary); }
+/* Text labels clipped at 390px. Skill names and exact values remain available
+ * in the keyboard-accessible list adjacent to the chart. */
+@media (max-width: 640px) {
+  .trajectory-growth-radar svg text { display: none; }
+  .trajectory-growth-radar svg { width: min(100%, 280px); }
+  .trajectory-growth-grid { grid-template-columns: minmax(0, 1fr); }
+}
