@@ -62,6 +62,41 @@ describe("Agentic Coding source-derived profile", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+
+  it("renders the skill inspector above the application and traps keyboard focus", () => {
+    render(<AgenticCodingProfile />);
+    const trigger = screen.getByTestId("agentic-skill-prompting");
+    fireEvent.click(trigger);
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.closest(".agentic-profile")).toBeNull();
+    const close = within(dialog).getByRole("button", { name: "Закрыть" });
+    expect(document.activeElement).toBe(close);
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    const summaries = dialog.querySelectorAll("summary");
+    expect(document.activeElement).toBe(summaries[summaries.length - 1]);
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(document.activeElement).toBe(close);
+    fireEvent.click(close);
+    expect(document.activeElement).toBe(trigger);
+    expect(document.body.style.overflow).not.toBe("hidden");
+  });
+
+  it("uses distinct prompting levels and telemetry for analysts and QA", () => {
+    render(<AgenticCodingProfile />);
+    fireEvent.change(screen.getByLabelText("Профессиональная группа"), { target: { value: "analyst" } });
+    fireEvent.click(screen.getByTestId("agentic-skill-prompting"));
+    expect(screen.getByRole("dialog")).toHaveTextContent("Назначает задачу агенту-аналитику");
+    expect(screen.getByRole("dialog")).toHaveTextContent("AI_PDLC_CORE_AGENT_DATALAKE_TELEMETRY");
+    fireEvent.keyDown(document, { key: "Escape" });
+    fireEvent.change(screen.getByLabelText("Профессиональная группа"), { target: { value: "qa" } });
+    fireEvent.click(screen.getByTestId("agentic-skill-prompting"));
+    expect(screen.getByRole("dialog")).toHaveTextContent("Назначает задачу агенту-тестировщику");
+    fireEvent.keyDown(document, { key: "Escape" });
+    fireEvent.change(screen.getByLabelText("Профессиональная группа"), { target: { value: "developer" } });
+    fireEvent.click(screen.getByTestId("agentic-skill-prompting"));
+    expect(screen.getByRole("dialog")).toHaveTextContent("Применяет AI-ассистента");
+  });
+
   it("keeps soft skills outside Agentic L1 and makes certification conditions explicit", () => {
     render(<AgenticCodingProfile />);
     fireEvent.click(screen.getByRole("button", { name: "Гибкие" }));

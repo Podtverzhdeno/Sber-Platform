@@ -140,7 +140,7 @@
 .agentic-footer-strip > div { display: flex; flex-direction: column; gap: 4px; padding: 11px 12px; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-surface-raised); }
 .agentic-footer-strip strong { font-size: 11px; }
 .agentic-footer-strip span { font-size: 10px; line-height: 1.4; color: var(--color-muted); }
-.agentic-detail-overlay { position: fixed; inset: 0; z-index: 150; display: flex; justify-content: flex-end; }
+.agentic-detail-overlay { --agentic-teal: #2dd4ac; --agentic-yellow: #f6bc54; position: fixed; inset: 0; z-index: 150; display: flex; justify-content: flex-end; }
 .agentic-detail-scrim { position: absolute; inset: 0; width: 100%; border: 0; background: rgb(4 11 24 / 70%); cursor: pointer; }
 .agentic-detail-sheet {
   position: relative; z-index: 1; width: min(100%, 560px); height: 100%; overflow-y: auto;

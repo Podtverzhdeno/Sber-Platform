@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { createPortal } from "react-dom";
 import { apiRequest } from "../api/client";
 import "./agentic-coding-profile.scss";
 
@@ -108,6 +109,26 @@ const SKILLS: readonly SkillDefinition[] = [
   }
 ];
 
+/* Role-specific normative anchors: competency_anchors.md §§1.2, 2.2 and 3.2. */
+const ROLE_SKILL_ANCHORS: Record<Role, Partial<Record<string, Partial<SkillDefinition>>>> = {
+  developer: {},
+  analyst: {
+    prompting: {
+      intermediate: "Назначает задачу агенту-аналитику через поддержанный рабочий сценарий (например, Story в Jira/SberTrack), а не только отправляет запрос AI-ассистенту",
+      advanced: "Уточняет задачу агента-аналитика, формулирует замечания, направляет на доработку либо ставит задачу в агентном режиме GigaCode",
+      traces: ["AI_PDLC_CORE_AGENT_DATALAKE_TELEMETRY", "chat_window.message.agent.sent", "cli.message.sent", "settings_ide.prompt_library.new_prompt"],
+      practice: "Назначить Story агенту-аналитику, проверить результат, сформулировать замечания и запросить доработку"
+    }
+  },
+  qa: {
+    prompting: {
+      intermediate: "Назначает задачу агенту-тестировщику, например Task в Jira/SberTrack со ссылкой на системные требования",
+      advanced: "Предоставляет артефакты и доступы агенту-тестировщику, проверяет результат, формулирует замечания и направляет на доработку либо работает в агентном режиме GigaCode",
+      traces: ["AI_PDLC_CORE_AGENT_DATALAKE_TELEMETRY", "chat_window.message.agent.sent", "cli.message.sent", "settings_ide.prompt_library.new_prompt"],
+      practice: "Назначить Task агенту-тестировщику на проверку требований, оценить результат и запросить исправления"
+    }
+  }
+};
 const ROLE_PROFILES: Record<Role, { name: string; target: readonly (number | null)[]; conflicts: readonly number[] }> = {
   developer: { name: "Разработчик", target: [3, 4, 3, 2, 3, 2], conflicts: [4] },
   analyst: { name: "Аналитик", target: [3, null, 3, 2, 2, 2], conflicts: [1, 2] },
@@ -175,20 +196,40 @@ function SkillDetail({ skill, target, currentLevel, roleName, conflict, onClose 
   skill: SkillDefinition; target: number | null; currentLevel: number | null; roleName: string; conflict: boolean; onClose: () => void;
 }) {
   const closeButton = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
   useEffect(() => {
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     closeButton.current?.focus();
-    const handleKey = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") { event.preventDefault(); onClose(); return; }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])'
+      ) ?? []).filter((node) => !node.closest("[hidden]") && node.getAttribute("aria-hidden") !== "true");
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (!first || !last) { event.preventDefault(); return; }
+      if (event.shiftKey && (document.activeElement === first || !dialogRef.current?.contains(document.activeElement))) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !dialogRef.current?.contains(document.activeElement))) {
+        event.preventDefault(); first.focus();
+      }
+    };
     document.addEventListener("keydown", handleKey);
-    return () => { document.removeEventListener("keydown", handleKey); previous?.focus(); };
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      document.body.style.overflow = originalOverflow;
+      if (previous?.isConnected) previous.focus();
+    };
   }, [onClose]);
   const levelDescriptions = [
     "Базовая теория: курс «Введение в GigaCode». В учебном Skill Passport хранится отдельно от практических следов L1.",
     skill.intermediate, skill.advanced, skill.expert
   ];
-  return <div className="agentic-detail-overlay" data-testid="agentic-skill-detail">
+  return createPortal(<div className="agentic-detail-overlay" data-testid="agentic-skill-detail">
     <button type="button" className="agentic-detail-scrim" onClick={onClose} aria-label="Закрыть подробности навыка" tabIndex={-1} />
-    <aside role="dialog" aria-modal="true" aria-labelledby="agentic-detail-heading" className="agentic-detail-sheet">
+    <aside ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="agentic-detail-heading" className="agentic-detail-sheet">
       <header className="agentic-detail-header">
         <div><span className="agentic-overline">Skill Passport / {roleName}</span><h2 id="agentic-detail-heading">{skill.label}</h2></div>
         <button ref={closeButton} type="button" className="agentic-close" onClick={onClose} aria-label="Закрыть">×</button>
@@ -216,7 +257,7 @@ function SkillDetail({ skill, target, currentLevel, roleName, conflict, onClose 
       <div className="agentic-detail-action"><h3>Следующая практика</h3><p>{skill.practice}</p><span>Учебная рекомендация · подтверждение по цифровым следам не подключено</span></div>
       <div className="agentic-detail-empty"><strong>История и подтверждения</strong><p>{currentLevel === null ? "Проверенные события, исключённые сигналы и даты оценки появятся после подключения разрешённого источника. Отсутствие данных не означает уровень 0." : "Подтверждённый агрегированный уровень получен из серверного профиля. Подробные события, исключения и история не переданы в этот UI и не должны выдумываться."}</p></div>
     </aside>
-  </div>;
+  </div>, document.body);
 }
 
 function CertificationPanel({ role, targets, current, conflicts, serverStatus, sourceCount, updatedAt }: {
@@ -384,7 +425,7 @@ export function AgenticCodingProfile({ activeRole, onRoleChange, serverProfile, 
         <div><strong>SDD · наблюдение</strong><span>Дополнительная компетенция, не входит в 6 осей L1</span></div>
       </div>
     </>}
-    {skill !== null && <SkillDetail skill={skill} target={target} currentLevel={currentLevel} roleName={profile.name} conflict={hasConflict} onClose={closeDetail} />}
+    {skill !== null && <SkillDetail skill={{ ...skill, ...ROLE_SKILL_ANCHORS[role][skill.key] }} target={target} currentLevel={currentLevel} roleName={profile.name} conflict={hasConflict} onClose={closeDetail} />}
   </section>;
 }
 
