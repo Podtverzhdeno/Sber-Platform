@@ -43,6 +43,8 @@ export interface SourceTrajectoryLayoutProps {
   onSelectStage: (key: string) => void;
   onOpenRole: () => void;
   onOpenActions: () => void;
+  /** Existing authorized menu can be injected without recreating its mutations. */
+  roleActions?: ReactNode;
   onOpenGrades: () => void;
   onOpenTask: (milestoneKey: string) => void;
   onOpenNext: () => void;
@@ -282,7 +284,7 @@ export function SourceTrajectoryLayout(props: SourceTrajectoryLayoutProps) {
                 </div>
                 <div className="role-heading-actions">
                   <button type="button" className="btn outline" onClick={props.onOpenRole}>О роли <SourceIcon name="arrow"/></button>
-                  <button type="button" className="btn square" onClick={props.onOpenActions} aria-label="Действия роли">•••</button>
+                  {props.roleActions ?? <button type="button" className="btn square" onClick={props.onOpenActions} aria-label="Действия роли">•••</button>}
                 </div>
               </div>
             </div>
