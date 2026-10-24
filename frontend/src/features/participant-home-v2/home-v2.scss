@@ -682,3 +682,49 @@
   .home-v2-outcome-stats>span {font-size:10.5px;}
   .home-v2-outcome-actions {grid-column:1/-1;}
 }
+
+
+/* Reference next-step height: keep the metadata and both actions on the same
+   grid row at desktop and on the same action row at phone widths. */
+.home-v2-next-outcome {
+  height:172px;min-height:172px;
+  display:flex;flex-direction:column;
+  padding:11px 14px 12px;
+}
+.home-v2-next-outcome>header {
+  flex:none;min-height:28px;margin:0 0 8px;
+  padding-bottom:8px;border-bottom:1px solid #123f55;
+}
+.home-v2-outcome-main {flex:1;min-height:0;align-content:center;}
+.home-v2-outcome-stats {gap:6px;}
+.home-v2-outcome-stats>span {
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;overflow-wrap:normal;
+}
+.home-v2-outcome-actions {gap:6px;align-self:center;}
+.home-v2-outcome-actions .home-v2-primary {min-height:40px;padding:0 7px;}
+.home-v2-outcome-actions .home-v2-secondary {min-height:32px;padding:6px 4px;}
+@media(min-width:631px) and (max-width:1399px) {
+  .home-v2-next-outcome {height:187px;min-height:187px;}
+}
+@media(min-width:631px) and (max-width:1040px) {
+  .home-v2-next-outcome {height:172px;min-height:172px;}
+}
+@media(max-width:630px) {
+  .home-v2-next-outcome {height:208px;min-height:208px;padding:11px;}
+  .home-v2-next-outcome>header {margin-bottom:7px;}
+  .home-v2-outcome-main {gap:7px;align-content:center;}
+  .home-v2-outcome-content h3 {font-size:16px;margin:0 0 5px;}
+  .home-v2-outcome-content p {line-height:1.3;font-size:11.5px;}
+  .home-v2-outcome-stats {
+    grid-column:2/-1;display:flex;gap:12px;
+    white-space:nowrap;overflow:hidden;flex-wrap:nowrap;
+  }
+  .home-v2-outcome-stats>span {font-size:10px;min-width:0;white-space:nowrap;}
+  .home-v2-outcome-actions {grid-column:1/-1;display:flex;gap:7px;align-items:center;width:100%;}
+  .home-v2-outcome-actions>* {flex:1;min-width:0;}
+  .home-v2-outcome-actions .home-v2-primary {min-height:40px;font-size:11px;}
+  .home-v2-outcome-actions .home-v2-secondary {min-height:36px;font-size:10.5px;}
+}
+@media(max-width:370px) {
+  .home-v2-next-outcome {height:220px;min-height:220px;}
+}
