@@ -185,3 +185,27 @@ test("foreign deep link is safe and mobile list has no page overflow", async ({ 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
   expect(overflow).toBe(false);
 });
+
+test("mobile collapses secondary filters and reveals opened task detail", async ({ page }) => {
+  await openCatalog(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const expander = page.getByRole("button", { name: "Все фильтры" });
+  await expect(expander).toBeVisible();
+  await expect(expander).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByLabel("Навык")).toBeHidden();
+  await expander.click();
+  await expect(page.getByLabel("Навык")).toBeVisible();
+  await page.getByLabel("Навык").fill("python");
+  await expect(page.getByRole("button", { name: /Сбросить фильтр Навык/ })).toBeVisible();
+  await page.getByRole("button", { name: "Скрыть фильтры" }).click();
+  await expect(page.getByLabel("Навык")).toBeHidden();
+
+  await page.getByRole("button", { name: "Подробнее" }).first().click();
+  await expect(page.getByRole("heading", { name: "Этапы задачи" })).toBeVisible();
+  await expect(page.getByText(/Это план, а не прогресс/)).toBeVisible();
+  await expect.poll(() =>
+    page.locator(".catalog-v2-inspector").evaluate((node) => node.getBoundingClientRect().top),
+  ).toBeLessThan(844);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+  expect(overflow).toBe(false);
+});
