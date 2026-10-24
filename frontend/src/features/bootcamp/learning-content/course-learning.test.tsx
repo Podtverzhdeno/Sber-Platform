@@ -58,7 +58,9 @@ describe("Bootcamp editorial course curriculum", () => {
     expect(screen.getByRole("heading", { name: "Архитектура и ADR" })).toBeInTheDocument();
     const checks = screen.getAllByRole("checkbox");
     expect(checks).toHaveLength(3);
-    fireEvent.click(checks[0]!);
+    const firstCheck = checks[0];
+    if (!firstCheck) throw new Error("Expected a self-check checkbox");
+    fireEvent.click(firstCheck);
     expect(checks[0]).toBeChecked();
     fireEvent.click(within(nav).getByRole("button", { name: /Сценарии и критерии/ }));
     expect(screen.getByRole("heading", { name: "Сценарии и критерии приёмки" })).toBeInTheDocument();
