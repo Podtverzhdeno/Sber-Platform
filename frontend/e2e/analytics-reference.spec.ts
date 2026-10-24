@@ -11,7 +11,7 @@ const actor = {
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: { honor_board_enabled: true } }));
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: "Алекс Речной", roles: ["participant"] }] }));
-  await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
+  await page.route("**/api/v1/me", (route) => route.fulfill({ json: actor }));
   await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: actor }));
   await page.route("**/api/v1/me/agentic-coding/profile**", async (route) => {
     const role = new URL(route.request().url()).searchParams.get("role_key") ?? "developer";
@@ -42,14 +42,8 @@ test.beforeEach(async ({ page }) => {
 for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { name: "mobile-390", width: 390, height: 844 }] as const) {
   test("analytics canonical reference variants " + viewport.name, async ({ page }, testInfo) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await page.goto("/");
-    await page.locator('[data-persona="participant-alex"]').click();
-    // Demo login is in-memory; a full reload would discard the actor because /me is mocked 401.
-    await expect(page.getByRole("navigation", { name: "Навигация роли", includeHidden: true })).toBeAttached();
-    await page.evaluate(() => {
-      window.history.pushState({}, "", "/workspace/9");
-      window.dispatchEvent(new PopStateEvent("popstate"));
-    });
+    // A design screenshot is not a login test: start from a deterministic authenticated actor.
+    await page.goto("/workspace/9");
     const root = page.getByTestId("analytics-reference");
     await expect(root).toBeVisible();
     await expect(page.getByRole("heading", { name: "Ваш Skill Passport" })).toBeVisible();
