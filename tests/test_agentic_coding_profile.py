@@ -100,6 +100,31 @@ def client() -> TestClient:
     )
 
 
+
+def test_revocation_tombstone_blocks_prior_verified_level() -> None:
+    active = evidence(level=4)
+    revoked = evidence(level=4, status=VerificationStatus.REVOKED)
+    result = evaluate_profile(PERSON, "developer", (active, revoked), as_of=NOW)
+    assert result.skills[0].current_level is None
+    assert result.skills[0].evidence_count == 0
+    assert result.certification_state == "not_evaluable"
+
+
+def test_untrusted_revocation_cannot_erase_verified_source() -> None:
+    active = evidence(level=2)
+    untrusted_tombstone = evidence(status=VerificationStatus.REVOKED, trusted=False)
+    result = evaluate_profile(PERSON, "developer", (active, untrusted_tombstone), as_of=NOW)
+    assert result.skills[0].current_level == 2
+    assert result.skills[0].evidence_count == 1
+
+
+def test_duplicated_qualified_evidence_does_not_inflate_coverage() -> None:
+    item = evidence(level=3)
+    result = evaluate_profile(PERSON, "developer", (item, item), as_of=NOW)
+    assert result.skills[0].evidence_count == 1
+    assert result.known_evidence_count == 1
+
+
 def test_api_requires_auth_and_never_issues_student_l1() -> None:
     with client() as c:
         assert c.get("/api/v1/me/agentic-coding/profile").status_code == 401
