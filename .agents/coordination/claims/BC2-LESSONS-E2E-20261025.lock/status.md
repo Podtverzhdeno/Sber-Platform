@@ -1,0 +1,11 @@
+# Claim BC2-LESSONS-E2E-20261025
+- task_id: BC2-LESSONS-E2E-20261025
+- session_id: gpt6-20261025-lessons-browser-acceptance
+- status: IN_PROGRESS
+- base_revision: dbbd96ffccfa7ee0cb5503284c64177372b5a3eb
+- write_scope:
+  - frontend/e2e/bootcamp-learning-content.spec.ts
+  - .agents/coordination/claims/BC2-LESSONS-E2E-20261025.lock/status.md
+- depends_on: [BC2-COURSE-CONTENT-20261025]
+- verification: real classic catalog lesson opening/navigation for all 12 demo courses, mobile width, no fabricated verification
+- progress: preparing browser acceptance
