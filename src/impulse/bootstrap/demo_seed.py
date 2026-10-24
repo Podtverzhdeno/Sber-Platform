@@ -1121,6 +1121,70 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
             payload={"artifact_refs": []},
         ),
     ]
+    # Idempotent reference communities, members and messages for the DEMO DB.
+    # No runtime user's authored data is overwritten on repeated deploys.
+    community_specs = (
+        ("mayaki", "Маяки", ("participant-alex", "participant-maria", "participant-anna", "mentor-elena"), (
+            ("mentor-elena", "Добро пожаловать в сообщество «Маяки»! Здесь обсуждаем карьеру, обучение и проекты."),
+            ("participant-maria", "В подборку добавлены новые возможности: стажировки, гранты и хакатоны."),
+        )),
+        ("school21", "Школа 21", ("participant-alex", "participant-igor", "participant-sofia", "mentor-elena"), (
+            ("participant-igor", "Открыта регистрация на новый поток. Поделитесь опытом прохождения отбора."),
+        )),
+        ("ai-dev", "AI в Dev Community", ("participant-alex", "participant-ilya", "participant-kirill", "mentor-elena"), (
+            ("participant-ilya", "Обсудим новые инструменты агентной разработки и проверку качества LLM."),
+        )),
+        ("grants", "Грантовый конкурс", ("participant-alex", "participant-anna", "participant-daria", "mentor-elena"), (
+            ("participant-daria", "Открыт приём заявок на гранты. Документы можно обсудить здесь."),
+        )),
+        ("technology", "Новости технологий", ("participant-alex", "participant-artem", "participant-timur", "mentor-elena"), (
+            ("participant-artem", "В этой группе публикуются и обсуждаются инженерные новости."),
+        )),
+        ("impulse", "Импульс — Общий чат", ("participant-alex", "participant-maria", "participant-igor", "customer-roman"), (
+            ("participant-maria", "Коллеги, завтра встреча команд по проектным задачам."),
+        )),
+    )
+    for slug, title, people, posts in community_specs:
+        channel_key = f"messaging-channel:community:{slug}"
+        channel_id = demo_id(channel_key)
+        channel_rows.append(
+            demo_row(channel_key, kind="community", context_key=f"demo-community:{slug}",
+                     title=title, task_id=None, status="active")
+        )
+        for person_key in people:
+            membership_rows.append(demo_row(
+                f"messaging-membership:community:{slug}:{person_key}",
+                channel_id=channel_id, person_id=demo_id(person_key),
+                role="member", muted=False, sender_enabled=True, status="active",
+            ))
+        for index, (author, text) in enumerate(posts, start=1):
+            message_rows.append(demo_row(
+                f"messaging-message:community:{slug}:{index}",
+                channel_id=channel_id, author_id=demo_id(author),
+                kind="text", body=text, sequence=index,
+                status="active", payload={"artifact_refs": []},
+            ))
+    # Ready-to-open DMs with named, actual demo personas, not UI-only names.
+    for person_key in ("customer-roman", "participant-maria", "participant-igor", "participant-anna"):
+        members = sorted((demo_id("participant-alex"), demo_id(person_key)), key=str)
+        channel_key = f"messaging-channel:personal:alex-{person_key}"
+        chat_id = demo_id(channel_key)
+        channel_rows.append(demo_row(
+            channel_key, kind="personal", context_key=f"pair:{members[0]}:{members[1]}",
+            title=None, task_id=None, status="active",
+        ))
+        for who in ("participant-alex", person_key):
+            membership_rows.append(demo_row(
+                f"messaging-membership:personal:alex-{person_key}:{who}",
+                channel_id=chat_id, person_id=demo_id(who),
+                role="member", muted=False, sender_enabled=True, status="active",
+            ))
+        message_rows.append(demo_row(
+            f"messaging-message:personal:alex-{person_key}:1",
+            channel_id=chat_id, author_id=demo_id(person_key),
+            kind="text", body="Привет! Давай обсудим совместные задачи и планы.",
+            sequence=1, status="active", payload={"artifact_refs": []},
+        ))
     cursor_rows = [
         demo_row(
             "messaging-cursor:task-1:mentor-elena",
