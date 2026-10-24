@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
+import { Award, BriefcaseBusiness, CalendarDays, CheckCircle2, ClipboardCheck, Clock3, FileText, Laptop2, ShieldCheck, Users } from "lucide-react";
 
 import { ApiClientError } from "../../api/client";
 import { StatePanel } from "../../components/ui";
@@ -140,25 +141,19 @@ export function ConditionsDialog(props: {
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
       >
-        <header>
+        <header className="catalog-v2-conditions-header">
+          <span className="catalog-v2-conditions-avatar" aria-hidden="true"><BriefcaseBusiness size={26} /></span>
           <div>
-            <p className="eyebrow">Актуальные условия · версия {termsData?.terms_version ?? "…"}</p>
-            <h2 id={titleId}>
-              {termsAccessDenied ? "Условия участия недоступны" : `Участие в задаче «${task.title}»`}
-            </h2>
+            <h2 id={titleId}>{termsAccessDenied ? "Условия участия недоступны" : "Условия участия"}</h2>
+            <strong>{termsAccessDenied ? "Доступ к задаче ограничен" : task.title}</strong>
+            <p>{task.customer.display_name} · версия условий {termsData?.terms_version ?? "…"}</p>
+            <ul className="catalog-v2-tags" aria-label="Компетенции задачи">{task.competency_tags.slice(0, 5).map((tag) => <li key={tag}>{tag}</li>)}</ul>
           </div>
-          <button
-            ref={closeRef}
-            type="button"
-            aria-label="Закрыть условия"
-            disabled={apply.isPending}
-            onClick={props.onClose}
-          >
-            ×
-          </button>
+          <button ref={closeRef} type="button" aria-label="Закрыть условия"
+            disabled={apply.isPending} onClick={props.onClose}>×</button>
         </header>
-        <p id={descriptionId}>
-          Отклик означает отправку заявки заказчику, а не автоматическое назначение на задачу.
+        <p id={descriptionId} className="catalog-v2-conditions-note">
+          Отклик — заявка заказчику, а не автоматическое назначение. Согласие действительно только для текущей версии условий.
         </p>
         {terms.isPending ? <StatePanel kind="loading" /> : null}
         {terms.isError ? (
@@ -177,48 +172,47 @@ export function ConditionsDialog(props: {
           />
         ) : null}
         {termsData !== undefined ? (
-          <div className="catalog-v2-terms-grid">
-            <section>
-              <h3>Результат</h3>
-              <p>{notProvided(termsData.deliverable)}</p>
-            </section>
-            <section>
-              <h3>Критерии приёмки</h3>
-              {termsData.acceptance_criteria.length ? (
-                <ul>{termsData.acceptance_criteria.map((item) => <li key={item}>{item}</li>)}</ul>
-              ) : <p>Критерии приёмки не опубликованы.</p>}
-            </section>
-            <section>
-              <h3>Требования к участнику</h3>
-              {termsData.prerequisites.length ? (
-                <ul>{termsData.prerequisites.map((item) => <li key={item}>{item}</li>)}</ul>
-              ) : <p>Дополнительные prerequisites не опубликованы.</p>}
-            </section>
-            <section>
-              <h3>Критерии отбора</h3>
-              {termsData.selection_criteria.length ? (
-                <ul>{termsData.selection_criteria.map((item) => <li key={item}>{item}</li>)}</ul>
-              ) : <p>Критерии отбора не опубликованы.</p>}
-            </section>
-            <section>
-              <h3>Срок и поддержка</h3>
-              <p>{formatDeadline(termsData.deadline_at)}</p>
-              <p>Длительность: {formatMinutes(termsData.duration_minutes)}</p>
-              <p>Нагрузка в неделю: {formatMinutes(termsData.weekly_workload_minutes)}</p>
-              <p>Поддержка: {notProvided(termsData.support_model)}</p>
-            </section>
-            <section>
-              <h3>Данные и интеллектуальная собственность</h3>
-              <p>{termsData.data_constraints ?? "Ограничения данных не указаны."}</p>
-              <p>{notProvided(termsData.ip_terms)}</p>
-            </section>
-            <section>
-              <h3>Оплата и портфолио</h3>
-              <p>{termsData.paid ? "Участие оплачивается." : "Оплата не предусмотрена."}</p>
-              <p>{termsData.payout_condition ?? "Условие выплаты не указано."}</p>
-              <p>Портфолио: {termsData.portfolio_permission}.</p>
-            </section>
-          </div>
+          <>
+            <div className="catalog-v2-conditions-stats" aria-label="Ключевые параметры задачи">
+              <div><CalendarDays size={20} aria-hidden="true" /><strong>{termsData.duration_minutes === null ? "Не указано" : formatMinutes(termsData.duration_minutes)}</strong><small>Срок выполнения</small></div>
+              <div><Clock3 size={20} aria-hidden="true" /><strong>{formatMinutes(termsData.weekly_workload_minutes)}</strong><small>Нагрузка в неделю</small></div>
+              <div><Users size={20} aria-hidden="true" /><strong>{String(task.places_total)} участников</strong><small>Размер команды · мест {task.places_available ?? "—"}</small></div>
+              <div><FileText size={20} aria-hidden="true" /><strong>{notProvided(termsData.deliverable)}</strong><small>Ожидаемый результат</small></div>
+            </div>
+            <div className="catalog-v2-terms-grid">
+              <section>
+                <h3><ClipboardCheck size={19} aria-hidden="true" /> Что нужно для отклика</h3>
+                {termsData.prerequisites.length > 0 ? <ul>{termsData.prerequisites.map((value) => <li key={value}>{value}</li>)}</ul> : <p>Дополнительные требования не опубликованы.</p>}
+              </section>
+              <section>
+                <h3><FileText size={19} aria-hidden="true" /> Что сдаёшь в итоге</h3>
+                <p>{notProvided(termsData.deliverable)}</p>
+                <h4>Критерии приёмки</h4>
+                {termsData.acceptance_criteria.length > 0 ? <ul>{termsData.acceptance_criteria.map((value) => <li key={value}>{value}</li>)}</ul> : <p>Критерии приёмки не опубликованы.</p>}
+              </section>
+              <section>
+                <h3><Laptop2 size={19} aria-hidden="true" /> Формат работы</h3>
+                <p>{task.work_format ?? "Формат не указан"}</p>
+                <p>Дедлайн отклика: {formatDeadline(termsData.deadline_at)}</p>
+                <p>Поддержка: {notProvided(termsData.support_model)}</p>
+              </section>
+              <section>
+                <h3><Award size={19} aria-hidden="true" /> Критерии отбора</h3>
+                {termsData.selection_criteria.length > 0 ? <ul>{termsData.selection_criteria.map((value) => <li key={value}>{value}</li>)}</ul> : <p>Критерии отбора не опубликованы.</p>}
+              </section>
+              <section className="catalog-v2-terms-support">
+                <h3><Users size={19} aria-hidden="true" /> Поддержка</h3>
+                <p>{notProvided(termsData.support_model)}</p>
+              </section>
+              <section className="catalog-v2-terms-disclosure">
+                <h3><ShieldCheck size={19} aria-hidden="true" /> Условия использования результата</h3>
+                <p>{termsData.data_constraints ?? "Ограничения данных не указаны."}</p>
+                <p>{notProvided(termsData.ip_terms)}</p>
+                <p>{termsData.paid ? "Участие оплачивается." : "Оплата не предусмотрена."} {termsData.payout_condition ?? "Условия выплаты не опубликованы."}</p>
+                <p>Портфолио: {termsData.portfolio_permission === "none" ? "не разрешено" : termsData.portfolio_permission === "full" ? "разрешено по условиям заказчика" : "только при выполнении дополнительных условий"}.</p>
+              </section>
+            </div>
+          </>
         ) : null}
         {actionError !== null ? <p className="catalog-v2-action-error" role="alert">{actionError}</p> : null}
         {termsChangedFrom !== null ? <p className="catalog-v2-terms-changed" role="status">Версия {termsChangedFrom} больше не действует. Сейчас открыта версия {termsData?.terms_version ?? "…"}; согласие нужно подтвердить заново.</p> : null}
@@ -241,9 +235,12 @@ export function ConditionsDialog(props: {
               />
               Я прочитал(а) условия версии {termsData.terms_version} и подтверждаю их перед откликом.
             </label>
-            <button type="submit" className="catalog-v2-primary" disabled={!consent || apply.isPending}>
-              {apply.isPending ? "Проверяем и отправляем…" : "Подтвердить и отправить отклик"}
-            </button>
+            <div className="catalog-v2-conditions-actions">
+              <button type="button" disabled={apply.isPending} onClick={props.onClose}>Закрыть</button>
+              <button type="submit" className="catalog-v2-primary" aria-label="Подтвердить и отправить отклик" disabled={!consent || apply.isPending}>
+                {apply.isPending ? "Проверяем и отправляем…" : "Откликнуться"}
+              </button>
+            </div>
           </form>
         ) : null}
       </section>
