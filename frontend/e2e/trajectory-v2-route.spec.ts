@@ -52,6 +52,14 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
     skill: "AI architecture", target_kind: "task", target_key: `reference-task-${String(index + 1)}`,
     completed: index < 2, activities: ["Изучить принципы", "Реализовать практику", "Проверить результат"],
     deliverable: `Артефакт: ${title}`,
+    theory: ["Границы доверия AI-сервиса", "Принципы оценки качества архитектуры"],
+    lab: `Подготовить рабочий архитектурный прототип для модуля «${title}» с проверяемыми ограничениями.`,
+    acceptance: [
+      "Есть воспроизводимые входы и результат",
+      "Негативные сценарии покрыты тестами",
+      "Представлен проверяемый артефакт",
+    ],
+    estimated_hours: 8,
   }));
   const roadmapCatalog = roles.map((role) => ({
     track_key: role.track_key, policy_version: 1, replacement_reason: null,
@@ -105,6 +113,13 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await expect(page.locator(".trajectory-v2-role-card")).toHaveCount(7);
   await expect(stageCard).toBeVisible();
   await expect(page.getByTestId("trajectory-stage-activities").locator("li")).toHaveCount(3);
+  const teaching = page.getByTestId("trajectory-learning-material");
+  await expect(teaching).toHaveCount(1);
+  await teaching.locator("summary").click();
+  await expect(teaching.getByText("Границы доверия AI-сервиса")).toBeVisible();
+  await expect(teaching.getByText(/Подготовить рабочий архитектурный прототип/)).toBeVisible();
+  await expect(teaching.locator("ul").last().locator("li")).toHaveCount(3);
+  await teaching.locator("summary").click();
   await page.locator('.trajectory-v2-role-card[data-role-key="python"]').click();
   await expect(page.locator(".trajectory-v2-stage-path button")).toHaveCount(7);
   await expect(page.getByRole("heading", { name: "AI Security Engineer" })).toBeVisible();
@@ -128,6 +143,8 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await page.locator(".trajectory-v2-stage-path [data-stage-state='completed']").first().click();
   await page.locator(".trajectory-v2-stage-detail").getByRole("button", { name: "Посмотреть →" }).click();
   await expect(page.getByTestId("trajectory-drawer-overlay")).toBeVisible();
+  await expect(page.getByTestId("trajectory-drawer-learning-content")).toBeVisible();
+  await expect(page.getByTestId("trajectory-drawer-learning-content").getByText("Как проверить результат")).toBeVisible();
   await page.screenshot({ path: "test-results/trajectory-v2-task-drawer-candidate.png", animations: "disabled" });
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: /RAG & Knowledge Design/ }).first().click();
