@@ -54,7 +54,7 @@ test.describe("task catalog interactive controls and motion", () => {
     await page.addInitScript(() => {
       Object.defineProperty(navigator, "clipboard", {
         configurable: true,
-        value: { writeText: async (_value: string) => Promise.resolve() },
+        value: { writeText: async () => Promise.resolve() },
       });
     });
     await openCatalog(page);
