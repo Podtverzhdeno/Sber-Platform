@@ -61,7 +61,8 @@ const screenshotCandidate = async (page: Page, file: string): Promise<void> => {
 };
 
 test.describe("user-approved messaging visual scenarios", () => {
-  test.use({ viewport: { width: 1649, height: 1056 }, reducedMotion: "reduce" });
+  // Match the supplied 01.png / 02.png 1448×1086 references exactly.
+  test.use({ viewport: { width: 1448, height: 1086 }, reducedMotion: "reduce" });
 
   test("02.png: empty chat + actions + placeholder context", async ({ page }) => {
     await openApprovedPreview(page);
@@ -70,6 +71,7 @@ test.describe("user-approved messaging visual scenarios", () => {
     await expect(page.getByRole("button", { name: /Перейти в Маяки/ })).toBeEnabled();
     await expect(page.locator(".messenger-shell")).toHaveAttribute("data-pane", "desktop");
     await screenshotCandidate(page, "messages-02-empty-approved.png");
+    await page.screenshot({ path: "test-results/messages-02-full-page-1448x1086.png", animations: "disabled" });
   });
 
   test("03.png: direct messages + peer context + attachments", async ({ page }) => {
@@ -79,7 +81,10 @@ test.describe("user-approved messaging visual scenarios", () => {
     await expect(page.locator(".msg-context__description")).toBeVisible();
     await expect(page.locator(".ref-context-files li")).toHaveCount(3);
     await expect(page.getByText(/сообщения здесь не сохраняются/)).toBeVisible();
+    await page.setViewportSize({ width: 1672, height: 941 });
+    await page.evaluate(() => document.fonts.ready);
     await screenshotCandidate(page, "messages-03-elena-approved.png");
+    await page.screenshot({ path: "test-results/messages-03-full-page-1672x941.png", animations: "disabled" });
   });
 
   test("01.png: Mayaki community posts + pinned + moderators", async ({ page }) => {
@@ -97,6 +102,7 @@ test.describe("user-approved messaging visual scenarios", () => {
     await expect(page.locator(".ref-context-files li")).toHaveCount(3);
     await expect(page.locator(".msg-composer__reference-row button")).toBeDisabled();
     await screenshotCandidate(page, "messages-01-mayaki-approved.png");
+    await page.screenshot({ path: "test-results/messages-01-full-page-1448x1086.png", animations: "disabled" });
     expect(interceptedWrites).toHaveLength(0);
   });
 });
