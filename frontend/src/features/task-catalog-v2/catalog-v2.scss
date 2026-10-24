@@ -2656,3 +2656,77 @@
   .catalog-v2-detail .catalog-v2-detail-grid { row-gap: 6px; }
   .catalog-v2-detail-footer { padding-top: 8px !important; }
 }
+
+
+/* Reference-image acceptance continuation: preserve valid dt/dd semantics,
+   keep desktop table actions in a single scanline, and pass light WCAG AA. */
+.catalog-v2-detail-factrail > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 3px;
+}
+
+.catalog-v2-detail-factrail dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.catalog-v2-detail-factrail dt svg { width: 17px; height: 17px; }
+.catalog-v2-detail-factrail dd { margin: 0; }
+
+@media (min-width: 1121px) {
+  .catalog-v2-table-head,
+  .catalog-v2-table-row {
+    grid-template-columns:
+      22px
+      minmax(170px, 1.7fr)
+      minmax(100px, 0.9fr)
+      minmax(100px, 0.9fr)
+      minmax(110px, 0.9fr)
+      minmax(95px, 0.8fr)
+      minmax(130px, 1.15fr)
+      minmax(125px, 1.1fr)
+      minmax(160px, 1.25fr);
+    gap: 5px;
+    padding: 5px 9px;
+  }
+
+  .catalog-v2-table-row { min-height: 72px; }
+  .catalog-v2-table-actions {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 3px;
+    min-width: 0;
+  }
+  .catalog-v2-table-actions button {
+    flex: 0 0 auto;
+    min-width: 37px;
+    min-height: 40px;
+    padding: 5px 6px;
+  }
+  .catalog-v2-table-actions .catalog-v2-list-apply {
+    min-width: 48px;
+    font-size: 0.67rem;
+  }
+  .catalog-v2-table-task-text strong { line-height: 1.22; }
+  .catalog-v2-table-task-text small,
+  .catalog-v2-table-reason small,
+  .catalog-v2-table-benefit small { line-height: 1.2; }
+}
+
+html[data-theme="light"] .catalog-v2 {
+  /* Teal #0d9488 is only 3.74:1 on white at small sizes. */
+  --catalog-highlight: #0b716d;
+}
+html[data-theme="light"] .catalog-v2 .catalog-v2-kpi-ring,
+html[data-theme="light"] .catalog-v2 .catalog-v2-top-match,
+html[data-theme="light"] .catalog-v2 .catalog-v2-match,
+html[data-theme="light"] .catalog-v2 .catalog-v2-customer-verified,
+html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
+  color: #0b716d;
+}
