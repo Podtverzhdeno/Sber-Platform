@@ -207,7 +207,7 @@ function CatalogFilters({
         </button>
       </div>
       <p className="bootcamp-filter-hint">
-        Актуальные — доступные курсы, связанные с выбранной траекторией и дефицитами навыков.
+        Актуальные — курсы, доступные сейчас и связанные с активной траекторией и незакрытым пробелом навыков.
       </p>
       <label className="bootcamp-query" htmlFor="bootcamp-search-course">
         Поиск курса
