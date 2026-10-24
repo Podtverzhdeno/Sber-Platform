@@ -23,6 +23,7 @@ import {
 import { ConditionsDialog } from "./conditions-dialog";
 import { CustomerMark } from "./customer-mark";
 import { BenefitMark } from "./benefit-mark";
+import { SkillMark } from "./skill-mark";
 import { TaskCatalogList } from "./list";
 import type {
   CatalogFilters,
@@ -278,7 +279,7 @@ function TaskDetail(props: {
                   const delta = current !== null && projected !== null ? projected - current : null;
                   return (
                     <li key={impact.skill_id}>
-                      <strong>{impact.title}</strong>
+                      <strong className="catalog-v2-skill-name"><SkillMark title={impact.title} /> {impact.title}</strong>
                       <div className="catalog-v2-skill-transition">
                         <span><small>Текущий уровень</small><b>{impact.current_level ?? "Нет подтверждённого уровня"}</b>{current !== null ? <span className="catalog-v2-skill-bar"><i style={{ width: String(current) + "%" }} /></span> : null}</span>
                         <span className="catalog-v2-skill-arrow" aria-hidden="true">→</span>
