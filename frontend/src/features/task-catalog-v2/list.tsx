@@ -64,14 +64,14 @@ export function TaskCatalogList(props: {
               <small>{props.customerLabel(item)} · {props.applicationLabel(item)}</small>
               <small>{item.competency_tags.join(" · ") || "Компетенции не указаны"}</small>
             </span>
-            <span role="cell">{props.matchBadge(item)}</span>
-            <span role="cell" className="catalog-v2-table-facts">
+            <span role="cell" data-label="Релевантность">{props.matchBadge(item)}</span>
+            <span role="cell" className="catalog-v2-table-facts" data-label="Параметры задачи">
               <span>{props.difficultyLabel(item.difficulty)}</span>
               <span>{props.formatDuration(item.duration_minutes)}</span>
               <span>{props.formatLabel(item.work_format)}</span>
             </span>
-            <span role="cell">{props.formatDeadline(item.deadline_at)}</span>
-            <span role="cell" className="catalog-v2-table-actions">
+            <span role="cell" data-label="Отклик до">{props.formatDeadline(item.deadline_at)}</span>
+            <span role="cell" className="catalog-v2-table-actions" data-label="Действия">
               <button type="button" onClick={() => { props.onOpen(item); }}>Подробнее</button>
               {item.allowed_actions.includes("open_conditions") || canApply ? <button type="button" className="catalog-v2-primary" disabled={!canApply} onClick={(event) => { event.currentTarget.focus(); props.onConditions(item); }}>Отклик</button> : null}
               <button type="button" aria-pressed={item.bookmarked} disabled={props.bookmarkPendingId === item.task_id} onClick={() => { props.onBookmark(item); }}>{item.bookmarked ? "Сохранено" : "Сохранить"}</button>
