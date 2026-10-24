@@ -102,6 +102,7 @@ test("participant activates second track and freezes one only when choosing thir
   await page.locator('[data-persona="participant-alex"]').click();
   // Точка входа «Мой путь» ушла в историю: реальная роль ведёт на «Мою траекторию».
   await page.getByRole("link", { name: "Моя траектория" }).click();
+  await page.goto("/workspace/1?legacy=1");
   await page.getByRole("button", { name: /Аналитик данных/ }).click();
   await expect(page.locator(".track-card").filter({ hasText: "Аналитик данных" })).toContainText("Активно");
   await page.getByRole("button", { name: /Продуктовый аналитик/ }).click();
