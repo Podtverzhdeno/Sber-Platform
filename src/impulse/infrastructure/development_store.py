@@ -164,11 +164,7 @@ class SqlDevelopmentStore(DevelopmentStore):
                         for topic in row["payload"].get("theory", [])
                         if isinstance(topic, str)
                     ),
-                    lab=(
-                        str(row["payload"]["lab"])
-                        if row["payload"].get("lab")
-                        else None
-                    ),
+                    lab=(str(row["payload"]["lab"]) if row["payload"].get("lab") else None),
                     acceptance=tuple(
                         str(check)
                         for check in row["payload"].get("acceptance", [])
