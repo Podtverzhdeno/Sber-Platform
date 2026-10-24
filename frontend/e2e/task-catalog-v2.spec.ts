@@ -157,11 +157,11 @@ test("120-task catalog keeps detail lazy and warm by id and snapshot", async ({ 
   await expect(page.locator('[role="listitem"]')).toHaveCount(120);
 
   await page.getByRole("button", { name: "Подробнее" }).first().click();
-  await expect(page.getByRole("heading", { name: "Почему задача рекомендована" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Почему подходит" })).toBeVisible();
   await page.getByRole("button", { name: "Закрыть детали" }).click();
   const warmStarted = Date.now();
   await page.getByRole("button", { name: "Подробнее" }).first().click();
-  await expect(page.getByRole("heading", { name: "Почему задача рекомендована" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Почему подходит" })).toBeVisible();
   const warmMs = Date.now() - warmStarted;
 
   expect(detailRequests).toHaveLength(1);
