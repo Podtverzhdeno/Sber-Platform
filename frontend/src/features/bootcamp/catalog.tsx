@@ -487,7 +487,7 @@ export function BootcampCatalog({
     setSearchParams(next);
   }
 
-  if (catalog.isLoading && !catalog.data) return <StatePanel kind="loading" />;
+  if (catalog.isLoading) return <StatePanel kind="loading" />;
   if (!catalog.data) {
     return (
       <StatePanel
