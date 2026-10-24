@@ -61,7 +61,7 @@ const nextOutcome = {
   target_key: "qa-task-3",
   target_title: "Оценка и приоритизация гипотез",
 };
-function Preview() {
+export function Preview() {
   const [roleKey, setRoleKey] = useState("product");
   const [stageKey, setStageKey] = useState("stage-3");
   const [notice, setNotice] = useState("");
