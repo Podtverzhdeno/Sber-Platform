@@ -192,7 +192,7 @@ describe("trajectory v2 task/evidence drawer", () => {
   it("keeps role/stage context for an unselected role without inert actions", async () => {
     shell("/workspace/1?role=product", [roadmapWithNext, productRoadmap]);
     fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
-    const drawer = screen.getByRole("dialog", { name: /Детали этапа|Этап пройден/ });
+    const drawer = screen.getByRole("dialog", { name: "Программа для ознакомления" });
     expect(
       drawer.textContent,
     ).toContain(
