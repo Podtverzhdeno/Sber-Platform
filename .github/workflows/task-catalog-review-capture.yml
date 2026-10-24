@@ -1,4 +1,5 @@
 name: Temporary approved-task visual review
+# Capture after CSS specificity/ring fixes
 on:
   push:
     branches: [codex/task-catalog-visual-polish-20261024]
