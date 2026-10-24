@@ -1022,3 +1022,54 @@
 }
 
 .workspace-content .trajectory-v2-detail-icon svg {width:26px;height:26px}
+
+
+/* TRJ-SCREEN-03 | Source role-info modal: one underline tab row, compact close. */
+.workspace-content .trajectory-v2-role-dialog {
+  position:relative;box-sizing:border-box;
+  width:min(908px,calc(100vw - 28px));max-width:none;
+  padding:24px 27px;max-height:91vh;overflow-y:auto;
+  border:1px solid #195676;border-radius:16px;background:#061b2b;color:#edf7ff;
+}
+.workspace-content .trajectory-v2-role-dialog-close {
+  position:absolute;right:17px;top:17px;z-index:2;
+  display:grid;place-items:center;box-sizing:border-box;
+  width:36px;height:36px;min-height:36px;padding:0;
+  border:1px solid #28536b;border-radius:9px;background:#143249;color:#cde5f9;
+  font-size:23px;line-height:1;cursor:pointer;
+}
+.workspace-content .trajectory-v2-role-modal-title{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.workspace-content .trajectory-v2-role-modal-icon svg{width:25px;height:25px}
+.workspace-content .trajectory-v2-role-dialog>small{display:none}
+.workspace-content .trajectory-v2-role-tabs{
+  display:flex;flex-wrap:nowrap;gap:0;
+  width:100%;box-sizing:border-box;min-width:0;
+  margin:22px 0 14px;padding:0 0 0 2px;
+  border-bottom:1px solid #254962;
+  overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;
+}
+.workspace-content .trajectory-v2-role-tabs>button{
+  flex:0 0 auto;white-space:nowrap;
+  margin:0;padding:11px 13px!important;
+  border:0!important;border-bottom:3px solid transparent!important;
+  outline:0!important;box-shadow:none!important;
+  border-radius:0!important;background:transparent!important;
+  font-size:12px;font-weight:500;color:#a8bbd1!important;cursor:pointer;
+}
+.workspace-content .trajectory-v2-role-tabs>button[aria-selected="true"]{
+  border-bottom-color:#04eee3!important;color:#0ff1e7!important;font-weight:800;
+}
+.workspace-content .trajectory-v2-role-tabs>button:focus-visible{outline:2px solid #17e9dc!important;outline-offset:-4px}
+.workspace-content .trajectory-v2-role-intro-grid>section:not(.trajectory-v2-role-intro-hero){min-height:208px}
+.workspace-content .trajectory-v2-role-intro-grid li{
+  list-style:none;position:relative;padding-left:18px;margin-bottom:6px;
+}
+.workspace-content .trajectory-v2-role-intro-grid li::before{
+  content:"✓";color:#17f0de;position:absolute;left:0;
+}
+@media(max-width:690px){
+  .workspace-content .trajectory-v2-role-dialog{padding:17px 14px}
+  .workspace-content .trajectory-v2-role-modal-title h2{font-size:21px}
+  .workspace-content .trajectory-v2-role-tabs{overflow-x:auto;flex-wrap:nowrap}
+  .workspace-content .trajectory-v2-role-intro-grid>section:not(.trajectory-v2-role-intro-hero){min-height:0}
+}
