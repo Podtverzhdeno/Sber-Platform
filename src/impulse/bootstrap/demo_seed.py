@@ -151,7 +151,79 @@ TRACKS = (
     ("data", "Аналитик данных"),
     ("product", "Продуктовый аналитик"),
     ("ml", "ML-инженер"),
+    ("backend", "Backend-разработчик"),
+    ("design", "UX/UI-дизайнер"),
+    ("manager", "Менеджер проекта"),
 )
+
+# The seven-stage routes are demo catalog data, not a career grade policy.
+# Every task/course target refers to an existing synthetic published catalog key.
+# Only a selected attempt can have completed stages; all other roles show catalog only.
+DEMO_ROUTE_STAGES: dict[str, tuple[tuple[str, str, str, str, str], ...]] = {
+    "product": (
+        ("База и основы", "Разобраться в продуктовой разработке и задачах команды.", "Product fundamentals", "course", "demo-course-1"),
+        ("Исследование пользователей", "Изучить пользователей и сформулировать потребности.", "User research", "course", "demo-course-6"),
+        ("Продуктовые гипотезы", "Сформулировать проверяемую продуктовую гипотезу.", "Hypothesis validation", "task", "demo-task-8"),
+        ("Метрики и приоритизация", "Выбрать метрики и обосновать приоритеты.", "Product metrics", "task", "demo-task-12"),
+        ("Реальные задачи и проекты", "Внести проверяемый личный вклад в продукт.", "Product delivery", "task", "demo-task-10"),
+        ("Подтверждение компетенций", "Собрать цифровые доказательства выполненной работы.", "Evidence", "course", "demo-course-11"),
+        ("Новые возможности", "Подготовить карьерную траекторию на основании результатов.", "Communication", "course", "demo-course-12"),
+    ),
+    "ml": (
+        ("База и основы", "Изучить основы агентных приложений и моделей.", "AI fundamentals", "course", "demo-course-1"),
+        ("Python и данные", "Реализовать обработку данных для обучения моделей.", "Python", "course", "demo-course-3"),
+        ("Обучение модели", "Изучить подходы к обучению и оценке моделей.", "Machine learning", "course", "demo-course-7"),
+        ("Исследование качества", "Сравнить воспроизводимые ML-метрики.", "Evaluation", "task", "demo-task-1"),
+        ("Эксперименты", "Проверить гипотезы на синтетических данных.", "Experimentation", "task", "demo-task-11"),
+        ("Интеграция решения", "Подготовить рабочую интеграцию и тесты.", "Deployment", "task", "demo-task-2"),
+        ("Результат и развитие", "Подготовить артефакты и получить обратную связь.", "Evidence", "course", "demo-course-11"),
+    ),
+    "python": (
+        ("База и основы", "Изучить основы программирования.", "Python", "course", "demo-course-1"),
+        ("Разработка на Python", "Подготовить первый самостоятельный модуль.", "Python development", "course", "demo-course-3"),
+        ("Разработка API", "Создать API и определить контракты интеграции.", "API design", "course", "demo-course-4"),
+        ("Хранение данных", "Подключить SQL и обработку транзакций.", "Databases", "course", "demo-course-5"),
+        ("Тестирование и CI", "Проверить систему автоматизированными тестами.", "Testing", "course", "demo-course-9"),
+        ("Работа в команде", "Принять участие в проекте и ревью.", "Teamwork", "task", "demo-task-2"),
+        ("Подтверждение навыков", "Подготовить проверяемые результаты.", "Evidence", "task", "demo-task-10"),
+    ),
+    "data": (
+        ("База и основы", "Изучить способы обработки данных.", "Data basics", "course", "demo-course-1"),
+        ("SQL и запросы", "Освоить аналитические SQL-запросы.", "SQL", "course", "demo-course-5"),
+        ("Очистка данных", "Подготовить набор данных к анализу.", "Data cleaning", "task", "demo-task-4"),
+        ("Метрики", "Проанализировать бизнес-показатели.", "Metrics", "task", "demo-task-8"),
+        ("Визуализация", "Построить понятный дашборд.", "Visualization", "task", "demo-task-12"),
+        ("Валидация", "Оценить корректность выводов.", "Validation", "course", "demo-course-9"),
+        ("Презентация", "Защитить результаты анализа.", "Communication", "course", "demo-course-11"),
+    ),
+    "backend": (
+        ("База и основы", "Изучить контракты сервисов.", "API architecture", "course", "demo-course-1"),
+        ("Backend-разработка", "Написать серверную бизнес-логику.", "Backend", "course", "demo-course-4"),
+        ("База данных", "Смоделировать хранение.", "SQL", "course", "demo-course-5"),
+        ("Интеграции", "Подключить внешнее API.", "Integration", "task", "demo-task-2"),
+        ("Тестирование", "Зафиксировать проверяемые сценарии.", "Testing", "course", "demo-course-9"),
+        ("Надёжность", "Исследовать безопасность и отказоустойчивость.", "Reliability", "course", "demo-course-10"),
+        ("Проект", "Представить рабочий результат.", "Delivery", "task", "demo-task-10"),
+    ),
+    "design": (
+        ("База и основы", "Изучить пользовательский опыт.", "UX basics", "course", "demo-course-1"),
+        ("Исследование", "Понять пользователей и их задачи.", "User research", "course", "demo-course-6"),
+        ("Информационная архитектура", "Построить карту экранов.", "Information architecture", "task", "demo-task-10"),
+        ("Прототипирование", "Собрать интерактивный прототип.", "Prototyping", "task", "demo-task-8"),
+        ("Тестирование решений", "Проверить прототип на сценариях.", "Usability", "course", "demo-course-9"),
+        ("Работа с командой", "Согласовать требования и реализацию.", "Collaboration", "course", "demo-course-8"),
+        ("Кейс для портфолио", "Описать выполненную работу и доказательства.", "Evidence", "course", "demo-course-11"),
+    ),
+    "manager": (
+        ("База и основы", "Освоить постановку задач.", "Planning", "course", "demo-course-1"),
+        ("Цели и ограничения", "Определить критерии успеха.", "Requirements", "course", "demo-course-6"),
+        ("Планирование", "Сформировать этапы и зависимости.", "Delivery planning", "task", "demo-task-10"),
+        ("Работа с командой", "Координировать участников.", "Teamwork", "course", "demo-course-8"),
+        ("Управление рисками", "Проверить ограничения проекта.", "Risks", "course", "demo-course-10"),
+        ("Контроль результата", "Проверить метрики и качество.", "Quality", "task", "demo-task-8"),
+        ("Презентация результата", "Защитить итог работы.", "Communication", "course", "demo-course-11"),
+    ),
+}
 COURSES = (
     "OpenSpec и SDD",
     "Агентная разработка",
@@ -258,19 +330,21 @@ def build_seed_batches() -> list[SeedBatch]:
     ]
     milestone_rows = [
         demo_row(
-            f"milestone:{slug}:start",
+            f"milestone:{slug}:{position}",
             roadmap_version_id=demo_id(f"roadmap:{slug}:1"),
-            milestone_key="start-bootcamp",
-            position=1,
+            milestone_key="start-bootcamp" if position == 1 else f"stage-{position}",
+            position=position,
             payload={
-                "title": "Начать Bootcamp",
-                "purpose": "Освоить основу и перейти к первой реальной задаче.",
-                "skill": "Spec-driven development",
-                "target_kind": "course",
-                "target_key": "demo-course-1",
+                "title": title,
+                "purpose": purpose,
+                "skill": skill,
+                "target_kind": target_kind,
+                "target_key": target_key,
             },
         )
         for slug, _title in TRACKS
+        for position, (title, purpose, skill, target_kind, target_key)
+        in enumerate(DEMO_ROUTE_STAGES[slug], start=1)
     ]
     course_rows = [
         demo_row(
@@ -303,9 +377,21 @@ def build_seed_batches() -> list[SeedBatch]:
             person_id=demo_id("participant-alex"),
             course_id=demo_id(f"course:{index}"),
             attempt_number=1,
-            status="verified" if index <= 3 else "in_progress",
+            status="verified" if index in {1, 2, 3, 5, 6, 7} else "in_progress",
         )
-        for index in range(1, 5)
+        for index in range(1, 9)
+    ]
+    # Real activity projections consume source-linked rows rather than UI-only
+    # percentages. All of these events remain labelled synthetic by provenance.
+    today = datetime.now(UTC).date()
+    learning_rows = [
+        demo_row(
+            f"learning:alex:{days_ago}",
+            enrollment_id=demo_id("enrollment:alex:1"),
+            local_date=today - timedelta(days=days_ago),
+            timezone="Europe/Moscow",
+        )
+        for days_ago in range(0, 11)
     ]
     freeze_rows = [
         demo_row(
@@ -318,13 +404,20 @@ def build_seed_batches() -> list[SeedBatch]:
     ]
     track_attempt_rows = [
         demo_row(
-            "track-attempt:alex:python:1",
+            f"track-attempt:alex:{slug}:1",
             person_id=demo_id("participant-alex"),
-            track_id=demo_id("track:python"),
+            track_id=demo_id(f"track:{slug}"),
             attempt_number=1,
-            status="active",
-            payload={"completed_milestones": []},
-        ),
+            status="frozen" if slug == "python" else "active",
+            payload={"completed_milestones": completed},
+        )
+        for slug, completed in (
+            ("product", ["start-bootcamp", "stage-2"]),
+            ("ml", ["start-bootcamp", "stage-2", "stage-3"]),
+            ("python", ["start-bootcamp", "stage-2"]),
+        )
+    ]
+    track_attempt_rows.append(
         demo_row(
             "track-attempt:maria:data:1",
             person_id=demo_id("participant-maria"),
@@ -332,8 +425,8 @@ def build_seed_batches() -> list[SeedBatch]:
             attempt_number=1,
             status="active",
             payload={"completed_milestones": ["start-bootcamp"]},
-        ),
-    ]
+        )
+    )
 
     source_row = demo_row(
         "source:demo-sber",
@@ -397,6 +490,7 @@ def build_seed_batches() -> list[SeedBatch]:
         SeedBatch(courses, course_rows),
         SeedBatch(course_track_links, course_link_rows),
         SeedBatch(enrollments, enrollment_rows),
+        SeedBatch(learning_days, learning_rows),
         SeedBatch(freeze_days, freeze_rows),
         SeedBatch(external_sources, [source_row]),
         SeedBatch(programs, [program_row]),
