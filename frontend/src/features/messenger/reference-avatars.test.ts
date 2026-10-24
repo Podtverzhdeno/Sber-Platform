@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { referenceAvatarFor } from "./reference-avatars";
+import { referenceAvatarFor, referenceAvatarSpriteIndexFor } from "./reference-avatars";
 
 describe("approved Messages ZIP avatar identity", () => {
   it("reproduces the distinct community icons from app.js", () => {
@@ -13,4 +13,13 @@ describe("approved Messages ZIP avatar identity", () => {
     expect(referenceAvatarFor("b6a24e2f-8a0e-4a41-9cea-5f5a2e39a10d")).toBeNull();
     expect(referenceAvatarFor("reference:unknown")).toBeNull();
   });
+  it("maps the approved 01.png raster assets to the same identity across panes", () => {
+    expect(referenceAvatarSpriteIndexFor("reference:mayaki")).toBe(0);
+    expect(referenceAvatarSpriteIndexFor("reference:grants")).toBe(1);
+    expect(referenceAvatarSpriteIndexFor("reference:mentor")).toBe(3);
+    expect(referenceAvatarSpriteIndexFor("reference:zlata")).toBe(8);
+    expect(referenceAvatarSpriteIndexFor("reference:common")).toBe(12);
+    expect(referenceAvatarSpriteIndexFor("real-channel-id")).toBeNull();
+  });
+
 });
