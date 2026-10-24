@@ -72,6 +72,8 @@ describe("three canonical analytics reference layouts", () => {
     expect(screen.getByRole("heading", { name: "Как копятся цифровые доказательства" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Результаты и навыки" })).toBeInTheDocument();
     expect(container.querySelector(".ref-kpis")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Все доказательства ↗" }));
+    expect(screen.getByRole("dialog", { name: "Все квалифицированные доказательства Agentic Coding" })).toBeInTheDocument();
   });
 
   it("switches roles, chart type and period without manufacturing competency evidence", async () => {
