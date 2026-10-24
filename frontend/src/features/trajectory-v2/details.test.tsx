@@ -242,8 +242,8 @@ describe("trajectory v2 task/evidence drawer", () => {
 describe("trajectory v2 role info dialog", () => {
   it("shows six keyboard-operable sections with the snapshot version", async () => {
     shell("/workspace/1", [roadmapWithNext]);
-    fireEvent.click(await screen.findByRole("button", { name: "Подробнее о роли" }));
-    const dialog = screen.getByRole("dialog", { name: "Роль: Python-разработчик" });
+    fireEvent.click(await screen.findByRole("button", { name: "О роли →" }));
+    const dialog = screen.getByRole("dialog", { name: "Python-разработчик" });
     expect(dialog.textContent).toContain("Дорожная карта v1");
     expect(screen.getAllByRole("tab")).toHaveLength(6);
     fireEvent.click(screen.getByRole("tab", { name: "Компетенции" }));
@@ -252,21 +252,21 @@ describe("trajectory v2 role info dialog", () => {
     expect(panel.textContent).toContain("python-core");
     expect(panel.textContent).toContain("python-project");
     fireEvent.keyDown(screen.getByRole("tab", { name: "Компетенции" }), { key: "ArrowRight" });
-    expect(screen.getByRole("tab", { name: "Представительные задачи" })).toHaveAttribute(
+    expect(screen.getByRole("tab", { name: "Примеры задач" })).toHaveAttribute(
       "aria-selected",
       "true",
     );
     expect(document.activeElement).toBe(
-      screen.getByRole("tab", { name: "Представительные задачи" }),
+      screen.getByRole("tab", { name: "Примеры задач" }),
     );
   });
 
   it("describes honest entry state for an unselected role", async () => {
     shell("/workspace/1?role=product", [roadmapWithNext, productRoadmap]);
-    fireEvent.click(await screen.findByRole("button", { name: "Подробнее о роли" }));
-    fireEvent.click(screen.getByRole("tab", { name: "Вход и переходы" }));
+    fireEvent.click(await screen.findByRole("button", { name: "О роли →" }));
+    fireEvent.click(screen.getByRole("tab", { name: "Кому подойдёт" }));
     expect(screen.getByRole("tabpanel").textContent).toContain("Вход — через каталог траекторий");
-    fireEvent.keyDown(screen.getByRole("dialog", { name: "Роль: Продакт-менеджер" }), {
+    fireEvent.keyDown(screen.getByRole("dialog", { name: "Продакт-менеджер" }), {
       key: "Escape",
     });
     expect(screen.queryAllByRole("tab")).toHaveLength(0);
