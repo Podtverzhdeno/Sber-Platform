@@ -340,7 +340,7 @@ export function DialogList({
                     }}
                   >
                     <span className="msg-dialog-list__avatar" aria-hidden="true">
-                      {row.initial}
+                      {row.title.trim().toLowerCase() === "маяки" ? <img src="/messages-reference/mayaki-avatar.svg" alt="" /> : row.initial}
                     </span>
                     <span className="msg-dialog-list__row-text">
                       <span className="msg-dialog-list__row-title">
