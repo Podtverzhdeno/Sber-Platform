@@ -1,4 +1,4 @@
-export { BootcampCatalog } from "./catalog";
+export { BootcampCatalog, ReferenceBootcampCatalog } from "./catalog";
 export {
   BootcampDrawers,
   BootcampPage,
