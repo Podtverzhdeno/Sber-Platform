@@ -254,8 +254,11 @@ test("approved terms modal: four top fact cards, two-column content, two actions
     };
   });
   expect(geometry.statsLastTop).toBeCloseTo(geometry.statsTop, 0);
-  expect(geometry.left).toBeGreaterThan(0);
-  expect(geometry.width).toBeLessThan(970);
+  // Approved reference #02 at 1672px is ~657px wide, centered in the
+  // viewport. Preserve this geometry without truncating real legal terms.
+  expect(geometry.width).toBeGreaterThanOrEqual(630);
+  expect(geometry.width).toBeLessThanOrEqual(690);
+  expect(Math.abs(geometry.left - (1672 - geometry.width) / 2)).toBeLessThanOrEqual(8);
   expect(geometry.overflow).toBe(false);
   await modal.getByRole("button", { name: "Закрыть", exact: true }).click();
   await expect(modal).toHaveCount(0);
