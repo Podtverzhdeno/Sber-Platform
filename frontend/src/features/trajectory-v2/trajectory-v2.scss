@@ -611,3 +611,15 @@
 .trajectory-v2-drawer-close{border-radius:9px;background:#12364d;color:#d9edff;border:1px solid #24536c}
 .trajectory-v2-drawer-facts>div{border-color:#1c455f}
 @media(max-width:700px){.trajectory-v2-stage-path{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:16px}.trajectory-v2-stage-path>li::after{display:none}}
+
+
+.trajectory-v2-all-grades-link {background:none;border:0;color:#14e1f5;font-size:12px;font-weight:700;cursor:pointer}
+.trajectory-v2-grades-dialog {width:min(760px,calc(100vw - 28px));max-height:90vh;overflow:auto;margin:auto;padding:25px;border-radius:17px;background:#071d30;color:#f0f7ff;border:1px solid #1b597d;box-shadow:0 20px 80px #000b}
+.trajectory-v2-grades-dialog>header{display:flex;justify-content:space-between;align-items:center}
+.trajectory-v2-grades-dialog h2{margin:0;font-size:24px}
+.trajectory-v2-grades-dialog>header button{border:0;border-radius:8px;background:#163d55;color:#e2f7ff;padding:8px 12px;cursor:pointer}
+.trajectory-v2-grades-dialog>p,.trajectory-v2-grades-dialog>small{color:#9ab4ca}
+.trajectory-v2-grades-list{padding:0;display:grid;gap:9px;list-style:none}
+.trajectory-v2-grades-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #24506a;border-radius:11px;padding:14px 16px;background:#0a293e}
+.trajectory-v2-grades-list li[data-current="true"]{border-color:#00d9d0;background:#074247}
+.trajectory-v2-grades-list span{color:#a8c0d4;font-size:12px}
