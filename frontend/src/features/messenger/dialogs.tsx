@@ -35,12 +35,16 @@ import {
   type KeyValueStorage,
 } from "./view-model";
 import { DialogAvatar } from "./dialog-avatar";
+import { GroupCreator, type DirectoryContact } from "./group-creator";
 import "./dialogs.scss";
 
 const windowStorage = (): KeyValueStorage => window.localStorage;
 
 export type DialogListProps = {
   channels: readonly ApiChannelView[];
+  directoryContacts?: readonly DirectoryContact[];
+  onCreateGroup?: (title: string, ids: string[]) => Promise<void>;
+  actionError?: string;
   viewerId: string | null;
   viewerName?: string | null;
   selectedId: string | null;
@@ -55,6 +59,9 @@ export type DialogListProps = {
 
 export function DialogList({
   channels,
+  directoryContacts = [],
+  onCreateGroup,
+  actionError = "",
   viewerId,
   viewerName = null,
   selectedId,
@@ -68,6 +75,7 @@ export function DialogList({
   const [tab, setTab] = useState<"Все" | "Архив" | "Контакты">("Все");
   const [query, setQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [groupOpen, setGroupOpen] = useState(false);
   const [prefs, setPrefsState] = useState(() => readDialogPrefs(storage));
   const drafts = useSyncExternalStore(
     subscribeDialogDrafts,
@@ -105,10 +113,18 @@ export function DialogList({
   );
   const contacts = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    return contactsOfChannels(channels, viewerId).filter((contact) =>
+    const mapped = new Map(contactsOfChannels(channels, viewerId).map((contact) => [contact.id, contact]));
+    for (const person of directoryContacts) {
+      if (person.id === viewerId || mapped.has(person.id)) continue;
+      mapped.set(person.id, {
+        id:person.id, display_name:person.display_name, role:person.role,
+        roleLabel:person.role, sharedTitles:[],
+      });
+    }
+    return [...mapped.values()].filter((contact) =>
       normalized ? contact.display_name.toLowerCase().includes(normalized) : true,
-    );
-  }, [channels, viewerId, query]);
+    ).sort((a,b)=>a.display_name.localeCompare(b.display_name,"ru"));
+  }, [channels, directoryContacts, viewerId, query]);
 
   useEffect(() => {
     if (createSignal === 0 || handledCreateSignal.current === createSignal) return;
@@ -229,6 +245,12 @@ export function DialogList({
                 }
               }}
             >
+              {onCreateGroup && (
+                <button type="button" role="menuitem" className="msg-group-create-trigger"
+                  onClick={() => {setMenuOpen(false);setGroupOpen(true);}}>
+                  <strong>Новый групповой чат</strong><small>Выбрать нескольких участников</small>
+                </button>
+              )}
               {contacts.map((contact) => (
                 <button
                   key={contact.id}
@@ -236,7 +258,7 @@ export function DialogList({
                   role="menuitem"
                   onClick={() => {
                     setMenuOpen(false);
-                    onCreateDialog?.(contact.id);
+                    void onCreateDialog?.(contact.id)?.catch(() => undefined);
                   }}
                 >
                   <strong>{contact.display_name}</strong>
@@ -444,6 +466,11 @@ export function DialogList({
             )}
           </ul>
         </div>
+      )}
+      {actionError && <p className="msg-dialog-action-error" role="alert">{actionError}</p>}
+      {groupOpen && onCreateGroup && (
+        <GroupCreator contacts={directoryContacts} onCreate={onCreateGroup}
+          onClose={() => {setGroupOpen(false);}} />
       )}
     </aside>
   );
