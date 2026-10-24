@@ -110,6 +110,18 @@ test("approved list density: ten test rows remain scannable without horizontal o
   expect(data.columnCount).toBeGreaterThanOrEqual(8);
   expect(data.overflow).toBe(false);
   await expect(page.locator(".catalog-v2-table-match .catalog-v2-match-ring")).toHaveCount(10);
+  const matchLayout = await page.locator(".catalog-v2-table-row").evaluateAll((rowNodes) =>
+    rowNodes.map((node) => {
+      const ring = node.querySelector(".catalog-v2-match-ring")?.getBoundingClientRect();
+      const deadline = node.querySelector(".catalog-v2-table-deadline")?.getBoundingClientRect();
+      const label = node.querySelector(".catalog-v2-match-visual--ring-only > .catalog-v2-match")?.getBoundingClientRect();
+      return {
+        noCollision: ring !== undefined && deadline !== undefined && ring.right <= deadline.left + 1,
+        accessibleMatchHiddenVisually: label !== undefined && label.width <= 1 && label.height <= 1,
+      };
+    }),
+  );
+  expect(matchLayout.every((row) => row.noCollision && row.accessibleMatchHiddenVisually)).toBe(true);
   await expect(page.locator(".catalog-v2-table-benefit")).toHaveCount(10);
   await expect(page.locator(".catalog-v2-table-reason")).toHaveCount(10);
 });
