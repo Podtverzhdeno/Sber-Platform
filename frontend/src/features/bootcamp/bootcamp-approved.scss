@@ -325,3 +325,42 @@
 .bc-panel-content .bc-detail-tabs button[aria-selected=true] {background:var(--color-surface-raised,#0c3050);border-radius:7px 7px 0 0;}
 .bc-panel-content .bc-requirements-list li {background:var(--color-surface-raised,#091f35);border-color:var(--color-border,#184364);}
 @media(max-width:460px) {.bc-panel-content .bc-drawer-hero {padding:12px;gap:10px;}.bc-panel-content .bc-drawer-hero .bc-course-icon {width:42px;height:42px;flex-basis:42px;}}
+
+
+/* BC-R01 layout correction: the role summary and grade panel are stacked right of the course panel. */
+.bc-approved .bc-overview-grid {grid-template-columns:minmax(0,1.34fr) minmax(0,1fr);align-items:stretch;gap:16px;}
+.bc-approved .bc-overview-right {min-width:0;display:grid;grid-template-rows:auto 1fr;gap:6px;}
+.bc-approved .bc-overview-right > section {min-width:0;margin:0;}
+.bc-approved .bc-continue {padding:14px 15px!important;}
+.bc-approved .bc-continue > h2 {font-size:21px;margin:0 0 15px;}
+.bc-approved .bc-continue-inner {display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,.85fr);gap:12px;}
+.bc-approved .bc-continue-inner > div {min-width:0;}
+.bc-approved .bc-continue-inner .bc-next-course {align-items:flex-start;background:#09213a;border:1px solid #164569;border-radius:12px;padding:12px;}
+.bc-approved .bc-continue-copy {display:grid;align-content:start;gap:7px;min-width:0;}
+.bc-approved .bc-continue-copy h3 {font-size:17px;margin:0;}
+.bc-approved .bc-continue-copy p {font-size:13px;line-height:1.45;color:var(--bc2-muted);margin:0;}
+.bc-approved .bc-continue-right {display:flex;flex-direction:column;justify-content:space-between;gap:14px;padding:15px 8px;}
+.bc-approved .bc-continue-right p {font-size:13px;}
+.bc-approved .bc-continue-right button {width:100%;background:#05eaf0;color:#041827;font-weight:800;}
+.bc-approved .bc-role-card {padding:15px 18px;border:1px solid #194667;border-radius:11px;}
+.bc-approved .bc-role-card > h2 {font-size:17px;line-height:1.3;margin:0 0 7px;}
+.bc-approved .bc-role-metrics {margin:5px 0;grid-template-columns:repeat(2,minmax(0,1fr));}
+.bc-approved .bc-role-metrics > div {padding:6px 10px;}
+.bc-approved .bc-role-metrics strong {font-size:17px;}
+.bc-approved .bc-grade-banner {padding:14px 17px;align-items:end;min-height:154px;}
+.bc-approved .bc-grade-copy {max-width:75%;min-width:0;}
+.bc-approved .bc-grade-mini {display:grid;gap:5px;margin-top:8px;max-width:250px;}
+.bc-approved .bc-grade-mini button {display:flex;align-items:center;gap:8px;text-align:left;background:none;color:var(--bc2-text);min-height:29px;border:0;border-bottom:1px solid #ffffff18;padding:3px 0;font-size:12px;}
+.bc-approved .bc-grade-mini .bc-course-icon {width:25px;height:25px;flex-basis:25px;border-radius:5px;font-size:12px;}
+.bc-approved .bc-grade-mini span:nth-child(2) {flex:1;min-width:0;}
+.bc-approved .bc-grade-action {z-index:2;white-space:nowrap;align-self:end;}
+@media(max-width:1160px) {
+ .bc-approved .bc-overview-grid {grid-template-columns:1fr;}
+ .bc-approved .bc-overview-right {grid-template-columns:1fr;grid-template-rows:auto;gap:12px;}
+}
+@media(max-width:650px) {
+ .bc-approved .bc-continue-inner {grid-template-columns:1fr;}
+ .bc-approved .bc-continue-right {padding:2px;}
+ .bc-approved .bc-grade-banner {flex-direction:column;align-items:stretch;}
+ .bc-approved .bc-grade-copy {max-width:100%;}
+}
