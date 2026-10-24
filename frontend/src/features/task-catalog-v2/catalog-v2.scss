@@ -830,6 +830,19 @@
   max-width: 100%;
 }
 
+/* A selected row in a long list must never place its detail after all results. */
+.catalog-v2-workspace[data-layout="list"][data-has-selection="true"] .catalog-v2-inspector {
+  grid-row: 1;
+}
+
+.catalog-v2-workspace[data-layout="list"][data-has-selection="true"] .catalog-v2-discovery {
+  grid-row: 2;
+}
+
+.catalog-v2-workspace[data-layout="list"][data-has-selection="false"] .catalog-v2-inspector {
+  display: none;
+}
+
 .catalog-v2-card {
   gap: 12px;
   height: auto;
