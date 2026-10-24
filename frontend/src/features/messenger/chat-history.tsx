@@ -26,6 +26,7 @@ import {
 
 import type { ApiChannelView, ApiMessageView } from "./contracts";
 import { isReferenceChannel, referencePinnedMessage } from "./reference-fixtures";
+import { referenceAvatarFor } from "./reference-avatars";
 import {
   CHAT_REACTION_EMOJIS,
   buildChatRows,
@@ -246,8 +247,12 @@ export function ChatHistory({
       aria-label={ariaLabel ?? `Чат «${channelTitle}»`}
     >
       <header className="msg-chat__header" aria-label="Заголовок чата">
-        <span className="msg-chat__avatar" aria-hidden="true">
-          {channelInitial(channel)}
+        <span
+          className="msg-chat__avatar"
+          aria-hidden="true"
+          data-reference-tone={channel ? referenceAvatarFor(channel.id)?.tone : undefined}
+        >
+          {(channel && referenceAvatarFor(channel.id)?.glyph) ?? channelInitial(channel)}
         </span>
         <span className="msg-chat__header-title">
           <strong>{channelTitle}</strong>

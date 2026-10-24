@@ -1,5 +1,6 @@
 import type { ApiChannelView } from "./contracts";
 import { referenceDescriptions } from "./reference-fixtures";
+import { referenceAvatarFor } from "./reference-avatars";
 import { FileText, FolderOpen, Link2, Users } from "lucide-react";
 import {
   type ChannelWorkContextView,
@@ -57,8 +58,12 @@ export function ContextPanel({
         <p className="msg-context__eyebrow">Контекст</p>
       </div>
       <div className="msg-context__profile">
-        <span className="msg-context__avatar" aria-hidden="true">
-          {dialogTitle(channel, viewerId).trim().charAt(0).toUpperCase() || "?"}
+        <span
+          className="msg-context__avatar"
+          aria-hidden="true"
+          data-reference-tone={referenceAvatarFor(channel.id)?.tone}
+        >
+          {referenceAvatarFor(channel.id)?.glyph ?? (dialogTitle(channel, viewerId).trim().charAt(0).toUpperCase() || "?")}
         </span>
         <div className="msg-context__profile-copy">
           <h2 className="msg-context__title">{dialogTitle(channel, viewerId)}</h2>
