@@ -13679,9 +13679,28 @@
       },
       "impulse__api__v1__development__MilestoneView": {
         "properties": {
+          "activities": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Activities",
+            "type": "array"
+          },
           "completed": {
             "title": "Completed",
             "type": "boolean"
+          },
+          "deliverable": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Deliverable"
           },
           "key": {
             "title": "Key",
@@ -18929,6 +18948,28 @@
           }
         },
         "summary": "Participant Reward Evidence"
+      }
+    },
+    "/api/v1/me/roadmap-catalog": {
+      "get": {
+        "operationId": "roadmap_catalog_api_v1_me_roadmap_catalog_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RoadmapView"
+                  },
+                  "title": "Response Roadmap Catalog Api V1 Me Roadmap Catalog Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Roadmap Catalog"
       }
     },
     "/api/v1/me/roadmaps": {
