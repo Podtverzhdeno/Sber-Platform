@@ -315,7 +315,7 @@ function CourseDetails({
     <div role="tabpanel" className="bc-detail-tabpanel">
       {tab === "about" && <>
         <h3>Для чего нужен курс</h3>
-        <p>{detail?.objective ?? card.recommendation_reason ?? "Описание цели пока не опубликовано."}</p>
+        <p>{detail?.objective || card.recommendation_reason || "Описание цели пока не опубликовано."}</p>
         {detail?.milestone_title && <p>Этап траектории: {detail.milestone_title}</p>}
         {detail?.next_step && <p>Следующий шаг: {detail.next_step}</p>}
         {detail?.artifact && <p>Проверяемый результат: {detail.artifact}</p>}
@@ -418,6 +418,7 @@ export function BootcampCatalog({
   honorBoardEnabled: boolean;
   honorBoardConsent: boolean;
 }) {
+  const client = useQueryClient();
   const catalog = useQuery({
     queryKey: ["bootcamp-catalog"],
     queryFn: () => apiRequest<CourseCardState[]>(CATALOG_PATH),
