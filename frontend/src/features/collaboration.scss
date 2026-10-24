@@ -1850,3 +1850,33 @@
 @media (max-width:480px) {
  .sberchat-shell .ref-empty-state__art { transform: scale(.8); margin-block: -10px; }
 }
+
+
+/* Mobile-height fix from validated messenger PR #34.
+ * The legacy global .messenger-page grid rules override the component's height
+ * on narrow viewports; the combined selector restores the screenshot contract. */
+.messenger-page.sberchat-shell {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 100px);
+  min-height: 570px;
+}
+.messenger-page.sberchat-shell > .messenger-shell {
+  display: grid;
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 0;
+}
+@media (max-width: 959px) {
+  .messenger-page.sberchat-shell {
+    height: calc(100dvh - 112px);
+    min-height: 470px;
+  }
+  .messenger-page.sberchat-shell > .messenger-shell { min-height: 0; }
+}
+@media (max-width: 480px) {
+  .messenger-page.sberchat-shell {
+    height: calc(100dvh - 96px);
+    min-height: 470px;
+  }
+}
