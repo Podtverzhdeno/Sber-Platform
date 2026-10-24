@@ -114,6 +114,8 @@ class RoadmapMilestone:
     target_kind: str
     target_key: str
     mandatory: bool = True
+    activities: tuple[str, ...] = ()
+    deliverable: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
