@@ -178,4 +178,36 @@ describe("participant home v2", () => {
     renderHome({ next_outcome: null });
     expect(screen.getByText(/Активной траектории нет/)).toBeInTheDocument();
   });
+  it("preserves approved artwork and reference section ordering", () => {
+    const { view } = renderHome();
+    const heroArt = view.container.querySelector<HTMLImageElement>(".home-v2-hero-art");
+    const buddyArt = view.container.querySelector<HTMLImageElement>(".home-v2-buddy-content img");
+    expect(heroArt?.getAttribute("src")).toBe("/home-reference/mountain-path.svg");
+    expect(buddyArt?.getAttribute("src")).toBe("/home-reference/buddy.svg");
+    const work = view.container.querySelector(".home-v2-work-column");
+    expect(work?.firstElementChild).toHaveClass("home-v2-next-outcome");
+    expect(work?.lastElementChild).toHaveClass("home-v2-tasks");
+    const insights = view.container.querySelector(".home-v2-insights-column");
+    expect(insights?.firstElementChild).toHaveClass("home-v2-buddy");
+    expect(insights?.lastElementChild).toHaveClass("home-v2-passport");
+  });
+
+  it("opens approved grade panels and restores keyboard focus without invented grade values", () => {
+    renderHome();
+    const opener = screen.getByRole("button", { name: /Все уровни/ });
+    opener.focus();
+    fireEvent.click(opener);
+    const levels = screen.getByRole("dialog", { name: "Карта уровней" });
+    expect(levels).toHaveTextContent("Каталог грейдов пока не опубликован");
+    expect(levels).not.toHaveTextContent("88%");
+    fireEvent.keyDown(levels, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(opener).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: /Следующий уровень/ }));
+    const details = screen.getByRole("dialog", { name: "Требования следующего грейда" });
+    expect(details).toHaveTextContent("Оценка грейда недоступна");
+    fireEvent.click(screen.getByRole("button", { name: "Закрыть панель" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
 });
