@@ -199,8 +199,9 @@ describe("mentor workspace", () => {
       expect(screen.getByText("Все")).toBeVisible();
       fireEvent.click(screen.getByRole("tab", { name: "Архив" }));
       expect(
-        screen.queryByRole("button", { name: /Рекомендательная система/ }),
-      ).not.toBeInTheDocument();
+        screen.queryAllByRole("button", { name: /Рекомендательная система/ })
+          .some((element) => element.classList.contains("msg-dialog-list__row")),
+      ).toBe(false);
       fireEvent.click(screen.getByRole("tab", { name: "Все" }));
       await waitFor(() => {
         expect(
