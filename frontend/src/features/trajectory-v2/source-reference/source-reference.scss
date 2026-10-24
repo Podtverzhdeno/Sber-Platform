@@ -172,7 +172,7 @@
  .trj-source .hero-graphic{display:none}
  .trj-source .role-heading{flex-wrap:wrap}
  .trj-source .role-heading-actions{margin:3px 0 0;width:100%;justify-content:flex-end}
- .trj-source .roadmap-steps{overflow-x:auto;grid-template-columns:repeat(var(--stage-count,7),96px);padding-bottom:24px}
+ .trj-source .roadmap-steps{box-sizing:border-box;min-width:0;width:100%;max-width:min(100%, calc(100vw - 56px));overflow-x:auto;overflow-y:hidden;grid-template-columns:repeat(var(--stage-count,7),96px);padding-bottom:24px;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch}
  .trj-source .roadmap-steps::before,.trj-source .roadmap-steps::after{display:none}
  .trj-source .stage-top{display:block}
  .trj-source .stage-progress{margin-top:12px;max-width:none;width:100%;min-width:0}
