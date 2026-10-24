@@ -204,6 +204,7 @@ const ROLE_INFO_SECTIONS: readonly { id: string; title: string }[] = [
 export function RoleInfoDialog(props: {
   role: RoleCardView;
   roadmap: RoadmapView | null;
+  primary: boolean;
   onClose: () => void;
   triggerRef: RefObject<HTMLElement | null>;
 }) {
@@ -325,13 +326,11 @@ export function RoleInfoDialog(props: {
           event.stopPropagation();
         }}
       >
-        <button type="button" className="trajectory-v2-drawer-close" onClick={props.onClose}>
-          Закрыть
-        </button>
+        <button type="button" className="trajectory-v2-drawer-close trajectory-v2-role-dialog-close" aria-label="Закрыть" onClick={props.onClose}>×</button>
         <div className="trajectory-v2-role-modal-heading">
-          <span className="trajectory-v2-role-modal-icon" aria-hidden="true">▥</span>
+          <span className="trajectory-v2-role-modal-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M4 20V13m6 7V8m6 12V4m5 16v-10"/></svg></span>
           <div>
-            <h2 id="trajectory-role-dialog-title">{role.title}</h2>
+            <div className="trajectory-v2-role-modal-title"><h2 id="trajectory-role-dialog-title">{role.title}</h2>{props.primary && <span className="trajectory-v2-role-badge">Основная роль</span>}</div>
             <p>{role.title.toLowerCase().includes("продуктов") ? "Исследуй пользователей, находи точки роста и влияй на продуктовые решения через данные." : `Освой ${String(role.total_milestones)} этапов профессии: от обучения до проектной практики.`}</p>
           </div>
         </div>
