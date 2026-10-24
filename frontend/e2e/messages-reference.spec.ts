@@ -110,6 +110,10 @@ test("quick actions, search, tabs, context, mute, chat input operate end to end"
   await expect(page.locator(".msg-chat__header-title")).toContainText("Маяки");
   await expect(page.locator(".msg-chat__avatar img")).toHaveAttribute("src","/messages-reference/mayaki-avatar.svg");
   await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toContainText("Маяки");
+  await page.getByRole("button",{name:"Скрыть информацию о чате"}).click();
+  await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toHaveCount(0);
+  await page.getByRole("button",{name:"Информация о чате"}).click();
+  await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toBeVisible();
   await page.getByRole("button",{name:"Скрыть контекст"}).click();
   await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toHaveCount(0);
   await page.getByRole("button",{name:"Открыть контекст"}).click();
