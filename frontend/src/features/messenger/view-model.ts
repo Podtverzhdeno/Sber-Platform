@@ -108,6 +108,10 @@ const participantRoleLabels: Record<string, string> = {
   mentor: "ментор",
   member: "участник",
   support: "оператор",
+  admin: "администратор",
+  administrator: "администратор",
+  owner: "владелец",
+  moderator: "модератор",
 };
 
 export function dialogKindLabel(kind: string): string {
