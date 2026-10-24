@@ -1332,3 +1332,44 @@
     font-size: 20px;
   }
 }
+
+
+/* Final mobile alignment against 390px reference: source role cards are 155px tall. */
+@media (max-width:660px) {
+  .workspace-content .trajectory-v2-heading {
+    margin-top: 11px;
+    margin-bottom: 14px;
+  }
+  .workspace-content .trajectory-v2-roles ul {
+    grid-auto-rows: 155px;
+  }
+  .workspace-content .trajectory-v2-role-card {
+    height: 155px;
+    min-height: 155px;
+    align-content: center;
+    padding: 13px 8px 11px;
+    gap: 9px;
+  }
+  .workspace-content .trajectory-v2-role-icon {
+    width: 48px;height: 48px;
+  }
+  .workspace-content .trajectory-v2-role-icon svg {width:29px;height:29px}
+  .workspace-content .trajectory-v2-role-card strong {
+    font-size:13px;
+    min-height:31px;
+    line-height:1.14;
+  }
+  .workspace-content .trajectory-v2-role-card progress {
+    margin-top:2px;height:7px;
+  }
+  .page-shell:has(.trajectory-v2) .topbar .notification-button {
+    font-size:0;
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:21px 21px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23c6dcf4' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9'/%3E%3Cpath d='M10 21h4'/%3E%3C/svg%3E");
+  }
+  .page-shell:has(.trajectory-v2) .topbar .notification-button i {
+    font-size:10px;
+  }
+}
