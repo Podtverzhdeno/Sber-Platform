@@ -22,6 +22,7 @@ import {
 } from "./client";
 import { ConditionsDialog } from "./conditions-dialog";
 import { CustomerMark } from "./customer-mark";
+import { BenefitMark } from "./benefit-mark";
 import { TaskCatalogList } from "./list";
 import type {
   CatalogFilters,
@@ -307,7 +308,7 @@ function TaskDetail(props: {
           <h3>Что ты получишь</h3>
           {shownBenefits.length > 0 ? (
             <ul>{shownBenefits.map((benefit) => (
-              <li key={benefit.code}><span className="catalog-v2-benefit-icon"><Award size={19} aria-hidden="true" /></span><div><strong>{benefit.label}</strong><p>{benefit.condition}</p><small>{benefit.state === "potential" ? "При выполнении условия" : "Подтверждённое условие"}</small></div></li>
+              <li key={benefit.code}><BenefitMark type={benefit.benefit_type} /><div><strong>{benefit.label}</strong><p>{benefit.condition}</p><small>{benefit.state === "potential" ? "При выполнении условия" : "Подтверждённое условие"}</small></div></li>
             ))}</ul>
           ) : <p>Дополнительные преимущества не опубликованы.</p>}
         </section>
