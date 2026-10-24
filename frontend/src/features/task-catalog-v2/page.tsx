@@ -40,6 +40,12 @@ const formatLabels: Record<string, string> = {
   hybrid: "Гибрид",
   onsite: "На площадке",
 };
+const supportLabels: Record<string, string> = {
+  mentor_review: "Проверка результата ментором",
+  mentor: "Поддержка ментора",
+  team_review: "Проверка результата командой",
+  self_service: "Самостоятельная работа",
+};
 const applicationLabels = {
   none: "Можно откликнуться",
   submitted: "Отклик отправлен",
@@ -317,7 +323,7 @@ function TaskDetail(props: {
 
         <section className="catalog-v2-support-section">
           <Users size={24} aria-hidden="true" />
-          <div><strong>Поддержка и ментор</strong><p>{item.support_model && item.support_model !== "not_provided" ? item.support_model : "Ментор и формат поддержки пока не опубликованы"}</p></div>
+          <div><strong>Поддержка и ментор</strong><p>{item.support_model && item.support_model !== "not_provided" ? supportLabels[item.support_model] ?? item.support_model : "Ментор и формат поддержки пока не опубликованы"}</p></div>
         </section>
 
         <section className="catalog-v2-reasons-section">
