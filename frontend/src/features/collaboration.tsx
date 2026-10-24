@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import { apiRequest } from "../api/client";
 import type { RuntimeApiPath } from "../api/client";
 import { StatePanel } from "../components/ui";
+import { ArrowRight, FileText, FolderOpen, MessageCircle, MessagesSquare, Plus, Settings2, Users } from "lucide-react";
 import "./collaboration.scss";
 
 import { ChatHistory } from "./messenger/chat-history";
@@ -141,7 +142,7 @@ export function MessagingWorkspace({
     (requestedChannel !== null && UUID_PATTERN.test(requestedChannel)
       ? channels.find((item) => item.id === requestedChannel)
       : undefined) ??
-    (channels.length ? channels[0] : undefined);
+    undefined;
 
   // Глубокая ссылка ?task=<task_id>: открываем чат команды этой задачи,
   // когда он появится в списке каналов; явный ?channel= приоритетнее.
@@ -402,7 +403,7 @@ export function MessagingWorkspace({
 
   const chatVisible = !isNarrow || mobilePane === "chat";
   const listVisible = !isNarrow || mobilePane === "list";
-  const contextVisible = selected ? (!isNarrow ? contextOpen : mobilePane === "context") : false;
+  const contextVisible = selected ? (!isNarrow ? contextOpen : mobilePane === "context") : !isNarrow;
 
   return (
     <div
@@ -424,7 +425,27 @@ export function MessagingWorkspace({
             storage={storage}
           />
         )}
-        {chatVisible && (
+        {chatVisible && !selected && (
+          <section className="chat-thread ref-chat-empty" aria-label="Выбор диалога" data-testid="messenger-empty-state">
+            <div className="ref-empty-state">
+              <div className="ref-empty-state__art" aria-hidden="true"><MessagesSquare size={104} strokeWidth={1.1} /><span>•••</span></div>
+              <h2>Выберите диалог или сообщество</h2>
+              <p>Слева вы можете открыть личный чат, рабочую группу или сообщество</p>
+              <div className="ref-empty-state__actions">
+                <button type="button" onClick={() => { const previous = channels.find((item) => item.kind === "personal") ?? channels[0]; if (previous) selectChannel(previous.id); }} disabled={channels.length === 0}>
+                  <span className="ref-empty-state__action-icon">Е</span><span><strong>Открыть последний чат</strong><small>{channels.find((item) => item.kind === "personal")?.title || channels[0]?.title || "Нет доступных диалогов"}</small></span><ArrowRight size={20} />
+                </button>
+                <button type="button" onClick={() => { const mayaki = channels.find((item) => item.title.toLocaleLowerCase("ru-RU").includes("маяки")); if (mayaki) selectChannel(mayaki.id); }} disabled={!channels.some((item) => item.title.toLocaleLowerCase("ru-RU").includes("маяки"))}>
+                  <span className="ref-empty-state__action-icon ref-empty-state__action-icon--blue">♜</span><span><strong>Перейти в Маяки</strong><small>Сообщество</small></span><ArrowRight size={20} />
+                </button>
+                <button type="button" onClick={() => { document.querySelector<HTMLButtonElement>(".msg-dialog-list__create-button")?.click(); }}>
+                  <span className="ref-empty-state__action-icon ref-empty-state__action-icon--teal"><Plus size={25} /></span><span><strong>Создать новый чат</strong><small>Начните общение с коллегами</small></span><ArrowRight size={20} />
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+        {chatVisible && selected && (
           <section className="chat-thread" aria-label="Текущий чат">
             <ChatHistory
               channel={selected ?? null}
@@ -456,10 +477,7 @@ export function MessagingWorkspace({
               }}
               headerExtra={headerExtra}
             />
-            {!selected ? (
-              <StatePanel kind="empty" />
-            ) : (
-              <Composer
+            <Composer
                 channelId={selected.id}
                 participants={selected.participants}
                 storage={storage}
@@ -473,8 +491,23 @@ export function MessagingWorkspace({
                   setReplyId(null);
                 }}
               />
-            )}
           </section>
+        )}
+        {contextVisible && !selected && (
+          <aside className="ref-empty-context" id="messenger-context-panel" aria-label="Контекст диалога" data-testid="messenger-empty-context">
+            <header>КОНТЕКСТ</header>
+            <div className="ref-empty-context__body">
+              <MessageCircle size={83} strokeWidth={1} aria-hidden="true" />
+              <h2>Здесь появится контекст диалога</h2>
+              <p>Выберите чат или сообщество, чтобы увидеть информацию о нём: участников, связанные задачи и проекты, общие файлы и другие детали.</p>
+              {([[Users, "Участники"], [FolderOpen, "Связанные объекты"], [FileText, "Общие файлы"], [Settings2, "Настройки чата"]] as const).map(([Icon, label]) => (
+                <div className="ref-empty-context__skeleton" key={label}>
+                  <Icon aria-hidden="true" size={22} />
+                  <div><strong>{label}</strong><i /><i /></div>
+                </div>
+              ))}
+            </div>
+          </aside>
         )}
         {contextVisible && selected && (
           <ContextPanel
