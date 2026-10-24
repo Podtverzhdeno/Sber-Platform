@@ -117,6 +117,12 @@ describe("SberChat-style messenger shell", () => {
     mockMessagingApi();
     renderWorkspace();
 
+    expect(await screen.findByRole("heading", { name: "Выберите диалог или сообщество" })).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Контекст диалога" })).toHaveTextContent("Здесь появится контекст диалога");
+    const firstRow = screen.getAllByRole("button", { name: /Команда проекта Альфа/ })
+      .find((element) => element.classList.contains("msg-dialog-list__row"));
+    if (!firstRow) throw new Error("dialog row missing");
+    fireEvent.click(firstRow);
     expect((await screen.findAllByText("Проверяемый статус проекта")).length).toBeGreaterThan(0);
     const container = document.querySelector('[data-visual-reference="R-MSG-01"]');
     expect(container).not.toBeNull();
@@ -135,6 +141,32 @@ describe("SberChat-style messenger shell", () => {
       expect(screen.getByRole("complementary", { name: "Контекст диалога" })).toBeInTheDocument();
     });
     expect(document.querySelector(".messenger-shell")).not.toHaveClass("messenger-shell--no-context");
+  });
+
+  it("starts in the supplied three-column empty reference, not an arbitrary first channel", async () => {
+    window.sessionStorage.clear();
+    mockMessagingApi([channelFixture, personalChannelFixture]);
+    renderWorkspace();
+    expect(await screen.findByRole("heading", { name: "Выберите диалог или сообщество" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Открыть последний чат/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Найти Маяки/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Создать новый чат/ })).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Контекст диалога" }))
+      .toHaveTextContent("Настройки чата");
+    expect(screen.queryByRole("textbox", { name: "Текст сообщения" })).toBeNull();
+  });
+
+  it("quick actions select existing channels or open actual search and contacts", async () => {
+    window.sessionStorage.clear();
+    mockMessagingApi([channelFixture, personalChannelFixture]);
+    renderWorkspace();
+    await screen.findByRole("heading", { name: "Выберите диалог или сообщество" });
+    fireEvent.click(screen.getByRole("button", { name: /Найти Маяки/ }));
+    expect(screen.getByRole("searchbox", { name: "Поиск диалогов" })).toHaveValue("Маяки");
+    expect(screen.getByText("Ничего не найдено по этому запросу.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Создать новый чат/ }));
+    expect(screen.getByRole("tab", { name: "Контакты" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("button", { name: /Участник проекта/ })).toBeInTheDocument();
   });
 
   it("mobile single-pane: выбор диалога открывает чат, назад возвращается к списку", async () => {
@@ -175,6 +207,10 @@ describe("SberChat-style messenger shell", () => {
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Поиск в чате" })).toBeTruthy();
     });
+    const firstRow = screen.getAllByRole("button", { name: /Команда проекта Альфа/ })
+      .find((element) => element.classList.contains("msg-dialog-list__row"));
+    if (!firstRow) throw new Error("dialog row missing");
+    fireEvent.click(firstRow);
     fireEvent.click(screen.getAllByRole("button", { name: "Поиск в чате" })[0] as Element);
     const input = await screen.findByRole("searchbox", { name: "Поиск по сообщениям чата" });
     fireEvent.change(input, { target: { value: "проекта" } });
