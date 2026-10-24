@@ -319,6 +319,8 @@ describe("task catalog v2", () => {
     expect(await within(dialog).findByText("Раздел недоступен")).toBeInTheDocument();
     expect(within(dialog).queryAllByText(catalogTerms.deliverable)).toHaveLength(0);
     expect(within(dialog).queryByText(new RegExp(catalogItem.title))).not.toBeInTheDocument();
+    expect(within(dialog).queryByText(catalogItem.customer.display_name, { exact: false })).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole("list", { name: "Компетенции задачи" })).not.toBeInTheDocument();
     expect(within(dialog).queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
