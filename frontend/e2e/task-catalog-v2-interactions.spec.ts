@@ -145,6 +145,63 @@ test.describe("task catalog interactive controls and motion", () => {
     await expect.poll(() => new URL(page.url()).searchParams.get("saved")).toBeNull();
   });
 
+  test("all catalog filters and sorting send the correct API query without losing view state", async ({ page }) => {
+    const queries: URLSearchParams[] = [];
+    await openCatalog(page);
+    page.on("request", (request) => {
+      if (new URL(request.url()).pathname === "/api/v1/me/task-recommendations") {
+        queries.push(new URL(request.url()).searchParams);
+      }
+    });
+    await page.getByRole("button", { name: "Все фильтры" }).click();
+    const ensureParam = async (key: string, value: string) => {
+      await expect.poll(() => new URL(page.url()).searchParams.get(key)).toBe(value);
+      await expect.poll(() => queries.some((query) => query.get(key) === value)).toBe(true);
+    };
+    await page.getByLabel("Направление", { exact: true }).fill("ml");
+    await ensureParam("direction", "ml");
+    await page.getByLabel("Навык", { exact: true }).fill("python");
+    await ensureParam("competency", "python");
+    await page.getByLabel("Заказчик", { exact: true }).fill("R&D");
+    await ensureParam("customer", "R&D");
+    await page.getByLabel("Сложность", { exact: true }).selectOption("intermediate");
+    await ensureParam("difficulty", "intermediate");
+    await page.getByLabel("Формат", { exact: true }).selectOption("remote");
+    await ensureParam("work_format", "remote");
+    await page.getByLabel("Срок", { exact: true }).selectOption("30d");
+    await ensureParam("timeframe", "30d");
+    await page.getByLabel("Сортировка", { exact: true }).selectOption("deadline");
+    await ensureParam("sort", "deadline");
+
+    await page.getByRole("button", { name: "Список" }).click();
+    await expect(page).toHaveURL(/catalog_view=list/);
+    await ensureParam("direction", "ml");
+    await page.getByRole("button", { name: /Сбросить фильтр Навык/ }).click();
+    await expect.poll(() => new URL(page.url()).searchParams.get("competency")).toBeNull();
+    await ensureParam("direction", "ml");
+    await page.getByRole("button", { name: /Все задачи/ }).click();
+    for (const key of ["direction", "competency", "customer", "difficulty", "work_format", "timeframe", "sort"]) {
+      await expect.poll(() => new URL(page.url()).searchParams.get(key)).toBeNull();
+    }
+    await expect(page).toHaveURL(/catalog_view=list/);
+    await expect(page.locator(".catalog-v2-table-row")).toHaveCount(2);
+  });
+
+  test("API filter response controls visible results and empty state can be reset", async ({ page }) => {
+    await openCatalog(page);
+    await page.route("**/api/v1/me/task-recommendations?*", (route) => {
+      const search = new URL(route.request().url()).searchParams.get("q");
+      const filtered = search === "No matching task" ? [] : [catalogItem, insufficientItem];
+      return route.fulfill({ json: catalogPage(filtered) });
+    });
+    await page.getByRole("button", { name: "Все фильтры" }).click();
+    await page.getByLabel("Поиск", { exact: true }).fill("No matching task");
+    await page.getByRole("button", { name: "Найти" }).click();
+    await expect(page.getByRole("heading", { name: "Подходящих задач не найдено" })).toBeVisible();
+    await page.locator(".catalog-v2-empty").getByRole("button", { name: "Сбросить фильтры" }).click();
+    await expect(page.locator('[role="listitem"]')).toHaveCount(2);
+  });
+
   test("read-only terms button opens modal, but blocked user cannot apply", async ({ page }) => {
     const readOnly: CatalogItem = {
       ...catalogItem,
