@@ -82,14 +82,15 @@ async function showTrajectory(page: import("@playwright/test").Page) {
 }
 
 async function captureState(page: import("@playwright/test").Page, name: string) {
-  await test.info().attach(name, { body: await page.screenshot({ animations: "disabled" }), contentType: "image/png" });
+  await test.info().attach(name, { body: await page.screenshot({ animations: "disabled", fullPage: name.endsWith("-mobile") }), contentType: "image/png" });
 }
 
 test("TRJ-SCREEN-03 and 04: desktop dialog cards and role menu geometry", async ({ page }) => {
-  await page.setViewportSize({ width: 1672, height: 941 });
+  await page.setViewportSize({ width: 1672, height: 1038 });
   await showTrajectory(page);
   await expect(page.locator(".trajectory-v2-stage-path")).toBeVisible();
   await captureState(page, "TRJ-SCREEN-01-main");
+  await page.setViewportSize({ width: 1672, height: 941 });
   await page.getByRole("button", { name: /^О роли/ }).click();
 
   const dialog = page.locator(".trajectory-v2-role-dialog");
