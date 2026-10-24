@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { apiRequest } from "../api/client";
+import { Modal } from "../components/ui";
 import type { AgenticServerProfile } from "./agentic-coding-profile";
 import "./analytics-reference.scss";
 
@@ -300,7 +301,20 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
       </div>
     </>}
     <p className="ref-footer-note">Данные берутся из текущих источников Impulse. Неизвестные уровни не заменяются нулём. Официальный корпоративный L1 здесь не выдаётся.</p>
-    {detailed && <div className="ref-modal-overlay" role="presentation" onClick={() => { setOpenDetail(null); }}><section role="dialog" aria-modal="true" aria-label={"Подтверждение навыка " + detailed.title} className="ref-modal" onClick={(event) => event.stopPropagation()}><button type="button" aria-label="Закрыть" onClick={() => { setOpenDetail(null); }}>×</button><span className="ref-cap">SKILL PASSPORT · КОМПЕТЕНЦИЯ</span><h2>{detailed.title}</h2><p>Подтверждённый уровень: <strong>{pString(detailed.current_level)}</strong> · Цель: <strong>{pString(detailed.target_level)}</strong></p><p>{PRACTICES[detailed.key]}</p><p>Событий из разрешённого источника: {detailed.evidence_count}. {detailed.unresolved_methodology ? "Есть нерешённое расхождение методологии." : "Неподтверждённый уровень не является нулём."}</p><a className="ref-primary-cta" href={tasksUrl}>Перейти к задачам →</a></section></div>}
-    {showCriteria && <div className="ref-modal-overlay" role="presentation" onClick={() => { setShowCriteria(false); }}><section role="dialog" aria-modal="true" aria-label="Условия Agentic Coding L1" className="ref-modal" onClick={(event) => event.stopPropagation()}><button type="button" aria-label="Закрыть" onClick={() => { setShowCriteria(false); }}>×</button><span className="ref-cap">СЕРТИФИКАЦИЯ</span><h2>Условия Agentic Coding L1</h2><p>Требуется утверждённая матрица роли, разрешённые цифровые следы и авторизованное решение корпоративного источника.</p><p>Прогресс на платформе Impulse — учебная проекция, не официальный сертификат Сбера.</p></section></div>}
+    <Modal title={detailed ? "Подтверждение навыка " + detailed.title : "Подтверждение навыка"} open={detailed !== undefined} onClose={() => { setOpenDetail(null); }}>
+      {detailed && <div className="ref-modal-content"><span className="ref-cap">SKILL PASSPORT · КОМПЕТЕНЦИЯ</span>
+        <h3>{detailed.title}</h3>
+        <p>Подтверждённый уровень: <strong>{pString(detailed.current_level)}</strong> · Цель: <strong>{pString(detailed.target_level)}</strong></p>
+        <p>{PRACTICES[detailed.key]}</p>
+        <p>Событий из разрешённого источника: {detailed.evidence_count}. {detailed.unresolved_methodology ? "Есть нерешённое расхождение методологии." : "Неподтверждённый уровень не является нулём."}</p>
+        <a className="ref-primary-cta" href={tasksUrl}>Перейти к задачам →</a>
+      </div>}
+    </Modal>
+    <Modal title="Условия Agentic Coding L1" open={showCriteria} onClose={() => { setShowCriteria(false); }}>
+      <div className="ref-modal-content"><span className="ref-cap">СЕРТИФИКАЦИЯ</span>
+        <p>Требуется утверждённая матрица роли, разрешённые цифровые следы и авторизованное решение корпоративного источника.</p>
+        <p>Прогресс на платформе Impulse — учебная проекция, не официальный сертификат Сбера.</p>
+      </div>
+    </Modal>
   </main>;
 }
