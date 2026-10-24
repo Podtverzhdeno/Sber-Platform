@@ -164,6 +164,10 @@ async def test_postgresql_api_returns_all_detailed_ai_paths_for_unselected_roles
             assert len(plan["milestones"]) == 7
             assert all(len(stage["activities"]) == 3 for stage in plan["milestones"])
             assert all(stage["deliverable"] for stage in plan["milestones"])
+            assert all(len(stage["theory"]) == 2 for stage in plan["milestones"])
+            assert all(len(stage["acceptance"]) == 3 for stage in plan["milestones"])
+            assert all(stage["lab"] for stage in plan["milestones"])
+            assert all(4 <= stage["estimated_hours"] <= 16 for stage in plan["milestones"])
             assert [stage["position"] for stage in plan["milestones"]] == list(
                 range(1, 8)
             )
