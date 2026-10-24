@@ -24,6 +24,21 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/me/bootcamp/catalog", (route) => route.fulfill({ json: [] }));
 });
 
+for (const colorScheme of ["light", "dark"] as const) {
+  for (const width of [390, 1280]) {
+    test(`login heading contrast at ${colorScheme} / ${String(width)}px`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme });
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto("/");
+      const heading = page.getByRole("heading", { name: "Демо-персоны" });
+      await expect(heading).toBeVisible();
+      const foreground = await heading.evaluate((element) => getComputedStyle(element).color);
+      // Persona panel is intentionally dark in both theme modes.
+      expect(foreground).toBe("rgb(244, 247, 251)");
+    });
+  }
+}
+
 for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 }]) {
   test(`navigation and accessibility at ${String(viewport.width)}px`, async ({ page }) => {
     await page.setViewportSize(viewport);

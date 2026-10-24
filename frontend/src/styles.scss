@@ -779,6 +779,8 @@ tbody tr:hover, tbody tr:focus-within { background: var(--c-rgb2f95ff_a05);; }
 .login-layout { width: min(1180px, calc(100% - 48px)); min-height: 100vh; margin: 0 auto; padding-top: 110px;; }
 .login-layout h1 { font-size: clamp(42px, 6vw, 70px);; }
 .persona-panel { border-color: var(--color-border); background: rgb(11 23 38 / 94%);; }
+/* Login panels remain dark in both themes; inherited light-theme ink was illegible. */
+.login-layout .persona-panel > h2 { color: #f4f7fb; }
 .persona-card { border-color: var(--color-border); color: var(--color-text); background: var(--color-surface-2);; }
 .persona-card:hover { border-color: var(--color-primary); background: var(--c-rgb22e6d0_a07);; }
 @media (max-width: 1180px) {
