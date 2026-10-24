@@ -161,7 +161,8 @@ export function MessagingWorkspace({
     (requestedChannel !== null && UUID_PATTERN.test(requestedChannel)
       ? channels.find((item) => item.id === requestedChannel)
       : undefined) ??
-    (!useReferencePreview ? channels[0] : undefined);
+    // A real authenticated dialog takes precedence over reference-only fixtures.
+    channels.find((item) => !isReferenceChannel(item.id));
 
   // Глубокая ссылка ?task=<task_id>: открываем чат команды этой задачи,
   // когда он появится в списке каналов; явный ?channel= приоритетнее.
