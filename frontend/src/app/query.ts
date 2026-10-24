@@ -1,9 +1,9 @@
 import { QueryClient } from "@tanstack/react-query";
 
-import { retrySafeRead } from "../api/client";
+import { retrySafeRead, subscribeAuthScopeChange } from "../api/client";
 
 export function createQueryClient(): QueryClient {
-  return new QueryClient({
+  const client = new QueryClient({
     defaultOptions: {
       queries: {
         retry: retrySafeRead,
@@ -14,4 +14,13 @@ export function createQueryClient(): QueryClient {
       mutations: { retry: false },
     },
   });
+  subscribeAuthScopeChange(() => {
+    // A role switch can change visibility without a route change. Never reuse
+    // private search, notification, analytics or work projections from prior scope.
+    client.removeQueries({
+      predicate: (query) =>
+        !["public-config", "demo-personas"].includes(String(query.queryKey[0])),
+    });
+  });
+  return client;
 }
