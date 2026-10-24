@@ -31,7 +31,9 @@ async function openApprovedPreview(page: Page): Promise<void> {
         assigned_roles: ["participant"],
         scopes: [],
         consent_scopes: [],
-        navigation: ["Сообщения"],
+        // The source screenshots include the full participant navigation.
+        // These mocked items are UI-only; access to real APIs is not broadened.
+        navigation: ["Главная", "Задачи", "Мои проекты", "Bootcamp", "Сообщения", "Команда", "База знаний", "Аналитика", "Настройки"],
         csrf_token: "csrf",
       },
     }),

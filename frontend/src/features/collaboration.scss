@@ -1966,3 +1966,50 @@
 :root:not([data-theme="light"]) .sberchat-shell .ref-empty-state__art > * {
   visibility: hidden;
 }
+
+
+/* Desktop messenger viewport fidelity: the product-wide sidebar is 244px and
+ * workspace adds 28px padding, while approved ZIP references reserve 164px
+ * for navigation and let the message panes touch the content edges.
+ * Scope the geometry to this route only; never alter other workspaces. */
+@media (min-width: 1121px) {
+  .page-shell:has(.sberchat-shell) .workspace {
+    padding-left: 164px;
+    padding-top: 72px;
+  }
+  .page-shell:has(.sberchat-shell) > .topbar {
+    left: 164px;
+    min-height: 72px;
+    padding-inline: 18px;
+  }
+  .page-shell:has(.sberchat-shell) .sidebar {
+    width: 164px;
+    padding-inline: 9px;
+  }
+  .page-shell:has(.sberchat-shell) .sidebar-brand {
+    min-height: 72px;
+  }
+  .page-shell:has(.sberchat-shell) .sidebar-message {
+    display: none;
+  }
+  .page-shell:has(.sberchat-shell) .workspace-content {
+    min-height: calc(100dvh - 72px);
+    padding: 0;
+  }
+  .page-shell:has(.sberchat-shell) .workspace-content > .messenger-page {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border-radius: 0;
+    height: calc(100dvh - 72px);
+    min-height: 570px;
+  }
+}
+@media (min-width: 1381px) {
+  .page-shell:has(.sberchat-shell) .sberchat-shell .messenger-shell {
+    grid-template-columns: clamp(370px, 24vw, 395px) minmax(0, 1fr) clamp(340px, 22vw, 380px);
+  }
+  .page-shell:has(.sberchat-shell) .sberchat-shell .messenger-shell--no-context {
+    grid-template-columns: clamp(370px, 24vw, 395px) minmax(0, 1fr);
+  }
+}
