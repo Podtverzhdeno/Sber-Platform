@@ -9,7 +9,7 @@ const base = "2026-10-20T";
 // read-only demonstration is opened; older Elena messages stay on October 20.
 const currentDate = new Date();
 const todayBase =
-  `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}T`;
+  `${String(currentDate.getFullYear())}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}T`;
 type SpecRow = [string,string,string,string,string,number,"community"|"personal"|"task_team"];
 const examples: SpecRow[] = [
   ["mayaki","Маяки","Анна Ковалёва","Друзья! Напоминаю о встречах и возможностях","12:59",4,"community"],
