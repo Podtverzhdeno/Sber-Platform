@@ -561,10 +561,12 @@ test.describe("engagement journey: desktop acceptance", () => {
   await expect(page).toHaveURL(/\/workspace\/2\?.*course=python-base/);
 
   // Страница курса: программа и матрица компетенций из detail-контракта.
-  await expect(page.getByRole("heading", { name: "Python: основа", exact: true })).toBeVisible();
-  await expect(page.getByTestId("course-progress")).toContainText("Не начат");
-  await expect(page.getByTestId("course-detail-facts")).toContainText("Освоить базу Python и собрать конспект для будущего проекта.");
-  await expect(page.getByTestId("course-competency-0")).toContainText("Текущий: базовый → прогноз: уверенный");
+  const courseDrawer = page.getByRole("dialog", { name: "Информация о курсе" });
+  await expect(courseDrawer.getByRole("heading", { name: "Python: основа", exact: true })).toBeVisible();
+  await expect(courseDrawer).toContainText("Освоить базу Python и собрать конспект для будущего проекта.");
+  await courseDrawer.getByRole("tab", { name: "Навыки" }).click();
+  await expect(courseDrawer).toContainText("Подтверждено: базовый; прогноз: уверенный"); 
+  await courseDrawer.getByRole("button", { name: "Закрыть" }).click();
 
   // Streak reveal до qualifying action: v1 (break) честно показывает разрыв серии.
   const streakButton = page.locator(".streak-utility .streak-button");
@@ -603,7 +605,7 @@ test.describe("engagement journey: desktop acceptance", () => {
   // Закрыть поповер и записать квалифицируемый учебный день в списке каталога.
   await streakButton.click();
   await expect(dialog).toBeHidden();
-  await page.getByRole("button", { name: "← Вернуться в Bootcamp" }).click();
+  await expect(page.getByRole("dialog", { name: "Информация о курсе" })).toHaveCount(0);
   const courseCard = page.getByTestId("course-python-base");
   await expect(courseCard).toBeVisible();
   await expect(page.getByRole("heading", { name: "Серия: 4 дн." })).toBeVisible();
@@ -688,10 +690,10 @@ test.describe("mobile touch journey: engagement goal through freeze and rhythm i
     await page.getByTestId("buddy-suggestion-activate").click();
     await page.getByRole("button", { name: "Записать учебный день сегодня" }).tap();
     await expect(page).toHaveURL(/\/workspace\/2\?.*course=python-base/);
-    await expect(page.getByRole("heading", { name: "Python: основа", exact: true })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Информация о курсе" }).getByRole("heading", { name: "Python: основа", exact: true })).toBeVisible();
 
     // В списке каталога честный учебный день записывается с носителя.
-    await page.getByRole("button", { name: "← Вернуться в Bootcamp" }).tap();
+    await page.getByRole("dialog", { name: "Информация о курсе" }).getByRole("button", { name: "Закрыть" }).tap();
     await expect(page.getByTestId("course-python-base")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Серия: 4 дн." })).toBeVisible();
     await page.getByTestId("course-python-base").getByRole("button", { name: "Записать учебный день" }).tap();
@@ -751,10 +753,10 @@ test("engagement surfaces stay honest when the engagement API is unavailable", a
   await page.getByTestId("buddy-suggestion-activate").click();
   await page.getByRole("button", { name: "Записать учебный день сегодня" }).click();
   await expect(page).toHaveURL(/\/workspace\/2\?.*course=python-base/);
-  await expect(page.getByRole("heading", { name: "Python: основа", exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Информация о курсе" }).getByRole("heading", { name: "Python: основа", exact: true })).toBeVisible();
 
   // Список каталога: стрик и учебный день работают независимо от engagement API.
-  await page.getByRole("button", { name: "← Вернуться в Bootcamp" }).click();
+  await page.getByRole("dialog", { name: "Информация о курсе" }).getByRole("button", { name: "Закрыть" }).click();
   const courseCard = page.getByTestId("course-python-base");
   await expect(courseCard).toBeVisible();
   await expect(page.getByRole("heading", { name: "Серия: 4 дн." })).toBeVisible();

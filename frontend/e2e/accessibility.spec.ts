@@ -50,7 +50,7 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
     }
     await page.getByRole("link", { name: "Bootcamp" }).click();
     await expect(page).toHaveURL(/\/workspace\/1$/);
-    await expect(page.getByRole("heading", { name: "Учитесь ради следующего результата" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Bootcamp.*Развитие навыков/ })).toBeVisible();
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations.filter((item) => ["critical", "serious"].includes(item.impact ?? ""))).toEqual([]);
   });

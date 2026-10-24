@@ -156,8 +156,10 @@ test("Bootcamp catalog explains states, keeps filters in URL and streak honest",
   await expect(card).toBeVisible();
 
   await card.getByRole("button", { name: "Открыть траекторию" }).click();
-  await expect(page.getByRole("heading", { name: "Python: основа" })).toBeVisible();
-  await expect(page.getByTestId("course-competency-0")).toContainText("Прогноз: базовый");
+  const courseDrawer = page.getByRole("dialog", { name: "Информация о курсе" });
+  await expect(courseDrawer.getByRole("heading", { name: "Python: основа" })).toBeVisible();
+  await courseDrawer.getByRole("tab", { name: "Навыки" }).click();
+  await expect(courseDrawer).toContainText("Развитие навыков");
   await page.goBack();
   await expect(page).toHaveURL(/relevance=relevant/);
   await expect(card).toBeVisible();
