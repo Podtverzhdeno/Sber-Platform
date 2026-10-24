@@ -1422,3 +1422,19 @@
     opacity:1;
   }
 }
+
+
+/* User-owned evidence overview lives behind a disclosure to preserve the PNG
+   reference geometry in its default, collapsed state. */
+.trajectory-v2-statistics {margin-top:16px;padding-top:12px;border-top:1px solid #1c4f69}
+.trajectory-v2-statistics summary {cursor:pointer;color:#22e2e0;font-size:12px;font-weight:750;list-style-position:inside}
+.trajectory-v2-statistics[open] summary {margin-bottom:12px}
+.trajectory-v2-statistics-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.trajectory-v2-statistics-grid>div {padding:9px 10px;background:#0b293e;border:1px solid #194d69;border-radius:9px}
+.trajectory-v2-statistics-grid dt {font-size:10px;color:#adc4d7}
+.trajectory-v2-statistics-grid dd {margin:5px 0 0;font-size:22px;line-height:1.1;font-weight:800;color:#effbff}
+.trajectory-v2-statistics-section {margin-top:13px}
+.trajectory-v2-statistics-section strong {font-size:11px;color:#e4f3ff}
+.trajectory-v2-statistics-section ul {margin:8px 0 0;padding-left:16px;display:grid;gap:5px;color:#aec4d9;font-size:11px}
+.trajectory-v2-stats-origin {color:#ffc77c!important;font-size:10px!important;margin:8px 0!important}
+.trajectory-v2-stats-caveat {color:#859bb0!important;font-size:10px!important;line-height:1.4!important}
