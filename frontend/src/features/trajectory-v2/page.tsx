@@ -872,6 +872,32 @@ export function StageDetail(props: {
           <small>Подзадачи — план этапа; выполнение подтверждается отдельно</small>
         </div>
       )}
+      {(milestone.theory?.length || milestone.lab || milestone.acceptance?.length) && (
+        <details className="trajectory-v2-learning-material" data-testid="trajectory-learning-material">
+          <summary>Теория, практикум и критерии проверки
+            {milestone.estimated_hours ? <span>{milestone.estimated_hours} ч ориентировочно</span> : null}
+          </summary>
+          {milestone.theory && milestone.theory.length > 0 && (
+            <section>
+              <h4>Разобраться в теории</h4>
+              <ul>{milestone.theory.map((topic) => <li key={topic}>{topic}</li>)}</ul>
+            </section>
+          )}
+          {milestone.lab && (
+            <section>
+              <h4>Лабораторная работа</h4>
+              <p>{milestone.lab}</p>
+            </section>
+          )}
+          {milestone.acceptance && milestone.acceptance.length > 0 && (
+            <section>
+              <h4>Критерии готовности</h4>
+              <ul>{milestone.acceptance.map((criterion) => <li key={criterion}>{criterion}</li>)}</ul>
+            </section>
+          )}
+          <small>Это учебный план. Критерии помогают подготовиться к проверке, но сами по себе не подтверждают выполнение этапа.</small>
+        </details>
+      )}
       <details className="trajectory-v2-stage-more">
         <summary>Подробнее об этапе</summary>
         <dl>
