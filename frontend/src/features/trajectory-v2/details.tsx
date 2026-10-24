@@ -1,3 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "../../api/client";
+
 import {
   useEffect,
   useRef,
@@ -15,8 +18,7 @@ const UNKNOWN_PUBLISHED =
   "Раздел не публикуется в снимке дорожной карты; данные появятся только через сервер.";
 
 /* Canonical participant deep links used elsewhere in the workspace. */
-const TASK_WORKSPACE_PATH = "/workspace/1";
-const COURSE_CATALOG_PATH = "/workspace/2";
+const TARGET_SECTIONS = { task: "Задачи", course: "Bootcamp" } as const;
 
 function stageTargetLabel(milestone: MilestoneView): string {
   if (milestone.target_kind === "course") return `Курс · ${milestone.target_key}`;
@@ -172,6 +174,12 @@ function StageDrawerContinuation(props: {
 }) {
   const { milestone } = props;
   const navigate = useNavigate();
+  const navigable = milestone.target_kind === "task" || milestone.target_kind === "course";
+  const roleNavigation = useQuery({
+    queryKey: ["me"],
+    queryFn: () => apiRequest<{ navigation: string[] }>("/api/v1/me"),
+    enabled: props.canContinue && props.state !== "locked" && navigable,
+  });
   if (!props.canContinue) {
     return (
       <p role="status">
@@ -186,34 +194,32 @@ function StageDrawerContinuation(props: {
       </p>
     );
   }
-  if (milestone.target_kind === "task") {
-    return (
-      <button
-        type="button"
-        onClick={() => {
-          void navigate(`${TASK_WORKSPACE_PATH}?task=${encodeURIComponent(milestone.target_key)}`);
-        }}
-      >
-        {props.state === "completed" ? "Открыть результат" : "Открыть задачу"}
-      </button>
-    );
+  if (!navigable) {
+    return <p role="status">Канонический переход для цели «{milestone.target_kind}» не определён в снимке.</p>;
   }
-  if (milestone.target_kind === "course") {
-    return (
-      <button
-        type="button"
-        onClick={() => {
-          void navigate(`${COURSE_CATALOG_PATH}?course=${encodeURIComponent(milestone.target_key)}`);
-        }}
-      >
-        Открыть курс
-      </button>
-    );
+  if (roleNavigation.isPending) {
+    return <p role="status">Уточняем доступный раздел для перехода…</p>;
   }
+  if (roleNavigation.isError) {
+    return <p role="status">Не удалось проверить доступный раздел. Обновите страницу и повторите попытку.</p>;
+  }
+  const section = TARGET_SECTIONS[milestone.target_kind as keyof typeof TARGET_SECTIONS];
+  const sectionIndex = roleNavigation.data.navigation.indexOf(section);
+  if (sectionIndex < 0) {
+    return <p role="status">Раздел «{section}» недоступен для текущей роли.</p>;
+  }
+  const route = `/workspace/${String(sectionIndex)}?${milestone.target_kind === "task" ? "task" : "course"}=${encodeURIComponent(milestone.target_key)}`;
   return (
-    <p role="status">
-      Канонический переход для цели «{milestone.target_kind}» не определён в снимке.
-    </p>
+    <button
+      type="button"
+      onClick={() => {
+        void navigate(route);
+      }}
+    >
+      {milestone.target_kind === "course"
+        ? "Открыть курс"
+        : props.state === "completed" ? "Открыть результат" : "Открыть задачу"}
+    </button>
   );
 }
 
