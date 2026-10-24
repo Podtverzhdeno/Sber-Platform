@@ -45,7 +45,7 @@ import {
 } from "./app/theme";
 import { createQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
-import { Bootcamp, DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
+import { DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
 import { BootcampCatalog } from "./features/bootcamp";
 import { ParticipantEventCatalog } from "./features/participant-events";
 import { CustomerWorkspace } from "./features/customer";
@@ -524,17 +524,10 @@ function Workspace({
           currentSection === "Bootcamp" ? (
           searchParams.get("v2") === "1" ? (
             <BootcampV2Route />
-          ) : searchParams.get("course") === null ? (
+          ) : (
             <BootcampCatalog
               honorBoardEnabled={honorBoardEnabled}
               honorBoardConsent={actor.consent_scopes.includes("course_honor_board")}
-            />
-          ) : (
-            <Bootcamp
-              honorBoardEnabled={honorBoardEnabled}
-              honorBoardConsent={actor.consent_scopes.includes(
-                "course_honor_board",
-              )}
             />
           )
         ) : allowed &&
