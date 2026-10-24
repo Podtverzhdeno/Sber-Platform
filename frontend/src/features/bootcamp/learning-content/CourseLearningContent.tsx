@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { learningProgramFor } from "./programs";
+import { blueprintFor } from "./course-blueprints";
 import "./learning-content.scss";
 
 type Props = {
@@ -11,6 +12,8 @@ type Props = {
 
 export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Props) {
   const program = learningProgramFor(courseKey);
+  const blueprint = blueprintFor(courseKey);
+  const [activeView, setActiveView] = useState<"lessons" | "project">("lessons");
   const [current, setCurrent] = useState(0);
   const [opened, setOpened] = useState<ReadonlySet<string>>(() => new Set());
   const [checks, setChecks] = useState<ReadonlySet<string>>(() => new Set());
@@ -18,6 +21,7 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
 
   useEffect(() => {
     setCurrent(0);
+    setActiveView("lessons");
     setOpened(new Set());
     setChecks(new Set());
     setShowExpected(false);
@@ -65,7 +69,7 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
           <p>{program.description}</p>
         </div>
         <div className="bc-learning__meta">
-          <strong>{String(program.units.length)} урока</strong>
+          <strong>{String(program.units.length)} уроков</strong>
           <span>≈ {String(totalMinutes)} мин</span>
         </div>
       </header>
@@ -73,9 +77,59 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
         Это учебные материалы платформы, а не опубликованная программа провайдера.
         Открытие урока и самопроверка не начисляют XP, не выдают сертификат и не изменяют серверный статус курса.
       </p>
-      <div className="bc-learning__body">
+
+      {blueprint && (
+        <div className="bc-learning__orientation">
+          <div className="bc-learning__orientation-head">
+            <span><strong>Уровень:</strong> {blueprint.level}</span>
+            <span><strong>Для кого:</strong> {blueprint.audience}</span>
+          </div>
+          <details>
+            <summary>Что нужно знать перед началом</summary>
+            <ul>{blueprint.prereqs.map(item => <li key={item}>{item}</li>)}</ul>
+          </details>
+          <details>
+            <summary>Какие компетенции сформируете</summary>
+            <ul>{blueprint.outcomes.map(item => <li key={item}>{item}</li>)}</ul>
+          </details>
+        </div>
+      )}
+      <div className="bc-learning__view-switch" role="group" aria-label="Раздел практикума">
+        <button type="button" aria-pressed={activeView === "lessons"} onClick={() => { setActiveView("lessons"); }}>Уроки и задания</button>
+        {blueprint && <button type="button" aria-pressed={activeView === "project"} onClick={() => { setActiveView("project"); }}>Итоговый проект</button>}
+      </div>
+      {activeView === "project" && blueprint ? (
+        <article className="bc-learning__capstone" aria-label="Итоговый проект">
+          <div className="bc-learning__capstone-heading">
+            <span className="bc-learning__eyebrow">Практический проект · самостоятельная работа</span>
+            <h4>{blueprint.capstone.title}</h4>
+            <p>{blueprint.capstone.scenario}</p>
+          </div>
+          <section>
+            <h5>Пошаговый план</h5>
+            <ol>{blueprint.capstone.steps.map((step, index) => <li key={step}><strong>Шаг {String(index + 1)}.</strong> {step}</li>)}</ol>
+          </section>
+          <section>
+            <h5>Что должно получиться</h5>
+            <ul>{blueprint.capstone.artifacts.map(item => <li key={item}>{item}</li>)}</ul>
+          </section>
+          <section>
+            <h5>Проверка результата</h5>
+            <ul>{blueprint.capstone.validation.map(item => <li key={item}>{item}</li>)}</ul>
+          </section>
+          <section>
+            <h5>Критерии оценки проекта</h5>
+            <table>
+              <thead><tr><th>Критерий</th><th>Вес</th><th>Условие успешного выполнения</th></tr></thead>
+              <tbody>{blueprint.capstone.rubric.map(item => <tr key={item.criterion}><td>{item.criterion}</td><td>{String(item.weight)}%</td><td>{item.pass}</td></tr>)}</tbody>
+            </table>
+            <p className="bc-learning__review-note">Это прозрачные критерии для самопроверки. Официальная оценка и сертификат требуют отдельной процедуры проверки.</p>
+          </section>
+          <button type="button" className="bc-learning__back" onClick={() => { setActiveView("lessons"); }}>Вернуться к урокам</button>
+        </article>
+      ) : <div className="bc-learning__body">
         <nav className="bc-learning__toc" aria-label="Шаги обучения">
-          <strong>План обучения</strong>
+          <strong>План обучения · {String(program.units.length)} шагов</strong>
           <ol>
             {program.units.map((item, index) => (
               <li key={item.id}>
@@ -93,7 +147,7 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
           </ol>
         </nav>
         <article className="bc-learning__lesson" aria-labelledby="bc-learning-title">
-          <p className="bc-learning__eyebrow">Урок {String(current + 1)} из {String(program.units.length)}</p>
+          <p className="bc-learning__eyebrow">{current < 4 ? "Основы" : "Прикладная практика"} · Урок {String(current + 1)} из {String(program.units.length)}</p>
           <h4 id="bc-learning-title">{unit.title}</h4>
           <p className="bc-learning__purpose"><strong>Цель:</strong> {unit.purpose}</p>
           <h5>Разберёмся</h5>
@@ -126,7 +180,7 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
             <button type="button" disabled={current === program.units.length - 1} onClick={() => { selectUnit(current + 1); }}>Следующий урок</button>
           </div>
         </article>
-      </div>
+      </div>}
       <footer className="bc-learning__footer">
         <strong>Результат практикума:</strong> {program.result}
         {sourceUrl?.startsWith("https://") && <a href={sourceUrl} target="_blank" rel="noopener noreferrer">Открыть первоисточник материалов курса</a>}
