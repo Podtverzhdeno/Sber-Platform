@@ -193,3 +193,18 @@
   color: var(--on-brand-ink);
   background: transparent;
 }
+
+/* The light-theme brand token is too light for white 13px text in category controls.
+   Dedicated dark evergreen provides >7:1 contrast against white at WCAG AA/AAA. */
+:root[data-theme="light"] .bc-approved .bootcamp-catalog-toolbar .bc-category-row button[aria-pressed="true"] {
+  color: #fff;
+  background: #0b6256;
+}
+:root[data-theme="light"] .bc-approved .bootcamp-catalog-toolbar .bc-category-row button[aria-pressed="true"]:hover {
+  color: #fff;
+  background: #084a42;
+}
+:root[data-theme="light"] .bc-approved .bootcamp-catalog-toolbar .bc-category-row button[aria-pressed="true"] span {
+  color: #fff;
+  background: transparent;
+}
