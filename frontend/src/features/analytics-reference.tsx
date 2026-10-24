@@ -251,6 +251,11 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
       </div>
     </header>
     {profileQuery.isError && <div className="ref-alert" role="status">Источник Skill Passport недоступен. Уровни не считаются нулём. <button type="button" onClick={() => { void profileQuery.refetch(); }}>Повторить</button></div>}
+    {profileQuery.isPending && <p className="ref-loading" role="status">Загружается подтверждённый профиль навыков…</p>}
+    {growthQuery.isPending && <p className="ref-loading" role="status">Загружается история цифровых следов…</p>}
+    {growthQuery.isError && <div className="ref-alert" role="alert">Историю цифровых следов загрузить не удалось. Это не означает отсутствие подтверждений. <button type="button" onClick={() => { void growthQuery.refetch(); }}>Повторить</button></div>}
+    {journeyQuery.isPending && <p className="ref-loading" role="status">Загружаются принятые результаты и путь участника…</p>}
+    {journeyQuery.isError && <div className="ref-alert" role="alert">Источник принятых результатов недоступен. Отсутствующее значение не является нулём. <button type="button" onClick={() => { void journeyQuery.refetch(); }}>Повторить</button></div>}
     {layout !== "path" && <Kpis skills={skills} ready={ready} events={events} accepted={accepted} variant={layout} />}
     {layout === "passport" && <>
       <div className="ref-v1-middle">
