@@ -64,7 +64,8 @@ test("catalog filters, view parity and one idempotent apply", async ({ page }) =
   });
 
   // Advanced controls are deliberately hidden until requested in both desktop and mobile.
-  const advanced = page.getByRole("button", { name: "Все фильтры" });
+  const advanced = page.locator(".catalog-v2-filter-expander");
+  await expect(advanced).toHaveAccessibleName("Все фильтры");
   await expect(advanced).toHaveAttribute("aria-expanded", "false");
   await expect(page.getByLabel("Навык", { exact: true })).toBeHidden();
   await advanced.click();
