@@ -96,6 +96,15 @@ def test_demo_alex_has_seven_real_role_catalogs_and_distinct_progress() -> None:
     rows = _rows()
     tracks = {row["slug"]: row for row in rows["tracks"]}
     assert len(tracks) == 7
+    assert {item["title"] for item in tracks.values()} == {
+        "AI Architect",
+        "AI Engineer",
+        "AI Security Engineer",
+        "AI Data Engineer",
+        "MLOps Engineer",
+        "AI Agent Engineer",
+        "AI Product Engineer",
+    }
     roadmap_by_slug = {
         slug: next(row for row in rows["roadmap_versions"] if row["track_id"] == track["id"])
         for slug, track in tracks.items()
@@ -107,6 +116,9 @@ def test_demo_alex_has_seven_real_role_catalogs_and_distinct_progress() -> None:
         assert [row["position"] for row in stages] == list(range(1, 8)), slug
         assert stages[0]["id"] == demo_id(f"milestone:{slug}:start")
         assert all(item["payload"]["target_key"] for item in stages)
+        assert all(len(item["payload"]["activities"]) == 3 for item in stages)
+        assert all(item["payload"]["deliverable"] for item in stages)
+        assert all(item["payload"]["title"] for item in stages)
 
     alex = [
         row for row in rows["track_attempts"]
