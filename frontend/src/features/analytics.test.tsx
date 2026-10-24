@@ -4,7 +4,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { MemoryRouter, useLocation } from "react-router-dom";
 import { describe, expect, it, vi } from "vitest";
 
-import { ParticipantAnalytics, TrajectoryGrowthAnalytics, VerifiedDocumentsPanel, weeklyActivityFromSnapshot } from "./analytics";
+import { ParticipantAnalytics, TrajectoryGrowthAnalytics, VerifiedDocumentsPanel } from "./analytics";
 import type { MonthlyGoalView } from "./monthly-goal-client";
 
 const snapshot = {
@@ -357,8 +357,8 @@ function renderDeepLink(url: string) {
 }
 
 describe("participant analytics chart rendering", () => {
-  it("buckets observed actions by Monday in the actor's timezone", () => {
-    const result = weeklyActivityFromSnapshot({
+  it("buckets observed actions by local Monday, not the UTC date", async () => {
+    installDeepLinkFetch({ snapshot: {
       ...snapshot,
       events: [
         { occurred_at: "2026-10-18T21:05:00Z", kind: "course", title: "A", source_kind: "course", source_ref: "1" },
@@ -366,18 +366,20 @@ describe("participant analytics chart rendering", () => {
         { occurred_at: "2026-09-01T11:00:00Z", kind: "course", title: "C", source_kind: "course", source_ref: "3" },
         { occurred_at: "not-a-date", kind: "course", title: "D", source_kind: "course", source_ref: "4" },
       ],
-    });
-    expect(result.observed).toBe(true);
-    expect(result.weeks).toHaveLength(8);
-    expect(result.weeks[7]?.count).toBe(1);
-    expect(result.weeks[6]?.count).toBe(1);
-    expect(result.weeks.reduce((sum, week) => sum + week.count, 0)).toBe(2);
+    }});
+    renderDeepLink("/analytics");
+    const chart = await screen.findByRole("img", { name: /Подтверждённые события по восьми неделям/ });
+    expect(chart).toHaveAccessibleName(/неделя 7 — 1 действий/);
+    expect(chart).toHaveAccessibleName(/неделя 8 — 1 действий/);
+    expect(chart.querySelectorAll("svg rect")).toHaveLength(2);
   });
 
-  it("never turns unknown or invalid timezones into invented zero activity", () => {
-    expect(weeklyActivityFromSnapshot(snapshot)).toEqual({ observed: false, weeks: [] });
-    expect(weeklyActivityFromSnapshot({ ...snapshot, events: [], freshness: { known: false, latest_observed_at: null } })).toEqual({ observed: false, weeks: [] });
-    expect(weeklyActivityFromSnapshot({ ...snapshot, events: [], actor_timezone: "invalid/TZ" })).toEqual({ observed: false, weeks: [] });
+  it("never turns invalid timezone into invented zero activity", async () => {
+    installDeepLinkFetch({ snapshot: { ...snapshot, events: [], actor_timezone: "invalid/TZ" } });
+    renderDeepLink("/analytics");
+    const chart = await screen.findByRole("img", { name: /Активность не подтверждена/ });
+    expect(chart.querySelectorAll("svg rect")).toHaveLength(0);
+    expect(screen.getByText("Среднее: нет данных")).toBeInTheDocument();
   });
 
   it("renders SVG bars only for real weekly events, and uses authoritative journey stages", async () => {
