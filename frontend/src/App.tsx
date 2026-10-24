@@ -511,7 +511,7 @@ function Workspace({
           <span aria-hidden="true">☰</span> Меню
         </button>
         {allowed && actor.active_role === "customer" && mockCustomer ? (
-          currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" personId={actor.person_id} /> : currentSection === "Настройки" ? <ParticipantSettings actorName="Роман Воронов" consentScopes={actor.consent_scopes} role="customer" /> : <CustomerPremium section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
+          currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" personId={actor.person_id} quickTargets={{ task: navigation.findIndex((section) => section === "Задачи" || section === "Мои задачи") }} /> : currentSection === "Настройки" ? <ParticipantSettings actorName="Роман Воронов" consentScopes={actor.consent_scopes} role="customer" /> : <CustomerPremium section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
         ) : allowed && currentSection === "Главная" ? (
           actor.active_role === "participant" ? (
             <ParticipantDashboard actor={actor} />
@@ -662,16 +662,13 @@ function Workspace({
           <MessagingWorkspace
             role={actor.active_role}
             personId={actor.person_id}
-            quickTargets={
-              actor.active_role === "mentor"
-                ? {
-                    review: navigation.findIndex(
-                      (name) => name === "Очередь ревью" || name === "Проверка вкладов",
-                    ),
-                    plan: navigation.indexOf("План недели"),
-                  }
-                : undefined
-            }
+            quickTargets={{
+              task: navigation.findIndex((section) => section === "Задачи" || section === "Мои задачи"),
+              ...(actor.active_role === "mentor" ? {
+                review: navigation.findIndex((name) => name === "Очередь ревью" || name === "Проверка вкладов"),
+                plan: navigation.indexOf("План недели"),
+              } : {}),
+            }}
           />
         ) : allowed ? (
           <RoleDashboard
