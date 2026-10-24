@@ -196,7 +196,7 @@ function SourceGradePolicyDialog({ grade, onClose }: {
         {grade.current_grade !== null && <p><strong>Текущий грейд:</strong> {grade.current_grade}</p>}
         {grade.target_grade !== null && <p><strong>Целевой грейд:</strong> {grade.target_grade}</p>}
       </div>
-      <small>Версия политики: {grade.policy_version === null ? "не опубликована" : String(grade.policy_version)}</small>
+      <small>Версия политики: {String(grade.policy_version)}</small>
     </section>
   </div>;
 }
