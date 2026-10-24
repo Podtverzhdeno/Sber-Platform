@@ -282,7 +282,7 @@ export function ReferenceBootcampCatalog(props: { honorBoardEnabled: boolean; ho
                 {currentCourse && <Skills course={currentCourse}/>}</div></div>
                 <div className="continue-progress"><div className="progress-top"><span>Учебный прогресс</span><b>—</b></div>
                   <span className="track"><i style={{width:0}} /></span><div className="next-lesson"><Glyph name="clock"/><span><em>Следующий шаг</em><br/>{currentCourse ? "Начать изучение курса" : "Выбрать курс из каталога"}<br/><span className="bc-missing-fact">Данные LMS пока не подключены</span></span></div>
-                  <button type="button" className="btn" onClick={() => { currentCourse ? courseAction(currentCourse) : document.getElementById("bc-reference-catalog")?.scrollIntoView({behavior:"smooth"}); }}>{currentCourse ? "Начать курс" : "Смотреть курсы"}<Glyph name="arrow" /></button>
+                  <button type="button" className="btn" onClick={() => { if (currentCourse) courseAction(currentCourse); else document.getElementById("bc-reference-catalog")?.scrollIntoView({behavior:"smooth"}); }}>{currentCourse ? "Начать курс" : "Смотреть курсы"}<Glyph name="arrow" /></button>
                 </div>
               </div>
             </div>
