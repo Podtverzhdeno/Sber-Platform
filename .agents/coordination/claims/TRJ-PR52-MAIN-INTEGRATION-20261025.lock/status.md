@@ -1,0 +1,13 @@
+# Claim TRJ-PR52-MAIN-INTEGRATION-20261025
+- task_id: TRJ-PR52-MAIN-INTEGRATION-20261025
+- session_id: gpt6-20261025-pr52-integration
+- status: IN_PROGRESS
+- base_revision: 85d563d2f140c6e485dc98b430174b2b3067ba4e
+- write_scope:
+  - frontend/src/features/trajectory-v2/trajectory-v2.scss
+  - frontend/e2e/trajectory-reference-geometry.spec.ts
+  - .agents/coordination/claims/TRJ-PR52-MAIN-INTEGRATION-20261025.lock/status.md
+- depends_on: [TRJ-ROLE-DIALOG-PARITY-20261024]
+- verification: append only source-scoped CSS to latest main, preserve existing CSS, test E2E import and build
+- progress: conflicting PR52 will be recomposed atop latest main with force-with-lease, then GitHub merge
+- blockers: visual 1:1 sign-off still pending
