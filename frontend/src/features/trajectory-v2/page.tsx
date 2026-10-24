@@ -273,7 +273,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
       </div>
       <aside className="trajectory-v2-reference-sidebar" aria-label="Карьерный прогресс и следующий шаг">
         <section className="trajectory-v2-grade-panel">
-          <header><h3>Твой грейд</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => setGradesOpen(true)}>Все уровни →</button></header>
+          <header><h3>Твой грейд</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => { setGradesOpen(true); }}>Все уровни →</button></header>
           <div className="trajectory-v2-grade-body">
             <div className="trajectory-v2-grade-ring"><strong>{overview.concepts.career_grade.current_grade === null ? "—" : `Грейд ${overview.concepts.career_grade.current_grade}`}</strong><small>{selected?.title ?? "Моя роль"}</small></div>
             <div className="trajectory-v2-grade-progress">
@@ -289,7 +289,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           <header><h3>Следующий шаг</h3><span>{overview.next_outcome?.trajectory_title ?? "Маршрут"}</span></header>
           <strong>{overview.next_outcome?.target_title ?? "Следующий шаг пока не назначен"}</strong>
           <p>{overview.next_outcome?.stale_reason ?? "Продолжайте маршрут после подтверждения результата"}</p>
-          {overview.next_outcome !== null && <button type="button" onClick={() => openStageDetails(overview.next_outcome!.milestone_key)}>Посмотреть →</button>}
+          {overview.next_outcome !== null && <button type="button" onClick={() => { if (overview.next_outcome !== null) openStageDetails(overview.next_outcome.milestone_key); }}>Посмотреть →</button>}
         </section>
         <section className="trajectory-v2-passport-panel">
           <header><h3>Мой скилл-паспорт</h3></header>
@@ -297,9 +297,9 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         </section>
       </aside>
       {gradesOpen && (
-        <div className="trajectory-v2-overlay" onClick={() => setGradesOpen(false)}>
-          <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => event.stopPropagation()}>
-            <header><h2>Все уровни</h2><button type="button" aria-label="Закрыть" onClick={() => setGradesOpen(false)}>✕</button></header>
+        <div className="trajectory-v2-overlay" onClick={() => { setGradesOpen(false); }}>
+          <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => { event.stopPropagation(); }}>
+            <header><h2>Все уровни</h2><button type="button" aria-label="Закрыть" onClick={() => { setGradesOpen(false); }}>✕</button></header>
             <p>Грейд определяется подтверждёнными результатами и действующей политикой оценки.</p>
             <div className="trajectory-v2-grades-list" role="status">
               <p>Полный перечень грейдов пока не опубликован. Условия и количество уровней появятся после утверждения карьерной политики.</p>
