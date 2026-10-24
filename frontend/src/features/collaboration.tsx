@@ -417,7 +417,7 @@ export function MessagingWorkspace({
         </div>
         {isOnline ? (
           <span className="workspace-online-badge" aria-live="polite">
-            {isNarrow ? "Офлайн" : "В сети"}
+            В сети
           </span>
         ) : (
           <span className="workspace-online-badge" data-badge="offline">
@@ -426,7 +426,7 @@ export function MessagingWorkspace({
         )}
       </header>
       <div
-        className={`messenger-shell${isNarrow ? ` messenger-shell--${mobilePane}` : ""}`}
+        className={`messenger-shell${isNarrow ? ` messenger-shell--${mobilePane}` : ""}${!isNarrow && !contextVisible ? " messenger-shell--no-context" : ""}`}
         data-pane={isNarrow ? mobilePane : "desktop"}
       >
         {listVisible && (
@@ -489,7 +489,6 @@ export function MessagingWorkspace({
                 }}
               />
             )}
-            {!selected ? null : null}
           </section>
         )}
         {contextVisible && selected && (
