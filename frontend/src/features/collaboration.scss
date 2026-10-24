@@ -1952,3 +1952,17 @@
   height: 100%;
   object-fit: cover;
 }
+
+
+/* The supplied 02.png includes a multi-layer cyan illustration not present
+ * in its independent HTML prototype. Reuse that original visual on dark
+ * reference previews; keep CSS-drawn accessible light-theme fallback. */
+:root:not([data-theme="light"]) .sberchat-shell .ref-empty-state__art {
+  width: 261px;
+  height: 179px;
+  background: url("/messages-reference/empty-hero.webp") center / contain no-repeat;
+  mix-blend-mode: screen;
+}
+:root:not([data-theme="light"]) .sberchat-shell .ref-empty-state__art > * {
+  visibility: hidden;
+}
