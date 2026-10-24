@@ -22,7 +22,7 @@ jobs:
           package-manager-cache: false
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - name: Verify reference-sized cards list and terms with accessible match ring
+      - name: Validate 1672 and 1280 task catalog layouts and accessibility
         env:
           CAPTURE_APPROVED_TASKS: "1"
           TZ: Europe/Moscow
