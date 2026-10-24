@@ -17,7 +17,44 @@ type Metric = { key: string; label: string; numerator: number; denominator: numb
 type RoleAnalyticsData = { role: Role; metrics: Metric[] };
 type GrowthSkill = { skill_key: string; title: string; current_level: string; target_level: string; known: boolean };
 type GrowthTrajectory = { track_key: string; track_title: string; policy_version: number; readiness_skills: GrowthSkill[]; readiness: { percent: number | null; coverage: number; partial: boolean }; completion: { percent: number | null; coverage: number; partial: boolean } };
-type GrowthSnapshot = { snapshot_id: string; generated_at: string; actor_timezone: string; definitions: Record<string, string>; freshness: { known: boolean; latest_observed_at: string | null }; trajectories: GrowthTrajectory[] };
+type GrowthActivityEvent = { occurred_at: string; kind: string; title: string; source_kind: string; source_ref: string };
+type GrowthSnapshot = { snapshot_id: string; generated_at: string; actor_timezone: string; definitions: Record<string, string>; freshness: { known: boolean; latest_observed_at: string | null }; events?: GrowthActivityEvent[]; trajectories: GrowthTrajectory[] };
+type WeeklyActivity = { label: string; count: number };
+
+/** Counts observed events, not guessed engagement. Align weeks to the actor's local Monday. */
+export function weeklyActivityFromSnapshot(snapshot: GrowthSnapshot | undefined): { observed: boolean; weeks: WeeklyActivity[] } {
+  if (!snapshot || !snapshot.freshness.known || !Array.isArray(snapshot.events)) return { observed: false, weeks: [] };
+  let formatter: Intl.DateTimeFormat;
+  try {
+    formatter = new Intl.DateTimeFormat("en-US", { timeZone: snapshot.actor_timezone, year: "numeric", month: "2-digit", day: "2-digit" });
+  } catch {
+    return { observed: false, weeks: [] };
+  }
+  const localWeekMonday = (iso: string): number | null => {
+    const date = new Date(iso);
+    if (!Number.isFinite(date.getTime())) return null;
+    const parts = formatter.formatToParts(date);
+    const field = (name: string) => Number(parts.find((item) => item.type === name)?.value ?? NaN);
+    const year = field("year");
+    const month = field("month");
+    const day = field("day");
+    if (![year, month, day].every(Number.isFinite)) return null;
+    const localDay = Date.UTC(year, month - 1, day);
+    const weekday = new Date(localDay).getUTCDay();
+    return localDay - ((weekday + 6) % 7) * 86_400_000;
+  };
+  const currentWeek = localWeekMonday(snapshot.generated_at);
+  if (currentWeek === null) return { observed: false, weeks: [] };
+  const counts = Array<number>(8).fill(0);
+  for (const event of snapshot.events) {
+    const eventWeek = localWeekMonday(event.occurred_at);
+    if (eventWeek === null) continue;
+    const offset = Math.round((currentWeek - eventWeek) / (7 * 86_400_000));
+    if (offset >= 0 && offset < counts.length) counts[7 - offset] = (counts[7 - offset] ?? 0) + 1;
+  }
+  return { observed: true, weeks: counts.map((count, index) => ({ label: `Н${String(index + 1)}`, count })) };
+}
+
 type EvidenceAnchorView = { competency_key: string; source_kind: string; source_ref: string; level: string; observed_at: string; reason: string; counted: boolean };
 type FrameworkSkillView = { skill_key: string; skill_title: string; level: string; explanation: string; anchors: EvidenceAnchorView[]; excluded: EvidenceAnchorView[] };
 type FrameworkReportView = { framework_key: string; domain: "course" | "role" | "project"; version: number; title: string; created_at: string; skills: FrameworkSkillView[] };
