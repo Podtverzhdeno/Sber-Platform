@@ -3413,3 +3413,20 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
   .catalog-v2-stage-content strong { font-size: 0.7rem; line-height: 1.1; }
   .catalog-v2-stage-content small { font-size: 0.63rem; line-height: 1.08; }
 }
+
+/* Source UI (1): illustrative verified-brand marks, without rewriting real task data. */
+.catalog-v2 .catalog-v2-brand-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  flex: none;
+  border-radius: inherit;
+}
+.catalog-v2 .catalog-v2-customer-avatar:has(.catalog-v2-brand-logo),
+.catalog-v2 .catalog-v2-detail-avatar:has(.catalog-v2-brand-logo),
+.catalog-v2 .catalog-v2-conditions-avatar:has(.catalog-v2-brand-logo),
+.catalog-v2 .catalog-v2-table-avatar:has(.catalog-v2-brand-logo) {
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+}
