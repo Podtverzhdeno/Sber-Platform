@@ -113,7 +113,12 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   };
   // All cards come from the authorized server catalog; never invent
   // frontend-only roles or progress for unselected tracks.
-  const catalogueRoles = overview.roles;
+  const catalogueRoles = useMemo(() => {
+    const rank = new Map(["product", "ml", "python", "design", "data", "backend", "manager"].map((key, i) => [key, i]));
+    return [...overview.roles].sort(
+      (a, b) => (rank.get(a.track_key) ?? 99) - (rank.get(b.track_key) ?? 99),
+    );
+  }, [overview.roles]);
   const roleParam = searchParams.get("role");
   const selectedKey = useMemo(() => {
     const paramRole = catalogueRoles.find((role) => role.track_key === roleParam);
@@ -524,7 +529,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         <StageTaskDrawer
           key={drawerMilestone.key}
           milestone={drawerMilestone}
-          state={milestoneState(drawerMilestone, selectedRoadmap.next_step)}
+          state={selected.attempt_number === null ? "preview" : milestoneState(drawerMilestone, selectedRoadmap.next_step)}
           role={selected}
           policyVersion={selectedRoadmap.policy_version}
           onClose={closeOverlays}
@@ -696,7 +701,7 @@ function SelectedStageCard(props: { role: RoleCardView; roadmap: RoadmapView | n
   const activeKey = isSelectedStage(props.stageKey, roadmap.milestones, currentKey);
   const active = roadmap.milestones.find((milestone) => milestone.key === activeKey);
   if (active === undefined) return null;
-  return <StageDetail milestone={active} state={milestoneState(active, roadmap.next_step)} nextStep={roadmap.next_step} role={role} onOpenDetails={props.onOpenDetails}/>;
+  return <StageDetail milestone={active} state={role.attempt_number === null ? "preview" : milestoneState(active, roadmap.next_step)} nextStep={roadmap.next_step} role={role} onOpenDetails={props.onOpenDetails}/>;
 }
 
 export function StagePathSection(props: {
@@ -758,7 +763,7 @@ export function StagePathSection(props: {
       </header>
       <ol className="trajectory-v2-stage-path">
         {roadmap.milestones.map((milestone) => {
-          const state = milestoneState(milestone, nextStep);
+          const state = role.attempt_number === null ? "preview" : milestoneState(milestone, nextStep);
           return (
             <li key={milestone.key}>
               <button
@@ -793,7 +798,7 @@ export function StagePathSection(props: {
       {visibleMilestone === undefined || props.showDetails === false ? null : (
         <StageDetail
           milestone={visibleMilestone}
-          state={milestoneState(visibleMilestone, nextStep)}
+          state={role.attempt_number === null ? "preview" : milestoneState(visibleMilestone, nextStep)}
           nextStep={nextStep}
           role={role}
           onOpenDetails={props.onOpenDetails}
@@ -827,7 +832,7 @@ export function StageDetail(props: {
         </div>
         <div className="trajectory-v2-stage-progress">
           <span className="trajectory-v2-stage-state" data-state={props.state}>
-            {MILESTONE_STATE_LABELS[props.state] ?? props.state}
+            {props.state === "preview" ? "План обучения" : (MILESTONE_STATE_LABELS[props.state] ?? props.state)}
           </span>
           {role.attempt_number !== null && <small>{role.completed_milestones} из {total} этапов завершено</small>}
           <progress max={total} value={Math.min(total,role.completed_milestones)} aria-label="Завершено этапов роли"/>
@@ -841,7 +846,7 @@ export function StageDetail(props: {
           <strong>{milestone.target_kind === "course" ? `Курс: ${milestone.title}` : milestone.title}</strong>
           <small>{milestone.skill} · {milestone.target_kind === "task" ? "Практическая задача" : milestone.target_kind === "course" ? "Обучение" : milestone.target_kind}</small>
         </div>
-        <span className="trajectory-v2-task-status">{props.state === "completed" ? "Завершено" : props.state === "locked" ? "Недоступно" : "К выполнению"}</span>
+        <span className="trajectory-v2-task-status">{props.state === "preview" ? "Для ознакомления" : props.state === "completed" ? "Завершено" : props.state === "locked" ? "Недоступно" : "К выполнению"}</span>
         {canOpen ? (
           <button type="button" className={props.state === "completed" || role.attempt_number === null ? "trajectory-v2-task-action" : "trajectory-v2-task-action is-primary"} onClick={() => props.onOpenDetails?.(milestone.key)}>
             {role.attempt_number === null || props.state === "completed" ? "Посмотреть" : "Продолжить"} →
@@ -880,8 +885,8 @@ export function StageDetail(props: {
           {nextStep === null ? "Этап недоступен: сервер не разрешает переход дальше." : `Этап откроется после завершения «${nextStep.title}». Первый разрешённый шаг — «${nextStep.title}».`}
         </p>
       )}
-      {props.state === "available" && role.attempt_number === null && (
-        <p className="trajectory-v2-stage-note" role="status">Прогресс появится после выбора траектории.</p>
+      {role.attempt_number === null && (
+        <p className="trajectory-v2-stage-note" role="status">Это программа обучения. Личный прогресс появится после выбора профессии.</p>
       )}
     </section>
   );
