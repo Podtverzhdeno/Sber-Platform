@@ -116,6 +116,10 @@ class RoadmapMilestone:
     mandatory: bool = True
     activities: tuple[str, ...] = ()
     deliverable: str | None = None
+    theory: tuple[str, ...] = ()
+    lab: str | None = None
+    acceptance: tuple[str, ...] = ()
+    estimated_hours: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
