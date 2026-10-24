@@ -63,7 +63,7 @@ function trustedProfile(profile: AgenticServerProfile | undefined, role: RoleKey
 }
 function pString(level: number | null): string { return level === null ? "—" : String(level); }
 function monthSeries(snapshot: Snapshot | undefined, period: number): { name: string; total: number; verified: number }[] | null {
-  if (!snapshot?.freshness?.known || !snapshot.events?.length) return null;
+  if (!snapshot?.freshness.known || !snapshot.events?.length) return null;
   const now = new Date(snapshot.generated_at);
   if (!Number.isFinite(now.getTime())) return null;
   const result = Array.from({ length: period }, (_, i) => {
@@ -91,7 +91,6 @@ function Radar({ skills }: { skills: Skill[] }) {
     const pos = xy(index, level);
     return String(pos.x) + "," + String(pos.y);
   }).join(" ");
-  const target = skills.map((skill) => skill.target_level ?? 0);
   const known = skills.map((skill) => skill.current_level);
   return <div className="ref-radar" data-testid="reference-radar">
     <svg viewBox="0 0 520 350" role="img" aria-label="Циклограмма: бирюзовая линия — подтверждённый уровень, оранжевая пунктирная — целевой">
@@ -103,14 +102,14 @@ function Radar({ skills }: { skills: Skill[] }) {
         const a = skills[i]?.target_level, b = skills[next]?.target_level;
         if (a === null || a === undefined || b === null || b === undefined) return null;
         const first = xy(i, a), second = xy(next, b);
-        return <line key={"t" + i} x1={first.x} y1={first.y} x2={second.x} y2={second.y} stroke="#ffae2b" strokeWidth="2.6" strokeDasharray="6 5" />;
+        return <line key={"t" + String(i)} x1={first.x} y1={first.y} x2={second.x} y2={second.y} stroke="#ffae2b" strokeWidth="2.6" strokeDasharray="6 5" />;
       })}
       {skills.map((_, i) => {
         const next = (i + 1) % skills.length;
         const a = known[i], b = known[next];
         if (a === null || a === undefined || b === null || b === undefined) return null;
         const first = xy(i, a), second = xy(next, b);
-        return <line key={"c" + i} x1={first.x} y1={first.y} x2={second.x} y2={second.y} stroke="#2ce8b5" strokeWidth="3" />;
+        return <line key={"c" + String(i)} x1={first.x} y1={first.y} x2={second.x} y2={second.y} stroke="#2ce8b5" strokeWidth="3" />;
       })}
       {skills.map((skill, i) => {
         const aim = skill.target_level, current = skill.current_level;
@@ -143,8 +142,8 @@ function HistoryChart({ series, mode = "bars" }: { series: ReturnType<typeof mon
 }
 function Controls({ role, setRole, chart, setChart }: { role: RoleKey; setRole: (role: RoleKey) => void; chart: ChartKey; setChart: (chart: ChartKey) => void }) {
   return <div className="ref-controls">
-    <div className="ref-switch" role="group" aria-label="Профессиональная группа">{(Object.entries(ROLES) as [RoleKey, string][]).map(([key, label]) => <button type="button" className={role === key ? "active" : ""} aria-pressed={role === key} key={key} onClick={() => setRole(key)}>{label}</button>)}</div>
-    <div className="ref-switch" role="group" aria-label="Вид диаграммы">{([["radar", "Циклограмма"], ["histogram", "Гистограмма"], ["trend", "Тренд"]] as [ChartKey, string][]).map(([key, label]) => <button type="button" className={chart === key ? "active" : ""} aria-pressed={chart === key} key={key} onClick={() => setChart(key)}>{label}</button>)}</div>
+    <div className="ref-switch" role="group" aria-label="Профессиональная группа">{(Object.entries(ROLES) as [RoleKey, string][]).map(([key, label]) => <button type="button" className={role === key ? "active" : ""} aria-pressed={role === key} key={key} onClick={() => { setRole(key); }}>{label}</button>)}</div>
+    <div className="ref-switch" role="group" aria-label="Вид диаграммы">{([["radar", "Циклограмма"], ["histogram", "Гистограмма"], ["trend", "Тренд"]] as [ChartKey, string][]).map(([key, label]) => <button type="button" className={chart === key ? "active" : ""} aria-pressed={chart === key} key={key} onClick={() => { setChart(key); }}>{label}</button>)}</div>
   </div>;
 }
 function SkillsVisual({ skills, chart, series }: { skills: Skill[]; chart: ChartKey; series: ReturnType<typeof monthSeries> }) {
@@ -155,7 +154,7 @@ function SkillsVisual({ skills, chart, series }: { skills: Skill[]; chart: Chart
 }
 function SkillRows({ skills, openSkill }: { skills: Skill[]; openSkill: (key: string) => void }) {
   return <div className="ref-skill-list">{skills.map((skill, index) =>
-    <button type="button" className="ref-skill-row" key={skill.key} onClick={() => openSkill(skill.key)}>
+    <button type="button" className="ref-skill-row" key={skill.key} onClick={() => { openSkill(skill.key); }}>
       <span className="ref-skill-no">{index + 1}</span><span className="ref-skill-title">{skill.title}</span>
       <span className="ref-meter"><span style={{ width: String((skill.current_level ?? 0) * 25) + "%" }} /><i style={{ left: String((skill.target_level ?? 0) * 25) + "%" }} /></span>
       <strong>{pString(skill.current_level)} / {pString(skill.target_level)}</strong>
@@ -205,7 +204,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
   const [period, setPeriod] = useState(3);
   const [openDetail, setOpenDetail] = useState<string | null>(null);
   const [showCriteria, setShowCriteria] = useState(false);
-  const profileQuery = useQuery({ queryKey: ["agentic-coding-profile", role], queryFn: () => apiRequest<AgenticServerProfile>("/api/v1/me/agentic-coding/profile?role_key=" + role) });
+  const profileQuery = useQuery({ queryKey: ["agentic-coding-profile", role], queryFn: () => apiRequest<AgenticServerProfile>(("/api/v1/me/agentic-coding/profile?role_key=" + role) as `/api/v1/me/agentic-coding/profile?${string}`) });
   const growthQuery = useQuery({ queryKey: ["participant-growth-analytics"], queryFn: () => apiRequest<Snapshot>("/api/v1/me/growth/snapshot") });
   const journeyQuery = useQuery({ queryKey: ["participant-analytics"], queryFn: () => apiRequest<Journey>("/api/v1/me/analytics/journey") });
   const skills = useMemo(() => skillSource(profileQuery.data, role), [profileQuery.data, role]);
@@ -223,16 +222,16 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
   const focusTitle = focus?.title ?? "Все требования требуют подтверждения";
   const tasksAt = navigation.indexOf("Задачи");
   const tasksUrl = "/workspace/" + String(tasksAt >= 0 ? tasksAt : 2);
-  const current = LAYOUTS.find((item) => item.key === layout) ?? LAYOUTS[0];
+  const current = LAYOUTS.find((item) => item.key === layout) ?? { eyebrow: "АНАЛИТИКА / SKILL PASSPORT", heading: "Ваш Skill Passport", description: "Подтверждённые навыки и результаты" };
   const detailed = skills.find((skill) => skill.key === openDetail);
   return <main className={"analytics-reference ref-layout-" + layout} data-testid="analytics-reference" data-reference="ANALYTICS-REF-20261024">
     <nav className="ref-pages" aria-label="Представление аналитики">
-      {LAYOUTS.map((item) => <button type="button" key={item.key} aria-current={layout === item.key ? "page" : undefined} className={layout === item.key ? "selected" : ""} onClick={() => setLayout(item.key)}>{item.name}</button>)}
+      {LAYOUTS.map((item) => <button type="button" key={item.key} aria-current={layout === item.key ? "page" : undefined} className={layout === item.key ? "selected" : ""} onClick={() => { setLayout(item.key); }}>{item.name}</button>)}
     </nav>
     <header className="ref-page-header">
       <div><span className="ref-cap">{current.eyebrow}</span><h1 id="workspace-title">{current.heading}</h1><p>{current.description}</p></div>
-      <div className="ref-filters"><label>Период<select aria-label="Период аналитики" value={period} onChange={(event) => setPeriod(Number(event.target.value))}><option value={3}>3 месяца</option><option value={8}>8 месяцев</option></select></label>
-        <label>Направление<select aria-label="Направление аналитики" value={role} onChange={(event) => setRole(event.target.value as RoleKey)}>{(Object.entries(ROLES) as [RoleKey, string][]).map(([key, value]) => <option key={key} value={key}>{value}</option>)}</select></label>
+      <div className="ref-filters"><label>Период<select aria-label="Период аналитики" value={period} onChange={(event) => { setPeriod(Number(event.target.value)); }}><option value={3}>3 месяца</option><option value={8}>8 месяцев</option></select></label>
+        <label>Направление<select aria-label="Направление аналитики" value={role} onChange={(event) => { setRole(event.target.value as RoleKey); }}>{(Object.entries(ROLES) as [RoleKey, string][]).map(([key, value]) => <option key={key} value={key}>{value}</option>)}</select></label>
         <span className="ref-fresh">{profileQuery.data ? "● Данные " + new Date(profileQuery.data.as_of).toLocaleDateString("ru-RU") : "● Источник недоступен"}</span>
       </div>
     </header>
@@ -246,24 +245,24 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
           <div className="ref-progress"><i style={{ width: String(ready ?? 0) + "%" }} /></div>
           <div className="ref-passport-info"><span>Уровень компетенций <b>1—4</b></span><span>Методология <b>Agentic Coding</b></span><span>Состояние <b>{known.length ? "Частичные данные" : "Нет подтверждений"}</b></span></div>
           <div className="ref-passport-summary"><span>Цифровые следы <b>{events.length || "—"}</b></span><span>Требования <b>{met.length} / {required.length}</b></span></div>
-          <button className="ref-primary-cta" type="button" onClick={() => setShowCriteria(true)}>Открыть Skill Passport ↗</button>
+          <button className="ref-primary-cta" type="button" onClick={() => { setShowCriteria(true); }}>Открыть Skill Passport ↗</button>
           <small className="ref-disclaimer">Корпоративный L1 не выдаётся платформой Impulse</small>
         </aside>
       </div>
       <div className="ref-v1-bottom">
         <section className="ref-panel ref-action"><span className="ref-cap">ВАШ СЛЕДУЮЩИЙ ШАГ</span><h2>{focus ? "Подтвердить: " + focusTitle : "Продолжайте развитие навыков"}</h2><p>{focus ? PRACTICES[focus.key] : "Целевые уровни проверены. Дальнейший прогресс зависит от новых результатов."}</p><span className="ref-step-meta">{focus ? "Сейчас: " + pString(focus.current_level) + " / " + pString(focus.target_level) : "Нет открытых пробелов"}</span><a className="ref-primary-cta" href={tasksUrl}>Перейти к заданиям →</a></section>
-        <section className="ref-panel ref-bottom-evidence"><div className="ref-card-title"><div><span className="ref-cap">ОСНОВАНИЯ УРОВНЕЙ</span><h2>Последние подтверждения</h2></div><button type="button" className="ref-small-link" onClick={() => setLayout("evidence")}>Все события ↗</button></div><EvidenceList events={events} /></section>
+        <section className="ref-panel ref-bottom-evidence"><div className="ref-card-title"><div><span className="ref-cap">ОСНОВАНИЯ УРОВНЕЙ</span><h2>Последние подтверждения</h2></div><button type="button" className="ref-small-link" onClick={() => { setLayout("evidence"); }}>Все события ↗</button></div><EvidenceList events={events} /></section>
         <section className="ref-panel ref-bottom-chart"><div className="ref-card-title"><div><span className="ref-cap">ДИНАМИКА</span><h2>Развитие за {period} месяцев</h2></div></div><HistoryChart series={series} mode="line" /></section>
       </div>
     </>}
     {layout === "path" && <>
-      <section className="ref-panel ref-path-hero"><div><span className="ref-cap">ПРОГРЕСС ПО ЦЕЛЕВОМУ ПРОФИЛЮ</span><h2>{gap.length ? "До учебного соответствия L1 — " + String(gap.length) + " навыка" : "Целевой профиль сформирован"}</h2><p>{known.length ? "Оценка строится только на подтверждённых навыках. Остальные требуют проверяемых действий." : "Пока не подключены подтверждённые цифровые следы. Требования методологии представлены как целевой профиль."}</p><div className="ref-path-buttons"><a className="ref-primary-cta" href={tasksUrl}>Начать следующий шаг →</a><button type="button" className="ref-ghost-cta" onClick={() => setShowCriteria(true)}>Показать критерии L1</button></div></div>
+      <section className="ref-panel ref-path-hero"><div><span className="ref-cap">ПРОГРЕСС ПО ЦЕЛЕВОМУ ПРОФИЛЮ</span><h2>{gap.length ? "До учебного соответствия L1 — " + String(gap.length) + " навыка" : "Целевой профиль сформирован"}</h2><p>{known.length ? "Оценка строится только на подтверждённых навыках. Остальные требуют проверяемых действий." : "Пока не подключены подтверждённые цифровые следы. Требования методологии представлены как целевой профиль."}</p><div className="ref-path-buttons"><a className="ref-primary-cta" href={tasksUrl}>Начать следующий шаг →</a><button type="button" className="ref-ghost-cta" onClick={() => { setShowCriteria(true); }}>Показать критерии L1</button></div></div>
         <div className="ref-path-gauge"><div className="ref-donut" style={{ background: "conic-gradient(#25e2be " + String(ready ?? 0) + "%, #144355 0)" }}><div><b>{met.length} / {required.length}</b><small>подтверждено</small></div></div><span>{ready === null ? "Готовность не рассчитана" : String(ready) + "% готовности профиля"}</span></div>
       </section>
       <section className="ref-panel ref-route"><div className="ref-route-title"><span className="ref-cap">ВАШ МАРШРУТ</span><span>От практики к проверяемому результату</span></div><div className="ref-route-steps">{["Выбрана роль", "Оценены навыки", "Закрыть пробелы", "Подтвердить L1"].map((step, i) => <div key={step} className={i === 2 ? "active" : i === 3 ? "locked" : ""}><span>{String(i + 1).padStart(2, "0")}</span><b>{step}</b><small>{[ROLES[role], String(required.length) + " по матрице", String(gap.length) + " требуют проверки", "По разрешённым цифровым следам"][i]}</small></div>)}</div></section>
       <div className="ref-v2-main">
         <section className="ref-panel ref-gaps"><div className="ref-card-title"><div><span className="ref-cap">ТОЧЕЧНЫЕ ДЕЙСТВИЯ</span><h2>{gap.length ? String(gap.length) + " навыка до целевого профиля" : "Открытые требования"}</h2><p>Каждое действие связано с правилами методологии</p></div></div>
-          <div className="ref-gaps-list">{gap.length ? gap.slice(0, 3).map((skill, i) => <button className="ref-gap-row" key={skill.key} type="button" onClick={() => setOpenDetail(skill.key)}><span className="ref-gap-num">{i + 1}</span><div><h3>{skill.title}</h3><div className="ref-meter"><span style={{ width: String((skill.current_level ?? 0) * 25) + "%" }} /><i style={{ left: String((skill.target_level ?? 0) * 25) + "%" }} /></div><p>{PRACTICES[skill.key]}</p></div><strong>{pString(skill.current_level)} / {pString(skill.target_level)}</strong></button>) : <p className="ref-quiet">Пока нет новых пробелов для отображения.</p>}</div>
+          <div className="ref-gaps-list">{gap.length ? gap.slice(0, 3).map((skill, i) => <button className="ref-gap-row" key={skill.key} type="button" onClick={() => { setOpenDetail(skill.key); }}><span className="ref-gap-num">{i + 1}</span><div><h3>{skill.title}</h3><div className="ref-meter"><span style={{ width: String((skill.current_level ?? 0) * 25) + "%" }} /><i style={{ left: String((skill.target_level ?? 0) * 25) + "%" }} /></div><p>{PRACTICES[skill.key]}</p></div><strong>{pString(skill.current_level)} / {pString(skill.target_level)}</strong></button>) : <p className="ref-quiet">Пока нет новых пробелов для отображения.</p>}</div>
         </section>
         <Matrix className="ref-path-matrix" title={"Ваш профиль — " + ROLES[role]} skills={skills} role={role} setRole={setRole} chart={chart} setChart={setChart} series={series} openSkill={setOpenDetail} />
       </div>
@@ -283,11 +282,11 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
       <div className="ref-v3-bottom">
         <section className="ref-panel ref-evidence-bars"><div className="ref-card-title"><div><span className="ref-cap">ДИНАМИКА</span><h2>Как копятся цифровые доказательства</h2></div></div><HistoryChart series={series} /></section>
         <section className="ref-panel ref-projects"><div className="ref-card-title"><div><span className="ref-cap">ПРАКТИКА</span><h2>Результаты и навыки</h2></div></div><EvidenceList events={events} emptyText="Нет подтверждённых проектных цифровых следов" /></section>
-        <section className="ref-panel ref-growth"><span className="ref-cap">ТОЧКА РОСТА</span><span className="ref-growth-icon">◎</span><h2>{focus ? "Следующее подтверждение — " + focusTitle : "Следующий шаг развития"}</h2><p>{focus ? "Сейчас " + pString(focus.current_level) + " / " + pString(focus.target_level) + ". Нужно дополнительное подтверждение." : "Продолжайте документировать результаты."}</p><div className="ref-progress"><i style={{ width: String(focus?.current_level !== null && focus?.target_level ? (focus.current_level ?? 0) / focus.target_level * 100 : 0) + "%" }} /></div><a className="ref-primary-cta" href={tasksUrl}>Посмотреть план →</a></section>
+        <section className="ref-panel ref-growth"><span className="ref-cap">ТОЧКА РОСТА</span><span className="ref-growth-icon">◎</span><h2>{focus ? "Следующее подтверждение — " + focusTitle : "Следующий шаг развития"}</h2><p>{focus ? "Сейчас " + pString(focus.current_level) + " / " + pString(focus.target_level) + ". Нужно дополнительное подтверждение." : "Продолжайте документировать результаты."}</p><div className="ref-progress"><i style={{ width: String(focus && focus.current_level !== null && focus.target_level !== null && focus.target_level > 0 ? focus.current_level / focus.target_level * 100 : 0) + "%" }} /></div><a className="ref-primary-cta" href={tasksUrl}>Посмотреть план →</a></section>
       </div>
     </>}
     <p className="ref-footer-note">Данные берутся из текущих источников Impulse. Неизвестные уровни не заменяются нулём. Официальный корпоративный L1 здесь не выдаётся.</p>
-    {detailed && <div className="ref-modal-overlay" role="presentation" onClick={() => setOpenDetail(null)}><section role="dialog" aria-modal="true" aria-label={"Подтверждение навыка " + detailed.title} className="ref-modal" onClick={(event) => event.stopPropagation()}><button type="button" aria-label="Закрыть" onClick={() => setOpenDetail(null)}>×</button><span className="ref-cap">SKILL PASSPORT · КОМПЕТЕНЦИЯ</span><h2>{detailed.title}</h2><p>Подтверждённый уровень: <strong>{pString(detailed.current_level)}</strong> · Цель: <strong>{pString(detailed.target_level)}</strong></p><p>{PRACTICES[detailed.key]}</p><p>Событий из разрешённого источника: {detailed.evidence_count}. {detailed.unresolved_methodology ? "Есть нерешённое расхождение методологии." : "Неподтверждённый уровень не является нулём."}</p><a className="ref-primary-cta" href={tasksUrl}>Перейти к задачам →</a></section></div>}
-    {showCriteria && <div className="ref-modal-overlay" role="presentation" onClick={() => setShowCriteria(false)}><section role="dialog" aria-modal="true" aria-label="Условия Agentic Coding L1" className="ref-modal" onClick={(event) => event.stopPropagation()}><button type="button" aria-label="Закрыть" onClick={() => setShowCriteria(false)}>×</button><span className="ref-cap">СЕРТИФИКАЦИЯ</span><h2>Условия Agentic Coding L1</h2><p>Требуется утверждённая матрица роли, разрешённые цифровые следы и авторизованное решение корпоративного источника.</p><p>Прогресс на платформе Impulse — учебная проекция, не официальный сертификат Сбера.</p></section></div>}
+    {detailed && <div className="ref-modal-overlay" role="presentation" onClick={() => { setOpenDetail(null); }}><section role="dialog" aria-modal="true" aria-label={"Подтверждение навыка " + detailed.title} className="ref-modal" onClick={(event) => event.stopPropagation()}><button type="button" aria-label="Закрыть" onClick={() => { setOpenDetail(null); }}>×</button><span className="ref-cap">SKILL PASSPORT · КОМПЕТЕНЦИЯ</span><h2>{detailed.title}</h2><p>Подтверждённый уровень: <strong>{pString(detailed.current_level)}</strong> · Цель: <strong>{pString(detailed.target_level)}</strong></p><p>{PRACTICES[detailed.key]}</p><p>Событий из разрешённого источника: {detailed.evidence_count}. {detailed.unresolved_methodology ? "Есть нерешённое расхождение методологии." : "Неподтверждённый уровень не является нулём."}</p><a className="ref-primary-cta" href={tasksUrl}>Перейти к задачам →</a></section></div>}
+    {showCriteria && <div className="ref-modal-overlay" role="presentation" onClick={() => { setShowCriteria(false); }}><section role="dialog" aria-modal="true" aria-label="Условия Agentic Coding L1" className="ref-modal" onClick={(event) => event.stopPropagation()}><button type="button" aria-label="Закрыть" onClick={() => { setShowCriteria(false); }}>×</button><span className="ref-cap">СЕРТИФИКАЦИЯ</span><h2>Условия Agentic Coding L1</h2><p>Требуется утверждённая матрица роли, разрешённые цифровые следы и авторизованное решение корпоративного источника.</p><p>Прогресс на платформе Impulse — учебная проекция, не официальный сертификат Сбера.</p></section></div>}
   </main>;
 }
