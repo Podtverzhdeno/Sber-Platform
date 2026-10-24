@@ -3448,3 +3448,15 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
   color: #e5aa1b;
   background: rgb(245 179 1 / 14%);
 }
+
+/* UI (1) source skill pictograms next to server-provided skill names. */
+.catalog-v2 .catalog-v2-skill-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.catalog-v2 .catalog-v2-skill-mark {
+  flex: none;
+  color: var(--color-info-text, #63adff);
+}
