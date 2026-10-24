@@ -117,4 +117,29 @@ describe("typed API client policy", () => {
     expect(options?.staleTime).toBe(60_000);
     expect(options?.gcTime).toBe(10 * 60_000);
   });
+  it("evicts actor-scoped TanStack queries after a successful role change but keeps public config", async () => {
+    const client = createQueryClient();
+    client.setQueryData(["search", "restricted"], { items: ["private-result"] });
+    client.setQueryData(["participant-growth-analytics"], { snapshot_id: "role-A" });
+    client.setQueryData(["public-config"], { demo_mode: true });
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(JSON.stringify({ active_role: "mentor" }), { status: 200 }));
+
+    await apiRequest("/api/v1/me/active-role", { method: "POST" });
+
+    expect(client.getQueryData(["search", "restricted"])).toBeUndefined();
+    expect(client.getQueryData(["participant-growth-analytics"])).toBeUndefined();
+    expect(client.getQueryData(["public-config"])).toEqual({ demo_mode: true });
+    client.clear();
+  });
+
+  it("does not remove actor-scoped queries when a role switch is rejected", async () => {
+    const client = createQueryClient();
+    client.setQueryData(["search", "restricted"], { items: ["still-current-role"] });
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(JSON.stringify({ code: "FORBIDDEN", message: "Нет доступа" }), { status: 403 }));
+
+    await expect(apiRequest("/api/v1/me/active-role", { method: "POST" })).rejects.toMatchObject({ status: 403 });
+    expect(client.getQueryData(["search", "restricted"])).toEqual({ items: ["still-current-role"] });
+    client.clear();
+  });
+
 });

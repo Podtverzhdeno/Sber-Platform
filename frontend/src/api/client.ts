@@ -99,6 +99,24 @@ const readCache = new Map<string, ReadCacheEntry>();
 const pendingReads = new Map<string, Promise<unknown>>();
 let cacheGeneration = 0;
 let activeFetch = globalThis.fetch;
+/** Role and identity changes must invalidate every actor-scoped TanStack query too. */
+const authScopeListeners = new Set<() => void>();
+
+export function subscribeAuthScopeChange(listener: () => void): () => void {
+  authScopeListeners.add(listener);
+  return () => { authScopeListeners.delete(listener); };
+}
+
+function publishAuthScopeChange(): void {
+  for (const listener of authScopeListeners) listener();
+}
+
+const AUTH_SCOPE_MUTATIONS = new Set<string>([
+  "/api/v1/auth/demo-login",
+  "/api/v1/auth/logout",
+  "/api/v1/me/active-role",
+]);
+
 
 export function clearApiReadCache(): void {
   cacheGeneration += 1;
@@ -140,6 +158,7 @@ export async function apiRequest<T>(path: RuntimeApiPath, options?: RequestInit)
     if (method !== "GET" && method !== "HEAD") clearApiReadCache();
     const response = await fetch(path, { credentials: "include", ...options, headers });
     if (!response.ok) throw await decodeError(response);
+    if (AUTH_SCOPE_MUTATIONS.has(path) && method !== "GET" && method !== "HEAD") publishAuthScopeChange();
     if (response.status === 204) return undefined as T;
     return (await response.json()) as T;
   }
