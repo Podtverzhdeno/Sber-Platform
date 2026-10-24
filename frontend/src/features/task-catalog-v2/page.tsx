@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Award, BadgeCheck, Bookmark, BriefcaseBusiness, CalendarDays, ChartNoAxesColumnIncreasing, Check, ChevronDown, ClipboardList, Clock3, Info, Laptop2, LayoutGrid, List, Search, Share2, SlidersHorizontal, Sparkles, Users } from "lucide-react";
 
 import { ApiClientError } from "../../api/client";
 import { StatePanel } from "../../components/ui";
@@ -405,6 +406,12 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   const selected = detailAccessDenied ? undefined : (selectedFromCatalog ?? detail.data);
   const displayedDetail = selected ?? previewItem;
   const totals = catalog.data?.pages[0];
+  const scoredItems = items.filter((item) => item.match.status === "calculated" && item.match.percent !== null);
+  const averageMatch = scoredItems.length
+    ? Math.round(scoredItems.reduce((sum, item) => sum + Number(item.match.percent), 0) / scoredItems.length)
+    : null;
+  const mentoredCount = items.filter((item) => item.support_model !== null && item.support_model !== "not_provided" && item.support_model.trim().length > 0).length;
+  const portfolioCount = items.filter((item) => item.benefits.some((benefit) => benefit.state !== "unavailable" && (benefit.benefit_type.toLowerCase().includes("portfolio") || benefit.code.toLowerCase().includes("portfolio")))).length;
 
   useEffect(() => {
     setSearchInput(filters.q);
@@ -521,20 +528,33 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
     <div className="catalog-v2" data-reference="R-PAR-03">
       <header className="catalog-v2-heading">
         <div>
-          <p className="eyebrow">Каталог задач · актуальные условия</p>
-          <h1 id="workspace-title">Задачи для вашего следующего результата</h1>
-          <p>Релевантность объясняет соответствие траектории и требованиям. Она не обещает отбор, оффер или найм.</p>
+          <p className="eyebrow">ЗАДАЧИ</p>
+          <h1 id="workspace-title">Задачи для твоего развития</h1>
+          <p>Реальные задачи от команд и заказчиков под твою траекторию. Развивай навыки, получай опыт и собирай портфолио.</p>
         </div>
-        <div className="catalog-v2-totals" aria-live="polite">
-          <span title="Количество задач в текущей серверной выборке"><strong>{totals?.total_found ?? 0}</strong><small>найдено по фильтрам</small></span>
-          <span title="Количество задач, для которых доступен отклик"><strong>{totals?.total_available ?? 0}</strong><small>доступно для отклика · из {totals?.total_found ?? 0}</small></span>
-          <span title="Сохранённые задачи в том же авторитетном снимке"><strong>{totals?.total_saved ?? 0}</strong><small>сохранено · из {totals?.total_found ?? 0}</small></span>
-          <span title="Задачи с рассчитанным match; insufficient_data не считается нулём"><strong>{totals?.total_calculated ?? 0}</strong><small>с числовым match · из {totals?.total_found ?? 0}</small></span>
-          <small className="catalog-v2-snapshot">
-            Снимок: {totals?.snapshot_at ? formatDeadline(totals.snapshot_at) : "время не указано"} · Период: {filters.timeframe ? timeframeLabels[filters.timeframe] ?? filters.timeframe : "без ограничения"}
-          </small>
-        </div>
+        <details className="catalog-v2-help">
+          <summary><Info size={15} aria-hidden="true" /> Как это работает?</summary>
+          <p>Выбери задачу, изучи план и условия, затем подтверди согласие перед откликом. Релевантность не означает вероятность отбора; навыки подтверждаются только после проверки результата.</p>
+        </details>
       </header>
+      <div className="catalog-v2-kpis" aria-label="Показатели каталога">
+        <div className="catalog-v2-kpi">
+          <span className="catalog-v2-kpi-icon"><ClipboardList size={23} aria-hidden="true" /></span>
+          <div><strong>{totals?.total_available ?? 0}</strong><b>доступных задач</b><small>Для отклика · из {totals?.total_found ?? 0} найденных</small></div>
+        </div>
+        <div className="catalog-v2-kpi">
+          <span className="catalog-v2-kpi-ring" aria-hidden="true">{averageMatch === null ? "—" : `${String(averageMatch)}%`}</span>
+          <div><strong>{averageMatch === null ? "—" : `${String(averageMatch)}%`}</strong><b>среднее соответствие</b><small>По {scoredItems.length} из {items.length} загруженных</small></div>
+        </div>
+        <div className="catalog-v2-kpi">
+          <span className="catalog-v2-kpi-icon catalog-v2-kpi-icon--blue"><Users size={23} aria-hidden="true" /></span>
+          <div><strong>{mentoredCount}</strong><b>с поддержкой</b><small>Из {items.length} загруженных задач</small></div>
+        </div>
+        <div className="catalog-v2-kpi">
+          <span className="catalog-v2-kpi-icon catalog-v2-kpi-icon--gold"><Award size={23} aria-hidden="true" /></span>
+          <div><strong>{portfolioCount}</strong><b>с потенциалом портфолио</b><small>По опубликованным выгодам · из {items.length}</small></div>
+        </div>
+      </div>
       <form
         className="catalog-v2-filters"
         aria-label="Фильтры каталога"
