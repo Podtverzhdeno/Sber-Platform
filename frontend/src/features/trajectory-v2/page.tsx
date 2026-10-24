@@ -97,6 +97,15 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     queryKey: ["talent-passport"],
     queryFn: () => apiRequest<{ verified_courses: string[]; skills: { key: string; practical_level: string; confirmed_case_count: number }[]; cases: { contribution_id: string; submitted_at: string; reviewer_id: string }[] }>("/api/v1/me/talent-passport"),
   });
+  const portfolio = useQuery({
+    queryKey: ["portfolio", "me", "trajectory-summary"],
+    queryFn: () => apiRequest<{
+      demo_data: boolean;
+      courses: { key: string; title: string; status: string }[];
+      contributions: { contribution_id: string; project_title: string; grade: string | null; verification_status: string }[];
+    }>("/api/v1/me/portfolio"),
+    retry: false,
+  });
   const navigation = useQuery({
     queryKey: ["me"],
     queryFn: () => apiRequest<{ navigation: string[] }>("/api/v1/me"),
@@ -131,6 +140,13 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   }, [catalogueRoles, overview.next_outcome, roleParam]);
   const selected = catalogueRoles.find((role) => role.track_key === selectedKey) ?? null;
   const passportSkills = Array.isArray(passport.data?.skills) ? passport.data.skills : [];
+  const completedMilestones = overview.roles.reduce((sum, role) => sum + role.completed_milestones, 0);
+  const activeTrajectories = overview.roles.filter((role) => role.state === "active").length;
+  const verifiedCourses = Array.isArray(portfolio.data?.courses) ? portfolio.data.courses : [];
+  const acceptedContributions = Array.isArray(portfolio.data?.contributions)
+    ? portfolio.data.contributions.filter((item) => item.verification_status === "verified")
+    : [];
+
   const primaryKey = primaryTrajectoryKey(overview);
   const selectedRoadmap =
     selected !== null
@@ -392,6 +408,35 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
             </ul>
           )}
           <small className="trajectory-v2-passport-disclaimer">Полоса отражает число подтверждённых кейсов относительно других навыков, не оценку уровня компетенции.</small>
+          <details className="trajectory-v2-statistics" data-testid="trajectory-user-statistics">
+            <summary>Полная статистика участника</summary>
+            {portfolio.isPending && <p role="status">Загружаем данные портфолио…</p>}
+            {portfolio.isError && <p role="status">Портфолио временно недоступно. Прогресс ролей показан отдельно.</p>}
+            {portfolio.data?.demo_data === true && <p className="trajectory-v2-stats-origin">Демонстрационные данные · не реальные достижения</p>}
+            <dl className="trajectory-v2-statistics-grid">
+              <div><dt>Активных траекторий</dt><dd>{activeTrajectories}</dd></div>
+              <div><dt>Пройдено этапов</dt><dd>{completedMilestones}</dd></div>
+              <div><dt>Курсов подтверждено</dt><dd>{verifiedCourses.length}</dd></div>
+              <div><dt>Проектов принято</dt><dd>{acceptedContributions.length}</dd></div>
+              <div><dt>Навыков с кейсами</dt><dd>{passportSkills.length}</dd></div>
+              <div><dt>Активных задач</dt><dd>{Array.isArray(overview.active_tasks) ? overview.active_tasks.length : 0}</dd></div>
+            </dl>
+            {verifiedCourses.length > 0 && (
+              <div className="trajectory-v2-statistics-section">
+                <strong>Подтверждённые курсы</strong>
+                <ul>{verifiedCourses.slice(0, 8).map((course) => <li key={course.key}>{course.title}</li>)}</ul>
+              </div>
+            )}
+            {acceptedContributions.length > 0 && (
+              <div className="trajectory-v2-statistics-section">
+                <strong>Проверенные проекты</strong>
+                <ul>{acceptedContributions.slice(0, 5).map((item) => (
+                  <li key={item.contribution_id}>{item.project_title}{item.grade ? ` · оценка ${item.grade}` : ""}</li>
+                ))}</ul>
+              </div>
+            )}
+            <p className="trajectory-v2-stats-caveat">Карьерный грейд, рейтинг и подтверждённый уровень компетенций рассчитываются раздельно, по своим опубликованным правилам.</p>
+          </details>
         </section>
       </aside>
       </div>
