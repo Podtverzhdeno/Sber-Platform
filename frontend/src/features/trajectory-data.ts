@@ -374,7 +374,7 @@ export interface TrajectoryStage {
 }
 
 export function buildStages(
-  roadmapStages: DevMilestoneView[] | null,
+  roadmapStages: Array<Pick<DevMilestoneView, "key" | "title" | "purpose" | "skill" | "target_kind" | "target_key" | "completed">> | null,
   growthStages: GrowthMilestoneView[] | null,
 ): TrajectoryStage[] {
   if (roadmapStages) {
