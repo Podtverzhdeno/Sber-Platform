@@ -162,3 +162,27 @@
     transform: none;
   }
 }
+
+
+/* Approved 1672 × 941 list: ten rows must remain within the first fold.
+   Keep row content elastic for lengthy real names; only compress its minimum,
+   padding and gap at the reference desktop width. */
+@media (min-width: 1500px) {
+  .catalog-v2 .catalog-v2-table-row {
+    min-height: 58px;
+    padding-block: 4px;
+  }
+  .catalog-v2 .catalog-v2-table-task-text strong,
+  .catalog-v2 .catalog-v2-table-company strong,
+  .catalog-v2 .catalog-v2-table-benefit strong,
+  .catalog-v2 .catalog-v2-table-reason strong {
+    line-height: 1.16;
+  }
+  .catalog-v2 .catalog-v2-table-task-text small,
+  .catalog-v2 .catalog-v2-table-company small,
+  .catalog-v2 .catalog-v2-table-benefit small,
+  .catalog-v2 .catalog-v2-table-reason small {
+    line-height: 1.1;
+    margin-top: 1px;
+  }
+}
