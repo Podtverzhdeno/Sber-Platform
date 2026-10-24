@@ -7,7 +7,7 @@ import "./agentic-coding-profile.scss";
  * This is a read-only METHODOLOGY PREVIEW, never an evidence evaluation.
  * Do not equate these targets with an actual student certification.
  */
-export const AGENTIC_SKILLS = [
+const AGENTIC_SKILLS = [
   { key: "prompting", label: "Постановка задач агенту" },
   { key: "prompt_engineering", label: "Правила работы агента" },
   { key: "context_management", label: "Формирование контекста" },
@@ -19,7 +19,7 @@ export const AGENTIC_SKILLS = [
 type Role = "developer" | "analyst" | "qa";
 type ChartView = "radar" | "bars" | "table";
 
-export const AGENTIC_ROLE_PROFILES: Record<Role, {
+const AGENTIC_ROLE_PROFILES: Record<Role, {
   name: string;
   target: readonly (number | null)[];
   unresolved: readonly number[];
@@ -41,14 +41,14 @@ function Radar({ target }: { target: readonly (number | null)[] }) {
   for (let index = 0; index < target.length; index++) {
     const following = (index + 1) % target.length;
     const a = target[index], b = target[following];
-    if (a !== null && b !== null) segments.push({ from: index, to: following, a, b });
+    if (typeof a === "number" && typeof b === "number") segments.push({ from: index, to: following, a, b });
   }
   return (
     <svg viewBox="0 0 340 340" role="img"
       aria-label="Циклограмма целевых уровней Agentic Coding. Оранжевый пунктир — цель по методологии. Зелёный текущий уровень не показан: подтверждённых цифровых следов пока нет.">
       {[1, 2, 3, 4].map((level) => (
         <polygon className="agentic-ring" key={level}
-          points={axes.map((_, i) => { const p = polarPoint(i, level); return `${p.x},${p.y}`; }).join(" ")} />
+          points={axes.map((_, i) => { const p = polarPoint(i, level); return `${String(p.x)},${String(p.y)}`; }).join(" ")} />
       ))}
       {axes.map((_, index) => { const to = polarPoint(index, 4); return (
         <line className="agentic-axis" key={index} x1="170" y1="170" x2={to.x} y2={to.y} />
@@ -59,7 +59,7 @@ function Radar({ target }: { target: readonly (number | null)[] }) {
           x1={start.x} y1={start.y} x2={end.x} y2={end.y} />;
       })}
       {target.map((level, index) => {
-        if (level === null) return null;
+        if (typeof level !== "number") return null;
         const pt = polarPoint(index, level);
         return <circle key={index} className="agentic-target-dot" cx={pt.x} cy={pt.y} r="4" />;
       })}
@@ -84,7 +84,7 @@ export function AgenticCodingProfile() {
         </div>
         <label className="agentic-role-picker">
           Профессиональная группа
-          <select value={role} onChange={(event) => setRole(event.target.value as Role)}>
+          <select value={role} onChange={(event) => { setRole(event.target.value as Role); }}>
             <option value="developer">Разработчик</option>
             <option value="analyst">Аналитик</option>
             <option value="qa">Тестировщик</option>
@@ -96,9 +96,9 @@ export function AgenticCodingProfile() {
           <div className="agentic-chart-title">
             <h3>{profile.name} · 6 навыков</h3>
             <div role="group" aria-label="Вид диаграммы" className="agentic-chart-modes">
-              <button type="button" aria-pressed={view === "radar"} onClick={() => setView("radar")}>Циклограмма</button>
-              <button type="button" aria-pressed={view === "bars"} onClick={() => setView("bars")}>Гистограмма</button>
-              <button type="button" aria-pressed={view === "table"} onClick={() => setView("table")}>Таблица</button>
+              <button type="button" aria-pressed={view === "radar"} onClick={() => { setView("radar"); }}>Циклограмма</button>
+              <button type="button" aria-pressed={view === "bars"} onClick={() => { setView("bars"); }}>Гистограмма</button>
+              <button type="button" aria-pressed={view === "table"} onClick={() => { setView("table"); }}>Таблица</button>
             </div>
           </div>
           <div className="agentic-legend" aria-label="Легенда диаграммы">
@@ -111,9 +111,9 @@ export function AgenticCodingProfile() {
               <div key={skill.key} className="agentic-bar-row">
                 <span>{skill.label}</span>
                 <div className="agentic-bar-track">
-                  {profile.target[index] !== null && <i style={{ width: `${(profile.target[index] ?? 0) * 25}%` }} />}
+                  {profile.target[index] !== null && <i style={{ width: `${String((profile.target[index] ?? 0) * 25)}%` }} />}
                 </div>
-                <strong>{profile.target[index] === null ? "—" : `${profile.target[index]}/4`}</strong>
+                <strong>{profile.target[index] === null ? "—" : `${String(profile.target[index])}/4`}</strong>
               </div>
             ))}
           </div>}
@@ -126,7 +126,7 @@ export function AgenticCodingProfile() {
           {view === "radar" && <div className="agentic-axis-list" aria-label="Числовые уровни, альтернатива циклограмме">
             {AGENTIC_SKILLS.map((skill, index) => <div key={skill.key}>
               <span>{skill.label}</span>
-              <strong>{profile.target[index] === null ? "Не задана" : `${profile.target[index]}/4`}</strong>
+              <strong>{profile.target[index] === null ? "Не задана" : `${String(profile.target[index])}/4`}</strong>
             </div>)}
           </div>}
           <p className="agentic-methodology-note">
