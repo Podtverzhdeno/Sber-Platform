@@ -43,6 +43,7 @@ export function ConditionsDialog(props: {
   onApplicationResult?: (result: CatalogApplicationResult) => void;
 }) {
   const { task } = props;
+  const canApply = task.allowed_actions.includes("apply") && task.eligibility.status === "eligible" && task.application_state === "none";
   const titleId = useId();
   const descriptionId = useId();
   const panelRef = useRef<HTMLElement>(null);
@@ -66,7 +67,7 @@ export function ConditionsDialog(props: {
   const termsData = termsAccessDenied ? undefined : terms.data;
   const apply = useMutation({
     mutationFn: async () => {
-      if (termsData === undefined) throw new Error("Terms are not loaded");
+      if (termsData === undefined || !canApply) throw new Error("Application is not permitted");
       await acceptCurrentTermsAndApply(task.task_id, termsData);
     },
     onMutate: () => {
@@ -234,14 +235,15 @@ export function ConditionsDialog(props: {
             className="catalog-v2-consent"
             onSubmit={(event) => {
               event.preventDefault();
-              if (consent && !apply.isPending) apply.mutate();
+              if (consent && canApply && !apply.isPending) apply.mutate();
             }}
           >
+            {!canApply ? <p className="catalog-v2-application-unavailable" role="status">Отклик сейчас недоступен. Условия можно изучить, но отправить заявку получится только после выполнения требований и открытия набора.</p> : null}
             <label>
               <input
                 type="checkbox"
                 checked={consent}
-                disabled={apply.isPending}
+                disabled={apply.isPending || !canApply}
                 onChange={(event) => {
                   setConsent(event.target.checked);
                 }}
@@ -250,8 +252,8 @@ export function ConditionsDialog(props: {
             </label>
             <div className="catalog-v2-conditions-actions">
               <button type="button" disabled={apply.isPending} onClick={props.onClose}>Закрыть</button>
-              <button type="submit" className="catalog-v2-primary" aria-label="Подтвердить и отправить отклик" disabled={!consent || apply.isPending}>
-                {apply.isPending ? "Проверяем и отправляем…" : "Откликнуться"}
+              <button type="submit" className="catalog-v2-primary" aria-label="Подтвердить и отправить отклик" disabled={!canApply || !consent || apply.isPending}>
+                {apply.isPending ? "Проверяем и отправляем…" : canApply ? "Откликнуться" : "Отклик недоступен"}
               </button>
             </div>
           </form>
