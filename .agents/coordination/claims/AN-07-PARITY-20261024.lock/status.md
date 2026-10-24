@@ -1,0 +1,13 @@
+# AN-07-PARITY-20261024
+- status: IN_PROGRESS
+- session: analytics-parity-20261024
+- baseline: 8ff62a7256772493dbabd1b953d6b1c488a56797
+- scope:
+  - frontend/src/features/analytics.tsx
+  - frontend/src/features/analytics.test.tsx
+  - frontend/e2e/analytics.spec.ts
+  - docs/analytics-parity-audit-2026-10-24.md
+  - .agents/coordination/claims/AN-07-PARITY-20261024.lock/status.md
+- goal: Prevent regressions in layout (desktop/mobile), text link wrapping, sparse chart data, missing-source indicators; collect candidate screenshots for owner visual acceptance.
+- acceptance_constraints: The original Analytics reference PNG and code are not in the repo. The visual catalog points to a local Windows folder but has no Analytics entry among R-PAR references. No pixel-perfect 1:1 certification without original source, same viewport and fonts.
+- done: pending
