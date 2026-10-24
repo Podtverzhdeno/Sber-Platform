@@ -251,10 +251,10 @@ function TaskDetail(props: {
       </header>
 
       <dl className="catalog-v2-detail-factrail">
-        <div><ChartNoAxesColumnIncreasing size={23} aria-hidden="true" /><span><dt>Уровень</dt><dd>{item.difficulty === null ? "Не указана" : difficultyLabels[item.difficulty] ?? item.difficulty}</dd></span></div>
-        <div><Clock3 size={23} aria-hidden="true" /><span><dt>Срок</dt><dd>{formatDuration(item.duration_minutes)}</dd></span></div>
-        <div><Laptop2 size={23} aria-hidden="true" /><span><dt>Формат</dt><dd>{item.work_format === null ? "Не указан" : formatLabels[item.work_format] ?? item.work_format}</dd></span></div>
-        <div><Users size={23} aria-hidden="true" /><span><dt>Команда</dt><dd>{item.places_available ?? "—"} свободных из {item.places_total}</dd></span></div>
+        <div><dt><ChartNoAxesColumnIncreasing size={23} aria-hidden="true" /> Уровень</dt><dd>{item.difficulty === null ? "Не указана" : difficultyLabels[item.difficulty] ?? item.difficulty}</dd></div>
+        <div><dt><Clock3 size={23} aria-hidden="true" /> Срок</dt><dd>{formatDuration(item.duration_minutes)}</dd></div>
+        <div><dt><Laptop2 size={23} aria-hidden="true" /> Формат</dt><dd>{item.work_format === null ? "Не указан" : formatLabels[item.work_format] ?? item.work_format}</dd></div>
+        <div><dt><Users size={23} aria-hidden="true" /> Команда</dt><dd>{item.places_available ?? "—"} свободных из {item.places_total}</dd></div>
       </dl>
 
       <div className="catalog-v2-detail-grid">
