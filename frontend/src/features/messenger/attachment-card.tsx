@@ -14,7 +14,7 @@ function safeExternalUrl(reference: string): string | null {
   }
 }
 
-export function attachmentDisplayName(reference: string): string {
+function attachmentDisplayName(reference: string): string {
   const source = reference.split(/[?#]/u)[0] ?? reference;
   const name = source.split("/").pop() ?? reference;
   return name || reference;
