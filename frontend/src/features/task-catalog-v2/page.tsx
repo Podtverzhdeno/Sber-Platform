@@ -398,10 +398,18 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const [previewDismissed, setPreviewDismissed] = useState(false);
   const inspectorRef = useRef<HTMLElement>(null);
-  // React Router navigation is asynchronous; keep the newest filter state
-  // synchronously to avoid losing earlier filters during fast interactions.
+  // Own in-flight query parameters. React Router can render older navigation
+  // updates after a later filter click, so mirroring every intermediate URL
+  // back into this ref would discard filters typed quickly in succession.
+  // Back/Forward is different: it is an external navigation and resets intent.
   const paramsRef = useRef(new URLSearchParams(searchParams));
-  useEffect(() => { paramsRef.current = new URLSearchParams(searchParams); }, [searchParams]);
+  useEffect(() => {
+    const onHistoryNavigation = () => {
+      paramsRef.current = new URLSearchParams(window.location.search);
+    };
+    window.addEventListener("popstate", onHistoryNavigation);
+    return () => { window.removeEventListener("popstate", onHistoryNavigation); };
+  }, []);
   const [conditionsTask, setConditionsTask] = useState<CatalogItem | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const client = useQueryClient();
