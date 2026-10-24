@@ -963,6 +963,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/agentic-coding/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Agentic Coding Profile */
+        get: operations["agentic_coding_profile_api_v1_me_agentic_coding_profile_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/analytics/journey": {
         parameters: {
             query?: never;
@@ -6667,6 +6684,34 @@ export interface components {
             /** Track Key */
             track_key: string;
         };
+        /** RoleProfile */
+        RoleProfile: {
+            /**
+             * As Of
+             * Format: date-time
+             */
+            as_of: string;
+            /** Certification Reason */
+            certification_reason: string;
+            /** Certification State */
+            certification_state: string;
+            /** Data Origin */
+            data_origin: string;
+            /** Framework Version */
+            framework_version: string;
+            /** Known Evidence Count */
+            known_evidence_count: number;
+            /** Profile Scope */
+            profile_scope: string;
+            /** Role Key */
+            role_key: string;
+            /** Role Title */
+            role_title: string;
+            /** Scale Key */
+            scale_key: string;
+            /** Skills */
+            skills: components["schemas"]["SkillPosition"][];
+        };
         /** RoleSummary */
         RoleSummary: {
             /** Current Grade Key */
@@ -6915,6 +6960,23 @@ export interface components {
             skill: string;
             /** Target Level */
             target_level: string;
+        };
+        /** SkillPosition */
+        SkillPosition: {
+            /** Current Level */
+            current_level: number | null;
+            /** Data State */
+            data_state: string;
+            /** Evidence Count */
+            evidence_count: number;
+            /** Key */
+            key: string;
+            /** Target Level */
+            target_level: number | null;
+            /** Title */
+            title: string;
+            /** Unresolved Methodology */
+            unresolved_methodology: boolean;
         };
         /** SkillPositionView */
         SkillPositionView: {
@@ -9477,6 +9539,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ActorView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    agentic_coding_profile_api_v1_me_agentic_coding_profile_get: {
+        parameters: {
+            query?: {
+                role_key?: "developer" | "analyst" | "qa";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleProfile"];
                 };
             };
             /** @description Validation Error */

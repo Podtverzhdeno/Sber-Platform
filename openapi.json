@@ -10647,6 +10647,73 @@
         "title": "RoleOption",
         "type": "object"
       },
+      "RoleProfile": {
+        "properties": {
+          "as_of": {
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "certification_reason": {
+            "title": "Certification Reason",
+            "type": "string"
+          },
+          "certification_state": {
+            "title": "Certification State",
+            "type": "string"
+          },
+          "data_origin": {
+            "title": "Data Origin",
+            "type": "string"
+          },
+          "framework_version": {
+            "title": "Framework Version",
+            "type": "string"
+          },
+          "known_evidence_count": {
+            "title": "Known Evidence Count",
+            "type": "integer"
+          },
+          "profile_scope": {
+            "title": "Profile Scope",
+            "type": "string"
+          },
+          "role_key": {
+            "title": "Role Key",
+            "type": "string"
+          },
+          "role_title": {
+            "title": "Role Title",
+            "type": "string"
+          },
+          "scale_key": {
+            "title": "Scale Key",
+            "type": "string"
+          },
+          "skills": {
+            "items": {
+              "$ref": "#/components/schemas/SkillPosition"
+            },
+            "title": "Skills",
+            "type": "array"
+          }
+        },
+        "required": [
+          "role_key",
+          "role_title",
+          "profile_scope",
+          "scale_key",
+          "framework_version",
+          "as_of",
+          "skills",
+          "certification_state",
+          "certification_reason",
+          "known_evidence_count",
+          "data_origin"
+        ],
+        "title": "RoleProfile",
+        "type": "object"
+      },
       "RoleSummary": {
         "properties": {
           "current_grade_key": {
@@ -11397,6 +11464,63 @@
           "fallback"
         ],
         "title": "SkillImpactView",
+        "type": "object"
+      },
+      "SkillPosition": {
+        "properties": {
+          "current_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Level"
+          },
+          "data_state": {
+            "title": "Data State",
+            "type": "string"
+          },
+          "evidence_count": {
+            "title": "Evidence Count",
+            "type": "integer"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "target_level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Level"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "unresolved_methodology": {
+            "title": "Unresolved Methodology",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "target_level",
+          "current_level",
+          "evidence_count",
+          "data_state",
+          "unresolved_methodology"
+        ],
+        "title": "SkillPosition",
         "type": "object"
       },
       "SkillPositionView": {
@@ -16411,6 +16535,54 @@
           }
         },
         "summary": "Switch Role"
+      }
+    },
+    "/api/v1/me/agentic-coding/profile": {
+      "get": {
+        "operationId": "agentic_coding_profile_api_v1_me_agentic_coding_profile_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "role_key",
+            "required": false,
+            "schema": {
+              "default": "developer",
+              "enum": [
+                "developer",
+                "analyst",
+                "qa"
+              ],
+              "title": "Role Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleProfile"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Agentic Coding Profile",
+        "tags": [
+          "agentic-coding"
+        ]
       }
     },
     "/api/v1/me/analytics/journey": {
