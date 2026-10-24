@@ -206,7 +206,7 @@ function CatalogFilters({
   const relevanceFilter = searchParams.get("relevance") ?? "all";
   const trackFilter = searchParams.get("track") ?? "all";
   const view = searchParams.get("view") ?? "card";
-  const category = searchParams.get("category") ?? "all";
+  const category = searchParams.get("category") ?? "role";
   const query = searchParams.get("q") ?? "";
   return (
     <div className="bootcamp-catalog-toolbar">
@@ -511,14 +511,14 @@ export function BootcampCatalog({
   const relevantCount = catalog.data.filter((card) => card.relevant).length;
   const forTrack = (card: CourseCardState) => trackFilter === "all" || card.track_keys.includes(trackFilter);
   const categoryCounts = [
-    { key: "all", label: "Все курсы", count: catalog.data.filter(forTrack).length },
     { key: "role", label: "Для моей роли", count: catalog.data.filter((card) => forTrack(card) && card.relevant).length },
+    { key: "all", label: "Все курсы", count: catalog.data.filter(forTrack).length },
     { key: "required", label: "Обязательные", count: catalog.data.filter((card) => forTrack(card) && card.must_take !== null).length },
-    { key: "progress", label: "На проверке", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "reported").length },
+    { key: "progress", label: "В процессе", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "reported").length },
     { key: "completed", label: "Завершённые", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "verified").length },
   ];
   const pendingRequired = catalog.data.filter((card) => forTrack(card) && card.must_take && card.completion_state !== "verified");
-  const nextCourse = catalog.data.find((card) => forTrack(card) && card.relevant && card.access_state === "available" && card.completion_state === "not_started") ?? null;
+  const nextCourse = catalog.data.find((card) => forTrack(card) && card.relevant && card.access_state === "available" && card.completion_state === "reported") ?? catalog.data.find((card) => forTrack(card) && card.relevant && card.access_state === "available" && card.completion_state === "not_started") ?? null;
   const selectedRoleTitle = trackOptions.find((key) => key === trackFilter) ?? (trackFilter === "all" ? "Все активные направления" : trackFilter);
   const visible = catalog.data
     .filter((card) => relevanceFilter !== "relevant" || card.relevant)
@@ -572,7 +572,7 @@ export function BootcampCatalog({
       <div className="bc-overview-grid">
         <section className="bc-continue ui-card" aria-labelledby="bc-continue-title">
           <p className="bc-panel-kicker">СЛЕДУЮЩЕЕ ДЕЙСТВИЕ</p>
-          <h2 id="bc-continue-title">{nextCourse ? "Начните с подходящего курса" : "Выберите следующий шаг"}</h2>
+          <h2 id="bc-continue-title">{nextCourse?.completion_state === "reported" ? "Продолжить обучение" : nextCourse ? "Начните с подходящего курса" : "Выберите следующий шаг"}</h2>
           <p className="bc-overview-course">{nextCourse?.title ?? "Доступный курс пока не определён"}</p>
           <p className="bc-muted">Прогресс и контрольные точки появятся после подключения подтверждённого источника LMS</p>
           {nextCourse ? <button type="button" onClick={() => { openPanel("detail", nextCourse.key); }}>Перейти к курсу →</button> :
@@ -623,8 +623,7 @@ export function BootcampCatalog({
               <CardStates card={card} />
               {card.pending_verification_note && <p className="notice" role="status">{card.pending_verification_note}</p>}
               <details className="bc-explain"><summary>{card.must_take ? "Навык и требования" : "Обоснование курса"}</summary><CardExplanation card={card} relevanceOnly={relevanceOnly} /></details>
-              <div className="bc-open-actions"><button type="button" onClick={() => { openPanel("detail", card.key); }}>Подробнее →</button><button className="secondary-button" type="button" onClick={() => { openPanel("reason", card.key); }}>Почему рекомендован</button></div>
-              <CardActions card={card} />
+              <div className="bc-open-actions"><button type="button" onClick={() => { openPanel("detail", card.key); }}>{card.access_state === "prerequisite_not_met" ? "Посмотреть условия →" : card.completion_state === "reported" ? "Продолжить →" : "Открыть курс →"}</button><button className="secondary-button" type="button" onClick={() => { openPanel("reason", card.key); }}>Почему рекомендован?</button></div>
             </article>
           ))}
         </div>
@@ -641,13 +640,12 @@ export function BootcampCatalog({
               <CardStates card={card} />
               {card.pending_verification_note && <p className="notice" role="status">{card.pending_verification_note}</p>}
               <details className="bc-explain"><summary>Основание рекомендации</summary><CardExplanation card={card} relevanceOnly={relevanceOnly} /></details>
-              <div className="bc-open-actions"><button type="button" onClick={() => { openPanel("detail", card.key); }}>Подробнее →</button><button type="button" className="secondary-button" onClick={() => { openPanel("reason", card.key); }}>Почему рекомендован</button></div>
-              <CardActions card={card} />
+              <div className="bc-open-actions"><button type="button" onClick={() => { openPanel("detail", card.key); }}>{card.access_state === "prerequisite_not_met" ? "Посмотреть условия →" : "Открыть курс →"}</button><button type="button" className="secondary-button" onClick={() => { openPanel("reason", card.key); }}>Почему рекомендован?</button></div>
             </li>
           ))}
         </ul>
       )}
-      {visible.length === 0 && <StatePanel kind="empty" />}
+      {visible.length === 0 && <div role="status" className="bc-no-results"><p>По выбранным условиям курсы не найдены.</p><button type="button" onClick={resetFilters}>Сбросить фильтры</button></div>}
       <Drawer key={`${panel}:${deepLinked?.key ?? ""}`} title={panel === "reason" ? "Почему рекомендован" : "Информация о курсе"} open={deepLinked !== null && panel !== "requirements"} onClose={closePanel}>
         {deepLinked && (panel === "reason" ? <RecommendationDetails card={deepLinked} track={selectedRoleTitle} /> :
           <CourseDetails key={deepLinked.key} card={deepLinked}
