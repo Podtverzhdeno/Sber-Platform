@@ -299,7 +299,7 @@ function CourseDetails({
   certificatesLoading: boolean; certificateError: boolean; issuing: boolean;
   issueError: boolean; onIssue: (key: string) => void;
 }) {
-  const [tab, setTab] = useState<"about" | "program" | "skills" | "reviews">("program");
+  const [tab, setTab] = useState<"about" | "program" | "skills" | "reviews">("about");
   const tabs = [
     { key: "about", label: "О курсе" },
     { key: "program", label: "Программа" },
@@ -325,6 +325,7 @@ function CourseDetails({
         {card.verified_evidence ? <p>Подтверждённый результат: {card.verified_evidence}</p> :
           <p>{card.pending_verification_note || "Освоение курса и подтверждение компетенции — разные этапы. Основание для подтверждения появится после проверки результата."}</p>}
         <p className="bc-muted">{card.access_note || accessLabels[card.access_state].label}</p>
+        <button type="button" className="secondary-button" onClick={() => { setTab("program"); }}>Открыть уроки и практику →</button>
       </>}
       {tab === "program" && <>
         <h3>Программа курса</h3>
