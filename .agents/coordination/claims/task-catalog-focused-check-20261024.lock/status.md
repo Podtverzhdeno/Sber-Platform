@@ -1,0 +1,11 @@
+# Task catalog focused browser verification
+- task_id: task-catalog-focused-check-20261024
+- session_id: gpt6-20261024-1945-fidelity-focus
+- status: IN_PROGRESS
+- depends_on: [task-catalog-visual-polish-20261024, task-catalog-visual-fidelity-qa-20261024]
+- base_revision: eeda9f7adc6aaf2e9ef41b927408f8a7c7ce1ea3
+- write_scope:
+  - .github/workflows/task-catalog-focused-qa-20261024.yml
+  - .agents/coordination/claims/task-catalog-focused-check-20261024.lock/status.md
+- acceptance: 10 synthetic task layout, axe accessibility and task behavior on Linux head
+- no runtime files, no main or Railway deployment
