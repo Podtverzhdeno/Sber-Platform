@@ -146,6 +146,27 @@ test("approved intermediate desktop list preserves two-column readability withou
   await expect(page.locator(".catalog-v2-table-actions").first().getByRole("button", { name: "Подробнее" })).toBeVisible();
 });
 
+test("mobile benefits wrap customer conditions without horizontal overflow", async ({ page }) => {
+  await openReferenceVolumeCatalog(page);
+  await page.setViewportSize({ width: 390, height: 844 });
+  const benefit = page.locator(".catalog-v2-benefits-section > ul > li").last();
+  await expect(benefit).toBeVisible();
+  const geometry = await benefit.evaluate((node) => {
+    const description = node.querySelector("p");
+    const box = node.getBoundingClientRect();
+    if (description === null) return { wraps: false, withinCard: false, overflow: true };
+    const paragraph = description.getBoundingClientRect();
+    return {
+      wraps: getComputedStyle(description).whiteSpace === "normal",
+      withinCard: paragraph.right <= box.right + 1 && paragraph.left >= box.left,
+      overflow: document.documentElement.scrollWidth > innerWidth + 1,
+    };
+  });
+  expect(geometry.wraps).toBe(true);
+  expect(geometry.withinCard).toBe(true);
+  expect(geometry.overflow).toBe(false);
+});
+
 test("approved terms modal: four top fact cards, two-column content, two actions and consent safety", async ({ page }) => {
   await openReferenceVolumeCatalog(page);
   const sourceCard = page.locator(".catalog-v2-card").first();
