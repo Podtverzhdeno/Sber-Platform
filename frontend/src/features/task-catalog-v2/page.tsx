@@ -40,11 +40,6 @@ const formatLabels: Record<string, string> = {
   hybrid: "Гибрид",
   onsite: "На площадке",
 };
-const timeframeLabels: Record<string, string> = {
-  "7d": "ближайшие 7 дней",
-  "30d": "ближайшие 30 дней",
-  "90d": "ближайшие 90 дней",
-};
 const applicationLabels = {
   none: "Можно откликнуться",
   submitted: "Отклик отправлен",
