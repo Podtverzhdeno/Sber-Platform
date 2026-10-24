@@ -1,0 +1,53 @@
+name: AI trajectory format and schema sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/ai-trajectory-format-sync.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+concurrency:
+  group: ai-trajectory-format-main
+  cancel-in-progress: false
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install locked tooling
+        run: |
+          uv sync --frozen
+          cd frontend && npm ci
+      - name: Format Python and regenerate API types from OpenAPI
+        run: |
+          uv run ruff format src/impulse/bootstrap/ai_role_catalog.py src/impulse/bootstrap/demo_seed.py src/impulse/application/development.py src/impulse/infrastructure/development_store.py src/impulse/api/v1/development.py
+          cd frontend && npm run api:generate
+      - name: Safely commit regenerated files to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/impulse/bootstrap/ai_role_catalog.py src/impulse/bootstrap/demo_seed.py src/impulse/application/development.py src/impulse/infrastructure/development_store.py src/impulse/api/v1/development.py frontend/src/api/schema.ts
+          if git diff --cached --quiet; then
+            echo "Already formatted and generated"
+            exit 0
+          fi
+          git commit -m "chore(ai-trajectory): format Python and synchronize generated client types"
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
