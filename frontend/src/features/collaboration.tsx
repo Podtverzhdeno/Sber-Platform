@@ -146,6 +146,7 @@ export function MessagingWorkspace({
     return stored ?? "";
   });
   const [mobilePane, setMobilePane] = useState<MobilePane>("list");
+  const [emptyActionNote, setEmptyActionNote] = useState("");
   const [contextOpen, setContextOpen] = useState(true);
   const [pending, setPending] = useState<PendingMessageOverlay[]>([]);
   const [replyId, setReplyId] = useState<string | null>(null);
@@ -454,10 +455,19 @@ export function MessagingWorkspace({
                 <button type="button" onClick={() => { const mayaki = channels.find((item) => item.title.toLocaleLowerCase("ru-RU").includes("маяки")); if (mayaki) selectChannel(mayaki.id); }} disabled={!channels.some((item) => item.title.toLocaleLowerCase("ru-RU").includes("маяки"))}>
                   <span className="ref-empty-state__action-icon ref-empty-state__action-icon--blue">♜</span><span><strong>Перейти в Маяки</strong><small>Сообщество</small></span><ArrowRight size={20} />
                 </button>
-                <button type="button" onClick={() => { document.querySelector<HTMLButtonElement>(".msg-dialog-list__create-button")?.click(); }}>
+                <button type="button" onClick={() => {
+                  const createButton = document.querySelector<HTMLButtonElement>(".msg-dialog-list__create-button");
+                  if (createButton && !createButton.disabled) {
+                    setEmptyActionNote("");
+                    createButton.click();
+                  } else {
+                    setEmptyActionNote("Пока нет доступных контактов для нового личного чата. Откройте существующий диалог или сообщество.");
+                  }
+                }}>
                   <span className="ref-empty-state__action-icon ref-empty-state__action-icon--teal"><Plus size={25} /></span><span><strong>Создать новый чат</strong><small>Начните общение с коллегами</small></span><ArrowRight size={20} />
                 </button>
               </div>
+              {emptyActionNote && <p className="ref-empty-state__notice" role="status">{emptyActionNote}</p>}
             </div>
           </section>
         )}
