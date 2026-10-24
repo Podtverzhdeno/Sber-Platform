@@ -591,3 +591,29 @@
     min-height:calc(100dvh - 115px);
   }
 }
+
+
+/* The legacy global `.messenger-page` applies display:grid with two explicit
+   rows. Its first auto row consumes half the viewport when our reference
+   header is hidden. Higher-specificity flex layout prevents that collision. */
+.messenger-page.sberchat-reference {
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  grid-template-rows:none;
+  width:100%;
+  height:calc(100dvh - 65px);
+  min-height:460px;
+  margin:0;
+  padding:0;
+}
+.messenger-page.sberchat-reference > .messenger-shell {
+  display:grid;
+  height:auto;
+  flex:1 1 auto;
+  min-height:0;
+  width:100%;
+}
+@media(max-width:959px) {
+  .messenger-page.sberchat-reference {height:calc(100dvh - 105px);}
+}
