@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useRef, useState } from "react";
-import { Award, BriefcaseBusiness, CalendarDays, CheckCircle2, ClipboardCheck, Clock3, FileText, Laptop2, ShieldCheck, Users } from "lucide-react";
+import { Award, BriefcaseBusiness, CalendarDays, ClipboardCheck, Clock3, FileText, Laptop2, ShieldCheck, Users } from "lucide-react";
 
 import { ApiClientError } from "../../api/client";
 import { StatePanel } from "../../components/ui";
