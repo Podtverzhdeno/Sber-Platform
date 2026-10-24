@@ -138,7 +138,7 @@ export function DialogList({
       aria-label="Список диалогов"
     >
       <div className="msg-dialog-list__heading">
-        <h1 id="workspace-title">Сообщения</h1>
+        <div><h1 id="workspace-title">Сообщения</h1><p className="msg-dialog-list__subtitle">Диалоги и сообщества</p></div>
         <div className="msg-dialog-list__create">
           <button
             type="button"
@@ -236,7 +236,7 @@ export function DialogList({
               setTab(item);
             }}
           >
-            {item}
+            {item}{item === "Все" && <span className="msg-dialog-list__count">{rows.length}</span>}
           </button>
         ))}
       </div>
