@@ -626,3 +626,11 @@
 
 .trajectory-v2-grades-list>p{margin:0;border:1px solid #24506a;border-radius:11px;padding:14px 16px;background:#0a293e;color:#bcd2e4;line-height:1.5}
 .trajectory-v2-grades-list>p strong{color:#f0f7ff}
+
+
+.trajectory-v2-role-icon{display:grid;place-items:center;width:46px;height:46px;background:#123f77;color:#43b5fa;border-radius:12px}
+.trajectory-v2-role-icon svg{width:27px;height:27px}
+.trajectory-v2-role-card[aria-pressed="true"] .trajectory-v2-role-icon{background:#452078;color:#c18aff}
+.trajectory-v2-role-card:not([aria-pressed="true"])[data-role-key*="python"] .trajectory-v2-role-icon{background:#193d86;color:#8cbeff}
+.trajectory-v2-role-card[data-role-key*="ml"] .trajectory-v2-role-icon{background:#094377;color:#39b1ff}
+.trajectory-v2-role-card:has(.trajectory-v2-role-state):not([aria-pressed="true"]):has(.trajectory-v2-role-state){font-variant-numeric:tabular-nums}
