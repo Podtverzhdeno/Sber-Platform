@@ -137,7 +137,7 @@ describe("participant home v2", () => {
     expect(screen.getAllByText("Python: основы").length).toBeGreaterThan(0);
     expect(screen.getByTestId("grade-summary").textContent).toContain("Карьерные грейды ещё не опубликованы");
     expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("not_evaluable");
-    expect(screen.getByTestId("weekly-focus").textContent).toContain("выполнено 2 из 5");
+    expect(screen.getByTestId("weekly-focus")).toHaveTextContent("План недели");
     const [firstTask] = overview.active_tasks;
     expect(firstTask === undefined ? "missing" : TASK_NEXT_ACTION_LABELS[firstTask.next_action]).toBe(
       "Отправить работу",
@@ -183,6 +183,19 @@ describe("participant home v2", () => {
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /24 октября/ }));
     expect(screen.getByText("Не запланирован по ритму недели.")).toBeInTheDocument();
+  });
+
+  it("opens the weekly plan and reports only verified days, then restores focus", async () => {
+    renderHome();
+    const trigger = screen.getByRole("button", { name: "План недели" });
+    trigger.focus();
+    fireEvent.click(trigger);
+    const modal = screen.getByRole("dialog", { name: "План недели" });
+    expect(modal).toHaveTextContent("Выполнено 2 из 5");
+    expect(modal).toHaveTextContent("Запланировано");
+    fireEvent.keyDown(modal, { key: "Escape" });
+    await waitFor(() => {expect(screen.queryByRole("dialog", { name: "План недели" })).toBeNull();});
+    expect(trigger).toHaveFocus();
   });
 
   it("keeps one canonical task row for the next outcome task", () => {
