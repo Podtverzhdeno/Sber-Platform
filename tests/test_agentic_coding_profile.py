@@ -101,7 +101,7 @@ def client() -> TestClient:
 def test_api_requires_auth_and_never_issues_student_l1() -> None:
     with client() as c:
         assert c.get("/api/v1/me/agentic-coding/profile").status_code == 401
-        assert c.post("/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}).status_code == 200
+        assert (\n            c.post("/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}).status_code\n            == 200\n        )
         response = c.get("/api/v1/me/agentic-coding/profile?role_key=developer")
         assert response.status_code == 200, response.text
         payload = response.json()
