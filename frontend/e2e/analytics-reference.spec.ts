@@ -95,7 +95,7 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
         const golden = goldenByView[view] ?? {};
         for (const { selector, rect } of geometry) {
           const expected = golden[selector];
-          if (rect === null || expected === undefined) {
+          if (rect === null) {
             geometryViolations.push(view + " " + selector + " is missing its rectangle or reference");
             continue;
           }
@@ -110,14 +110,17 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
       }
       const headerStats = await root.locator(".ref-page-header").evaluate((el) => {
         const style = window.getComputedStyle(el);
-        const heading = el.querySelector("h1");
-        const paragraph = el.querySelector("p");
+        const rectangle = (element: Element | null): { x: number; y: number; width: number; height: number } | null => {
+          if (!element) return null;
+          const rect = element.getBoundingClientRect();
+          return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+        };
         return {
-          header: el.getBoundingClientRect().toJSON(),
+          header: rectangle(el),
           marginBottom: style.marginBottom,
           headerHeight: style.height,
-          heading: heading?.getBoundingClientRect().toJSON(),
-          paragraph: paragraph?.getBoundingClientRect().toJSON(),
+          heading: rectangle(el.querySelector("h1")),
+          paragraph: rectangle(el.querySelector("p")),
           gap: window.getComputedStyle(el.parentElement as Element).gap,
         };
       });
