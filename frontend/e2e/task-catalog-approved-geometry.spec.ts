@@ -77,6 +77,14 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
   expect(geometry.kpiLastTop).toBeCloseTo(geometry.kpiTop, 0);
   expect(geometry.stageWidth).toBeGreaterThan(250);
   expect(geometry.hasOverflow).toBe(false);
+  const firstCard = page.locator(".catalog-v2-card").first();
+  const actions = firstCard.locator(".catalog-v2-card-actions");
+  await expect(actions).toHaveCSS("opacity", "0");
+  await firstCard.hover();
+  await expect(actions).toHaveCSS("opacity", "1");
+  await page.locator(".catalog-v2-heading h1").click();
+  await firstCard.focus();
+  await expect(actions).toHaveCSS("opacity", "1");
 });
 
 test("approved list density: ten test rows remain scannable without horizontal overflow", async ({ page }) => {
@@ -96,9 +104,9 @@ test("approved list density: ten test rows remain scannable without horizontal o
     };
   });
   // Approved 1672px reference rows are ~60px high, and ten fit on screen.
-  // A 68px ceiling matches the approved 60px source rhythm while preserving 40px actions,
+  // A 64px ceiling follows the approved 60px row rhythm with a little room for real text,
   // without cutting off full text in the selected detail panel.
-  expect(data.heights.every((height) => height <= 68), `Row heights: ${data.heights.join(", ")}`).toBe(true);
+  expect(data.heights.every((height) => height <= 64), `Row heights: ${data.heights.join(", ")}`).toBe(true);
   expect(data.columnCount).toBeGreaterThanOrEqual(8);
   expect(data.overflow).toBe(false);
   await expect(page.locator(".catalog-v2-table-match .catalog-v2-match-ring")).toHaveCount(10);
