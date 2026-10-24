@@ -2966,3 +2966,34 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
   line-height: 1.2;
   color: var(--catalog-muted);
 }
+
+
+/* The ring already renders the numeric percentage. Keep its full label
+   accessible to assistive technology without doubling visible text or
+   colliding with the adjacent deadline column. */
+.catalog-v2-table-match .catalog-v2-match-visual--ring-only {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  max-width: 100%;
+}
+
+.catalog-v2-table-match .catalog-v2-match-visual--ring-only > .catalog-v2-match {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.catalog-v2-table-number {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+  font-variant-numeric: tabular-nums;
+}
