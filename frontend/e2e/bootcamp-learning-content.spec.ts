@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("all twelve Bootcamp courses open four real lessons with working navigation", async ({ page }) => {
+test("all twelve Bootcamp courses open eight real lessons and final projects with working navigation", async ({ page }) => {
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
@@ -16,12 +16,16 @@ test("all twelve Bootcamp courses open four real lessons with working navigation
     await drawer.getByRole("button", { name: /Открыть уроки и практику/ }).click();
     await expect(drawer.locator(`.bc-learning[data-course-key="${key}"]`)).toBeVisible();
     const outline = drawer.getByRole("navigation", { name: "Шаги обучения" });
-    await expect(outline.getByRole("button")).toHaveCount(4);
+    await expect(outline.getByRole("button")).toHaveCount(8);
     await drawer.getByRole("button", { name: "Следующий урок" }).click();
-    await expect(drawer.getByText("Урок 2 из 4")).toBeVisible();
+    await expect(drawer.getByText(/Урок 2 из 8/)).toBeVisible();
     await drawer.getByRole("button", { name: "Показать ожидаемый результат" }).click();
     await expect(drawer.getByRole("button", { name: "Скрыть ожидаемый результат" })).toBeVisible();
     await expect(drawer.getByText(/не начисляют XP/)).toBeVisible();
+    await drawer.getByRole("button", { name: "Итоговый проект" }).click();
+    await expect(drawer.getByRole("article", { name: "Итоговый проект" })).toBeVisible();
+    await expect(drawer.getByRole("table")).toBeVisible();
+    await drawer.getByRole("button", { name: "Вернуться к урокам" }).click();
   }
 });
 
