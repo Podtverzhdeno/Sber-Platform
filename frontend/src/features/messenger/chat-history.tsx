@@ -440,13 +440,13 @@ export function ChatHistory({
                   <span className="msg-chat__group-author">
                     {row.authorId !== viewerId && (
                       <span className="msg-chat__group-avatar" aria-hidden="true">
-                        {channel?.kind === "community" && channel.title.trim().toLowerCase() === "маяки" && /^анна ковал[её]ва$/iu.test(row.authorName)
+                        {channel?.kind === "community" && channel.title.trim().toLowerCase() === "маяки" && /^анна ковал[её]ва$/iu.test(row.authorName ?? "")
                           ? <img src="/messages-reference/anna-avatar.svg" alt="" />
                           : channel?.kind === "community" && channel.title.trim().toLowerCase() === "маяки" && row.authorName === "Дмитрий Соколов"
                             ? <img src="/messages-reference/dmitry-avatar.svg" alt="" />
                             : channel?.kind === "community" && channel.title.trim().toLowerCase() === "маяки" && row.authorName === "Мария Лебедева"
                               ? <img src="/messages-reference/maria-avatar.svg" alt="" />
-                              : row.authorName.trim().slice(0,1).toUpperCase()}
+                              : (row.authorName ?? "У").trim().slice(0,1).toUpperCase()}
                       </span>
                     )}
                     <span>{row.authorId === viewerId ? "Вы" : row.authorName}</span>
