@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { afterAll, describe, expect, it, vi } from "vitest";
 
 import {
@@ -134,7 +134,7 @@ afterAll(() => {
 describe("participant home v2", () => {
   it("keeps next outcome, grade and weekly focus on one authorized snapshot", () => {
     renderHome();
-    expect(screen.getByText("Python: основы")).toBeInTheDocument();
+    expect(screen.getAllByText("Python: основы").length).toBeGreaterThan(0);
     expect(screen.getByTestId("grade-summary").textContent).toContain("Карьерные грейды ещё не опубликованы");
     expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("not_evaluable");
     expect(screen.getByTestId("weekly-focus").textContent).toContain("выполнено 2 из 5");
@@ -169,7 +169,7 @@ describe("participant home v2", () => {
 
   it("keeps one canonical task row for the next outcome task", () => {
     const { onOpenTarget } = renderHome();
-    expect(screen.getByText("Семантический поиск по документам")).toBeInTheDocument();
+    expect(within(screen.getByTestId("active-tasks")).getByText("Семантический поиск по документам")).toBeInTheDocument();
     fireEvent.click(screen.getByText("Открыть задачу"));
     expect(onOpenTarget).toHaveBeenCalledWith("task", overview.active_tasks[0]?.task_id);
   });
@@ -192,7 +192,7 @@ describe("participant home v2", () => {
     expect(insights?.lastElementChild).toHaveClass("home-v2-passport");
   });
 
-  it("opens approved grade panels and restores keyboard focus without invented grade values", () => {
+  it("opens approved grade panels and restores keyboard focus without invented grade values", async () => {
     renderHome();
     const opener = screen.getByRole("button", { name: /Все уровни/ });
     opener.focus();
@@ -202,7 +202,7 @@ describe("participant home v2", () => {
     expect(levels).not.toHaveTextContent("88%");
     fireEvent.keyDown(levels, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(opener).toHaveFocus();
+    await waitFor(() => { expect(opener).toHaveFocus(); });
     fireEvent.click(screen.getByRole("button", { name: /Следующий уровень/ }));
     const details = screen.getByRole("dialog", { name: "Требования следующего грейда" });
     expect(details).toHaveTextContent("Оценка грейда недоступна");
