@@ -321,7 +321,7 @@ function TaskDetail(props: {
                   <div className="catalog-v2-stage-content">
                     <strong>{stage.title}</strong>
                     <p>{stage.summary}</p>
-                    <small><span className="catalog-v2-stage-state">{stage.state === "locked" ? "Пока недоступен" : "Запланировано"} · </span>{formatDuration(stage.estimated_minutes)}</small>
+                    <small><span className="catalog-v2-stage-state">{stage.state === "locked" ? "Пока недоступен" : "Запланировано"} · {formatDuration(stage.estimated_minutes)}</span><span className="catalog-v2-stage-duration" aria-hidden="true">{formatDuration(stage.estimated_minutes)}</span></small>
                   </div>
                 </li>
               ))}</ol>
