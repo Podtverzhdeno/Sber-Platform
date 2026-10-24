@@ -407,9 +407,11 @@ export function MessagingWorkspace({
     );
   }
 
-  const recentChannel = [...channels].sort((a, b) =>
-    (b.last_message?.created_at ?? b.created_at).localeCompare(a.last_message?.created_at ?? a.created_at)
-  )[0] ?? null;
+  const recentChannel = channels
+    .filter((channel) => channel.kind === "personal")
+    .sort((a, b) =>
+      (b.last_message?.created_at ?? b.created_at).localeCompare(a.last_message?.created_at ?? a.created_at)
+    )[0] ?? null;
   const mayakiChannel = channels.find((channel) => channel.title.trim().toLowerCase() === "маяки") ?? null;
   const openCreate = () => {
     setCreateSignal((current) => current + 1);
