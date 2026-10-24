@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { useEffect, useId, useRef } from "react";
 
 export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "success" | "warning" }) {
@@ -22,13 +22,54 @@ export function DataTable({ caption, headers, rows }: { caption: string; headers
 function Overlay({ title, open, onClose, kind, children }: { title: string; open: boolean; onClose: () => void; kind: "dialog" | "drawer"; children: ReactNode }) {
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
-    if (open) closeRef.current?.focus();
+    if (!open) return;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeRef.current?.focus();
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      // An overlay must not strand keyboard focus in a removed node.
+      if (previouslyFocused?.isConnected) previouslyFocused.focus();
+    };
   }, [open]);
+
+  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.key === "Escape") {
+      event.stopPropagation();
+      onClose();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const nodes = Array.from(
+      dialogRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      ) ?? [],
+    ).filter((node) => node.getAttribute("aria-hidden") !== "true");
+    if (nodes.length === 0) {
+      event.preventDefault();
+      return;
+    }
+    const first = nodes[0];
+    const last = nodes[nodes.length - 1];
+    if (!first || !last) return;
+    if (event.shiftKey && (document.activeElement === first || !dialogRef.current?.contains(document.activeElement))) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !dialogRef.current?.contains(document.activeElement))) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   if (!open) return null;
   return (
     <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <section className={`overlay-panel overlay-panel--${kind}`} role="dialog" aria-modal="true" aria-labelledby={titleId} onKeyDown={(event) => { if (event.key === "Escape") onClose(); }}>
+      <section ref={dialogRef} className={`overlay-panel overlay-panel--${kind}`} role="dialog"
+        aria-modal="true" aria-labelledby={titleId} onKeyDown={handleKeyDown}>
         <header><h2 id={titleId}>{title}</h2><button ref={closeRef} type="button" aria-label="Закрыть" onClick={onClose}>×</button></header>
         {children}
       </section>
