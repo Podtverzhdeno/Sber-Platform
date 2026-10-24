@@ -12,8 +12,8 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from impulse.application.notifications import DEMO_NOTIFICATION_SCRIPTS
-from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
 from impulse.application.reward import DEFAULT_REVIEW_RUBRIC
+from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
 from impulse.bootstrap.settings import Settings
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.assist import (
@@ -33,9 +33,9 @@ from impulse.infrastructure.models.buddy import (
     buddy_threads,
 )
 from impulse.infrastructure.models.competencies import (
-    competency_models,
     competency_definitions,
     competency_evidence,
+    competency_models,
 )
 from impulse.infrastructure.models.credentials import (
     course_certificates,
