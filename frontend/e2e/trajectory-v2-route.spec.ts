@@ -35,19 +35,32 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await page.setViewportSize({ width: 1672, height: 941 });
   let loggedIn = false;
   const roles = [
-    { track_key: "product", title: "Продуктовый аналитик", state: "active", attempt_number: 1, completed_milestones: 2, total_milestones: 7 },
-    { track_key: "ml", title: "ML-инженер", state: "active", attempt_number: 1, completed_milestones: 3, total_milestones: 4 },
-    { track_key: "python", title: "Python-разработчик", state: "paused", attempt_number: 1, completed_milestones: 2, total_milestones: 4 },
-    { track_key: "data", title: "Аналитик данных", state: "unselected", attempt_number: null, completed_milestones: 0, total_milestones: 0 },
+    { track_key: "product", title: "AI Architect", state: "active", attempt_number: 1, completed_milestones: 2, total_milestones: 7 },
+    { track_key: "ml", title: "AI Engineer", state: "active", attempt_number: 1, completed_milestones: 3, total_milestones: 7 },
+    { track_key: "python", title: "AI Security Engineer", state: "paused", attempt_number: 1, completed_milestones: 2, total_milestones: 7 },
+    { track_key: "data", title: "AI Data Engineer", state: "unselected", attempt_number: null, completed_milestones: 0, total_milestones: 7 },
+    { track_key: "backend", title: "MLOps Engineer", state: "unselected", attempt_number: null, completed_milestones: 0, total_milestones: 7 },
+    { track_key: "design", title: "AI Agent Engineer", state: "unselected", attempt_number: null, completed_milestones: 0, total_milestones: 7 },
+    { track_key: "manager", title: "AI Product Engineer", state: "unselected", attempt_number: null, completed_milestones: 0, total_milestones: 7 },
   ];
-  const milestones = ["База и основы", "Исследование пользователей", "Продуктовые гипотезы", "Метрики и приоритизация", "Реальные задачи и проекты", "Подтверждение компетенций", "Новые возможности"].map((title, index) => ({
-    key: `m${String(index+1)}`, position: index+1, title, purpose: `Практика: ${title}`,
-    skill: "Аналитика данных", target_kind: "task", target_key: `reference-task-${String(index+1)}`, completed: index < 2,
+  const milestones = [
+    "AI Systems Foundations", "Requirements & ADR", "RAG & Knowledge Design",
+    "Agent & A2A Integration", "Security & Reliability", "LLM Evaluation",
+    "Architecture Defense",
+  ].map((title, index) => ({
+    key: `m${String(index + 1)}`, position: index + 1, title, purpose: `Практика: ${title}`,
+    skill: "AI architecture", target_kind: "task", target_key: `reference-task-${String(index + 1)}`,
+    completed: index < 2, activities: ["Изучить принципы", "Реализовать практику", "Проверить результат"],
+    deliverable: `Артефакт: ${title}`,
+  }));
+  const roadmapCatalog = roles.map((role) => ({
+    track_key: role.track_key, policy_version: 1, replacement_reason: null,
+    milestones, next_step: milestones[role.attempt_number === null ? 0 : Math.min(role.completed_milestones, 6)],
   }));
   const overview = {
     as_of: "2026-10-24T19:00:00Z",
     roles,
-    next_outcome: { trajectory_key: "product", trajectory_title: "Продуктовый аналитик", milestone_key: "m3", milestone_position: 3, policy_version: 1, reasons: [], stale_reason: null, target_key: "reference-task-3", target_kind: "task", target_title: "Оценка и приоритизация гипотез" },
+    next_outcome: { trajectory_key: "product", trajectory_title: "AI Architect", milestone_key: "m3", milestone_position: 3, policy_version: 1, reasons: [], stale_reason: null, target_key: "reference-task-3", target_kind: "task", target_title: "Оценка и приоритизация гипотез" },
     concepts: {
       career_grade: { auto_transition: false, catalog_version: null, current_grade: "5", hint: "До следующего уровня один шаг", policy_version: 1, readiness_percent: 88, reason: null, state: "ready", target_grade: "6" },
       competency_level: { canonical_surface: "", universe_version: "", value_state: "" },
@@ -63,6 +76,7 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await page.route("**/api/v1/auth/demo-login", route => { loggedIn = true; return route.fulfill({ json: { ...actor, navigation: ["Главная", "Моя траектория", "Bootcamp", "Задачи", "Портфолио"] } }); });
   await page.route("**/api/v1/participant/me/development-overview", route => route.fulfill({ json: overview }));
   await page.route("**/api/v1/me/roadmaps", route => route.fulfill({ json: [{ track_key: "product", policy_version: 1, replacement_reason: null, milestones, next_step: milestones[2] }] }));
+  await page.route("**/api/v1/me/roadmap-catalog", route => route.fulfill({ json: roadmapCatalog }));
   await page.route("**/api/v1/me/talent-passport", route => route.fulfill({ json: { verified_courses: [], cases: [], skills: [{ key: "Аналитика данных", practical_level: "verified", confirmed_case_count: 3 }, { key: "Коммуникация", practical_level: "verified", confirmed_case_count: 2 }] } }));
   await page.route("**/api/v1/me/portfolio", route => route.fulfill({ json: {
     demo_data: true,
@@ -90,6 +104,12 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   const rightRail = page.locator(".trajectory-v2-reference-sidebar");
   await expect(page.locator(".trajectory-v2-role-card")).toHaveCount(7);
   await expect(stageCard).toBeVisible();
+  await expect(page.getByTestId("trajectory-stage-activities").locator("li")).toHaveCount(3);
+  await page.locator('.trajectory-v2-role-card[data-role-key="python"]').click();
+  await expect(page.locator(".trajectory-v2-stage-path button")).toHaveCount(7);
+  await expect(page.getByRole("heading", { name: "AI Security Engineer" })).toBeVisible();
+  await page.locator('.trajectory-v2-role-card[data-role-key="product"]').click();
+
   await page.screenshot({ path: "test-results/trajectory-v2-desktop-candidate.png", fullPage: true, animations: "disabled" });
   await page.locator('[data-testid="trajectory-user-statistics"] summary').click();
   await expect(page.getByText("Курсов подтверждено")).toBeVisible();
@@ -110,13 +130,13 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await expect(page.getByTestId("trajectory-drawer-overlay")).toBeVisible();
   await page.screenshot({ path: "test-results/trajectory-v2-task-drawer-candidate.png", animations: "disabled" });
   await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: /Продуктовые гипотезы/ }).first().click();
+  await page.getByRole("button", { name: /RAG & Knowledge Design/ }).first().click();
   await page.getByRole("button", { name: "Действия роли" }).click();
   await expect(page.getByTestId("trajectory-actions-menu")).toBeVisible();
   await page.screenshot({ path: "test-results/trajectory-v2-actions-candidate.png", animations: "disabled" });
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "О роли →" }).click();
-  await expect(page.getByRole("dialog", { name: /Продуктовый аналитик/ })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: /AI Architect/ })).toBeVisible();
   await page.screenshot({ path: "test-results/trajectory-v2-role-candidate.png", animations: "disabled" });
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Все уровни →" }).click();
