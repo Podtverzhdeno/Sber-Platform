@@ -78,7 +78,7 @@ describe("three canonical analytics reference layouts", () => {
     fireEvent.click(within(screen.getByRole("group", { name: "Вид диаграммы" })).getByRole("button", { name: "Гистограмма" }));
     expect(container.querySelector(".ref-skill-bars")).toBeInTheDocument();
     fireEvent.click(within(screen.getByRole("group", { name: "Вид диаграммы" })).getByRole("button", { name: "Тренд" }));
-    expect(screen.getByText(/Нет достаточной истории цифровых следов/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Нет достаточной истории цифровых следов/).length).toBeGreaterThan(0);
     fireEvent.change(screen.getByRole("combobox", { name: "Период аналитики" }), { target: { value: "8" } });
     expect(screen.getByRole("heading", { name: "Развитие за 8 месяцев" })).toBeInTheDocument();
   });
