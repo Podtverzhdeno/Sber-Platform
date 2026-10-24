@@ -367,7 +367,7 @@ describe("participant analytics chart rendering", () => {
         { occurred_at: "not-a-date", kind: "course", title: "D", source_kind: "course", source_ref: "4" },
       ],
     }});
-    renderDeepLink("/analytics");
+    renderDeepLink("/analytics?legacy=1");
     const chart = await screen.findByRole("img", { name: /Подтверждённые события по восьми неделям/ });
     expect(chart).toHaveAccessibleName(/неделя 7 — 1 действий/);
     expect(chart).toHaveAccessibleName(/неделя 8 — 1 действий/);
@@ -378,7 +378,7 @@ describe("participant analytics chart rendering", () => {
     installDeepLinkFetch({ snapshot: {
       ...snapshot, events: [], freshness: { known: true, latest_observed_at: "2026-10-20T09:00:00Z" },
     } });
-    renderDeepLink("/analytics");
+    renderDeepLink("/analytics?legacy=1");
     const chart = await screen.findByRole("img", { name: /Активность не подтверждена/ });
     expect(chart.querySelectorAll("svg rect")).toHaveLength(0);
     expect(screen.getByText("Среднее: нет данных")).toBeInTheDocument();
@@ -387,7 +387,7 @@ describe("participant analytics chart rendering", () => {
 
   it("never turns invalid timezone into invented zero activity", async () => {
     installDeepLinkFetch({ snapshot: { ...snapshot, events: [], actor_timezone: "invalid/TZ" } });
-    renderDeepLink("/analytics");
+    renderDeepLink("/analytics?legacy=1");
     const chart = await screen.findByRole("img", { name: /Активность не подтверждена/ });
     expect(chart.querySelectorAll("svg rect")).toHaveLength(0);
     expect(screen.getByText("Среднее: нет данных")).toBeInTheDocument();
@@ -413,7 +413,7 @@ describe("participant analytics chart rendering", () => {
         earnings: { calculated: "0", approved: "0", paid: "0", failed: "0", currency: null, unknown_items: 0 },
       },
     });
-    const { container } = renderDeepLink("/analytics");
+    const { container } = renderDeepLink("/analytics?legacy=1");
     const funnel = await screen.findByTestId("analytics-live-funnel");
     expect(within(funnel).getByText("Направление выбрано")).toBeInTheDocument();
     expect(within(funnel).getByText("Опыт подтверждён")).toBeInTheDocument();
@@ -427,7 +427,7 @@ describe("participant analytics chart rendering", () => {
 
   it("shows an explicit no-evidence state instead of fictional bars", async () => {
     installDeepLinkFetch({});
-    renderDeepLink("/analytics");
+    renderDeepLink("/analytics?legacy=1");
     await screen.findByTestId("analytics-live-funnel");
     const chart = screen.getByRole("img", { name: /Активность не подтверждена/ });
     expect(chart.querySelectorAll("svg rect")).toHaveLength(0);
@@ -439,7 +439,7 @@ describe("participant analytics chart rendering", () => {
 describe("participant analytics drill-down deep links", () => {
   it("restores drilldown from a stable deep link and serializes trajectory and skill selection", async () => {
     installDeepLinkFetch({});
-    renderDeepLink("/analytics?trajectory=python&skill=tests");
+    renderDeepLink("/analytics?legacy=1&trajectory=python&skill=tests");
     await screen.findByTestId("skill-drilldown");
     expect(screen.getByTestId("url-probe")).toHaveTextContent("trajectory=python&skill=tests");
     fireEvent.click(screen.getByRole("button", { name: "Подробнее о навыке Проектирование API" }));
@@ -457,7 +457,7 @@ describe("participant analytics drill-down deep links", () => {
 
   it("keeps deep links with unknown referral and honest responses without fake data", async () => {
     installDeepLinkFetch({});
-    renderDeepLink("/analytics?skill=absent-key");
+    renderDeepLink("/analytics?legacy=1&skill=absent-key");
     await screen.findByTestId("skill-toggle-api");
     expect(screen.queryByTestId("skill-drilldown")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Подробнее о навыке Автоматические тесты" }));
@@ -467,7 +467,7 @@ describe("participant analytics drill-down deep links", () => {
 
   it("renders the monthly goal projection on the analytics page", async () => {
     installDeepLinkFetch({ goal: monthlyGoal });
-    renderDeepLink("/analytics");
+    renderDeepLink("/analytics?legacy=1");
     expect(await screen.findByTestId("trajectory-monthly-goal")).toHaveTextContent("Довести ИИ-агентов до уверенного уровня");
     expect(within(screen.getByTestId("trajectory-monthly-goal")).getByText("Прогноз:")).toBeInTheDocument();
     expect(screen.getByTestId("skill-toggle-tests")).toBeInTheDocument();
@@ -475,7 +475,7 @@ describe("participant analytics drill-down deep links", () => {
 
   it("stays silent when the endpoint reports no monthly goal", async () => {
     installDeepLinkFetch({});
-    renderDeepLink("/analytics?trajectory=python&skill=tests");
+    renderDeepLink("/analytics?legacy=1&trajectory=python&skill=tests");
     await screen.findByTestId("skill-drilldown");
     expect(screen.queryByTestId("trajectory-monthly-goal")).not.toBeInTheDocument();
     expect(screen.getByTestId("trajectory-growth-overview")).toBeInTheDocument();
