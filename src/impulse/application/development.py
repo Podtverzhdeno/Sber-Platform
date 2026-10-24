@@ -638,6 +638,36 @@ class DevelopmentService:
             )
         return tuple(projections)
 
+    async def catalog_roadmaps(self, actor: ActorContext) -> tuple[RoadmapProjection, ...]:
+        """All published track paths; unselected roles have no personal completions.
+
+        This read is participant-scoped and does not mutate attempts. Active
+        and frozen roles may display only this participant's own progress.
+        """
+        self._participant(actor)
+        attempts = {attempt.track_key: attempt for attempt in await self.store.attempts(actor.person_id)}
+        result: list[RoadmapProjection] = []
+        for track in await self.store.tracks():
+            record = await self.store.roadmap(track.key)
+            if record is None:
+                continue
+            attempt = attempts.get(track.key)
+            completed = attempt.completed_milestones if attempt is not None else frozenset()
+            result.append(
+                recalculate_roadmap(
+                    RoadmapProjection(
+                        track_key=track.key,
+                        policy_version=record.policy_version,
+                        milestones=(),
+                        completed_keys=completed,
+                    ),
+                    track_key=record.track_key,
+                    policy_version=record.policy_version,
+                    milestones=record.milestones,
+                )
+            )
+        return tuple(result)
+
     async def set_monthly_goal(
         self,
         actor: ActorContext,
