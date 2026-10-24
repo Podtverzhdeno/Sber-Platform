@@ -582,3 +582,79 @@
   .home-v2-week-days {max-width:610px;}
   .home-v2-week-day-detail {margin:0;}
 }
+
+
+/* Home-only header parity with ZIP preview_home_1448 and preview_home_390:
+   preserve existing auth/search/notifications controls and real actor name. */
+.page-shell:has(.home-v2) .topbar .global-search {
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-shrink:1;
+  width:min(525px,64%);
+  max-width:525px;
+  height:43px;
+  padding:0 13px;
+  border:1px solid #193951;
+  border-radius:8px;
+  background:linear-gradient(95deg,#0a2137,#0b223a);
+  color:#bdcfe7;
+}
+.page-shell:has(.home-v2) .topbar .global-search:focus-within {
+  border-color:#16c5d5;box-shadow:0 0 0 3px #00d9dd1d;
+}
+.page-shell:has(.home-v2) .topbar .global-search input {
+  min-width:0;width:100%;height:100%;font-size:13px;color:#f5fcff;
+}
+.page-shell:has(.home-v2) .topbar .global-search input::placeholder {
+  color:#8aabc8;opacity:1;
+}
+.page-shell:has(.home-v2) .home-search-icon {width:19px;height:19px;flex:none;display:grid;place-items:center;}
+.page-shell:has(.home-v2) .home-search-icon svg {width:19px;height:19px;}
+.home-search-shortcut {display:none;}
+.page-shell:has(.home-v2) .home-search-shortcut {
+  display:inline-flex;flex:none;align-items:center;justify-content:center;
+  border-radius:4px;padding:4px 7px;background:#172f49;color:#a4bad5;
+  white-space:nowrap;font:12px/1.25 inherit;
+}
+.page-shell:has(.home-v2) .topbar .top-persona {
+  display:flex;align-items:center;gap:9px;padding:5px 3px 5px 13px;
+  border-left:1px solid #163349;
+}
+.page-shell:has(.home-v2) .topbar .top-persona strong {color:#f3f7ff;font-size:13px;font-weight:750;}
+.page-shell:has(.home-v2) .topbar .top-persona small {color:#a0b0c9;font-size:12px;}
+.page-shell:has(.home-v2) .topbar .mini-avatar {
+  width:41px;height:41px;overflow:hidden;flex:none;
+  border:2px solid #16526b;border-radius:50%;background:#133a53;
+  color:#f1f8ff;font-size:15px;
+}
+.page-shell:has(.home-v2) .topbar .mini-avatar .home-reference-avatar {
+  display:block;object-fit:cover;width:100%;height:100%;border-radius:50%;
+}
+.page-shell:has(.home-v2) .topbar .notification-button {
+  display:grid;place-items:center;width:42px;height:42px;
+  background:transparent;color:#c7dcf4;
+}
+.page-shell:has(.home-v2) .topbar .notification-button:hover {
+  color:#05e8ec;background:#092d43;
+}
+.page-shell:has(.home-v2) .topbar .notification-button i {
+  right:6px;top:4px;width:11px;height:11px;
+  font-size:0;border:1px solid #082336;
+  border-radius:50%;background:#fc4763;
+}
+@media(max-width:790px) {
+  .page-shell:has(.home-v2) .topbar .global-search {width:min(440px,100%);flex:1;}
+  .page-shell:has(.home-v2) .topbar .top-persona>span:last-child {display:none;}
+  .page-shell:has(.home-v2) .topbar .global-search input {font-size:12px;}
+  .page-shell:has(.home-v2) .home-search-shortcut {display:none;}
+}
+@media(max-width:630px) {
+  .page-shell:has(.home-v2) .topbar .global-search {
+    min-width:0;height:39px;gap:7px;padding:0 9px;
+  }
+  .page-shell:has(.home-v2) .topbar .global-search input {font-size:11.5px;}
+  .page-shell:has(.home-v2) .topbar .mini-avatar {width:34px;height:34px;}
+  .page-shell:has(.home-v2) .topbar .notification-button {width:33px;height:38px;}
+}
