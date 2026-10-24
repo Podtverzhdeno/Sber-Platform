@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "../../api/client";
+import type { components } from "../../api/schema";
 import "./agentic-coding-profile.scss";
 
 /**
@@ -17,6 +20,8 @@ const AGENTIC_SKILLS = [
 ] as const;
 
 type Role = "developer" | "analyst" | "qa";
+type ServerProfile = components["schemas"]["RoleProfile"];
+type ServerStatus = "loading" | "ready" | "unavailable" | "preview";
 type ChartView = "radar" | "bars" | "table";
 
 const AGENTIC_ROLE_PROFILES: Record<Role, {
@@ -37,16 +42,24 @@ function polarPoint(index: number, level: number): { x: number; y: number } {
   return { x: 170 + Math.cos(angle) * r, y: 170 + Math.sin(angle) * r };
 }
 
-function Radar({ target }: { target: readonly (number | null)[] }) {
+function Radar({ target, current }: { target: readonly (number | null)[]; current: readonly (number | null)[] }) {
   const segments: { from: number; to: number; a: number; b: number }[] = [];
   for (let index = 0; index < target.length; index++) {
     const following = (index + 1) % target.length;
     const a = target[index], b = target[following];
     if (typeof a === "number" && typeof b === "number") segments.push({ from: index, to: following, a, b });
   }
+  const currentSegments = [] as { from: number; to: number; a: number; b: number }[];
+  for (let index = 0; index < current.length; index++) {
+    const following = (index + 1) % current.length;
+    const a = current[index], b = current[following];
+    if (typeof a === "number" && typeof b === "number") currentSegments.push({ from: index, to: following, a, b });
+  }
   return (
     <svg viewBox="0 0 340 340" role="img"
-      aria-label="Циклограмма целевых уровней Agentic Coding. Оранжевый пунктир — цель по методологии. Зелёный текущий уровень не показан: подтверждённых цифровых следов пока нет.">
+      aria-label={current.some((level) => typeof level === "number")
+        ? "Циклограмма Agentic Coding: оранжевый пунктир — целевые уровни по методологии, зелёный контур и точки — проверенные текущие уровни."
+        : "Циклограмма целевых уровней Agentic Coding. Оранжевый пунктир — цель по методологии. Зелёный текущий уровень не показан: подтверждённых цифровых следов пока нет."}>
       {[1, 2, 3, 4].map((level) => (
         <polygon className="agentic-ring" key={level}
           points={axes.map((_, i) => { const p = polarPoint(i, level); return `${String(p.x)},${String(p.y)}`; }).join(" ")} />
@@ -64,17 +77,43 @@ function Radar({ target }: { target: readonly (number | null)[] }) {
         const pt = polarPoint(index, level);
         return <circle key={index} className="agentic-target-dot" cx={pt.x} cy={pt.y} r="4" />;
       })}
+      {currentSegments.map(({ from, to, a, b }) => {
+        const start = polarPoint(from, a), end = polarPoint(to, b);
+        return <line className="agentic-current-line" key={from} x1={start.x} y1={start.y} x2={end.x} y2={end.y} />;
+      })}
+      {current.map((level, index) => {
+        if (typeof level !== "number") return null;
+        const point = polarPoint(index, level);
+        return <circle className="agentic-current-dot" key={index} cx={point.x} cy={point.y} r="5" />;
+      })}
       {[1, 2, 3, 4].map((level) => <text key={level} className="agentic-ring-label"
         x="174" y={170 - 33 * level + 13}>{level}</text>)}
     </svg>
   );
 }
 
-export function AgenticCodingProfile() {
-  const [role, setRole] = useState<Role>("developer");
+export function AgenticCodingProfile({ activeRole, onRoleChange, serverProfile, serverStatus = "preview" }: {
+  activeRole?: Role;
+  onRoleChange?: (role: Role) => void;
+  serverProfile?: ServerProfile;
+  serverStatus?: ServerStatus;
+} = {}) {
+  const [localRole, setLocalRole] = useState<Role>("developer");
+  const role = activeRole ?? localRole;
   const [view, setView] = useState<ChartView>("radar");
   const profile = AGENTIC_ROLE_PROFILES[role];
   const unresolvedCount = profile.unresolved.length;
+  const certified = serverProfile?.role_key === role
+    && serverProfile.scale_key === "agentic_coding_1_4"
+    && serverProfile.framework_version === "agentic-coding-source-map-2026-10-23"
+    ? serverProfile : null;
+  const authoritative = AGENTIC_SKILLS.map((skill) => certified?.skills.find((item) => item.key === skill.key));
+  const target = AGENTIC_SKILLS.map((skill, index) => authoritative[index]?.target_level ?? profile.target[index] ?? null);
+  const current = AGENTIC_SKILLS.map((skill, index) => {
+    const item = authoritative[index];
+    return item?.data_state === "verified" && typeof item.current_level === "number" ? item.current_level : null;
+  });
+  const verifiedCount = current.filter((level) => typeof level === "number").length;
   return (
     <section className="agentic-profile" aria-labelledby="agentic-profile-title" data-testid="agentic-profile">
       <header className="agentic-profile-heading">
@@ -85,7 +124,11 @@ export function AgenticCodingProfile() {
         </div>
         <label className="agentic-role-picker">
           Профессиональная группа
-          <select value={role} onChange={(event) => { setRole(event.target.value as Role); }}>
+          <select value={role} onChange={(event) => {
+            const nextRole = event.target.value as Role;
+            setLocalRole(nextRole);
+            onRoleChange?.(nextRole);
+          }}>
             <option value="developer">Разработчик</option>
             <option value="analyst">Аналитик</option>
             <option value="qa">Тестировщик</option>
@@ -102,32 +145,34 @@ export function AgenticCodingProfile() {
               <button type="button" aria-pressed={view === "table"} onClick={() => { setView("table"); }}>Таблица</button>
             </div>
           </div>
+          {serverStatus === "loading" && <p role="status">Загружаем подтверждённый профиль компетенций…</p>}
+          {serverStatus === "unavailable" && <p role="status">Серверный профиль временно недоступен. Показаны только цели из методологии.</p>}
           <div className="agentic-legend" aria-label="Легенда диаграммы">
             <span className="agentic-legend-target">Цель по методологии</span>
-            <span className="agentic-legend-current">Текущий уровень: нет подтверждённых данных</span>
+            <span className="agentic-legend-current">{verifiedCount > 0 ? `Подтверждено навыков: ${String(verifiedCount)} из 6` : "Текущий уровень: нет подтверждённых данных"}</span>
           </div>
-          {view === "radar" && <div className="agentic-radar"><Radar target={profile.target} /></div>}
+          {view === "radar" && <div className="agentic-radar"><Radar target={target} current={current} /></div>}
           {view === "bars" && <div className="agentic-bars" aria-label="Целевые уровни по навыкам">
             {AGENTIC_SKILLS.map((skill, index) => (
               <div key={skill.key} className="agentic-bar-row">
                 <span>{skill.label}</span>
                 <div className="agentic-bar-track">
-                  {profile.target[index] !== null && <i style={{ width: `${String((profile.target[index] ?? 0) * 25)}%` }} />}
+                  {target[index] !== null && <i style={{ width: `${String((target[index] ?? 0) * 25)}%` }} />}
                 </div>
-                <strong>{profile.target[index] === null ? "—" : `${String(profile.target[index])}/4`}</strong>
+                <strong>{target[index] === null ? "—" : `${String(target[index])}/4`}</strong>
               </div>
             ))}
           </div>}
           {view === "table" && <table className="agentic-table">
             <thead><tr><th scope="col">Навык</th><th scope="col">Текущий</th><th scope="col">Цель</th></tr></thead>
             <tbody>{AGENTIC_SKILLS.map((skill, index) => <tr key={skill.key}>
-              <th scope="row">{skill.label}</th><td>Нет данных</td><td>{profile.target[index] ?? "Не задана"}</td>
+              <th scope="row">{skill.label}</th><td>{current[index] ?? "Нет данных"}</td><td>{target[index] ?? "Не задана"}</td>
             </tr>)}</tbody>
           </table>}
           {view === "radar" && <div className="agentic-axis-list" aria-label="Числовые уровни, альтернатива циклограмме">
             {AGENTIC_SKILLS.map((skill, index) => <div key={skill.key}>
               <span>{skill.label}</span>
-              <strong>{profile.target[index] === null ? "Не задана" : `${String(profile.target[index])}/4`}</strong>
+              <strong>{target[index] === null ? "Не задана" : `${String(target[index])}/4`}</strong>
             </div>)}
           </div>}
           <p className="agentic-methodology-note">
@@ -137,6 +182,7 @@ export function AgenticCodingProfile() {
         <aside className="agentic-certification" aria-label="Состояние сертификации">
           <p className="eyebrow">Сертификация</p>
           <h3>Agentic Coding L1</h3>
+          <p>{certified ? `Проверенных цифровых следов: ${String(certified.known_evidence_count)}` : "Проверенные цифровые следы пока не подключены"}</p>
           <strong>Учебная оценка пока не рассчитана</strong>
           <p>Для присвоения результата нужны проверенные цифровые следы, опубликованная версия правил и авторизованный источник сертификации.</p>
           {unresolvedCount > 0 && <p role="status" className="agentic-conflict">
@@ -150,4 +196,14 @@ export function AgenticCodingProfile() {
       </div>
     </section>
   );
+}
+
+export function ConnectedAgenticCodingProfile() {
+  const [role, setRole] = useState<Role>("developer");
+  const profile = useQuery({
+    queryKey: ["agentic-coding-profile", role],
+    queryFn: () => apiRequest<ServerProfile>(`/api/v1/me/agentic-coding/profile?role_key=${role}`),
+  });
+  return <AgenticCodingProfile activeRole={role} onRoleChange={setRole} serverProfile={profile.data}
+    serverStatus={profile.isPending ? "loading" : profile.isError ? "unavailable" : "ready"} />;
 }
