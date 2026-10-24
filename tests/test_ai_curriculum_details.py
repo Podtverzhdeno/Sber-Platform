@@ -16,7 +16,19 @@ def test_all_49_stages_have_distinct_actionable_learning_materials() -> None:
     for role_key, details in AI_CURRICULUM_DETAILS.items():
         assert len(details) == len(AI_ROLE_PROFILES[role_key]["stages"]) == 7
         for position, module in enumerate(details, start=1):
-            assert learning_details(role_key, position) == module
+            lesson = learning_details(role_key, position)
+            assert lesson["lab"].startswith(module["lab"])
+            assert {k: v for k, v in lesson.items() if k != "lab"} == {
+                k: v for k, v in module.items() if k != "lab"
+            }
+            for heading in (
+                "Учебный кейс:",
+                "Пример решения:",
+                "Типичная ошибка:",
+                "Самостоятельная проверка:",
+            ):
+                assert heading in lesson["lab"]
+            assert len(lesson["lab"]) >= len(module["lab"]) + 250
             assert len(module["theory"]) == 2
             assert len(set(module["theory"])) == 2
             assert all(len(item) >= 18 for item in module["theory"])
@@ -41,6 +53,8 @@ def test_learning_details_are_persisted_with_existing_milestone_ids() -> None:
         assert len(payload["activities"]) == 3
         assert len(payload["acceptance"]) == 3
         assert payload["lab"]
+        assert "Учебный кейс:" in payload["lab"]
+        assert "Самостоятельная проверка:" in payload["lab"]
         assert payload["deliverable"]
         assert payload["estimated_hours"] >= 4
         assert "completed" not in payload
