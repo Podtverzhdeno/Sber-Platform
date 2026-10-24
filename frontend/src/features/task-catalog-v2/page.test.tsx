@@ -80,13 +80,31 @@ afterAll(() => {
 describe("task catalog v2", () => {
   it("renders authoritative match and insufficient-data states without a fake zero", async () => {
     renderCatalog();
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
-    expect(screen.getByText("84% релевантности")).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
+    expect(screen.getAllByText("84% релевантности").length).toBeGreaterThan(0);
     expect(screen.getByText("Недостаточно данных")).toBeInTheDocument();
     expect(screen.queryByText("0% релевантности")).not.toBeInTheDocument();
-    expect(screen.getByText("доступно для отклика · из 2")).toBeInTheDocument();
-    expect(screen.getByText(/Период: без ограничения/)).toBeInTheDocument();
-    expect(screen.getByText(/не обещает отбор, оффер или найм/)).toBeInTheDocument();
+    expect(screen.getByText("Для отклика · из 2 найденных")).toBeInTheDocument();
+    expect(screen.getByText(/По 1 из 2 загруженных/)).toBeInTheDocument();
+    expect(screen.getByText(/Релевантность не означает вероятность отбора/)).toBeInTheDocument();
+  });
+
+  it("does not treat unsupported or self-service tasks as mentored support", async () => {
+    const unsupported = { ...catalogItem, support_model: "none" };
+    const selfService = { ...insufficientItem, support_model: "self_service" };
+    fetchMock.mockImplementation((input, init) => {
+      const path = requestPath(input);
+      if (path.startsWith("/api/v1/me/task-recommendations?")) {
+        return Promise.resolve(json(catalogPage([unsupported, selfService])));
+      }
+      return defaultFetch(input, init);
+    });
+    renderCatalog();
+    await screen.findAllByText(catalogItem.title);
+    const kpi = screen.getByText("с поддержкой").closest(".catalog-v2-kpi");
+    if (!(kpi instanceof HTMLElement)) throw new Error("Support KPI missing");
+    expect(within(kpi).getByText("0")).toBeInTheDocument();
+    expect(screen.getByText("Сопровождение не предусмотрено")).toBeInTheDocument();
   });
 
   it("labels an unverified customer without a verified-partner badge", async () => {
@@ -102,13 +120,13 @@ describe("task catalog v2", () => {
       return defaultFetch(input, init);
     });
     renderCatalog();
-    expect(await screen.findByText(/Заказчик не верифицирован/)).toBeInTheDocument();
+    expect((await screen.findAllByText(/Заказчик не верифицирован/)).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Проверенный заказчик/)).not.toBeInTheDocument();
   });
 
   it("uses the same projection in list layout and opens its detail", async () => {
     renderCatalog("/workspace/2?catalog_view=list");
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     expect(document.querySelector(".catalog-v2-results--list")).not.toBeNull();
     expect(screen.getByRole("button", { name: "Список" })).toHaveAttribute("aria-pressed", "true");
     const rows = document.querySelectorAll<HTMLElement>(".catalog-v2-table-row");
@@ -165,7 +183,7 @@ describe("task catalog v2", () => {
       value: { writeText },
     });
     renderCatalog("/workspace/2?q=private-search");
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     const shareButtons = screen.getAllByRole("button", { name: "Поделиться" });
     const shareButton = shareButtons[0];
     if (shareButton === undefined) throw new Error("Share button is missing");
@@ -189,7 +207,7 @@ describe("task catalog v2", () => {
       return defaultFetch(input, init);
     });
     renderCatalog();
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: "Показать ещё" }));
     expect(await screen.findByText(insufficientItem.title)).toBeInTheDocument();
     expect(document.querySelectorAll(".catalog-v2-results > [role=\"listitem\"]")).toHaveLength(2);
@@ -203,7 +221,7 @@ describe("task catalog v2", () => {
 
   it("persists a bookmark through the CSRF-protected server mutation", async () => {
     renderCatalog();
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: "Сохранить" }));
     expect(await screen.findByText(/Задача сохранена/)).toBeInTheDocument();
     expect(fetchMock.mock.calls.some(([input, init]) =>
@@ -216,15 +234,16 @@ describe("task catalog v2", () => {
 
   it("requires explicit consent and runs revalidate, accept and canonical apply", async () => {
     renderCatalog();
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: "Условия и отклик" }));
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
-    expect(await screen.findByText(catalogTerms.deliverable)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogTerms.deliverable)).length).toBeGreaterThan(0);
     expect(screen.getByRole("heading", { name: "Критерии приёмки" })).toBeInTheDocument();
     for (const criterion of catalogTerms.acceptance_criteria) {
       expect(screen.getByText(criterion)).toBeInTheDocument();
     }
-    expect(screen.getByText(/Нагрузка в неделю: 4 ч 0 мин/)).toBeInTheDocument();
+    expect(screen.getByText("Нагрузка в неделю")).toBeInTheDocument();
+    expect(screen.getByText("4 ч 0 мин")).toBeInTheDocument();
     const submit = screen.getByRole("button", { name: "Подтвердить и отправить отклик" });
     expect(submit).toBeDisabled();
     fireEvent.click(screen.getByRole("checkbox", { name: /Я прочитал/ }));
@@ -262,7 +281,7 @@ describe("task catalog v2", () => {
       return defaultFetch(input, init);
     });
     renderCatalog();
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: "Условия и отклик" }));
     const consent = await screen.findByRole("checkbox", { name: /Я прочитал/ });
     fireEvent.click(consent);
@@ -287,10 +306,10 @@ describe("task catalog v2", () => {
       return defaultFetch(input, init);
     });
     const { client } = renderCatalog();
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: "Условия и отклик" }));
     const dialog = await screen.findByRole("dialog");
-    expect(await within(dialog).findByText(catalogTerms.deliverable)).toBeInTheDocument();
+    expect((await within(dialog).findAllByText(catalogTerms.deliverable)).length).toBeGreaterThan(0);
 
     revoked = true;
     await act(async () => {
@@ -298,14 +317,16 @@ describe("task catalog v2", () => {
     });
 
     expect(await within(dialog).findByText("Раздел недоступен")).toBeInTheDocument();
-    expect(within(dialog).queryByText(catalogTerms.deliverable)).not.toBeInTheDocument();
+    expect(within(dialog).queryAllByText(catalogTerms.deliverable)).toHaveLength(0);
     expect(within(dialog).queryByText(new RegExp(catalogItem.title))).not.toBeInTheDocument();
+    expect(within(dialog).queryByText(catalogItem.customer.display_name, { exact: false })).not.toBeInTheDocument();
+    expect(within(dialog).queryByRole("list", { name: "Компетенции задачи" })).not.toBeInTheDocument();
     expect(within(dialog).queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
   it("serializes direction, skill and timeframe filters into the server query", async () => {
     renderCatalog();
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     fireEvent.change(screen.getByLabelText("Навык"), { target: { value: "python" } });
     fireEvent.change(screen.getByLabelText("Направление"), { target: { value: "ml" } });
     fireEvent.change(screen.getByLabelText("Срок"), { target: { value: "30d" } });
@@ -321,7 +342,7 @@ describe("task catalog v2", () => {
 
   it("preserves the selected task when switching cards and list layouts", async () => {
     renderCatalog();
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     const detailButton = screen.getAllByRole("button", { name: "Подробнее" })[0];
     if (detailButton === undefined) throw new Error("Detail button is missing");
     fireEvent.click(detailButton);
@@ -333,7 +354,7 @@ describe("task catalog v2", () => {
 
   it("opens a list row with Enter and exposes row selection semantics", async () => {
     renderCatalog("/workspace/2?catalog_view=list");
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     const row = screen.getAllByRole("row").find((candidate) => candidate.textContent.includes(catalogItem.title));
     expect(row).toBeDefined();
     if (row === undefined) return;
@@ -354,11 +375,13 @@ describe("task catalog v2", () => {
   });
   it("keeps catalog and selected detail in separate regions with a neutral stage plan", async () => {
     renderCatalog();
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     const workspace = document.querySelector(".catalog-v2-workspace");
     expect(workspace).not.toBeNull();
     expect(workspace).toHaveAttribute("data-layout", "cards");
-    expect(screen.getByRole("heading", { name: "Выберите задачу" })).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: "Предпросмотр рекомендованной задачи" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Этапы задачи" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Выберите задачу" })).not.toBeInTheDocument();
     const detailButton = screen.getAllByRole("button", { name: "Подробнее" })[0];
     if (detailButton === undefined) throw new Error("Detail button is missing");
     fireEvent.click(detailButton);
@@ -373,10 +396,10 @@ describe("task catalog v2", () => {
 
   it("provides readable mobile list labels without changing task ordering", async () => {
     renderCatalog("/workspace/2?catalog_view=list");
-    expect(await screen.findByText(catalogItem.title)).toBeInTheDocument();
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
     const first = document.querySelector(".catalog-v2-table-row");
-    expect(first?.querySelector('[data-label="Релевантность"]')).not.toBeNull();
-    expect(first?.querySelector('[data-label="Отклик до"]')).not.toBeNull();
+    expect(first?.querySelector('[data-label="Соответствие"]')).not.toBeNull();
+    expect(first?.querySelector('[data-label="Срок"]')).not.toBeNull();
     expect(first?.querySelector('[data-label="Действия"]')).not.toBeNull();
   });
 

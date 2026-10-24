@@ -1,0 +1,13 @@
+# Task catalog first-fold screenshot baseline refresh
+- task_id: task-catalog-firstfold-snapshots-20261024
+- session_id: gpt6-20261024-2050-final-regression-snapshots
+- status: IN_PROGRESS
+- base_revision: 4ab666310b76175190bc73afc42377d5d896d052
+- depends_on: [task-catalog-desktop-firstfold-20261024, focused Chromium source-sized QA 40126870575 SUCCESS]
+- write_scope:
+  - .github/workflows/task-catalog-firstfold-snapshots-20261024.yml
+  - frontend/e2e/task-catalog-v2-visual.spec.ts-snapshots/
+  - .agents/coordination/claims/task-catalog-firstfold-snapshots-20261024.lock/status.md
+- verification: 20 responsive screenshot states in exact Linux Chromium/fonts; compare structural changes to original approved 01/02/03 before marking RELEASED; fixed toHaveScreenshot comparisons thereafter
+- acceptance: no fake source numbers/customer brands; human-approved original PNG is distinct from generated regression baselines
+- production: not touched; no direct main merge

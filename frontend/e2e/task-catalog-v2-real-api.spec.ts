@@ -97,7 +97,7 @@ async function openRealCatalog(page: Page): Promise<void> {
   await page.goto("/");
   await page.getByRole("link", { name: "Задачи", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Задачи для вашего следующего результата" }),
+    page.getByRole("heading", { name: "Задачи для твоего развития" }),
   ).toBeVisible();
 }
 
@@ -134,15 +134,16 @@ test("real seeded API preserves card/list order and opens the canonical assigned
   await page.getByRole("button", { name: "Список", exact: true }).click();
   const rows = page.locator(".catalog-v2-table-row");
   await expect(rows).toHaveCount(expectedTitles.length);
-  await expect(rows.locator(".catalog-v2-table-task > strong")).toHaveText(expectedTitles);
+  await expect(rows.locator(".catalog-v2-table-task-text > strong")).toHaveText(expectedTitles);
   await page.getByRole("button", { name: "Карточки", exact: true }).click();
   await expect(page.locator('[role="listitem"] h2')).toHaveText(expectedTitles);
 
+  await page.getByRole("button", { name: "Все фильтры" }).click();
   const search = page.getByLabel("Поиск", { exact: true });
   await search.fill("no-such-real-catalog-task-000000");
   await search.press("Enter");
   await expect(page.getByRole("heading", { name: "Подходящих задач не найдено" })).toBeVisible();
-  await page.getByRole("button", { name: "Сбросить фильтры" }).click();
+  await page.locator(".catalog-v2-empty").getByRole("button", { name: "Сбросить фильтры" }).click();
   await expect(page.locator('[role="listitem"]')).toHaveCount(expectedTitles.length);
 
   const planned = catalog.items.find((item) => item.stage_plan.stages.length > 0);
@@ -151,7 +152,7 @@ test("real seeded API preserves card/list order and opens the canonical assigned
   await page.goto(`${taskPath}?task=${planned.task_id}`);
   const plannedDetail = page.locator(".catalog-v2-detail");
   await expect(page.locator("#catalog-detail-title")).toHaveText(planned.title);
-  await expect(plannedDetail.locator(".catalog-v2-facts")).toContainText(
+  await expect(plannedDetail.locator(".catalog-v2-detail-customer")).toContainText(
     customerStateLabels[planned.customer.verification],
   );
   await expect(plannedDetail.getByText(/Запланировано ·/).first()).toBeVisible();
@@ -223,6 +224,7 @@ test("real seeded API submits one application and replays its idempotency key", 
 
   await openRealCatalog(page);
   expect(await page.evaluate(() => window.sessionStorage.getItem("impulse_csrf"))).toBe(csrf);
+  await page.getByRole("button", { name: "Все фильтры" }).click();
   const search = page.getByLabel("Поиск", { exact: true });
   await search.fill(candidate.title);
   await search.press("Enter");
@@ -238,7 +240,7 @@ test("real seeded API submits one application and replays its idempotency key", 
 
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
-  await expect(dialog.locator(".eyebrow")).toContainText(`версия ${String(candidate.terms_version)}`);
+  await expect(dialog.locator(".catalog-v2-conditions-header p")).toContainText(`версия условий ${String(candidate.terms_version)}`);
   await expect(dialog.getByRole("heading", { name: "Критерии приёмки" })).toBeVisible();
   for (const criterion of terms.acceptance_criteria) {
     await expect(dialog.getByText(criterion, { exact: true })).toBeVisible();
@@ -321,7 +323,8 @@ test("real seeded API separates match snapshots after a trajectory change", asyn
     const card = page.locator('[role="listitem"]').filter({ hasText: candidate.title });
     await expect(card).toBeVisible();
     await card.getByRole("button", { name: "Подробнее" }).click();
-    // The provenance was intentionally moved into an expandable explanation.
+    // Matching factors and calculation provenance are now two nested disclosures.
+    await page.locator(".catalog-v2-reasons-disclosure > summary").click();
     const provenance = page.locator(".catalog-v2-provenance");
     await provenance.locator("summary").click();
     const snapshot = provenance.locator(".catalog-v2-match-snapshot code");
@@ -370,7 +373,7 @@ test("real seeded API separates match snapshots after a trajectory change", asyn
 
   await page.getByRole("link", { name: "Задачи", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Задачи для вашего следующего результата" }),
+    page.getByRole("heading", { name: "Задачи для твоего развития" }),
   ).toBeVisible();
   const refreshedSnapshot = await openCandidateDetail();
   await expect(refreshedSnapshot).not.toHaveText(candidate.match.source_snapshot_version);
@@ -408,6 +411,7 @@ test("real server requires fresh consent after v3 to v4 terms drift", async ({ p
     await reviseTerms(customer, candidate.task_id, customerDetail.terms.deadline_at, 3);
 
     await openRealCatalog(page);
+    await page.getByRole("button", { name: "Все фильтры" }).click();
     const search = page.getByLabel("Поиск", { exact: true });
     await search.fill(candidate.title);
     await search.press("Enter");
@@ -415,7 +419,7 @@ test("real server requires fresh consent after v3 to v4 terms drift", async ({ p
     await expect(page.locator('[role="listitem"]')).toHaveCount(1);
     await card.getByRole("button", { name: "Условия и отклик" }).click();
     const dialog = page.getByRole("dialog");
-    await expect(dialog.locator(".eyebrow")).toContainText("версия 3");
+    await expect(dialog.locator(".catalog-v2-conditions-header p")).toContainText("версия условий 3");
     await dialog.getByRole("checkbox").check();
 
     await reviseTerms(customer, candidate.task_id, customerDetail.terms.deadline_at, 4);
@@ -423,7 +427,7 @@ test("real server requires fresh consent after v3 to v4 terms drift", async ({ p
     await expect(dialog.locator(".catalog-v2-terms-changed")).toContainText(
       "Версия 3 больше не действует",
     );
-    await expect(dialog.locator(".eyebrow")).toContainText("версия 4");
+    await expect(dialog.locator(".catalog-v2-conditions-header p")).toContainText("версия условий 4");
     await expect(dialog.getByRole("checkbox")).not.toBeChecked();
     expect(await applicationIds(customer, candidate.task_id)).toEqual(beforeIds);
 
@@ -450,6 +454,7 @@ test("real server rejects an expired application and refreshes to an honest empt
     const beforeIds = await applicationIds(customer, candidate.task_id);
 
     await openRealCatalog(page);
+    await page.getByRole("button", { name: "Все фильтры" }).click();
     const search = page.getByLabel("Поиск", { exact: true });
     await search.fill(candidate.title);
     await search.press("Enter");
@@ -514,6 +519,7 @@ test("real server exposes qualitative growth, unverified customer and hard eligi
   }
 
   await openRealCatalog(page);
+  await page.getByRole("button", { name: "Все фильтры" }).click();
   const search = page.getByLabel("Поиск", { exact: true });
   await search.fill(candidate.title);
   await search.press("Enter");
@@ -583,7 +589,7 @@ test("real server keeps equal-score ordering stable across requests, cards and l
   await page.getByRole("button", { name: "Список", exact: true }).click();
   const rows = page.locator(".catalog-v2-table-row");
   await expect(rows).toHaveCount(2);
-  await expect(rows.locator(".catalog-v2-table-task > strong")).toHaveText(expectedTitles);
+  await expect(rows.locator(".catalog-v2-table-task-text > strong")).toHaveText(expectedTitles);
   await page.getByRole("button", { name: "Карточки", exact: true }).click();
   await expect(page.locator('[role="listitem"] h2')).toHaveText(expectedTitles);
 });
@@ -660,7 +666,7 @@ test("real server preserves canonical state during the v2 flag rollback rehearsa
     page.getByRole("heading", { name: "Задачи для вашего развития", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Задачи для вашего следующего результата" }),
+    page.getByRole("heading", { name: "Задачи для твоего развития" }),
   ).toHaveCount(0);
   await expect(page.locator(".participant-work--catalog")).toContainText(candidate.title);
 

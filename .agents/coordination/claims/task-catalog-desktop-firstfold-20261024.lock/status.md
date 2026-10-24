@@ -1,0 +1,16 @@
+# Approved task catalog desktop first-fold composition
+- task_id: task-catalog-desktop-firstfold-20261024
+- session_id: gpt6-20261024-2046-desktop-firstfold
+- status: IN_PROGRESS
+- base_revision: 99f7e8617a41ddf31efa3244268056200afc27e0
+- depends_on: [task-catalog-visual-polish-20261024, CI 40121807639 success]
+- write_scope:
+  - frontend/src/features/task-catalog-v2/catalog-v2.scss
+  - frontend/src/features/task-catalog-v2/page.tsx
+  - frontend/e2e/task-catalog-approved-geometry.spec.ts
+  - .agents/coordination/claims/task-catalog-desktop-firstfold-20261024.lock/status.md
+- shared_files: []
+- goals: compact right inspector on exact 1672×941 source canvas; 5 neutral stages, support and consent actions visible within first viewport as close to approved 01 PNG as dynamic data allow
+- safeguards: no invented match/skill levels, no fake completed states, preserve accessibility and full published summary for screen reader and mobile
+- verification: targeted Playwright composition, source-size screenshots, full CI
+- no main merge, Railway deployment or mutation of backend

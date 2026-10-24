@@ -1392,3 +1392,2024 @@
     transition: none;
   }
 }
+
+
+/* Follow-up visual pass: give discovery priority over controls.
+   Keep all legacy filters/URL semantics, but show optional controls on demand. */
+.catalog-v2-heading {
+  gap: clamp(16px, 2vw, 30px);
+}
+
+.catalog-v2-heading > div:first-child {
+  flex: 1 1 0;
+}
+
+.catalog-v2-heading h1 {
+  max-width: 820px;
+  margin-bottom: 6px;
+  font-size: clamp(1.55rem, 2.15vw, 2.1rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.catalog-v2-heading > div:first-child > p:last-child {
+  max-width: 740px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.catalog-v2-totals {
+  flex: 0 1 500px;
+  gap: 8px 12px;
+  padding: 12px 16px;
+}
+
+.catalog-v2-totals > span strong {
+  font-size: 1.22rem;
+  line-height: 1.1;
+}
+
+.catalog-v2-filters {
+  display: block;
+  padding: 12px 14px;
+}
+
+.catalog-v2-toolbar {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) auto auto auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.catalog-v2-toolbar > * {
+  min-width: 0;
+}
+
+.catalog-v2-search-field {
+  min-width: 0;
+}
+
+.catalog-v2-toolbar .catalog-v2-find {
+  min-width: 104px;
+  background: var(--catalog-accent);
+  color: var(--catalog-accent-ink);
+  border-color: var(--catalog-accent);
+  font-weight: 700;
+}
+
+.catalog-v2-filter-expander {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 138px;
+  white-space: nowrap;
+}
+
+.catalog-v2-filter-expander[aria-expanded="true"] {
+  border-color: var(--catalog-accent);
+  box-shadow: inset 0 -2px var(--catalog-accent);
+  font-weight: 700;
+}
+
+.catalog-v2-toolbar .catalog-v2-layout {
+  align-self: end;
+}
+
+.catalog-v2-toolbar .catalog-v2-layout button {
+  min-width: 86px;
+}
+
+.catalog-v2-advanced-filters[data-open="false"] {
+  display: none;
+}
+
+.catalog-v2-advanced-filters[data-open="true"] {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin-top: 13px;
+  padding-top: 13px;
+  border-top: 1px solid var(--catalog-border);
+}
+
+.catalog-v2-advanced-filters .catalog-v2-saved-filter {
+  grid-column: span 2;
+}
+
+.catalog-v2-advanced-filters .catalog-v2-reset {
+  justify-self: end;
+  min-width: 150px;
+}
+
+.catalog-v2-chips {
+  gap: 6px;
+}
+
+.catalog-v2-chips button {
+  min-height: 34px;
+  font-size: 0.76rem;
+}
+
+.catalog-v2-workspace {
+  gap: 16px;
+}
+
+.catalog-v2-card {
+  gap: 10px;
+  padding: 16px 18px;
+}
+
+.catalog-v2-card > header h2 {
+  font-size: 1.08rem;
+  line-height: 1.28;
+}
+
+.catalog-v2-card .catalog-v2-facts {
+  padding: 10px 12px;
+}
+
+.catalog-v2-card > footer button {
+  min-height: 38px;
+}
+
+.catalog-v2-inspector-empty {
+  min-height: 285px;
+  padding: 28px;
+}
+
+.catalog-v2-table-head,
+.catalog-v2-table-row {
+  grid-template-columns: minmax(220px, 1.7fr) minmax(125px, 0.74fr) minmax(138px, 0.94fr) minmax(125px, 0.8fr) minmax(245px, 1.38fr);
+  gap: 14px;
+  padding: 14px 18px;
+}
+
+.catalog-v2-table-task {
+  gap: 4px;
+}
+
+.catalog-v2-table-task > strong {
+  line-height: 1.35;
+}
+
+.catalog-v2-table-actions {
+  gap: 6px;
+}
+
+.catalog-v2-table-actions button {
+  min-height: 36px;
+  padding: 5px 9px;
+}
+
+@media (max-width: 1120px) {
+  .catalog-v2-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .catalog-v2-search-field {
+    grid-column: 1 / -1;
+  }
+
+  .catalog-v2-advanced-filters[data-open="true"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .catalog-v2-toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 9px;
+  }
+
+  .catalog-v2-search-field {
+    grid-column: 1 / -1;
+  }
+
+  .catalog-v2-toolbar .catalog-v2-find {
+    grid-column: 1;
+  }
+
+  .catalog-v2-filter-expander {
+    grid-column: 2;
+    min-width: 135px;
+  }
+
+  .catalog-v2-toolbar .catalog-v2-layout {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .catalog-v2-advanced-filters[data-open="true"] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .catalog-v2-advanced-filters .catalog-v2-saved-filter {
+    grid-column: auto;
+  }
+
+  .catalog-v2-advanced-filters .catalog-v2-reset {
+    justify-self: stretch;
+  }
+
+  .catalog-v2-totals {
+    padding: 12px;
+  }
+
+  .catalog-v2-table-row {
+    padding: 14px;
+  }
+
+  .catalog-v2-inspector-empty {
+    min-height: 195px;
+    padding: 22px;
+  }
+}
+
+/* Breakpoint invariants are last: desktop refinement must not undo stacked
+   tablet list layout or turn a desktop flex-basis into mobile panel height. */
+@media (max-width: 1050px) {
+  .catalog-v2-heading .catalog-v2-totals {
+    flex: 0 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .catalog-v2-table-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 680px) {
+  .catalog-v2-table-head {
+    display: none;
+  }
+
+  .catalog-v2-advanced-filters[data-open="true"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Compact, accessible list actions: icon labels remain available to AT. */
+.catalog-v2-table-actions .catalog-v2-icon-action {
+  display: inline-grid;
+  flex: 0 0 38px;
+  place-items: center;
+  width: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+}
+
+.catalog-v2-table-row [role="cell"] .catalog-v2-match {
+  display: inline-flex;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+@media (min-width: 1051px) {
+  .catalog-v2-table-head,
+  .catalog-v2-table-row {
+    grid-template-columns: minmax(200px, 1.7fr) minmax(160px, 0.87fr) minmax(135px, 0.9fr) minmax(140px, 0.9fr) minmax(235px, 1.45fr);
+  }
+}
+
+
+/* 2026-10-24 approved prototype alignment: source 01 cards, 02 terms, 03 list.
+   Scoped to catalog v2; shared shell/theme/behavior remain authoritative. */
+.catalog-v2 {
+  --catalog-highlight: var(--catalog-accent);
+  --catalog-soft: var(--color-surface-raised, var(--catalog-surface));
+  gap: 14px;
+}
+
+.catalog-v2-heading {
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.catalog-v2-heading h1 {
+  max-width: none;
+  margin-bottom: 4px;
+  font-size: clamp(1.55rem, 2.3vw, 2rem);
+  line-height: 1.2;
+}
+
+.catalog-v2-heading > div:first-child > p:last-child {
+  max-width: 920px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.catalog-v2 .eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.71rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.catalog-v2-help {
+  position: relative;
+  flex: none;
+  align-self: center;
+  color: var(--catalog-ink);
+}
+
+.catalog-v2-help summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 12px;
+  font-size: 0.76rem;
+  white-space: nowrap;
+  background: var(--catalog-surface);
+  border: 1px solid var(--catalog-border);
+  border-radius: 10px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.catalog-v2-help summary::-webkit-details-marker { display: none; }
+
+.catalog-v2-help > p {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 8px);
+  right: 0;
+  box-sizing: border-box;
+  width: min(320px, 82vw);
+  margin: 0;
+  padding: 14px;
+  font-size: 0.81rem;
+  line-height: 1.45;
+  background: var(--catalog-surface);
+  border: 1px solid var(--catalog-border);
+  border-radius: 12px;
+  box-shadow: 0 12px 28px rgb(0 0 0 / 18%);
+}
+
+.catalog-v2-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.catalog-v2-kpi {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-height: 76px;
+  padding: 13px 16px;
+  border: 1px solid var(--catalog-border);
+  border-radius: 12px;
+  background: var(--catalog-surface);
+}
+
+.catalog-v2-kpi > div { display: grid; gap: 2px; min-width: 0; }
+.catalog-v2-kpi strong { font-size: 1.38rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.catalog-v2-kpi b { font-size: 0.82rem; line-height: 1.2; }
+.catalog-v2-kpi small { color: var(--catalog-muted); font-size: 0.7rem; line-height: 1.3; }
+
+.catalog-v2-kpi-icon, .catalog-v2-kpi-ring {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  color: var(--catalog-highlight);
+  background: var(--catalog-soft);
+  border-radius: 12px;
+}
+.catalog-v2-kpi-icon--blue { color: var(--color-info-text, #63adff); }
+.catalog-v2-kpi-icon--gold { color: var(--color-warning-text, #e5aa1b); }
+.catalog-v2-kpi-ring {
+  width: 43px;
+  height: 43px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  border-radius: 50%;
+  background: var(--catalog-surface);
+  border: 5px solid var(--catalog-highlight);
+}
+
+.catalog-v2-filters {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+}
+
+.catalog-v2-filter-rail {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.catalog-v2-filter-rail .catalog-v2-all-tasks {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  min-height: 39px;
+  padding: 7px 10px;
+  color: var(--catalog-ink);
+  border-color: var(--catalog-highlight);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.catalog-v2-filter-rail .catalog-v2-layout {
+  display: flex;
+  flex: none;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.catalog-v2-filter-rail .catalog-v2-layout button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 65px;
+  min-height: 39px;
+  padding: 6px 8px;
+  font-size: 0.74rem;
+}
+
+.catalog-v2-filter-rail .catalog-v2-filter-expander {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 5px;
+  min-width: 0;
+  min-height: 39px;
+  padding: 6px 9px;
+  font-size: 0.72rem;
+}
+
+.catalog-v2-filter-rail .catalog-v2-advanced-filters label {
+  display: block;
+  min-width: 0;
+  color: var(--catalog-muted);
+  font-size: 0;
+}
+
+.catalog-v2-filter-rail .catalog-v2-advanced-filters input,
+.catalog-v2-filter-rail .catalog-v2-advanced-filters select {
+  box-sizing: border-box;
+  height: 39px;
+  min-height: 39px;
+  padding: 7px 9px;
+  font-size: 0.74rem;
+  border-radius: 9px;
+}
+
+.catalog-v2-secondary-filters[data-open="false"] { display: none; }
+.catalog-v2-secondary-filters[data-open="true"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid var(--catalog-border);
+  border-radius: 11px;
+  background: var(--catalog-surface);
+}
+
+.catalog-v2-secondary-filters .catalog-v2-search-field {
+  flex: 1 1 210px;
+}
+.catalog-v2-secondary-filters .catalog-v2-saved-filter {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-height: 40px;
+}
+.catalog-v2-secondary-filters .catalog-v2-find { min-width: 94px; }
+.catalog-v2-secondary-filters .catalog-v2-reset { min-width: 110px; }
+
+.catalog-v2-workspace {
+  grid-template-columns: minmax(315px, 0.85fr) minmax(0, 1.5fr);
+  gap: 14px;
+}
+
+.catalog-v2-card {
+  padding: 13px 14px;
+  gap: 9px;
+  cursor: pointer;
+}
+
+.catalog-v2-card .catalog-v2-card-top {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.catalog-v2-customer-avatar,
+.catalog-v2-detail-avatar,
+.catalog-v2-conditions-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  color: var(--catalog-highlight);
+  background: var(--catalog-soft);
+  border: 1px solid var(--catalog-border);
+  border-radius: 11px;
+}
+
+.catalog-v2-card-identity { min-width: 0; }
+.catalog-v2-card-identity > small {
+  display: block;
+  margin: 1px 0 3px;
+  color: var(--catalog-muted);
+  font-size: 0.73rem;
+}
+
+.catalog-v2-card .catalog-v2-card-top h2 {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  font-weight: 760;
+}
+
+.catalog-v2-top-match {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 3px;
+  padding: 3px 7px;
+  color: var(--catalog-highlight);
+  background: var(--catalog-soft);
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.catalog-v2-card-match {
+  grid-column: 3;
+  grid-row: 1;
+  align-self: start;
+  font-size: 0.7rem;
+}
+.catalog-v2-card-match .catalog-v2-match {
+  max-width: 115px;
+  padding: 0;
+  color: var(--catalog-highlight);
+  background: transparent;
+  border: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: right;
+  white-space: normal;
+}
+
+.catalog-v2-card .catalog-v2-card-bookmark {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  align-self: end;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 6px;
+  border-radius: 9px;
+  transform: translateY(31px);
+}
+
+.catalog-v2-card .catalog-v2-tags {
+  margin: 0 0 0 54px;
+  gap: 5px;
+}
+.catalog-v2-card .catalog-v2-tags li { font-size: 0.68rem; padding: 3px 8px; }
+
+.catalog-v2-card-quickfacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.catalog-v2-card-quickfacts > div { display: flex; align-items: center; gap: 4px; }
+.catalog-v2-card-quickfacts dt {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  color: var(--catalog-highlight);
+  font-size: 0;
+}
+.catalog-v2-card-quickfacts dd { margin: 0; color: var(--catalog-muted); font-size: 0.73rem; }
+
+.catalog-v2-card-status { margin: 0; color: var(--catalog-muted); font-size: 0.7rem; }
+.catalog-v2-card .catalog-v2-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 4px;
+  border-top: 1px solid var(--catalog-border);
+}
+.catalog-v2-card .catalog-v2-card-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 36px;
+  padding: 5px 9px;
+  font-size: 0.7rem;
+}
+.catalog-v2-card .catalog-v2-card-actions .catalog-v2-card-share { margin-left: auto; min-width: 36px; padding: 6px; }
+.catalog-v2-card[data-selected="true"] {
+  border-color: var(--catalog-highlight);
+  box-shadow: 0 0 0 1px var(--catalog-highlight), 0 4px 22px rgb(0 0 0 / 8%);
+}
+
+/* Reference 01: header + four facts + left growth/right benefits + horizontal stages. */
+.catalog-v2-detail {
+  gap: 12px;
+  padding: 16px;
+  background: var(--catalog-surface);
+  border: 1px solid var(--catalog-border);
+  border-radius: 15px;
+}
+
+.catalog-v2-detail .catalog-v2-detail-header {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto 30px;
+  align-items: start;
+  gap: 10px;
+}
+
+.catalog-v2-detail-identity { min-width: 0; }
+.catalog-v2-detail-customer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 5px;
+  font-size: 0.77rem;
+  font-weight: 650;
+}
+.catalog-v2-customer-verified {
+  padding: 3px 7px;
+  font-size: 0.67rem;
+  font-weight: 650;
+  color: var(--catalog-highlight);
+  background: var(--catalog-soft);
+  border-radius: 999px;
+}
+.catalog-v2-detail-identity h2 {
+  margin: 0 0 7px;
+  font-size: clamp(1.02rem, 1.7vw, 1.28rem);
+  line-height: 1.25;
+}
+.catalog-v2-detail-description {
+  margin: 0 0 8px;
+  color: var(--catalog-muted);
+  font-size: 0.81rem;
+  line-height: 1.45;
+}
+.catalog-v2-detail .catalog-v2-tags { margin: 0; gap: 5px; }
+.catalog-v2-detail .catalog-v2-tags li { padding: 3px 8px; font-size: 0.71rem; }
+
+.catalog-v2-detail-close {
+  width: 30px;
+  min-width: 30px;
+  min-height: 30px !important;
+  padding: 3px !important;
+}
+
+.catalog-v2-detail-score {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  max-width: 130px;
+}
+.catalog-v2-detail-score small {
+  text-align: center;
+  max-width: 110px;
+  color: var(--catalog-muted);
+  font-size: 0.7rem;
+}
+.catalog-v2-detail-score .catalog-v2-match-visual {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+}
+.catalog-v2-detail-score .catalog-v2-match-visual svg {
+  width: 65px;
+  height: 65px;
+}
+.catalog-v2-detail-score .catalog-v2-match { font-size: 0.75rem; border: 0; padding: 0; }
+
+.catalog-v2-detail-factrail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  padding: 10px 0;
+  margin: 0;
+  border-top: 1px solid var(--catalog-border);
+  border-bottom: 1px solid var(--catalog-border);
+}
+.catalog-v2-detail-factrail > div { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.catalog-v2-detail-factrail svg { flex: none; color: var(--catalog-highlight); }
+.catalog-v2-detail-factrail dt { color: var(--catalog-muted); font-size: 0.68rem; }
+.catalog-v2-detail-factrail dd { margin: 2px 0 0; font-size: 0.76rem; font-weight: 720; overflow-wrap: anywhere; }
+
+.catalog-v2-detail .catalog-v2-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(180px, 0.85fr);
+  gap: 12px;
+}
+.catalog-v2-detail-grid > section { min-width: 0; padding: 0; border: 0; }
+.catalog-v2-detail-grid h3 { margin: 0 0 10px; font-size: 0.9rem; }
+.catalog-v2-detail-grid section p { margin: 4px 0; font-size: 0.75rem; }
+
+.catalog-v2-growth-section { grid-column: 1; }
+.catalog-v2-benefits-section { grid-column: 2; }
+.catalog-v2-stage-section { grid-column: 1 / -1; }
+.catalog-v2-support-section { grid-column: 1; }
+.catalog-v2-reasons-section { grid-column: 2; }
+
+.catalog-v2-section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+}
+.catalog-v2-section-heading > span { color: var(--catalog-muted); font-size: 0.68rem; }
+.catalog-v2-growth-section .catalog-v2-section-heading button {
+  min-height: 29px;
+  padding: 4px 8px;
+  font-size: 0.65rem;
+}
+.catalog-v2-growth-table { min-width: 0; }
+.catalog-v2-growth-head {
+  display: grid;
+  grid-template-columns: minmax(82px, 1fr) minmax(100px, 2fr) 64px;
+  gap: 8px;
+  padding: 5px 8px 8px;
+  color: var(--catalog-muted);
+  font-size: 0.65rem;
+}
+.catalog-v2-growth-head span:nth-child(2) { grid-column: 2; }
+.catalog-v2-growth-head span:nth-child(3) { display: none; }
+.catalog-v2-growth-head span:last-child { grid-column: 3; }
+
+.catalog-v2-growth-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0 !important;
+  list-style: none;
+}
+.catalog-v2-growth-list > li {
+  display: grid;
+  grid-template-columns: minmax(82px, 1fr) minmax(100px, 2fr) 64px;
+  gap: 6px 8px;
+  align-items: center;
+  padding: 7px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--catalog-border);
+  border-radius: 0;
+}
+.catalog-v2-growth-list li > strong { font-size: 0.7rem; }
+.catalog-v2-growth-list li > p,
+.catalog-v2-growth-list li > small { grid-column: 1 / -1; margin: 0; font-size: 0.67rem; line-height: 1.4; }
+.catalog-v2-growth-list li > small { color: var(--catalog-muted); }
+.catalog-v2-skill-transition {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);
+  gap: 4px;
+  align-items: center;
+}
+.catalog-v2-skill-transition > span:not(.catalog-v2-skill-arrow) { min-width: 0; }
+.catalog-v2-skill-transition small { display: block; color: var(--catalog-muted); font-size: 0.63rem; }
+.catalog-v2-skill-transition b { display: block; font-size: 0.67rem; line-height: 1.3; overflow-wrap: anywhere; }
+.catalog-v2-skill-arrow { font-size: 0.78rem; text-align: center; }
+.catalog-v2-skill-bar { display: block; height: 6px; margin-top: 5px; overflow: hidden; border-radius: 999px; background: var(--catalog-soft); }
+.catalog-v2-skill-bar > i { display: block; height: 100%; border-radius: inherit; background: var(--color-info-text, #64a6ed); }
+.catalog-v2-skill-bar--forecast > i { background: var(--catalog-highlight); }
+.catalog-v2-growth-delta { font-size: 0.69rem; font-weight: 750; color: var(--catalog-highlight); text-align: right; }
+
+.catalog-v2-benefits-section {
+  border-left: 1px solid var(--catalog-border) !important;
+  padding-left: 12px !important;
+}
+.catalog-v2-benefits-section > ul {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.catalog-v2-benefits-section > ul > li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid var(--catalog-border);
+  border-radius: 10px;
+  background: var(--catalog-soft);
+}
+.catalog-v2-benefit-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--catalog-highlight);
+  border-radius: 8px;
+  background: var(--catalog-surface);
+}
+.catalog-v2-benefits-section li strong { font-size: 0.72rem; }
+.catalog-v2-benefits-section li p { font-size: 0.68rem; line-height: 1.4; }
+.catalog-v2-benefits-section li small { font-size: 0.66rem; }
+
+.catalog-v2-stage-section { padding-top: 6px !important; }
+.catalog-v2-detail-grid .catalog-v2-stage-track {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0;
+  margin: 0;
+  padding: 12px 0 5px;
+  overflow-x: auto;
+  list-style: none;
+  scrollbar-width: thin;
+}
+.catalog-v2-stage-track > li {
+  position: relative;
+  flex: 1 0 120px;
+  min-width: 120px;
+  border: 0;
+  padding: 0 6px 0 0;
+}
+.catalog-v2-stage-track > li::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  left: 32px;
+  right: 0;
+  border-top: 1px dashed var(--catalog-muted);
+  opacity: .6;
+}
+.catalog-v2-stage-track > li:last-child::before { display: none; }
+.catalog-v2-stage-index {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 29px;
+  height: 29px;
+  color: var(--catalog-ink);
+  border: 1px solid var(--catalog-border);
+  border-radius: 50%;
+  background: var(--catalog-surface);
+  font-size: 0.72rem;
+}
+.catalog-v2-stage-track > li:first-child .catalog-v2-stage-index {
+  border-color: var(--catalog-highlight);
+  color: var(--catalog-highlight);
+}
+.catalog-v2-stage-content { padding: 7px 6px 0 0; }
+.catalog-v2-stage-content strong { font-size: 0.69rem; line-height: 1.35; }
+.catalog-v2-stage-content p { font-size: 0.65rem !important; line-height: 1.35; }
+.catalog-v2-stage-content small { color: var(--catalog-muted); font-size: 0.63rem; }
+.catalog-v2-plan-note { font-size: 0.67rem !important; color: var(--catalog-muted); }
+
+.catalog-v2-support-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 10px !important;
+  border-top: 1px solid var(--catalog-border) !important;
+}
+.catalog-v2-support-section svg { flex: none; color: var(--catalog-highlight); }
+.catalog-v2-support-section strong { font-size: 0.76rem; }
+
+.catalog-v2-reasons-section {
+  padding-top: 10px !important;
+  border-top: 1px solid var(--catalog-border) !important;
+}
+.catalog-v2-reasons-section h3 { margin-bottom: 4px; }
+.catalog-v2-reasons-section ul { display: grid; gap: 3px; margin: 0 0 6px; padding-left: 15px; font-size: 0.69rem; }
+.catalog-v2-reasons-section summary { font-size: 0.71rem; }
+.catalog-v2-detail-footer {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  padding-top: 12px !important;
+  border-top: 1px solid var(--catalog-border);
+}
+.catalog-v2-detail-footer > small { flex: 1 1 auto; color: var(--catalog-muted); font-size: 0.66rem; }
+.catalog-v2-detail-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.catalog-v2-detail-actions button { min-width: 130px; font-size: 0.72rem; }
+.catalog-v2-detail-actions .catalog-v2-primary { background: var(--catalog-highlight); color: var(--catalog-accent-ink); font-weight: 800; }
+
+/* Reference 02: structured consent dialog with four top facts. */
+.catalog-v2-conditions {
+  width: min(780px, 100%);
+  padding: 17px 18px;
+  gap: 12px;
+}
+.catalog-v2-conditions .catalog-v2-conditions-header {
+  display: grid;
+  grid-template-columns: 47px minmax(0, 1fr) 32px;
+  gap: 12px;
+  align-items: start;
+}
+.catalog-v2-conditions-header h2 { margin: 0 0 4px; font-size: 1.25rem; }
+.catalog-v2-conditions-header strong { display: block; font-size: 0.9rem; }
+.catalog-v2-conditions-header p { margin: 2px 0 5px; color: var(--catalog-muted); font-size: 0.71rem; }
+.catalog-v2-conditions-header .catalog-v2-tags { margin: 0; gap: 5px; }
+.catalog-v2-conditions-header .catalog-v2-tags li { font-size: 0.69rem; }
+.catalog-v2-conditions-header button { min-width: 32px; min-height: 32px; padding: 3px; }
+.catalog-v2-conditions-note { margin: 0; color: var(--catalog-muted); font-size: 0.75rem; }
+
+.catalog-v2-conditions-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.catalog-v2-conditions-stats > div {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px;
+  background: var(--catalog-soft);
+  border: 1px solid var(--catalog-border);
+  border-radius: 10px;
+}
+.catalog-v2-conditions-stats svg { color: var(--catalog-highlight); }
+.catalog-v2-conditions-stats strong { font-size: 0.75rem; overflow-wrap: anywhere; line-height: 1.35; }
+.catalog-v2-conditions-stats small { color: var(--catalog-muted); font-size: 0.67rem; }
+
+.catalog-v2-terms-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.catalog-v2-terms-grid section { padding: 10px 12px; }
+.catalog-v2-terms-grid section h3 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 7px;
+  font-size: 0.81rem;
+}
+.catalog-v2-terms-grid h3 svg { flex: none; color: var(--catalog-highlight); }
+.catalog-v2-terms-grid h4 { margin: 9px 0 4px; font-size: 0.73rem; }
+.catalog-v2-terms-grid section p, .catalog-v2-terms-grid section li {
+  margin: 2px 0;
+  font-size: 0.73rem;
+  line-height: 1.5;
+}
+.catalog-v2-terms-grid ul { display: grid; gap: 4px; margin: 0; padding-left: 18px; }
+.catalog-v2-terms-support { grid-column: 1 / -1; }
+.catalog-v2-terms-disclosure { grid-column: 1 / -1; }
+.catalog-v2-consent {
+  gap: 9px;
+  margin-top: 10px;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--catalog-border);
+}
+.catalog-v2-consent label { font-size: 0.75rem; }
+.catalog-v2-conditions-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}
+.catalog-v2-conditions-actions button { min-width: 160px; }
+.catalog-v2-conditions-actions .catalog-v2-primary {
+  color: var(--catalog-accent-ink);
+  background: var(--catalog-highlight);
+  font-weight: 800;
+}
+
+/* Reference 03: scannable list rows with match, outcome and rationale. */
+.catalog-v2-workspace[data-layout="list"] { grid-template-columns: minmax(0, 1fr); }
+.catalog-v2-table-head,
+.catalog-v2-table-row {
+  grid-template-columns: 25px minmax(150px, 1.7fr) minmax(90px, 0.85fr) minmax(95px, 0.96fr) minmax(100px, 0.95fr) minmax(98px, 0.9fr) minmax(135px, 1.24fr) minmax(135px, 1.2fr) minmax(80px, 0.7fr);
+  gap: 7px;
+  padding: 10px 12px;
+}
+.catalog-v2-table-head { font-size: 0.69rem; }
+.catalog-v2-table-row { min-height: 76px; cursor: pointer; }
+.catalog-v2-table-row:hover { border-color: var(--catalog-highlight); }
+.catalog-v2-table-number { color: var(--catalog-muted); font-weight: 800; }
+.catalog-v2-table-task {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+.catalog-v2-table-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  background: var(--catalog-soft);
+  border-radius: 8px;
+  color: var(--catalog-highlight);
+}
+.catalog-v2-table-task-text { display: grid; min-width: 0; }
+.catalog-v2-table-task-text strong { font-size: 0.73rem; line-height: 1.35; }
+.catalog-v2-table-task-text small { font-size: 0.66rem; }
+.catalog-v2-table-company { display: grid; gap: 3px; }
+.catalog-v2-table-company strong { font-size: 0.73rem; overflow-wrap: anywhere; }
+.catalog-v2-table-company small { font-size: 0.64rem; color: var(--catalog-muted); }
+.catalog-v2-table-directions { display: flex; flex-wrap: wrap; gap: 4px; }
+.catalog-v2-table-directions small {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 6px;
+  border-radius: 999px;
+  background: var(--catalog-soft);
+  font-size: 0.64rem;
+}
+.catalog-v2-table-match .catalog-v2-match-visual {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.catalog-v2-table-match .catalog-v2-match-visual svg { flex: none; width: 37px; height: 37px; }
+.catalog-v2-table-match .catalog-v2-match { padding: 0; border: 0; font-size: 0.66rem; white-space: normal; }
+.catalog-v2-table-deadline, .catalog-v2-table-benefit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.catalog-v2-table-deadline svg, .catalog-v2-table-benefit svg { flex: none; color: var(--catalog-highlight); }
+.catalog-v2-table-deadline strong, .catalog-v2-table-benefit strong, .catalog-v2-table-reason strong {
+  display: block;
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+.catalog-v2-table-deadline small, .catalog-v2-table-benefit small, .catalog-v2-table-reason small {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.64rem;
+  color: var(--catalog-muted);
+  line-height: 1.3;
+}
+.catalog-v2-table-actions { align-items: center; gap: 4px; }
+.catalog-v2-table-actions button { min-width: 33px; min-height: 36px; padding: 5px; }
+.catalog-v2-table-actions .catalog-v2-list-apply { font-size: 0.63rem; padding: 5px 7px; }
+
+/* Desktop has the full reference strip. On small screens all optional controls
+   remain accessible through the original ARIA disclosure button. */
+@media (min-width: 1121px) {
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters[data-open="false"],
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters[data-open="true"] {
+    display: contents;
+  }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters label {
+    flex: 1 1 auto;
+  }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(1) { max-width: 104px; }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(2) { max-width: 92px; }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(3) { max-width: 103px; }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(4) { max-width: 95px; }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(5) { max-width: 86px; }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(6) { max-width: 83px; }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(7) { max-width: 140px; }
+}
+
+@media (max-width: 1350px) {
+  .catalog-v2-detail .catalog-v2-detail-grid {
+    grid-template-columns: minmax(0, 1.6fr) minmax(160px, 0.8fr);
+  }
+  .catalog-v2-table-head,
+  .catalog-v2-table-row { gap: 5px; padding: 10px; }
+}
+
+@media (max-width: 1120px) {
+  .catalog-v2-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .catalog-v2-heading { flex-direction: column; align-items: stretch; }
+  .catalog-v2-filter-rail { flex-wrap: wrap; }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters[data-open="false"] { display: none; }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters[data-open="true"] {
+    display: grid;
+    order: 10;
+    flex: 0 0 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding-top: 8px;
+  }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters label { font-size: 0.74rem; }
+  .catalog-v2-filter-rail .catalog-v2-layout { margin-left: auto; }
+  .catalog-v2-table-head { display: none; }
+  .catalog-v2-table-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 11px;
+    margin-bottom: 12px;
+    border: 1px solid var(--catalog-border);
+    border-radius: 13px;
+  }
+  .catalog-v2-table-row [role="cell"][data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    color: var(--catalog-muted);
+    font-size: 0.65rem;
+  }
+  .catalog-v2-table-number { display: none; }
+  .catalog-v2-table-task { grid-column: 1 / -1; }
+  .catalog-v2-table-actions { grid-column: 1 / -1; justify-content: end; }
+}
+
+@media (max-width: 1050px) {
+  .catalog-v2-workspace { grid-template-columns: minmax(0, 1fr); }
+  .catalog-v2-detail .catalog-v2-detail-grid { grid-template-columns: minmax(0, 1fr) minmax(200px, 0.7fr); }
+}
+
+@media (max-width: 680px) {
+  .catalog-v2-heading { gap: 8px; }
+  .catalog-v2-help { align-self: start; }
+  .catalog-v2-kpis { gap: 8px; }
+  .catalog-v2-kpi { min-height: 72px; padding: 9px; gap: 7px; }
+  .catalog-v2-kpi-icon, .catalog-v2-kpi-ring { width: 32px; height: 32px; border-radius: 8px; }
+  .catalog-v2-kpi strong { font-size: 1.08rem; }
+  .catalog-v2-kpi b { font-size: 0.7rem; }
+  .catalog-v2-kpi small { font-size: 0.62rem; }
+  .catalog-v2-filter-rail .catalog-v2-advanced-filters[data-open="true"] { grid-template-columns: minmax(0, 1fr); }
+  .catalog-v2-filter-rail .catalog-v2-layout { flex: 0 0 auto; }
+  .catalog-v2-workspace { grid-template-columns: minmax(0, 1fr); }
+  .catalog-v2-card .catalog-v2-card-top { grid-template-columns: 36px minmax(0, 1fr) auto; gap: 7px; }
+  .catalog-v2-customer-avatar { width: 36px; height: 36px; }
+  .catalog-v2-card .catalog-v2-tags { margin-left: 43px; }
+  .catalog-v2-detail { padding: 12px; }
+  .catalog-v2-detail .catalog-v2-detail-header { grid-template-columns: 40px minmax(0, 1fr) 28px; gap: 7px; }
+  .catalog-v2-detail-avatar { width: 40px; height: 40px; }
+  .catalog-v2-detail-score { grid-column: 1 / -1; grid-row: 2; max-width: none; justify-items: start; display: flex; align-items: center; }
+  .catalog-v2-detail-close { grid-column: 3; grid-row: 1; }
+  .catalog-v2-detail-factrail { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .catalog-v2-detail .catalog-v2-detail-grid { grid-template-columns: minmax(0, 1fr); }
+  .catalog-v2-growth-section, .catalog-v2-benefits-section, .catalog-v2-stage-section,
+  .catalog-v2-support-section, .catalog-v2-reasons-section { grid-column: 1 / -1; }
+  .catalog-v2-benefits-section { border-left: 0 !important; padding-left: 0 !important; }
+  .catalog-v2-growth-head { display: none; }
+  .catalog-v2-growth-list > li { grid-template-columns: minmax(0, 1fr); }
+  .catalog-v2-growth-list > li > strong, .catalog-v2-growth-list > li > .catalog-v2-skill-transition,
+  .catalog-v2-growth-list > li > .catalog-v2-growth-delta { grid-column: 1; text-align: left; }
+  .catalog-v2-detail-footer { flex-direction: column; align-items: stretch; }
+  .catalog-v2-detail-actions { justify-content: stretch; }
+  .catalog-v2-detail-actions button { flex: 1 1 140px; }
+  .catalog-v2-conditions-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .catalog-v2-terms-grid { grid-template-columns: minmax(0, 1fr); }
+  .catalog-v2-terms-grid > section { grid-column: 1 / -1; }
+  .catalog-v2-conditions-actions { justify-content: stretch; }
+  .catalog-v2-conditions-actions button { flex: 1 1 45%; min-width: 0; }
+  .catalog-v2-table-row { grid-template-columns: minmax(0, 1fr); }
+  .catalog-v2-table-row [role="cell"] { grid-column: 1 / -1; }
+}
+
+/* Specificity reconciliation with the original catalog styles.
+   Without this, legacy full-width section placement defeats the approved
+   two-column skill/benefit composition, and legacy cards defeat the timeline. */
+@media (min-width: 1051px) {
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-growth-section { grid-column: 1; }
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-benefits-section { grid-column: 2; }
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-stage-section { grid-column: 1 / -1; }
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-support-section { grid-column: 1; }
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-reasons-section { grid-column: 2; }
+}
+.catalog-v2-detail-grid .catalog-v2-growth-list {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.catalog-v2-detail-grid .catalog-v2-stage-track > li {
+  flex: 1 0 105px;
+  max-width: none;
+  min-width: 105px;
+  gap: 3px;
+  padding: 0 6px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.catalog-v2-match-ring {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+.catalog-v2-match-ring svg { grid-area: 1 / 1; }
+.catalog-v2-match-ring strong {
+  grid-area: 1 / 1;
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.82rem;
+}
+.catalog-v2-detail-score .catalog-v2-match { font-size: 0; }
+.catalog-v2-table-match .catalog-v2-match-ring strong { font-size: 0.58rem; }
+@media (max-width: 680px) {
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-growth-section,
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-benefits-section,
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-stage-section,
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-support-section,
+  .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-reasons-section { grid-column: 1 / -1; }
+}
+
+/* The approved desktop card keeps explanatory matching secondary to skills,
+   stages and actions. Reveal it on demand without hiding the accessible heading. */
+.catalog-v2-reasons-disclosure > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 42px;
+  cursor: pointer;
+  list-style: none;
+}
+.catalog-v2-reasons-disclosure > summary::-webkit-details-marker { display: none; }
+.catalog-v2-reasons-disclosure > summary h3 { margin: 0; font-size: 0.79rem; }
+.catalog-v2-reasons-disclosure[open] > summary svg { transform: rotate(180deg); }
+.catalog-v2-reasons-disclosure > ul { padding-top: 6px; }
+.catalog-v2-support-section {
+  min-height: 48px;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+}
+.catalog-v2-stage-content p {
+  max-height: 2.7em;
+  overflow: hidden;
+}
+@media (min-width: 1051px) {
+  .catalog-v2-detail .catalog-v2-detail-grid { row-gap: 6px; }
+  .catalog-v2-detail-footer { padding-top: 8px !important; }
+}
+
+
+/* Reference-image acceptance continuation: preserve valid dt/dd semantics,
+   keep desktop table actions in a single scanline, and pass light WCAG AA. */
+.catalog-v2-detail-factrail > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: center;
+  gap: 3px;
+}
+
+.catalog-v2-detail-factrail dt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.catalog-v2-detail-factrail dt svg { width: 17px; height: 17px; }
+.catalog-v2-detail-factrail dd { margin: 0; }
+
+@media (min-width: 1121px) {
+  .catalog-v2-table-head,
+  .catalog-v2-table-row {
+    grid-template-columns:
+      22px
+      minmax(170px, 1.7fr)
+      minmax(100px, 0.9fr)
+      minmax(100px, 0.9fr)
+      minmax(110px, 0.9fr)
+      minmax(95px, 0.8fr)
+      minmax(130px, 1.15fr)
+      minmax(125px, 1.1fr)
+      minmax(160px, 1.25fr);
+    gap: 5px;
+    padding: 5px 9px;
+  }
+
+  .catalog-v2-table-row { min-height: 72px; }
+  .catalog-v2-table-actions {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 3px;
+    min-width: 0;
+  }
+  .catalog-v2-table-actions button {
+    flex: 0 0 auto;
+    min-width: 37px;
+    min-height: 40px;
+    padding: 5px 6px;
+  }
+  .catalog-v2-table-actions .catalog-v2-list-apply {
+    min-width: 48px;
+    font-size: 0.67rem;
+  }
+  .catalog-v2-table-task-text strong { line-height: 1.22; }
+  .catalog-v2-table-task-text small,
+  .catalog-v2-table-reason small,
+  .catalog-v2-table-benefit small { line-height: 1.2; }
+}
+
+html[data-theme="light"] .catalog-v2 {
+  /* Teal #0d9488 is only 3.74:1 on white at small sizes. */
+  --catalog-highlight: #0b716d;
+}
+html[data-theme="light"] .catalog-v2 .catalog-v2-kpi-ring,
+html[data-theme="light"] .catalog-v2 .catalog-v2-top-match,
+html[data-theme="light"] .catalog-v2 .catalog-v2-match,
+html[data-theme="light"] .catalog-v2 .catalog-v2-customer-verified,
+html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
+  color: #0b716d;
+}
+
+/* Unknown relevance is a real, visible status, not an empty ring. */
+.catalog-v2-detail-score .catalog-v2-match--unknown {
+  font-size: 0.77rem;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+/* Reference 03 requires dense rows. Full copy remains in DOM and in the
+   selected detail; clamp only desktop summary previews, never mobile cards. */
+@media (min-width: 1121px) {
+  .catalog-v2-table-task-text,
+  .catalog-v2-table-company,
+  .catalog-v2-table-deadline > span,
+  .catalog-v2-table-benefit > span,
+  .catalog-v2-table-reason {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .catalog-v2-table-task-text strong,
+  .catalog-v2-table-company strong,
+  .catalog-v2-table-benefit strong,
+  .catalog-v2-table-reason strong {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+  .catalog-v2-table-task-text small,
+  .catalog-v2-table-company small,
+  .catalog-v2-table-deadline small,
+  .catalog-v2-table-benefit small,
+  .catalog-v2-table-reason small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .catalog-v2-table-directions {
+    max-height: 50px;
+    overflow: hidden;
+    align-content: center;
+  }
+}
+
+/* Approved 1672px reference: 10 results occupy approximately 600px.
+   Preserve 40px controls while eliminating artificial row min-height. */
+@media (min-width: 1121px) {
+  .catalog-v2-table-row {
+    min-height: 60px;
+    padding-block: 5px;
+  }
+}
+
+/* At the source width, compact task cards align the mini-facts and the
+   existing functional actions on one line, instead of adding a fourth row.
+   On smaller screens keep the familiar stacked CTA layout. */
+@media (min-width: 1550px) {
+  .catalog-v2-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-content: start;
+    column-gap: 8px;
+    row-gap: 8px;
+  }
+
+  .catalog-v2-card > header,
+  .catalog-v2-card > .catalog-v2-tags,
+  .catalog-v2-card > .catalog-v2-card-status,
+  .catalog-v2-card > .catalog-v2-eligibility {
+    grid-column: 1 / -1;
+  }
+
+  .catalog-v2-card .catalog-v2-card-quickfacts {
+    grid-column: 1;
+    grid-row: 3;
+    align-self: end;
+    gap: 4px 8px;
+  }
+
+  .catalog-v2-card .catalog-v2-card-actions {
+    grid-column: 2;
+    grid-row: 3;
+    align-self: end;
+    justify-self: end;
+    padding-top: 0;
+    border-top: 0;
+    gap: 4px;
+  }
+
+  .catalog-v2-card .catalog-v2-card-actions button {
+    min-height: 36px;
+    padding: 5px 7px;
+    white-space: nowrap;
+  }
+}
+
+/* Keep modal content readable while moving toward source modal proportions. */
+@media (min-width: 900px) {
+  .catalog-v2-conditions {
+    width: min(720px, calc(100vw - 36px));
+    padding-inline: 16px;
+  }
+}
+
+/* Final source-viewport density: match compact 60px list rows and the
+   approved hover-to-inspect card pattern. Secondary commands remain
+   keyboard discoverable and reachable via the selected detail panel. */
+@media (min-width: 1550px) {
+  .catalog-v2-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 11px 14px;
+  }
+
+  .catalog-v2-card .catalog-v2-card-actions {
+    position: absolute;
+    z-index: 2;
+    right: 10px;
+    bottom: 7px;
+    display: flex;
+    padding: 4px;
+    border: 1px solid var(--catalog-border);
+    border-radius: 9px;
+    background: var(--catalog-surface);
+    box-shadow: 0 4px 14px rgb(0 0 0 / 14%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease;
+  }
+
+  .catalog-v2-card:hover .catalog-v2-card-actions,
+  .catalog-v2-card:focus-within .catalog-v2-card-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .catalog-v2-card .catalog-v2-card-quickfacts {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1121px) {
+  .catalog-v2-table-row {
+    min-height: 58px;
+    padding-block: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-v2-card .catalog-v2-card-actions { transition: none; }
+}
+
+/* Source card #01: explainability stays available, not repeated as two
+   paragraphs inside every skill row. Benefits remain conditional and truthful. */
+.catalog-v2-growth-caveat {
+  margin: 7px 0 3px !important;
+  font-size: 0.68rem !important;
+  line-height: 1.35;
+  color: var(--catalog-muted);
+}
+
+.catalog-v2-growth-explanations {
+  padding: 5px 0 2px;
+  color: var(--catalog-muted);
+  font-size: 0.7rem;
+}
+
+.catalog-v2-growth-explanations summary {
+  cursor: pointer;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  color: var(--catalog-ink);
+  font-weight: 650;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+}
+
+.catalog-v2-growth-explanations ul {
+  padding: 8px 0 2px 15px;
+  margin: 0;
+}
+
+.catalog-v2-growth-explanations li {
+  margin-bottom: 8px;
+}
+
+.catalog-v2-growth-explanations li strong {
+  display: block;
+  font-size: 0.7rem;
+}
+
+.catalog-v2-growth-explanations li p,
+.catalog-v2-growth-explanations li small {
+  margin: 3px 0;
+  line-height: 1.4;
+  font-size: 0.68rem;
+  color: var(--catalog-muted);
+}
+
+.catalog-v2-benefits-section > ul { gap: 6px; }
+
+.catalog-v2-benefits-section > ul > li {
+  padding: 6px 7px;
+  align-items: center;
+  gap: 7px;
+}
+
+.catalog-v2-benefit-icon {
+  width: 29px;
+  height: 29px;
+}
+
+.catalog-v2-benefits-section li p {
+  max-width: 100%;
+  margin: 2px 0 !important;
+  font-size: 0.66rem;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalog-v2-benefits-section li small {
+  display: block;
+  line-height: 1.2;
+  color: var(--catalog-muted);
+}
+
+
+/* The ring already renders the numeric percentage. Keep its full label
+   accessible to assistive technology without doubling visible text or
+   colliding with the adjacent deadline column. */
+.catalog-v2-table-match .catalog-v2-match-visual--ring-only {
+  display: inline-grid;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  max-width: 100%;
+}
+
+.catalog-v2-table-match .catalog-v2-match-visual--ring-only > .catalog-v2-match {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.catalog-v2-table-number {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: normal;
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* A 9-column reference data table requires the wide source viewport.
+   At intermediate desktops the shell reserves ~244px for navigation; switch
+   to two scan-friendly columns before the content would horizontally spill. */
+@media (min-width: 681px) and (max-width: 1380px) {
+  .catalog-v2-table-head { display: none; }
+
+  .catalog-v2-table-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+    min-height: 0;
+    margin-bottom: 10px;
+    padding: 13px 15px;
+    border: 1px solid var(--catalog-border);
+    border-radius: 12px;
+  }
+
+  .catalog-v2-table-row [role="cell"][data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    color: var(--catalog-muted);
+    font-size: 0.66rem;
+    font-weight: 650;
+  }
+
+  .catalog-v2-table-number { display: none; }
+  .catalog-v2-table-task { grid-column: 1 / -1; }
+  .catalog-v2-table-actions { grid-column: 1 / -1; justify-content: flex-end; }
+}
+
+
+/* Published customer benefit conditions must stay fully readable on mobile;
+   no ellipsis or min-content overflow may hide mandatory qualifications. */
+@media (max-width: 680px) {
+  .catalog-v2-benefits-section > ul > li > div {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .catalog-v2-benefits-section li p {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+    line-height: 1.4;
+  }
+}
+
+
+/* On narrow screens the help trigger is left-aligned; anchor its floating
+   explanation to that same edge so no guidance gets clipped off-screen. */
+@media (max-width: 680px) {
+  .catalog-v2-help > p {
+    left: 0;
+    right: auto;
+    width: min(320px, calc(100vw - 28px));
+    max-width: calc(100vw - 28px);
+    overflow-wrap: anywhere;
+  }
+}
+
+
+/*
+ * Approved source 01 uses one-screen composition at 1672×941.
+ * Compact the large-desktop preview only; full source copy remains in DOM,
+ * screen-reader accessible and visible in the mobile/tablet layout.
+ * No skill level or eligibility forecast is synthesized by these rules.
+ */
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2 { gap: 10px; }
+
+  .catalog-v2-detail {
+    gap: 7px;
+    padding: 11px 13px;
+  }
+
+  .catalog-v2-detail .catalog-v2-detail-header { gap: 7px; }
+  .catalog-v2-detail-identity h2 {
+    margin-bottom: 4px;
+    font-size: 1.12rem;
+    line-height: 1.18;
+  }
+  .catalog-v2-detail-customer { margin-bottom: 3px; }
+  .catalog-v2-detail-description {
+    margin-bottom: 4px;
+    line-height: 1.3;
+    font-size: 0.75rem;
+  }
+  .catalog-v2-detail .catalog-v2-tags li { padding: 2px 6px; }
+  .catalog-v2-detail-score .catalog-v2-match-visual svg {
+    width: 56px;
+    height: 56px;
+  }
+
+  .catalog-v2-detail-factrail {
+    padding: 6px 0;
+    gap: 5px;
+  }
+  .catalog-v2-detail .catalog-v2-detail-grid { gap: 6px 10px; }
+  .catalog-v2-detail-grid h3 {
+    margin-bottom: 5px;
+    font-size: 0.81rem;
+  }
+  .catalog-v2-growth-section .catalog-v2-section-heading button {
+    min-height: 25px;
+    padding: 3px 6px;
+  }
+  .catalog-v2-growth-head { padding: 3px 5px 4px; }
+  .catalog-v2-growth-list > li {
+    padding: 4px 5px;
+    gap: 4px;
+  }
+  .catalog-v2-skill-transition > span:not(.catalog-v2-skill-arrow) {
+    min-height: 0;
+    padding: 4px 5px;
+    gap: 2px;
+  }
+  .catalog-v2-skill-transition small {
+    font-size: 0.59rem;
+    line-height: 1.08;
+  }
+  .catalog-v2-skill-transition b {
+    font-size: 0.62rem;
+    line-height: 1.13;
+  }
+  .catalog-v2-growth-caveat {
+    margin: 4px 0 2px !important;
+    font-size: 0.61rem !important;
+    line-height: 1.25 !important;
+  }
+  .catalog-v2-growth-explanations { padding: 0; }
+  .catalog-v2-growth-explanations summary {
+    min-height: 19px;
+    font-size: 0.65rem;
+  }
+
+  .catalog-v2-benefits-section {
+    padding-left: 8px !important;
+  }
+  .catalog-v2-benefits-section > ul { gap: 4px; }
+  .catalog-v2-benefits-section > ul > li {
+    padding: 4px 5px;
+    gap: 5px;
+    align-items: center;
+    border-radius: 7px;
+  }
+  .catalog-v2-benefit-icon {
+    width: 25px;
+    height: 25px;
+    border-radius: 6px;
+  }
+  .catalog-v2-benefit-icon svg { width: 16px; height: 16px; }
+  .catalog-v2-benefits-section li strong {
+    font-size: 0.66rem;
+    line-height: 1.15;
+  }
+  .catalog-v2-benefits-section li p {
+    margin: 2px 0 !important;
+    font-size: 0.61rem;
+    line-height: 1.18;
+  }
+  /* The published condition already qualifies the potential benefit.
+     Preserve complete state text for screen readers without duplicating it. */
+  .catalog-v2-benefits-section li small {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    white-space: nowrap;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+  }
+  .catalog-v2-stage-section { padding-top: 2px !important; }
+  .catalog-v2-detail-grid .catalog-v2-stage-track { padding: 7px 0 3px; }
+  .catalog-v2-stage-track > li .catalog-v2-stage-content p,
+  .catalog-v2-stage-track > li .catalog-v2-stage-state {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    white-space: nowrap;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+  }
+  .catalog-v2-stage-content strong {
+    line-height: 1.16;
+    font-size: 0.68rem;
+  }
+  .catalog-v2-stage-content small {
+    font-size: 0.64rem;
+    line-height: 1.2;
+  }
+  .catalog-v2-plan-note {
+    font-size: 0.64rem !important;
+    line-height: 1.2;
+    margin: 2px 0 !important;
+  }
+  .catalog-v2-support-section {
+    padding-block: 6px;
+  }
+  .catalog-v2-detail-footer {
+    padding-top: 5px !important;
+  }
+}
+
+
+/* Full state remains one text node for AT; the duplicate compact duration is
+   decorative and shown only on wide source-viewport layouts. */
+.catalog-v2-stage-duration { display: none; }
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2-stage-duration { display: inline; }
+}
+
+
+/* The approved first screen keeps the primary decision actions in view.
+   Sticky actions move only within the selected task detail; no information is
+   removed, and they return to the normal document flow on narrow screens. */
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2-detail-footer {
+    position: sticky;
+    z-index: 3;
+    bottom: 0;
+    padding: 7px 0 2px !important;
+    background: var(--catalog-surface);
+    box-shadow: 0 -5px 10px -9px rgb(0 0 0 / 25%);
+  }
+
+  .catalog-v2-support-section {
+    min-height: 30px;
+    padding-block: 3px !important;
+  }
+  .catalog-v2-reasons-disclosure > summary {
+    min-height: 30px;
+  }
+  .catalog-v2-stage-track > li .catalog-v2-stage-content {
+    gap: 2px;
+    padding-top: 3px;
+  }
+  .catalog-v2-detail-grid .catalog-v2-stage-track {
+    padding-top: 5px;
+    padding-bottom: 0;
+  }
+}
+
+
+/* Approved first fold: support and actions share one real layout row.
+   Do not float a sticky button bar over stages or authoritative mentor text. */
+.catalog-v2-detail-footer {
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.catalog-v2-detail-footer .catalog-v2-support-section {
+  flex: 1 1 170px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 0 !important;
+  border: 0;
+}
+
+.catalog-v2-detail-footer .catalog-v2-support-section svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+.catalog-v2-detail-footer .catalog-v2-support-section p {
+  margin: 2px 0 0;
+  color: var(--catalog-muted);
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.catalog-v2-detail-footer-controls {
+  flex: 0 1 auto;
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  min-width: 0;
+}
+.catalog-v2-detail-footer-controls > small {
+  color: var(--catalog-muted);
+  font-size: 0.64rem;
+  line-height: 1.25;
+}
+
+.catalog-v2-detail > .catalog-v2-reasons-section {
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2-detail-footer {
+    position: static;
+    bottom: auto;
+    z-index: auto;
+    box-shadow: none;
+    padding: 5px 0 !important;
+    gap: 8px;
+    background: transparent;
+  }
+  .catalog-v2-detail-footer .catalog-v2-support-section {
+    min-height: 28px;
+  }
+  .catalog-v2-detail-footer .catalog-v2-detail-actions {
+    gap: 5px;
+    flex-wrap: nowrap;
+  }
+  .catalog-v2-detail-footer .catalog-v2-detail-actions button {
+    min-height: 38px;
+    padding: 5px 9px;
+    min-width: 122px;
+  }
+  .catalog-v2-detail > .catalog-v2-reasons-section {
+    margin-top: 0;
+  }
+  .catalog-v2-detail > .catalog-v2-reasons-section .catalog-v2-reasons-disclosure > summary {
+    min-height: 25px;
+  }
+}
+
+@media (max-width: 900px) {
+  .catalog-v2-detail-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .catalog-v2-detail-footer-controls {
+    justify-items: stretch;
+  }
+  .catalog-v2-detail-footer-controls > small { text-align: left; }
+  .catalog-v2-detail-footer .catalog-v2-detail-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+
+
+/* The moved explainability section previously inherited grid-column: 2 from
+   the inner detail matrix and silently created an implicit second column in
+   the outer detail grid. Keep the outer detail strictly single-column. */
+.catalog-v2-detail {
+  grid-template-columns: minmax(0, 1fr);
+}
+.catalog-v2-detail > .catalog-v2-reasons-section {
+  grid-column: 1;
+}
+
+
+/* Last 40px of first-fold alignment come from a noninteractive stepper.
+   Keep every stage title/duration and the plan disclaimer readable. */
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2-detail { gap: 5px; }
+  .catalog-v2-detail .catalog-v2-detail-grid { gap: 3px 9px; }
+  .catalog-v2-stage-section { padding-top: 0 !important; }
+  .catalog-v2-stage-section .catalog-v2-section-heading h3 {
+    margin-bottom: 0;
+  }
+  .catalog-v2-detail-grid .catalog-v2-stage-track {
+    padding-top: 1px;
+    padding-bottom: 0;
+  }
+  .catalog-v2-stage-index { width: 24px; height: 24px; font-size: 0.66rem; }
+  .catalog-v2-stage-track > li::before { top: 12px; left: 26px; }
+  .catalog-v2-stage-track > li .catalog-v2-stage-content {
+    padding-top: 0;
+    gap: 1px;
+  }
+  .catalog-v2-stage-content strong {
+    font-size: 0.66rem;
+    line-height: 1.08;
+  }
+  .catalog-v2-stage-content small {
+    font-size: 0.61rem;
+    line-height: 1.04;
+  }
+  .catalog-v2-plan-note {
+    font-size: 0.61rem !important;
+    line-height: 1.12;
+    margin: 0 !important;
+  }
+  .catalog-v2-detail-footer {
+    padding: 3px 0 !important;
+    gap: 4px;
+  }
+  .catalog-v2-detail-footer-controls { gap: 1px; }
+  .catalog-v2-detail-footer .catalog-v2-support-section {
+    min-height: 24px;
+    gap: 5px;
+  }
+  .catalog-v2-detail-footer .catalog-v2-support-section p {
+    margin: 0;
+    line-height: 1.1;
+  }
+  .catalog-v2-detail-footer .catalog-v2-detail-actions button {
+    min-height: 36px;
+  }
+}
+
+
+/* Compact source-width stepper: use readable labels while retaining the
+   verified height of the skill comparison and published-benefit rail. */
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2-stage-content strong { font-size: 0.7rem; line-height: 1.1; }
+  .catalog-v2-stage-content small { font-size: 0.63rem; line-height: 1.08; }
+}
