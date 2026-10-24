@@ -130,6 +130,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
       : (catalogueRoles[0]?.track_key ?? null);
   }, [catalogueRoles, overview.next_outcome, roleParam]);
   const selected = catalogueRoles.find((role) => role.track_key === selectedKey) ?? null;
+  const passportSkills = Array.isArray(passport.data?.skills) ? passport.data.skills : [];
   const primaryKey = primaryTrajectoryKey(overview);
   const selectedRoadmap =
     selected !== null
@@ -339,11 +340,11 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           </header>
           {passport.isPending && <p role="status">Загружаем подтверждённые навыки…</p>}
           {passport.isError && <p role="status">Не удалось загрузить скилл-паспорт.</p>}
-          {passport.data?.skills?.length === 0 && <p>Подтверждённые навыки появятся после проверки личного вклада в проект.</p>}
-          {passport.data && passport.data.skills.length > 0 && (
+          {!passport.isPending && !passport.isError && passportSkills.length === 0 && <p>Подтверждённые навыки появятся после проверки личного вклада в проект.</p>}
+          {passportSkills.length > 0 && (
             <ul className="trajectory-v2-skill-list">
-              {passport.data.skills.slice(0, 4).map((skill, index) => {
-                const maxCount = Math.max(1, ...passport.data.skills.map((entry) => entry.confirmed_case_count));
+              {passportSkills.slice(0, 4).map((skill, index) => {
+                const maxCount = Math.max(1, ...passportSkills.map((entry) => entry.confirmed_case_count));
                 return (
                   <li key={skill.key}>
                     <span className="trajectory-v2-skill-icon" data-tone={index % 4}>{["▤", "✧", "▣", "⌁"][index % 4]}</span>
@@ -368,7 +369,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 <h2>Все грейды роли «{selected?.title ?? "Моя роль"}»</h2>
                 <p>Изучай уровни и свой путь профессионального развития</p>
               </div>
-              <button type="button" aria-label="Закрыть" onClick={() => setGradesOpen(false)}>✕</button>
+              <button type="button" aria-label="Закрыть" onClick={() => { setGradesOpen(false); }}>✕</button>
             </header>
             <div className="trajectory-v2-grades-layout">
               <nav className="trajectory-v2-grades-list" aria-label="Выбор грейда">
