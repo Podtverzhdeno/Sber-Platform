@@ -51,7 +51,10 @@ const projectCredential = {
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: { honor_board_enabled: true } }));
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: "Алекс Речной", roles: ["participant"] }] }));
-  await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
+  await page.route("**/api/v1/me", (route) => {
+    const workspaceRoute = new URL(page.url()).pathname.startsWith("/workspace/");
+    return workspaceRoute ? route.fulfill({ json: actor }) : route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } });
+  });
   await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: actor }));
   await page.route("**/api/v1/me/analytics/journey", (route) => route.fulfill({ json: { stages: [], successful: true, next_action: "Продолжить работу над проектом", earnings: { calculated: "0", approved: "0", paid: "0", failed: "0", currency: "RUB", unknown_items: 0 }, freshness: "fresh", generated_at: "2026-10-20T10:00:00Z" } }));
   await page.route("**/api/v1/me/growth/snapshot", (route) => route.fulfill({
@@ -83,10 +86,7 @@ test.beforeEach(async ({ page }) => {
 test("documents panel reveals verification and lands exactly on certificate, project and task checkpoints", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.evaluate(() => {
-    window.history.pushState({}, "", "/workspace/5?legacy=1");
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  });
+  await page.goto("/workspace/5?legacy=1");
 
   const documents = page.getByTestId("document-item");
   await expect(documents.filter({ hasText: "Python: основа" })).toBeVisible();
@@ -102,10 +102,7 @@ test("documents panel reveals verification and lands exactly on certificate, pro
 
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.evaluate(() => {
-    window.history.pushState({}, "", "/workspace/5?legacy=1");
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  });
+  await page.goto("/workspace/5?legacy=1");
   await documents.filter({ hasText: "Проверка прототипа на данных" }).getByRole("button", { name: "Проверить" }).click();
   const projectViewer = page.getByTestId("document-viewer").first();
   await projectViewer.getByRole("link", { name: "Открыть публичную проверку проектного credential" }).click();
@@ -113,10 +110,7 @@ test("documents panel reveals verification and lands exactly on certificate, pro
 
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.evaluate(() => {
-    window.history.pushState({}, "", "/workspace/5?legacy=1");
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  });
+  await page.goto("/workspace/5?legacy=1");
   await page.getByRole("button", { name: /До следующего уровня/ }).click();
   const firstPlanStep = page.getByTestId("plan-step-0");
   await expect(firstPlanStep).toHaveAttribute("href", "/workspace/2");
@@ -137,10 +131,7 @@ test("mobile layout in light theme keeps verification and plan deep links exact"
   const openAnalytics = async (): Promise<void> => {
     await page.getByRole("button", { name: "Меню", exact: true }).click();
     await expect(page.getByRole("button", { name: "Меню", exact: true })).toHaveAttribute("aria-expanded", "true");
-    await page.evaluate(() => {
-    window.history.pushState({}, "", "/workspace/5?legacy=1");
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  });
+    await page.goto("/workspace/5?legacy=1");
   };
 
   await openAnalytics();
@@ -180,10 +171,7 @@ for (const viewport of [
     if (viewport.width < 700) {
       await page.getByRole("button", { name: "Меню", exact: true }).click();
     }
-    await page.evaluate(() => {
-    window.history.pushState({}, "", "/workspace/5?legacy=1");
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  });
+    await page.goto("/workspace/5?legacy=1");
 
     await expect(page.getByRole("heading", { name: "Моя аналитика" })).toBeVisible();
     const profile = page.getByTestId("agentic-profile");
