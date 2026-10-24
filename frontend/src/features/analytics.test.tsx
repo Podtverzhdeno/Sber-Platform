@@ -69,7 +69,19 @@ const monthlyGoal = {
 
 describe("trajectory growth analytics", () => {
   it("keeps partial and unknown values distinct from zero and explains contour colors", () => {
-    const { container } = render(<TrajectoryGrowthAnalytics snapshot={snapshot} />);
+    const baseline = snapshot.trajectories[0];
+    if (baseline === undefined) throw new Error("Missing baseline trajectory");
+    const radarSnapshot = {
+      ...snapshot,
+      trajectories: [{
+        ...baseline,
+        readiness_skills: [
+          ...baseline.readiness_skills,
+          { skill_key: "ops", title: "Сопровождение", current_level: "базовый", target_level: "уверенный", known: true },
+        ],
+      }],
+    };
+    const { container } = render(<TrajectoryGrowthAnalytics snapshot={radarSnapshot} />);
     expect(screen.getByText("Готовность роли:").parentElement).toHaveTextContent("Недостаточно данных");
     expect(screen.getByRole("status")).toHaveTextContent("Неизвестные уровни не заменены нулём");
     expect(screen.getByText("Сейчас: нет подтверждённых данных")).toBeInTheDocument();
@@ -84,8 +96,38 @@ describe("trajectory growth analytics", () => {
     expect(screen.getAllByText("Data pipelines").length).toBeGreaterThan(0);
     expect(screen.queryByText("Проектирование API")).not.toBeInTheDocument();
     expect(screen.getByText("Готовность роли:").parentElement).toHaveTextContent("100%");
-    expect(container.querySelector(".growth-achieved")).toBeInTheDocument();
-    expect(container.querySelector(".growth-deficit")).not.toBeInTheDocument();
+    expect(container.querySelector(".growth-achieved")).not.toBeInTheDocument();
+    expect(screen.getByTestId("trajectory-growth-overview")).toBeInTheDocument();
+  });
+});
+
+describe("analytics visual integrity with sparse data", () => {
+  it("does not render an empty radar when no competency axes exist", () => {
+    const baseline = snapshot.trajectories[0];
+    if (baseline === undefined) throw new Error("Missing baseline trajectory");
+    const empty = {
+      ...snapshot,
+      trajectories: [{
+        ...baseline,
+        readiness_skills: [],
+        completion: { percent: 100, coverage: 1, partial: false },
+        readiness: { percent: 0, coverage: 0, partial: true },
+      }],
+    };
+    const { container } = render(<TrajectoryGrowthAnalytics snapshot={empty} />);
+    expect(screen.getByTestId("trajectory-growth-overview")).toBeInTheDocument();
+    expect(screen.getByText("Прогресс пути")).toBeInTheDocument();
+    expect(screen.getByText("Готовность к роли")).toBeInTheDocument();
+    expect(screen.getByText(/Циклограмма появится/)).toBeInTheDocument();
+    expect(container.querySelector(".trajectory-growth-radar svg")).not.toBeInTheDocument();
+    expect(screen.getByText(/Это не означает, что все навыки равны нулю/)).toBeInTheDocument();
+  });
+
+  it("avoids a degenerate radar polygon when the trajectory has only two skills", () => {
+    const { container } = render(<TrajectoryGrowthAnalytics snapshot={snapshot} />);
+    expect(screen.getByTestId("trajectory-growth-overview")).toBeInTheDocument();
+    expect(container.querySelector(".trajectory-growth-radar svg")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Подробнее о навыке Проектирование API" })).toBeInTheDocument();
   });
 });
 
@@ -110,7 +152,7 @@ describe("trajectory monthly goal projection", () => {
   it("stays silent when the projected goal belongs to another trajectory", () => {
     render(<TrajectoryGrowthAnalytics snapshot={snapshot} goal={{ ...monthlyGoal, track_key: "data" }} />);
     expect(screen.queryByTestId("trajectory-monthly-goal")).not.toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /Циклограмма траектории/ })).toBeInTheDocument();
+    expect(screen.getByTestId("trajectory-growth-overview")).toBeInTheDocument();
   });
 });
 
@@ -314,6 +356,18 @@ function renderDeepLink(url: string) {
   return render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[url]}><DeepLinkProbe /><ParticipantAnalytics /></MemoryRouter></QueryClientProvider>);
 }
 
+describe("participant analytics chart rendering", () => {
+  it("renders real SVG bars for the weekly activity demo instead of relying on percentage CSS heights", async () => {
+    installDeepLinkFetch({});
+    const { container } = renderDeepLink("/analytics");
+    expect(await screen.findByTestId("skill-toggle-api")).toBeInTheDocument();
+    const chart = screen.getByRole("img", { name: /Активность по восьми неделям/ });
+    expect(chart).toHaveAccessibleName(/неделя 8 — 94 действий/);
+    expect(chart.querySelectorAll("svg rect")).toHaveLength(8);
+    expect(container.querySelector(".analytics-demo-notice")).toBeInTheDocument();
+  });
+});
+
 describe("participant analytics drill-down deep links", () => {
   it("restores drilldown from a stable deep link and serializes trajectory and skill selection", async () => {
     installDeepLinkFetch({});
@@ -356,7 +410,7 @@ describe("participant analytics drill-down deep links", () => {
     renderDeepLink("/analytics?trajectory=python&skill=tests");
     await screen.findByTestId("skill-drilldown");
     expect(screen.queryByTestId("trajectory-monthly-goal")).not.toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /Циклограмма траектории/ })).toBeInTheDocument();
+    expect(screen.getByTestId("trajectory-growth-overview")).toBeInTheDocument();
   });
 });
 
