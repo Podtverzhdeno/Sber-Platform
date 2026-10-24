@@ -78,6 +78,8 @@ def test_weighted_readiness_is_complementary_and_only_verified_counts() -> None:
     result = calculate_grade_readiness(PERSON, "agent-developer", policy(), (item,), as_of=NOW)
     assert result.state == "known"
     assert result.completed_percent == Decimal(200) / Decimal(3)
+    assert result.completed_percent is not None
+    assert result.remaining_percent is not None
     assert result.completed_percent + result.remaining_percent == Decimal(100)
     assert not result.ready_for_atomic_transition
     assert result.requirements[1].state == "not_verified"
@@ -148,6 +150,8 @@ def test_scheduled_revocation_applies_only_after_effective_time() -> None:
     )
     assert before.requirements[0].state == "verified"
     assert after.requirements[0].state == "revoked"
+    assert before.completed_percent is not None
+    assert after.completed_percent is not None
     assert before.completed_percent > after.completed_percent
 
 
