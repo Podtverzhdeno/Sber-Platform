@@ -1,0 +1,11 @@
+# Claim TRAJECTORY-CANONICAL-LINKS-20261024
+- session_id: codex-20261024-canonical-navigation
+- status: IN_PROGRESS
+- base_revision: 2e17b6e931c614e10460dd15e07a3fe76c2ca033
+- lane: trajectory-v2-stage-navigation
+- depends_on: [participant-home-trajectory-grades 5.3]
+- write_scope:
+  - frontend/src/features/trajectory-v2/details.tsx
+  - frontend/src/features/trajectory-v2/details.test.tsx
+- verification: unit, typecheck, lint, Playwright and route context tests
+- progress: remove hard-coded workspace index from stage continuation and use authenticated actor navigation; fail-closed when unavailable
