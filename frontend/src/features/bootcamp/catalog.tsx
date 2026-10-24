@@ -121,69 +121,6 @@ function CardExplanation({
   );
 }
 
-function CardActions({ card }: { card: CourseCardState }) {
-  const client = useQueryClient();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const canAct = card.access_state === "available" && card.completion_state === "not_started";
-  const completion = useMutation({
-    mutationFn: (courseKey: string) =>
-      apiRequest(`/api/v1/me/courses/${encodeURIComponent(courseKey)}/completion`, {
-        method: "POST",
-        headers: csrfHeaders(),
-      }),
-    onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: ["bootcamp-catalog"] });
-      await client.invalidateQueries({ queryKey: ["courses"] });
-    },
-  });
-  const learning = useMutation({
-    mutationFn: (courseKey: string) =>
-      apiRequest(`/api/v1/me/courses/${encodeURIComponent(courseKey)}/learning-days`, {
-        method: "POST",
-        headers: csrfHeaders(),
-        body: JSON.stringify({ occurred_at: new Date().toISOString() }),
-      }),
-    onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: ["streak"] });
-    },
-  });
-
-  function openTrajectory() {
-    const next = new URLSearchParams(searchParams);
-    next.set("course", card.key);
-    setSearchParams(next);
-  }
-
-  return (
-    <div className="course-actions">
-      <button type="button" onClick={openTrajectory}>
-        Открыть траекторию
-      </button>
-      {canAct && (
-        <button
-          type="button"
-          className="secondary-button"
-          onClick={() => { completion.mutate(card.key); }}
-        >
-          Отметить завершение
-        </button>
-      )}
-      {canAct && (
-        <button
-          type="button"
-          className="secondary-button"
-          onClick={() => { learning.mutate(card.key); }}
-        >
-          Записать учебный день
-        </button>
-      )}
-      {card.access_state === "available" && (
-        <SafeExternalLink href={card.source_url}>Первоисточник курса</SafeExternalLink>
-      )}
-    </div>
-  );
-}
-
 function CatalogFilters({
   searchParams,
   updateFilter,
