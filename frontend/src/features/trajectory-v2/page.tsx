@@ -492,21 +492,10 @@ export function RoleDetailPanel(props: {
           />
         </div>
       </header>
-      {role.attempt_number === null ? (
-        <section aria-label="Прогресс роли">
-          <p className="trajectory-v2-unselected-note" role="status">
-            Траектория ещё не включена. Персональный прогресс отсутствует — он появится после
-            выбора роли в каталоге траекторий.
-          </p>
-          <small>этапов в каталоге: {role.total_milestones}</small>
-        </section>
-      ) : (
-        <section aria-label="Прогресс роли">
-          <p>
-            Этапов пройдено: {role.completed_milestones} из {role.total_milestones}.
-          </p>
-          <small>Попытка {role.attempt_number}.</small>
-        </section>
+      {role.attempt_number === null && (
+        <p className="trajectory-v2-unselected-note" role="status">
+          Это направление пока не выбрано. Этапы станут доступны после его подключения.
+        </p>
       )}
       <StagePathSection
         role={role}
