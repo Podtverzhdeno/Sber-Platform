@@ -144,6 +144,10 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [compareTarget, setCompareTarget] = useState<string | null>(null);
   const [gradesOpen, setGradesOpen] = useState(false);
+  const [gradeFocus, setGradeFocus] = useState<number>(() => {
+    const candidate = Number(overview.concepts.career_grade.current_grade);
+    return Number.isInteger(candidate) && candidate >= 1 && candidate <= 6 ? candidate : 1;
+  });
   const snapshotTrigger = () => {
     lastOverlayTriggerRef.current =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -357,20 +361,54 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
       </aside>
       </div>
       {gradesOpen && (
-        <div className="trajectory-v2-overlay" onClick={() => { setGradesOpen(false); }}>
-          <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => { event.stopPropagation(); }}>
-            <header><h2>Все уровни</h2><button type="button" aria-label="Закрыть" onClick={() => { setGradesOpen(false); }}>✕</button></header>
-            <p>Грейд определяется подтверждёнными результатами и действующей политикой оценки.</p>
-            <div className="trajectory-v2-grades-list" role="status">
-              <p>Полный перечень грейдов пока не опубликован. Условия и количество уровней появятся после утверждения карьерной политики.</p>
-              {overview.concepts.career_grade.current_grade !== null && (
-                <p><strong>Текущий грейд:</strong> {overview.concepts.career_grade.current_grade}</p>
-              )}
-              {overview.concepts.career_grade.target_grade !== null && (
-                <p><strong>Целевой грейд:</strong> {overview.concepts.career_grade.target_grade}</p>
-              )}
+        <div className="trajectory-v2-overlay" onClick={() => setGradesOpen(false)}>
+          <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => event.stopPropagation()}>
+            <header className="trajectory-v2-grades-heading">
+              <div className="trajectory-v2-grades-symbol" aria-hidden="true">▥</div>
+              <div>
+                <h2>Все грейды роли «{selected?.title ?? "Моя роль"}»</h2>
+                <p>Изучай уровни и свой путь профессионального развития</p>
+              </div>
+              <button type="button" aria-label="Закрыть" onClick={() => setGradesOpen(false)}>✕</button>
+            </header>
+            <div className="trajectory-v2-grades-layout">
+              <nav className="trajectory-v2-grades-list" aria-label="Выбор грейда">
+                {["База и основы","Исследование пользователей","Продуктовые гипотезы","Метрики и приоритизация","Реальные задачи и проекты","Подтверждение компетенций"].map((label,index) => {
+                  const level = index+1;
+                  const current = overview.concepts.career_grade.current_grade === String(level);
+                  return <button type="button" key={level} className="trajectory-v2-grade-option" aria-pressed={gradeFocus===level} onClick={() => setGradeFocus(level)}>
+                    <span className="trajectory-v2-grade-dot">{current ? String(level) : level < Number(overview.concepts.career_grade.current_grade) ? "✓" : String(level)}</span>
+                    <span><strong>Грейд {level}</strong><small>{label}</small></span>
+                    <span aria-hidden="true">›</span>
+                  </button>;
+                })}
+              </nav>
+              <div className="trajectory-v2-grade-explanation">
+                <div className="trajectory-v2-grade-explanation-head">
+                  <div>
+                    <h3>Грейд {gradeFocus}</h3>
+                    {overview.concepts.career_grade.current_grade === String(gradeFocus) && <span>Твой текущий грейд</span>}
+                  </div>
+                  <div className="trajectory-v2-grade-explanation-graphic" aria-hidden="true">⚑</div>
+                </div>
+                <strong>{["База и основы","Исследование пользователей","Продуктовые гипотезы","Метрики и приоритизация","Реальные задачи и проекты","Подтверждение компетенций"][gradeFocus-1]}</strong>
+                <p>Описание уровней приведено для ознакомления с макетом. Официальная политика и требования к этому уровню пока не опубликованы.</p>
+                <div className="trajectory-v2-grade-explanation-progress">
+                  <div className="trajectory-v2-grade-ring"><strong>{overview.concepts.career_grade.current_grade === String(gradeFocus) ? `Грейд ${gradeFocus}` : "—"}</strong></div>
+                  <div>
+                    <small>До следующего грейда</small>
+                    <strong>{overview.concepts.career_grade.current_grade === String(gradeFocus) && overview.concepts.career_grade.readiness_percent !== null ? `${100-overview.concepts.career_grade.readiness_percent}%` : "Проверяем"}</strong>
+                    <progress max={100} value={overview.concepts.career_grade.current_grade === String(gradeFocus) ? overview.concepts.career_grade.readiness_percent ?? 0 : 0}/>
+                    <small>{overview.concepts.career_grade.hint ?? "Официальные критерии будут доступны после публикации политики"}</small>
+                  </div>
+                </div>
+                <div className="trajectory-v2-grade-expectations">
+                  <h4>Ключевые ожидания на этом уровне</h4>
+                  <p>Точные требования к грейду и подтверждённые компетенции публикуются серверной политикой, а не определяются интерфейсом.</p>
+                </div>
+                <div className="trajectory-v2-grade-next-note">Следующий уровень — грейд {Math.min(6,gradeFocus+1)} · Подтверждённые компетенции и более сложные задачи</div>
+              </div>
             </div>
-            <small>Версия политики: {overview.concepts.career_grade.policy_version ?? "не опубликована"}. Точный каталог условий недоступен в текущем снимке.</small>
           </section>
         </div>
       )}
