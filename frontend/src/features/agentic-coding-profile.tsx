@@ -33,7 +33,8 @@ const axes = Array.from({ length: AGENTIC_SKILLS.length }, (_, index) => -Math.P
 
 function polarPoint(index: number, level: number): { x: number; y: number } {
   const r = level * 33;
-  return { x: 170 + Math.cos(axes[index]) * r, y: 170 + Math.sin(axes[index]) * r };
+  const angle = axes[index] ?? (-Math.PI / 2);
+  return { x: 170 + Math.cos(angle) * r, y: 170 + Math.sin(angle) * r };
 }
 
 function Radar({ target }: { target: readonly (number | null)[] }) {
