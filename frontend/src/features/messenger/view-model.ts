@@ -120,11 +120,13 @@ export function participantRoleLabel(role: string): string {
 }
 
 export function dialogTitle(channel: ApiChannelView, viewerId: string | null): string {
-  if (channel.title) return channel.title;
   const peers = channel.participants
     .filter((person) => person.id !== viewerId && person.display_name)
     .map((person) => person.display_name);
-  return peers.length ? peers.join(", ") : "Личный чат";
+  if (channel.kind === "personal" && viewerId && channel.participants.some((person) => person.id === viewerId) && peers.length) {
+    return peers.join(", ");
+  }
+  return channel.title || (peers.length ? peers.join(", ") : "Личный чат");
 }
 
 export function dialogTimeLabel(iso: string, now: Date = new Date()): string {
