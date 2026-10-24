@@ -27,7 +27,7 @@ import type {
 import { ContextPanel } from "./messenger/context";
 import type { ChannelWorkContextView } from "./messenger/context-model";
 import { DialogList } from "./messenger/dialogs";
-import { isReferenceChannel, referenceChannels, referenceMessages } from "./messenger/reference-fixtures";
+import { isReferenceChannel, referenceChannels, referenceMessages, referenceSharedFiles } from "./messenger/reference-fixtures";
 import type { KeyValueStorage } from "./messenger/view-model";
 
 export type Role =
@@ -532,7 +532,7 @@ export function MessagingWorkspace({
             viewerId={selectedIsReference ? "reference:me" : personId}
             workContext={contextQuery.data ?? null}
             isReferencePreview={selectedIsReference}
-            sharedFiles={[...new Set(messages.flatMap((message) => message.artifact_refs))]}
+            sharedFiles={selectedIsReference ? (referenceSharedFiles[selected.id] ?? []) : [...new Set(messages.flatMap((message) => message.artifact_refs))]}
             open={contextVisible}
             onClose={isNarrow ? () => { setMobilePane("chat"); } : undefined}
             onOpenTask={(taskId) => {
