@@ -4,6 +4,12 @@
 import type { ApiChannelView, ApiMessageView } from "./contracts";
 
 const base = "2026-10-20T";
+// The approved 01.png community timeline and the final message of 03.png are
+// explicitly headed "Сегодня". Preserve that view independently of when the
+// read-only demonstration is opened; older Elena messages stay on October 20.
+const currentDate = new Date();
+const todayBase =
+  `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}-${String(currentDate.getDate()).padStart(2, "0")}T`;
 type SpecRow = [string,string,string,string,string,number,"community"|"personal"|"task_team"];
 const examples: SpecRow[] = [
   ["mayaki","Маяки","Анна Ковалёва","Друзья! Напоминаю о встречах и возможностях","12:59",4,"community"],
@@ -29,8 +35,8 @@ export const referenceChannels:ApiChannelView[]=examples.map(([key,title,peer,pr
  participants:[me,{id:id(key+"-peer"),display_name:peer,role:"member"}],
  last_message:{id:id(key+"-last"),author_id:id(key+"-peer"),author_name:peer,kind:"text",body:preview,artifact_refs:[],sequence:1,created_at:base+stamp+":00+03:00"}
 }));
-const msg=(key:string,n:number,name:string,clock:string,body:string,artifact_refs:string[]=[]):ApiMessageView=>({
- id:id(`${key}-message-${String(n)}`),author_id:name==="Алекс Речной"?id("me"):id(name),author_name:name,kind:"text",body,artifact_refs,sequence:n,created_at:base+clock+":00+03:00"
+const msg=(key:string,n:number,name:string,clock:string,body:string,artifact_refs:string[]=[],useToday=false):ApiMessageView=>({
+ id:id(`${key}-message-${String(n)}`),author_id:name==="Алекс Речной"?id("me"):id(name),author_name:name,kind:"text",body,artifact_refs,sequence:n,created_at:(useToday?todayBase:base)+clock+":00+03:00"
 });
 export const referenceMessages:Record<string,ApiMessageView[]>={
  [id("mentor")]:[
@@ -38,13 +44,13 @@ export const referenceMessages:Record<string,ApiMessageView[]>={
   msg("mentor",2,"Алекс Речной","09:28","Привет! Уже смотрю данные. Вот обновлённая таблица с метриками по эксперименту.",["Метрики_эксперимента.xlsx"]),
   msg("mentor",3,"Елена Наставник","10:03","Отлично, спасибо!\nМожешь также добавить пояснение по методологии расчёта? Это важно для презентации."),
   msg("mentor",4,"Алекс Речной","10:15","Конечно! Добавил отдельный лист с методологией и краткими выводами.",["Итоговая_методология.pdf"]),
-  msg("mentor",5,"Елена Наставник","12:42","Отлично! Тогда согласовываем этот вариант. Готовлю слайды и добавлю тебя в презентацию. 👍")
+  msg("mentor",5,"Елена Наставник","12:42","Отлично! Тогда согласовываем этот вариант. Готовлю слайды и добавлю тебя в презентацию. 👍",[],true)
  ],
  [id("mayaki")]:[
-  msg("mayaki",1,"Анна Ковалёва","09:24","Друзья! Напоминаю, что на этой неделе стартует серия встреч «Карьера в IT: от обучения к возможностям».\nБудут спикеры из Яндекса, Сбера и Т-Банка.",["Программа_Карьера_в_IT.pdf"]),
-  msg("mayaki",2,"Дмитрий Соколов","10:03","Очень крутая инициатива! Уже зарегистрировался. Такие встречи реально помогают понять, куда двигаться дальше 🎯"),
-  msg("mayaki",3,"Мария Лебедева","11:17","Кстати, мы обновили подборку возможностей для студентов. Там стажировки, гранты и хакатоны.",["Возможности для студентов — октябрь 2026"]),
-  msg("mayaki",4,"Иван Петров","12:28","Добавил в закреп календарь мероприятий. Если у вас есть предложения по новым активностям — пишите в этот чат.")
+  msg("mayaki",1,"Анна Ковалёва","09:24","Друзья! Напоминаю, что на этой неделе стартует серия встреч «Карьера в IT: от обучения к возможностям».\nБудут спикеры из Яндекса, Сбера и Т-Банка.",["Программа_Карьера_в_IT.pdf"],true),
+  msg("mayaki",2,"Дмитрий Соколов","10:03","Очень крутая инициатива! Уже зарегистрировался. Такие встречи реально помогают понять, куда двигаться дальше 🎯",[],true),
+  msg("mayaki",3,"Мария Лебедева","11:17","Кстати, мы обновили подборку возможностей для студентов. Там стажировки, гранты и хакатоны.",["Возможности для студентов — октябрь 2026"],true),
+  msg("mayaki",4,"Иван Петров","12:28","Добавил в закреп календарь мероприятий. Если у вас есть предложения по новым активностям — пишите в этот чат.",[],true)
  ]
 };
 export const referencePinnedMessage="Календарь мероприятий на осень 2026 — возможности, стажировки, митапы";
