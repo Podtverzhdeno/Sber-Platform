@@ -1101,3 +1101,41 @@
 .sberchat-reference .msg-chat__group:has(:focus-visible) .msg-chat__actions {
   opacity:1;visibility:visible;pointer-events:auto;
 }
+
+
+/* Persistent real group creator: styled to the dark Messenger reference. */
+.msg-group-layer{position:fixed;inset:0;z-index:1700}
+.msg-group-backdrop{position:absolute;inset:0;border:0;background:rgba(0,6,17,.76);width:100%;height:100%}
+.msg-group-dialog{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+ width:min(480px,calc(100vw - 24px));max-height:min(85vh,700px);overflow:auto;
+ padding:20px;background:#061c30;border:1px solid #146882;border-radius:16px;
+ box-shadow:0 25px 85px #000b;color:#edfaff}
+.msg-group-dialog>header{display:flex;justify-content:space-between;align-items:center;
+ border-bottom:1px solid #17445e;padding-bottom:14px;margin-bottom:17px}
+.msg-group-dialog>header span{display:flex;align-items:center;gap:10px;font-size:17px}
+.msg-group-dialog>header button{display:grid;place-items:center;width:34px;height:34px;color:#c5e7ff;
+ border:1px solid #205670;border-radius:8px;background:#08273f;cursor:pointer}
+.msg-group-label{display:grid;gap:7px;color:#b8d9f3;font-size:12px}
+.msg-group-label input{height:43px;width:100%;padding:0 13px;color:#f3ffff;
+ border:1px solid #205e79;border-radius:8px;background:#07182a;outline:0}
+.msg-group-label input:focus{border-color:#1eeaf1}
+.msg-group-dialog fieldset{border:0;padding:0;margin:20px 0 0}
+.msg-group-dialog legend{font-size:13px;font-weight:700;color:#e2f7ff;margin-bottom:10px}
+.msg-group-contacts{display:grid;max-height:310px;overflow:auto;gap:5px}
+.msg-group-contact{display:flex;align-items:center;gap:10px;padding:8px 9px;
+ border:1px solid #123c56;border-radius:8px;background:#082138;cursor:pointer}
+.msg-group-contact:hover{border-color:#0bb8cb;background:#0b314c}
+.msg-group-contact input{accent-color:#06d9e3;width:16px;height:16px}
+.msg-group-contact-avatar{display:grid;place-items:center;width:33px;height:33px;
+ border-radius:50%;background:#124368;color:#fff;font-size:15px;font-weight:700}
+.msg-group-contact>span:last-child{display:grid;gap:2px;font-size:12px;color:#eefaff}
+.msg-group-contact small{font-size:10px;color:#93b6d2}
+.msg-group-dialog footer{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}
+.msg-group-dialog footer button{padding:11px 15px;border-radius:8px;cursor:pointer;
+ border:1px solid #1b6684;color:#f1feff;background:#082941;font-weight:700}
+.msg-group-dialog footer button:last-child{background:linear-gradient(120deg,#03c7cb,#04ddef);color:#07263c}
+.msg-group-dialog footer button:disabled{opacity:.5;cursor:not-allowed}
+.msg-group-error,.msg-dialog-action-error{padding:9px 12px;border:1px solid #a24050;
+ border-radius:7px;background:#401b2b;color:#ffd1d8;font-size:12px}
+.msg-dialog-action-error{margin:8px 10px}
+.sberchat-reference .msg-group-create-trigger{display:grid;gap:4px;border-bottom:1px solid #185677;color:#05e3e9}
