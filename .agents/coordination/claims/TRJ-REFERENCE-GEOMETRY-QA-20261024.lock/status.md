@@ -1,0 +1,16 @@
+# Claim TRJ-REFERENCE-GEOMETRY-QA-20261024
+- task_id: TRJ-REFERENCE-GEOMETRY-QA-20261024
+- session_id: gpt6-20261024-trj-geometry-qa
+- status: IN_PROGRESS
+- started_at: 2026-10-24T23:10:00+03:00
+- heartbeat_at: 2026-10-24T23:10:00+03:00
+- base_revision: 98196d7ae563b515b8b67a0aa406ac6baf3ed15c
+- depends_on: [participant-home-trajectory-grades/5.3]
+- lane: quality-ui-v2-visual
+- write_scope:
+  - frontend/e2e/trajectory-reference-geometry.spec.ts
+  - .agents/coordination/claims/TRJ-REFERENCE-GEOMETRY-QA-20261024.lock/status.md
+- shared_files: []
+- verification: Playwright with deterministic intercepted API fixture for role cards, stage path and modal menu
+- progress: claim created; awaiting test implementation
+- blockers: no pixel baselines committed for user reference PNG; production browser credentials unavailable
