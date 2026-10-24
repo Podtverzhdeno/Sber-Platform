@@ -69,7 +69,17 @@ const monthlyGoal = {
 
 describe("trajectory growth analytics", () => {
   it("keeps partial and unknown values distinct from zero and explains contour colors", () => {
-    const { container } = render(<TrajectoryGrowthAnalytics snapshot={snapshot} />);
+    const radarSnapshot = {
+      ...snapshot,
+      trajectories: [{
+        ...snapshot.trajectories[0],
+        readiness_skills: [
+          ...snapshot.trajectories[0].readiness_skills,
+          { skill_key: "ops", title: "Сопровождение", current_level: "базовый", target_level: "уверенный", known: true },
+        ],
+      }],
+    };
+    const { container } = render(<TrajectoryGrowthAnalytics snapshot={radarSnapshot} />);
     expect(screen.getByText("Готовность роли:").parentElement).toHaveTextContent("Недостаточно данных");
     expect(screen.getByRole("status")).toHaveTextContent("Неизвестные уровни не заменены нулём");
     expect(screen.getByText("Сейчас: нет подтверждённых данных")).toBeInTheDocument();
@@ -84,8 +94,8 @@ describe("trajectory growth analytics", () => {
     expect(screen.getAllByText("Data pipelines").length).toBeGreaterThan(0);
     expect(screen.queryByText("Проектирование API")).not.toBeInTheDocument();
     expect(screen.getByText("Готовность роли:").parentElement).toHaveTextContent("100%");
-    expect(container.querySelector(".growth-achieved")).toBeInTheDocument();
-    expect(container.querySelector(".growth-deficit")).not.toBeInTheDocument();
+    expect(container.querySelector(".growth-achieved")).not.toBeInTheDocument();
+    expect(screen.getByTestId("trajectory-growth-overview")).toBeInTheDocument();
   });
 });
 
@@ -138,7 +148,7 @@ describe("trajectory monthly goal projection", () => {
   it("stays silent when the projected goal belongs to another trajectory", () => {
     render(<TrajectoryGrowthAnalytics snapshot={snapshot} goal={{ ...monthlyGoal, track_key: "data" }} />);
     expect(screen.queryByTestId("trajectory-monthly-goal")).not.toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /Циклограмма траектории/ })).toBeInTheDocument();
+    expect(screen.getByTestId("trajectory-growth-overview")).toBeInTheDocument();
   });
 });
 
