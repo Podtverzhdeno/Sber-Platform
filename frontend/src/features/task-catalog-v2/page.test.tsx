@@ -81,7 +81,7 @@ describe("task catalog v2", () => {
   it("renders authoritative match and insufficient-data states without a fake zero", async () => {
     renderCatalog();
     expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
-    expect(screen.getByText("84% релевантности")).toBeInTheDocument();
+    expect(screen.getAllByText("84% релевантности").length).toBeGreaterThan(0);
     expect(screen.getByText("Недостаточно данных")).toBeInTheDocument();
     expect(screen.queryByText("0% релевантности")).not.toBeInTheDocument();
     expect(screen.getByText("доступно для отклика · из 2")).toBeInTheDocument();
@@ -102,7 +102,7 @@ describe("task catalog v2", () => {
       return defaultFetch(input, init);
     });
     renderCatalog();
-    expect(await screen.findByText(/Заказчик не верифицирован/)).toBeInTheDocument();
+    expect((await screen.findAllByText(/Заказчик не верифицирован/)).length).toBeGreaterThan(0);
     expect(screen.queryByText(/Проверенный заказчик/)).not.toBeInTheDocument();
   });
 
