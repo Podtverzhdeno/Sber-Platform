@@ -102,7 +102,7 @@ function isOfflineError(error: unknown): boolean {
   return (typeof navigator !== "undefined" && !navigator.onLine) || error instanceof TypeError;
 }
 
-function MatchBadge({ item, showRing = false }: { item: CatalogItem; showRing?: boolean }) {
+function MatchBadge({ item, showRing = false, ringOnly = false }: { item: CatalogItem; showRing?: boolean; ringOnly?: boolean }) {
   if (item.match.status !== "calculated" || item.match.percent === null) {
     const explanation = item.match.missing_factors
       .map((code) => missingFactorLabels[code] ?? code)
@@ -131,7 +131,7 @@ function MatchBadge({ item, showRing = false }: { item: CatalogItem; showRing?: 
   if (!showRing) return badge;
   const ringPercent = Math.min(100, Math.max(0, Number(item.match.percent)));
   return (
-    <span className="catalog-v2-match-visual">
+    <span className={`catalog-v2-match-visual${ringOnly ? " catalog-v2-match-visual--ring-only" : ""}`}>
       <span className="catalog-v2-match-ring">
         <svg viewBox="0 0 44 44" aria-hidden="true" focusable="false">
           <circle className="catalog-v2-match-ring-track" cx="22" cy="22" r="18" pathLength="100" />
@@ -656,7 +656,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
             onConditions={openConditions}
             onBookmark={(item) => { bookmark.mutate({ taskId: item.task_id, saved: !item.bookmarked }); }}
             onShare={(item) => { void shareTask(item); }}
-            matchBadge={(item) => <MatchBadge item={item} showRing />}
+            matchBadge={(item) => <MatchBadge item={item} showRing ringOnly />}
             formatDuration={formatDuration}
             formatDeadline={formatDeadline}
             difficultyLabel={(value) => value === null ? "Не указана" : difficultyLabels[value] ?? value}
