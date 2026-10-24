@@ -410,7 +410,7 @@ describe("participant analytics drill-down deep links", () => {
     renderDeepLink("/analytics?trajectory=python&skill=tests");
     await screen.findByTestId("skill-drilldown");
     expect(screen.queryByTestId("trajectory-monthly-goal")).not.toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /Циклограмма траектории/ })).toBeInTheDocument();
+    expect(screen.getByTestId("trajectory-growth-overview")).toBeInTheDocument();
   });
 });
 
