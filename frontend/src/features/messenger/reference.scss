@@ -1091,3 +1091,13 @@
 }
 .sberchat-reference .msg-mayaki-preview__copy strong {font-size:13px;line-height:1.18;font-weight:800;}
 .sberchat-reference .msg-mayaki-preview__copy small {font-size:8px;font-weight:600;color:#c5e9ff;}
+
+
+/* Programmatic chat focus must not expose the floating reaction bar on a
+   static screenshot. Show it only on pointer hover or keyboard-visible focus. */
+.sberchat-reference .msg-chat__group:focus-within:not(:hover):not(:has(:focus-visible)) .msg-chat__actions {
+  opacity:0;visibility:hidden;pointer-events:none;
+}
+.sberchat-reference .msg-chat__group:has(:focus-visible) .msg-chat__actions {
+  opacity:1;visibility:visible;pointer-events:auto;
+}
