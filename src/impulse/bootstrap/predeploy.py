@@ -16,7 +16,7 @@ from impulse.bootstrap.settings import Settings
 from impulse.infrastructure.database import Database
 
 
-async def _seed_and_verify(database_url: str) -> None:
+async def seed_and_verify(database_url: str) -> None:
     database = Database(database_url)
     try:
         counts = await seed_demo(database)
@@ -42,7 +42,7 @@ def main() -> None:
         print("DEMO_MODE=false: production data is unchanged; demo seed skipped")
         return
 
-    asyncio.run(_seed_and_verify(settings.database_url.get_secret_value()))
+    asyncio.run(seed_and_verify(settings.database_url.get_secret_value()))
 
 
 if __name__ == "__main__":
