@@ -1,0 +1,20 @@
+# Claim AN-06-LIVE-20261024
+- task_id: AN-06-LIVE-20261024
+- session_id: gpt6-20261024-analytics-live-series
+- status: IN_PROGRESS
+- started_at: 2026-10-24T18:20:00+03:00
+- heartbeat_at: 2026-10-24T18:20:00+03:00
+- base_revision: e1bf004ec2748f6d8972cfafb0dce7badde46100
+- depends_on: [AN-05-UI-20261024]
+- write_scope:
+  - frontend/src/features/analytics.tsx
+  - frontend/src/features/analytics-growth.scss
+  - frontend/src/features/analytics.test.tsx
+  - .agents/coordination/claims/AN-06-LIVE-20261024.lock/status.md
+- shared_files: []
+- verification:
+  - frontend typecheck + lint
+  - frontend unit tests
+  - frontend production build + E2E
+- progress: Implementing trustworthy chart data from existing participant journey and growth snapshot APIs instead of hard-coded samples
+- blockers: authenticated Railway live visual comparison unavailable; no original 1:1 source PNG

@@ -17,23 +17,56 @@ type Metric = { key: string; label: string; numerator: number; denominator: numb
 type RoleAnalyticsData = { role: Role; metrics: Metric[] };
 type GrowthSkill = { skill_key: string; title: string; current_level: string; target_level: string; known: boolean };
 type GrowthTrajectory = { track_key: string; track_title: string; policy_version: number; readiness_skills: GrowthSkill[]; readiness: { percent: number | null; coverage: number; partial: boolean }; completion: { percent: number | null; coverage: number; partial: boolean } };
-type GrowthSnapshot = { snapshot_id: string; generated_at: string; actor_timezone: string; definitions: Record<string, string>; freshness: { known: boolean; latest_observed_at: string | null }; trajectories: GrowthTrajectory[] };
+type GrowthActivityEvent = { occurred_at: string; kind: string; title: string; source_kind: string; source_ref: string };
+type GrowthSnapshot = { snapshot_id: string; generated_at: string; actor_timezone: string; definitions: Record<string, string>; freshness: { known: boolean; latest_observed_at: string | null }; events?: GrowthActivityEvent[]; trajectories: GrowthTrajectory[] };
+type WeeklyActivity = { label: string; count: number };
+
+/** Counts observed events, not guessed engagement. Align weeks to the actor's local Monday. */
+function weeklyActivityFromSnapshot(snapshot: GrowthSnapshot | undefined): { observed: boolean; weeks: WeeklyActivity[] } {
+  if (!snapshot || !snapshot.freshness.known || !Array.isArray(snapshot.events)) return { observed: false, weeks: [] };
+  let formatter: Intl.DateTimeFormat;
+  try {
+    formatter = new Intl.DateTimeFormat("en-US", { timeZone: snapshot.actor_timezone, year: "numeric", month: "2-digit", day: "2-digit" });
+  } catch {
+    return { observed: false, weeks: [] };
+  }
+  const localWeekMonday = (iso: string): number | null => {
+    const date = new Date(iso);
+    if (!Number.isFinite(date.getTime())) return null;
+    const parts = formatter.formatToParts(date);
+    const field = (name: string) => Number(parts.find((item) => item.type === name)?.value ?? NaN);
+    const year = field("year");
+    const month = field("month");
+    const day = field("day");
+    if (![year, month, day].every(Number.isFinite)) return null;
+    const localDay = Date.UTC(year, month - 1, day);
+    const weekday = new Date(localDay).getUTCDay();
+    return localDay - ((weekday + 6) % 7) * 86_400_000;
+  };
+  const currentWeek = localWeekMonday(snapshot.generated_at);
+  if (currentWeek === null) return { observed: false, weeks: [] };
+  const counts = Array<number>(8).fill(0);
+  for (const event of snapshot.events) {
+    const eventWeek = localWeekMonday(event.occurred_at);
+    if (eventWeek === null) continue;
+    const offset = Math.round((currentWeek - eventWeek) / (7 * 86_400_000));
+    if (offset >= 0 && offset < counts.length) counts[7 - offset] = (counts[7 - offset] ?? 0) + 1;
+  }
+  return { observed: true, weeks: counts.map((count, index) => ({ label: `Н${String(index + 1)}`, count })) };
+}
+
 type EvidenceAnchorView = { competency_key: string; source_kind: string; source_ref: string; level: string; observed_at: string; reason: string; counted: boolean };
 type FrameworkSkillView = { skill_key: string; skill_title: string; level: string; explanation: string; anchors: EvidenceAnchorView[]; excluded: EvidenceAnchorView[] };
 type FrameworkReportView = { framework_key: string; domain: "course" | "role" | "project"; version: number; title: string; created_at: string; skills: FrameworkSkillView[] };
 type BuddySuggestionView = { suggestion_id: string; kind: string; observation: string; gap: string; benefit: string; explanation: string; source_categories: string[]; model_called: boolean; auto_enrolled: boolean; partial: boolean; coverage_note: string };
 type BuddySuggestionStateView = { policy_version: number; ai_model_available: boolean; dismissed: boolean; suggestion: BuddySuggestionView | null; suggestions: BuddySuggestionView[] };
-const demoAnalytics: Analytics = {
-  stages: [
-    { key: "learning", title: "Обучение", status: "completed", completed: true, count: 6 },
-    { key: "applications", title: "Отклики", status: "completed", completed: true, count: 4 },
-    { key: "work", title: "Работа", status: "completed", completed: true, count: 3 },
-    { key: "accepted", title: "Принятый результат", status: "completed", completed: true, count: 2 },
-  ],
-  successful: true,
-  next_action: "Завершить MVP рекомендательной системы и отправить артефакты до 12 октября",
-  earnings: { calculated: "225000", approved: "200000", paid: "125000", failed: "0", currency: "RUB", unknown_items: 0 },
-  freshness: "fresh", generated_at: "2026-09-28T12:00:00Z",
+const unavailableAnalytics: Analytics = {
+  stages: [],
+  successful: false,
+  next_action: "Следующий шаг появится после загрузки данных пути",
+  earnings: { calculated: "0", approved: "0", paid: "0", failed: "0", currency: null, unknown_items: 0 },
+  freshness: "unknown",
+  generated_at: "",
 };
 
 
@@ -262,12 +295,18 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
   const updateParams = (key: string, value: string | null) => { setSearchParams((previous) => { const next = new URLSearchParams(previous); if (value) next.set(key, value); else next.delete(key); return next; }); };
   const urlSkill = searchParams.get("skill");
   const urlTrajectory = searchParams.get("trajectory");
-  const data = query.data ?? demoAnalytics;
+  const data = query.data ?? unavailableAnalytics;
   const selectedGrowth = growthQuery.data?.trajectories.find((item) => item.track_key === urlTrajectory) ?? growthQuery.data?.trajectories[0];
-  const activity = [42, 58, 51, 73, 66, 88, 79, 94];
+  const activitySnapshot = weeklyActivityFromSnapshot(growthQuery.data);
+  const activity = activitySnapshot.weeks;
+  const maxActivity = Math.max(0, ...activity.map((week) => week.count));
+  const activityScale = Math.max(4, Math.ceil(maxActivity / 4) * 4);
+  const activityAverage = activity.length > 0 ? Math.round(activity.reduce((sum, week) => sum + week.count, 0) / activity.length) : null;
+  const journeyCount = (key: string): number | null => data.stages.find((stage) => stage.key === key)?.count ?? null;
+  const journeyMax = Math.max(0, ...data.stages.map((stage) => stage.count));
   return <div className="feature-stack participant-analytics analytics-dashboard">
     {query.isLoading && <p className="analytics-data-loading" role="status">Загружаются дополнительные показатели пути…</p>}
-    {query.isError && <div className="demo-fallback-note" role="status"><strong>Демонстрационная аналитика</strong><span>API временно недоступен — показана связанная mock-проекция.</span><button className="secondary-button" type="button" onClick={() => { void query.refetch(); }}>Повторить</button></div>}
+    {query.isError && <div className="demo-fallback-note" role="status"><strong>Аналитика пути недоступна</strong><span>Непроверенные показатели не подставляются. Повторите запрос.</span><button className="secondary-button" type="button" onClick={() => { void query.refetch(); }}>Повторить</button></div>}
     <header className="dashboard-heading analytics-page-heading">
       <div><p className="eyebrow">Skill Passport · Мой прогресс</p><h1 id="workspace-title">Моя аналитика</h1>
         <p className="lead">Компетенции, подтверждённый опыт и следующий шаг в развитии</p></div>
@@ -285,21 +324,42 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
       </div>
     </section>
     <p className="analytics-demo-notice" role="note">
-      Остальные агрегаты ниже — демонстрационная статистика, не результат проверки навыков Agentic Coding и не официальная сертификация.
+      Числа траектории, этапов пути и активности ниже берутся из данных платформы. Рейтинг, распределение направлений, эффективность обучения и примеры результатов пока остаются демонстрационными. Эти показатели не означают присвоение Agentic Coding L1.
     </p>
-    <section className="metric-grid participant-kpi-grid" aria-label="Демонстрационные показатели"><article className="metric-card metric-card--teal"><span>Прогресс выбранной траектории</span><strong>{selectedGrowth === undefined || selectedGrowth.completion.percent === null ? "—" : `${String(selectedGrowth.completion.percent)}%`}</strong><small>{selectedGrowth === undefined ? "Нет доступного снимка" : selectedGrowth.completion.partial ? "Частичные данные · уточните охват" : selectedGrowth.track_title}</small></article><article className="metric-card metric-card--blue"><span>Активные проекты · пример</span><strong>2</strong><small>1 результат до 12 октября</small></article><article className="metric-card metric-card--violet"><span>Подтверждённый опыт · пример</span><strong>7</strong><small>2 оценки A · 3 оценки B</small></article><article className="metric-card metric-card--teal"><span>Принятые результаты · пример</span><strong>3</strong><small>+1 за месяц</small></article></section>
-    <div className="analytics-main-grid"><section className="analytics-panel"><div className="section-heading"><div><p className="eyebrow">Конверсия пути</p><h2>От обучения до принятого результата</h2></div><Badge tone="success">42% до результата</Badge></div><div className="analytics-funnel">{[{ label: "Обучение", value: 12, rate: "100%" }, { label: "Отклики", value: 8, rate: "67%" }, { label: "Работа", value: 5, rate: "63%" }, { label: "Принято", value: 3, rate: "60%" }, { label: "Подтверждено", value: 2, rate: "67%" }].map((stage, index) => <div key={stage.label} style={{ width: `${String(100 - index * 11)}%` }}><span>{stage.label}</span><strong>{stage.value}</strong><small>{stage.rate}</small></div>)}</div></section>
-      <section className="analytics-panel activity-chart-panel"><div className="section-heading"><div><p className="eyebrow">Динамика</p><h2>Активность по неделям</h2></div><Badge>8 недель</Badge></div><div className="analytics-histogram analytics-activity-visual" role="img" aria-label={`Активность по восьми неделям: ${activity.map((value, index) => `неделя ${String(index + 1)} — ${String(value)} действий`).join(", ")}`}>
-        <svg viewBox="0 0 740 250" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
-          <defs><linearGradient id="analytics-activity-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#24ead0" /><stop offset="100%" stopColor="#1886b5" /></linearGradient></defs>
-          {[0, 25, 50, 75, 100].map((tick) => <g key={tick}><line x1="34" y1={199 - tick * 1.56} x2="728" y2={199 - tick * 1.56} stroke="currentColor" opacity=".12" strokeDasharray={tick === 0 ? undefined : "4 7"} /><text x="24" y={203 - tick * 1.56} textAnchor="end" className="analytics-activity-visual__axis">{tick}</text></g>)}
-          {activity.map((value, index) => { const height = value * 1.56; const x = 53 + index * 85; return <g key={index}><rect x={x} y={199 - height} width="42" height={height} rx="7" fill="url(#analytics-activity-fill)" /><text x={x + 21} y={189 - height} textAnchor="middle" className="analytics-activity-visual__value">{value}</text><text x={x + 21} y="228" textAnchor="middle" className="analytics-activity-visual__week">Н{index + 1}</text></g>; })}
-        </svg>
-      </div><ol className="analytics-activity-readout" aria-hidden="true">{activity.map((value, index) => <li key={index}><span>Неделя {index + 1}</span><strong>{value}</strong></li>)}</ol><footer className="histogram-caption"><span><i />Учебные и проектные действия</span><strong>Среднее: 69 в неделю</strong></footer></section></div>
-    <div className="analytics-main-grid"><section className="analytics-panel"><h2>Баллы и рейтинг</h2><div className="score-split"><div><span>Постоянные</span><strong>450</strong><small>Принятые проекты и подтверждённые события</small></div><div><span>Замороженные</span><strong>+5</strong><small>AI Journey 2026 · до проверки результата</small></div><div><span>Позиция</span><strong>3 → 2</strong><small>50 баллов до следующего места</small></div></div></section><section className="analytics-panel"><h2>Распределение результата</h2><div className="direction-bars"><div><span>Python / Backend</span><i><b style={{ width: "74%" }} /></i><strong>74%</strong></div><div><span>Data / ML</span><i><b style={{ width: "18%" }} /></i><strong>18%</strong></div><div><span>Product</span><i><b style={{ width: "8%" }} /></i><strong>8%</strong></div></div></section></div>
-    <section className="learning-effectiveness"><div><p className="eyebrow">Эффективность обучения</p><h2>Навыки применяются в реальных проектах</h2></div><div><strong>18</strong><span>checkpoint завершено</span></div><div><strong>42 ч</strong><span>осмысленного обучения</span></div><div><strong>3</strong><span>курса подтверждено</span></div><div><strong>78%</strong><span>навыков применено</span></div></section>
-    <section className="analytics-results"><div className="section-heading"><h2>Последние подтверждённые результаты</h2><Badge tone="success">Проверены человеком</Badge></div><article><strong>Рекомендательная система</strong><span>Оценка A · +150 баллов</span></article><article><strong>Прогнозирование нагрузки</strong><span>Оценка B · +90 баллов</span></article></section>
-    <section className="analytics-ai-insight"><span className="ai-orb">✦</span><div><p className="eyebrow">AI insight · не решение</p><h2>{data.next_action}</h2><p>Следующий шаг для развития. Проверяемые результаты влияют на Skill Passport только после подтверждения.</p></div><Badge tone={data.successful ? "success" : "warning"}>{data.successful ? "Путь подтверждён" : "Путь продолжается"}</Badge></section>
+    <section className="metric-grid participant-kpi-grid" aria-label="Актуальные показатели пути">
+      <article className="metric-card metric-card--teal"><span>Прогресс выбранной траектории</span><strong>{selectedGrowth === undefined || selectedGrowth.completion.percent === null ? "—" : `${String(selectedGrowth.completion.percent)}%`}</strong><small>{selectedGrowth === undefined ? "Нет доступного снимка" : selectedGrowth.completion.partial ? "Частичные данные · уточните охват" : selectedGrowth.track_title}</small></article>
+      <article className="metric-card metric-card--blue"><span>Обучение подтверждено</span><strong>{journeyCount("learning") ?? "—"}</strong><small>{query.isError ? "Источник недоступен" : "По проверенным завершениям курсов"}</small></article>
+      <article className="metric-card metric-card--violet"><span>Работа и результаты</span><strong>{journeyCount("practice") ?? "—"}</strong><small>{query.isError ? "Источник недоступен" : "Назначения в работе и принятые вклады"}</small></article>
+      <article className="metric-card metric-card--teal"><span>Принятые вклады</span><strong>{journeyCount("verified_experience") ?? "—"}</strong><small>{query.isError ? "Источник недоступен" : "Решения о принятии личного вклада"}</small></article>
+    </section>
+    <div className="analytics-main-grid">
+      <section className="analytics-panel">
+        <div className="section-heading"><div><p className="eyebrow">Этапы участника</p><h2>От направления до подтверждённого опыта</h2></div><Badge tone={data.successful ? "success" : "warning"}>{query.isError ? "Источник недоступен" : data.successful ? "Последний этап завершён" : "Путь продолжается"}</Badge></div>
+        {data.stages.length === 0 ? <div className="analytics-chart-empty" role="status">Нет данных об этапах пути. График появится после получения подтверждённых событий.</div> :
+          <div className="analytics-funnel" data-testid="analytics-live-funnel">{data.stages.map((stage) => <div key={stage.key} className={`analytics-funnel-stage analytics-funnel-stage--${stage.status}`} style={{ width: `${String(journeyMax === 0 ? 100 : Math.max(42, Math.round(stage.count / journeyMax * 100)))}%` }}>
+            <span>{stage.title}</span><strong>{stage.count}</strong><small>{stage.status === "completed" ? "Завершено" : stage.status === "in_progress" ? "В работе" : stage.status === "not_started" ? "Не начато" : "Нет данных"}</small>
+          </div>)}</div>}
+        <p className="analytics-chart-provenance">{query.isError ? "Источник пути недоступен" : `Источник: путь участника · срез ${new Date(data.generated_at).toLocaleString("ru-RU")}`}. Значения отражают количество событий или объектов на этапе, а не сопоставимую конверсию когорты.</p>
+      </section>
+      <section className="analytics-panel activity-chart-panel">
+        <div className="section-heading"><div><p className="eyebrow">Динамика</p><h2>Активность по неделям</h2></div><Badge>{activitySnapshot.observed ? "8 недель · факты" : "Источники активности"}</Badge></div>
+        <div className="analytics-histogram analytics-activity-visual" role="img" aria-label={activitySnapshot.observed ? `Подтверждённые события по восьми неделям: ${activity.map((week, index) => `неделя ${String(index + 1)} — ${String(week.count)} действий`).join(", ")}` : "Активность не подтверждена: источники событий пока недоступны"}>
+          <svg viewBox="0 0 740 250" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+            <defs><linearGradient id="analytics-activity-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#24ead0" /><stop offset="100%" stopColor="#1886b5" /></linearGradient></defs>
+            {[0, 1, 2, 3, 4].map((step) => { const tick = Math.round(activityScale * step / 4); return <g key={step}><line x1="34" y1={199 - step * 39} x2="728" y2={199 - step * 39} stroke="currentColor" opacity=".12" strokeDasharray={step === 0 ? undefined : "4 7"} /><text x="24" y={203 - step * 39} textAnchor="end" className="analytics-activity-visual__axis">{activitySnapshot.observed ? tick : "—"}</text></g>; })}
+            {activitySnapshot.observed && activity.map((week, index) => { const height = week.count / activityScale * 156; const x = 53 + index * 85; return <g key={index}>{week.count > 0 && <rect x={x} y={199 - height} width="42" height={height} rx="7" fill="url(#analytics-activity-fill)" />}<text x={x + 21} y={Math.max(17, 189 - height)} textAnchor="middle" className="analytics-activity-visual__value">{week.count}</text><text x={x + 21} y="228" textAnchor="middle" className="analytics-activity-visual__week">{week.label}</text></g>; })}
+            {!activitySnapshot.observed && Array.from({ length: 8 }, (_, index) => <text key={index} x={74 + index * 85} y="228" textAnchor="middle" className="analytics-activity-visual__week">{`Н${String(index + 1)}`}</text>)}
+          </svg>
+        </div>
+        {!activitySnapshot.observed && <p className="analytics-chart-empty" role="status">Нет проверяемой истории событий для построения недельного графика. Подключение цифровых следов и выполнение подтверждённых действий сформируют динамику.</p>}
+        {activitySnapshot.observed && <ol className="analytics-activity-readout" aria-hidden="true">{activity.map((week, index) => <li key={index}><span>Неделя {index + 1}</span><strong>{week.count}</strong></li>)}</ol>}
+        <footer className="histogram-caption"><span><i />Проверяемые действия</span><strong>{activityAverage === null ? "Среднее: нет данных" : `Среднее: ${String(activityAverage)} в неделю`}</strong></footer>
+      </section>
+    </div>
+    <div className="analytics-main-grid"><section className="analytics-panel"><h2>Баллы и рейтинг <span className="analytics-demo-label">· пример</span></h2><div className="score-split"><div><span>Постоянные</span><strong>450</strong><small>Принятые проекты и подтверждённые события</small></div><div><span>Замороженные</span><strong>+5</strong><small>AI Journey 2026 · до проверки результата</small></div><div><span>Позиция</span><strong>3 → 2</strong><small>50 баллов до следующего места</small></div></div></section><section className="analytics-panel"><h2>Распределение результата <span className="analytics-demo-label">· пример</span></h2><div className="direction-bars"><div><span>Python / Backend</span><i><b style={{ width: "74%" }} /></i><strong>74%</strong></div><div><span>Data / ML</span><i><b style={{ width: "18%" }} /></i><strong>18%</strong></div><div><span>Product</span><i><b style={{ width: "8%" }} /></i><strong>8%</strong></div></div></section></div>
+    <section className="learning-effectiveness"><div><p className="eyebrow">Эффективность обучения</p><h2>Навыки применяются в реальных проектах <span className="analytics-demo-label">· пример</span></h2></div><div><strong>18</strong><span>checkpoint завершено</span></div><div><strong>42 ч</strong><span>осмысленного обучения</span></div><div><strong>3</strong><span>курса подтверждено</span></div><div><strong>78%</strong><span>навыков применено</span></div></section>
+    <section className="analytics-results"><div className="section-heading"><h2>Последние подтверждённые результаты <span className="analytics-demo-label">· пример</span></h2><Badge>Демонстрация</Badge></div><article><strong>Рекомендательная система</strong><span>Оценка A · +150 баллов</span></article><article><strong>Прогнозирование нагрузки</strong><span>Оценка B · +90 баллов</span></article></section>
+    <section className="analytics-ai-insight"><span className="ai-orb">✦</span><div><p className="eyebrow">AI insight · не решение</p><h2>{data.next_action}</h2><p>Следующий шаг для развития. Проверяемые результаты влияют на Skill Passport только после подтверждения.</p></div><Badge tone={query.data?.successful ? "success" : "warning"}>{!query.data ? "Нет данных пути" : data.successful ? "Путь подтверждён" : "Путь продолжается"}</Badge></section>
   </div>;
 }
 
