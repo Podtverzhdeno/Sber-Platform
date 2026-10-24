@@ -37,7 +37,7 @@ jobs:
           uv run ruff format --check src/impulse/bootstrap/ai_role_catalog.py src/impulse/bootstrap/demo_seed.py src/impulse/application/development.py src/impulse/infrastructure/development_store.py src/impulse/api/v1/development.py
           uv run ruff check src/impulse/bootstrap/ai_role_catalog.py src/impulse/bootstrap/demo_seed.py src/impulse/application/development.py src/impulse/infrastructure/development_store.py src/impulse/api/v1/development.py
       - name: Validate seven AI role catalog and graph
-        run: uv run pytest -q tests/test_demo_seed_graph.py tests/task_catalog/test_demo_seed.py
+        run: uv run pytest -q tests/test_demo_seed_graph.py tests/task_catalog/test_demo_seed.py tests/test_development_api.py
   types-and-lint:
     runs-on: ubuntu-24.04
     timeout-minutes: 17
