@@ -19,13 +19,13 @@ const channel = {
     { id: "5f2b0a8e-32c2-4f9f-9d1f-8d0c37a24e10", display_name: "Елена Наставник", role: "mentor" },
   ],
   last_message: {
-    id: "msg-2",
+    id: "msg-3",
     author_id: "7cf6de52-be5a-4c6f-b082-84ef2fb9079c",
     author_name: "Алекс Речной",
     kind: "text",
     body: "Сборка прошла тесты, выгружаю релиз-кандидат.",
     artifact_refs: ["repository"],
-    sequence: 3,
+    sequence: 4,
     created_at: "2026-10-16T12:40:00+00:00",
   },
   created_at: "2026-10-10T09:00:00+00:00",
@@ -124,6 +124,50 @@ async function openMessenger(page: Page): Promise<void> {
   await page.evaluate(() => document.fonts.ready);
 }
 
+test.describe("R-MSG-01 reference geometry and bubble density", () => {
+  test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
+
+  test("maintains the three-pane reference composition without inflated message bubbles", async ({ page }) => {
+    messageRoutes(page);
+    await openMessenger(page);
+
+    const shell = page.locator(".messenger-shell");
+    const dialogList = page.locator(".msg-dialog-list");
+    const chat = page.locator(".chat-thread");
+    const context = page.locator(".msg-context");
+
+    await expect(dialogList.getByRole("heading", { name: "Сообщения" })).toBeVisible();
+    await expect(dialogList.getByRole("button", { name: "Создать диалог" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Упомянуть участника" })).toBeVisible();
+    await expect(context.locator(".msg-context__profile")).toBeVisible();
+    await expect(context.getByRole("region", { name: "Связанные артефакты" })).toBeVisible();
+
+    const [layoutBox, listBox, chatBox, contextBox, bubbleBox] = await Promise.all([
+      shell.boundingBox(),
+      dialogList.boundingBox(),
+      chat.boundingBox(),
+      context.boundingBox(),
+      page.locator(".msg-chat__bubble").first().boundingBox(),
+    ]);
+    expect(layoutBox).not.toBeNull();
+    expect(listBox).not.toBeNull();
+    expect(chatBox).not.toBeNull();
+    expect(contextBox).not.toBeNull();
+    expect(bubbleBox).not.toBeNull();
+    if (!layoutBox || !listBox || !chatBox || !contextBox || !bubbleBox) return;
+
+    expect(listBox.width / layoutBox.width).toBeGreaterThan(0.22);
+    expect(listBox.width / layoutBox.width).toBeLessThan(0.33);
+    expect(contextBox.width / layoutBox.width).toBeGreaterThan(0.17);
+    expect(contextBox.width / layoutBox.width).toBeLessThan(0.28);
+    expect(Math.abs(listBox.y - chatBox.y)).toBeLessThan(3);
+    expect(Math.abs(listBox.y - contextBox.y)).toBeLessThan(3);
+    expect(bubbleBox.height).toBeLessThan(110);
+    await expect(page.locator(".msg-chat__group.outgoing")).toHaveCount(1);
+    await expect(page.locator(".msg-chat__group.outgoing .msg-chat__delivered")).toBeVisible();
+  });
+});
+
 test.describe("R-MSG-01 visual baselines light/dark 1440x900", () => {
   test.use({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
 
@@ -144,6 +188,23 @@ test.describe("R-MSG-01 visual baselines light/dark 1440x900", () => {
     await expect(page.locator(".messenger-shell")).toHaveScreenshot(
       "messenger-desktop-dark-1440x900.png",
     );
+  });
+});
+
+test.describe("R-MSG-01 mobile single-pane geometry", () => {
+  test.use({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+
+  test("fills the mobile viewport with one dialog and keeps navigation intact", async ({ page }) => {
+    messageRoutes(page);
+    await openMessenger(page);
+    const shellBox = await page.locator(".messenger-shell").boundingBox();
+    expect(shellBox).not.toBeNull();
+    expect(shellBox?.height).toBeGreaterThan(500);
+    await page.locator(".msg-dialog-list__row").first().click();
+    await expect(page.getByRole("region", { name: "Текущий чат", exact: true })).toBeVisible();
+    await expect(page.locator(".msg-chat__group.outgoing")).toHaveCount(1);
+    const chatBox = await page.locator(".messenger-shell").boundingBox();
+    expect(chatBox?.height).toBeGreaterThan(500);
   });
 });
 

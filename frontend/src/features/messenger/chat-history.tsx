@@ -36,7 +36,7 @@ import {
   writePinnedMessageId,
   type ReactionRecord,
 } from "./chat-model";
-import { dialogKindLabel, dialogTimeLabel } from "./view-model";
+import { dialogKindLabel, dialogTimeLabel, dialogTitle } from "./view-model";
 import type { KeyValueStorage } from "./view-model";
 import "./chat-history.scss";
 
@@ -86,9 +86,9 @@ const PENDING_STATE_LABELS: Record<PendingMessageOverlay["state"], string> = {
   failed: "Не отправлено",
 };
 
-function channelInitial(channel: ApiChannelView | null): string {
+function channelInitial(channel: ApiChannelView | null, viewerId: string | null): string {
   if (channel === null) return "ч";
-  const title = channel.title || channel.participants.map((person) => person.display_name).join(", ");
+  const title = dialogTitle(channel, viewerId);
   return (title.trim()[0] ?? "ч").toUpperCase();
 }
 
@@ -235,10 +235,7 @@ export function ChatHistory({
     actionButtons[next]?.focus();
   };
 
-  const channelTitle =
-    channel?.title ||
-    (channel?.participants.map((person) => person.display_name) ?? []).join(", ") ||
-    "Чат";
+  const channelTitle = channel ? dialogTitle(channel, viewerId) : "Чат";
 
   return (
     <section
@@ -247,7 +244,7 @@ export function ChatHistory({
     >
       <header className="msg-chat__header" aria-label="Заголовок чата">
         <span className="msg-chat__avatar" aria-hidden="true">
-          {channelInitial(channel)}
+          {channelInitial(channel, viewerId)}
         </span>
         <span className="msg-chat__header-title">
           <strong>{channelTitle}</strong>
@@ -433,6 +430,11 @@ export function ChatHistory({
                     (row.authorId !== null && row.authorId === viewerId ? "outgoing" : "incoming")
                   }
                 >
+                  {row.authorId !== viewerId && (
+                    <span className="msg-chat__sender-avatar" aria-hidden="true">
+                      {(row.authorName ?? "").trim().charAt(0).toUpperCase() || "?"}
+                    </span>
+                  )}
                   <span className="msg-chat__group-author" aria-hidden="true">
                     {row.authorId === viewerId ? "Вы" : row.authorName}
                   </span>
