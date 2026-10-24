@@ -336,7 +336,19 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           <header><h3>Следующий шаг</h3><span>{overview.next_outcome?.trajectory_title ?? "Маршрут"}</span></header>
           <strong>{overview.next_outcome?.target_title ?? "Следующий шаг пока не назначен"}</strong>
           <p>{overview.next_outcome?.stale_reason ?? "Продолжайте маршрут после подтверждения результата"}</p>
-          {overview.next_outcome !== null && <button type="button" onClick={() => { if (overview.next_outcome !== null) openStageDetails(overview.next_outcome.milestone_key); }}>Посмотреть →</button>}
+          {overview.next_outcome !== null && <button type="button" onClick={() => {
+            const outcome = overview.next_outcome;
+            if (outcome === null) return;
+            snapshotTrigger();
+            if (outcome.trajectory_key !== selectedKey) {
+              const nextParams = new URLSearchParams(searchParams);
+              nextParams.set("role", outcome.trajectory_key);
+              nextParams.set("stage", outcome.milestone_key);
+              setSearchParams(nextParams);
+            }
+            setRoleInfoOpen(false);
+            setDrawerKey(outcome.milestone_key);
+          }}>Посмотреть →</button>}
         </section>
         <section className="trajectory-v2-passport-panel">
           <header>
