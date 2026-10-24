@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "../../api/client";
-import type { components } from "../../api/schema";
 import "./agentic-coding-profile.scss";
 
 /**
@@ -20,7 +19,19 @@ const AGENTIC_SKILLS = [
 ] as const;
 
 type Role = "developer" | "analyst" | "qa";
-type ServerProfile = components["schemas"]["RoleProfile"];
+export type AgenticServerProfile = {
+  role_key: string;
+  scale_key: string;
+  framework_version: string;
+  known_evidence_count: number;
+  skills: Array<{
+    key: string;
+    target_level: number | null;
+    current_level: number | null;
+    data_state: string;
+  }>;
+};
+type ServerProfile = AgenticServerProfile;
 type ServerStatus = "loading" | "ready" | "unavailable" | "preview";
 type ChartView = "radar" | "bars" | "table";
 
