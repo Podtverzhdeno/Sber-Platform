@@ -108,8 +108,12 @@ function jsonResponse(data: unknown, status = 200) {
   });
 }
 
-function installFetch(catalogFixture: CatalogCard[] = cards) {
-  const mocks = { mutationCount: 0, catalogCalls: 0, learningCount: 0 };
+function installFetch(
+  catalogFixture: CatalogCard[] = cards,
+  provider?: { courseDetail?: Record<string, unknown>; existingCertificate?: { certificate_id: string; verification_id: string; course_title: string } },
+) {
+  const mocks = { mutationCount: 0, catalogCalls: 0, learningCount: 0, certificateIssues: 0, detailCalls: 0 };
+  let certificate = provider?.existingCertificate ?? null;
   const fetchMock = vi.fn((input: RequestInfo | URL): Promise<Response> => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
     if (url.includes("/me/bootcamp/catalog")) {
@@ -126,6 +130,18 @@ function installFetch(catalogFixture: CatalogCard[] = cards) {
     if (url.includes("/learning-days")) {
       mocks.learningCount += 1;
       return Promise.resolve(jsonResponse({ ...streak, current_days: streak.current_days + 1 }));
+    }
+    if (url.includes("/me/bootcamp/certificates/")) {
+      mocks.certificateIssues += 1;
+      certificate = { certificate_id: "issued-1", verification_id: "verify-123", course_title: "Отчётность ESG" };
+      return Promise.resolve(jsonResponse(certificate));
+    }
+    if (url.includes("/me/bootcamp/certificates")) {
+      return Promise.resolve(jsonResponse(certificate === null ? [] : [certificate]));
+    }
+    if (url.includes("/me/courses/") && url.endsWith("/detail")) {
+      mocks.detailCalls += 1;
+      if (provider?.courseDetail) return Promise.resolve(jsonResponse(provider.courseDetail));
     }
     return Promise.resolve(
       jsonResponse(
@@ -445,6 +461,43 @@ describe("Bootcamp catalog states and filters (22.15)", () => {
     if (firstCourseButton === undefined) throw new Error("No course action in requirements");
     fireEvent.click(firstCourseButton);
     expect(await screen.findByRole("dialog", { name: "Информация о курсе" })).toBeInTheDocument();
+  });
+
+  it("loads authoritative course objective, checkpoint, workload and competency cycle from the existing API", async () => {
+    const fixtures = installFetch(cards, { courseDetail: {
+      course_key: "openspec-sdd", title: "OpenSpec и SDD", source_url: "https://example.test/courses/openspec",
+      availability: "available", access_note: "", enrollment_status: null, verified: false,
+      specialization: "Разработка", program_version: "2026.2", workload_hours: 24,
+      objective: "Спроектировать проверяемый контур изменений", milestone_title: "Принять решение по архитектуре",
+      next_step: "Создать корректный ADR", artifact: "ADR-0001",
+      program_competencies: [["OpenSpec", "SDD"]],
+      cycle: [{ competency: "OpenSpec", current_level: "базовый", projected_level: "уверенный",
+        target_level: "уверенный", projected_confirmed: false, evidence: "checkpoint" }],
+    } });
+    renderCatalog("/workspace/3");
+    const card = await screen.findByTestId("course-openspec-sdd");
+    fireEvent.click(within(card).getByRole("button", { name: "Подробнее →" }));
+    const dialog = await screen.findByRole("dialog", { name: "Информация о курсе" });
+    expect(await within(dialog).findByText(/Спроектировать проверяемый контур изменений/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/Создать корректный ADR/)).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Программа" }));
+    expect(within(dialog).getByText(/24 ч/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/Принять решение по архитектуре/)).toBeInTheDocument();
+    fireEvent.click(within(dialog).getByRole("tab", { name: "Навыки" }));
+    expect(within(dialog).getByText(/Подтверждено: базовый/)).toBeInTheDocument();
+    expect(fixtures.detailCalls).toBe(1);
+  });
+
+  it("preserves certificate issuance for verified courses without issuing certificates for unverified ones", async () => {
+    const fixtures = installFetch();
+    renderCatalog("/workspace/3");
+    await screen.findByTestId("course-greenhouse-esg");
+    fireEvent.click(within(screen.getByTestId("course-greenhouse-esg")).getByRole("button", { name: "Подробнее →" }));
+    const dialog = await screen.findByRole("dialog", { name: "Информация о курсе" });
+    const issue = await within(dialog).findByRole("button", { name: "Получить сертификат" });
+    fireEvent.click(issue);
+    await waitFor(() => expect(fixtures.certificateIssues).toBe(1));
+    expect(await within(dialog).findByRole("link", { name: "Открыть выданный сертификат →" })).toHaveAttribute("href", "/verify/verify-123");
   });
 
 });
