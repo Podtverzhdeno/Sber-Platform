@@ -88,7 +88,7 @@ export function StageTaskDrawer(props: {
   const completed = props.state === "completed";
   return (
     <div className="trajectory-v2-overlay" data-testid="trajectory-drawer-overlay" onClick={props.onClose}>
-      <div ref={dialogRef} className="trajectory-v2-drawer" role="dialog" aria-modal="true" aria-labelledby="trajectory-drawer-title" tabIndex={-1} onKeyDown={onKeyDown} onClick={(event) => event.stopPropagation()}>
+      <div ref={dialogRef} className="trajectory-v2-drawer" role="dialog" aria-modal="true" aria-labelledby="trajectory-drawer-title" tabIndex={-1} onKeyDown={onKeyDown} onClick={(event) => { event.stopPropagation(); }}>
         <header className="trajectory-v2-drawer-heading">
           <div>
             <small id="trajectory-drawer-title">{completed ? "✓ Этап пройден" : "Детали этапа"}</small>
