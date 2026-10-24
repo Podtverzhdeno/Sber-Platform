@@ -48,6 +48,7 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
   await expect(page.locator(".catalog-v2-kpi")).toHaveCount(4);
   await expect(page.locator(".catalog-v2-stage-track li")).toHaveCount(5);
   await expect(page.locator(".catalog-v2-benefits-section li")).toHaveCount(4);
+  if (process.env.CAPTURE_APPROVED_TASKS === "1") await page.screenshot({ path: "test-results/approved-geometry-cards.png", fullPage: true, animations: "disabled" });
   await expect(page.getByRole("heading", { name: "Развитие твоих навыков" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Что ты получишь" })).toBeVisible();
   await expect(page.getByText(/Это план, а не прогресс/)).toBeVisible();
@@ -83,6 +84,7 @@ test("approved list density: ten test rows remain scannable without horizontal o
   await page.getByRole("button", { name: "Список" }).click();
   const rows = page.locator(".catalog-v2-table-row");
   await expect(rows).toHaveCount(10);
+  if (process.env.CAPTURE_APPROVED_TASKS === "1") await page.screenshot({ path: "test-results/approved-geometry-list.png", fullPage: true, animations: "disabled" });
   const data = await page.evaluate(() => {
     const rows = Array.from(document.querySelectorAll(".catalog-v2-table-row")).map((row) => row.getBoundingClientRect());
     return {
@@ -108,6 +110,7 @@ test("approved terms modal: four top fact cards, two-column content, two actions
   await page.getByRole("button", { name: "Условия и отклик" }).first().click();
   const modal = page.getByRole("dialog");
   await expect(modal).toBeVisible();
+  if (process.env.CAPTURE_APPROVED_TASKS === "1") await page.screenshot({ path: "test-results/approved-geometry-conditions.png", fullPage: false, animations: "disabled" });
   await expect(modal.getByRole("heading", { name: "Условия участия" })).toBeVisible();
   await expect(modal.locator(".catalog-v2-conditions-stats > div")).toHaveCount(4);
   await expect(modal.locator(".catalog-v2-terms-grid > section")).toHaveCount(6);
