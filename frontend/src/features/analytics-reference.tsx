@@ -195,12 +195,12 @@ function Kpis({ skills, ready, sourceCount, accepted, variant }: { skills: Skill
   const required = skills.filter((skill) => skill.target_level !== null);
   const met = required.filter((skill) => skill.current_level !== null && skill.current_level >= (skill.target_level ?? 5)).length;
   const cards = variant === "evidence"
-    ? [["Подтверждённые навыки", met ? String(met) + " / " + String(required.length) : "—", "По методологии L1", "✓"],
+    ? [["Подтверждённые навыки", required.some((skill) => skill.current_level !== null) ? String(met) + " / " + String(required.length) : "—", "По методологии L1", "✓"],
        ["Основания профиля", sourceCount === null ? "—" : String(sourceCount), "Квалифицированные Agentic источники", "▤"],
        ["Результаты в проектах", accepted === null ? "—" : String(accepted), "Принятые результаты", "◉"],
        ["Готовность профиля", ready === null ? "—" : String(ready) + "%", "Только подтверждённые уровни", "↗"]]
     : [["Готовность профиля", ready === null ? "—" : String(ready) + "%", "На основе проверенных требований", "◉"],
-       ["Требования выполнены", met ? String(met) + " / " + String(required.length) : "—", "Нет данных ≠ нулевой уровень", "◎"],
+       ["Требования выполнены", required.some((skill) => skill.current_level !== null) ? String(met) + " / " + String(required.length) : "—", "Нет данных ≠ нулевой уровень", "◎"],
        ["Подтверждённый опыт", sourceCount === null ? "—" : String(sourceCount), "Источник Agentic Coding", "▤"],
        ["Принятые результаты", accepted === null ? "—" : String(accepted), "С проверенным вкладом", "✓"]];
   return <div className="ref-kpis">{cards.map(([label, value, detail, icon], i) => <article className={"ref-kpi ref-kpi-" + String(i)} key={label}><span>{label}</span><b>{value}</b><small>{detail}</small><i aria-hidden="true">{icon}</i></article>)}</div>;
@@ -272,7 +272,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
           <div className="ref-big-value">{ready === null ? "—" : String(ready) + "%"} <span>готовность к целевому профилю</span></div>
           <div className="ref-progress"><i style={{ width: String(ready ?? 0) + "%" }} /></div>
           <div className="ref-passport-info"><span>Уровень компетенций <b>1—4</b></span><span>Методология <b>Agentic Coding</b></span><span>Состояние <b>{known.length ? "Частичные данные" : "Нет подтверждений"}</b></span></div>
-          <div className="ref-passport-summary"><span>Цифровые следы <b>{qualifiedSourceCount ?? "—"}</b></span><span>Требования <b>{met.length} / {required.length}</b></span></div>
+          <div className="ref-passport-summary"><span>Цифровые следы <b>{qualifiedSourceCount ?? "—"}</b></span><span>Требования <b>{known.length > 0 ? String(met.length) + " / " + String(required.length) : "—"}</b></span></div>
           <button className="ref-primary-cta" type="button" onClick={() => { setShowCriteria(true); }}>Открыть Skill Passport ↗</button>
           <small className="ref-disclaimer">Корпоративный L1 не выдаётся платформой Impulse</small>
         </aside>
@@ -285,7 +285,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
     </>}
     {layout === "path" && <>
       <section className="ref-panel ref-path-hero"><div><span className="ref-cap">ПРОГРЕСС ПО ЦЕЛЕВОМУ ПРОФИЛЮ</span><h2>{gap.length ? "До учебного соответствия L1 — " + String(gap.length) + " навыка" : "Целевой профиль сформирован"}</h2><p>{known.length ? "Оценка строится только на подтверждённых навыках. Остальные требуют проверяемых действий." : "Пока не подключены подтверждённые цифровые следы. Требования методологии представлены как целевой профиль."}</p><div className="ref-path-buttons"><a className="ref-primary-cta" href={tasksUrl}>Начать следующий шаг →</a><button type="button" className="ref-ghost-cta" onClick={() => { setShowCriteria(true); }}>Показать критерии L1</button></div></div>
-        <div className="ref-path-gauge"><div className="ref-donut" style={{ background: "conic-gradient(#25e2be " + String(ready ?? 0) + "%, #144355 0)" }}><div><b>{met.length} / {required.length}</b><small>подтверждено</small></div></div><span>{ready === null ? "Готовность не рассчитана" : String(ready) + "% готовности профиля"}</span></div>
+        <div className="ref-path-gauge"><div className="ref-donut" style={{ background: "conic-gradient(#25e2be " + String(ready ?? 0) + "%, #144355 0)" }}><div><b>{known.length > 0 ? String(met.length) + " / " + String(required.length) : "—"}</b><small>подтверждено</small></div></div><span>{ready === null ? "Готовность не рассчитана" : String(ready) + "% готовности профиля"}</span></div>
       </section>
       <section className="ref-panel ref-route"><div className="ref-route-title"><span className="ref-cap">ВАШ МАРШРУТ</span><span>От практики к проверяемому результату</span></div><div className="ref-route-steps">{["Выбрана роль", "Оценены навыки", "Закрыть пробелы", "Подтвердить L1"].map((step, i) => <div key={step} className={i === 2 ? "active" : i === 3 ? "locked" : ""}><span>{String(i + 1).padStart(2, "0")}</span><b>{step}</b><small>{[ROLES[role], String(required.length) + " по матрице", String(gap.length) + " требуют проверки", "По разрешённым цифровым следам"][i]}</small></div>)}</div></section>
       <div className="ref-v2-main">
