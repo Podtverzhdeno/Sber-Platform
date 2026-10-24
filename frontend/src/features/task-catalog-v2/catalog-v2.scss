@@ -3354,3 +3354,54 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
 .catalog-v2-detail > .catalog-v2-reasons-section {
   grid-column: 1;
 }
+
+
+/* Last 40px of first-fold alignment come from a noninteractive stepper.
+   Keep every stage title/duration and the plan disclaimer readable. */
+@media (min-width: 1550px) and (min-height: 850px) {
+  .catalog-v2-detail { gap: 5px; }
+  .catalog-v2-detail .catalog-v2-detail-grid { gap: 3px 9px; }
+  .catalog-v2-stage-section { padding-top: 0 !important; }
+  .catalog-v2-stage-section .catalog-v2-section-heading h3 {
+    margin-bottom: 0;
+  }
+  .catalog-v2-detail-grid .catalog-v2-stage-track {
+    padding-top: 1px;
+    padding-bottom: 0;
+  }
+  .catalog-v2-stage-index { width: 24px; height: 24px; font-size: 0.66rem; }
+  .catalog-v2-stage-track > li::before { top: 12px; left: 26px; }
+  .catalog-v2-stage-track > li .catalog-v2-stage-content {
+    padding-top: 0;
+    gap: 1px;
+  }
+  .catalog-v2-stage-content strong {
+    font-size: 0.66rem;
+    line-height: 1.08;
+  }
+  .catalog-v2-stage-content small {
+    font-size: 0.61rem;
+    line-height: 1.04;
+  }
+  .catalog-v2-plan-note {
+    font-size: 0.61rem !important;
+    line-height: 1.12;
+    margin: 0 !important;
+  }
+  .catalog-v2-detail-footer {
+    padding: 3px 0 !important;
+    gap: 4px;
+  }
+  .catalog-v2-detail-footer-controls { gap: 1px; }
+  .catalog-v2-detail-footer .catalog-v2-support-section {
+    min-height: 24px;
+    gap: 5px;
+  }
+  .catalog-v2-detail-footer .catalog-v2-support-section p {
+    margin: 0;
+    line-height: 1.1;
+  }
+  .catalog-v2-detail-footer .catalog-v2-detail-actions button {
+    min-height: 36px;
+  }
+}
