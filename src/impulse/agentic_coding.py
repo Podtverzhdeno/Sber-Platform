@@ -32,7 +32,9 @@ ROLE_TARGETS: dict[str, tuple[int | None, ...]] = {
     "qa": (3, 2, 2, 2, 2, 2),
 }
 ROLE_LABELS: dict[str, str] = {
-    "developer": "Разработчик",\n    "analyst": "Аналитик",\n    "qa": "Тестировщик",
+    "developer": "Разработчик",
+    "analyst": "Аналитик",
+    "qa": "Тестировщик",
 }
 CONFLICT_KEYS: dict[str, frozenset[str]] = {
     "developer": frozenset({"creating_skills"}),
@@ -143,7 +145,9 @@ def evaluate_profile(
             "учебный профиль не является официальным сертификатом L1."
         ),
         known_evidence_count=sum(item.evidence_count for item in skills),
-        data_origin="verified_evidence"\n        if any(item.evidence_count for item in skills)\n        else "not_connected",
+        data_origin="verified_evidence"
+        if any(item.evidence_count for item in skills)
+        else "not_connected",
     )
 
 __all__ = [
