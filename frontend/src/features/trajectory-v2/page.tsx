@@ -339,7 +339,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           </header>
           {passport.isPending && <p role="status">Загружаем подтверждённые навыки…</p>}
           {passport.isError && <p role="status">Не удалось загрузить скилл-паспорт.</p>}
-          {passport.data?.skills.length === 0 && <p>Подтверждённые навыки появятся после проверки личного вклада в проект.</p>}
+          {passport.data?.skills?.length === 0 && <p>Подтверждённые навыки появятся после проверки личного вклада в проект.</p>}
           {passport.data && passport.data.skills.length > 0 && (
             <ul className="trajectory-v2-skill-list">
               {passport.data.skills.slice(0, 4).map((skill, index) => {
@@ -556,7 +556,7 @@ export function RoleDetailPanel(props: {
       </header>
       {role.attempt_number === null && (
         <p className="trajectory-v2-unselected-note" role="status">
-          Это направление пока не выбрано. Этапы станут доступны после его подключения.
+          Это направление пока не выбрано. Персональный прогресс отсутствует; этапы появятся после подключения роли.
         </p>
       )}
       <StagePathSection
@@ -739,13 +739,13 @@ export function StageDetail(props: {
         <summary>Подробнее об этапе</summary>
         <dl>
           <div><dt>Навык</dt><dd>{milestone.skill}</dd></div>
-          <div><dt>Цель</dt><dd>{milestone.target_kind} · {milestone.target_key}</dd></div>
+          <div><dt>Цель</dt><dd>{milestone.target_kind === "task" ? "Задача" : milestone.target_kind === "course" ? "Курс" : milestone.target_kind} · {milestone.target_key}</dd></div>
           <div><dt>Позиция</dt><dd>{milestone.position}</dd></div>
         </dl>
       </details>
       {props.state === "locked" && (
         <p className="trajectory-v2-stage-note" role="status">
-          {nextStep === null ? "Этап недоступен: сервер не разрешает переход дальше." : `Этап откроется после завершения «${nextStep.title}».`}
+          {nextStep === null ? "Этап недоступен: сервер не разрешает переход дальше." : `Этап откроется после завершения «${nextStep.title}». Первый разрешённый шаг — «${nextStep.title}».`}
         </p>
       )}
       {props.state === "available" && role.attempt_number === null && (
