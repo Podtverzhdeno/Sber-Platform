@@ -25,7 +25,7 @@ for (const viewport of viewports) {
 
     const shell = page.locator(".bc-reference-root");
     await expect(shell.getByRole("heading", { name: "Bootcamp" })).toBeVisible();
-    await expect(shell.getByRole("heading", { name: "Каталог курсов", exact: false })).toBeVisible();
+    await expect(shell.getByRole("group", { name: "Категории курсов" })).toBeVisible();
     const cards = shell.locator(".bootcamp-course-card");
     await expect(cards.first()).toBeVisible();
 
