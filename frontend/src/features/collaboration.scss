@@ -834,8 +834,10 @@
   right: 0;
   bottom: calc(100% + 4px);
   z-index: 2;
-  display: none;
+  display: flex;
   flex-wrap: nowrap;
+  opacity: 0;
+  pointer-events: none;
   padding: 3px;
   border: 1px solid var(--msg-line);
   border-radius: 8px;
@@ -844,7 +846,8 @@
 }
 .sberchat-shell .msg-chat__bubble:hover .msg-chat__actions,
 .sberchat-shell .msg-chat__bubble:focus-within .msg-chat__actions {
-  display: flex;
+  opacity: 1;
+  pointer-events: auto;
 }
 .sberchat-shell .msg-chat__action { opacity: 1; }
 .sberchat-shell .msg-composer {
