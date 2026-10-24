@@ -142,6 +142,7 @@ test.describe("task catalog interactive controls and motion", () => {
     await search.fill("Прототип");
     await page.getByRole("button", { name: "Найти" }).click();
     await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBe("Прототип");
+    await expect(page.locator(".catalog-v2-all-tasks")).toHaveText("Все задачи");
     const saved = page.getByRole("checkbox", { name: "Только сохранённые" });
     await saved.click();
     await expect.poll(() => new URL(page.url()).searchParams.get("saved")).toBe("true");
@@ -149,6 +150,7 @@ test.describe("task catalog interactive controls and motion", () => {
     await page.getByRole("button", { name: "Сбросить фильтры" }).click();
     await expect.poll(() => new URL(page.url()).searchParams.get("q")).toBeNull();
     await expect.poll(() => new URL(page.url()).searchParams.get("saved")).toBeNull();
+    await expect(page.locator(".catalog-v2-all-tasks")).toHaveText("Все задачи (2)");
   });
 
   test("all catalog filters and sorting send the correct API query without losing view state", async ({ page }) => {
