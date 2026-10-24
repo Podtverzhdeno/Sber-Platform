@@ -110,6 +110,33 @@ export function StageTaskDrawer(props: {
             <small>Эти действия не считаются завершёнными без проверки этапа.</small>
           </section>
         )}
+        {(milestone.theory?.length || milestone.lab || milestone.acceptance?.length) && (
+          <section className="trajectory-v2-drawer-section trajectory-v2-learning-content" data-testid="trajectory-drawer-learning-content">
+            <header>
+              <h3>Учебный модуль</h3>
+              {milestone.estimated_hours && <span>~{milestone.estimated_hours} ч</span>}
+            </header>
+            {milestone.theory && milestone.theory.length > 0 && (
+              <div>
+                <h4>Теория</h4>
+                <ul>{milestone.theory.map((topic) => <li key={topic}>{topic}</li>)}</ul>
+              </div>
+            )}
+            {milestone.lab && (
+              <div>
+                <h4>Практикум</h4>
+                <p>{milestone.lab}</p>
+              </div>
+            )}
+            {milestone.acceptance && milestone.acceptance.length > 0 && (
+              <div>
+                <h4>Как проверить результат</h4>
+                <ul>{milestone.acceptance.map((criterion) => <li key={criterion}>{criterion}</li>)}</ul>
+              </div>
+            )}
+            <small>Это требования учебного задания, а не подтверждение пройденного этапа.</small>
+          </section>
+        )}
         <section className="trajectory-v2-drawer-section">
           <h3>Что было сделано</h3>
           <p>{completed
