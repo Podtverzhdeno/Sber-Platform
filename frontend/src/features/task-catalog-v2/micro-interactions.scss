@@ -129,3 +129,36 @@
     transform: none !important;
   }
 }
+
+
+/* Eligibility and application-status copy must never sit above an action button.
+   Long cards use an in-flow action row rather than the compact hover tray. */
+@media (min-width: 1550px) {
+  .catalog-v2 .catalog-v2-card:has(.catalog-v2-eligibility) .catalog-v2-card-actions,
+  .catalog-v2 .catalog-v2-card:has(.catalog-v2-card-status) .catalog-v2-card-actions {
+    position: static;
+    z-index: auto;
+    align-self: stretch;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    margin-top: 3px;
+    padding: 5px 0 0;
+    border: 0;
+    border-top: 1px solid var(--catalog-border);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+}
+/* Hover-only disclosure would strand controls on wide touch devices. */
+@media (hover: none) {
+  .catalog-v2 .catalog-v2-card .catalog-v2-card-actions {
+    position: static;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+}
