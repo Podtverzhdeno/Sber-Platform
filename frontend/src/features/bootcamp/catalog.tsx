@@ -318,12 +318,13 @@ export function BootcampCatalog({
         <div>
           <p className="eyebrow">Ваша траектория развития</p>
           <h1 id="workspace-title">Bootcamp</h1>
+          <h2 className="bootcamp-hero-kicker">Учитесь ради следующего результата</h2>
           <p className="lead">Выбирайте обучение под свою роль и продолжайте с того места, где остановились.</p>
         </div>
         <div className="bootcamp-hero-pulse" aria-label="Состояние обучения">
           <strong>{String(catalog.data.filter((card) => card.completion_state === "verified").length)}</strong>
           <span>подтверждённых курсов</span>
-          <small>Серия обучения: {String(streak.data.current_days)} дн.</small>
+          <h2 className="bootcamp-streak-heading">Серия: {String(streak.data.current_days)} дн.</h2>
         </div>
       </header>
       {deepLinkedKey !== null && deepLinked === null && (
