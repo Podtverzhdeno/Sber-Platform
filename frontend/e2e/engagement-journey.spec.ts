@@ -627,7 +627,7 @@ test.describe("engagement journey: desktop acceptance", () => {
   await expect(page.locator(".engagement-flash", { hasText: "5 → 6" })).toBeVisible();
 
   // Публичная проверка credential: документ открывается и в viewer, и по verify-URL.
-  await page.goto("/workspace/9");
+  await page.goto("/workspace/9?legacy=1");
   const documents = page.getByTestId("document-item");
   await expect(documents.filter({ hasText: "Проверка прототипа на данных" })).toBeVisible();
   await documents.filter({ hasText: "Проверка прототипа на данных" }).getByRole("button", { name: "Проверить" }).click();

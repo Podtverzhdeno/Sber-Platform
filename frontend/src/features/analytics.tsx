@@ -7,6 +7,7 @@ import { Badge, StatePanel } from "../components/ui";
 import { loadMonthlyGoal, type MonthlyGoalView } from "./monthly-goal-client";
 import { MonthlyGoalDiagram } from "./monthly-goal-card";
 import { ConnectedAgenticCodingProfile } from "./agentic-coding-profile";
+import { AnalyticsReference } from "./analytics-reference";
 import "./analytics-growth.scss";
 
 type Stage = { key: string; title: string; status: "completed" | "in_progress" | "not_started" | "unknown"; completed: boolean; count: number };
@@ -284,7 +285,7 @@ export function TrajectoryGrowthAnalytics({ snapshot, selectedTrajectoryKey, onT
   </section>;
 }
 
-export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[] }) {
+function LegacyParticipantAnalytics({ navigation = [] }: { navigation?: string[] }) {
   const [gapExpanded, setGapExpanded] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const query = useQuery({ queryKey: ["participant-analytics"], queryFn: () => apiRequest<Analytics>("/api/v1/me/analytics/journey"), refetchOnMount: "always" });
@@ -361,6 +362,14 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
     <section className="analytics-results"><div className="section-heading"><h2>Последние подтверждённые результаты <span className="analytics-demo-label">· пример</span></h2><Badge>Демонстрация</Badge></div><article><strong>Рекомендательная система</strong><span>Оценка A · +150 баллов</span></article><article><strong>Прогнозирование нагрузки</strong><span>Оценка B · +90 баллов</span></article></section>
     <section className="analytics-ai-insight"><span className="ai-orb">✦</span><div><p className="eyebrow">AI insight · не решение</p><h2>{data.next_action}</h2><p>Следующий шаг для развития. Проверяемые результаты влияют на Skill Passport только после подтверждения.</p></div><Badge tone={query.data?.successful ? "success" : "warning"}>{!query.data ? "Нет данных пути" : data.successful ? "Путь подтверждён" : "Путь продолжается"}</Badge></section>
   </div>;
+}
+
+export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[] }) {
+  const [params] = useSearchParams();
+  // Keep the previous dashboard available as a migration-only comparison,
+  // without showing it below the three approved reference compositions.
+  if (params.get("legacy") === "1") return <LegacyParticipantAnalytics navigation={navigation} />;
+  return <AnalyticsReference navigation={navigation} />;
 }
 
 const roleTitles: Record<Role, string> = { mentor: "Качество и скорость ревью", customer: "Путь задачи до принятого результата", manager: "Результаты и повторное использование", hr: "Воронка кандидатов по решениям людей", operator: "Качество операционного контура" };

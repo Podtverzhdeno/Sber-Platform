@@ -1,0 +1,14 @@
+# AN-08 Reference composition implementation
+- status: IN_PROGRESS
+- owner: GPT-6 UI implementation
+- base: 55f30c1ef612fe70a0691b5587fa639d8a2e646f
+- task: Implement 01 Skill Passport, 02 Path to goal, 03 Evidence and results using user-supplied original HTML and PNG
+- write_scope:
+  - frontend/src/features/analytics-reference.tsx
+  - frontend/src/features/analytics-reference.scss
+  - frontend/src/features/analytics.tsx
+  - frontend/src/features/analytics-reference.test.tsx
+  - frontend/e2e/analytics-reference.spec.ts
+  - docs/analytics-reference-parity.md
+  - .agents/coordination/claims/AN-08-REFERENCES-20261024.lock/status.md
+- constraints: preserve real backend data; no invented badge or fabricated skill levels; keep other agents' changes untouched
