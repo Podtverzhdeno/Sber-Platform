@@ -17,6 +17,7 @@ from impulse.application.development import (
     RoadmapRecord,
     TrackRecord,
 )
+from impulse.bootstrap.ai_curriculum_details import AI_CURRICULUM_DETAILS, learning_details
 from impulse.domain.development import (
     CompletionStatus,
     RoadmapMilestone,
@@ -164,7 +165,15 @@ class SqlDevelopmentStore(DevelopmentStore):
                         for topic in row["payload"].get("theory", [])
                         if isinstance(topic, str)
                     ),
-                    lab=(str(row["payload"]["lab"]) if row["payload"].get("lab") else None),
+                    lab=(
+                        str(learning_details(track_key, int(row["position"]))["lab"])
+                        if row["data_origin"] == "demo_seed"
+                        and track_key in AI_CURRICULUM_DETAILS
+                        and 1 <= int(row["position"]) <= len(AI_CURRICULUM_DETAILS[track_key])
+                        else str(row["payload"]["lab"])
+                        if row["payload"].get("lab")
+                        else None
+                    ),
                     acceptance=tuple(
                         str(check)
                         for check in row["payload"].get("acceptance", [])
