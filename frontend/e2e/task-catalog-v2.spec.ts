@@ -63,6 +63,12 @@ test("catalog filters, view parity and one idempotent apply", async ({ page }) =
     await route.fulfill({ json: { id: "00000000-0000-0000-0000-000000000704", status: "applied" } });
   });
 
+  // Advanced controls are deliberately hidden until requested in both desktop and mobile.
+  const advanced = page.getByRole("button", { name: "Все фильтры" });
+  await expect(advanced).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByLabel("Навык", { exact: true })).toBeHidden();
+  await advanced.click();
+  await expect(advanced).toHaveAttribute("aria-expanded", "true");
   await page.getByLabel("Навык", { exact: true }).fill("python");
   await expect(page.getByRole("button", { name: /Сбросить фильтр Навык/ })).toBeVisible();
   await page.getByRole("button", { name: "Список" }).click();
