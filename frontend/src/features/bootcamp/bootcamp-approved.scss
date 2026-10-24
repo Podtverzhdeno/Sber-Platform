@@ -187,3 +187,9 @@
   padding: 10px;
   border-radius: 9px;
 }
+
+/* The counter chip must not inherit muted text on an active brand-filled button. */
+.bc-approved .bootcamp-catalog-toolbar .bc-category-row button[aria-pressed="true"] span {
+  color: var(--on-brand-ink);
+  background: transparent;
+}
