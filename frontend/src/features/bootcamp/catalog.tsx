@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { apiRequest, retrySafeRead, RuntimeApiPath } from "../../api/client";
 import { Badge, Card, Drawer, SafeExternalLink, StatePanel } from "../../components/ui";
+import { CourseLearningContent } from "./learning-content/CourseLearningContent";
 import "./bootcamp-ux.scss";
 import "./bootcamp-approved.scss";
 
@@ -324,6 +325,7 @@ function CourseDetails({
         {card.verified_evidence ? <p>Подтверждённый результат: {card.verified_evidence}</p> :
           <p>{card.pending_verification_note || "Освоение курса и подтверждение компетенции — разные этапы. Основание для подтверждения появится после проверки результата."}</p>}
         <p className="bc-muted">{card.access_note || accessLabels[card.access_state].label}</p>
+        <button type="button" className="secondary-button" onClick={() => { setTab("program"); }}>Открыть уроки и практику →</button>
       </>}
       {tab === "program" && <>
         <h3>Программа курса</h3>
@@ -339,6 +341,7 @@ function CourseDetails({
               <p>Подробный состав модулей ещё не опубликован провайдером.</p>}
           </> : <p>{detailError ? "Подтверждённая программа временно недоступна: сведения не переданы источником обучения." : "Сведения не переданы источником обучения."}</p>}
         {card.access_state === "available" && <SafeExternalLink href={card.source_url}>Перейти к программе ↗</SafeExternalLink>}
+        <CourseLearningContent courseKey={card.key} courseTitle={card.title} sourceUrl={card.source_url} />
       </>}
       {tab === "skills" && <>
         <h3>Развитие навыков</h3>

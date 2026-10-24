@@ -6,6 +6,7 @@ import { apiRequest, type RuntimeApiPath } from "../../api/client";
 import type { components } from "../../api/schema";
 import { Modal, StatePanel } from "../../components/ui";
 import { BootcampPage, type BootcampOverview, type CatalogToolbarState } from "./page";
+import { CourseLearningContent } from "./learning-content/CourseLearningContent";
 import { parseBootcampUrl } from "./urlState";
 
 type CourseDetail = components["schemas"]["CourseDetail"];
@@ -141,6 +142,12 @@ export function BootcampV2Route() {
             <p>{detail.data.reviews_unavailable_reason}</p>
           </div>
         ))}
+        {courseKey !== null && <CourseLearningContent
+          key={courseKey}
+          courseKey={courseKey}
+          courseTitle={query.data.courses.find(item => item.card.key === courseKey)?.card.title}
+          sourceUrl={query.data.courses.find(item => item.card.key === courseKey)?.card.source_url}
+        />}
       </Modal>
     </section>
   );
