@@ -35,9 +35,9 @@ jobs:
         run: npm ci
       - name: Lint curriculum and browser test
         run: npx eslint src/features/bootcamp/learning-content e2e/bootcamp-learning-content.spec.ts --max-warnings 0
-      - name: Type-check all imports and contracts
-        run: npm run typecheck
       - name: Test 12 x 8 lessons and capstones
         run: npx vitest run src/features/bootcamp/learning-content/course-learning.test.tsx
+      - name: Type-check all imports and contracts
+        run: npm run typecheck
       - name: Build production frontend
         run: npm run build
