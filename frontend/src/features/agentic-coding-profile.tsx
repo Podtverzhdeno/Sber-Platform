@@ -19,16 +19,26 @@ const AGENTIC_SKILLS = [
 ] as const;
 
 type Role = "developer" | "analyst" | "qa";
+/** Read-only projection of RoleProfile from the published API contract. */
 export type AgenticServerProfile = {
   role_key: string;
+  role_title: string;
+  profile_scope: string;
   scale_key: string;
   framework_version: string;
+  as_of: string;
+  certification_state: string;
+  certification_reason: string;
   known_evidence_count: number;
+  data_origin: string;
   skills: Array<{
     key: string;
+    title: string;
     target_level: number | null;
     current_level: number | null;
+    evidence_count: number;
     data_state: string;
+    unresolved_methodology: boolean;
   }>;
 };
 type ServerProfile = AgenticServerProfile;
