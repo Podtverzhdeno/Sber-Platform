@@ -114,13 +114,17 @@ async function openNav(page: Page): Promise<void> {
   await page.getByRole("link", { name: "Сообщения" }).click();
 }
 
-async function openMessenger(page: Page): Promise<void> {
+async function openMessenger(page: Page, selectChat = false): Promise<void> {
   await page.goto("/");
   await page.locator('[data-persona="participant-ilya"]').click();
   await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
   await openNav(page);
   await expect(page.locator(".messenger-shell")).toBeVisible();
   await expect(page.locator(".msg-dialog-list__row").first()).toBeVisible();
+  if (selectChat) {
+    await page.locator(".msg-dialog-list__row").first().click();
+    await expect(page.getByRole("region", { name: "Текущий чат", exact: true })).toBeVisible();
+  }
   await page.evaluate(() => document.fonts.ready);
 }
 
@@ -129,7 +133,7 @@ test.describe("R-MSG-01 reference geometry and bubble density", () => {
 
   test("maintains the three-pane reference composition without inflated message bubbles", async ({ page }) => {
     messageRoutes(page);
-    await openMessenger(page);
+    await openMessenger(page, true);
 
     const shell = page.locator(".messenger-shell");
     const dialogList = page.locator(".msg-dialog-list");
@@ -173,7 +177,7 @@ test.describe("R-MSG-01 visual baselines light/dark 1440x900", () => {
       window.localStorage.setItem("impulse-theme", "light");
     });
     messageRoutes(page);
-    await openMessenger(page);
+    await openMessenger(page, true);
     await expect(page.locator(".messenger-shell")).toHaveScreenshot(
       "messenger-desktop-light-1440x900.png",
     );
@@ -181,7 +185,7 @@ test.describe("R-MSG-01 visual baselines light/dark 1440x900", () => {
 
   test("desktop dark", async ({ page }) => {
     messageRoutes(page);
-    await openMessenger(page);
+    await openMessenger(page, true);
     await expect(page.locator(".messenger-shell")).toHaveScreenshot(
       "messenger-desktop-dark-1440x900.png",
     );
