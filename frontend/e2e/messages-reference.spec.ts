@@ -101,6 +101,7 @@ test("messages empty state uses reference three-column composition at 1448px",as
   await expectRect(page,".chat-thread",{x:531,y:70,width:575,height:1016},14);
   await expectRect(page,".msg-reference-context-empty",{x:1106,y:70,width:298,height:1016},14);
   await expect(page.locator(".msg-reference-empty__bubble.front")).toBeVisible();
+  await page.screenshot({path:"test-results/messages-empty-1448.png",fullPage:false});
 });
 
 test("quick actions, search, tabs, context, mute, chat input operate end to end",async ({page})=>{
@@ -113,6 +114,7 @@ test("quick actions, search, tabs, context, mute, chat input operate end to end"
   await expectRect(page,".msg-dialog-list",{x:156,y:64,width:334,height:1022},12);
   await expectRect(page,".chat-thread",{x:490,y:64,width:606,height:1022},14);
   await expectRect(page,".msg-context",{x:1096,y:64,width:352,height:1022},14);
+  await page.screenshot({path:"test-results/messages-mayaki-1448.png",fullPage:false});
   await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toContainText("Маяки");
   await page.getByRole("button",{name:"Скрыть информацию о чате"}).click();
   await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toHaveCount(0);
@@ -146,6 +148,7 @@ test("direct chat follows 1672px personal PNG geometry with working editor",asyn
   await expectRect(page,".msg-dialog-list",{x:172,y:69,width:391,height:872},12);
   await expectRect(page,".chat-thread",{x:563,y:69,width:752,height:872},14);
   await expectRect(page,".msg-context",{x:1315,y:69,width:357,height:872},14);
+  await page.screenshot({path:"test-results/messages-personal-1672.png",fullPage:false});
   await page.getByRole("button",{name:"Поиск в чате"}).click();
   await expect(page.getByRole("searchbox",{name:"Поиск по сообщениям чата"})).toBeVisible();
   await page.getByRole("searchbox",{name:"Поиск по сообщениям чата"}).fill("Проверь");
