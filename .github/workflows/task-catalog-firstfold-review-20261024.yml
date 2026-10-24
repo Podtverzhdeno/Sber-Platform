@@ -16,7 +16,7 @@ jobs:
       - name: Checkout exact PR 35 first-fold fix
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: 8c0752147e8a022ede4ba7021c51a8c15072ddf7
+          ref: 4de39342470c9f11fb4da36a337a946cc7f6efbc
       - name: Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
