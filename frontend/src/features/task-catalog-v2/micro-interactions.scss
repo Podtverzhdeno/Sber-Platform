@@ -189,3 +189,36 @@
     margin-top: 1px;
   }
 }
+
+
+/* Geometry from approved source PNGs (1672×941):
+   ref 02 uses a ~656px modal, ref 03 uses ~40px company artwork.
+   Keep arbitrary API text scrollable rather than clipping the contract. */
+@media (min-width: 900px) {
+  .catalog-v2-conditions {
+    width: min(664px, calc(100vw - 36px));
+  }
+}
+@media (min-width: 1121px) {
+  .catalog-v2-table-avatar:has(.catalog-v2-brand-logo) {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+  }
+}
+.catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:has(input[list]) {
+  position: relative;
+}
+.catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters input[list] {
+  padding-right: 20px;
+}
+.catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:has(input[list])::after {
+  content: "⌄";
+  position: absolute;
+  right: 8px;
+  top: 9px;
+  color: var(--catalog-muted);
+  font-size: 15px;
+  line-height: 1;
+  pointer-events: none;
+}
