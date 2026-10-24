@@ -343,12 +343,12 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           {passport.data && passport.data.skills.length > 0 && (
             <ul className="trajectory-v2-skill-list">
               {passport.data.skills.slice(0, 4).map((skill, index) => {
-                const maxCount = Math.max(1, ...passport.data!.skills.map((entry) => entry.confirmed_case_count));
+                const maxCount = Math.max(1, ...passport.data.skills.map((entry) => entry.confirmed_case_count));
                 return (
                   <li key={skill.key}>
                     <span className="trajectory-v2-skill-icon" data-tone={index % 4}>{["▤", "✧", "▣", "⌁"][index % 4]}</span>
                     <strong>{skill.key}</strong>
-                    <progress max={maxCount} value={skill.confirmed_case_count} aria-label={`${skill.key}: подтверждено кейсов ${skill.confirmed_case_count}`}/>
+                    <progress max={maxCount} value={skill.confirmed_case_count} aria-label={`${skill.key}: подтверждено кейсов ${String(skill.confirmed_case_count)}`}/>
                     <small>{skill.confirmed_case_count} кейс.</small>
                   </li>
                 );
@@ -360,8 +360,8 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
       </aside>
       </div>
       {gradesOpen && (
-        <div className="trajectory-v2-overlay" onClick={() => setGradesOpen(false)}>
-          <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => event.stopPropagation()}>
+        <div className="trajectory-v2-overlay" onClick={() => { setGradesOpen(false); }}>
+          <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => { event.stopPropagation(); }}>
             <header className="trajectory-v2-grades-heading">
               <div className="trajectory-v2-grades-symbol" aria-hidden="true">▥</div>
               <div>
@@ -375,7 +375,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 {["База и основы","Исследование пользователей","Продуктовые гипотезы","Метрики и приоритизация","Реальные задачи и проекты","Подтверждение компетенций"].map((label,index) => {
                   const level = index+1;
                   const current = overview.concepts.career_grade.current_grade === String(level);
-                  return <button type="button" key={level} className="trajectory-v2-grade-option" aria-pressed={gradeFocus===level} onClick={() => setGradeFocus(level)}>
+                  return <button type="button" key={level} className="trajectory-v2-grade-option" aria-pressed={gradeFocus===level} onClick={() => { setGradeFocus(level); }}>
                     <span className="trajectory-v2-grade-dot">{current ? String(level) : level < Number(overview.concepts.career_grade.current_grade) ? "✓" : String(level)}</span>
                     <span><strong>Грейд {level}</strong><small>{label}</small></span>
                     <span aria-hidden="true">›</span>
@@ -393,10 +393,10 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 <strong>{["База и основы","Исследование пользователей","Продуктовые гипотезы","Метрики и приоритизация","Реальные задачи и проекты","Подтверждение компетенций"][gradeFocus-1]}</strong>
                 <p>Описание уровней приведено для ознакомления с макетом. Официальная политика и требования к этому уровню пока не опубликованы.</p>
                 <div className="trajectory-v2-grade-explanation-progress">
-                  <div className="trajectory-v2-grade-ring"><strong>{overview.concepts.career_grade.current_grade === String(gradeFocus) ? `Грейд ${gradeFocus}` : "—"}</strong></div>
+                  <div className="trajectory-v2-grade-ring"><strong>{overview.concepts.career_grade.current_grade === String(gradeFocus) ? `Грейд ${String(gradeFocus)}` : "—"}</strong></div>
                   <div>
                     <small>До следующего грейда</small>
-                    <strong>{overview.concepts.career_grade.current_grade === String(gradeFocus) && overview.concepts.career_grade.readiness_percent !== null ? `${100-overview.concepts.career_grade.readiness_percent}%` : "Проверяем"}</strong>
+                    <strong>{overview.concepts.career_grade.current_grade === String(gradeFocus) && overview.concepts.career_grade.readiness_percent !== null ? `${String(100-overview.concepts.career_grade.readiness_percent)}%` : "Проверяем"}</strong>
                     <progress max={100} value={overview.concepts.career_grade.current_grade === String(gradeFocus) ? overview.concepts.career_grade.readiness_percent ?? 0 : 0}/>
                     <small>{overview.concepts.career_grade.hint ?? "Официальные критерии будут доступны после публикации политики"}</small>
                   </div>
@@ -533,7 +533,7 @@ export function RoleDetailPanel(props: {
             </div>
             <p>{role.attempt_number === null
               ? "Познакомься с профессией и выбери направление развития."
-              : `Путь освоения роли · ${role.completed_milestones} из ${role.total_milestones} этапов пройдено`}</p>
+              : `Путь освоения роли · ${String(role.completed_milestones)} из ${String(role.total_milestones)} этапов пройдено`}</p>
           </div>
         </div>
         <div className="trajectory-v2-detail-controls">
@@ -667,7 +667,7 @@ export function StagePathSection(props: {
         {Array.from({ length: Math.max(0, 7 - roadmap.milestones.length) }, (_, index) => {
           const slot = roadmap.milestones.length + index + 1;
           return (
-            <li key={`unpublished-${slot}`} className="trajectory-v2-unpublished-stage" aria-label={`Этап ${slot} пока не опубликован`}>
+            <li key={`unpublished-${String(slot)}`} className="trajectory-v2-unpublished-stage" aria-label={`Этап ${String(slot)} пока не опубликован`}>
               <div className="trajectory-v2-stage" data-stage-state="unpublished">
                 <span className="trajectory-v2-milestone-node" aria-hidden="true">♙</span>
                 <strong className="trajectory-v2-milestone-position">{slot}</strong>
