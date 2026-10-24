@@ -200,3 +200,7 @@
 .trj-source .milestone.unpublished{opacity:.43;pointer-events:none;cursor:default}
 .trj-source .milestone.unpublished .milestone-circle{border-color:#29435a;background:#071725;color:#8b9dad}
 .trj-source .milestone.unpublished span:last-child{font-style:italic;color:#8a9db5}
+
+/* Source art cropped directly from the user's approved 01-original-main.png. */
+.trj-source .hero-graphic{flex-basis:225px;width:225px;height:96px;background:#061323 url("./hero-reference.webp") center / cover no-repeat}
+.trj-source .hero-graphic::before,.trj-source .hero-graphic::after,.trj-source .hero-graphic .flag{display:none}
