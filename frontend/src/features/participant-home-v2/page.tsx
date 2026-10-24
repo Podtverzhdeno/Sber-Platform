@@ -88,6 +88,7 @@ export function ParticipantHomeV2Body(props: {
   return (
     <div className="home-v2" data-reference="R-PAR-01" data-as-of={overview.as_of}>
       <header className="home-v2-freshness">
+        <h1 id="workspace-title" className="sr-only">Главная участника</h1>
         <p className="eyebrow">Предпросмотр нового домашнего раздела</p>
         <small>Снимок авторизованных данных от {asOf}</small>
       </header>
