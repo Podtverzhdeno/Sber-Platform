@@ -123,8 +123,15 @@ test("approved list density: ten test rows remain scannable without horizontal o
       firstTop: Math.round(rows[0]?.top ?? 0),
       columnCount: document.querySelectorAll(".catalog-v2-table-head [role=columnheader]").length,
       overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+      inspect: Array.from(document.querySelectorAll<HTMLElement>(".catalog-v2-table-row")).slice(0, 2).map((row) => ({
+        height: row.getBoundingClientRect().height,
+        minHeight: getComputedStyle(row).minHeight,
+        padding: getComputedStyle(row).padding,
+        tallest: Array.from(row.querySelectorAll<HTMLElement>('[role="cell"]')).map((cell) => ({label: cell.dataset.label ?? cell.className, height: cell.getBoundingClientRect().height})).sort((a,b) => b.height-a.height).slice(0,3),
+      })),
     };
   });
+  console.info("[tasks-list-dimensions]", JSON.stringify(data));
   // Approved 1672px reference rows are ~60px high, and ten fit on screen.
   // A 64px ceiling follows the approved 60px row rhythm with a little room for real text,
   // without cutting off full text in the selected detail panel.
