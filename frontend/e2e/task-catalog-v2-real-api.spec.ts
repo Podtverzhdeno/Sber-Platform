@@ -97,7 +97,7 @@ async function openRealCatalog(page: Page): Promise<void> {
   await page.goto("/");
   await page.getByRole("link", { name: "Задачи", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Задачи для вашего следующего результата" }),
+    page.getByRole("heading", { name: "Задачи для твоего развития" }),
   ).toBeVisible();
 }
 
@@ -370,7 +370,7 @@ test("real seeded API separates match snapshots after a trajectory change", asyn
 
   await page.getByRole("link", { name: "Задачи", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "Задачи для вашего следующего результата" }),
+    page.getByRole("heading", { name: "Задачи для твоего развития" }),
   ).toBeVisible();
   const refreshedSnapshot = await openCandidateDetail();
   await expect(refreshedSnapshot).not.toHaveText(candidate.match.source_snapshot_version);
@@ -660,7 +660,7 @@ test("real server preserves canonical state during the v2 flag rollback rehearsa
     page.getByRole("heading", { name: "Задачи для вашего развития", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Задачи для вашего следующего результата" }),
+    page.getByRole("heading", { name: "Задачи для твоего развития" }),
   ).toHaveCount(0);
   await expect(page.locator(".participant-work--catalog")).toContainText(candidate.title);
 
