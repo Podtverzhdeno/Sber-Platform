@@ -151,3 +151,63 @@ test("mobile layout in light theme keeps verification and plan deep links exact"
 });
 
 
+
+
+/**
+ * Candidate screenshot evidence only: the approved Analytics PNG/HTML are not
+ * available in the repository. These captures never establish pixel parity.
+ */
+for (const viewport of [
+  { name: "desktop-dark", width: 1440, height: 900 },
+  { name: "mobile-dark", width: 390, height: 844 },
+] as const) {
+  test(`analytics visual audit: ${viewport.name} layout, chart, long plan links and candidate screenshot`, async ({ page }, testInfo) => {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.goto("/");
+    await page.locator('[data-persona="participant-alex"]').click();
+    if (viewport.width < 700) {
+      await page.getByRole("button", { name: "Меню", exact: true }).click();
+    }
+    await page.getByRole("link", { name: "Аналитика", exact: true }).click();
+
+    await expect(page.getByRole("heading", { name: "Моя аналитика" })).toBeVisible();
+    const profile = page.getByTestId("agentic-profile");
+    const chart = page.locator(".agentic-profile-chart");
+    const certification = page.locator(".agentic-certification");
+    await expect(profile).toBeVisible();
+    await expect(chart).toBeVisible();
+    await expect(certification).toBeVisible();
+    await expect(page.locator(".activity-chart-panel svg")).toBeVisible();
+    await expect(page.getByText(/Нет проверяемой истории событий/)).toBeVisible();
+
+    const chartRect = await chart.boundingBox();
+    const certificationRect = await certification.boundingBox();
+    expect(chartRect).not.toBeNull();
+    expect(certificationRect).not.toBeNull();
+    if (chartRect && certificationRect) {
+      if (viewport.width >= 1080) {
+        expect(certificationRect.x).toBeGreaterThan(chartRect.x + chartRect.width - 5);
+        expect(Math.abs(chartRect.y - certificationRect.y)).toBeLessThan(8);
+      } else {
+        expect(certificationRect.y).toBeGreaterThan(chartRect.y + chartRect.height - 5);
+      }
+    }
+
+    await page.getByRole("button", { name: /До следующего уровня/ }).click();
+    const firstPlanLink = page.getByTestId("plan-step-0");
+    await expect(firstPlanLink).toBeVisible();
+    const planStyles = await firstPlanLink.evaluate((link) => {
+      const styles = window.getComputedStyle(link);
+      return { width: link.getBoundingClientRect().width, display: styles.display, fontSize: Number.parseFloat(styles.fontSize) };
+    });
+    expect(planStyles.width).toBeGreaterThan(100);
+    expect(planStyles.fontSize).toBeGreaterThanOrEqual(11);
+    expect(planStyles.display).not.toBe("inline");
+
+    const htmlOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(htmlOverflow).toBeLessThanOrEqual(2);
+    await page.evaluate(async () => { await document.fonts.ready; });
+    const screenshot = await page.screenshot({ animations: "disabled", fullPage: true });
+    await testInfo.attach(`analytics-candidate-${viewport.name}`, { body: screenshot, contentType: "image/png" });
+  });
+}
