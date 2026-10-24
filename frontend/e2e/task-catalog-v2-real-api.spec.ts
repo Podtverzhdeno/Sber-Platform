@@ -321,7 +321,10 @@ test("real seeded API separates match snapshots after a trajectory change", asyn
     const card = page.locator('[role="listitem"]').filter({ hasText: candidate.title });
     await expect(card).toBeVisible();
     await card.getByRole("button", { name: "Подробнее" }).click();
-    const snapshot = page.locator(".catalog-v2-match-snapshot code");
+    // The provenance was intentionally moved into an expandable explanation.
+    const provenance = page.locator(".catalog-v2-provenance");
+    await provenance.locator("summary").click();
+    const snapshot = provenance.locator(".catalog-v2-match-snapshot code");
     await expect(snapshot).toBeVisible();
     return snapshot;
   };
@@ -528,7 +531,7 @@ test("real server exposes qualitative growth, unverified customer and hard eligi
   await expect(detail).not.toContainText("Возможность использовать результат в портфолио");
   const growth = detail.locator(".catalog-v2-growth-list");
   await expect(growth).toContainText("Нет подтверждённого уровня");
-  await expect(growth).toContainText("Качественный потенциал, без числового прогноза");
+  await expect(growth).toContainText("Без числового прогноза");
   await expect(growth).not.toContainText("0%");
 
   const directApply = await page.context().request.post(
