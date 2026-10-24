@@ -1,0 +1,15 @@
+# Claim TRJ-ROUTE-LINT-20261024
+- task_id: TRJ-ROUTE-LINT-20261024
+- session_id: gpt6-20261024-trj-route-lint
+- status: IN_PROGRESS
+- started_at: 2026-10-24T23:40:00+03:00
+- heartbeat_at: 2026-10-24T23:40:00+03:00
+- base_revision: cfdde9fd9f584f601a915e168140da5813d70758
+- lane: trajectory-e2e-route-lint
+- depends_on: []
+- write_scope:
+  - frontend/e2e/trajectory-v2-route.spec.ts
+  - .agents/coordination/claims/TRJ-ROUTE-LINT-20261024.lock/status.md
+- verification: exact frontend ESLint errors line 44 and 45
+- progress: read-only inspection complete
+- blockers: page.tsx lint under separate existing CI-MAIN-TRAJECTORY-LINT claim
