@@ -1599,3 +1599,22 @@
 }
 .sberchat-shell .msg-composer__reference-hint { font-size: 10px; line-height: 1.2; color: var(--ref-muted); margin: 4px 0 0 68px; }
 @media (max-width: 480px) { .sberchat-shell .msg-composer__reference-row { gap: 6px; } .sberchat-shell .msg-composer__reference-hint { margin-left: 0; } }
+
+/* Reference-only labels for communities and demonstrative post reactions. */
+.sberchat-shell .msg-dialog-list__row-item[data-kind="community"] .msg-dialog-list__kind {
+  display: block; color: #76c5f8; font-size: 10px; line-height: 1.15;
+}
+.sberchat-shell .msg-dialog-list__row-item[data-kind="community"] .msg-dialog-list__avatar {
+  background: linear-gradient(135deg, #0a4d7c, #0876c1);
+  color: #e4faff; border-color: #227fc0;
+}
+.sberchat-shell .msg-dialog-list__row-item[data-kind="community"]:nth-child(4n+2) .msg-dialog-list__avatar {
+  background: linear-gradient(135deg, #772c6e, #ec9135);
+}
+.sberchat-shell .msg-chat__reference-reactions { display: flex; gap: 6px; padding-top: 4px; }
+.sberchat-shell .msg-chat__reference-reactions > span {
+  display: inline-flex; align-items: center; border-radius: 999px; gap: 4px;
+  border: 1px solid var(--ref-line); background: #0d2c4a; color: #d1eaff;
+  padding: 3px 7px; font-size: 10px;
+}
+.sberchat-shell .msg-chat__header-action:disabled { opacity: .65; cursor: not-allowed; }
