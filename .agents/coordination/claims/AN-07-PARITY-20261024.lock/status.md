@@ -1,5 +1,5 @@
 # AN-07-PARITY-20261024
-- status: IN_PROGRESS
+- status: RELEASED
 - session: analytics-parity-20261024
 - baseline: 8ff62a7256772493dbabd1b953d6b1c488a56797
 - scope:
@@ -10,4 +10,4 @@
   - .agents/coordination/claims/AN-07-PARITY-20261024.lock/status.md
 - goal: Prevent regressions in layout (desktop/mobile), text link wrapping, sparse chart data, missing-source indicators; collect candidate screenshots for owner visual acceptance.
 - acceptance_constraints: The original Analytics reference PNG and code are not in the repo. The visual catalog points to a local Windows folder but has no Analytics entry among R-PAR references. No pixel-perfect 1:1 certification without original source, same viewport and fonts.
-- done: pending
+- done: PR #36 merged to main at 4b94017774e7e12d603bd09113c583eca1fc46b6. CI 40109772229 all gates green, Playwright candidate PNG artifacts 12566267498 persisted, latest Codex review no findings. Source visual reference missing, therefore 1:1 status remains NOT ACCEPTED. No Railway deploy. Scope released.
