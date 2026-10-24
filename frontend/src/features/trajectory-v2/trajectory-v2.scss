@@ -634,3 +634,16 @@
 .trajectory-v2-role-card:not([aria-pressed="true"])[data-role-key*="python"] .trajectory-v2-role-icon{background:#193d86;color:#8cbeff}
 .trajectory-v2-role-card[data-role-key*="ml"] .trajectory-v2-role-icon{background:#094377;color:#39b1ff}
 .trajectory-v2-role-card:has(.trajectory-v2-role-state):not([aria-pressed="true"]):has(.trajectory-v2-role-state){font-variant-numeric:tabular-nums}
+
+
+.trajectory-v2-passport-panel>header button{border:0;background:none;color:#08dfe8;font-size:12px;font-weight:700;cursor:pointer}
+.trajectory-v2-skill-list{display:grid;gap:11px;margin:10px 0 8px;padding:0;list-style:none}
+.trajectory-v2-skill-list li{display:grid;align-items:center;grid-template-columns:26px minmax(0,1.3fr) minmax(70px,.9fr) 42px;gap:9px}
+.trajectory-v2-skill-list li strong{font-size:11px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trajectory-v2-skill-icon{display:grid;place-items:center;width:26px;height:26px;border-radius:6px;background:#0d66e2;color:white;font-size:16px}
+.trajectory-v2-skill-icon[data-tone="1"]{background:#df9206}
+.trajectory-v2-skill-icon[data-tone="2"]{background:#8540e5}
+.trajectory-v2-skill-icon[data-tone="3"]{background:#713fbd}
+.trajectory-v2-skill-list progress{width:100%;height:7px;accent-color:#08ddc8}
+.trajectory-v2-skill-list small{font-size:11px;text-align:right;color:#c5dfef}
+.trajectory-v2-passport-disclaimer{display:block;color:#7995a9;font-size:10px;line-height:1.3}
