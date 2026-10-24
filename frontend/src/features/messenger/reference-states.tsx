@@ -40,7 +40,7 @@ export function EmptyChatState({
           <ArrowRight size={19} />
         </button>
         <button type="button" className="community" onClick={openMayaki}>
-          <span className="msg-reference-empty__action-icon blue">{mayaki ? <img src="/messages-reference/mayaki-avatar.webp" alt="" /> : <Search size={21}/>}</span>
+          <span className="msg-reference-empty__action-icon blue">{mayaki ? <img src="/messages-reference/mayaki-avatar.svg" alt="" /> : <Search size={21}/>}</span>
           <span><strong>{mayaki ? "Перейти в Маяки" : "Найти Маяки"}</strong><small>{mayaki ? "Сообщество" : "Поиск среди доступных сообществ"}</small></span>
           <ArrowRight size={19}/>
         </button>
