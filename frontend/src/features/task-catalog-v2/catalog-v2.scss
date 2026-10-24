@@ -1650,3 +1650,27 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Compact, accessible list actions: icon labels remain available to AT. */
+.catalog-v2-table-actions .catalog-v2-icon-action {
+  display: inline-grid;
+  flex: 0 0 38px;
+  place-items: center;
+  width: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+}
+
+.catalog-v2-table-row [role="cell"] .catalog-v2-match {
+  display: inline-flex;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+@media (min-width: 1051px) {
+  .catalog-v2-table-head,
+  .catalog-v2-table-row {
+    grid-template-columns: minmax(200px, 1.7fr) minmax(160px, 0.87fr) minmax(135px, 0.9fr) minmax(140px, 0.9fr) minmax(235px, 1.45fr);
+  }
+}
