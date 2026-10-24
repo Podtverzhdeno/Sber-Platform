@@ -647,7 +647,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
             onConditions={openConditions}
             onBookmark={(item) => { bookmark.mutate({ taskId: item.task_id, saved: !item.bookmarked }); }}
             onShare={(item) => { void shareTask(item); }}
-            matchBadge={(item) => <MatchBadge item={item} />}
+            matchBadge={(item) => <MatchBadge item={item} showRing />}
             formatDuration={formatDuration}
             formatDeadline={formatDeadline}
             difficultyLabel={(value) => value === null ? "Не указана" : difficultyLabels[value] ?? value}
