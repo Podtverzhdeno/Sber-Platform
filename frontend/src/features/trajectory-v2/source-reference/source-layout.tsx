@@ -188,7 +188,8 @@ function StageCard({ role, milestone, state, stageTasks, onOpen }: {
 }) {
   /* The roadmap currently contains one goal per stage, not all individual
      tasks. Show a real source-backed goal until a read projection is provided. */
-  const tasks = stageTasks ?? [{
+  const hasPublishedAssignments = stageTasks !== undefined && stageTasks.length > 0;
+  const tasks = hasPublishedAssignments ? stageTasks : [{
     id: milestone.key,
     title: milestone.title,
     kind: milestone.target_kind === "course" ? "Обучение" : milestone.target_kind === "task" ? "Практическая задача" : milestone.target_kind,
@@ -212,7 +213,7 @@ function StageCard({ role, milestone, state, stageTasks, onOpen }: {
     <div className="stage-list">
       {tasks.map(task => <TaskRow key={task.id} task={task} milestoneKey={milestone.key} onOpen={onOpen} />)}
     </div>
-    {stageTasks === undefined && <small className="stage-truth-note">Показана цель этапа из дорожной карты; детализация отдельных заданий пока недоступна</small>}
+    {!hasPublishedAssignments && <small className="stage-truth-note">Показана цель этапа из дорожной карты; детализация отдельных заданий пока недоступна</small>}
   </section>;
 }
 
