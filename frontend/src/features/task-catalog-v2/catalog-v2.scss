@@ -2997,3 +2997,34 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
   word-break: normal;
   font-variant-numeric: tabular-nums;
 }
+
+
+/* A 9-column reference data table requires the wide source viewport.
+   At intermediate desktops the shell reserves ~244px for navigation; switch
+   to two scan-friendly columns before the content would horizontally spill. */
+@media (min-width: 681px) and (max-width: 1380px) {
+  .catalog-v2-table-head { display: none; }
+
+  .catalog-v2-table-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 14px;
+    min-height: 0;
+    margin-bottom: 10px;
+    padding: 13px 15px;
+    border: 1px solid var(--catalog-border);
+    border-radius: 12px;
+  }
+
+  .catalog-v2-table-row [role="cell"][data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    color: var(--catalog-muted);
+    font-size: 0.66rem;
+    font-weight: 650;
+  }
+
+  .catalog-v2-table-number { display: none; }
+  .catalog-v2-table-task { grid-column: 1 / -1; }
+  .catalog-v2-table-actions { grid-column: 1 / -1; justify-content: flex-end; }
+}
