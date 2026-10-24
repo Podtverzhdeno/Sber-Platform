@@ -42,7 +42,7 @@
 .analytics-reference .ref-switch button.active {background:linear-gradient(115deg,#16e7d9,#10b8ff);color:#001c2a;box-shadow:0 2px 11px rgba(16,233,222,.2)}
 .analytics-reference .ref-matrix {display:flex;flex-direction:column;min-width:0}
 .analytics-reference .ref-primary-matrix {border-color:#176074;box-shadow:0 8px 55px rgba(0,196,205,.045)}
-.analytics-reference .ref-matrix-grid {display:grid;grid-template-columns:51% 49%;gap:8px;flex:1;padding:0 16px 12px;min-height:260px;min-width:0}
+.analytics-reference .ref-matrix-grid {display:grid;grid-template-columns:minmax(0,1.02fr) minmax(0,.98fr);gap:8px;flex:1;padding:0 16px 12px;min-height:260px;min-width:0}
 .analytics-reference .ref-radar {display:flex;flex-direction:column;justify-content:center;align-items:center;min-width:0;gap:4px}
 .analytics-reference .ref-radar svg {width:100%;max-height:290px;display:block}
 .analytics-reference .ref-legend {display:flex;justify-content:center;gap:13px;flex-wrap:wrap;color:#9dbbd0;font-size:10px;margin-top:1px}
@@ -143,7 +143,7 @@
 .analytics-reference .ref-gap-row h3 {font-size:12px;margin-bottom:7px}
 .analytics-reference .ref-gap-row p {font-size:10px;color:#96b5c8;margin-top:6px;line-height:1.4}
 .analytics-reference .ref-gap-row strong {font-size:11px;white-space:nowrap}
-.analytics-reference .ref-v2-main .ref-matrix-grid {grid-template-columns:53% 47%;min-height:225px}
+.analytics-reference .ref-v2-main .ref-matrix-grid {grid-template-columns:minmax(0,1.06fr) minmax(0,.94fr);min-height:225px}
 .analytics-reference .ref-v2-main .ref-radar svg {max-height:195px}
 .analytics-reference .ref-v2-main .ref-matrix-list {padding:8px}
 .analytics-reference .ref-v2-main .ref-skill-row {grid-template-columns:17px minmax(55px,1fr) minmax(32px,70px) 35px;gap:3px}
