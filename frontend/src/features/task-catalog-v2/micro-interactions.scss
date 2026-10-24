@@ -255,3 +255,21 @@
     padding-block: 8px;
   }
 }
+
+/* Source-consistent filters for verified mentorship, conditional portfolio
+   benefit and real application eligibility. */
+.catalog-v2 .catalog-v2-secondary-filters .catalog-v2-toggle-filter {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 40px;
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+.catalog-v2 .catalog-v2-secondary-filters .catalog-v2-toggle-filter input {
+  accent-color: var(--catalog-highlight, #22e6d0);
+}
+@media (max-width: 680px) {
+  .catalog-v2 .catalog-v2-secondary-filters .catalog-v2-toggle-filter { flex: 1 1 132px; }
+}

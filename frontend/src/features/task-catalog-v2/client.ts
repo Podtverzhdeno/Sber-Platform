@@ -16,6 +16,9 @@ export function catalogQueryKey(filters: CatalogFilters) {
     filters.competency,
     filters.timeframe,
     filters.saved,
+    filters.mentored,
+    filters.portfolio,
+    filters.available,
     filters.sort,
   ] as const;
 }
@@ -33,6 +36,9 @@ export function loadCatalogPage(
   if (filters.competency) params.set("competency", filters.competency);
   if (filters.timeframe) params.set("timeframe", filters.timeframe);
   if (filters.saved) params.set("saved", "true");
+  if (filters.mentored) params.set("mentored", "true");
+  if (filters.portfolio) params.set("portfolio", "true");
+  if (filters.available) params.set("available", "true");
   if (cursor !== null) params.set("cursor", cursor);
   return apiRequest<CatalogPage>(`/api/v1/me/task-recommendations?${params.toString()}`, {
     cache: "no-store",

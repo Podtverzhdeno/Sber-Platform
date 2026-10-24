@@ -19156,6 +19156,54 @@
           },
           {
             "in": "query",
+            "name": "mentored",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Mentored"
+            }
+          },
+          {
+            "in": "query",
+            "name": "portfolio",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Portfolio"
+            }
+          },
+          {
+            "in": "query",
+            "name": "available",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Available"
+            }
+          },
+          {
+            "in": "query",
             "name": "sort",
             "required": false,
             "schema": {

@@ -11237,6 +11237,9 @@ export interface operations {
                 direction?: string | null;
                 timeframe?: string | null;
                 saved?: boolean | null;
+                mentored?: boolean | null;
+                portfolio?: boolean | null;
+                available?: boolean | null;
                 sort?: string;
                 page_size?: number;
                 cursor?: string | null;

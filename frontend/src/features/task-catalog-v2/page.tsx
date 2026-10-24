@@ -390,6 +390,9 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
     competency: searchParams.get("competency") ?? "",
     timeframe: searchParams.get("timeframe") ?? "",
     saved: searchParams.get("saved") === "true",
+    mentored: searchParams.get("mentored") === "true",
+    portfolio: searchParams.get("portfolio") === "true",
+    available: searchParams.get("available") === "true",
     sort: sortValue(searchParams.get("sort")),
   }), [searchParams]);
   const layout: CatalogLayout = searchParams.get("catalog_view") === "list" ? "list" : "cards";
@@ -575,6 +578,9 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
     filters.workFormat ? { key: "work_format", label: `Формат: ${formatLabels[filters.workFormat] ?? filters.workFormat}` } : null,
     filters.timeframe ? { key: "timeframe", label: `Срок: ${filters.timeframe}` } : null,
     filters.saved ? { key: "saved", label: "Только сохранённые" } : null,
+    filters.mentored ? { key: "mentored", label: "С ментором" } : null,
+    filters.portfolio ? { key: "portfolio", label: "Для портфолио" } : null,
+    filters.available ? { key: "available", label: "Открыт отклик" } : null,
     filters.sort !== "match-default" ? { key: "sort", label: `Сортировка: ${filters.sort}` } : null,
   ].filter((chip): chip is { key: string; label: string } => chip !== null);
 
@@ -619,7 +625,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
         onSubmit={(event) => { event.preventDefault(); updateParams({ q: searchInput.trim() }, true); }}>
         <div className="catalog-v2-filter-rail">
           <button type="button" className="catalog-v2-all-tasks" onClick={() => {
-            updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, sort: null }, true);
+            updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, mentored: null, portfolio: null, available: null, sort: null }, true);
           }}><SlidersHorizontal size={15} aria-hidden="true" /> Все задачи ({totals?.total_found ?? 0})</button>
           <div id="catalog-v2-advanced-filters" className="catalog-v2-advanced-filters" data-open={advancedFiltersOpen}>
             <label>Направление<input list="catalog-v2-direction-options" value={filters.direction} onChange={(event) => { updateParams({ direction: event.target.value }, true); }} placeholder="Направление" autoComplete="off" /></label>
@@ -657,8 +663,17 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
           <label className="catalog-v2-saved-filter"><input type="checkbox" checked={filters.saved} onChange={(event) => {
             updateParams({ saved: event.target.checked ? "true" : null }, true);
           }} />Только сохранённые</label>
+          <label className="catalog-v2-toggle-filter"><input type="checkbox" checked={filters.mentored} onChange={(event) => {
+            updateParams({ mentored: event.target.checked ? "true" : null }, true);
+          }} />С ментором</label>
+          <label className="catalog-v2-toggle-filter"><input type="checkbox" checked={filters.portfolio} onChange={(event) => {
+            updateParams({ portfolio: event.target.checked ? "true" : null }, true);
+          }} />Для портфолио</label>
+          <label className="catalog-v2-toggle-filter"><input type="checkbox" checked={filters.available} onChange={(event) => {
+            updateParams({ available: event.target.checked ? "true" : null }, true);
+          }} />Открыт отклик</label>
           <button type="button" className="catalog-v2-reset" onClick={() => {
-            updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, sort: null }, true);
+            updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, mentored: null, portfolio: null, available: null, sort: null }, true);
           }}>Сбросить фильтры</button>
         </div>
       </form>
@@ -674,7 +689,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
               {chip.label} ×
             </button>
           ))}
-          <button type="button" onClick={() => { updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, sort: null }, true); }}>Очистить всё</button>
+          <button type="button" onClick={() => { updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, mentored: null, portfolio: null, available: null, sort: null }, true); }}>Очистить всё</button>
         </div>
       ) : null}
       {catalog.isError ? <StatePanel kind="stale" action="Повторить" onAction={() => { void catalog.refetch(); }} /> : null}
@@ -686,7 +701,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
         <section className="catalog-v2-empty">
           <h2>Подходящих задач не найдено</h2>
           <p>{filters.saved ? "Сохранённых задач с такими фильтрами нет." : "Измените фильтры или проверьте каталог позже. Мы не подставляем демонстрационные задачи в пустой ответ."}</p>
-          <button type="button" onClick={() => { updateParams({ q: null, difficulty: null, work_format: null, direction: null, competency: null, timeframe: null, saved: null }, true); }}>Сбросить фильтры</button>
+          <button type="button" onClick={() => { updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, mentored: null, portfolio: null, available: null, sort: null }, true); }}>Сбросить фильтры</button>
         </section>
       ) : (
         layout === "list" ? (

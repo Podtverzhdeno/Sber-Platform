@@ -176,6 +176,12 @@ test.describe("task catalog interactive controls and motion", () => {
     await ensureParam("work_format", "remote");
     await page.getByLabel("Срок", { exact: true }).selectOption("30d");
     await ensureParam("timeframe", "30d");
+    await page.getByRole("checkbox", { name: "С ментором" }).check();
+    await ensureParam("mentored", "true");
+    await page.getByRole("checkbox", { name: "Для портфолио" }).check();
+    await ensureParam("portfolio", "true");
+    await page.getByRole("checkbox", { name: "Открыт отклик" }).check();
+    await ensureParam("available", "true");
     await page.getByLabel("Сортировка", { exact: true }).selectOption("deadline");
     await ensureParam("sort", "deadline");
 
@@ -186,7 +192,7 @@ test.describe("task catalog interactive controls and motion", () => {
     await expect.poll(() => new URL(page.url()).searchParams.get("competency")).toBeNull();
     await ensureParam("direction", "ml");
     await page.getByRole("button", { name: /Все задачи/ }).click();
-    for (const key of ["direction", "competency", "customer", "difficulty", "work_format", "timeframe", "sort"]) {
+    for (const key of ["direction", "competency", "customer", "difficulty", "work_format", "timeframe", "mentored", "portfolio", "available", "sort"]) {
       await expect.poll(() => new URL(page.url()).searchParams.get(key)).toBeNull();
     }
     await expect(page).toHaveURL(/catalog_view=list/);
@@ -201,10 +207,14 @@ test.describe("task catalog interactive controls and motion", () => {
       return route.fulfill({ json: catalogPage(filtered) });
     });
     await page.getByRole("button", { name: "Все фильтры" }).click();
+    await page.getByLabel("Заказчик", { exact: true }).fill("unknown-company");
+    await page.getByLabel("Сортировка", { exact: true }).selectOption("deadline");
     await page.getByLabel("Поиск", { exact: true }).fill("No matching task");
     await page.getByRole("button", { name: "Найти" }).click();
     await expect(page.getByRole("heading", { name: "Подходящих задач не найдено" })).toBeVisible();
     await page.locator(".catalog-v2-empty").getByRole("button", { name: "Сбросить фильтры" }).click();
+    await expect.poll(() => new URL(page.url()).searchParams.has("customer")).toBe(false);
+    await expect.poll(() => new URL(page.url()).searchParams.has("sort")).toBe(false);
     await expect(page.locator('[role="listitem"]')).toHaveCount(2);
   });
 

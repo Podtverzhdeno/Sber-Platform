@@ -140,5 +140,8 @@ export type CatalogFilters = {
   competency: string;
   timeframe: string;
   saved: boolean;
+  mentored: boolean;
+  portfolio: boolean;
+  available: boolean;
   sort: CatalogSort;
 };
