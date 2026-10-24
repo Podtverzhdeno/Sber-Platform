@@ -496,7 +496,7 @@ describe("Bootcamp catalog states and filters (22.15)", () => {
     const dialog = await screen.findByRole("dialog", { name: "Информация о курсе" });
     const issue = await within(dialog).findByRole("button", { name: "Получить сертификат" });
     fireEvent.click(issue);
-    await waitFor(() => expect(fixtures.certificateIssues).toBe(1));
+    await waitFor(() => { expect(fixtures.certificateIssues).toBe(1); });
     expect(await within(dialog).findByRole("link", { name: "Открыть выданный сертификат →" })).toHaveAttribute("href", "/verify/verify-123");
   });
 
