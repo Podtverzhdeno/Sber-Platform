@@ -1,9 +1,9 @@
 # Claim AN-06-LIVE-20261024
 - task_id: AN-06-LIVE-20261024
 - session_id: gpt6-20261024-analytics-live-series
-- status: IN_PROGRESS
+- status: RELEASED
 - started_at: 2026-10-24T18:20:00+03:00
-- heartbeat_at: 2026-10-24T18:20:00+03:00
+- heartbeat_at: 2026-10-24T18:40:00+03:00
 - base_revision: e1bf004ec2748f6d8972cfafb0dce7badde46100
 - depends_on: [AN-05-UI-20261024]
 - write_scope:
@@ -16,5 +16,7 @@
   - frontend typecheck + lint
   - frontend unit tests
   - frontend production build + E2E
-- progress: Implementing trustworthy chart data from existing participant journey and growth snapshot APIs instead of hard-coded samples
+- progress: Implemented verified journey funnel, KPI and timezone-aware weekly event chart, honest missing source/empty state, demo marking and unit coverage. PR #33 squash-merged at f6083c86acbfe21ae4a85f840b7acf8c51105f78; CI 40106565177 required-gates SUCCESS; Codex reviewed fc9bf6b with no findings. Scope released.
 - blockers: authenticated Railway live visual comparison unavailable; no original 1:1 source PNG
+
+- integration: merged to main; exact pixel-diff with original PNG and production deployment remain outside this claim.
