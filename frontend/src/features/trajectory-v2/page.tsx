@@ -107,6 +107,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const [hiddenUnselected, setHiddenUnselected] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [compareTarget, setCompareTarget] = useState<string | null>(null);
+  const [gradesOpen, setGradesOpen] = useState(false);
   const snapshotTrigger = () => {
     lastOverlayTriggerRef.current =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -272,7 +273,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
       </div>
       <aside className="trajectory-v2-reference-sidebar" aria-label="Карьерный прогресс и следующий шаг">
         <section className="trajectory-v2-grade-panel">
-          <header><h3>Твой грейд</h3><span>Карьерный уровень</span></header>
+          <header><h3>Твой грейд</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => setGradesOpen(true)}>Все уровни →</button></header>
           <div className="trajectory-v2-grade-body">
             <div className="trajectory-v2-grade-ring"><strong>{overview.concepts.career_grade.current_grade === null ? "—" : `Грейд ${overview.concepts.career_grade.current_grade}`}</strong><small>{selected?.title ?? "Моя роль"}</small></div>
             <div className="trajectory-v2-grade-progress">
@@ -295,6 +296,22 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           <p>Подтверждённые компетенции и цифровые следы доступны в разделе портфолио. Учебный прогресс не является подтверждённым уровнем компетенции.</p>
         </section>
       </aside>
+      {gradesOpen && (
+        <div className="trajectory-v2-overlay" onClick={() => setGradesOpen(false)}>
+          <section className="trajectory-v2-grades-dialog" role="dialog" aria-modal="true" aria-label="Все уровни" onClick={(event) => event.stopPropagation()}>
+            <header><h2>Все уровни</h2><button type="button" aria-label="Закрыть" onClick={() => setGradesOpen(false)}>✕</button></header>
+            <p>Грейд определяется подтверждёнными результатами и действующей политикой оценки.</p>
+            <ol className="trajectory-v2-grades-list">
+              {Array.from({ length: 6 }, (_, index) => index + 1).map((grade) => {
+                const isCurrent = overview.concepts.career_grade.current_grade === String(grade);
+                const isTarget = overview.concepts.career_grade.target_grade === String(grade);
+                return <li key={grade} data-current={isCurrent}><strong>Грейд {grade}</strong><span>{isCurrent ? "Текущий уровень" : isTarget ? "Следующий уровень" : "Условия определяются политикой оценки"}</span></li>;
+              })}
+            </ol>
+            <small>Версия политики: {overview.concepts.career_grade.policy_version}. Точный каталог условий недоступен в текущем снимке.</small>
+          </section>
+        </div>
+      )}
       {roleInfoOpen && selected !== null ? (
         <RoleInfoDialog
           role={selected}
