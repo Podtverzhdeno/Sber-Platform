@@ -8,6 +8,8 @@ on:
       - "tests/test_demo_seed_graph.py"
       - "tests/integration/test_demo_seed_idempotency.py"
       - "src/impulse/bootstrap/ai_role_catalog.py"
+      - "src/impulse/bootstrap/ai_curriculum_details.py"
+      - "tests/test_ai_curriculum_details.py"
       - "src/impulse/application/development.py"
       - "src/impulse/api/v1/development.py"
       - ".github/workflows/demo-statistics-qa.yml"
@@ -54,7 +56,7 @@ jobs:
       - name: Apply migrations
         run: uv run alembic upgrade head
       - name: Validate demo graph
-        run: uv run pytest -q tests/test_demo_seed_graph.py tests/task_catalog/test_demo_seed.py
+        run: uv run pytest -q tests/test_demo_seed_graph.py tests/test_ai_curriculum_details.py tests/task_catalog/test_demo_seed.py
       - name: Reproduce runtime UUID collision without losing participant progress
         run: uv run pytest -q tests/integration/test_demo_seed_idempotency.py
         env:
