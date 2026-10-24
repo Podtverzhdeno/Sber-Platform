@@ -1,0 +1,17 @@
+# Task catalog main integration
+- task_id: task-catalog-main-integration-20261024
+- session_id: gpt6-20261024-2253-main-integration
+- status: IN_PROGRESS
+- started_at: 2026-10-24T22:53:00+03:00
+- base_revision: 2c471261f482b75d6113a6e6c86e980a6c641bd3
+- depends_on: [task-catalog-visual-polish-20261024, task-catalog-firstfold-snapshots-20261024]
+- write_scope:
+  - .agents/coordination/claims/task-catalog-main-integration-20261024.lock/status.md
+- verification:
+  - exact HEAD CI and browser E2E
+  - check PR conflicts and branch protection
+  - merge PR #35 to main using expected HEAD SHA only after green CI
+  - verify final main branch file content and push-triggered CI
+- progress: release integration requested by repository owner; latest bot-written snapshot commit needs user-actor CI rerun
+- blockers: independent original-PNG strict pixel identity unavailable for variable live data; user authorized main integration but not production deploy or flag activation
+- production: do not deploy, run migrations or touch Railway services
