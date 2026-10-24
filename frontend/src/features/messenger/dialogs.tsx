@@ -51,7 +51,7 @@ export type DialogListProps = {
   createSignal?: number;
   findSignal?: number;
   onSelect: (channelId: string) => void;
-  onCreateDialog?: (peerId: string) => void;
+  onCreateDialog?: (peerId: string) => Promise<void> | void;
   /** Test seam: deterministic dm state in jsdom. */
   storage?: KeyValueStorage;
   className?: string;
@@ -258,7 +258,7 @@ export function DialogList({
                   role="menuitem"
                   onClick={() => {
                     setMenuOpen(false);
-                    void onCreateDialog?.(contact.id)?.catch(() => undefined);
+                    void Promise.resolve(onCreateDialog?.(contact.id)).catch(() => undefined);
                   }}
                 >
                   <strong>{contact.display_name}</strong>
