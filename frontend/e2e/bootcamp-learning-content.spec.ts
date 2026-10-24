@@ -10,6 +10,7 @@ test("all twelve Bootcamp courses open four real lessons with working navigation
     await page.goto(`/workspace/2?course=${key}`);
     const drawer = page.getByRole("dialog", { name: "Информация о курсе" });
     await expect(drawer).toBeVisible();
+    await drawer.getByRole("button", { name: /Открыть уроки и практику/ }).click();
     await expect(drawer.locator(`.bc-learning[data-course-key="${key}"]`)).toBeVisible();
     const outline = drawer.getByRole("navigation", { name: "Шаги обучения" });
     await expect(outline.getByRole("button")).toHaveCount(4);
@@ -27,6 +28,7 @@ test("Bootcamp mobile lesson reader fits the viewport and keeps navigation opera
   await page.locator('[data-persona="participant-alex"]').click();
   await page.goto("/workspace/2?course=demo-course-3");
   const drawer = page.getByRole("dialog", { name: "Информация о курсе" });
+  await drawer.getByRole("button", { name: /Открыть уроки и практику/ }).click();
   await expect(drawer.getByRole("heading", { name: "Типы и выражения" })).toBeVisible();
   await drawer.getByRole("button", { name: "Следующий урок" }).click();
   await expect(drawer.getByRole("heading", { name: "Условия и циклы" })).toBeVisible();
