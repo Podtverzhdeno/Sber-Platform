@@ -98,7 +98,7 @@ export function DialogList({
   );
   const contacts = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    return contactsOfChannels(channels, viewerId).filter((contact) =>
+    return contactsOfChannels(channels.filter((channel) => !channel.id.startsWith("reference:")), viewerId).filter((contact) =>
       normalized ? contact.display_name.toLowerCase().includes(normalized) : true,
     );
   }, [channels, viewerId, query]);
@@ -295,6 +295,7 @@ export function DialogList({
               visible.map((row) => (
                 <li
                   key={row.channel.id}
+                  data-kind={row.channel.kind}
                   className={
                     "msg-dialog-list__row-item" +
                     (row.selected ? " selected" : "") +
