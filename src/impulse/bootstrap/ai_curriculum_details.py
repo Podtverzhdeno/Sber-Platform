@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import json
 
+from impulse.bootstrap.ai_stage_guides import stage_guide
+
 # ruff: noqa: E501 -- curated human-readable Russian lesson descriptions.
 AI_CURRICULUM_DETAILS: dict[str, list[dict[str, object]]] = json.loads(r"""{
   "product": [
@@ -667,4 +669,15 @@ AI_CURRICULUM_DETAILS: dict[str, list[dict[str, object]]] = json.loads(r"""{
 
 def learning_details(track_key: str, stage_position: int) -> dict[str, object]:
     """Read a curriculum module without mutating the canonical milestone."""
-    return dict(AI_CURRICULUM_DETAILS[track_key][stage_position - 1])
+    details = dict(AI_CURRICULUM_DETAILS[track_key][stage_position - 1])
+    guide = stage_guide(track_key, stage_position)
+    details["lab"] = "\n\n".join(
+        (
+            str(details["lab"]),
+            f"Учебный кейс: {guide['case_study']}",
+            f"Пример решения: {guide['worked_example']}",
+            f"Типичная ошибка: {guide['common_mistake']}",
+            f"Самостоятельная проверка: {guide['stretch_task']}",
+        )
+    )
+    return details
