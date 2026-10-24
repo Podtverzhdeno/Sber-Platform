@@ -2,10 +2,9 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 
-import { apiRequest } from "../../api/client";
+import { apiRequest, type RuntimeApiPath } from "../../api/client";
 import type { components } from "../../api/schema";
 import { Modal, StatePanel } from "../../components/ui";
-import { BootcampCatalog } from "./catalog";
 import { BootcampPage, type BootcampOverview, type CatalogToolbarState } from "./page";
 import { parseBootcampUrl } from "./urlState";
 
@@ -39,7 +38,7 @@ export function BootcampV2Route() {
   const query = useQuery({
     queryKey: ["bootcamp-v2-overview", track],
     queryFn: () => apiRequest<BootcampOverview>(
-      track ? `${OVERVIEW_PATH}?track=${encodeURIComponent(track)}` as typeof OVERVIEW_PATH : OVERVIEW_PATH,
+      track ? `${OVERVIEW_PATH}?track=${encodeURIComponent(track)}` as RuntimeApiPath : OVERVIEW_PATH,
     ),
   });
   const courseKey = state.course;
@@ -95,7 +94,7 @@ export function BootcampV2Route() {
 
   return (
     <section className="bootcamp-v2-boundary">
-      <nav aria-label="Версии Bootcamp"><button type="button" onClick={classic}>Действующий каталог</button></nav>
+      <div aria-label="Версии Bootcamp"><button type="button" onClick={classic}>Действующий каталог</button></div>
       <BootcampPage
         overview={query.data}
         visibleCourses={visibleCourses}
