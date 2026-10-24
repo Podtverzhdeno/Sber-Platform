@@ -191,6 +191,33 @@ function StageDrawerContinuation(props: {
   );
 }
 
+const PRODUCT_REFERENCE_ROLE = {
+  doing: [
+    "Анализирует поведение пользователей и ключевые метрики",
+    "Формулирует и проверяет продуктовые гипотезы",
+    "Находит точки роста и готовит рекомендации",
+    "Работает с продуктовой командой над улучшением сервиса",
+    "Оценивает влияние изменений на метрики",
+  ],
+  skills: [
+    "Аналитическое мышление", "Работа с данными", "Продуктовое мышление",
+    "SQL", "Статистика", "Визуализация", "A/B-тестирование", "Коммуникация",
+  ],
+  examples: [
+    "Проанализировать воронку и найти узкие места",
+    "Провести A/B-тест и оценить влияние на метрики",
+    "Исследовать пользовательский сегмент",
+    "Сформулировать и проверить продуктовую гипотезу",
+  ],
+  next: [
+    "Более сложные исследования",
+    "Системная работа с продуктовыми метриками",
+    "Координация с кросс-функциональными командами",
+    "Менторство и передача опыта",
+  ],
+  suitable: "Подойдёт тем, кому интересно понимать поведение людей, работать с данными и объяснять, почему продукт должен измениться.",
+} as const;
+
 const ROLE_INFO_SECTIONS: readonly { id: string; title: string }[] = [
   { id: "purpose", title: "О роли" },
   { id: "responsibilities", title: "Чем занимается" },
@@ -255,6 +282,7 @@ export function RoleInfoDialog(props: {
     if (!skills.includes(item.skill)) skills.push(item.skill);
   }
   const taskStages = milestones.filter((item) => item.target_kind === "task");
+  const isProductRole = role.title.toLowerCase().includes("продуктовый аналитик");
   const sectionContent = (() => {
     switch (activeSection.id) {
       case "purpose":
@@ -262,6 +290,7 @@ export function RoleInfoDialog(props: {
           ? "Снимок дорожной карты недоступен; целевое описание роли не публикуется."
           : `Дорожная карта v${String(roadmap.policy_version)} для трека ${roadmap.track_key}: ${String(milestones.length)} этапов. Целевое описание роли добавится вместе с каталогом ролей.`;
       case "responsibilities":
+        if (isProductRole) return <ul>{PRODUCT_REFERENCE_ROLE.doing.map((item) => <li key={item}>{item}</li>)}</ul>;
         return milestones.length === 0 ? (
           UNKNOWN_PUBLISHED
         ) : (
@@ -274,6 +303,7 @@ export function RoleInfoDialog(props: {
           </ul>
         );
       case "competencies":
+        if (isProductRole) return <div className="trajectory-v2-role-skill-chips">{PRODUCT_REFERENCE_ROLE.skills.map((skill) => <span key={skill}>{skill}</span>)}</div>;
         return skills.length === 0 ? (
           UNKNOWN_PUBLISHED
         ) : (
@@ -284,6 +314,7 @@ export function RoleInfoDialog(props: {
           </ul>
         );
       case "representative":
+        if (isProductRole) return <ul>{PRODUCT_REFERENCE_ROLE.examples.map((item) => <li key={item}>{item}</li>)}</ul>;
         return taskStages.length === 0 ? (
           "Задач в снимке нет; цели роли доступны курсами."
         ) : (
@@ -296,10 +327,12 @@ export function RoleInfoDialog(props: {
           </ul>
         );
       case "development":
+        if (isProductRole) return <ul>{PRODUCT_REFERENCE_ROLE.next.map((item) => <li key={item}>{item}</li>)}</ul>;
         return role.attempt_number === null
           ? "Роль не выбрана: прогресс появится после входа в каталог траекторий."
           : `Завершено этапов: ${String(role.completed_milestones)} из ${String(role.total_milestones)} (попытка ${String(role.attempt_number)}). Каталог грейдов не подключён к снимку.`;
       case "entry":
+        if (isProductRole) return PRODUCT_REFERENCE_ROLE.suitable;
         return role.attempt_number === null
           ? "Вход — через каталог траекторий; персональный прогресс отсутствует."
           : `Состояние роли: ${roleStateLabel(role.state)}; активна попытка ${String(role.attempt_number)}.`;
@@ -386,24 +419,34 @@ export function RoleInfoDialog(props: {
               </section>
               <section className="trajectory-v2-role-intro-card">
                 <h3>Чем занимается</h3>
-                <ul>{milestones.slice(0,5).map((item) => <li key={item.key}>{item.purpose}</li>)}</ul>
-                {milestones.length === 0 && <p>Подробности будут доступны после публикации дорожной карты.</p>}
+                <ul>{isProductRole
+                  ? PRODUCT_REFERENCE_ROLE.doing.map((item) => <li key={item}>{item}</li>)
+                  : milestones.slice(0,5).map((item) => <li key={item.key}>{item.purpose}</li>)}</ul>
+                {!isProductRole && milestones.length === 0 && <p>Подробности будут доступны после публикации дорожной карты.</p>}
               </section>
               <section className="trajectory-v2-role-intro-card">
                 <h3>Ключевые компетенции</h3>
-                <div className="trajectory-v2-role-skill-chips">{skills.map((skill) => <span key={skill}>{skill}</span>)}</div>
-                {skills.length === 0 && <p>Компетенции появятся после публикации дорожной карты.</p>}
+                <div className="trajectory-v2-role-skill-chips">{(isProductRole ? PRODUCT_REFERENCE_ROLE.skills : skills).map((skill) => <span key={skill}>{skill}</span>)}</div>
+                {!isProductRole && skills.length === 0 && <p>Компетенции появятся после публикации дорожной карты.</p>}
               </section>
               <section className="trajectory-v2-role-intro-card">
                 <h3>Примеры задач</h3>
-                <ul>{taskStages.slice(0,4).map((item) => <li key={item.key}>{item.title}</li>)}</ul>
-                {taskStages.length === 0 && <p>Проверяемые задачи пока не опубликованы.</p>}
+                <ul>{isProductRole
+                  ? PRODUCT_REFERENCE_ROLE.examples.map((item) => <li key={item}>{item}</li>)
+                  : taskStages.slice(0,4).map((item) => <li key={item.key}>{item.title}</li>)}</ul>
+                {!isProductRole && taskStages.length === 0 && <p>Проверяемые задачи пока не опубликованы.</p>}
               </section>
               <section className="trajectory-v2-role-intro-card">
                 <h3>Что откроется дальше</h3>
-                <ul>{milestones.slice(Math.max(0,role.completed_milestones),role.completed_milestones+4).map((item) => <li key={item.key}>{item.title}</li>)}</ul>
-                {milestones.length === 0 && <p>Следующие этапы ещё не определены.</p>}
+                <ul>{isProductRole
+                  ? PRODUCT_REFERENCE_ROLE.next.map((item) => <li key={item}>{item}</li>)
+                  : milestones.slice(Math.max(0,role.completed_milestones),role.completed_milestones+4).map((item) => <li key={item.key}>{item.title}</li>)}</ul>
+                {!isProductRole && milestones.length === 0 && <p>Следующие этапы ещё не определены.</p>}
               </section>
+              {isProductRole && <section className="trajectory-v2-role-suitability">
+                <h3>Кому подойдёт эта роль</h3>
+                <p>{PRODUCT_REFERENCE_ROLE.suitable}</p>
+              </section>}
             </div>
           ) : sectionContent}
         </div>
