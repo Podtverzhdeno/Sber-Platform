@@ -100,9 +100,9 @@ function SourceRoleCard({ role, selected, primary, onSelect }: {
       {unselected || role.attempt_number === null ? <span className="role-caption">Не выбрана</span> : (
         <>
           <div className="mini-track" role="progressbar" aria-label={`Пройдено этапов роли ${role.title}`} aria-valuenow={complete} aria-valuemin={0} aria-valuemax={Math.max(1, denominator)}>
-            <div style={{ width: `${portion}%` }} />
+            <div style={{ width: `${String(portion)}%` }} />
           </div>
-          <span className="role-caption">{selected && primary ? "Основная роль" : `${complete} из ${denominator} этапов`}{role.state === "paused" ? " · пауза" : ""}</span>
+          <span className="role-caption">{selected && primary ? "Основная роль" : `${String(complete)} из ${String(denominator)} этапов`}{role.state === "paused" ? " · пауза" : ""}</span>
         </>
       )}
     </button>
@@ -111,7 +111,7 @@ function SourceRoleCard({ role, selected, primary, onSelect }: {
 
 function ProgressRail({ current, className = "" }: { current: number | null; className?: string }) {
   return <div className={["progress-rail", className].filter(Boolean).join(" ")} role={current === null ? undefined : "progressbar"} aria-valuenow={current ?? undefined} aria-valuemin={current === null ? undefined : 0} aria-valuemax={current === null ? undefined : 100}>
-    {current === null ? null : <div className="progress-fill" style={{ width: `${Math.min(100, Math.max(0, current))}%` }} />}
+    {current === null ? null : <div className="progress-fill" style={{ width: `${String(Math.min(100, Math.max(0, current)))}%` }} />}
   </div>;
 }
 
@@ -130,7 +130,7 @@ function RoleRoadmap({ roadmap, selectedStageKey, onSelectStage }: {
           className={["milestone", state === "completed" ? "completed" : state === "current" ? "current" : "future"].join(" ")}
           role="listitem"
           aria-pressed={stage.key === selectedStageKey}
-          onClick={() => onSelectStage(stage.key)}
+          onClick={() => { onSelectStage(stage.key); }}
         >
           <span className="milestone-circle">{state === "completed" ? <SourceIcon name="check" /> : state === "locked" ? <SourceIcon name="lock" /> : state === "current" ? <span className="current-dot" /> : stage.position}</span>
           <strong>{stage.position}</strong>
@@ -159,7 +159,7 @@ function TaskRow({ task, milestoneKey, onOpen }: { task: VerifiedStageTask; mile
       {completed ? "Завершено" : task.status === "locked" ? "Закрыто" : "К выполнению"}
       {task.completedAt ? ` · ${task.completedAt}` : ""}
     </span>
-    {task.status === "locked" ? null : <button type="button" className={["btn", completed ? "neutral" : "primary"].join(" ")} onClick={() => onOpen(milestoneKey)}>{completed ? "Посмотреть" : "Продолжить"} {!completed && <SourceIcon name="arrow" />}</button>}
+    {task.status === "locked" ? null : <button type="button" className={["btn", completed ? "neutral" : "primary"].join(" ")} onClick={() => { onOpen(milestoneKey); }}>{completed ? "Посмотреть" : "Продолжить"} {!completed && <SourceIcon name="arrow" />}</button>}
   </div>;
 }
 
@@ -205,12 +205,12 @@ function GradeCard({ grade, title, onOpen }: {
   return <section className="grade-card card">
     <div className="section-head"><h3>Твой грейд</h3><button type="button" className="text-link" onClick={onOpen}>Все уровни <SourceIcon name="arrow" /></button></div>
     <div className="grade-metrics">
-      <div className="grade-ring" style={{ "--grade-progress": `${completed ?? 0}%` } as CSSProperties}>
+      <div className="grade-ring" style={{ "--grade-progress": `${String(completed ?? 0)}%` } as CSSProperties}>
         <div className="grade-ring-inner"><strong>{grade.current_grade === null ? "Грейд —" : `Грейд ${grade.current_grade}`}</strong><small>{title}</small></div>
       </div>
       <div className="grade-data">
         <span className="to-grade">До следующего грейда</span>
-        <div className="remaining">{remaining === null ? "Проверяем" : `${remaining}%`}</div>
+        <div className="remaining">{remaining === null ? "Проверяем" : `${String(remaining)}%`}</div>
         <ProgressRail current={completed} />
         <span className="remain-steps">{grade.hint ?? (remaining === null ? "Политика оценки ещё не опубликована" : "По проверенным результатам")}</span>
       </div>
@@ -267,7 +267,7 @@ export function SourceTrajectoryLayout(props: SourceTrajectoryLayoutProps) {
     <section className="roles-grid" aria-label="Профессиональные роли">
       {props.roles.map(item => <SourceRoleCard key={item.track_key} role={item}
         selected={item.track_key === props.selectedRoleKey} primary={item.track_key === props.primaryRoleKey}
-        onSelect={() => props.onSelectRole(item.track_key)}/>)}
+        onSelect={() => { props.onSelectRole(item.track_key); }}/>)}
     </section>
     <div className="content-columns">
       <div className="left-stack">
@@ -278,7 +278,7 @@ export function SourceTrajectoryLayout(props: SourceTrajectoryLayoutProps) {
                 <span className="badge-icon"><SourceIcon name={roleGlyph(role.title)} /></span>
                 <div className="role-heading-copy">
                   <h2>{role.title}</h2>{role.track_key === props.primaryRoleKey && <span className="pill amber">Основная роль</span>}
-                  <p>{role.attempt_number === null ? "Роль ещё не выбрана" : `Маршрут: ${role.completed_milestones} из ${role.total_milestones} этапов завершено`}</p>
+                  <p>{role.attempt_number === null ? "Роль ещё не выбрана" : `Маршрут: ${String(role.completed_milestones)} из ${String(role.total_milestones)} этапов завершено`}</p>
                 </div>
                 <div className="role-heading-actions">
                   <button type="button" className="btn outline" onClick={props.onOpenRole}>О роли <SourceIcon name="arrow"/></button>
