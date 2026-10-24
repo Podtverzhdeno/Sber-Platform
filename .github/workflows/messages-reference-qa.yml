@@ -8,6 +8,8 @@ on:
       - "frontend/src/features/messenger/**"
       - "frontend/public/messages-reference/**"
       - "frontend/e2e/messages-reference.spec.ts"
+      - "frontend/e2e/messages-reference-fixtures.ts"
+      - "frontend/src/App.tsx"
       - "frontend/tsconfig.messages.json"
       - ".github/workflows/messages-reference-qa.yml"
   workflow_dispatch:
