@@ -52,7 +52,7 @@ describe("three canonical analytics reference layouts", () => {
     expect(screen.getByRole("heading", { name: "Матрица навыков Agentic Coding" })).toBeInTheDocument();
     expect(container.querySelector(".ref-passport")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Последние подтверждения" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Развитие за 3 месяцев" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Развитие за 8 месяцев" })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/Подтверждённых уровней пока нет/)).toBeInTheDocument());
     expect(screen.getAllByText(/официальный|корпоративный/i).length).toBeGreaterThan(0);
     expect(screen.getByText(/Нет достаточной истории цифровых следов/)).toBeInTheDocument();
@@ -83,8 +83,8 @@ describe("three canonical analytics reference layouts", () => {
     expect(container.querySelector(".ref-skill-bars")).toBeInTheDocument();
     fireEvent.click(within(screen.getByRole("group", { name: "Вид диаграммы" })).getByRole("button", { name: "Тренд" }));
     expect(screen.getAllByText(/Нет достаточной истории цифровых следов/).length).toBeGreaterThan(0);
-    fireEvent.change(screen.getByRole("combobox", { name: "Период аналитики" }), { target: { value: "8" } });
-    expect(screen.getByRole("heading", { name: "Развитие за 8 месяцев" })).toBeInTheDocument();
+    fireEvent.change(screen.getByRole("combobox", { name: "Период аналитики" }), { target: { value: "3" } });
+    expect(screen.getByRole("heading", { name: "Развитие за 3 месяцев" })).toBeInTheDocument();
   });
 
   it("shows target rather than fake 3/6 when current levels are unverified", async () => {
