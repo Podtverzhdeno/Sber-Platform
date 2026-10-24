@@ -204,13 +204,14 @@ describe("SberChat-style messenger shell", () => {
   it("Escape закрывает поиск в чате и очищает запрос", async () => {
     mockMessagingApi();
     renderWorkspace();
-    await waitFor(() => {
-      expect(screen.getByRole("button", { name: "Поиск в чате" })).toBeTruthy();
-    });
+    await screen.findByRole("complementary", { name: "Список диалогов" });
     const firstRow = screen.getAllByRole("button", { name: /Команда проекта Альфа/ })
       .find((element) => element.classList.contains("msg-dialog-list__row"));
     if (!firstRow) throw new Error("dialog row missing");
     fireEvent.click(firstRow);
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Поиск в чате" })).toBeTruthy();
+    });
     fireEvent.click(screen.getAllByRole("button", { name: "Поиск в чате" })[0] as Element);
     const input = await screen.findByRole("searchbox", { name: "Поиск по сообщениям чата" });
     fireEvent.change(input, { target: { value: "проекта" } });
