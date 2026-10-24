@@ -133,6 +133,7 @@ def test_api_requires_auth_and_never_issues_student_l1() -> None:
         )
         response = c.get("/api/v1/me/agentic-coding/profile?role_key=developer")
         assert response.status_code == 200, response.text
+        assert response.headers["cache-control"] == "private, no-store"
         payload = response.json()
         assert [skill["target_level"] for skill in payload["skills"]] == [3, 4, 3, 2, 3, 2]
         assert all(skill["current_level"] is None for skill in payload["skills"])
