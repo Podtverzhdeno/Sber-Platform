@@ -243,7 +243,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
   const series = monthSeries(growthQuery.data, period);
   const gap = skills.filter((skill) => skill.target_level !== null && (skill.current_level === null || skill.current_level < skill.target_level));
   const focus = gap.find((skill) => skill.current_level !== null) ?? gap[0];
-  const focusTitle = focus?.title ?? "Все требования требуют подтверждения";
+  const focusTitle = focus?.title ?? "Целевой профиль достигнут";
   const tasksAt = navigation.indexOf("Задачи");
   const tasksUrl = "/workspace/" + String(tasksAt >= 0 ? tasksAt : 2);
   const current = LAYOUTS.find((item) => item.key === layout) ?? { eyebrow: "АНАЛИТИКА / SKILL PASSPORT", heading: "Ваш Skill Passport", description: "Подтверждённые навыки и результаты" };
