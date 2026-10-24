@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 
 import { StatePanel } from "../../components/ui";
+import { apiRequest } from "../../api/client";
 import {
   TASK_NEXT_ACTION_LABELS,
   formatDayLabel,
@@ -39,6 +40,7 @@ import "./home-v2.scss";
 
 type HomeGrade = DevelopmentOverviewView["concepts"]["career_grade"];
 type HomePanel = "levels" | "grade-details" | null;
+type HomePassport = { skills: {key: string; practical_level: string; confirmed_case_count: number}[] };
 
 /** Same approved SVG artwork as the standalone 22.10.2026 ZIP. */
 const HERO_ART = "/home-reference/mountain-path.svg";
@@ -84,6 +86,10 @@ export function ParticipantHomeV2Body(props: {
 }) {
   const { overview } = props;
   const nextOutcome = overview.next_outcome;
+  const passport = useQuery({
+    queryKey: ["talent-passport"],
+    queryFn: () => apiRequest<HomePassport>("/api/v1/me/talent-passport"),
+  });
   const [panel, setPanel] = useState<HomePanel>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
@@ -182,8 +188,21 @@ export function ParticipantHomeV2Body(props: {
           </section>
           <section className="home-v2-block home-v2-passport" aria-label="Мой скилл-паспорт">
             <header><h2>Мой скилл-паспорт</h2><button type="button" className="home-v2-inline-link" onClick={() => { props.onOpenWorkspace("skills"); }}>Все навыки <ArrowRight size={16}/></button></header>
-            <div className="home-v2-passport-row"><span className="home-v2-skill-icon"><ShieldCheck size={21}/></span><span><strong>Подтверждённые компетенции</strong><small>Факты обучения и выполнения задач</small></span></div>
-            <div className="home-v2-passport-message">Показатели навыков доступны в полном скилл-паспорте после проверки результатов. Неоценённые навыки не получают вымышленные проценты.</div>
+            {passport.isPending ? <div className="home-v2-passport-message" role="status">Загружаем подтверждённые навыки…</div> : passport.isError ? (
+              <div className="home-v2-passport-message" role="status">Скилл-паспорт временно недоступен. Данные о навыках не подменяются оценкой.</div>
+            ) : passport.data.skills.length === 0 ? (
+              <div className="home-v2-passport-message">Проверенных практических результатов пока нет. Выполняй задачи и получай подтверждение вклада.</div>
+            ) : (
+              <div className="home-v2-skill-list">
+                {passport.data.skills.slice(0,4).map((skill,index) => (
+                  <div className="home-v2-skill-row" key={skill.key}>
+                    <span className={`home-v2-skill-icon home-v2-skill-icon--${String(index%4)}`}><ShieldCheck size={21}/></span>
+                    <div><strong>{skill.key}</strong><small>{skill.practical_level}</small></div>
+                    <span className="home-v2-skill-cases">{String(skill.confirmed_case_count)} кейс.</span>
+                  </div>
+                ))}
+              </div>
+            )}
             <button type="button" className="home-v2-passport-open" onClick={() => { props.onOpenWorkspace("skills"); }}>Перейти в скилл-паспорт <ArrowRight size={16}/></button>
           </section>
         </div>
