@@ -204,3 +204,8 @@
   .agentic-detail-stats { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) { .agentic-profile *, .agentic-detail-overlay * { animation: none !important; transition: none !important; } }
+
+/* Contours from authenticated verified server snapshot only. */
+.agentic-current-line { stroke: var(--agentic-teal); stroke-width: 2.6; stroke-linecap: round; }
+.agentic-current-dot { fill: var(--agentic-teal); stroke: var(--color-surface-raised); stroke-width: 2; }
+.agentic-source-status { color: var(--color-muted); font-size: 11px; margin: 10px 0; line-height: 1.5; }

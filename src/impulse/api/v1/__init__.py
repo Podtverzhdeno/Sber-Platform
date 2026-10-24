@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Request
 
+from impulse.api.v1.agentic_coding import router as agentic_coding_router
 from impulse.api.v1.analytics import router as analytics_router
 from impulse.api.v1.assistant import router as assistant_router
 from impulse.api.v1.buddy import router as buddy_router
@@ -24,6 +25,7 @@ from impulse.bootstrap.settings import Settings
 from impulse.trajectory_map import router as trajectory_map_router
 
 router = APIRouter(prefix="/api/v1")
+router.include_router(agentic_coding_router)
 router.include_router(analytics_router)
 router.include_router(assistant_router)
 router.include_router(buddy_router)

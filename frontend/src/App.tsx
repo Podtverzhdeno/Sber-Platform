@@ -1,6 +1,7 @@
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
+import { BootcampV2Route } from "./features/bootcamp/route-v2";
 import { TrajectoryV2 } from "./features/trajectory-v2/page";
 import { TaskCatalogV2 } from "./features/task-catalog-v2/page";
 import { ParticipantMetricSpark } from "./features/participant-home-spark";
@@ -521,7 +522,9 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Bootcamp" ? (
-          searchParams.get("course") === null ? (
+          searchParams.get("v2") === "1" ? (
+            <BootcampV2Route />
+          ) : searchParams.get("course") === null ? (
             <BootcampCatalog
               honorBoardEnabled={honorBoardEnabled}
               honorBoardConsent={actor.consent_scopes.includes("course_honor_board")}

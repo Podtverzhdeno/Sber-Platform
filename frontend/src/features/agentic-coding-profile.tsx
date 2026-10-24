@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "../api/client";
 import "./agentic-coding-profile.scss";
 
 /**
@@ -8,6 +10,29 @@ import "./agentic-coding-profile.scss";
  * Unknown is null, never a competency level 0 or a certification failure.
  */
 type Role = "developer" | "analyst" | "qa";
+type ServerStatus = "loading" | "ready" | "unavailable" | "preview";
+
+export type AgenticServerProfile = {
+  role_key: string;
+  role_title: string;
+  profile_scope: string;
+  scale_key: string;
+  framework_version: string;
+  as_of: string;
+  certification_state: string;
+  certification_reason: string;
+  known_evidence_count: number;
+  data_origin: string;
+  skills: Array<{
+    key: string;
+    title: string;
+    target_level: number | null;
+    current_level: number | null;
+    evidence_count: number;
+    data_state: string;
+    unresolved_methodology: boolean;
+  }>;
+};
 type ChartView = "radar" | "bars" | "table";
 type SkillSlice = "practical" | "technical" | "soft";
 type SkillDefinition = {
@@ -110,9 +135,9 @@ function targetSegments(target: readonly (number | null)[]) {
   });
 }
 
-function TargetRadar({ targets, onSelect }: { targets: readonly (number | null)[]; onSelect: (key: string) => void }) {
+function TargetRadar({ targets, current, onSelect }: { targets: readonly (number | null)[]; current: readonly (number | null)[]; onSelect: (key: string) => void }) {
   return <div className="agentic-radar" data-testid="agentic-target-radar">
-    <svg viewBox="0 0 366 366" role="img" aria-label="Циклограмма целевых навыков Agentic Coding по шкале от 1 до 4. Подтверждённые уровни отсутствуют. Все точные значения представлены в списке навыков справа.">
+    <svg viewBox="0 0 366 366" role="img" aria-label={current.some((level) => level !== null) ? "Циклограмма целевых и текущих проверенных навыков Agentic Coding. Точные уровни приведены в списке." : "Циклограмма целевых навыков Agentic Coding по шкале от 1 до 4. Подтверждённые уровни отсутствуют. Все точные значения представлены в списке навыков справа."}>
       {[1, 2, 3, 4].map((level) => <polygon key={level} className="agentic-ring" points={polygonAt(level)} />)}
       {SKILLS.map((skill, index) => {
         const end = point(index, 4);
@@ -125,6 +150,8 @@ function TargetRadar({ targets, onSelect }: { targets: readonly (number | null)[
       })}
       {targetSegments(targets).map(({ start, end, key }) =>
         <line key={key} className="agentic-target-line" x1={start.x} y1={start.y} x2={end.x} y2={end.y} />)}
+      {targetSegments(current).map(({ start, end, key }) => <line key={"current-" + String(key)} className="agentic-current-line" x1={start.x} y1={start.y} x2={end.x} y2={end.y} />)}
+      {current.map((level, index) => { if (level === null) return null; const pos = point(index, level); return <circle key={"current-" + String(index)} className="agentic-current-dot" cx={pos.x} cy={pos.y} r="5" />; })}
       {targets.map((level, index) => {
         if (level === null) return null;
         const pos = point(index, level);
@@ -144,8 +171,8 @@ function TargetRadar({ targets, onSelect }: { targets: readonly (number | null)[
   </div>;
 }
 
-function SkillDetail({ skill, target, roleName, conflict, onClose }: {
-  skill: SkillDefinition; target: number | null; roleName: string; conflict: boolean; onClose: () => void;
+function SkillDetail({ skill, target, currentLevel, roleName, conflict, onClose }: {
+  skill: SkillDefinition; target: number | null; currentLevel: number | null; roleName: string; conflict: boolean; onClose: () => void;
 }) {
   const closeButton = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -168,7 +195,7 @@ function SkillDetail({ skill, target, roleName, conflict, onClose }: {
       </header>
       <p>{skill.summary}</p>
       <div className="agentic-detail-stats">
-        <div><span>Подтверждено</span><strong>Нет данных</strong></div>
+        <div><span>Подтверждено</span><strong>{currentLevel === null ? "Нет данных" : String(currentLevel) + " / 4"}</strong></div>
         <div><span>Цель</span><strong>{target === null ? "Не задана" : String(target) + " / 4"}</strong></div>
         <div><span>Прогноз</span><strong>Нет данных</strong></div>
       </div>
@@ -187,30 +214,48 @@ function SkillDetail({ skill, target, roleName, conflict, onClose }: {
       <ul className="agentic-evidence-list">{skill.traces.map((trace) => <li key={trace}><code>{trace}</code></li>)}</ul>
       <p className="agentic-detail-note">Примеры событий не означают, что они получены от участника. Применимость правил и пороги определяются версией методологии и профессиональной группой.</p>
       <div className="agentic-detail-action"><h3>Следующая практика</h3><p>{skill.practice}</p><span>Учебная рекомендация · подтверждение по цифровым следам не подключено</span></div>
-      <div className="agentic-detail-empty"><strong>История и подтверждения</strong><p>Проверенные события, исключённые сигналы и даты оценки появятся после подключения разрешённого источника. Отсутствие данных не означает уровень 0.</p></div>
+      <div className="agentic-detail-empty"><strong>История и подтверждения</strong><p>{currentLevel === null ? "Проверенные события, исключённые сигналы и даты оценки появятся после подключения разрешённого источника. Отсутствие данных не означает уровень 0." : "Подтверждённый агрегированный уровень получен из серверного профиля. Подробные события, исключения и история не переданы в этот UI и не должны выдумываться."}</p></div>
     </aside>
   </div>;
 }
 
-function CertificationPanel({ role, targets, conflicts }: {
-  role: { name: string }; targets: readonly (number | null)[]; conflicts: readonly number[];
+function CertificationPanel({ role, targets, current, conflicts, serverStatus, sourceCount, updatedAt }: {
+  role: { name: string };
+  targets: readonly (number | null)[];
+  current: readonly (number | null)[];
+  conflicts: readonly number[];
+  serverStatus: ServerStatus;
+  sourceCount: number;
+  updatedAt: string | null;
 }) {
   const [expanded, setExpanded] = useState(false);
   const required = targets.filter((value) => value !== null).length;
+  const knownRequired = targets.filter((value, index) => typeof value === "number" && typeof current[index] === "number").length;
+  const metRequired = targets.filter((value, index) => {
+    const measured = current[index];
+    return typeof value === "number" && typeof measured === "number" && measured >= value;
+  }).length;
+  const sourceDescription = serverStatus === "loading" ? "Загрузка"
+    : serverStatus === "unavailable" ? "Источник недоступен"
+    : sourceCount > 0 ? String(sourceCount) + " событий" : "Нет подключённых следов";
+
   return <aside className="agentic-certification" aria-label="Сертификация Agentic Coding">
     <div className="agentic-cert-top"><span className="agentic-overline">Сертификация</span><span className="agentic-status-mark">Не подключена</span></div>
     <h3>Agentic Coding <em>L1</em></h3>
     <p className="agentic-cert-lead">Соответствие профилю L1: учебная оценка</p>
     <div className="agentic-cert-count">
-      <div><span>Подтверждено</span><strong>— <small>/ {required}</small></strong></div>
+      <div><span>Целевые навыки достигнуты</span><strong>{knownRequired > 0 ? metRequired : "—"} <small>/ {required}</small></strong></div>
       <span>обязательных навыков</span>
     </div>
-    <p className="agentic-cert-foot">Источники цифровых следов не подключены. Рассчитать соответствие нельзя.</p>
+    <p className="agentic-cert-foot">{knownRequired > 0
+      ? "Проверенные данные доступны для " + String(knownRequired) + " из " + String(required) + " требований. Это не корпоративное решение о сертификации."
+      : "Источники цифровых следов не подключены. Рассчитать соответствие нельзя."}</p>
     <div className="agentic-cert-checks" aria-label="Состояние источников">
       <div><span className="agentic-check-dot agentic-check-dot--known" /><span>Целевая матрица</span><strong>{required} требований</strong></div>
-      <div><span className="agentic-check-dot" /><span>Цифровые следы</span><strong>Нет подключения</strong></div>
+      <div><span className="agentic-check-dot" /><span>Цифровые следы</span><strong>{sourceDescription}</strong></div>
       <div><span className="agentic-check-dot" /><span>Решение о L1</span><strong>Не выдавалось</strong></div>
     </div>
+    {updatedAt !== null && <p className="agentic-cert-foot">Серверный снимок: {new Date(updatedAt).toLocaleString("ru-RU")}</p>}
     {conflicts.length > 0 && <p className="agentic-cert-conflict" role="status">
       <strong>Есть спорные требования: {conflicts.length}</strong>
       <span>Нужна утверждённая версия правил для роли «{role.name}»</span>
@@ -230,15 +275,37 @@ function CertificationPanel({ role, targets, conflicts }: {
   </aside>;
 }
 
-export function AgenticCodingProfile() {
-  const [role, setRole] = useState<Role>("developer");
+export function AgenticCodingProfile({ activeRole, onRoleChange, serverProfile, serverStatus = "preview" }: {
+  activeRole?: Role;
+  onRoleChange?: (role: Role) => void;
+  serverProfile?: AgenticServerProfile;
+  serverStatus?: ServerStatus;
+} = {}) {
+  const [localRole, setLocalRole] = useState<Role>("developer");
+  const role = activeRole ?? localRole;
   const [view, setView] = useState<ChartView>("radar");
   const [slice, setSlice] = useState<SkillSlice>("practical");
   const [activeSkill, setActiveSkill] = useState<string | null>(null);
   const profile = ROLE_PROFILES[role];
+  const trusted = serverProfile?.role_key === role
+    && serverProfile.profile_scope === "impulse_learning"
+    && serverProfile.scale_key === "agentic_coding_1_4"
+    && serverProfile.framework_version === "agentic-coding-source-map-2026-10-23" ? serverProfile : null;
+  const authoritative = SKILLS.map((item) => trusted?.skills.find((entry) => entry.key === item.key));
+  const targets = SKILLS.map((_, index) => {
+    const entry = authoritative[index];
+    return entry !== undefined ? entry.target_level : (profile.target[index] ?? null);
+  });
+  const current = SKILLS.map((_, index) => {
+    const entry = authoritative[index];
+    return entry?.data_state === "verified" && typeof entry.current_level === "number"
+      ? entry.current_level : null;
+  });
+  const verifiedCount = current.filter((level) => level !== null).length;
   const skill = SKILLS.find((item) => item.key === activeSkill) ?? null;
   const activeIndex = SKILLS.findIndex((item) => item.key === activeSkill);
-  const target = activeIndex >= 0 ? profile.target[activeIndex] ?? null : null;
+  const target = activeIndex >= 0 ? targets[activeIndex] ?? null : null;
+  const currentLevel = activeIndex >= 0 ? current[activeIndex] ?? null : null;
   const hasConflict = profile.conflicts.includes(activeIndex);
   const closeDetail = () => { setActiveSkill(null); };
 
@@ -250,7 +317,7 @@ export function AgenticCodingProfile() {
         <p>Ваш профиль навыков: что требуется для роли и какие данные ещё нужно подтвердить</p>
       </div>
       <label className="agentic-role-picker">Профессиональная группа
-        <select value={role} onChange={(event) => { setRole(event.target.value as Role); setActiveSkill(null); }}>
+        <select value={role} onChange={(event) => { const nextRole = event.target.value as Role; setLocalRole(nextRole); onRoleChange?.(nextRole); setActiveSkill(null); }}>
           <option value="developer">Разработчик</option><option value="analyst">Аналитик</option><option value="qa">Тестировщик</option>
         </select>
       </label>
@@ -275,19 +342,22 @@ export function AgenticCodingProfile() {
               <button type="button" aria-pressed={view === "table"} onClick={() => { setView("table"); }}>Таблица</button>
             </div>
           </div>
+          {serverStatus === "loading" && <p className="agentic-source-status" role="status">Загружаем серверный профиль…</p>}
+          {serverStatus === "unavailable" && <p className="agentic-source-status" role="status">Серверный профиль недоступен. Показаны только цели методологии.</p>}
+          {trusted && <p className="agentic-source-status">Модель: {trusted.framework_version} · снимок {new Date(trusted.as_of).toLocaleString("ru-RU")}</p>}
           <div className="agentic-legend" aria-label="Обозначения">
             <span className="agentic-legend-target">Цель</span>
-            <span className="agentic-legend-current">Подтверждено: нет данных</span>
+            <span className="agentic-legend-current">{verifiedCount === 0 ? "Подтверждено: нет данных" : "Подтверждённых навыков: " + String(verifiedCount)}</span>
             <span className="agentic-legend-forecast">Прогноз: нет данных</span>
           </div>
           {view === "radar" && <div className="agentic-visual-layout">
-            <TargetRadar targets={profile.target} onSelect={setActiveSkill} />
+            <TargetRadar targets={targets} current={current} onSelect={setActiveSkill} />
             <div className="agentic-axis-list" aria-label="Значения целевого профиля">
               {SKILLS.map((item, index) => <button type="button" key={item.key} onClick={() => { setActiveSkill(item.key); }}
                 className="agentic-skill-row" data-testid={"agentic-skill-" + item.key}>
                 <span className="agentic-skill-label">{String(index + 1).padStart(2, "0")} <strong>{item.label}</strong></span>
-                <span className="agentic-skill-current">Подтверждено: нет данных</span>
-                <span className="agentic-skill-target">Цель <b>{profile.target[index] === null ? "—" : String(profile.target[index]) + "/4"}</b><span aria-hidden="true">›</span></span>
+                <span className="agentic-skill-current">{current[index] === null ? "Подтверждено: нет данных" : "Подтверждено: " + String(current[index]) + "/4"}</span>
+                <span className="agentic-skill-target">Цель <b>{targets[index] === null ? "—" : String(targets[index]) + "/4"}</b><span aria-hidden="true">›</span></span>
                 {profile.conflicts.includes(index) && <small>Требуется уточнение методологии</small>}
               </button>)}
             </div>
@@ -295,18 +365,18 @@ export function AgenticCodingProfile() {
           {view === "bars" && <div className="agentic-bars" aria-label="Целевые уровни по навыкам">
             {SKILLS.map((item, index) => <button type="button" key={item.key} className="agentic-bar-row" onClick={() => { setActiveSkill(item.key); }}>
               <span>{item.label}</span><span className="agentic-bar-track">
-                {profile.target[index] !== null && <i style={{ width: String((profile.target[index] ?? 0) * 25) + "%" }} />}
-              </span><strong>{profile.target[index] === null ? "—" : String(profile.target[index]) + "/4"}</strong><small>Подтверждено: нет данных</small>
+                {targets[index] !== null && <i style={{ width: String((targets[index] ?? 0) * 25) + "%" }} />}
+              </span><strong>{targets[index] === null ? "—" : String(targets[index]) + "/4"}</strong><small>{current[index] === null ? "Подтверждено: нет данных" : "Подтверждено: " + String(current[index]) + "/4"}</small>
             </button>)}
           </div>}
           {view === "table" && <div className="agentic-table-scroll"><table className="agentic-table">
             <thead><tr><th scope="col">Навык</th><th scope="col">Подтверждено</th><th scope="col">Цель</th><th scope="col">Детали</th></tr></thead>
-            <tbody>{SKILLS.map((item, index) => <tr key={item.key}><th scope="row">{item.label}</th><td>Нет данных</td><td>{profile.target[index] === null ? "Не задана" : String(profile.target[index]) + "/4"}</td><td><button type="button" onClick={() => { setActiveSkill(item.key); }} aria-label={"Подробнее: " + item.label}>Открыть ↗</button></td></tr>)}</tbody>
+            <tbody>{SKILLS.map((item, index) => <tr key={item.key}><th scope="row">{item.label}</th><td>{current[index] === null ? "Нет данных" : String(current[index])}</td><td>{targets[index] === null ? "Не задана" : String(targets[index]) + "/4"}</td><td><button type="button" onClick={() => { setActiveSkill(item.key); }} aria-label={"Подробнее: " + item.label}>Открыть ↗</button></td></tr>)}</tbody>
           </table></div>}
           <div className="agentic-methodology-note"><span>i</span>
             <p>Цели приведены по методологии Agentic Coding. Отсутствие цифровых следов — не уровень 0 и не провал сертификации.</p></div>
         </div>
-        <CertificationPanel role={profile} targets={profile.target} conflicts={profile.conflicts} />
+        <CertificationPanel role={profile} targets={targets} current={current} conflicts={profile.conflicts} serverStatus={serverStatus} sourceCount={trusted?.known_evidence_count ?? 0} updatedAt={trusted?.as_of ?? null} />
       </div>
       <div className="agentic-footer-strip">
         <div><strong>Шкала 1–4</strong><span>Теория · применение · управление · экспертиза</span></div>
@@ -314,6 +384,23 @@ export function AgenticCodingProfile() {
         <div><strong>SDD · наблюдение</strong><span>Дополнительная компетенция, не входит в 6 осей L1</span></div>
       </div>
     </>}
-    {skill !== null && <SkillDetail skill={skill} target={target} roleName={profile.name} conflict={hasConflict} onClose={closeDetail} />}
+    {skill !== null && <SkillDetail skill={skill} target={target} currentLevel={currentLevel} roleName={profile.name} conflict={hasConflict} onClose={closeDetail} />}
   </section>;
+}
+
+
+const AGENTIC_PROFILE_PATHS = {
+  developer: "/api/v1/me/agentic-coding/profile?role_key=developer",
+  analyst: "/api/v1/me/agentic-coding/profile?role_key=analyst",
+  qa: "/api/v1/me/agentic-coding/profile?role_key=qa"
+} as const;
+
+export function ConnectedAgenticCodingProfile() {
+  const [role, setRole] = useState<Role>("developer");
+  const profile = useQuery({
+    queryKey: ["agentic-coding-profile", role],
+    queryFn: () => apiRequest<AgenticServerProfile>(AGENTIC_PROFILE_PATHS[role]),
+  });
+  return <AgenticCodingProfile activeRole={role} onRoleChange={setRole} serverProfile={profile.data}
+    serverStatus={profile.isPending ? "loading" : profile.isError ? "unavailable" : "ready"} />;
 }

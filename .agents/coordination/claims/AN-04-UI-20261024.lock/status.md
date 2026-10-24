@@ -19,4 +19,6 @@
   - npm test
   - npm run build
 - progress: SDD and visual contracts reviewed; implementing participant Analytics visual redesign
-- blockers: no access to original source mockup pixels; authoritative L1 evidence integration unavailable
+- blockers: original mockup pixels unavailable; corporate L1 issuer not connected
+
+- coordination_note: reconciled concurrent server-side Agentic Coding profile API from main while retaining read-only certification boundaries

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { AgenticCodingProfile } from "./agentic-coding-profile";
+import { AgenticCodingProfile, type AgenticServerProfile } from "./agentic-coding-profile";
 
 describe("Agentic Coding source-derived profile", () => {
   it("renders exact role targets without treating an unknown value as zero", () => {
@@ -71,4 +71,45 @@ describe("Agentic Coding source-derived profile", () => {
     fireEvent.click(screen.getByRole("button", { name: /Посмотреть условия сертификации/ }));
     expect(screen.getByText(/Курс и тест сами по себе не подтверждают/)).toBeInTheDocument();
   });
+
+  it("renders qualified server levels in radar and table without leaking evidence across roles", () => {
+    const source: AgenticServerProfile = {
+      role_key: "developer", role_title: "Разработчик", profile_scope: "impulse_learning",
+      scale_key: "agentic_coding_1_4", framework_version: "agentic-coding-source-map-2026-10-23",
+      as_of: "2026-10-24T12:00:00Z", known_evidence_count: 1,
+      certification_state: "not_evaluable", certification_reason: "Only advisory profile",
+      data_origin: "verified_evidence",
+      skills: [
+        { key: "prompting", title: "Постановка задач агенту", target_level: 3, current_level: 2, evidence_count: 1, data_state: "verified", unresolved_methodology: false },
+        { key: "prompt_engineering", title: "Правила работы агента", target_level: 4, current_level: null, evidence_count: 0, data_state: "not_connected", unresolved_methodology: false }
+      ]
+    };
+    const { container } = render(<AgenticCodingProfile serverProfile={source} serverStatus="ready" />);
+    expect(container.querySelectorAll(".agentic-current-dot")).toHaveLength(1);
+    expect(screen.getByText(/Подтверждённых навыков: 1/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Таблица" }));
+    const rows = screen.getByRole("table").querySelectorAll("tbody tr");
+    expect(rows[0]?.querySelector("td")?.textContent).toBe("2");
+    fireEvent.change(screen.getByLabelText("Профессиональная группа"), { target: { value: "qa" } });
+    const other = screen.getByRole("table").querySelectorAll("tbody tr");
+    expect(other[0]?.querySelector("td")?.textContent).toBe("Нет данных");
+  });
+
+  it("does not replace explicit null policy target with hardcoded role goal", () => {
+    const source: AgenticServerProfile = {
+      role_key: "developer", role_title: "Разработчик", profile_scope: "impulse_learning",
+      scale_key: "agentic_coding_1_4", framework_version: "agentic-coding-source-map-2026-10-23",
+      as_of: "2026-10-24T12:00:00Z", known_evidence_count: 0,
+      certification_state: "not_evaluable", certification_reason: "No published policy",
+      data_origin: "not_connected",
+      skills: [
+        { key: "prompt_engineering", title: "Правила работы агента", target_level: null, current_level: null, evidence_count: 0, data_state: "not_connected", unresolved_methodology: true }
+      ]
+    };
+    render(<AgenticCodingProfile serverProfile={source} serverStatus="ready" />);
+    fireEvent.click(screen.getByRole("button", { name: "Таблица" }));
+    const rows = screen.getByRole("table").querySelectorAll("tbody tr");
+    expect(rows[1]?.querySelector("td:nth-child(3)")?.textContent).toBe("Не задана");
+  });
+
 });

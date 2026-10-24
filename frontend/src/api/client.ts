@@ -17,6 +17,7 @@ export type RuntimeApiPath =
   | "/api/v1/mentor/review-workspace"
   | "/api/v1/mentor/review-queue"
   | "/api/v1/manager/overview"
+  | `/api/v1/me/agentic-coding/profile?${string}`
   | "/api/v1/me/analytics/journey"
   | "/api/v1/analytics/role"
   | "/api/v1/ops/cases"
@@ -63,6 +64,7 @@ export type RuntimeApiPath =
   | `/api/v1/customer/applications/${string}/accept`
   | `/api/v1/customer/deadline-requests/${string}/decision`
   | `/api/v1/customer/tasks/${string}/deadline-requests`
+  | `/api/v1/me/bootcamp/courses/${string}`
   | "/api/v1/me/bootcamp/certificates"
   | `/api/v1/me/bootcamp/certificates/${string}`
   | `/api/v1/bootcamp/certificates/${string}`

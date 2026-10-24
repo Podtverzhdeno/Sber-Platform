@@ -6,7 +6,7 @@ import { apiRequest } from "../api/client";
 import { Badge, StatePanel } from "../components/ui";
 import { loadMonthlyGoal, type MonthlyGoalView } from "./monthly-goal-client";
 import { MonthlyGoalDiagram } from "./monthly-goal-card";
-import { AgenticCodingProfile } from "./agentic-coding-profile";
+import { ConnectedAgenticCodingProfile } from "./agentic-coding-profile";
 import "./analytics-growth.scss";
 
 type Stage = { key: string; title: string; status: "completed" | "in_progress" | "not_started" | "unknown"; completed: boolean; count: number };
@@ -272,7 +272,7 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
         <p className="lead">Компетенции, подтверждённый опыт и следующий шаг в развитии</p></div>
       <div className="analytics-page-context"><span className="analytics-page-context-label">Оценка навыков</span><strong>На основе подтверждённых данных</strong><small>Неизвестные уровни не считаются нулём</small></div>
     </header>
-    <AgenticCodingProfile />
+    <ConnectedAgenticCodingProfile />
     <div className="analytics-secondary-heading"><div><p className="eyebrow">Проверяемая проекция Impulse</p><h2>Аналитика траектории</h2><p>Прогресс выбранного направления, источники подтверждений и прогноз месячной цели</p></div>
       {growthQuery.data && <span className="analytics-snapshot-label">Снимок: {new Date(growthQuery.data.generated_at).toLocaleString("ru-RU")}</span>}</div>
     {growthQuery.status === "pending" ? <StatePanel kind="loading" /> : growthQuery.status === "error" ? <StatePanel kind="error" action="Повторить аналитику траекторий" onAction={() => { void growthQuery.refetch(); }} /> : <TrajectoryGrowthAnalytics snapshot={growthQuery.data} selectedTrajectoryKey={urlTrajectory ?? undefined} onTrajectorySelect={(track) => { setSearchParams((previous) => { const next = new URLSearchParams(previous); next.set("trajectory", track); next.delete("skill"); return next; }); }} selectedSkillKey={urlSkill ?? undefined} onSkillSelect={(skill) => { updateParams("skill", skill); }} reports={skillReportsQuery.data} reportsPending={skillReportsQuery.isPending} reportsError={skillReportsQuery.isError} onRetryReports={() => { void skillReportsQuery.refetch(); }} buddy={buddyQuery.data ?? undefined} buddyPending={buddyQuery.isPending} goal={monthlyGoalQuery.data ?? undefined} />}
