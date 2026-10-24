@@ -1,4 +1,5 @@
 import { Bell, BellOff, FileText, Link2, Users, X } from "lucide-react";
+import { useState } from "react";
 import type { ApiChannelView } from "./contracts";
 import {
   type ChannelWorkContextView,
@@ -36,6 +37,7 @@ export function ContextPanel({
   messageRefs = [],
   className,
 }: ContextPanelProps) {
+  const [copyStatus, setCopyStatus] = useState<"ready" | "copied" | "unavailable">("ready");
   if (!open) return null;
   const classes = ["msg-context", "chat-context", className ?? ""].filter(Boolean).join(" ");
   const roleInChannel = viewerId
@@ -129,15 +131,22 @@ export function ContextPanel({
               <li key={ref}>
                 <FileText size={20} aria-hidden="true"/>
                 <span title={ref}>{ref.split("/").pop() || ref}</span>
-                <button type="button" aria-label={`Скопировать ссылку на файл ${ref.split("/").pop() || ref}`} onClick={() => {
-                  if (typeof navigator.clipboard !== "undefined") {
-                    void navigator.clipboard.writeText(ref);
+                <button type="button" aria-label={`Скопировать ссылку или идентификатор файла ${ref.split("/").pop() || ref}`} onClick={() => {
+                  if (navigator.clipboard?.writeText === undefined) {
+                    setCopyStatus("unavailable");
+                    return;
                   }
+                  void navigator.clipboard.writeText(ref)
+                    .then(() => { setCopyStatus("copied"); })
+                    .catch(() => { setCopyStatus("unavailable"); });
                 }}><Link2 size={16}/></button>
               </li>
             ))}
           </ul>
         )}
+        <p role="status" aria-live="polite" className="msg-context__copy-status">
+          {copyStatus === "copied" ? "Ссылка или идентификатор скопированы" : copyStatus === "unavailable" ? "Не удалось скопировать. Выберите текст файла вручную." : ""}
+        </p>
       </section>
       <section className="msg-context__section" aria-label="Участники">
         <h3 className="msg-context__section-title"><Users size={17}/>Участники <span>{String(channel.participants.length)}</span></h3>
