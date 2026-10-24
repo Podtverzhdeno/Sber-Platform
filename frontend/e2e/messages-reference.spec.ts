@@ -145,6 +145,24 @@ test("direct chat follows 1672px personal PNG geometry with working editor",asyn
   await expect(page.getByRole("searchbox",{name:"Поиск по сообщениям чата"})).toHaveCount(0);
 });
 
+test("Messages sidebar collapse actually changes layout and restores it without losing chat",async ({page})=>{
+  await page.setViewportSize({width:1448,height:1086});
+  await openMessages(page);
+  const toggle=page.getByRole("button",{name:"Свернуть навигацию"});
+  await expect(toggle).toBeVisible();
+  await toggle.click();
+  await expect(page.locator(".workspace")).toHaveClass(/workspace--messages-compact/);
+  await expect(page.getByRole("button",{name:"Развернуть навигацию"})).toBeVisible();
+  const small=await page.locator(".sidebar").boundingBox();
+  expect(small?.width).toBe(80);
+  await page.getByRole("button",{name:"Развернуть навигацию"}).click();
+  await expect(page.locator(".workspace")).not.toHaveClass(/workspace--messages-compact/);
+  const normal=await page.locator(".sidebar").boundingBox();
+  expect(normal?.width).toBeGreaterThan(150);
+  await page.getByRole("button",{name:/Перейти в Маяки/}).click();
+  await expect(page.locator(".msg-chat__header-title")).toContainText("Маяки");
+});
+
 test("mobile messages open real dialog and return to list",async ({page})=>{
   await page.setViewportSize({width:390,height:844});
   await openMessages(page);
