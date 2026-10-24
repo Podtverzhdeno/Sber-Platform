@@ -38,12 +38,16 @@ export function ContextPanel({
   className,
 }: ContextPanelProps) {
   const [copyStatus, setCopyStatus] = useState<"ready" | "copied" | "unavailable">("ready");
+  const [showAllPeople, setShowAllPeople] = useState(false);
   if (!open) return null;
   const classes = ["msg-context", "chat-context", className ?? ""].filter(Boolean).join(" ");
   const roleInChannel = viewerId
     ? channel.participants.find((person) => person.id === viewerId)?.role ?? null
     : null;
   const isChannelTeam = channel.task_id !== null;
+  const isCommunity = channel.kind === "community";
+  const moderators = channel.participants.filter((person) => ["owner", "admin", "moderator"].includes(person.role));
+  const visiblePeople = showAllPeople ? channel.participants : channel.participants.slice(0, 4);
   return (
     <aside className={classes} id="messenger-context-panel" aria-label="Контекст диалога">
       {onClose !== undefined && (
@@ -148,10 +152,36 @@ export function ContextPanel({
           {copyStatus === "copied" ? "Ссылка или идентификатор скопированы" : copyStatus === "unavailable" ? "Не удалось скопировать. Выберите текст файла вручную." : ""}
         </p>
       </section>
+      {isCommunity && (
+        <section className="msg-context__section msg-context__moderators" aria-label="Администраторы и модераторы">
+          <h3 className="msg-context__section-title">Администраторы и модераторы <span>{String(moderators.length)}</span></h3>
+          {moderators.length === 0 ? (
+            <p className="msg-context__no-files">Модераторы в списке участников не указаны</p>
+          ) : (
+            <ul className="msg-context__people">
+              {moderators.slice(0,3).map((person) => (
+                <li key={person.id}>
+                  <span>{person.display_name || "Без имени"}</span>
+                  <small>{participantRoleLabel(person.role)}</small>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+      {isCommunity && (
+        <section className="msg-context__section msg-context__materials" aria-label="Полезные материалы">
+          <h3 className="msg-context__section-title">Полезные материалы <span>{String(new Set(messageRefs).size)}</span></h3>
+          {messageRefs.length === 0 ? (
+            <p className="msg-context__no-files">Материалы появятся после публикации сообщений с вложениями</p>
+          ) : <p className="msg-context__no-files">Вложения сообщества перечислены выше в разделе «Связанные файлы»</p>}
+        </section>
+      )}
       <section className="msg-context__section" aria-label="Участники">
-        <h3 className="msg-context__section-title"><Users size={17}/>Участники <span>{String(channel.participants.length)}</span></h3>
+        <h3 className="msg-context__section-title"><Users size={17}/>Участники <span>{String(channel.participants.length)}</span>
+        {channel.participants.length > 4 && <button className="msg-context__show-all" type="button" onClick={() => { setShowAllPeople((value) => !value); }}>{showAllPeople ? "Свернуть" : "Все"}</button>}</h3>
         <ul className="msg-context__people">
-          {channel.participants.map((person) => (
+          {visiblePeople.map((person) => (
             <li key={person.id} data-testid="context-participant">
               <span>{person.display_name || "Без имени"}</span>
               <small> · {participantRoleLabel(person.role)}</small>
