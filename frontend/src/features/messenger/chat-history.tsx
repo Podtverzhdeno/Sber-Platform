@@ -302,15 +302,18 @@ export function ChatHistory({
               <span className="sr-only">{contextOpen ? "Скрыть контекст" : "Открыть контекст"}</span>
             </button>
           )}
-          <button
-            type="button"
-            className="msg-chat__header-action"
-            disabled
-            title="Подробности чата появятся после интеграции capability"
-          >
-            <Info aria-hidden="true" size={15} />
-            <span className="sr-only">Подробности чата недоступны</span>
-          </button>
+          {onToggleContext !== undefined && (
+            <button
+              type="button"
+              className="msg-chat__header-action"
+              aria-label={contextOpen ? "Скрыть информацию о чате" : "Информация о чате"}
+              aria-expanded={contextOpen ?? false}
+              aria-controls="messenger-context-panel"
+              onClick={onToggleContext}
+            >
+              <Info aria-hidden="true" size={15} />
+            </button>
+          )}
         </span>
       </header>
 
