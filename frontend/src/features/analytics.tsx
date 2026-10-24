@@ -60,17 +60,13 @@ type FrameworkSkillView = { skill_key: string; skill_title: string; level: strin
 type FrameworkReportView = { framework_key: string; domain: "course" | "role" | "project"; version: number; title: string; created_at: string; skills: FrameworkSkillView[] };
 type BuddySuggestionView = { suggestion_id: string; kind: string; observation: string; gap: string; benefit: string; explanation: string; source_categories: string[]; model_called: boolean; auto_enrolled: boolean; partial: boolean; coverage_note: string };
 type BuddySuggestionStateView = { policy_version: number; ai_model_available: boolean; dismissed: boolean; suggestion: BuddySuggestionView | null; suggestions: BuddySuggestionView[] };
-const demoAnalytics: Analytics = {
-  stages: [
-    { key: "learning", title: "Обучение", status: "completed", completed: true, count: 6 },
-    { key: "applications", title: "Отклики", status: "completed", completed: true, count: 4 },
-    { key: "work", title: "Работа", status: "completed", completed: true, count: 3 },
-    { key: "accepted", title: "Принятый результат", status: "completed", completed: true, count: 2 },
-  ],
-  successful: true,
-  next_action: "Завершить MVP рекомендательной системы и отправить артефакты до 12 октября",
-  earnings: { calculated: "225000", approved: "200000", paid: "125000", failed: "0", currency: "RUB", unknown_items: 0 },
-  freshness: "fresh", generated_at: "2026-09-28T12:00:00Z",
+const unavailableAnalytics: Analytics = {
+  stages: [],
+  successful: false,
+  next_action: "Следующий шаг появится после загрузки данных пути",
+  earnings: { calculated: "0", approved: "0", paid: "0", failed: "0", currency: null, unknown_items: 0 },
+  freshness: "unknown",
+  generated_at: "",
 };
 
 
@@ -299,7 +295,7 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
   const updateParams = (key: string, value: string | null) => { setSearchParams((previous) => { const next = new URLSearchParams(previous); if (value) next.set(key, value); else next.delete(key); return next; }); };
   const urlSkill = searchParams.get("skill");
   const urlTrajectory = searchParams.get("trajectory");
-  const data = query.data ?? demoAnalytics;
+  const data = query.data ?? unavailableAnalytics;
   const selectedGrowth = growthQuery.data?.trajectories.find((item) => item.track_key === urlTrajectory) ?? growthQuery.data?.trajectories[0];
   const activitySnapshot = weeklyActivityFromSnapshot(growthQuery.data);
   const activity = activitySnapshot.weeks;
@@ -310,7 +306,7 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
   const journeyMax = Math.max(0, ...data.stages.map((stage) => stage.count));
   return <div className="feature-stack participant-analytics analytics-dashboard">
     {query.isLoading && <p className="analytics-data-loading" role="status">Загружаются дополнительные показатели пути…</p>}
-    {query.isError && <div className="demo-fallback-note" role="status"><strong>Демонстрационная аналитика</strong><span>API временно недоступен — показана связанная mock-проекция.</span><button className="secondary-button" type="button" onClick={() => { void query.refetch(); }}>Повторить</button></div>}
+    {query.isError && <div className="demo-fallback-note" role="status"><strong>Аналитика пути недоступна</strong><span>Непроверенные показатели не подставляются. Повторите запрос.</span><button className="secondary-button" type="button" onClick={() => { void query.refetch(); }}>Повторить</button></div>}
     <header className="dashboard-heading analytics-page-heading">
       <div><p className="eyebrow">Skill Passport · Мой прогресс</p><h1 id="workspace-title">Моя аналитика</h1>
         <p className="lead">Компетенции, подтверждённый опыт и следующий шаг в развитии</p></div>
@@ -332,13 +328,13 @@ export function ParticipantAnalytics({ navigation = [] }: { navigation?: string[
     </p>
     <section className="metric-grid participant-kpi-grid" aria-label="Актуальные показатели пути">
       <article className="metric-card metric-card--teal"><span>Прогресс выбранной траектории</span><strong>{selectedGrowth === undefined || selectedGrowth.completion.percent === null ? "—" : `${String(selectedGrowth.completion.percent)}%`}</strong><small>{selectedGrowth === undefined ? "Нет доступного снимка" : selectedGrowth.completion.partial ? "Частичные данные · уточните охват" : selectedGrowth.track_title}</small></article>
-      <article className="metric-card metric-card--blue"><span>Обучение подтверждено</span><strong>{journeyCount("learning") ?? "—"}</strong><small>{query.isError ? "Демонстрационный пример" : "По проверенным завершениям курсов"}</small></article>
-      <article className="metric-card metric-card--violet"><span>Работа и результаты</span><strong>{journeyCount("practice") ?? "—"}</strong><small>{query.isError ? "Демонстрационный пример" : "Назначения в работе и принятые вклады"}</small></article>
-      <article className="metric-card metric-card--teal"><span>Принятые вклады</span><strong>{journeyCount("verified_experience") ?? "—"}</strong><small>{query.isError ? "Демонстрационный пример" : "Решения о принятии личного вклада"}</small></article>
+      <article className="metric-card metric-card--blue"><span>Обучение подтверждено</span><strong>{journeyCount("learning") ?? "—"}</strong><small>{query.isError ? "Источник недоступен" : "По проверенным завершениям курсов"}</small></article>
+      <article className="metric-card metric-card--violet"><span>Работа и результаты</span><strong>{journeyCount("practice") ?? "—"}</strong><small>{query.isError ? "Источник недоступен" : "Назначения в работе и принятые вклады"}</small></article>
+      <article className="metric-card metric-card--teal"><span>Принятые вклады</span><strong>{journeyCount("verified_experience") ?? "—"}</strong><small>{query.isError ? "Источник недоступен" : "Решения о принятии личного вклада"}</small></article>
     </section>
     <div className="analytics-main-grid">
       <section className="analytics-panel">
-        <div className="section-heading"><div><p className="eyebrow">Этапы участника</p><h2>От направления до подтверждённого опыта</h2></div><Badge tone={data.successful ? "success" : "warning"}>{query.isError ? "Пример" : data.successful ? "Последний этап завершён" : "Путь продолжается"}</Badge></div>
+        <div className="section-heading"><div><p className="eyebrow">Этапы участника</p><h2>От направления до подтверждённого опыта</h2></div><Badge tone={data.successful ? "success" : "warning"}>{query.isError ? "Источник недоступен" : data.successful ? "Последний этап завершён" : "Путь продолжается"}</Badge></div>
         {data.stages.length === 0 ? <div className="analytics-chart-empty" role="status">Нет данных об этапах пути. График появится после получения подтверждённых событий.</div> :
           <div className="analytics-funnel" data-testid="analytics-live-funnel">{data.stages.map((stage) => <div key={stage.key} className={`analytics-funnel-stage analytics-funnel-stage--${stage.status}`} style={{ width: `${String(journeyMax === 0 ? 100 : Math.max(42, Math.round(stage.count / journeyMax * 100)))}%` }}>
             <span>{stage.title}</span><strong>{stage.count}</strong><small>{stage.status === "completed" ? "Завершено" : stage.status === "in_progress" ? "В работе" : stage.status === "not_started" ? "Не начато" : "Нет данных"}</small>
