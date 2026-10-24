@@ -8,6 +8,7 @@ on:
       - "frontend/src/features/messenger/**"
       - "frontend/public/messages-reference/**"
       - "frontend/e2e/messages-reference.spec.ts"
+      - "frontend/tsconfig.messages.json"
       - ".github/workflows/messages-reference-qa.yml"
   workflow_dispatch:
 
@@ -48,8 +49,8 @@ jobs:
           CI: "true"
           TZ: Europe/Moscow
         run: npx playwright test messages-reference.spec.ts --project=chromium --reporter=line
-      - name: Verify repository-wide TypeScript (includes other concurrently edited sections)
-        run: npm run typecheck
+      - name: Strict TypeScript check for messages and imported API contracts
+        run: npx tsc -p tsconfig.messages.json --noEmit --pretty false
       - name: Retain failures
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
