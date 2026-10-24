@@ -177,9 +177,9 @@ function SkillRows({ skills, openSkill }: { skills: Skill[]; openSkill: (key: st
       </small>
     </button>)}</div>;
 }
-function EvidenceList({ events, emptyText = "Подтверждённые цифровые следы пока не поступили" }: { events: EventView[]; emptyText?: string }) {
+function EvidenceList({ events, emptyText = "Подтверждённые цифровые следы пока не поступили", limit = 3 }: { events: EventView[]; emptyText?: string; limit?: number }) {
   if (events.length === 0) return <div className="ref-evidence-empty" role="status">{emptyText}</div>;
-  return <div className="ref-evidence-list">{events.slice(0, 3).map((event, index) => <div className="ref-evidence-row" key={event.source_ref + String(index)}>
+  return <div className="ref-evidence-list">{events.slice(0, limit).map((event, index) => <div className="ref-evidence-row" key={event.source_ref + String(index)}>
     <span className="ref-evidence-icon">✓</span><div><b>{event.title || "Подтверждённое действие"}</b><small>{event.source_kind} · {new Date(event.occurred_at).toLocaleDateString("ru-RU")}</small></div><em>Источник</em>
   </div>)}</div>;
 }
@@ -289,7 +289,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
       <div className="ref-v3-main">
         <section className="ref-panel ref-v3-chart"><div className="ref-card-title"><div><span className="ref-cap">ВАШ ПРОФИЛЬ</span><h2>Компетенции Agentic Coding</h2></div></div><Controls role={role} setRole={setRole} chart={chart} setChart={setChart} /><SkillsVisual skills={skills} chart={chart} series={series} /></section>
         <section className="ref-panel ref-v3-evidence"><div className="ref-card-title"><div><span className="ref-cap">ПОДТВЕРЖДЕНИЕ</span><h2>Каждый уровень — с доказательством</h2><p>Откуда взялась оценка и какой источник её подтверждает</p></div></div>
-          <div className="ref-evidence-count"><div><b>{events.length || "—"}</b><span>действительных источников</span></div><div><b>{known.length ? met.length : "—"}</b><span>компетенции достигли цели</span></div></div><EvidenceList events={events} /><div className="ref-warning"><strong>Как определяется уровень?</strong><p>По разрешённым цифровым следам и утверждённым требованиям роли. Курсы и тесты сами по себе не присваивают L1.</p></div>
+          <div className="ref-evidence-count"><div><b>{events.length || "—"}</b><span>действительных источников</span></div><div><b>{known.length ? met.length : "—"}</b><span>компетенции достигли цели</span></div></div><div className="ref-all-evidence"><EvidenceList events={events} limit={events.length} /></div><div className="ref-warning"><strong>Как определяется уровень?</strong><p>По разрешённым цифровым следам и утверждённым требованиям роли. Курсы и тесты сами по себе не присваивают L1.</p></div>
         </section>
       </div>
       <div className="ref-section-intro"><div><span className="ref-cap">ОТ ДЕЙСТВИЙ К РЕЗУЛЬТАТУ</span><h2>Не только баллы: что изменилось в вашей работе</h2></div><span>Период: {period} месяцев</span></div>
