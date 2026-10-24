@@ -126,6 +126,26 @@ test("approved list density: ten test rows remain scannable without horizontal o
   await expect(page.locator(".catalog-v2-table-reason")).toHaveCount(10);
 });
 
+test("intermediate desktop list preserves two-column readability without page overflow", async ({ page }) => {
+  await openReferenceVolumeCatalog(page);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.getByRole("button", { name: "Список" }).click();
+  await expect(page.locator(".catalog-v2-table-row")).toHaveCount(10);
+  const shape = await page.evaluate(() => {
+    const head = document.querySelector(".catalog-v2-table-head");
+    const row = document.querySelector(".catalog-v2-table-row");
+    return {
+      headerHidden: head !== null && getComputedStyle(head).display === "none",
+      columns: row !== null ? getComputedStyle(row).gridTemplateColumns.split(" ").length : 0,
+      horizontalOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+    };
+  });
+  expect(shape.headerHidden).toBe(true);
+  expect(shape.columns).toBe(2);
+  expect(shape.horizontalOverflow).toBe(false);
+  await expect(page.locator(".catalog-v2-table-actions").first().getByRole("button", { name: "Подробнее" })).toBeVisible();
+});
+
 test("approved terms modal: four top fact cards, two-column content, two actions and consent safety", async ({ page }) => {
   await openReferenceVolumeCatalog(page);
   const sourceCard = page.locator(".catalog-v2-card").first();
