@@ -84,7 +84,7 @@ test("documents panel reveals verification and lands exactly on certificate, pro
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Аналитика" }).click();
-  const location = new URL(page.url()); location.searchParams.set("legacy", "1"); await page.goto(location.toString());
+  await page.goto(page.url() + (page.url().includes("?") ? "&" : "?") + "legacy=1");
 
   const documents = page.getByTestId("document-item");
   await expect(documents.filter({ hasText: "Python: основа" })).toBeVisible();
@@ -101,7 +101,7 @@ test("documents panel reveals verification and lands exactly on certificate, pro
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Аналитика" }).click();
-  const location = new URL(page.url()); location.searchParams.set("legacy", "1"); await page.goto(location.toString());
+  await page.goto(page.url() + (page.url().includes("?") ? "&" : "?") + "legacy=1");
   await documents.filter({ hasText: "Проверка прототипа на данных" }).getByRole("button", { name: "Проверить" }).click();
   const projectViewer = page.getByTestId("document-viewer").first();
   await projectViewer.getByRole("link", { name: "Открыть публичную проверку проектного credential" }).click();
@@ -110,7 +110,7 @@ test("documents panel reveals verification and lands exactly on certificate, pro
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Аналитика" }).click();
-  const location = new URL(page.url()); location.searchParams.set("legacy", "1"); await page.goto(location.toString());
+  await page.goto(page.url() + (page.url().includes("?") ? "&" : "?") + "legacy=1");
   await page.getByRole("button", { name: /До следующего уровня/ }).click();
   const firstPlanStep = page.getByTestId("plan-step-0");
   await expect(firstPlanStep).toHaveAttribute("href", "/workspace/2");
@@ -132,7 +132,7 @@ test("mobile layout in light theme keeps verification and plan deep links exact"
     await page.getByRole("button", { name: "Меню", exact: true }).click();
     await expect(page.getByRole("button", { name: "Меню", exact: true })).toHaveAttribute("aria-expanded", "true");
     await page.getByRole("link", { name: "Аналитика" }).click();
-  const location = new URL(page.url()); location.searchParams.set("legacy", "1"); await page.goto(location.toString());
+  await page.goto(page.url() + (page.url().includes("?") ? "&" : "?") + "legacy=1");
   };
 
   await openAnalytics();
