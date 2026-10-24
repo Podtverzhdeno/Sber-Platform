@@ -1896,3 +1896,31 @@
   .trajectory-v2-grades-dialog {width:100%;padding:20px 16px;max-height:calc(100dvh - 20px);}
   .trajectory-v2-grades-dialog > header h2 {font-size:20px;}
 }
+
+
+/* AI-only role names: never truncate career titles (especially AI Security Engineer). */
+.workspace-content .trajectory-v2-role-card strong {
+  display: block;
+  max-width: 100%;
+  min-height: 30px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  text-wrap: balance;
+}
+.workspace-content .trajectory-v2-role-icon[data-glyph="security"] {background:#493620;color:#f5be59}
+.workspace-content .trajectory-v2-role-icon[data-glyph="agent"] {background:#153e4e;color:#42e4dd}
+.workspace-content .trajectory-v2-role-card[data-role-state="unselected"] .trajectory-v2-role-icon {background:#1c2a36;color:#8198a6}
+@media (max-width:660px) {
+  .workspace-content .trajectory-v2-role-card strong {
+    white-space:normal;
+    overflow:visible;
+    text-overflow:clip;
+    min-height:31px;
+    font-size:11px;
+    line-height:1.25;
+  }
+}
