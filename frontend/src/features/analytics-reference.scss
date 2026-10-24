@@ -300,8 +300,10 @@
     overflow-y:auto;
   }
   .analytics-reference .ref-v3-bottom { height:304px; min-height:304px; }
-  .analytics-reference .ref-layout-path .ref-page-header { min-height:81px; }
+  .analytics-reference.ref-layout-evidence .ref-section-intro { min-height:50px; }
+  .analytics-reference.ref-layout-path { gap:14px; }
   .analytics-reference.ref-layout-path .ref-page-header { min-height:81px; }
+  .analytics-reference.ref-layout-passport .ref-v1-bottom { margin-top:2px; }
   .analytics-reference .ref-path-hero { height:199px; min-height:199px; }
   .analytics-reference .ref-route { height:106px; min-height:106px; }
   .analytics-reference .ref-v2-main { height:379px; min-height:379px; }
