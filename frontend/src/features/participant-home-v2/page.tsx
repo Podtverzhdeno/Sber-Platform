@@ -19,6 +19,7 @@ import {
   Layers3,
   LockKeyhole,
   ShieldCheck,
+  Send,
   Sparkles,
   Target,
   TrendingUp,
@@ -184,7 +185,7 @@ export function ParticipantHomeV2Body(props: {
                 {overview.next_outcome && <button type="button" className="home-v2-buddy-tip" onClick={openNext}><BookOpen size={22}/><span><strong>Материалы и задания</strong><small>{overview.next_outcome.target_title}</small></span><ChevronRight size={15}/></button>}
               </div>
             </div>
-            <p className="home-v2-buddy-footnote">Подсказка составлена из текущей траектории, не является оценкой навыков</p>
+            <button type="button" className="home-v2-buddy-footnote" onClick={() => { props.onOpenWorkspace("buddy"); }}>Задать вопрос или попросить совет… <Send size={19} /></button>
           </section>
           <section className="home-v2-block home-v2-passport" aria-label="Мой скилл-паспорт">
             <header><h2>Мой скилл-паспорт</h2><button type="button" className="home-v2-inline-link" onClick={() => { props.onOpenWorkspace("skills"); }}>Все навыки <ArrowRight size={16}/></button></header>
