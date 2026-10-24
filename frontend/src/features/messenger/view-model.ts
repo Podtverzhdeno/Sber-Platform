@@ -98,6 +98,7 @@ export function dialogDraftText(drafts: DialogDrafts, channelId: string): string
 
 const channelKindLabels: Record<string, string> = {
   personal: "Личный чат",
+  community: "Сообщество",
   task_team: "Команда задачи",
   customer: "Канал заказчика",
   operator_case: "Служебный канал",
