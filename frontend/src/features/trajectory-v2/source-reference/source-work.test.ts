@@ -12,6 +12,7 @@ const milestone: MilestoneView = {
   target_kind: "task",
   target_key: "verified-task-1",
   completed: false,
+  deliverable: null,
 };
 
 function workItem(taskKey: string, latestDecision: "accepted" | "revision_requested"): ParticipantWorkItem {
