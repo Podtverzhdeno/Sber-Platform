@@ -626,7 +626,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
         <div className="catalog-v2-filter-rail">
           <button type="button" className="catalog-v2-all-tasks" onClick={() => {
             updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, mentored: null, portfolio: null, available: null, sort: null }, true);
-          }}><SlidersHorizontal size={15} aria-hidden="true" /> Все задачи{activeFilterChips.length === 0 ? ` (${totals?.total_found ?? 0})` : ""}</button>
+          }}><SlidersHorizontal size={15} aria-hidden="true" /> Все задачи{activeFilterChips.length === 0 ? ` (${String(totals?.total_found ?? 0)})` : ""}</button>
           <div id="catalog-v2-advanced-filters" className="catalog-v2-advanced-filters" data-open={advancedFiltersOpen}>
             <label>Направление<input list="catalog-v2-direction-options" value={filters.direction} onChange={(event) => { updateParams({ direction: event.target.value }, true); }} placeholder="Направление" autoComplete="off" /></label>
             <label>Навык<input list="catalog-v2-competency-options" value={filters.competency} onChange={(event) => { updateParams({ competency: event.target.value }, true); }} placeholder="Навыки" autoComplete="off" /></label>
