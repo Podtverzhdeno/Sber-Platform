@@ -633,3 +633,15 @@
   max-height:100%;
   grid-template-rows:minmax(0,1fr);
 }
+
+
+/* Context controls are real actions, with visible confirmation and keyboard focus. */
+.sberchat-reference .msg-context__section-title .msg-context__show-all {
+  margin-left:auto;
+  border:0;background:none;padding:4px 0 4px 8px;
+  color:#14d9ef;font-size:11px;cursor:pointer;
+}
+.sberchat-reference .msg-context__section-title .msg-context__show-all:hover {color:#bdffff;text-decoration:underline;}
+.sberchat-reference .msg-context__copy-status {min-height:1em;margin:6px 0 0;color:#20e5ce;font-size:11px;}
+.sberchat-reference .msg-context__moderators .msg-context__people li {padding:8px 1px;border-bottom:1px solid #173e55;}
+.sberchat-reference .msg-context__materials {padding-bottom:4px;}
