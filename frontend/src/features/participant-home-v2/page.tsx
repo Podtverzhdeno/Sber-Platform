@@ -1,12 +1,31 @@
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+} from "react";
+import {
+  ArrowRight,
+  BookOpen,
+  BriefcaseBusiness,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  Circle,
+  ClipboardCheck,
+  Clock3,
+  FileCheck2,
+  Layers3,
+  LockKeyhole,
+  ShieldCheck,
+  Sparkles,
+  Target,
+  TrendingUp,
+  X,
+} from "lucide-react";
 
 import { StatePanel } from "../../components/ui";
-import {
-  BuddySuggestionCard,
-} from "../buddy-suggestion";
-import { MonthlyGoalCard } from "../monthly-goal-card";
-import { PassportNextResultCard } from "../next-result";
 import {
   TASK_NEXT_ACTION_LABELS,
   formatDayLabel,
@@ -18,13 +37,13 @@ import {
 } from "./client";
 import "./home-v2.scss";
 
-/**
- * Home v2 preview (participant-home-trajectory-grades, participant-experience).
- * One versioned overview request feeds the canonical blocks; Next Result,
- * Buddy and Monthly Goal reuse the existing components with identical
- * properties, so no client-side joins by title are performed. Prototype
- * panels stay API-backed: demo constants are never rendered here.
- */
+type HomeGrade = DevelopmentOverviewView["concepts"]["career_grade"];
+type HomePanel = "levels" | "grade-details" | null;
+
+/** Same approved SVG artwork as the standalone 22.10.2026 ZIP. */
+const HERO_ART = "/home-reference/mountain-path.svg";
+const BUDDY_ART = "/home-reference/buddy.svg";
+
 export function ParticipantHomeV2(props: {
   onOpenTarget: OpenTarget;
   onOpenWorkspace: (canonicalPath?: string) => void;
@@ -34,26 +53,15 @@ export function ParticipantHomeV2(props: {
     queryFn: loadDevelopmentOverview,
   });
   if (overview.isPending) {
-    return (
-      <div className="home-v2" data-reference="R-PAR-01">
-        <StatePanel kind="loading" />
-      </div>
-    );
+    return <div className="home-v2" data-reference="R-PAR-01"><StatePanel kind="loading" /></div>;
   }
   if (overview.isError) {
     return (
       <div className="home-v2" data-reference="R-PAR-01">
         <section className="home-v2-failure" role="status">
           <strong>Не удалось загрузить обзор развития.</strong>
-          <p>Блоки домашнего раздела остаются недоступными без авторизованного снимка.</p>
-          <button
-            type="button"
-            onClick={() => {
-              void overview.refetch();
-            }}
-          >
-            Повторить
-          </button>
+          <p>Домашний раздел недоступен без авторизованных данных.</p>
+          <button type="button" onClick={() => { void overview.refetch(); }}>Повторить</button>
         </section>
       </div>
     );
@@ -63,9 +71,7 @@ export function ParticipantHomeV2(props: {
       overview={overview.data}
       onOpenTarget={props.onOpenTarget}
       onOpenWorkspace={props.onOpenWorkspace}
-      onRetry={() => {
-        void overview.refetch();
-      }}
+      onRetry={() => { void overview.refetch(); }}
     />
   );
 }
@@ -77,50 +83,142 @@ export function ParticipantHomeV2Body(props: {
   onRetry: () => void;
 }) {
   const { overview } = props;
-  const asOf = useMemo(
-    () =>
-      new Intl.DateTimeFormat("ru-RU", {
-        dateStyle: "long",
-        timeStyle: "short",
-      }).format(new Date(overview.as_of)),
-    [overview.as_of],
-  );
+  const [panel, setPanel] = useState<HomePanel>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const grade = overview.concepts.career_grade;
+  const activeRole = overview.roles.find((item) => item.state === "active") ?? overview.roles[0] ?? null;
+  const recommendedTask = overview.active_tasks.find((task) => task.next_action !== "await_review") ?? null;
+  const heroKind = recommendedTask ? "task" : overview.next_outcome?.target_kind ?? null;
+  const heroKey = recommendedTask?.task_id ?? overview.next_outcome?.target_key ?? null;
+  const heroTitle = recommendedTask?.title ?? overview.next_outcome?.target_title ?? null;
+  const openHero = () => {
+    if (heroKind !== null && heroKey !== null) props.onOpenTarget(heroKind, heroKey);
+  };
+  const openPanel = (next: Exclude<HomePanel, null>) => {
+    if (document.activeElement instanceof HTMLElement) returnFocusRef.current = document.activeElement;
+    setPanel(next);
+  };
+  const closePanel = () => {
+    setPanel(null);
+    window.requestAnimationFrame(() => returnFocusRef.current?.focus());
+  };
+
+  useEffect(() => {
+    if (panel !== null) {
+      panelRef.current?.querySelector<HTMLButtonElement>(".home-v2-drawer-close")?.focus();
+    }
+  }, [panel]);
+
+  const drawerKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closePanel();
+    }
+    if (event.key !== "Tab") return;
+    const buttons = Array.from(
+      panelRef.current?.querySelectorAll<HTMLButtonElement>("button:not(:disabled)") ?? [],
+    );
+    const first = buttons[0];
+    const last = buttons[buttons.length - 1];
+    if (!first || !last) return;
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
   return (
     <div className="home-v2" data-reference="R-PAR-01" data-as-of={overview.as_of}>
-      <header className="home-v2-freshness">
-        <h1 id="workspace-title" className="sr-only">Главная участника</h1>
-        <p className="eyebrow">Предпросмотр нового домашнего раздела</p>
-        <small>Снимок авторизованных данных от {asOf}</small>
-      </header>
+      <h1 className="sr-only" id="workspace-title">Главная участника</h1>
       <div className="home-v2-first-row">
-        <NextOutcomePanel
-          outcome={overview.next_outcome}
-          onOpenTarget={props.onOpenTarget}
-          onRetry={props.onRetry}
-        />
-        <GradeSummaryPanel grade={overview.concepts.career_grade} hint={overview.concepts} />
-        <WeeklyFocusPanel focus={overview.weekly_focus} />
-      </div>
-      <ActiveTasksPanel
-        tasks={overview.active_tasks}
-        onOpenTarget={props.onOpenTarget}
-      />
-      <div className="home-v2-support-rail">
-        <section className="home-v2-rail-block" aria-label="Навыки и следующий результат">
-          <h2>Skills Passport</h2>
-          <PassportNextResultCard
-            onOpenWorkspace={() => {
-              props.onOpenWorkspace();
-            }}
-            onOpenTarget={props.onOpenTarget}
-          />
+        <section className="home-v2-block home-v2-hero" aria-label="Рекомендованная задача">
+          <img src={HERO_ART} className="home-v2-hero-art" alt="" aria-hidden="true" />
+          <div className="home-v2-hero-inner">
+            <div className="home-v2-hero-kicker"><span className="home-v2-hero-target"><Target size={20} /></span><span>Рекомендуем сегодня</span></div>
+            <h2>{heroTitle ?? "Выбери задачу для развития"}</h2>
+            <p>{heroTitle ? "Продолжи работу над текущим результатом — выполненное задание поможет продвинуться по траектории." : "После выбора траектории здесь появится приоритетное действие."}</p>
+            <div className="home-v2-hero-meta">
+              {activeRole && <span><Layers3 size={16} />{activeRole.title}</span>}
+              {recommendedTask && <span><Clock3 size={16} />{TASK_NEXT_ACTION_LABELS[recommendedTask.next_action] ?? recommendedTask.status}</span>}
+            </div>
+            <div className="home-v2-hero-actions">
+              <button type="button" className="home-v2-primary" disabled={heroKind === null} onClick={openHero}>{heroKind === null ? "Выбрать траекторию" : "Продолжить задачу"}<ArrowRight size={18} /></button>
+              {overview.next_outcome && <button type="button" className="home-v2-text-action" onClick={() => props.onOpenTarget(overview.next_outcome!.target_kind, overview.next_outcome!.target_key)}>Следующий шаг</button>}
+            </div>
+          </div>
+          {grade.state !== "not_evaluable" && grade.target_grade !== null && (
+            <button className="home-v2-hero-gain" type="button" onClick={() => openPanel("grade-details")}><TrendingUp size={23}/><span>Открыть требования следующего грейда</span></button>
+          )}
         </section>
-        <section className="home-v2-rail-block" aria-label="AI Buddy recommendation">
-          <h2>AI-Buddy</h2>
-          <BuddySuggestionCard onOpenWorkspace={props.onOpenWorkspace} />
-        </section>
+
+        <GradeSummaryPanel grade={grade} hint={overview.concepts} roleTitle={activeRole?.title ?? null} onOpenLevels={() => openPanel("levels")} onOpenDetails={() => openPanel("grade-details")} />
+        <WeeklyFocusPanel focus={overview.weekly_focus} today={overview.local_today} />
       </div>
-      <MonthlyGoalCard />
+
+      <div className="home-v2-bottom-grid">
+        <div className="home-v2-work-column">
+          <NextOutcomePanel outcome={overview.next_outcome} onOpenTarget={props.onOpenTarget} onRetry={props.onRetry} onOpenGrade={() => openPanel("grade-details")} gradeAvailable={grade.state !== "not_evaluable" && grade.target_grade !== null} />
+          <ActiveTasksPanel tasks={overview.active_tasks} onOpenTarget={props.onOpenTarget} onOpenAll={() => props.onOpenTarget("tasks", "")} />
+        </div>
+        <div className="home-v2-insights-column">
+          <section className="home-v2-block home-v2-buddy">
+            <header><h2><Sparkles size={23} />AI Buddy <span className="home-v2-beta">Бета</span></h2><button type="button" className="home-v2-inline-link" onClick={() => props.onOpenTarget("course", overview.next_outcome?.target_key ?? "")} disabled={overview.next_outcome?.target_kind !== "course"}>Открыть <ArrowRight size={16}/></button></header>
+            <div className="home-v2-buddy-content">
+              <img src={BUDDY_ART} alt="AI Buddy" />
+              <div><p>{overview.next_outcome ? "Твой следующий шаг по траектории уже определён." : "Выбери роль и траекторию, чтобы получать подсказки по развитию."}</p>
+                {overview.next_outcome && <button type="button" className="home-v2-buddy-tip" onClick={() => props.onOpenTarget(overview.next_outcome!.target_kind, overview.next_outcome!.target_key)}><BookOpen size={22}/><span><strong>Материалы и задания</strong><small>{overview.next_outcome.target_title}</small></span><ChevronRight size={15}/></button>}
+              </div>
+            </div>
+            <p className="home-v2-buddy-footnote">Подсказка составлена из текущей траектории, не является оценкой навыков</p>
+          </section>
+          <section className="home-v2-block home-v2-passport" aria-label="Мой скилл-паспорт">
+            <header><h2>Мой скилл-паспорт</h2><button type="button" className="home-v2-inline-link" onClick={() => props.onOpenWorkspace("skills")}>Все навыки <ArrowRight size={16}/></button></header>
+            <div className="home-v2-passport-row"><span className="home-v2-skill-icon"><ShieldCheck size={21}/></span><span><strong>Подтверждённые компетенции</strong><small>Факты обучения и выполнения задач</small></span></div>
+            <div className="home-v2-passport-message">Показатели навыков доступны в полном скилл-паспорте после проверки результатов. Неоценённые навыки не получают вымышленные проценты.</div>
+            <button type="button" className="home-v2-passport-open" onClick={() => props.onOpenWorkspace("skills")}>Перейти в скилл-паспорт <ArrowRight size={16}/></button>
+          </section>
+        </div>
+      </div>
+      {panel && (
+        <div className="home-v2-drawer-layer">
+          <button className="home-v2-drawer-backdrop" type="button" aria-label="Закрыть карту уровней" onClick={closePanel} />
+          <div className="home-v2-drawer" role="dialog" aria-modal="true" aria-label={panel === "levels" ? "Карта уровней" : "Требования следующего грейда"} ref={panelRef} onKeyDown={drawerKeyDown}>
+            <div className="home-v2-drawer-top">
+              <span>{panel === "levels" ? "Траектория · Карта уровней" : "Траектория · Подробности грейда"}</span>
+              <button type="button" className="home-v2-drawer-close" aria-label="Закрыть панель" onClick={closePanel}><X size={21}/></button>
+            </div>
+            {panel === "levels" ? (
+              <div className="home-v2-drawer-body">
+                <p className="home-v2-drawer-eyebrow">Профессиональный рост</p><h2>Карта уровней</h2>
+                <p>Путь развития по выбранной роли. Грейды отображаются только после публикации их критериев.</p>
+                {grade.state === "not_evaluable" ? (
+                  <section className="home-v2-grade-unavailable" role="status"><LockKeyhole size={25}/><strong>Каталог грейдов пока не опубликован</strong><span>Поэтому мы не показываем фиктивные грейды 5–6, проценты готовности или достижения.</span></section>
+                ) : <div className="home-v2-grade-timeline">
+                  {grade.target_grade !== null && <button type="button" onClick={() => setPanel("grade-details")}><span className="home-v2-grade-dot target"></span><strong>Грейд {String(grade.target_grade)}</strong><small>Следующая цель</small><ChevronRight size={18}/></button>}
+                  {grade.current_grade !== null && <button type="button" onClick={() => setPanel("grade-details")}><span className="home-v2-grade-dot current"></span><strong>Грейд {String(grade.current_grade)}</strong><small>Текущий</small><ChevronRight size={18}/></button>}
+                </div>}
+                {activeRole && <div className="home-v2-drawer-note">Активная роль: {activeRole.title}</div>}
+              </div>
+            ) : (
+              <div className="home-v2-drawer-body">
+                <button className="home-v2-drawer-back" type="button" onClick={() => setPanel("levels")}>← Все грейды</button>
+                <div className="home-v2-grade-detail-hero"><span className="home-v2-drawer-eyebrow">Следующий уровень</span><h2>{grade.target_grade === null ? "Требования ещё не опубликованы" : `Грейд ${String(grade.target_grade)}`}</h2><p>{activeRole?.title ?? "Траектория развития"}</p></div>
+                {grade.state === "not_evaluable" ? <section className="home-v2-grade-unavailable" role="status"><LockKeyhole size={25}/><strong>Оценка грейда недоступна</strong><span>Данные о готовности, компетенциях и критериях не утверждены. Демонстрационные 88% здесь намеренно не используются.</span></section> : (
+                  <section className="home-v2-grade-progress"><Target size={24}/><div><strong>Готовность к следующему уровню</strong><span>{grade.readiness_percent === null ? "Требует проверки" : `${String(grade.readiness_percent)}% по действующей политике`}</span>{grade.readiness_percent !== null && <div className="home-v2-grade-track"><span style={{ width: `${String(grade.readiness_percent)}%` }}/></div>}</div></section>
+                )}
+                <h3>Что нужно для перехода</h3>
+                <div className="home-v2-grade-requirement"><ClipboardCheck size={21}/><div><strong>Практический результат</strong><small>Выполнить этап траектории и подтвердить личный вклад</small></div></div>
+                <div className="home-v2-grade-requirement"><FileCheck2 size={21}/><div><strong>Проверенные компетенции</strong><small>Решение принимается после проверки артефактов, а не по XP</small></div></div>
+                {overview.next_outcome && <button type="button" className="home-v2-primary home-v2-grade-button" onClick={() => { closePanel(); props.onOpenTarget(overview.next_outcome!.target_kind, overview.next_outcome!.target_key); }}>Перейти к следующему шагу <ArrowRight size={17}/></button>}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -129,136 +227,66 @@ export function NextOutcomePanel(props: {
   outcome: DevelopmentOverviewView["next_outcome"];
   onOpenTarget: OpenTarget;
   onRetry: () => void;
+  onOpenGrade?: () => void;
+  gradeAvailable?: boolean;
 }) {
   const outcome = props.outcome;
-  if (outcome === null) {
-    return (
-      <section className="home-v2-block home-v2-next-outcome home-v2-next-outcome--empty" role="status">
-        <h2>Главный результат</h2>
-        <p>
-          Активной траектории нет, поэтому обязательный следующий шаг не вычислен.
-          Выберите траекторию в разделе траекторий.
-        </p>
-        <button type="button" onClick={props.onRetry}>
-          Обновить
-        </button>
-      </section>
-    );
-  }
   return (
-    <section className="home-v2-block home-v2-next-outcome" data-testid={`next-outcome-${outcome.target_kind}`}>
-      <header>
-        <h2>Главный результат</h2>
-        <small>{outcome.trajectory_title} · этап {String(outcome.milestone_position)} · политика v{String(outcome.policy_version)}</small>
-      </header>
-      <p className="home-v2-outcome-title">{outcome.target_title}</p>
-      <ul className="home-v2-outcome-reasons">
-        {outcome.reasons.map((reason) => (
-          <li key={reason}>{reason}</li>
-        ))}
-      </ul>
-      {outcome.stale_reason !== null && (
-        <p className="home-v2-outcome-stale" role="status">{outcome.stale_reason}</p>
+    <section className="home-v2-block home-v2-next-outcome" data-testid={outcome ? `next-outcome-${outcome.target_kind}` : undefined}>
+      <header><h2><ClipboardCheck size={23}/>Следующий шаг</h2>{outcome && <span className="home-v2-state">В процессе</span>}</header>
+      {outcome === null ? (
+        <div className="home-v2-outcome-empty" role="status"><p>Активной траектории нет, поэтому обязательный следующий шаг не вычислен. Выберите траекторию в разделе траекторий.</p><button type="button" onClick={props.onRetry}>Обновить</button></div>
+      ) : (
+        <div className="home-v2-outcome-main"><span className="home-v2-outcome-symbol"><FileCheck2 size={32}/></span><div className="home-v2-outcome-content"><h3>{outcome.target_kind === "task" ? "Пройти задание" : "Продолжить обучение"}</h3><p>{outcome.target_title}</p>{outcome.stale_reason && <small role="status">{outcome.stale_reason}</small>}</div>
+          <div className="home-v2-outcome-actions"><button type="button" className="home-v2-primary" onClick={() => props.onOpenTarget(outcome.target_kind, outcome.target_key)}>Перейти к шагу <ArrowRight size={17}/></button>{props.gradeAvailable && props.onOpenGrade && <button type="button" className="home-v2-secondary" onClick={props.onOpenGrade}>Посмотреть программу уровня</button>}</div>
+        </div>
       )}
-      <button
-        type="button"
-        onClick={() => {
-          props.onOpenTarget(outcome.target_kind, outcome.target_key);
-        }}
-      >
-        Перейти к шагу
-      </button>
     </section>
   );
 }
 
 export function GradeSummaryPanel(props: {
-  grade: DevelopmentOverviewView["concepts"]["career_grade"];
+  grade: HomeGrade;
   hint: DevelopmentOverviewView["concepts"];
+  roleTitle?: string | null;
+  onOpenLevels?: () => void;
+  onOpenDetails?: () => void;
 }) {
-  const grade = props.grade;
+  const { grade } = props;
+  const valid = grade.state !== "not_evaluable";
   return (
     <section className="home-v2-block home-v2-grade" data-testid="grade-summary" data-grade-state={grade.state}>
-      <header>
-        <h2>Карьерный грейд</h2>
-        <small>политика v{String(grade.policy_version)}</small>
-      </header>
-      {grade.state === "not_evaluable" ? (
-        <div className="home-v2-grade-not-evaluable" role="status">
-          <p>
-            Грейд пока не вычисляется: каталог грейдов не опубликован
-            {grade.reason !== null && grade.reason.length > 0 ? ` (${grade.reason})` : ""}.
-          </p>
-          {grade.hint !== null && <small>{grade.hint}</small>}
-        </div>
-      ) : (
-        <div>{grade.current_grade ?? "—"}</div>
-      )}
-      <dl className="home-v2-concepts">
-        <div>
-          <dt>Компетенция</dt>
-          <dd>{props.hint.competency_level.value_state}</dd>
-        </div>
-        <div>
-          <dt>Этап</dt>
-          <dd>{props.hint.stage_progress.value_state}</dd>
-        </div>
-        <div>
-          <dt>Готовность</dt>
-          <dd>{props.hint.readiness_percent.value_state}</dd>
-        </div>
-        <div>
-          <dt>Рейтинг</dt>
-          <dd>{props.hint.rating_xp.value_state}</dd>
-        </div>
-        <div>
-          <dt>Ревью</dt>
-          <dd>{props.hint.review_grade.value_state}</dd>
-        </div>
-      </dl>
+      <header><h2>Твой уровень</h2><button type="button" className="home-v2-inline-link" onClick={props.onOpenLevels} disabled={!props.onOpenLevels}>Все уровни <ArrowRight size={16}/></button></header>
+      <div className="home-v2-grade-overview">
+        <div className="home-v2-ring" aria-label={valid && grade.current_grade !== null ? `Текущий грейд ${String(grade.current_grade)}` : "Карьерный грейд пока не вычисляется"}><div><strong>{valid && grade.current_grade !== null ? String(grade.current_grade) : "—"}</strong><span>{valid && grade.current_grade !== null ? `Грейд ${String(grade.current_grade)}` : "Грейд не назначен"}</span></div></div>
+        <div className="home-v2-grade-readiness"><small>{valid && grade.target_grade !== null ? `До грейда ${String(grade.target_grade)}` : "До следующего грейда"}</small><strong>{valid && grade.readiness_percent !== null ? `${String(Math.max(0,100-grade.readiness_percent))}%` : "—"}</strong><div className="home-v2-progress"><span style={{width: valid && grade.readiness_percent !== null ? `${String(grade.readiness_percent)}%` : "0%"}} /></div><small>{valid && grade.readiness_percent !== null ? "Осталось до следующего уровня" : "Прогресс не утверждён"}</small></div>
+      </div>
+      <button type="button" className="home-v2-next-grade" onClick={props.onOpenDetails} disabled={!props.onOpenDetails}>
+        <div className="home-v2-next-grade-name"><span>{valid && grade.target_grade !== null ? String(grade.target_grade) : "—"}</span><strong>{valid && grade.target_grade !== null ? `Грейд ${String(grade.target_grade)}` : "Следующий уровень"}</strong><ChevronRight size={17}/></div>
+        <p>{props.roleTitle ?? "Выберите профессиональную роль"}</p>
+      </button>
+      {!valid && <p className="home-v2-grade-disclaimer" role="status">Грейд пока не вычисляется: каталог грейдов не опубликован{grade.reason ? ` (${grade.reason})` : ""}.</p>}
     </section>
   );
 }
 
 export function WeeklyFocusPanel(props: {
   focus: DevelopmentOverviewView["weekly_focus"];
+  today?: string;
 }) {
-  const focus = props.focus;
-  const [selected, setSelected] = useState<string | null>(
-    focus.days[0]?.date ?? null,
-  );
+  const { focus } = props;
+  const [selected, setSelected] = useState<string | null>(props.today ?? focus.days[0]?.date ?? null);
+  const day = focus.days.find((item) => item.date === selected) ?? null;
   return (
     <section className="home-v2-block home-v2-weekly" data-testid="weekly-focus">
-      <header>
-        <h2>Фокус недели</h2>
-        <small>
-          {focus.versioned && focus.preset !== null
-            ? `${focus.preset} · выполнено ${String(focus.done_days)} из ${String(focus.target_days)}`
-            : "Ритм недели не настроен"}
-        </small>
-      </header>
+      <header><h2>На этой неделе</h2><small>{focus.versioned ? `выполнено ${String(focus.done_days)} из ${String(focus.target_days)}` : "Ритм недели не настроен"}</small></header>
       <div className="home-v2-week-days" role="group" aria-label="Дни недели">
-        {focus.days.map((day) => {
-          const label = formatWeekdayShort(day.date);
-          const active = day.date === selected;
-          const state = day.done ? "done" : day.planned ? "planned" : "off";
-          return (
-            <button
-              type="button"
-              key={day.date}
-              className={`home-v2-day home-v2-day--${state}${active ? " home-v2-day--selected" : ""}`}
-              aria-pressed={active}
-              onClick={() => {
-                setSelected(day.date);
-              }}
-            >
-              <span>{label}</span>
-              <strong>{formatDayLabel(day.date)}</strong>
-            </button>
-          );
+        {focus.days.map((item) => {
+          const active = selected === item.date;
+          return <button type="button" key={item.date} aria-pressed={active} aria-label={formatDayLabel(item.date)} onClick={() => setSelected(item.date)} className={`home-v2-day${item.done ? " home-v2-day--done" : ""}${item.planned ? " home-v2-day--planned" : ""}${active ? " home-v2-day--selected" : ""}`}><span>{formatWeekdayShort(item.date)}</span><small>{new Intl.DateTimeFormat("ru-RU",{day:"numeric",month:"short"}).format(new Date(`${item.date}T00:00:00`))}</small>{item.done ? <Check size={17}/> : <Circle size={17}/>}</button>;
         })}
       </div>
-      {selected !== null && <WeeklyFocusDetail date={selected} focus={props.focus} />}
+      {day && <div className="home-v2-week-day-detail" role="status"><span className="home-v2-week-target"><Target size={25}/></span><div><strong>{focus.hint ?? "План недели"}</strong><p>{day.done ? "День подтверждён квалификационным действием." : day.planned ? "Запланирован по ритму недели, выполнение пока не подтверждено." : "Не запланирован по ритму недели."}</p></div><ChevronRight size={16}/></div>}
     </section>
   );
 }
@@ -267,65 +295,22 @@ export function WeeklyFocusDetail(props: {
   date: string;
   focus: DevelopmentOverviewView["weekly_focus"];
 }) {
-  const day = props.focus.days.find((item) => item.date === props.date) ?? null;
-  if (day === null) return null;
-  const title = formatDayLabel(day.date);
-  return (
-    <div className="home-v2-week-day-detail" role="status" aria-label={`Фокус на ${title}`}>
-      <strong>{title}</strong>
-      <p>
-        {day.done
-          ? "День подтверждён квалификационным действием."
-          : day.planned
-            ? "Запланирован по ритму недели, выполнение пока не подтверждено."
-            : "Не запланирован по ритму недели."}
-      </p>
-    </div>
-  );
+  const day = props.focus.days.find((item) => item.date === props.date);
+  if (!day) return null;
+  return <p role="status">{day.done ? "День подтверждён квалификационным действием." : day.planned ? "Запланирован по ритму недели, выполнение пока не подтверждено." : "Не запланирован по ритму недели."}</p>;
 }
 
 export function ActiveTasksPanel(props: {
   tasks: DevelopmentOverviewView["active_tasks"];
   onOpenTarget: OpenTarget;
+  onOpenAll?: () => void;
 }) {
   const { tasks } = props;
   return (
     <section className="home-v2-block home-v2-tasks" data-testid="active-tasks">
-      <header>
-        <h2>Активные задачи</h2>
-        <small>{tasks.length === 0 ? "нет активных назначений" : String(tasks.length)}</small>
-      </header>
-      {tasks.length === 0 ? (
-        <p className="home-v2-tasks-empty" role="status">
-          Активных задач нет. Доступные задачи открываются из раздела задач.
-        </p>
-      ) : (
-        <ul className="home-v2-task-list">
-          {tasks.map((task) => (
-            <li key={task.assignment_id}>
-              <article>
-                <div>
-                  <strong>{task.title}</strong>
-                  <small>
-                    {TASK_NEXT_ACTION_LABELS[task.next_action] ?? task.status}
-                  </small>
-                </div>
-                {task.open_contributions > 0 && (
-                  <small>открытых отправок: {String(task.open_contributions)}</small>
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    props.onOpenTarget("task", task.task_id);
-                  }}
-                >
-                  Открыть задачу
-                </button>
-              </article>
-            </li>
-          ))}
-        </ul>
-      )}
+      <header><h2><BriefcaseBusiness size={21}/>Активные задачи</h2>{props.onOpenAll && <button type="button" className="home-v2-inline-link" onClick={props.onOpenAll}>Все задачи <ArrowRight size={16}/></button>}</header>
+      {tasks.length === 0 ? <p className="home-v2-tasks-empty" role="status">Активных задач нет. Доступные задачи открываются из раздела задач.</p> :
+        <ul className="home-v2-task-list">{tasks.slice(0,4).map((task) => <li key={task.assignment_id}><article><span className="home-v2-task-check"><CheckCircle2 size={25}/></span><div className="home-v2-task-copy"><strong>{task.title}</strong><div className="home-v2-task-tags"><span>{TASK_NEXT_ACTION_LABELS[task.next_action] ?? task.status}</span>{task.open_contributions > 0 && <span>Отправок: {String(task.open_contributions)}</span>}</div></div><button type="button" className="home-v2-task-open" onClick={() => props.onOpenTarget("task",task.task_id)}>Открыть задачу <ArrowRight size={15}/></button></article></li>)}</ul>}
     </section>
   );
 }
