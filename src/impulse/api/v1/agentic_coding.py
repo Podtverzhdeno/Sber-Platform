@@ -1,4 +1,5 @@
 """Read-only participant Agentic Coding target and qualified evidence view."""
+
 from __future__ import annotations
 
 from typing import Annotated, Literal
@@ -12,6 +13,7 @@ from impulse.application.identity import AuthenticatedSession
 from impulse.domain.identity import Role
 
 router = APIRouter(tags=["agentic-coding"])
+
 
 @router.get("/me/agentic-coding/profile", response_model=RoleProfile)
 async def agentic_coding_profile(
