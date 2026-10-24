@@ -31,7 +31,11 @@ from impulse.infrastructure.models.buddy import (
     buddy_suggestion_states,
     buddy_threads,
 )
-from impulse.infrastructure.models.competencies import competency_evidence
+from impulse.infrastructure.models.competencies import (
+    competency_models,
+    competency_definitions,
+    competency_evidence,
+)
 from impulse.infrastructure.models.credentials import (
     course_certificates,
     project_credentials,
@@ -428,6 +432,45 @@ def build_seed_batches() -> list[SeedBatch]:
         )
     )
 
+    # Evidence is anchored only to verified synthetic courses. It never
+    # creates an official career grade or bypasses a framework allowlist.
+    framework_row = demo_row(
+        "competency-model:demo-product:1",
+        framework_key="role:product-analyst-demo",
+        framework_version=1,
+        domain="role",
+        title="Продуктовая аналитика · демонстрационный фреймворк",
+    )
+    competency_specs = (
+        ("requirements", "Постановка требований", "demo-course-1", "базовый"),
+        ("discovery", "Исследование пользователей", "demo-course-6", "уверенный"),
+        ("python", "Программирование Python", "demo-course-3", "уверенный"),
+        ("machine-learning", "Машинное обучение", "demo-course-7", "базовый"),
+        ("data-analysis", "Работа с данными", "demo-course-5", "базовый"),
+    )
+    definition_rows = [
+        demo_row(
+            f"competency-def:demo-product:{key}",
+            model_id=framework_row["id"],
+            competency_key=key,
+            title=title,
+            payload={"evidence_sources": [["course", source_ref]]},
+        )
+        for key, title, source_ref, _level in competency_specs
+    ]
+    evidence_rows = [
+        demo_row(
+            f"competency-evidence:alex:{key}",
+            person_id=demo_id("participant-alex"),
+            competency_key=key,
+            source_kind="course",
+            source_ref=source_ref,
+            level=level,
+            created_at=DEMO_NOW,
+        )
+        for key, _title, source_ref, level in competency_specs
+    ]
+
     source_row = demo_row(
         "source:demo-sber",
         provider="demo-organizer",
@@ -491,6 +534,9 @@ def build_seed_batches() -> list[SeedBatch]:
         SeedBatch(course_track_links, course_link_rows),
         SeedBatch(enrollments, enrollment_rows),
         SeedBatch(learning_days, learning_rows),
+        SeedBatch(competency_models, [framework_row]),
+        SeedBatch(competency_definitions, definition_rows),
+        SeedBatch(competency_evidence, evidence_rows),
         SeedBatch(freeze_days, freeze_rows),
         SeedBatch(external_sources, [source_row]),
         SeedBatch(programs, [program_row]),
