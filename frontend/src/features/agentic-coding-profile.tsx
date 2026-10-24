@@ -219,11 +219,17 @@ export function AgenticCodingProfile({ activeRole, onRoleChange, serverProfile, 
   );
 }
 
+const AGENTIC_PROFILE_PATHS = {
+  developer: "/api/v1/me/agentic-coding/profile?role_key=developer",
+  analyst: "/api/v1/me/agentic-coding/profile?role_key=analyst",
+  qa: "/api/v1/me/agentic-coding/profile?role_key=qa",
+} as const;
+
 export function ConnectedAgenticCodingProfile() {
   const [role, setRole] = useState<Role>("developer");
   const profile = useQuery({
     queryKey: ["agentic-coding-profile", role],
-    queryFn: () => apiRequest<ServerProfile>(`/api/v1/me/agentic-coding/profile?role_key=${role}`),
+    queryFn: () => apiRequest<ServerProfile>(AGENTIC_PROFILE_PATHS[role]),
   });
   return <AgenticCodingProfile activeRole={role} onRoleChange={setRole} serverProfile={profile.data}
     serverStatus={profile.isPending ? "loading" : profile.isError ? "unavailable" : "ready"} />;
