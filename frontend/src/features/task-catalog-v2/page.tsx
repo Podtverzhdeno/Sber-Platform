@@ -574,52 +574,42 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
           <div><strong>{portfolioCount}</strong><b>с потенциалом портфолио</b><small>По опубликованным выгодам · из {items.length}</small></div>
         </div>
       </div>
-      <form
-        className="catalog-v2-filters"
-        aria-label="Фильтры каталога"
-        onSubmit={(event) => {
-          event.preventDefault();
-          updateParams({ q: searchInput.trim() }, true);
-        }}
-      >
-        <div className="catalog-v2-toolbar">
-          <label className="catalog-v2-search-field">Поиск
-            <input
-              value={searchInput}
-              onChange={(event) => { setSearchInput(event.target.value); }}
-              placeholder="Название задачи, результат или навык"
-            />
-          </label>
-          <button type="submit" className="catalog-v2-primary catalog-v2-find">Найти</button>
-          <button
-            type="button"
-            className="catalog-v2-filter-expander"
-            aria-expanded={advancedFiltersOpen}
-            aria-controls="catalog-v2-advanced-filters"
-            onClick={() => { setAdvancedFiltersOpen((value) => !value); }}
-          >
-            {advancedFiltersOpen ? "Скрыть фильтры" : "Все фильтры"}
-            {activeFilterChips.length > 0 ? ` · ${String(activeFilterChips.length)}` : ""}
-          </button>
-          <div className="catalog-v2-layout" role="group" aria-label="Вид каталога">
-            <button type="button" aria-pressed={layout === "cards"} onClick={() => { changeLayout("cards"); }}>Карточки</button>
-            <button type="button" aria-pressed={layout === "list"} onClick={() => { changeLayout("list"); }}>Список</button>
+      <form className="catalog-v2-filters" aria-label="Фильтры каталога"
+        onSubmit={(event) => { event.preventDefault(); updateParams({ q: searchInput.trim() }, true); }}>
+        <div className="catalog-v2-filter-rail">
+          <button type="button" className="catalog-v2-all-tasks" onClick={() => {
+            updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, sort: null }, true);
+          }}><SlidersHorizontal size={15} aria-hidden="true" /> Все задачи ({totals?.total_found ?? 0})</button>
+          <div id="catalog-v2-advanced-filters" className="catalog-v2-advanced-filters" data-open={advancedFiltersOpen}>
+            <label>Направление<input value={filters.direction} onChange={(event) => { updateParams({ direction: event.target.value }, true); }} placeholder="Направление" /></label>
+            <label>Навык<input value={filters.competency} onChange={(event) => { updateParams({ competency: event.target.value }, true); }} placeholder="Навыки" /></label>
+            <label>Сложность<select value={filters.difficulty} onChange={(event) => { updateParams({ difficulty: event.target.value }, true); }}><option value="">Сложность</option><option value="beginner">Начальная</option><option value="intermediate">Средняя</option><option value="advanced">Продвинутая</option></select></label>
+            <label>Заказчик<input value={filters.customer} onChange={(event) => { updateParams({ customer: event.target.value }, true); }} placeholder="Компании" /></label>
+            <label>Формат<select value={filters.workFormat} onChange={(event) => { updateParams({ work_format: event.target.value }, true); }}><option value="">Формат</option><option value="remote">Удалённо</option><option value="hybrid">Гибрид</option><option value="onsite">На площадке</option></select></label>
+            <label>Срок<select value={filters.timeframe} onChange={(event) => { updateParams({ timeframe: event.target.value }, true); }}><option value="">Сроки</option><option value="7d">Ближайшие 7 дней</option><option value="30d">Ближайшие 30 дней</option><option value="90d">Ближайшие 90 дней</option></select></label>
+            <label>Сортировка<select value={filters.sort} onChange={(event) => { updateParams({ sort: event.target.value }, true); }}><option value="match-default">По соответствию</option><option value="deadline">По сроку</option><option value="duration">По длительности</option><option value="newest">Сначала новые</option><option value="skill-growth">По соответствию росту</option></select></label>
           </div>
+          <div className="catalog-v2-layout" role="group" aria-label="Вид каталога">
+            <button type="button" aria-pressed={layout === "cards"} onClick={() => { changeLayout("cards"); }}><LayoutGrid size={15} aria-hidden="true" /> Карточки</button>
+            <button type="button" aria-pressed={layout === "list"} onClick={() => { changeLayout("list"); }}><List size={15} aria-hidden="true" /> Список</button>
+          </div>
+          <button type="button" className="catalog-v2-filter-expander" aria-expanded={advancedFiltersOpen}
+            aria-controls="catalog-v2-advanced-filters catalog-v2-secondary-filters"
+            onClick={() => { setAdvancedFiltersOpen((value) => !value); }}>
+            <Search size={15} aria-hidden="true" /> {advancedFiltersOpen ? "Скрыть фильтры" : "Все фильтры"}
+          </button>
         </div>
-        <div
-          id="catalog-v2-advanced-filters"
-          className="catalog-v2-advanced-filters"
-          data-open={advancedFiltersOpen}
-        >
-          <label>Навык<input value={filters.competency} onChange={(event) => { updateParams({ competency: event.target.value }, true); }} placeholder="Например, python" /></label>
-          <label>Направление<input value={filters.direction} onChange={(event) => { updateParams({ direction: event.target.value }, true); }} placeholder="Ключ траектории" /></label>
-          <label>Заказчик<input value={filters.customer} onChange={(event) => { updateParams({ customer: event.target.value }, true); }} placeholder="Название заказчика" /></label>
-          <label>Сложность<select value={filters.difficulty} onChange={(event) => { updateParams({ difficulty: event.target.value }, true); }}><option value="">Любая</option><option value="beginner">Начальная</option><option value="intermediate">Средняя</option><option value="advanced">Продвинутая</option></select></label>
-          <label>Формат<select value={filters.workFormat} onChange={(event) => { updateParams({ work_format: event.target.value }, true); }}><option value="">Любой</option><option value="remote">Удалённо</option><option value="hybrid">Гибрид</option><option value="onsite">На площадке</option></select></label>
-          <label>Срок<select value={filters.timeframe} onChange={(event) => { updateParams({ timeframe: event.target.value }, true); }}><option value="">Любой</option><option value="7d">Ближайшие 7 дней</option><option value="30d">Ближайшие 30 дней</option><option value="90d">Ближайшие 90 дней</option></select></label>
-          <label>Сортировка<select value={filters.sort} onChange={(event) => { updateParams({ sort: event.target.value }, true); }}><option value="match-default">По релевантности</option><option value="deadline">По сроку</option><option value="duration">По длительности</option><option value="newest">Сначала новые</option><option value="skill-growth">По соответствию росту</option></select></label>
-          <label className="catalog-v2-saved-filter"><input type="checkbox" checked={filters.saved} onChange={(event) => { updateParams({ saved: event.target.checked ? "true" : null }, true); }} />Только сохранённые</label>
-          <button type="button" className="catalog-v2-reset" onClick={() => { updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, sort: null }, true); }}>Сбросить фильтры</button>
+        <div id="catalog-v2-secondary-filters" className="catalog-v2-secondary-filters" data-open={advancedFiltersOpen}>
+          <label className="catalog-v2-search-field">Поиск<input value={searchInput}
+            onChange={(event) => { setSearchInput(event.target.value); }}
+            placeholder="Название задачи, результат или навык" /></label>
+          <button type="submit" className="catalog-v2-primary catalog-v2-find">Найти</button>
+          <label className="catalog-v2-saved-filter"><input type="checkbox" checked={filters.saved} onChange={(event) => {
+            updateParams({ saved: event.target.checked ? "true" : null }, true);
+          }} />Только сохранённые</label>
+          <button type="button" className="catalog-v2-reset" onClick={() => {
+            updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, sort: null }, true);
+          }}>Сбросить фильтры</button>
         </div>
       </form>
       {activeFilterChips.length > 0 ? (
