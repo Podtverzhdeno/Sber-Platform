@@ -98,6 +98,7 @@ export function dialogDraftText(drafts: DialogDrafts, channelId: string): string
 
 const channelKindLabels: Record<string, string> = {
   personal: "Личный чат",
+  community: "Сообщество",
   task_team: "Команда задачи",
   customer: "Канал заказчика",
   operator_case: "Служебный канал",
@@ -119,11 +120,13 @@ export function participantRoleLabel(role: string): string {
 }
 
 export function dialogTitle(channel: ApiChannelView, viewerId: string | null): string {
-  if (channel.title) return channel.title;
   const peers = channel.participants
     .filter((person) => person.id !== viewerId && person.display_name)
     .map((person) => person.display_name);
-  return peers.length ? peers.join(", ") : "Личный чат";
+  if (channel.kind === "personal" && viewerId && channel.participants.some((person) => person.id === viewerId) && peers.length) {
+    return peers.join(", ");
+  }
+  return channel.title || (peers.length ? peers.join(", ") : "Личный чат");
 }
 
 export function dialogTimeLabel(iso: string, now: Date = new Date()): string {
@@ -192,7 +195,7 @@ export function deriveDialogRow(input: {
     initial: (dialogTitle(channel, viewerId).trim()[0] ?? "к").toUpperCase(),
     lastSender,
     preview: draft ? singleLine(draft) : last ? singleLine(last.body) : null,
-    timeLabel: last ? dialogTimeLabel(last.created_at, input.now) : "",
+    timeLabel: last ? channel.id.startsWith("reference:") ? last.created_at.slice(11, 16) : dialogTimeLabel(last.created_at, input.now) : "",
     timeIso: last ? last.created_at : channel.created_at,
     unread: channel.unread,
     muted: channel.muted,
@@ -223,9 +226,20 @@ export function deriveDialogRows(input: {
   now?: Date;
 }): DialogRow[] {
   const rows = input.channels
-    .filter((channel) => channel.status === "active")
+    .filter((channel) => channel.status === "active" || (channel.status === "preview" && channel.id.startsWith("reference:")))
     .map((channel) => deriveDialogRow({ ...input, channel }));
+  const approvedOrder = ["mentor", "roman", "proto", "mayaki", "aidev", "sberkot", "zlata", "news", "curator", "taskteam", "common", "grants", "school21"];
   return rows.sort((a, b) => {
+    const aPreview = a.channel.id.startsWith("reference:");
+    const bPreview = b.channel.id.startsWith("reference:");
+    if (aPreview && bPreview) {
+      if (a.channel.id === "reference:mayaki" && a.selected) return -1;
+      if (b.channel.id === "reference:mayaki" && b.selected) return 1;
+      const aIndex = approvedOrder.indexOf(a.channel.id.slice("reference:".length));
+      const bIndex = approvedOrder.indexOf(b.channel.id.slice("reference:".length));
+      if (aIndex !== bIndex) return aIndex - bIndex;
+    }
+    if (aPreview !== bPreview) return aPreview ? 1 : -1;
     if (a.archived !== b.archived) return a.archived ? 1 : -1;
     if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
     if (a.mention !== b.mention) return a.mention ? -1 : 1;
