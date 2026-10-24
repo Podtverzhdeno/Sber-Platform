@@ -143,7 +143,7 @@ test("real seeded API preserves card/list order and opens the canonical assigned
   await search.fill("no-such-real-catalog-task-000000");
   await search.press("Enter");
   await expect(page.getByRole("heading", { name: "Подходящих задач не найдено" })).toBeVisible();
-  await page.getByRole("button", { name: "Сбросить фильтры" }).click();
+  await page.locator(".catalog-v2-empty").getByRole("button", { name: "Сбросить фильтры" }).click();
   await expect(page.locator('[role="listitem"]')).toHaveCount(expectedTitles.length);
 
   const planned = catalog.items.find((item) => item.stage_plan.stages.length > 0);
@@ -240,7 +240,7 @@ test("real seeded API submits one application and replays its idempotency key", 
 
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
-  await expect(dialog.locator(".eyebrow")).toContainText(`версия ${String(candidate.terms_version)}`);
+  await expect(dialog.locator(".catalog-v2-conditions-header p")).toContainText(`версия условий ${String(candidate.terms_version)}`);
   await expect(dialog.getByRole("heading", { name: "Критерии приёмки" })).toBeVisible();
   for (const criterion of terms.acceptance_criteria) {
     await expect(dialog.getByText(criterion, { exact: true })).toBeVisible();
@@ -419,7 +419,7 @@ test("real server requires fresh consent after v3 to v4 terms drift", async ({ p
     await expect(page.locator('[role="listitem"]')).toHaveCount(1);
     await card.getByRole("button", { name: "Условия и отклик" }).click();
     const dialog = page.getByRole("dialog");
-    await expect(dialog.locator(".eyebrow")).toContainText("версия 3");
+    await expect(dialog.locator(".catalog-v2-conditions-header p")).toContainText("версия условий 3");
     await dialog.getByRole("checkbox").check();
 
     await reviseTerms(customer, candidate.task_id, customerDetail.terms.deadline_at, 4);
@@ -427,7 +427,7 @@ test("real server requires fresh consent after v3 to v4 terms drift", async ({ p
     await expect(dialog.locator(".catalog-v2-terms-changed")).toContainText(
       "Версия 3 больше не действует",
     );
-    await expect(dialog.locator(".eyebrow")).toContainText("версия 4");
+    await expect(dialog.locator(".catalog-v2-conditions-header p")).toContainText("версия условий 4");
     await expect(dialog.getByRole("checkbox")).not.toBeChecked();
     expect(await applicationIds(customer, candidate.task_id)).toEqual(beforeIds);
 
