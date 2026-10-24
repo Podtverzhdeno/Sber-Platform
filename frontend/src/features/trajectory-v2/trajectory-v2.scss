@@ -703,3 +703,100 @@
 .trajectory-v2-drawer-footer>button:last-child{background:#09dbdf;border-color:#0aece3;color:#042632;font-weight:800}
 .trajectory-v2-drawer-footer>p{font-size:11px;color:#a8bed2}
 @media(max-width:560px){.trajectory-v2-drawer{border-radius:0;padding:20px 15px}.trajectory-v2-drawer-heading h2{font-size:22px}.trajectory-v2-drawer-metrics{grid-template-columns:1fr 1fr}}
+
+
+/* Layout guard: the page must have a full-width heading and a shared two-column content grid. */
+.workspace-content .trajectory-v2 {
+  display:block;
+  box-sizing:border-box;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  margin:0;
+  padding:0 0 32px;
+}
+.workspace-content .trajectory-v2-heading {
+  display:flex;
+  width:100%;
+  min-height:0;
+  margin:0 0 20px;
+  padding:0;
+  align-items:flex-start;
+  justify-content:space-between;
+}
+.workspace-content .trajectory-v2-heading h2 {margin:0 0 6px;font-size:32px;line-height:1.1}
+.workspace-content .trajectory-v2-heading small {display:none}
+.workspace-content .trajectory-v2-columns {
+  display:grid;
+  width:100%;
+  min-width:0;
+  grid-template-columns:minmax(0,1fr) minmax(290px,364px);
+  gap:14px 15px;
+  align-items:start;
+}
+.workspace-content .trajectory-v2-roles {
+  grid-column:1/-1;
+  grid-row:1;
+  width:100%;
+  min-width:0;
+}
+.workspace-content .trajectory-v2-roles ul {
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:9px;
+  width:100%;
+  min-width:0;
+  margin:0;
+  padding:0;
+}
+.workspace-content .trajectory-v2-detail {
+  grid-column:1;
+  grid-row:2;
+  min-width:0;
+  width:100%;
+}
+.workspace-content .trajectory-v2-reference-sidebar {
+  grid-column:2;
+  grid-row:2;
+  display:grid;
+  width:100%;
+  min-width:0;
+  gap:13px;
+  align-self:start;
+}
+.workspace-content .trajectory-v2-role-card {
+  box-sizing:border-box;
+  width:100%;
+  min-width:0;
+  min-height:145px;
+  height:100%;
+  padding:12px 6px;
+  gap:8px;
+  justify-items:center;
+}
+.workspace-content .trajectory-v2-role-detail {box-sizing:border-box;width:100%;min-width:0}
+.workspace-content .trajectory-v2-stage-path {
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  width:100%;
+  min-width:0;
+  gap:0;
+}
+.workspace-content .trajectory-v2-stage-path>li {min-width:0}
+.workspace-content .trajectory-v2-grade-ring {box-sizing:border-box}
+@media(max-width:1140px){
+  .workspace-content .trajectory-v2-columns {grid-template-columns:minmax(0,1fr)}
+  .workspace-content .trajectory-v2-roles {grid-column:1}
+  .workspace-content .trajectory-v2-detail {grid-column:1;grid-row:2}
+  .workspace-content .trajectory-v2-reference-sidebar {grid-column:1;grid-row:3;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .workspace-content .trajectory-v2-passport-panel {grid-column:1/-1}
+  .workspace-content .trajectory-v2-roles ul {grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:690px){
+  .workspace-content .trajectory-v2-roles ul {display:flex;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 12px}
+  .workspace-content .trajectory-v2-role-card {min-width:156px;scroll-snap-align:start}
+  .workspace-content .trajectory-v2-stage-path {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px 0}
+  .workspace-content .trajectory-v2-reference-sidebar {grid-template-columns:1fr}
+  .workspace-content .trajectory-v2-passport-panel {grid-column:1}
+  .workspace-content .trajectory-v2-heading h2 {font-size:27px}
+}
