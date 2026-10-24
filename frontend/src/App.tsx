@@ -735,26 +735,8 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
         : ("pending" as const);
   return (
     <div className="dashboard-shell participant-home" data-reference="R-PAR-01">
-      <header className="dashboard-heading">
-        <div>
-          <p className="eyebrow">Участник · персональный маршрут</p>
-          <h1 id="workspace-title">
-            Добро пожаловать, {actor.display_name.split(" ")[0]}!
-          </h1>
-          <p className="lead">
-            Следующий шаг связан с реальным результатом: курс готовит к проекту,
-            проект подтверждает опыт, а проверенный опыт усиливает резюме.
-          </p>
-        </div>
-        <button
-          type="button"
-          className="date-chip date-chip--button"
-          onClick={openAgenda}
-          aria-haspopup="dialog"
-        >
-          Сегодня
-        </button>
-        {searchParams.get("v2") === "1" && (
+      {searchParams.get("v2") === "1" ? (
+        <div className="home-v2-preview-nav" aria-label="Режим главной">
           <button
             type="button"
             className="date-chip date-chip--button"
@@ -766,8 +748,27 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
           >
             Классическая главная
           </button>
-        )}
-      </header>
+        </div>
+      ) : (
+        <header className="dashboard-heading">
+          <div>
+            <p className="eyebrow">Участник · персональный маршрут</p>
+            <h1 id="workspace-title">Добро пожаловать, {actor.display_name.split(" ")[0]}!</h1>
+            <p className="lead">
+              Следующий шаг связан с реальным результатом: курс готовит к проекту,
+              проект подтверждает опыт, а проверенный опыт усиливает резюме.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="date-chip date-chip--button"
+            onClick={openAgenda}
+            aria-haspopup="dialog"
+          >
+            Сегодня
+          </button>
+        </header>
+      )}
       {searchParams.get("v2") === "1" ? (
         <ParticipantHomeV2
           onOpenTarget={(kind, key) => {
