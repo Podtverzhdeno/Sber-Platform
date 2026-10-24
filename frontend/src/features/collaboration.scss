@@ -2153,3 +2153,137 @@
     border-radius: 12px;
   }
 }
+
+
+/* Screenshot fidelity pass for approved 01.png and 03.png.
+ * The static references show more history per viewport and shorter inspector
+ * sections than the previous React composition. Keep mobile dimensions intact. */
+@media (min-width: 1381px) {
+  .page-shell:has(.sberchat-shell) .sberchat-shell .messenger-shell {
+    grid-template-columns: clamp(367px, calc(12vw + 193px), 395px) minmax(0, 1fr) clamp(341px, calc(7vw + 240px), 357px);
+  }
+  .sberchat-shell .msg-chat__header {
+    min-height: 68px;
+    height: 68px;
+    padding: 0 15px;
+  }
+  .sberchat-shell .msg-chat__header-title strong {
+    font-size: 15px;
+  }
+  .sberchat-shell .msg-chat__header-title small {
+    font-size: 12px;
+    margin-top: 2px;
+  }
+  .sberchat-shell .msg-chat__avatar {
+    width: 49px;
+    height: 49px;
+    flex-basis: 49px;
+  }
+  .sberchat-shell .msg-chat__pinned--approved {
+    margin: 4px 12px 0;
+    padding: 7px 10px;
+    min-height: 54px;
+    border-radius: 9px;
+    font-size: 12px;
+  }
+  .sberchat-shell .msg-chat__preview-notice {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+  .sberchat-shell .msg-chat__scroll {
+    padding: 5px 12px 10px;
+  }
+  .sberchat-shell .msg-chat__rows {
+    gap: 9px;
+  }
+  .sberchat-shell .msg-chat__group {
+    max-width: min(69%, 440px);
+    gap: 3px;
+  }
+  .sberchat-shell .msg-chat__group.incoming {
+    padding-left: 49px;
+  }
+  .sberchat-shell .msg-chat__group-avatar {
+    width: 37px;
+    height: 37px;
+    font-size: 13px;
+  }
+  .sberchat-shell .msg-chat__group-author {
+    font-size: 12px;
+    margin: 0 6px 2px;
+    padding: 0;
+  }
+  .sberchat-shell .msg-chat__bubble {
+    padding: 9px 11px;
+    border-radius: 13px;
+    gap: 5px;
+  }
+  .sberchat-shell .msg-chat__bubble-body {
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .sberchat-shell .msg-chat__meta {
+    font-size: 11px;
+    line-height: 1.2;
+  }
+  .sberchat-shell .msg-chat__divider {
+    padding: 5px 13px;
+    font-size: 11px;
+  }
+  .sberchat-shell .msg-context__heading {
+    min-height: 52px;
+    height: 52px;
+    padding: 0 15px;
+  }
+  .sberchat-shell .msg-context__eyebrow {
+    font-size: 14px;
+    text-transform: none;
+  }
+  .sberchat-shell .msg-context__profile {
+    padding: 10px 14px 7px;
+  }
+  .sberchat-shell .msg-context__avatar {
+    width: 48px;
+    height: 48px;
+    flex-basis: 48px;
+  }
+  .sberchat-shell .msg-context__title {
+    font-size: 15px;
+  }
+  .sberchat-shell .msg-context__description {
+    margin: 10px 14px 10px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .sberchat-shell .msg-context__about-heading,
+  .sberchat-shell .msg-context__section-title {
+    font-size: 13px;
+  }
+  .sberchat-shell .msg-context__facts {
+    padding-inline: 14px;
+  }
+  .sberchat-shell .msg-context__facts > div {
+    min-height: 28px;
+    padding: 3px 0;
+  }
+  .sberchat-shell .msg-context__facts dt,
+  .sberchat-shell .msg-context__facts dd {
+    font-size: 12px;
+  }
+  .sberchat-shell .msg-context__section {
+    padding: 9px 14px;
+  }
+  .sberchat-shell .msg-context__intro-actions {
+    margin: 0 14px 9px;
+  }
+  .sberchat-shell .msg-context__intro-actions button {
+    height: 35px;
+  }
+}

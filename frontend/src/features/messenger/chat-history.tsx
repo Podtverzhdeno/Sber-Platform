@@ -467,7 +467,7 @@ export function ChatHistory({
                      <span className="msg-chat__group-avatar" aria-hidden="true">{row.authorName?.trim().charAt(0).toUpperCase() || "?"}</span>
                    )}
                    <span className="msg-chat__group-author" aria-hidden="true">
-                    {row.authorId === viewerId ? "Вы" : row.authorName}
+                    {row.authorId === viewerId ? (isReferenceChannel(channel?.id) ? "Алекс Речной" : "Вы") : row.authorName}
                     {channel?.id === "reference:mayaki" && (row.authorName === "Анна Ковалёва" || row.authorName === "Иван Петров") && (
                       <span className="msg-chat__reference-role">{row.authorName === "Анна Ковалёва" ? "Администратор" : "Модератор"}</span>
                     )}
