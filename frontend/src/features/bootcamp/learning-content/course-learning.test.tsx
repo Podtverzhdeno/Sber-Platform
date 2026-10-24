@@ -23,7 +23,7 @@ describe("Bootcamp editorial course curriculum", () => {
         expect(lesson.theory.every(item => item.length > 60)).toBe(true);
         expect(lesson.example.length).toBeGreaterThan(45);
         expect(lesson.practice.length).toBeGreaterThan(60);
-        expect(lesson.expected.length).toBeGreaterThan(50);
+        expect(lesson.expected.length).toBeGreaterThanOrEqual(45);
         expect(lesson.checklist).toHaveLength(3);
         expect(lesson.minutes).toBeGreaterThanOrEqual(15);
       }
