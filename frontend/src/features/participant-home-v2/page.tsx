@@ -220,7 +220,7 @@ export function ParticipantHomeV2Body(props: {
                 <p className="home-v2-drawer-eyebrow">Профессиональный рост</p><h2>Карта уровней</h2>
                 <p>Путь развития по выбранной роли. Грейды отображаются только после публикации их критериев.</p>
                 {grade.state === "not_evaluable" ? (
-                  <section className="home-v2-grade-unavailable" role="status"><LockKeyhole size={25}/><strong>Каталог грейдов пока не опубликован</strong><span>Поэтому мы не показываем фиктивные грейды 5–6, проценты готовности или достижения.</span></section>
+                  <section className="home-v2-grade-unavailable" role="status"><LockKeyhole size={25}/><strong>Каталог грейдов пока не опубликован</strong><span>После согласования модели здесь появятся ступени, подтверждённые результаты и прогресс развития.</span></section>
                 ) : <div className="home-v2-grade-timeline">
                   {grade.target_grade !== null && <button type="button" onClick={() => { setPanel("grade-details"); }}><span className="home-v2-grade-dot target"></span><strong>Грейд {grade.target_grade}</strong><small>Следующая цель</small><ChevronRight size={18}/></button>}
                   {grade.current_grade !== null && <button type="button" onClick={() => { setPanel("grade-details"); }}><span className="home-v2-grade-dot current"></span><strong>Грейд {grade.current_grade}</strong><small>Текущий</small><ChevronRight size={18}/></button>}
@@ -231,7 +231,7 @@ export function ParticipantHomeV2Body(props: {
               <div className="home-v2-drawer-body">
                 <button className="home-v2-drawer-back" type="button" onClick={() => { setPanel("levels"); }}>← Все грейды</button>
                 <div className="home-v2-grade-detail-hero"><span className="home-v2-drawer-eyebrow">Следующий уровень</span><h2>{grade.target_grade === null ? "Требования ещё не опубликованы" : `Грейд ${grade.target_grade}`}</h2><p>{activeRole?.title ?? "Траектория развития"}</p></div>
-                {grade.state === "not_evaluable" ? <section className="home-v2-grade-unavailable" role="status"><LockKeyhole size={25}/><strong>Оценка грейда недоступна</strong><span>Данные о готовности, компетенциях и критериях не утверждены. Демонстрационные 88% здесь намеренно не используются.</span></section> : (
+                {grade.state === "not_evaluable" ? <section className="home-v2-grade-unavailable" role="status"><LockKeyhole size={25}/><strong>Оценка грейда недоступна</strong><span>После утверждения модели будут доступны требования к переходу, компетенции и прогресс.</span></section> : (
                   <section className="home-v2-grade-progress"><Target size={24}/><div><strong>Готовность к следующему уровню</strong><span>{grade.readiness_percent === null ? "Требует проверки" : `${String(grade.readiness_percent)}% по действующей политике`}</span>{grade.readiness_percent !== null && <div className="home-v2-grade-track"><span style={{ width: `${String(grade.readiness_percent)}%` }}/></div>}</div></section>
                 )}
                 <h3>Что нужно для перехода</h3>
@@ -289,7 +289,7 @@ export function GradeSummaryPanel(props: {
         <div className="home-v2-next-grade-name"><span>{valid && grade.target_grade !== null ? grade.target_grade : "—"}</span><strong>{valid && grade.target_grade !== null ? `Грейд ${grade.target_grade}` : "Следующий уровень"}</strong><ChevronRight size={17}/></div>
         <p>{props.roleTitle ?? "Выберите профессиональную роль"}</p>
       </button>
-      {!valid && <p className="home-v2-grade-disclaimer" role="status">Грейд пока не вычисляется: каталог грейдов не опубликован{grade.reason ? ` (${grade.reason})` : ""}.</p>}
+      {!valid && <p className="home-v2-grade-disclaimer" role="status">Карьерные грейды ещё не опубликованы. Прогресс появится после утверждения требований.</p>}
     </section>
   );
 }
