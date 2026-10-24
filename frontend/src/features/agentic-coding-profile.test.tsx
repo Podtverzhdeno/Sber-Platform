@@ -1,41 +1,42 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { AgenticCodingProfile } from "./agentic-coding-profile";
-import type { AgenticServerProfile } from "./agentic-coding-profile";
+import { AgenticCodingProfile, type AgenticServerProfile } from "./agentic-coding-profile";
 
 describe("Agentic Coding source-derived profile", () => {
-  it("renders developer, analyst and QA target levels exactly as in source map", () => {
+  it("renders exact role targets without treating an unknown value as zero", () => {
     render(<AgenticCodingProfile />);
     const panel = screen.getByTestId("agentic-profile");
     fireEvent.click(within(panel).getByRole("button", { name: "Таблица" }));
     const checkTargets = (expected: string[]) => {
       const rows = within(panel).getByRole("table").querySelectorAll("tbody tr");
-      expect(Array.from(rows, (row) => row.querySelector("td:last-child")?.textContent)).toEqual(expected);
+      expect(Array.from(rows, (row) => row.querySelector("td:nth-child(3)")?.textContent)).toEqual(expected);
     };
-    checkTargets(["3", "4", "3", "2", "3", "2"]);
+    checkTargets(["3/4", "4/4", "3/4", "2/4", "3/4", "2/4"]);
     fireEvent.change(within(panel).getByLabelText("Профессиональная группа"), { target: { value: "analyst" } });
-    checkTargets(["3", "Не задана", "3", "2", "2", "2"]);
+    checkTargets(["3/4", "Не задана", "3/4", "2/4", "2/4", "2/4"]);
+    expect(within(panel).getByText("5 требований")).toBeInTheDocument();
     fireEvent.change(within(panel).getByLabelText("Профессиональная группа"), { target: { value: "qa" } });
-    checkTargets(["3", "2", "2", "2", "2", "2"]);
+    checkTargets(["3/4", "2/4", "2/4", "2/4", "2/4", "2/4"]);
+    expect(within(panel).getByText("6 требований")).toBeInTheDocument();
   });
-  it("shows only one selected role; never invents current values or L1 certificates", () => {
+
+  it("shows a six-skill matrix first and never invents measured skills or an L1 badge", () => {
     render(<AgenticCodingProfile />);
     const panel = screen.getByTestId("agentic-profile");
-    expect(within(panel).getByRole("heading", { name: "Разработчик · 6 навыков" })).toBeInTheDocument();
-    expect(within(panel).getByRole("img")).toHaveAccessibleName(/подтверждённых цифровых следов пока нет/);
-    expect(within(panel).getByText("Учебная оценка пока не рассчитана")).toBeInTheDocument();
-    expect(within(panel).queryByText("L1 подтверждён")).not.toBeInTheDocument();
-    expect(within(panel).getAllByText("Постановка задач агенту")).toHaveLength(1);
-    fireEvent.change(within(panel).getByLabelText("Профессиональная группа"), { target: { value: "analyst" } });
-    expect(within(panel).getByRole("heading", { name: "Аналитик · 6 навыков" })).toBeInTheDocument();
-    expect(within(panel).queryByRole("heading", { name: "Разработчик · 6 навыков" })).not.toBeInTheDocument();
-    expect(within(panel).getByText(/2 положения методологии требуют согласования/)).toBeInTheDocument();
+    expect(within(panel).getByRole("heading", { name: "Матрица компетенций" })).toBeInTheDocument();
+    expect(within(panel).getAllByTestId(/^agentic-skill-/)).toHaveLength(6);
+    expect(within(panel).getByRole("img")).toHaveAccessibleName(/Подтверждённые уровни отсутствуют/);
+    expect(within(panel).getByText(/цифровых следов не подключены/i)).toBeInTheDocument();
+    expect(within(panel).getByText(/Официальный бейдж L1 не выдаётся/)).toBeInTheDocument();
+    expect(within(panel).queryByText(/L1 подтверждён/)).not.toBeInTheDocument();
   });
-  it("switches between the same canonical values in radar, bars and table", () => {
+
+  it("switches radar, bars and table while preserving six required axes", () => {
     render(<AgenticCodingProfile />);
     const panel = screen.getByTestId("agentic-profile");
-    fireEvent.click(within(panel).getByRole("button", { name: "Гистограмма" }));
-    expect(within(panel).getByRole("button", { name: "Гистограмма" })).toHaveAttribute("aria-pressed", "true");
+    expect(within(panel).getByLabelText("Значения целевого профиля")).toHaveTextContent("Постановка задач агенту");
+    fireEvent.click(within(panel).getByRole("button", { name: "Полосы" }));
+    expect(within(panel).getByRole("button", { name: "Полосы" })).toHaveAttribute("aria-pressed", "true");
     expect(within(panel).getByLabelText("Целевые уровни по навыкам").children).toHaveLength(6);
     fireEvent.click(within(panel).getByRole("button", { name: "Таблица" }));
     const table = within(panel).getByRole("table");
@@ -44,67 +45,120 @@ describe("Agentic Coding source-derived profile", () => {
     fireEvent.click(within(panel).getByRole("button", { name: "Циклограмма" }));
     expect(within(panel).getByRole("img")).toBeInTheDocument();
   });
-  it("renders green contour only from verified server snapshot and avoids role leakage", () => {
+
+  it("opens a keyboard-closable skills inspector with level anchors and trace examples", () => {
+    render(<AgenticCodingProfile />);
+    fireEvent.click(screen.getByTestId("agentic-skill-creating_skills"));
+    const dialog = screen.getByRole("dialog");
+    expect(within(dialog).getByRole("heading", { name: "Skills агента" })).toBeInTheDocument();
+    expect(within(dialog).getByText("Теория")).toBeInTheDocument();
+    expect(within(dialog).getByText("Применение")).toBeInTheDocument();
+    expect(within(dialog).getByText("Управление")).toBeInTheDocument();
+    expect(within(dialog).getByText("Экспертиза")).toBeInTheDocument();
+    expect(within(dialog).getByText("chat_window.skill.invoked")).toBeInTheDocument();
+    expect(within(dialog).getByText(/Примеры событий не означают/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/Проверенные события, исключённые сигналы/)).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+
+  it("renders the skill inspector above the application and traps keyboard focus", () => {
+    render(<AgenticCodingProfile />);
+    const trigger = screen.getByTestId("agentic-skill-prompting");
+    trigger.focus(); // Simulate opening the inspector via keyboard; click alone does not move focus in jsdom.
+    fireEvent.click(trigger);
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.closest(".agentic-profile")).toBeNull();
+    const close = within(dialog).getByRole("button", { name: "Закрыть" });
+    expect(document.activeElement).toBe(close);
+    fireEvent.keyDown(document, { key: "Tab", shiftKey: true });
+    const summaries = dialog.querySelectorAll("summary");
+    expect(document.activeElement).toBe(summaries[summaries.length - 1]);
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(document.activeElement).toBe(close);
+    fireEvent.click(close);
+    expect(document.activeElement).toBe(trigger);
+    expect(document.body.style.overflow).not.toBe("hidden");
+  });
+
+  it("restores focus to the radar SVG control after opening by Enter", () => {
+    render(<AgenticCodingProfile />);
+    const control = screen.getByTestId("agentic-target-radar").querySelector<SVGElement>(".agentic-radar-control");
+    if (control === null) throw new Error("Focusable radar control not found");
+    control.focus();
+    expect(document.activeElement).toBe(control);
+    fireEvent.keyDown(control, { key: "Enter" });
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(document.activeElement).toBe(control);
+  });
+
+  it("uses distinct prompting levels and telemetry for analysts and QA", () => {
+    render(<AgenticCodingProfile />);
+    fireEvent.change(screen.getByLabelText("Профессиональная группа"), { target: { value: "analyst" } });
+    fireEvent.click(screen.getByTestId("agentic-skill-prompting"));
+    expect(screen.getByRole("dialog")).toHaveTextContent("Назначает задачу агенту-аналитику");
+    expect(screen.getByRole("dialog")).toHaveTextContent("AI_PDLC_CORE_AGENT_DATALAKE_TELEMETRY");
+    fireEvent.keyDown(document, { key: "Escape" });
+    fireEvent.change(screen.getByLabelText("Профессиональная группа"), { target: { value: "qa" } });
+    fireEvent.click(screen.getByTestId("agentic-skill-prompting"));
+    expect(screen.getByRole("dialog")).toHaveTextContent("Назначает задачу агенту-тестировщику");
+    fireEvent.keyDown(document, { key: "Escape" });
+    fireEvent.change(screen.getByLabelText("Профессиональная группа"), { target: { value: "developer" } });
+    fireEvent.click(screen.getByTestId("agentic-skill-prompting"));
+    expect(screen.getByRole("dialog")).toHaveTextContent("Применяет AI-ассистента");
+  });
+
+  it("keeps soft skills outside Agentic L1 and makes certification conditions explicit", () => {
+    render(<AgenticCodingProfile />);
+    fireEvent.click(screen.getByRole("button", { name: "Гибкие" }));
+    expect(screen.getByText(/Отдельная модель оценки гибких навыков пока не подключена/)).toBeInTheDocument();
+    expect(screen.queryByTestId("agentic-target-radar")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Вернуться к AI-навыкам" }));
+    fireEvent.click(screen.getByRole("button", { name: /Посмотреть условия сертификации/ }));
+    expect(screen.getByText(/Курс и тест сами по себе не подтверждают/)).toBeInTheDocument();
+  });
+
+  it("renders qualified server levels in radar and table without leaking evidence across roles", () => {
     const source: AgenticServerProfile = {
-      role_key: "developer",
-      role_title: "Разработчик",
-      profile_scope: "impulse_learning",
-      scale_key: "agentic_coding_1_4",
-      framework_version: "agentic-coding-source-map-2026-10-23",
-      as_of: "2026-10-24T12:00:00Z",
-      known_evidence_count: 1,
-      certification_state: "not_evaluable",
-      certification_reason: "Only advisory profile",
+      role_key: "developer", role_title: "Разработчик", profile_scope: "impulse_learning",
+      scale_key: "agentic_coding_1_4", framework_version: "agentic-coding-source-map-2026-10-23",
+      as_of: "2026-10-24T12:00:00Z", known_evidence_count: 1,
+      certification_state: "not_evaluable", certification_reason: "Only advisory profile",
       data_origin: "verified_evidence",
       skills: [
         { key: "prompting", title: "Постановка задач агенту", target_level: 3, current_level: 2, evidence_count: 1, data_state: "verified", unresolved_methodology: false },
-        { key: "prompt_engineering", title: "Правила работы агента", target_level: 4, current_level: null, evidence_count: 0, data_state: "not_connected", unresolved_methodology: false },
-        { key: "context_management", title: "Контекст", target_level: 3, current_level: null, evidence_count: 0, data_state: "not_connected", unresolved_methodology: false },
-        { key: "tools_mcp", title: "Tools", target_level: 2, current_level: null, evidence_count: 0, data_state: "not_connected", unresolved_methodology: false },
-        { key: "creating_skills", title: "Skills", target_level: 3, current_level: null, evidence_count: 0, data_state: "not_connected", unresolved_methodology: true },
-        { key: "agents_team", title: "Agents", target_level: 2, current_level: null, evidence_count: 0, data_state: "not_connected", unresolved_methodology: false },
-      ],
+        { key: "prompt_engineering", title: "Правила работы агента", target_level: 4, current_level: null, evidence_count: 0, data_state: "not_connected", unresolved_methodology: false }
+      ]
     };
     const { container } = render(<AgenticCodingProfile serverProfile={source} serverStatus="ready" />);
-    const panel = screen.getByTestId("agentic-profile");
-    expect(within(panel).getByText("Проверенных цифровых следов: 1")).toBeInTheDocument();
     expect(container.querySelectorAll(".agentic-current-dot")).toHaveLength(1);
-    fireEvent.click(within(panel).getByRole("button", { name: "Таблица" }));
-    const rows = within(panel).getByRole("table").querySelectorAll("tbody tr");
+    expect(screen.getByText(/Подтверждённых навыков: 1/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Таблица" }));
+    const rows = screen.getByRole("table").querySelectorAll("tbody tr");
     expect(rows[0]?.querySelector("td")?.textContent).toBe("2");
-    fireEvent.change(within(panel).getByLabelText("Профессиональная группа"), { target: { value: "qa" } });
-    const otherRows = within(panel).getByRole("table").querySelectorAll("tbody tr");
-    expect(otherRows[0]?.querySelector("td")?.textContent).toBe("Нет данных");
+    fireEvent.change(screen.getByLabelText("Профессиональная группа"), { target: { value: "qa" } });
+    const other = screen.getByRole("table").querySelectorAll("tbody tr");
+    expect(other[0]?.querySelector("td")?.textContent).toBe("Нет данных");
   });
 
-  it("keeps explicitly undefined policy targets unknown instead of synthesizing an L1 threshold", () => {
+  it("does not replace explicit null policy target with hardcoded role goal", () => {
     const source: AgenticServerProfile = {
-      role_key: "developer",
-      role_title: "Разработчик",
-      profile_scope: "impulse_learning",
-      scale_key: "agentic_coding_1_4",
-      framework_version: "agentic-coding-source-map-2026-10-23",
-      as_of: "2026-10-24T12:00:00Z",
-      known_evidence_count: 0,
-      certification_state: "not_evaluable",
-      certification_reason: "policy not published",
+      role_key: "developer", role_title: "Разработчик", profile_scope: "impulse_learning",
+      scale_key: "agentic_coding_1_4", framework_version: "agentic-coding-source-map-2026-10-23",
+      as_of: "2026-10-24T12:00:00Z", known_evidence_count: 0,
+      certification_state: "not_evaluable", certification_reason: "No published policy",
       data_origin: "not_connected",
-      skills: [{
-        key: "prompt_engineering",
-        title: "Правила работы агента",
-        target_level: null,
-        current_level: null,
-        evidence_count: 0,
-        data_state: "not_connected",
-        unresolved_methodology: true,
-      }],
+      skills: [
+        { key: "prompt_engineering", title: "Правила работы агента", target_level: null, current_level: null, evidence_count: 0, data_state: "not_connected", unresolved_methodology: true }
+      ]
     };
     render(<AgenticCodingProfile serverProfile={source} serverStatus="ready" />);
-    const panel = screen.getByTestId("agentic-profile");
-    fireEvent.click(within(panel).getByRole("button", { name: "Таблица" }));
-    const rows = within(panel).getByRole("table").querySelectorAll("tbody tr");
-    expect(rows[1]?.querySelector("td:last-child")?.textContent).toBe("Не задана");
+    fireEvent.click(screen.getByRole("button", { name: "Таблица" }));
+    const rows = screen.getByRole("table").querySelectorAll("tbody tr");
+    expect(rows[1]?.querySelector("td:nth-child(3)")?.textContent).toBe("Не задана");
   });
-
 
 });
