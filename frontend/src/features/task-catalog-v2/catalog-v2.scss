@@ -2627,3 +2627,32 @@
   .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-support-section,
   .catalog-v2-detail .catalog-v2-detail-grid .catalog-v2-reasons-section { grid-column: 1 / -1; }
 }
+
+/* The approved desktop card keeps explanatory matching secondary to skills,
+   stages and actions. Reveal it on demand without hiding the accessible heading. */
+.catalog-v2-reasons-disclosure > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 42px;
+  cursor: pointer;
+  list-style: none;
+}
+.catalog-v2-reasons-disclosure > summary::-webkit-details-marker { display: none; }
+.catalog-v2-reasons-disclosure > summary h3 { margin: 0; font-size: 0.79rem; }
+.catalog-v2-reasons-disclosure[open] > summary svg { transform: rotate(180deg); }
+.catalog-v2-reasons-disclosure > ul { padding-top: 6px; }
+.catalog-v2-support-section {
+  min-height: 48px;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+}
+.catalog-v2-stage-content p {
+  max-height: 2.7em;
+  overflow: hidden;
+}
+@media (min-width: 1051px) {
+  .catalog-v2-detail .catalog-v2-detail-grid { row-gap: 6px; }
+  .catalog-v2-detail-footer { padding-top: 8px !important; }
+}
