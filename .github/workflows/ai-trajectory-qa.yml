@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "src/impulse/bootstrap/ai_role_catalog.py"
+      - "src/impulse/bootstrap/ai_curriculum_details.py"
+      - "tests/test_ai_curriculum_details.py"
       - "src/impulse/bootstrap/demo_seed.py"
       - "src/impulse/application/development.py"
       - "src/impulse/infrastructure/development_store.py"
@@ -34,10 +36,10 @@ jobs:
       - run: uv sync --frozen
       - name: Check Python formatting and lint
         run: |
-          uv run ruff format --check src/impulse/bootstrap/ai_role_catalog.py src/impulse/bootstrap/demo_seed.py src/impulse/application/development.py src/impulse/infrastructure/development_store.py src/impulse/api/v1/development.py
-          uv run ruff check src/impulse/bootstrap/ai_role_catalog.py src/impulse/bootstrap/demo_seed.py src/impulse/application/development.py src/impulse/infrastructure/development_store.py src/impulse/api/v1/development.py
+          uv run ruff format --check src/impulse/bootstrap/ai_role_catalog.py src/impulse/bootstrap/ai_curriculum_details.py src/impulse/bootstrap/demo_seed.py src/impulse/application/development.py src/impulse/infrastructure/development_store.py src/impulse/api/v1/development.py
+          uv run ruff check src/impulse/bootstrap/ai_role_catalog.py src/impulse/bootstrap/ai_curriculum_details.py src/impulse/bootstrap/demo_seed.py src/impulse/application/development.py src/impulse/infrastructure/development_store.py src/impulse/api/v1/development.py
       - name: Validate seven AI role catalog and graph
-        run: uv run pytest -q tests/test_demo_seed_graph.py tests/task_catalog/test_demo_seed.py tests/test_development_api.py
+        run: uv run pytest -q tests/test_demo_seed_graph.py tests/test_ai_curriculum_details.py tests/task_catalog/test_demo_seed.py tests/test_development_api.py
   types-and-lint:
     runs-on: ubuntu-24.04
     timeout-minutes: 17
