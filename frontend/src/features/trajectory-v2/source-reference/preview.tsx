@@ -69,7 +69,7 @@ function Preview() {
   return <div className="preview-app">
     <div className="preview-sidebar"><strong>◈ Impulse</strong><nav>Главная<div className="active">Моя траектория</div>Bootcamp<div>Задачи</div>Мои проекты<div>События</div>Сообщения<div>Портфолио</div>Достижения<div>Аналитика</div>AI Buddy<div>Настройки</div></nav></div>
     <div className="preview-main">
-      <div className="preview-topbar"><div>⌕　Поиск по задачам, навыкам, проектам, людям...</div><span>◯　Алексей Смирнов　 Участник</span></div>
+      <div className="preview-topbar"><div>⌕ Поиск по задачам, навыкам, проектам, людям...</div><span>◯ Алексей Смирнов  Участник</span></div>
       <main className="preview-workspace">
         <SourceTrajectoryLayout
           roles={roles} selectedRoleKey={roleKey} primaryRoleKey="product"
