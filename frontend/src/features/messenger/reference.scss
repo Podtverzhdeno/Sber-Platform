@@ -617,3 +617,19 @@
 @media(max-width:959px) {
   .messenger-page.sberchat-reference {height:calc(100dvh - 105px);}
 }
+
+
+/* Guard against late legacy grid declarations on the messenger wrapper:
+   fill the fixed-height reference canvas in every selected/empty state. */
+.messenger-page.sberchat-reference {
+  position:relative;
+  isolation:isolate;
+}
+.messenger-page.sberchat-reference > .messenger-shell {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  max-height:100%;
+  grid-template-rows:minmax(0,1fr);
+}
