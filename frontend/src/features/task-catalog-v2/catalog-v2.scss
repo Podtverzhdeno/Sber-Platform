@@ -3028,3 +3028,22 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
   .catalog-v2-table-task { grid-column: 1 / -1; }
   .catalog-v2-table-actions { grid-column: 1 / -1; justify-content: flex-end; }
 }
+
+
+/* Published customer benefit conditions must stay fully readable on mobile;
+   no ellipsis or min-content overflow may hide mandatory qualifications. */
+@media (max-width: 680px) {
+  .catalog-v2-benefits-section > ul > li > div {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .catalog-v2-benefits-section li p {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+    line-height: 1.4;
+  }
+}
