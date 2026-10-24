@@ -224,9 +224,20 @@ export function deriveDialogRows(input: {
   now?: Date;
 }): DialogRow[] {
   const rows = input.channels
-    .filter((channel) => channel.status === "active")
+    .filter((channel) => channel.status === "active" || (channel.status === "preview" && channel.id.startsWith("reference:")))
     .map((channel) => deriveDialogRow({ ...input, channel }));
+  const approvedOrder = ["mentor", "roman", "proto", "mayaki", "aidev", "sberkot", "zlata", "news", "curator", "taskteam", "common", "grants", "school21"];
   return rows.sort((a, b) => {
+    const aPreview = a.channel.id.startsWith("reference:");
+    const bPreview = b.channel.id.startsWith("reference:");
+    if (aPreview && bPreview) {
+      if (a.channel.id === "reference:mayaki" && a.selected) return -1;
+      if (b.channel.id === "reference:mayaki" && b.selected) return 1;
+      const aIndex = approvedOrder.indexOf(a.channel.id.slice("reference:".length));
+      const bIndex = approvedOrder.indexOf(b.channel.id.slice("reference:".length));
+      if (aIndex !== bIndex) return aIndex - bIndex;
+    }
+    if (aPreview !== bPreview) return aPreview ? 1 : -1;
     if (a.archived !== b.archived) return a.archived ? 1 : -1;
     if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
     if (a.mention !== b.mention) return a.mention ? -1 : 1;
