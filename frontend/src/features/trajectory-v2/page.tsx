@@ -602,15 +602,17 @@ export function RoleDetailPanel(props: {
     >
       <header className="trajectory-v2-detail-heading">
         <div className="trajectory-v2-detail-identity">
-          <span className="trajectory-v2-detail-icon" aria-hidden="true">▥</span>
+          <span className="trajectory-v2-detail-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round"><path d="M4 20V13m6 7V8m6 12V4m5 16v-10"/></svg></span>
           <div>
             <div className="trajectory-v2-detail-title">
               <h3>{role.title}</h3>
               {props.primary && <span className="trajectory-v2-role-badge">{PRIMARY_LABEL}</span>}
             </div>
-            <p>{role.attempt_number === null
-              ? "Познакомься с профессией и выбери направление развития."
-              : `Путь освоения роли · ${String(role.completed_milestones)} из ${String(role.total_milestones)} этапов пройдено`}</p>
+            <p>{role.title.toLowerCase().includes("продукт")
+              ? "Исследуй пользователей, находи точки роста и влияй на продуктовые решения через данные."
+              : role.attempt_number === null
+                ? "Познакомься с профессией и выбери направление развития."
+                : `Путь освоения роли · ${String(role.completed_milestones)} из ${String(role.total_milestones)} этапов пройдено`}</p>
           </div>
         </div>
         <div className="trajectory-v2-detail-controls">
