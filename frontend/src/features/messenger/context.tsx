@@ -1,4 +1,6 @@
 import type { ApiChannelView } from "./contracts";
+import { referenceDescriptions } from "./reference-fixtures";
+import { FileText, FolderOpen, Link2, Pin, Users } from "lucide-react";
 import {
   type ChannelWorkContextView,
   contextDateLabel,
@@ -12,6 +14,8 @@ export type ContextPanelProps = {
   channel: ApiChannelView;
   viewerId: string | null;
   workContext?: ChannelWorkContextView;
+  isReferencePreview?: boolean;
+  sharedFiles?: readonly string[];
   open: boolean;
   onOpenTask?: (taskId: string) => void;
   onOpenMeeting?: () => void;
@@ -24,6 +28,8 @@ export function ContextPanel({
   channel,
   viewerId,
   workContext = null,
+  isReferencePreview = false,
+  sharedFiles = [],
   open,
   onOpenTask,
   onOpenMeeting,
@@ -37,6 +43,8 @@ export function ContextPanel({
     ? channel.participants.find((person) => person.id === viewerId)?.role ?? null
     : null;
   const isChannelTeam = channel.task_id !== null;
+  const isCommunity = channel.kind === "community";
+  const description = isReferencePreview ? referenceDescriptions[channel.id] : undefined;
   return (
     <aside className={classes} id="messenger-context-panel" aria-label="Контекст диалога">
       {onClose !== undefined && (
@@ -64,6 +72,14 @@ export function ContextPanel({
           )}
         </div>
       </div>
+      {description && <p className="msg-context__description">{description}</p>}
+      {isCommunity && isReferencePreview && (
+        <div className="msg-context__intro-actions">
+          <button type="button" disabled title="Приглашения доступны после подключения API сообщества"><Users size={17} /> Пригласить участников</button>
+          <span>Демо</span>
+        </div>
+      )}
+      <h3 className="msg-context__about-heading">{isCommunity ? "О сообществе" : "О чате"}</h3>
       <dl className="msg-context__facts">
         <div>
           <dt>Непрочитанных</dt>
@@ -71,7 +87,7 @@ export function ContextPanel({
         </div>
         <div>
           <dt>Статус</dt>
-          <dd>{channel.status === "active" ? "активен" : "закрыт"}</dd>
+          <dd>{isReferencePreview ? "демо" : channel.status === "active" ? "активен" : "закрыт"}</dd>
         </div>
         <div>
           <dt>Участников</dt>
@@ -107,7 +123,44 @@ export function ContextPanel({
           </dl>
         )}
       </section>
-      <section className="msg-context__section" aria-label="Участники">
+      {isCommunity && isReferencePreview && (
+        <section className="msg-context__section ref-context-community" aria-label="Администраторы и модераторы">
+          <h3 className="msg-context__section-title">Администраторы и модераторы</h3>
+          <ul>
+            {["Анна Ковалева · Администратор", "Иван Петров · Модератор", "Мария Лебедева · Модератор"].map((name)=>(
+              <li key={name}><span className="ref-context-user-icon">{name.charAt(0)}</span><span>{name}</span></li>
+            ))}
+          </ul>
+        </section>
+      )}
+      <section className="msg-context__section ref-context-linked" aria-label="Связанные объекты">
+        <h3 className="msg-context__section-title">Связанные объекты</h3>
+        {workContext?.task_title ? (
+          <button type="button" onClick={()=> {if(channel.task_id) onOpenTask?.(channel.task_id);}} disabled={!channel.task_id || !onOpenTask}>
+            <FolderOpen size={17} aria-hidden="true" />
+            <span><small>Задача</small><strong>{workContext.task_title}</strong></span>
+          </button>
+        ) : isReferencePreview && channel.id === "reference:mentor" ? (
+          <div className="ref-context-linked__item"><FolderOpen size={17} /><span><small>Пример проекта</small><strong>Эксперимент с рекомендателем</strong></span></div>
+        ) : <p className="ref-context-placeholder-text">Связанные объекты пока отсутствуют</p>}
+      </section>
+      {isCommunity && isReferencePreview && (
+        <section className="msg-context__section ref-context-resources" aria-label="Полезные материалы">
+          <h3 className="msg-context__section-title">Полезные материалы</h3>
+          {["Календарь мероприятий", "Возможности для студентов", "Гайд: как попасть на стажировку"].map((name)=>(
+            <div className="ref-context-resource" key={name}><Link2 size={17} aria-hidden="true" /><span>{name}</span></div>
+          ))}
+        </section>
+      )}
+      <section className="msg-context__section ref-context-files" aria-label="Связанные файлы">
+        <h3 className="msg-context__section-title">Связанные файлы {sharedFiles.length > 0 && <small>{sharedFiles.length}</small>}</h3>
+        {sharedFiles.length ? (
+          <ul>
+            {sharedFiles.map((file)=> <li key={file}><FileText aria-hidden="true" size={18}/><span title={file}>{file}</span></li>)}
+          </ul>
+        ) : <p className="ref-context-placeholder-text">Общих файлов пока нет</p>}
+      </section>
+            <section className="msg-context__section" aria-label="Участники">
         <h3 className="msg-context__section-title">Участники</h3>
         <ul className="msg-context__people">
           {channel.participants.map((person) => (
