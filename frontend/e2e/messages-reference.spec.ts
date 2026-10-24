@@ -89,6 +89,14 @@ test("messages empty state uses reference three-column composition at 1448px",as
   await expect(page.getByRole("button",{name:/Открыть последний чат/})).toBeVisible();
   await expect(page.getByRole("button",{name:/Перейти в Маяки/})).toBeVisible();
   await expect(page.getByRole("button",{name:/Создать новый чат/})).toBeVisible();
+  console.log("[MESSAGES_LAYOUT_DEBUG]", JSON.stringify(await page.evaluate(() => {
+    const selectors=[".workspace",".workspace-content",".messenger-page",".messenger-shell",".msg-dialog-list",".chat-thread",".msg-reference-context-empty"];
+    return selectors.map(selector=>{
+      const el=document.querySelector(selector); if(!el)return {selector,missing:true};
+      const r=el.getBoundingClientRect(),css=getComputedStyle(el);
+      return {selector,x:r.x,y:r.y,width:r.width,height:r.height,display:css.display,position:css.position,flex:css.flex,gridTemplateRows:css.gridTemplateRows,minHeight:css.minHeight,heightCss:css.height,overflow:css.overflow};
+    });
+  })));
   await expectRect(page,".msg-dialog-list",{x:156,y:65,width:334,height:1021},12);
   await expectRect(page,".chat-thread",{x:490,y:65,width:606,height:1021},14);
   await expectRect(page,".msg-reference-context-empty",{x:1096,y:65,width:352,height:1021},14);
