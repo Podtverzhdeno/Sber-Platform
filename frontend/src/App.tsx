@@ -731,7 +731,7 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
   return (
     <div className="dashboard-shell participant-home" data-reference="R-PAR-01">
       {searchParams.get("v2") === "1" ? (
-        <nav className="home-v2-preview-nav" aria-label="Режим главной">
+        <div className="home-v2-preview-nav" aria-label="Режим главной">
           <button
             type="button"
             className="date-chip date-chip--button"
@@ -741,9 +741,9 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
               setSearchParams(next);
             }}
           >
-            Вернуться к классической главной
+            Классическая главная
           </button>
-        </nav>
+        </div>
       ) : (
         <header className="dashboard-heading">
           <div>
