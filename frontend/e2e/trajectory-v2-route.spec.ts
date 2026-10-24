@@ -32,7 +32,7 @@ test("trajectory v2 is default and legacy route stays available", async ({ page 
 
 
 test("approved trajectory layout has seven role cards, side-by-side rail and separate stage card", async ({ page }) => {
-  await page.setViewportSize({ width: 1547, height: 929 });
+  await page.setViewportSize({ width: 1672, height: 941 });
   let loggedIn = false;
   const roles = [
     { track_key: "product", title: "Продуктовый аналитик", state: "active", attempt_number: 1, completed_milestones: 2, total_milestones: 7 },
@@ -82,12 +82,24 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   expect(Math.abs(left.y-right.y)).toBeLessThan(32);
   expect(left.x+left.width).toBeLessThanOrEqual(right.x+5);
   expect(stage.y).toBeGreaterThanOrEqual(left.y+left.height-2);
-  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1548);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(1673);
+  await page.locator(".trajectory-v2-stage-path [data-stage-state='completed']").first().click();
+  await page.locator(".trajectory-v2-stage-detail").getByRole("button", { name: "Посмотреть →" }).click();
+  await expect(page.getByTestId("trajectory-drawer-overlay")).toBeVisible();
+  await page.screenshot({ path: "test-results/trajectory-v2-task-drawer-candidate.png", animations: "disabled" });
+  await page.keyboard.press("Escape");
+  await page.getByRole("button", { name: /Продуктовые гипотезы/ }).first().click();
+  await page.getByRole("button", { name: "Действия роли" }).click();
+  await expect(page.getByTestId("trajectory-actions-menu")).toBeVisible();
+  await page.screenshot({ path: "test-results/trajectory-v2-actions-candidate.png", animations: "disabled" });
+  await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "О роли →" }).click();
   await expect(page.getByRole("dialog", { name: /Продуктовый аналитик/ })).toBeVisible();
+  await page.screenshot({ path: "test-results/trajectory-v2-role-candidate.png", animations: "disabled" });
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Все уровни →" }).click();
   await expect(page.locator(".trajectory-v2-grade-option")).toHaveCount(6);
+  await page.screenshot({ path: "test-results/trajectory-v2-grades-candidate.png", animations: "disabled" });
   await page.getByRole("button", { name: "Закрыть" }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator(".trajectory-v2-role-card").first()).toBeVisible();
