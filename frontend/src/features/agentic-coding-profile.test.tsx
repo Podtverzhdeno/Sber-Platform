@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { AgenticCodingProfile } from "./agentic-coding-profile";
-import type { components } from "../../api/schema";
+import type { AgenticServerProfile } from "./agentic-coding-profile";
 
 describe("Agentic Coding source-derived profile", () => {
   it("renders developer, analyst and QA target levels exactly as in source map", () => {
@@ -45,7 +45,7 @@ describe("Agentic Coding source-derived profile", () => {
     expect(within(panel).getByRole("img")).toBeInTheDocument();
   });
   it("renders green contour only from verified server snapshot and avoids role leakage", () => {
-    const source: components["schemas"]["RoleProfile"] = {
+    const source: AgenticServerProfile = {
       role_key: "developer",
       role_title: "Разработчик",
       profile_scope: "impulse_learning",
