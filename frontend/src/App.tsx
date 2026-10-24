@@ -731,21 +731,7 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
         : ("pending" as const);
   return (
     <div className="dashboard-shell participant-home" data-reference="R-PAR-01">
-      {searchParams.get("v2") === "1" ? (
-        <div className="home-v2-preview-nav" aria-label="Режим главной">
-          <button
-            type="button"
-            className="date-chip date-chip--button"
-            onClick={() => {
-              const next = new URLSearchParams(searchParams);
-              next.delete("v2");
-              setSearchParams(next);
-            }}
-          >
-            Классическая главная
-          </button>
-        </div>
-      ) : (
+      {searchParams.get("v2") === "0" ? (
         <header className="dashboard-heading">
           <div>
             <p className="eyebrow">Участник · персональный маршрут</p>
@@ -764,18 +750,20 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
             Сегодня
           </button>
         </header>
-      )}
-      {searchParams.get("v2") === "1" ? (
+      ) : null}
+      {searchParams.get("v2") !== "0" ? (
         <ParticipantHomeV2
           onOpenTarget={(kind, key) => {
             if (kind === "course") {
               goTo("Bootcamp", `?course=${encodeURIComponent(key)}`);
+            } else if (kind === "task" && key) {
+              goTo("Задачи", `?task=${encodeURIComponent(key)}`);
             } else {
               goTo("Задачи");
             }
           }}
           onOpenWorkspace={() => {
-            setProjectOpen(true);
+            goTo("Портфолио");
           }}
         />
       ) : (
