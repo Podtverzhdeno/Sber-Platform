@@ -728,3 +728,31 @@
 @media(max-width:370px) {
   .home-v2-next-outcome {height:220px;min-height:220px;}
 }
+
+
+/* Working weekly-plan overlay behind the reference's "План недели" action. */
+.home-v2-week-dialog-layer {position:fixed;inset:0;z-index:1600;}
+.home-v2-week-dialog-backdrop {position:absolute;inset:0;width:100%;height:100%;border:0;background:#000e1bc6;}
+.home-v2-week-dialog {
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:min(460px,calc(100vw - 28px));max-height:calc(100dvh - 28px);overflow:auto;
+  padding:21px;border:1px solid #15798a;border-radius:14px;background:#071b2d;color:#f1f8ff;
+  box-shadow:0 22px 70px #000c;
+}
+.home-v2-week-dialog>header {display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin:0 0 15px;}
+.home-v2-week-dialog>header small {color:#0de0e6;font-size:11px;}
+.home-v2-week-dialog h2 {font-size:22px;margin:6px 0 0;}
+.home-v2-week-dialog>header button {flex:none;display:grid;place-items:center;width:34px;height:34px;border:1px solid #215069;border-radius:8px;background:#0b2b42;color:#ebfbff;}
+.home-v2-week-dialog>p {color:#c2d4ea;font-size:13px;line-height:1.5;margin:0 0 18px;}
+.home-v2-week-dialog-days {display:grid;gap:6px;}
+.home-v2-week-dialog-days>div {
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  border:1px solid #204052;border-radius:7px;padding:11px 12px;
+  color:#cbdcee;font-size:12px;
+}
+.home-v2-week-dialog-days strong {color:#92a9bd;font-weight:550;white-space:nowrap;}
+.home-v2-week-dialog-days strong.home-v2-week-done {color:#03e8e9;}
+@media(max-width:630px) {
+  .home-v2-week-dialog {padding:15px;}
+  .home-v2-week-dialog-days>div {padding:10px 8px;font-size:11px;}
+}
