@@ -1,6 +1,6 @@
 import type { ApiChannelView } from "./contracts";
 import { referenceDescriptions } from "./reference-fixtures";
-import { referenceAvatarFor } from "./reference-avatars";
+import { referenceAvatarFor, referenceAvatarSpriteIndexFor } from "./reference-avatars";
 import { FileText, FolderOpen, Link2, Users } from "lucide-react";
 import {
   type ChannelWorkContextView,
@@ -62,6 +62,7 @@ export function ContextPanel({
           className="msg-context__avatar"
           aria-hidden="true"
           data-reference-tone={referenceAvatarFor(channel.id)?.tone}
+          data-reference-index={referenceAvatarSpriteIndexFor(channel.id) ?? undefined}
         >
           {referenceAvatarFor(channel.id)?.glyph ?? (dialogTitle(channel, viewerId).trim().charAt(0).toUpperCase() || "?")}
         </span>

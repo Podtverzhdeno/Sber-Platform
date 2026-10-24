@@ -26,7 +26,7 @@ import {
 
 import type { ApiChannelView, ApiMessageView } from "./contracts";
 import { isReferenceChannel, referencePinnedMessage } from "./reference-fixtures";
-import { referenceAvatarFor } from "./reference-avatars";
+import { referenceAvatarFor, referenceAvatarSpriteIndexFor } from "./reference-avatars";
 import {
   CHAT_REACTION_EMOJIS,
   buildChatRows,
@@ -260,6 +260,7 @@ export function ChatHistory({
           className="msg-chat__avatar"
           aria-hidden="true"
           data-reference-tone={channel ? referenceAvatarFor(channel.id)?.tone : undefined}
+          data-reference-index={channel ? (referenceAvatarSpriteIndexFor(channel.id) ?? undefined) : undefined}
         >
           {(channel && referenceAvatarFor(channel.id)?.glyph) ?? channelInitial(channel)}
         </span>

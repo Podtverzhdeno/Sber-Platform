@@ -18,7 +18,7 @@ import {
 } from "react";
 
 import type { ApiChannelView } from "./contracts";
-import { referenceAvatarFor } from "./reference-avatars";
+import { referenceAvatarFor, referenceAvatarSpriteIndexFor } from "./reference-avatars";
 import {
   getDialogDraftsSnapshot,
   hydrateDialogDrafts,
@@ -312,7 +312,7 @@ export function DialogList({
                       onSelect(row.channel.id);
                     }}
                   >
-                    <span className="msg-dialog-list__avatar" aria-hidden="true" data-reference-tone={referenceAvatarFor(row.channel.id)?.tone}>
+                    <span className="msg-dialog-list__avatar" aria-hidden="true" data-reference-tone={referenceAvatarFor(row.channel.id)?.tone} data-reference-index={referenceAvatarSpriteIndexFor(row.channel.id) ?? undefined}>
                       {referenceAvatarFor(row.channel.id)?.glyph ?? row.initial}
                     </span>
                     <span className="msg-dialog-list__row-text">
