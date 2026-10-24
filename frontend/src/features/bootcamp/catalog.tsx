@@ -112,7 +112,7 @@ function CardExplanation({
         </div>
       )}
       {card.relevant && <Badge tone="success">Актуальный</Badge>}
-      {card.pending_verification_note && <p className="notice">{card.pending_verification_note}</p>}
+      {/* The verification status is displayed outside the collapsed explanation so it stays visible. */}
       {card.verified_evidence && (
         <small className="muted">Подтверждённое доказательство: {card.verified_evidence}</small>
       )}
