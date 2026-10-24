@@ -26,7 +26,7 @@ describe("Agentic Coding source-derived profile", () => {
     expect(within(panel).getByRole("heading", { name: "Матрица компетенций" })).toBeInTheDocument();
     expect(within(panel).getAllByTestId(/^agentic-skill-/)).toHaveLength(6);
     expect(within(panel).getByRole("img")).toHaveAccessibleName(/Подтверждённые уровни отсутствуют/);
-    expect(within(panel).getByText(/Цифровые следы не подключены/)).toBeInTheDocument();
+    expect(within(panel).getByText(/цифровых следов не подключены/i)).toBeInTheDocument();
     expect(within(panel).getByText(/Официальный бейдж L1 не выдаётся/)).toBeInTheDocument();
     expect(within(panel).queryByText(/L1 подтверждён/)).not.toBeInTheDocument();
   });
