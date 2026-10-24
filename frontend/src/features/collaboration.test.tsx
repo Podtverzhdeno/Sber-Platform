@@ -123,7 +123,7 @@ describe("SberChat-style messenger shell", () => {
     // Real channels preserve the working composer; the standalone ZIP demo
     // keeps its empty state only when no live dialog is available.
     // Nested named regions are legitimate: use the outer workspace chat shell.
-    expect(await screen.findByRole("region", { name: "Текущий чат", exact: true })).toBeInTheDocument();
+    expect(await screen.findByRole("region", { name: "Текущий чат" })).toBeInTheDocument();
     expect(screen.getByRole("complementary", { name: "Контекст диалога" })).toBeInTheDocument();
     const listBefore = screen.getByRole("complementary", { name: "Список диалогов" });
     const rowToOpen = within(listBefore).getAllByRole("button", { name: /Команда проекта Альфа/ })
