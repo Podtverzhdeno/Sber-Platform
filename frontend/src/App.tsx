@@ -526,6 +526,7 @@ function Workspace({
             <BootcampV2Route />
           ) : (
             <ReferenceBootcampCatalog
+              navigation={navigation}
               honorBoardEnabled={honorBoardEnabled}
               honorBoardConsent={actor.consent_scopes.includes("course_honor_board")}
             />
