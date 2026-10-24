@@ -1,0 +1,57 @@
+name: Temporary task catalog design capture
+on:
+  push:
+    branches: [codex/task-catalog-visual-polish-20261024]
+    paths: [.github/workflows/task-catalog-review-capture.yml]
+permissions:
+  contents: write
+jobs:
+  screenshot-capture:
+    if: github.repository == 'Podtverzhdeno/Sber-Platform'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: codex/task-catalog-visual-polish-20261024
+          persist-credentials: true
+      - name: Install node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install frontend packages
+        run: npm ci
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: Match Linux screenshot fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-core fonts-liberation fontconfig
+          fc-cache -f
+      - name: Capture initial, detail, list, and conditions
+        env:
+          TZ: Europe/Moscow
+          LANG: ru_RU.UTF-8
+        run: npx playwright test e2e/task-catalog-v2-visual.spec.ts --update-snapshots
+      - name: Upload screenshots for review
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: task-catalog-all-compositions
+          path: frontend/e2e/task-catalog-v2-visual.spec.ts-snapshots/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Commit captured images to feature branch only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/e2e/task-catalog-v2-visual.spec.ts-snapshots/
+          if ! git diff --cached --quiet; then
+            git commit -m "test(tasks): baseline responsive implementation compositions"
+            git push origin HEAD:codex/task-catalog-visual-polish-20261024
+          fi
+        working-directory: .
