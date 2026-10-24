@@ -3,19 +3,20 @@ import { describe, expect, it } from "vitest";
 
 import { CourseLearningContent } from "./CourseLearningContent";
 import { learningPrograms, learningProgramFor } from "./programs";
+import { courseBlueprints } from "./course-blueprints";
 
 describe("Bootcamp editorial course curriculum", () => {
-  it("contains exactly twelve catalog courses and four concrete lessons per course", () => {
+  it("contains exactly twelve catalog courses and eight concrete lessons per course", () => {
     expect(learningPrograms).toHaveLength(12);
     expect(new Set(learningPrograms.map(item => item.courseKey)).size).toBe(12);
     for (let index = 1; index <= 12; index++) {
       const p = learningProgramFor(`demo-course-${String(index)}`);
       expect(p).not.toBeNull();
-      expect(p?.units).toHaveLength(4);
+      expect(p?.units).toHaveLength(8);
       expect(p?.description.length).toBeGreaterThan(20);
       expect(p?.result.length).toBeGreaterThan(20);
       const keys = p?.units.map(item => item.id) ?? [];
-      expect(new Set(keys).size).toBe(4);
+      expect(new Set(keys).size).toBe(8);
       for (const lesson of p?.units ?? []) {
         expect(lesson.title.length).toBeGreaterThan(7);
         expect(lesson.purpose.length).toBeGreaterThan(20);
@@ -30,10 +31,38 @@ describe("Bootcamp editorial course curriculum", () => {
     }
   });
 
+  it("publishes twelve complete capstones with balanced review rubrics", () => {
+    expect(courseBlueprints).toHaveLength(12);
+    expect(new Set(courseBlueprints.map(item => item.key)).size).toBe(12);
+    for (const blueprint of courseBlueprints) {
+      expect(learningProgramFor(blueprint.key)).not.toBeNull();
+      expect(blueprint.prereqs.length).toBeGreaterThanOrEqual(2);
+      expect(blueprint.outcomes.length).toBeGreaterThanOrEqual(3);
+      expect(blueprint.capstone.steps.length).toBeGreaterThanOrEqual(5);
+      expect(blueprint.capstone.artifacts.length).toBeGreaterThanOrEqual(3);
+      expect(blueprint.capstone.validation.length).toBeGreaterThanOrEqual(3);
+      expect(blueprint.capstone.rubric).toHaveLength(4);
+      expect(blueprint.capstone.rubric.reduce((sum, item) => sum + item.weight, 0)).toBe(100);
+      expect(blueprint.capstone.rubric.every(item => item.pass.length > 20)).toBe(true);
+    }
+  });
+
+  it("opens a concrete final project and returns to lessons without granting a certificate", () => {
+    render(<CourseLearningContent courseKey="demo-course-2" />);
+    fireEvent.click(screen.getByRole("button", { name: "Итоговый проект" }));
+    expect(screen.getByRole("heading", { name: "B2B-агент обработки заявок" })).toBeInTheDocument();
+    expect(screen.getByText(/six-tool-contract/)).toBeInTheDocument();
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.getByText(/Официальная оценка и сертификат/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Вернуться к урокам" }));
+    expect(screen.getByRole("heading", { name: "Операции агента и границы автономности" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Шаги обучения" })).toBeInTheDocument();
+  });
+
   it("has working navigation and reveals real exercise expectations without awarding grade", () => {
     render(<CourseLearningContent courseKey="demo-course-3" courseTitle="Python: основа" />);
     const nav = screen.getByRole("navigation", { name: "Шаги обучения" });
-    expect(within(nav).getAllByRole("button")).toHaveLength(4);
+    expect(within(nav).getAllByRole("button")).toHaveLength(8);
     expect(screen.getByRole("heading", { name: "Типы и выражения" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Предыдущий урок" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "Следующий урок" }));
