@@ -1,15 +1,21 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { AGENTIC_ROLE_PROFILES, AgenticCodingProfile } from "./agentic-coding-profile";
+import { AgenticCodingProfile } from "./agentic-coding-profile";
 
 describe("Agentic Coding source-derived profile", () => {
-  it("preserves six source skill levels and explicit methodology conflicts", () => {
-    expect(AGENTIC_ROLE_PROFILES.developer.target).toEqual([3, 4, 3, 2, 3, 2]);
-    expect(AGENTIC_ROLE_PROFILES.analyst.target).toEqual([3, null, 3, 2, 2, 2]);
-    expect(AGENTIC_ROLE_PROFILES.qa.target).toEqual([3, 2, 2, 2, 2, 2]);
-    expect(AGENTIC_ROLE_PROFILES.developer.unresolved).toEqual([4]);
-    expect(AGENTIC_ROLE_PROFILES.analyst.unresolved).toEqual([1, 2]);
-    expect(AGENTIC_ROLE_PROFILES.qa.unresolved).toEqual([1]);
+  it("renders developer, analyst and QA target levels exactly as in source map", () => {
+    render(<AgenticCodingProfile />);
+    const panel = screen.getByTestId("agentic-profile");
+    fireEvent.click(within(panel).getByRole("button", { name: "Таблица" }));
+    const checkTargets = (expected: string[]) => {
+      const rows = within(panel).getByRole("table").querySelectorAll("tbody tr");
+      expect(Array.from(rows, (row) => row.querySelector("td:last-child")?.textContent)).toEqual(expected);
+    };
+    checkTargets(["3", "4", "3", "2", "3", "2"]);
+    fireEvent.change(within(panel).getByLabelText("Профессиональная группа"), { target: { value: "analyst" } });
+    checkTargets(["3", "Не задана", "3", "2", "2", "2"]);
+    fireEvent.change(within(panel).getByLabelText("Профессиональная группа"), { target: { value: "qa" } });
+    checkTargets(["3", "2", "2", "2", "2", "2"]);
   });
   it("shows only one selected role; never invents current values or L1 certificates", () => {
     render(<AgenticCodingProfile />);
