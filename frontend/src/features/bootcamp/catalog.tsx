@@ -475,6 +475,7 @@ export function BootcampCatalog({
     { key: "completed", label: "Завершённые", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "verified").length },
   ];
   const pendingRequired = catalog.data.filter((card) => forTrack(card) && card.must_take && card.completion_state !== "verified");
+  const roleRequirementLabel = pendingRequired.length > 0 ? "Не завершены курсы, необходимые для развития роли" : "Учебные требования не определены";
   const nextCourse = catalog.data.find((card) => forTrack(card) && card.relevant && card.access_state === "available" && card.completion_state === "reported") ?? catalog.data.find((card) => forTrack(card) && card.relevant && card.access_state === "available" && card.completion_state === "not_started") ?? null;
   const selectedRoleTitle = trackOptions.find((key) => key === trackFilter) ?? (trackFilter === "all" ? "Все активные направления" : trackFilter);
   const visible = catalog.data
@@ -554,8 +555,8 @@ export function BootcampCatalog({
           <section className="bc-grade-banner" aria-labelledby="bc-grade-title">
             <div className="bc-grade-copy">
               <p className="bc-panel-kicker">♛ ДО СЛЕДУЮЩЕГО ГРЕЙДА</p>
-              <h2 id="bc-grade-title">{pendingRequired.length > 0 ? `Осталось ${pendingRequired.length} ${pendingRequired.length % 10 === 1 && pendingRequired.length % 100 !== 11 ? "обязательный курс" : [2, 3, 4].includes(pendingRequired.length % 10) && ![12, 13, 14].includes(pendingRequired.length % 100) ? "обязательных курса" : "обязательных курсов"}` : "Требования к грейду"}</h2>
-              <p>{pendingRequired.length > 0 ? "Завершите обязательные курсы и подтвердите результаты обучения" : "Опубликованных незакрытых учебных требований сейчас нет"}</p>
+              <h2 id="bc-grade-title">{roleRequirementLabel}</h2>
+              <p>{pendingRequired.length > 0 ? "Подтверждение курсов не гарантирует присвоение грейда; нужны опубликованные требования и проверка практики" : "Опубликованных незакрытых учебных требований сейчас нет"}</p>
               <div className="bc-grade-mini">
                 {pendingRequired.slice(0,2).map((card) => <button key={card.key} type="button" onClick={() => { openPanel("detail",card.key); }}><CourseCover title={card.title} /><span>{card.title}</span><span aria-hidden="true">↗</span></button>)}
               </div>
