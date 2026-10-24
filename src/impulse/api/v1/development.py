@@ -54,6 +54,10 @@ class MilestoneView(BaseModel):
     completed: bool
     activities: list[str] = Field(default_factory=list)
     deliverable: str | None = None
+    theory: list[str] = Field(default_factory=list)
+    lab: str | None = None
+    acceptance: list[str] = Field(default_factory=list)
+    estimated_hours: int | None = Field(default=None, ge=1, le=80)
 
 
 class RoadmapView(BaseModel):
@@ -190,6 +194,10 @@ def _milestone_view(item: object, completed_keys: frozenset[str]) -> MilestoneVi
         completed=item.key in completed_keys,
         activities=list(item.activities),
         deliverable=item.deliverable,
+        theory=list(item.theory),
+        lab=item.lab,
+        acceptance=list(item.acceptance),
+        estimated_hours=item.estimated_hours,
     )
 
 
