@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { referenceChannels, referenceMessagesByChannel, referenceIds } from "./messages-reference-fixtures";
+import { referenceChannels, referenceMessagesByChannel } from "./messages-reference-fixtures";
 
 const actor = {
   person_id: "00000000-0000-0000-0000-000000000001",
@@ -11,8 +11,6 @@ const actor = {
   navigation: ["Главная", "Сообщения", "Задачи"],
   csrf_token: "messages-reference",
 };
-const elenaId=referenceIds.mentor;
-const mayakiId=referenceIds.mayaki;
 const makeMessage = (id: string, body: string, author_name = "Елена Наставник") => ({
   id, author_id: "00000000-0000-4000-8000-000000000005", author_name,
   kind: "text", body, artifact_refs: [], sequence: 1,
