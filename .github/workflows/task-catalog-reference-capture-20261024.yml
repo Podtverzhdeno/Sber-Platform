@@ -27,7 +27,7 @@ jobs:
           CAPTURE_APPROVED_TASKS: "1"
           TZ: Europe/Moscow
           LANG: ru_RU.UTF-8
-        run: npx playwright test e2e/task-catalog-approved-geometry.spec.ts --workers=1 --reporter=line
+        run: npx playwright test e2e/task-catalog-approved-geometry.spec.ts e2e/task-catalog-v2.spec.ts --grep "approved|automated accessibility|light theme" --workers=1 --reporter=line
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
         with:
