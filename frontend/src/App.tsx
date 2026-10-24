@@ -762,8 +762,12 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
               goTo("Задачи");
             }
           }}
-          onOpenWorkspace={() => {
-            goTo("Портфолио");
+          onOpenWorkspace={(destination) => {
+            if (destination === "trajectory") {
+              goTo("Моя траектория");
+            } else {
+              goTo("Портфолио");
+            }
           }}
         />
       ) : (
