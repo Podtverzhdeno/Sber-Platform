@@ -126,7 +126,7 @@ test("approved list density: ten test rows remain scannable without horizontal o
   await expect(page.locator(".catalog-v2-table-reason")).toHaveCount(10);
 });
 
-test("intermediate desktop list preserves two-column readability without page overflow", async ({ page }) => {
+test("approved intermediate desktop list preserves two-column readability without page overflow", async ({ page }) => {
   await openReferenceVolumeCatalog(page);
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.getByRole("button", { name: "Список" }).click();
