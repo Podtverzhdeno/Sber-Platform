@@ -122,7 +122,7 @@ describe("SberChat-style messenger shell", () => {
 
     // Real channels preserve the working composer; the standalone ZIP demo
     // keeps its empty state only when no live dialog is available.
-    expect(await screen.findByRole("region", { name: /Текущий чат/ })).toBeInTheDocument();
+    expect(await screen.findAllByRole("region", { name: /Текущий чат/ })).toBeInTheDocument();
     expect(screen.getByRole("complementary", { name: "Контекст диалога" })).toBeInTheDocument();
     const listBefore = screen.getByRole("complementary", { name: "Список диалогов" });
     const rowToOpen = within(listBefore).getAllByRole("button", { name: /Команда проекта Альфа/ })
@@ -184,7 +184,7 @@ describe("SberChat-style messenger shell", () => {
   it("Escape закрывает поиск в чате и очищает запрос", async () => {
     mockMessagingApi();
     renderWorkspace();
-    await screen.findByRole("region", { name: /Текущий чат/ });
+    await screen.findAllByRole("region", { name: /Текущий чат/ });
     const row = screen.getAllByRole("button", { name: /Команда проекта Альфа/ })
       .find((element) => element.classList.contains("msg-dialog-list__row"));
     if (!row) throw new Error("Диалог не найден");
