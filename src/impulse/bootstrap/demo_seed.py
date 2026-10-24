@@ -390,7 +390,7 @@ def build_seed_batches() -> list[SeedBatch]:
     today = datetime.now(UTC).date()
     learning_rows = [
         demo_row(
-            f"learning:alex:{days_ago}",
+            f"learning:alex:{(today - timedelta(days=days_ago)).isoformat()}",
             enrollment_id=demo_id("enrollment:alex:1"),
             local_date=today - timedelta(days=days_ago),
             timezone="Europe/Moscow",
@@ -1326,6 +1326,12 @@ async def _insert_batches(session: AsyncSession, batches: list[SeedBatch]) -> No
         statement = insert(batch.table).values(batch.rows)
         if batch.table is talent_pipeline_events:
             statement = statement.on_conflict_do_nothing(index_elements=[batch.table.c.id])
+        elif batch.table is learning_days:
+            # A learner may have recorded the same activity date at runtime.
+            # Never overwrite it with synthetic demo history during a deploy.
+            statement = statement.on_conflict_do_nothing(
+                index_elements=[learning_days.c.enrollment_id, learning_days.c.local_date]
+            )
         else:
             update_values = {
                 key: getattr(statement.excluded, key) for key in batch.rows[0] if key != "id"
