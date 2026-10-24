@@ -16,7 +16,7 @@ const participant = {
 test.use({ viewport: { width: 1672, height: 941 }, reducedMotion: "reduce" });
 
 async function openReferenceVolumeCatalog(page: Page) {
-  await page.addInitScript(() => localStorage.setItem("impulse-theme", "dark"));
+  await page.addInitScript(() => { localStorage.setItem("impulse-theme", "dark"); });
   await page.route("**/api/v1/me/**", (route) => route.fulfill({ status: 404, json: { code: "NOT_MOCKED" } }));
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: {
     honor_board_enabled: false, task_catalog_v2_enabled: true, demo_mode: true,
@@ -32,7 +32,7 @@ async function openReferenceVolumeCatalog(page: Page) {
   for (const task of approvedGeometryTasks) {
     await page.route(`**/api/v1/me/task-recommendations/${task.task_id}`, (route) => route.fulfill({ json: task }));
   }
-  await page.route(`**/api/v1/me/task-recommendations/${approvedGeometryTasks[0]!.task_id}/terms`, (route) => route.fulfill({ json: approvedGeometryTerms }));
+  await page.route(`**/api/v1/me/task-recommendations/${approvedGeometryTasks[0].task_id}/terms`, (route) => route.fulfill({ json: approvedGeometryTerms }));
   await page.route("**/api/v1/me/task-recommendations/analytics/events", (route) => route.fulfill({ status: 202, json: { event_id: "00000000-0000-4000-8000-000000000902", duplicate: false } }));
 
   await page.goto("/");
@@ -59,7 +59,7 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
     const details = rect(".catalog-v2-inspector");
     const stage = rect(".catalog-v2-stage-track");
     const firstKpi = rect(".catalog-v2-kpi");
-    const lastKpi = document.querySelectorAll(".catalog-v2-kpi").item(3)?.getBoundingClientRect();
+    const lastKpi = document.querySelectorAll(".catalog-v2-kpi").item(3).getBoundingClientRect();
     return {
       left: cards?.left ?? -1,
       leftRight: cards?.right ?? -1,
@@ -67,7 +67,7 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
       detailRight: details?.right ?? -1,
       stageWidth: stage?.width ?? 0,
       kpiTop: firstKpi?.top ?? -1,
-      kpiLastTop: lastKpi?.top ?? -1,
+      kpiLastTop: lastKpi.top,
       hasOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
     };
   });
@@ -120,8 +120,8 @@ test("approved terms modal: four top fact cards, two-column content, two actions
     return {
       width: dialog?.width ?? 0,
       left: dialog?.left ?? -1,
-      statsTop: cards.item(0)?.getBoundingClientRect().top ?? -1,
-      statsLastTop: cards.item(3)?.getBoundingClientRect().top ?? -1,
+      statsTop: cards.item(0).getBoundingClientRect().top,
+      statsLastTop: cards.item(3).getBoundingClientRect().top,
       overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
     };
   });
