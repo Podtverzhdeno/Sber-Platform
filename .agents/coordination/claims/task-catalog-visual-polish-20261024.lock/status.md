@@ -1,8 +1,8 @@
 # Claim task-catalog-visual-polish-20261024
 
 - task_id: task-catalog-visual-polish-20261024
-- session_id: gpt6-20261024-1812-visual-polish
-- status: REVIEW
+- session_id: gpt6-20261024-approved-ref-implementation
+- status: IN_PROGRESS
 - started_at: 2026-10-24T18:12:00+03:00
 - heartbeat_at: 2026-10-24T18:12:00+03:00
 - base_revision: d663bb9757656bb7dd0515a63c4f942ff2c2e5df
@@ -11,6 +11,7 @@
   - frontend/src/features/task-catalog-v2/page.tsx
   - frontend/src/features/task-catalog-v2/catalog-v2.scss
   - frontend/src/features/task-catalog-v2/list.tsx
+  - frontend/src/features/task-catalog-v2/conditions-dialog.tsx
   - frontend/e2e/task-catalog-v2.spec.ts
   - frontend/src/features/task-catalog-v2/page.test.tsx
   - .agents/coordination/claims/task-catalog-visual-polish-20261024.lock/status.md
@@ -34,3 +35,10 @@
 - implemented: compact search toolbar, progressive advanced filters, first-task read-only preview, tighter cards/list, accessible icon actions, responsive list and KPI corrections
 - automated_quality: screenshot-generation test passed; exact final PR CI still pending
 - disposition: REVIEW, no checkbox updates, no production deploy, no feature-flag changes, no claim of exact reference match
+
+## Approved ZIP received — continuation by explicit owner request
+
+- source_pngs: exact registered original references 01,02,03,04 and full `tasks.md` now accessible as user-provided ZIP
+- status_reset: original author handoff superseded by same claim continued under owner authorization; no competing active owner scope
+- target: implement reference-faithful compact cards with side detail, four honest KPI, desktop filter bar, horizontal stages, forecast-vs-evidence skill display, structured modal, scannable 8-column list
+- no backend changes, no synthetic claims/percentages, no shared shell changes, no deployment
