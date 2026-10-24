@@ -1,0 +1,15 @@
+# Claim TOPBAR-AVATAR-ROUTE-20261025
+- task_id: TOPBAR-AVATAR-ROUTE-20261025
+- session_id: gpt6-20261025-visual-topbar-avatar
+- status: IN_PROGRESS
+- base_revision: e6dc11abaf73a47bf75fe6029e1d369c8bb6eb88
+- started_at: 2026-10-25T01:26:00+03:00
+- heartbeat_at: 2026-10-25T01:26:00+03:00
+- lane: topbar-avatar-regression
+- write_scope:
+  - frontend/src/components/topbar-theme.scss
+  - frontend/e2e/topbar-avatar-route.spec.ts
+  - .agents/coordination/claims/TOPBAR-AVATAR-ROUTE-20261025.lock/status.md
+- verification: Playwright avatar image bounds and non-overlap at desktop and mobile in route other than home
+- progress: root cause found: home-v2.scss constrains image only when :has(.home-v2); route lacks CSS and SVG overflows
+- blockers: none
