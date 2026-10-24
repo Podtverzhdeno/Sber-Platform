@@ -339,6 +339,7 @@ test("real seeded API separates match snapshots after a trajectory change", asyn
   if (target === undefined) return;
 
   await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
+  await page.goto("/workspace/1?classic=1");
   const targetCard = page.locator(".track-card").filter({ hasText: target.title });
   await expect(targetCard).toBeVisible();
   if (overview.active_count >= overview.max_active) {

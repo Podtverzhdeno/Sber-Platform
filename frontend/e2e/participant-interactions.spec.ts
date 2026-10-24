@@ -424,7 +424,7 @@ test("rating opens selected public profile", async ({ page }) => {
 });
 
 test("trajectory views keep selection and open overview by deep link", async ({ page }) => {
-  await page.goto("/workspace/1?view=list");
+  await page.goto("/workspace/1?classic=1&view=list");
   await page.locator('[data-persona="participant-alex"]').click();
   await expect(page.getByTestId("trajectory-view-list")).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByTestId("trajectory-view-cards")).toHaveAttribute("aria-pressed", "false");
@@ -442,7 +442,7 @@ test("trajectory views keep selection and open overview by deep link", async ({ 
   await expect(page.getByTestId("trajectory-overview-body")).toContainText("Этапы направления");
   await page.locator('[aria-label="Закрыть"]').click();
   await expect(page).not.toHaveURL(/track=/);
-  await page.goto("/workspace/1?track=python-dev&pane=detail");
+  await page.goto("/workspace/1?classic=1&track=python-dev&pane=detail");
   await page.locator('[data-persona="participant-alex"]').click();
   await expect(page.getByRole("dialog", { name: /Python-разработчик · подробнее/ })).toBeVisible();
   await expect(page.getByTestId("trajectory-formula")).toContainText("равный вес");

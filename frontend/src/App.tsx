@@ -2,7 +2,7 @@ import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
 import { BootcampV2Route } from "./features/bootcamp/route-v2";
-import { TrajectoryV2 } from "./features/trajectory-v2/page";
+import { TrajectoryRedesignPage } from "./features/trajectory-redesign/page";
 import { TaskCatalogV2 } from "./features/task-catalog-v2/page";
 import { ParticipantMetricSpark } from "./features/participant-home-spark";
 import { BuddySuggestionCard } from "./features/buddy-suggestion";
@@ -511,13 +511,13 @@ function Workspace({
           actor.active_role === "participant" &&
           (currentSection === "Мой путь" ||
             currentSection === "Моя траектория") ? (
-          searchParams.get("v2") === "1" ? (
-            <TrajectoryV2 />
-          ) : (
+          searchParams.get("classic") === "1" || searchParams.get("v2") === "0" ? (
             <>
               <DevelopmentJourney />
               <TrajectoryMapPage />
             </>
+          ) : (
+            <TrajectoryRedesignPage />
           )
         ) : allowed &&
           actor.active_role === "participant" &&

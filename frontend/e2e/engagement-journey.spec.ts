@@ -620,7 +620,7 @@ test.describe("engagement journey: desktop acceptance", () => {
   await expect(courseCard).toContainText("Завершение отправлено на проверку: повторно проходить тот же шаг не нужно.");
 
   // Radar/readiness: снапшот пересчитался по квалифицируемым событиям.
-  await page.goto("/workspace/1");
+  await page.goto("/workspace/1?classic=1");
   await expect(page.getByTestId("trajectory-map")).toBeVisible();
   await expect(page.getByTestId("trajectory-track-progress")).toContainText("66%");
   // Честная reload-поверхность: рост стрика фиксируется flat-анимацией 5 → 6.

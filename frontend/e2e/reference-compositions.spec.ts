@@ -683,6 +683,7 @@ test("R-PAR-02 journey composition and mentor consultation", async ({ page }) =>
   await installParticipantData(page);
   await openWorkspace(page, participantBase.key);
   await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
+    await page.goto("/workspace/1?classic=1");
   await expect(page.locator('[data-reference="R-PAR-02"]')).toBeVisible();
   await screenshot(page, "R-PAR-02");
   await page.getByRole("button", { name: "Получить рекомендацию ментора" }).click();
@@ -967,7 +968,7 @@ test("R-CUS-05 task detail acceptance", async ({ page }) => {
   const actor = actorOf("customer", "Роман Воронов", customerNavigation);
   await installAuth(page, actor, { key: "customer-roman", display_name: actor.display_name, roles: ["customer"], demoMode: true });
   await openWorkspace(page, "customer-roman");
-  await page.goto("/workspace/1?task=acceptance-1&result=open");
+  await page.goto("/workspace/1?classic=1&task=acceptance-1&result=open");
   await expect(page.locator('[data-reference="R-CUS-05"]')).toBeVisible();
   await screenshot(page, "R-CUS-05");
   await page.getByRole("button", { name: "Ответить" }).click();

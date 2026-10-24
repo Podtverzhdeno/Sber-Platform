@@ -97,7 +97,7 @@ test("mounted trajectory map keeps deep links, Back/reload and read-only progres
   await installApi(page, methods);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Моя траектория" }).click();
+  await page.goto("/workspace/1?classic=1");
   await expect(page.getByTestId("trajectory-map")).toBeVisible();
 
   const step = page.getByRole("button", { name: "Освоить основу. Текущий шаг" });
@@ -125,7 +125,7 @@ test("trajectory map remains usable in light theme and mobile viewport", async (
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("button", { name: "Меню", exact: true }).click();
-  await page.getByRole("link", { name: "Моя траектория" }).click();
+  await page.goto("/workspace/1?classic=1");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.getByRole("button", { name: "Освоить основу. Текущий шаг" }).click();
   await expect(page.getByRole("dialog", { name: "Веха траектории" })).toBeVisible();

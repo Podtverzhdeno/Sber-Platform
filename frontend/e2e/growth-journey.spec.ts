@@ -324,7 +324,7 @@ test("participant growth journey: theme, passport project, evidence checkpoint, 
   await expect(page.getByText("На приёмке").first()).toBeVisible();
 
   // Изменённая циклограмма и готовность роли на «Моей траектории» (v2: 54→66, 40→66).
-  await page.goto("/workspace/1");
+  await page.goto("/workspace/1?classic=1");
   await expect(page.getByTestId("trajectory-percent-python")).toContainText("66%");
   await expect(page.getByTestId("trajectory-card-python")).toContainText("Готовность роли: 66%");
   await page.getByTestId("trajectory-open-detail-python").click();
@@ -387,7 +387,7 @@ test.describe("mobile touch journey: theme, project evidence and readiness in li
   await contributionForm.getByRole("button", { name: "Отправить личный вклад" }).tap();
   await expect(page.locator(".contribution-summary").first()).toContainText("Личный вклад · версия 1");
 
-  await page.goto("/workspace/1");
+  await page.goto("/workspace/1?classic=1");
   await expect(page.getByTestId("trajectory-percent-python")).toContainText("66%");
   await page.getByTestId("trajectory-open-detail-python").tap();
   await expect(page.getByTestId("cycle-readiness")).toContainText("66%");
