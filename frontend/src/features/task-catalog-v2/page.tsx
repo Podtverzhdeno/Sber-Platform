@@ -438,6 +438,19 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
   // offline/server failures may still render explicitly stale catalog data.
   const selected = detailAccessDenied ? undefined : (selectedFromCatalog ?? detail.data);
   const displayedDetail = selected ?? previewItem;
+  // The production API accepts exact direction/competency keys and a company
+  // substring. Suggestions are advisory; typing remains available for tasks
+  // beyond the loaded page instead of implying that the first page is the
+  // complete set of filter options.
+  const filterSuggestions = useMemo(() => {
+    const unique = (values: string[]) =>
+      Array.from(new Set(values.filter(Boolean))).sort((a, b) => a.localeCompare(b, "ru-RU"));
+    return {
+      directions: unique(items.flatMap((item) => item.direction_keys)),
+      competencies: unique(items.flatMap((item) => item.competency_tags)),
+      customers: unique(items.map((item) => item.customer.display_name)),
+    };
+  }, [items]);
   const totals = catalog.data?.pages[0];
   const scoredItems = items.filter((item) => item.match.status === "calculated" && item.match.percent !== null);
   const averageMatch = scoredItems.length
@@ -595,14 +608,23 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
             updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, sort: null }, true);
           }}><SlidersHorizontal size={15} aria-hidden="true" /> Все задачи ({totals?.total_found ?? 0})</button>
           <div id="catalog-v2-advanced-filters" className="catalog-v2-advanced-filters" data-open={advancedFiltersOpen}>
-            <label>Направление<input value={filters.direction} onChange={(event) => { updateParams({ direction: event.target.value }, true); }} placeholder="Направление" /></label>
-            <label>Навык<input value={filters.competency} onChange={(event) => { updateParams({ competency: event.target.value }, true); }} placeholder="Навыки" /></label>
+            <label>Направление<input list="catalog-v2-direction-options" value={filters.direction} onChange={(event) => { updateParams({ direction: event.target.value }, true); }} placeholder="Направление" autoComplete="off" /></label>
+            <label>Навык<input list="catalog-v2-competency-options" value={filters.competency} onChange={(event) => { updateParams({ competency: event.target.value }, true); }} placeholder="Навыки" autoComplete="off" /></label>
             <label>Сложность<select value={filters.difficulty} onChange={(event) => { updateParams({ difficulty: event.target.value }, true); }}><option value="">Сложность</option><option value="beginner">Начальная</option><option value="intermediate">Средняя</option><option value="advanced">Продвинутая</option></select></label>
-            <label>Заказчик<input value={filters.customer} onChange={(event) => { updateParams({ customer: event.target.value }, true); }} placeholder="Компании" /></label>
+            <label>Заказчик<input list="catalog-v2-customer-options" value={filters.customer} onChange={(event) => { updateParams({ customer: event.target.value }, true); }} placeholder="Компании" autoComplete="off" /></label>
             <label>Формат<select value={filters.workFormat} onChange={(event) => { updateParams({ work_format: event.target.value }, true); }}><option value="">Формат</option><option value="remote">Удалённо</option><option value="hybrid">Гибрид</option><option value="onsite">На площадке</option></select></label>
             <label>Срок<select value={filters.timeframe} onChange={(event) => { updateParams({ timeframe: event.target.value }, true); }}><option value="">Сроки</option><option value="7d">Ближайшие 7 дней</option><option value="30d">Ближайшие 30 дней</option><option value="90d">Ближайшие 90 дней</option></select></label>
             <label>Сортировка<select value={filters.sort} onChange={(event) => { updateParams({ sort: event.target.value }, true); }}><option value="match-default">По соответствию</option><option value="deadline">По сроку</option><option value="duration">По длительности</option><option value="newest">Сначала новые</option><option value="skill-growth">По соответствию росту</option></select></label>
           </div>
+          <datalist id="catalog-v2-direction-options">
+            {filterSuggestions.directions.map((value) => <option key={value} value={value} />)}
+          </datalist>
+          <datalist id="catalog-v2-competency-options">
+            {filterSuggestions.competencies.map((value) => <option key={value} value={value} />)}
+          </datalist>
+          <datalist id="catalog-v2-customer-options">
+            {filterSuggestions.customers.map((value) => <option key={value} value={value} />)}
+          </datalist>
           <div className="catalog-v2-layout" role="group" aria-label="Вид каталога">
             <button type="button" aria-pressed={layout === "cards"} onClick={() => { changeLayout("cards"); }}><LayoutGrid size={15} aria-hidden="true" /> Карточки</button>
             <button type="button" aria-pressed={layout === "list"} onClick={() => { changeLayout("list"); }}><List size={15} aria-hidden="true" /> Список</button>
