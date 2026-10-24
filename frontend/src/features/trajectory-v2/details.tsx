@@ -76,92 +76,60 @@ export function StageTaskDrawer(props: {
   const { milestone } = props;
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const onKeyDown = useOverlayKeyboard(dialogRef, props.onClose);
-
   useEffect(() => {
     const dialog = dialogRef.current;
     if (dialog !== null && !dialog.contains(document.activeElement)) dialog.focus();
   }, []);
   useEffect(() => {
     const triggerRef = props.triggerRef;
-    return () => {
-      triggerRef.current?.focus();
-    };
+    return () => { triggerRef.current?.focus(); };
   }, [props.triggerRef]);
 
   const completed = props.state === "completed";
   return (
-    <div
-      className="trajectory-v2-overlay"
-      data-testid="trajectory-drawer-overlay"
-      onClick={props.onClose}
-    >
-      <div
-        ref={dialogRef}
-        className="trajectory-v2-drawer"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="trajectory-drawer-title"
-        tabIndex={-1}
-        onKeyDown={onKeyDown}
-        onClick={(event) => {
-          event.stopPropagation();
-        }}
-      >
-        <button type="button" className="trajectory-v2-drawer-close" onClick={props.onClose}>
-          Закрыть
-        </button>
-        <h2 id="trajectory-drawer-title">Детали этапа</h2>
-        {props.policyVersion !== null && (
-          <small>Снимок дорожной карты v{String(props.policyVersion)}</small>
-        )}
-        <dl className="trajectory-v2-drawer-facts">
+    <div className="trajectory-v2-overlay" data-testid="trajectory-drawer-overlay" onClick={props.onClose}>
+      <div ref={dialogRef} className="trajectory-v2-drawer" role="dialog" aria-modal="true" aria-labelledby="trajectory-drawer-title" tabIndex={-1} onKeyDown={onKeyDown} onClick={(event) => event.stopPropagation()}>
+        <header className="trajectory-v2-drawer-heading">
           <div>
-            <dt>Статус</dt>
-            <dd>
-              {MILESTONE_STATE_LABELS[props.state] ?? props.state} ·{" "}
-              {stageTargetLabel(milestone)} · позиция {String(milestone.position)}
-            </dd>
+            <small id="trajectory-drawer-title">{completed ? "✓ Этап пройден" : "Детали этапа"}</small>
+            <h2>{milestone.title}</h2>
+            <span className="trajectory-v2-drawer-tag">{milestone.target_kind === "task" ? "Практическая задача" : milestone.target_kind === "course" ? "Обучение" : milestone.target_kind}</span>
+            <span className="trajectory-v2-drawer-tag">{milestone.skill}</span>
           </div>
-          <div>
-            <dt>Цель</dt>
-            <dd>{milestone.purpose}</dd>
-          </div>
-          <div>
-            <dt>Требования</dt>
-            <dd>{UNKNOWN_PUBLISHED}</dd>
-          </div>
-          <div>
-            <dt>Ожидаемый артефакт</dt>
-            <dd>
-              {stageTargetLabel(milestone)}
-              {completed
-                ? " · этап завершён в снимке дорожной карты"
-                : " · этап ещё не завершён"}
-            </dd>
-          </div>
-          <div>
-            <dt>Верификация</dt>
-            <dd>
-              {completed
-                ? "Этап отмечен пройденным в снимке дорожной карты; метаданные верификации не публикуются."
-                : "Этап не завершён; метаданные верификации не публикуются в снимке."}
-            </dd>
-          </div>
-          <div>
-            <dt>Влияние</dt>
-            <dd>Навык: {milestone.skill}</dd>
-          </div>
-          <div>
-            <dt>Продолжение</dt>
-            <dd data-testid="trajectory-drawer-continuation">
-              <StageDrawerContinuation
-                milestone={milestone}
-                state={props.state}
-                canContinue={props.role.attempt_number !== null}
-              />
-            </dd>
-          </div>
-        </dl>
+          <button type="button" className="trajectory-v2-drawer-close" aria-label="Закрыть" onClick={props.onClose}>✕</button>
+        </header>
+        <section className="trajectory-v2-drawer-section">
+          <h3>Описание</h3>
+          <p>{milestone.purpose}</p>
+        </section>
+        <section className="trajectory-v2-drawer-section">
+          <h3>Что было сделано</h3>
+          <p>{completed
+            ? "Этап отмечен завершённым в подтверждённом снимке дорожной карты. Подробности личного вклада и отзыв ментора в этом API не публикуются."
+            : "Этап ещё не завершён. После выполнения и проверки результат отразится в дорожной карте."}</p>
+        </section>
+        <div className="trajectory-v2-drawer-metrics">
+          <div><small>Состояние</small><strong>{MILESTONE_STATE_LABELS[props.state] ?? props.state}</strong></div>
+          <div><small>Навык</small><strong>{milestone.skill}</strong></div>
+        </div>
+        <section className="trajectory-v2-drawer-section">
+          <h3>Цель этапа</h3>
+          <p>{stageTargetLabel(milestone)}</p>
+          <small>{completed ? "Факт завершения отражён в дорожной карте" : "Факт выполнения ожидает подтверждения"}</small>
+        </section>
+        <section className="trajectory-v2-drawer-section">
+          <h3>Проверка результата</h3>
+          <p>Детализация решения ментора недоступна в текущем снимке. Завершение курса не подменяет проверку проектного вклада.</p>
+          {props.policyVersion !== null && <small>Политика дорожной карты v{String(props.policyVersion)}</small>}
+        </section>
+        <footer className="trajectory-v2-drawer-footer">
+          <button type="button" onClick={props.onClose}>Закрыть</button>
+          <StageDrawerContinuation
+            milestone={milestone}
+            state={props.state}
+            canContinue={props.role.attempt_number !== null}
+          />
+        </footer>
       </div>
     </div>
   );
