@@ -87,3 +87,6 @@
 @media(prefers-reduced-motion:reduce) {
   .bootcamp-experience .bootcamp-course-card { transition: none; }
 }
+
+.bootcamp-hero-kicker { font-size: .94rem; font-weight: 650; margin: 0 0 8px; color: var(--color-muted); }
+.bootcamp-streak-heading { font-size: .84rem; font-weight: 650; margin: 5px 0 0; white-space: nowrap; }
