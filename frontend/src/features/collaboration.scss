@@ -1757,3 +1757,48 @@
   .sberchat-shell .msg-chat__reference-media strong,
   .sberchat-shell .msg-chat__reference-link strong { font-size: 12px; }
 }
+
+
+/* Parity with Impulse light theme: source PNGs are dark; keep exact geometry
+   but use semantic colours when the user's product theme is light. */
+:root[data-theme="light"] .sberchat-shell {
+  --ref-bg: var(--color-bg);
+  --ref-surface: var(--color-surface);
+  --ref-line: var(--color-border);
+  --ref-accent: var(--color-accent);
+  --ref-fg: var(--color-text);
+  --ref-muted: var(--color-muted);
+}
+:root[data-theme="light"] .sberchat-shell .msg-dialog-list,
+:root[data-theme="light"] .sberchat-shell .msg-context,
+:root[data-theme="light"] .sberchat-shell .ref-empty-context {
+  background: linear-gradient(180deg, var(--color-surface), var(--color-bg));
+}
+:root[data-theme="light"] .sberchat-shell .msg-chat__bubble {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  box-shadow: 0 5px 24px rgb(20 57 89 / 8%);
+}
+:root[data-theme="light"] .sberchat-shell .msg-chat__group.outgoing .msg-chat__bubble {
+  background: color-mix(in srgb, var(--color-accent) 14%, var(--color-surface));
+}
+:root[data-theme="light"] .sberchat-shell .msg-chat__avatar,
+:root[data-theme="light"] .sberchat-shell .msg-chat__group-avatar,
+:root[data-theme="light"] .sberchat-shell .ref-empty-state__action-icon {
+  background: color-mix(in srgb, var(--color-accent) 15%, var(--color-surface));
+  color: var(--color-text);
+}
+:root[data-theme="light"] .sberchat-shell .msg-chat__reference-media,
+:root[data-theme="light"] .sberchat-shell .msg-chat__reference-link,
+:root[data-theme="light"] .sberchat-shell .msg-chat__reference-reactions > span {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+:root[data-theme="light"] .sberchat-shell .msg-chat__reference-media strong,
+:root[data-theme="light"] .sberchat-shell .msg-chat__reference-link strong { color: var(--color-text); }
+:root[data-theme="light"] .sberchat-shell .msg-composer__reference-row input { background: var(--color-bg); }
+:root[data-theme="light"] .sberchat-shell .msg-dialog-list__row-item.selected .msg-dialog-list__row {
+  background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+}
