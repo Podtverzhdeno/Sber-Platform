@@ -88,8 +88,10 @@ export function TrajectoryActions(props: TrajectoryActionsProps) {
         onClick={() => {
           setOpen(!open);
         }}
+        aria-label="Действия роли"
+        title="Действия роли"
       >
-        Действия роли
+        •••
       </button>
       {open ? (
         !chooserOpen ? (
