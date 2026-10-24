@@ -129,6 +129,31 @@ def test_pending_rejected_and_revoked_are_visible_but_not_verified() -> None:
     assert not state.ready_for_atomic_transition
 
 
+
+def test_scheduled_revocation_applies_only_after_effective_time() -> None:
+    row = GradeEvidence(
+        person_id=PERSON,
+        track_key="agent-developer",
+        requirement_key="course",
+        source_key="course-x",
+        source_version="published-1",
+        source_ref="verified:before-revocation",
+        state=EvidenceState.VERIFIED,
+        trusted=True,
+        observed_at=NOW - timedelta(hours=1),
+        revoked_at=NOW + timedelta(hours=1),
+    )
+    before = calculate_grade_readiness(
+        PERSON, "agent-developer", policy(), (row,), as_of=NOW
+    )
+    after = calculate_grade_readiness(
+        PERSON, "agent-developer", policy(), (row,), as_of=NOW + timedelta(hours=2)
+    )
+    assert before.requirements[0].state == "verified"
+    assert after.requirements[0].state == "revoked"
+    assert before.completed_percent > after.completed_percent
+
+
 def test_policy_not_effective_or_wrong_track_does_not_return_readiness() -> None:
     result = calculate_grade_readiness(
         PERSON,
