@@ -271,3 +271,24 @@
  .bc-approved .course-row { grid-template-columns:1fr; }
  .bc-approved .bc-grade-banner::after { right:0; opacity:.13; }
 }
+
+
+/* Reference BC-R01/BC-R02: actual icon + chip anatomy, without synthetic learning facts. */
+.bc-approved .bc-course-heading {display:flex;align-items:flex-start;gap:12px;min-width:0;}
+.bc-approved .bc-course-heading :is(h2,strong) {flex:1;min-width:0;overflow-wrap:anywhere;margin:0;}
+.bc-approved .bc-course-icon {flex:0 0 52px;width:52px;height:52px;display:grid;place-items:center;border-radius:12px;font-size:23px;font-weight:850;line-height:1;border:1px solid #235181;color:#36bdff;background:linear-gradient(135deg,#073d72,#05254b);}
+.bc-approved .bc-course-icon--purple {color:#c17aff;border-color:#50349b;background:linear-gradient(135deg,#351660,#161746);}
+.bc-approved .bc-course-icon--red {color:#ff5b50;border-color:#632b3b;background:linear-gradient(135deg,#4d1c28,#1a1d30);}
+.bc-approved .bc-course-icon--green {color:#04e9b6;border-color:#136c68;background:linear-gradient(135deg,#045650,#092941);}
+.bc-approved .bc-skill-chips {display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 0;}
+.bc-approved .bc-skill-chips span {display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:#102b48;border:1px solid #173a5b;border-radius:9px;padding:5px 10px;color:#bbd6f1;font-size:12px;}
+.bc-approved .bc-next-course {display:flex;align-items:center;gap:13px;min-width:0;}
+.bc-approved .bc-next-course .bc-course-icon {width:58px;height:58px;flex-basis:58px;}
+.bc-approved .bc-course-summary {-webkit-line-clamp:3;}
+.bc-approved .course-row .bc-course-icon {width:44px;height:44px;flex-basis:44px;font-size:20px;}
+.bc-approved .course-row .bc-skill-chips {margin-top:4px;}
+.bc-approved .course-row .bc-course-heading {align-items:center;}
+.bc-approved .bc-course-labels {font-size:11px;}
+.bc-approved .bootcamp-course-card .course-meta {margin-top:0;}
+.bc-approved .bootcamp-course-card .bc-open-actions {margin-top:auto;}
+@media (max-width:590px) {.bc-approved .bc-course-icon {width:46px;height:46px;flex-basis:46px;}.bc-approved .bc-next-course {align-items:flex-start;}}
