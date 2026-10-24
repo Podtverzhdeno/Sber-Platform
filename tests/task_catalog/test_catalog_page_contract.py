@@ -325,6 +325,7 @@ def test_product_filters_for_mentor_portfolio_and_open_application() -> None:
         allowed_actions=frozenset({CatalogAction.OPEN_CONDITIONS}),
     )
     catalog = (mentor, portfolio, closed, base[3])
+
     def titles(**params: bool) -> list[str]:
         page = build_catalog_page(catalog, CatalogQuery(page_size=10, **params))
         return [item.title for item in page.items]
