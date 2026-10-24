@@ -3,6 +3,7 @@ import { useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { StatePanel } from "../../components/ui";
+import { apiRequest } from "../../api/client";
 import {
   loadDevelopmentOverview,
   loadRoadmaps,
@@ -85,6 +86,18 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     queryKey: roadmapsQueryKey,
     queryFn: loadRoadmaps,
   });
+  const passport = useQuery({
+    queryKey: ["talent-passport"],
+    queryFn: () => apiRequest<{ verified_courses: string[]; skills: { key: string; practical_level: string; confirmed_case_count: number }[]; cases: { contribution_id: string; submitted_at: string; reviewer_id: string }[] }>("/api/v1/me/talent-passport"),
+  });
+  const navigation = useQuery({
+    queryKey: ["me"],
+    queryFn: () => apiRequest<{ navigation: string[] }>("/api/v1/me"),
+  });
+  const goToPortfolio = () => {
+    const idx = navigation.data?.navigation.indexOf("Портфолио") ?? -1;
+    if (idx >= 0) window.location.assign(`/workspace/${String(idx)}`);
+  };
   const roleParam = searchParams.get("role");
   const selectedKey = useMemo(() => {
     const paramRole = overview.roles.find((role) => role.track_key === roleParam);
@@ -292,8 +305,31 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           {overview.next_outcome !== null && <button type="button" onClick={() => { if (overview.next_outcome !== null) openStageDetails(overview.next_outcome.milestone_key); }}>Посмотреть →</button>}
         </section>
         <section className="trajectory-v2-passport-panel">
-          <header><h3>Мой скилл-паспорт</h3></header>
-          <p>Подтверждённые компетенции и цифровые следы доступны в разделе портфолио. Учебный прогресс не является подтверждённым уровнем компетенции.</p>
+          <header>
+            <h3>Мой скилл-паспорт</h3>
+            {navigation.data?.navigation.includes("Портфолио") && (
+              <button type="button" onClick={goToPortfolio}>Открыть →</button>
+            )}
+          </header>
+          {passport.isPending && <p role="status">Загружаем подтверждённые навыки…</p>}
+          {passport.isError && <p role="status">Не удалось загрузить скилл-паспорт.</p>}
+          {passport.data?.skills.length === 0 && <p>Подтверждённые навыки появятся после проверки личного вклада в проект.</p>}
+          {passport.data && passport.data.skills.length > 0 && (
+            <ul className="trajectory-v2-skill-list">
+              {passport.data.skills.slice(0, 4).map((skill, index) => {
+                const maxCount = Math.max(1, ...passport.data!.skills.map((entry) => entry.confirmed_case_count));
+                return (
+                  <li key={skill.key}>
+                    <span className="trajectory-v2-skill-icon" data-tone={index % 4}>{["▤", "✧", "▣", "⌁"][index % 4]}</span>
+                    <strong>{skill.key}</strong>
+                    <progress max={maxCount} value={skill.confirmed_case_count} aria-label={`${skill.key}: подтверждено кейсов ${skill.confirmed_case_count}`}/>
+                    <small>{skill.confirmed_case_count} кейс.</small>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+          <small className="trajectory-v2-passport-disclaimer">Полоса отражает число подтверждённых кейсов относительно других навыков, не оценку уровня компетенции.</small>
         </section>
       </aside>
       {gradesOpen && (
