@@ -702,7 +702,14 @@ test("R-PAR-03 bootcamp course detail and return", async ({ page }) => {
   await expect(page.locator('[data-reference="BC-R01"]')).toBeVisible();
   const courseDrawer = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(courseDrawer.getByRole("heading", { name: "Основы Python для анализа данных" })).toBeVisible();
-  await screenshot(page, "R-PAR-03");
+  // BC-R03 replaces the legacy R-PAR-03 page. Capture a new candidate without
+  // comparing it to the obsolete full-page golden (the old page has a different layout).
+  // Promote to a stable BC-R03 golden only after owner approval of the five PNG targets.
+  await page.screenshot({
+    path: "test-results/bc-r03-course-detail-candidate.png",
+    animations: "disabled",
+    fullPage: true,
+  });
   await courseDrawer.getByRole("button", { name: "Закрыть" }).click();
   await expect(page.getByRole("heading", { name: /Bootcamp.*Развитие навыков/ })).toBeVisible();
 });
