@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, cast
 
 from fastapi import APIRouter, Depends, Query, Request
 
@@ -26,14 +26,22 @@ async def agentic_coding_profile(
     # No trusted source integration yet. Never promote generic course completions
     # or demo competence into Agentic levels. A verified owner may attach a
     # read-only qualified source only after authorization, audit and publication.
-    evidence = getattr(request.app.state, "agentic_qualified_evidence", ())
-    if not isinstance(evidence, tuple) or not all(
-        isinstance(row, QualifiedEvidence) for row in evidence
-    ):
+    source: object = getattr(request.app.state, "agentic_qualified_evidence", ())
+    if not isinstance(source, tuple):
         raise ApiError(
             code="AGENTIC_SOURCE_UNAVAILABLE",
             message="Источник проверенных данных временно недоступен.",
             status_code=503,
             retryable=True,
         )
-    return evaluate_profile(authenticated.actor.person_id, role_key, evidence)
+    rows = cast(tuple[object, ...], source)
+    if not all(isinstance(row, QualifiedEvidence) for row in rows):
+        raise ApiError(
+            code="AGENTIC_SOURCE_UNAVAILABLE",
+            message="Источник проверенных данных временно недоступен.",
+            status_code=503,
+            retryable=True,
+        )
+    return evaluate_profile(
+        authenticated.actor.person_id, role_key, cast(tuple[QualifiedEvidence, ...], rows)
+    )
