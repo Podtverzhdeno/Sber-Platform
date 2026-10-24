@@ -35,7 +35,7 @@ export function EmptyChatState({
       <p>Слева вы можете открыть личный чат,<br/> рабочую группу или сообщество</p>
       <div className="msg-reference-empty__actions">
         <button type="button" onClick={() => {if (recent !== null) onOpen(recent.id); else onCreate();}}>
-          <span className="msg-reference-empty__action-icon">{recent ? (recent.title?.[0] ?? "Ч") : <MessageCircleMore size={22}/>}</span>
+          <span className="msg-reference-empty__action-icon">{recent ? (recent.title[0] ?? "Ч") : <MessageCircleMore size={22}/>}</span>
           <span><strong>{recent ? "Открыть последний чат" : "Начать общение"}</strong><small>{recent?.title ?? "Контакты и доступные диалоги"}</small></span>
           <ArrowRight size={19} />
         </button>
