@@ -18,10 +18,10 @@ const supportModelLabels: Record<string, string> = {
   team_review: "Проверка результата командой",
   self_service: "Самостоятельная работа",
 };
-const formatModel = (value: string) => supportModelLabels[value] ?? notProvided(value);
-
 const notProvided = (value: string) =>
   value === "not_provided" || !value.trim() ? "Не указано заказчиком" : value;
+
+const formatModel = (value: string) => supportModelLabels[value] ?? notProvided(value);
 
 const formatDeadline = (value: string | null) => {
   if (value === null) return "Срок не указан";
