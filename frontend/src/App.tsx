@@ -3,6 +3,7 @@ import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
 import { BootcampV2Route } from "./features/bootcamp/route-v2";
 import { TrajectoryV2 } from "./features/trajectory-v2/page";
+import { SourceTrajectoryPage } from "./features/trajectory-v2/source-reference/source-route";
 import { TaskCatalogV2 } from "./features/task-catalog-v2/page";
 import { ParticipantMetricSpark } from "./features/participant-home-spark";
 import { BuddySuggestionCard } from "./features/buddy-suggestion";
@@ -517,7 +518,7 @@ function Workspace({
               <TrajectoryMapPage />
             </>
           ) : (
-            <TrajectoryV2 />
+            searchParams.get("source") === "1" ? <SourceTrajectoryPage /> : <TrajectoryV2 />
           )
         ) : allowed &&
           actor.active_role === "participant" &&
