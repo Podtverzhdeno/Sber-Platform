@@ -20,3 +20,22 @@ Source: supplied Impulse_Bootcamp ZIP, specifically references/BC-R01..BC-R05, i
 
 ## Known discrepancy
 The previous CSS-only change is a visual approximation; it is not proof of 1:1. Treat PR as draft until all criteria above have linked artifacts and green checks.
+
+
+## Reproduced offline verification — 2026-10-24
+
+Ran `python tests/test_ui.py` locally against the supplied ZIP HTML. All six viewports passed functional smoke, width and scroll checks. This is NOT React verification.
+
+Direct pixel comparison of ZIP `references/*.png` vs its own `previews/1448_*.png` at 1448×1086, RGB channel mean absolute error (MAE), plus percent of pixels where any color-channel absolute difference exceeds 30/255:
+
+| Reference | MAE/255 | Pixels with channel difference >30 |
+|---|---:|---:|
+| BC-R01 cards | 24.69 | 22.69% |
+| BC-R02 list | 24.99 | 22.61% |
+| BC-R03 course drawer | 19.84 | 19.78% |
+| BC-R04 recommendation drawer | 21.71 | 19.93% |
+| BC-R05 requirements drawer | 17.13 | 19.86% |
+
+These metrics are for the **provided prototype screenshots**, not the integrated React app. They show the archive implementation itself is not pixel-identical to its source artwork. Pixel differences include antialiasing, icons, fonts and geometry. A matching full production page still needs equal viewport/browser/font settings and new production screenshots before a 1:1 claim is defensible.
+
+Environment limitation: external git clone from the execution container failed due to DNS, so this run did not execute frontend typecheck, production visual regression or CI.
