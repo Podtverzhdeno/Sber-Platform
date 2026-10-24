@@ -116,7 +116,10 @@ test("approved list density: ten test rows remain scannable without horizontal o
 
 test("approved terms modal: four top fact cards, two-column content, two actions and consent safety", async ({ page }) => {
   await openReferenceVolumeCatalog(page);
-  await page.getByRole("button", { name: "Условия и отклик" }).first().click();
+  const sourceCard = page.locator(".catalog-v2-card").first();
+  await sourceCard.hover();
+  await expect(sourceCard.locator(".catalog-v2-card-actions")).toHaveCSS("opacity", "1");
+  await sourceCard.getByRole("button", { name: "Условия и отклик" }).click();
   const modal = page.getByRole("dialog");
   await expect(modal).toBeVisible();
   if (process.env.CAPTURE_APPROVED_TASKS === "1") await page.screenshot({ path: "test-results/approved-geometry-conditions.png", fullPage: false, animations: "disabled" });
