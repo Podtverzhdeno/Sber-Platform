@@ -22,14 +22,7 @@ export function EmptyChatState({
   return (
     <section className="msg-reference-empty" aria-label="Выберите диалог">
       <div className="msg-reference-empty__orbit" aria-hidden="true">
-        <span className="msg-reference-empty__orbit-ring one" />
-        <span className="msg-reference-empty__orbit-ring two" />
-        <span className="msg-reference-empty__sparkle s1">✦</span>
-        <span className="msg-reference-empty__sparkle s2">✧</span>
-        <span className="msg-reference-empty__sparkle s3">✦</span>
-        <span className="msg-reference-empty__sparkle s4">✧</span>
-        <span className="msg-reference-empty__bubble back"><span /></span>
-        <span className="msg-reference-empty__bubble front"><i/><i/><i/></span>
+        <img className="msg-reference-empty__exact-art" src="/messages-reference/empty-hero-original.svg" alt="" width={265} height={182}/>
       </div>
       <h2>Выберите диалог или сообщество</h2>
       <p>Слева вы можете открыть личный чат,<br/> рабочую группу или сообщество</p>
