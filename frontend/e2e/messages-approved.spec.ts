@@ -45,7 +45,9 @@ async function openApprovedPreview(page: Page): Promise<void> {
   await page.locator('[data-persona="participant-alex"]').click();
   const menu = page.getByRole("button", { name: "Меню", exact: true });
   if (await menu.isVisible().catch(() => false)) await menu.click();
-  await page.getByRole("link", { name: "Сообщения", exact: true }).click();
+  // Navigating directly avoids a stale sidebar node during asynchronous demo-login
+  // hydration; the separate navigation tests still exercise sidebar interactions.
+  await page.goto("/workspace/4");
   if ((page.viewportSize()?.width ?? 1440) >= 960) {
     await expect(page.getByTestId("messenger-empty-state")).toBeVisible();
   } else {

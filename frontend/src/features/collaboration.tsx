@@ -153,12 +153,15 @@ export function MessagingWorkspace({
   const openedPeerRef = useRef("");
   const openedTaskRef = useRef("");
 
+  // The approved empty state is intentional only for participant reference previews.
+  // In live role workflows preserve the original first-conversation behavior:
+  // sender, contextual task and message history are visible when channels exist.
   const selected =
     channels.find((item) => item.id === selectedId) ??
     (requestedChannel !== null && UUID_PATTERN.test(requestedChannel)
       ? channels.find((item) => item.id === requestedChannel)
       : undefined) ??
-    undefined;
+    (!useReferencePreview ? channels[0] : undefined);
 
   // Глубокая ссылка ?task=<task_id>: открываем чат команды этой задачи,
   // когда он появится в списке каналов; явный ?channel= приоритетнее.
