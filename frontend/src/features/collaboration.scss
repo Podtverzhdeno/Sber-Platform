@@ -2013,3 +2013,143 @@
     grid-template-columns: clamp(370px, 24vw, 395px) minmax(0, 1fr);
   }
 }
+
+
+/* Screenshot fidelity pass — derived by overlaying 02.png (1448×1086) and
+ * the real Playwright full-page candidate from run 40120938791.
+ * Keep narrower breakpoints on the original responsive CSS. */
+@media (min-width: 1381px) {
+  .page-shell:has(.sberchat-shell) .sberchat-shell .messenger-shell {
+    grid-template-columns: 367px minmax(0, 1fr) 341px;
+  }
+  .page-shell:has(.sberchat-shell) .sberchat-shell .messenger-shell--no-context {
+    grid-template-columns: 367px minmax(0, 1fr);
+  }
+  .page-shell:has(.sberchat-shell) .workspace {
+    padding-top: 65px;
+  }
+  .page-shell:has(.sberchat-shell) > .topbar {
+    height: 65px;
+    min-height: 65px;
+  }
+  .page-shell:has(.sberchat-shell) .sidebar-brand {
+    min-height: 65px;
+  }
+  .page-shell:has(.sberchat-shell) .workspace-content {
+    min-height: calc(100dvh - 65px);
+  }
+  .page-shell:has(.sberchat-shell) .workspace-content > .messenger-page {
+    height: calc(100dvh - 65px);
+  }
+  .sberchat-shell .msg-dialog-list__heading {
+    min-height: 70px;
+    padding: 7px 12px 2px 13px;
+  }
+  .sberchat-shell .msg-dialog-list__heading h1 {
+    font-size: 23px;
+    line-height: 1.13;
+  }
+  .sberchat-shell .msg-dialog-list__heading .msg-dialog-list__subtitle {
+    font-size: 14px;
+    margin-top: 3px;
+  }
+  .sberchat-shell .msg-dialog-list__heading .msg-dialog-list__create-button {
+    min-width: 128px;
+    height: 43px;
+    padding-inline: 11px;
+    border-radius: 11px;
+  }
+  .sberchat-shell .msg-dialog-list__top {
+    min-height: 49px;
+    padding: 5px 12px 5px;
+  }
+  .sberchat-shell .msg-dialog-list__search-field {
+    height: 40px;
+    border-radius: 10px;
+    padding-inline: 12px;
+  }
+  .sberchat-shell .msg-dialog-list__search-field input { font-size: 13px; }
+  .sberchat-shell .msg-dialog-list__tabs {
+    min-height: 49px;
+    gap: 21px;
+    padding: 5px 14px 6px;
+  }
+  .sberchat-shell .msg-dialog-list__tabs button {
+    height: 38px;
+    font-size: 14px;
+  }
+  .sberchat-shell .msg-dialog-list__count {
+    min-width: 25px;
+    height: 25px;
+    font-size: 12px;
+  }
+  .sberchat-shell .msg-dialog-list__row {
+    min-height: 67px;
+    padding: 8px 12px;
+    gap: 10px;
+  }
+  .sberchat-shell .msg-dialog-list__avatar {
+    width: 49px;
+    height: 49px;
+    flex-basis: 49px;
+    font-size: 17px;
+  }
+  .sberchat-shell .msg-dialog-list__row-title strong {
+    font-size: 14px;
+    font-weight: 750;
+  }
+  .sberchat-shell .msg-dialog-list__preview {
+    font-size: 12px;
+    line-height: 1.23;
+    margin-top: 3px;
+  }
+  .sberchat-shell .msg-dialog-list__kind {
+    font-size: 11px;
+  }
+  .sberchat-shell .msg-dialog-list__meta {
+    font-size: 12px;
+    gap: 6px;
+  }
+  .sberchat-shell .msg-dialog-list__unread {
+    min-width: 23px;
+    height: 23px;
+    padding-inline: 5px;
+    font-size: 11px;
+  }
+  /* PNG: the hero and action stack sit around the middle of a 1086px page,
+     not immediately below the topbar as in the earlier candidate. */
+  .sberchat-shell .ref-empty-state {
+    transform: translateY(clamp(45px, 10.5vh, 115px));
+  }
+  .sberchat-shell .ref-empty-state__actions {
+    width: min(100%, 436px);
+  }
+  .sberchat-shell .ref-empty-state__actions button {
+    min-height: 89px;
+    border-radius: 12px;
+    padding: 15px 16px;
+  }
+  .sberchat-shell .ref-empty-state__actions strong {
+    font-size: 15px;
+  }
+  .sberchat-shell .ref-empty-state__actions small {
+    font-size: 12px;
+  }
+  .sberchat-shell .ref-empty-state h2 {
+    font-size: 27px;
+  }
+  .sberchat-shell .ref-empty-state > p {
+    font-size: 16px;
+  }
+  .sberchat-shell .ref-empty-context > header {
+    height: 55px;
+    min-height: 55px;
+    padding: 16px 18px;
+  }
+  .sberchat-shell .ref-empty-context__skeleton {
+    min-height: 89px;
+    margin-bottom: 11px;
+    padding: 14px;
+    border-radius: 12px;
+  }
+}
