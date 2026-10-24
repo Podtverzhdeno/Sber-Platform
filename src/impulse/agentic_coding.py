@@ -162,13 +162,13 @@ def evaluate_profile(
 
 
 __all__ = [
+    "ROLE_TARGETS",
+    "SCALE_KEY",
+    "SKILLS",
+    "SOURCE_MAP_VERSION",
     "QualifiedEvidence",
     "RoleProfile",
     "SkillPosition",
     "VerificationStatus",
-    "SOURCE_MAP_VERSION",
-    "SCALE_KEY",
-    "SKILLS",
-    "ROLE_TARGETS",
     "evaluate_profile",
 ]
