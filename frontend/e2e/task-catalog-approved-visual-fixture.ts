@@ -56,7 +56,7 @@ export const approvedGeometryTasks: CatalogItem[] = taskTitles.map((title, index
 export const approvedGeometryPage = catalogPage(approvedGeometryTasks);
 export const approvedGeometryTerms = {
   ...catalogTerms,
-  task_id: approvedGeometryTasks[0]!.task_id,
+  task_id: approvedGeometryTasks[0].task_id,
   prerequisites: ["Основы Python", "Готовность к командной работе"],
   selection_criteria: ["Соответствие требованиям задачи", "Проверяемый опыт"],
   support_model: "Встречи с ментором после согласования",
