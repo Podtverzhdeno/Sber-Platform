@@ -440,7 +440,7 @@ export function BootcampCatalog({
 
   function resetFilters() {
     const next = new URLSearchParams(searchParams);
-    for (const key of ["relevance", "category", "q", "level", "course", "panel"]) next.delete(key);
+    for (const key of ["relevance", "category", "q", "level", "track", "course", "panel"]) next.delete(key);
     setSearchParams(next);
   }
 
@@ -487,7 +487,7 @@ export function BootcampCatalog({
   const deepLinked =
     deepLinkedKey !== null ? (catalog.data.find((card) => card.key === deepLinkedKey) ?? null) : null;
   const passesFilters = (card: CourseCardState) => visible.includes(card);
-  const orderedVisible = deepLinked && passesFilters(deepLinked) ? ([deepLinked, ...visible.filter((card) => card !== deepLinked)]) : visible;
+  const orderedVisible = visible;
   const deepLinkFilteredOut = deepLinked !== null && !passesFilters(deepLinked);
   const panel = searchParams.get("panel") ?? "detail";
 
@@ -519,7 +519,8 @@ export function BootcampCatalog({
       {catalog.isError && <p className="notice" role="status">Показаны сохранённые данные каталога. Обновление временно недоступно. <button type="button" onClick={() => { void catalog.refetch(); }}>Повторить</button></p>}
       {streak.isError && <p className="notice" role="status">Серия обучения временно недоступна. Каталог продолжает работать.</p>}
       <div className="bc-role-switch-row" role="group" aria-label="Выбор профессиональной роли">
-        {trackOptions.map((key) => <button key={key} type="button" aria-pressed={trackFilter === key || (trackFilter === "all" && key === trackOptions[0])} onClick={() => { setTrack(key); }}>{key}</button>)}
+        {trackOptions.length > 1 && <button type="button" aria-pressed={trackFilter === "all"} onClick={() => { setTrack("all"); }}>Все направления</button>}
+        {trackOptions.map((key) => <button key={key} type="button" aria-pressed={trackFilter === key} onClick={() => { setTrack(key); }}>{key}</button>)}
         {trackOptions.length === 0 && <span className="bc-muted">Активные траектории пока не найдены</span>}
       </div>
       <div className="bc-overview-grid">
