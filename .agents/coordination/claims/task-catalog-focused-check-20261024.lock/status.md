@@ -1,7 +1,7 @@
 # Task catalog focused browser verification
 - task_id: task-catalog-focused-check-20261024
 - session_id: gpt6-20261024-1945-fidelity-focus
-- status: IN_PROGRESS
+- status: REVIEW
 - depends_on: [task-catalog-visual-polish-20261024, task-catalog-visual-fidelity-qa-20261024]
 - base_revision: eeda9f7adc6aaf2e9ef41b927408f8a7c7ce1ea3
 - write_scope:
@@ -9,3 +9,10 @@
   - .agents/coordination/claims/task-catalog-focused-check-20261024.lock/status.md
 - acceptance: 10 synthetic task layout, axe accessibility and task behavior on Linux head
 - no runtime files, no main or Railway deployment
+
+## Evidence 2026-10-24
+- workflow_run: 40115675727
+- result: SUCCESS, 5 of 5 passed under Linux Chromium, source reference geometry 1672x941
+- covers: 10-task 90px list row ceiling, five neutral stages, four conditional benefits, terms consent, light-theme WCAG AA and markup validity
+- scope: release merge blocked until final PR CI and reference image review
+- temporary focused workflow to be deleted after success
