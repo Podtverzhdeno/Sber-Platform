@@ -26,6 +26,7 @@ import {
 
 import type { ApiChannelView, ApiMessageView } from "./contracts";
 import { isReferenceChannel, referencePinnedMessage } from "./reference-fixtures";
+import { referenceAvatarFor } from "./reference-avatars";
 import {
   CHAT_REACTION_EMOJIS,
   buildChatRows,
@@ -171,6 +172,15 @@ export function ChatHistory({
     }
   }, [hasMoreOlder, isPaginating, onLoadOlder]);
 
+  // The approved static PNGs show reference conversations from their first message.
+  // Production chats keep their own normal bottom anchoring.
+  useLayoutEffect(() => {
+    if (!isReferenceChannel(channel?.id)) return;
+    const pane = scrollRef.current;
+    if (pane) pane.scrollTop = 0;
+    wasAtBottomRef.current = false;
+  }, [channel?.id]);
+
   // Восстановление якоря: при подгрузке старой страницы окно остаётся на том же месте.
   useLayoutEffect(() => {
     const pane = scrollRef.current;
@@ -180,7 +190,7 @@ export function ChatHistory({
       if (delta > 0) pane.scrollTop += delta;
     }
     anchorHeightRef.current = pane.scrollHeight;
-    if (wasAtBottomRef.current) scrollToBottom();
+    if (wasAtBottomRef.current && !isReferenceChannel(channel?.id)) scrollToBottom();
     loadingOlderRef.current = false;
   }, [messages, pendingMessages, scrollToBottom]);
 
@@ -246,8 +256,12 @@ export function ChatHistory({
       aria-label={ariaLabel ?? `Чат «${channelTitle}»`}
     >
       <header className="msg-chat__header" aria-label="Заголовок чата">
-        <span className="msg-chat__avatar" aria-hidden="true">
-          {channelInitial(channel)}
+        <span
+          className="msg-chat__avatar"
+          aria-hidden="true"
+          data-reference-tone={channel ? referenceAvatarFor(channel.id)?.tone : undefined}
+        >
+          {(channel && referenceAvatarFor(channel.id)?.glyph) ?? channelInitial(channel)}
         </span>
         <span className="msg-chat__header-title">
           <strong>{channelTitle}</strong>
