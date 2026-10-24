@@ -620,61 +620,55 @@ export function StageDetail(props: {
   onOpenDetails?: (stageKey: string) => void;
 }) {
   const { milestone, nextStep, role } = props;
+  const canOpen = props.onOpenDetails !== undefined && props.state !== "locked";
+  const total = Math.max(1, role.total_milestones);
   return (
     <section className="trajectory-v2-stage-detail" data-testid="trajectory-stage-detail" data-stage-key={milestone.key}>
-      <header>
-        <strong>{milestone.title}</strong>
-        <span>{MILESTONE_STATE_LABELS[props.state] ?? props.state}</span>
-        {props.onOpenDetails !== undefined && (
-          <button
-            type="button"
-            className="trajectory-v2-stage-details-button"
-            onClick={() => {
-              props.onOpenDetails?.(milestone.key);
-            }}
-          >
-            Подробнее об этапе
+      <div className="trajectory-v2-stage-header">
+        <div>
+          <small>Этап {milestone.position} из {total}</small>
+          <h3>{milestone.title}</h3>
+          <p>{milestone.purpose}</p>
+        </div>
+        <div className="trajectory-v2-stage-progress">
+          <span className="trajectory-v2-stage-state" data-state={props.state}>
+            {MILESTONE_STATE_LABELS[props.state] ?? props.state}
+          </span>
+          {role.attempt_number !== null && <small>{role.completed_milestones} из {total} этапов завершено</small>}
+          <progress max={total} value={Math.min(total,role.completed_milestones)} aria-label="Завершено этапов роли"/>
+        </div>
+      </div>
+      <div className="trajectory-v2-task-row" data-state={props.state}>
+        <span className="trajectory-v2-task-check" aria-hidden="true">
+          {props.state === "completed" ? "✓" : props.state === "locked" ? "🔒" : ""}
+        </span>
+        <div className="trajectory-v2-task-copy">
+          <strong>{milestone.target_kind === "course" ? `Курс: ${milestone.title}` : milestone.title}</strong>
+          <small>{milestone.skill} · {milestone.target_kind === "task" ? "Практическая задача" : milestone.target_kind === "course" ? "Обучение" : milestone.target_kind}</small>
+        </div>
+        <span className="trajectory-v2-task-status">{props.state === "completed" ? "Завершено" : props.state === "locked" ? "Недоступно" : "К выполнению"}</span>
+        {canOpen ? (
+          <button type="button" className={props.state === "completed" ? "trajectory-v2-task-action" : "trajectory-v2-task-action is-primary"} onClick={() => props.onOpenDetails?.(milestone.key)}>
+            {props.state === "completed" ? "Посмотреть" : "Продолжить"} →
           </button>
-        )}
-      </header>
-      <p>{milestone.purpose}</p>
-      <dl>
-        <div>
-          <dt>Навык</dt>
-          <dd>{milestone.skill}</dd>
-        </div>
-        <div>
-          <dt>Цель</dt>
-          <dd>
-            {milestone.target_kind === "course"
-              ? `Курс · ${milestone.target_key}`
-              : milestone.target_kind === "task"
-                ? `Задача · ${milestone.target_key}`
-                : milestone.target_kind}
-          </dd>
-        </div>
-        <div>
-          <dt>Позиция</dt>
-          <dd>{milestone.position}</dd>
-        </div>
-      </dl>
-      {props.state === "locked" ? (
+        ) : null}
+      </div>
+      <details className="trajectory-v2-stage-more">
+        <summary>Подробнее об этапе</summary>
+        <dl>
+          <div><dt>Навык</dt><dd>{milestone.skill}</dd></div>
+          <div><dt>Цель</dt><dd>{milestone.target_kind} · {milestone.target_key}</dd></div>
+          <div><dt>Позиция</dt><dd>{milestone.position}</dd></div>
+        </dl>
+      </details>
+      {props.state === "locked" && (
         <p className="trajectory-v2-stage-note" role="status">
-          {nextStep === null
-            ? "Этап недоступен: сервер не разрешает переход дальше."
-            : `Этап откроется после завершения «${nextStep.title}». Первый разрешённый шаг — «${nextStep.title}».`}
+          {nextStep === null ? "Этап недоступен: сервер не разрешает переход дальше." : `Этап откроется после завершения «${nextStep.title}».`}
         </p>
-      ) : null}
-      {props.state === "available" && role.attempt_number === null ? (
-        <p className="trajectory-v2-stage-note" role="status">
-          Прогресс по этапам появится после выбора траектории; каталог цели указан выше.
-        </p>
-      ) : null}
-      {props.state === "current" && role.attempt_number !== null ? (
-        <p className="trajectory-v2-stage-note" role="status">
-          Первый разрешённый шаг этой траектории — текущий этап «{milestone.title}».
-        </p>
-      ) : null}
+      )}
+      {props.state === "available" && role.attempt_number === null && (
+        <p className="trajectory-v2-stage-note" role="status">Прогресс появится после выбора траектории.</p>
+      )}
     </section>
   );
 }
