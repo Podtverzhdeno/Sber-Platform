@@ -32,6 +32,7 @@ import type {
   CatalogSort,
 } from "./types";
 import "./catalog-v2.scss";
+import "./micro-interactions.scss";
 
 const difficultyLabels: Record<string, string> = {
   beginner: "Начальный",
@@ -159,7 +160,7 @@ function TaskSummary(props: {
   onShare: () => void;
 }) {
   const { item } = props;
-  const canApply = item.allowed_actions.includes("apply") && item.eligibility.status === "eligible";
+  const canApply = item.allowed_actions.includes("apply") && item.eligibility.status === "eligible" && item.application_state === "none";
   const canSeeConditions = item.allowed_actions.includes("open_conditions") || canApply;
   return (
     <article
@@ -184,7 +185,8 @@ function TaskSummary(props: {
           <h2>{item.title}</h2>
         </div>
         <div className="catalog-v2-card-match"><MatchBadge item={item} /></div>
-        <button type="button" className="catalog-v2-card-bookmark" disabled={props.bookmarkPending}
+        <button type="button" className="catalog-v2-card-bookmark" disabled={props.bookmarkPending || !item.allowed_actions.includes("bookmark")}
+          title={!item.allowed_actions.includes("bookmark") ? "Сохранение этой задачи недоступно" : item.bookmarked ? "Удалить из сохранённых" : "Сохранить задачу"}
           aria-label={item.bookmarked ? "Сохранено" : "Сохранить"}
           aria-pressed={item.bookmarked} onClick={props.onBookmark}>
           <Bookmark size={19} fill={item.bookmarked ? "currentColor" : "none"} aria-hidden="true" />
@@ -204,8 +206,8 @@ function TaskSummary(props: {
       ) : null}
       <footer className="catalog-v2-card-actions">
         <button type="button" onClick={props.onOpen}>Подробнее <ChevronDown size={14} aria-hidden="true" /></button>
-        {canSeeConditions ? <button type="button" className="catalog-v2-primary" disabled={!canApply}
-          onClick={(event) => { event.currentTarget.focus(); props.onConditions(); }}>Условия и отклик</button> : null}
+        {canSeeConditions ? <button type="button" className={canApply ? "catalog-v2-primary" : "catalog-v2-secondary"}
+          onClick={(event) => { event.currentTarget.focus(); props.onConditions(); }}>{canApply ? "Условия и отклик" : "Посмотреть условия"}</button> : null}
         {item.allowed_actions.includes("share") ? <button type="button" aria-label="Поделиться"
           className="catalog-v2-card-share" onClick={props.onShare}><Share2 size={16} aria-hidden="true" /></button> : null}
       </footer>
@@ -231,7 +233,7 @@ function TaskDetail(props: {
   const { item } = props;
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
   const [growthExpanded, setGrowthExpanded] = useState(true);
-  const canApply = item.allowed_actions.includes("apply") && item.eligibility.status === "eligible";
+  const canApply = item.allowed_actions.includes("apply") && item.eligibility.status === "eligible" && item.application_state === "none";
   const canSeeConditions = item.allowed_actions.includes("open_conditions") || canApply;
   const shownBenefits = item.benefits.filter((benefit) => benefit.state !== "unavailable");
   return (
