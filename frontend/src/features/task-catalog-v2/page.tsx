@@ -258,15 +258,18 @@ function TaskDetail(props: {
           </dl>
         </section>
         <section>
-          <h3>Почему задача рекомендована</h3>
+          <h3>Почему подходит</h3>
           {item.match.reasons.length ? (
             <ul>{item.match.reasons.map((reason) => <li key={reason.code}>{reason.label}</li>)}</ul>
           ) : <p>Причины появятся после накопления достаточного coverage.</p>}
-          <small>Алгоритм: {item.match.algorithm_version ?? "не рассчитан"} · расчёт: {formatCalculatedAt(item.match.calculated_at)}. Это не вероятность отбора или найма.</small>
-          <small className="catalog-v2-match-snapshot">Снимок входных данных: <code>{item.match.source_snapshot_version}</code></small>
+          <details className="catalog-v2-provenance">
+            <summary>Как рассчитана релевантность</summary>
+            <p>Алгоритм: {item.match.algorithm_version ?? "не рассчитан"} · расчёт: {formatCalculatedAt(item.match.calculated_at)}. Это не вероятность отбора или найма.</p>
+            <p className="catalog-v2-match-snapshot">Снимок входных данных: <code>{item.match.source_snapshot_version}</code></p>
+          </details>
         </section>
-        <section>
-          <h3>Вклад в развитие</h3>
+        <section className="catalog-v2-growth-section">
+          <h3>Развитие навыков</h3>
           <button
             type="button"
             aria-expanded={growthExpanded}
@@ -283,27 +286,39 @@ function TaskDetail(props: {
                 {item.skill_impact.map((impact) => (
                   <li key={impact.skill_id}>
                     <strong>{impact.title}</strong>
-                    <dl>
-                      <div><dt>Текущий уровень</dt><dd>{impact.current_level ?? "Нет подтверждённого уровня"}</dd></div>
-                      <div><dt>Прогноз после проверки</dt><dd>{impact.projected_level ?? "Качественный потенциал, без числового прогноза"}</dd></div>
-                      <div><dt>Потенциальный рост</dt><dd>{impact.status === "calculated" ? "Рассчитан моделью; требует верификации" : "Не рассчитан численно"}</dd></div>
-                    </dl>
+                    <div className="catalog-v2-skill-transition">
+                      <span><small>Текущий уровень</small><b>{impact.current_level ?? "Нет подтверждённого уровня"}</b></span>
+                      <span className="catalog-v2-skill-arrow" aria-hidden="true">→</span>
+                      <span><small>Прогноз после проверки</small><b>{impact.projected_level ?? "Без числового прогноза"}</b></span>
+                    </div>
                     <p>{impact.explanation}</p>
-                    <small>{impact.verification_required ? "Результат не становится подтверждённым навыком автоматически." : "Статус проверки не указан."}</small>
+                    <small>{impact.status === "calculated" ? "Потенциальный рост рассчитан; необходима верификация." : "Потенциальный рост пока не рассчитан."} {impact.verification_required ? "Навык не подтверждается автоматически." : "Статус проверки не указан."}</small>
                   </li>
                 ))}
               </ul>
             ) : <p>Компетенции для прогноза не опубликованы; числовой рост не рассчитывается.</p>
           ) : null}
         </section>
-        <section>
-          <h3>План участия</h3>
+        <section className="catalog-v2-stage-section">
+          <div className="catalog-v2-section-heading"><h3>Этапы задачи</h3><span>План до начала работы</span></div>
           {item.stage_plan.stages.length ? (
-            <ol>{item.stage_plan.stages.map((stage) => <li key={stage.key}><strong>{stage.title}</strong><p>{stage.summary}</p><small>{stage.state === "locked" ? "Заблокировано в плане" : "Запланировано"} · {formatDuration(stage.estimated_minutes)}</small></li>)}</ol>
-          ) : <p>Заказчик не опубликовал ориентировочный план. Это не операционный прогресс задачи.</p>}
+            <>
+              <ol className="catalog-v2-stage-track">{item.stage_plan.stages.map((stage, index) => (
+                <li key={stage.key} data-state={stage.state}>
+                  <span className="catalog-v2-stage-index" aria-hidden="true">{index + 1}</span>
+                  <div className="catalog-v2-stage-content">
+                    <strong>{stage.title}</strong>
+                    <p>{stage.summary}</p>
+                    <small>{stage.state === "locked" ? "Пока недоступен" : "Запланировано"} · {formatDuration(stage.estimated_minutes)}</small>
+                  </div>
+                </li>
+              ))}</ol>
+              <p className="catalog-v2-plan-note">Это план, а не прогресс. Выполнение этапов будет учитываться только после назначения на задачу.</p>
+            </>
+          ) : <p>Заказчик не опубликовал ориентировочный план. Прогресс появляется только после назначения.</p>}
         </section>
-        <section>
-          <h3>Возможные преимущества</h3>
+        <section className="catalog-v2-benefits-section">
+          <h3>Что даст участие</h3>
           {item.benefits.length ? (
             <ul>{item.benefits.map((benefit) => <li key={benefit.code}><strong>{benefit.label}</strong><p>{benefit.condition}</p><small>{benefit.state === "potential" ? "При выполнении условия" : benefit.state}</small></li>)}</ul>
           ) : <p>Дополнительные преимущества не опубликованы.</p>}
@@ -315,7 +330,7 @@ function TaskDetail(props: {
             Перейти в рабочую область
           </button>
         ) : null}
-        {canApply ? <button type="button" className="catalog-v2-primary" onClick={(event) => { event.currentTarget.focus(); props.onConditions(); }}>Прочитать условия и откликнуться</button> : null}
+        {canApply ? <button type="button" className="catalog-v2-primary" onClick={(event) => { event.currentTarget.focus(); props.onConditions(); }}>Посмотреть условия и откликнуться</button> : null}
         {item.application_id !== null && item.allowed_actions.includes("withdraw") ? (
           confirmWithdraw ? (
             <span className="catalog-v2-withdraw-confirm" role="group" aria-label="Подтверждение отзыва">
@@ -538,6 +553,8 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
       {catalog.isError ? <StatePanel kind="stale" action="Повторить" onAction={() => { void catalog.refetch(); }} /> : null}
       {notice !== null ? <p className="catalog-v2-notice" role="status">{notice}<button type="button" aria-label="Закрыть уведомление" onClick={() => { setNotice(null); }}>×</button></p> : null}
       {catalog.isRefetching ? <p className="catalog-v2-refresh" role="status">Обновляем авторитетный снимок…</p> : null}
+      <div className="catalog-v2-workspace" data-layout={layout}>
+        <div className="catalog-v2-discovery">
       {items.length === 0 ? (
         <section className="catalog-v2-empty">
           <h2>Подходящих задач не найдено</h2>
@@ -582,6 +599,8 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
         )
       )}
       {catalog.hasNextPage ? <button type="button" className="catalog-v2-more" disabled={catalog.isFetchingNextPage} onClick={() => { void catalog.fetchNextPage(); }}>{catalog.isFetchingNextPage ? "Загружаем…" : "Показать ещё"}</button> : null}
+        </div>
+        <aside className="catalog-v2-inspector" aria-label="Панель выбранной задачи">
       {selectedTaskId !== null && detail.isPending && selected === undefined ? <StatePanel kind="loading" /> : null}
       {selectedTaskId !== null && detail.isError && selected === undefined ? <StatePanel kind={isOfflineError(detail.error) ? "offline" : "restricted"} action="Закрыть" onAction={() => { updateParams({ task: null }); }} /> : null}
       {selected !== undefined ? (
@@ -595,7 +614,16 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
           onWithdraw={(applicationId) => { withdraw.mutate(applicationId); }}
           onGrowthExpand={() => { trackCatalogEvent({ eventName: "growth_expand", task: selected }); }}
         />
+      ) : selectedTaskId === null && items.length > 0 ? (
+        <div className="catalog-v2-inspector-empty">
+          <span className="catalog-v2-inspector-empty-mark" aria-hidden="true">↗</span>
+          <h2>Выберите задачу</h2>
+          <p>Посмотрите условия, требования и навыки, которые сможете развить после выполнения и проверки результата.</p>
+          <p className="catalog-v2-inspector-empty-tip">Начните с подходящей карточки слева — отклик не будет отправлен без вашего согласия.</p>
+        </div>
       ) : null}
+        </aside>
+      </div>
       {conditionsTask !== null ? (
         <ConditionsDialog
           key={conditionsTask.task_id}
