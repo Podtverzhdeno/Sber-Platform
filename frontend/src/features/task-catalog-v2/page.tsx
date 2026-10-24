@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Award, BadgeCheck, Bookmark, BriefcaseBusiness, CalendarDays, ChartNoAxesColumnIncreasing, Check, ChevronDown, ClipboardList, Clock3, Info, Laptop2, LayoutGrid, List, Search, Share2, SlidersHorizontal, Sparkles, Users } from "lucide-react";
+import { Award, Bookmark, BriefcaseBusiness, ChartNoAxesColumnIncreasing, ChevronDown, ClipboardList, Clock3, Info, Laptop2, LayoutGrid, List, Search, Share2, SlidersHorizontal, Sparkles, Users } from "lucide-react";
 
 import { ApiClientError } from "../../api/client";
 import { StatePanel } from "../../components/ui";
