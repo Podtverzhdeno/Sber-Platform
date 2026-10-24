@@ -73,7 +73,7 @@ describe("trajectory growth analytics", () => {
     expect(screen.getByText("Готовность роли:").parentElement).toHaveTextContent("Недостаточно данных");
     expect(screen.getByRole("status")).toHaveTextContent("Неизвестные уровни не заменены нулём");
     expect(screen.getByText("Сейчас: нет подтверждённых данных")).toBeInTheDocument();
-    expect(screen.getByRole("img")).toHaveAccessibleName(/жёлтая цель, красный дефицит, зелёный достигнутый уровень, серый неизвестный уровень/);
+    expect(screen.getByRole("img")).toHaveAccessibleName(/оранжевая пунктирная цель, зелёный текущий уровень, серый неизвестный уровень/);
     expect(container.querySelector(".growth-deficit-fill")).toBeInTheDocument();
     expect(container.querySelector(".growth-unknown-fill")).toBeInTheDocument();
   });
