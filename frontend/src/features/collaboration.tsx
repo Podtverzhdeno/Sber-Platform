@@ -521,7 +521,9 @@ export function MessagingWorkspace({
             viewerId={personId}
             workContext={contextQuery.data ?? null}
             open={contextVisible}
-            onClose={isNarrow ? () => { setMobilePane("chat"); } : undefined}
+            onClose={() => { if (isNarrow) setMobilePane("chat"); else setContextOpen(false); }}
+            onToggleMute={() => { toggleMute.mutate(!selected.muted); }}
+            messageRefs={messages.flatMap((message) => message.artifact_refs)}
             onOpenTask={(taskId) => {
               navigateClient(`/workspace/1?task=${encodeURIComponent(taskId)}`);
             }}
