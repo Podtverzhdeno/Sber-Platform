@@ -110,3 +110,21 @@ test("My Projects: mobile three views do not horizontally overflow the viewport"
   const width=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   expect(width).toBeLessThanOrEqual(2);
 });
+
+test("My Projects: hover animations and workspace transition are real",async({page})=>{
+  await page.setViewportSize({width:1648,height:941});
+  await fixture(page);
+  const tile=page.locator(".mp-project-tile").nth(1);
+  await expect(tile).toBeVisible();
+  const initial=await tile.evaluate(node=>getComputedStyle(node).transform);
+  const duration=await tile.evaluate(node=>getComputedStyle(node).transitionDuration);
+  expect(duration).not.toBe("0s");
+  await tile.hover();
+  await expect.poll(()=>tile.evaluate(node=>getComputedStyle(node).transform)).not.toBe(initial);
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Открыть/}).click();
+  await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
+  await page.getByRole("button",{name:/Продолжить работу/}).click();
+  await expect(page.locator(".mpv2--workspace")).toBeVisible();
+  await page.getByRole("button",{name:"К странице проекта"}).click();
+  await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
+});
