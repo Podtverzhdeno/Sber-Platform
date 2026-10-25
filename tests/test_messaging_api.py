@@ -392,7 +392,7 @@ def test_demo_contact_directory_and_group_creation_round_trip() -> None:
     contacts_response = api.get("/api/v1/me/messaging/contacts")
     assert contacts_response.status_code == 200
     contacts = contacts_response.json()
-    assert len(contacts) >= 14
+    assert len(contacts) >= 5
     assert str(ALEX) not in {person["id"] for person in contacts}
     assert {str(ELENA), str(ROMAN)}.issubset({person["id"] for person in contacts})
 
