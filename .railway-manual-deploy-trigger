@@ -8,3 +8,6 @@ release_request=2026-10-25-bootcamp-final-capstones-47b3bfee55b2
 
 # Center the recommendation modal close X with a vector icon, preserving hit area and styling
 release_request=2026-10-25-why-dialog-close-0b2f215519ea
+
+# Restore Bootcamp panel alignment and non-overlapping catalog across responsive breakpoints
+release_request=2026-10-25-bootcamp-layout-e27518446123
