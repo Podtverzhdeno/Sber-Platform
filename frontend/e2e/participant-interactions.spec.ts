@@ -443,6 +443,16 @@ test("rating benefits navigate from the default list and back", async ({ page })
   await expect(rewards.nth(0)).toContainText("ТОП 30");
   await expect(rewards.nth(1)).toContainText("ТОП 1");
   await expect(rewards.nth(2)).toContainText("ТОП 50");
+  const rewardArt = rewards.locator(".ir-art");
+  await expect(rewardArt).toHaveCount(3);
+  for (const [index, tier] of ["top30", "top1", "top50"].entries()) {
+    await expect(rewardArt.nth(index)).toHaveCSS(
+      "background-image", new RegExp("/rating-reference/" + tier + "\\.svg"),
+    );
+    const asset = await page.request.get("/rating-reference/" + tier + ".svg");
+    expect(asset.status()).toBe(200);
+    expect(asset.headers()["content-type"]).toContain("image/svg+xml");
+  }
   await rewards.nth(1).click();
   await expect(page.getByRole("dialog", { name: /ТОП 1/ })).toBeVisible();
   await page.keyboard.press("Escape");

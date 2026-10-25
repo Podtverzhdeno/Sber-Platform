@@ -249,3 +249,54 @@
   .ir-page[data-screen="list"] .ir-hero {min-height:130px;}
   .ir-leader-row {min-height:62px;}
 }
+
+
+/* Approved reference artwork: use illustrated crowns/trophies, rather than
+   geometric CSS placeholder crystals. The content and hit targets remain HTML. */
+.ir-page {
+  .ir-benefit > .ir-art,
+  .ir-top-card > .ir-art {
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-position: center center;
+    isolation: isolate;
+  }
+  .ir-benefit > .ir-art > *,
+  .ir-top-card > .ir-art > * { display: none; }
+  .ir-benefit--top30 > .ir-art,
+  .ir-top-card--silver > .ir-art,
+  .ir-top-card--teal > .ir-art {
+    background-image: url("/rating-reference/top30.svg");
+  }
+  .ir-benefit--top1 > .ir-art,
+  .ir-top-card--gold > .ir-art {
+    background-image: url("/rating-reference/top1.svg");
+  }
+  .ir-benefit--top50 > .ir-art {
+    background-image: url("/rating-reference/top50.svg");
+  }
+  .ir-benefit--top1 > .ir-art,
+  .ir-benefit--top50 > .ir-art,
+  .ir-top-card--gold > .ir-art {
+    filter: drop-shadow(0 0 12px #ffbd524c);
+  }
+  .ir-benefit--top30 > .ir-art,
+  .ir-top-card--silver > .ir-art,
+  .ir-top-card--teal > .ir-art {
+    filter: drop-shadow(0 0 10px #26dfff55);
+  }
+}
+@media (min-width: 901px) {
+  .ir-page[data-screen="list"] {
+    gap: 8px;
+    .ir-hero { min-height: 94px; }
+    .ir-benefit--compact { min-height: 74px; }
+    .ir-leader-row { min-height: 46px; }
+    .ir-list-head { min-height: 22px; }
+    .ir-person .ir-avatar { width: 35px; height: 35px; flex-basis: 35px; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ir-page .ir-benefit > .ir-art,
+  .ir-page .ir-top-card > .ir-art { transition: none; }
+}
