@@ -106,21 +106,24 @@ function Status({ status }: { status: string }) {
   return <span className={`mp-status mp-status--${tone}`}><i />{statusText[status] || status}</span>;
 }
 function RewardsPath({ completedCount, onSelect }: { completedCount: number; onSelect: (id: string) => void }) {
-  const unlocked = (id: string) => id === "gitverse" && completedCount > 0 || id === "gigacode" && completedCount >= 1 ||
-    id === "gigaagent" && completedCount >= 2 || id === "internship" && completedCount >= 5 ||
-    id === "community" && completedCount >= 10 || id === "portfolio" && completedCount >= 1;
-  return <section className="mp-benefit-journey" aria-label="Путь выгод от проектов">
-    <div className="mp-benefit-heading"><h2>Твой путь выгоды от проектов</h2><span><Info size={14}/> Программа возможностей · условия уточняются</span></div>
+  const milestones = benefits.filter(item=>item.id!=="assessment"&&item.id!=="portfolio");
+  const always = benefits.filter(item=>item.id==="assessment"||item.id==="portfolio");
+  const unlocked = (id: string) => id === "gitverse" || id === "gigacode" && completedCount>=1 ||
+    id === "gigaagent" && completedCount>=2 || id === "internship" && completedCount>=5 ||
+    id === "community" && completedCount>=10 || id === "mentor" && completedCount>=20;
+  return <section className="mp-benefit-journey" aria-label="Возможности и результаты участия">
+    <div className="mp-benefit-heading"><h2>Возможности за выполненные проекты</h2><span><Info size={14}/> Пороги участия, выдача по условиям программы</span></div>
     <div className="mp-benefit-steps">
-      {benefits.map((reward,index) => {
-        const Icon = reward.icon;
-        return <button type="button" onClick={() =>{ onSelect(reward.id); }} className={`mp-benefit-step mp-benefit-step--${reward.color}`} key={reward.id} aria-label={`${reward.title}, ${reward.unlock}`}>
-          <span className="mp-benefit-step__index">{index + 1}</span><span className="mp-benefit-step__icon"><Icon size={25}/></span>
-          <span className="mp-benefit-step__text"><strong>{reward.title}</strong><small>{unlocked(reward.id) ? "Этап достигнут · выдача по условиям" : reward.unlock}</small></span>
-          {index < benefits.length-1 && <ArrowRight className="mp-benefit-arrow" size={15}/>}
+      {milestones.map((reward,index)=>{
+        const Icon=reward.icon;
+        return <button type="button" onClick={()=>onSelect(reward.id)} className={"mp-benefit-step mp-benefit-step--"+reward.color} key={reward.id} aria-label={reward.title+", "+reward.unlock}>
+          <span className="mp-benefit-step__index">{index+1}</span><span className="mp-benefit-step__icon"><Icon size={25}/></span>
+          <span className="mp-benefit-step__text"><strong>{reward.title}</strong><small>{unlocked(reward.id)?"Порог достигнут · выдача по условиям":reward.unlock}</small></span>
+          {index<milestones.length-1&&<ArrowRight className="mp-benefit-arrow" size={15}/>}
         </button>;
       })}
     </div>
+    <div className="mp-benefit-always"><span>На каждом проекте</span>{always.map(reward=>{const Icon=reward.icon;return <button type="button" key={reward.id} onClick={()=>onSelect(reward.id)}><Icon size={15}/><strong>{reward.title}</strong><small>{reward.unlock}</small></button>})}</div>
   </section>;
 }
 function ProjectSidebarRow({ project, selected, onSelect, onOpen, onBookmark, saved }: {
