@@ -7,7 +7,7 @@ remain exclusively on the verified provider/reviewer track.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
@@ -20,6 +20,7 @@ from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.bootcamp.service import BootcampCatalogService
 from impulse.domain.identity import Role
+from impulse.domain.development import local_learning_days
 
 router = APIRouter(tags=["bootcamp"])
 UNIT_COUNT = 8
@@ -256,6 +257,29 @@ async def complete_impulse_lesson(
                     message="Сначала завершите предыдущий урок.",
                     status_code=409,
                 )
+        if changed is not None:
+            # Atomically record the lesson as qualified activity. Only a genuine
+            # first completion may write an event; repeated clicks are idempotent.
+            local_day = next(
+                iter(local_learning_days((datetime.now(UTC),), authenticated.actor.timezone))
+            )
+            await session.execute(
+                text(
+                    "INSERT INTO qualification_events "
+                    "(id, person_id, source, source_ref, local_date, timezone, "
+                    "data_origin, created_by) VALUES "
+                    "(:id, :person, 'course_learning', :source_ref, :day, "
+                    ":timezone, 'impulse_study', :person) "
+                    "ON CONFLICT (person_id, source, source_ref) DO NOTHING"
+                ),
+                {
+                    "id": uuid4(),
+                    "person": person,
+                    "source_ref": f"impulse-study:{course_key}:lesson:{index}",
+                    "day": local_day,
+                    "timezone": authenticated.actor.timezone,
+                },
+            )
     return await _view(request, person, course_key)
 
 
