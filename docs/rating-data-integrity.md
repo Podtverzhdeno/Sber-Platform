@@ -19,3 +19,5 @@ The participant ranking is a read-only projection of the published recognition s
 - TypeScript, linter, backend recognition API tests, unit tests and Chromium desktop/mobile scenarios must pass before deployment.
 
 **Note:** Program privileges are informational until an independently published award policy grants them.
+
+Task stage plans and provisional event claims must not count toward score-ledger entries until the required reviewer or operator decision is committed.
