@@ -39,7 +39,6 @@ type CourseCardState = {
   verified_evidence: string | null;
 };
 
-type Streak = { current_days: number; qualified_dates: string[]; reason: string };
 type CourseDetail = {
   course_key: string; title: string; source_url: string; availability: string;
   access_note: string; enrollment_status: string | null; verified: boolean;
@@ -640,11 +639,6 @@ export function BootcampCatalog({
   const studyFor = (key: string): LearningCourse | undefined => study.data?.courses.find(item => item.course_key === key);
   const studyStarted = (key: string) => (studyFor(key)?.completed_units ?? 0) > 0;
   const studyFinished = (key: string) => studyFor(key)?.finished === true;
-  const streak = useQuery({
-    queryKey: ["streak"],
-    queryFn: () => apiRequest<Streak>("/api/v1/me/learning/streak"),
-    retry: retrySafeRead,
-  });
   const [searchParams, setSearchParams] = useSearchParams();
   const [expandedRoleCatalog, setExpandedRoleCatalog] = useState(false);
   const selectedCourseKey = searchParams.get("course");
@@ -715,7 +709,6 @@ export function BootcampCatalog({
         action="Обновить"
         onAction={() => {
           void catalog.refetch();
-          void streak.refetch();
         }}
       />
     );
@@ -782,7 +775,6 @@ export function BootcampCatalog({
     <div className="feature-stack bootcamp-experience bc-approved bc-reference" data-reference={view === "list" ? "BC-R02" : "BC-R01"}>
       <header className="bc-ref-heading">
         <div><h1 id="workspace-title">Bootcamp</h1><p>Обучение для твоей роли и реальных проектов</p></div>
-        <span className="bc-ref-streak" role="status">🔥 {streak.data ? "Серия: " + String(streak.data.current_days) + " дней" : "Серия недоступна"}</span>
       </header>
       {catalog.isError && <p className="notice" role="status">Обновление каталога недоступно. <button type="button" onClick={() => { void catalog.refetch(); }}>Повторить</button></p>}
       <AiRoleTabs roles={trackOptions} selected={selectedRole} onSelect={setRole} />
