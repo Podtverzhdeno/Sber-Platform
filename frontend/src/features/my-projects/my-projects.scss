@@ -620,3 +620,17 @@
 [data-theme="light"] .mpv2 :is(.mp-outcome-band,.mp-criteria-list li,.mp-overview-checkpoint,.mp-mini-stat){background:#ebf7fb;border-color:#c3dfe9}
 [data-theme="light"] .mpv2 :is(.mp-summary-lead,.mp-outcome-band strong,.mp-criteria-list li p,.mp-overview-checkpoint strong,.mp-progress-stage strong,.mp-history-item strong,.mp-permanent-benefit strong,.mp-contact-card strong){color:#17394e}
 [data-theme="light"] .mpv2 .mp-summary-panel{background:#f2fbfd}
+
+/* Rewards pathway: milestones are distinct from results that accumulate continuously. */
+.mpv2 .mp-benefit-steps{grid-template-columns:repeat(6,minmax(0,1fr));gap:11px}
+.mpv2 .mp-benefit-always{display:flex;align-items:center;flex-wrap:wrap;gap:8px;border-top:1px solid #1e4965;margin-top:12px;padding-top:12px}
+.mpv2 .mp-benefit-always>span{font-size:11px;color:#92bfd5;font-weight:800;margin-right:5px}
+.mpv2 .mp-benefit-always>button{display:inline-flex;align-items:center;gap:8px;min-height:34px;padding:7px 10px;border:1px solid #1d5364;border-radius:8px;color:#c9f6f4;background:#0a3041;text-align:left}
+.mpv2 .mp-benefit-always>button svg{color:#09eadd}
+.mpv2 .mp-benefit-always strong{font-size:11px}
+.mpv2 .mp-benefit-always small{color:#8ab8c9;font-size:10px}
+.mpv2 .mp-benefit-always>button:hover{background:#104756;border-color:#0addd4}
+@media(max-width:1420px){.mpv2 .mp-benefit-steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:800px){.mpv2 .mp-benefit-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:460px){.mpv2 .mp-benefit-steps{grid-template-columns:1fr 1fr}.mpv2 .mp-benefit-always>button{width:100%;justify-content:flex-start}}
+[data-theme="light"] .mpv2 .mp-benefit-always>button{background:#effbfc;color:#174054;border-color:#b4dce5}
