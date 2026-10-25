@@ -81,6 +81,6 @@ test("missing activity or streak source displays unknown, never fake zeros",asyn
  const root=page.getByTestId("premium-activity");
  await expect(root).toBeVisible();
  await expect(root.getByText("Показатель временно недоступен")).toBeVisible();
- await expect(root.getByText(/Нет истории активности/)).toBeVisible();
+ await expect(page.getByRole("alert").filter({hasText:"История активности недоступна"})).toBeVisible();
  await expect(root.getByText("Длительность сессий не измеряется")).toBeVisible();
 });
