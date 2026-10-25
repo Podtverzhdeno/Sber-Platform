@@ -1,12 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { ArrowRight, Bot, Check, Clock3, FileText, GitBranch, GraduationCap, List, LockKeyhole, Search, Sparkles, ChartNoAxesCombined, LayoutGrid } from "lucide-react";
 
 import { apiRequest, retrySafeRead, RuntimeApiPath } from "../../api/client";
 import { Badge, Card, Drawer, SafeExternalLink, StatePanel } from "../../components/ui";
 import { CourseLearningContent } from "./learning-content/CourseLearningContent";
 import "./bootcamp-ux.scss";
 import "./bootcamp-approved.scss";
+import "./reference-fidelity.scss";
 
 type MustTake = {
   skill: string;
@@ -205,9 +207,10 @@ function CatalogFilters({
   onReset: () => void;
 }) {
   const relevanceFilter = searchParams.get("relevance") ?? "all";
-  const trackFilter = searchParams.get("track") ?? "all";
+  const trackOptions = [...new Set(catalog.data.flatMap((card) => card.track_keys))];
+  const trackFilter = searchParams.get("track") ?? (trackOptions[0] ?? "all");
   const view = searchParams.get("view") ?? "card";
-  const category = searchParams.get("category") ?? "all";
+  const category = searchParams.get("category") ?? "role";
   const query = searchParams.get("q") ?? "";
   return (
     <div className="bootcamp-catalog-toolbar">
@@ -415,6 +418,36 @@ function RequirementsDetails({ cards, onSelect }: { cards: CourseCardState[]; on
   </div>;
 }
 
+
+function CourseArtwork({ title }: { title: string }) {
+  const key = title.toLocaleLowerCase("ru-RU");
+  const kind = key.includes("git") ? "git" : key.includes("python") ? "python" :
+    key.includes("fastapi") ? "api" : key.includes("агент") || key.includes("agent") ? "agent" :
+    key.includes("openspec") || key.includes("sdd") ? "spec" : "default";
+  return <span className={"bc-ref-art bc-ref-art--" + kind} aria-hidden="true">
+    {kind === "git" ? <GitBranch /> : kind === "python" ? <strong>Py</strong> :
+     kind === "agent" ? <Sparkles /> : kind === "api" ? <span>ϟ</span> : <FileText />}
+  </span>;
+}
+function CourseFlags({ card }: { card: CourseCardState }) {
+  return <div className="bc-ref-flags">
+    {card.must_take && <span className="bc-ref-chip bc-ref-chip--required"><GraduationCap />Нужно для роли</span>}
+    {!card.must_take && card.relevant && <span className="bc-ref-chip bc-ref-chip--recommended"><Sparkles />Рекомендован</span>}
+    {card.access_state === "available" ? <span className="bc-ref-chip bc-ref-chip--available"><Check />Доступен</span> :
+      <span className="bc-ref-chip bc-ref-chip--locked"><LockKeyhole />{card.access_state === "prerequisite_not_met" ? "Заблокирован" : "Недоступен"}</span>}
+    {card.completion_state === "verified" && <span className="bc-ref-chip bc-ref-chip--available"><Check />Подтверждено</span>}
+    {card.completion_state === "reported" && <span className="bc-ref-chip bc-ref-chip--progress">На проверке</span>}
+  </div>;
+}
+function CoursePrimaryAction({ card, onOpen }: { card: CourseCardState; onOpen: (key: string) => void }) {
+  const locked = card.access_state !== "available";
+  return <button type="button" className={"bc-ref-primary" + (locked ? " bc-ref-primary--locked" : "")}
+    onClick={() => { onOpen(card.key); }}>
+    {locked ? <><LockKeyhole />{card.access_state === "prerequisite_not_met" ? "Смотреть условия" : "Недоступен"}</> :
+      <>{card.completion_state === "verified" ? "Посмотреть курс" : card.completion_state === "reported" ? "Посмотреть результат" : "Открыть курс"}<ArrowRight /></>}
+  </button>;
+}
+
 export function BootcampCatalog({
   honorBoardEnabled,
   honorBoardConsent,
@@ -477,7 +510,7 @@ export function BootcampCatalog({
 
   function updateFilter(key: string, value: string) {
     const next = new URLSearchParams(searchParams);
-    if (value === "all") next.delete(key);
+    if (value === "all" && key !== "category") next.delete(key);
     else next.set(key, value);
     next.delete("course");
     next.delete("panel");
@@ -509,15 +542,13 @@ export function BootcampCatalog({
   const view = searchParams.get("view") ?? "card";
   const category = searchParams.get("category") ?? "all";
   const query = (searchParams.get("q") ?? "").trim().toLocaleLowerCase("ru-RU");
-  const trackOptions = [...new Set(catalog.data.flatMap((card) => card.track_keys))];
   const setTrack = (track: string) => { updateFilter("track", track); };
   const relevantCount = catalog.data.filter((card) => card.relevant).length;
   const forTrack = (card: CourseCardState) => trackFilter === "all" || card.track_keys.includes(trackFilter);
   const categoryCounts = [
-    { key: "all", label: "Все курсы", count: catalog.data.filter(forTrack).length },
     { key: "role", label: "Для моей роли", count: catalog.data.filter((card) => forTrack(card) && card.relevant).length },
-    { key: "required", label: "Обязательные", count: catalog.data.filter((card) => forTrack(card) && card.must_take !== null).length },
-    { key: "progress", label: "На проверке", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "reported").length },
+    { key: "all", label: "Все курсы", count: catalog.data.filter(forTrack).length },
+    { key: "progress", label: "В процессе", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "reported").length },
     { key: "completed", label: "Завершённые", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "verified").length },
   ];
   const pendingRequired = catalog.data.filter((card) => forTrack(card) && card.must_take && card.completion_state !== "verified");
