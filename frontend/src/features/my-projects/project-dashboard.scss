@@ -167,7 +167,7 @@
 @media(min-width:1024px){
   .workspace:has(.mpd-page){padding-left:0}
   .workspace:has(.mpd-page)>.sidebar{display:none}
-  .workspace:has(.mpd-page)>.workspace-content{padding:20px clamp(26px,4.5vw,76px) 44px}
+  .workspace:has(.mpd-page)>.workspace-content{padding:20px clamp(24px,2.9vw,48px) 44px}
 }
 
 /* Each About fact gets its own readable two-line block; prevent overlap
@@ -213,6 +213,6 @@
    hero content. Keep the three-column card canvas below at full width. */
 @media(min-width:1500px){
   .mpd-page .mpd-hero>.mpd-back{position:absolute;top:1px;left:0}
-  .mpd-page .mpd-heading{margin-left:190px;min-height:177px}
+  .mpd-page .mpd-heading{margin-left:210px;min-height:177px}
   .mpd-page .mpd-tabs{margin-top:12px}
 }
