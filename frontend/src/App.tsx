@@ -63,6 +63,7 @@ import { RoleAnalytics } from "./features/analytics";
 import { AnalyticsDashboardV3 } from "./features/analytics-v3/page";
 import { ParticipantRating } from "./features/portfolio";
 import { ParticipantPortfolioV2 } from "./features/portfolio-v2";
+import { ParticipantGuide } from "./features/participant-guide";
 import { MentorReviewWorkspace } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
 import { MessagingWorkspace } from "./features/collaboration";
@@ -669,6 +670,14 @@ function Workspace({
             onAction={() => {
               window.location.assign("/workspace/0");
             }}
+          />
+        )}
+        {allowed && actor.active_role === "participant" && currentSection && (
+          <ParticipantGuide
+            personId={actor.person_id}
+            section={currentSection}
+            navigation={navigation}
+            onNavigate={(index) => { void navigate(`/workspace/${String(index)}`); }}
           />
         )}
       </div>
