@@ -555,7 +555,7 @@ export function BootcampCatalog({
 
   function updateFilter(key: string, value: string) {
     const next = new URLSearchParams(searchParams);
-    if (value === "all" && key !== "category" && key !== "track") next.delete(key);
+    if (value === "all" && key !== "category") next.delete(key);
     else next.set(key, value);
     next.delete("course");
     next.delete("panel");
@@ -564,7 +564,7 @@ export function BootcampCatalog({
 
   function resetFilters() {
     const next = new URLSearchParams(searchParams);
-    for (const key of ["relevance", "category", "q", "level", "course", "panel"]) next.delete(key);
+    for (const key of ["relevance", "track", "category", "q", "level", "course", "panel"]) next.delete(key);
     setSearchParams(next);
   }
 
@@ -584,27 +584,42 @@ export function BootcampCatalog({
 
   const relevanceFilter = searchParams.get("relevance") ?? "all";
   const trackOptions: string[] = [...new Set(catalog.data.flatMap(card => card.track_keys))];
-  const trackFilter = searchParams.get("track") ?? (trackOptions[0] ?? "all");
+  // Role selection and catalog direction are independent state dimensions.
+  // Otherwise 'Все курсы' silently only showed the first role's courses.
+  const requestedRole = searchParams.get("role");
+  const selectedRole = requestedRole !== null && trackOptions.includes(requestedRole)
+    ? requestedRole : (trackOptions[0] ?? "all");
+  const trackFilter = searchParams.get("track") ?? "all";
   const view = searchParams.get("view") ?? "card";
   const category = searchParams.get("category") ?? "role";
   const query = (searchParams.get("q") ?? "").trim().toLocaleLowerCase("ru-RU");
   const setTrack = (track: string) => { updateFilter("track", track); };
+  const setRole = (role: string) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("role", role);
+    next.delete("track");
+    next.delete("course");
+    next.delete("panel");
+    next.delete("category");
+    setSearchParams(next);
+  };
   const forTrack = (card: CourseCardState) => trackFilter === "all" || card.track_keys.includes(trackFilter);
+  const forRole = (card: CourseCardState) => selectedRole === "all" || card.track_keys.includes(selectedRole);
   const categoryCounts = [
-    { key: "role", label: "Для моей роли", count: catalog.data.filter((card) => forTrack(card) && card.relevant).length },
+    { key: "role", label: "Для моей роли", count: catalog.data.filter((card) => forTrack(card) && forRole(card)).length },
     { key: "all", label: "Все курсы", count: catalog.data.filter(forTrack).length },
     { key: "progress", label: "В процессе", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "reported").length },
     { key: "completed", label: "Завершённые", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "verified").length },
   ];
-  const pendingRequired = catalog.data.filter((card) => forTrack(card) && card.must_take && card.completion_state !== "verified");
+  const pendingRequired = catalog.data.filter((card) => forRole(card) && card.must_take && card.completion_state !== "verified");
   const requiredWord = new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "one" ? "курс" :
     new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "few" ? "курса" : "курсов";
-  const nextCourse = catalog.data.find((card) => forTrack(card) && card.relevant && card.access_state === "available" && card.completion_state === "not_started") ?? null;
-  const selectedRoleTitle = trackOptions.find((key) => key === trackFilter) ?? (trackFilter === "all" ? "Все активные направления" : trackFilter);
+  const nextCourse = catalog.data.find((card) => forRole(card) && card.relevant && card.access_state === "available" && card.completion_state === "not_started") ?? null;
+  const selectedRoleTitle = selectedRole === "all" ? "Все активные направления" : selectedRole;
   const visible = catalog.data
     .filter((card) => relevanceFilter !== "relevant" || card.relevant)
     .filter(forTrack)
-    .filter((card) => category === "all" || (category === "role" && card.relevant) || (category === "required" && card.must_take !== null) || (category === "progress" && card.completion_state === "reported") || (category === "completed" && card.completion_state === "verified"))
+    .filter((card) => category === "all" || (category === "role" && forRole(card)) || (category === "required" && forRole(card) && card.must_take !== null) || (category === "progress" && card.completion_state === "reported") || (category === "completed" && card.completion_state === "verified"))
     .filter((card) => !query || [card.title, card.recommendation_reason, card.must_take?.skill ?? ""].some((value) => value.toLocaleLowerCase("ru-RU").includes(query)));
   const deepLinkedKey = searchParams.get("course");
   const deepLinked =
@@ -623,8 +638,8 @@ export function BootcampCatalog({
       </header>
       {catalog.isError && <p className="notice" role="status">Обновление каталога недоступно. <button type="button" onClick={() => { void catalog.refetch(); }}>Повторить</button></p>}
       <div className="bc-ref-role-tabs" role="group" aria-label="Направление обучения">
-        {trackOptions.map((role, index) => <button type="button" key={role} aria-pressed={trackFilter === role}
-          onClick={() => setTrack(role)}>{index === 0 ? <Bot /> : <ChartNoAxesCombined />}{role}</button>)}
+        {trackOptions.map((role, index) => <button type="button" key={role} aria-pressed={selectedRole === role}
+          onClick={() => setRole(role)}>{index === 0 ? <Bot /> : <ChartNoAxesCombined />}{role}</button>)}
       </div>
       <div className="bc-ref-hero-grid">
         <section className="bc-ref-continue" aria-labelledby="bc-continue-title">
@@ -650,9 +665,9 @@ export function BootcampCatalog({
         <div className="bc-ref-right-panels">
           <section className="bc-ref-role-summary" aria-labelledby="bc-role-title">
             <div><h2 id="bc-role-title">Моя роль: {selectedRoleTitle}</h2>
-              <div className="bc-ref-summary-tags"><span>♜ Грейд: не установлен</span><span>▦ Курсов: {catalog.data.filter(forTrack).length}</span></div>
+              <div className="bc-ref-summary-tags"><span>♜ Грейд: не установлен</span><span>▦ Курсов: {catalog.data.filter(forRole).length}</span></div>
             </div>
-            <div className="bc-ref-ring" aria-label="Число подтверждённых курсов, не оценка освоения навыков"><strong>{catalog.data.filter(card => forTrack(card) && card.completion_state === "verified").length}</strong><small>курсов<br/>подтверждено</small></div>
+            <div className="bc-ref-ring" aria-label="Число подтверждённых курсов, не оценка освоения навыков"><strong>{catalog.data.filter(card => forRole(card) && card.completion_state === "verified").length}</strong><small>курсов<br/>подтверждено</small></div>
           </section>
           <section className="bc-ref-grade" aria-labelledby="bc-grade-title">
             <img className="bc-ref-trophy" alt="" src="/bootcamp/trophy.svg" />
@@ -718,7 +733,7 @@ export function BootcampCatalog({
             onReason={() => { openPanel("reason", deepLinked.key); }} />)}
       </Drawer>
       <Drawer title="Требования к обучению" open={panel === "requirements"} onClose={closePanel}>
-        <RequirementsDetails cards={catalog.data.filter(forTrack)} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} />
+        <RequirementsDetails cards={catalog.data.filter(forRole)} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} />
       </Drawer>
       {honorBoardEnabled && honorBoardConsent && (
         <Card title="Зал славы курсов">
