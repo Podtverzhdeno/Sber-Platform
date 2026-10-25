@@ -1,26 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type FocusEvent, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { ArrowRight, CalendarDays, Clock3, Info, X } from "lucide-react";
+import { buildActivityDays, type ActivityEvent, type ActivityFeed, type Day } from "./calendar-model";
 
 import "./activity-calendar.scss";
 
-export type ActivityEvent = {
-  occurred_at: string;
-  kind: string;
-  title: string;
-  source_kind: string;
-  source_ref: string;
-};
-
-export type ActivityFeed = {
-  generated_at: string;
-  actor_timezone?: string;
-  freshness: { known: boolean; latest_observed_at: string | null };
-  events?: ActivityEvent[];
-};
-
 type ActivityCategory = "learning" | "practice" | "projects" | "community" | "certification";
-type Day = { key: string; timestamp: number; count: number; events: ActivityEvent[]; future: boolean };
 type Props = {
   snapshot: ActivityFeed | undefined;
   weeks: number;
@@ -29,30 +14,9 @@ type Props = {
   onOpenEvents: () => void;
 };
 
-const DAY = 86_400_000;
 const weekdayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 const MONTH = new Intl.DateTimeFormat("ru-RU", { month: "short", timeZone: "UTC" });
 const FULL_DATE = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-
-function utcKey(timestamp: number): string {
-  return new Date(timestamp).toISOString().slice(0, 10);
-}
-
-/** Assign timestamps to calendar days in the server-provided actor timezone. */
-function localDateKey(timestamp: number, timeZone: string): string | null {
-  if (!Number.isFinite(timestamp)) return null;
-  try {
-    const formatter = new Intl.DateTimeFormat("en-US", {
-      timeZone, year: "numeric", month: "2-digit", day: "2-digit",
-    });
-    const parts = formatter.formatToParts(new Date(timestamp));
-    const part = (type: string) => parts.find(item => item.type === type)?.value ?? "";
-    const dateKey = part("year") + "-" + part("month") + "-" + part("day");
-    return /^\d{4}-\d{2}-\d{2}$/.test(dateKey) ? dateKey : null;
-  } catch {
-    return null;
-  }
-}
 
 function categoryOf(event: ActivityEvent): ActivityCategory {
   const label = (event.kind + " " + event.source_kind + " " + event.title).toLowerCase();
@@ -67,38 +31,6 @@ const categoryLabels: Record<ActivityCategory, string> = {
   learning: "Обучение", practice: "Практика", projects: "Проекты",
   community: "События", certification: "Сертификация",
 };
-
-export function buildActivityDays(snapshot: ActivityFeed | undefined, weeks: number, now = new Date()): Day[] {
-  const length = Math.max(1, Math.min(52, Math.trunc(weeks) || 12)) * 7;
-  const timeZone = snapshot?.actor_timezone || "UTC";
-  const todayKey = localDateKey(now.getTime(), timeZone) ?? utcKey(now.getTime());
-  const todayTimestamp = Date.parse(todayKey + "T00:00:00Z");
-  const dayOfWeek = new Date(todayTimestamp).getUTCDay();
-  const monday = todayTimestamp - ((dayOfWeek + 6) % 7) * DAY;
-  const first = monday - (length - 7) * DAY;
-  const eventsByDate = new Map<string, ActivityEvent[]>();
-  const seen = new Set<string>();
-
-  for (const event of snapshot?.events ?? []) {
-    if (!event.source_kind || !event.source_ref || !event.title) continue;
-    const timestamp = Date.parse(event.occurred_at);
-    const key = localDateKey(timestamp, timeZone);
-    if (!key) continue;
-    const fingerprint = [event.source_kind, event.source_ref, event.kind, event.occurred_at].join("|");
-    if (seen.has(fingerprint)) continue;
-    seen.add(fingerprint);
-    const list = eventsByDate.get(key) ?? [];
-    list.push(event);
-    eventsByDate.set(key, list);
-  }
-
-  return Array.from({ length }, (_, index) => {
-    const timestamp = first + index * DAY;
-    const key = utcKey(timestamp);
-    const events = (eventsByDate.get(key) ?? []).sort((a, b) => a.occurred_at.localeCompare(b.occurred_at));
-    return { key, timestamp, count: events.length, events, future: timestamp > todayTimestamp };
-  });
-}
 
 function activityLevel(count: number, observed: boolean, future: boolean): number {
   if (future || !observed || count === 0) return 0;
