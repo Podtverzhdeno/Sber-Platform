@@ -9,6 +9,7 @@ import { Badge, Card, Drawer, SafeExternalLink, StatePanel } from "../../compone
 import { CourseLearningContent } from "./learning-content/CourseLearningContent";
 import { ImmersiveCourseExperience } from "./learning-content/ImmersiveCourseExperience";
 import { LearningProgressPanel } from "../learning-progress-panel";
+import { learningSummaryQueryKey, loadLearningSummary, type LearningCourse } from "../learning-progress";
 import { aiRoleTitle, bootcampRoleKeys, courseRoleTitles, isCourseInAiRole, orderRoleCourses } from "./trajectory-content";
 import "./bootcamp-ux.scss";
 import "./bootcamp-approved.scss";
@@ -611,6 +612,17 @@ function CourseContinueStatus({ card, onOpen, onCatalog }: {
   </div>;
 }
 
+export function StudyCourseProgress({course,compact=false}:{course?:LearningCourse;compact?:boolean}) {
+  if (!course) return null;
+  const units=Math.max(1,course.total_units);
+  const completed=Math.min(units,course.completed_units);
+  return <div className={"bc-study-progress"+(compact?" bc-study-progress--compact":"")} data-testid="bootcamp-study-progress" data-course-key={course.course_key}>
+    <span>{course.finished?"Учебный курс пройден":`Уроки: ${String(completed)} из ${String(units)}`}</span>
+    <progress max={units} value={completed} aria-label={`Учебный прогресс: ${course.title}`}/>
+    <small>{course.finished?"Сертификат обучения выдан · практические навыки подтверждаются отдельно":`${String(Math.round(completed/units*100))}% изучено · не оценка навыков`}</small>
+  </div>;
+}
+
 export function BootcampCatalog({
   honorBoardEnabled,
   honorBoardConsent,
@@ -624,6 +636,10 @@ export function BootcampCatalog({
     queryFn: () => apiRequest<CourseCardState[]>(CATALOG_PATH),
     retry: retrySafeRead,
   });
+  const study = useQuery({ queryKey: learningSummaryQueryKey, queryFn: loadLearningSummary, retry: retrySafeRead });
+  const studyFor = (key: string): LearningCourse | undefined => study.data?.courses.find(item => item.course_key === key);
+  const studyStarted = (key: string) => (studyFor(key)?.completed_units ?? 0) > 0;
+  const studyFinished = (key: string) => studyFor(key)?.finished === true;
   const streak = useQuery({
     queryKey: ["streak"],
     queryFn: () => apiRequest<Streak>("/api/v1/me/learning/streak"),
@@ -732,18 +748,19 @@ export function BootcampCatalog({
   const categoryCounts = [
     { key: "role", label: "Для моей роли", count: catalog.data.filter((card) => forTrack(card) && forRole(card)).length },
     { key: "all", label: "Все курсы", count: catalog.data.filter(forTrack).length },
-    { key: "progress", label: "В процессе", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "reported").length },
-    { key: "completed", label: "Завершённые", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "verified").length },
+    { key: "progress", label: "В процессе", count: catalog.data.filter((card) => forTrack(card) && (card.completion_state === "reported" || (studyStarted(card.key) && !studyFinished(card.key)))).length },
+    { key: "completed", label: "Завершённые", count: catalog.data.filter((card) => forTrack(card) && (card.completion_state === "verified" || studyFinished(card.key))).length },
   ];
   const pendingRequired = catalog.data.filter((card) => forRole(card) && card.must_take && card.completion_state !== "verified");
   const requiredWord = new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "one" ? "курс" :
     new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "few" ? "курса" : "курсов";
-  const nextCourse = orderRoleCourses(catalog.data.filter(forRole), selectedRole).find((card) => card.access_state === "available" && card.completion_state === "not_started" && (selectedRole !== "all" || card.relevant)) ?? null;
+  const suggestedCourses = orderRoleCourses(catalog.data.filter(forRole), selectedRole).filter((card) => card.access_state === "available" && card.completion_state === "not_started" && !studyFinished(card.key) && (selectedRole !== "all" || card.relevant));
+  const nextCourse = suggestedCourses.find(card => studyStarted(card.key)) ?? suggestedCourses[0] ?? null;
   const selectedRoleTitle = selectedRole === "all" ? "Все активные направления" : aiRoleTitle(selectedRole);
   const visible = catalog.data
     .filter((card) => relevanceFilter !== "relevant" || card.relevant)
     .filter(forTrack)
-    .filter((card) => category === "all" || (category === "role" && forRole(card)) || (category === "required" && forRole(card) && card.must_take !== null) || (category === "progress" && card.completion_state === "reported") || (category === "completed" && card.completion_state === "verified"))
+    .filter((card) => category === "all" || (category === "role" && forRole(card)) || (category === "required" && forRole(card) && card.must_take !== null) || (category === "progress" && (card.completion_state === "reported" || (studyStarted(card.key) && !studyFinished(card.key)))) || (category === "completed" && (card.completion_state === "verified" || studyFinished(card.key))))
     .filter((card) => !query || [card.title, card.recommendation_reason, card.must_take?.skill ?? ""].some((value) => value.toLocaleLowerCase("ru-RU").includes(query)));
   const deepLinkedKey = searchParams.get("course");
   const deepLinked =
@@ -829,6 +846,7 @@ export function BootcampCatalog({
             <div className="bc-ref-card-intro"><CourseArtwork title={card.title}/><div><h3>{card.title}</h3><p>{card.recommendation_reason || "Описание пока не опубликовано"}</p></div></div>
             <div className="bc-ref-tags">{courseRoleTitles(card).slice(0,3).map(title => <span key={title}>{title}</span>)}</div>
             <p className="bc-ref-card-meta"><Clock3/> Длительность уточняется</p>
+            <StudyCourseProgress course={studyFor(card.key)} />
             <div className="bc-ref-card-bottom">
               <CoursePrimaryAction card={card} onOpen={key => { openPanel("detail",key); }}/>
               {card.relevant && <button className="bc-ref-reason" type="button" onClick={() => { openPanel("reason",card.key); }}>Почему рекомендован? ›</button>}
@@ -839,7 +857,7 @@ export function BootcampCatalog({
             <div className="bc-ref-row-info"><CourseArtwork title={card.title}/><div><h3>{card.title}</h3><p>{card.recommendation_reason || "Описание пока не опубликовано"}</p></div></div>
             <div className="bc-ref-row-flags"><CourseFlags card={card}/><div className="bc-ref-tags">{courseRoleTitles(card).slice(0,3).map(title => <span key={title}>{title}</span>)}</div></div>
             <div className="bc-ref-row-meta"><Clock3 /> Длительность уточняется</div>
-            <div className="bc-ref-row-progress">{card.completion_state === "verified" ? "Подтверждено" : card.completion_state === "reported" ? "На проверке" : "Нет данных о прогрессе"}<div className="bc-ref-track"><i style={{ width: card.completion_state === "verified" ? "100%" : "0%" }}/></div></div>
+            <div className="bc-ref-row-progress"><StudyCourseProgress course={studyFor(card.key)} compact />{!studyFor(card.key) && <><span>{card.completion_state === "verified" ? "Подтверждено" : card.completion_state === "reported" ? "На проверке" : "Учебный прогресс не начат"}</span><div className="bc-ref-track"><i style={{width:card.completion_state==="verified"?"100%":"0%"}}/></div></>}</div>
             <CoursePrimaryAction card={card} onOpen={key => { openPanel("detail",key); }}/>
           </li>)}
         </ul>}
