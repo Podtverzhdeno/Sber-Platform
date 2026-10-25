@@ -8,7 +8,6 @@ from impulse.api.v1.assistant import router as assistant_router
 from impulse.api.v1.buddy import router as buddy_router
 from impulse.api.v1.competencies import router as competencies_router
 from impulse.api.v1.development import router as development_router
-from impulse.bootcamp.editorial_learning import router as editorial_study_router
 from impulse.api.v1.ecosystem import router as ecosystem_router
 from impulse.api.v1.growth import router as growth_router
 from impulse.api.v1.identity import router as identity_router
@@ -22,6 +21,7 @@ from impulse.api.v1.search import router as search_router
 from impulse.api.v1.support import router as support_router
 from impulse.api.v1.task_catalog import router as task_catalog_router
 from impulse.api.v1.work import router as work_router
+from impulse.bootcamp.editorial_learning import router as editorial_study_router
 from impulse.bootstrap.settings import Settings
 from impulse.trajectory_map import router as trajectory_map_router
 
