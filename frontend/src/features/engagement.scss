@@ -257,24 +257,25 @@
 .streak-freeze-stock {display:block;margin-top:2px;font-size:10px;color:#82b9d2;}
 @media(min-width:1050px) {
   .streak-modal-root .streak-redesign {
-    width:996px;padding:40px 43px 39px;transform:translate(-8px,-28px);
+    width:1016px;min-height:1135px;padding:43px 46px 39px;transform:translateY(-28px);
   }
   .streak-hero {min-height:195px;}
-  .streak-heading {gap:33px;margin-bottom:6px;}
+  .streak-hero-copy {transform:translateY(-8px);}
+  .streak-heading {gap:20px;margin-bottom:2px;margin-left:6px;}
   .streak-emoji {font-size:47px;}
   .streak-modal-root .streak-heading h2 {font-size:29px;letter-spacing:-.6px;}
-  .streak-headline {margin:0 0 10px 83px;font-size:34px;line-height:1.23;}
+  .streak-headline {margin:0 0 6px 83px;font-size:34px;line-height:1.23;}
   .streak-headline strong {font-size:39px;}
   .streak-redesign .engagement-reason {margin:0 0 0 83px;max-width:475px;
     font-size:18px;line-height:1.55;}
   .streak-hero-illustration {right:-10px;top:12px;width:40%;height:333px;}
-  .streak-hero-illustration img {right:0;top:95px;width:305px;height:285px;max-width:92%;
+  .streak-hero-illustration img {right:-24px;top:115px;width:315px;height:295px;max-width:none;
     filter:drop-shadow(0 0 20px #6869f5aa);}
-  .streak-hero-flame {left:10px;top:183px;font-size:76px;}
+  .streak-hero-flame {left:44px;top:200px;font-size:83px;}
   .streak-hero-spark {left:10px;top:102px;font-size:39px;}
   .streak-next-goal {right:19px;top:21px;}
   .streak-redesign .streak-week-card {
-    width:60%;min-height:189px;margin-bottom:27px;padding:21px 0 0;
+    width:60%;min-height:195px;margin-bottom:31px;padding:21px 0 0;
     border-radius:20px;
   }
   .streak-week-days {padding:8px 20px 21px;gap:3px;}
@@ -285,20 +286,20 @@
   .streak-week-link > span:last-child {font-size:15px;}
   .streak-week-arrow {right:16px;top:76px;}
   .streak-facts {gap:18px;margin-bottom:25px;}
-  .streak-fact {min-height:128px;padding:16px;gap:21px;border-radius:19px;}
+  .streak-fact {min-height:130px;padding:16px;gap:21px;border-radius:19px;}
   .streak-fact-icon {width:78px;height:78px;border-radius:19px;}
   .streak-fact-icon svg {width:38px;height:38px;}
   .streak-fact div {gap:8px;}
   .streak-fact strong {font-size:24px;}
   .streak-fact small {font-size:15px;line-height:1.32;}
   .streak-freeze-stock {font-size:11px;}
-  .streak-rule {min-height:126px;gap:21px;padding:22px 29px 21px;
+  .streak-rule {min-height:128px;gap:21px;padding:22px 29px 21px;
     margin-bottom:25px;border-radius:18px;}
   .streak-rule > svg {width:28px;height:28px;}
   .streak-rule h3 {font-size:19px;margin-bottom:11px;}
   .streak-rule p {font-size:16px;line-height:1.46;}
   .streak-redesign .engagement-rhythm-block {
-    min-height:248px;padding:23px 24px 17px;gap:24px;border-radius:18px;
+    min-height:250px;padding:23px 24px 17px;gap:24px;border-radius:18px;
   }
   .streak-redesign .engagement-rhythm-header h3 {font-size:23px;}
   .streak-redesign .engagement-help-button {width:29px;height:29px;font-size:16px;}
@@ -319,10 +320,11 @@
   .streak-redesign .engagement-rhythm-schedule input {
     height:60px;padding:0 12px;font-size:17px;border-radius:10px;
   }
-  .streak-redesign .streak-save-button {min-height:67px;margin-top:18px;
+  .streak-redesign .streak-save-button {min-height:67px;margin-top:22px;
     border-radius:18px;color:#f6ffff;font-size:22px;letter-spacing:-.2px;
     box-shadow:0 0 20px #00d5f038;}
   .engagement-help-tooltip {width:340px;max-width:340px;
+    top:-52px;bottom:auto;left:calc(100% + 18px);
     font-size:15px;line-height:1.5;padding:16px 20px;}
 }
 @media(min-width:701px) and (max-width:1049px) {
