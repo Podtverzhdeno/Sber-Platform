@@ -30,8 +30,8 @@ type Portfolio = {
 };
 type Passport = {
   verified_courses: string[];
-  skills: { key: string; practical_level: string; confirmed_case_count: number }[];
-  cases: { contribution_id: string; submitted_at: string; reviewer_id: string }[];
+  skills: { key: string; practical_level: string; confirmed_case_count: number; last_confirmed_at?: string | null }[];
+  cases: { task_id?: string; contribution_id: string; personal_summary?: string; competency_tags?: string[]; artifact_keys?: string[]; submitted_at: string; reviewer_id: string; freshness?: string }[];
 };
 type ProjectDocument = {
   verification_id: string; holder_name: string; customer_name: string; task_title: string;
@@ -77,6 +77,18 @@ const numberForGrade = (grade: string | null): number | null => {
 };
 const isAccepted = (value: Contribution) => ["verified", "accepted", "approved"].includes(value.verification_status.toLowerCase());
 const csrf = (): HeadersInit => ({ "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" });
+const skillTitle = (key: string): string => {
+  const titles: Record<string, string> = {
+    python: "Python", "recommender-systems": "Рекомендательные системы",
+    "recommender_systems": "Рекомендательные системы",
+    "recommender-system": "Рекомендательные системы",
+  };
+  return titles[key.toLowerCase()] ?? key.replaceAll("_", " ").replaceAll("-", " ");
+};
+const caseLabel = (n: number) => {
+  const form = new Intl.PluralRules("ru-RU").select(n);
+  return String(n) + " " + (form === "one" ? "подтверждённый кейс" : form === "few" ? "подтверждённых кейса" : "подтверждённых кейсов");
+};
 
 function PanelHeading({ icon: Icon, title, action, onAction }: { icon: LucideIcon; title: string; action?: string; onAction?: () => void }) {
   return <header className="p2-panel-heading"><span><Icon size={17} strokeWidth={2.4}/>{title}</span>{action && <button type="button" onClick={onAction}>{action}<ArrowRight size={14}/></button>}</header>;
@@ -259,7 +271,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
                   const ratio = level === null ? skill.confirmed_case_count / passportEvidenceMax(skills) : level / 5;
                   return <div className="p2-skill-level" key={skill.key}
                     title={skill.key + ": " + (level === null ? String(skill.confirmed_case_count) + " подтверждённых кейсов" : "уровень " + String(level) + "/5")}>
-                    <span>{skill.key}</span>
+                    <span title={skill.key}>{skillTitle(skill.key)}</span>
                     <i><b style={{width:String(ratio * 100) + "%"}}/></i>
                     <em>{level === null ? String(skill.confirmed_case_count) : String(level) + "/5"}</em>
                   </div>;
@@ -320,7 +332,30 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
           <button type="button" className="p2-visibility-share" onClick={()=>void share()}><Copy size={14}/>{portfolio.public_url?"Скопировать публичную ссылку":"Поделиться страницей"}<ChevronRight size={15}/></button>
         </section>}
         {tab==="achievements" && portfolio.offers.length>0 && <section className="p2-panel p2-offers"><PanelHeading icon={Rocket} title="КАРЬЕРНЫЕ ВОЗМОЖНОСТИ"/>{portfolio.offers.map((x,i)=><article key={i}><strong>{x.title}</strong><p>{x.basis}</p></article>)}</section>}
-        {tab==="passport"&&<section className="p2-panel p2-passport-detail"><PanelHeading icon={Target} title="ПОДТВЕРЖДАЮЩИЕ КЕЙСЫ"/>{skills.map(s=><div key={s.key} className="p2-skill-detail"><strong>{s.key}</strong><span>{s.confirmed_case_count} подтверждённых кейсов</span><em>{s.practical_level || "Уровень не определён"}</em></div>)}{skills.length===0&&<div className="p2-inline-empty">Данные о навыках пока не поступили.</div>}</section>}
+        {tab==="passport" && <section className="p2-panel p2-passport-detail" aria-label="Подтверждающие кейсы">
+          <PanelHeading icon={Target} title="ПОДТВЕРЖДАЮЩИЕ КЕЙСЫ"/>
+          {skills.map(skill => {
+            const related = (passportQuery.data?.cases ?? []).filter(item => item.competency_tags?.includes(skill.key));
+            return <article className="p2-skill-evidence" key={skill.key}>
+              <div className="p2-skill-detail">
+                <div><strong>{skillTitle(skill.key)}</strong><small>{skill.key}</small></div>
+                <span>{caseLabel(skill.confirmed_case_count)}</span>
+                <em>{numericPassportLevel(skill.practical_level) !== null ? "Оценён уровень" : "Подтверждена практика"}</em>
+              </div>
+              {skill.last_confirmed_at && <p>Последнее подтверждение: {new Date(skill.last_confirmed_at).toLocaleDateString("ru-RU")}</p>}
+              {related.length > 0 ? <details>
+                <summary>Доказательства и принятые результаты · {related.length}</summary>
+                <div className="p2-skill-evidence-list">{related.map(item => <div key={item.contribution_id}>
+                  <strong>{item.personal_summary || "Подтверждённый личный вклад"}</strong>
+                  <small>{new Date(item.submitted_at).toLocaleDateString("ru-RU")}{item.freshness === "aging" ? " · ранее 90 дней" : ""}</small>
+                  {(item.artifact_keys?.length ?? 0) > 0 && <p>Артефакты: {item.artifact_keys?.join(" · ")}</p>}
+                </div>)}</div>
+              </details> : <p>Подтверждено в реестре. Детальные свидетельства для этого навыка в текущем ответе не представлены.</p>}
+            </article>;
+          })}
+          {skills.length === 0 && <div className="p2-inline-empty">Нет принятых кейсов с подтверждёнными компетенциями. После проверки личного вклада данные появятся автоматически.</div>}
+          <p className="p2-passport-disclaimer">Подтверждённый кейс означает проверенный практический результат. Уровень L1–L5 присваивается только отдельной оценкой, а не количеством кейсов.</p>
+        </section>}
       </div>
     </div>
     {(openCase || openCredential) && <div className="p2-modal-scrim" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget){setOpenCase(null);setOpenCredential(null);}}}>
