@@ -2,15 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
-  ArrowLeft, ArrowRight, Award, BookOpen, CalendarDays, Check, ChevronDown,
+  ArrowLeft, ArrowRight, Award, CalendarDays, ChevronDown,
   CircleCheck, Clock3, ExternalLink, FileBadge, FolderOpen, GraduationCap,
-  Grid2X2, Medal, Plus, Search, ShieldCheck, Sparkles, Star, Trophy, X,
+  Medal, Plus, Search, ShieldCheck, Star, Trophy, X,
 } from "lucide-react";
 
 import { apiRequest } from "../../api/client";
 import { SafeExternalLink } from "../../components/ui";
 import {
-  achievementCategoryLabels, achievementStatusLabels, achievementSummary, buildAchievements,
+  achievementStatusLabels, achievementSummary, buildAchievements,
   type AchievementCategory, type AchievementClaim, type AchievementEventsPage,
   type AchievementRecord, type AchievementStatus, type AchievementsPortfolio,
 } from "./model";
