@@ -1,0 +1,21 @@
+# Claim RATING-V2-REFERENCE-PORT-20261025
+
+- task_id: RATING-V2-REFERENCE-PORT-20261025
+- session_id: gpt6-20261025-rating-three-screens
+- status: IN_PROGRESS
+- started_at: 2026-10-25T14:38:00+03:00
+- heartbeat_at: 2026-10-25T14:38:00+03:00
+- base_revision: 803a829aa8fa2c01fb0a6b8464cfbc5bcb5e6e5d
+- depends_on: []
+- write_scope:
+  - frontend/src/features/rating-v2/**
+  - frontend/src/App.tsx (rating import and route only)
+  - frontend/e2e/rating-v2.spec.ts
+  - frontend/e2e/participant-interactions.spec.ts (rating assertions only)
+  - .agents/coordination/claims/RATING-V2-REFERENCE-PORT-20261025.lock/status.md
+- shared_files: frontend/src/App.tsx (small import/route swap)
+- verification:
+  - frontend typecheck, lint, build, vitest
+  - Playwright 3 rating views, filters, search, hover, keyboard, responsive
+  - visual QA against 3 image references
+- progress: Initial scoped implementation based on generated 1672x941px PNGs. Main ranking list first, rewards via CTA, profile via buttons.
