@@ -67,8 +67,9 @@ for (const viewport of viewports) {
     await shell.locator(".bc-ref-course-card[data-access=\"available\"]").first().getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
     const details = page.getByRole("dialog", { name: "Информация о курсе" });
     await expect(details).toBeVisible();
-    await details.getByRole("tab", { name: "Навыки" }).click();
-    await expect(details.getByRole("tabpanel")).toBeVisible();
+    await expect(details.getByTestId("impulse-immersive-reader")).toBeVisible();
+    await details.getByRole("button", { name: "Перейти к программе" }).click();
+    await expect(details.getByRole("heading", { name: "Программа курса" })).toBeVisible();
     await details.getByRole("button", { name: "Почему рекомендован" }).click();
     const reason = page.getByRole("dialog", { name: "Почему рекомендован" });
     await expect(reason).toBeVisible();
@@ -138,9 +139,9 @@ test("course reader fills viewport and lesson navigation never clips", async ({ 
   await page.getByTestId("course-demo-course-2").getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(dialog).toBeVisible();
-  await dialog.getByRole("tab", { name: "Программа" }).click();
-  await expect(dialog.getByRole("tabpanel")).toBeVisible();
-  await expect(dialog.locator(".bc-learning__body")).toBeVisible();
+  await expect(dialog.getByTestId("impulse-immersive-reader")).toBeVisible();
+  await dialog.locator(".imp-study__program-list button").first().click();
+  await expect(dialog.locator(".imp-study__grid")).toBeVisible();
   const geometry = await dialog.evaluate(node => {
     const rect = node.getBoundingClientRect();
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height,
@@ -160,7 +161,7 @@ test("course reader fills viewport and lesson navigation never clips", async ({ 
     expect(buttonBounds.x + buttonBounds.width).toBeLessThanOrEqual(1449);
   }
   await next.click();
-  await expect(dialog.locator(".bc-learning__eyebrow").filter({ hasText: "Урок 2 из" })).toBeVisible();
+  await expect(dialog.getByRole("heading", { name: /Аутентификация|разработк|Введение|Типы/i }).first()).toBeVisible();
   await dialog.getByRole("button", { name: "Закрыть" }).click();
   await expect(dialog).toHaveCount(0);
 });
@@ -175,8 +176,8 @@ test("mobile fullscreen reader keeps lesson controls usable", async ({ page }) =
   await page.getByTestId("course-demo-course-2").getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(dialog).toBeVisible();
-  await dialog.getByRole("tab", { name: "Программа" }).click();
-  await expect(dialog.locator(".bc-learning__body")).toBeVisible();
+  await dialog.locator(".imp-study__program-list button").first().click();
+  await expect(dialog.locator(".imp-study__grid")).toBeVisible();
   const dimensions = await dialog.evaluate(node => {
     const rect = node.getBoundingClientRect();
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
@@ -195,7 +196,7 @@ test("mobile fullscreen reader keeps lesson controls usable", async ({ page }) =
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(391);
   }
   await next.click();
-  await expect(dialog.locator(".bc-learning__eyebrow").filter({ hasText: "Урок 2 из" })).toBeVisible();
+  await expect(dialog.getByRole("heading", { name: /Аутентификация|разработк|Введение|Типы/i }).first()).toBeVisible();
   await dialog.getByRole("button", { name: "Закрыть" }).click();
   await expect(dialog).toHaveCount(0);
 });
