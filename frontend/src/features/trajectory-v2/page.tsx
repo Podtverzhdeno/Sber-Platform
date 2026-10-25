@@ -891,6 +891,20 @@ export function StageDetail(props: {
               <ul>{milestone.acceptance.map((criterion) => <li key={criterion}>{criterion}</li>)}</ul>
             </section>
           )}
+          {milestone.resources && milestone.resources.length > 0 && (
+            <section className="trajectory-v2-reading-resources">
+              <h4>Официальные материалы для изучения</h4>
+              <ul>{milestone.resources
+                .filter((resource) => resource.url?.startsWith("https://"))
+                .map((resource) => (
+                  <li key={resource.url}>
+                    <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                      {resource.title || "Открыть руководство"} ↗
+                    </a>
+                  </li>
+                ))}</ul>
+            </section>
+          )}
           <small>Это учебный план. Критерии помогают подготовиться к проверке, но сами по себе не подтверждают выполнение этапа.</small>
         </details>
       )}
