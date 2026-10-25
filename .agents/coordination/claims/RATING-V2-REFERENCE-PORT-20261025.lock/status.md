@@ -2,7 +2,7 @@
 
 - task_id: RATING-V2-REFERENCE-PORT-20261025
 - session_id: gpt6-20261025-rating-three-screens
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-25T14:38:00+03:00
 - heartbeat_at: 2026-10-25T14:38:00+03:00
 - base_revision: 803a829aa8fa2c01fb0a6b8464cfbc5bcb5e6e5d
@@ -18,4 +18,5 @@
   - frontend typecheck, lint, build, vitest
   - Playwright 3 rating views, filters, search, hover, keyboard, responsive
   - visual QA against 3 image references
-- progress: Rating reference QA 40194797563 green 5/5, scoped lint/typecheck/build. The integration is moved behind the existing ParticipantRating export to avoid App.tsx conflicts. Main list first, benefits via CTA, profile via buttons. Pixel-exact visual acceptance not yet claimed.
+- progress: PR #66 merged as 1e074e369b49a42fc510f1b3888a0448c6a6e36f. Rating reference QA run 40196119077 passed scoped lint, TypeScript, production build, and all five Chromium Playwright scenarios on integration revision 7fc30bdf02f7b59e4caa432e6a218e5c3a1296d7. Screenshots of list, benefits, and profile at 1672×941 retained as GitHub Actions artifacts. User-requested visual parity remains iterative; reward artwork is CSS approximation rather than exact raster.
+- next_step: independent reviewer to inspect CSS/image reference parity and mark DONE; production deployment must be verified separately.
