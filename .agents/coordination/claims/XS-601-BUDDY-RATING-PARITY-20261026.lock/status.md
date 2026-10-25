@@ -1,0 +1,22 @@
+# Claim XS-601-BUDDY-RATING-PARITY-20261026
+- session_id: gpt6-20261026-buddy-ranking-parity
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: f6c3ee5e38a69719fe8bb33b25fe68435828a7f9
+- depends_on:
+  - XS-501-RATING-CONSUMERS-20261026 (REVIEW)
+  - XS-601-BUDDY-LIVE-CONTEXT-20261026 (REVIEW)
+- write_scope:
+  - frontend/src/features/buddy-chat-v2.tsx (rating data source only)
+  - frontend/src/features/buddy-chat-v2.test.tsx (rating API fixture only)
+  - frontend/src/features/buddy-live-data.ts (remove competing own standing selector)
+  - frontend/src/features/buddy-live-data.test.ts (remove duplicative selector test)
+  - .github/workflows/buddy-ranking-parity-qa.yml
+  - .agents/coordination/claims/XS-601-BUDDY-RATING-PARITY-20261026.lock/status.md
+- shared_files:
+  - frontend/src/features/rating-v2/own-standing.ts (read-only shared hook and selector)
+- verification:
+  - ESLint, TypeScript, Vitest Buddy and owner rating
+- progress: Ensure Buddy and Topbar use same owner-scoped query and strict published season+version mapping.
+- blockers: Independent review and all-app CI.
