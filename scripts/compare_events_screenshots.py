@@ -31,9 +31,13 @@ SCREENS = {
 }
 
 
-def compare(reference: Image.Image, capture: Image.Image, threshold: int) -> tuple[dict, Image.Image, Image.Image]:
+def compare(
+    reference: Image.Image, capture: Image.Image, threshold: int
+) -> tuple[dict, Image.Image, Image.Image]:
     if reference.size != capture.size:
-        raise ValueError(f"dimension mismatch: reference={reference.size}, capture={capture.size}")
+        raise ValueError(
+            f"dimension mismatch: reference={reference.size}, capture={capture.size}"
+        )
     difference = ImageChops.difference(reference, capture)
     pixels = list(difference.getdata())
     total = reference.width * reference.height
@@ -48,7 +52,11 @@ def compare(reference: Image.Image, capture: Image.Image, threshold: int) -> tup
         "mean_absolute_channel_difference": round(distance, 3),
         "threshold_per_channel": threshold,
     }
-    return stats, difference.point(lambda value: min(255, 4 * value)), Image.blend(reference, capture, 0.5)
+    return (
+        stats,
+        difference.point(lambda value: min(255, 4 * value)),
+        Image.blend(reference, capture, 0.5),
+    )
 
 
 def main() -> int:
