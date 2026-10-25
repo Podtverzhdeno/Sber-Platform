@@ -301,8 +301,8 @@ test("Bootcamp recommendation popup opens real course details", async ({ page })
   await reason.click();
   const dialog = page.getByRole("dialog", { name: "Почему рекомендован" });
   await expect(dialog).toBeVisible();
-  await expect(dialog.locator(".bc-ref-why-item")).toHaveCount(4);
-  await dialog.getByRole("button", { name: /Посмотреть программу курса/ }).click();
+  await expect(dialog.locator(".bc-ref-why-item")).toHaveCount(3);
+  await dialog.getByRole("button", { name: /Открыть курс/ }).click();
   await expect(page.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
 });
 
