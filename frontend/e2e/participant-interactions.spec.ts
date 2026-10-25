@@ -412,13 +412,16 @@ test("participant home actions open project, buddy and linked routes", async ({ 
 });
 
 test("rating list opens participant profile and returns to the same ranking", async ({ page }) => {
+  await page.setViewportSize({ width: 1672, height: 941 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Рейтинг" }).click();
   await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
+  await page.screenshot({ path: "test-results/rating-v2-main-list-1672x941.png", fullPage: true });
   await page.getByRole("button", { name: "Кирилл Меньшев" }).click();
   await expect(page).toHaveURL(/ratingView=profile/);
   await expect(page.getByRole("heading", { name: "Кирилл Меньшев" })).toBeVisible();
+  await page.screenshot({ path: "test-results/rating-v2-profile-1672x941.png", fullPage: true });
   await expect(page.getByText("Победитель МАЯКИ")).toBeVisible();
   await page.getByRole("tab", { name: "Проекты" }).click();
   await expect(page.getByText("AI Study Assistant")).toBeVisible();
@@ -427,12 +430,14 @@ test("rating list opens participant profile and returns to the same ranking", as
 });
 
 test("rating benefits navigate from the default list and back", async ({ page }) => {
+  await page.setViewportSize({ width: 1672, height: 941 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Рейтинг" }).click();
   await page.getByRole("button", { name: "Подробнее о рейтинге и наградах" }).click();
   await expect(page).toHaveURL(/ratingView=benefits/);
   await expect(page.getByRole("heading", { name: "Рейтинг подтверждённого опыта" })).toBeVisible();
+  await page.screenshot({ path: "test-results/rating-v2-benefits-1672x941.png", fullPage: true });
   const rewards = page.locator(".ir-benefits-showcase .ir-benefit");
   await expect(rewards).toHaveCount(3);
   await expect(rewards.nth(0)).toContainText("ТОП 30");
