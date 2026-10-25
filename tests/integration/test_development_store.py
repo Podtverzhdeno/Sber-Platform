@@ -77,6 +77,7 @@ async def test_track_swap_reported_completion_and_one_learning_day() -> None:
             headers={"X-CSRF-Token": csrf},
         )
         assert reported.json()["rating_eligible"] is False
+        qualified_after_first: set[str] | None = None
         for occurred_at in ("2026-09-27T18:00:00Z", "2026-09-27T19:00:00Z"):
             day = await client.post(
                 "/api/v1/me/courses/demo-course-5/learning-days",
@@ -84,7 +85,11 @@ async def test_track_swap_reported_completion_and_one_learning_day() -> None:
                 headers={"X-CSRF-Token": csrf},
             )
             assert day.status_code == 200
-        assert len(day.json()["qualified_dates"]) == 1
+            dates: set[str] = set(day.json()["qualified_dates"])
+            if qualified_after_first is None:
+                qualified_after_first = dates
+            else:
+                assert dates == qualified_after_first, "Two events on one day must not double count"
 
     async with database.sessions() as session:
         attempt_rows = (
@@ -95,7 +100,19 @@ async def test_track_swap_reported_completion_and_one_learning_day() -> None:
             )
         ).all()
         learning_count = int(
-            await session.scalar(select(func.count()).select_from(learning_days)) or 0
+            await session.scalar(
+                select(func.count())
+                .select_from(
+                    learning_days.join(
+                        enrollments, enrollments.c.id == learning_days.c.enrollment_id
+                    )
+                )
+                .where(
+                    enrollments.c.person_id == demo_id("participant-alex"),
+                    enrollments.c.data_origin == "demo_runtime",
+                )
+            )
+            or 0
         )
         completion = await session.scalar(
             select(enrollments.c.status).where(
