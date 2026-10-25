@@ -51,13 +51,12 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
   const tabs = await page.locator(".p2-tabs").boundingBox();
   const projects = await page.locator(".p2-projects-panel").boundingBox();
   const passport = await page.locator(".p2-passport-panel").boundingBox();
-  expect(hero).not.toBeNull(); expect(tabs).not.toBeNull();
-  expect(projects).not.toBeNull(); expect(passport).not.toBeNull();
-  expect(hero!.height).toBeGreaterThanOrEqual(200);
-  expect(hero!.height).toBeLessThan(350);
-  expect(Math.abs((tabs!.y - hero!.y - hero!.height) - 12)).toBeLessThanOrEqual(3);
-  expect(projects!.x).toBeLessThan(passport!.x);
-  expect(Math.abs(projects!.y - passport!.y)).toBeLessThanOrEqual(2);
+  if (!hero || !tabs || !projects || !passport) throw new Error("Portfolio geometry is incomplete");
+  expect(hero.height).toBeGreaterThanOrEqual(200);
+  expect(hero.height).toBeLessThan(350);
+  expect(Math.abs((tabs.y - hero.y - hero.height) - 12)).toBeLessThanOrEqual(3);
+  expect(projects.x).toBeLessThan(passport.x);
+  expect(Math.abs(projects.y - passport.y)).toBeLessThanOrEqual(2);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2)).toBe(true);
 
   await page.getByRole("button", { name: /Открыть кейс/ }).first().click();
