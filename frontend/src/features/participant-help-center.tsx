@@ -8,10 +8,12 @@ export function ParticipantHelpCenter({ section, initialTopicId, onClose, onOpen
   const [query, setQuery] = useState("");
   const [topicId, setTopicId] = useState<string | null>(initialTopicId);
   const searchRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
   useEffect(() => {
     previousFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    searchRef.current?.focus();
+    if (searchRef.current) searchRef.current.focus();
+    else dialogRef.current?.focus();
     return () => { previousFocus.current?.focus(); };
   }, []);
   const topics = useMemo(() => {
@@ -22,7 +24,15 @@ export function ParticipantHelpCenter({ section, initialTopicId, onClose, onOpen
   const relatedCount = topicsForSection(section).length;
   return <div className="pg-help-layer" data-testid="participant-help-center">
     <div className="pg-help-backdrop" aria-hidden="true" onClick={onClose} />
-    <section className="pg-help-shell" role="dialog" aria-modal="true" aria-labelledby="pg-help-title">
+    <section className="pg-help-shell" ref={dialogRef} tabIndex={-1} role="dialog" aria-modal="true" aria-labelledby="pg-help-title"
+      onKeyDown={(event) => {
+        if (event.key !== "Tab") return;
+        const nodes = dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])');
+        if (!nodes?.length) return;
+        const first = nodes[0], last = nodes[nodes.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+      }}>
       <header className="pg-help-head">
         <div className="pg-help-head-mark"><Sparkles size={20}/></div>
         <div className="pg-help-heading"><span>IMPULSE · БАЗА ЗНАНИЙ</span><h2 id="pg-help-title">Центр помощи</h2><p>Понятные инструкции для каждого этапа работы</p></div>
