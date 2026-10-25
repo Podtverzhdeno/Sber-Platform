@@ -63,7 +63,7 @@ const dateLabel = (value: string) => {
 const daysLabel = (value: string) => {
   const difference = Math.ceil((new Date(value).getTime() - Date.now()) / 86400000);
   if (!Number.isFinite(difference)) return "";
-  return difference < 0 ? "Срок прошёл" : difference === 0 ? "Сегодня" : `${difference} дн.`;
+  return difference < 0 ? "Срок прошёл" : difference === 0 ? "Сегодня" : `${String(difference)} дн.`;
 };
 function completion(project: Project): number | null {
   const milestones = project.detail?.checkpoints;
@@ -96,8 +96,8 @@ function CompanyIcon({ name }: { name: string }) {
 }
 function ProgressBar({ value, compact = false }: { value: number | null; compact?: boolean }) {
   return <div className={`mp-progress ${compact ? "mp-progress--compact" : ""}`}>
-    <div className="mp-progress__track"><span style={{ width: value === null ? "0%" : `${value}%` }} /></div>
-    <strong>{value === null ? "—" : `${value}%`}</strong>
+    <div className="mp-progress__track"><span style={{ width: value === null ? "0%" : `${String(value)}%` }} /></div>
+    <strong>{value === null ? "—" : `${String(value)}%`}</strong>
   </div>;
 }
 function Status({ status }: { status: string }) {
@@ -136,11 +136,11 @@ function ProjectSummary({ project, selected, onSelect, onOpen, onBookmark, saved
       <button type="button" className="mp-icon-button" aria-label={saved ? "Убрать из избранного" : "В избранное"} aria-pressed={saved} onClick={onBookmark}><Bookmark size={17} fill={saved ? "currentColor" : "none"}/></button>
     </div>
     <div className="mp-chip-row"><em>Практика</em><em>Команда</em><em>Проверяемый результат</em></div>
-    <div className="mp-project-card-progress"><div><span>Твой прогресс</span><strong>{progress === null ? "Не оценён" : `${progress}%`}</strong></div><ProgressBar value={progress} compact/></div>
+    <div className="mp-project-card-progress"><div><span>Твой прогресс</span><strong>{progress === null ? "Не оценён" : `${String(progress)}%`}</strong></div><ProgressBar value={progress} compact/></div>
     <div className="mp-project-card-meta">
       <span><Clock3 size={15}/>{statusText[status] || status}</span>
       <span><CalendarDays size={15}/>{dateLabel(project.work.terms.deadline_at)}</span>
-      <span><Users size={15}/>{project.detail?.team?.length ?? "—"} участников</span>
+      <span><Users size={15}/>{project.detail?.team.length ?? "—"} участников</span>
     </div>
     <div className="mp-project-card-rewards" aria-label="Возможные награды за участие">
       <span title="Возможность получения токенов GitVerse"><Layers3 size={15}/> GitVerse</span>
@@ -181,10 +181,10 @@ function PanelPreview({ project, onOpen, onRewards }: { project: Project; onOpen
     <div className="mp-preview__tabs"><button type="button" className="is-active" onClick={onOpen}>Обзор</button><button type="button" onClick={onOpen}>Прогресс</button><button type="button" onClick={onOpen}>Мой вклад</button><button type="button" onClick={onOpen}>Команда</button><button type="button" onClick={onRewards}>Бонусы и выгоды</button></div>
     <div className="mp-preview__content">
       <div className="mp-preview__left">
-        <section className="mp-surface mp-panel-inset"><header><h3>Прогресс по этапам</h3><strong>{progress === null ? "Нет оценки" : `${progress}%`}</strong></header>
+        <section className="mp-surface mp-panel-inset"><header><h3>Прогресс по этапам</h3><strong>{progress === null ? "Нет оценки" : `${String(progress)}%`}</strong></header>
           {checkpoints.length ? checkpoints.slice(0,5).map((cp,index)=><div className="mp-stage" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"done":""}>{finishedCheckpoint.has(cp.status)?<Check size={15}/>:index+1}</span><div><p>{cp.title}</p><ProgressBar value={finishedCheckpoint.has(cp.status)?100:null} compact/></div></div>) : <p className="mp-muted">План этапов появится после публикации заказчиком</p>}
         </section>
-        <section className="mp-surface mp-panel-inset"><header><h3>Команда проекта</h3><small>{project.detail?.team?.length ?? "—"} участников</small></header><p>{project.detail?.mentor?.display_name ? `Ментор: ${project.detail.mentor.display_name}` : "Состав команды уточняется"}</p></section>
+        <section className="mp-surface mp-panel-inset"><header><h3>Команда проекта</h3><small>{project.detail?.team.length ?? "—"} участников</small></header><p>{project.detail?.mentor?.display_name ? `Ментор: ${project.detail.mentor.display_name}` : "Состав команды уточняется"}</p></section>
       </div>
       <div className="mp-preview__right">
         <section className="mp-surface mp-panel-inset"><header><h3>Мой вклад</h3><small>{contributions.length} версий</small></header>
@@ -255,18 +255,18 @@ function ProjectDetail({ project, onBack, onWorkspace, onMessage, onSubmitContri
             <span><BriefcaseBusiness size={17}/> Компания <strong>{projectCompany(project)}</strong></span>
             <span><CalendarDays size={17}/> Дедлайн <strong>{dateLabel(project.work.terms.deadline_at)}</strong></span>
             <span><FileText size={17}/> Условия <strong>Версия {project.work.terms.version}</strong></span>
-            <span><Users size={17}/> Команда <strong>{project.detail?.team?.length ?? "Не указано"}</strong></span>
+            <span><Users size={17}/> Команда <strong>{project.detail?.team.length ?? "Не указано"}</strong></span>
           </div>
         </section>
         <section className="mp-surface mp-detail-panel">
-          <header><h2>Прогресс проекта</h2><strong>{progress===null?"Нет оценки":`${progress}%`}</strong></header>
+          <header><h2>Прогресс проекта</h2><strong>{progress===null?"Нет оценки":`${String(progress)}%`}</strong></header>
           {checkpoints.length ? checkpoints.slice(0,5).map((cp,index)=><div className="mp-stage" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"done":""}>{finishedCheckpoint.has(cp.status)?<Check size={15}/>:index+1}</span><div><p>{cp.title}</p><ProgressBar compact value={finishedCheckpoint.has(cp.status)?100:null}/></div></div>):<p className="mp-muted">Этапы проекта пока не опубликованы</p>}
         </section>
       </div>
       <div className="mp-detail-column">
         <section className="mp-surface mp-detail-panel">
           <h2><Users/> Команда проекта</h2>
-          {project.detail?.team?.length?project.detail.team.slice(0,5).map(person=><div className="mp-team-member" key={person.person_id}><span>{person.display_name.slice(0,1)}</span><div><strong>{person.display_name}</strong><small>{person.status}</small></div><button type="button" className="mp-secondary" onClick={onMessage} aria-label={`Написать ${person.display_name}`}><MessageCircle size={15}/></button></div>):<p className="mp-muted">Состав команды уточняется</p>}
+          {project.detail?.team.length?project.detail.team.slice(0,5).map(person=><div className="mp-team-member" key={person.person_id}><span>{person.display_name.slice(0,1)}</span><div><strong>{person.display_name}</strong><small>{person.status}</small></div><button type="button" className="mp-secondary" onClick={onMessage} aria-label={`Написать ${person.display_name}`}><MessageCircle size={15}/></button></div>):<p className="mp-muted">Состав команды уточняется</p>}
           <button type="button" className="mp-secondary" onClick={()=>setTab("team")}>Все участники <ArrowRight size={16}/></button>
         </section>
         <section className="mp-surface mp-detail-panel">
@@ -278,8 +278,8 @@ function ProjectDetail({ project, onBack, onWorkspace, onMessage, onSubmitContri
     </div>}
     {tab==="tasks" && <section className="mp-surface mp-detail-panel"><h2>Задачи и критерии результата</h2><p className="mp-muted">Здесь представлены проверяемые критерии заказчика. Их выполнение нельзя подтверждать простым нажатием галочки.</p><ul className="mp-checklist">{project.work.terms.acceptance_criteria.map(criterion=><li key={criterion}><CheckCircle2/>{criterion}</li>)}</ul><button className="mp-primary" type="button" onClick={onWorkspace}>Перейти в рабочую область <ArrowRight size={16}/></button></section>}
     {tab==="progress" && <section className="mp-surface mp-detail-panel"><h2>Прогресс по этапам</h2>{checkpoints.length?checkpoints.map((cp,index)=><div className="mp-stage" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"done":""}>{index+1}</span><div><p>{cp.title} · {cp.status}</p><ProgressBar value={finishedCheckpoint.has(cp.status)?100:null}/></div></div>):<p>Заказчик пока не опубликовал этапы. Прогресс появится по подтверждённым результатам.</p>}</section>}
-    {tab==="contribution" && <section className="mp-surface mp-detail-panel"><h2>Мой личный вклад</h2>{project.work.contributions.map(item=><article className="mp-history-item" key={item.id}><strong>Версия {item.version} · {item.status}</strong><p>{item.personal_summary}</p></article>)}{project.work.assignment.status==="staffed"||project.work.assignment.status==="revision_requested"?<button type="button" className="mp-primary" disabled={starting} onClick={onStart}>{starting?"Сохраняем…":"Начать работу"} <ArrowRight size={16}/></button>:project.work.assignment.status==="in_progress"?<form className="mp-contribute-form" onSubmit={e=>{e.preventDefault();onSubmitContribution(summary,artifact);}}><label>Что сделали лично<textarea required minLength={20} value={summary} onChange={e=>setSummary(e.target.value)} placeholder="Опишите проверяемый личный результат…"/></label><label>Ссылка на доказательство<input type="url" value={artifact} onChange={e=>setArtifact(e.target.value)} placeholder="https://…"/></label><button type="submit" disabled={saving} className="mp-primary">{saving?"Отправляем…":"Отправить вклад"} <ArrowRight size={16}/></button>{saveError&&<p role="alert">Не удалось отправить вклад. Проверьте поля и соединение.</p>}</form>:<p>Проект на стадии проверки или завершён. История вклада доступна для просмотра.</p>}</section>}
-    {tab==="team" && <section className="mp-surface mp-detail-panel"><h2>Команда проекта</h2>{project.detail?.team?.length?project.detail.team.map(person=><div className="mp-team-member" key={person.person_id}><span>{person.display_name.slice(0,1)}</span><div><strong>{person.display_name}</strong><small>{person.status}</small></div><button className="mp-secondary" type="button" onClick={onMessage}><MessageCircle size={16}/> Написать</button></div>):<p className="mp-muted">Данные команды пока не опубликованы</p>}</section>}
+    {tab==="contribution" && <section className="mp-surface mp-detail-panel"><h2>Мой личный вклад</h2>{project.work.contributions.map(item=><article className="mp-history-item" key={item.id}><strong>Версия {item.version} · {item.status}</strong><p>{item.personal_summary}</p></article>)}{project.work.assignment.status==="staffed"||project.work.assignment.status==="revision_requested"?<button type="button" className="mp-primary" disabled={starting} onClick={onStart}>{starting?"Сохраняем…":"Начать работу"} <ArrowRight size={16}/></button>:project.work.assignment.status==="in_progress"?<form className="mp-contribute-form" onSubmit={e=>{e.preventDefault();onSubmitContribution(summary,artifact);}}><label>Что сделали лично<textarea required minLength={20} value={summary} onChange={e=>{ setSummary(e.target.value); }} placeholder="Опишите проверяемый личный результат…"/></label><label>Ссылка на доказательство<input type="url" value={artifact} onChange={e=>{ setArtifact(e.target.value); }} placeholder="https://…"/></label><button type="submit" disabled={saving} className="mp-primary">{saving?"Отправляем…":"Отправить вклад"} <ArrowRight size={16}/></button>{saveError&&<p role="alert">Не удалось отправить вклад. Проверьте поля и соединение.</p>}</form>:<p>Проект на стадии проверки или завершён. История вклада доступна для просмотра.</p>}</section>}
+    {tab==="team" && <section className="mp-surface mp-detail-panel"><h2>Команда проекта</h2>{project.detail?.team.length?project.detail.team.map(person=><div className="mp-team-member" key={person.person_id}><span>{person.display_name.slice(0,1)}</span><div><strong>{person.display_name}</strong><small>{person.status}</small></div><button className="mp-secondary" type="button" onClick={onMessage}><MessageCircle size={16}/> Написать</button></div>):<p className="mp-muted">Данные команды пока не опубликованы</p>}</section>}
     {tab==="rewards" && <section className="mp-surface mp-detail-panel"><h2><Gift/> Бонусы и выгоды</h2><p>Возможности открываются последовательно. Точные условия выдачи определяются программой поощрений.</p><div className="mp-rewards-full">{benefits.map(item=>{const Icon=item.icon;return <button type="button" key={item.id} className={rewardFocus===item.id?"is-active":""} onClick={()=>setRewardFocus(item.id)}><Icon size={25}/><strong>{item.title}</strong><span>{item.unlock}</span><ChevronDown size={16}/></button>})}</div>{rewardFocus&&<p className="mp-reward-notice" role="status">«{benefits.find(x=>x.id===rewardFocus)?.title}»: конкретный размер и право на получение подтверждаются организаторами. Достижение порога проектов само по себе не начисляет бонус.</p>}</section>}
     <footer className="mp-detail-footer"><button type="button" className="mp-secondary" onClick={onBack}><ArrowLeft size={15}/> Все проекты</button><button type="button" className="mp-secondary" onClick={onMessage}><MessageCircle size={15}/> Обсуждение</button><button className="mp-secondary" type="button" onClick={()=>{void navigator.clipboard?.writeText(window.location.href).then(()=>{setCopied(true);}).catch(()=>{setCopied(false);});}}><Share2 size={15}/>{copied?"Ссылка скопирована":"Поделиться"}</button><button className="mp-primary" type="button" onClick={onWorkspace}>Перейти к задачам <ArrowRight size={16}/></button></footer>
   </div>;
@@ -337,21 +337,21 @@ export function ParticipantProjectsV2() {
     {rewardFocus&&<div className="mp-reward-popup" role="status"><div><Gift size={17}/><span><strong>{benefits.find(x=>x.id===rewardFocus)?.title}</strong> — {benefits.find(x=>x.id===rewardFocus)?.unlock}. Условия участия и выдачи подтверждаются организатором.</span></div><button type="button" onClick={()=>setRewardFocus(null)} aria-label="Закрыть информацию о бонусе">×</button></div>}
     <section className="mp-toolbar" aria-label="Управление проектами">
       <div className="mp-filters" role="group" aria-label="Статус проектов">{filterChoices.map(item=><button type="button" aria-pressed={filter===item.key} className={filter===item.key?"is-active":""} onClick={()=>setFilter(item.key)} key={item.key}>{item.title} ({filter==="all"?projects.length:item.key==="active"?projects.filter(p=>activeStatuses.has(p.work.assignment.status)).length:item.key==="review"?projects.filter(p=>reviewStatuses.has(p.work.assignment.status)).length:finished})</button>)}</div>
-      <label className="mp-select"><span className="mp-visually-hidden">Компания</span><select aria-label="Компания" value={company} onChange={e=>setCompany(e.target.value)}><option value="all">Все компании</option>{companies.map(name=><option value={name} key={name}>{name}</option>)}</select><ChevronDown size={14}/></label>
-      <label className="mp-select"><span className="mp-visually-hidden">Сортировка</span><select aria-label="Сортировка" value={sort} onChange={e=>setSort(e.target.value)}><option value="deadline">По сроку</option><option value="progress">По прогрессу</option><option value="title">По названию</option></select><ChevronDown size={14}/></label>
+      <label className="mp-select"><span className="mp-visually-hidden">Компания</span><select aria-label="Компания" value={company} onChange={e=>{ setCompany(e.target.value); }}><option value="all">Все компании</option>{companies.map(name=><option value={name} key={name}>{name}</option>)}</select><ChevronDown size={14}/></label>
+      <label className="mp-select"><span className="mp-visually-hidden">Сортировка</span><select aria-label="Сортировка" value={sort} onChange={e=>{ setSort(e.target.value); }}><option value="deadline">По сроку</option><option value="progress">По прогрессу</option><option value="title">По названию</option></select><ChevronDown size={14}/></label>
       <div className="mp-toolbar-spacer"/>
       <div className="mp-layout" role="group" aria-label="Режим проектов"><button type="button" onClick={()=>setLayout("cards")} aria-pressed={layout==="cards"} className={layout==="cards"?"is-active":""}><LayoutGrid size={15}/> Карточки</button><button type="button" onClick={()=>setLayout("list")} aria-pressed={layout==="list"} className={layout==="list"?"is-active":""}><List size={16}/> Список</button></div>
     </section>
     {work.data.length===0?<div className="mp-empty mp-surface"><FolderKanban size={34}/><h2>Пока нет принятых проектов</h2><p>После принятия назначения проект появится здесь. Откликнуться на новые задачи можно в каталоге.</p><button className="mp-primary" onClick={()=>void navigate("/workspace/3")}>Перейти к задачам <ArrowRight size={16}/></button></div>:
       <>
       {layout==="cards"?<div className="mp-card-view">
-        <label className="mp-card-search"><Search size={17}/><input aria-label="Поиск проектов" placeholder="Поиск по проектам и компаниям" value={text} onChange={e=>setText(e.target.value)}/></label>
+        <label className="mp-card-search"><Search size={17}/><input aria-label="Поиск проектов" placeholder="Поиск по проектам и компаниям" value={text} onChange={e=>{ setText(e.target.value); }}/></label>
         <div className="mp-project-grid">
           {visible.map(project=><ProjectSummary key={project.work.assignment.id} project={project} selected={focus===project.work.assignment.id} onSelect={()=>setFocus(previous=>previous===project.work.assignment.id?null:project.work.assignment.id)} onOpen={()=>open(project.work.assignment.id)} saved={saved.includes(project.work.assignment.id)} onBookmark={()=>setSaved(prev=>prev.includes(project.work.assignment.id)?prev.filter(i=>i!==project.work.assignment.id):[...prev,project.work.assignment.id])}/>)}
         </div>
         {!visible.length&&<p className="mp-muted mp-empty-row">Подходящих проектов нет. Измените фильтры.</p>}
         {focused && focus && visible.some(project=>project.work.assignment.id===focus) && <div className="mp-quick-preview"><PanelPreview project={focused} onOpen={()=>open(focused.work.assignment.id)} onRewards={()=>{setRewardFocus("gigacode");window.scrollTo({top:0,behavior:"smooth"});}}/></div>}
-      </div>:<div className="mp-list-layout"><div className="mp-list-search"><Search size={17}/><input aria-label="Поиск проектов" value={text} onChange={e=>setText(e.target.value)} placeholder="Поиск по проектам, компаниям и результатам"/><SlidersHorizontal size={17}/></div>{visible.length?<ProjectList projects={visible} onOpen={open}/>:<div className="mp-empty-row">По заданным условиям проекты не найдены</div>}</div>}
+      </div>:<div className="mp-list-layout"><div className="mp-list-search"><Search size={17}/><input aria-label="Поиск проектов" value={text} onChange={e=>{ setText(e.target.value); }} placeholder="Поиск по проектам, компаниям и результатам"/><SlidersHorizontal size={17}/></div>{visible.length?<ProjectList projects={visible} onOpen={open}/>:<div className="mp-empty-row">По заданным условиям проекты не найдены</div>}</div>}
       </>}
   </div>;
 }
