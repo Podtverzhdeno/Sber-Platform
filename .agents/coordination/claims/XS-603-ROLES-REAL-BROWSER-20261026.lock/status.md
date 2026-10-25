@@ -1,0 +1,17 @@
+# Claim XS-603-ROLES-REAL-BROWSER-20261026
+- session_id: gpt6-20261026-xs-all-roles
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: a34210c7a89d318fb258a88b889652f46af54320
+- depends_on: []
+- write_scope:
+  - frontend/e2e/cross-section-role-privacy.spec.ts
+  - .github/workflows/cross-section-role-privacy-qa.yml
+  - .agents/coordination/claims/XS-603-ROLES-REAL-BROWSER-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - migrated PostgreSQL, real API, Chromium, user role switch
+  - scoped ESLint, TypeScript and Playwright
+- progress: Verify participant vs mentor/customer/manager/hr/operator on owner-only journey/ranking/passport/profile and Buddy visibility.
+- blockers: Full cross-role task creation, reviews, HR consent and page-by-page visual acceptance remain separate gates.
