@@ -8,12 +8,25 @@ identifiers, participants' selections and verified progress.
 from __future__ import annotations
 
 import json
+from typing import TypedDict, cast
+
+
+class LearningModule(TypedDict):
+    theory: list[str]
+    lab: str
+    acceptance: list[str]
+    estimated_hours: int
+
+
+class LearningDetails(LearningModule):
+    resources: list[dict[str, str]]
+
 
 from impulse.bootstrap.ai_reading_resources import reading_for_stage
 from impulse.bootstrap.ai_stage_guides import stage_guide
 
 # ruff: noqa: E501 -- curated human-readable Russian lesson descriptions.
-AI_CURRICULUM_DETAILS: dict[str, list[dict[str, object]]] = json.loads(r"""{
+AI_CURRICULUM_DETAILS: dict[str, list[LearningModule]] = cast(dict[str, list[LearningModule]], json.loads(r"""{
   "product": [
     {
       "theory": [
@@ -665,21 +678,26 @@ AI_CURRICULUM_DETAILS: dict[str, list[dict[str, object]]] = json.loads(r"""{
       "estimated_hours": 12
     }
   ]
-}""")
+}"""))
 
 
-def learning_details(track_key: str, stage_position: int) -> dict[str, object]:
+def learning_details(track_key: str, stage_position: int) -> LearningDetails:
     """Read a curriculum module without mutating the canonical milestone."""
-    details = dict(AI_CURRICULUM_DETAILS[track_key][stage_position - 1])
+    module = AI_CURRICULUM_DETAILS[track_key][stage_position - 1]
     guide = stage_guide(track_key, stage_position)
-    details["resources"] = reading_for_stage(track_key, stage_position)
-    details["lab"] = "\n\n".join(
+    lab = "\n\n".join(
         (
-            str(details["lab"]),
+            module["lab"],
             f"Учебный кейс: {guide['case_study']}",
             f"Пример решения: {guide['worked_example']}",
             f"Типичная ошибка: {guide['common_mistake']}",
             f"Самостоятельная проверка: {guide['stretch_task']}",
         )
     )
-    return details
+    return {
+        "theory": module["theory"],
+        "lab": lab,
+        "acceptance": module["acceptance"],
+        "estimated_hours": module["estimated_hours"],
+        "resources": reading_for_stage(track_key, stage_position),
+    }
