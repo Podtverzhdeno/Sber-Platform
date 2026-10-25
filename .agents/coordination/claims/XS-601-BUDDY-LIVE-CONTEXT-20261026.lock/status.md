@@ -1,0 +1,22 @@
+# Claim XS-601-BUDDY-LIVE-CONTEXT-20261026
+- session_id: gpt6-20261026-buddy-live-context
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 3908e31f3a79975bf067c8fb95d46d8e311bfeff
+- depends_on: []
+- write_scope:
+  - frontend/src/features/buddy-chat-v2.tsx
+  - frontend/src/features/buddy-chat-v2.scss
+  - frontend/src/features/buddy-chat-v2.test.tsx
+  - frontend/src/features/buddy-live-data.ts
+  - frontend/src/features/buddy-live-data.test.ts
+  - .github/workflows/buddy-live-context-qa.yml
+  - .agents/coordination/claims/XS-601-BUDDY-LIVE-CONTEXT-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - npm run typecheck
+  - scoped eslint
+  - scoped vitest
+- progress: Provide owner-only course, project, confirmed skill and private rank facts inside AI Buddy chat, with no fabricated values and no right-side context panel.
+- blockers: Full multi-role production browser E2E and external LLM generation are not in scope.
