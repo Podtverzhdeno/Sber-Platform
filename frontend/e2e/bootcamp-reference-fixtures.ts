@@ -68,7 +68,7 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
     }
     if (route.request().method() === "POST" && match[3]) {
       if (record.completed_units !== 8) { await route.fulfill({ status: 409, json: { code: "COURSE_INCOMPLETE" } }); return; }
-      record.certificate_id ??= "a1b2c3d4-e5f6-47ab-8c12-000000000099";
+      record.certificate_id = "a1b2c3d4-e5f6-47ab-8c12-000000000099";
     }
     study.set(course, record);
     await route.fulfill({ json: {
