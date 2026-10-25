@@ -399,6 +399,16 @@ test("filter rail stays inside its actual workspace width with full sorting and 
       const sort = page.getByLabel("Сортировка", { exact: true });
       await expect(sort).toHaveValue("match-default");
       await expect(page.locator(".catalog-v2-filter-rail .catalog-v2-advanced-filters label").last()).toContainText("Сортировка");
+      // A previous visual iteration drew the prefix in CSS even though it
+      // was already present in the selected option, creating duplicate text.
+      const sortLabel = page.locator(".catalog-v2-filter-rail .catalog-v2-advanced-filters label").last();
+      const sortPresentation = await sortLabel.evaluate((label) => ({
+        pseudo: getComputedStyle(label, "::before").content,
+        selected: label.querySelector("select")?.selectedOptions.item(0)?.textContent ?? "",
+      }));
+      expect(["none", "normal", '""']).toContain(sortPresentation.pseudo);
+      expect(sortPresentation.selected).toMatch(/^Сортировка:/);
+
     }
   }
 });
