@@ -51,9 +51,12 @@ def test_approved_brand_never_impersonates_non_demo_customer() -> None:
         {"task_key": "../../demo-task-1"},
     ):
         case = base | override
-        assert catalog_demo_company_name(
-            demo_mode=bool(case["demo_mode"]),
-            task_key=str(case["task_key"]),
-            customer_name=str(case["customer_name"]),
-            customer_verification=str(case["customer_verification"]),
-        ) is None
+        assert (
+            catalog_demo_company_name(
+                demo_mode=bool(case["demo_mode"]),
+                task_key=str(case["task_key"]),
+                customer_name=str(case["customer_name"]),
+                customer_verification=str(case["customer_verification"]),
+            )
+            is None
+        )
