@@ -29,8 +29,6 @@ jobs:
       - run: npm ci
       - name: Lint
         run: npx eslint src/features/my-projects/page.tsx e2e/my-projects-v2.spec.ts --max-warnings 0
-      - name: TypeScript
-        run: npm run typecheck
       - name: Build
         run: npm run build
       - name: Chromium
@@ -40,6 +38,8 @@ jobs:
           CI: "true"
           TZ: Europe/Moscow
         run: npx playwright test my-projects-v2.spec.ts --project=chromium --grep "introductory copy" --reporter=line
+      - name: TypeScript whole-project gate
+        run: npm run typecheck
       - name: Save browser evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
