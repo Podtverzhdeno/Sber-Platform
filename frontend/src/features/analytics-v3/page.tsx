@@ -4,6 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Activity, ArrowRight, BookOpen, CalendarDays, CheckCircle2, Clock3, Code2, FileBadge2, Flame, FolderOpen, GraduationCap, LockKeyhole, ShieldCheck, Sparkles, Target, TrendingUp, Trophy, X } from "lucide-react";
 import { apiRequest } from "../../api/client";
 import { AnalyticsReference } from "../analytics-reference";
+import { LearningProgressPanel } from "../learning-progress-panel";
 import "./analytics-v3.scss";
 
 type Tab = "activity" | "passport" | "certification";
@@ -62,6 +63,7 @@ export function AnalyticsDashboardV3({navigation=[]}:{navigation?:string[]}) {
  {tab==="activity"&&<>{snapshot.isError&&<div className="av3-alert" role="alert">История активности недоступна <button type="button" onClick={()=>{void snapshot.refetch();}}>Повторить</button></div>}<ActivityTab snapshot={snapshot.data} weeks={weeks} openSection={openSection}/></>}
  {tab==="passport"&&<div className="av3-embedded-passport"><AnalyticsReference navigation={navigation}/></div>}
  {tab==="certification"&&<>{certificates.isError&&<div className="av3-alert" role="alert">Реестр сертификатов недоступен <button type="button" onClick={()=>{void certificates.refetch();}}>Повторить</button></div>}<CertificationTab certificates={certificates.data} openDetail={setDetail} openSection={openSection}/></>}
+ {tab!=="passport"&&<LearningProgressPanel bootcampIndex={Math.max(0,navigation.indexOf("Bootcamp"))}/>}
  <p className="av3-data-foot">Аналитика опирается на текущие источники Impulse. Отсутствующие данные не заменяются нулём; статус корпоративного L1 не присваивается автоматически.</p>
  {detail&&<div className="av3-overlay" role="presentation" onClick={()=>{setDetail(null);}}><section className="av3-dialog" role="dialog" aria-modal="true" aria-label={detail} onClick={e=>{e.stopPropagation();}}><button type="button" aria-label="Закрыть" onClick={()=>{setDetail(null);}}><X size={22}/></button><Sparkles size={36}/><h2>{detail}</h2><p>Для присвоения уровня необходимы утверждённые требования, проверяемые цифровые следы и решение уполномоченной стороны. Пока данные об этом шаге не поступили, статус не считается выполненным.</p><button className="av3-primary" type="button" onClick={()=>{setDetail(null);}}>Понятно <ArrowRight size={16}/></button></section></div>}
  </main>;
