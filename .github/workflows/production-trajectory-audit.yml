@@ -1,0 +1,46 @@
+name: Live Production Trajectory Audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/e2e/production-trajectory-audit.spec.ts"
+      - "frontend/production-playwright.config.ts"
+      - ".github/workflows/production-trajectory-audit.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: production-trajectory-audit-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  read-only-live-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - name: Typecheck live read-only audit
+        run: npm run typecheck
+      - name: Install Chrome
+        run: npx playwright install --with-deps chromium
+      - name: Inspect production API and browser without mutating learner progress
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test --config production-playwright.config.ts --project=chromium
+      - name: Preserve production screenshots and traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: production-trajectory-audit-evidence
+          path: |
+            frontend/test-results/
+          retention-days: 14
+          if-no-files-found: ignore
