@@ -34,7 +34,7 @@ jobs:
       - name: Focused audit unit tests
         run: python -m unittest discover -s tests/architecture -p 'test_*.py' -v
       - name: Analyze all tracked code, imports and Alembic graph
-        run: python scripts/architecture/audit.py --root . --output-dir architecture-report --fail-on-domain-violations
+        run: python scripts/architecture/audit.py --root . --output-dir architecture-report --fail-on-domain-violations --fail-on-new
       - name: Print and publish architecture findings
         if: always()
         run: |
