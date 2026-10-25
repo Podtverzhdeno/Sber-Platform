@@ -186,7 +186,8 @@ async def my_journey_snapshot(
                 if contribution.status is not ContributionStatus.ACCEPTED
             ],
             accepted_contribution_ids=[
-                contribution.id for contribution in item.contributions
+                contribution.id
+                for contribution in item.contributions
                 if contribution.status is ContributionStatus.ACCEPTED
             ],
         )
