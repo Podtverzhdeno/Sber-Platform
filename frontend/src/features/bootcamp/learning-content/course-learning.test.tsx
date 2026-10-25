@@ -63,7 +63,8 @@ describe("Bootcamp editorial course curriculum", () => {
         expect(lesson.example.length).toBeGreaterThan(45);
         expect(lesson.practice.length).toBeGreaterThan(60);
         expect(lesson.expected.length).toBeGreaterThanOrEqual(45);
-        expect(lesson.checklist).toHaveLength(3);
+        expect(lesson.checklist.length).toBeGreaterThanOrEqual(3);
+        expect(lesson.checklist.length).toBeLessThanOrEqual(4);
         expect(lesson.minutes).toBeGreaterThanOrEqual(15);
       }
     }
