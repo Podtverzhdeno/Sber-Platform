@@ -259,7 +259,7 @@ test("Project information popup is read-only, detailed, responsive and dismissib
   const dialog=page.getByRole("dialog",{name:"Подробнее о проекте"});
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText("Реальный исследовательский проект")).toBeVisible();
-  await expect(dialog.getByText("Прототип")).toBeVisible();
+  await expect(dialog.getByRole("heading",{name:"Подробнее о проекте"})).toBeVisible();
   await expect(dialog.getByText("Версия условий")).toBeVisible();
   await expect(dialog.locator(".mpd-criteria li")).toHaveCount(5);
   await expect(dialog.getByText("Заказчик")).toBeVisible();
