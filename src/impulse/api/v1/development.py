@@ -58,7 +58,7 @@ class MilestoneView(BaseModel):
     lab: str | None = None
     acceptance: list[str] = Field(default_factory=list)
     estimated_hours: int | None = Field(default=None, ge=1, le=80)
-    resources: list[dict[str, str]] = Field(default_factory=list)
+    resources: list[dict[str, str]] = Field(default_factory=list[dict[str, str]])
 
 
 class RoadmapView(BaseModel):
