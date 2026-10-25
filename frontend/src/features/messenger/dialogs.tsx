@@ -85,6 +85,7 @@ export function DialogList({
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const handledCreateSignal = useRef(0);
+  const previousSelectedId = useRef(selectedId);
 
   useEffect(() => {
     hydrateDialogDrafts(storage, true);
@@ -144,6 +145,17 @@ export function DialogList({
     setQuery("Маяки");
     setMenuOpen(false);
   }, [findSignal]);
+
+  useEffect(() => {
+    // A newly created/selected dialog should be visible immediately instead
+    // of leaving its new card hidden behind the Contacts tab.
+    if (selectedId !== null && previousSelectedId.current !== selectedId) {
+      setTab("Все");
+      setQuery("");
+      setMenuOpen(false);
+    }
+    previousSelectedId.current = selectedId;
+  }, [selectedId]);
 
   const onScroll = () => {
     if (scrollRef.current) writeDialogScroll(storage, scrollRef.current.scrollTop);
