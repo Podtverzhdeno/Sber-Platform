@@ -29,6 +29,7 @@ from impulse.domain.development import CompletionStatus
 from impulse.domain.identity import ActorContext, Role
 from impulse.infrastructure.database import Database
 
+
 def _study(*, finished: bool) -> ImpulseStudySummary:
     now = datetime.now(UTC)
     certificate_id = uuid4() if finished else None
