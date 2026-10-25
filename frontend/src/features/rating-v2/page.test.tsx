@@ -48,6 +48,7 @@ describe("published rating integration", () => {
     expect(within(board).getByText("100")).toBeInTheDocument();
     expect(within(board).getByText("75")).toBeInTheDocument();
     expect(within(board).getByText("Тестовый участник")).toBeInTheDocument();
+    expect(within(board).getByRole("img", { name: "Тестовый участник" })).toHaveTextContent("ТУ");
     const anonymous = within(board).getAllByRole("button", { name: /Профиль/ })[0];
     expect(anonymous).toBeDisabled();
     const profile = within(board).getAllByRole("button", { name: /Профиль/ })[1];
