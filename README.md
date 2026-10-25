@@ -1,153 +1,269 @@
-# Impulse
+<div align="center">
+  <img src="./frontend/public/home-reference/brand-symbol.svg" alt="Impulse" width="66" height="66" />
+  <h1>IMPULSE</h1>
+  <h3>От интереса к профессии — через реальные задачи и подтверждённые результаты</h3>
+  <p>Платформа, которая соединяет карьерную траекторию, обучение, командную работу и доказуемое портфолио</p>
+  <p>
+    <a href="https://github.com/Podtverzhdeno/Sber-Platform/actions/workflows/ci.yml"><img src="https://github.com/Podtverzhdeno/Sber-Platform/actions/workflows/ci.yml/badge.svg" alt="GitHub CI" /></a>
+    <img src="https://img.shields.io/badge/Python-3.13%2B-122b3f?logo=python&amp;logoColor=white" alt="Python 3.13+" />
+    <img src="https://img.shields.io/badge/React-19-122b3f?logo=react&amp;logoColor=61dafb" alt="React 19" />
+    <img src="https://img.shields.io/badge/TypeScript-5-122b3f?logo=typescript&amp;logoColor=3178c6" alt="TypeScript 5" />
+    <img src="https://img.shields.io/badge/FastAPI-0.115%2B-122b3f?logo=fastapi&amp;logoColor=00c7aa" alt="FastAPI" />
+    <img src="https://img.shields.io/badge/PostgreSQL-16-122b3f?logo=postgresql&amp;logoColor=77b4ea" alt="PostgreSQL 16" />
+  </p>
+  <p>
+    <strong><a href="https://sber-platform-production.up.railway.app/">Открыть демостенд</a></strong>
+    &nbsp; · &nbsp; <a href="#быстрый-старт">Быстрый старт</a>
+    &nbsp; · &nbsp; <a href="#архитектура">Архитектура</a>
+    &nbsp; · &nbsp; <a href="#документация">Документация</a>
+  </p>
+  <sub>Работа демостенда зависит от состояния Railway; ссылка не подтверждает готовность к промышленной эксплуатации</sub>
+</div>
 
-Impulse связывает выбор профессионального направления, обучение и реальную проектную работу в один проверяемый путь: `направление → Bootcamp → задача → вклад → оценка → портфолио`.
+---
 
-Репозиторий развивается по Spec-Driven Development. Текущий источник требований — OpenSpec change [`impulse-ecosystem`](openspec/changes/impulse-ecosystem/).
+## Зачем существует Impulse
 
-## Что уже запускается
+Курс можно закончить, но не получить практики. Проект можно выполнить, но не суметь объяснить свой вклад. Достижения могут остаться разрозненными файлами, которые заказчик или HR не могут объективно проверить.
 
-- FastAPI application factory и `GET /health/live`.
-- React/TypeScript/Vite frontend с начальным экраном участника.
-- Python и frontend unit tests, strict typecheck, Ruff, Pyright и ESLint.
-- Локальный scanner, который проверяет Git-visible файлы на ключи OpenRouter и private keys.
+**Impulse собирает эти шаги в единую историю развития:** от выбора профессионального направления — к освоению навыков, выполнению реальной задачи и подтверждённому результату.
 
-## Требования
+~~~mermaid
+flowchart LR
+    A["🧭 Траектория"] --> B["📚 Bootcamp"]
+    B --> C["🛠️ Задача и проект"]
+    C --> D["📎 Личный вклад и артефакты"]
+    D --> E["✅ Проверка"]
+    E --> F["🪪 Skill Passport"]
+    E --> G["🏆 Достижения и рейтинг"]
+    F --> H["💼 Портфолио"]
+    G --> H
+~~~
 
-- Python 3.13 или 3.14;
-- [uv](https://docs.astral.sh/uv/);
-- Node.js 24+ и npm;
-- Docker — для будущего container smoke и Railway deploy.
+> **Правило продукта:** обучение, заявленный вклад и подтверждённый результат — не одно и то же. Платформа должна показывать основание достижения, а не только красивую цифру.
 
-## Локальный запуск
+## Возможности
 
-Установить Python-зависимости из lockfile:
+| | |
+|---|---|
+| **🧭 Моя траектория**<br>Карьерные роли, этапы освоения, основное и дополнительные направления, следующий шаг | **📚 Bootcamp**<br>Теория, примеры, практика, учебные шаги и прогресс прохождения |
+| **🛠️ Задачи и проекты**<br>Каталог, условия, заявки, команда, материалы, личные вклады и проверки | **🪪 Skill Passport**<br>Матрица навыков и проверяемые кейсы, которые подтверждают компетенции |
+| **🏅 Рейтинг и достижения**<br>Сезоны, личные результаты, трофеи и статусы подтверждения | **👤 Портфолио и сертификация**<br>Проекты, навыки, сертификаты, информация о себе и настройки видимости |
+| **✨ События**<br>Программы, конкурсы, хакатоны, подбор, фильтры и избранное | **💬 Сообщения и AI Buddy**<br>Коммуникации участников и подсказки AI при включённых настройках |
 
-```powershell
+<details>
+<summary><strong>Визуальный стиль платформы</strong></summary>
+
+<br>
+
+<img src="./frontend/public/events/cyberpunk-hero.png" width="100%" alt="Киберпанк-иллюстрация из раздела событий Impulse" />
+
+<sub>Действующий визуальный ассет приложения, а не скриншот завершённого пользовательского сценария</sub>
+
+</details>
+
+### Шесть ролей — одна система
+
+| Роль | Что делает |
+|---|---|
+| **Участник** | Учится, выбирает направление, выполняет задачи, собирает доказательства и портфолио |
+| **Заказчик** | Публикует задачу, описывает критерии, работает с заявками и принимает результаты |
+| **Ментор** | Сопровождает участника и проверяет его вклад |
+| **Руководитель** | Анализирует ход инициатив и агрегированные результаты |
+| **HR** | Видит разрешённую и проверяемую информацию о кандидатах |
+| **Оператор** | Разбирает проверки, источники, обращения и спорные случаи |
+
+Доступные разделы зависят от активной роли, прав и состояния данных. Некоторые сценарии пока демонстрационные.
+
+## Архитектура
+
+~~~mermaid
+flowchart TB
+    UI["React + TypeScript + Vite"] --> API["FastAPI · REST / OpenAPI"]
+    API --> APP["Прикладные сервисы и доменные правила"]
+    APP --> DB[("PostgreSQL · SQLAlchemy / Alembic")]
+    APP --> AUDIT["Аудит и доменные события"]
+    API --> AI["AI Buddy / LangGraph · опционально"]
+    AI -. "через gateway" .-> LLM["OpenRouter"]
+    AI -. "трассировка, если включена" .-> LF["Langfuse"]
+~~~
+
+| Слой | Стек | Назначение |
+|---|---|---|
+| **Frontend** | React 19, TypeScript 5, Vite 7, TanStack Query, React Router | Интерфейсы ролей, состояние запросов, клиентская навигация |
+| **Backend** | Python 3.13+, FastAPI, Pydantic | API, права, бизнес-правила и сценарии |
+| **Data** | PostgreSQL, SQLAlchemy async, Alembic | Хранение, миграции и транзакции |
+| **AI** | LangChain, LangGraph, OpenRouter; Langfuse опционально | Подсказки, инструменты, наблюдаемость |
+| **Quality** | Pytest, Ruff, Pyright, Vitest, ESLint, Playwright | Контракты, регрессии, безопасность, UI |
+| **Delivery** | Docker, GitHub Actions, Railway | Сборка, проверки и развёртывание |
+
+**AI не принимает решения** об оценках, выплатах, трофеях или офферах. Он формирует предложения и черновики; итоговые решения остаются за уполномоченным человеком и проверяемой серверной логикой.
+
+Подробнее: [доменная модель](docs/domain-model.md) и [доменные события](docs/domain-events.md).
+
+## Быстрый старт
+
+### 1. Docker — посмотреть платформу локально
+
+Нужен [Docker с Compose](https://docs.docker.com/get-docker/).
+
+~~~bash
+git clone https://github.com/Podtverzhdeno/Sber-Platform.git
+cd Sber-Platform
+docker compose up --build
+~~~
+
+Откройте **http://localhost:8000**.
+
+Docker Compose запускает PostgreSQL и приложение, применяет миграции и загружает синтетические демоданные. Остановить без удаления базы:
+
+~~~bash
+docker compose down
+~~~
+
+> Compose содержит локальные демонстрационные пароли. **Не используйте эту конфигурацию как публичную production-среду.** Ключ <code>-v</code> при остановке дополнительно удалит том базы данных.
+
+### 2. Разработка с hot reload
+
+Требуется Python **3.13–3.14**, [uv](https://docs.astral.sh/uv/), Node.js **24+**, npm и доступный экземпляр PostgreSQL.
+
+**Backend (корень репозитория)**
+
+~~~bash
 uv sync --frozen
-```
+cp .env.example .env
+~~~
 
-Запустить backend:
+В Windows PowerShell вместо <code>cp</code> используйте <code>Copy-Item .env.example .env</code>. Настройте в <code>.env</code> локальный <code>DATABASE_URL</code> и случайный <code>SESSION_SECRET</code> длиной не менее 32 символов.
 
-```powershell
+~~~bash
+uv run alembic upgrade head
+uv run impulse-demo-seed
 uv run uvicorn impulse.main:app --reload --host 127.0.0.1 --port 8000
-```
+~~~
 
-В другом терминале установить и запустить frontend:
+**Frontend (другой терминал)**
 
-```powershell
+~~~bash
 cd frontend
 npm ci
 npm run dev
-```
+~~~
 
-Vite откроет приложение на `http://127.0.0.1:5173` и проксирует `/api` и `/health` на backend.
+Откройте **http://127.0.0.1:5173**. Vite проксирует <code>/api</code> и <code>/health</code> на локальный backend.
 
-### PostgreSQL и демонстрационные данные
+**Демонстрационные роли:** при <code>DEMO_MODE=true</code> можно войти под синтетическими участником, заказчиком, ментором, руководителем, HR или оператором. Seed идемпотентен — повторный запуск не создаёт дубли.
 
-Создайте локальную базу и укажите строку подключения только в `.env`:
+<details>
+<summary><strong>Настройка окружения и AI</strong></summary>
 
-```dotenv
-APP_ENV=development
-DEMO_MODE=true
-DATABASE_URL=postgresql://<user>:<password>@127.0.0.1:5432/<database>
-SESSION_SECRET=<local-random-secret-at-least-32-characters>
-```
+<br>
 
-Примените миграции и загрузите идемпотентный связанный набор данных:
+Все базовые параметры приведены в [.env.example](.env.example):
 
-```powershell
-uv run alembic upgrade head
-uv run impulse-demo-seed
-```
+| Переменная | Назначение |
+|---|---|
+| <code>APP_ENV</code> | Режим приложения |
+| <code>DEMO_MODE</code> | Демонстрационные сценарии и синтетические данные |
+| <code>DATABASE_URL</code> | Подключение к PostgreSQL |
+| <code>SESSION_SECRET</code> | Подпись сессий |
+| <code>OPENROUTER_API_KEY</code> | Ключ опционального AI |
+| <code>AI_BUDDY_ENABLED</code> | Включение AI Buddy |
+| <code>LANGFUSE_ENABLED</code> | Включение опциональной AI-трассировки |
 
-Seed создаёт синтетических участников, задачи, условия оплаты, заявки, назначения, личные вклады, артефакты, оценки 5+, начисления, рейтинг, HR-события и операторские кейсы. Повторный запуск обновляет те же стабильные demo UUID и не создаёт дублей. Удаление только seed-owned записей доступно исключительно при `DEMO_MODE=true`:
+По умолчанию AI-флаги выключены. В AI-контуре допускается <code>openrouter/free</code> либо явно разрешённая модель с суффиксом <code>:free</code>; платного fallback нет. Не помещайте API-ключи, реальные пароли и токены в Git, frontend или логи.
 
-```powershell
-uv run impulse-demo-reset
-```
+Команда <code>uv run impulse-demo-reset</code> удаляет только seed-owned записи и допустима исключительно при <code>DEMO_MODE=true</code>. Для обычного запуска она не требуется.
 
-Не добавляйте реальный `DATABASE_URL`, пароль PostgreSQL или `SESSION_SECRET` в Git.
+</details>
 
 ## Проверки качества
 
-```powershell
+~~~bash
+# Backend — из корня репозитория
 uv run ruff format --check .
 uv run ruff check .
 uv run pyright
 uv run pytest
 uv run impulse-secret-scan
-uv run python scripts/check_docs.py
-uv run python scripts/check_analytics_docs.py
-uv run python scripts/check_visual_reference_docs.py
-uv run python scripts/check_release_docs.py
-uv run python scripts/check_release_report.py
-uv run python scripts/check_incident_runbooks.py
-uv run python scripts/check_release_acceptance_docs.py
-uv run python scripts/check_ai_release_docs.py
-uv run python scripts/check_ci_docs.py
-uv run python scripts/check_ci_evidence_docs.py
 uv run python scripts/check_markdown_links.py
-uv run python scripts/check_post_deploy_docs.py
-uv run python scripts/check_security_docs.py
-uv run python scripts/check_journey_docs.py
-uv run python scripts/check_contract_docs.py
 
-cd frontend
+# Frontend — из каталога frontend/
 npm run lint
 npm run typecheck
 npm test
 npm run build
-```
+npm run api:check
+npm run test:e2e
+~~~
 
-OpenSpec проверяется отдельно:
+Интеграционным тестам может понадобиться тестовая PostgreSQL-база, а Playwright — браузер Chromium и настроенное тестовое окружение. Подробные проверки описаны в [CI quality gates](docs/ci-quality-gates.md).
 
-```powershell
+**Бейдж CI отображает актуальный статус workflow, но не заменяет приёмку релиза.** [Pre-RC quality report](docs/release-report.md) — исторический срез от 18 октября 2026 года, а не текущий вердикт о готовности.
+
+## Структура репозитория
+
+~~~text
+Sber-Platform/
+├── frontend/
+│   ├── src/features/              # Продуктовые UI-модули
+│   ├── e2e/                       # Playwright-проверки сценариев
+│   └── public/                    # Изображения и UI-ассеты
+├── src/impulse/                   # FastAPI и доменная логика
+├── migrations/                    # Alembic
+├── tests/                         # Python unit / integration tests
+├── openspec/changes/             # Спецификации и задачи
+├── docs/                          # Архитектура, эксплуатация, безопасность
+├── scripts/                       # Проверки контрактов и документации
+├── .github/workflows/             # CI и специализированный UI QA
+├── Dockerfile
+├── docker-compose.yml
+└── railway.toml
+~~~
+
+## Как вносить изменения
+
+Impulse развивается по **Spec-Driven Development**. Основные требования и критерии приёмки живут в [OpenSpec change impulse-ecosystem](openspec/changes/impulse-ecosystem/tasks.md).
+
+1. Найдите задачу и проверьте критерии приёмки в [tasks.md](openspec/changes/impulse-ecosystem/tasks.md).
+2. Прочитайте [AGENTS.md](AGENTS.md): при параллельной работе необходимо координировать write-scope и не перезаписывать чужие изменения.
+3. Реализуйте изменение вместе с проверками для затронутого сценария.
+4. Для UI проверяйте адаптивность, состояния, клики и эталонную геометрию; для backend — права, транзакции, миграции и идемпотентность.
+5. Перед merge пройдите релевантные [quality gates](docs/ci-quality-gates.md) и OpenSpec validation.
+
+~~~bash
 npx -y @fission-ai/openspec@latest validate impulse-ecosystem --strict --no-interactive
-```
+~~~
 
-## Конфигурация и секреты
+## Документация
 
-Скопируйте `.env.example` в `.env` и задавайте значения только локально. `.env` исключён из Git и Docker build context.
+| Область | Документы |
+|---|---|
+| **Продукт и данные** | [Доменная модель](docs/domain-model.md) · [Доменные события](docs/domain-events.md) · [Путь пользователя](docs/journey-traceability.md) |
+| **Контракты и аналитика** | [API: ошибки и повторные запросы](docs/api-error-contract.md) · [Словарь аналитики](docs/analytics-dictionary.md) · [Достоверность рейтинга](docs/rating-data-integrity.md) |
+| **AI** | [Оценка качества](docs/ai-evaluation-contract.md) · [Релиз моделей и промптов](docs/ai-release-policy.md) |
+| **Безопасность** | [RBAC / IDOR](docs/security-test-matrix.md) · [Хранение и удаление](docs/retention-deletion.md) |
+| **Развёртывание** | [Railway](docs/railway-deploy.md) · [Variables](docs/railway-variables-checklist.md) · [Откат миграций](docs/migration-rollbacks.md) |
+| **Эксплуатация и релизы** | [Incident runbooks](docs/incident-runbooks.md) · [Release acceptance](docs/release-acceptance.md) · [Post-deploy smoke](docs/railway-post-deploy-smoke.md) |
+| **CI** | [Quality gates](docs/ci-quality-gates.md) · [Исторический Pre-RC отчёт](docs/release-report.md) |
 
-```powershell
-Copy-Item .env.example .env
-```
+## Что важно знать о MVP
 
-`OPENROUTER_API_KEY` нельзя помещать в исходный код, frontend, тесты, Dockerfile, OpenSpec или логи. В Railway он будет задан через Variables. В Git хранится только пустое имя переменной в `.env.example`.
+- **Данные деморежима — синтетические.** Персоны, события и результаты из seed-набора не подтверждают достижения реальных людей.
+- **Корпоративные интеграции не заявлены как подключённые.** Наличие интерфейсов не доказывает интеграции с SSO, HRIS, LMS или платёжным контуром.
+- **Заявка ≠ выполненная работа ≠ подтверждённый вклад.** У каждого шага собственные условия и статусы.
+- **AI помогает, но не утверждает результат.** Награды, оценки и решения остаются в контролируемом доменном процессе.
+- **Демостенд ≠ production-ready.** Промышленный запуск требует актуальных quality gates, прав доступа, настройки безопасности и отдельной приёмки.
 
-По умолчанию все AI flags выключены. Допустимы только `openrouter/free` или явно проверенная модель с суффиксом `:free`; платного fallback нет.
+---
 
-## Граница демонстрационного режима
-
-MVP работает на вымышленных данных с явной маркировкой `demo`. Он не обещает реальную выплату, оффер или диплом и не интегрирован с корпоративным SSO, HR-системой, LMS или платёжным контуром. AI не принимает решений об оценке, деньгах, трофеях и офферах: окончательное действие выполняет уполномоченный человек через детерминированный Python-код.
-
-При `DEMO_MODE=false` приложение в дальнейшем будет требовать настроенный production auth provider и утверждённые launch gates.
-
-## OpenSpec workflow
-
-Railway deployment guide: [docs/railway-deploy.md](docs/railway-deploy.md).
-Analytics dictionary: [docs/analytics-dictionary.md](docs/analytics-dictionary.md).
-Migration rollback runbook: [docs/migration-rollbacks.md](docs/migration-rollbacks.md).
-Current pre-RC quality report: [docs/release-report.md](docs/release-report.md).
-Railway Variables checklist: [docs/railway-variables-checklist.md](docs/railway-variables-checklist.md).
-Incident runbooks: [docs/incident-runbooks.md](docs/incident-runbooks.md).
-Release readiness and six-role acceptance: [docs/release-acceptance.md](docs/release-acceptance.md).
-AI model/prompt release, canary and rollback: [docs/ai-release-policy.md](docs/ai-release-policy.md).
-CI workflow: [.github/workflows/ci.yml](.github/workflows/ci.yml). Quality gates and
-intentional-failure matrix: [docs/ci-quality-gates.md](docs/ci-quality-gates.md).
-CI intentional-failure evidence: [docs/ci-intentional-failure-evidence.md](docs/ci-intentional-failure-evidence.md).
-Railway post-deploy smoke: [docs/railway-post-deploy-smoke.md](docs/railway-post-deploy-smoke.md).
-Security/RBAC/IDOR test matrix: [docs/security-test-matrix.md](docs/security-test-matrix.md).
-Playwright journey traceability: [docs/journey-traceability.md](docs/journey-traceability.md).
-Retention and deletion runbook: [docs/retention-deletion.md](docs/retention-deletion.md).
-Offline AI evaluation contract: [docs/ai-evaluation-contract.md](docs/ai-evaluation-contract.md).
-Observability and alert contract: [docs/observability-alerts.md](docs/observability-alerts.md).
-API error/retry/idempotency contract: [docs/api-error-contract.md](docs/api-error-contract.md).
-OpenCode local gateway PoC: [docs/opencode-gateway-poc.md](docs/opencode-gateway-poc.md).
-
-1. Требования, сценарии и дизайн находятся в `openspec/changes/impulse-ecosystem/`.
-2. Реализация выполняется по порядку `tasks.md`.
-3. Чекбокс задачи меняется на `[x]` только после прохождения указанной проверки.
-4. Изменение строго валидируется перед merge.
-5. После реализации и проверки change архивируется отдельной OpenSpec-командой.
-
+<div align="center">
+  <h3>От обучения — к работе, которую можно показать и доказать</h3>
+  <strong>IMPULSE · Career paths · Real projects · Verifiable skills</strong>
+  <p>
+    <a href="https://sber-platform-production.up.railway.app/">Демостенд</a> ·
+    <a href="openspec/changes/impulse-ecosystem/tasks.md">План развития</a> ·
+    <a href="https://github.com/Podtverzhdeno/Sber-Platform/actions">GitHub Actions</a>
+  </p>
+  <sub>Проект находится в активной разработке. README описывает архитектуру и сценарии, а не гарантирует готовность каждого компонента для production.</sub>
+</div>
