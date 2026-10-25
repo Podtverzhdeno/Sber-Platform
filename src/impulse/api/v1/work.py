@@ -1539,7 +1539,7 @@ class CheckpointFilePayload(BaseModel):
 class CheckpointSubmissionPayload(BaseModel):
     summary: str = Field(min_length=20, max_length=1500)
     artifact_key: str = Field(min_length=1, max_length=128)
-    file_ids: list[UUID] = Field(default_factory=list, max_length=5)
+    file_ids: list[UUID] = Field(default_factory=lambda: list[UUID](), max_length=5)
     external_url: AnyHttpUrl | None = None
 
 
