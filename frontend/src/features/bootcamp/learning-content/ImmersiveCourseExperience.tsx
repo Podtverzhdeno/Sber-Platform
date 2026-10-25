@@ -365,7 +365,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
               : <div className="imp-study__callout"><CheckCircle2 size={18}/><p><strong>Разбор</strong>Сравните пример с задачей и объясните каждый ключевой шаг.</p></div>}
             </div>
           </section>}</LessonFrame>
-          <LessonFrame key={courseKey + "-" + unit.id + "-practice"} unitId={courseKey + "-" + unit.id} kind="practice">{() => <section className="imp-study__content" aria-label="Практическое задание"><h3>Практическое задание</h3><p>{authReference ? "Реализуйте защищённый API на FastAPI: проверяйте JWT и возвращайте профиль текущего пользователя только по доверенному токену. Добавьте негативные проверки и запрет доступа к чужим объектам." : unit.practice}</p>
+          <LessonFrame key={courseKey + "-" + unit.id + "-practice"} unitId={courseKey + "-" + unit.id} kind="practice">{() => <section className="imp-study__content" aria-label="Практическое задание"><h3>Практическое задание</h3><div className="imp-study__compact-course"><BookOpen size={18}/><strong>{courseTitle}</strong><span>{unit.title}</span></div><p>{authReference ? "Реализуйте защищённый API на FastAPI: проверяйте JWT и возвращайте профиль текущего пользователя только по доверенному токену. Добавьте негативные проверки и запрет доступа к чужим объектам." : unit.practice}</p>
             <StarterCaseCard courseKey={courseKey} unitTitle={unit.title}/>
             <div className="imp-study__practice-columns"><div><h4><Target size={18}/> Требования</h4>
               {authReference ? authorizationRequirements.map((item,index)=><div className="imp-study__requirement" key={item.title}><span>{index+1}</span><div><strong>{item.title}</strong><p>{item.detail}</p></div></div>)
