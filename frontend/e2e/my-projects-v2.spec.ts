@@ -166,9 +166,12 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   await page.getByRole("button",{name:"Этапы",exact:true}).click();
   await expect(page.getByRole("button",{name:"Назад к обзору"})).toBeVisible();
   await page.getByRole("button",{name:"Назад к обзору"}).click();
-  await page.getByRole("button",{name:"Загрузить новую версию"}).click();
-  await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
-  await expect(page.getByRole("tab",{name:"Мой вклад"})).toHaveAttribute("aria-selected","true");
+  await page.getByRole("button",{name:"Сдать решение по этапу"}).click();
+  const checkpoint=page.getByTestId("checkpoint-solution-popup");
+  await expect(checkpoint).toBeVisible();
+  await expect(checkpoint).toContainText("Документация");
+  await checkpoint.getByRole("button",{name:"Закрыть чекпоинт"}).click();
+  await expect(checkpoint).toHaveCount(0);
 });
 
 test("My Projects: reference desktop grid and contextual help",async({page})=>{
