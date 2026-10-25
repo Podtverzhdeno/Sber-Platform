@@ -230,26 +230,52 @@ export function ParticipantHomeV2Body(props: {
             </div>
             {panel === "levels" ? (
               <div className="home-v2-drawer-body">
-                <p className="home-v2-drawer-eyebrow">Профессиональный рост</p><h2>Карта уровней</h2>
-                <p>Путь развития по выбранной роли. Грейды отображаются только после публикации их критериев.</p>
-                {grade.state === "not_evaluable" ? (
-                  <section className="home-v2-grade-unavailable" role="status"><LockKeyhole size={25}/><strong>Каталог грейдов пока не опубликован</strong><span>После согласования модели здесь появятся ступени, подтверждённые результаты и прогресс развития.</span></section>
-                ) : <div className="home-v2-grade-timeline">
-                  {grade.target_grade !== null && <button type="button" onClick={() => { setPanel("grade-details"); }}><span className="home-v2-grade-dot target"></span><strong>Грейд {grade.target_grade}</strong><small>Следующая цель</small><ChevronRight size={18}/></button>}
-                  {grade.current_grade !== null && <button type="button" onClick={() => { setPanel("grade-details"); }}><span className="home-v2-grade-dot current"></span><strong>Грейд {grade.current_grade}</strong><small>Текущий</small><ChevronRight size={18}/></button>}
-                </div>}
-                {activeRole && <div className="home-v2-drawer-note">Активная роль: {activeRole.title}</div>}
+                <p className="home-v2-drawer-eyebrow">Путь развития Impulse</p><h2>Карта уровней</h2>
+                <p>Начни с L0. Заверши учебную программу и получи независимое подтверждение практики, чтобы перейти на следующий уровень.</p>
+                <div className="home-v2-grade-timeline">
+                  {impulseLevel.data && <button type="button" onClick={() => { setPanel("grade-details"); }}>
+                    <span className="home-v2-grade-dot current"/>
+                    <strong>L{impulseLevel.data.level} · текущий уровень</strong>
+                    <small>Цикл {impulseLevel.data.cycle_number}</small><ChevronRight size={18}/>
+                  </button>}
+                  <button type="button" onClick={() => { setPanel("grade-details"); }}>
+                    <span className="home-v2-grade-dot target"/>
+                    <strong>L{(impulseLevel.data?.level ?? 0)+1} · следующая цель</strong>
+                    <small>{impulseLevel.data?.curriculum_state==="published" ? "Курсы + проверенная практика" : "Программа ожидает публикации"}</small>
+                    <ChevronRight size={18}/>
+                  </button>
+                </div>
+                {activeRole && <div className="home-v2-drawer-note">Роль: {activeRole.title}</div>}
+                <div className="home-v2-drawer-note">Это учебные уровни Impulse. Официальный карьерный грейд рассчитывается отдельно.</div>
               </div>
             ) : (
               <div className="home-v2-drawer-body">
-                <button className="home-v2-drawer-back" type="button" onClick={() => { setPanel("levels"); }}>← Все грейды</button>
-                <div className="home-v2-grade-detail-hero"><span className="home-v2-drawer-eyebrow">Следующий уровень</span><h2>{grade.target_grade === null ? "Требования ещё не опубликованы" : `Грейд ${grade.target_grade}`}</h2><p>{activeRole?.title ?? "Траектория развития"}</p></div>
-                {grade.state === "not_evaluable" ? <section className="home-v2-grade-unavailable" role="status"><LockKeyhole size={25}/><strong>Оценка грейда недоступна</strong><span>После утверждения модели будут доступны требования к переходу, компетенции и прогресс.</span></section> : (
-                  <section className="home-v2-grade-progress"><Target size={24}/><div><strong>Готовность к следующему уровню</strong><span>{grade.readiness_percent === null ? "Требует проверки" : `${String(grade.readiness_percent)}% по действующей политике`}</span>{grade.readiness_percent !== null && <div className="home-v2-grade-track"><span style={{ width: `${String(grade.readiness_percent)}%` }}/></div>}</div></section>
-                )}
-                <h3>Что нужно для перехода</h3>
-                <div className="home-v2-grade-requirement"><ClipboardCheck size={21}/><div><strong>Практический результат</strong><small>Выполнить этап траектории и подтвердить личный вклад</small></div></div>
-                <div className="home-v2-grade-requirement"><FileCheck2 size={21}/><div><strong>Проверенные компетенции</strong><small>Решение принимается после проверки артефактов, а не по XP</small></div></div>
+                <button className="home-v2-drawer-back" type="button" onClick={() => { setPanel("levels"); }}>← Все уровни</button>
+                <div className="home-v2-grade-detail-hero">
+                  <span className="home-v2-drawer-eyebrow">Учебный уровень Impulse</span>
+                  <h2>{impulseLevel.data ? `L${String(impulseLevel.data.level)} → L${String(impulseLevel.data.level+1)}` : "Данные ещё загружаются"}</h2>
+                  <p>{activeRole?.title ?? "Траектория развития"}</p>
+                </div>
+                {impulseLevel.data ? <>
+                  <section className="home-v2-grade-progress"><Target size={24}/><div>
+                    <strong>Курсы выбранной роли</strong>
+                    <span>{impulseLevel.data.completed_courses} из {impulseLevel.data.required_courses} пройдено</span>
+                    <div className="home-v2-grade-track"><span style={{width:`${String(levelCoursesProgress(impulseLevel.data))}%`}}/></div>
+                  </div></section>
+                  <h3>Что нужно для перехода</h3>
+                  <div className="home-v2-grade-requirement"><FileCheck2 size={21}/><div>
+                    <strong>Курсы: {impulseLevel.data.completed_courses}/{impulseLevel.data.required_courses}</strong>
+                    <small>Учебные сертификаты учитываются один раз в своём цикле</small>
+                  </div></div>
+                  <div className="home-v2-grade-requirement"><ClipboardCheck size={21}/><div>
+                    <strong>Проверенная практика: {impulseLevel.data.approved_practices}/{impulseLevel.data.required_practices}</strong>
+                    <small>Результат подтверждает проверяющий, не сам участник</small>
+                  </div></div>
+                  {impulseLevel.data.curriculum_state==="unpublished" && <section className="home-v2-grade-unavailable" role="status">
+                    <LockKeyhole size={23}/><strong>Новая программа ещё не опубликована</strong>
+                    <span>Старые сертификаты не повышают уровень повторно.</span>
+                  </section>}
+                </> : <section className="home-v2-grade-unavailable" role="status">Сервис учебных уровней недоступен. Текущее значение не подменяется выдуманной оценкой.</section>}
                 {overview.next_outcome && <button type="button" className="home-v2-primary home-v2-grade-button" onClick={() => { closePanel(); openNext(); }}>Перейти к следующему шагу <ArrowRight size={17}/></button>}
               </div>
             )}
