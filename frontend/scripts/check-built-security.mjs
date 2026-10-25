@@ -58,6 +58,17 @@ const urlAllowlist = [
 // Exact, reviewed documentation links used by the editorial Bootcamp curriculum.
 // Do not use a hostname wildcard: an unrelated URL must still fail the bundle scan.
 const approvedLearningUrls = new Set([
+  // Exact public documentation references embedded by the expanded Bootcamp.
+  // Keep them enumerated: never allow an entire host, URL prefix or wildcard.
+  "https://github.com/Fission-AI/OpenSpec",
+  "https://docs.langchain.com/oss/python/langgraph/overview",
+  "https://fastapi.tiangolo.com/tutorial/testing/",
+  "https://www.postgresql.org/docs/current/tutorial-join.html",
+  "https://amplitude.com/blog/event-tracking-taxonomy",
+  "https://scikit-learn.org/stable/modules/model_evaluation.html",
+  "https://docs.pytest.org/en/stable/how-to/assert.html",
+  "https://owasp.org/API-Security/editions/2023/en/0xa1-broken-object-level-authorization/",
+  "https://support.microsoft.com/en-us/office/make-your-powerpoint-presentations-accessible-to-people-with-disabilities-6f7772b2-2d0c-4e39-beb2-2013a5f3fcac",
   "https://github.com/Fission-AI/OpenSpec/blob/main/docs/getting-started.md",
   "https://reference.langchain.com/python/langgraph/overview",
   "https://docs.python.org/3/tutorial/",
