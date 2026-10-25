@@ -1730,7 +1730,7 @@ function ImpulseApp() {
                           <strong>Пока нет уведомлений</strong>
                           <span>Здесь появятся события ваших проектов</span>
                         </div>
-                      )}
+                      ) : null}
                     </div>
                     <footer>
                       <button
