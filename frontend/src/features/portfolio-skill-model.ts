@@ -5,6 +5,7 @@ export type VerifiedPassportSkill = {
   key: string;
   practical_level: string;
   confirmed_case_count: number;
+  last_confirmed_at?: string | null;
 };
 
 export function numericPassportLevel(value: string): number | null {
