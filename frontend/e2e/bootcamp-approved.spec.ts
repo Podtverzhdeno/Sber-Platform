@@ -81,3 +81,28 @@ for (const viewport of viewports) {
     });
   });
 }
+
+
+test("Bootcamp cards respond to hover and keyboard focus", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1086 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+
+  const card = page.locator('[data-reference="BC-R01"] .bootcamp-course-card[data-access="available"]').first();
+  await expect(card).toBeVisible();
+  const before = await card.evaluate((node) => ({
+    border: getComputedStyle(node).borderTopColor,
+    shadow: getComputedStyle(node).boxShadow,
+  }));
+  await card.hover();
+  await expect.poll(() => card.evaluate((node) => getComputedStyle(node).borderTopColor))
+    .not.toBe(before.border);
+  await expect.poll(() => card.evaluate((node) => getComputedStyle(node).boxShadow))
+    .not.toBe(before.shadow);
+
+  await card.getByRole("button", { name: "Подробнее →" }).focus();
+  await expect(card.getByRole("button", { name: "Подробнее →" })).toBeFocused();
+  await card.getByRole("button", { name: "Подробнее →" }).click();
+  await expect(page.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
+});
