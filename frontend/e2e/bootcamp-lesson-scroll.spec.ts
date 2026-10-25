@@ -4,7 +4,7 @@ import { installBootcampReferenceApi } from "./bootcamp-reference-fixtures";
 test.beforeEach(async ({ page }) => { await installBootcampReferenceApi(page); });
 
 for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
-  test(`next and previous lesson return to the new lesson's beginning at ${viewport.width}px`, async ({ page }) => {
+  test(`next and previous lesson return to the new lesson's beginning at ${String(viewport.width)}px`, async ({ page }) => {
     await page.setViewportSize(viewport);
     await page.goto("/");
     await page.locator('[data-persona="participant-alex"]').click();
