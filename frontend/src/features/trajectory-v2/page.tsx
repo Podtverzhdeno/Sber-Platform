@@ -260,6 +260,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               <li key={role.track_key}>
                 <RoleCardOverview
                   role={role}
+                  courseProgress={role.track_key===selectedKey && roleLevel?.curriculum_state==="published" ? `${String(roleLevel.completed_courses)} из ${String(roleLevel.required_courses)} курсов` : null}
                   primary={role.track_key === primaryKey}
                   selected={role.track_key === selectedKey}
                   pinned={role.track_key === pinnedTrack}
@@ -552,6 +553,7 @@ function formatAsOf(asOf: string): string {
 
 export function RoleCardOverview(props: {
   role: RoleCardView;
+  courseProgress?: string | null;
   primary: boolean;
   selected: boolean;
   pinned: boolean;
@@ -606,7 +608,7 @@ export function RoleCardOverview(props: {
       {role.attempt_number !== null ? (
         <>
           <progress max={Math.max(1,role.total_milestones)} value={Math.min(role.total_milestones,role.completed_milestones)} aria-label="Прогресс этапов роли" />
-          <small>{role.completed_milestones} из {role.total_milestones} этапов{role.state === "paused" ? " · пауза" : ""}</small>
+          <small>{role.completed_milestones} из {role.total_milestones} этапов подтверждено{role.state === "paused" ? " · пауза" : ""}{props.courseProgress ? ` · ${props.courseProgress}` : ""}</small>
         </>
       ) : (
         <small className="trajectory-v2-role-unselected">Не выбрана</small>
