@@ -596,3 +596,17 @@
   .imp-study__course-tabs button { flex:0 0 auto; min-width:112px; padding:0 14px; }
   .imp-study__skills-panel > div { grid-template-columns:minmax(0,1fr); }
 }
+
+
+/* Reference illustration: the data-security hero uses its own layered server
+   and shield artwork, without a screenshot replacing interactive elements. */
+.imp-study[data-course="demo-course-10"] .imp-study__hero {
+  background:
+    radial-gradient(ellipse at 58% 38%,#173a8b55,transparent 55%),
+    linear-gradient(110deg,#081e3e,#0c1647 66%,#0b1b42);
+}
+.imp-study[data-course="demo-course-10"] .imp-study__shield {
+  background: url("/bootcamp/security-hero.svg") center/contain no-repeat;
+}
+.imp-study[data-course="demo-course-10"] .imp-study__shield > svg,
+.imp-study[data-course="demo-course-10"] .imp-study__shield > .imp-study__glow { display:none; }
