@@ -494,5 +494,45 @@
 
 /* The lesson shortcut lands below the fullscreen reader's sticky 76px header. */
 .bc-reference .bc-learning__body {
-  scroll-margin-top: 94px; /* reader title clearance */
+  scroll-margin-top: 80px; /* reader title clearance */
+}
+
+
+/* Compact touch-scrolling lesson plan: on phones the eight-step vertical
+   outline should not push the actual educational material below the fold. */
+@media (max-width: 800px) {
+  .bc-reference .bc-learning__toc {
+    position: static;
+    overflow: hidden;
+    padding: 12px;
+  }
+  .bc-reference .bc-learning__toc ol {
+    display: flex;
+    flex-wrap: nowrap;
+    grid-template-columns: none;
+    gap: 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    padding-bottom: 7px;
+    scrollbar-width: thin;
+    scrollbar-color: #16b9c4 transparent;
+  }
+  .bc-reference .bc-learning__toc li {
+    flex: 0 0 min(70vw, 235px);
+    min-width: 0;
+    scroll-snap-align: start;
+  }
+  .bc-reference .bc-learning__toc button {
+    height: 100%;
+    min-height: 74px;
+    padding: 9px;
+    align-items: center;
+  }
+  .bc-reference .bc-learning__toc button strong {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
 }
