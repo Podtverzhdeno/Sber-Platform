@@ -405,7 +405,7 @@ function RecommendationDetails({ card, track, onOpenCourse }: { card: CourseCard
     <section className="bc-ref-why-item">
       <span className="bc-ref-why-symbol bc-ref-why-symbol--role"><GraduationCap /></span>
       <div><h3>Связь с ролью</h3>
-        <p>{card.track_keys.includes(track)
+        <p>{courseRoleTitles(card).includes(track)
           ? "Курс связан с направлением «" + track + "»."
           : card.relevance_reasons[0] ?? "Привязка к активной роли уточняется."}</p></div>
     </section>
