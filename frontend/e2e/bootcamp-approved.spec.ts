@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { installBootcampReferenceApi } from "./bootcamp-reference-fixtures";
+import { bootcampCatalogFixture, installBootcampReferenceApi } from "./bootcamp-reference-fixtures";
 
 test.beforeEach(async ({ page }) => { await installBootcampReferenceApi(page); });
 
@@ -367,6 +367,11 @@ test("all seven AI trajectory roles remain reachable through horizontal controls
 
 
 test("Bootcamp primary actions share a baseline with or without recommendation links", async ({ page }) => {
+  await page.route("**/api/v1/me/bootcamp/catalog", route => route.fulfill({
+    json: bootcampCatalogFixture.map(card => card.key === "demo-course-8"
+      ? { ...card, relevant: false }
+      : card),
+  }));
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
