@@ -236,11 +236,15 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
   const [copied,setCopied] = useState(false);
   const checkpoints = project.detail?.checkpoints ?? [];
   const progress = completion(project);
+  const projectTopic=[project.work.task.title,project.detail?.problem??"",...(project.work.task.competency_tags??[])].join(" ").toLowerCase();
+  const heroArtKind=/(спутник|satellite|космич|earth observation)/.test(projectTopic)?"satellite":
+    /(статей|публикац|литератур|исследован|рекомендател|поиск)/.test(projectTopic)?"research":
+    /(ассистент|чат|агент|llm|бот|нейросет)/.test(projectTopic)?"agent":"abstract";
   const tabs: {id:Tab;title:string}[]=[{id:"overview",title:"Обзор"},{id:"tasks",title:"Задачи"},{id:"progress",title:"Прогресс"},{id:"contribution",title:"Мой вклад"},{id:"team",title:"Команда"},{id:"rewards",title:"Бонусы и выгоды"}];
   return <div ref={dialogRef} className="mp-detail" data-project-screen="detail" role="dialog" aria-modal="true" aria-labelledby="workspace-title">
     <nav className="mp-breadcrumb" aria-label="Путь"><button type="button" onClick={onBack}><ArrowLeft size={16}/> Мои проекты</button><span>/</span><span>{project.work.task.title}</span></nav>
     <div className="mp-ref-hero" role="banner">
-      <div className="mp-ref-hero-art" aria-hidden="true"/>
+      <div className={`mp-ref-hero-art mp-ref-hero-art--${heroArtKind}`} aria-hidden="true"/>
       <CompanyIcon name={projectCompany(project)}/>
       <div className="mp-ref-hero-text">
         <div className="mp-ref-kicker"><strong>{projectCompany(project)}</strong><span>Заказчик</span></div>
