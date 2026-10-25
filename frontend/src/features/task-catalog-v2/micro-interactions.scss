@@ -413,3 +413,101 @@
     outline-offset: 2px;
   }
 }
+
+/* source-like-compact-list-actions: reference 03 ends each table row with one
+   detail arrow. Keep bookmark/share/apply accessible in a separate menu rather
+   than squeezing four permanent buttons into the information columns. */
+.catalog-v2 .catalog-v2-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.catalog-v2 .catalog-v2-table-actions {
+  position: relative;
+  overflow: visible;
+}
+.catalog-v2 .catalog-v2-table-row:has(.catalog-v2-table-menu[open]) {
+  position: relative;
+  z-index: 12;
+}
+.catalog-v2 .catalog-v2-table-menu {
+  position: relative;
+  flex: 0 0 auto;
+}
+.catalog-v2 .catalog-v2-table-menu summary {
+  display: grid;
+  place-items: center;
+  width: 37px;
+  min-height: 40px;
+  box-sizing: border-box;
+  padding: 5px;
+  border: 1px solid var(--catalog-border);
+  border-radius: 9px;
+  background: var(--catalog-surface);
+  color: var(--catalog-ink);
+  cursor: pointer;
+  list-style: none;
+}
+.catalog-v2 .catalog-v2-table-menu summary::-webkit-details-marker { display: none; }
+.catalog-v2 .catalog-v2-table-menu summary:hover,
+.catalog-v2 .catalog-v2-table-menu summary:focus-visible,
+.catalog-v2 .catalog-v2-table-menu[open] summary {
+  border-color: var(--catalog-highlight);
+  outline-offset: 2px;
+}
+.catalog-v2 .catalog-v2-table-menu-popover {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  right: 0;
+  display: grid;
+  gap: 6px;
+  width: max-content;
+  min-width: 190px;
+  max-width: min(260px, calc(100vw - 32px));
+  padding: 9px;
+  border: 1px solid var(--catalog-border);
+  border-radius: 12px;
+  background: var(--catalog-surface);
+  box-shadow: 0 12px 26px rgb(0 0 0 / 26%);
+}
+.catalog-v2 .catalog-v2-table-menu:not([open]) .catalog-v2-table-menu-popover {
+  display: none;
+}
+.catalog-v2 .catalog-v2-table-menu-popover button,
+.catalog-v2 .catalog-v2-table-menu-popover .catalog-v2-icon-action {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 9px;
+  text-align: left;
+  font-size: 0.75rem;
+}
+@media (min-width: 1550px) {
+  .catalog-v2 .catalog-v2-table-head,
+  .catalog-v2 .catalog-v2-table-row {
+    grid-template-columns:
+      22px
+      minmax(190px, 1.8fr)
+      minmax(110px, 0.93fr)
+      minmax(105px, 0.92fr)
+      minmax(95px, 0.85fr)
+      minmax(100px, 0.86fr)
+      minmax(150px, 1.20fr)
+      minmax(150px, 1.20fr)
+      84px;
+  }
+}
+@media (max-width: 680px) {
+  .catalog-v2 .catalog-v2-table-menu-popover {
+    right: 0;
+    width: 205px;
+  }
+}
