@@ -2,3 +2,6 @@ a48b39fa2b75f01176f7e0bb6eaf83dec60a006d
 
 # My Projects redesigned full-width dashboard, detailed modal, progress ring, all sections verified in Chromium
 release_request=2026-10-25-my-projects-pixel-pass-63fe43d
+
+# Events banner: original 2172x724 asset, lime Sber label removed, browser QA passed
+release_request=2026-10-25-events-hires-cyberpunk-cacf530a7
