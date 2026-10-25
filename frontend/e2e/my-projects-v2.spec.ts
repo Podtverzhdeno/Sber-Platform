@@ -132,7 +132,7 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   await expect.poll(()=>tile.evaluate(node=>getComputedStyle(node).transform)).not.toBe(initial);
   await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
-  await page.getByRole("button",{name:/Продолжить|Открыть/}).click();
+  await page.locator(".mp-detail-hero__lower").getByRole("button",{name:"Продолжить работу"}).click();
   await expect(page.locator(".mpv2--workspace")).toBeVisible();
   await page.getByRole("button",{name:"Загрузить новую версию"}).click();
   await expect(page.locator(".mpv2--workspace .ctw-upload")).toBeVisible();
@@ -174,7 +174,7 @@ test("My Projects: quick preview tabs open correct deep-linked details",async({p
 test("My Projects: writing to a teammate targets the selected participant",async({page})=>{
   await page.setViewportSize({width:1672,height:941});
   await fixture(page);
-  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить работу|Открыть проект/}).click();
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
   await page.getByRole("tab",{name:"Команда"}).click();
   await expect(page.locator(".mp-team-member")).toHaveCount(2);
   await page.locator(".mp-team-member").nth(1).getByRole("button",{name:"Написать"}).click();
