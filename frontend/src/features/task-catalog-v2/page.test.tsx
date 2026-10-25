@@ -142,6 +142,7 @@ describe("task catalog v2", () => {
     expect(document.querySelector(".catalog-v2-match-ring-value")).not.toBeNull();
     expect(screen.getAllByText(catalogItem.title).length).toBeGreaterThan(1);
     expect(screen.getAllByText(/R&D лаборатория · Демо-заказчик/).length).toBeGreaterThan(0);
+    await screen.findByRole("heading", { name: "Этапы задачи" });
     const stageState = document.querySelector(".catalog-v2-stage-state");
     expect(stageState).not.toBeNull();
     expect(stageState).toHaveTextContent(/Запланировано/);
@@ -383,7 +384,7 @@ describe("task catalog v2", () => {
     expect(workspace).not.toBeNull();
     expect(workspace).toHaveAttribute("data-layout", "cards");
     expect(screen.getByRole("complementary", { name: "Предпросмотр рекомендованной задачи" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Этапы задачи" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Этапы задачи" })).toBeInTheDocument();
     expect(document.querySelector(".catalog-v2-stage-track")).not.toBeNull();
     const detailButton = screen.getAllByRole("button", { name: "Подробнее" })[0];
     if (detailButton === undefined) throw new Error("Detail button is missing");
