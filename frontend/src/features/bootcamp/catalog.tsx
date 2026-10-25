@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ArrowRight, Bot, Check, Clock3, FileText, GitBranch, GraduationCap, List, LockKeyhole, Search, Sparkles, ChartNoAxesCombined, LayoutGrid, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -502,20 +502,20 @@ function AiRoleTabs({
   const scroller = useRef<HTMLDivElement>(null);
   const [canScroll, setCanScroll] = useState({ back: false, next: false });
 
-  function updateScrollButtons() {
+  const updateScrollButtons = useCallback(() => {
     const element = scroller.current;
     if (!element) return;
     const back = element.scrollLeft > 2;
     const next = element.scrollLeft + element.clientWidth < element.scrollWidth - 2;
     setCanScroll(previous =>
       previous.back === back && previous.next === next ? previous : { back, next });
-  }
+  }, []);
 
   useEffect(() => {
     updateScrollButtons();
     window.addEventListener("resize", updateScrollButtons);
     return () => { window.removeEventListener("resize", updateScrollButtons); };
-  }, [roles.length]);
+  }, [roles.length, updateScrollButtons]);
 
   function scrollRoles(direction: -1 | 1) {
     const element = scroller.current;
