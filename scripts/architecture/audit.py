@@ -11,8 +11,8 @@ import re
 import subprocess
 from typing import Any
 
-EXT = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".css", ".scss", ".sql"}
-GENERATED = {"frontend/src/api/schema.ts"}
+EXT = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".css", ".scss", ".sql", ".yaml", ".yml", ".json", ".toml", ".ini", ".html"}
+GENERATED = {"frontend/src/api/schema.ts", "openapi.json"}
 TS_IMPORT = re.compile(r'(?:\bfrom\s*|\bimport\s*\(|\brequire\s*\()\s*["\x27]([^"\x27]+)["\x27]|^\s*import\s*["\x27]([^"\x27]+)["\x27]', re.M)
 MIGRATION = re.compile(r'(?m)^\s*(revision|down_revision)\s*(?::[^=\n]+)?=\s*(.+?)\s*$')
 
@@ -166,7 +166,11 @@ def analyze(root: Path) -> dict[str, Any]:
     counts: Counter[str] = Counter()
     edges_scanned = 0
     type_edges_skipped = 0
+    manifest: list[dict[str, Any]] = []
     for path in all_files:
+        name = PurePosixPath(path).name
+        manifest.append({"path": path, "bytes": (root / path).stat().st_size, "kind": (
+            "generated" if path in GENERATED else category(path) if Path(path).suffix in EXT else "asset_or_document")})
         if Path(path).suffix not in EXT:
             counts["non_source"] += 1
             continue
@@ -227,7 +231,8 @@ def analyze(root: Path) -> dict[str, Any]:
                         cross_features.append({"path": path, "line": source.count("\n", 0, match.start()) + 1, "target": dest})
         graph.setdefault(path, set())
     biggest.sort(key=lambda x: x["bytes"], reverse=True)
-    return {"tracked": len(all_files), "sources": sum(v for k, v in counts.items() if k != "non_source"),
+    return {"tracked": len(all_files), "manifest": manifest,
+            "sources": sum(v for k, v in counts.items() if k != "non_source"),
             "categories": dict(counts), "imports_scanned": edges_scanned,
             "edges": sum(len(x) for x in graph.values()), "type_only_edges_skipped": type_edges_skipped,
             "forbidden_imports": sorted(forbidden, key=lambda x: (x["path"], x["line"])),
