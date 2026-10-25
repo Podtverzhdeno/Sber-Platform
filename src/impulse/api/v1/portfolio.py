@@ -116,6 +116,83 @@ def _participant_actor(persona: PersonaRecord, authenticated: AuthenticatedSessi
     )
 
 
+async def _recognition_evidence(
+    request: Request,
+    authenticated: AuthenticatedSession,
+    persona: PersonaRecord,
+    consents: frozenset[ConsentScope],
+) -> tuple[list[PortfolioCredentialView], list[PortfolioTrophyView], list[dict[str, str]]]:
+    """Only issued records and approved public proofs, never candidate XP.
+
+    The owner may see their own issued credentials (including revoked records).
+    HR sees credentials only with explicit profile + trophies permission and
+    an enabled achievements visibility setting. Public trophy/offer evidence is
+    filtered by the same recognition leaderboard policy as the rating page.
+    """
+    auth = request.app.state.auth_service
+    own = (
+        authenticated.actor.active_role is Role.PARTICIPANT
+        and authenticated.actor.person_id == persona.person_id
+    )
+    authorized_hr = False
+    if authenticated.actor.active_role is Role.HR and ConsentScope.HR_PROFILE in consents:
+        settings = await auth.store.hr_visibility(persona.person_id)
+        authorized_hr = (
+            settings.get("hr_achievements", False)
+            and ConsentScope.PUBLIC_TROPHIES in consents
+        )
+    recognition = request.app.state.recognition_service
+    if not (own or authorized_hr):
+        return [], [], []
+
+    credential_records, seasons = await asyncio.gather(
+        recognition.store.person_credentials(persona.person_id),
+        recognition.public_seasons(),
+    )
+    credentials = [
+        PortfolioCredentialView(
+            verification_id=credential.verification_id,
+            title=credential.title,
+            status=credential.status.value,
+        )
+        for credential in credential_records
+    ]
+
+    # The leaderboard applies public_rating/public_trophies/public_profile
+    # consent and filters revoked source evidence in its backing store.
+    leaderboards = await asyncio.gather(
+        *(recognition.leaderboard(season.season_id) for season in seasons)
+    )
+    trophies: list[PortfolioTrophyView] = []
+    offers: list[dict[str, str]] = []
+    trophy_sources: set[tuple[str, str, str]] = set()
+    offer_sources: set[tuple[str, str]] = set()
+    for entries in leaderboards:
+        for entry in entries:
+            if entry.anonymized or entry.person_id != persona.person_id:
+                continue
+            for proof in entry.trophies:
+                source = (proof.title, proof.trophy_type, proof.source_url)
+                if source in trophy_sources:
+                    continue
+                trophy_sources.add(source)
+                trophies.append(
+                    PortfolioTrophyView(
+                        title=proof.title,
+                        organizer="Не указан",
+                        source_url=proof.source_url,
+                        trophy_type=proof.trophy_type,
+                    )
+                )
+            for proof in entry.offers:
+                source = (proof.event_title, proof.source_url)
+                if source in offer_sources:
+                    continue
+                offer_sources.add(source)
+                offers.append({"title": proof.event_title, "basis": proof.basis})
+    return credentials, trophies, offers
+
+
 async def _projection(
     request: Request, authenticated: AuthenticatedSession, persona: PersonaRecord
 ) -> PortfolioView:
@@ -161,14 +238,17 @@ async def _projection(
         for item in enrollments
         if item.status is CompletionStatus.VERIFIED and item.course_key in course_titles
     ]
+    credentials, trophies, offers = await _recognition_evidence(
+        request, authenticated, persona, consents
+    )
     return PortfolioView(
         person_id=persona.person_id,
         display_name=persona.display_name,
         contributions=contributions,
         courses=courses,
-        credentials=[],
-        trophies=[],
-        offers=[],
+        credentials=credentials,
+        trophies=trophies,
+        offers=offers,
         visibility={scope.value: scope in consents for scope in ConsentScope},
     )
 
