@@ -35,15 +35,15 @@ async def seed_and_verify(database_url: str) -> None:
         ("messaging_messages", 10),
     ):
         if counts.get(table, 0) < minimum:
-            raise RuntimeError(
-                f"Demo seed incomplete: {table} has {counts.get(table, 0)} rows"
-            )
+            raise RuntimeError(f"Demo seed incomplete: {table} has {counts.get(table, 0)} rows")
     print(
         "Demo data verified: "
         + ", ".join(
             f"{name}={counts.get(name, 0)}"
             for name in (
-                "tasks", "messaging_channels", "messaging_memberships",
+                "tasks",
+                "messaging_channels",
+                "messaging_memberships",
                 "messaging_messages",
             )
         )
