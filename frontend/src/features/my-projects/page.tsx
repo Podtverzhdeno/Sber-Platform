@@ -209,12 +209,35 @@ function ProjectDetail({ project, onBack, onWorkspace, onMessage, onSubmitContri
   const tabs: {id:Tab;title:string}[]=[{id:"overview",title:"Обзор"},{id:"tasks",title:"Задачи"},{id:"progress",title:"Прогресс"},{id:"contribution",title:"Мой вклад"},{id:"team",title:"Команда"},{id:"rewards",title:"Бонусы и выгоды"}];
   return <div className="mp-detail" data-project-screen="detail">
     <nav className="mp-breadcrumb" aria-label="Путь"><button type="button" onClick={onBack}><ArrowLeft size={16}/> Мои проекты</button><span>/</span><span>{project.work.task.title}</span></nav>
-    <header className="mp-detail-hero mp-surface">
-      <CompanyIcon name={projectCompany(project)}/>
-      <div className="mp-detail-hero__name"><small>{projectCompany(project)} · Заказчик</small><h1 id="workspace-title">{project.work.task.title}</h1><div className="mp-chip-row"><em>Практика</em><em>Реальный проект</em><em>Командная работа</em></div></div>
-      <div className="mp-detail-hero__progress"><Status status={project.work.assignment.status}/><span>Прогресс проекта</span><ProgressBar value={progress}/><small>Следующий этап · до {dateLabel(project.work.terms.deadline_at)}</small></div>
-      <button type="button" className="mp-primary" onClick={onWorkspace}>Продолжить работу <ArrowRight size={18}/></button>
-    </header>
+    <div className="mp-detail-top">
+      <header className="mp-detail-hero mp-surface">
+        <div className="mp-detail-hero__upper">
+          <CompanyIcon name={projectCompany(project)}/>
+          <div className="mp-detail-hero__name"><small>{projectCompany(project)} · Заказчик</small><h1 id="workspace-title">{project.work.task.title}</h1><div className="mp-chip-row"><em>Практика</em><em>Реальный проект</em><em>Командная работа</em></div></div>
+          <Status status={project.work.assignment.status}/>
+        </div>
+        <div className="mp-detail-hero__lower">
+          <div className="mp-detail-hero__progress"><span>Твой прогресс</span><ProgressBar value={progress}/><small>Срок · {dateLabel(project.work.terms.deadline_at)}</small></div>
+          <button type="button" className="mp-primary" onClick={onWorkspace}>Продолжить работу <ArrowRight size={18}/></button>
+        </div>
+      </header>
+      <section className="mp-detail-earnings mp-surface" aria-label="Возможные награды за проект">
+        <h2>Твои выгоды за этот проект</h2>
+        <div className="mp-detail-earnings__grid">
+          {benefits.slice(0,3).map(reward=>{
+            const Icon=reward.icon;
+            return <button key={reward.id} type="button" onClick={()=>{setTab("rewards");setRewardFocus(reward.id);}}>
+              <Icon size={23}/><span><strong>{reward.title}</strong><small>{reward.unlock}</small></span>
+            </button>;
+          })}
+        </div>
+        <p>Начисления и условия подтверждаются организаторами</p>
+      </section>
+    </div>
+    <div className="mp-detail-opportunities">
+      <button type="button" onClick={()=>{setTab("rewards");setRewardFocus("internship");}}><BriefcaseBusiness size={19}/><span><strong>Возможность стажировки</strong><small>После выполнения условий программы</small></span><ArrowRight size={15}/></button>
+      <button type="button" onClick={()=>{setTab("rewards");setRewardFocus("community");}}><Users size={19}/><span><strong>Закрытое комьюнити лучших</strong><small>После 10 подтверждённых проектов</small></span><ArrowRight size={15}/></button>
+    </div>
     <div className="mp-detail-tabs" role="tablist" aria-label="Разделы проекта">{tabs.map(item=><button key={item.id} type="button" role="tab" aria-selected={tab===item.id} className={tab===item.id?"is-active":""} onClick={()=>setTab(item.id)}>{item.title}</button>)}</div>
     {tab==="overview" && <div className="mp-detail-grid">
       <div className="mp-detail-column">
