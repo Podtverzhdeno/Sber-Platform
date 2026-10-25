@@ -279,7 +279,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
       }} />}
       <section
         id="participant-guide-panel" ref={cardRef}
-        className={`participant-guide-card pg-coachmark pg-coachmark--${step.accent} pg-coachmark--${place?.side ?? "floating"}`}
+        className={`participant-guide-card pg-coachmark pg-coachmark--${step.accent} pg-coachmark--${place?.side ?? "floating"}${view === "hint" ? " pg-coachmark--passive" : ""}`}
         style={place ? { left: place.left, top: place.top } : undefined}
         aria-labelledby="participant-guide-title" aria-describedby="participant-guide-description"
       >
