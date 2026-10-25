@@ -1,10 +1,19 @@
-import { describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { cleanup, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { createQueryClient } from "../app/query";
+import { clearApiReadCache } from "../api/client";
+import { ParticipantPortfolioV2 } from "./portfolio-v2";
 import {
   countCurrentDocuments,
   credentialStatusLabel,
   isCurrentCredential,
   isRevokedCredential,
 } from "./portfolio-v2-data";
+
+afterEach(() => { cleanup(); clearApiReadCache(); vi.restoreAllMocks(); });
 
 describe("portfolio credential evidence rules", () => {
   it("includes a current issued season award in the document count", () => {
@@ -32,4 +41,28 @@ describe("portfolio credential evidence rules", () => {
     expect(credentialStatusLabel(unknown)).toBe("reported");
     expect(countCurrentDocuments([unknown], 0)).toBe(0);
   });
+});
+
+
+it("shows an explicit API error instead of another participant's demo awards", async () => {
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response(JSON.stringify({
+      code: "PORTFOLIO_UNAVAILABLE",
+      message: "Backend unavailable",
+      retryable: false,
+    }), { status: 503 }),
+  );
+  const client = createQueryClient();
+  try {
+    render(createElement(
+      QueryClientProvider, { client },
+      createElement(MemoryRouter, null, createElement(ParticipantPortfolioV2)),
+    ));
+    const alert = await screen.findByRole("alert");
+    expect(alert.textContent).toContain("Демонстрационные результаты не подставляются");
+    expect(screen.queryByText("Алекс Речной")).toBeNull();
+    expect(screen.getByRole("button", { name: "Повторить загрузку" })).toBeTruthy();
+  } finally {
+    client.clear();
+  }
 });
