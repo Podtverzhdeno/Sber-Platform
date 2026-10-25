@@ -46,13 +46,13 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     await check.click();
     await expect(check).toHaveAttribute("aria-pressed", "true");
     await reader.getByRole("button", { name: "Следующий урок" }).click();
-    await expect(reader.getByText("13%", { exact: true }).first()).toBeVisible();
+    await expect(reader.locator(".imp-study__aside-heading > span")).toHaveText("13%");
     await expect(reader.locator(".imp-study__lesson-list button").nth(1)).toHaveAttribute("aria-current", "step");
     await page.screenshot({ path: "test-results/imp-04-progress-" + String(viewport.width) + ".png", animations: "disabled" });
     for (let index = 1; index < 8; index++) {
       await reader.locator(".imp-study__navigation .imp-study__primary").click();
     }
-    await expect(reader.getByText("100%", { exact: true }).first()).toBeVisible();
+    await expect(reader.locator(".imp-study__aside-heading > span")).toHaveText("100%");
     await expect(reader.getByRole("heading", { name: "Завершение обучения" })).toBeVisible();
     await page.screenshot({ path: "test-results/imp-05-finish-" + String(viewport.width) + ".png", animations: "disabled" });
     await reader.locator(".imp-study__finish").click();
