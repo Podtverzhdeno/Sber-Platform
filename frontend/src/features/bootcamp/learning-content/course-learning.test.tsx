@@ -6,8 +6,38 @@ import { learningPrograms, learningProgramFor } from "./programs";
 import { courseBlueprints } from "./course-blueprints";
 import { allKnowledgeChecks } from "./knowledge-checks";
 import { allManualChapters, manualFor } from "./manuals";
+import { allStarterCases, starterCaseFor } from "./starter-cases";
 
 describe("Bootcamp editorial course curriculum", () => {
+  it("provides twelve concrete case studies with safe test fixtures and primary references", () => {
+    const cases = allStarterCases();
+    expect(cases).toHaveLength(12);
+    for (let index = 1; index <= 12; index++) {
+      const key = `demo-course-${String(index)}`;
+      const item = starterCaseFor(key);
+      expect(item).not.toBeNull();
+      expect(item?.scenario.length).toBeGreaterThan(70);
+      expect(item?.starter.length).toBeGreaterThan(100);
+      expect(item?.checkpoints.length).toBeGreaterThanOrEqual(3);
+      expect(item?.commonPitfall.length).toBeGreaterThan(50);
+      expect(item?.reference.url).toMatch(/^https:\/\//);
+    }
+    expect(starterCaseFor("non-existent-course")).toBeNull();
+  });
+
+  it("keeps the worked case within the practical block but the answers behind self-check", () => {
+    render(<CourseLearningContent courseKey="demo-course-3" />);
+    const practice = document.querySelector('[data-learning-block="practice"]');
+    expect(practice).not.toBeNull();
+    expect(practice?.textContent).toContain("Сквозной кейс");
+    const lab = practice?.querySelector("details.starter-case");
+    expect(lab?.hasAttribute("open")).toBe(false);
+    expect(document.querySelector('[data-learning-block="check"] .bc-learning__expected')).toBeNull();
+    const reveal = screen.getByRole("button", { name: /04 Самопроверка/ });
+    fireEvent.click(reveal);
+    expect(screen.getByRole("button", { name: "Показать ожидаемый результат" })).toBeInTheDocument();
+  });
+
   it("offers 96 distinct original explanations and accountable primary reading links", () => {
     const chapters = allManualChapters();
     expect(chapters).toHaveLength(96);
