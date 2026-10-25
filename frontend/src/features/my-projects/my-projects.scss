@@ -217,3 +217,44 @@
 .mp-company-mark--logo{background:transparent;padding:0;overflow:hidden;border:0}
 .mp-company-mark--logo img{display:block;width:100%;height:100%;object-fit:contain}
 .mpv2 .mp-company-mark--logo img{border-radius:inherit}
+
+/* Approved cards state: standalone grid, matching the Tasks catalogue density.
+   The optional preview is revealed only after an explicit quick-view click. */
+.mpv2 .mp-card-view{display:grid;gap:12px}
+.mpv2 .mp-card-search{display:flex;gap:9px;align-items:center;max-width:360px;min-height:35px;border:1px solid #1a405b;border-radius:9px;color:#789fb7;background:#071c30;padding:6px 11px;margin-left:auto}
+.mpv2 .mp-card-search input{border:0;min-width:0;width:100%;background:transparent;color:#e6f9ff;outline:0;box-shadow:none;font-size:12px}
+.mpv2 .mp-card-search input::placeholder{color:#7299b7}
+.mpv2 .mp-project-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;align-items:stretch}
+.mpv2 .mp-project-tile--grid{display:flex;flex-direction:column;gap:11px;min-width:0;min-height:300px;padding:14px 14px 12px;box-shadow:none}
+.mpv2 .mp-project-card-top{display:flex;align-items:flex-start;gap:10px;min-width:0}
+.mpv2 .mp-project-card-heading{min-width:0;flex:1;display:grid;gap:4px}
+.mpv2 .mp-project-card-heading small{font-size:11px;color:#9abbd4}
+.mpv2 .mp-project-card-heading h2{font-size:15px;line-height:1.35;font-weight:800;margin:0;letter-spacing:-.12px;color:#f3faff;overflow-wrap:anywhere}
+.mpv2 .mp-project-card-progress{display:grid;gap:6px;margin-top:auto}
+.mpv2 .mp-project-card-progress>div:first-child{display:flex;align-items:center;justify-content:space-between;color:#b6d2e7;font-size:11px}
+.mpv2 .mp-project-card-progress>div:first-child strong{color:#00e9e6;font-size:12px}
+.mpv2 .mp-project-card-progress .mp-progress>strong{display:none}
+.mpv2 .mp-project-card-progress .mp-progress__track{height:8px}
+.mpv2 .mp-project-card-meta{display:flex;flex-wrap:wrap;gap:9px 15px;color:#abc8e1;font-size:11px;padding:10px 0;border-top:1px solid #163a51;border-bottom:1px solid #163a51}
+.mpv2 .mp-project-card-meta>span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.mpv2 .mp-project-card-meta svg{color:#00e7d6}
+.mpv2 .mp-project-card-rewards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.mpv2 .mp-project-card-rewards span{display:flex;align-items:center;gap:5px;justify-content:center;padding:7px 5px;border-radius:7px;border:1px solid #1c4260;background:#09243b;color:#b9d9eb;font-size:10px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mpv2 .mp-project-card-rewards span:first-child svg{color:#00e1db}
+.mpv2 .mp-project-card-rewards span:nth-child(2) svg{color:#4b91f9}
+.mpv2 .mp-project-card-rewards span:nth-child(3) svg{color:#ffd143}
+.mpv2 .mp-project-card-actions{display:flex;align-items:stretch;gap:8px}
+.mpv2 .mp-project-card-actions .mp-primary{min-width:0;flex:1;min-height:40px}
+.mpv2 .mp-project-card-actions .mp-primary--quiet{background:linear-gradient(100deg,#173956,#0a4a64);border-color:#246283;color:#e5f8ff}
+.mpv2 .mp-project-card-actions>.mp-icon-button{width:40px;min-height:40px}
+.mpv2 .mp-quick-preview{border-top:1px solid #16435e;padding-top:15px;animation:mp-enter .2s ease}
+.mpv2 .mp-quick-preview .mp-preview{max-width:none;min-height:0}
+.mpv2 .mp-quick-preview .mp-preview__content{grid-template-columns:1fr 1fr}
+.mpv2 .mp-quick-preview .mp-preview__right{grid-template-columns:1fr}
+@media(min-width:1700px){.mpv2 .mp-project-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:1190px){.mpv2 .mp-project-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:750px){.mpv2 .mp-project-grid{grid-template-columns:1fr}.mpv2 .mp-card-search{margin-left:0;max-width:none}.mpv2 .mp-quick-preview .mp-preview__content{grid-template-columns:1fr}}
+@media(max-width:430px){.mpv2 .mp-project-card-meta{gap:7px}.mpv2 .mp-project-card-rewards span{font-size:9px}}
+[data-theme="light"] .mpv2 .mp-project-card-heading h2{color:#123146}
+[data-theme="light"] .mpv2 .mp-project-card-meta{color:#3d6780}
+[data-theme="light"] .mpv2 .mp-project-card-rewards span{background:#e7f4f8;color:#24506a;border-color:#b9d7e6}
