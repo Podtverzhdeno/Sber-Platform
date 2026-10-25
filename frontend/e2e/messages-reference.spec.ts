@@ -16,15 +16,20 @@ const makeMessage = (id: string, body: string, author_name = "Елена Нас�
   kind: "text", body, artifact_refs: [], sequence: 1,
   created_at: "2026-10-20T09:14:00Z",
 });
-async function openMessages(page: Page, opts: { unreadContact?: boolean } = {}) {
+async function openMessages(page: Page, opts: { unreadContact?: boolean; eventCommunity?: boolean } = {}) {
   let loggedIn = false;
   const channels: Array<Omit<(typeof referenceChannels)[number], "last_message"> & { last_message: (typeof referenceChannels)[number]["last_message"] | null }> =
     referenceChannels.map((channel) => ({
       ...channel,
       unread: opts.unreadContact && channel.title === "Елена Наставник" ? 3 : channel.unread,
     }));
+  if (opts.eventCommunity) channels.push({
+    ...channels[1]!, id: "00000000-0000-4000-8000-000000004444",
+    title: "События", unread: 2,
+  });
   const sentMessages: string[] = [];
   const readRequests: string[] = [];
+  const mutedRequests: Array<{channelId:string;muted:boolean}> = [];
   await page.route("**/api/v1/config", route => route.fulfill({json:{demo_mode:true}}));
   await page.route("**/api/v1/auth/personas", route => route.fulfill({
     json:[{key:"participant-alex",display_name:actor.display_name,roles:["participant"]}],
@@ -71,7 +76,15 @@ async function openMessages(page: Page, opts: { unreadContact?: boolean } = {}) 
     const fixture=referenceMessagesByChannel[String(id)];
     return route.fulfill({json:fixture ?? [makeMessage("msg-"+String(id),"Задача в работе")]});
   });
-  await page.route("**/api/v1/me/messaging/channels/*/mute", route => route.fulfill({json:{...channels[0],muted:true}}));
+  await page.route("**/api/v1/me/messaging/channels/*/mute", route => {
+    const channelId = new URL(route.request().url()).pathname.split("/").at(-2) ?? "";
+    const body = route.request().postDataJSON() as { muted: boolean };
+    mutedRequests.push({ channelId, muted: body.muted });
+    const channel = channels.find(item => item.id === channelId);
+    if (!channel) return route.fulfill({status:404,json:{code:"RESOURCE_NOT_FOUND"}});
+    channel.muted = body.muted;
+    return route.fulfill({json:channel});
+  });
   await page.route("**/api/v1/me/messaging/channels/*/read", route => {
     const channelId=new URL(route.request().url()).pathname.split("/").at(-2);
     if(channelId) readRequests.push(channelId);
@@ -84,7 +97,7 @@ async function openMessages(page: Page, opts: { unreadContact?: boolean } = {}) 
   await page.locator('[data-persona="participant-alex"]').click();
   await page.goto("/workspace/4");
   await expect(page.getByRole("complementary",{name:"Список диалогов"})).toBeVisible();
-  return {sentMessages,readRequests,channels};
+  return {sentMessages,readRequests,mutedRequests,channels};
 }
 
 async function expectRect(page:Page, selector:string, expected:{x:number,y:number,width:number,height:number}, tolerance=8) {
@@ -345,4 +358,59 @@ test("create chat opens real contacts rather than an empty decorative modal",asy
   await page.getByRole("button",{name:"Создать новый чат"}).click();
   await expect(page.getByRole("tab",{name:"Контакты"})).toHaveAttribute("aria-selected","true");
   await expect(page.getByRole("button",{name:/Елена Наставник/}).first()).toBeVisible();
+});
+
+test("chat details collapse into full width for direct, community and Events conversations", async ({page}) => {
+  await page.setViewportSize({width:1672,height:941});
+  const {channels} = await openMessages(page,{eventCommunity:true});
+  for (const name of ["Елена Наставник", "Маяки", "События"]) {
+    const record = channels.find(channel=>channel.title===name);
+    expect(record, name).toBeDefined();
+    await page.getByRole("button",{name:new RegExp(name)}).first().click();
+    const shell = page.locator(".messenger-shell");
+    await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toBeVisible();
+    const before = await page.locator(".chat-thread").boundingBox();
+    await page.getByRole("button",{name:"К чату"}).click();
+    await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toHaveCount(0);
+    await expect(shell).toHaveClass(/messenger-shell--no-context/);
+    await expect.poll(async ()=> (await page.locator(".chat-thread").boundingBox())?.width ?? 0)
+      .toBeGreaterThan((before?.width ?? 0)+220);
+    const after = await page.locator(".chat-thread").boundingBox();
+    const container = await shell.boundingBox();
+    expect(after?.x).toBeDefined();
+    if(after && container){
+      expect(Math.abs(after.x+after.width-(container.x+container.width))).toBeLessThanOrEqual(2);
+    }
+    await page.getByRole("button",{name:new RegExp("Информация о чате «"+name+"»")}).click();
+    await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toBeVisible();
+    await page.getByRole("button",{name:"Показать участников чата",exact:false}).click();
+    await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toHaveCount(0);
+  }
+});
+
+test("reading a chat instantly clears only its badge and notification; mute icon actually toggles", async ({page}) => {
+  await page.setViewportSize({width:1448,height:1086});
+  const {channels,readRequests,mutedRequests} = await openMessages(page,{unreadContact:true});
+  const mentor = channels.find(channel=>channel.title==="Елена Наставник");
+  const mayaki = channels.find(channel=>channel.title==="Маяки");
+  expect(mentor).toBeDefined();
+  expect(mayaki).toBeDefined();
+  await page.getByRole("button",{name:/Уведомления:/}).click();
+  await expect(page.locator(".notification-chat-unread").filter({hasText:"Елена Наставник"})).toBeVisible();
+  await page.getByRole("button",{name:/Уведомления:/}).click();
+  await page.getByRole("button",{name:/Елена Наставник/}).first().click();
+  await expect.poll(()=>readRequests.includes(mentor?.id ?? "")).toBe(true);
+  await expect.poll(()=>mentor?.unread).toBe(0);
+  await page.getByRole("button",{name:/Уведомления:/}).click();
+  await expect(page.locator(".notification-chat-unread").filter({hasText:"Елена Наставник"})).toHaveCount(0);
+  await expect(page.locator(".notification-chat-unread").filter({hasText:"Маяки"})).toBeVisible();
+  await page.getByRole("button",{name:/Уведомления:/}).click();
+  const mute = page.getByRole("button",{name:"Отключить уведомления"}).first();
+  await expect(mute.locator("svg")).toBeVisible();
+  await mute.click();
+  await expect.poll(()=>mutedRequests.some(item=>item.channelId===mentor?.id && item.muted)).toBe(true);
+  await expect(page.getByRole("button",{name:"Включить уведомления"}).first()).toBeVisible();
+  await page.getByRole("button",{name:"Включить уведомления"}).first().click();
+  await expect.poll(()=>mutedRequests.some(item=>item.channelId===mentor?.id && !item.muted)).toBe(true);
+  await expect(page.getByRole("button",{name:"Отключить уведомления"}).first()).toBeVisible();
 });
