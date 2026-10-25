@@ -312,7 +312,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
         <button type="button" className="pg-quiet-button" onClick={() => { setStepIndex(0); setView("walkthrough"); }}>Показать подсказки ещё раз</button>
       </section>
     </div>}
-    {view === "library" && <ParticipantHelpCenter section={section} initialTopicId={selectedHelpTopic} onClose={close}
+    {view === "library" && <ParticipantHelpCenter key={selectedHelpTopic ?? section} section={section} initialTopicId={selectedHelpTopic} onClose={close}
       onOpenTour={() => { setView("walkthrough"); setStepIndex(0); setContext(pickContext()); }}
       onNavigateSection={(name) => { const target = navigation.indexOf(name); if (target >= 0) onNavigate(target); }} />}
     <button type="button" className="participant-guide-trigger" aria-expanded={view !== "closed"}
