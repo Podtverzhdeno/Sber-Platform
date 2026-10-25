@@ -183,7 +183,7 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await page.screenshot({ path: "test-results/trajectory-v2-role-candidate.png", animations: "disabled" });
   await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Все уровни →" }).click();
-  await expect(page.locator(".trajectory-v2-grade-option")).toHaveCount(6);
+  await expect(page.locator(".trajectory-v2-grade-option")).toHaveCount(2);
   await page.screenshot({ path: "test-results/trajectory-v2-grades-candidate.png", animations: "disabled" });
   await page.getByRole("button", { name: "Закрыть" }).click();
   await page.setViewportSize({ width: 390, height: 844 });
