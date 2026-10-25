@@ -85,7 +85,7 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     );
     await reader.getByRole("button", { name: /Отправить на проверку/ }).click();
     await expect(reader.getByText(/Практическая работа получена/)).toBeVisible();
-    await page.screenshot({ path: "test-results/imp-08-practice-pending-" + viewport.width + ".png", animations: "disabled" });
+    await page.screenshot({ path: `test-results/imp-08-practice-pending-${String(viewport.width)}.png`, animations: "disabled" });
     const overflow = await dialog.evaluate(el => el.scrollWidth > el.clientWidth + 1);
     expect(overflow).toBe(false);
   });
