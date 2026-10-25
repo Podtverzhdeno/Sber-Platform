@@ -207,7 +207,7 @@ export function TopbarEngagementIndicator() {
                   <div className="streak-hero-illustration" aria-hidden="true">
                     <span className="streak-hero-spark">✦</span>
                     <span className="streak-hero-flame">🔥</span>
-                    <img src="/home-reference/buddy.svg" alt="" />
+                    <img src="/streak-reference/mascot.svg" alt="" />
                   </div>
                 </div>
                 <button type="button" className="streak-week-card" onClick={() => { setCalendarOpen(true); }}
