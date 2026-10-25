@@ -64,6 +64,19 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
     return image.complete && image.naturalWidth === 64 && image.naturalHeight === 64;
   }))).toBe(true);
   await expect(page.locator(".catalog-v2-card").first()).toContainText("Демо-заказчик");
+  const firstLogo = await logos.first().boundingBox();
+  expect(firstLogo).not.toBeNull();
+  if (firstLogo !== null) {
+    expect(Math.round(firstLogo.width)).toBe(48);
+    expect(Math.round(firstLogo.height)).toBe(48);
+  }
+  const detailLogo = await page.locator(".catalog-v2-detail-avatar .catalog-v2-brand-logo").boundingBox();
+  expect(detailLogo).not.toBeNull();
+  if (detailLogo !== null) {
+    expect(Math.round(detailLogo.width)).toBe(48);
+    expect(Math.round(detailLogo.height)).toBe(48);
+  }
+
 
   if (process.env.CAPTURE_APPROVED_TASKS === "1") await page.screenshot({ path: "test-results/approved-geometry-cards.png", fullPage: true, animations: "disabled" });
   await expect(page.getByRole("heading", { name: "Развитие твоих навыков" })).toBeVisible();
