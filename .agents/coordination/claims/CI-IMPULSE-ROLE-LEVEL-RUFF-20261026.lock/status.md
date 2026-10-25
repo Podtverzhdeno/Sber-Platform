@@ -1,0 +1,17 @@
+# Claim CI-IMPULSE-ROLE-LEVEL-RUFF-20261026
+- task_id: CI-IMPULSE-ROLE-LEVEL-RUFF-20261026
+- session_id: gpt6-20261026-impulse-role-level-format-01
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 09b9f44e57bc9373f953a6fcb7f7592355cc0478
+- depends_on: []
+- write_scope:
+  - tests/bootcamp/test_impulse_role_levels.py
+  - .agents/coordination/claims/CI-IMPULSE-ROLE-LEVEL-RUFF-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - uv run ruff format --check tests/bootcamp/test_impulse_role_levels.py
+  - exact-sha GitHub CI
+- progress: Fix only Ruff formatting, preserving assertions and fixtures.
+- blockers: Whole CI has concurrent unrelated changes.
