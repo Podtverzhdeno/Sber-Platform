@@ -353,6 +353,19 @@ test("pixel-reference tabs remain interactive at 1548×1016",async({page})=>{
   await detail.getByRole("tab",{name:"Бонусы и выгоды"}).click();
   await detail.getByRole("button",{name:/Результат в портфолио/}).click();
   await expect(detail.locator(".mp-ref-reward-note")).toBeVisible();
+
+  const timelineCircles=await detail.locator(".mp-ref-timeline .mp-ref-stage > span:first-child")
+    .evaluateAll(elements=>elements.map(node=>{
+      const rect=node.getBoundingClientRect();
+      return {width:rect.width,height:rect.height,radius:getComputedStyle(node).borderRadius};
+    }));
+  expect(timelineCircles.length).toBe(4);
+  for(const circle of timelineCircles){
+    expect(Math.abs(circle.width-circle.height)).toBeLessThanOrEqual(1);
+    expect(circle.width).toBeGreaterThanOrEqual(26);
+    expect(circle.radius).toBe("50%");
+  }
+
 });
 
 
@@ -368,6 +381,12 @@ test("My Projects: golden Skill Passport details and all rewards are interactive
   await passportButton.click();
   const dialog=page.getByRole("dialog",{name:"Skill Passport"});
   await expect(dialog).toBeVisible();
+  const closeGeometry=await dialog.getByRole("button",{name:"Закрыть информацию о бонусе"}).evaluate(element=>{
+    const rect=element.getBoundingClientRect();
+    return {width:rect.width,height:rect.height,borderRadius:getComputedStyle(element).borderRadius};
+  });
+  expect(Math.abs(closeGeometry.width-closeGeometry.height)).toBeLessThanOrEqual(1);
+  expect(closeGeometry.borderRadius).toBe("50%");
   await expect(dialog.getByText("Признание среди работодателей")).toBeVisible();
   await expect(dialog.getByText("Приоритетное внимание к кандидатуре")).toBeVisible();
   await expect(dialog.getByText("Ускоренный карьерный рост")).toBeVisible();
