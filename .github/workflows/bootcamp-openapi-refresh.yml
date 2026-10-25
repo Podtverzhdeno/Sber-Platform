@@ -1,0 +1,39 @@
+name: Bootcamp OpenAPI Snapshot Refresh
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/bootcamp-openapi-refresh.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: true
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Render the actual API contract
+        run: uv run python -m impulse.quality.openapi_contract
+      - name: Commit only the generated snapshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add openapi.json
+          if git diff --cached --quiet; then
+            echo "OpenAPI contract already current"
+          else
+            git commit -m "contract(bootcamp): synchronize study and practice API snapshot"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
