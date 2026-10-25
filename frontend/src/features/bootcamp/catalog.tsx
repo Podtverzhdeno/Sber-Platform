@@ -452,7 +452,7 @@ function RequirementsDetails({ cards, onSelect, onClose }: { cards: CourseCardSt
               <h4>{card.title}</h4>
               <small>{completionLabels[card.completion_state]?.label ?? accessLabels[card.access_state].label}</small>
             </div>
-            <button type="button" onClick={() => onSelect(card.key)}>
+            <button type="button" onClick={() => { onSelect(card.key); }}>
               {card.access_state === "available" ? "Открыть" : "Условия"} <ArrowRight/>
             </button>
           </li>)}</ol>}
@@ -651,7 +651,7 @@ export function BootcampCatalog({
       {catalog.isError && <p className="notice" role="status">Обновление каталога недоступно. <button type="button" onClick={() => { void catalog.refetch(); }}>Повторить</button></p>}
       <div className="bc-ref-role-tabs" role="group" aria-label="Направление обучения">
         {trackOptions.map((role, index) => <button type="button" key={role} aria-pressed={selectedRole === role}
-          onClick={() => setRole(role)}>{index === 0 ? <Bot /> : <ChartNoAxesCombined />}{aiRoleTitle(role)}</button>)}
+          onClick={() => { setRole(role); }}>{index === 0 ? <Bot /> : <ChartNoAxesCombined />}{aiRoleTitle(role)}</button>)}
       </div>
       <div className="bc-ref-hero-grid">
         <section className="bc-ref-continue" aria-labelledby="bc-continue-title">
@@ -687,9 +687,9 @@ export function BootcampCatalog({
               <div className="bc-ref-grade-kicker">♛ &nbsp; До следующего грейда</div>
               <h2 id="bc-grade-title">{pendingRequired.length > 0 ? <>{pendingRequired.length === 1 ? "Остался" : "Осталось"} <em>{pendingRequired.length}</em> {pendingRequired.length === 1 ? "обязательный" : "обязательных"} {requiredWord}</> : "Требования к грейду"}</h2>
               <p>{pendingRequired.length > 0 ? "Заверши учебные требования. Практика и подтверждение проверяются отдельно." : "Учебные требования уточняются по опубликованной программе."}</p>
-              <div className="bc-ref-grade-list">{pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => openPanel("detail",card.key)}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
+              <div className="bc-ref-grade-list">{pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => { openPanel("detail",card.key); }}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
             </div>
-            <button className="bc-ref-grade-button" type="button" onClick={() => openPanel("requirements")}>Посмотреть курсы <ArrowRight /></button>
+            <button className="bc-ref-grade-button" type="button" onClick={() => { openPanel("requirements"); }}>Посмотреть курсы <ArrowRight /></button>
           </section>
         </div>
       </div>
@@ -698,18 +698,18 @@ export function BootcampCatalog({
       <section className="bc-ref-catalog" aria-labelledby="bc-catalog-title">
         <h2 id="bc-catalog-title" className="bc-ref-sr-only">Каталог курсов</h2>
         <div className="bc-ref-category-tabs" role="group" aria-label="Категории курсов">
-          {categoryCounts.map(item => <button type="button" key={item.key} aria-pressed={category === item.key} onClick={() => updateFilter("category",item.key)}>{item.label}<span>{item.count}</span></button>)}
+          {categoryCounts.map(item => <button type="button" key={item.key} aria-pressed={category === item.key} onClick={() => { updateFilter("category",item.key); }}>{item.label}<span>{item.count}</span></button>)}
         </div>
         <div className="bc-ref-controls">
           <label className="bc-ref-search"><Search aria-hidden="true" /><span className="bc-ref-sr-only">Поиск курсов</span>
-            <input type="search" aria-label="Поиск по курсам" value={searchParams.get("q") ?? ""} placeholder="Поиск по названию курса, навыку или технологии…" onChange={event => updateFilter("q",event.target.value)} /></label>
+            <input type="search" aria-label="Поиск по курсам" value={searchParams.get("q") ?? ""} placeholder="Поиск по названию курса, навыку или технологии…" onChange={event => { updateFilter("q",event.target.value); }} /></label>
           <label className="bc-ref-select">Направление
-            <select value={trackFilter} onChange={event => setTrack(event.target.value)}><option value="all">Все направления</option>{trackOptions.map(role => <option key={role} value={role}>{aiRoleTitle(role)}</option>)}</select></label>
+            <select value={trackFilter} onChange={event => { setTrack(event.target.value); }}><option value="all">Все направления</option>{trackOptions.map(role => <option key={role} value={role}>{aiRoleTitle(role)}</option>)}</select></label>
           <label className="bc-ref-select">Уровень
             <select disabled title="Уровень станет доступен после публикации классификации"><option>Все уровни</option></select></label>
           <div className="bc-ref-views" role="group" aria-label="Вид каталога">
-            <button type="button" aria-pressed={view !== "list"} onClick={() => updateFilter("view","card")}><LayoutGrid /> Карточки</button>
-            <button type="button" aria-pressed={view === "list"} onClick={() => updateFilter("view","list")}><List /> Список</button>
+            <button type="button" aria-pressed={view !== "list"} onClick={() => { updateFilter("view","card"); }}><LayoutGrid /> Карточки</button>
+            <button type="button" aria-pressed={view === "list"} onClick={() => { updateFilter("view","list"); }}><List /> Список</button>
           </div>
         </div>
         {view !== "list" ? <div className="bc-ref-course-grid">
@@ -719,8 +719,8 @@ export function BootcampCatalog({
             <div className="bc-ref-tags">{courseRoleTitles(card).slice(0,3).map(title => <span key={title}>{title}</span>)}</div>
             <p className="bc-ref-card-meta"><Clock3/> Длительность уточняется</p>
             <div className="bc-ref-card-bottom">
-              <CoursePrimaryAction card={card} onOpen={key => openPanel("detail",key)}/>
-              {card.relevant && <button className="bc-ref-reason" type="button" onClick={() => openPanel("reason",card.key)}>Почему рекомендован? ›</button>}
+              <CoursePrimaryAction card={card} onOpen={key => { openPanel("detail",key); }}/>
+              {card.relevant && <button className="bc-ref-reason" type="button" onClick={() => { openPanel("reason",card.key); }}>Почему рекомендован? ›</button>}
             </div>
           </article>)}
         </div> : <ul className="bc-ref-course-list" aria-label="Каталог Bootcamp списком">
@@ -729,10 +729,10 @@ export function BootcampCatalog({
             <div className="bc-ref-row-flags"><CourseFlags card={card}/><div className="bc-ref-tags">{courseRoleTitles(card).slice(0,3).map(title => <span key={title}>{title}</span>)}</div></div>
             <div className="bc-ref-row-meta"><Clock3 /> Длительность уточняется</div>
             <div className="bc-ref-row-progress">{card.completion_state === "verified" ? "Подтверждено" : card.completion_state === "reported" ? "На проверке" : "Нет данных о прогрессе"}<div className="bc-ref-track"><i style={{ width: card.completion_state === "verified" ? "100%" : "0%" }}/></div></div>
-            <CoursePrimaryAction card={card} onOpen={key => openPanel("detail",key)}/>
+            <CoursePrimaryAction card={card} onOpen={key => { openPanel("detail",key); }}/>
           </li>)}
         </ul>}
-        {additionalCourses > 0 && <button className="bc-ref-show-more" type="button" onClick={() => setExpandedRoleCatalog(true)}>Показать ещё {additionalCourses} курсов для роли <ArrowRight /></button>}
+        {additionalCourses > 0 && <button className="bc-ref-show-more" type="button" onClick={() => { setExpandedRoleCatalog(true); }}>Показать ещё {additionalCourses} курсов для роли <ArrowRight /></button>}
         {visible.length === 0 && <div className="bc-ref-empty" role="status">Курсов по условиям не найдено. <button type="button" onClick={resetFilters}>Сбросить фильтры</button></div>}
       </section>
       <Drawer key={`${panel}:${deepLinked?.key ?? ""}`} title={panel === "reason" ? "Почему рекомендован" : "Информация о курсе"} open={deepLinked !== null && panel !== "requirements"} onClose={closePanel}>
