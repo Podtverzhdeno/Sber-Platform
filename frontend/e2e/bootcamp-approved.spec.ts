@@ -364,3 +364,34 @@ test("all seven AI trajectory roles remain reachable through horizontal controls
   await expect(page.getByRole("heading", { name: "Моя роль: AI Product Engineer" })).toBeVisible();
   await expect(page.getByTestId("course-demo-course-6")).toBeVisible();
 });
+
+
+test("Bootcamp primary actions share a baseline with or without recommendation links", async ({ page }) => {
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  for (const width of [1448, 1024, 768]) {
+    await page.setViewportSize({ width, height: 900 });
+    const cards = await page.locator(".bc-ref-course-card").evaluateAll(elements =>
+      elements.map(element => {
+        const card = element.getBoundingClientRect();
+        const cta = element.querySelector(".bc-ref-card-bottom .bc-ref-primary")?.getBoundingClientRect();
+        return {
+          row: Math.round(card.top),
+          top: cta?.top ?? -1,
+          hasReason: Boolean(element.querySelector(".bc-ref-reason")),
+        };
+      }),
+    );
+    const rows = new Map<number, typeof cards>();
+    for (const card of cards) rows.set(card.row, [...(rows.get(card.row) ?? []), card]);
+    let mixedRowChecked = false;
+    for (const row of rows.values()) {
+      if (row.length < 2) continue;
+      const tops = row.map(card => card.top);
+      expect(Math.max(...tops) - Math.min(...tops), `misaligned CTAs at ${String(width)}px`).toBeLessThanOrEqual(2);
+      if (row.some(card => card.hasReason) && row.some(card => !card.hasReason)) mixedRowChecked = true;
+    }
+    expect(mixedRowChecked, `fixture needs recommended and ordinary courses at ${String(width)}px`).toBe(true);
+  }
+});
