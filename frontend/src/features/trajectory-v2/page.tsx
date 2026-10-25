@@ -677,7 +677,7 @@ export function RoleDetailPanel(props: {
             </div>
             <p>{role.attempt_number === null
                 ? "Познакомься с профессией и выбери направление развития."
-                : `Путь освоения роли · ${String(role.completed_milestones)} из ${String(role.total_milestones)} этапов пройдено`}</p>
+                : "Обучение и практические шаги"}</p>
           </div>
         </div>
         <div className="trajectory-v2-detail-controls">
@@ -788,9 +788,6 @@ export function StagePathSection(props: {
     <section className="trajectory-v2-stage-block" aria-label="Этапы" data-testid="trajectory-stages">
       <header>
         <h4>Путь освоения роли</h4>
-        <small>
-          {role.completed_milestones} этапов подтверждено · {roadmap.milestones.length} всего
-        </small>
       </header>
       <ol className="trajectory-v2-stage-path">
         {roadmap.milestones.map((milestone) => {
@@ -812,7 +809,7 @@ export function StagePathSection(props: {
                 <span className="trajectory-v2-milestone-node" aria-hidden="true">{state === "completed" ? "✓" : state === "current" ? "◉" : state === "locked" ? "♙" : String(milestone.position)}</span>
                 <strong className="trajectory-v2-milestone-position">{milestone.position}</strong>
                 <span className="trajectory-v2-milestone-title">{milestone.title}</span>
-                {studied && studied.completed_units > 0 && <small className="trajectory-v2-stage-study-tag">{studyProgress.studiedKeys.has(milestone.key) ? "Обучение ✓ · на проверке" : `${String(Math.round(100*studied.completed_units/Math.max(1,studied.total_units)))}% обучения`}</small>}
+                {studied && studied.completed_units > 0 && <small className="trajectory-v2-stage-study-tag">{studyProgress.studiedKeys.has(milestone.key) ? "✓ Курс пройден" : `${String(Math.round(100*studied.completed_units/Math.max(1,studied.total_units)))}% обучения`}</small>}
               </button>
             </li>
           );
@@ -830,16 +827,14 @@ export function StagePathSection(props: {
           );
         })}
       </ol>
-      {studyProgress.finishedCourses>0 && <div className="trajectory-v2-study-evidence" data-testid="trajectory-study-evidence" role="status">
-        <span className="trajectory-v2-study-evidence__symbol" aria-hidden="true">✓</span>
-        <div><strong>{studyProgress.finishedCourses} из {studyProgress.matchedCourses} учебных курсов завершено</strong>
-          <small>{studyProgress.pendingEvidence>0 ? `${String(studyProgress.pendingEvidence)} курс(а) изучено, но этап ещё ожидает независимого подтверждения` : "Все учебные результаты синхронизированы"}</small>
+      {(studyProgress.matchedCourses > 0 || lessonsTotal > 0) && <div className="trajectory-v2-study-summary" data-testid="trajectory-study-evidence" role="status">
+        <div className="trajectory-v2-study-summary__text">
+          <strong>{studyProgress.finishedCourses} из {studyProgress.matchedCourses} учебных курсов завершено</strong>
+          <small>{lessonsDone} из {lessonsTotal} уроков · {role.completed_milestones} из {roadmap.milestones.length} этапов подтверждено</small>
         </div>
-        <span className="trajectory-v2-study-evidence__count">{role.completed_milestones} из {roadmap.milestones.length} этапов подтверждено</span>
-      </div>}
-      {lessonsTotal > 0 && <div className="trajectory-v2-studying" data-testid="trajectory-study-progress">
-        <div><strong>Освоение курсов траектории</strong><small>{lessonsDone} из {lessonsTotal} уроков · подтверждение этапов отдельно</small></div>
-        <progress max={lessonsTotal} value={lessonsDone} aria-label="Учебный прогресс выбранной траектории"/>
+        {lessonsTotal > 0 && <div className="trajectory-v2-studying" data-testid="trajectory-study-progress">
+          <progress max={lessonsTotal} value={lessonsDone} aria-label="Учебный прогресс выбранной траектории"/>
+        </div>}
       </div>}
       {visibleMilestone === undefined || props.showDetails === false ? null : (
         <StageDetail
@@ -879,37 +874,32 @@ export function StageDetail(props: {
           <h3>{milestone.title}</h3>
           <p>{milestone.purpose}</p>
         </div>
-        <div className="trajectory-v2-stage-progress">
-          <span className="trajectory-v2-stage-state" data-state={props.state}>
-            {props.state === "preview" ? "План обучения" : (MILESTONE_STATE_LABELS[props.state] ?? props.state)}
-          </span>
-          {role.attempt_number !== null && <small>{role.completed_milestones} из {total} этапов завершено</small>}
-          <progress max={total} value={Math.min(total,role.completed_milestones)} aria-label="Завершено этапов роли"/>
-        </div>
+        <span className="trajectory-v2-stage-state" data-state={props.state}>
+          {props.state === "preview" ? "План обучения" : (MILESTONE_STATE_LABELS[props.state] ?? props.state)}
+        </span>
       </div>
       <div className="trajectory-v2-task-row" data-state={props.state}>
         <span className="trajectory-v2-task-check" aria-hidden="true">
           {props.state === "completed" ? "✓" : props.state === "locked" ? "🔒" : ""}
         </span>
         <div className="trajectory-v2-task-copy">
-          <strong>{milestone.target_kind === "course" ? `Курс: ${milestone.title}` : milestone.title}</strong>
+          <strong>{milestone.target_kind === "course" ? "Курс в Bootcamp" : milestone.title}</strong>
           <small>{milestone.skill} · {milestone.target_kind === "task" ? "Практическая задача" : milestone.target_kind === "course" ? "Обучение" : milestone.target_kind}</small>
         </div>
-        <span className="trajectory-v2-task-status">{props.state === "preview" ? "Для ознакомления" : props.state === "completed" ? "Завершено" : props.state === "locked" ? "Недоступно" : "К выполнению"}</span>
+        <span className="trajectory-v2-task-status">{props.state === "preview" ? "Для ознакомления" : props.state === "completed" ? "Подтверждено" : props.state === "locked" ? "Недоступно" : studied?.finished ? "Курс пройден" : studied?.completed_units ? "В процессе" : "К выполнению"}</span>
         {canOpen ? (
           <button type="button" className={props.state === "completed" || role.attempt_number === null ? "trajectory-v2-task-action" : "trajectory-v2-task-action is-primary"} onClick={() => props.onOpenDetails?.(milestone.key)}>
-            {role.attempt_number === null || props.state === "completed" ? "Посмотреть" : "Продолжить"} →
+            {role.attempt_number === null || props.state === "completed" || studied?.finished ? "Посмотреть" : "Продолжить"} →
           </button>
         ) : null}
       </div>
-      {studied && <div className="trajectory-v2-studied-course" data-testid="trajectory-course-learning" data-course-key={studied.course_key}>
-        <div><strong>{studied.finished ? "Учебный курс завершён" : "Сохранён прогресс обучения"}</strong><span>{studied.completed_units} из {studied.total_units} уроков</span></div>
-        <progress max={studied.total_units} value={studied.completed_units} aria-label={`Прогресс обучения ${studied.title}`}/>
-        <small>{studied.finished ? "Сертификат обучения выдан. Этап траектории и практические навыки подтверждаются отдельно." : "Учебный прогресс сохранён в Bootcamp. Это не подтверждение профессионального навыка."}</small>
-      </div>}
+      {studied && <p className="trajectory-v2-study-caption" data-testid="trajectory-course-learning" data-course-key={studied.course_key}>
+        {studied.completed_units} из {studied.total_units} уроков{studied.finished ? " · учебный сертификат выдан" : " · прогресс сохранён"}
+        <span> · этап подтверждается отдельно</span>
+      </p>}
       {milestone.activities && milestone.activities.length > 0 && (
         <div className="trajectory-v2-activities" data-testid="trajectory-stage-activities">
-          <h4>Что предстоит сделать</h4>
+          <h4>План этапа</h4>
           <ol>
             {milestone.activities.map((activity, index) => (
               <li key={activity}>
@@ -923,12 +913,11 @@ export function StageDetail(props: {
               <strong>Результат:</strong> {milestone.deliverable}
             </p>
           )}
-          <small>Подзадачи — план этапа; выполнение подтверждается отдельно</small>
         </div>
       )}
       {(milestone.theory?.length || milestone.lab || milestone.acceptance?.length) && (
         <details className="trajectory-v2-learning-material" data-testid="trajectory-learning-material">
-          <summary>Теория, практикум и критерии проверки
+          <summary>Материалы и критерии
             {milestone.estimated_hours ? <span>{milestone.estimated_hours} ч ориентировочно</span> : null}
           </summary>
           {milestone.theory && milestone.theory.length > 0 && (
@@ -963,17 +952,15 @@ export function StageDetail(props: {
                 ))}</ul>
             </section>
           )}
-          <small>Это учебный план. Критерии помогают подготовиться к проверке, но сами по себе не подтверждают выполнение этапа.</small>
+          <section className="trajectory-v2-stage-meta">
+            <h4>Навык и формат</h4>
+            <dl>
+              <div><dt>Навык</dt><dd>{milestone.skill}</dd></div>
+              <div><dt>Формат</dt><dd>{milestone.target_kind === "task" ? "Практическая задача" : milestone.target_kind === "course" ? "Курс" : milestone.target_kind}</dd></div>
+            </dl>
+          </section>
         </details>
       )}
-      <details className="trajectory-v2-stage-more">
-        <summary>Подробнее об этапе</summary>
-        <dl>
-          <div><dt>Навык</dt><dd>{milestone.skill}</dd></div>
-          <div><dt>Цель</dt><dd>{milestone.target_kind === "task" ? "Задача" : milestone.target_kind === "course" ? "Курс" : milestone.target_kind} · {milestone.target_key}</dd></div>
-          <div><dt>Позиция</dt><dd>{milestone.position}</dd></div>
-        </dl>
-      </details>
       {props.state === "locked" && (
         <p className="trajectory-v2-stage-note" role="status">
           {nextStep === null ? "Этап недоступен: сервер не разрешает переход дальше." : `Этап откроется после завершения «${nextStep.title}». Первый разрешённый шаг — «${nextStep.title}».`}
