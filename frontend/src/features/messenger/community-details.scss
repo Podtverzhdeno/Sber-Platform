@@ -184,3 +184,11 @@
 .msg-community__invite button:disabled{opacity:.45;cursor:not-allowed;}
 @media(max-width:700px){.sberchat-reference .msg-context.msg-community{width:100%;}.sberchat-reference .msg-community__content{padding:10px 12px;}}
 @media(prefers-reduced-motion:reduce){.msg-community *{transition:none!important;}}
+
+.sberchat-reference .msg-community__load-more {
+  display:block;width:100%;margin:16px 0 6px;padding:11px 9px;
+  border:1px solid #285e73;border-radius:9px;background:#0c3145;
+  color:#70e1d8;font-size:11px;font-weight:700;cursor:pointer;
+}
+.sberchat-reference .msg-community__load-more:hover:not(:disabled) {background:#12465b;border-color:#2fdacf;}
+.sberchat-reference .msg-community__load-more:disabled {opacity:.6;cursor:wait;}
