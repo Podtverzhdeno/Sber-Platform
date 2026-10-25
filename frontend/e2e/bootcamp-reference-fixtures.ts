@@ -101,7 +101,7 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
   await page.route("**/api/v1/me/bootcamp/impulse-study/summary", route => {
     const courses = Array.from(study.entries()).map(([key, state]) => ({
       course_key: key,
-      title: catalog.find(item => item.key === key)?.title ?? key,
+      title: bootcampCatalogFixture.find(item => item.key === key)?.title ?? key,
       completed_units: state.completed_units,
       total_units: 8,
       finished: Boolean(state.certificate_id),
