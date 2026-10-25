@@ -1,0 +1,66 @@
+name: Rating reference QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/rating-v2/**"
+      - "frontend/src/App.tsx"
+      - "frontend/e2e/participant-interactions.spec.ts"
+      - ".github/workflows/rating-reference-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/rating-v2/**"
+      - "frontend/src/App.tsx"
+      - "frontend/e2e/participant-interactions.spec.ts"
+      - ".github/workflows/rating-reference-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rating-reference-qa-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  rating-visual-acceptance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout the exact commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Install Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Lint rating implementation and interaction tests
+        run: npx eslint src/features/rating-v2/page.tsx e2e/participant-interactions.spec.ts --max-warnings 0
+      - name: Verify TypeScript
+        run: npm run typecheck
+      - name: Compile rating styles and build production assets
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Verify rating list, rewards, profiles, and mobile interactions
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+          LANG: ru_RU.UTF-8
+        run: npx playwright test participant-interactions.spec.ts --project=chromium --grep "rating" --reporter=line
+      - name: Retain rating screenshots and failure traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: rating-reference-visual-evidence
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
