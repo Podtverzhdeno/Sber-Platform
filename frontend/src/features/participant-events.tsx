@@ -8,6 +8,7 @@ import { Award, BriefcaseBusiness, GraduationCap, Users } from "lucide-react";
 import { EventsHero, EventsCard, EventExperienceDetail, EventRegistrationForm, type EventTab } from "./participant-events-design";
 import "./participant-events-reference.scss";
 import "./participant-events.scss";
+import "./participant-events-fidelity.scss";
 
 type EventItem = {
   key: string; title: string; event_type: string; organizer: string; conditions: string;
