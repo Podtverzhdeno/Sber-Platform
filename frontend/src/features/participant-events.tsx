@@ -118,9 +118,8 @@ export function ParticipantEventCatalog() {
   };
   if (events.isLoading) return <StatePanel kind="loading" />;
   if (events.isError || !events.data) return <StatePanel kind="error" action="Обновить" onAction={() => { void events.refetch(); }} />;
-  const demoCompleted: EventItem = { key: "mayaki-2025", title: "Маяки 2025", event_type: "Хакатон", organizer: "Сбер", conditions: "Приложите сертификат участника, финалиста или победителя.", source_url: "https://developers.sber.ru/", deadline_at: "2025-09-20T18:00:00Z", status: "completed", track_keys: ["python"], recommendation_reason: "Подтвердите результат и получите постоянные баллы и трофей.", source_checked_at: "2026-09-28T09:00:00Z", source_status: "verified" };
-  const claimsReady = claims.isSuccess && claims.data.length === 0;
-  const allItems: EventItem[] = !events.data.items.some((item) => item.status !== "open") && claimsReady ? [...events.data.items, demoCompleted] : events.data.items;
+  // Only events returned by the server may be shown to a participant.
+  const allItems: EventItem[] = events.data.items;
   const tracks = [...new Set(allItems.flatMap((item) => item.track_keys))];
   const types = [...new Set(allItems.map((item) => item.event_type))];
   const claimByEvent = new Map((claims.data ?? []).map((item) => [item.event_key, item]));

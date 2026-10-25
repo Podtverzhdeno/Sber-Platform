@@ -9,6 +9,19 @@ test.beforeEach(async ({ page }) => {
     { key: "mentor-elena", display_name: "Елена Наставник", roles: ["mentor"] },
   ] }));
   await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: {} }));
+  // Published, deterministic API fixtures. No ranking values are embedded in the UI.
+  await page.route("**/api/v1/rating-seasons", (route) => route.fulfill({ json: [
+    { id: "season-e2e", key: "autumn-2026", title: "Сезон 2026", status: "open", version: 2, policy_version: 1 },
+  ] }));
+  await page.route("**/api/v1/rating-seasons/season-e2e/leaderboard", (route) => route.fulfill({ json: [
+    { place: 1, person_id: "2", display_name: "Кирилл Меньшев", score: "550", successful_projects: 8,
+      trophies: [{ trophy_type: "winner", title: "Победитель МАЯКИ", source_url: "https://example.test/proof" }], offers: [], anonymized: false },
+    { place: 2, person_id: "3", display_name: "Мария Северова", score: "500", successful_projects: 7,
+      trophies: [], offers: [], anonymized: false },
+    { place: 3, person_id: "1", display_name: "Алекс Речной", score: "450", successful_projects: 6,
+      trophies: [], offers: [], anonymized: false },
+  ] }));
+
   await page.route("**/api/v1/auth/demo-login", async (route) => {
     const { persona_key } = route.request().postDataJSON() as { persona_key: string };
     const mentor = persona_key === "mentor-elena";
@@ -424,7 +437,8 @@ test("rating list opens participant profile and returns to the same ranking", as
   await page.screenshot({ path: "test-results/rating-v2-profile-1672x941.png", fullPage: true });
   await expect(page.getByText("Победитель МАЯКИ")).toBeVisible();
   await page.getByRole("tab", { name: "Проекты" }).click();
-  await expect(page.getByText("AI Study Assistant")).toBeVisible();
+  await expect(page.getByText(/Подтверждённых проектов: 8/)).toBeVisible();
+  await expect(page.getByText("AI Study Assistant")).toHaveCount(0);
   await page.getByRole("button", { name: /Вернуться в рейтинг/ }).click();
   await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
 });
@@ -466,9 +480,9 @@ test("rating filters, ordering and profile actions are interactive", async ({ pa
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Рейтинг" }).click();
   const allRows = page.locator(".ir-leader-row");
-  await expect(allRows).toHaveCount(12);
+  await expect(allRows).toHaveCount(3);
   await page.getByRole("button", { name: "ТОП 10", exact: true }).click();
-  await expect(allRows).toHaveCount(10);
+  await expect(allRows).toHaveCount(3);
   await page.getByRole("searchbox", { name: "Поиск участников" }).fill("Алекс");
   await expect(allRows).toHaveCount(1);
   await expect(allRows.first()).toContainText("Алекс Речной");
@@ -602,18 +616,14 @@ test("participant settings and AI Buddy controls are interactive", async ({ page
 test("header notifications and rating indicators open real destinations", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await expect(page.getByRole("button", { name: "Рейтинг: 3 место, 450 баллов" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Открыть рейтинг участников" })).toBeVisible();
   await page.getByRole("button", { name: /Уведомления: 3 непрочитанных/ }).click();
   await expect(page.getByRole("dialog", { name: "Центр уведомлений" })).toBeVisible();
   await expect(page.getByText("Новый комментарий ментора")).toBeVisible();
   await page.getByRole("button", { name: /Checkpoint принят/ }).click();
   await expect(page).toHaveURL(/\/workspace\/4$/);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "Рейтинг: 3 место, 450 баллов" }).click();
-  await expect(page.getByRole("dialog", { name: "Баллы и место в рейтинге" })).toBeVisible();
-  await expect(page.getByText("постоянных баллов")).toBeVisible();
-  await expect(page.getByText("До 2 места")).toBeVisible();
-  await page.getByRole("link", { name: "Открыть рейтинг →" }).click();
+  await page.getByRole("button", { name: "Открыть рейтинг участников" }).click();
   await expect(page).toHaveURL(/\/workspace\/6$/);
   await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
 });

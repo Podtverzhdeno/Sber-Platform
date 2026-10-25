@@ -24,3 +24,11 @@ export function createQueryClient(): QueryClient {
   });
   return client;
 }
+
+/** A single query client per browser session, reused across workspace routes. */
+export const appQueryClient = createQueryClient();
+
+/** Reset cached actor-scoped projections between independent test mounts. */
+export function resetAppQueryCacheForTests(): void {
+  appQueryClient.clear();
+}
