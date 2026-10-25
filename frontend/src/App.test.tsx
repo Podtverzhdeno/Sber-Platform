@@ -152,4 +152,47 @@ describe("App", () => {
     expect(sidebar.querySelector(".nav-icon")?.textContent).toBe("⌂");
     expect(sidebar.querySelector(".sidebar-art")).toBeInTheDocument();
   });
+  it("reuses one sidebar for home, analytics and messages", async () => {
+    const actor = {
+      person_id: "00000000-0000-0000-0000-000000000001",
+      display_name: "Алекс Речной",
+      active_role: "participant",
+      assigned_roles: ["participant"],
+      scopes: [],
+      consent_scopes: [],
+      navigation: ["Главная", "Аналитика", "Сообщения"],
+      csrf_token: "csrf",
+    };
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+      const url = requestUrl(input);
+      if (url.endsWith("/personas")) {
+        return Promise.resolve(new Response(JSON.stringify(personas), { status: 200 }));
+      }
+      if (url.endsWith("/me")) {
+        return Promise.resolve(new Response(JSON.stringify(actor), { status: 200 }));
+      }
+      return Promise.resolve(new Response("{}", { status: 200 }));
+    });
+    window.history.pushState({}, "", "/workspace/0");
+    render(<App />);
+
+    const sidebar = await screen.findByRole("complementary", { name: "Боковая панель" });
+    const signature = () => ({
+      brand: sidebar.querySelector(".sidebar-brand")?.innerHTML,
+      icons: Array.from(sidebar.querySelectorAll("nav .nav-icon"), (icon) => icon.innerHTML),
+      promo: sidebar.querySelector(".sidebar-message")?.innerHTML,
+    });
+    const initial = signature();
+    expect(initial.promo).toContain("Развиваем технологии вместе");
+
+    for (const section of ["Аналитика", "Сообщения", "Главная"]) {
+      fireEvent.click(screen.getByRole("link", { name: section }));
+      await waitFor(() => {
+        expect(screen.getByRole("link", { name: section })).toHaveAttribute("aria-current", "page");
+      });
+      expect(signature()).toEqual(initial);
+      expect(sidebar.querySelector(".messages-sidebar-collapse")).not.toBeInTheDocument();
+    }
+  });
+
 });
