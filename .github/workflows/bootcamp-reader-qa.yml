@@ -5,7 +5,8 @@ on:
     branches: [main]
     paths:
       # Keep this expensive browser suite scoped to the lesson reader.
-      # Broader catalog redraws have their own reference QA and may commit rapidly.
+      # Include the integrated course dialog because its buttons launch the reader.
+      - "frontend/src/features/bootcamp/catalog.tsx"
       - "frontend/src/features/bootcamp/bootcamp-approved.scss"
       - "frontend/src/features/bootcamp/route-v2.tsx"
       - "frontend/src/features/bootcamp/learning-content/CourseLearningContent.tsx"
