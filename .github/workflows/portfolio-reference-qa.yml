@@ -5,13 +5,19 @@ on:
     paths:
       - "frontend/src/features/portfolio-v2.tsx"
       - "frontend/src/features/portfolio-v2.scss"
+      - "frontend/src/features/portfolio-skill-model.ts"
+      - "frontend/src/features/portfolio-skill-model.test.ts"
       - "frontend/e2e/portfolio.spec.ts"
+      - "frontend/e2e/portfolio-evidence-chart.spec.ts"
       - ".github/workflows/portfolio-reference-qa.yml"
   pull_request:
     paths:
       - "frontend/src/features/portfolio-v2.tsx"
       - "frontend/src/features/portfolio-v2.scss"
+      - "frontend/src/features/portfolio-skill-model.ts"
+      - "frontend/src/features/portfolio-skill-model.test.ts"
       - "frontend/e2e/portfolio.spec.ts"
+      - "frontend/e2e/portfolio-evidence-chart.spec.ts"
       - ".github/workflows/portfolio-reference-qa.yml"
   workflow_dispatch:
 permissions:
@@ -38,6 +44,8 @@ jobs:
         run: npm ci
       - name: Lint portfolio
         run: npx eslint src/features/portfolio-v2.tsx e2e/portfolio.spec.ts --max-warnings 0
+      - name: Test verified portfolio evidence model
+        run: npx vitest run src/features/portfolio-skill-model.test.ts
       - name: Full-repository Typecheck (informational while parallel rating API work lands)
         continue-on-error: true
         run: npm run typecheck
@@ -49,7 +57,7 @@ jobs:
         env:
           CI: "true"
           TZ: Europe/Moscow
-        run: npx playwright test portfolio.spec.ts --project=chromium --reporter=line
+        run: npx playwright test portfolio.spec.ts portfolio-evidence-chart.spec.ts --project=chromium --reporter=line
       - name: Save screenshots and traces
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
