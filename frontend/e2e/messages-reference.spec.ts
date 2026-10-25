@@ -86,7 +86,7 @@ test("messages empty state uses reference three-column composition at 1448px",as
   await expectRect(page,".msg-dialog-list",{x:164,y:70,width:367,height:1016},12);
   await expectRect(page,".chat-thread",{x:531,y:70,width:575,height:1016},14);
   await expectRect(page,".msg-reference-context-empty",{x:1106,y:70,width:298,height:1016},14);
-  await expect(page.locator(".msg-reference-empty__bubble.front")).toBeVisible();
+  await expect(page.locator(".msg-reference-empty__exact-art")).toHaveAttribute("src","/messages-reference/empty-hero-original.svg");
   await page.mouse.move(5,5);
   await page.screenshot({path:"test-results/messages-empty-1448.png",fullPage:false});
 });
