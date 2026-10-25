@@ -24,7 +24,7 @@
 .ac-week-columns { display:grid; column-gap:4px; row-gap:4px; min-width:0; }
 .ac-month-name { grid-row:1; overflow:visible; font-size:10px;line-height:20px;white-space:nowrap;color:#91b8c7;pointer-events:none; }
 .ac-week { display:grid;grid-row:2;grid-template-rows:repeat(7,14px);row-gap:4px;min-width:0; }
-.ac-day { display:block;width:14px;height:14px;min-width:14px;padding:0;border:1px solid #1b4a60;border-radius:3px;background:#10283b;transition:filter .12s ease,outline-color .12s ease,transform .12s ease; }
+.analytics-v3 .ac-calendar-card .ac-day { display:block;box-sizing:border-box;width:14px;height:14px;min-width:14px;min-height:14px;max-width:14px;max-height:14px;line-height:0;padding:0;border:1px solid #1b4a60;border-radius:3px;background:#10283b;transition:filter .12s ease,outline-color .12s ease; }
 .ac-calendar-card .ac-day:hover:not(:disabled) { border-color:#b1ffef;box-shadow:0 0 0 1px #b1ffef,0 0 7px #18f3d06a;filter:brightness(1.25); }
 .ac-calendar-card .ac-day:focus-visible { outline:2px solid #fff;outline-offset:2px; }
 .ac-day.ac-level-0 { background:#122f40;border-color:#1e4558; }
