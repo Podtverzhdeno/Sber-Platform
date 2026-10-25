@@ -25,6 +25,9 @@ const materialWrites = [
 ] as const;
 
 export const participantProjectionKeys = [
+  "engagement-overview",
+  "engagement-freeze",
+  "engagement-rhythm",
   "impulse-learning-summary",
   "participant-growth-analytics",
   "participant-analytics",
