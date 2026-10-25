@@ -303,6 +303,7 @@ export function ParticipantProjectsV2() {
   const selectedId=params.get("project");
   const [text,setText]=useState("");
   const [company,setCompany]=useState("all");
+  const [deadlineFilter,setDeadlineFilter]=useState("all");
   const [sort,setSort]=useState("deadline");
   const [workspaceTab,setWorkspaceTab]=useState(false);
   const [showHelp,setShowHelp]=useState(false);
@@ -326,6 +327,13 @@ export function ParticipantProjectsV2() {
     const status=project.work.assignment.status;
     if(filter==="active"&&!activeStatuses.has(status)||filter==="review"&&!reviewStatuses.has(status)||filter==="finished"&&!finishedStatuses.has(status))return false;
     if(company!=="all"&&projectCompany(project)!==company)return false;
+    if(deadlineFilter!=="all"){
+      const remaining=new Date(project.work.terms.deadline_at).getTime()-Date.now();
+      if(!Number.isFinite(remaining))return false;
+      if(deadlineFilter==="overdue" && remaining>=0)return false;
+      if(deadlineFilter==="week" && (remaining<0 || remaining>7*86400000))return false;
+      if(deadlineFilter==="month" && (remaining<0 || remaining>30*86400000))return false;
+    }
     return !text||[project.work.task.title,project.work.terms.deliverable,projectCompany(project)].some(x=>x.toLowerCase().includes(text.toLowerCase()));
   }).sort((a,b)=>sort==="title"?a.work.task.title.localeCompare(b.work.task.title,"ru"):sort==="progress"?(completion(b)??-1)-(completion(a)??-1):new Date(a.work.terms.deadline_at).getTime()-new Date(b.work.terms.deadline_at).getTime());
   const finished=projects.filter(p=>finishedStatuses.has(p.work.assignment.status)).length;
@@ -346,6 +354,7 @@ export function ParticipantProjectsV2() {
     <section className="mp-toolbar" aria-label="Управление проектами">
       <div className="mp-filters" role="group" aria-label="Статус проектов">{filterChoices.map(item=><button type="button" aria-pressed={filter===item.key} className={filter===item.key?"is-active":""} onClick={()=>{ setFilter(item.key); }} key={item.key}>{item.title} ({filter==="all"?projects.length:item.key==="active"?projects.filter(p=>activeStatuses.has(p.work.assignment.status)).length:item.key==="review"?projects.filter(p=>reviewStatuses.has(p.work.assignment.status)).length:finished})</button>)}</div>
       <label className="mp-select"><span className="mp-visually-hidden">Компания</span><select aria-label="Компания" value={company} onChange={e=>{ setCompany(e.target.value); }}><option value="all">Все компании</option>{companies.map(name=><option value={name} key={name}>{name}</option>)}</select><ChevronDown size={14}/></label>
+      <label className="mp-select"><span className="mp-visually-hidden">Сроки</span><select aria-label="Сроки" value={deadlineFilter} onChange={e=>{setDeadlineFilter(e.target.value);}}><option value="all">Все сроки</option><option value="week">Ближайшие 7 дней</option><option value="month">Ближайшие 30 дней</option><option value="overdue">Просрочено</option></select><ChevronDown size={14}/></label>
       <label className="mp-select"><span className="mp-visually-hidden">Сортировка</span><select aria-label="Сортировка" value={sort} onChange={e=>{ setSort(e.target.value); }}><option value="deadline">По сроку</option><option value="progress">По прогрессу</option><option value="title">По названию</option></select><ChevronDown size={14}/></label>
       <div className="mp-toolbar-spacer"/>
       <div className="mp-layout" role="group" aria-label="Режим проектов"><button type="button" onClick={()=>{ setLayout("cards"); }} aria-pressed={layout==="cards"} className={layout==="cards"?"is-active":""}><LayoutGrid size={15}/> Карточки</button><button type="button" onClick={()=>{ setLayout("list"); }} aria-pressed={layout==="list"} className={layout==="list"?"is-active":""}><List size={16}/> Список</button></div>
