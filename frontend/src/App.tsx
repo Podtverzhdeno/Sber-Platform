@@ -564,7 +564,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Рейтинг" ? (
-          <ParticipantRating />
+          <ParticipantRating personId={actor.person_id} />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Аналитика" ? (
@@ -1615,7 +1615,11 @@ function ImpulseApp() {
               {actor.active_role === "participant" && (
                 <TopbarEngagementIndicator />
               )}
-              {actor.active_role === "participant" && <div className="ranking-wrapper"><button className="ranking-utility" type="button" aria-label="Рейтинг: 3 место, 450 баллов" aria-expanded={rankingOpen} onClick={()=>{setRankingOpen(value=>!value);setNotificationOpen(false);setSearchOpen(false);}}><span aria-hidden="true">♜</span><strong>3 место</strong><small>450 баллов</small></button>{rankingOpen&&<div className="ranking-popover" role="dialog" aria-label="Баллы и место в рейтинге"><header><div><span>Рейтинг сезона</span><strong>3 место</strong></div><b>ТОП 5%</b></header><div className="ranking-score-grid"><article><strong>450</strong><span>постоянных баллов</span></article><article><strong>+5</strong><span>заморожено</span></article></div><div className="ranking-next"><span>До 2 места</span><strong>50 баллов</strong><i><b/></i></div><a href={`/workspace/${String(actor.navigation.indexOf("Рейтинг"))}`} onClick={event=>{event.preventDefault();setRankingOpen(false);openSearchItem("Рейтинг");}}>Открыть рейтинг →</a></div>}</div>}
+              {actor.active_role === "participant" && actor.navigation.includes("Рейтинг") && <div className="ranking-wrapper">
+                <button className="ranking-utility" type="button" aria-label="Открыть рейтинг участников" onClick={() => { setRankingOpen(false); openSearchItem("Рейтинг"); }}>
+                  <span aria-hidden="true">♜</span><strong>Рейтинг</strong>
+                </button>
+              </div>}
               <div className="notification-utility">
                 <button
                   className="notification-button"
