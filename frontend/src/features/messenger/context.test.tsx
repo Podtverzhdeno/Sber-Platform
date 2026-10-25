@@ -82,7 +82,7 @@ describe("ContextPanel", () => {
     expect(openedTask[0]).toBe("task-1");
   });
 
-  it("сообщество отображает реальные роли модераторов, материалы и полный список", () => {
+  it("сообщество показывает реальных участников, поиск и отдельные вкладки материалов", () => {
     const community: ApiChannelView = {
       ...channel,
       kind: "community",
@@ -96,15 +96,47 @@ describe("ContextPanel", () => {
         { id: "u5", display_name: "Мария", role: "member" },
       ],
     };
-    render(<ContextPanel channel={community} viewerId="u3" open messageRefs={["files/guide.pdf"]} />);
-    expect(screen.getByRole("region", { name: "Администраторы и модераторы" })).toHaveTextContent("Анна");
-    expect(screen.getByRole("region", { name: "Администраторы и модераторы" })).toHaveTextContent("Иван");
-    expect(screen.getByRole("region", { name: "Полезные материалы" })).toHaveTextContent("1");
-    expect(screen.getAllByTestId("context-participant")).toHaveLength(4);
-    fireEvent.click(screen.getByRole("button", { name: "Все" }));
+    const onToggleMute = vi.fn();
+    const onOpenMember = vi.fn(async () => undefined);
+    render(<ContextPanel channel={community} viewerId="u3" open
+      onToggleMute={onToggleMute} onOpenMember={onOpenMember}
+      messageRefs={["files/guide.pdf"]}
+      messages={[{id:"m1",author_id:"u2",author_name:"Иван",kind:"text",body:"Материалы: https://example.org/guide",
+        artifact_refs: ["files/guide.pdf","photo.png"],created_at:"2026-10-20T10:00:00Z",sequence:1}]} />);
+    expect(screen.getByRole("tab", { name: "Участники" })).toHaveAttribute("aria-selected","true");
     expect(screen.getAllByTestId("context-participant")).toHaveLength(5);
-    fireEvent.click(screen.getByRole("button", { name: "Свернуть" }));
-    expect(screen.getAllByTestId("context-participant")).toHaveLength(4);
+    fireEvent.change(screen.getByRole("searchbox", { name: "Найти участника" }), {target:{value:"Иван"}});
+    expect(screen.getAllByTestId("context-participant")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button",{name:"Открыть профиль: Иван"}));
+    expect(screen.getByRole("dialog",{name:"Профиль участника: Иван"})).toBeVisible();
+    fireEvent.click(screen.getByRole("button",{name:"Написать"}));
+    expect(onOpenMember).toHaveBeenCalledWith("u2");
+    fireEvent.click(screen.getByRole("tab",{name:"Файлы"}));
+    expect(screen.getByRole("tabpanel",{name:"Файлы"})).toHaveTextContent("guide.pdf");
+    fireEvent.click(screen.getByRole("tab",{name:"Медиа"}));
+    expect(screen.getByRole("tabpanel",{name:"Медиа"})).toHaveTextContent("photo.png");
+    fireEvent.click(screen.getByRole("tab",{name:"Ссылки"}));
+    expect(screen.getByRole("tabpanel",{name:"Ссылки"})).toHaveTextContent("https://example.org/guide");
+    fireEvent.click(screen.getByRole("tab",{name:"Боты"}));
+    expect(screen.getByRole("tabpanel",{name:"Боты"})).toHaveTextContent("Боты не подключены");
+    fireEvent.click(screen.getByRole("button",{name:"Без звука"}));
+    expect(onToggleMute).toHaveBeenCalledTimes(1);
+  });
+
+  it("можно выбрать только доступных, ещё не состоящих в сообществе коллег", async () => {
+    const community: ApiChannelView = {...channel,kind:"community",task_id:null,
+      participants:[{id:"u1",display_name:"Алексей",role:"member"}]};
+    const onInvite = vi.fn(async (_ids: string[]) => undefined);
+    render(<ContextPanel channel={community} viewerId="u1" open onInvite={onInvite}
+      contacts={[{id:"u1",display_name:"Алексей",role:"participant"},
+        {id:"u2",display_name:"Новый коллега",role:"participant"}]} />);
+    fireEvent.click(screen.getByRole("button",{name:"Добавить участников"}));
+    const modal=screen.getByRole("dialog",{name:"Добавить участников"});
+    expect(modal).toHaveTextContent("Новый коллега");
+    expect(modal).not.toHaveTextContent("Алексей");
+    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("button",{name:"Добавить (1)"}));
+    await vi.waitFor(()=>{expect(onInvite).toHaveBeenCalledWith(["u2"]);});
   });
 
   it("свёрнутая панель не рендерится", () => {
