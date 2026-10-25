@@ -144,7 +144,7 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await expect(mainRole).toHaveAttribute("data-tone", "primary");
   await untouchedRole.click();
   await expect(untouchedRole).toHaveAttribute("data-tone", "unselected");
-  await expect(untouchedRole).toHaveCSS("border-top-color", "rgb(129, 148, 164)");
+  await expect(untouchedRole).toHaveCSS("border-top-color", "rgb(132, 149, 167)");
   await expect(mainRole).toHaveAttribute("data-tone", "primary");
 
   await expect(page.locator(".trajectory-v2-stage-path button")).toHaveCount(7);
