@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, BookOpenText, BriefcaseBusiness, Check, CheckCircle2, CircleHelp,
-  Compass, GraduationCap, Layers3, Lightbulb, MessageCircle, Rocket, Sparkles, Star, X,
+  ArrowRight, BookOpenText, BriefcaseBusiness, CircleHelp,
+  Compass, GraduationCap, Layers3, MessageCircle, Rocket, Sparkles, Star, X,
 } from "lucide-react";
-import { PARTICIPANT_GUIDES, shouldAutomaticallySuggest, type PersistedGuide } from "./participant-guide-data";
+import { shouldAutomaticallySuggest, type PersistedGuide } from "./participant-guide-data";
 import { SECTION_TOURS, locatePopover, type GuideStep } from "./participant-tour-steps";
 import "./participant-guide.scss";
 
