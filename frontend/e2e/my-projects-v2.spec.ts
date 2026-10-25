@@ -134,6 +134,7 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
   await page.locator(".mp-detail-hero__lower").getByRole("button",{name:"Продолжить работу"}).click();
   await expect(page.locator('[data-project-screen="dashboard"]')).toBeVisible();
+  await page.screenshot({path:"test-results/my-projects-v2/04_dashboard_1672.png",fullPage:true,animations:"disabled"});
   await expect(page.getByRole("heading",{name:"Этапы проекта"})).toBeVisible();
   await page.getByRole("button",{name:"Подробнее"}).click();
   const info=page.getByRole("dialog",{name:"Подробнее о проекте"});
@@ -249,7 +250,7 @@ test("My Projects: contribution upload uses allowed artifact key and real API pa
 });
 
 test("Project information popup is read-only, detailed, responsive and dismissible",async({page})=>{
-  await page.setViewportSize({width:1280,height:900});
+  await page.setViewportSize({width:1672,height:941});
   await fixture(page);
   await page.locator(".mp-card-list .mp-open-tile").first().click();
   await page.locator(".mp-detail-hero__lower").getByRole("button",{name:"Продолжить работу"}).click();
@@ -258,13 +259,34 @@ test("Project information popup is read-only, detailed, responsive and dismissib
   await dashboard.getByRole("button",{name:"Подробнее"}).click();
   const dialog=page.getByRole("dialog",{name:"Подробнее о проекте"});
   await expect(dialog).toBeVisible();
+  await page.screenshot({path:"test-results/my-projects-v2/05_popup_1672.png",fullPage:false,animations:"disabled"});
   await expect(dialog.getByText("Реальный исследовательский проект")).toBeVisible();
   await expect(dialog.getByRole("heading",{name:"Подробнее о проекте"})).toBeVisible();
   await expect(dialog.getByText("Версия условий")).toBeVisible();
   await expect(dialog.locator(".mpd-criteria li")).toHaveCount(5);
-  await expect(dialog.getByText("Заказчик")).toBeVisible();
-  await expect(dialog.getByText("Сбер")).toBeVisible();
+  await expect(dialog.getByText("Заказчик",{exact:true})).toBeVisible();
+  await expect(dialog.getByText("Сбер",{exact:true})).toBeVisible();
   await dialog.getByRole("button",{name:"Вернуться к работе"}).click();
   await expect(dialog).toHaveCount(0);
   await expect(dashboard).toBeVisible();
+});
+
+test("Project dashboard and detailed popup remain usable on a narrow phone",async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await fixture(page);
+  await page.locator(".mp-card-list .mp-open-tile").first().click();
+  await page.locator(".mp-detail-hero__lower").getByRole("button",{name:"Продолжить работу"}).click();
+  const dashboard=page.locator('[data-project-screen="dashboard"]');
+  await expect(dashboard).toBeVisible();
+  await dashboard.getByRole("button",{name:"Подробнее"}).click();
+  const dialog=page.getByRole("dialog",{name:"Подробнее о проекте"});
+  await expect(dialog).toBeVisible();
+  const box=await dialog.boundingBox();
+  if(!box)throw new Error("Popup was not rendered");
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(391);
+  await dialog.getByRole("button",{name:"Закрыть подробности о проекте"}).click();
+  await expect(dialog).toHaveCount(0);
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(2);
 });
