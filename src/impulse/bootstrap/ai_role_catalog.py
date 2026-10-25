@@ -8,10 +8,28 @@ learning activities, which are *planned actions*, never fabricated completions.
 from __future__ import annotations
 
 import json
+from typing import TypedDict, cast
+
+
+class AiRoleStage(TypedDict):
+    title: str
+    purpose: str
+    skill: str
+    target_kind: str
+    target_key: str
+    activities: list[str]
+    deliverable: str
+
+
+class AiRoleProfile(TypedDict):
+    title: str
+    description: str
+    stages: list[AiRoleStage]
+
 
 # ruff: noqa: E501 -- long text inside the JSON curriculum is user-facing copy.
 
-AI_ROLE_PROFILES: dict[str, dict] = json.loads(r"""{
+AI_ROLE_PROFILES: dict[str, AiRoleProfile] = cast(dict[str, AiRoleProfile], json.loads(r"""{
   "product": {
     "title": "AI Architect",
     "description": "Проектирует надёжные корпоративные AI-системы, определяет границы сервисов, интеграции и критерии качества.",
@@ -691,7 +709,7 @@ AI_ROLE_PROFILES: dict[str, dict] = json.loads(r"""{
       }
     ]
   }
-}""")
+}"""))
 
 
 def role_title(track_key: str) -> str:
