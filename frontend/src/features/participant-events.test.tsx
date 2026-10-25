@@ -150,8 +150,10 @@ describe("participant event catalog: verified source and claim lifecycle", () =>
     expect(screen.queryByText("+5 frozen")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Зарегистрироваться · +5" })).not.toBeInTheDocument();
     expect(probes.posts).toBe(0);
-    fireEvent.click(within(cards[0]!).getByRole("button", { name: "Подробнее" }));
-    expect(screen.getByRole("dialog", { name: "AI Journey 2026" })).toBeInTheDocument();
+    const first = cards[0];
+    if (!first) throw new Error("The first API event is missing");
+    fireEvent.click(within(first).getByRole("button", { name: "Подробнее" }));
+    expect(await screen.findByRole("dialog", { name: "AI Journey 2026" })).toBeInTheDocument();
     const official = within(screen.getByRole("dialog", { name: "AI Journey 2026" })).getByRole("link", { name: /Сайт события/ });
     expect(official).toHaveAttribute("href", "https://example.test/event");
     expect(official).toHaveAttribute("rel", "noopener noreferrer");
