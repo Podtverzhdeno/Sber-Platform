@@ -213,7 +213,7 @@
    hero content. Keep the three-column card canvas below at full width. */
 @media(min-width:1500px){
   .mpd-page .mpd-hero>.mpd-back{position:absolute;top:1px;left:0}
-  .mpd-page .mpd-heading{margin-left:210px;min-height:177px}
+  .mpd-page .mpd-heading{margin-left:210px;min-height:190px}
   .mpd-page .mpd-tabs{margin-top:12px}
 }
 
@@ -254,3 +254,4 @@
 .mpd-metric:has(.mpd-progress-ring)>div:last-child{gap:4px}
 .mpd-metric:has(.mpd-progress-ring)>div:last-child b{font-size:14px;line-height:1.25}
 @media(max-width:1350px){.mpd-metric-progress{width:57px;height:57px}.mpd-progress-ring{width:56px;height:56px}.mpd-progress-ring::before{inset:8px}.mpd-progress-ring>span{font-size:13px}}
+\n/* Stage strip in the approved desktop screenshot occupies a full visual row. */\n@media(min-width:1500px){.mpd-page .mpd-stages{min-height:193px}}\n
