@@ -38,20 +38,19 @@ test("production demo session: saved learning, selected trajectory, verified sta
  const roles=overview.roles.filter(role=>role.attempt_number!==null);
  expect(roles.length,"At least one selected or enrolled role").toBeGreaterThan(0);
  const focus=roles.find(r=>r.track_key===overview.next_outcome?.trajectory_key)??roles[0];
- if(!focus)throw new Error("No enrolled role");
  const track=focus.track_key;
  const learning=await api<{courses:Course[]}>("/api/v1/me/bootcamp/impulse-study/summary");
  const catalog=await api<Roadmap[]>("/api/v1/me/roadmap-catalog");
  const roadmap=catalog.find(item=>item.track_key===track);
- expect(roadmap,`Published roadmap for enrolled role ${track}`).toBeDefined();
+ if(!roadmap)throw new Error(`Published roadmap for enrolled role ${track} not found`);
  const trajectoryIndex=me.navigation.indexOf("Моя траектория");
  expect(trajectoryIndex,"Trajectory navigation present").toBeGreaterThanOrEqual(0);
  await page.goto(`${url}/workspace/${String(trajectoryIndex)}?role=${encodeURIComponent(track)}`);
  const detail=page.getByTestId("trajectory-role-detail");
  await expect(detail).toHaveAttribute("data-role-key",track,{timeout:15000});
- const expectedStudied=roadmap!.milestones.filter(m=>m.target_kind==="course"&&
+ const expectedStudied=roadmap.milestones.filter(m=>m.target_kind==="course"&&
   learning.courses.some(c=>c.course_key===m.target_key&&c.finished&&c.certificate_id!==null)).length;
- const expectedAccepted=roadmap!.milestones.filter(m=>m.completed).length;
+ const expectedAccepted=roadmap.milestones.filter(m=>m.completed).length;
  const studiedSteps=page.locator(".trajectory-v2-stage[data-study-state='studied']");
  const acceptedSteps=page.locator(".trajectory-v2-stage[data-stage-state='completed']");
  // The trajectory fetches study evidence separately from the role overview;
@@ -64,7 +63,7 @@ test("production demo session: saved learning, selected trajectory, verified sta
  await expect(stageTitle).toContainText(`${String(expectedAccepted)} этапов подтверждено`);
  const gradeResponse=await page.evaluate(async track=>{
   const response=await fetch("/api/v1/me/bootcamp/overview?track="+encodeURIComponent(track),{credentials:"same-origin"});
-  return {ok:response.ok,status:response.status,body:response.ok?await response.json():null};
+  return {ok:response.ok,status:response.status,body:response.ok?(await response.json() as unknown):null};
  },track);
  const shownGrade=(await page.getByTestId("trajectory-official-grade").innerText()).trim();
  const grade=gradeResponse.ok?(gradeResponse.body as GradeSummary):null;
