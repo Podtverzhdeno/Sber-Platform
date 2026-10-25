@@ -13,7 +13,7 @@ const actor = {
   csrf_token: "reference-geometry",
 };
 
-async function openReferenceHome(page: Page) {
+async function openReferenceHome(page: Page, courseHero = false) {
   let loggedIn = false;
   await page.route("**/api/v1/config", (route) =>
     route.fulfill({ json: { demo_mode: true } }),
@@ -33,7 +33,7 @@ async function openReferenceHome(page: Page) {
     return route.fulfill({ json: actor });
   });
   await page.route("**/api/v1/participant/me/development-overview", (route) =>
-    route.fulfill({ json: overviewFixture }),
+    route.fulfill({ json: courseHero ? { ...overviewFixture, active_tasks: [] } : overviewFixture }),
   );
   await page.route("**/api/v1/me/talent-passport", (route) =>
     route.fulfill({ json: { verified_courses: [], cases: [], skills: [] } }),
@@ -248,6 +248,37 @@ test("home actions keep stable backgrounds and smoothly animate on hover and pre
   await day.click();
   await expect(day).toHaveAttribute("aria-pressed", "true");
   expect(await day.evaluate((el) => getComputedStyle(el).transitionProperty)).toContain("background-color");
+});
+
+test("learning CTA has ambient glow, keyboard focus and restrained motion on desktop and mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 920 });
+  await openReferenceHome(page, true);
+  const cta = page.getByRole("button", { name: "Продолжить обучение" });
+  await expect(cta).toHaveClass(/home-v2-primary--learning/);
+  await expect(cta).toBeVisible();
+  const motion = await cta.evaluate(el => ({
+    animation: getComputedStyle(el).animationName,
+    shine: getComputedStyle(el, "::before").animationName,
+    arrow: getComputedStyle(el.querySelector("svg") as SVGElement).animationName,
+  }));
+  expect(motion.animation).toContain("home-v2-learning-glow");
+  expect(motion.shine).toContain("home-v2-learning-shine");
+  expect(motion.arrow).toContain("home-v2-learning-arrow");
+
+  await cta.hover();
+  await expect(cta).toHaveCSS("filter", "brightness(1.07)");
+  await expect(cta).toHaveCSS("animation-name", "none");
+  await cta.focus();
+  await expect(cta).toBeFocused();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2)).toBe(true);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(cta).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 2)).toBe(true);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(cta).toHaveCSS("animation-name", "none");
+  expect(await cta.evaluate(el => getComputedStyle(el, "::before").animationName)).toBe("none");
+  expect(await cta.locator("svg").evaluate(el => getComputedStyle(el).animationName)).toBe("none");
 });
 
 test("grade drawer matches the source 456px geometry and restores focus at desktop", async ({ page }) => {
