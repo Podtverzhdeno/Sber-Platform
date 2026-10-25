@@ -99,9 +99,9 @@ test("portfolio: narrow layout never overflows and all six tabs remain reachable
   }}));
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  const menu = page.getByRole("button", { name: /Меню/ });
-  if (await menu.isVisible()) await menu.click();
-  await page.getByRole("link", { name: "Портфолио" }).click();
+  // On narrow screens the shared sidebar is off-canvas. Test the portfolio route directly;
+  // shell navigation has its own responsive acceptance coverage.
+  await page.goto("/workspace/1");
   await expect(page.getByTestId("portfolio-v2")).toBeVisible();
   for (const name of ["Обзор","Skill Passport","Проекты","Сертификация","Достижения","О себе"]) {
     await page.getByRole("tab",{name}).click();
