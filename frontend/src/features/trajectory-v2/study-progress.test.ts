@@ -21,7 +21,7 @@ describe("role-specific trajectory learning reconciliation",()=>{
     const progress=trajectoryStudyProgress(milestones,[
       study("demo-course-1",true,"certificate-1"),study("demo-course-2",true,"certificate-2"),
     ],true);
-    expect(progress.matchedCourses).toBe(2);
+    expect(progress.matchedCourses).toBe(3);
     expect(progress.finishedCourses).toBe(2);
     expect(progress.lessonsDone).toBe(16);
     expect(progress.lessonsTotal).toBe(16);
