@@ -59,6 +59,7 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
   await expect(root.locator(".mp-project-grid .mp-project-tile")).toHaveCount(3);
   await expect(root.locator(".mp-project-card-heading small").first()).toContainText("Сбер");
   await expect(root.locator(".mp-preview")).toHaveCount(0);
+  await expect(root.getByRole("button",{name:"Быстрый просмотр"}).first()).toHaveAttribute("aria-pressed","false");
   await page.screenshot({path:"test-results/my-projects-v2/01_cards_1672.png",fullPage:true,animations:"disabled"});
   await root.getByRole("button",{name:"Быстрый просмотр"}).first().click();
   await expect(root.locator(".mp-preview")).toBeVisible();
