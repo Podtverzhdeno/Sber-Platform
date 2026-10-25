@@ -1,0 +1,74 @@
+import { fireEvent, render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CustomerCreateTask } from "./customer-create-task";
+
+const candidates = [{ id: "p1", name: "Мария Ковалёва", direction: "AI / ML", cases: [{ title: "AI-агент" }] }];
+const create = (publish = vi.fn()) => {
+  const view = render(<CustomerCreateTask candidates={candidates} onPublish={publish} />);
+  return { ...view, publish };
+};
+const completeBrief = () => {
+  fireEvent.change(screen.getByPlaceholderText("Например, AI-агент для анализа обращений"), { target: { value: "AI-агент для обращений" } });
+  fireEvent.change(screen.getByPlaceholderText("Что сейчас не работает, почему это важно и какое изменение нужно получить?"), { target: { value: "Обращения маршрутизируются вручную" } });
+  fireEvent.change(screen.getByPlaceholderText("Что нужно передать: код, API, демо, отчёт, инструкции, метрики?"), { target: { value: "Прототип, API и README" } });
+  fireEvent.click(screen.getByRole("button", { name: /Критерии и сроки/ }));
+  fireEvent.change(screen.getByPlaceholderText(/Каждый критерий с новой строки/), { target: { value: "Запуск по инструкции; отчёт по точности" } });
+};
+beforeEach(() => localStorage.clear());
+
+describe("customer task creation wizard", () => {
+  it("keeps draft fields and step after reopening", () => {
+    const { unmount } = create();
+    fireEvent.change(screen.getByPlaceholderText("Например, AI-агент для анализа обращений"), { target: { value: "Новая задача" } });
+    fireEvent.click(screen.getByRole("button", { name: /Критерии и сроки/ }));
+    expect(localStorage.getItem("impulse-customer-task-wizard-v2")).toContain("Новая задача");
+    unmount();
+    create();
+    expect(screen.getByRole("heading", { name: "Как понять, что задача решена" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Бриф/ }));
+    expect(screen.getByPlaceholderText("Например, AI-агент для анализа обращений")).toHaveValue("Новая задача");
+  });
+
+  it("prevents publication without mandatory requirements", () => {
+    const { publish } = create();
+    fireEvent.click(screen.getByRole("button", { name: /Проверка и публикация/ }));
+    expect(screen.getByRole("button", { name: "Опубликовать" })).toBeDisabled();
+    expect(screen.getByText("Остались обязательные поля")).toBeInTheDocument();
+    expect(publish).not.toHaveBeenCalled();
+  });
+
+  it("publishes a complete open task and clears only the wizard draft", () => {
+    const { publish } = create();
+    completeBrief();
+    fireEvent.click(screen.getByRole("button", { name: /Проверка и публикация/ }));
+    expect(screen.getByRole("button", { name: "Опубликовать" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Опубликовать" }));
+    expect(publish).toHaveBeenCalledWith(expect.objectContaining({ title: "AI-агент для обращений", criteria: "Запуск по инструкции; отчёт по точности" }), []);
+    expect(localStorage.getItem("impulse-customer-task-wizard-v2")).toBeNull();
+  });
+
+  it("requires an invited participant when invitation-only is selected", () => {
+    const { publish } = create();
+    completeBrief();
+    fireEvent.click(screen.getByRole("button", { name: /Формат и данные/ }));
+    fireEvent.click(screen.getByRole("button", { name: /По приглашению/ }));
+    fireEvent.click(screen.getByRole("button", { name: /Проверка и публикация/ }));
+    expect(screen.getByRole("button", { name: "Опубликовать" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: /Поддержка/ }));
+    fireEvent.click(screen.getByRole("checkbox"));
+    fireEvent.click(screen.getByRole("button", { name: /Проверка и публикация/ }));
+    expect(screen.getByRole("button", { name: "Опубликовать" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Опубликовать" }));
+    expect(publish).toHaveBeenCalledWith(expect.objectContaining({ mode: "invitation_only" }), ["p1"]);
+  });
+
+  it("opens participant preview without publishing", () => {
+    const { publish } = create();
+    fireEvent.click(screen.getByRole("button", { name: "Предпросмотр" }));
+    expect(screen.getByRole("dialog", { name: "Название ещё не задано" })).toBeInTheDocument();
+    expect(screen.getByText(/задача ещё не опубликована/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Закрыть предпросмотр" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(publish).not.toHaveBeenCalled();
+  });
+});
