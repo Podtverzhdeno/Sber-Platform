@@ -43,7 +43,7 @@ for (const viewport of [{width:1440,height:900},{width:390,height:844}]) {
     await expect(panel.getByTestId("passport-evidence-chart")).toBeVisible();
     await expect(panel.getByTestId("passport-skill-radar")).toHaveCount(0);
     await expect(panel.getByText("Python",{exact:true})).toBeVisible();
-    await expect(panel.getByText("recommender-systems",{exact:true})).toBeVisible();
+    await expect(panel.getByText("Рекомендательные системы",{exact:true})).toBeVisible();
     await expect(panel.getByText("Число кейсов не означает уровень компетенции")).toBeVisible();
     await expect(panel.getByText("2",{exact:true}).first()).toBeVisible();
     await expect(panel.locator(".p2-skill-level")).toHaveCount(2);
