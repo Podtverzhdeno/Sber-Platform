@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCircle2, ChevronRight,
   ClipboardCheck, Clock3, Code2, Copy, Download, FileCode2, FileText, GraduationCap,
-  LockKeyhole, Medal, Play, ShieldCheck, Sparkles, Target, Trophy,
+  LockKeyhole, Medal, ShieldCheck, Sparkles, Target, Trophy,
 } from "lucide-react";
 import { apiRequest, type RuntimeApiPath } from "../../../api/client";
 import { learningProgramFor } from "./programs";
@@ -67,6 +67,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const certificateId = progress.data?.certificate_id;
   const unit = program.units[current] ?? program.units[0];
   if (!unit) return null;
+  const currentUnitId = unit.id;
   const question = knowledgeCheckFor(courseKey, unit.id);
   const ready = completed === total;
   const busy = advance.isPending || finish.isPending;
@@ -111,7 +112,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     }
   }
   function toggleCheck(index: number) {
-    const key = unit.id + ":" + String(index);
+    const key = currentUnitId + ":" + String(index);
     setChecks(previous => {
       const next = new Set(previous);
       if (next.has(key)) next.delete(key);
@@ -138,6 +139,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
         <span className="imp-study__chips"><span>Нужно для роли</span><span className="ok"><Check size={13}/> Доступен</span></span>
         <h2>{courseTitle}</h2>
         <p>{program.description}</p>
+        <p className="imp-study__recommendation">{recommendation}</p>
         <div className="imp-study__hero-facts"><span><BookOpen size={15}/>{total} уроков</span><span><Clock3 size={15}/>{program.units.reduce((sum,u) => sum + u.minutes, 0)} мин</span></div>
         <div className="imp-study__hero-actions">
           <button type="button" className="imp-study__primary" onClick={() => { openView("program"); }}>
@@ -182,7 +184,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
             <p>{program.description}</p></div>
           <div className="imp-study__program-intro"><BookOpen/><div><strong>Практикум Impulse · самостоятельное обучение</strong><p>{total} уроков · {program.result}</p></div></div>
           <p className="imp-study__disclaimer">Учебные материалы Impulse не равны подтверждению практических компетенций. Сертификат прохождения и проверка навыков выдаются раздельно.</p>
-          <div className="imp-study__program-list">{program.units.map((lesson,index)=><button type="button" key={lesson.id} disabled={index > completed && !certificateId} onClick={()=>selectLesson(index)}>
+          <div className="imp-study__program-list">{program.units.map((lesson,index)=><button type="button" key={lesson.id} disabled={index > completed && !certificateId} onClick={()=>{ selectLesson(index); }}>
             <span className="imp-study__lesson-number">{index+1}</span><strong>{lesson.title}</strong><small>{lesson.minutes} мин</small><span>{index < completed ? "Пройден" : index === completed ? "Начать" : "Закрыт"}</span><ChevronRight size={17}/></button>)}</div>
         </> : view === "finish" || view === "success" || view === "certificates" ? <>
           <div className="imp-study__final-head">
@@ -204,17 +206,17 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
             </section>
           </div>
           {view === "finish" && <button type="button" className="imp-study__primary imp-study__finish" disabled={busy || !ready} onClick={() => { void completeCourse(); }}><CheckCircle2/> {busy ? "Проверяем и выдаём…" : "Завершить обучение"}</button>}
-          {view === "success" && <button type="button" className="imp-study__secondary imp-study__finish" onClick={() => openView("certificates")}>Посмотреть два сертификата <ArrowRight size={18}/></button>}
+          {view === "success" && <button type="button" className="imp-study__secondary imp-study__finish" onClick={() => { openView("certificates"); }}>Посмотреть два сертификата <ArrowRight size={18}/></button>}
           <div className="imp-study__print-certificate" aria-hidden="true"><h2>IMPULSE · Сертификат прохождения</h2><p>Подтверждается прохождение курса «{courseTitle}»</p><p>Номер {certificateId}</p></div>
         </> : <>
           <div className="imp-study__lesson-heading"><div><span className="imp-study__eyebrow">Урок {current+1} из {total}</span><h2>{unit.title}</h2><p>{unit.purpose}</p></div><div className="imp-study__progress-top"><strong>{percent}% прохождения</strong><div className="imp-study__bar"><span style={{width:String(percent)+"%"}}/></div></div></div>
-          <nav className="imp-study__tabs" aria-label="Разделы урока">{sectionTabs.map(({id,name,Icon})=><button type="button" key={id} aria-current={view===id ? "page" : undefined} className={view===id?"active":""} onClick={() => openView(id)}><Icon size={18}/>{name}</button>)}</nav>
+          <nav className="imp-study__tabs" aria-label="Разделы урока">{sectionTabs.map(({id,name,Icon})=><button type="button" key={id} aria-current={view===id ? "page" : undefined} className={view===id?"active":""} onClick={() => { openView(id); }}><Icon size={18}/>{name}</button>)}</nav>
           {view === "theory" && <section className="imp-study__content" aria-label="Теория"><h3>Теория</h3><h4>{unit.title}</h4>
             {unit.theory.map((text,index)=><p key={index}>{text}</p>)}
             <div className="imp-study__callout"><Sparkles size={21}/><p><strong>Важно</strong>Используйте принципы из урока на реальных задачах и проверяйте результат самостоятельно.</p></div>
           </section>}
           {view === "example" && <section className="imp-study__content" aria-label="Пример"><h3>Пример</h3><p>Практический пример применения материала урока</p>
-            <div className="imp-study__example-head"><Code2 size={17}/> Пример решения <button type="button" onClick={() => { void navigator.clipboard?.writeText(unit.example); }}><Copy size={14}/> Копировать</button></div>
+            <div className="imp-study__example-head"><Code2 size={17}/> Пример решения <button type="button" onClick={() => { if (navigator.clipboard) { void navigator.clipboard.writeText(unit.example); } }}><Copy size={14}/> Копировать</button></div>
             <pre className="imp-study__code"><code>{unit.example}</code></pre>
             <div className="imp-study__callout"><CheckCircle2 size={18}/><p><strong>Разбор</strong>Сравните пример с задачей и объясните каждый ключевой шаг.</p></div>
           </section>}
@@ -231,12 +233,12 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
               <strong>{unit.checklist.length ? Math.round(checkedCount / unit.checklist.length * 100) : 0}%</strong></div>
             <div className="imp-study__check-grid">{unit.checklist.map((item,index) => {
               const active=checks.has(unit.id+":"+String(index));
-              return <button type="button" aria-pressed={active} className={active?"checked":""} key={item} onClick={() => toggleCheck(index)}>
+              return <button type="button" aria-pressed={active} className={active?"checked":""} key={item} onClick={() => { toggleCheck(index); }}>
                 <span className="imp-study__check-square">{active && <Check size={18}/>}</span><strong>{item}</strong><small>{active?"Проверено":"Отметить после проверки"}</small></button>;
             })}</div>
-            {question && <section className="imp-study__quiz"><h4>Проверьте понимание на примере</h4><p>{question.question}</p>{question.options.map((option,index)=><button key={option} type="button" aria-pressed={answer===index} onClick={() => setAnswer(index)}>{index+1}. {option}</button>)}
+            {question && <section className="imp-study__quiz"><h4>Проверьте понимание на примере</h4><p>{question.question}</p>{question.options.map((option,index)=><button key={option} type="button" aria-pressed={answer===index} onClick={() => { setAnswer(index); }}>{index+1}. {option}</button>)}
               {answer!==null && <p role="status"><strong>{answer === question.correctIndex ? "Верно!" : "Попробуйте ещё раз."}</strong> {question.explanation}</p>}</section>}
-            <button type="button" className="imp-study__secondary" onClick={() => setShowExpected(value=>!value)}>{showExpected?"Скрыть ожидаемый результат":"Показать ожидаемый результат"}</button>
+            <button type="button" className="imp-study__secondary" onClick={() => { setShowExpected(value=>!value); }}>{showExpected?"Скрыть ожидаемый результат":"Показать ожидаемый результат"}</button>
             {showExpected && <div role="status" className="imp-study__callout">{unit.expected}</div>}
           </section>}
         </>}
