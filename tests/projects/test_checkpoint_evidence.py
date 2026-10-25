@@ -189,6 +189,15 @@ async def test_checkpoint_files_persist_and_restrict_access() -> None:
             },
         )
         assert invalid.status_code == 422
+        disguised = client.post(
+            route + "/files",
+            json={
+                "filename": "forged.pdf",
+                "content_type": "application/pdf",
+                "base64_data": base64.b64encode(raw).decode(),
+            },
+        )
+        assert disguised.status_code == 422
 
         response = client.post(
             route + "/files",
