@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Award, ArrowRight, BarChart3, BadgeCheck, BriefcaseBusiness,
+  Award, ArrowRight, BarChart3, BadgeCheck, BookOpen, BriefcaseBusiness,
   Check, CheckCircle2, ChevronRight, ClipboardCheck, Copy, ExternalLink,
   Eye, FileBadge2, FileCheck2, FolderKanban, GraduationCap, Link2, MapPin, Medal,
   MoreHorizontal, Pencil, Rocket, Share2, ShieldCheck, Sparkles, Star, Target, Trophy,
@@ -219,7 +219,8 @@ export function ParticipantPortfolioV2() {
         {showCerts && <section className="p2-panel p2-certs-panel" aria-label="Сертификация">
           <PanelHeading icon={FileBadge2} title="СЕРТИФИКАЦИЯ" action={tab==="overview"?"Все сертификаты":"Перейти в аналитику"} onAction={()=>{ if(tab==="overview") openTab("certification"); else navigateTo(9); }}/>
           <div className="p2-cert-list">{certificates.slice(0,tab==="overview"?3:20).map(item=><CredentialCard key={item.verification_id} item={item} onSelect={setOpenCredential}/>)}</div>
-          {certificates.length===0 && <div className="p2-inline-empty">Проверяемые сертификаты курсов пока не выданы. Пройденные курсы доступны в Bootcamp.</div>}
+          {certificates.length===0 && portfolio.courses.length>0 && <><p className="p2-learning-subtitle">Завершённые курсы · сертификат ещё не выдан</p><div className="p2-cert-list">{portfolio.courses.slice(0,tab==="overview"?3:20).map(course=><button className="p2-certificate" key={course.key} type="button" onClick={()=>{ navigateTo(2); }}><span className="p2-certificate-symbol"><BookOpen size={23}/></span><span className="p2-certificate-description"><strong>{course.title}</strong><small>Bootcamp · завершённый курс</small><em>Сертификат отдельно</em></span><span className="p2-verified"><CheckCircle2 size={13}/> Завершён</span></button>)}</div></>}
+          {certificates.length===0 && portfolio.courses.length===0 && <div className="p2-inline-empty">Проверяемые сертификаты курсов пока не выданы. Пройденные курсы доступны в Bootcamp.</div>}
           {tab==="certification" && (documentsQuery.data??[]).length>0 && <div className="p2-document-list"><h3>Документы проектного опыта</h3>{(documentsQuery.data??[]).map(item=><a key={item.verification_id} href={"/verify/projects/"+encodeURIComponent(item.verification_id)}><FileCheck2 size={20}/><span>{item.task_title}<small>{item.customer_name} · {item.grade_label}</small></span><ExternalLink size={15}/></a>)}</div>}
         </section>}
         {showAchievements && <section className="p2-panel p2-achievements-panel" aria-label="Достижения">
