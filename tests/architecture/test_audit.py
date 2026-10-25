@@ -103,7 +103,10 @@ class ArchitectureAuditTests(unittest.TestCase):
         import ast
 
         tree = ast.parse(
-            "from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    from app.a import A\nfrom app.b import B\n"
+            "from typing import TYPE_CHECKING\n"
+            "if TYPE_CHECKING:\n"
+            "    from app.a import A\n"
+            "from app.b import B\n"
         )
         modules = [
             n.module for n in audit_module.runtime_ast_nodes(tree) if isinstance(n, ast.ImportFrom)
