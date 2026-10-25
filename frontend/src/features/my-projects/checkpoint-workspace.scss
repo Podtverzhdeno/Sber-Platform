@@ -1,0 +1,82 @@
+/* Checkpoint submission: focused 1040px modal, independent of dashboard cards. */
+.mpc-backdrop{position:fixed;inset:0;z-index:10900;background:#020b17df;backdrop-filter:blur(10px);display:grid;place-items:center;padding:18px;color:#edfaff}
+.mpc-dialog{width:min(1090px,100%);max-height:min(92vh,1050px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #1687a4;border-radius:20px;background:linear-gradient(147deg,#081f35,#06162b 74%);box-shadow:0 18px 80px #000c,0 0 35px #0ae3c515;font-size:13px}
+.mpc-header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:22px 26px 20px;border-bottom:1px solid #1c4964;background:radial-gradient(ellipse at 70% -30%,#11607477,transparent 65%)}
+.mpc-heading{min-width:0}
+.mpc-kicker{display:flex;align-items:center;gap:10px;margin-bottom:11px;color:#26e6c6;font-weight:800;font-size:10px;letter-spacing:.08em}
+.mpc-indicator{letter-spacing:normal;color:#a5e7da;background:#0c554c;border:1px solid #1f8c7d;border-radius:30px;padding:5px 10px}
+.mpc-heading h2{margin:0;font-size:clamp(22px,2.6vw,31px);line-height:1.2;color:#f6ffff;font-weight:850;letter-spacing:-.5px}
+.mpc-heading p{margin:9px 0 0;line-height:1.45;font-size:12px;color:#a5c5d8}
+.mpc-close{flex:none;display:grid;place-items:center;width:36px;height:36px;min-height:36px;border:1px solid #285b73;border-radius:10px;background:#102d44;color:#b7d6e8;cursor:pointer}
+.mpc-close:hover,.mpc-close:focus-visible{color:white;border-color:#27efd1;background:#134559}
+.mpc-scroll{overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#2e708c #071c30;display:grid;grid-template-columns:minmax(0,1.13fr) minmax(340px,1fr);gap:13px;padding:17px 20px;align-items:start;overscroll-behavior:contain}
+.mpc-left,.mpc-right{min-width:0;display:grid;gap:12px;align-content:start}
+.mpc-card{min-width:0;padding:17px 18px;border:1px solid #204c67;border-radius:14px;background:linear-gradient(144deg,#09253e,#0a1b30)}
+.mpc-card-heading{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.mpc-card-heading h3{margin:0;font-size:15px;font-weight:800;color:#f7ffff}
+.mpc-icon{flex:none;width:32px;height:32px;display:grid;place-items:center;background:#084b55;border-radius:9px;color:#28efd3}
+.mpc-action-lead{color:#e7f8ff;font-size:17px;line-height:1.35;font-weight:800;margin:0 0 12px}
+.mpc-description{margin:0 0 15px;color:#accde0;line-height:1.6;font-size:12px}
+.mpc-outcome{display:grid;gap:7px;padding:12px 14px;border:1px solid #20718b;background:#07344b;border-radius:11px}
+.mpc-outcome strong{font-size:10px;letter-spacing:.03em;color:#40eed5}
+.mpc-outcome span{color:#e2f4fc;font-weight:680;font-size:12px;line-height:1.5}
+.mpc-muted{color:#9ebed2;font-size:11px;line-height:1.55;display:block;margin:0 0 10px}
+.mpc-criteria{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px}
+.mpc-criteria li{display:flex;align-items:flex-start;gap:9px;min-height:39px;padding:11px;border:1px solid #1c4965;border-radius:9px;background:#0a2a44;color:#c7dfed;font-size:11.5px;line-height:1.5}
+.mpc-criteria li span{display:grid;place-items:center;flex:none;width:23px;height:23px;border-radius:7px;background:#095769;color:#50f8df;font-weight:850}
+.mpc-guide-list{display:grid;gap:11px}
+.mpc-guide-list>div{display:flex;gap:11px;align-items:flex-start}
+.mpc-guide-list b{display:grid;place-items:center;flex:none;width:32px;height:32px;border:1px solid #196078;border-radius:9px;background:#08445a;color:#42e4df;font-size:11px}
+.mpc-guide-list span{display:grid;gap:4px;padding-top:1px}
+.mpc-guide-list strong{color:#e8f9ff;font-size:12px}
+.mpc-guide-list small{font-size:11px;line-height:1.5;color:#97b7cb}
+.mpc-submission{border-color:#1f9a9a;box-shadow:0 0 20px #00b6a70b}
+.mpc-form{display:grid;gap:9px}
+.mpc-form label,.mpc-field-title{display:grid;gap:5px;color:#edfaff;font-size:12px}
+.mpc-form label small,.mpc-field-title small{font-size:10.5px;color:#95b5ca;font-weight:400}
+.mpc-form em{color:#24efd0;font-style:normal}
+.mpc-form textarea,.mpc-form input,.mpc-form select{width:100%;max-width:100%;box-sizing:border-box;min-height:40px;border:1px solid #285774;border-radius:9px;background:#071c31;color:#f1faff;padding:10px 12px;font:inherit;outline:none}
+.mpc-form textarea{resize:vertical;min-height:103px;line-height:1.5}
+.mpc-form :is(textarea,input,select):focus{border-color:#23e5cb;box-shadow:0 0 0 3px #17c8b41c}
+.mpc-field-title{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;margin-top:7px}
+.mpc-dropzone{display:grid;place-items:center;gap:7px;padding:18px 12px;text-align:center;min-height:130px;border:1px dashed #3889a5;border-radius:11px;background:#092e44;cursor:pointer;transition:background .15s,border-color .15s;outline-offset:3px}
+.mpc-dropzone svg{color:#45f3d7}
+.mpc-dropzone strong{font-size:12px;color:#e8faff}
+.mpc-dropzone span{font-size:11px;color:#a5c5db}
+.mpc-dropzone u{color:#3df6d9;text-underline-offset:3px}
+.mpc-dropzone small{font-size:10px;color:#8facbf}
+.mpc-dropzone:is(:hover,.is-dragging,:focus-visible){background:#075064;border-color:#2cf9d6}
+.mpc-files{display:grid;gap:5px}
+.mpc-files>div{display:flex;align-items:center;gap:7px;min-width:0;border:1px solid #275770;border-radius:8px;padding:8px 10px;background:#0a2c41}
+.mpc-files>div svg{flex:none;color:#54ccfa}
+.mpc-files strong{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:700}
+.mpc-files small{flex:none;color:#9fbed1;font-size:10px}
+.mpc-files button{display:grid;place-items:center;flex:none;width:27px;height:27px;min-height:27px;padding:0;border:1px solid #28536e;border-radius:7px;background:#0a1d32;color:#a3bed0}
+.mpc-files button:hover{border-color:#ed7c85;color:#ffc3bd}
+.mpc-link{display:flex!important;align-items:center;gap:7px;margin-top:4px}
+.mpc-link svg{color:#30d6da}
+.mpc-artifact-type{margin:3px 0}
+.mpc-submit{display:flex;justify-content:center;align-items:center;gap:9px;width:100%;min-height:45px;border:none;border-radius:10px;background:linear-gradient(100deg,#38f5b7,#0bc2dc);color:#04323d;font-size:12px;font-weight:850;cursor:pointer;margin-top:5px}
+.mpc-submit:disabled{cursor:not-allowed;opacity:.43;filter:grayscale(.5)}
+.mpc-submit:not(:disabled):hover{filter:brightness(1.08)}
+.mpc-security{display:flex;gap:6px;align-items:center;justify-content:center;font-size:10px;color:#90b7c7;margin:3px 0 0}
+.mpc-error{padding:11px;background:#4a182c;border:1px solid #a94e63;border-radius:8px;color:#ffc9d2;font-size:11px;line-height:1.45;margin:3px 0}
+.mpc-restricted,.mpc-submitted{display:grid;justify-items:start;gap:10px;padding:16px;border:1px solid #205979;background:#0a3048;border-radius:10px}
+.mpc-restricted>strong,.mpc-submitted>strong{font-size:14px;color:#f1ffff}
+.mpc-restricted>p,.mpc-submitted>p{color:#a1c4d5;font-size:12px;line-height:1.5;margin:0}
+.mpc-restricted>small{color:#52e9d5}
+.mpc-submitted{justify-items:center;text-align:center}
+.mpc-submitted svg{color:#37f1be}
+.mpc-submitted button{display:flex;align-items:center;gap:7px;border:1px solid #12bba7;border-radius:8px;background:#07463f;color:#8effdb;padding:10px 13px}
+.mpc-facts>div:not(.mpc-card-heading){display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid #24475c;font-size:11px}
+.mpc-facts>div:not(.mpc-card-heading)>svg{color:#27efd0;flex:none}
+.mpc-facts>div:not(.mpc-card-heading)>span{color:#96b9cb;flex:1}
+.mpc-facts strong{color:#efffff;font-size:11px}
+.mpc-facts p{display:flex;align-items:center;gap:7px;color:#8fb6c5;font-size:10.5px;line-height:1.5;margin:12px 0 0}
+.mpc-footer{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:13px 23px;border-top:1px solid #20445c}
+.mpc-footer>span{display:flex;align-items:center;gap:7px;color:#92bbca;font-size:10.5px}
+.mpc-footer>span svg{color:#4ee7ce}
+.mpc-footer button{min-height:37px;padding:9px 14px;background:#0a314b;color:#b2d7e8;border:1px solid #255c78;border-radius:9px;font-weight:700;font-size:11px}
+@media(max-width:880px){.mpc-scroll{grid-template-columns:1fr}.mpc-dialog{max-width:650px}.mpc-header{padding:16px 20px}.mpc-scroll{padding:14px}.mpc-footer{padding:12px 17px}}
+@media(max-width:530px){.mpc-backdrop{padding:0}.mpc-dialog{width:100%;height:100%;max-height:100dvh;border-radius:0}.mpc-heading h2{font-size:21px}.mpc-header{padding:14px}.mpc-scroll{padding:10px;gap:9px}.mpc-card{padding:13px}.mpc-footer>span{display:none}.mpc-footer{justify-content:stretch}.mpc-footer button{width:100%}}
+@media(prefers-reduced-motion:reduce){.mpc-dropzone{transition:none}}
