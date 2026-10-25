@@ -7,9 +7,23 @@ business execution rights are created by reading these examples.
 from __future__ import annotations
 
 import json
+from typing import TypedDict, cast
+
+
+class StageGuide(TypedDict):
+    case_study: str
+    worked_example: str
+    common_mistake: str
+    stretch_task: str
+
+
+class RoleGuides(TypedDict):
+    context: str
+    lessons: list[list[str]]
+
 
 # ruff: noqa: E501 -- explicit teaching examples are intentionally descriptive.
-_GUIDES: dict[str, dict] = json.loads(r"""{
+_GUIDES: dict[str, RoleGuides] = cast(dict[str, RoleGuides], json.loads(r"""{
   "product": {
     "context": "Корпоративный AI-помощник обрабатывает заявки нескольких организаций: ищет договоры, предлагает ответ и передаёт действия специалисту на подтверждение. Во всех упражнениях используются синтетические данные.",
     "lessons": [
@@ -290,10 +304,10 @@ _GUIDES: dict[str, dict] = json.loads(r"""{
       ]
     ]
   }
-}""")
+}"""))
 
 
-def stage_guide(track_key: str, stage_position: int) -> dict[str, object]:
+def stage_guide(track_key: str, stage_position: int) -> StageGuide:
     """Return a distinct learning aid for one stable roadmap position."""
     role = _GUIDES[track_key]
     worked_example, pitfall, stretch_task = role["lessons"][stage_position - 1]
