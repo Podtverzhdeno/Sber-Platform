@@ -21,6 +21,11 @@ test("saved Bootcamp certificate appears in selected trajectory without inventin
  await page.route("**/api/v1/me/roadmap-catalog",route=>route.fulfill({json:[
   {track_key:"product",policy_version:1,replacement_reason:null,milestones:stages,next_step:stages[0]}
  ]}));
+ await page.route("**/api/v1/me/bootcamp/overview?track=product",route=>route.fulfill({json:{
+  selected_track_key:"product",role_summary:{track_key:"product",grade_state:"not_evaluable",
+   current_grade_key:null,current_grade_title:null,readiness:null},
+  curriculum:{state:"not_evaluable",requirements:[]}
+ }}));
  await page.goto("/");
  await page.locator('[data-persona="participant-alex"]').click();
  await page.getByRole("link",{name:"Bootcamp"}).click();
