@@ -32,7 +32,7 @@ function installRoutes(page: Page): void {
     target_days: 5, done_days: 5, hint: null, scheduled_from: null, scheduled_preset: null,
   } }));
 }
-test("approved streak composition: desktop 1122px", async ({ page }) => {
+test("compact streak composition: desktop 1122px", async ({ page }) => {
   test.setTimeout(75_000);
   await page.setViewportSize({ width: 1122, height: 1402 });
   installRoutes(page);
@@ -48,25 +48,20 @@ test("approved streak composition: desktop 1122px", async ({ page }) => {
   const modal = await dialog.boundingBox();
   const week = await dialog.locator(".streak-week-card").boundingBox();
   if (!modal || !week) throw new Error("Reference geometry not rendered");
-  expect(modal.width).toBeGreaterThanOrEqual(1010);
-  expect(modal.width).toBeLessThanOrEqual(1022);
-  expect(modal.x).toBeGreaterThanOrEqual(46);
-  expect(modal.x).toBeLessThanOrEqual(62);
-  expect(modal.y).toBeGreaterThanOrEqual(90);
-  expect(modal.y).toBeLessThanOrEqual(126);
-  expect(week.width).toBeGreaterThan(535);
-  expect(week.width).toBeLessThan(570);
-  expect(week.y).toBeGreaterThanOrEqual(325);
-  expect(week.y).toBeLessThanOrEqual(356);
+  expect(modal.width).toBeGreaterThanOrEqual(606);
+  expect(modal.width).toBeLessThanOrEqual(625);
+  expect(modal.x).toBeGreaterThan(240);
+  expect(modal.x).toBeLessThan(260);
+  expect(modal.height).toBeLessThanOrEqual(860);
+  expect(week.width).toBeGreaterThan(545);
+  expect(week.width).toBeLessThan(580);
   expect(week.x).toBeGreaterThanOrEqual(modal.x);
   const cards = await dialog.locator(".streak-facts").boundingBox();
   const rhythm = await dialog.locator(".engagement-rhythm-block").boundingBox();
   const save = await dialog.locator(".streak-save-button").boundingBox();
   if (!cards || !rhythm || !save) throw new Error("Streak landmarks not rendered");
-  expect(cards.y).toBeGreaterThan(535);
-  expect(cards.y).toBeLessThan(585);
-  expect(rhythm.y).toBeGreaterThan(835);
-  expect(rhythm.y).toBeLessThan(900);
+  expect(cards.y).toBeGreaterThanOrEqual(week.y + week.height);
+  expect(rhythm.y).toBeGreaterThanOrEqual(cards.y + cards.height);
   expect(save.y).toBeGreaterThanOrEqual(rhythm.y + rhythm.height);
   const help = dialog.getByRole("button", { name: "Что такое недельный ритм?" });
   await help.hover();
@@ -76,6 +71,28 @@ test("approved streak composition: desktop 1122px", async ({ page }) => {
   await expect(dialog.getByText("2026-10-15")).toBeVisible();
   await dialog.getByRole("button", { name: /Вернуться к серии/ }).click();
   await expect(dialog.locator(".streak-week-card")).toBeVisible();
+});
+
+test("compact modal never exceeds 85vh on a laptop and retains a scrollable save action", async ({ page }) => {
+  test.setTimeout(75_000);
+  await page.setViewportSize({ width: 1440, height: 800 });
+  installRoutes(page);
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("button", { name: /Учебный стрик: 11 дней/ }).click();
+  const dialog = page.getByRole("dialog", { name: "Учебный стрик" });
+  await expect(dialog).toBeVisible();
+  const geometry = await dialog.evaluate(el => {
+    const rect = el.getBoundingClientRect();
+    return { width: rect.width, height: rect.height, scrollHeight: el.scrollHeight, clientHeight: el.clientHeight };
+  });
+  expect(geometry.width).toBeLessThanOrEqual(625);
+  expect(geometry.height).toBeLessThanOrEqual(800 * 0.85 + 1);
+  expect(geometry.scrollHeight).toBeGreaterThanOrEqual(geometry.clientHeight);
+  const save = dialog.getByRole("button", { name: "Сохранить ритм" });
+  await save.scrollIntoViewIfNeeded();
+  await expect(save).toBeVisible();
+  await page.screenshot({ path: "test-results/streak-reference-laptop.png" });
 });
 
 test("streak mobile 390px: no clipping and all actions reachable", async ({ page }) => {
@@ -94,11 +111,11 @@ test("streak mobile 390px: no clipping and all actions reachable", async ({ page
   expect(geometry.x).toBeGreaterThanOrEqual(0);
   expect(geometry.right).toBeLessThanOrEqual(391);
   expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 2);
+  await page.screenshot({ path: "test-results/streak-reference-mobile.png" });
   await dialog.getByRole("button", { name: "Что такое недельный ритм?" }).click();
   await expect(dialog.getByRole("tooltip")).toBeVisible();
   await dialog.getByRole("button", { name: "Открыть полный календарь серии" }).click();
   await expect(dialog.getByText("2026-10-24")).toBeVisible();
-  await page.screenshot({ path: "test-results/streak-reference-mobile.png" });
   await dialog.getByRole("button", { name: /Вернуться к серии/ }).click();
   await dialog.getByRole("button", { name: "Закрыть" }).click();
   await expect(dialog).toHaveCount(0);
