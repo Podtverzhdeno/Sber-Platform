@@ -100,6 +100,15 @@ describe("contextual participant guide", () => {
     expect(screen.getByRole("heading", { name: "Выбирай задачи под свой интерес" })).toBeInTheDocument();
   });
 
+  it("lets participants jump from the welcome screen to full instructions", () => {
+    renderGuide("Главная");
+    fireEvent.click(screen.getByRole("button", { name: "Как здесь всё устроено?" }));
+    expect(screen.getByRole("dialog", { name: /Добро пожаловать/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Все инструкции" }));
+    expect(screen.getByRole("dialog", { name: "Центр помощи" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Помощь: Главная" })).toBeInTheDocument();
+  });
+
   it("opens exactly the requested just-in-time topic and returns to the page", () => {
     renderGuide("Мои проекты");
     fireEvent(window, new CustomEvent("impulse:guide:topic", { detail: { topicId: "task-submit" } }));
