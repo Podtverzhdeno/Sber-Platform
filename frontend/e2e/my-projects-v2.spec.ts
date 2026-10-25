@@ -50,7 +50,7 @@ async function fixture(page: Page) {
 }
 
 test("My Projects: cards, selection, filtering, bookmarks and rewards",async({page})=>{
-  await page.setViewportSize({width:1648,height:941});
+  await page.setViewportSize({width:1672,height:941});
   await fixture(page);
   const root=page.locator(".mpv2");
   await expect(root).toHaveAttribute("data-project-screen","cards");
@@ -58,9 +58,9 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
   await expect(root.locator(".mp-benefit-step")).toHaveCount(7);
   await expect(root.locator(".mp-project-grid .mp-project-tile")).toHaveCount(3);
   await expect(root.locator(".mp-preview")).toHaveCount(0);
+  await page.screenshot({path:"test-results/my-projects-v2/01_cards_1672.png",fullPage:true,animations:"disabled"});
   await root.getByRole("button",{name:"Быстрый просмотр"}).first().click();
   await expect(root.locator(".mp-preview")).toBeVisible();
-  await page.screenshot({path:"test-results/my-projects-v2/01_cards_1648.png",fullPage:true,animations:"disabled"});
   await root.locator(".mp-project-tile").first().hover();
   await expect(root.locator(".mp-project-tile").first()).toBeVisible();
   await root.getByRole("button",{name:/В избранное/}).first().click();
@@ -77,16 +77,16 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
   await expect(root.locator(".mp-project-tile")).toHaveCount(3);
 });
 test("My Projects: list has genuine rows and opens full project page",async({page})=>{
-  await page.setViewportSize({width:1648,height:941});
+  await page.setViewportSize({width:1672,height:941});
   await fixture(page);
   const root=page.locator(".mpv2");
   await root.getByRole("group",{name:"Режим проектов"}).getByRole("button",{name:"Список"}).click();
   await expect(root).toHaveAttribute("data-project-screen","list");
   await expect(root.locator(".mp-table tbody tr")).toHaveCount(3);
-  await page.screenshot({path:"test-results/my-projects-v2/02_list_1648.png",fullPage:true,animations:"disabled"});
+  await page.screenshot({path:"test-results/my-projects-v2/02_list_1672.png",fullPage:true,animations:"disabled"});
   await root.locator(".mp-table-open").first().click();
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
-  await page.screenshot({path:"test-results/my-projects-v2/03_detail_1648.png",fullPage:true,animations:"disabled"});
+  await page.screenshot({path:"test-results/my-projects-v2/03_detail_1672.png",fullPage:true,animations:"disabled"});
   await expect(page.getByRole("tab",{name:"Бонусы и выгоды"})).toBeVisible();
   await page.getByRole("tab",{name:"Команда"}).click();
   await expect(page.getByRole("heading",{name:"Команда проекта"})).toBeVisible();
@@ -115,7 +115,7 @@ test("My Projects: mobile three views do not horizontally overflow the viewport"
 });
 
 test("My Projects: hover animations and workspace transition are real",async({page})=>{
-  await page.setViewportSize({width:1648,height:941});
+  await page.setViewportSize({width:1672,height:941});
   await fixture(page);
   const tile=page.locator(".mp-project-tile").nth(1);
   await expect(tile).toBeVisible();
