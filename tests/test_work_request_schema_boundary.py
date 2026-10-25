@@ -7,7 +7,6 @@ from pydantic import ValidationError
 
 from impulse.api.v1 import work, work_requests
 
-
 EXPORTED_REQUESTS = (
     "AcceptApplicationRequest",
     "AcceptTermsRequest",
