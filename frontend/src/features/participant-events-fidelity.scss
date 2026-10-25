@@ -197,6 +197,13 @@
   .ev-program-timeline li b {font-size:14px}
   .ev-program-timeline li small {display:block;margin-top:4px;color:#92adc0;font-size:12px}
   .ev-benefit-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .ev-detail--about .ev-benefit-grid {grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:1px solid #14354b;padding-top:10px}
+  .ev-detail--about .ev-benefit-grid>div {grid-template-columns:38px 1fr;align-items:center;border:0;border-right:1px solid #173b4d;border-radius:0;padding:9px 8px;background:none;min-height:82px}
+  .ev-detail--about .ev-benefit-grid>div:last-child {border-right:0}
+  .ev-detail--about .ev-benefit-grid svg {background:#063d40;border-radius:50%;padding:9px;width:40px;height:40px}
+  .ev-detail--about .ev-benefit-grid b {font-size:11px}
+  .ev-detail--about .ev-benefit-grid small {font-size:10px}
+  .ev-detail--about .ev-detail-side .ev-panel:first-child {border-color:#1a4a57}
   .ev-benefit-grid>div {min-height:60px;display:grid;grid-template-columns:40px 1fr;padding:11px;border-color:#17445b;border-radius:9px}
   .ev-benefit-grid svg {grid-row:span 2;width:25px;height:25px;margin:0;color:#16e4cf}
   .ev-benefit-grid b {font-size:13px}
@@ -257,7 +264,7 @@
     .ev-detail-columns{grid-template-columns:1fr;gap:10px;padding:10px;overflow:auto}
     .ev-prize-grid,.ev-requirements-grid{grid-template-columns:1fr}
     .ev-prize-grid>div{height:auto;min-height:120px}
-    .ev-benefit-grid{grid-template-columns:1fr}
+    .ev-benefit-grid,.ev-detail--about .ev-benefit-grid{grid-template-columns:1fr}
     .ev-registration-card{padding:20px 16px}
   }
 }
