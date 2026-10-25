@@ -786,7 +786,7 @@
 .mpv2 .mp-ref-timeline{display:grid;gap:0}
 .mpv2 .mp-ref-stage{display:grid;grid-template-columns:29px minmax(0,1fr) auto;gap:10px;align-items:start;padding:9px 0;border-bottom:1px solid #1c415c}
 .mpv2 .mp-ref-stage:last-child{border:0}
-.mpv2 .mp-ref-stage>span{display:grid;place-items:center;height:27px;width:27px;border:1px solid #2a627e;background:#0b3650;color:#b2d8ed;border-radius:50%;font-size:12px;font-weight:800}
+.mpv2 .mp-ref-stage>span{display:grid;place-items:center;box-sizing:border-box;flex:none;justify-self:start;align-self:start;width:27px;min-width:27px;height:27px;min-height:27px;aspect-ratio:1 / 1;padding:0;line-height:1;border:1px solid #2a627e;background:#0b3650;color:#b2d8ed;border-radius:50%;font-size:12px;font-weight:800}
 .mpv2 .mp-ref-stage>span.is-done{border-color:#0ec0a4;background:#086656;color:#a6ffe2}
 .mpv2 .mp-ref-stage>div{display:grid;gap:5px}
 .mpv2 .mp-ref-stage strong{font-size:11.5px;color:#f1faff}
