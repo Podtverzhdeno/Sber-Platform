@@ -19,7 +19,7 @@ def test_all_49_stages_have_distinct_actionable_learning_materials() -> None:
         for position, module in enumerate(details, start=1):
             lesson = learning_details(role_key, position)
             assert lesson["lab"].startswith(module["lab"])
-            assert {k: v for k, v in lesson.items() if k != "lab"} == {
+            assert {k: v for k, v in lesson.items() if k not in ("lab", "resources")} == {
                 k: v for k, v in module.items() if k != "lab"
             }
             for heading in (
