@@ -1024,3 +1024,38 @@
     min-width:74px;padding:8px;
   }
 }
+
+/* Context closed: the conversation must own all remaining space in every
+   data-message-state (direct, community, task_team). Keep empty-state unchanged. */
+@media (min-width: 960px) {
+  .messenger-page.sberchat-reference[data-message-state="direct"] > .messenger-shell.messenger-shell--no-context,
+  .messenger-page.sberchat-reference[data-message-state="community"] > .messenger-shell.messenger-shell--no-context,
+  .messenger-page.sberchat-reference[data-message-state="task_team"] > .messenger-shell.messenger-shell--no-context {
+    grid-template-columns: clamp(295px, calc(26.3vw - 47px), 393px) minmax(0, 1fr);
+  }
+  .messenger-page.sberchat-reference .messenger-shell--no-context > .chat-thread {
+    grid-column: 2 / -1;
+    min-width: 0;
+  }
+}
+@media (min-width: 1400px) and (max-width: 1599px) {
+  .messenger-page.sberchat-reference[data-message-state="community"] > .messenger-shell.messenger-shell--no-context {
+    grid-template-columns: 334px minmax(0, 1fr);
+  }
+}
+@media (min-width: 1600px) {
+  .messenger-page.sberchat-reference[data-message-state="direct"] > .messenger-shell.messenger-shell--no-context {
+    grid-template-columns: 391px minmax(0, 1fr);
+  }
+  .messenger-page.sberchat-reference[data-message-state="community"] > .messenger-shell.messenger-shell--no-context {
+    grid-template-columns: 334px minmax(0, 1fr);
+  }
+}
+.sberchat-reference .msg-chat__header-title-button {
+  display: grid; justify-items: start; gap: 3px; text-align: left;
+  min-width: 0; width: 100%; border: 0; padding: 4px 0;
+  background: transparent; color: inherit; cursor: pointer;
+}
+.sberchat-reference .msg-chat__header-title-button:hover strong { color: #47eee0; }
+.sberchat-reference .msg-chat__header-title-button:focus-visible { outline: 2px solid #1ce5e7; border-radius: 5px; }
+.sberchat-reference .msg-chat__header-action--mute svg { width: 17px; height: 17px; }
