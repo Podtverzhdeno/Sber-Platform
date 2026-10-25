@@ -309,9 +309,17 @@ function CourseDetails({
     { key: "reviews", label: "Отзывы" },
   ] as const;
   return <div className="bc-panel-content" data-reference="BC-R03">
-    <div className="bc-panel-kicker">BOOTCAMP · КУРС</div>
-    <h2 className="bc-detail-title">{detail?.title ?? card.title}</h2>
-    <CardStates card={card} />
+    <div className="bc-ref-detail-hero">
+      <CourseFlags card={card}/>
+      <h2 className="bc-detail-title">{detail?.title ?? card.title}</h2>
+      <p>{detail?.objective || card.recommendation_reason || "Описание курса пока не опубликовано."}</p>
+      <div className="bc-ref-detail-facts"><span><Clock3 />{detail?.workload_hours ? String(detail.workload_hours) + " часов" : "Длительность уточняется"}</span>
+        <span><GraduationCap />{detail?.program_competencies.length ? String(detail.program_competencies.length) + " групп навыков" : "Навыки уточняются"}</span></div>
+      <div className="bc-ref-detail-actions">
+        {card.access_state === "available" ? <SafeExternalLink href={card.source_url}>Открыть курс <ArrowRight /></SafeExternalLink> : <p>{card.access_note || "Требуется выполнение условий доступа"}</p>}
+        <button type="button" onClick={onReason}>Почему рекомендован</button>
+      </div>
+    </div>
     <div className="bc-detail-tabs" role="tablist" aria-label="Информация о курсе">
       {tabs.map((item) => <button key={item.key} type="button" role="tab" aria-selected={tab === item.key}
         onClick={() => { setTab(item.key); }}>{item.label}</button>)}
