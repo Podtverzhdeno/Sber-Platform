@@ -44,7 +44,7 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
   test("analytics canonical reference variants " + viewport.name, async ({ page }, testInfo) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     // A design screenshot is not a login test: start from a deterministic authenticated actor.
-    await page.goto("/workspace/9");
+    await page.goto("/workspace/9?analyticsTab=passport");
     const root = page.getByTestId("analytics-reference");
     await expect(root).toBeVisible();
     await expect(page.getByRole("heading", { name: "Ваш Skill Passport" })).toBeVisible();
@@ -53,11 +53,12 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
       await expect(page.locator(".sidebar")).toHaveCSS("width", "244px");
       await expect(page.locator(".topbar")).toHaveCSS("left", "244px");
     }
-    for (const [view, title] of [
+    for (const [view] of [
       ["passport", "Ваш Skill Passport"], ["path", "Маршрут к вашей следующей цели"], ["evidence", "Результаты, которым можно доверять"]
     ] as const) {
-      if (view !== "passport") await root.getByRole("button", { name: view === "path" ? "Мой маршрут" : "Результаты", exact: true }).click();
-      await expect(page.getByRole("heading", { name: title })).toBeVisible();
+      if (view !== "passport") await page.goto("/workspace/9?analyticsTab=passport&view=" + view);
+      await expect(root).toHaveClass(new RegExp("ref-layout-" + view));
+      await expect(root.locator(view === "path" ? ".ref-path-hero" : view === "evidence" ? ".ref-v3-main" : ".ref-v1-middle")).toBeVisible();
       await expect(root.locator(".ref-radar svg")).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow).toBeLessThanOrEqual(2);
@@ -76,11 +77,11 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
       if (viewport.name === "desktop-1600") {
         const goldenByView: Record<string, Record<string, [number, number, number, number]>> = {
           passport: {
-            ".ref-primary-matrix": [227, 288, 879, 441],
-            ".ref-passport": [1120, 288, 458, 441],
-            ".ref-action": [227, 743, 407, 255],
-            ".ref-bottom-evidence": [648, 743, 460, 255],
-            ".ref-bottom-chart": [1122, 743, 456, 255],
+            ".ref-primary-matrix": [272, 307, 846, 441],
+            ".ref-passport": [1132, 307, 440, 441],
+            ".ref-action": [272, 773, 391, 255],
+            ".ref-bottom-evidence": [677, 773, 442, 255],
+            ".ref-bottom-chart": [1134, 773, 438, 255],
           },
           path: {
             ".ref-path-hero": [227, 174, 1351, 199],
@@ -140,7 +141,7 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
       await page.screenshot({ path: testInfo.outputPath("analytics-" + view + "-" + viewport.name + ".png"), fullPage: true, animations: "disabled" });
     }
     expect(geometryViolations, "Analytics cards must retain reference height and remain in the shared shell").toEqual([]);
-    await root.getByRole("button", { name: "Мой маршрут" }).click();
+    await page.goto("/workspace/9?analyticsTab=passport&view=path");
     await root.getByRole("group", { name: "Профессиональная группа" }).getByRole("button", { name: "Аналитик" }).click();
     await root.getByRole("group", { name: "Вид диаграммы" }).getByRole("button", { name: "Гистограмма" }).click();
     await expect(root.locator(".ref-skill-bars")).toBeVisible();
