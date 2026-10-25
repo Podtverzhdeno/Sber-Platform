@@ -606,3 +606,30 @@
     line-height: 1.32;
   }
 }
+
+/* reference-benefit-accent-v3: four distinct source-like benefit tiles.
+   This styling never alters server-provided eligibility or legal conditions. */
+.catalog-v2 .catalog-v2-benefits-section > ul > li {
+  transition: border-color 170ms ease, box-shadow 170ms ease;
+}
+.catalog-v2 .catalog-v2-benefits-section > ul > li:has(.catalog-v2-benefit-icon[data-tone="violet"]) {
+  background: linear-gradient(90deg, rgb(128 104 255 / 9%), transparent 64%), var(--catalog-soft);
+}
+.catalog-v2 .catalog-v2-benefits-section > ul > li:has(.catalog-v2-benefit-icon[data-tone="blue"]) {
+  background: linear-gradient(90deg, rgb(47 149 255 / 9%), transparent 64%), var(--catalog-soft);
+}
+.catalog-v2 .catalog-v2-benefits-section > ul > li:has(.catalog-v2-benefit-icon[data-tone="teal"]) {
+  background: linear-gradient(90deg, rgb(34 230 208 / 8%), transparent 64%), var(--catalog-soft);
+}
+.catalog-v2 .catalog-v2-benefits-section > ul > li:has(.catalog-v2-benefit-icon[data-tone="amber"]) {
+  background: linear-gradient(90deg, rgb(245 179 1 / 9%), transparent 64%), var(--catalog-soft);
+}
+@media (hover: hover) and (pointer: fine) {
+  .catalog-v2 .catalog-v2-benefits-section > ul > li:hover {
+    border-color: var(--catalog-highlight);
+    box-shadow: inset 2px 0 0 var(--catalog-highlight);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .catalog-v2 .catalog-v2-benefits-section > ul > li { transition: none; }
+}
