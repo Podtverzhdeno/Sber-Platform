@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+from typing import cast
 from uuid import uuid4
 
 import pytest
+from fastapi import Request
 
 from impulse.api.errors import ApiError
+from impulse.application.identity import AuthenticatedSession
 from impulse.bootcamp import impulse_levels
 from impulse.domain.development import TrackAttempt, TrackStatus
 from impulse.domain.identity import ActorContext, Role
@@ -51,7 +54,7 @@ async def test_l0_starts_without_fabricated_grade_and_needs_practical_review(
         )
     )
     auth = SimpleNamespace(actor=actor)
-    level = await impulse_levels._project(request, auth, "ai-security")
+    level = await impulse_levels.impulse_level("ai-security", cast(AuthenticatedSession, auth), cast(Request, request))
     assert level.level == 0
     assert level.cycle_number == 1
     assert level.completed_courses == 4
@@ -64,7 +67,7 @@ async def test_l0_starts_without_fabricated_grade_and_needs_practical_review(
         return 4, 4, 1, ("demo-course-1", "demo-course-2", "demo-course-3", "demo-course-4")
 
     monkeypatch.setattr(impulse_levels, "_evidence", approved)
-    ready = await impulse_levels._project(request, auth, "ai-security")
+    ready = await impulse_levels.impulse_level("ai-security", cast(AuthenticatedSession, auth), cast(Request, request))
     assert ready.advance_ready
     assert ready.level == 0  # reading readiness never grants an award
 
@@ -101,10 +104,10 @@ async def test_l1_requires_new_curriculum_and_never_replays_older_courses(
         )
     )
     auth = SimpleNamespace(actor=actor)
-    state = await impulse_levels._project(request, auth, "ai-security")
+    state = await impulse_levels.impulse_level("ai-security", cast(AuthenticatedSession, auth), cast(Request, request))
     assert state.level == 1 and state.cycle_number == 2
     assert state.curriculum_state == "unpublished"
     assert not state.advance_ready
     assert state.completed_courses == 0
     with pytest.raises(ApiError):
-        await impulse_levels._project(request, auth, "ai-data")
+        await impulse_levels.impulse_level("ai-data", cast(AuthenticatedSession, auth), cast(Request, request))
