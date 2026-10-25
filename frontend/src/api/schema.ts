@@ -338,23 +338,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/customer/applications/{application_id}/accept": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Accept Candidate */
-        post: operations["accept_candidate_api_v1_customer_applications__application_id__accept_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/customer/analytics/activity": {
         parameters: {
             query?: never;
@@ -369,6 +352,23 @@ export interface paths {
         get: operations["customer_analytics_activity_api_v1_customer_analytics_activity_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customer/applications/{application_id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Candidate */
+        post: operations["accept_candidate_api_v1_customer_applications__application_id__accept_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1756,6 +1756,23 @@ export interface paths {
         get: operations["channel_context_api_v1_me_messaging_channels__channel_id__context_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/messaging/channels/{channel_id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Community Members */
+        post: operations["add_community_members_api_v1_me_messaging_channels__channel_id__members_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3308,6 +3325,11 @@ export interface components {
             scopes: string[];
             /** Timezone */
             timezone: string;
+        };
+        /** AddCommunityMembersRequest */
+        AddCommunityMembersRequest: {
+            /** Person Ids */
+            person_ids: string[];
         };
         /**
          * AppealStatus
@@ -8761,6 +8783,26 @@ export interface operations {
             };
         };
     };
+    customer_analytics_activity_api_v1_customer_analytics_activity_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerActivityView"];
+                };
+            };
+        };
+    };
     accept_candidate_api_v1_customer_applications__application_id__accept_post: {
         parameters: {
             query?: never;
@@ -8794,26 +8836,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    customer_analytics_activity_api_v1_customer_analytics_activity_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomerActivityView"];
                 };
             };
         };
@@ -11356,6 +11378,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChannelWorkContextView"] | null;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_community_members_api_v1_me_messaging_channels__channel_id__members_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                channel_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddCommunityMembersRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelView"];
                 };
             };
             /** @description Validation Error */
