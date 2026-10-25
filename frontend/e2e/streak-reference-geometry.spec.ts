@@ -145,7 +145,7 @@ test("chosen weekly rhythm saves via the API and survives a fresh read", async (
     reminder_window_hours: number;
     effective_from: string;
   };
-  let received: SavePayload | null = null;
+  const received: SavePayload[] = [];
   let persisted = {
     versioned: true, history_count: 1, version: 1, preset: "workdays",
     active_days: [1, 2, 3, 4, 5], reminder_hour: 18, reminder_window_hours: 3,
@@ -154,14 +154,15 @@ test("chosen weekly rhythm saves via the API and survives a fresh read", async (
   };
   await page.route("**/api/v1/me/engagement/rhythm", async route => {
     if (route.request().method() === "POST") {
-      received = route.request().postDataJSON() as SavePayload;
+      const posted = route.request().postDataJSON() as SavePayload;
+      received.push(posted);
       persisted = {
         ...persisted,
-        version: 2, history_count: 2, preset: received.preset,
-        active_days: received.preset === "weekends" ? [6, 7] : received.custom_days,
-        reminder_hour: received.reminder_hour,
-        reminder_window_hours: received.reminder_window_hours,
-        effective_from: received.effective_from,
+        version: 2, history_count: 2, preset: posted.preset,
+        active_days: posted.preset === "weekends" ? [6, 7] : posted.custom_days,
+        reminder_hour: posted.reminder_hour,
+        reminder_window_hours: posted.reminder_window_hours,
+        effective_from: posted.effective_from,
         target_days: 2,
       };
     }
@@ -177,9 +178,10 @@ test("chosen weekly rhythm saves via the API and survives a fresh read", async (
   expect(selectedDate).toMatch(/^20\d\d-\d\d-\d\d$/);
   await dialog.getByRole("button", { name: "Сохранить ритм" }).click();
   await expect(dialog.getByText(/Ритм сохранён/)).toBeVisible();
-  expect(received).not.toBeNull();
-  expect(received?.preset).toBe("weekends");
-  expect(received?.effective_from).toBe(selectedDate);
+  const lastSaved = received.at(-1);
+  if (!lastSaved) throw new Error("Rhythm API did not receive a save");
+  expect(lastSaved.preset).toBe("weekends");
+  expect(lastSaved.effective_from).toBe(selectedDate);
   await page.reload();
   const signIn = page.locator('[data-persona="participant-alex"]');
   if (await signIn.isVisible()) await signIn.click();
