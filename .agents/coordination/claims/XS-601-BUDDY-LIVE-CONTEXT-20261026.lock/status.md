@@ -1,6 +1,6 @@
 # Claim XS-601-BUDDY-LIVE-CONTEXT-20261026
 - session_id: gpt6-20261026-buddy-live-context
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 3908e31f3a79975bf067c8fb95d46d8e311bfeff
@@ -18,5 +18,19 @@
   - npm run typecheck
   - scoped eslint
   - scoped vitest
-- progress: Provide owner-only course, project, confirmed skill and private rank facts inside AI Buddy chat, with no fabricated values and no right-side context panel.
+- progress: AI Buddy now consumes owner-scoped journey snapshot, passport, private rating and analytics read models; shows real completed courses, accepted contributions and verified skills inline with links. No right-side context panel. Handed to independent review.
+- changed_files:
+  - frontend/src/features/buddy-chat-v2.tsx
+  - frontend/src/features/buddy-chat-v2.scss
+  - frontend/src/features/buddy-chat-v2.test.tsx
+  - frontend/src/features/buddy-live-data.ts
+  - frontend/src/features/buddy-live-data.test.ts
+  - .github/workflows/buddy-live-context-qa.yml
+- verification_evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40241897464
+  - scoped ESLint, Vitest and full TS typecheck: PASS
+- unverified:
+  - Full browser/production smoke under all roles
+  - Server model generation of AI replies (explicitly not implemented)
+  - Independent diff review
 - blockers: Full multi-role production browser E2E and external LLM generation are not in scope.
