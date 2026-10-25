@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 320" width="720" height="320" role="img" aria-label="Защищённые серверы и цифровой щит">
+<defs>
+ <linearGradient id="face" x1="0" x2=".8" y1="0" y2="1"><stop stop-color="#147bc0"/><stop offset=".6" stop-color="#0a3267"/><stop offset="1" stop-color="#071c45"/></linearGradient>
+ <linearGradient id="edge" x1="0" x2="1"><stop stop-color="#0094ff"/><stop offset="1" stop-color="#00e8f4"/></linearGradient>
+ <linearGradient id="shield" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1289f8"/><stop offset=".5" stop-color="#0641a5"/><stop offset="1" stop-color="#071645"/></linearGradient>
+ <radialGradient id="aura"><stop stop-color="#008cff" stop-opacity=".38"/><stop offset=".6" stop-color="#0154f9" stop-opacity=".12"/><stop offset="1" stop-color="#0b1752" stop-opacity="0"/></radialGradient>
+ <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="7"/></filter>
+ <filter id="soft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2"/></filter>
+</defs>
+<ellipse cx="354" cy="200" rx="295" ry="156" fill="url(#aura)"/>
+<g fill="none" stroke="#0086ff" stroke-width="1" opacity=".36">
+ <path d="M0 253l171-86 98 49 130-66 106 52 215-109M30 307l161-82 113 54 120-61 115 55 181-89M120 320l92-49m161 43l150-75M53 205l138 69m126-149l120 59m150-19l79 39"/>
+ <path d="M201 104v39l35 18m-93 84v-36l65-35m323 102v-35l56-24m49-72v35l-31 17"/>
+</g>
+<g stroke="#02b6f7" fill="none" stroke-width="1.6" opacity=".88">
+ <circle cx="201" cy="104" r="4"/><circle cx="143" cy="245" r="4"/><circle cx="531" cy="276" r="4"/><circle cx="636" cy="145" r="4"/>
+</g>
+<!-- Server rack left -->
+<g transform="translate(125 115)">
+ <path d="M0 22l42-21 53 20-42 24z" fill="#0c66af" stroke="#2487ef" stroke-width="2"/>
+ <path d="M0 22l53 23v120L0 142z" fill="#052a58" stroke="#1376c8" stroke-width="2"/>
+ <path d="M53 45l42-24v120l-42 24z" fill="#0a2c68" stroke="#156dc4" stroke-width="2"/>
+ <g stroke="#05adf4" stroke-width="3.6" stroke-linecap="round"><path d="M9 50l34 14m-34 17l34 14m-34 17l34 14"/></g>
+ <g fill="#00efff"><circle cx="15" cy="137" r="2.7"/><circle cx="23" cy="140" r="2.7"/></g>
+</g>
+<!-- Server rack right -->
+<g transform="translate(516 122)">
+ <path d="M0 18l53-20 54 27-53 24z" fill="#135bab" stroke="#217cd8" stroke-width="2"/>
+ <path d="M0 18l54 31v110L0 132z" fill="#082b60" stroke="#186dc7" stroke-width="2"/>
+ <path d="M54 49l53-24v109l-53 25z" fill="#061f4b" stroke="#145eac" stroke-width="2"/>
+ <g stroke="#00cffa" stroke-width="3" stroke-linecap="round"><path d="M11 52l32 17m-32 17l32 17m-32 17l32 17"/></g>
+</g>
+<!-- Floating rack silhouettes -->
+<g opacity=".6">
+ <path d="M239 69l43-22 44 20-44 24z" fill="#0b5fbd" stroke="#0d8bff"/>
+ <path d="M239 69l43 22v54l-43-22z" fill="#092d68" stroke="#0e71cc"/>
+ <path d="M282 91l44-24v55l-44 23z" fill="#061c50" stroke="#0e71cc"/>
+ <path d="M435 72l44-19 53 21-53 27z" fill="#0b5cbd" stroke="#0d8bff"/>
+ <path d="M435 72l44 29v40l-44-24z" fill="#092957" stroke="#0e71cc"/>
+ <path d="M479 101l53-27v43l-53 24z" fill="#061c50" stroke="#0e71cc"/>
+</g>
+<ellipse cx="357" cy="289" rx="141" ry="14" fill="#00ddf5" opacity=".18" filter="url(#glow)"/>
+<!-- Illuminated shield and lock -->
+<path d="M355 22L451 70v97c0 61-39 103-96 129-57-26-96-68-96-129V70z" fill="#009bff" opacity=".5" filter="url(#glow)"/>
+<path d="M355 21L450 70v95c0 61-37 100-95 127-57-27-95-66-95-127V70z" fill="url(#shield)" stroke="#00e8ff" stroke-width="5"/>
+<path d="M355 38l76 39v87c0 47-28 80-76 103-47-23-76-56-76-103V77z" fill="#0e3d8b" stroke="#078bff" stroke-width="2"/>
+<path d="M355 52l61 31v80c0 35-20 61-61 83-40-22-61-48-61-83V83z" fill="url(#face)" opacity=".46"/>
+<g transform="translate(318 109)" stroke="#37eeff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+ <path d="M18 43V22C18-5 56-5 56 22v21" fill="none"/>
+ <rect x="6" y="40" width="64" height="62" rx="10" fill="#1179f8"/>
+ <circle cx="38" cy="69" r="5" fill="#bbffff" stroke="none"/>
+ <path d="M38 75v12" />
+</g>
+<g fill="#00dfff"><circle cx="163" cy="83" r="3"/><circle cx="571" cy="92" r="3"/><circle cx="622" cy="257" r="3"/><circle cx="81" cy="211" r="2.4"/></g>
+</svg>
