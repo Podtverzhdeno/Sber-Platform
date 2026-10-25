@@ -117,9 +117,7 @@ async def test_two_checkpoint_reviews_close_project_only_after_final_review() ->
                 status = await session.scalar(
                     select(assignments.c.status).where(assignments.c.id == assignment_id)
                 )
-                payload = await session.scalar(
-                    select(tasks.c.payload).where(tasks.c.id == task_id)
-                )
+                payload = await session.scalar(select(tasks.c.payload).where(tasks.c.id == task_id))
             expected_status = "in_progress" if index == 1 else "accepted"
             assert status == expected_status
             assert [stage["status"] for stage in payload["checkpoints"]] == (
