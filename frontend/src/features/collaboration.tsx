@@ -151,6 +151,7 @@ export function MessagingWorkspace({
   const [mobilePane, setMobilePane] = useState<MobilePane>("list");
   const [contextOpen, setContextOpen] = useState(true);
   const readsInFlight = useRef(new Set<string>());
+  const linkedNotificationReadsInFlight = useRef(new Set<string>());
   const [createSignal, setCreateSignal] = useState(0);
   const [findSignal, setFindSignal] = useState(0);
   const [pending, setPending] = useState<PendingMessageOverlay[]>([]);
@@ -214,10 +215,42 @@ export function MessagingWorkspace({
     }
   }, [selectedId]);
 
+  // Some messages also generate a general notification. Clear only entries
+  // explicitly linked to THIS channel, without touching unrelated reminders.
+  const markLinkedNotifications = useCallback((channelId: string) => {
+    type Entry = { id: string; kind: string; read: boolean; entity_type: string | null; entity_id: string | null };
+    type Feed = { items: Entry[]; unread: number };
+    const feed = client.getQueryData<Feed>(["notifications"]);
+    const related = (feed?.items ?? []).filter((entry) => !entry.read
+      && entry.kind === "message"
+      && entry.entity_type === "messaging_channel"
+      && entry.entity_id === channelId
+      && !linkedNotificationReadsInFlight.current.has(entry.id));
+    for (const entry of related) {
+      linkedNotificationReadsInFlight.current.add(entry.id);
+      client.setQueryData<Feed>(["notifications"], (old) => old ? {
+        ...old,
+        unread: Math.max(0, old.unread - (old.items.some((item) => item.id === entry.id && !item.read) ? 1 : 0)),
+        items: old.items.map((item) => item.id === entry.id ? { ...item, read: true } : item),
+      } : old);
+      void apiRequest(`/api/v1/me/notifications/${entry.id}/read`, {
+        method: "POST", headers: csrfHeaders(),
+      }).then(() => client.invalidateQueries({ queryKey: ["notifications"] }))
+        .catch(() => {
+          client.setQueryData<Feed>(["notifications"], (old) => old ? {
+            ...old, unread: old.unread + (old.items.some((item) => item.id === entry.id && item.read) ? 1 : 0),
+            items: old.items.map((item) => item.id === entry.id ? { ...item, read: false } : item),
+          } : old);
+          setActionError("Не удалось обновить уведомление о сообщении.");
+        }).finally(() => { linkedNotificationReadsInFlight.current.delete(entry.id); });
+    }
+  }, [client]);
+
   // Mark each conversation read immediately when actually opened, then confirm
   // with the server. The cache update makes badges disappear without waiting
   // for the next poll. A failed request restores only this conversation.
   const markChannelRead = useCallback((channel: ChannelView) => {
+    markLinkedNotifications(channel.id);
     if (channel.unread <= 0 || !channel.last_message) return;
     const key = `${channel.id}:${channel.last_message.id}`;
     if (readsInFlight.current.has(key)) return;
@@ -241,7 +274,7 @@ export function MessagingWorkspace({
       );
       setActionError("Не удалось отметить сообщения прочитанными. Повторите открытие чата.");
     }).finally(() => { readsInFlight.current.delete(key); });
-  }, [client]);
+  }, [client, markLinkedNotifications]);
 
   const selectChannel = (channelId: string) => {
     setSelectedId(channelId);
