@@ -37,7 +37,7 @@
   .ach-gallery-scene::after {content:"";position:absolute;left:23%;right:14%;bottom:17px;height:15px;border:2px solid #07c6ff70;border-radius:50%;transform:rotate(-4deg);box-shadow:0 0 23px #00edfcaa;}
   .ach-gallery-scene img {
     position:relative;z-index:3;width:265px;height:194px;object-fit:contain;
-    filter:hue-rotate(70deg) saturate(1.28) drop-shadow(0 0 21px #0ce9f4b0);
+    filter:saturate(1.4) drop-shadow(0 0 21px #0ce9f4b0);
   }
   .ach-gallery-holo {
     position:absolute;z-index:2;display:grid;place-items:center;width:71px;height:84px;
@@ -144,7 +144,7 @@
     display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;min-height:385px;
     padding:35px 20px;border:1px solid #1a5069;border-radius:12px;background:linear-gradient(145deg,#061829,#071f35);
   }
-  .ach-gallery-empty>img {max-width:200px;width:32%;min-width:110px;height:138px;object-fit:contain;filter:hue-rotate(88deg) drop-shadow(0 0 25px #0ad4ff99);}
+  .ach-gallery-empty>img {max-width:200px;width:32%;min-width:110px;height:138px;object-fit:contain;filter:drop-shadow(0 0 25px #0ad4ff99);}
   .ach-gallery-empty>svg {color:#28e7e3;margin-bottom:18px;}
   .ach-gallery-empty h2 {font-size:22px;margin:12px 0 8px;}
   .ach-gallery-empty p {font-size:13px;color:#a9bdcf;line-height:1.5;max-width:540px;margin:0 0 19px;}
@@ -229,7 +229,7 @@
   .ach-gallery-add-preview p {font-size:12px;color:#aac2d4;line-height:1.5;max-width:330px;margin:0 0 18px;}
 }
 @media(max-width:1380px) {
-  .ach-gallery .ach-gallery-hero {padding:23px 28px;}
+  .ach-gallery .ach-gallery-hero {padding:23px 28px;min-height:218px;height:auto;}\n  .ach-gallery .ach-gallery-copy {max-width:62%;}\n  .ach-gallery .ach-gallery-copy h1 {font-size:31px;}
   .ach-gallery .ach-gallery-scene {right:11%;transform:scale(.85);}
   .ach-gallery .ach-gallery-tools {display:grid;gap:10px;}
   .ach-gallery .ach-gallery-filterbar {width:100%;margin:0;justify-content:flex-start;}
@@ -238,8 +238,8 @@
 }
 @media(max-width:1100px) {
   .ach-gallery .ach-gallery-grid {grid-template-columns:repeat(3,minmax(0,1fr));}
-  .ach-gallery .ach-gallery-hero {height:192px;}
-  .ach-gallery .ach-gallery-copy {max-width:58%;}
+  .ach-gallery .ach-gallery-hero {min-height:218px;height:auto;}
+  .ach-gallery .ach-gallery-copy {max-width:62%;}
   .ach-gallery .ach-gallery-scene {right:0;transform:scale(.78);}
   .ach-gallery .ach-gallery-stats {grid-template-columns:repeat(2,minmax(0,1fr));}
 }
