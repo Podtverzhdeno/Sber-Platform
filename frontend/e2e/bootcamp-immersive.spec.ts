@@ -130,3 +130,22 @@ test("data-security reference: theory methods, JWT example, practice requirement
   await expect(reader.locator(".imp-study__check-grid button")).toHaveCount(4);
   await page.screenshot({ path: "test-results/reference-security-07-check.png", animations: "disabled" });
 });
+
+
+test("course progress resumes from first unfinished lesson after reload", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1086 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const path = new URL(page.url()).pathname;
+  await page.goto(path + "?course=demo-course-10");
+  let reader = page.getByTestId("impulse-immersive-reader");
+  await reader.getByRole("button", { name: /Перейти к программе/ }).click();
+  await reader.locator(".imp-study__program-list button").first().click();
+  await reader.locator(".imp-study__navigation .imp-study__primary").click();
+  await expect(reader.locator(".imp-study__aside-heading > span")).toHaveText("13%");
+  await page.reload();
+  reader = page.getByTestId("impulse-immersive-reader");
+  await expect(reader.locator(".imp-study__lesson-list button").nth(1)).toHaveAttribute("aria-current", "step");
+  await expect(reader.locator(".imp-study__aside-heading > span")).toHaveText("13%");
+});
