@@ -30,6 +30,12 @@ class ImpulseStudyView(BaseModel):
     total_units: int = 8
     certificate_id: UUID | None
     finished: bool
+    practice_status: str | None = None
+
+
+class PracticeSubmissionBody(BaseModel):
+    description: str = Field(min_length=50, max_length=5000)
+    artifact_url: str | None = Field(default=None, max_length=2000)
 
 
 def _check_actor(authenticated: AuthenticatedSession, course_key: str) -> None:
@@ -52,11 +58,17 @@ async def _view(request: Request, person_id: UUID, course_key: str) -> ImpulseSt
             .mappings()
             .one_or_none()
         )
+    async with request.app.state.database.sessions() as session:
+        practice = (await session.execute(
+            text("SELECT status FROM impulse_practical_submissions WHERE person_id = :person AND course_key = :course"),
+            {"person": person_id, "course": course_key},
+        )).scalar_one_or_none()
     return ImpulseStudyView(
         course_key=course_key,
         completed_units=int(row["completed_units"]) if row else 0,
         certificate_id=row["certificate_id"] if row else None,
         finished=bool(row and row["certificate_id"]),
+        practice_status=practice,
     )
 
 
@@ -162,4 +174,37 @@ async def finish_impulse_study(
                     message="Завершите все восемь уроков.",
                     status_code=409,
                 )
+    return await _view(request, person, course_key)
+
+
+@router.post("/me/bootcamp/impulse-study/{course_key}/practice", response_model=ImpulseStudyView)
+async def submit_impulse_practice(
+    course_key: str,
+    body: PracticeSubmissionBody,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    request: Request,
+) -> ImpulseStudyView:
+    _check_actor(authenticated, course_key)
+    if body.artifact_url and not body.artifact_url.startswith("https://"):
+        raise ApiError(code="INVALID_ARTIFACT_URL", message="Допускаются только ссылки HTTPS.", status_code=422)
+    person = authenticated.actor.person_id
+    async with request.app.state.database.session() as session:
+        progress = (await session.execute(
+            text("SELECT certificate_id FROM impulse_course_progress "
+                 "WHERE person_id = :person AND course_key = :course"),
+            {"person": person, "course": course_key},
+        )).scalar_one_or_none()
+        if progress is None:
+            raise ApiError(code="COURSE_INCOMPLETE", message="Сначала завершите курс.", status_code=409)
+        await session.execute(
+            text("INSERT INTO impulse_practical_submissions "
+                 "(person_id, course_key, description, artifact_url, status) "
+                 "VALUES (:person, :course, :description, :artifact_url, 'pending') "
+                 "ON CONFLICT (person_id, course_key) DO UPDATE SET "
+                 "description = EXCLUDED.description, artifact_url = EXCLUDED.artifact_url, "
+                 "status = 'pending', submitted_at = now() "
+                 "WHERE impulse_practical_submissions.status <> 'approved'"),
+            {"person": person, "course": course_key, "description": body.description,
+             "artifact_url": body.artifact_url},
+        )
     return await _view(request, person, course_key)
