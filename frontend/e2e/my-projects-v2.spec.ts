@@ -464,7 +464,7 @@ test("reference project controls have distinct effects and accessible keyboard n
   await detail.getByRole("tab",{name:"Команда"}).click();
   await expect(page).toHaveURL(/tab=team/);
   await expect(detail.locator(".mp-ref-team-list")).toContainText("Ментор");
-  await expect(detail.locator(".mp-ref-team-count")).toContainText("1 участников");
+  await expect(detail.locator(".mp-ref-team-count")).toContainText("1 участник");
   await detail.getByRole("tab",{name:"Бонусы и выгоды"}).click();
   await expect(page).toHaveURL(/tab=rewards/);
   const expected=[
