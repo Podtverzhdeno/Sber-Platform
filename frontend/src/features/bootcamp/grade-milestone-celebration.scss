@@ -1,0 +1,41 @@
+/* Fullscreen grade/stage celebration — visual motion only; values come from authoritative state. */
+.imp-grade-celebration{position:fixed;inset:0;z-index:99999;isolation:isolate;display:grid;place-items:center;padding:22px;overflow:hidden;color:#fff;background:radial-gradient(ellipse 85% 100% at 50% 60%,#0b1746 0%,#071329 44%,#020a18 85%);animation:impGradeFade .36s ease both}
+.imp-grade-celebration__aurora{position:absolute;inset:-35%;z-index:-1;background:conic-gradient(from 20deg at 50% 50%,transparent,#03dfed2a,#8254ff55,#ffbb4054,#02e5dd3a,transparent);filter:blur(85px);opacity:.7;animation:impGradeAurora 10s linear infinite}
+.imp-grade-celebration__grid{position:absolute;inset:0;z-index:-1;opacity:.2;background:linear-gradient(#36c9fc17 1px,transparent 1px),linear-gradient(90deg,#36c9fc17 1px,transparent 1px);background-size:62px 62px;transform:perspective(850px) rotateX(56deg) scale(1.65);transform-origin:center 70%;mask-image:linear-gradient(transparent,#000 45%,transparent)}
+.imp-grade-celebration__panel{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;width:min(620px,100%);max-height:calc(100dvh - 36px);overflow-y:auto;scrollbar-width:thin;border:1px solid #3c8bc18c;border-radius:28px;text-align:center;padding:25px 34px 29px;background:linear-gradient(157deg,#10273eea,#100f36f7 62%,#062534e8);box-shadow:0 0 75px #03dfff29,inset 0 1px #7bfcff5b,0 28px 90px #000c;backdrop-filter:blur(20px);animation:impGradePanel .58s cubic-bezier(.14,1.5,.2,1) both}
+.imp-grade-celebration__panel::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1px;background:linear-gradient(126deg,#36ffe7c4,transparent 30%,#ad8cff84 70%,#f0c15cc7);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude}
+.imp-grade-celebration__close{position:absolute;top:18px;right:19px;z-index:2;display:grid;place-items:center;width:36px;height:36px;flex:none;border-radius:50%;border:1px solid #6ca8c87a;background:#17324cb3;color:#e7faff;cursor:pointer}
+.imp-grade-celebration__badge{display:flex;align-items:center;gap:8px;margin:2px 40px 0;color:#7cf8ee;font-size:10px;letter-spacing:.16em;font-weight:850}
+.imp-grade-celebration__crest{position:relative;display:grid;place-items:center;width:190px;height:167px;margin:10px 0 3px;flex:none}
+.imp-grade-celebration__orbit{position:absolute;inset:8px 18px;border-radius:50%;border:1px solid #2cf9ed8f;box-shadow:0 0 25px #09eff045}
+.imp-grade-celebration__orbit--one{transform:rotate(-32deg) scaleX(1.2) scaleY(.8);animation:impGradeSpin 5.5s linear infinite}
+.imp-grade-celebration__orbit--two{transform:rotate(55deg) scaleX(.85) scaleY(1.11);border-color:#a88dff96;animation:impGradeSpinRev 6.2s linear infinite}
+.imp-grade-celebration__crown{position:relative;display:grid;place-items:center;width:119px;height:119px;border:1px solid #dfb966;border-radius:29px;background:linear-gradient(145deg,#4d3762,#143f57 52%,#11304c);color:#ffdc81;box-shadow:0 0 33px #ecc16f7a,inset 0 0 34px #d9a84224;transform:rotate(-9deg);animation:impGradeCrest 2.4s ease-in-out infinite alternate}
+.imp-grade-celebration__crown svg{filter:drop-shadow(0 0 17px #ffd57b)}
+.imp-grade-celebration__check{position:absolute;right:28px;bottom:11px;display:grid;place-items:center;width:35px;height:35px;background:#00d4ab;border:2px solid #061a36;border-radius:50%;color:#061629;box-shadow:0 0 20px #00ffd6}
+.imp-grade-celebration__eyebrow{color:#b1cdf3;letter-spacing:.11em;font-size:11px;font-weight:800;text-transform:uppercase}
+.imp-grade-celebration h2{margin:9px 0 13px;font-size:clamp(29px,5.5vw,49px);line-height:1.04;letter-spacing:-.04em;font-weight:950;text-shadow:0 3px 24px #00d9ff47}
+.imp-grade-celebration h2 span{display:inline-block;background:linear-gradient(98deg,#ffdc81,#ffe8ac,#7bfde6,#9fafff,#f8c866);background-size:240% 100%;background-clip:text;-webkit-background-clip:text;color:transparent;animation:impGradeText 2.5s linear infinite}
+.imp-grade-celebration__stage,.imp-grade-celebration__ladder{display:flex;align-items:center;justify-content:center;gap:11px;min-width:0;margin:1px 0 9px;padding:10px 15px;border:1px solid #16a7aa;border-radius:12px;background:#064b556a;color:#74ffe4;font-weight:820;font-size:14px}
+.imp-grade-celebration__ladder{flex-wrap:wrap;background:#392c5677;border-color:#c6a15c;color:#f2d5aa;gap:12px}
+.imp-grade-celebration__ladder strong{color:#fff;font-size:17px;text-shadow:0 0 15px #e5c37c}
+.imp-grade-celebration__ladder svg{color:#10e9e5}
+.imp-grade-celebration p{max-width:480px;margin:0 0 21px;color:#afc8e7;font-size:14px;line-height:1.65}
+.imp-grade-celebration__cta{display:flex;align-items:center;justify-content:center;gap:14px;width:min(355px,100%);min-height:52px;padding:10px 20px;border:0;border-radius:12px;background:linear-gradient(104deg,#6ffae5,#16def4 45%,#c397fa 82%,#ffcc78);background-size:240% 100%;color:#052238;font-size:15px;font-weight:900;box-shadow:0 8px 35px #00daf65b;cursor:pointer;animation:impGradeText 3.5s ease-in-out infinite}
+.imp-grade-celebration__cta:hover{filter:brightness(1.12);transform:translateY(-2px)}
+.imp-grade-celebration__skip{margin-top:11px;padding:8px;border:0;background:transparent;color:#8aafcb;font-size:11px;cursor:pointer}
+.imp-grade-celebration button:focus-visible{outline:2px solid #6cf7f1;outline-offset:3px}
+.imp-grade-celebration__particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.imp-grade-celebration__particles i{position:absolute;top:50%;left:50%;width:var(--particle-size);height:var(--particle-size);border-radius:2px;background:#ffd472;box-shadow:0 0 13px currentColor;animation:impGradeParticle 2.2s cubic-bezier(.17,.66,.25,1) both;animation-delay:var(--particle-delay)}
+.imp-grade-celebration__particles i:nth-child(3n){color:#35eff8;background:currentColor;border-radius:50%}
+.imp-grade-celebration__particles i:nth-child(3n + 1){color:#a887ff;background:currentColor}
+@keyframes impGradeFade{from{opacity:0}to{opacity:1}}
+@keyframes impGradePanel{from{transform:translateY(34px) scale(.88);opacity:0}to{transform:none;opacity:1}}
+@keyframes impGradeParticle{0%{opacity:0;transform:translate(0,0) scale(.3) rotate(0deg)}12%{opacity:1}78%{opacity:.9}100%{opacity:0;transform:translate(var(--particle-x),var(--particle-y)) scale(.7) rotate(350deg)}}
+@keyframes impGradeText{to{background-position:-240% 0}}
+@keyframes impGradeSpin{to{transform:rotate(328deg) scaleX(1.2) scaleY(.8)}}
+@keyframes impGradeSpinRev{to{transform:rotate(-305deg) scaleX(.85) scaleY(1.11)}}
+@keyframes impGradeCrest{from{transform:rotate(-10deg) translateY(0)}to{transform:rotate(-5deg) translateY(-6px)}}
+@keyframes impGradeAurora{to{transform:rotate(360deg)}}
+@media(max-width:600px){.imp-grade-celebration{padding:10px}.imp-grade-celebration__panel{border-radius:19px;padding:19px 14px 22px}.imp-grade-celebration__crest{height:139px;width:145px}.imp-grade-celebration__crown{height:99px;width:99px}.imp-grade-celebration__crest .imp-grade-celebration__orbit{inset:8px}.imp-grade-celebration__badge{font-size:9px;letter-spacing:.05em;margin:1px 36px 0}.imp-grade-celebration p{font-size:12px}.imp-grade-celebration h2{font-size:clamp(26px,8vw,36px)}}
+@media(prefers-reduced-motion:reduce){.imp-grade-celebration,.imp-grade-celebration *,.imp-grade-celebration *::before,.imp-grade-celebration *::after{animation:none!important;transition:none!important}.imp-grade-celebration__aurora{opacity:.35}.imp-grade-celebration__particles{display:none}}
