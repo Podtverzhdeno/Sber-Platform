@@ -1,0 +1,55 @@
+name: Bootcamp to Trajectory Learning E2E
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/trajectory-v2/page.tsx"
+      - "frontend/src/features/trajectory-v2/study-progress*"
+      - "frontend/src/features/bootcamp/catalog.tsx"
+      - "frontend/e2e/trajectory-learning-sync.spec.ts"
+      - "frontend/e2e/bootcamp-role-progression.spec.ts"
+      - ".github/workflows/bootcamp-trajectory-learning-e2e.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: bootcamp-trajectory-learning-${{ github.sha }}
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - name: Lint synchronized feature sources
+        run: npx eslint src/features/trajectory-v2/page.tsx src/features/trajectory-v2/study-progress.ts src/features/trajectory-v2/study-progress.test.ts src/features/bootcamp/catalog.tsx e2e/trajectory-learning-sync.spec.ts e2e/bootcamp-role-progression.spec.ts --max-warnings 0
+      - name: Check types
+        run: npm run typecheck
+      - name: Verify study-key and role scope
+        run: npx vitest run src/features/trajectory-v2/study-progress.test.ts
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+      - name: Verify cross-section progression
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test trajectory-learning-sync.spec.ts bootcamp-role-progression.spec.ts --project=chromium --reporter=line
+      - name: Save screenshots and traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bootcamp-trajectory-learning-evidence
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore
