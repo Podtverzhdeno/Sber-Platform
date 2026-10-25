@@ -89,7 +89,7 @@ function MiniArt({ index }: { index: number }) {
 function Radar({ skills }: { skills: Passport["skills"] }) {
   const values = Array.from({ length: 5 }, (_, i) => {
     const item = skills[i];
-    const raw = item?.practical_level?.match(/[1-5]/)?.[0];
+    const raw = item?.practical_level.match(/[1-5]/)?.[0];
     return raw ? Math.min(5, Math.max(1, Number(raw))) : item?.confirmed_case_count ? 1 : 0;
   });
   const pt = (index: number, scale: number) => {
@@ -113,7 +113,7 @@ function Metric({ Icon, count, label }: { Icon: LucideIcon; count: string | numb
   return <div className="p2-metric"><span className="p2-metric-icon"><Icon size={21}/></span><div><strong>{count}</strong><small>{label}</small></div></div>;
 }
 function CredentialCard({ item, onSelect }: { item: Credential; onSelect: (item: Credential) => void }) {
-  return <button className="p2-certificate" type="button" onClick={() => onSelect(item)}>
+  return <button className="p2-certificate" type="button" onClick={() => { onSelect(item); }}>
     <span className="p2-certificate-symbol"><GraduationCap size={23}/></span><span className="p2-certificate-description"><strong>{item.title}</strong><small>{item.issuer || "Impulse · документ"}</small><em>{item.verification_id}</em></span>
     <span className="p2-verified"><CheckCircle2 size={13}/> {item.status}</span>
   </button>;
@@ -125,7 +125,7 @@ function ProjectCard({ item, index, onSelect }: { item: Contribution; index: num
       <div className="p2-project-top"><h3>{item.project_title}</h3><span className={"p2-project-status" + (isAccepted(item) ? " is-accepted" : "")}><CheckCircle2 size={13}/>{isAccepted(item) ? "Принят заказчиком" : item.verification_status}</span></div>
       <p>{item.personal_summary}</p>
       <div className="p2-project-facts"><span><BarChart3 size={17}/> {item.grade ? "Оценка " + item.grade : "Без оценки"}</span><span><Users size={17}/> {item.artifact_keys.length} доказательств</span><span><ShieldCheck size={17}/> Личный вклад</span></div>
-      <div className="p2-project-actions"><button className="p2-primary" type="button" onClick={() => onSelect(item)}>Открыть кейс <ArrowRight size={15}/></button><button className="p2-outline" type="button" onClick={() => onSelect(item)}><FolderKanban size={15}/> Доказательства · {item.artifact_keys.length}</button></div>
+      <div className="p2-project-actions"><button className="p2-primary" type="button" onClick={() => { onSelect(item); }}>Открыть кейс <ArrowRight size={15}/></button><button className="p2-outline" type="button" onClick={() => { onSelect(item); }}><FolderKanban size={15}/> Доказательства · {item.artifact_keys.length}</button></div>
     </div>
   </article>;
 }
@@ -143,24 +143,24 @@ export function ParticipantPortfolioV2() {
   const consent = useMutation({
     mutationFn: ({ scope, granted }: { scope: Scope; granted: boolean }) => apiRequest(`/api/v1/me/consents/${scope}`, { method: "PUT", headers: csrf(), body: JSON.stringify({ granted }) }),
     onSuccess: async () => { await client.invalidateQueries({ queryKey: ["portfolio"] }); },
-    onError: () => setNotice("Не удалось сохранить настройку видимости. Попробуйте ещё раз."),
+    onError: () => { setNotice("Не удалось сохранить настройку видимости. Попробуйте ещё раз."); },
   });
-  useEffect(() => { if (!notice) return; const t = window.setTimeout(() => setNotice(""), 4000); return () => window.clearTimeout(t); }, [notice]);
+  useEffect(() => { if (!notice) return; const t = window.setTimeout(() => setNotice(""), 4000); return () => { window.clearTimeout(t); }; }, [notice]);
   useEffect(() => {
     if (!openCase && !openCredential) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { setOpenCase(null); setOpenCredential(null); } };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => { window.removeEventListener("keydown", onKey); };
   }, [openCase, openCredential]);
 
   if (profileQuery.isPending) return <div className="p2-loading" role="status">Загружаем подтверждённое портфолио…</div>;
   const portfolio = profileQuery.data ?? demoPortfolio;
-  const contributions = portfolio.contributions ?? [];
+  const contributions = portfolio.contributions;
   const verifiedProjects = contributions.filter(isAccepted);
   const skills = passportQuery.data?.skills ?? [];
-  const credentials = portfolio.credentials ?? [];
+  const credentials = portfolio.credentials;
   const certificates = credentials.filter(i => i.credential_type === "course");
-  const trophies = portfolio.trophies ?? [];
+  const trophies = portfolio.trophies;
   const allGrades = verifiedProjects.map(x => numberForGrade(x.grade)).filter((n): n is number => n !== null);
   const grade = allGrades.length ? (allGrades.reduce((a,b)=>a+b,0) / allGrades.length).toFixed(1) : "—";
   const bio = portfolio.about || portfolio.bio || (portfolio.demo_data ? demoPortfolio.about : null);
@@ -186,7 +186,7 @@ export function ParticipantPortfolioV2() {
       <div className="p2-hero-top">
         <div className="p2-avatar" aria-hidden="true">{portfolio.demo_data && portfolio.display_name === "Алекс Речной" ? <img src="/home-reference/avatar.svg" alt="" /> : <span>{portfolio.display_name.split(" ").map(part => part[0]).slice(0,2).join("").toUpperCase()}</span>}{verified && <i><Check size={14}/></i>}</div>
         <div className="p2-person"><div className="p2-overline">ПОДТВЕРЖДЁННЫЙ ПРОФИЛЬ УЧАСТНИКА</div><div className="p2-name-line"><h1 id="workspace-title">{portfolio.display_name}</h1>{verified && <span className="p2-identity-badge"><BadgeCheck size={15}/> Есть подтверждённые результаты</span>}</div><p>Участник Impulse</p><div className="p2-person-about">{portfolio.headline || bio || "Здесь появится описание профессиональных интересов, специализации и практического опыта."}</div></div>
-        <div className="p2-hero-controls"><div className="p2-hero-buttons"><button className="p2-primary" type="button" onClick={() => navigateTo(12)}><Pencil size={16}/> Редактировать профиль</button><button className="p2-outline" type="button" onClick={() => void share()}><Share2 size={16}/> Поделиться</button><button className="p2-outline p2-more" aria-label="Настроить видимость" type="button" onClick={() => openTab("about")}><MoreHorizontal size={19}/></button></div><div className="p2-skill-chips">{skills.slice(0,4).map(s => <span key={s.key}>{s.key}</span>)}{skills.length>4 && <span>+{skills.length-4}</span>}{skills.length === 0 && <span>Навыки пока не подтверждены</span>}</div></div>
+        <div className="p2-hero-controls"><div className="p2-hero-buttons"><button className="p2-primary" type="button" onClick={() => { navigateTo(12); }}><Pencil size={16}/> Редактировать профиль</button><button className="p2-outline" type="button" onClick={() => void share()}><Share2 size={16}/> Поделиться</button><button className="p2-outline p2-more" aria-label="Настроить видимость" type="button" onClick={() => { openTab("about"); }}><MoreHorizontal size={19}/></button></div><div className="p2-skill-chips">{skills.slice(0,4).map(s => <span key={s.key}>{s.key}</span>)}{skills.length>4 && <span>+{skills.length-4}</span>}{skills.length === 0 && <span>Навыки пока не подтверждены</span>}</div></div>
       </div>
       <div className="p2-metrics">
         <Metric Icon={FolderKanban} count={verifiedProjects.length} label="Принятых проектов"/>
@@ -197,44 +197,44 @@ export function ParticipantPortfolioV2() {
       </div>
     </section>
     <nav className="p2-tabs" role="tablist" aria-label="Разделы портфолио">
-      {sections.map(({id,name,Icon}) => <button key={id} id={panelId+"-"+id} role="tab" aria-selected={tab===id} aria-controls={panelId+"-panel"} className={tab===id ? "is-active" : ""} type="button" onClick={()=>openTab(id)}><Icon size={18}/>{name}</button>)}
+      {sections.map(({id,name,Icon}) => <button key={id} id={panelId+"-"+id} role="tab" aria-selected={tab===id} aria-controls={panelId+"-panel"} className={tab===id ? "is-active" : ""} type="button" onClick={()=>{ openTab(id); }}><Icon size={18}/>{name}</button>)}
     </nav>
     <div className="p2-sections" role="tabpanel" id={panelId+"-panel"} aria-labelledby={panelId+"-"+tab}>
       <div className={"p2-content-grid" + (tab !== "overview" ? " p2-content-grid--single" : "")}>
         {showProjects && <section className="p2-panel p2-projects-panel" aria-label="Лучшие проекты">
-          <PanelHeading icon={Star} title={tab==="overview"?"ЛУЧШИЕ ПРОЕКТЫ":"ПРОЕКТЫ И ПРАКТИЧЕСКИЙ ОПЫТ"} action={tab==="overview"?"Все проекты":"Открыть раздел проектов"} onAction={()=>tab==="overview"?openTab("projects"):navigateTo(4)}/>
+          <PanelHeading icon={Star} title={tab==="overview"?"ЛУЧШИЕ ПРОЕКТЫ":"ПРОЕКТЫ И ПРАКТИЧЕСКИЙ ОПЫТ"} action={tab==="overview"?"Все проекты":"Открыть раздел проектов"} onAction={()=>{ if(tab==="overview") openTab("projects"); else navigateTo(4); }}/>
           <div className="p2-project-list">{(tab==="overview"?verifiedProjects.slice(0,2):contributions).map((item,index)=><ProjectCard item={item} index={index} key={item.contribution_id} onSelect={setOpenCase}/>)}</div>
-          {(tab==="overview"?verifiedProjects:contributions).length===0 && <div className="p2-empty"><FolderKanban size={27}/><strong>Пока нет принятых проектов</strong><p>После проверки личного вклада здесь появятся кейсы с доказательствами.</p><button type="button" className="p2-primary" onClick={()=>navigateTo(4)}>Мои проекты <ArrowRight size={14}/></button></div>}
-          {tab==="overview"&&verifiedProjects.length>2 && <button type="button" className="p2-show-all" onClick={()=>openTab("projects")}>Показать все {verifiedProjects.length} проектов <ArrowRight size={15}/></button>}
+          {(tab==="overview"?verifiedProjects:contributions).length===0 && <div className="p2-empty"><FolderKanban size={27}/><strong>Пока нет принятых проектов</strong><p>После проверки личного вклада здесь появятся кейсы с доказательствами.</p><button type="button" className="p2-primary" onClick={()=>{ navigateTo(4); }}>Мои проекты <ArrowRight size={14}/></button></div>}
+          {tab==="overview"&&verifiedProjects.length>2 && <button type="button" className="p2-show-all" onClick={()=>{ openTab("projects"); }}>Показать все {verifiedProjects.length} проектов <ArrowRight size={15}/></button>}
         </section>}
         {showPassport && <section className="p2-panel p2-passport-panel" aria-label="Skill Passport">
-          <PanelHeading icon={BarChart3} title="SKILL PASSPORT" action={tab==="overview"?"Открыть":"Подробнее в аналитике"} onAction={()=>tab==="overview"?openTab("passport"):navigateTo(9)}/>
+          <PanelHeading icon={BarChart3} title="SKILL PASSPORT" action={tab==="overview"?"Открыть":"Подробнее в аналитике"} onAction={()=>{ if(tab==="overview") openTab("passport"); else navigateTo(9); }}/>
           <div className="p2-passport-body"><div className="p2-radar-wrap"><Radar skills={skills}/></div><div className="p2-skill-levels"><h3>Уровень компетенций</h3>{skills.slice(0,5).map((s)=>{
-            const m=s.practical_level?.match(/[1-5]/);
+            const m=s.practical_level.match(/[1-5]/);
             const level=m ? Math.min(5,Number(m[0])) : null;
             return <div className="p2-skill-level" key={s.key}><span>{s.key}</span><i><b style={{width:level?String(level*20)+"%":"0%"}}/></i><em>{level?String(level)+"/5":"—"}</em></div>;
           })}{skills.length===0 && <p className="p2-inline-empty">Подтверждённые компетенции появятся после оценки кейсов.</p>}</div></div>
-          <div className="p2-passport-footer"><div className="p2-passport-count"><Award size={19}/><strong>{skills.filter(s=>s.confirmed_case_count>0).length}</strong><small>практически подтверждённых навыков</small></div><button className="p2-primary" type="button" onClick={()=>navigateTo(9)}>Открыть Skill Passport <ArrowRight size={15}/></button></div>
+          <div className="p2-passport-footer"><div className="p2-passport-count"><Award size={19}/><strong>{skills.filter(s=>s.confirmed_case_count>0).length}</strong><small>практически подтверждённых навыков</small></div><button className="p2-primary" type="button" onClick={()=>{ navigateTo(9); }}>Открыть Skill Passport <ArrowRight size={15}/></button></div>
         </section>}
         {showCerts && <section className="p2-panel p2-certs-panel" aria-label="Сертификация">
-          <PanelHeading icon={FileBadge2} title="СЕРТИФИКАЦИЯ" action={tab==="overview"?"Все сертификаты":"Перейти в аналитику"} onAction={()=>tab==="overview"?openTab("certification"):navigateTo(9)}/>
+          <PanelHeading icon={FileBadge2} title="СЕРТИФИКАЦИЯ" action={tab==="overview"?"Все сертификаты":"Перейти в аналитику"} onAction={()=>{ if(tab==="overview") openTab("certification"); else navigateTo(9); }}/>
           <div className="p2-cert-list">{certificates.slice(0,tab==="overview"?3:20).map(item=><CredentialCard key={item.verification_id} item={item} onSelect={setOpenCredential}/>)}</div>
           {certificates.length===0 && <div className="p2-inline-empty">Проверяемые сертификаты курсов пока не выданы. Пройденные курсы доступны в Bootcamp.</div>}
           {tab==="certification" && (documentsQuery.data??[]).length>0 && <div className="p2-document-list"><h3>Документы проектного опыта</h3>{(documentsQuery.data??[]).map(item=><a key={item.verification_id} href={"/verify/projects/"+encodeURIComponent(item.verification_id)}><FileCheck2 size={20}/><span>{item.task_title}<small>{item.customer_name} · {item.grade_label}</small></span><ExternalLink size={15}/></a>)}</div>}
         </section>}
         {showAchievements && <section className="p2-panel p2-achievements-panel" aria-label="Достижения">
-          <PanelHeading icon={Trophy} title="ДОСТИЖЕНИЯ" action={tab==="overview"?"Все достижения":"Перейти в достижения"} onAction={()=>tab==="overview"?openTab("achievements"):navigateTo(8)}/>
+          <PanelHeading icon={Trophy} title="ДОСТИЖЕНИЯ" action={tab==="overview"?"Все достижения":"Перейти в достижения"} onAction={()=>{ if(tab==="overview") openTab("achievements"); else navigateTo(8); }}/>
           {trophies.length>0?<div className="p2-trophies">{trophies.slice(0,tab==="overview"?2:30).map((item,i)=><a href={item.source_url} target="_blank" rel="noopener noreferrer" key={item.title+"-"+String(i)}><span className="p2-trophy-icon"><Medal size={23}/></span><span><strong>{item.title}</strong><small>{item.organizer} · {item.trophy_type}</small></span><ExternalLink size={14}/></a>)}</div>:<div className="p2-inline-empty">Подтверждённых достижений пока нет.</div>}
         </section>}
         {showAbout && <section className="p2-panel p2-about-panel" aria-label="О себе">
-          <PanelHeading icon={Users} title="О СЕБЕ" action="Редактировать" onAction={()=>navigateTo(12)}/>
+          <PanelHeading icon={Users} title="О СЕБЕ" action="Редактировать" onAction={()=>{ navigateTo(12); }}/>
           <p>{bio || "Добавьте профессиональное описание: чем занимаетесь, какие задачи решаете и какие возможности рассматриваете."}</p>
           <div className="p2-about-chips">{portfolio.location && <span><MapPin size={15}/>{portfolio.location}</span>}<span><BriefcaseBusiness size={15}/>Профессиональный профиль</span><span><Link2 size={15}/>{portfolio.public_url?"Публичная ссылка доступна":"Ссылка не опубликована"}</span></div>
         </section>}
         {(tab==="overview" || tab==="about" || tab==="projects") && <section className="p2-panel p2-trust-panel" aria-label="Доказательства и доверие">
-          <PanelHeading icon={ShieldCheck} title="ДОКАЗАТЕЛЬСТВА И ДОВЕРИЕ" action="Все подтверждения" onAction={()=>openTab("projects")}/>
-          <div className="p2-trust-list">{verifiedProjects.slice(0,2).map(x=><button key={x.contribution_id} type="button" onClick={()=>setOpenCase(x)}><span className="p2-trust-icon"><ClipboardCheck size={18}/></span><span><strong>Проект принят заказчиком</strong><small>{x.project_title}</small></span><CheckCircle2 size={17}/></button>)}
-            {certificates.slice(0,2).map(c=><button key={c.verification_id} type="button" onClick={()=>setOpenCredential(c)}><span className="p2-trust-icon"><GraduationCap size={18}/></span><span><strong>Сертификат курса</strong><small>{c.title}</small></span><CheckCircle2 size={17}/></button>)}
+          <PanelHeading icon={ShieldCheck} title="ДОКАЗАТЕЛЬСТВА И ДОВЕРИЕ" action="Все подтверждения" onAction={()=>{ openTab("projects"); }}/>
+          <div className="p2-trust-list">{verifiedProjects.slice(0,2).map(x=><button key={x.contribution_id} type="button" onClick={()=>{ setOpenCase(x); }}><span className="p2-trust-icon"><ClipboardCheck size={18}/></span><span><strong>Проект принят заказчиком</strong><small>{x.project_title}</small></span><CheckCircle2 size={17}/></button>)}
+            {certificates.slice(0,2).map(c=><button key={c.verification_id} type="button" onClick={()=>{ setOpenCredential(c); }}><span className="p2-trust-icon"><GraduationCap size={18}/></span><span><strong>Сертификат курса</strong><small>{c.title}</small></span><CheckCircle2 size={17}/></button>)}
             {verifiedProjects.length===0&&certificates.length===0&&<div className="p2-inline-empty">Здесь появятся подтверждения проектов и обучения.</div>}
           </div>
         </section>}
@@ -246,7 +246,7 @@ export function ParticipantPortfolioV2() {
               ["hr_profile","Резюме для HR"],
               ["public_profile","Публичный профиль"],
               ["public_trophies","Публичные достижения"],
-            ] as [Scope,string][]).map(([scope,label])=><label key={scope}><span>{label}</span><input type="checkbox" aria-label={label} checked={Boolean(portfolio.visibility?.[scope])} disabled={consent.isPending || profileQuery.isError} onChange={e=>consent.mutate({scope,granted:e.target.checked})}/></label>)}
+            ] as [Scope,string][]).map(([scope,label])=><label key={scope}><span>{label}</span><input type="checkbox" aria-label={label} checked={Boolean(portfolio.visibility[scope])} disabled={consent.isPending || profileQuery.isError} onChange={e=>{ consent.mutate({scope,granted:e.target.checked}); }}/></label>)}
           </div>
           <button type="button" className="p2-visibility-share" onClick={()=>void share()}><Copy size={14}/>{portfolio.public_url?"Скопировать публичную ссылку":"Поделиться страницей"}<ChevronRight size={15}/></button>
         </section>}
@@ -256,7 +256,7 @@ export function ParticipantPortfolioV2() {
     </div>
     {(openCase || openCredential) && <div className="p2-modal-scrim" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget){setOpenCase(null);setOpenCredential(null);}}}>
       <section className="p2-modal" role="dialog" aria-modal="true" aria-label={openCase?"Подтверждённый проект":"Сертификат"}><button type="button" className="p2-modal-close" aria-label="Закрыть" onClick={()=>{setOpenCase(null);setOpenCredential(null);}}><X size={22}/></button>
-        {openCase ? <><div className="p2-overline">КЕЙС И ДОКАЗАТЕЛЬСТВА</div><h2>{openCase.project_title}</h2><span className="p2-identity-badge"><BadgeCheck size={16}/>{isAccepted(openCase)?"Принят заказчиком":"Статус: "+openCase.verification_status}</span><h3>Личный вклад</h3><p>{openCase.personal_summary}</p><h3>Оценка и комментарий</h3><p>{openCase.grade??"Без оценки"} · {openCase.review_reason||"Комментарий ещё не предоставлен"}</p><h3>Связанные артефакты</h3><ul>{openCase.artifact_keys.map((key,i)=><li key={key+"-"+i}><FileCheck2 size={17}/>{key}</li>)}</ul><p className="p2-modal-note">Для доступа к исходным файлам требуется разрешённая ссылка на артефакт. Названия файлов не являются прямыми ссылками.</p></> :
+        {openCase ? <><div className="p2-overline">КЕЙС И ДОКАЗАТЕЛЬСТВА</div><h2>{openCase.project_title}</h2><span className="p2-identity-badge"><BadgeCheck size={16}/>{isAccepted(openCase)?"Принят заказчиком":"Статус: "+openCase.verification_status}</span><h3>Личный вклад</h3><p>{openCase.personal_summary}</p><h3>Оценка и комментарий</h3><p>{openCase.grade??"Без оценки"} · {openCase.review_reason||"Комментарий ещё не предоставлен"}</p><h3>Связанные артефакты</h3><ul>{openCase.artifact_keys.map((key,i)=><li key={key+"-"+String(i)}><FileCheck2 size={17}/>{key}</li>)}</ul><p className="p2-modal-note">Для доступа к исходным файлам требуется разрешённая ссылка на артефакт. Названия файлов не являются прямыми ссылками.</p></> :
         openCredential && <><div className="p2-overline">СЕРТИФИКАЦИЯ</div><h2>{openCredential.title}</h2><p>{openCredential.issuer || "Impulse"}</p><h3>Идентификатор документа</h3><p>{openCredential.verification_id}</p><h3>Статус</h3><p>{openCredential.status}</p><p className="p2-modal-note">Информация получена из реестра портфолио.</p></>}
       </section>
     </div>}
