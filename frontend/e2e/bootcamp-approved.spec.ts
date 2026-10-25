@@ -161,7 +161,7 @@ test("course reader fills viewport and lesson navigation never clips", async ({ 
     expect(buttonBounds.x + buttonBounds.width).toBeLessThanOrEqual(1449);
   }
   await next.click();
-  await expect(dialog.getByRole("heading", { name: /Аутентификация|разработк|Введение|Типы/i }).first()).toBeVisible();
+  await expect(dialog.locator(".imp-study__lesson-heading .imp-study__eyebrow")).toContainText("Урок 2 из");
   await dialog.getByRole("button", { name: "Закрыть" }).click();
   await expect(dialog).toHaveCount(0);
 });
@@ -196,7 +196,7 @@ test("mobile fullscreen reader keeps lesson controls usable", async ({ page }) =
     expect(bounds.x + bounds.width).toBeLessThanOrEqual(391);
   }
   await next.click();
-  await expect(dialog.getByRole("heading", { name: /Аутентификация|разработк|Введение|Типы/i }).first()).toBeVisible();
+  await expect(dialog.locator(".imp-study__lesson-heading .imp-study__eyebrow")).toContainText("Урок 2 из");
   await dialog.getByRole("button", { name: "Закрыть" }).click();
   await expect(dialog).toHaveCount(0);
 });
