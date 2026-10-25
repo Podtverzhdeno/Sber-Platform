@@ -261,14 +261,14 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
           {(project.work.task.competency_tags?.length ?? 0)>0 && <div className="mp-skill-tags"><span>Навыки проекта</span>{(project.work.task.competency_tags ?? []).map(tag=><em key={tag}>{tag}</em>)}</div>}
         </section>
         <section className="mp-surface mp-detail-panel">
-          <header><h2><CheckCircle2/> Критерии приёмки</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab($1);}}>Все требования <ArrowRight size={15}/></button></header>
+          <header><h2><CheckCircle2/> Критерии приёмки</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab("tasks");}}>Все требования <ArrowRight size={15}/></button></header>
           <p className="mp-panel-caption">Именно по этим пунктам заказчик проверяет результат. Галочки здесь не означают автоматического зачёта.</p>
           <ul className="mp-criteria-list">{project.work.terms.acceptance_criteria.slice(0,5).map((criterion,index)=><li key={index}><span>{index+1}</span><p>{criterion}</p></li>)}</ul>
           {project.work.terms.acceptance_criteria.length===0 && <p className="mp-muted">Критерии приёмки пока не опубликованы</p>}
-          {project.work.terms.acceptance_criteria.length>5&&<button className="mp-inline-action" type="button" onClick={()=>{setTab($1);}}>Ещё критерии: {project.work.terms.acceptance_criteria.length-5} <ArrowRight size={15}/></button>}
+          {project.work.terms.acceptance_criteria.length>5&&<button className="mp-inline-action" type="button" onClick={()=>{setTab("tasks");}}>Ещё критерии: {project.work.terms.acceptance_criteria.length-5} <ArrowRight size={15}/></button>}
         </section>
         <section className="mp-surface mp-detail-panel">
-          <header><h2><Layers3/> Ближайшие этапы</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab($1);}}>Весь прогресс <ArrowRight size={15}/></button></header>
+          <header><h2><Layers3/> Ближайшие этапы</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab("progress");}}>Весь прогресс <ArrowRight size={15}/></button></header>
           {checkpoints.length>0?<div className="mp-overview-checkpoints">{checkpoints.slice(0,4).map((cp,index)=><div className="mp-overview-checkpoint" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"is-done":""}>{finishedCheckpoint.has(cp.status)?<Check size={14}/>:index+1}</span><div><strong>{cp.title}</strong><small>{finishedCheckpoint.has(cp.status)?"Подтверждено":statusText[cp.status] || cp.status}</small></div></div>)}</div>:<p className="mp-muted">План этапов пока не опубликован заказчиком</p>}
         </section>
       </div>
@@ -286,15 +286,15 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
           <header><h2>Прогресс проекта</h2><strong>{progress===null?"—":String(progress)+"%"}</strong></header>
           <ProgressBar value={progress}/>
           <p>{checkpoints.length>0?String(checkpoints.filter(cp=>finishedCheckpoint.has(cp.status)).length)+" из "+String(checkpoints.length)+" этапов подтверждено":"Прогресс появится после подтверждения этапов"}</p>
-          <button className="mp-inline-action" type="button" onClick={()=>{setTab($1);}}>Подробнее о ходе работы <ArrowRight size={15}/></button>
+          <button className="mp-inline-action" type="button" onClick={()=>{setTab("progress");}}>Подробнее о ходе работы <ArrowRight size={15}/></button>
         </section>
         <section className="mp-surface mp-detail-panel">
-          <header><h2><Users/> Команда</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab($1);}}>Все участники <ArrowRight size={15}/></button></header>
+          <header><h2><Users/> Команда</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab("team");}}>Все участники <ArrowRight size={15}/></button></header>
           {(project.detail?.team ?? []).slice(0,3).map(person=><div className="mp-team-member" key={person.person_id}><span>{person.display_name.slice(0,1)}</span><div><strong>{person.display_name}</strong><small>{readableMemberStatus(person.status)}</small></div><button type="button" className="mp-secondary" onClick={()=>{onMessage(person.person_id);}} aria-label={"Написать "+person.display_name}><MessageCircle size={15}/></button></div>)}
           {(project.detail?.team?.length ?? 0)===0&&<p className="mp-muted">Состав команды пока не опубликован</p>}
         </section>
         <section className="mp-surface mp-detail-panel mp-summary-contribution">
-          <header><h2><FileText/> Мой вклад</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab($1);}}>Открыть <ArrowRight size={15}/></button></header>
+          <header><h2><FileText/> Мой вклад</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab("contribution");}}>Открыть <ArrowRight size={15}/></button></header>
           <div className="mp-mini-stat"><strong>{project.work.contributions.length}</strong><span>отправленных версий</span></div>
           {project.work.contributions.length>0?<p>{project.work.contributions[project.work.contributions.length-1]?.personal_summary}</p>:<p>Опиши сделанную работу и приложи доказательство, чтобы заказчик мог оценить твой результат.</p>}
         </section>
@@ -323,7 +323,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
           <h2><CalendarDays/> Сроки и условия</h2>
           <div className="mp-key-facts"><span><CalendarDays size={16}/> Дедлайн <strong>{dateLabel(project.work.terms.deadline_at)}</strong></span><span><FileText size={16}/> Условия <strong>Версия {project.work.terms.version}</strong></span></div>
           <button className="mp-primary" type="button" onClick={onWorkspace}>Открыть рабочую область <ArrowRight size={16}/></button>
-          <button className="mp-secondary" type="button" onClick={()=>{setTab($1);}}>Мой вклад и сдача результата</button>
+          <button className="mp-secondary" type="button" onClick={()=>{setTab("contribution");}}>Мой вклад и сдача результата</button>
         </section>
       </div>
     </div>}
@@ -384,7 +384,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
           <div className="mp-contact-card"><small>Ментор</small><strong>{project.detail?.mentor?.display_name || "Пока не назначен"}</strong></div>
           <button className="mp-secondary" type="button" onClick={()=>{onMessage();}}>Обсуждение проекта <MessageCircle size={16}/></button>
         </section>
-        <section className="mp-surface mp-detail-panel"><h2><Info/> Совместная работа</h2><p>Обсуждайте решения в сообщениях, а персональные результаты фиксируйте во вкладке «Мой вклад». Так оценка не теряется внутри общей работы команды.</p><button className="mp-inline-action" type="button" onClick={()=>{setTab($1);}}>Посмотреть мой вклад <ArrowRight size={15}/></button></section>
+        <section className="mp-surface mp-detail-panel"><h2><Info/> Совместная работа</h2><p>Обсуждайте решения в сообщениях, а персональные результаты фиксируйте во вкладке «Мой вклад». Так оценка не теряется внутри общей работы команды.</p><button className="mp-inline-action" type="button" onClick={()=>{setTab("contribution");}}>Посмотреть мой вклад <ArrowRight size={15}/></button></section>
       </div>
     </div>}
     {tab==="rewards" && <div className="mp-rewards-layout" role="tabpanel" aria-label="Бонусы и выгоды">
@@ -400,7 +400,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
           <div className="mp-permanent-benefit"><FileText size={20}/><div><strong>Пополнение портфолио</strong><p>После подтверждения результата данные о проекте и личном вкладе становятся частью портфолио.</p></div></div>
           <div className="mp-permanent-benefit"><Award size={20}/><div><strong>Оценка личного вклада</strong><p>При сдаче результата заказчик может проверить работу и предоставить обратную связь.</p></div></div>
         </section>
-        <section className="mp-surface mp-detail-panel"><h2><Info/> Что важно знать</h2><p>Бонусы программы и подтверждение компетенций — разные вещи. Версии решений, оценки и результаты проверок хранятся в разделе «Мой вклад».</p><button className="mp-secondary" type="button" onClick={()=>{setTab($1);}}>Перейти к моему вкладу <ArrowRight size={16}/></button></section>
+        <section className="mp-surface mp-detail-panel"><h2><Info/> Что важно знать</h2><p>Бонусы программы и подтверждение компетенций — разные вещи. Версии решений, оценки и результаты проверок хранятся в разделе «Мой вклад».</p><button className="mp-secondary" type="button" onClick={()=>{setTab("contribution");}}>Перейти к моему вкладу <ArrowRight size={16}/></button></section>
       </div>
     </div>}
     <footer className="mp-detail-footer"><button type="button" className="mp-secondary" onClick={onBack}><ArrowLeft size={15}/> Все проекты</button><button type="button" className="mp-secondary" onClick={()=>{onMessage();}}><MessageCircle size={15}/> Обсуждение</button><button className="mp-secondary" type="button" onClick={()=>{void navigator.clipboard.writeText(window.location.href).then(()=>{setCopied(true);}).catch(()=>{setCopied(false);});}}><Share2 size={15}/>{copied?"Ссылка скопирована":"Поделиться"}</button><button className="mp-primary" type="button" onClick={onWorkspace}>Перейти к задачам <ArrowRight size={16}/></button></footer>
