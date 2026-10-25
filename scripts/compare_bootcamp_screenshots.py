@@ -14,6 +14,7 @@ Usage:
   python scripts/compare_bootcamp_screenshots.py --reference reference.zip \
       --captures frontend/test-results/bootcamp-reference --output /tmp/bootcamp-diff
 """
+
 from __future__ import annotations
 
 import argparse
@@ -39,11 +40,7 @@ SCREENS = (
 def reference_image(path: Path, file_name: str) -> Image.Image:
     if path.is_file() and path.suffix.lower() == ".zip":
         with ZipFile(path) as archive:
-            matches = [
-                name
-                for name in archive.namelist()
-                if name.endswith("/references/" + file_name)
-            ]
+            matches = [name for name in archive.namelist() if name.endswith("/references/" + file_name)]
             if len(matches) != 1:
                 raise ValueError(f"Expected one reference {file_name}, got {len(matches)}")
             return Image.open(io.BytesIO(archive.read(matches[0]))).convert("RGB")
