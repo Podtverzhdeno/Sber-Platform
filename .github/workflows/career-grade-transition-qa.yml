@@ -1,0 +1,33 @@
+name: Career Grade Transition QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/impulse/application/career_grade_transition.py"
+      - "src/impulse/domain/career_grade_policy.py"
+      - "tests/test_career_grade_transition.py"
+      - ".github/workflows/career-grade-transition-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: career-grade-transition-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  grade-atomicity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Lint career-grade policy and issuer
+        run: uv run ruff check src/impulse/application/career_grade_transition.py tests/test_career_grade_transition.py
+      - name: Verify automatic transitions, CAS idempotency and policy gate
+        run: uv run pytest tests/test_career_grade_policy.py tests/test_career_grade_transition.py -q
