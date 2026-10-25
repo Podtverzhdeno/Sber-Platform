@@ -6,14 +6,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { apiRequest } from "../api/client";
 import { BuddyChatV2 } from "./buddy-chat-v2";
-import type { BuddyJourney, BuddyPassport, BuddyOwnStanding } from "./buddy-live-data";
+import type { BuddyJourney, BuddyPassport } from "./buddy-live-data";
+import type { OwnPublishedStanding } from "./rating-v2/own-standing";
 
 vi.mock("../api/client", () => ({ apiRequest: vi.fn() }));
 const profile = { person_id: "00000000-0000-0000-0000-000000000099", display_name: "Тестовый участник", primary_track: "Python" };
 const thread = { id: "11111111-1111-4111-8111-111111111111", status: "active", content_deleted: false, messages: [] as {id:string;client_message_id:string;role:string;content:string}[] };
 let journeyResult: BuddyJourney;
 let passportResult: BuddyPassport;
-let standingResult: BuddyOwnStanding[];
+let standingResult: OwnPublishedStanding[];
 const courses = [{
   key: "api-course", title: "Работа с API", recommendation_reason: "Тренировка интеграций",
   availability: "available", source_url: "https://example.test/course", access_note: "", completion_status: null,
@@ -25,6 +26,7 @@ const initialCalls = () => {
     if (path.endsWith("/me/journey/snapshot")) return journeyResult;
     if (path === "/api/v1/me/talent-passport") return passportResult;
     if (path.endsWith("/me/rating/standings")) return standingResult;
+    if (path === "/api/v1/rating-seasons") return [{ id: "season-1", version: 1, policy_version: 1, status: "open" }];
     if (path === "/api/v1/me/analytics/journey") return { next_action: "Завершить учебную практику", freshness: "current" };
     if (path === "/api/v1/agents/buddy/suggestion") return { suggestion: null };
     if (path === "/api/v1/agents/buddy/threads") return thread;
@@ -77,7 +79,7 @@ describe("AI-Buddy single-pane conversation", () => {
       }],
     };
     passportResult = { person_id: profile.person_id, skills: [{ key: "python", practical_level: "confirmed", confirmed_case_count: 1 }] };
-    standingResult = [{ season_id: "season-1", season_title: "Осень 2026", place: 4, score: "120.00" }];
+    standingResult = [{ season_id: "season-1", season_key: "autumn", season_title: "Осень 2026", season_status: "open", season_version: 1, policy_version: 1, place: 4, score: "120.00", successful_projects: 1 }];
     view();
     expect(await screen.findByTestId("buddy-finished-count")).toHaveTextContent("1");
     expect(screen.getByTestId("buddy-accepted-count")).toHaveTextContent("1");
@@ -87,6 +89,22 @@ describe("AI-Buddy single-pane conversation", () => {
     expect(screen.getByText("Проект с подтверждённым вкладом")).toBeVisible();
     expect(screen.getByText(/Самостоятельно пройден · не подтверждённый навык/)).toBeVisible();
     expect(screen.getByText(/Завершить учебную практику/)).toBeVisible();
+  });
+
+  it("refuses an outdated own rating until the published season version matches", async () => {
+    standingResult = [{
+      season_id: "season-1", season_key: "autumn", season_title: "Осень 2026",
+      season_status: "open", season_version: 0, policy_version: 1,
+      place: 2, score: "500", successful_projects: 3,
+    }];
+    view();
+    expect(await screen.findByTestId("buddy-live-context")).toBeVisible();
+    await waitFor(() => {
+      expect(vi.mocked(apiRequest)).toHaveBeenCalledWith(
+        "/api/v1/rating-seasons", expect.objectContaining({ cache: "no-store" }),
+      );
+    });
+    expect(screen.getByTestId("buddy-rank")).toHaveTextContent("—");
   });
 
   it("never inserts another person's result if a scoped API responds with a different owner", async () => {
