@@ -232,11 +232,7 @@ async def open_personal(
     store = request.app.state.auth_service.store
     viewer = await store.get_persona_by_id(authenticated.actor.person_id)
     peer = await store.get_persona_by_id(command.peer_id)
-    if (
-        viewer is None
-        or peer is None
-        or viewer.program_key != peer.program_key
-    ):
+    if viewer is None or peer is None or viewer.program_key != peer.program_key:
         raise ApiError("MESSAGE_PEER_INVALID", "Контакт недоступен.", 403)
     channel = await service.open_personal_channel(authenticated.actor, command.peer_id)
     summary = await service.channel_view(authenticated.actor, channel.id)
