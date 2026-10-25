@@ -1,0 +1,38 @@
+name: Project Journey Consistency QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tests/test_project_journey_consistency.py"
+      - ".github/workflows/project-journey-consistency-qa.yml"
+  pull_request:
+    paths:
+      - "tests/test_project_journey_consistency.py"
+      - ".github/workflows/project-journey-consistency-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: project-journey-consistency-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  evidence-chain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Format cross-role journey test
+        run: uv run ruff format --check tests/test_project_journey_consistency.py
+      - name: Lint cross-role journey test
+        run: uv run ruff check tests/test_project_journey_consistency.py
+      - name: Verify project acceptance through participant projections
+        run: uv run pytest tests/test_project_journey_consistency.py -q
