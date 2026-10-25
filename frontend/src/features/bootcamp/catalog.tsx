@@ -336,7 +336,7 @@ function CourseDetails({
         {card.verified_evidence ? <p>Подтверждённый результат: {card.verified_evidence}</p> :
           <p>{card.pending_verification_note || "Освоение курса и подтверждение компетенции — разные этапы. Основание для подтверждения появится после проверки результата."}</p>}
         <p className="bc-muted">{card.access_note || accessLabels[card.access_state].label}</p>
-        <button type="button" className="secondary-button" onClick={() => { setTab("program"); }}>Открыть уроки и практику →</button>
+        <button type="button" className="secondary-button bc-learning-launch" onClick={() => { setTab("program"); }}>Открыть уроки и практику <ArrowRight aria-hidden="true" /></button>
       </>}
       {tab === "program" && <>
         <h3>Программа курса</h3>
