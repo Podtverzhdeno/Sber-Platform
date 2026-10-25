@@ -582,6 +582,7 @@ test("checkpoint popup stores binary file and submits stage-specific contributio
   await first.getByRole("button",{name:/Открыть задачу этапа/}).click();
   const popup=page.getByTestId("checkpoint-solution-popup");
   await expect(popup).toBeVisible();
+  await page.screenshot({path:"test-results/my-projects-v2/05_checkpoint_desktop.png",fullPage:true,animations:"disabled"});
   await expect(popup).toContainText("ЧЕКПОИНТ 4 / 5");
   await expect(popup).toContainText("Документация");
   const send=popup.getByRole("button",{name:/Отправить на проверку/});
@@ -616,6 +617,7 @@ test("checkpoint popup validates attachments and supports Escape on a narrow scr
   await page.getByTestId("project-next-action").getByRole("button",{name:/Открыть задачу этапа/}).click();
   const popup=page.getByTestId("checkpoint-solution-popup");
   await expect(popup).toBeVisible();
+  await page.screenshot({path:"test-results/my-projects-v2/06_checkpoint_mobile.png",fullPage:true,animations:"disabled"});
   await popup.locator('input[type="file"]').setInputFiles({
     name:"run.exe",mimeType:"application/octet-stream",buffer:Buffer.from("blocked"),
   });
