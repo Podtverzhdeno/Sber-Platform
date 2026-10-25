@@ -87,9 +87,9 @@ for (const viewport of [
     const r=el.getBoundingClientRect();
     const buttons=Array.from(el.querySelectorAll<HTMLButtonElement>("button"), x=>{
      const rect=x.getBoundingClientRect();
-     return {x:rect.x,y:rect.y,width:rect.width,height:rect.height};
+     return {x:rect.x+window.scrollX,y:rect.y+window.scrollY,width:rect.width,height:rect.height};
     });
-    return {x:r.x,y:r.y,width:r.width,height:r.height,buttons};
+    return {x:r.x+window.scrollX,y:r.y+window.scrollY,width:r.width,height:r.height,buttons};
    });
   };
   const initial=await sample();
