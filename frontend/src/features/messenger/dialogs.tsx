@@ -321,7 +321,7 @@ export function DialogList({
                 <button
                   type="button"
                   onClick={() => {
-                    onCreateDialog?.(contact.id);
+                    void Promise.resolve(onCreateDialog?.(contact.id)).catch(() => undefined);
                   }}
                 >
                   <span className="msg-dialog-list__avatar" aria-hidden="true">
