@@ -224,6 +224,7 @@ test("finished course appears in Analytics and Trajectory from one persisted lea
   await expect(analytics.getByTestId("learn-lessons")).toHaveText("8");
   await expect(analytics.getByTestId("learn-reviewed")).toHaveText("0");
   await expect(analytics).toContainText("OpenSpec и SDD");
+  await expect(page.getByTestId("analytics-v3")).toContainText("Пройден курс Impulse: OpenSpec и SDD");
 
   await page.goto("/workspace/1");
   const trajectory = page.getByTestId("learning-progress-bridge");
