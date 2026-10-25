@@ -178,9 +178,13 @@
   gap:8px;min-width:0;margin:0;color:#f4faff;font-size:15px;font-weight:760;}
 .engagement-rhythm-status {color:#50ecc8;font-size:11px;white-space:nowrap;}
 .engagement-help-wrap {position:relative;display:inline-flex;align-items:center;flex:none;}
-.streak-redesign .engagement-help-button {display:grid;place-items:center;width:22px;height:22px;
-  padding:0;border:1.5px solid #19b9f5;border-radius:50%;
-  background:#062b40;color:#56d5ff;font-size:12px;font-weight:700;}
+.streak-redesign .engagement-help-button {
+  display:inline-grid;place-items:center;box-sizing:border-box;
+  flex:0 0 24px;width:24px;height:24px;min-width:24px;min-height:24px;
+  aspect-ratio:1;padding:0;line-height:1;
+  border:1.5px solid #19b9f5;border-radius:50%;
+  background:#062b40;color:#56d5ff;font-size:12px;font-weight:700;
+}
 .engagement-help-tooltip {position:absolute;z-index:20;left:calc(100% + 9px);top:-25px;
   width:240px;max-width:60vw;padding:10px 12px;
   border:1px solid #2aa8f6;border-radius:9px;background:#0a253e;
