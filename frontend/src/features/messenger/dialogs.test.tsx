@@ -275,6 +275,23 @@ describe("DialogList", () => {
     ).toContain("Поддержка · стенд");
   });
 
+  it("возвращает вкладку «Все» после перехода к только что выбранному контакту", () => {
+    const storage=new MemoryStorage();
+    const onSelect=vi.fn<(channelId:string)=>void>();
+    const { rerender }=render(
+      <DialogList channels={CHANNELS} viewerId={VIEWER_ID} viewerName={VIEWER_NAME}
+        selectedId={null} storage={storage} onSelect={onSelect} />,
+    );
+    fireEvent.click(screen.getByRole("tab", {name:"Контакты"}));
+    expect(screen.getByRole("tab", {name:"Контакты"})).toHaveAttribute("aria-selected","true");
+    rerender(
+      <DialogList channels={CHANNELS} viewerId={VIEWER_ID} viewerName={VIEWER_NAME}
+        selectedId="ch-personal" storage={storage} onSelect={onSelect} />,
+    );
+    expect(screen.getByRole("tab", {name:/Все/})).toHaveAttribute("aria-selected","true");
+    expect(screen.getByText("Диалогов показано: 3")).toBeInTheDocument();
+  });
+
   it("вкладка «Контакты» выводит контакты и вызывает onCreateDialog для пика", () => {
     const { container, onCreateDialog } = renderList(new MemoryStorage());
     fireEvent.click(screen.getByRole("tab", { name: "Контакты" }));
