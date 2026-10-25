@@ -336,6 +336,11 @@ const participantMetricSeries = [
 ];
 
 const queryClient = createQueryClient();
+/** Test isolation only: the production QueryClient remains shared across routes. */
+export function resetAppQueryCacheForTests(): void {
+  if (import.meta.env.MODE === "test") queryClient.clear();
+}
+
 
 function LoginScreen({
   personas,
