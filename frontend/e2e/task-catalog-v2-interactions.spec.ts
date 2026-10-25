@@ -127,11 +127,37 @@ test.describe("task catalog interactive controls and motion", () => {
     await rows.first().focus();
     await page.keyboard.press("ArrowDown");
     await expect(rows.nth(1)).toBeFocused();
-    await rows.nth(1).getByRole("button", { name: "Сохранено" }).click();
+    const menu = rows.nth(1).locator(".catalog-v2-table-menu");
+    await menu.locator("summary").click();
+    await expect(menu).toHaveAttribute("open", "");
+    await menu.getByRole("button", { name: "Сохранено" }).click();
     await expect.poll(() => secondBookmarkSaved).toBe(false);
     await expect(page).toHaveURL(new RegExp(`task=${catalogItem.task_id}`));
     await page.getByRole("button", { name: "Карточки" }).click();
     await expect(page).toHaveURL(/catalog_view=cards/);
+    await expect(page).toHaveURL(new RegExp(`task=${catalogItem.task_id}`));
+  });
+
+  test("compact list actions are accessible without activating the underlying row", async ({ page }) => {
+    await openCatalog(page);
+    await page.getByRole("button", { name: "Список" }).click();
+    const first = page.locator(".catalog-v2-table-row").first();
+    await expect(first.getByRole("button", { name: "Подробнее" })).toBeVisible();
+    const disclosure = first.locator(".catalog-v2-table-menu");
+    const trigger = disclosure.locator("summary");
+    await expect(trigger).toHaveAttribute("aria-label", /Действия с задачей/);
+    await trigger.click();
+    await expect(disclosure).toHaveAttribute("open", "");
+    await expect(page).not.toHaveURL(/task=/);
+    await disclosure.getByRole("button", { name: "Поделиться" }).click();
+    await expect(page.getByText(/Ссылка на задачу скопирована/)).toBeVisible();
+    await expect(page).not.toHaveURL(/task=/);
+    await disclosure.getByRole("button", { name: "Условия и отклик" }).click();
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page).not.toHaveURL(/task=/);
+    await first.getByRole("button", { name: "Подробнее" }).click();
     await expect(page).toHaveURL(new RegExp(`task=${catalogItem.task_id}`));
   });
 
