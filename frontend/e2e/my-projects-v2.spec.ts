@@ -33,16 +33,16 @@ async function fixture(page: Page) {
     const project=projects[Math.max(0,index)];
     return route.fulfill({json:{
       task:{id:"task-"+project.id,title:project.title},
-      customer:{id:"customer-"+index,display_name:project.customer},
+      customer:{id:"customer-"+String(index),display_name:project.customer},
       mentor:{id:"mentor-1",display_name:"Мария Волкова"},
       team:[{person_id:actor.person_id,display_name:actor.display_name,status:"in_progress"},{person_id:"mentor-1",display_name:"Мария Волкова",status:"mentor"}],
-      checkpoints:["Исследование требований","Прототип","Тестирование","Документация","Финальный отчёт"].map((title,i)=>({key:"cp-"+i,title,status:i<project.completed?"completed":"pending"})),
+      checkpoints:["Исследование требований","Прототип","Тестирование","Документация","Финальный отчёт"].map((title,i)=>({key:"cp-"+String(i),title,status:i<project.completed?"completed":"pending"})),
       personal:[],feedback:[],problem:"Реальный исследовательский проект",
     }});
   });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  if (page.viewportSize() && page.viewportSize()!.width < 1024) {
+  if ((page.viewportSize()?.width ?? 1024) < 1024) {
     await page.getByRole("button", { name: "Меню", exact: true }).click();
   }
   await page.getByRole("link",{name:"Мои проекты"}).click();
