@@ -69,3 +69,49 @@ test("missing-source values never masquerade as issued certification or verified
  await expect(page.getByText("Не присвоен")).toBeVisible();
  await expect(page.getByText("Реестр сертификатов недоступен")).toBeVisible();
 });
+
+for (const viewport of [
+ { name: "desktop-1586", width: 1586, height: 992 },
+ { name: "compact-desktop-1366", width: 1366, height: 900 },
+ { name: "mobile-390", width: 390, height: 844 },
+] as const) {
+ test("analytics tab switcher stays stationary — "+viewport.name, async ({page}) => {
+  await page.setViewportSize({width:viewport.width,height:viewport.height});
+  await page.goto("/workspace/9");
+  const root=page.getByTestId("analytics-v3");
+  const nav=root.getByRole("navigation",{name:"Подразделы аналитики"});
+  await expect(nav).toBeVisible();
+  const sample=async()=>{
+   await page.evaluate(async()=>{await document.fonts.ready;});
+   return nav.evaluate((el)=>{
+    const r=el.getBoundingClientRect();
+    const buttons=Array.from(el.querySelectorAll<HTMLButtonElement>("button"), x=>{
+     const rect=x.getBoundingClientRect();
+     return {x:rect.x,y:rect.y,width:rect.width,height:rect.height};
+    });
+    return {x:r.x,y:r.y,width:r.width,height:r.height,buttons};
+   });
+  };
+  const initial=await sample();
+  for(const [tab,label] of [
+   ["passport","Skill Passport"],["certification","Сертификация"],["activity","Активность"],
+   ["certification","Сертификация"],["passport","Skill Passport"],
+  ] as const) {
+   await nav.getByRole("button",{name:label,exact:true}).click();
+   await expect(root).toHaveAttribute("data-tab",tab);
+   const next=await sample();
+   for(const k of ["x","y","width","height"] as const){
+    expect(Math.abs(next[k]-initial[k]),viewport.name+": nav "+k+" moved on "+label).toBeLessThanOrEqual(1);
+   }
+   expect(next.buttons.length).toBe(initial.buttons.length);
+   initial.buttons.forEach((first,i)=>{
+    const current=next.buttons.at(i);
+    if(current===undefined)throw new Error("Missing analytics tab at index "+String(i));
+    for(const k of ["x","y","width","height"] as const){
+     expect(Math.abs(current[k]-first[k]),viewport.name+": button "+String(i)+" "+k+" moved on "+label).toBeLessThanOrEqual(1);
+    }
+   });
+   expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(2);
+  }
+ });
+}

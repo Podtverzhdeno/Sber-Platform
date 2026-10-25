@@ -45,7 +45,6 @@ import {
   applyTheme,
   storedThemeChoice,
   subscribeSystemTheme,
-  type ThemeChoice,
 } from "./app/theme";
 import { appQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
@@ -62,7 +61,8 @@ import { OperatorWorkspace } from "./features/operator";
 import { ManagerVisualPage, OperatorVisualPage } from "./features/visual-gap-pages";
 import { RoleAnalytics } from "./features/analytics";
 import { AnalyticsDashboardV3 } from "./features/analytics-v3/page";
-import { ParticipantPortfolio, ParticipantRating } from "./features/portfolio";
+import { ParticipantRating } from "./features/portfolio";
+import { ParticipantPortfolioV2 } from "./features/portfolio-v2";
 import { MentorReviewWorkspace } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
 import { MessagingWorkspace } from "./features/collaboration";
@@ -561,7 +561,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Портфолио" ? (
-          <ParticipantPortfolio />
+          <ParticipantPortfolioV2 />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Рейтинг" ? (
@@ -573,7 +573,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Достижения" ? (
-          <ParticipantAchievements />
+          <ParticipantAchievements navigation={navigation} />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "AI-Buddy" ? (
@@ -1267,25 +1267,13 @@ function ImpulseApp() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [, setRankingOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [themeChoice, setThemeChoice] = useState<ThemeChoice>(() =>
-    storedThemeChoice(),
-  );
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() =>
-    document.documentElement.dataset.theme === "light" ? "light" : "dark",
-  );
-
+  const [themeChoice, setThemeChoice] = useState(() => storedThemeChoice());
+  useEffect(() => { applyTheme(themeChoice); }, [themeChoice]);
   useEffect(() => {
-    setResolvedTheme(applyTheme(themeChoice));
-  }, [themeChoice]);
-
-  useEffect(() => {
-    const subscription = subscribeSystemTheme((next) => {
-      if (storedThemeChoice() !== "system") return;
-      setResolvedTheme(next);
+    const unsubscribe = subscribeSystemTheme(() => {
+      if (storedThemeChoice() === "system") applyTheme("system");
     });
-    return () => {
-      subscription();
-    };
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -1298,21 +1286,6 @@ function ImpulseApp() {
       window.removeEventListener("storage", onStorage);
     };
   }, []);
-
-  function toggleTheme() {
-    const next: ThemeChoice = resolvedTheme === "dark" ? "light" : "dark";
-    setThemeChoice(next);
-    setResolvedTheme(applyTheme(next));
-    if (actor?.active_role === "participant") {
-      void apiRequest("/api/v1/me/theme", {
-        method: "PUT",
-        headers: {
-          "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "",
-        },
-        body: JSON.stringify({ theme: next }),
-      }).catch(() => undefined);
-    }
-  }
 
   useEffect(() => {
     if (meQuery.data && !explicitSignOut.current) {
@@ -1596,23 +1569,6 @@ function ImpulseApp() {
               )}
             </div>
             <div className="header-actions">
-              <div className="theme-utility">
-                <button
-                  type="button"
-                  className="theme-toggle"
-                  aria-pressed={resolvedTheme === "dark"}
-                  aria-label={
-                    resolvedTheme === "dark"
-                      ? "Тёмная тема включена. Переключить на светлую."
-                      : "Светлая тема включена. Переключить на тёмную."
-                  }
-                  onClick={toggleTheme}
-                >
-                  <span aria-hidden="true">
-                    {resolvedTheme === "dark" ? "☾" : "☀"}
-                  </span>
-                </button>
-              </div>
               {actor.active_role === "participant" && (
                 <TopbarEngagementIndicator />
               )}

@@ -241,4 +241,29 @@ describe("participant home v2", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+
+  it("renders grade ring from API readiness rather than a fixed decoration", () => {
+    const custom = {
+      ...overview.concepts,
+      career_grade: {
+        ...overview.concepts.career_grade,
+        state: "evaluable" as const,
+        current_grade: "2",
+        target_grade: "3",
+        readiness_percent: 50,
+      },
+    };
+    const { view } = renderHome({ concepts: custom });
+    const ring = view.container.querySelector<HTMLElement>(".home-v2-ring");
+    expect(ring?.style.background).toContain("180deg");
+    expect(screen.getByTestId("grade-summary")).toHaveTextContent("50%");
+  });
+
+  it("shows no invented ring fill when grade evaluation is unavailable", () => {
+    const { view } = renderHome();
+    const ring = view.container.querySelector<HTMLElement>(".home-v2-ring");
+    expect(ring?.style.background).toContain("0deg");
+  });
+
+
 });

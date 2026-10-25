@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { createPortal } from "react-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowLeft, ArrowRight, BarChart3, Bell, CalendarDays, Check, ChevronDown,
+  CircleHelp, Snowflake, Trophy, X,
+} from "lucide-react";
 import {
   ANIMATION_STORAGE_KEY,
   fetchEngagementOverview,
@@ -17,94 +22,85 @@ const RHYTHM_PRESETS: Readonly<Record<string, string>> = {
   twice_week: "Два дня",
   custom: "Свой список",
 };
-
-const ISO_WEEKDAY_LABELS: Readonly<Record<number, string>> = {
-  1: "Пн",
-  2: "Вт",
-  3: "Ср",
-  4: "Чт",
-  5: "Пт",
-  6: "Сб",
-  7: "Вс",
-};
-
+const WEEKDAY_LABELS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+function dateKey(day: Date): string {
+  return [day.getFullYear(), String(day.getMonth()+1).padStart(2, "0"), String(day.getDate()).padStart(2, "0")].join("-");
+}
+function recentDays(): Array<{ date: string; label: string }> {
+  const now = new Date();
+  return Array.from({ length: 7 }, (_, index) => {
+    const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6 + index);
+    return { date: dateKey(day), label: WEEKDAY_LABELS[(day.getDay() + 6) % 7] ?? "" };
+  });
+}
 function serverErrorMessage(error: unknown): string {
   const raw = error instanceof Error ? error.message : String(error);
   try {
     const parsed: unknown = JSON.parse(raw);
     if (parsed && typeof parsed === "object" && "message" in parsed) {
       const message = (parsed as Record<string, unknown>).message;
-      if (typeof message === "string" && message.length > 0) {
-        return message;
-      }
+      if (typeof message === "string" && message) return message;
     }
-  } catch {
-    // non-JSON body: fall through
-  }
+  } catch { /* Non-JSON response */ }
   return "Не удалось сохранить недельный ритм.";
 }
 
 export function TopbarEngagementIndicator() {
-  const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [rhythmHelpOpen, setRhythmHelpOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
   const indicatorQuery = useQuery({
-    queryKey: ["engagement-overview"],
-    queryFn: fetchEngagementOverview,
-    retry: false,
+    queryKey: ["engagement-overview"], queryFn: fetchEngagementOverview, retry: false,
   });
   const freezeQuery = useQuery({
-    queryKey: ["engagement-freeze"],
-    queryFn: fetchFreezeSummary,
-    retry: false,
+    queryKey: ["engagement-freeze"], queryFn: fetchFreezeSummary, retry: false,
+  });
+  const rhythmQuery = useQuery({
+    queryKey: ["engagement-rhythm"], queryFn: fetchWeeklyRhythm, retry: false,
   });
   const freezeUse = useMutation({
     mutationFn: useFreezeDay,
-    onSuccess: () => {
+    onSuccess: (result) => {
+      queryClient.setQueryData(["engagement-overview"], result);
       void queryClient.invalidateQueries({ queryKey: ["engagement-overview"] });
       void queryClient.invalidateQueries({ queryKey: ["engagement-freeze"] });
     },
   });
-  const rhythmQuery = useQuery({
-    queryKey: ["engagement-rhythm"],
-    queryFn: fetchWeeklyRhythm,
-    retry: false,
-  });
   const rhythmSave = useMutation({
     mutationFn: saveWeeklyRhythm,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["engagement-rhythm"] });
-    },
+    onSuccess: () => { void queryClient.invalidateQueries({ queryKey: ["engagement-rhythm"] }); },
   });
 
+  const loading = indicatorQuery.isPending;
   const currentDays = indicatorQuery.data?.current_days ?? 0;
   const bestDays = indicatorQuery.data?.best_days ?? 0;
-  const qualifiedDates = indicatorQuery.data?.qualified_dates ?? [];
-  const reason = indicatorQuery.data?.reason ?? "";
   const todaySaved = indicatorQuery.data?.today_saved ?? false;
-  const loading = indicatorQuery.isPending;
+  const reason = indicatorQuery.data?.reason ?? "";
+  const qualifiedDates = indicatorQuery.data?.qualified_dates ?? [];
+  const frozenDates = indicatorQuery.data?.frozen_dates ?? [];
+  const qualifiedSet = new Set(qualifiedDates);
+  const frozenSet = new Set(frozenDates);
+  const mergedDays = Array.from(new Set([...qualifiedDates, ...frozenDates])).sort();
+  const week = recentDays();
+  const today = week[6]?.date ?? "";
+  const freezeState = indicatorQuery.data?.freeze_state ?? "idle";
+  const freezeStock = freezeQuery.data?.available ?? 0;
+  const freezeUsable = freezeState === "break" && freezeStock > 0;
+  const rhythmData = rhythmQuery.data ?? null;
 
   const [flashDays, setFlashDays] = useState<string | null>(null);
   useEffect(() => {
-    if (loading) {
-      return;
-    }
+    if (loading || indicatorQuery.isError) return;
     const stored = Number(window.localStorage.getItem(ANIMATION_STORAGE_KEY) ?? Number.NaN);
     if (Number.isFinite(stored) && stored < currentDays) {
       setFlashDays(`${String(stored)} → ${String(currentDays)}`);
     }
     window.localStorage.setItem(ANIMATION_STORAGE_KEY, String(currentDays));
-  }, [loading, currentDays]);
+  }, [loading, currentDays, indicatorQuery.isError]);
 
-  const frozenDates = indicatorQuery.data?.frozen_dates ?? [];
-  const freezeState = indicatorQuery.data?.freeze_state ?? "idle";
-  const freezeStock = freezeQuery.data?.available ?? 0;
-  const freezeUsable = freezeState === "break" && freezeStock > 0;
-  const mergedDays = Array.from(new Set([...qualifiedDates, ...frozenDates]))
-    .sort()
-    .slice(-56);
-  const qualifiedSet = new Set(qualifiedDates);
-
-  const rhythmData = rhythmQuery.data ?? null;
   const [chosenPreset, setChosenPreset] = useState<string | null>(null);
   const [chosenDays, setChosenDays] = useState<number[] | null>(null);
   const [chosenHour, setChosenHour] = useState<number | null>(null);
@@ -115,276 +111,210 @@ export function TopbarEngagementIndicator() {
   const reminderHour = chosenHour ?? rhythmData?.reminder_hour ?? 18;
   const reminderWindow = chosenWindow ?? rhythmData?.reminder_window_hours ?? 3;
   const effectiveDate = chosenEffective ?? rhythmData?.week_start ?? "";
+  const close = () => {
+    setOpen(false);
+    setCalendarOpen(false);
+    setRhythmHelpOpen(false);
+    triggerRef.current?.focus({ preventScroll: true });
+  };
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialogRef.current?.focus({ preventScroll: true });
+    return () => { document.body.style.overflow = previous; };
+  }, [open]);
+  const onDialogKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      if (calendarOpen) setCalendarOpen(false);
+      else if (rhythmHelpOpen) setRhythmHelpOpen(false);
+      else close();
+    }
+    if (event.key !== "Tab") return;
+    const focusable = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+      "button:not(:disabled), select:not(:disabled), input:not(:disabled)"
+    ) ?? []);
+    const first = focusable[0], last = focusable[focusable.length - 1];
+    if (!first || !last) return;
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+    else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  };
   const saveRhythm = () => {
+    if (!rhythmData || (preset === "custom" && activeDays.length === 0) || !effectiveDate) return;
     rhythmSave.mutate({
-      preset,
-      custom_days: preset === "custom" ? activeDays : [],
-      reminder_hour: reminderHour,
-      reminder_window_hours: reminderWindow,
+      preset, custom_days: preset === "custom" ? activeDays : [],
+      reminder_hour: reminderHour, reminder_window_hours: reminderWindow,
       effective_from: effectiveDate,
     });
   };
 
   return (
     <div className="streak-utility">
-      <button
-        className="streak-button"
-        type="button"
-        aria-label={`Учебный стрик: ${loading ? "загрузка" : `${String(currentDays)} дней`}. Открыть детали`}
-        aria-expanded={open}
-        onClick={() => {
-          setOpen((value) => !value);
-        }}
-      >
-        🔥 <strong>{loading ? "…" : String(currentDays)}</strong>
+      <button ref={triggerRef} className="streak-button" type="button"
+        aria-label={`Учебный стрик: ${loading || indicatorQuery.isError ? "загрузка" : `${String(currentDays)} дней`}. Открыть детали`}
+        aria-expanded={open} aria-haspopup="dialog"
+        onClick={() => { setOpen(value => !value); setCalendarOpen(false); }}>
+        <span className="streak-button-fire" aria-hidden="true">🔥</span>
+        <strong>{loading || indicatorQuery.isError ? "…" : String(currentDays)}</strong>
+        <ChevronDown size={16} aria-hidden="true" />
       </button>
-      {flashDays && (
-        <span className="engagement-flash" role="status">
-          Эффективность серии выросла: {flashDays}
-        </span>
-      )}
-      {open && (
-        <div className="streak-popover" role="dialog" aria-label="Учебный стрик">
-          <header>
-            <span>Квалифицированная серия</span>
-            <strong>{loading ? "загрузка…" : `${String(currentDays)} дней подряд`}</strong>
-          </header>
-          <p className="engagement-reason">
-            {todaySaved
-              ? "Сегодняшнее квалифицируемое действие сохранено."
-              : reason || "Первая квалифицируемая работа появится после действий."}
-          </p>
-          <div
-            className="engagement-calendar"
-            role="img"
-            aria-label={`Квалифицированные дни: ${String(qualifiedDates.length)}, лучшая серия ${String(bestDays)} дней`}
-          >
-            {mergedDays.length ? (
-              mergedDays.map((day) =>
-                qualifiedSet.has(day) ? (
-                  <span className="engagement-day" key={day}>
-                    <i>✓</i>
-                    {day}
-                  </span>
-                ) : (
-                  <span className="engagement-day engagement-day--frozen" key={day}>
-                    <i>❄</i>
-                    {day}
-                  </span>
-                ),
-              )
-            ) : (
-              <span className="engagement-day engagement-day--empty">
-                <i>·</i>
-                Пока нет квалифицируемых действий
-              </span>
-            )}
-          </div>
-          <dl className="engagement-facts">
-            <div>
-              <dt>Лучший результат</dt>
-              <dd>
-                {loading ? "загрузка…" : bestDays > 0 ? `${String(bestDays)} дней` : "Пока ноль"}
-              </dd>
-            </div>
-            <div>
-              <dt>Заморозки</dt>
-              <dd>
-                {freezeQuery.isPending
-                  ? "загрузка…"
-                  : `${String(freezeStock)} в запасе · использовано ${String(freezeQuery.data?.consumed_total ?? 0)}`}
-              </dd>
-            </div>
-            <div>
-              <dt>Как считается</dt>
-              <dd>
-                Один день за первое квалифицируемое действие: прогресс курса, отправка в
-                проект, принятое исправление, подтверждённое участие. Вход, клики и сообщения не
-                засчитываются.
-              </dd>
-            </div>
-          </dl>
-          {freezeState === "frozen" && (
-            <p className="engagement-freeze-note" role="status">
-              Вчерашний день закрыт заморозкой; заморозка не считается активностью.
-            </p>
-          )}
-          {freezeUsable && (
-            <section className="engagement-freeze-block">
-              <p>Пропущен вчерашний день. Заморозка может закрыть его один раз.</p>
-              <button
-                type="button"
-                className="streak-freeze-button"
-                disabled={freezeUse.isPending}
-                onClick={() => {
-                  freezeUse.mutate();
-                }}
-              >
-                {freezeUse.isPending ? "Применяем…" : "Использовать заморозку"}
-              </button>
-              {freezeUse.isSuccess && (
-                <p className="engagement-freeze-note" role="status">
-                  Заморозка не применяется: серия прервана глубже одного пропущенного дня.
-                </p>
-              )}
-              {freezeUse.isError && (
-                <p className="engagement-freeze-error" role="alert">
-                  Служебный сбой зафиксирован без расхода заморозки: не удалось применить
-                  заморозку к серии.
-                </p>
-              )}
-            </section>
-          )}
-          <p className="engagement-hint">
-            Календарь показывает только квалифицированные дни; счёт без входов и сообщений.
-          </p>
-          {rhythmData && (
-            <section className="engagement-rhythm-block" aria-label="Недельный ритм">
-              <header>
-                <span>Недельный ритм</span>
-                {rhythmData.versioned && rhythmData.done_days !== null && rhythmData.target_days ? (
-                  <strong>{`${String(rhythmData.done_days)} из ${String(rhythmData.target_days)} в этой неделе`}</strong>
-                ) : (
-                  <strong>не настроен</strong>
-                )}
-              </header>
-              {rhythmData.hint && <p className="engagement-rhythm-hint">{rhythmData.hint}</p>}
-              {rhythmData.versioned && rhythmData.scheduled_from && (
-                <p className="engagement-rhythm-hint">
-                  {`Запланировано новое соглашение: ${
-                    rhythmData.scheduled_preset
-                      ? (RHYTHM_PRESETS[rhythmData.scheduled_preset] ?? rhythmData.scheduled_preset)
-                      : ""
-                  }, с ${rhythmData.scheduled_from}.`}
-                </p>
-              )}
-              {!rhythmData.versioned && rhythmData.history_count > 0 && (
-                <p className="engagement-rhythm-hint">
-                  {(() => {
-                    const plannedFrom = rhythmData.scheduled_from ?? rhythmData.effective_from;
-                    return plannedFrom
-                      ? `Будущее соглашение ещё не действует; запланировано на ${plannedFrom}.`
-                      : "Будущее соглашение ещё не действует.";
-                  })()}
-                </p>
-              )}
-              <div className="engagement-rhythm-presets">
-                {Object.entries(RHYTHM_PRESETS).map(([presetKey, presetLabel]) => (
-                  <button
-                    type="button"
-                    key={presetKey}
-                    className={
-                      preset === presetKey
-                        ? "engagement-rhythm-chip engagement-rhythm-chip--active"
-                        : "engagement-rhythm-chip"
-                    }
-                    onClick={() => {
-                      setChosenPreset(presetKey);
-                      setChosenDays(
-                        presetKey === "custom"
-                          ? rhythmData.preset === "custom"
-                            ? rhythmData.active_days
-                            : []
-                          : null,
-                      );
-                    }}
-                  >
-                    {presetLabel}
-                  </button>
-                ))}
-              </div>
-              {preset === "custom" && (
-                <div className="engagement-rhythm-days">
-                  {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-                    <button
-                      type="button"
-                      key={day}
-                      className={
-                        activeDays.includes(day)
-                          ? "engagement-rhythm-chip engagement-rhythm-chip--active"
-                          : "engagement-rhythm-chip"
-                      }
-                      aria-pressed={activeDays.includes(day)}
-                      onClick={() => {
-                        setChosenDays(
-                          activeDays.includes(day)
-                            ? activeDays.filter((value) => value !== day)
-                            : [...activeDays, day].sort((left, right) => left - right),
-                        );
-                      }}
-                    >
-                      {ISO_WEEKDAY_LABELS[day]}
-                    </button>
-                  ))}
+      {flashDays && <span className="engagement-flash" role="status">Эффективность серии выросла: {flashDays}</span>}
+      {open && createPortal(
+        <div className="streak-modal-root">
+          <button type="button" className="streak-modal-backdrop" aria-label="Закрыть серию" onClick={close} />
+          <section ref={dialogRef} tabIndex={-1} className="streak-popover streak-redesign"
+            role="dialog" aria-modal="true" aria-label="Учебный стрик" onKeyDown={onDialogKeyDown}>
+            <button type="button" className="streak-modal-close" aria-label="Закрыть" onClick={close}><X size={22}/></button>
+            {calendarOpen ? (
+              <div className="streak-history">
+                <button type="button" className="streak-history-back" onClick={() => setCalendarOpen(false)}>
+                  <ArrowLeft size={18} /> Вернуться к серии
+                </button>
+                <div className="streak-history-heading">
+                  <CalendarDays size={29} />
+                  <div><h2>Календарь серии</h2><p>Подтверждённые дни и использованные заморозки</p></div>
                 </div>
-              )}
-              <div className="engagement-rhythm-schedule">
-                <label>
-                  Напоминание
-                  <select
-                    value={String(reminderHour)}
-                    onChange={(event) => {
-                      setChosenHour(Number(event.target.value));
-                    }}
-                  >
-                    {Array.from({ length: 24 }, (_hour, index) => String(index)).map((hour) => (
-                      <option key={hour} value={hour}>
-                        {`${hour}:00`}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    aria-label="Окно напоминания"
-                    value={String(reminderWindow)}
-                    onChange={(event) => {
-                      setChosenWindow(Number(event.target.value));
-                    }}
-                  >
-                    {[1, 2, 3, 4, 5, 6].map((hours) => (
-                      <option key={hours} value={hours}>
-                        {`+${String(hours)} ч`}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label>
-                  Действует с
-                  <input
-                    type="date"
-                    min={rhythmData.week_start ?? undefined}
-                    value={effectiveDate}
-                    onChange={(event) => {
-                      setChosenEffective(event.target.value);
-                    }}
-                  />
-                </label>
+                <div className="streak-history-legend">
+                  <span><Check size={15}/> Квалифицированное действие</span>
+                  <span><Snowflake size={15}/> Заморозка</span>
+                </div>
+                <div className="engagement-calendar" aria-label="История квалифицированной серии">
+                  {mergedDays.length ? mergedDays.map(day =>
+                    <span className={qualifiedSet.has(day) ? "engagement-day" : "engagement-day engagement-day--frozen"} key={day}>
+                      {qualifiedSet.has(day) ? <Check size={17}/> : <Snowflake size={16}/>}
+                      {day}
+                    </span>
+                  ) : <span className="engagement-day engagement-day--empty">Пока нет квалифицируемых действий</span>}
+                </div>
+                <p className="engagement-hint">Календарь отражает только квалифицируемые дни. Входы и сообщения не учитываются.</p>
               </div>
-              {rhythmData.versioned && (
-                <p className="engagement-rhythm-version">
-                  {`Соглашение v${String(rhythmData.version ?? 1)}; всего версий ${String(rhythmData.history_count)}`}
-                </p>
-              )}
-              <button
-                type="button"
-                className="streak-freeze-button"
-                disabled={rhythmSave.isPending}
-                onClick={saveRhythm}
-              >
-                {rhythmSave.isPending ? "Сохраняем…" : "Сохранить ритм"}
-              </button>
-              {rhythmSave.isSuccess && (
-                <p className="engagement-rhythm-note" role="status">
-                  {`Соглашение v${String(rhythmSave.data.version ?? 1)} сохранено; начинает действовать с ${rhythmSave.data.effective_from ?? ""}.`}
-                </p>
-              )}
-              {rhythmSave.isError && (
-                <p className="engagement-freeze-error" role="alert">
-                  {serverErrorMessage(rhythmSave.error)}
-                </p>
-              )}
-            </section>
-          )}
-        </div>
+            ) : (
+              <>
+                <div className="streak-hero">
+                  <div className="streak-hero-copy">
+                    <div className="streak-heading"><span className="streak-emoji" aria-hidden="true">🔥</span>
+                      <h2>Квалифицированная серия</h2></div>
+                    <div className="streak-headline">
+                      <strong>{loading || indicatorQuery.isError ? "Загрузка…" : `${String(currentDays)} дней`}</strong> подряд
+                    </div>
+                    <p className="engagement-reason">
+                      {indicatorQuery.isError ? "Не удалось загрузить данные о серии. Повторите попытку." :
+                        todaySaved ? "Сегодняшнее квалифицируемое действие сохранено. Продолжай развиваться, и серия будет расти." :
+                        reason || "Выполни квалифицируемое действие, чтобы продолжить серию."}
+                    </p>
+                  </div>
+                  <div className="streak-hero-illustration" aria-hidden="true">
+                    <span className="streak-hero-spark">✦</span>
+                    <span className="streak-hero-flame">🔥</span>
+                    <img src="/home-reference/buddy.svg" alt="" />
+                  </div>
+                </div>
+                <button type="button" className="streak-week-card" onClick={() => setCalendarOpen(true)}
+                  aria-label="Открыть полный календарь серии">
+                  <span className="streak-week-days">
+                    {week.map(({date, label}) => {
+                      const qualified = qualifiedSet.has(date);
+                      const frozen = frozenSet.has(date);
+                      return <span className="streak-week-cell" key={date}>
+                        <span>{label}</span>
+                        <i className={`streak-week-dot${qualified ? " is-qualified" : frozen ? " is-frozen" : ""}${today === date ? " is-today" : ""}`}>
+                          {qualified ? <Check size={20}/> : frozen ? <Snowflake size={17}/> : null}
+                        </i>
+                      </span>;
+                    })}
+                  </span>
+                  <span className="streak-week-link">
+                    <span>Календарь серии</span><span>Открыть полный календарь <ArrowRight size={18}/></span>
+                  </span>
+                </button>
+                <div className="streak-facts" aria-label="Статистика серии">
+                  <div className="streak-fact"><span className="streak-fact-icon is-growth"><BarChart3 size={26}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : `${String(currentDays)} дней`}</strong><small>Текущая серия</small></div></div>
+                  <div className="streak-fact"><span className="streak-fact-icon is-best"><Trophy size={27}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : bestDays > 0 ? `${String(bestDays)} дней` : "Пока ноль"}</strong><small>Лучший результат</small></div></div>
+                  <div className="streak-fact"><span className="streak-fact-icon is-freeze"><Snowflake size={27}/></span><div><strong>{freezeQuery.isPending || freezeQuery.isError ? "—" : `${String(freezeStock)} в запасе`}</strong><small>Использовано: {freezeQuery.data?.consumed_total ?? 0}</small></div></div>
+                </div>
+                <div className="streak-rule">
+                  <CircleHelp size={23} aria-hidden="true" /><div>
+                  <h3>Как считается серия</h3>
+                  <p>Один день за первое квалифицируемое действие: прогресс курса, отправка в проект, принятое исправление, подтверждённое участие. Вход, клики и сообщения не учитываются.</p>
+                  </div>
+                </div>
+                {freezeState === "frozen" && <p className="engagement-freeze-note" role="status">Вчерашний день закрыт заморозкой; заморозка не считается активностью.</p>}
+                {freezeUsable && <div className="engagement-freeze-block">
+                  <p>Пропущен вчерашний день. Можно использовать заморозку, если условия позволяют.</p>
+                  <button type="button" className="streak-freeze-button" disabled={freezeUse.isPending}
+                    onClick={() => freezeUse.mutate()}>{freezeUse.isPending ? "Применяем…" : "Использовать заморозку"}</button>
+                  {freezeUse.isSuccess && freezeUse.data.current_days === 0 &&
+                    <p className="engagement-freeze-note" role="status">Заморозка не применяется: серия прервана глубже одного пропущенного дня.</p>}
+                  {freezeUse.isError && <p className="engagement-freeze-error" role="alert">Не удалось применить заморозку. Запас не подтверждён как изменённый.</p>}
+                </div>}
+                {rhythmData && <section className="engagement-rhythm-block" aria-label="Недельный ритм">
+                  <div className="engagement-rhythm-header">
+                    <h3>Недельный ритм
+                      <span className="engagement-help-wrap">
+                        <button type="button" className="engagement-help-button" aria-label="Что такое недельный ритм?"
+                          aria-expanded={rhythmHelpOpen} aria-describedby="engagement-rhythm-tooltip"
+                          onClick={() => setRhythmHelpOpen(value => !value)}>?</button>
+                        <span id="engagement-rhythm-tooltip" className={`engagement-help-tooltip${rhythmHelpOpen ? " is-open" : ""}`} role="tooltip">
+                          Недельный ритм — дни, в которые ты планируешь поддерживать серию. По нему строятся напоминания и ожидание активности. Сам по себе ритм не засчитывает дни.
+                        </span>
+                      </span>
+                    </h3>
+                    <span className="engagement-rhythm-status">
+                      {rhythmData.versioned && rhythmData.done_days !== null && rhythmData.target_days
+                        ? `${String(rhythmData.done_days)} из ${String(rhythmData.target_days)} за неделю` : "Не настроен"}
+                    </span>
+                  </div>
+                  {rhythmData.scheduled_from && <p className="engagement-rhythm-hint">
+                    {rhythmData.versioned ? "Новое расписание" : "Будущее расписание"}: {RHYTHM_PRESETS[rhythmData.scheduled_preset ?? ""] ?? rhythmData.scheduled_preset ?? "—"}, с {rhythmData.scheduled_from}
+                  </p>}
+                  {!rhythmData.versioned && rhythmData.history_count > 0 && !rhythmData.scheduled_from && <p className="engagement-rhythm-hint">Будущее соглашение ещё не действует.</p>}
+                  {rhythmData.hint && <p className="engagement-rhythm-hint">{rhythmData.hint}</p>}
+                  <div className="engagement-rhythm-presets">
+                    {Object.entries(RHYTHM_PRESETS).map(([key,label]) => <button type="button" key={key}
+                      className={`engagement-rhythm-chip${preset === key ? " engagement-rhythm-chip--active" : ""}`}
+                      aria-pressed={preset === key} onClick={() => { setChosenPreset(key); setChosenDays(key === "custom" ? (rhythmData.preset === "custom" ? rhythmData.active_days : []) : null); }}>{label}</button>)}
+                  </div>
+                  {preset === "custom" && <div className="engagement-rhythm-days" aria-label="Дни недельного ритма">
+                    {WEEKDAY_LABELS.map((label,index) => {
+                      const day = index + 1, selected = activeDays.includes(day);
+                      return <button type="button" key={label}
+                        className={`engagement-rhythm-chip${selected ? " engagement-rhythm-chip--active" : ""}`}
+                        aria-pressed={selected} onClick={() => setChosenDays(
+                          selected ? activeDays.filter(value => value !== day) : [...activeDays,day].sort((a,b)=>a-b)
+                        )}>{label}</button>;
+                    })}
+                  </div>}
+                  <div className="engagement-rhythm-schedule">
+                    <div className="engagement-rhythm-reminder">
+                      <span className="streak-reminder-icon"><Bell size={22}/></span>
+                      <div><strong>Напоминание</strong><small>Чтобы не прерывать серию</small></div>
+                    </div>
+                    <label>Время
+                      <select value={String(reminderHour)} onChange={e => setChosenHour(Number(e.target.value))}>
+                        {Array.from({length:24},(_,i)=>i).map(h=><option key={h} value={h}>{String(h).padStart(2,"0")}:00</option>)}
+                      </select>
+                    </label>
+                    <label>Окно
+                      <select aria-label="Окно напоминания" value={String(reminderWindow)} onChange={e=>setChosenWindow(Number(e.target.value))}>
+                        {[1,2,3,4,5,6].map(h=><option key={h} value={h}>+{h} ч</option>)}
+                      </select>
+                    </label>
+                    <label>Действует с
+                      <input type="date" min={rhythmData.week_start ?? undefined}
+                        value={effectiveDate} onChange={e=>setChosenEffective(e.target.value)} />
+                    </label>
+                  </div>
+                  {rhythmData.versioned && <p className="engagement-rhythm-version">Соглашение v{rhythmData.version ?? 1}; всего версий {rhythmData.history_count}</p>}
+                  <button type="button" className="streak-save-button" disabled={rhythmSave.isPending || (preset === "custom" && activeDays.length === 0) || !effectiveDate}
+                    onClick={saveRhythm}>{rhythmSave.isPending ? "Сохраняем…" : "Сохранить ритм"}</button>
+                  {rhythmSave.isSuccess && <p role="status" className="engagement-rhythm-note">Соглашение v{rhythmSave.data.version ?? 1} сохранено; начинает действовать с {rhythmSave.data.effective_from ?? "даты начала"}.</p>}
+                  {rhythmSave.isError && <p role="alert" className="engagement-freeze-error">{serverErrorMessage(rhythmSave.error)}</p>}
+                </section>}
+              </>
+            )}
+          </section>
+        </div>, document.body
       )}
     </div>
   );

@@ -162,6 +162,28 @@ test("events reference: filters, favorite, motion and empty state", async ({ pag
   await page.getByRole("link", { name: "События" }).click();
   const eventCard = page.getByTestId("event-reference-card");
   await expect(eventCard).toHaveCount(1);
+  const sidebarHeading = page.locator(".ev-filters h2");
+  expect(await sidebarHeading.evaluate(el => el.getBoundingClientRect().height)).toBeLessThanOrEqual(26);
+  await page.getByRole("textbox", { name: "Поиск событий" }).fill("несуществующая тема");
+  await expect(page.getByText("События не найдены")).toBeVisible();
+  await page.getByRole("button", { name: "Сбросить все фильтры" }).click();
+  await expect(eventCard).toHaveCount(1);
+  const categoryTabs = page.locator(".ev-result-tabs");
+  await expect(categoryTabs.getByRole("button", { name: /Для вас/ })).toHaveAttribute("aria-pressed", "true");
+  await categoryTabs.getByRole("button", { name: "От Сбера" }).click();
+  await expect(categoryTabs.getByRole("button", { name: "От Сбера" })).toHaveAttribute("aria-pressed", "true");
+  await categoryTabs.getByRole("button", { name: /Для вас/ }).click();
+  await expect(page.getByRole("button", { name: "Рекомендации для вас" })).toHaveAttribute("aria-pressed", "true");
+  const detailsControl = eventCard.getByRole("button", { name: "Подробнее" });
+  const detailStyle = await detailsControl.evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
+    return { height: rect.height, width: rect.width, radius: style.borderRadius, fontSize: style.fontSize };
+  });
+  expect(detailStyle.height).toBeGreaterThanOrEqual(34);
+  expect(detailStyle.height).toBeLessThanOrEqual(40);
+  expect(detailStyle.width).toBeLessThanOrEqual(144);
+  expect(parseFloat(detailStyle.fontSize)).toBeLessThanOrEqual(12);
   await eventCard.getByRole("button", { name: "В избранное" }).click();
   await expect(eventCard.getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
   const duration = await eventCard.evaluate(el => getComputedStyle(el).transitionDuration);
