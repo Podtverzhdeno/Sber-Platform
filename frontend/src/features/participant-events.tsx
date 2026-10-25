@@ -4,8 +4,8 @@ import { useSearchParams } from "react-router-dom";
 
 import { apiRequest, type RuntimeApiPath } from "../api/client";
 import { Modal, SafeExternalLink, StatePanel } from "../components/ui";
-import { ArrowDownUp, ArrowRight, Award, BriefcaseBusiness, ChevronDown, Filter, GraduationCap, Plus, RotateCcw, Search, Users, X } from "lucide-react";
-import { EventsTile, EventExperienceDetail, EventRegistrationForm, type EventTab } from "./participant-events-design";
+import { ArrowRight, Award, BriefcaseBusiness, ChevronDown, Filter, GraduationCap, Search, Users, X } from "lucide-react";
+import { EventsHero, EventsCard, EventExperienceDetail, EventRegistrationForm, type EventTab } from "./participant-events-design";
 import "./participant-events-reference.scss";
 import "./participant-events.scss";
 import "./participant-events-fidelity.scss";
@@ -139,7 +139,7 @@ export function ParticipantEventCatalog() {
   const claimByEvent = new Map((claims.data ?? []).map((item) => [item.event_key, item]));
   const selectedFocus = (params.get("focus") ?? "").split(",").filter(Boolean);
   const activeTracks = Array.from(new Set([...selectedFocus, ...(track === "all" ? [] : [track])]));
-  const activeFilterCount = activeTracks.length + (eventType === "all" ? 0 : 1) + (activeCategory === "sber" ? 1 : 0);
+  const activeFilterCount = activeTracks.length + (eventType === "all" ? 0 : 1);
   const typeName = (key: string): string => ({ educational_program: "Образовательная программа", hackathon: "Хакатон", grant: "Грант", competition: "Конкурс", workshop: "Практикум" })[key] ?? key;
   const openFilters = () => { setDraftFocus(activeTracks); setDraftType(eventType); setFiltersOpen(value => !value); };
   const toggleDraftFocus = (key: string) => { setDraftFocus(value => value.includes(key) ? value.filter(item => item !== key) : [...value, key]); };
@@ -186,47 +186,49 @@ export function ParticipantEventCatalog() {
     setActiveCategory("for-you"); setSortBy("relevance"); setSearch("");
   };
   return <div className="feature-stack participant-events" data-testid="events-v2">
-    <section className="ev-catalog-v3" id="ev-results" aria-labelledby="workspace-title">
-      <header className="ev-v3-heading">
-        <h1 id="workspace-title">Подбор событий</h1>
-        <button type="button" className="ev-v3-reset" onClick={resetFilters}><RotateCcw size={15}/> Сбросить всё</button>
-      </header>
-      <nav className="ev-result-tabs ev-v3-tabs" aria-label="Категории событий">
-        {([["for-you","Для вас"],["sber","От Сбера"],["popular","Популярные"],["deadline","Скоро дедлайн"]] as const).map(([key,label]) =>
-          <button type="button" key={key} className={activeCategory===key?"active":""} aria-pressed={activeCategory===key} onClick={()=> { setActiveCategory(key); }}>{label}{key==="for-you"?" ("+String(visible.length)+")":""}</button>)}
-      </nav>
-      <div className="ev-v3-toolbar" ref={filtersRef}>
-        <button type="button" className={"ev-v3-filters-trigger"+(filtersOpen?" is-open":"")} aria-expanded={filtersOpen} aria-controls="ev-filter-popover" onClick={openFilters}>
-          <Filter size={19}/><strong>Фильтры</strong>{activeFilterCount>0&&<span className="ev-v3-count">{activeFilterCount}</span>}<ChevronDown className="ev-v3-trigger-chevron" size={17}/>
-        </button>
-        <label className="ev-v3-search"><Search size={20}/><input type="search" value={search} onChange={event=>{setSearch(event.target.value);}} placeholder="Найти событие" aria-label="Поиск событий"/></label>
-        <div className="ev-v3-active-filters" aria-label="Активные фильтры">
-          {activeTracks.map(key=><button key={"track-"+key} type="button" className="ev-v3-active-chip" aria-label={"Убрать направление "+key} onClick={()=>{removeDirection(key);}}>{key}<X size={13}/></button>)}
-          {eventType!=="all"&&<button type="button" className="ev-v3-active-chip" aria-label={"Убрать тип "+typeName(eventType)} onClick={()=>{setParam("type","all");}}>{typeName(eventType)}<X size={13}/></button>}
-          {activeCategory==="sber"&&<button type="button" className="ev-v3-active-chip" onClick={()=>{setActiveCategory("for-you");}}>От Сбера<X size={13}/></button>}
-          <button type="button" className="ev-v3-add" aria-label="Добавить фильтр" onClick={openFilters}><Plus size={18}/></button>
+    <EventsHero events={allItems} onChoose={() => { document.getElementById("ev-results")?.scrollIntoView({behavior:"smooth",block:"start"}); }}/>
+    <div className="ev-catalog ev-catalog--compact" id="ev-results">
+      <div className="ev-catalog-results">
+        <div className="ev-result-header ev-result-header--compact">
+          <nav className="ev-result-tabs" aria-label="Категории событий">
+            {([["for-you","Для вас"],["sber","От Сбера"],["popular","Популярные"],["deadline","Скоро дедлайн"]] as const).map(([key,label])=>
+              <button type="button" key={key} className={activeCategory===key?"active":""} aria-pressed={activeCategory===key} onClick={()=>{setActiveCategory(key);}}>{label}{key==="for-you"?" ("+String(visible.length)+")":""}</button>)}
+          </nav>
+          <div className="ev-compact-controls" ref={filtersRef}>
+            <label className="ev-compact-search"><Search size={15} aria-hidden="true"/><input type="search" aria-label="Поиск событий" placeholder="Найти событие" value={search} onChange={e=>{setSearch(e.target.value);}}/></label>
+            <button type="button" className={"ev-compact-trigger"+(filtersOpen?" is-open":"")} onClick={openFilters} aria-expanded={filtersOpen} aria-controls="ev-filter-popover">
+              <Filter size={14} aria-hidden="true"/><span>Фильтры</span>{activeFilterCount>0&&<b className="ev-compact-count">{activeFilterCount}</b>}<ChevronDown size={13} aria-hidden="true"/>
+            </button>
+            {filtersOpen&&<section className="ev-v3-popover" id="ev-filter-popover" aria-label="Фильтры событий">
+              <header className="ev-v3-popover-head"><strong>Фильтры</strong><button type="button" aria-label="Закрыть фильтры" onClick={()=>{setFiltersOpen(false);}}><X size={16}/></button></header>
+              <div className="ev-v3-filter-section"><h3>Направление</h3><div className="ev-v3-filter-options">
+                {tracks.map(key=><button type="button" key={key} aria-pressed={draftFocus.includes(key)} className={draftFocus.includes(key)?"is-active":""} onClick={()=>{toggleDraftFocus(key);}}>{key}</button>)}
+              </div></div>
+              <div className="ev-v3-filter-section"><h3>Тип события</h3><div className="ev-v3-filter-options">
+                <button type="button" aria-pressed={draftType==="all"} className={draftType==="all"?"is-active":""} onClick={()=>{setDraftType("all");}}>Все</button>
+                {types.map(key=><button type="button" key={key} aria-pressed={draftType===key} className={draftType===key?"is-active":""} onClick={()=>{setDraftType(draftType===key?"all":key);}}>{typeName(key)}</button>)}
+              </div></div>
+              <div className="ev-v3-popover-actions">
+                <button type="button" className="ev-v3-apply" onClick={applyFilters}>Показать · {previewCount}<ArrowRight size={14}/></button>
+                <button type="button" className="ev-v3-clear" onClick={resetFilters}>Сбросить всё</button>
+              </div>
+            </section>}
+          </div>
+          <div className="ev-result-order"><label>Сортировка: <select aria-label="Сортировка событий" value={sortBy} onChange={e=>{setSortBy(e.target.value);}}><option value="relevance">По соответствию</option><option value="deadline">По дедлайну</option><option value="newest">Недавно проверены</option></select></label></div>
         </div>
-        <span className="ev-v3-shown">Показано: {visible.length} из {allItems.length}</span>
-        <label className="ev-v3-order"><ArrowDownUp size={16}/><select value={sortBy} aria-label="Сортировка событий" onChange={e=>{setSortBy(e.target.value);}}><option value="relevance">По соответствию</option><option value="deadline">По дедлайну</option><option value="newest">Недавно проверены</option></select><ChevronDown size={14}/></label>
-        {filtersOpen&&<section id="ev-filter-popover" className="ev-v3-popover" aria-label="Фильтры событий">
-          <header className="ev-v3-popover-head"><div><strong>Фильтры событий</strong><small>Выберите подходящие направления и тип</small></div><button type="button" onClick={()=>{setFiltersOpen(false);}} aria-label="Закрыть фильтры"><X size={18}/></button></header>
-          <div className="ev-v3-filter-section"><h3>Направления</h3><div className="ev-v3-filter-options">
-            {tracks.map(key=><button type="button" key={key} aria-pressed={draftFocus.includes(key)} className={draftFocus.includes(key)?"is-active":""} onClick={()=>{toggleDraftFocus(key);}}>{key}</button>)}
-          </div></div>
-          <div className="ev-v3-filter-section"><h3>Тип события</h3><div className="ev-v3-filter-options">
-            <button type="button" className={draftType==="all"?"is-active":""} aria-pressed={draftType==="all"} onClick={()=>{setDraftType("all");}}>Все типы</button>
-            {types.map(key=><button type="button" key={key} className={draftType===key?"is-active":""} aria-pressed={draftType===key} onClick={()=>{setDraftType(draftType===key?"all":key);}}>{typeName(key)}</button>)}
-          </div></div>
-          <div className="ev-v3-popover-actions"><button type="button" className="ev-v3-apply" onClick={applyFilters}>Показать события · {previewCount} <ArrowRight size={15}/></button><button type="button" className="ev-v3-clear" onClick={()=>{setDraftFocus([]);setDraftType("all");}}>Очистить</button></div>
-        </section>}
+        {activeFilterCount>0&&<div className="ev-compact-applied" aria-label="Активные фильтры">
+          {activeTracks.map(key=><button type="button" key={key} aria-label={"Убрать направление "+key} onClick={()=>{removeDirection(key);}}>{key}<X size={12}/></button>)}
+          {eventType!=="all"&&<button type="button" aria-label={"Убрать тип "+typeName(eventType)} onClick={()=>{setParam("type","all");}}>{typeName(eventType)}<X size={12}/></button>}
+          <button type="button" className="ev-compact-clear" onClick={resetFilters}>Очистить</button>
+        </div>}
+        {visible.length===0?<div className="ev-empty"><h3>События не найдены</h3><p>Измените фильтры или направление развития</p><button className="ev-primary" type="button" onClick={resetFilters}>Сбросить фильтры</button></div>:
+          <div className="ev-event-list">{visible.map((item,index)=>{
+            const claim=claimByEvent.get(item.key);
+            return <div key={item.key}><EventsCard item={item} index={index} focus={focus} evidenceState={claim?.evidence_state} verificationExplanation={claim?.verification_explanation} canReportResult={item.status!=="open"&&!claim} onReportResult={()=>{setSelectedEvent(item);}} saved={savedEvents.has(item.key)} onSave={()=>{toggleSaved(item.key);}} onDetails={()=>{openEvent(item.key);}}/></div>;
+          })}</div>}
+        <div className="ev-benefits-bottom"><strong>После участия вы получите</strong><span><BriefcaseBusiness/> Практический опыт</span><span><Award/> Подтверждённые достижения</span><span><GraduationCap/> Развитие навыков</span><span><Users/> Новые контакты</span></div>
       </div>
-      {visible.length===0?<div className="ev-empty"><h3>События не найдены</h3><p>Попробуйте изменить направление, тип события или запрос</p><button className="ev-primary" type="button" onClick={resetFilters}>Сбросить фильтры</button></div>:
-        <div className="ev-event-list ev-v3-event-grid">{visible.map((item,index)=>{
-          const claim=claimByEvent.get(item.key);
-          return <EventsTile key={item.key} item={item} index={index} focus={focus} evidenceState={claim?.evidence_state} verificationExplanation={claim?.verification_explanation} canReportResult={item.status!=="open"&&!claim} onReportResult={()=>{setSelectedEvent(item);}} saved={savedEvents.has(item.key)} onSave={()=>{toggleSaved(item.key);}} onDetails={()=>{openEvent(item.key);}}/>;
-        })}</div>}
-      <div className="ev-benefits-bottom"><strong>После участия вы получите</strong><span><BriefcaseBusiness/> Практический опыт</span><span><Award/> Подтверждённые достижения</span><span><GraduationCap/> Развитие навыков</span><span><Users/> Новые контакты</span></div>
-    </section>
+    </div>
     <div className="ev-detail-modal"><Modal title={detail.data?.title ?? "Подробности события"} open={eventKey !== null} onClose={close}>{detail.isLoading || aggregate.isLoading ? <StatePanel kind="loading" /> : detail.isError || aggregate.isError || !detail.data || !aggregate.data ? <StatePanel kind="error" action="Закрыть" onAction={close} /> : <><EventExperienceDetail detail={detail.data} aggregate={aggregate.data} tab={detailTab} onTabChange={setDetailTab} onClose={close} onRegister={()=> { setRegistrationOpen(true); }} isSaved={savedEvents.has(detail.data.key)} onSave={()=> { toggleSaved(detail.data.key); }}/>{registrationOpen&&<EventRegistrationForm event={detail.data} onClose={closeRegistration}/>}</>}</Modal></div>
     <Modal title={`Подтвердить результат · ${selectedEvent?.title ?? ""}`} open={selectedEvent !== null} onClose={() => { setSelectedEvent(null); }}>
       <form className="event-claim-form" onSubmit={(event) => { event.preventDefault(); if (selectedEvent) report.mutate(selectedEvent.key); }}><p>Событие завершено. После проверки сертификата баллы станут постоянными.</p><label>Результат<select value={claimType} onChange={(event) => { setClaimType(event.target.value); }}><option value="participation">Участие</option><option value="completion">Завершение</option><option value="finalist">Финалист</option><option value="winner">Победа</option></select></label><label>Что вы сделали<textarea required minLength={20} value={result} onChange={(event) => { setResult(event.target.value); }} /></label><label>Ссылка на сертификат или доказательство<input required type="url" value={evidence} onChange={(event) => { setEvidence(event.target.value); }} /></label><div className="modal-actions"><button type="submit" disabled={report.isPending}>{report.isPending ? "Отправляем…" : "Отправить на проверку"}</button><button className="secondary-button" type="button" onClick={() => { setSelectedEvent(null); }}>Отмена</button></div></form>
