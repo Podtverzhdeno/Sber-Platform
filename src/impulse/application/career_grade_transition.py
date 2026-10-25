@@ -4,6 +4,7 @@ The issuer never creates policies or invents grades. Production must supply an
 approved, effective policy registry, a trusted evidence feed and a durable
 compare-and-swap award store before any automatic transition is possible.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -85,36 +86,62 @@ class CareerGradeTransitionService:
         current = await self._awards.current_grade(person_id, track_key)
         if current is None:
             return CareerGradeTransitionResult(
-                "not_evaluable", "initial_grade_not_assigned", None, None, None,
-                False, None,
+                "not_evaluable",
+                "initial_grade_not_assigned",
+                None,
+                None,
+                None,
+                False,
+                None,
             )
         policy = await self._policies.next_policy(track_key, current, as_of)
         if policy is None:
             return CareerGradeTransitionResult(
-                "not_evaluable", "grade_catalog_policy_not_published",
-                current, current, None, False, None,
+                "not_evaluable",
+                "grade_catalog_policy_not_published",
+                current,
+                current,
+                None,
+                False,
+                None,
             )
         if policy.track_key != track_key or policy.current_grade_key != current:
             raise ValueError("Grade policy must match current role and actual awarded grade")
         evidence = await self._evidence.evidence_for(person_id, track_key, policy)
         readiness = calculate_grade_readiness(
-            person_id, track_key, policy, evidence, as_of=as_of,
+            person_id,
+            track_key,
+            policy,
+            evidence,
+            as_of=as_of,
         )
         if readiness.state != "known":
             return CareerGradeTransitionResult(
-                "not_evaluable", readiness.reason, current, current,
-                policy.target_grade_key, False, readiness,
+                "not_evaluable",
+                readiness.reason,
+                current,
+                current,
+                policy.target_grade_key,
+                False,
+                readiness,
             )
         if not readiness.ready_for_atomic_transition:
             return CareerGradeTransitionResult(
-                "requirements_open", None, current, current,
-                policy.target_grade_key, False, readiness,
+                "requirements_open",
+                None,
+                current,
+                current,
+                policy.target_grade_key,
+                False,
+                readiness,
             )
         if readiness.calculation_fingerprint is None:
             raise ValueError("Verified grade transition needs an auditable fingerprint")
         issued = await self._awards.award_if_current(
-            person_id=person_id, track_key=track_key,
-            from_grade=current, to_grade=policy.target_grade_key,
+            person_id=person_id,
+            track_key=track_key,
+            from_grade=current,
+            to_grade=policy.target_grade_key,
             catalog_version=policy.catalog_version,
             calculation_fingerprint=readiness.calculation_fingerprint,
             awarded_at=as_of,
@@ -125,7 +152,11 @@ class CareerGradeTransitionService:
         return CareerGradeTransitionResult(
             "awarded" if issued else "already_processed",
             None,
-            current, after, policy.target_grade_key, issued, readiness,
+            current,
+            after,
+            policy.target_grade_key,
+            issued,
+            readiness,
         )
 
 

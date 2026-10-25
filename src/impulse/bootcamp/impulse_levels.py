@@ -5,6 +5,7 @@ published role course and at least one independently approved practical
 certificate. Later cycles need separately published curriculum; old
 certificates MUST NOT be replayed as evidence for a new level.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -58,19 +59,20 @@ async def _evidence(
     request: Request, authenticated: AuthenticatedSession, track_key: str
 ) -> tuple[int, int, int, tuple[str, ...]]:
     courses = await request.app.state.development_service.store.courses()
-    keys = tuple(sorted(
-        course.key for course in courses
-        if track_key in course.track_keys and course.key in ELIGIBLE_KEYS
-    ))
+    keys = tuple(
+        sorted(
+            course.key
+            for course in courses
+            if track_key in course.track_keys and course.key in ELIGIBLE_KEYS
+        )
+    )
     summary = await impulse_study_summary(authenticated, request)
     verified_by_key = {course.course_key: course for course in summary.courses}
-    finished = sum(
-        verified_by_key[key].finished
-        for key in keys if key in verified_by_key
-    )
+    finished = sum(verified_by_key[key].finished for key in keys if key in verified_by_key)
     approved = sum(
         verified_by_key[key].practical_certificate_id is not None
-        for key in keys if key in verified_by_key
+        for key in keys
+        if key in verified_by_key
     )
     return finished, len(keys), approved, keys
 
@@ -80,13 +82,17 @@ async def _saved(
 ) -> tuple[int, int, list[dict[str, object]]]:
     async with request.app.state.database.sessions() as session:
         row = (
-            (await session.execute(
-                text(
-                    "SELECT level, cycle_number, history FROM impulse_role_levels "
-                    "WHERE person_id = :person AND track_key = :track"
-                ),
-                {"person": person_id, "track": track_key},
-            )).mappings().one_or_none()
+            (
+                await session.execute(
+                    text(
+                        "SELECT level, cycle_number, history FROM impulse_role_levels "
+                        "WHERE person_id = :person AND track_key = :track"
+                    ),
+                    {"person": person_id, "track": track_key},
+                )
+            )
+            .mappings()
+            .one_or_none()
         )
     if row is None:
         return 0, 1, []
@@ -97,27 +103,32 @@ async def _project(
     request: Request, authenticated: AuthenticatedSession, track_key: str
 ) -> ImpulseLevelView:
     await _actor_track(request, authenticated, track_key)
-    level, cycle, history = await _saved(
-        request, authenticated.actor.person_id, track_key
-    )
+    level, cycle, history = await _saved(request, authenticated.actor.person_id, track_key)
     # Only the first-cycle curriculum has been published. Past certificates
     # cannot automatically count in a future cycle.
     if level > 0:
         return ImpulseLevelView(
-            track_key=track_key, level=level, cycle_number=cycle,
-            curriculum_state="unpublished", completed_courses=0,
-            required_courses=0, approved_practices=0,
-            required_practices=PRACTICE_MINIMUM, advance_ready=False,
+            track_key=track_key,
+            level=level,
+            cycle_number=cycle,
+            curriculum_state="unpublished",
+            completed_courses=0,
+            required_courses=0,
+            approved_practices=0,
+            required_practices=PRACTICE_MINIMUM,
+            advance_ready=False,
             history=history,
         )
-    finished, required, approved, _keys = await _evidence(
-        request, authenticated, track_key
-    )
+    finished, required, approved, _keys = await _evidence(request, authenticated, track_key)
     return ImpulseLevelView(
-        track_key=track_key, level=level, cycle_number=cycle,
+        track_key=track_key,
+        level=level,
+        cycle_number=cycle,
         curriculum_state="published" if required > 0 else "unpublished",
-        completed_courses=finished, required_courses=required,
-        approved_practices=approved, required_practices=PRACTICE_MINIMUM,
+        completed_courses=finished,
+        required_courses=required,
+        approved_practices=approved,
+        required_practices=PRACTICE_MINIMUM,
         advance_ready=required > 0 and finished == required and approved >= PRACTICE_MINIMUM,
         history=history,
     )
@@ -163,13 +174,17 @@ async def advance_impulse_level(
             {"person": person, "track": track},
         )
         row = (
-            (await session.execute(
-                text(
-                    "SELECT level FROM impulse_role_levels "
-                    "WHERE person_id=:person AND track_key=:track FOR UPDATE"
-                ),
-                {"person": person, "track": track},
-            )).mappings().one()
+            (
+                await session.execute(
+                    text(
+                        "SELECT level FROM impulse_role_levels "
+                        "WHERE person_id=:person AND track_key=:track FOR UPDATE"
+                    ),
+                    {"person": person, "track": track},
+                )
+            )
+            .mappings()
+            .one()
         )
         if int(row["level"]) == 0:
             await session.execute(
@@ -183,7 +198,9 @@ async def advance_impulse_level(
                     "WHERE person_id=:person AND track_key=:track AND level=0"
                 ),
                 {
-                    "person": person, "track": track, "version": POLICY_VERSION,
+                    "person": person,
+                    "track": track,
+                    "version": POLICY_VERSION,
                     "courses": current.completed_courses,
                     "practices": current.approved_practices,
                 },
