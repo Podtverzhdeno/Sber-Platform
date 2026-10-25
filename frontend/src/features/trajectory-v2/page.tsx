@@ -3,8 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { StatePanel } from "../../components/ui";
-import { apiRequest, type RuntimeApiPath } from "../../api/client";
-import type { BootcampOverview } from "../bootcamp/page";
+import { apiRequest } from "../../api/client";
 import { trajectoryStudyProgress } from "./study-progress";
 import {
   loadDevelopmentOverview,
@@ -132,14 +131,6 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
       : (catalogueRoles[0]?.track_key ?? null);
   }, [catalogueRoles, overview.next_outcome, roleParam]);
   const selected = catalogueRoles.find((role) => role.track_key === selectedKey) ?? null;
-  const roleGrade = useQuery({
-    queryKey:["bootcamp-v2-overview",selectedKey],
-    queryFn:()=>apiRequest<BootcampOverview>(
-      (`/api/v1/me/bootcamp/overview?track=${encodeURIComponent(selectedKey??"")}`) as RuntimeApiPath,
-    ),
-    enabled:selectedKey!==null,
-    retry:false,
-  });
   const learningLevel = useQuery({
     queryKey:roleLevelQueryKey(selectedKey),
     queryFn:()=>loadRoleLevel(selectedKey ?? ""),
@@ -147,16 +138,6 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   });
   const roleLevel=learningLevel.data?.track_key===selectedKey ? learningLevel.data : null;
   const nextCycleUnpublished=roleLevel!==null && roleLevel.level>0 && roleLevel.curriculum_state==="unpublished";
-  const officialRoleGrade=roleGrade.data?.selected_track_key===selectedKey
-    && roleGrade.data.role_summary.grade_state==="known"
-    ? roleGrade.data.role_summary : null;
-  const readyPercent=officialRoleGrade?.readiness?.percent !== undefined
-    ? Number(officialRoleGrade.readiness.percent)
-    : overview.concepts.career_grade.readiness_percent;
-  const displayReadiness=Number.isFinite(readyPercent) ? readyPercent : null;
-  const currentGrade=officialRoleGrade?.current_grade_title ?? overview.concepts.career_grade.current_grade;
-  const gradeCatalogKnown=officialRoleGrade!==null || overview.concepts.career_grade.catalog_version!==null;
-  const roleGradeUnavailable=roleGrade.isError;
 
   const passportSkills = Array.isArray(passport.data?.skills) ? passport.data.skills : [];
   const completedMilestones = overview.roles.reduce((sum, role) => sum + role.completed_milestones, 0);
@@ -188,10 +169,6 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     gradeDialogRef.current?.focus();
     return () => { gradeTriggerRef.current?.focus(); };
   }, [gradesOpen]);
-  const [gradeFocus, setGradeFocus] = useState<number>(() => {
-    const candidate = Number(overview.concepts.career_grade.current_grade);
-    return Number.isInteger(candidate) && candidate >= 1 && candidate <= 6 ? candidate : 1;
-  });
   const snapshotTrigger = () => {
     lastOverlayTriggerRef.current =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -360,7 +337,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         </section>
       <aside className="trajectory-v2-reference-sidebar" aria-label="Карьерный прогресс и следующий шаг">
         <section className="trajectory-v2-grade-panel">
-          <header><h3>Твой грейд</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => { gradeTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setGradesOpen(true); }}>Все уровни →</button></header>
+          <header><h3>Уровень Impulse</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => { gradeTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setGradesOpen(true); }}>Все уровни →</button></header>
           <div className="trajectory-v2-grade-body">
             <div className="trajectory-v2-grade-ring" style={{background:`conic-gradient(#0de5d6 0 ${String(roleLevel ? levelCoursesProgress(roleLevel) : 0)}%, #204a68 ${String(roleLevel ? levelCoursesProgress(roleLevel) : 0)}% 100%)`}}>
               <strong data-testid="trajectory-impulse-level">{roleLevel ? `L${String(roleLevel.level)}` : "—"}</strong>
@@ -505,49 +482,36 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
             <header className="trajectory-v2-grades-heading">
               <div className="trajectory-v2-grades-symbol" aria-hidden="true">▥</div>
               <div>
-                <h2>Все грейды роли «{selected?.title ?? "Моя роль"}»</h2>
-                <p>{overview.concepts.career_grade.catalog_version === null
-                  ? "Демонстрационная структура уровней — официальный каталог пока не опубликован"
-                  : "Изучай уровни и свой путь профессионального развития"}</p>
+                <h2>Уровни Impulse · {selected?.title ?? "Моя роль"}</h2>
+                <p>Учебные уровни и карьерные грейды Сбера — разные системы.</p>
               </div>
               <button type="button" aria-label="Закрыть" onClick={() => { setGradesOpen(false); }}>✕</button>
             </header>
             <div className="trajectory-v2-grades-layout">
-              <nav className="trajectory-v2-grades-list" aria-label="Выбор грейда">
-                {["База и основы","Исследование пользователей","Продуктовые гипотезы","Метрики и приоритизация","Реальные задачи и проекты","Подтверждение компетенций"].map((label,index) => {
-                  const level = index+1;
-                  const current = overview.concepts.career_grade.current_grade === String(level);
-                  return <button type="button" key={level} className="trajectory-v2-grade-option" aria-pressed={gradeFocus===level} onClick={() => { setGradeFocus(level); }}>
-                    <span className="trajectory-v2-grade-dot">{current ? String(level) : level < Number(overview.concepts.career_grade.current_grade) ? "✓" : String(level)}</span>
-                    <span><strong>Грейд {level}</strong><small>{label}</small></span>
-                    <span aria-hidden="true">›</span>
-                  </button>;
-                })}
+              <nav className="trajectory-v2-grades-list" aria-label="Учебные циклы">
+                <div className="trajectory-v2-grade-option">
+                  <span className="trajectory-v2-grade-dot">L0</span>
+                  <span><strong>Стартовый уровень</strong><small>Курсы и первая практика</small></span>
+                </div>
+                <div className="trajectory-v2-grade-option">
+                  <span className="trajectory-v2-grade-dot">L1</span>
+                  <span><strong>Следующий уровень</strong><small>Новый цикл и более сложные результаты</small></span>
+                </div>
               </nav>
               <div className="trajectory-v2-grade-explanation">
                 <div className="trajectory-v2-grade-explanation-head">
-                  <div>
-                    <h3>Грейд {gradeFocus}</h3>
-                    {overview.concepts.career_grade.current_grade === String(gradeFocus) && <span>Твой текущий грейд</span>}
-                  </div>
-                  <div className="trajectory-v2-grade-explanation-graphic" aria-hidden="true">⚑</div>
-                </div>
-                <strong>{["База и основы","Исследование пользователей","Продуктовые гипотезы","Метрики и приоритизация","Реальные задачи и проекты","Подтверждение компетенций"][gradeFocus-1]}</strong>
-                <p>Описание уровней приведено для ознакомления с макетом. Официальная политика и требования к этому уровню пока не опубликованы.</p>
-                <div className="trajectory-v2-grade-explanation-progress">
-                  <div className="trajectory-v2-grade-ring" style={{ background: `conic-gradient(#0de5d6 0 ${String(overview.concepts.career_grade.current_grade === String(gradeFocus) ? overview.concepts.career_grade.readiness_percent ?? 0 : 0)}%, #204a68 ${String(overview.concepts.career_grade.current_grade === String(gradeFocus) ? overview.concepts.career_grade.readiness_percent ?? 0 : 0)}% 100%)` }}><strong>{overview.concepts.career_grade.current_grade === String(gradeFocus) ? `Грейд ${String(gradeFocus)}` : "—"}</strong></div>
-                  <div>
-                    <small>До следующего грейда</small>
-                    <strong>{overview.concepts.career_grade.current_grade === String(gradeFocus) && overview.concepts.career_grade.readiness_percent !== null ? `${String(100-overview.concepts.career_grade.readiness_percent)}%` : "Проверяем"}</strong>
-                    <progress max={100} value={overview.concepts.career_grade.current_grade === String(gradeFocus) ? overview.concepts.career_grade.readiness_percent ?? 0 : 0}/>
-                    <small>{overview.concepts.career_grade.hint ?? "Официальные критерии будут доступны после публикации политики"}</small>
+                  <div><h3>{roleLevel ? `L${String(roleLevel.level)}` : "Уровень загружается"}</h3>
+                    <span>Текущий цикл: {roleLevel?.cycle_number ?? "—"}</span>
                   </div>
                 </div>
-                <div className="trajectory-v2-grade-expectations">
-                  <h4>Ключевые ожидания на этом уровне</h4>
-                  <p>Точные требования к грейду и подтверждённые компетенции публикуются серверной политикой, а не определяются интерфейсом.</p>
-                </div>
-                <div className="trajectory-v2-grade-next-note">Следующий уровень — грейд {Math.min(6,gradeFocus+1)} · Подтверждённые компетенции и более сложные задачи</div>
+                <p>Чтобы повысить уровень, завершите обязательные курсы выбранной роли и получите независимое подтверждение практики.</p>
+                {roleLevel && <div className="trajectory-v2-grade-expectations">
+                  <h4>Прогресс текущего цикла</h4>
+                  <p>Курсы: {roleLevel.completed_courses} из {roleLevel.required_courses}</p>
+                  <p>Принятая практика: {roleLevel.approved_practices} из {roleLevel.required_practices}</p>
+                  {roleLevel.curriculum_state==="unpublished" && <p>Программа следующего цикла ещё не опубликована. Старые сертификаты не засчитываются повторно.</p>}
+                </div>}
+                <div className="trajectory-v2-grade-next-note">Переход подтверждает сервер. Просмотр этой страницы не повышает уровень.</div>
               </div>
             </div>
           </section>
