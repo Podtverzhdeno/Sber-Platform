@@ -17,3 +17,6 @@ release_request=2026-10-25-bootcamp-capture-419d6885
 
 # Build reference My Projects V2: card, list, detail
 release_request=2026-10-25-projects-three-screens-1a84a93
+
+# Rebuild My Projects V2 after strict TypeScript and unrelated events import fix
+release_request=2026-10-25-projects-ts-clean-3b71e75
