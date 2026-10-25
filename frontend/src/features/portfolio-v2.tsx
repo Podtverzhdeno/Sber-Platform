@@ -8,7 +8,7 @@ import {
   MoreHorizontal, Pencil, Rocket, Share2, ShieldCheck, Sparkles, Star, Target, Trophy,
   Users, X, type LucideIcon,
 } from "lucide-react";
-import { apiRequest } from "../api/client";
+import { apiRequest, type RuntimeApiPath } from "../api/client";
 import "./portfolio-v2.scss";
 
 type Contribution = {
@@ -141,7 +141,7 @@ export function ParticipantPortfolioV2() {
   const passportQuery = useQuery({ queryKey: ["talent-passport"], queryFn: () => apiRequest<Passport>("/api/v1/me/talent-passport"), refetchOnMount: "always" });
   const documentsQuery = useQuery({ queryKey: ["project-credentials"], queryFn: () => apiRequest<ProjectDocument[]>("/api/v1/me/project-credentials"), refetchOnMount: "always" });
   const consent = useMutation({
-    mutationFn: ({ scope, granted }: { scope: Scope; granted: boolean }) => apiRequest("/api/v1/me/consents/" + scope, { method: "PUT", headers: csrf(), body: JSON.stringify({ granted }) }),
+    mutationFn: ({ scope, granted }: { scope: Scope; granted: boolean }) => apiRequest(`/api/v1/me/consents/${scope}` as RuntimeApiPath, { method: "PUT", headers: csrf(), body: JSON.stringify({ granted }) }),
     onSuccess: async () => { await client.invalidateQueries({ queryKey: ["portfolio"] }); },
     onError: () => setNotice("Не удалось сохранить настройку видимости. Попробуйте ещё раз."),
   });
