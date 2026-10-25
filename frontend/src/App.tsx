@@ -109,6 +109,7 @@ type NotificationItem = {
   entity_id: string | null;
 };
 type NotificationList = { items: NotificationItem[]; unread: number };
+type ChatNotification = { id: string; title: string; unread: number; muted: boolean; last_message: {id:string;body:string;created_at:string;author_name:string|null} | null };
 const customerSections = ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения", "Настройки"];
 
 const searchKindLabels: Record<string, string> = {
@@ -1415,23 +1416,49 @@ function ImpulseApp() {
     queryFn: () => apiRequest<NotificationList>("/api/v1/me/notifications"),
     enabled: Boolean(actor),
   });
+  const chatNotificationsQuery = useQuery({
+    queryKey: ["messaging-channels"],
+    queryFn: () => apiRequest<ChatNotification[]>("/api/v1/me/messaging/channels"),
+    enabled: Boolean(actor) && actor.navigation.includes("Сообщения"),
+    refetchInterval: 12_000,
+    refetchIntervalInBackground: false,
+  });
+  const unreadChats = (chatNotificationsQuery.data ?? [])
+    .filter((channel) => channel.unread > 0 && !channel.muted)
+    .sort((a,b) => (b.last_message?.created_at ?? "").localeCompare(a.last_message?.created_at ?? ""));
   const notificationItems = notificationsQuery.data?.items ?? [];
-  const unreadCount = notificationsQuery.data?.unread ?? 0;
+  const unreadCount = (notificationsQuery.data?.unread ?? 0)
+    + unreadChats.reduce((sum, channel) => sum + channel.unread, 0);
   const invalidateNotifications = () => {
     void queryClient.invalidateQueries({ queryKey: ["notifications"] });
   };
   async function readAllNotifications() {
     setError("");
     try {
+      const token = sessionStorage.getItem("impulse_csrf") ?? "";
       await apiRequest("/api/v1/me/notifications/read-all", {
-        method: "POST",
-        headers: { "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" },
+        method: "POST", headers: { "X-CSRF-Token": token },
       });
+      await Promise.all(unreadChats.filter((channel)=>channel.last_message).map((channel) =>
+        apiRequest(`/api/v1/me/messaging/channels/${channel.id}/read`, {
+          method:"POST", headers:{"X-CSRF-Token":token},
+          body:JSON.stringify({message_id:channel.last_message?.id}),
+        })
+      ));
       invalidateNotifications();
+      await queryClient.invalidateQueries({queryKey:["messaging-channels"]});
     } catch {
-      setError("Не удалось обновить уведомления.");
+      setError("Не удалось отметить все сообщения прочитанными.");
     }
   }
+  const openChatNotification = (channelId: string) => {
+    setNotificationOpen(false);
+    if (actor) {
+      const index = actor.navigation.indexOf("Сообщения");
+      if (index >= 0) void navigate(`/workspace/${String(index)}?channel=${encodeURIComponent(channelId)}`);
+    }
+  };
+
   async function openNotification(item: NotificationItem) {
     setError("");
     setNotificationOpen(false);
@@ -1629,6 +1656,17 @@ function ImpulseApp() {
                       </button>
                     </header>
                     <div className="notification-list">
+                      {unreadChats.map((channel) => (
+                        <button type="button" key={`channel:${channel.id}`} className="notification-chat-unread"
+                          onClick={() => {openChatNotification(channel.id);}}>
+                          <span className="notification-symbol notification-symbol--mentor">✉</span>
+                          <div>
+                            <strong>{channel.title || "Личный чат"}</strong>
+                            <p>{channel.last_message?.author_name ? `${channel.last_message.author_name}: ` : ""}{channel.last_message?.body ?? "Новые сообщения"}</p>
+                            <small>{channel.unread} непрочитанных · {channel.last_message ? formatRelativeTime(channel.last_message.created_at) : ""}</small>
+                          </div><i>›</i>
+                        </button>
+                      ))}
                       {notificationItems.length ? (
                         notificationItems.map((item) => {
                           const style =
