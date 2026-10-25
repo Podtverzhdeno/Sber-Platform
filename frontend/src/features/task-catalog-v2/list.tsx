@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Award, Bookmark, CalendarDays, ChevronRight, MoreHorizontal, Share2 } from "lucide-react";
 import type { CatalogItem } from "./types";
 import { CustomerMark } from "./customer-mark";
+import { displayCatalogTopic } from "./topic-labels";
 
 export function TaskCatalogList(props: {
   items: CatalogItem[];
@@ -75,7 +76,7 @@ export function TaskCatalogList(props: {
               <small>{item.customer.verification === "verified" ? "Проверенный заказчик" : props.customerLabel(item)}</small>
             </span>
             <span role="cell" className="catalog-v2-table-directions" data-label="Направление">
-              {(item.direction_keys.length ? item.direction_keys : item.competency_tags).slice(0, 3).map((tag) => <small key={tag}>{tag}</small>)}
+              {(item.direction_keys.length ? item.direction_keys : item.competency_tags).slice(0, 3).map((tag) => <small key={tag}>{displayCatalogTopic(tag)}</small>)}
               {item.direction_keys.length === 0 && item.competency_tags.length === 0 ? "Не указано" : null}
             </span>
             <span role="cell" className="catalog-v2-table-match" data-label="Соответствие">{props.matchBadge(item)}</span>
