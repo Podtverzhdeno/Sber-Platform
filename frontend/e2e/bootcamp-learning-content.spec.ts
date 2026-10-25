@@ -3,7 +3,7 @@ import { installBootcampReferenceApi } from "./bootcamp-reference-fixtures";
 
 test.beforeEach(async ({ page }) => { await installBootcampReferenceApi(page); });
 
-test("all twelve Bootcamp AI courses expose eight substantive lessons and four interactive learning tabs", async ({ page }) => {
+test("all twelve Bootcamp AI courses provide eight integrated lessons and concealed self-check", async ({ page }) => {
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
@@ -21,12 +21,13 @@ test("all twelve Bootcamp AI courses expose eight substantive lessons and four i
     await expect(outline).toHaveCount(8);
     if (index === 5) continue; // Temporarily unavailable external course: no unauthorized lesson entry.
     await outline.first().click();
-    await expect(reader.getByRole("navigation", { name: "Разделы урока" }).getByRole("button")).toHaveCount(4);
-    for (const label of ["Теория", "Пример", "Практическое задание", "Самопроверка"]) {
-      const button = reader.getByRole("navigation", { name: "Разделы урока" }).getByRole("button", { name: label });
-      await button.click();
-      await expect(button).toHaveAttribute("aria-current", "page");
-    }
+    const lesson = reader.getByTestId("unified-course-lesson");
+    await expect(lesson.locator("[data-learning-block]")).toHaveCount(4);
+    const privateCheck = lesson.locator('[data-learning-block="check"]');
+    await expect(privateCheck.locator(".lesson-frame__toggle")).toHaveAttribute("aria-expanded", "false");
+    await expect(privateCheck.locator(".imp-study__check-grid button")).toHaveCount(0);
+    await privateCheck.locator(".lesson-frame__toggle").click();
+    await expect(privateCheck.locator(".lesson-frame__toggle")).toHaveAttribute("aria-expanded", "true");
     await reader.getByRole("button", { name: "Показать ожидаемый результат" }).click();
     await expect(reader.getByRole("button", { name: "Скрыть ожидаемый результат" })).toBeVisible();
     await reader.getByRole("button", { name: "Следующий урок" }).click();
