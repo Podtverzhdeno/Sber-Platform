@@ -6,6 +6,7 @@ Curriculum content is a proposed learning plan and not verified user evidence.
 from __future__ import annotations
 
 from impulse.bootstrap.ai_curriculum_details import AI_CURRICULUM_DETAILS, learning_details
+from impulse.bootstrap.ai_reading_resources import READING_LIBRARY, STAGE_READINGS
 from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
 from impulse.bootstrap.demo_seed import build_seed_batches
 
@@ -59,3 +60,27 @@ def test_learning_details_are_persisted_with_existing_milestone_ids() -> None:
         assert payload["estimated_hours"] >= 4
         assert "completed" not in payload
         assert "verified" not in payload
+
+
+def test_all_stages_reference_two_verified_official_readings() -> None:
+    """Resource URLs are teaching aids, never completion evidence."""
+    assert set(STAGE_READINGS) == set(AI_CURRICULUM_DETAILS)
+    assert len(READING_LIBRARY) >= 12
+    for role_key, stages in STAGE_READINGS.items():
+        assert len(stages) == 7
+        for stage_position in range(1, 8):
+            details = learning_details(role_key, stage_position)
+            resources = details["resources"]
+            assert len(resources) == 2
+            assert len({item["url"] for item in resources}) == 2
+            for item in resources:
+                assert item["title"]
+                assert item["url"].startswith("https://")
+                assert "example.com" not in item["url"]
+
+    rows = next(
+        batch.rows
+        for batch in build_seed_batches()
+        if batch.table.name == "milestones"
+    )
+    assert sum(len(row["payload"]["resources"]) for row in rows) == 98
