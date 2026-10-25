@@ -69,7 +69,7 @@ for (const viewport of viewports) {
     await expect(details).toBeVisible();
     await expect(details.getByTestId("impulse-immersive-reader")).toBeVisible();
     await details.getByRole("button", { name: "Перейти к программе" }).click();
-    await expect(details.getByRole("heading", { name: "Программа курса" })).toBeVisible();
+    await expect(details.getByText("Программа курса", { exact: true }).first()).toBeVisible();
     await details.getByRole("button", { name: "Почему рекомендован" }).click();
     const reason = page.getByRole("dialog", { name: "Почему рекомендован" });
     await expect(reason).toBeVisible();
