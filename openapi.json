@@ -3437,6 +3437,30 @@
         "title": "ConsentView",
         "type": "object"
       },
+      "ContactView": {
+        "properties": {
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "role"
+        ],
+        "title": "ContactView",
+        "type": "object"
+      },
       "ContinueLearning": {
         "properties": {
           "action": {
@@ -4439,6 +4463,32 @@
           "rating_eligible"
         ],
         "title": "CourseView",
+        "type": "object"
+      },
+      "CreateGroupRequest": {
+        "properties": {
+          "peer_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 24,
+            "minItems": 1,
+            "title": "Peer Ids",
+            "type": "array"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "peer_ids"
+        ],
+        "title": "CreateGroupRequest",
         "type": "object"
       },
       "CreateReviewRequest": {
@@ -13706,21 +13756,19 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Deliverable"
           },
           "estimated_hours": {
             "anyOf": [
               {
-                "maximum": 80,
-                "minimum": 1,
+                "maximum": 80.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Estimated Hours"
           },
           "key": {
@@ -13736,7 +13784,6 @@
                 "type": "null"
               }
             ],
-            "default": null,
             "title": "Lab"
           },
           "position": {
@@ -15183,7 +15230,7 @@
                   "items": {
                     "$ref": "#/components/schemas/ApplicationView"
                   },
-                  "title": "Response Task Applications Api V1 Customer Tasks  Task Id  Applications Get",
+                  "title": "Response Task Applications Api V1 Customer Tasks Task Id Applications Get",
                   "type": "array"
                 }
               }
@@ -15293,7 +15340,7 @@
                   "items": {
                     "$ref": "#/components/schemas/DeadlineChangeView"
                   },
-                  "title": "Response Customer Deadline Requests Api V1 Customer Tasks  Task Id  Deadline Requests Get",
+                  "title": "Response Customer Deadline Requests Api V1 Customer Tasks Task Id Deadline Requests Get",
                   "type": "array"
                 }
               }
@@ -15469,7 +15516,7 @@
                   "items": {
                     "$ref": "#/components/schemas/WorkItemView"
                   },
-                  "title": "Response Participant Preview Api V1 Customer Tasks  Task Id  Participant Preview Get",
+                  "title": "Response Participant Preview Api V1 Customer Tasks Task Id Participant Preview Get",
                   "type": "array"
                 }
               }
@@ -15927,7 +15974,7 @@
                   "items": {
                     "$ref": "#/components/schemas/CandidateMatchView"
                   },
-                  "title": "Response Team Request Matches Api V1 Customer Team Requests  Request Id  Matches Get",
+                  "title": "Response Team Request Matches Api V1 Customer Team Requests Request Id Matches Get",
                   "type": "array"
                 }
               }
@@ -16817,7 +16864,7 @@
                   "items": {
                     "$ref": "#/components/schemas/DeadlineChangeView"
                   },
-                  "title": "Response My Deadline Requests Api V1 Me Assignments  Assignment Id  Deadline Requests Get",
+                  "title": "Response My Deadline Requests Api V1 Me Assignments Assignment Id Deadline Requests Get",
                   "type": "array"
                 }
               }
@@ -18267,6 +18314,62 @@
         "summary": "Channels"
       }
     },
+    "/api/v1/me/messaging/channels/group": {
+      "post": {
+        "operationId": "create_group_api_v1_me_messaging_channels_group_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateGroupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Group"
+      }
+    },
     "/api/v1/me/messaging/channels/personal": {
       "post": {
         "operationId": "open_personal_api_v1_me_messaging_channels_personal_post",
@@ -18391,7 +18494,7 @@
                       "type": "null"
                     }
                   ],
-                  "title": "Response Channel Context Api V1 Me Messaging Channels  Channel Id  Context Get"
+                  "title": "Response Channel Context Api V1 Me Messaging Channels Channel Id Context Get"
                 }
               }
             },
@@ -18463,7 +18566,7 @@
                   "items": {
                     "$ref": "#/components/schemas/impulse__api__v1__messaging__MessageView"
                   },
-                  "title": "Response Messages Api V1 Me Messaging Channels  Channel Id  Messages Get",
+                  "title": "Response Messages Api V1 Me Messaging Channels Channel Id Messages Get",
                   "type": "array"
                 }
               }
@@ -18678,6 +18781,29 @@
           }
         },
         "summary": "Mark Read"
+      }
+    },
+    "/api/v1/me/messaging/contacts": {
+      "get": {
+        "description": "Only expose contacts from the authenticated member's own program.",
+        "operationId": "contact_directory_api_v1_me_messaging_contacts_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ContactView"
+                  },
+                  "title": "Response Contact Directory Api V1 Me Messaging Contacts Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Contact Directory"
       }
     },
     "/api/v1/me/notifications": {
@@ -19002,6 +19128,7 @@
     },
     "/api/v1/me/roadmap-catalog": {
       "get": {
+        "description": "All role roadmaps; only the authenticated participant's completions appear.",
         "operationId": "roadmap_catalog_api_v1_me_roadmap_catalog_get",
         "responses": {
           "200": {
@@ -21503,7 +21630,7 @@
                   "items": {
                     "$ref": "#/components/schemas/StandingView"
                   },
-                  "title": "Response Rebuild Standings Projection Api V1 Operations Rating Seasons  Season Id  Standings Rebuild Post",
+                  "title": "Response Rebuild Standings Projection Api V1 Operations Rating Seasons Season Id Standings Rebuild Post",
                   "type": "array"
                 }
               }
@@ -22001,7 +22128,7 @@
                   "items": {
                     "$ref": "#/components/schemas/DecisionView"
                   },
-                  "title": "Response Timeline Api V1 Ops Cases  Case Id  Timeline Get",
+                  "title": "Response Timeline Api V1 Ops Cases Case Id Timeline Get",
                   "type": "array"
                 }
               }
@@ -22736,7 +22863,7 @@
                   "items": {
                     "$ref": "#/components/schemas/LeaderboardEntryView"
                   },
-                  "title": "Response Leaderboard Api V1 Rating Seasons  Season Id  Leaderboard Get",
+                  "title": "Response Leaderboard Api V1 Rating Seasons Season Id Leaderboard Get",
                   "type": "array"
                 }
               }
