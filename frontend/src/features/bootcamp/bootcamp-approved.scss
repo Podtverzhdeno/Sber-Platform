@@ -374,3 +374,45 @@
 @media (prefers-reduced-motion: reduce) {
   .overlay:has(.bc-panel-content[data-reference="BC-R03"]) button { transition: none; }
 }
+
+
+/* Immersive reader typography and navigation ergonomics. */
+.overlay:has(.bc-panel-content[data-reference="BC-R03"]) .bc-learning__lesson {
+  scroll-margin-top: 94px;
+}
+.overlay:has(.bc-panel-content[data-reference="BC-R03"]) .bc-learning__lesson > p {
+  max-width: 86ch;
+}
+.overlay:has(.bc-panel-content[data-reference="BC-R03"]) .bc-learning__lesson h4 {
+  font-size: clamp(23px, 2.1vw, 30px);
+  line-height: 1.24;
+}
+.overlay:has(.bc-panel-content[data-reference="BC-R03"]) .bc-learning__lesson h5 {
+  font-size: 17px;
+  line-height: 1.4;
+  margin-top: 24px;
+}
+.overlay:has(.bc-panel-content[data-reference="BC-R03"]) .bc-learning__example {
+  padding: clamp(15px, 2vw, 24px);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.overlay:has(.bc-panel-content[data-reference="BC-R03"]) .bc-learning__selfcheck label {
+  font-size: 14px;
+  line-height: 1.55;
+  min-height: 28px;
+}
+.overlay:has(.bc-panel-content[data-reference="BC-R03"]) .bc-learning__selfcheck input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+}
+.overlay:has(.bc-panel-content[data-reference="BC-R03"]) .bc-learning__navigation span {
+  font-size: 14px;
+  text-align: center;
+}
+.overlay:has(.bc-panel-content[data-reference="BC-R03"]) .bc-learning__navigation button:not(:disabled):focus-visible,
+.overlay:has(.bc-panel-content[data-reference="BC-R03"]) .overlay-panel--drawer > header button:focus-visible {
+  outline: 3px solid #1ceee9;
+  outline-offset: 3px;
+}
