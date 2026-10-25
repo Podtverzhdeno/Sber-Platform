@@ -16,7 +16,7 @@ const statusName: Record<string, string> = {
   revision_requested:"Нужна доработка",submitted:"На проверке",disputed:"На проверке",
   active:"В команде",accepted_member:"Участие подтверждено",
   invited:"Приглашён",pending:"Ожидает подтверждения",
-  left:"Вышел из команды",declined:"Приглашение отклонено",
+  left:"Вышел из команды",declined:"Приглашение отклонено",mentor:"Ментор",
 };
 const statusLabel = (s:string) => statusName[s] ?? (s ? "Статус уточняется" : "Ожидает");
 const dateLabel = (s:string) => {
@@ -128,13 +128,13 @@ export function ProjectReferenceProgress({checkpoints,progress,deadline,decision
 function LayersFallback(){return <FileText size={19}/>;}
 type TeamProps={team:ReferencePerson[];customer:string;mentor:string|null;onMessage:(id?:string)=>void;onContribution:()=>void;};
 export function ProjectReferenceTeam({team,customer,mentor,onMessage,onContribution}:TeamProps){
- const activeMembers=team.filter(person=>["active","accepted","joined","confirmed"].includes(person.status));
+ const activeMembers=team.filter(person=>["active","accepted","joined","confirmed","in_progress","staffed"].includes(person.status));
  const count=activeMembers.length;
  return <div className="mp-ref-columns" role="tabpanel" aria-label="Команда">
    <div className="mp-ref-stack"><Card><header className="mp-ref-card-head"><h2>Команда проекта</h2><span className="mp-ref-pill">{count} участников</span></header>
      <div className="mp-ref-team-list">{team.map(person=><div className="mp-ref-person" key={person.person_id}>
        <span className="mp-ref-avatar">{person.display_name.trim().charAt(0).toUpperCase()}</span><div><strong>{person.display_name}</strong><small>{statusLabel(person.status)}</small></div>
-       <span className="mp-ref-pill">{["active","accepted","joined","confirmed"].includes(person.status)?"Участник":statusLabel(person.status)}</span>
+       <span className="mp-ref-pill">{["active","accepted","joined","confirmed","in_progress","staffed"].includes(person.status)?"Участник":statusLabel(person.status)}</span>
        <button type="button" aria-label={`Написать ${person.display_name}`} onClick={()=>{onMessage(person.person_id);}}><MessageCircle size={17}/></button>
      </div>)}
      {!team.length&&<p className="mp-ref-empty">Состав команды ещё не опубликован</p>}
