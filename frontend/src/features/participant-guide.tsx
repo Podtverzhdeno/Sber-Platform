@@ -4,7 +4,7 @@ import {
   Compass, GraduationCap, Layers3, MessageCircle, Rocket, Sparkles, Star, X,
 } from "lucide-react";
 import { shouldAutomaticallySuggest, type PersistedGuide } from "./participant-guide-data";
-import { SECTION_TOURS, locatePopover, type GuideStep } from "./participant-tour-steps";
+import { PROJECT_DETAIL_TOUR, SECTION_TOURS, TASK_DETAIL_TOUR, locatePopover, type GuideStep } from "./participant-tour-steps";
 import "./participant-guide.scss";
 
 type View = "closed" | "welcome" | "hint" | "walkthrough" | "complete";
@@ -92,17 +92,23 @@ function Mascot() {
 export function ParticipantGuide({ personId, section, navigation, onNavigate }: Props) {
   const [view, setView] = useState<View>("closed");
   const [stepIndex, setStepIndex] = useState(0);
+  const [context, setContext] = useState<"default" | "task-detail" | "project-detail">("default");
   const [preferences, setPreferences] = useState<PersistedGuide>(() => readPrefs(personId));
   const [place, setPlace] = useState<Place | null>(null);
   const cardRef = useRef<HTMLElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
-  const list = SECTION_TOURS[section] ?? [fallbackStep];
+  const list = context === "task-detail" && section === "Задачи" ? TASK_DETAIL_TOUR : context === "project-detail" && section === "Мои проекты" ? PROJECT_DETAIL_TOUR : SECTION_TOURS[section] ?? [fallbackStep];
   const step = list[Math.min(stepIndex, list.length - 1)] ?? fallbackStep;
   const showTip = view === "hint" || view === "walkthrough";
   const destinationIndex = navigation.indexOf("Задачи");
   const isHome = section === "Главная";
 
   const close = useCallback(() => { setView("closed"); setPlace(null); }, []);
+  const pickContext = useCallback(() => {
+    if (section === "Задачи" && document.querySelector(".catalog-v2-detail")) return "task-detail";
+    if (section === "Мои проекты" && document.querySelector(".mp-detail")) return "project-detail";
+    return "default";
+  }, [section]);
   const rememberAuto = useCallback((name: string) => {
     const old = readPrefs(personId);
     const next = { ...old, seen: [...new Set([...old.seen, name])], lastAutoAt: Date.now() };
@@ -118,10 +124,12 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
   useEffect(() => {
     close();
     setStepIndex(0);
+    setContext("default");
     const timeout = window.setTimeout(() => {
       if (!shouldAutomaticallySuggest(readPrefs(personId), section, Date.now(), sessionShown(personId))) return;
       if (document.querySelector('[role="dialog"][aria-modal="true"]')) return;
       rememberAuto(section);
+      setContext(pickContext());
       if (isHome && !hasSeenWelcome(personId)) {
         markWelcome(personId);
         setView("welcome");
@@ -130,7 +138,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
       }
     }, 2000);
     return () => { window.clearTimeout(timeout); };
-  }, [section, personId, isHome, close, rememberAuto]);
+  }, [section, personId, isHome, close, rememberAuto, pickContext]);
 
   const startManually = () => {
     if (view !== "closed") { close(); return; }
@@ -139,6 +147,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
     savePrefs(personId, next);
     setPreferences(next);
     setStepIndex(0);
+    setContext(pickContext());
     if (isHome && !hasSeenWelcome(personId)) {
       markWelcome(personId);
       setView("welcome");
