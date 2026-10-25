@@ -127,7 +127,7 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
     setNotice("Не удалось загрузить диалог. Можно открыть другой или начать новый.");
   }, [thread.isError, activeId]);
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages.length, activeId]);
 
   const saveIndex = (items: Dialogue[]) => {
