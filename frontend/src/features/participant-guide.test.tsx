@@ -2,7 +2,8 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ParticipantGuide } from "./participant-guide";
 import { GUIDE_COOLDOWN_MS, PARTICIPANT_GUIDES, shouldAutomaticallySuggest } from "./participant-guide-data";
-import { SECTION_TOURS, locatePopover } from "./participant-tour-steps";
+import { PROJECT_DETAIL_TOUR, SECTION_TOURS, TASK_DETAIL_TOUR, locatePopover } from "./participant-tour-steps";
+import { HELP_TOPICS } from "./participant-help-content";
 
 const navigation = ["Главная", "Задачи", "Мои проекты", "Bootcamp", "Портфолио", "Аналитика"];
 const onNavigate = vi.fn();
@@ -142,6 +143,16 @@ describe("contextual participant guide", () => {
     const left = locatePopover({left: 940,right: 985,top: 200,bottom: 260,width:45,height:60}, {width:290,height:205}, {width:1000,height:700});
     expect(left.side).toBe("left");
     expect(left.left).toBeGreaterThanOrEqual(12);
+  });
+
+  it("every contextual hint opens a real detailed instruction", () => {
+    const known = new Set(HELP_TOPICS.map((topic) => topic.id));
+    const steps = [...Object.values(SECTION_TOURS).flat(), ...TASK_DETAIL_TOUR, ...PROJECT_DETAIL_TOUR];
+    expect(steps.length).toBeGreaterThanOrEqual(50);
+    for (const step of steps) {
+      expect(step.topicId, step.title).toBeTruthy();
+      expect(known.has(step.topicId ?? ""), step.title).toBe(true);
+    }
   });
 
   it("covers the approved reference sections with concrete local targets", () => {
