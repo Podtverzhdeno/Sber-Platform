@@ -18,6 +18,7 @@ on:
       - "frontend/src/components/topbar-theme.scss"
       - "frontend/src/features/engagement.tsx"
       - "frontend/e2e/participant-interactions.spec.ts"
+      - "frontend/e2e/topbar-ranking.spec.ts"
       - ".github/workflows/rating-reference-qa.yml"
   workflow_dispatch:
 
