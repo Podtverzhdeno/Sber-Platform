@@ -12,7 +12,7 @@ import type { RoadmapView } from "./client";
 const rolesFixture: DevelopmentOverviewView["roles"] = [
   {
     track_key: "python",
-    title: "Python-разработчик",
+    title: "AI Security Engineer",
     state: "active",
     attempt_number: 2,
     completed_milestones: 1,
@@ -20,7 +20,7 @@ const rolesFixture: DevelopmentOverviewView["roles"] = [
   },
   {
     track_key: "data",
-    title: "Data-аналитик",
+    title: "AI Data Engineer",
     state: "paused",
     attempt_number: 1,
     completed_milestones: 0,
@@ -28,7 +28,7 @@ const rolesFixture: DevelopmentOverviewView["roles"] = [
   },
   {
     track_key: "product",
-    title: "Продакт-менеджер",
+    title: "AI Architect",
     state: "unselected",
     attempt_number: null,
     completed_milestones: 0,
@@ -279,7 +279,7 @@ describe("trajectory v2 role info dialog", () => {
   it("shows six keyboard-operable sections with the snapshot version", async () => {
     shell("/workspace/1", [roadmapWithNext]);
     fireEvent.click(await screen.findByRole("button", { name: "О роли →" }));
-    const dialog = screen.getByRole("dialog", { name: "Python-разработчик" });
+    const dialog = screen.getByRole("dialog", { name: "AI Security Engineer" });
     expect(dialog.textContent).toContain("Дорожная карта v1");
     expect(screen.getAllByRole("tab")).toHaveLength(6);
     fireEvent.click(screen.getByRole("tab", { name: "Компетенции" }));
@@ -302,7 +302,7 @@ describe("trajectory v2 role info dialog", () => {
     fireEvent.click(await screen.findByRole("button", { name: "О роли →" }));
     fireEvent.click(screen.getByRole("tab", { name: "Кому подойдёт" }));
     expect(screen.getByRole("tabpanel").textContent).toContain("Вход — через каталог траекторий");
-    fireEvent.keyDown(screen.getByRole("dialog", { name: "Продакт-менеджер" }), {
+    fireEvent.keyDown(screen.getByRole("dialog", { name: "AI Architect" }), {
       key: "Escape",
     });
     expect(screen.queryAllByRole("tab")).toHaveLength(0);
