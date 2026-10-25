@@ -1579,7 +1579,7 @@ function ImpulseApp() {
             </div>
             <div className="header-actions">
               {actor.active_role === "participant" && (
-                <TopbarEngagementIndicator />
+                <TopbarEngagementIndicator personId={actor.person_id} />
               )}
               {actor.active_role === "participant" && <button type="button" className="topbar-guide-btn"
                 title="Как устроена платформа" aria-label="Как здесь всё устроено?"
