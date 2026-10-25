@@ -208,3 +208,11 @@
   .workspace:has(.mpd-page)>.sidebar .role-switcher{display:none}
   .page-shell:has(.mpd-page) .topbar{left:210px}
 }
+
+/* 1672px approved screenshot: the back action sits beside (not above) the
+   hero content. Keep the three-column card canvas below at full width. */
+@media(min-width:1500px){
+  .mpd-page .mpd-hero>.mpd-back{position:absolute;top:1px;left:0}
+  .mpd-page .mpd-heading{margin-left:190px;min-height:177px}
+  .mpd-page .mpd-tabs{margin-top:12px}
+}
