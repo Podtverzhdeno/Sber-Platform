@@ -106,3 +106,21 @@ test("Bootcamp cards respond to hover and keyboard focus", async ({ page }) => {
   await card.getByRole("button", { name: "Подробнее →" }).click();
   await expect(page.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
 });
+
+
+test("Bootcamp reference grid column count and card minimum heights", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1086 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const grid = page.locator('[data-reference="BC-R01"] .course-grid');
+  await expect(grid).toBeVisible();
+  const columns = await grid.evaluate((node) =>
+    getComputedStyle(node).gridTemplateColumns.split(" ").filter(Boolean).length
+  );
+  expect(columns).toBe(4);
+  const available = grid.locator('.bootcamp-course-card[data-access="available"]').first();
+  await expect(available).toBeVisible();
+  const height = await available.evaluate((node) => parseFloat(getComputedStyle(node).minHeight));
+  expect(height).toBe(296);
+});
