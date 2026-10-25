@@ -12,6 +12,12 @@ on:
       - "frontend/src/features/bootcamp/learning-content/CourseLearningContent.tsx"
       - "frontend/src/features/bootcamp/learning-content/learning-content.scss"
       - "frontend/src/features/bootcamp/learning-content/ImmersiveCourseExperience.tsx"
+      - "frontend/src/features/bootcamp/learning-content/LessonFrame.tsx"
+      - "frontend/src/features/bootcamp/learning-content/lesson-frame.scss"
+      - "frontend/src/features/bootcamp/learning-content/StarterCaseCard.tsx"
+      - "frontend/src/features/bootcamp/learning-content/starter-case.scss"
+      - "frontend/src/features/bootcamp/learning-content/starter-cases.ts"
+      - "frontend/e2e/bootcamp-learning-content.spec.ts"
       - "frontend/src/features/bootcamp/learning-content/immersive-course.scss"
       - "frontend/src/components/ui.tsx"
       - "frontend/e2e/bootcamp-approved.spec.ts"
@@ -57,7 +63,7 @@ jobs:
         env:
           CI: "true"
           TZ: Europe/Moscow
-        run: npx playwright test bootcamp-approved.spec.ts bootcamp-forensic-audit.spec.ts bootcamp-immersive.spec.ts --project=chromium --reporter=line
+        run: npx playwright test bootcamp-approved.spec.ts bootcamp-forensic-audit.spec.ts bootcamp-immersive.spec.ts bootcamp-learning-content.spec.ts --project=chromium --reporter=line
       - name: Lint Bootcamp components and browser tests
         if: always()
         run: npx eslint src/features/bootcamp e2e/bootcamp-approved.spec.ts e2e/bootcamp-forensic-audit.spec.ts --max-warnings 0
