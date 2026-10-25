@@ -13,6 +13,7 @@ import { ActivityPanel } from "./features/activity-panel";
 import { MonthlyGoalCard } from "./features/monthly-goal-card";
 import { KpiDetailsBody } from "./features/kpi-details";
 import { TopbarEngagementIndicator } from "./features/engagement";
+import { TopbarRank } from "./features/rating-v2/topbar-rank";
 import {
   KPI_KEYS,
   KPI_TITLES,
@@ -1581,9 +1582,7 @@ function ImpulseApp() {
                 <TopbarEngagementIndicator />
               )}
               {actor.active_role === "participant" && actor.navigation.includes("Рейтинг") && <div className="ranking-wrapper">
-                <button className="ranking-utility" type="button" aria-label="Открыть рейтинг участников" onClick={() => { setRankingOpen(false); openSearchItem("Рейтинг"); }}>
-                  <span aria-hidden="true">♜</span><strong>Рейтинг</strong>
-                </button>
+                <TopbarRank personId={actor.person_id} onOpen={() => { setRankingOpen(false); openSearchItem("Рейтинг"); }} />
               </div>}
               <div className="notification-utility">
                 <button
