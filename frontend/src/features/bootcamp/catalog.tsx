@@ -6,6 +6,7 @@ import { ArrowRight, Bot, Check, Clock3, FileText, GitBranch, GraduationCap, Lis
 import { apiRequest, retrySafeRead, RuntimeApiPath } from "../../api/client";
 import { Badge, Card, Drawer, SafeExternalLink, StatePanel } from "../../components/ui";
 import { CourseLearningContent } from "./learning-content/CourseLearningContent";
+import { ImmersiveCourseExperience } from "./learning-content/ImmersiveCourseExperience";
 import { aiRoleTitle, bootcampRoleKeys, courseRoleTitles, isCourseInAiRole, orderRoleCourses } from "./trajectory-content";
 import "./bootcamp-ux.scss";
 import "./bootcamp-approved.scss";
@@ -319,6 +320,15 @@ function CourseDetails({
     { key: "skills", label: "Навыки" },
     { key: "reviews", label: "Отзывы" },
   ] as const;
+  // Impulse's self-paced demo content uses the new ten-state immersive reader.
+  // External provider courses keep their original verified-program and certificate flow.
+  if (/^demo-course-(?:[1-9]|1[0-2])$/.test(card.key)) {
+    return <ImmersiveCourseExperience
+      courseKey={card.key} courseTitle={card.title}
+      recommendation={card.recommendation_reason}
+      accessible={card.access_state === "available"}
+      onReason={onReason} />;
+  }
   return <div ref={lessonSection} className="bc-panel-content" data-reference="BC-R03">
     <div className="bc-ref-detail-hero">
       <CourseFlags card={card}/>
