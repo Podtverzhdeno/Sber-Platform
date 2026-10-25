@@ -829,7 +829,7 @@ export function BootcampCatalog({
     : gradeOverview.isPending
       ? "Грейд: загружается"
       : officialGrade ? "Грейд: "+officialGrade
-        : gradeOverview.data?.role_summary.grade_state === "not_evaluable"
+        : gradeOverview.data.role_summary.grade_state === "not_evaluable"
           ? "Грейд: правила не опубликованы"
           : "Грейд: не присвоен";
   const progressionComplete = gradeCurriculum?policyRemaining.length===0:roleStudy.required.length>0 && pendingRequired.length===0;
