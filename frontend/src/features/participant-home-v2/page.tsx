@@ -319,7 +319,7 @@ export function GradeSummaryPanel(props: {
   onOpenLevels?: () => void;
   onOpenDetails?: () => void;
 }) {
-  const { grade } = props;
+
   const {levelData:level,levelPending} = props;
   const pct = level ? levelCoursesProgress(level) : 0;
   return (
