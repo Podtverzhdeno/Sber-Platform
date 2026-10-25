@@ -14,7 +14,7 @@ import "./my-projects.scss";
 
 type WorkItem = {
   assignment: { id: string; task_id: string; status: string; person_id: string };
-  task: { id: string; title: string; status: string };
+  task: { id: string; title: string; status: string; competency_tags?: string[] };
   terms: { version: number; deadline_at: string; deliverable: string; acceptance_criteria: string[] };
   contributions: { id: string; version: number; personal_summary: string; artifact_keys: string[]; status: string }[];
   decisions: { id: string; contribution_id: string; decision: string; reason: string; deadline_at: string | null }[];
@@ -163,7 +163,7 @@ function ProjectSidebarRow({ project, selected, onSelect, onOpen, onBookmark, sa
       <span className="mp-project-tile__identity">
         <small>{company} · Заказчик</small>
         <strong>{project.work.task.title}</strong>
-        <span className="mp-chip-row"><em>Python</em><em>ML / AI</em><em>Практика</em></span>
+        <span className="mp-chip-row">{(project.work.task.competency_tags?.length ? project.work.task.competency_tags.slice(0,3) : ["Практика", "Командная работа"]).map(tag=><em key={tag}>{tag}</em>)}</span>
       </span>
     </button>
     <div className="mp-project-tile__right">
