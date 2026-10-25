@@ -1,7 +1,6 @@
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
-import { MessagesNavigationIcon } from "./features/messenger/navigation-icons";
 import { Bell, Search } from "lucide-react";
 import { BootcampV2Route } from "./features/bootcamp/route-v2";
 import { TrajectoryV2 } from "./features/trajectory-v2/page";
@@ -418,13 +417,11 @@ function Workspace({
     sectionIndex < navigation.length;
   const currentSection = allowed ? navigation[sectionIndex] : null;
   const [navigationOpen, setNavigationOpen] = useState(false);
-  const [messagesSidebarCollapsed, setMessagesSidebarCollapsed] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const isMessageRoute = currentSection === "Сообщения";
   return (
     <section
-      className={`workspace${navigationOpen ? " workspace--nav-open" : ""}${isMessageRoute && messagesSidebarCollapsed ? " workspace--messages-compact" : ""}`}
+      className={`workspace${navigationOpen ? " workspace--nav-open" : ""}`}
       aria-labelledby="workspace-title"
     >
       <aside className="sidebar" aria-label="Боковая панель">
@@ -474,30 +471,18 @@ function Workspace({
               }}
             >
               <span className="nav-icon" aria-hidden="true">
-                {isMessageRoute ? <MessagesNavigationIcon section={item} /> : navigationIcons[item] ?? "•"}
+                {navigationIcons[item] ?? "•"}
               </span>
               <span>{item}</span>
             </NavLink>
           ))}
         </nav>
-        {isMessageRoute ? (
-          <button
-            className="messages-sidebar-collapse"
-            type="button"
-            aria-label={messagesSidebarCollapsed ? "Развернуть навигацию" : "Свернуть навигацию"}
-            aria-expanded={!messagesSidebarCollapsed}
-            onClick={() => { setMessagesSidebarCollapsed((value) => !value); }}
-          >
-            <span aria-hidden="true">{messagesSidebarCollapsed ? "›" : "‹"}</span>
-          </button>
-        ) : (
-          <div className="sidebar-message">
-            <span className="sidebar-art" aria-hidden="true"><i /><i /><i /></span>
-            <strong>Развиваем технологии вместе</strong>
-            <span>Реальные задачи, обучение и подтверждённый опыт</span>
-            <small>СБЕР</small>
-          </div>
-        )}
+        <div className="sidebar-message">
+          <span className="sidebar-art" aria-hidden="true"><i /><i /><i /></span>
+          <strong>Развиваем технологии вместе</strong>
+          <span>Реальные задачи, обучение и подтверждённый опыт</span>
+          <small>СБЕР</small>
+        </div>
       </aside>
       <div className="workspace-content">
         <button
