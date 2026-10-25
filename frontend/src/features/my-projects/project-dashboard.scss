@@ -243,3 +243,14 @@
 .mpd-info-feedback strong{font-size:11px;color:#06e9d4}
 .mpd-info-feedback p{font-size:12px;line-height:1.5;color:#b3cedf;margin:5px 0 0}
 @media(max-width:590px){.mpd-info-checkpoints ol{grid-template-columns:1fr}.mpd-info-checkpoints__heading{flex-direction:column;align-items:start}}
+
+/* Reference hero and circular progress graphic (derived from confirmed stages). */
+.mpd-edition{display:block;color:#93bbd1;font-size:11px;line-height:1.4;margin:-3px 0 8px}
+.mpd-metric-progress{flex:none;display:grid;place-items:center;width:72px;height:72px}
+.mpd-progress-ring{position:relative;width:70px;height:70px;border-radius:50%;display:grid;place-items:center;box-shadow:0 0 0 1px #1f4b68}
+.mpd-progress-ring::before{content:"";position:absolute;inset:9px;background:#081d31;border-radius:50%}
+.mpd-progress-ring>span{z-index:1;color:#f6feff;font-weight:850;font-size:16px;letter-spacing:-.3px}
+.mpd-metric:has(.mpd-progress-ring){gap:12px}
+.mpd-metric:has(.mpd-progress-ring)>div:last-child{gap:4px}
+.mpd-metric:has(.mpd-progress-ring)>div:last-child b{font-size:14px;line-height:1.25}
+@media(max-width:1350px){.mpd-metric-progress{width:57px;height:57px}.mpd-progress-ring{width:56px;height:56px}.mpd-progress-ring::before{inset:8px}.mpd-progress-ring>span{font-size:13px}}
