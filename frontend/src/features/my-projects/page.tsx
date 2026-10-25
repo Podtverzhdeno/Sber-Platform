@@ -1,5 +1,5 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Award, Bookmark, BriefcaseBusiness, CalendarDays,
@@ -193,12 +193,41 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
 }) {
   const [tab,setTab] = useState<Tab>(initialTab);
   useEffect(()=>{setTab(initialTab);},[initialTab]);
-  // This workspace follows the approved full-screen modal reference; its
-  // underlying page must remain fixed until the participant closes it.
+  const dialogRef=useRef<HTMLDivElement>(null);
+  const onBackRef=useRef(onBack);
+  useEffect(()=>{onBackRef.current=onBack;},[onBack]);
+  // Full-screen reference must behave as an actual accessible modal:
+  // trap keyboard focus, close on Escape and restore background scroll/focus.
   useEffect(()=>{
+    const previousFocus=document.activeElement instanceof HTMLElement?document.activeElement:null;
     const originalOverflow=document.body.style.overflow;
     document.body.style.overflow="hidden";
-    return ()=>{document.body.style.overflow=originalOverflow;};
+    dialogRef.current?.querySelector<HTMLButtonElement>(".mp-ref-close")?.focus({preventScroll:true});
+    const onKeyDown=(event:KeyboardEvent)=>{
+      if(event.key==="Escape"){
+        if(document.querySelectorAll('[role="dialog"][aria-modal="true"]').length>1)return;
+        event.preventDefault();
+        onBackRef.current();
+        return;
+      }
+      if(event.key!=="Tab")return;
+      const elements=Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+        'button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex]:not([tabindex="-1"])'
+      )??[]).filter(element=>element.getClientRects().length>0);
+      const first=elements[0],last=elements[elements.length-1];
+      if(!first||!last)return;
+      if(event.shiftKey&&(document.activeElement===first||!dialogRef.current?.contains(document.activeElement))){
+        event.preventDefault();last.focus();
+      }else if(!event.shiftKey&&(document.activeElement===last||!dialogRef.current?.contains(document.activeElement))){
+        event.preventDefault();first.focus();
+      }
+    };
+    document.addEventListener("keydown",onKeyDown);
+    return ()=>{
+      document.removeEventListener("keydown",onKeyDown);
+      document.body.style.overflow=originalOverflow;
+      if(previousFocus?.isConnected)previousFocus.focus({preventScroll:true});
+    };
   },[]);
   const [summary,setSummary] = useState("");
   const [artifact,setArtifact] = useState("");
@@ -208,7 +237,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
   const checkpoints = project.detail?.checkpoints ?? [];
   const progress = completion(project);
   const tabs: {id:Tab;title:string}[]=[{id:"overview",title:"Обзор"},{id:"tasks",title:"Задачи"},{id:"progress",title:"Прогресс"},{id:"contribution",title:"Мой вклад"},{id:"team",title:"Команда"},{id:"rewards",title:"Бонусы и выгоды"}];
-  return <div className="mp-detail" data-project-screen="detail" role="dialog" aria-modal="true" aria-label="Подробности проекта">
+  return <div ref={dialogRef} className="mp-detail" data-project-screen="detail" role="dialog" aria-modal="true" aria-labelledby="workspace-title">
     <nav className="mp-breadcrumb" aria-label="Путь"><button type="button" onClick={onBack}><ArrowLeft size={16}/> Мои проекты</button><span>/</span><span>{project.work.task.title}</span></nav>
     <div className="mp-ref-hero" role="banner">
       <div className="mp-ref-hero-art" aria-hidden="true"/>
