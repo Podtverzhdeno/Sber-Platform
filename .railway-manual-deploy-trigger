@@ -15,3 +15,6 @@ release_request=2026-10-25-my-projects-compact-1fb317ca
 
 # Canonical sidebar: browser acceptance 18/18, PR #65 merged
 release_request=2026-10-25-sidebar-audit-44d199d
+
+# Immediate production release: rating three-screen integration and green Chromium QA
+release_request=2026-10-25-rating-v2-636e1cc7cec7
