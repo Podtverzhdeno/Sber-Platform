@@ -210,6 +210,9 @@ test.describe("task catalog interactive controls and motion", () => {
         queries.push(new URL(request.url()).searchParams);
       }
     });
+    // Display names aid discovery; API parameters must remain canonical keys.
+    await expect(page.locator('#catalog-v2-direction-options option[value="ml"]')).toHaveAttribute("label", "ML / AI");
+    await expect(page.locator('#catalog-v2-competency-options option[value="python"]')).toHaveAttribute("label", "Python");
     await page.getByRole("button", { name: "Все фильтры" }).click();
     const ensureParam = async (key: string, value: string) => {
       await expect.poll(() => new URL(page.url()).searchParams.get(key)).toBe(value);
