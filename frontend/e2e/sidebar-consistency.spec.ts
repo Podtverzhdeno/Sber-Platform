@@ -29,7 +29,7 @@ async function installReferenceSession(page: Page): Promise<void> {
 
 async function sidebarSignature(page: Page) {
   return page.locator(".sidebar").evaluate(sidebar => ({
-    brand: sidebar.querySelector(".sidebar-brand")?.innerHTML,
+    brand: sidebar.querySelector(".sidebar-brand strong")?.textContent,
     links: Array.from(sidebar.querySelectorAll("nav a"), link => ({
       label: link.textContent.trim(),
       icon: link.querySelector(".nav-icon")?.innerHTML,
