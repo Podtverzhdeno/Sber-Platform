@@ -51,3 +51,30 @@ test("an official grade is displayed exclusively from the server's verified proj
   await page.getByRole("link",{name:"Bootcamp"}).click();
   await expect(page.getByTestId("bootcamp-official-grade")).toHaveText(/Опубликованный уровень L2/);
 });
+
+test("finishing from the real course player updates the requirement banner without reloading",async({page})=>{
+  await installBootcampReferenceApi(page);
+  await page.setViewportSize({width:1448,height:950});
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link",{name:"Bootcamp"}).click();
+  await expect(page.locator("#bc-grade-title")).toContainText("Остался");
+  const bootcampPath=new URL(page.url()).pathname;
+  await page.goto(bootcampPath+"?course=demo-course-1");
+  const reader=page.getByTestId("impulse-immersive-reader");
+  await expect(reader).toBeVisible();
+  await reader.getByRole("button",{name:/Перейти к программе/}).click();
+  await reader.locator(".imp-study__program-list button").first().click();
+  for(let i=0;i<8;i++){
+    await reader.locator(".imp-study__navigation .imp-study__primary").click();
+  }
+  await expect(reader.getByRole("heading",{name:"Завершение обучения"})).toBeVisible();
+  await reader.locator(".imp-study__finish").click();
+  await expect(reader.getByRole("heading",{name:"Обучение завершено!"})).toBeVisible();
+  // React Query invalidation must update the underlying role summary even
+  // while the completed course's drawer stays open.
+  await expect(page.locator("#bc-grade-title")).toContainText("Учебная часть завершена");
+  await expect(page.getByTestId("bootcamp-study-level")).toContainText("1 из 4");
+  await expect(page.getByTestId("bootcamp-next-stage")).toContainText("практика");
+  await expect(page.getByTestId("bootcamp-official-grade")).toContainText("не присвоен");
+});
