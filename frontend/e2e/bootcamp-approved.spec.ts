@@ -196,3 +196,71 @@ test("mobile fullscreen reader keeps lesson controls usable", async ({ page }) =
   await dialog.getByRole("button", { name: "Закрыть" }).click();
   await expect(dialog).toHaveCount(0);
 });
+
+
+test("Bootcamp role choice and direction are independent; reset clears hidden constraints", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1086 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+
+  const shell = page.locator('[data-reference="BC-R01"]');
+  const categories = shell.getByRole("group", { name: "Категории курсов" });
+  const direction = shell.getByLabel("Направление", { exact: true });
+  const search = shell.getByRole("searchbox", { name: "Поиск по курсам" });
+
+  await categories.getByRole("button", { name: /Все курсы/ }).click();
+  const allCount = await shell.locator(".bc-ref-course-card").count();
+  expect(allCount).toBeGreaterThan(0);
+
+  const directionOptions = await direction.locator("option").count();
+  if (directionOptions > 1) {
+    await direction.selectOption({ index: 1 });
+    const filteredCount = await shell.locator(".bc-ref-course-card").count();
+    expect(filteredCount).toBeLessThanOrEqual(allCount);
+    await direction.selectOption("all");
+    await expect(direction).toHaveValue("all");
+    await expect(shell.locator(".bc-ref-course-card")).toHaveCount(allCount);
+  }
+
+  const roles = shell.getByRole("group", { name: "Направление обучения" }).getByRole("button");
+  if (await roles.count() > 1) {
+    await roles.nth(1).click();
+    await expect(roles.nth(1)).toHaveAttribute("aria-pressed", "true");
+    await expect(direction).toHaveValue("all");
+    await categories.getByRole("button", { name: /Все курсы/ }).click();
+    await expect(shell.locator(".bc-ref-course-card")).toHaveCount(allCount);
+  }
+
+  await search.fill("a-course-that-does-not-exist-2026");
+  await expect(shell.locator(".bc-ref-empty")).toBeVisible();
+  await shell.getByRole("button", { name: "Сбросить фильтры" }).click();
+  await expect(search).toHaveValue("");
+  await expect(direction).toHaveValue("all");
+  await expect(shell.locator(".bc-ref-course-card").first()).toBeVisible();
+});
+
+test("Bootcamp desktop reference hero has correct stagger, overlay, and grid density", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1086 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const shell = page.locator('[data-reference="BC-R01"]');
+  const tabs = await shell.locator(".bc-ref-role-tabs").boundingBox();
+  const hero = await shell.locator(".bc-ref-hero-grid").boundingBox();
+  const summary = await shell.locator(".bc-ref-role-summary").boundingBox();
+  const categories = await shell.locator(".bc-ref-category-tabs").boundingBox();
+  const cards = shell.locator(".bc-ref-course-card");
+  expect(tabs).not.toBeNull();
+  expect(hero).not.toBeNull();
+  expect(summary).not.toBeNull();
+  expect(categories).not.toBeNull();
+  if (tabs && hero && summary && categories) {
+    expect(Math.abs(hero.y - (tabs.y + tabs.height + 15))).toBeLessThanOrEqual(3);
+    expect(Math.abs(summary.y - (hero.y - 24))).toBeLessThanOrEqual(3);
+    expect(Math.abs(categories.y - (hero.y + hero.height - 51))).toBeLessThanOrEqual(4);
+  }
+  const standard = cards.filter({ has: page.locator(".bc-ref-chip--available") }).first();
+  await expect(standard).toBeVisible();
+  expect(await standard.evaluate(node => parseFloat(getComputedStyle(node).minHeight))).toBe(296);
+});
