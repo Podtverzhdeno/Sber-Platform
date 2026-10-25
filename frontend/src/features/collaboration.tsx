@@ -292,7 +292,7 @@ export function MessagingWorkspace({
 
   useEffect(() => {
     if (selected && document.visibilityState !== "hidden") markChannelRead(selected);
-  }, [selected?.id, selected?.last_message?.id, selected?.unread, markChannelRead]);
+  }, [selected, markChannelRead]);
 
   const sendMessage = useMutation({
     mutationFn: (payload: ComposerSendPayload) =>
