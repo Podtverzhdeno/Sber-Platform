@@ -65,7 +65,7 @@ export function EventsCard({ item, focus, index, saved, onDetails, onSave }: {
   onDetails: () => void; onSave: () => void;
 }) {
   const match = matchPercent(item, focus);
-  const tracks = item.track_keys.slice(0, 3);
+  const tracks = item.track_keys.slice(0, 2);
   const roleScore = match ?? 0;
   return <article className="ev-event-card ev-event-card--compact" data-testid="event-reference-card" data-event-key={item.key}>
     <div className={`ev-event-thumb ev-event-thumb-${String(index % 3)}`} aria-hidden="true">
@@ -79,7 +79,7 @@ export function EventsCard({ item, focus, index, saved, onDetails, onSave }: {
       </div>
       <div className="ev-event-tags" aria-label="Направления события">
         {tracks.map(track => <span key={track}>{skillName(track)}</span>)}
-        <span className="ev-event-type">{item.event_type}</span>
+        <span className="ev-event-type">{item.event_type === "Образовательная программа" ? "Программа" : item.event_type === "educational_program" ? "Программа" : item.event_type}</span>
       </div>
     </div>
     <div className="ev-event-match ev-event-match--compact" aria-label={match === null ? "Для оценки совпадения выберите направления" : `Совпадение с вашим профилем — ${String(roleScore)}%`}>

@@ -66,8 +66,9 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     await expect(reader.locator(".imp-study__cert-timeline > div > div")).toHaveCount(2);
     const pdfButton = reader.getByRole("button", { name: /Распечатать \/ сохранить PDF/ });
     await expect(pdfButton).toBeEnabled();
-    const hoverStyle = await pdfButton.evaluate(el => getComputedStyle(el).transitionProperty);
-    expect(hoverStyle).not.toBe("none");
+    await pdfButton.hover();
+    await expect.poll(() => pdfButton.evaluate(el => getComputedStyle(el).transform)).not.toBe("none");
+
     await page.screenshot({ path: "test-results/imp-07-certificates-" + String(viewport.width) + ".png", animations: "disabled" });
     const infoTabs = reader.getByRole("navigation", { name: "Разделы информации о курсе" });
     await expect(infoTabs.getByRole("button")).toHaveCount(5);
@@ -84,7 +85,7 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     );
     await reader.getByRole("button", { name: /Отправить на проверку/ }).click();
     await expect(reader.getByText(/Практическая работа получена/)).toBeVisible();
-    await page.screenshot({ path: "test-results/imp-08-practice-pending-" + viewport.width + ".png", animations: "disabled" });
+    await page.screenshot({ path: `test-results/imp-08-practice-pending-${String(viewport.width)}.png`, animations: "disabled" });
     const overflow = await dialog.evaluate(el => el.scrollWidth > el.clientWidth + 1);
     expect(overflow).toBe(false);
   });

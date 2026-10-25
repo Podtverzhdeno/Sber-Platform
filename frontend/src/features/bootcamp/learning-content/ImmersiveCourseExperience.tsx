@@ -175,6 +175,14 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
         <div className="imp-study__progress-mini"><strong>{percent}%</strong><div className="imp-study__bar"><span style={{ width: String(percent) + "%" }}/></div></div>
       </div>
     </div>
+    {view === "practice" && <div className="imp-study__compact-course">
+      <div className="imp-study__compact-shield"><ShieldCheck size={28}/></div>
+      <div className="imp-study__compact-identity"><h3>{courseTitle}</h3><p>{program.description}</p></div>
+      <div className="imp-study__compact-progress"><span>Прогресс курса <strong>{percent}%</strong></span>
+        <div className="imp-study__bar"><span style={{width:String(percent)+"%"}}/></div>
+        <small>{completed} из {total} уроков завершено</small>
+      </div>
+    </div>}
     <div className="imp-study__grid">
       <aside className="imp-study__aside" aria-label="Программа курса">
         <div className="imp-study__aside-heading"><strong>Программа курса</strong><span>{percent}%</span></div>
@@ -324,12 +332,18 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
               : <div className="imp-study__callout"><CheckCircle2 size={18}/><p><strong>Разбор</strong>Сравните пример с задачей и объясните каждый ключевой шаг.</p></div>}
             </div>
           </section>}
-          {view === "practice" && <section className="imp-study__content" aria-label="Практическое задание"><h3>Практическое задание</h3><p>{unit.practice}</p>
+          {view === "practice" && <section className="imp-study__content" aria-label="Практическое задание"><h3>Практическое задание</h3><p>{authReference ? "Реализуйте защищённый API на FastAPI: проверяйте JWT и возвращайте профиль текущего пользователя только по доверенному токену. Добавьте негативные проверки и запрет доступа к чужим объектам." : unit.practice}</p>
             <div className="imp-study__practice-columns"><div><h4><Target size={18}/> Требования</h4>
               {authReference ? authorizationRequirements.map((item,index)=><div className="imp-study__requirement" key={item.title}><span>{index+1}</span><div><strong>{item.title}</strong><p>{item.detail}</p></div></div>)
               : unit.checklist.map((item,index)=><div className="imp-study__requirement" key={item}><span>{index+1}</span>{item}</div>)}</div>
               <div><h4><ClipboardCheck size={18}/> Критерии проверки</h4>
                 {authReference ? authorizationCriteria.map((item,index)=><div className="imp-study__requirement" key={item.title}><span>{index+1}</span><div><strong>{item.title}</strong><p>{item.detail}</p></div></div>) : <><p>{unit.expected}</p><p>Должны быть продемонстрированы работоспособность, полнота решения и корректность обработки ошибок.</p></>}</div></div>
+            {authReference && <div className="imp-study__template">
+              <FileCode2 size={30}/><div><strong>Шаблон проекта</strong><p>Базовая структура FastAPI, проверка JWT и подготовленные места для авторизации объектов.</p></div>
+              <a href="/bootcamp/templates/security-auth-fastapi-starter.py" download="security-auth-fastapi-starter.py">
+                <Download size={17}/> Скачать шаблон
+              </a>
+            </div>}
             <p className="imp-study__disclaimer">Практическая работа требует отдельной проверки для сертификата подтверждения знаний.</p>
             <form className="imp-study__submission" onSubmit={event => { event.preventDefault(); void submitPractice.mutateAsync(); }}>
               <h4>Отправить практическую работу на проверку</h4>

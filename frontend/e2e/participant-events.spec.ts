@@ -68,6 +68,17 @@ test("events reference: all six detail states, registration flow and keyboard na
   await page.getByRole("link", { name: "События" }).click();
   await expect(page.getByTestId("events-v2")).toBeVisible();
   await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
+  const referenceCards = page.getByTestId("event-reference-card");
+  await expect(referenceCards.locator(".ev-card-radar")).toHaveCount(0);
+  await expect(referenceCards.locator(".ev-event-capabilities")).toHaveCount(0);
+  await expect(referenceCards.locator(".ev-role-score")).toHaveCount(3);
+  for (const card of await referenceCards.all()) {
+    const cardBox = await card.boundingBox();
+    const titleBox = await card.locator(".ev-event-main h3").boundingBox();
+    if (!cardBox || !titleBox) throw new Error("Reference card title bounds are unavailable");
+    expect(titleBox.y).toBeGreaterThanOrEqual(cardBox.y - 1);
+    expect(titleBox.y + titleBox.height).toBeLessThanOrEqual(cardBox.y + cardBox.height + 1);
+  }
   await page.setViewportSize({ width: 1586, height: 1081 });
   await page.screenshot({ path: "test-results/event-reference/catalog.png", animations: "disabled", fullPage: false });
   await page.setViewportSize({ width: 1703, height: 924 });
