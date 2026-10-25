@@ -38,7 +38,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
   const [open, setOpen] = useState(false);
   const [prefs, setPrefs] = useState<PersistedGuide>(() => readPreferences(personId));
   const container = useRef<HTMLDivElement>(null);
-  const current = PARTICIPANT_GUIDES[section] ?? PARTICIPANT_GUIDES["Главная"];
+  const current = (PARTICIPANT_GUIDES[section] ?? PARTICIPANT_GUIDES["Главная"]) as NonNullable<(typeof PARTICIPANT_GUIDES)[string]>;
   const destinationIndex = current.destination ? navigation.indexOf(current.destination) : -1;
   const sectionTitle = section === "Главная" ? "Зачем участвовать в Impulse?" : `Зачем нужен раздел «${section}»?`;
 
