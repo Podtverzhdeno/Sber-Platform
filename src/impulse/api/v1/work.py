@@ -11,8 +11,8 @@ from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, Header, Request
 from fastapi.responses import Response
-from sqlalchemy import text
 from pydantic import AnyHttpUrl, AwareDatetime, BaseModel, Field
+from sqlalchemy import text
 
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import csrf_session, current_session
@@ -821,8 +821,11 @@ def _participant_task_detail_view(
         membership=(_assignment_view(detail.membership) if detail.membership is not None else None),
         checkpoints=[
             CheckpointView(
-                key=item.key, title=item.title, status=item.status,
-                description=item.description, deliverable=item.deliverable,
+                key=item.key,
+                title=item.title,
+                status=item.status,
+                description=item.description,
+                deliverable=item.deliverable,
                 acceptance_criteria=list(item.acceptance_criteria),
                 estimated_minutes=item.estimated_minutes,
             )
@@ -1508,18 +1511,27 @@ async def add_checkpoint(
     service: Annotated[WorkService, Depends(_service)],
 ) -> CheckpointView:
     item = await service.add_checkpoint(
-        authenticated.actor, task_id, CheckpointRecord(
-            command.key, command.title, "planned", command.description,
-            command.deliverable, tuple(command.acceptance_criteria),
+        authenticated.actor,
+        task_id,
+        CheckpointRecord(
+            command.key,
+            command.title,
+            "planned",
+            command.description,
+            command.deliverable,
+            tuple(command.acceptance_criteria),
             command.estimated_minutes,
-        )
+        ),
     )
     return CheckpointView(
-                key=item.key, title=item.title, status=item.status,
-                description=item.description, deliverable=item.deliverable,
-                acceptance_criteria=list(item.acceptance_criteria),
-                estimated_minutes=item.estimated_minutes,
-            )
+        key=item.key,
+        title=item.title,
+        status=item.status,
+        description=item.description,
+        deliverable=item.deliverable,
+        acceptance_criteria=list(item.acceptance_criteria),
+        estimated_minutes=item.estimated_minutes,
+    )
 
 
 @router.post("/customer/tasks/{task_id}/team-artifacts", response_model=ArtifactView)
@@ -1691,8 +1703,11 @@ async def _owned_checkpoint(
     if assignment is None or assignment.person_id != person_id:
         raise ApiError(code="RESOURCE_NOT_FOUND", message="Этап не найден.", status_code=404)
     stage = next(
-        (item for item in await service.store.checkpoints(assignment.task_id)
-         if item.key == checkpoint_key),
+        (
+            item
+            for item in await service.store.checkpoints(assignment.task_id)
+            if item.key == checkpoint_key
+        ),
         None,
     )
     if stage is None:
@@ -1754,11 +1769,14 @@ async def upload_checkpoint_file(
                 ":content_type, :size_bytes, :data)"
             ),
             {
-                "id": file_id, "assignment": assignment_id,
+                "id": file_id,
+                "assignment": assignment_id,
                 "person": authenticated.actor.person_id,
-                "checkpoint": checkpoint_key, "filename": filename,
+                "checkpoint": checkpoint_key,
+                "filename": filename,
                 "content_type": command.content_type,
-                "size_bytes": len(data), "data": data,
+                "size_bytes": len(data),
+                "data": data,
             },
         )
     return {"id": str(file_id), "filename": filename, "size_bytes": len(data)}
@@ -1773,24 +1791,27 @@ async def download_checkpoint_evidence(
 ) -> Response:
     async with request.app.state.database.sessions() as session:
         record = (
-            await session.execute(
-                text(
-                    "SELECT assignment_id, filename, content_type, data "
-                    "FROM checkpoint_evidence_files WHERE id = :id"
-                ),
-                {"id": file_id},
+            (
+                await session.execute(
+                    text(
+                        "SELECT assignment_id, filename, content_type, data "
+                        "FROM checkpoint_evidence_files WHERE id = :id"
+                    ),
+                    {"id": file_id},
+                )
             )
-        ).mappings().one_or_none()
+            .mappings()
+            .one_or_none()
+        )
     if record is None:
         raise ApiError(code="RESOURCE_NOT_FOUND", message="Файл не найден.", status_code=404)
     assignment = await service.store.assignment(record["assignment_id"])
     if assignment is None:
         raise ApiError(code="RESOURCE_NOT_FOUND", message="Файл не найден.", status_code=404)
     task = await service.store.get(assignment.task_id)
-    if (
-        task is None
-        or authenticated.actor.person_id
-        not in (assignment.person_id, task.aggregate.customer_id)
+    if task is None or authenticated.actor.person_id not in (
+        assignment.person_id,
+        task.aggregate.customer_id,
     ):
         raise ApiError(code="RESOURCE_NOT_FOUND", message="Файл не найден.", status_code=404)
     return Response(
@@ -1816,15 +1837,19 @@ async def list_checkpoint_submissions(
         raise ApiError(code="RESOURCE_NOT_FOUND", message="Проект не найден.", status_code=404)
     async with request.app.state.database.sessions() as session:
         rows = (
-            await session.execute(
-                text(
-                    "SELECT contribution_id, checkpoint_key, submitted_at "
-                    "FROM checkpoint_submissions WHERE assignment_id = :assignment "
-                    "ORDER BY submitted_at DESC"
-                ),
-                {"assignment": assignment_id},
+            (
+                await session.execute(
+                    text(
+                        "SELECT contribution_id, checkpoint_key, submitted_at "
+                        "FROM checkpoint_submissions WHERE assignment_id = :assignment "
+                        "ORDER BY submitted_at DESC"
+                    ),
+                    {"assignment": assignment_id},
+                )
             )
-        ).mappings().all()
+            .mappings()
+            .all()
+        )
     contributions = await service.store.contributions_for_assignment(assignment_id)
     by_id = {entry.id: entry for entry in contributions}
     return [
@@ -1871,7 +1896,8 @@ async def submit_checkpoint_solution(
                         "AND contribution_id IS NULL"
                     ),
                     {
-                        "id": file_id, "assignment": assignment_id,
+                        "id": file_id,
+                        "assignment": assignment_id,
                         "person": authenticated.actor.person_id,
                         "checkpoint": checkpoint_key,
                     },
