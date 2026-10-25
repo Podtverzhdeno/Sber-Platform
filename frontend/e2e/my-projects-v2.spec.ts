@@ -195,7 +195,7 @@ test("My Projects: quick preview tabs open correct deep-linked details",async({p
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
   await expect(page.getByRole("tab",{name:"Прогресс"})).toHaveAttribute("aria-selected","true");
   await expect(page.getByRole("heading",{name:"Прогресс выполнения проекта"})).toBeVisible();
-  await page.getByRole("button",{name:/Мои проекты/}).first().click();
+  await page.getByRole("button",{name:"Закрыть подробности проекта"}).click();
   await root.locator(".mp-preview__tabs").getByRole("button",{name:"Бонусы и выгоды"}).click();
   await expect(page.getByRole("tab",{name:"Бонусы и выгоды"})).toHaveAttribute("aria-selected","true");
   await expect(page.locator(".mp-ref-rewards button")).toHaveCount(6);
