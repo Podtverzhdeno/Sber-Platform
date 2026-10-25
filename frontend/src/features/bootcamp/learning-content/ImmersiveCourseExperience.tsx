@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCircle2, ChevronRight,
-  Clock3, Code2, Copy, Download, FileCode2, FileText, GraduationCap,
+  Clock3, ClipboardCheck, Code2, Copy, Download, FileCode2, FileText, GraduationCap,
   LockKeyhole, Medal, BadgeCheck, ShieldCheck, Sparkles, Target, Trophy,
 } from "lucide-react";
 import { apiRequest, type RuntimeApiPath } from "../../../api/client";
