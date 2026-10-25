@@ -23406,6 +23406,29 @@
         "summary": "Reconnect"
       }
     },
+    "/api/v1/rating-seasons": {
+      "get": {
+        "description": "Publicly discover published seasons; scheduled drafts are not exposed.",
+        "operationId": "published_rating_seasons_api_v1_rating_seasons_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SeasonView"
+                  },
+                  "title": "Response Published Rating Seasons Api V1 Rating Seasons Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Published Rating Seasons"
+      }
+    },
     "/api/v1/rating-seasons/{season_id}/leaderboard": {
       "get": {
         "operationId": "leaderboard_api_v1_rating_seasons__season_id__leaderboard_get",
