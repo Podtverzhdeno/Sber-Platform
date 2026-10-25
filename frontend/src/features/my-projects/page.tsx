@@ -327,7 +327,7 @@ function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, 
           <div><span className="mp-ref-title-icon"><FileText size={18}/></span><strong>{project.work.contributions.length}</strong><small>Отправлено версий</small></div>
           <div><span className="mp-ref-title-icon"><CheckCircle2 size={18}/></span><strong>{acceptedEvidenceCount}</strong><small>Принятых результатов</small></div>
           <div><span className="mp-ref-title-icon"><Award size={18}/></span><strong>{project.detail?.feedback?.length ?? 0}</strong><small>Проверок</small></div>
-          <div><span className="mp-ref-title-icon"><Layers3 size={18}/></span><strong>{project.work.contributions.reduce((count,item)=>count+item.artifact_keys.length,0)}</strong><small>Типов материалов</small></div>
+          <div><span className="mp-ref-title-icon"><Layers3 size={18}/></span><strong>{new Set(project.work.contributions.flatMap(item=>item.artifact_keys)).size}</strong><small>Типов материалов</small></div>
         </div>
       </div>
       <div className="mp-detail-tab-layout mp-ref-contribution-layout" role="tabpanel" aria-label="Мой вклад">
