@@ -1,0 +1,28 @@
+# Claim XS-501-RATING-CONSUMERS-20261026
+
+- session_id: gpt6-20261026-owners-ranking-consumers
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 55de5d13dc95a495d50f6e697c93c07605628173
+- depends_on:
+  - XS-501-PRIVATE-RATING-20261026 (REVIEW, API green)
+- write_scope:
+  - frontend/src/features/rating-v2/own-standing.ts
+  - frontend/src/features/rating-v2/own-standing.test.ts
+  - frontend/src/features/rating-v2/topbar-rank.tsx (read source only)
+  - frontend/src/features/rating-v2/topbar-rank.test.tsx
+  - frontend/src/features/rating-v2/page.tsx (owner standing display only)
+  - frontend/src/features/rating-v2/page.test.tsx
+  - frontend/e2e/topbar-ranking.spec.ts
+  - .github/workflows/own-rating-consumers-qa.yml
+  - openspec/changes/participant-cross-section-data/specs/cross-section-progress/spec.md (private owner standing scenario)
+  - .agents/coordination/claims/XS-501-RATING-CONSUMERS-20261026.lock/status.md
+- shared_files:
+  - frontend/src/features/rating-v2/page.tsx (prior reference UX agents in REVIEW; only personal standing calculations/display)
+- verification:
+  - ESLint and typecheck
+  - Vitest Topbar and rating page + standing selector
+  - Playwright role/consent example
+- progress: Remove public-leaderboard identity dependency for owner ranking; use exact private season+version evidence, no synthetic scores/places; retain public leaderboard privacy.
+- blockers: Independent review; full all-platform CI.
