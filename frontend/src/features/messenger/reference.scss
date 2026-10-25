@@ -1139,3 +1139,40 @@
  border-radius:7px;background:#401b2b;color:#ffd1d8;font-size:12px}
 .msg-dialog-action-error{margin:8px 10px}
 .sberchat-reference .msg-group-create-trigger{display:grid;gap:4px;border-bottom:1px solid #185677;color:#05e3e9}
+
+
+/* Fix attachment form clipping visible in the real 1584px screenshot:
+   the inherited 34px icon width must not constrain the 'Добавить' label. */
+.sberchat-reference .msg-composer__panel--refs {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(90px,max-content);
+  align-items:center;gap:9px;
+  width:100%;max-width:100%;min-width:0;
+  padding:10px;
+  overflow:hidden;
+}
+.sberchat-reference .msg-composer__panel--refs .msg-composer__ref-input {
+  display:block;flex:none;min-width:0;width:100%;max-width:100%;
+  min-height:40px;padding:9px 12px;border:1px solid #185876;
+  border-radius:7px;background:#041625;color:#f4fdff;font-size:12px;
+}
+.sberchat-reference .msg-composer__panel--refs > .msg-composer__tool {
+  display:inline-flex;align-items:center;justify-content:center;
+  box-sizing:border-box;width:auto;min-width:90px;max-width:100%;
+  height:40px;padding:8px 13px;
+  border:1px solid #1cb8ca;background:#093d54;
+  color:#e7fbff;font-size:12px;font-weight:700;
+  white-space:nowrap;line-height:1.25;
+}
+.sberchat-reference .msg-composer__panel--refs .msg-composer__ref-error {
+  grid-column:1/-1;overflow-wrap:anywhere;
+}
+@media(max-width:520px) {
+  .sberchat-reference .msg-composer__panel--refs {
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:5px;padding:7px;
+  }
+  .sberchat-reference .msg-composer__panel--refs > .msg-composer__tool {
+    min-width:74px;padding:8px;
+  }
+}
