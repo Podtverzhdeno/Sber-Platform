@@ -45,3 +45,6 @@ release_request=2026-10-25-bootcamp-real-progress-5cead636c98d
 
 # 2026-10-25 project workspace: new tabbed full-width dashboard and detailed read-only project popup
 release_request=2026-10-25-project-dashboard-detail-popup-4e67b2d
+
+# Release three live analytics dashboards with green Chromium QA.
+release_request=2026-10-25-analytics-v3-5d754effeab2
