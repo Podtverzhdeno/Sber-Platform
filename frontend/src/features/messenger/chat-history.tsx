@@ -261,9 +261,11 @@ export function ChatHistory({
             {(channel ? dialogKindLabel(channel.kind) : "Чат")}
             {" · "}
             {canSend ? "активен" : "недоступен для записей"}
-            {(channel?.participants.length ?? 0) > 2
-              ? ` · ${String((channel?.participants.length ?? 1) - 1)} участников`
-              : ""}
+            {channel?.kind === "community"
+              ? ` · ${String(channel.participants.length)} ${channel.participants.length % 10 === 1 && channel.participants.length % 100 !== 11 ? "участник" : [2, 3, 4].includes(channel.participants.length % 10) && ![12, 13, 14].includes(channel.participants.length % 100) ? "участника" : "участников"}`
+              : (channel?.participants.length ?? 0) > 2
+                ? ` · ${String((channel?.participants.length ?? 1) - 1)} участников`
+                : ""}
             {channel?.muted ? " · уведомления отключены" : ""}
           </small>
         </button>
