@@ -646,6 +646,27 @@ class MessagingService:
             )
         return channel
 
+    async def add_community_members(
+        self, actor_context: ActorContext, channel_id: UUID, person_ids: tuple[UUID, ...]
+    ) -> None:
+        """Members of an active community may invite peers from their program.
+
+        Cross-program validation is handled at the API boundary; direct service
+        callers must still be existing, send-enabled community members.
+        """
+        channel, membership = await self._visible(actor_context, channel_id)
+        if channel.kind is not ChannelKind.COMMUNITY or channel.status is not ChannelStatus.ACTIVE:
+            raise ApiError("MESSAGE_INVITE_UNAVAILABLE", "Участников можно добавлять только в активное сообщество.", 403)
+        self._assert_sender_enabled(channel, membership)
+        unique = tuple(dict.fromkeys(person_ids))
+        if not unique or len(unique) > 24 or actor_context.person_id in unique:
+            raise ApiError("MESSAGE_INVITE_INVALID", "Выберите от 1 до 24 других пользователей.", 422)
+        for person_id in unique:
+            if await self.store.membership(channel_id, person_id) is None:
+                await self.store.upsert_membership(
+                    channel_id, person_id, MemberRole.MEMBER, sender_enabled=True
+                )
+
     async def channel_work_context(
         self, actor_context: ActorContext, channel_id: UUID
     ) -> ChannelWorkContext | None:
