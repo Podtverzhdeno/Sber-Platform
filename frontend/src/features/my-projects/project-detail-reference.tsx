@@ -152,12 +152,14 @@ export function ProjectReferenceRewards({onContribution,onWorkspace,selected,onS
   const items=[
     {id:"portfolio",title:"Результат в портфолио",desc:"Подтверждённый результат может стать частью портфолио",when:"После приёмки",icon:FileText},
     {id:"assessment",title:"Развитие компетенций",desc:"Практические навыки подтверждаются после проверки результата",when:"По итогам проверки",icon:Award},
-    {id:"mentor",title:"Менторская поддержка",desc:"Обратная связь и консультации в ходе проекта",when:"В период участия",icon:Users},
-    {id:"community",title:"Рекомендации и возможности",desc:"Возможны дополнительные предложения в рамках программы",when:"По условиям программы",icon:Star},
+    {id:"mentor",title:"Менторская поддержка",desc:"Обратная связь и консультации, если назначен ментор",when:"В период участия",icon:Users},
+    {id:"case",title:"Реальный кейс",desc:"Практический опыт решения бизнес-задачи с проверяемым результатом",when:"После выполнения",icon:BriefcaseBusiness},
+    {id:"team",title:"Командная практика",desc:"Совместная работа, обсуждение и демонстрация решений",when:"При участии в команде",icon:MessageCircle},
+    {id:"community",title:"Рекомендации и возможности",desc:"Возможны дополнительные предложения по результатам отбора",when:"По решению заказчика",icon:Star},
   ];
   return <div className="mp-ref-columns" role="tabpanel" aria-label="Бонусы и выгоды">
     <div className="mp-ref-stack"><Card><header className="mp-ref-card-head"><h2>Что даст участие в проекте</h2><small>Возможности и условия</small></header>
-      <div className="mp-ref-rewards">{items.map(item=>{const Icon=item.icon;return <button key={item.id} type="button" className={selected===item.id?"is-selected":""} onClick={()=>{onSelected(item.id);}}><span className="mp-ref-blue-square"><Icon size={19}/></span><span><strong>{item.title}</strong><small>{item.desc}</small></span><span className="mp-ref-reward-when">{item.when}</span><ChevronRight size={17}/></button>;})}</div>
+      <div className="mp-ref-rewards">{items.map(item=>{const Icon=item.icon;return <button key={item.id} type="button" aria-pressed={selected===item.id} className={selected===item.id?"is-selected":""} onClick={()=>{onSelected(item.id);}}><span className="mp-ref-blue-square"><Icon size={19}/></span><span><strong>{item.title}</strong><small>{item.desc}</small></span><span className="mp-ref-reward-when">{item.when}</span><ChevronRight size={17}/></button>;})}</div>
       {selected&&<p className="mp-ref-reward-note" role="status">Предоставление возможности зависит от подтверждения результата и правил программы; автоматическая выдача не гарантируется</p>}
     </Card>
     <Card><Title icon={Award}>Что формируется по итогам</Title><div className="mp-ref-skill-grid"><div className="mp-ref-skill"><FileText size={20}/><strong>Результат</strong><small>Код и документы после приёмки</small></div><div className="mp-ref-skill"><Award size={20}/><strong>Компетенции</strong><small>После оценки</small></div><div className="mp-ref-skill"><Star size={20}/><strong>Портфолио</strong><small>Подтверждённый кейс</small></div></div></Card>
