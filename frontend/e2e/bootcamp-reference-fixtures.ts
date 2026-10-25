@@ -10,7 +10,7 @@ const COURSE_TITLES = [
   "Тестирование", "Безопасность данных", "Презентация результата",
   "Корпоративная культура",
 ];
-const catalog = COURSE_TITLES.map((title, index) => ({
+export const bootcampCatalogFixture = COURSE_TITLES.map((title, index) => ({
   key: `demo-course-${String(index + 1)}`,
   title,
   track_keys: [AI_TRACKS[index % AI_TRACKS.length]],
@@ -53,7 +53,7 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
     authenticated = true;
     return route.fulfill({ json: actor });
   });
-  await page.route("**/api/v1/me/bootcamp/catalog", route => route.fulfill({ json: catalog }));
+  await page.route("**/api/v1/me/bootcamp/catalog", route => route.fulfill({ json: bootcampCatalogFixture }));
   // Trajectory requires its own server-authored role snapshot; failing closed
   // without a fixture is correct, but would hide the shared learning panel.
   await page.route("**/api/v1/participant/me/development-overview", route =>
