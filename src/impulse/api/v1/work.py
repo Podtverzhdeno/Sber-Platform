@@ -17,24 +17,24 @@ from sqlalchemy import text
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.api.v1.work_requests import (
-    CompensationRequest as CompensationRequest,
+    AcceptApplicationRequest as AcceptApplicationRequest,
+    AcceptTermsRequest as AcceptTermsRequest,
+    ArtifactRequest as ArtifactRequest,
+    AuthorshipDisputeRequest as AuthorshipDisputeRequest,
     CaseRubricRequest as CaseRubricRequest,
     CatalogStageRequest as CatalogStageRequest,
-    TaskCatalogMetadataRequest as TaskCatalogMetadataRequest,
-    CreateTaskRequest as CreateTaskRequest,
-    SupportRequest as SupportRequest,
-    ReviseTermsRequest as ReviseTermsRequest,
-    AcceptTermsRequest as AcceptTermsRequest,
-    AcceptApplicationRequest as AcceptApplicationRequest,
-    RepeatTaskRequest as RepeatTaskRequest,
-    InviteCandidateRequest as InviteCandidateRequest,
-    DecideInvitationRequest as DecideInvitationRequest,
-    TeamRequestCommand as TeamRequestCommand,
     CheckpointRequest as CheckpointRequest,
-    ArtifactRequest as ArtifactRequest,
-    ContributionRequest as ContributionRequest,
+    CompensationRequest as CompensationRequest,
     ContributionDecisionRequest as ContributionDecisionRequest,
-    AuthorshipDisputeRequest as AuthorshipDisputeRequest,
+    ContributionRequest as ContributionRequest,
+    CreateTaskRequest as CreateTaskRequest,
+    DecideInvitationRequest as DecideInvitationRequest,
+    InviteCandidateRequest as InviteCandidateRequest,
+    RepeatTaskRequest as RepeatTaskRequest,
+    ReviseTermsRequest as ReviseTermsRequest,
+    SupportRequest as SupportRequest,
+    TaskCatalogMetadataRequest as TaskCatalogMetadataRequest,
+    TeamRequestCommand as TeamRequestCommand,
 )
 from impulse.application.identity import AuthenticatedSession, PersonaRecord
 from impulse.application.project_credentials import ProjectCredentialService
