@@ -247,7 +247,15 @@ export function ChatHistory({
         <span className="msg-chat__avatar" aria-hidden="true">
           {channel?.title.trim().toLowerCase() === "маяки" ? <img src="/messages-reference/mayaki-avatar.svg" alt="" /> : channelInitial(channel, viewerId)}
         </span>
-        <span className="msg-chat__header-title">
+        <button
+          type="button"
+          className="msg-chat__header-title msg-chat__header-title-button"
+          aria-label={`Информация о чате «${channelTitle}»`}
+          aria-expanded={contextOpen ?? false}
+          aria-controls="messenger-context-panel"
+          disabled={onToggleContext === undefined}
+          onClick={onToggleContext}
+        >
           <strong>{channelTitle}</strong>
           <small>
             {(channel ? dialogKindLabel(channel.kind) : "Чат")}
@@ -258,7 +266,7 @@ export function ChatHistory({
               : ""}
             {channel?.muted ? " · уведомления отключены" : ""}
           </small>
-        </span>
+        </button>
         {channel?.muted && (
           <span className="msg-chat__mute" title="Уведомления отключены">
             <BellOff aria-hidden="true" size={14} />
