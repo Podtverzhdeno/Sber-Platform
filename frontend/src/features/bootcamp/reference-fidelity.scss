@@ -103,7 +103,9 @@
 .bc-ref-card-intro p,.bc-ref-row-info p{font-size:11px;line-height:1.38;color:#a7c8e4;margin:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:anywhere}
 .bc-ref-card-meta{margin:7px 0;color:#a7c4df;display:flex;align-items:center;gap:6px;font-size:10px}
 .bc-ref-card-meta svg{width:13px;height:13px}
-.bc-ref-card-bottom{margin-top:auto;display:grid;gap:5px}
+/* Equal CTA baseline regardless of optional "Почему рекомендован?" link.
+   Reserve the same bottom action area without stretching the card content. */
+.bc-ref-card-bottom{margin-top:auto;display:grid;gap:5px;min-height:104px;align-content:space-between}
 .bc-reference .bc-ref-primary{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;min-height:36px;border-radius:7px;border:1px solid transparent;background:#05e0e9;color:#02192b;font-size:12px;font-weight:800}
 .bc-reference .bc-ref-primary--locked{border-color:#285574;background:#0c2d47;color:#b9d3ef}
 .bc-reference .bc-ref-primary:hover:not(:disabled),.bc-reference .bc-ref-continue-status button:hover{transform:translateY(-1px);background:#40f5fa;box-shadow:0 0 20px #00e7e74d}
