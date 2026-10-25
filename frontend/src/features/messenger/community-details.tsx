@@ -179,7 +179,7 @@ export function CommunityDetails({
         <section className="msg-community__invite" role="dialog" aria-modal="true" aria-label="Добавить участников" onKeyDown={event => {if(event.key==="Escape")closeInvite();}}>
           <header><strong>Добавить участников</strong><button type="button" ref={dialogClose} aria-label="Закрыть" disabled={busy} onClick={closeInvite}><X size={19}/></button></header>
           <p>Выберите коллег из вашей программы, которые ещё не состоят в сообществе.</p>
-          <label className="msg-community__search"><Search size={16}/><input type="search" placeholder="Поиск контактов" aria-label="Поиск контактов" value={filter} onChange={event=>setFilter(event.target.value)}/></label>
+          <label className="msg-community__search"><Search size={16}/><input type="search" placeholder="Поиск контактов" aria-label="Поиск контактов" value={filter} onChange={event=>{setFilter(event.target.value);}}/></label>
           <div className="msg-community__invites">
             {eligible.map(person=><label key={person.id}><input type="checkbox" checked={chosen.includes(person.id)} onChange={event=>{setChosen(current=>event.target.checked?[...current,person.id]:current.filter(id=>id!==person.id));}}/><span className="msg-community__person-avatar">{initials(person.display_name)}</span><span>{person.display_name}<small>{person.role}</small></span></label>)}
             {!eligible.length && <p className="msg-community__empty">Нет подходящих контактов для добавления</p>}
