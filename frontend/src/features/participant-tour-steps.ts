@@ -66,6 +66,20 @@ export const SECTION_TOURS: Record<string, GuideStep[]> = {
   ],
 };
 
+
+/** Smaller, focused overlays when a task or an assigned project is already open. */
+export const TASK_DETAIL_TOUR: GuideStep[] = [
+  { title: "Сначала изучи раздел «О задаче»", description: "Прочитай контекст, цель, ожидаемый результат и ограничения. Это сэкономит время перед началом работы.", anchor: ".catalog-v2-detail-header, .catalog-v2-detail", accent: "violet", symbol: "layers" },
+  { title: "Критерии — это ориентир", description: "Проверь требования к результату и правила приёмки. Если чего-то не хватает — уточни у заказчика.", anchor: ".catalog-v2-workflow-tabs, .catalog-v2-workflow-panel", accent: "cyan", symbol: "star" },
+  { title: "Доведи работу до проверки", description: "Открой рабочую область, сохраняй материалы и передавай решение по правилам задачи. Подтверждение навыков появляется после оценки.", anchor: ".catalog-v2-workflow-section, .catalog-v2-detail", accent: "blue", symbol: "rocket" },
+];
+
+export const PROJECT_DETAIL_TOUR: GuideStep[] = [
+  { title: "Здесь всё для твоего проекта", description: "Работай с условиями, материалами и командой в одном пространстве.", anchor: ".mp-detail-hero, .mp-detail", accent: "cyan", symbol: "briefcase" },
+  { title: "Сначала проверь требования", description: "Сверяй действия с критериями заказчика, прикладывай доказательства и сохраняй черновики.", anchor: ".mp-detail-panel, .mp-detail", accent: "amber", symbol: "star" },
+  { title: "Согласуй сложные моменты", description: "Задавай вопросы по данным, срокам и формату результата через доступное обсуждение.", anchor: ".mp-detail-tabs, .mp-detail", accent: "violet", symbol: "message" },
+];
+
 export const clampToViewport = (value: number, min: number, max: number): number => Math.max(min, Math.min(max, value));
 
 export function locatePopover(
