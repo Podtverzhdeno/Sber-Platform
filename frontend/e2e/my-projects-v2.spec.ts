@@ -196,8 +196,8 @@ test("My Projects: compact reference cards show real team and no duplicated bene
   await expect(cards.first().locator(".mp-project-card-rewards")).toHaveCount(0);
   await expect(cards.first()).toHaveClass(/is-selected/);
   const box=await cards.first().boundingBox();
-  expect(box).not.toBeNull();
-  expect(box!.height).toBeLessThanOrEqual(265);
+  if(!box) throw new Error("Project card bounding box is unavailable");
+  expect(box.height).toBeLessThanOrEqual(265);
   await page.getByRole("button",{name:"Быстрый просмотр"}).first().click();
   await expect(page.locator(".mp-preview")).toBeVisible();
   await page.getByRole("button",{name:"Скрыть предпросмотр"}).first().click();
