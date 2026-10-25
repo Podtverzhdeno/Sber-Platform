@@ -14,3 +14,6 @@ release_request=2026-10-25-bootcamp-layout-e27518446123
 
 # Restore lesson-start position on next/previous Bootcamp navigation
 release_request=2026-10-25-bootcamp-lesson-scroll-f8574242445b
+
+# Messaging QA: 58 unit + 14 browser passed, responsive context, read and notification synchronization, mute and working actions
+release_request=2026-10-25-messaging-audit-415662d3a4f9
