@@ -149,3 +149,28 @@ test("course progress resumes from first unfinished lesson after reload", async 
   await expect(reader.locator(".imp-study__lesson-list button").nth(1)).toHaveAttribute("aria-current", "step");
   await expect(reader.locator(".imp-study__aside-heading > span")).toHaveText("13%");
 });
+
+
+test("continue-learning card reflects server progress after a completed lesson", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1086 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const route = new URL(page.url()).pathname;
+  await page.goto(route + "?role=python");
+  const continueCard = page.locator(".bc-ref-continue-status");
+  await expect(continueCard).toBeVisible();
+  await continueCard.getByRole("button", { name: "Открыть курс" }).click();
+  const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
+  const reader = dialog.getByTestId("impulse-immersive-reader");
+  await expect(reader).toBeVisible();
+  await reader.getByRole("button", { name: /Перейти к программе/ }).click();
+  await reader.locator(".imp-study__program-list button").first().click();
+  await reader.locator(".imp-study__navigation .imp-study__primary").click();
+  await expect(reader.locator(".imp-study__aside-heading > span")).toHaveText("13%");
+  await dialog.getByRole("button", { name: "Закрыть" }).click();
+  await expect(continueCard).toContainText("13% пройдено");
+  await expect(continueCard).toContainText("1 из 8 уроков завершено");
+  await continueCard.getByRole("button", { name: "Продолжить обучение" }).click();
+  await expect(dialog.getByTestId("impulse-immersive-reader")).toBeVisible();
+});
