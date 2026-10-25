@@ -1784,7 +1784,7 @@ function ImpulseApp() {
               <Route
                 path="/choose-role"
                 element={
-                  !signedOut && meQuery.isPending ? (
+                  !signedOut && (meQuery.isPending || (meQuery.data !== undefined && !explicitSignOut.current)) ? (
                     <StatePanel kind="loading" />
                   ) : (
                     <LoginScreen
@@ -1801,7 +1801,7 @@ function ImpulseApp() {
               <Route
                 path="*"
                 element={
-                  !signedOut && meQuery.isPending ? (
+                  !signedOut && (meQuery.isPending || (meQuery.data !== undefined && !explicitSignOut.current)) ? (
                     <StatePanel kind="loading" />
                   ) : (
                     <Navigate to="/choose-role" replace />
