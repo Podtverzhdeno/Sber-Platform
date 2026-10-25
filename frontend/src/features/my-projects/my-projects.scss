@@ -212,3 +212,8 @@
 [data-theme="light"] .mpv2 :is(.mp-project-tile__identity small,.mp-page-title>p:last-child,.mp-detail-panel p){color:#52718a}
 [data-theme="light"] .mpv2 :is(.mp-table td,.mp-table th){color:#123c55;border-color:#d5e6ee}
 [data-theme="light"] .mpv2 :is(.mp-card-list__header input,.mp-list-search input,.mp-select select){color:#16415a}
+
+/* Exact company logo assets reused from the approved Tasks UI. */
+.mp-company-mark--logo{background:transparent;padding:0;overflow:hidden;border:0}
+.mp-company-mark--logo img{display:block;width:100%;height:100%;object-fit:contain}
+.mpv2 .mp-company-mark--logo img{border-radius:inherit}
