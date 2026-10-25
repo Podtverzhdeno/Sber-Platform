@@ -133,3 +133,57 @@ test("streak mobile 390px: no clipping and all actions reachable", async ({ page
   await dialog.getByRole("button", { name: "Закрыть" }).click();
   await expect(dialog).toHaveCount(0);
 });
+
+
+test("chosen weekly rhythm saves via the API and survives a fresh read", async ({ page }) => {
+  test.setTimeout(90_000);
+  installRoutes(page);
+  type SavePayload = {
+    preset: string;
+    custom_days: number[];
+    reminder_hour: number;
+    reminder_window_hours: number;
+    effective_from: string;
+  };
+  let received: SavePayload | null = null;
+  let persisted = {
+    versioned: true, history_count: 1, version: 1, preset: "workdays",
+    active_days: [1, 2, 3, 4, 5], reminder_hour: 18, reminder_window_hours: 3,
+    effective_from: "2026-10-19", week_start: "2026-10-19", week_end: "2026-10-25",
+    target_days: 5, done_days: 0, hint: null, scheduled_from: null, scheduled_preset: null,
+  };
+  await page.route("**/api/v1/me/engagement/rhythm", async route => {
+    if (route.request().method() === "POST") {
+      received = route.request().postDataJSON() as SavePayload;
+      persisted = {
+        ...persisted,
+        version: 2, history_count: 2, preset: received.preset,
+        active_days: received.preset === "weekends" ? [6, 7] : received.custom_days,
+        reminder_hour: received.reminder_hour,
+        reminder_window_hours: received.reminder_window_hours,
+        effective_from: received.effective_from,
+        target_days: 2,
+      };
+    }
+    await route.fulfill({ json: persisted });
+  });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("button", { name: /Учебный стрик: 11 дней/ }).click();
+  const dialog = page.getByRole("dialog", { name: "Учебный стрик" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "Выходные", exact: true }).click();
+  const selectedDate = await dialog.locator('input[type="date"]').inputValue();
+  expect(selectedDate).toMatch(/^20\d\d-\d\d-\d\d$/);
+  await dialog.getByRole("button", { name: "Сохранить ритм" }).click();
+  await expect(dialog.getByText(/Ритм сохранён/)).toBeVisible();
+  expect(received).not.toBeNull();
+  expect(received?.preset).toBe("weekends");
+  expect(received?.effective_from).toBe(selectedDate);
+  await page.reload();
+  const signIn = page.locator('[data-persona="participant-alex"]');
+  if (await signIn.isVisible()) await signIn.click();
+  await page.getByRole("button", { name: /Учебный стрик: 11 дней/ }).click();
+  const nextDialog = page.getByRole("dialog", { name: "Учебный стрик" });
+  await expect(nextDialog.getByRole("button", { name: "Выходные", exact: true })).toHaveAttribute("aria-pressed", "true");
+});
