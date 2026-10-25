@@ -656,3 +656,27 @@
   .imp-study__template { flex-wrap:wrap; }
   .imp-study__template > a { flex:0 0 100%; justify-content:center; }
 }
+
+
+/* Exact practice-state vertical geometry: the compact course header owns the
+   progress display, so remove the duplicate lesson heading above the tabs. */
+.imp-study[data-view="practice"] .imp-study__lesson-heading { display:none; }
+.imp-study[data-view="practice"] .imp-study__main {
+  padding:0; border:0; background:transparent;
+}
+.imp-study[data-view="practice"] .imp-study__tabs {
+  border-bottom:1px solid #1b536c; padding:0 5px 8px; margin:0 0 14px;
+}
+.imp-study[data-view="practice"] .imp-study__content {
+  padding:20px 22px; border-radius:12px;
+}
+.imp-study[data-view="practice"] .imp-study__content > h3 {
+  margin:0 0 9px; font-size:26px; letter-spacing:-.4px;
+}
+.imp-study[data-view="practice"] .imp-study__navigation {
+  padding:0 7px; margin-top:13px;
+}
+@media (max-width:780px) {
+  .imp-study[data-view="practice"] .imp-study__content { padding:15px; }
+  .imp-study[data-view="practice"] .imp-study__tabs { padding:0 0 9px; }
+}
