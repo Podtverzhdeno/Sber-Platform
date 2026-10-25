@@ -1,6 +1,6 @@
 # Claim XS-PROJECTION-QA-20261026
 - session_id: gpt6-20261026-xs-contract-qa-02
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: c3069a90ef8699d3d045fef52564897b8b085a5c
@@ -12,5 +12,12 @@
 - verification:
   - targeted Vitest in GitHub Actions
   - targeted ESLint for changed registry and tests
-- progress: добавление изолированного CI gate без изменения уже занятых UI и Bootcamp files
+- progress: Изолированный CI gate создан и успешно прошёл на revision 0876b6aff23ccbda25e2bfd4f114bdb0599d4fad; передано на независимую приёмку.
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40237409584
+  - targeted ESLint passed
+  - targeted Vitest scenarios passed
+- changed_files:
+  - .github/workflows/cross-section-projections-qa.yml
+- independent_review: required before DONE
 - blockers: none
