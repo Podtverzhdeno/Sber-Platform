@@ -41,3 +41,6 @@ release_request=2026-10-25-events-railway-repair-11e73cd
 
 # Rebuild after fixing three optional project-team TypeScript failures
 release_request=2026-10-25-events-team-optional-ts-18181082
+
+# My Projects: resolve optional team typing in card, preview and detail
+release_request=2026-10-25-my-projects-team-safe-34cc487
