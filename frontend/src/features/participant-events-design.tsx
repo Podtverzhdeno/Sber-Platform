@@ -183,7 +183,7 @@ export function EventRegistrationForm({event,onClose,onInterest}:{
  const next=(e:SyntheticEvent<HTMLFormElement>)=>{e.preventDefault();if(step<2)setStep(step+1);else {setStep(3);setFinished(true);onInterest();}};
  return <div className="ev-registration-cover" data-testid="event-registration">
    <section className="ev-registration-card" aria-label="Регистрация на событие">
-     <div className="ev-reg-top"><div><h3>Регистрация на событие</h3><p>{event.title}</p></div><button type="button" aria-label="Закрыть регистрацию" onClick={onClose}><X size={20}/></button></div>
+     <div className="ev-reg-top"><div><h3>Подготовка заявки</h3><p>{event.title} · Демонстрационная анкета, данные не отправляются организатору</p></div><button type="button" aria-label="Закрыть регистрацию" onClick={onClose}><X size={20}/></button></div>
      <div className="ev-reg-steps">{["Личные данные","Опыт и навыки","Дополнительно","Подтверждение"].map((s,i)=><div className={i<=step?"active":""} key={s}><span>{i+1}</span><small>{s}</small></div>)}</div>
      {finished?<div className="ev-reg-finish"><CheckCircle2 size={42}/><h4>Анкета подготовлена</h4><p>Данные анкеты не отправлялись организатору и не сохранялись в базе. Для реальной регистрации перейдите на официальный сайт события.</p><SafeExternalLink className="ev-primary" href={event.source_url}>Перейти к регистрации <ExternalLink size={17}/></SafeExternalLink></div>
       :<form onSubmit={next}>
