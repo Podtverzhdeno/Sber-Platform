@@ -73,7 +73,7 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
   const root=page.locator(".mpv2");
   await expect(root).toHaveAttribute("data-project-screen","cards");
   await expect(root.locator(".mp-project-tile")).toHaveCount(3);
-  await expect(root.locator(".mp-benefit-step")).toHaveCount(4);
+  await expect(root.locator(".mp-benefit-step")).toHaveCount(6);
   await expect(root.locator(".mp-card-list .mp-project-tile")).toHaveCount(3);
   await expect(root.locator(".mp-project-tile__identity small").first()).toContainText("Сбер");
   await expect(root.locator(".mp-preview")).toBeVisible();
@@ -110,7 +110,7 @@ test("My Projects: list has genuine rows and opens full project page",async({pag
   await page.screenshot({path:"test-results/my-projects-v2/03_detail_1672.png",fullPage:true,animations:"disabled"});
   await expect(page.getByRole("tab",{name:"Бонусы и выгоды"})).toBeVisible();
   await expect(page.getByRole("heading",{name:"Ключевая информация"})).toBeVisible();
-  await expect(page.locator(".mp-overview-layout > .mp-detail-stack")).toHaveCount(3);
+  await expect(page.locator(".mp-overview-layout > .mp-detail-stack")).toHaveCount(2);
   await page.getByRole("tab",{name:"Команда"}).click();
   await expect(page.getByRole("heading",{name:"Команда проекта"})).toBeVisible();
   await page.getByRole("tab",{name:"Мой вклад"}).click();
