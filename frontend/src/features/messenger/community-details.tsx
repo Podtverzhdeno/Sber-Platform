@@ -86,8 +86,8 @@ export function CommunityDetails({
     } finally {setBusy(false);}
   };
   const copyText = (value: string, success = "Скопировано") => {
-    void navigator.clipboard.writeText(value).then(() => setFeedback(success))
-      .catch(() => setFeedback("Не удалось скопировать"));
+    void navigator.clipboard.writeText(value).then(() => {setFeedback(success);})
+      .catch(() => {setFeedback("Не удалось скопировать");});
   };
   const openPerson = (person: ApiParticipantView) => {setFeedback("");setProfile(person);};
   const openDialog = () => {setMore(false);setFilter("");setChosen([]);setInviteError("");setInviteOpen(true);};
@@ -109,12 +109,12 @@ export function CommunityDetails({
             {channel.muted ? <Bell size={18}/> : <BellOff size={18}/>}
             <span>{channel.muted ? "Включить звук" : "Без звука"}</span>
           </button>
-          <button type="button" aria-expanded={more} onClick={() => setMore(value => !value)}>
+          <button type="button" aria-expanded={more} onClick={() => {setMore(value => !value);}}>
             <MoreHorizontal size={20}/><span>Ещё</span>
           </button>
           {more && <div className="msg-community__more" role="menu">
             <button role="menuitem" type="button" onClick={() => {
-              copyText(window.location.href.split("?")[0] + "?channel=" + encodeURIComponent(channel.id), "Ссылка на чат скопирована. Доступ есть только у участников");
+              copyText((window.location.href.split("?")[0] ?? window.location.href) + "?channel=" + encodeURIComponent(channel.id), "Ссылка на чат скопирована. Доступ есть только у участников");
               setMore(false);
             }}><Copy size={15}/>Скопировать ссылку на чат</button>
             <button role="menuitem" type="button" onClick={() => {setTab("members");setMore(false);}}><UsersRound size={15}/>Открыть участников</button>
@@ -134,11 +134,11 @@ export function CommunityDetails({
             <strong>Участники <span>{channel.participants.length}</span></strong>
           </div>
           {canInvite && <button className="msg-community__add" type="button" onClick={openDialog}><Plus size={20}/>Добавить участников</button>}
-          <label className="msg-community__search"><Search size={16}/><input type="search" aria-label="Найти участника" placeholder="Поиск по участникам" value={filter} onChange={event=>setFilter(event.target.value)}/></label>
+          <label className="msg-community__search"><Search size={16}/><input type="search" aria-label="Найти участника" placeholder="Поиск по участникам" value={filter} onChange={event=>{setFilter(event.target.value);}}/></label>
           <ul className="msg-community__members">
             {visible.map((person,index) => <li key={person.id} data-testid="context-participant">
-              <button type="button" onClick={() => openPerson(person)} aria-label={`Открыть профиль: ${person.display_name}`}>
-                <span className={`msg-community__person-avatar tone-${index%5}`} aria-hidden="true">{initials(person.display_name)}</span>
+              <button type="button" onClick={() => {openPerson(person);}} aria-label={`Открыть профиль: ${person.display_name}`}>
+                <span className={`msg-community__person-avatar tone-${String(index%5)}`} aria-hidden="true">{initials(person.display_name)}</span>
                 <span className="msg-community__person-name"><strong>{person.display_name || "Без имени"}</strong>
                   <small>{person.id === viewerId ? "Вы · " : ""}{participantRoleLabel(person.role)}</small>
                 </span>
@@ -153,13 +153,13 @@ export function CommunityDetails({
         {tab === "links" && <SharedList refs={shared.links} empty="В сообщениях пока нет ссылок" kind="links" onCopy={copyText}/>}
         {tab === "bots" && <>
           <h3 className="msg-community__section-title">Боты сообщества</h3>
-          {bots.length ? bots.map(bot => <button type="button" className="msg-community__resource" key={bot.id} onClick={()=>openPerson(bot)}><Bot size={19}/><span>{bot.display_name}</span><ChevronRight size={16}/></button>)
+          {bots.length ? bots.map(bot => <button type="button" className="msg-community__resource" key={bot.id} onClick={()=>{openPerson(bot);}}><Bot size={19}/><span>{bot.display_name}</span><ChevronRight size={16}/></button>)
             : <p className="msg-community__empty">Боты не подключены. Здесь появятся только участники с ролью бота.</p>}
         </>}
       </div>
       {feedback && <p className="msg-community__feedback" role="status">{feedback}</p>}
       {profile && <div className="msg-community__profile" role="dialog" aria-label={`Профиль участника: ${profile.display_name}`}>
-        <button type="button" className="msg-community__profile-close" aria-label="Закрыть профиль" onClick={() => setProfile(null)}><X size={18}/></button>
+        <button type="button" className="msg-community__profile-close" aria-label="Закрыть профиль" onClick={() => {setProfile(null);}}><X size={18}/></button>
         <span className="msg-community__profile-avatar">{initials(profile.display_name)}</span>
         <h3>{profile.display_name || "Без имени"}</h3>
         <p>{participantRoleLabel(profile.role)}{profile.id === viewerId ? " · это вы" : ""}</p>
@@ -167,25 +167,25 @@ export function CommunityDetails({
         <div className="msg-community__profile-actions">
           {profile.id !== viewerId && onOpenMember && <button type="button" disabled={busy} onClick={() => {
             setBusy(true);setFeedback("");
-            void onOpenMember(profile.id).then(()=>setProfile(null))
-              .catch(()=>setFeedback("Не удалось открыть личный чат"))
-              .finally(()=>setBusy(false));
+            void onOpenMember(profile.id).then(()=>{setProfile(null);})
+              .catch(()=>{setFeedback("Не удалось открыть личный чат");})
+              .finally(()=>{setBusy(false);});
           }}><MessageSquareText size={17}/>Написать</button>}
-          <button type="button" onClick={() => copyText(profile.id, "Идентификатор скопирован")}><Copy size={16}/>Скопировать ID</button>
+          <button type="button" onClick={() => {copyText(profile.id, "Идентификатор скопирован");}}><Copy size={16}/>Скопировать ID</button>
         </div>
       </div>}
       {inviteOpen && <div className="msg-community__layer">
-        <button type="button" className="msg-community__backdrop" aria-label="Отменить приглашение" onClick={closeInvite}/>
+        <button type="button" className="msg-community__backdrop" aria-label="Отменить приглашение" onClick={() => {closeInvite();}}/>
         <section className="msg-community__invite" role="dialog" aria-modal="true" aria-label="Добавить участников" onKeyDown={event => {if(event.key==="Escape")closeInvite();}}>
           <header><strong>Добавить участников</strong><button type="button" ref={dialogClose} aria-label="Закрыть" disabled={busy} onClick={closeInvite}><X size={19}/></button></header>
           <p>Выберите коллег из вашей программы, которые ещё не состоят в сообществе.</p>
           <label className="msg-community__search"><Search size={16}/><input type="search" placeholder="Поиск контактов" aria-label="Поиск контактов" value={filter} onChange={event=>setFilter(event.target.value)}/></label>
           <div className="msg-community__invites">
-            {eligible.map(person=><label key={person.id}><input type="checkbox" checked={chosen.includes(person.id)} onChange={event=>setChosen(current=>event.target.checked?[...current,person.id]:current.filter(id=>id!==person.id))}/><span className="msg-community__person-avatar">{initials(person.display_name)}</span><span>{person.display_name}<small>{person.role}</small></span></label>)}
+            {eligible.map(person=><label key={person.id}><input type="checkbox" checked={chosen.includes(person.id)} onChange={event=>{setChosen(current=>event.target.checked?[...current,person.id]:current.filter(id=>id!==person.id));}}/><span className="msg-community__person-avatar">{initials(person.display_name)}</span><span>{person.display_name}<small>{person.role}</small></span></label>)}
             {!eligible.length && <p className="msg-community__empty">Нет подходящих контактов для добавления</p>}
           </div>
           {inviteError && <p role="alert">{inviteError}</p>}
-          <footer><button type="button" disabled={busy} onClick={closeInvite}>Отмена</button><button type="button" disabled={busy || !chosen.length} onClick={()=>{void doInvite();}}>{busy?"Добавляем…":`Добавить (${chosen.length})`}</button></footer>
+          <footer><button type="button" disabled={busy} onClick={closeInvite}>Отмена</button><button type="button" disabled={busy || !chosen.length} onClick={()=>{void doInvite();}}>{busy?"Добавляем…":`Добавить (${String(chosen.length)})`}</button></footer>
         </section>
       </div>}
     </aside>
@@ -204,7 +204,7 @@ function SharedList({ refs, empty, kind, onCopy }: {
         <span className="msg-community__resource-icon"><Icon size={19}/></span>
         <span className="msg-community__resource-text" title={ref}><strong>{kind==="links"?ref:refLabel(ref)}</strong><small>{url?"Внешняя ссылка":"Идентификатор вложения"}</small></span>
         {url?<a href={url} target="_blank" rel="noopener noreferrer" aria-label={`Открыть ${refLabel(ref)}`}><ExternalLink size={17}/></a>
-          :<button type="button" aria-label={`Скопировать ${refLabel(ref)}`} onClick={()=>onCopy(ref)}><Copy size={17}/></button>}
+          :<button type="button" aria-label={`Скопировать ${refLabel(ref)}`} onClick={()=>{onCopy(ref);}}><Copy size={17}/></button>}
       </li>;
     })}</ul> : <p className="msg-community__empty">{empty}</p>}
   </>;
