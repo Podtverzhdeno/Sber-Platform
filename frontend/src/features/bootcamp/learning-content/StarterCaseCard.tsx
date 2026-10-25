@@ -1,10 +1,20 @@
-import { ArrowUpRight, BookOpenCheck, ClipboardCheck, Code2, ShieldAlert } from "lucide-react";
+import { useState } from "react";
+import { ArrowUpRight, BookOpenCheck, ClipboardCheck, Code2, Copy, ShieldAlert } from "lucide-react";
 import { starterCaseFor } from "./starter-cases";
 import "./starter-case.scss";
 
 export function StarterCaseCard({ courseKey, unitTitle }: { courseKey: string; unitTitle: string }) {
   const lab = starterCaseFor(courseKey);
+  const [copyState, setCopyState] = useState<"idle" | "success" | "error">("idle");
   if (!lab) return null;
+  const copyStarter = async () => {
+    try {
+      await navigator.clipboard.writeText(lab.starter);
+      setCopyState("success");
+    } catch {
+      setCopyState("error");
+    }
+  };
   return <details className="starter-case" data-testid="course-starter-case">
     <summary><span className="starter-case__icon"><Code2 size={18}/></span>
       <span><strong>Сквозной кейс: попробуйте на тестовых данных</strong><small>Готовый контекст и исходный пример для применения темы «{unitTitle}»</small></span>
@@ -12,7 +22,7 @@ export function StarterCaseCard({ courseKey, unitTitle }: { courseKey: string; u
     </summary>
     <div className="starter-case__body">
       <p>{lab.scenario}</p>
-      <div className="starter-case__head"><Code2 size={16}/><strong>{lab.starterLabel}</strong><span>Учебный пример</span></div>
+      <div className="starter-case__head"><Code2 size={16}/><strong>{lab.starterLabel}</strong><span>Учебный пример</span><button type="button" className="starter-case__copy" onClick={() => { void copyStarter(); }}><Copy size={14}/>{copyState === "success" ? "Скопировано" : copyState === "error" ? "Не удалось скопировать" : "Копировать"}</button></div>
       <pre><code>{lab.starter}</code></pre>
       <h5><ClipboardCheck size={17}/> Как проверить результат</h5>
       <ol>{lab.checkpoints.map(item=><li key={item}>{item}</li>)}</ol>
