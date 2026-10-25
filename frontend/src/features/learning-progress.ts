@@ -47,6 +47,10 @@ export function invalidateLearningProjections(client: QueryClient): void {
     ["trajectory-roadmaps"],
     ["trajectory-roadmap-catalog"],
     ["development-overview"],
+    ["engagement-overview"],
+    ["engagement-rhythm"],
+    ["streak"],
+    ["course-detail"],
     ["portfolio"],
   ] as const;
   for (const queryKey of prefixes) {
