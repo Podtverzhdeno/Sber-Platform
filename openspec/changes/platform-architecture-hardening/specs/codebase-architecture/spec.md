@@ -3,7 +3,8 @@
 ## ADDED Requirements
 
 ### Requirement: Полный воспроизводимый архитектурный аудит
-Платформа SHALL иметь воспроизводимый audit inventory всех production Python, TS/TSX, SCSS, SQL/migration, integration, configuration и CI files на фиксированном commit SHA. Audit SHALL включать dependency graph, ответственность модулей, циклы, raw infrastructure/HTTP calls, shared state, mutation/read contract, security, complexity, tests и необследованные участки. Generated sources SHALL маркироваться отдельно. Каждая находка SHALL иметь точный file:line, severity, evidence, impact и verification plan.
+Платформа SHALL формировать воспроизводимый audit inventory всех tracked production исходников, конфигураций, CI и миграций на фиксированном commit SHA. Отчёт SHALL содержать dependency graph, циклы, границы слоёв и непроверенные области. Generated sources SHALL маркироваться отдельно. Каждая находка SHALL содержать file:line, severity, evidence, impact, owner и verification plan.
+
 #### Scenario: Добавлен новый feature-модуль
 - **WHEN** в production tree появляется новый исходный файл
 - **THEN** inventory учитывает его и проверяет слой, зависимости, тестовый coverage и owner до архитектурной приёмки
