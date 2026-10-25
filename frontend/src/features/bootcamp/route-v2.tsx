@@ -8,6 +8,7 @@ import { Modal, StatePanel } from "../../components/ui";
 import { BootcampPage, type BootcampOverview, type CatalogToolbarState } from "./page";
 import { CourseLearningContent } from "./learning-content/CourseLearningContent";
 import { parseBootcampUrl } from "./urlState";
+import "./bootcamp-approved.scss";
 
 type CourseDetail = components["schemas"]["CourseDetail"];
 
