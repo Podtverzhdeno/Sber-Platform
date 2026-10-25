@@ -101,6 +101,11 @@ for (const viewport of [
    await nav.getByRole("button",{name:label,exact:true}).click();
    await expect(root).toHaveAttribute("data-tab",tab);
    const next=await sample();
+   const layout=await root.evaluate(el=>{
+    const container=el.getBoundingClientRect(),p=el.parentElement?.getBoundingClientRect();
+    return {rootX:container.x,rootWidth:container.width,parentX:p?.x,parentWidth:p?.width,scrollX:window.scrollX,scrollY:window.scrollY,docScrollWidth:document.documentElement.scrollWidth,clientWidth:document.documentElement.clientWidth};
+   });
+   console.log("ANALYTICS_SWITCH_POSITION",JSON.stringify({viewport:viewport.name,tab,initial,next,layout}));
    for(const k of ["x","y","width","height"] as const){
     expect(Math.abs(next[k]-initial[k]),viewport.name+": nav "+k+" moved on "+label).toBeLessThanOrEqual(1);
    }
