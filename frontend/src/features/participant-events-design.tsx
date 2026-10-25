@@ -2,7 +2,7 @@ import { useState, type CSSProperties, type SyntheticEvent, type ReactNode } fro
 import {
   ArrowLeft, ArrowRight, Award, Bookmark, BookOpen, CalendarDays,
   CheckCircle2, ChevronDown, Code2, ExternalLink, Gift, GraduationCap,
-  Landmark, Lightbulb, MapPin, Medal, ShieldCheck,
+  Landmark, Lightbulb, MapPin, Medal, ShieldCheck, Sparkles, BriefcaseBusiness,
 Star, Target, Trophy, Users, X,
 } from "lucide-react";
 import { SafeExternalLink } from "../components/ui";
@@ -15,7 +15,7 @@ export type EventViewItem = {
 };
 export type EventTab = "about" | "program" | "prizes" | "requirements" | "organizers" | "faq";
 const tabs: { key: EventTab; label: string }[] = [
-  { key: "about", label: "О событии" }, { key: "program", label: "Программа" },
+  { key: "program", label: "Программа" },
   { key: "prizes", label: "Призы и возможности" },
   { key: "requirements", label: "Требования" }, { key: "organizers", label: "Организаторы" },
   { key: "faq", label: "FAQ" },
@@ -43,22 +43,19 @@ export function EventsHero({ events, onChoose }: { events: EventViewItem[]; onCh
   return <>
     <section className="ev-hero">
       <div className="ev-hero-copy">
-        <div className="ev-kicker">СОБЫТИЯ ОТ СБЕРА И ПАРТНЁРОВ</div>
-        <h1 id="workspace-title">События, которые подходят <em>именно вам</em></h1>
-        <p>Выбирайте мероприятия по своей траектории, применяйте навыки на практике и открывайте возможности для развития в Сбере</p>
-        <button className="ev-primary ev-hero-action" type="button" onClick={onChoose}>Подобрать события для меня <ArrowRight size={18}/></button>
+        <div className="ev-kicker"><span className="ev-sber-emblem">✓ СБЕР</span> События от Сбера и партнёров</div>
+        <h1 id="workspace-title">События, которые дают <em>практику, баллы и карьерные возможности</em></h1>
+        <p>Участвуйте в хакатонах, конкурсах и образовательных программах, чтобы развиваться, получать опыт и попадать в проекты Сбера.</p>
+        <button className="ev-primary ev-hero-action" type="button" onClick={onChoose}>Посмотреть подборку <ArrowRight size={16}/></button>
       </div>
       <div className="ev-hero-art" aria-hidden="true">
-        <div className="ev-cube ev-cube-a">AI</div><div className="ev-cube ev-cube-b">PRODUCT</div>
-        <div className="ev-cube ev-cube-c">CODE</div><div className="ev-brand-tile"><img src="/task-catalog/brands/sber.svg" alt=""/> СБЕР</div>
+        <div className="ev-mock-orb"/><span className="ev-floating-chip ev-chip-practice">ϟ&nbsp; Практика</span><span className="ev-floating-chip ev-chip-network">♧&nbsp; Нетворк</span><span className="ev-floating-chip ev-chip-points">🏆&nbsp; Баллы</span><span className="ev-floating-chip ev-chip-career">▰&nbsp; Карьера</span>
       </div>
-      <div className="ev-focus-panel"><strong>Ваш фокус</strong><div>{tracks.slice(0,4).map(track => <span key={track}>{track}</span>)}</div><small>Рекомендации основаны на направлениях событий</small></div>
     </section>
     <div className="ev-metrics">
-      <div><CalendarDays/><strong>{events.length}</strong><span><b>событий в каталоге</b><small>Практика и новые возможности</small></span></div>
-      <div><Landmark/><strong>{sberEvents.length}</strong><span><b>событий со Сбером</b><small>Организатор указан в источнике</small></span></div>
-      <div><Target/><strong>{tracks.length}</strong><span><b>направлений развития</b><small>От разработки до продукта</small></span></div>
-      <div><Gift/><strong>+5</strong><span><b>условных баллов</b><small>После фиксации регистрации</small></span></div>
+      <div><CalendarDays/><strong>{events.length}</strong><span><b>событий подходят вам</b><small>На основе интересов и траектории</small></span></div>
+      <div><Landmark/><strong>{sberEvents.length}</strong><span><b>событий от Сбера</b><small>Эксклюзивные возможности</small></span></div>
+      <div className="ev-metric-alignment"><div className="ev-average-ring"><strong>{events.length ? Math.round(events.reduce((sum,item) => sum + (matchPercent(item,interests) ?? 0),0)/events.length) : 0}%</strong></div><span><b>Среднее совпадение</b><small>Насколько события соответствуют вашим навыкам</small></span></div>
     </div>
   </>;
 }
@@ -117,10 +114,10 @@ export function EventExperienceDetail({detail,aggregate,tab,onTabChange,onClose,
   return <div className="ev-detail-v2" data-testid="event-detail">
     <div className="ev-detail-top"><button type="button" onClick={onClose}><ArrowLeft size={16}/> К списку событий</button><button type="button" onClick={onClose} aria-label="Закрыть подробности"><X size={21}/></button></div>
     <section className="ev-detail-hero">
-      <div className="ev-detail-hero-top"><span>{detail.event_type}</span><span className="ev-hero-tag"><CheckCircle2 size={14}/> {detail.organizer}</span></div>
+      <div className="ev-detail-hero-top"><span>{detail.event_type}</span><span className="ev-hero-tag"><CheckCircle2 size={14}/> Совпадает с вашей траекторией</span><span className="ev-demo-stamp">{detail.organizer}</span></div>
       <h2>{detail.title}</h2>
       <p>{detail.description || detail.recommendation_reason || "Информация о событии уточняется организатором"}</p>
-      <div className="ev-detail-hero-meta"><span><Landmark size={17}/>{detail.organizer}</span><span><MapPin size={17}/>{detail.venue_format || "Место уточняется"}</span><span><CalendarDays size={17}/>{formatDate(detail.deadline_at)}</span></div>
+      <div className="ev-detail-hero-meta"><span><Landmark size={17}/>{detail.organizer}</span><span><MapPin size={17}/>{detail.venue_format || "Формат уточняется"}</span><span><CalendarDays size={17}/>{formatDate(detail.deadline_at)}</span></div>
     </section>
     <nav className="ev-tabs" aria-label="Разделы события">{tabs.map(item => <button type="button" key={item.key} className={tab===item.key?"active":""} aria-current={tab===item.key?"page":undefined} onClick={()=> { onTabChange(item.key); }}>{item.label}</button>)}<button type="button" className="ev-primary ev-registration-cta" onClick={onRegister} disabled={!isOpen}>Зарегистрироваться <ArrowRight size={16}/></button><button type="button" className={`ev-save ${isSaved?"is-saved":""}`} aria-label="Сохранить событие" aria-pressed={isSaved} onClick={onSave}><Bookmark size={18} fill={isSaved?"currentColor":"none"}/></button></nav>
     <div className="ev-detail-columns">
@@ -131,11 +128,11 @@ export function EventExperienceDetail({detail,aggregate,tab,onTabChange,onClose,
           <InformationPanel title="Содержание и результат"><p className="ev-paragraph">{detail.expected_result || "Результаты участия уточняются"}</p><p className="ev-paragraph">{detail.conditions}</p></InformationPanel>
         </>}
         {tab==="program"&&<InformationPanel title="Программа мероприятия" subtitle="Этапы из программы, опубликованной организатором">
-          {days.length ? <><div className="ev-day-tabs">{days.map((name,i)=><button key={name} type="button" className={day===i?"active":""} onClick={()=> { setDay(i); }}>{name}</button>)}</div><ol className="ev-program-timeline">{shown.map((stage,i)=><li key={`${stage.title}-${String(i)}`}><span>{String(i+1).padStart(2,"0")}</span><div><b>{stage.title}</b><small>{stage.detail}</small></div></li>)}</ol></>:<p className="ev-paragraph">Программа пока не опубликована. Актуальные этапы доступны у организатора.</p>}
+          {days.length ? <><div className="ev-day-tabs">{days.map((name,i)=><button key={name} type="button" className={day===i?"active":""} onClick={()=> { setDay(i); }}>{name}</button>)}</div><ol className="ev-program-timeline">{shown.map((stage,i)=><li key={`${stage.title}-${String(i)}`}><time>Этап {String(i+1)}</time><span className="ev-timeline-node" aria-hidden="true"/><div><b>{stage.title}</b><small>{stage.detail}</small></div></li>)}</ol></>:<p className="ev-paragraph">Программа пока не опубликована. Актуальные этапы доступны у организатора.</p>}
         </InformationPanel>}
         {tab==="prizes"&&<>
-          <InformationPanel title="Призы и возможности" subtitle="Подтверждённые сведения о результатах и преимуществах участия"><div className="ev-prize-grid"><div><Trophy/><b>Практика</b><small>{detail.expected_result || "Уточняется"}</small></div><div><Medal/><b>Результат в портфолио</b><small>После подтверждения участия</small></div><div><Award/><b>Призы</b><small>Условия и размер уточняются</small></div></div></InformationPanel>
-          <InformationPanel title="Что вы получите"><div className="ev-benefit-grid">{facts.map(({icon:Icon,title,text})=><div key={title}><Icon/><b>{title}</b><small>{text}</small></div>)}</div><p className="ev-paragraph">Денежные призы, стажировки и сертификаты показываются только после подтверждения организатором.</p></InformationPanel>
+          <InformationPanel title="Призы и возможности" subtitle="Награды, опыт и новые карьерные контакты — подробные условия уточняются у организатора"><div className="ev-prize-grid"><div><Trophy/><b>1 место</b><small>Награда победителю</small><p>Условия уточняются у организатора</p></div><div><Medal/><b>2 место</b><small>Награда финалистам</small><p>По правилам события</p></div><div><Award/><b>3 место</b><small>Награда финалистам</small><p>По правилам события</p></div></div></InformationPanel>
+          <InformationPanel title="Что останется после события"><div className="ev-benefit-grid">{facts.map(({icon:Icon,title,text})=><div key={title}><Icon/><b>{title}</b><small>{text}</small></div>)}</div><p className="ev-paragraph">Денежные призы, стажировки и сертификаты показываются только после подтверждения организатором.</p></InformationPanel>
         </>}
         {tab==="requirements"&&<>
           <InformationPanel title="Требования к участникам" subtitle="Проверьте условия перед подачей заявки"><div className="ev-requirements-grid">
@@ -160,8 +157,14 @@ export function EventExperienceDetail({detail,aggregate,tab,onTabChange,onClose,
           ].map(([q,a])=><details key={q}><summary>{q}<ChevronDown size={16}/></summary><p>{a}</p></details>)}</div></InformationPanel>}
       </main>
       <aside className="ev-detail-side">
-        <InformationPanel title="Ваши направления"><div className="ev-match-overview"><div className="ev-match-circle"><Target size={33}/></div><p>Событие связано с направлениями <strong>{detail.track_keys.join(", ") || "развития"}</strong></p></div><div className="ev-tags">{detail.track_keys.map(t=><span key={t}>{t}</span>)}</div></InformationPanel>
-        <InformationPanel title="Детали"><div className="ev-info-row"><span>Организатор</span><b>{detail.organizer}</b></div><div className="ev-info-row"><span>Формат</span><b>{detail.venue_format||"Уточняется"}</b></div><div className="ev-info-row"><span>Дедлайн</span><b>{formatDate(detail.deadline_at)}</b></div><div className="ev-info-row"><span>Регистраций</span><b>{aggregate.counter_state==="unknown"?"Нет данных":aggregate.confirmed_registrations??"Нет данных"}</b></div><div className="ev-info-row"><span>Участий</span><b>{aggregate.counter_state==="unknown"?"Нет данных":aggregate.participations??"Нет данных"}</b></div><p className="ev-side-note">{aggregate.definition_text}</p></InformationPanel>
+        <InformationPanel title={tab==="program" ? "Что вас ждёт" : tab==="prizes" ? "Карьерные возможности" : "Ваши направления"}>
+          {tab==="program" && <div className="ev-side-features">
+            {facts.map(({icon:Icon,title,text}) => <div className="ev-side-feature" key={title}><Icon size={21}/><span><b>{title}</b><small>{text}</small></span></div>)}
+            <div className="ev-side-feature"><Sparkles size={21}/><span><b>Результат для портфолио</b><small>После подтверждения результата</small></span></div>
+          </div>}
+          {tab==="prizes" && <div className="ev-side-features"><div className="ev-side-feature"><BriefcaseBusiness size={21}/><span><b>Возможность быть замеченным</b><small>При наличии программы отбора у организатора</small></span></div><div className="ev-side-feature"><Target size={21}/><span><b>Следующий шаг в траектории</b><small>Опыт решения задач и работы в команде</small></span></div></div>}
+          <div className={tab==="program"||tab==="prizes"?"ev-side-secondary":""}><div className="ev-match-overview"><div className="ev-match-circle"><Target size={33}/></div><p>Событие связано с направлениями <strong>{detail.track_keys.join(", ") || "развития"}</strong></p></div><div className="ev-tags">{detail.track_keys.map(t=><span key={t}>{t}</span>)}</div></div></InformationPanel>
+        <InformationPanel title="Формат"><div className="ev-info-row"><span>Организатор</span><b>{detail.organizer}</b></div><div className="ev-info-row"><span>Формат</span><b>{detail.venue_format||"Уточняется"}</b></div><div className="ev-info-row"><span>Дедлайн</span><b>{formatDate(detail.deadline_at)}</b></div><div className="ev-info-row"><span>Регистраций</span><b>{aggregate.counter_state==="unknown"?"Нет данных":aggregate.confirmed_registrations??"Нет данных"}</b></div><div className="ev-info-row"><span>Участий</span><b>{aggregate.counter_state==="unknown"?"Нет данных":aggregate.participations??"Нет данных"}</b></div><p className="ev-side-note">{aggregate.definition_text}</p></InformationPanel>
         <InformationPanel title="Полезные ссылки"><SafeExternalLink href={detail.source_url}>Сайт события <ExternalLink size={14}/></SafeExternalLink><p className="ev-side-note">Источник проверен: {formatDate(detail.source_checked_at)}</p></InformationPanel>
       </aside>
     </div>
