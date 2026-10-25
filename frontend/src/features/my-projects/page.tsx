@@ -188,7 +188,7 @@ function PanelPreview({ project, onOpen, onRewards }: { project: Project; onOpen
   </aside>;
 }
 function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, onMessage, onSubmitContribution, saving, saveError, onStart, starting, startError }: {
-  project: Project; initialTab: Tab; onBack: () => void; onTabChange:(tab:Tab)=>void; onWorkspace: () => void; onMessage: (personId?: string) => void;
+  project: Project; initialTab: Tab; onBack: () => void; onTabChange:(tab:Tab)=>void; onWorkspace: (checkpointKey?:string) => void; onMessage: (personId?: string) => void;
   onSubmitContribution: (summary: string, url: string, artifactKey: string) => void; saving: boolean; saveError: boolean; onStart: () => void; starting: boolean; startError: boolean;
 }) {
   const [tab,setTab] = useState<Tab>(initialTab);
@@ -237,6 +237,7 @@ function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, 
   const [copied,setCopied] = useState(false);
   const [copyFailed,setCopyFailed] = useState(false);
   const checkpoints = project.detail?.checkpoints ?? [];
+  const nextCheckpoint=checkpoints.find(cp=>!finishedCheckpoint.has(cp.status));
   const acceptedEvidenceCount=project.work.contributions.filter(item=>
     ["accepted","verified","approved"].includes(item.status)||
     (project.detail?.feedback??[]).some(review=>
@@ -274,6 +275,17 @@ function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, 
           <div className="mp-outcome-band"><span>Что нужно получить в результате</span><strong>{project.detail?.deliverable || project.work.terms.deliverable}</strong></div>
           {(project.work.task.competency_tags?.length ?? 0)>0 && <div className="mp-skill-tags"><span>Навыки проекта</span>{(project.work.task.competency_tags ?? []).map(tag=><em key={tag}>{tag}</em>)}</div>}
         </section>
+        <section className="mp-surface mp-detail-panel mp-overview-next" data-testid="project-next-action">
+          <header><h2><ClipboardCheck/> Твой следующий шаг</h2><span className="mp-ref-pill">{nextCheckpoint?"Открыть этап":"Этапы выполнены"}</span></header>
+          {nextCheckpoint?<div className="mp-overview-next-body">
+            <span className="mp-overview-next-count">{String(checkpoints.findIndex(cp=>cp.key===nextCheckpoint.key)+1).padStart(2,"0")}</span>
+            <div><strong>{nextCheckpoint.title}</strong>
+              <p>Открой задачу этого этапа, подготовь проверяемый результат и передай файлы или ссылку заказчику.</p>
+              <ol><li>Изучи постановку и критерии</li><li>Подготовь решение и подтверждение</li><li>Отправь этап на проверку</li></ol>
+              <button className="mp-primary" type="button" onClick={()=>{onWorkspace(nextCheckpoint.key);}}>Открыть задачу этапа <ArrowRight size={16}/></button>
+            </div>
+          </div>:<p className="mp-muted">Все опубликованные этапы подтверждены. Проверенные материалы доступны в разделе «Мой вклад».</p>}
+        </section>
         <section className="mp-surface mp-detail-panel">
           <header><h2><CheckCircle2/> Критерии приёмки</h2><button className="mp-inline-action" type="button" onClick={()=>{selectTab("tasks");}}>Все требования <ArrowRight size={15}/></button></header>
           <p className="mp-panel-caption">Именно по этим пунктам заказчик проверяет результат. Галочки здесь не означают автоматического зачёта.</p>
@@ -283,7 +295,7 @@ function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, 
         </section>
         <section className="mp-surface mp-detail-panel">
           <header><h2><Layers3/> Ближайшие этапы</h2><button className="mp-inline-action" type="button" onClick={()=>{selectTab("progress");}}>Весь прогресс <ArrowRight size={15}/></button></header>
-          {checkpoints.length>0?<div className="mp-overview-checkpoints">{checkpoints.slice(0,4).map((cp,index)=><div className="mp-overview-checkpoint" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"is-done":""}>{finishedCheckpoint.has(cp.status)?<Check size={14}/>:index+1}</span><div><strong>{cp.title}</strong><small>{finishedCheckpoint.has(cp.status)?"Подтверждено":statusText[cp.status] || cp.status}</small></div></div>)}</div>:<p className="mp-muted">План этапов пока не опубликован заказчиком</p>}
+          {checkpoints.length>0?<div className="mp-overview-checkpoints">{checkpoints.slice(0,4).map((cp,index)=><button type="button" className="mp-overview-checkpoint" key={cp.key} onClick={()=>{onWorkspace(cp.key);}} aria-label={`Открыть этап ${cp.title}`}><span className={finishedCheckpoint.has(cp.status)?"is-done":""}>{finishedCheckpoint.has(cp.status)?<Check size={14}/>:index+1}</span><div><strong>{cp.title}</strong><small>{finishedCheckpoint.has(cp.status)?"Подтверждено":statusText[cp.status] || cp.status}</small></div><ArrowRight size={15}/></button>)}</div>:<p className="mp-muted">План этапов пока не опубликован заказчиком</p>}
         </section>
       </div>
       <div className="mp-detail-stack mp-detail-stack--side">
@@ -317,7 +329,8 @@ function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, 
     {tab==="tasks" && <ProjectReferenceTasks checkpoints={checkpoints} decisions={project.work.decisions}
       projectDescription={project.detail?.problem || project.work.terms.deliverable}
       deliverable={project.detail?.deliverable || project.work.terms.deliverable}
-      acceptanceCriteria={project.work.terms.acceptance_criteria} onWorkspace={onWorkspace}/>}
+      acceptanceCriteria={project.work.terms.acceptance_criteria} onWorkspace={onWorkspace}
+      onCheckpoint={(key)=>{onWorkspace(key);}}/>}
     {tab==="progress" && <ProjectReferenceProgress checkpoints={checkpoints} progress={progress}
       deadline={project.work.terms.deadline_at} decisions={project.work.decisions} skills={project.work.task.competency_tags??[]} onWorkspace={onWorkspace}/>}
     {tab==="contribution" && <>
@@ -387,6 +400,7 @@ export function ParticipantProjectsV2() {
   const [deadlineFilter,setDeadlineFilter]=useState("all");
   const [sort,setSort]=useState("deadline");
   const [workspaceTab,setWorkspaceTab]=useState(false);
+  const [workspaceCheckpoint,setWorkspaceCheckpoint]=useState<string|null>(null);
   const [showHelp,setShowHelp]=useState(false);
   const work=useQuery({queryKey:["my-work"],queryFn:()=>apiRequest<WorkItem[]>("/api/v1/me/work"),refetchOnMount:"always"});
   const details=useQueries({queries:(work.data??[]).slice(0,30).map(item=>({
@@ -422,6 +436,8 @@ export function ParticipantProjectsV2() {
   if(work.isError)return <StatePanel kind="error" action="Повторить" onAction={()=>{void work.refetch();}}/>;
   if(selected&&workspaceTab)return <div className="mpv2 mpv2--workspace">
     <ProjectDashboard
+      assignmentId={selected.work.assignment.id} initialCheckpointKey={workspaceCheckpoint}
+      onStartWork={async()=>{await start.mutateAsync(selected.work.assignment.id);}}
       project={{
         title:selected.work.task.title,
         customer:projectCompany(selected),
@@ -439,7 +455,7 @@ export function ParticipantProjectsV2() {
         contributions:selected.work.contributions,
         feedback:selected.detail?.feedback ?? [],
       }}
-      onBack={()=>{setWorkspaceTab(false);}}
+      onBack={()=>{setWorkspaceTab(false);setWorkspaceCheckpoint(null);}}
       onChat={()=>{void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}`);}}
       onOpenMember={personId=>{void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}&participant=${encodeURIComponent(personId)}`);}}
       onUpload={()=>{
@@ -452,7 +468,7 @@ export function ParticipantProjectsV2() {
       }}
     />
   </div>;
-  if(selected)return <div className="mpv2"><ProjectDetail key={selected.work.assignment.id} onTabChange={(tab)=>{setParams(previous=>{const next=new URLSearchParams(previous);next.set("tab",tab);return next;},{replace:true});}} initialTab={(["overview","tasks","progress","contribution","team","rewards"] as const).find(tab=>tab===params.get("tab"))??"overview"} project={selected} onBack={back} onWorkspace={()=>{ setWorkspaceTab(true); }} onMessage={(personId)=>{ void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}${personId?`&participant=${encodeURIComponent(personId)}`:""}`); }} onSubmitContribution={(summary,url,artifactKey)=>{contribute.mutate({id:selected.work.assignment.id,summary,url,artifactKey});}} saving={contribute.isPending} saveError={contribute.isError} onStart={()=>{ start.mutate(selected.work.assignment.id); }} starting={start.isPending} startError={start.isError}/></div>;
+  if(selected)return <div className="mpv2"><ProjectDetail key={selected.work.assignment.id} onTabChange={(tab)=>{setParams(previous=>{const next=new URLSearchParams(previous);next.set("tab",tab);return next;},{replace:true});}} initialTab={(["overview","tasks","progress","contribution","team","rewards"] as const).find(tab=>tab===params.get("tab"))??"overview"} project={selected} onBack={back} onWorkspace={(key)=>{setWorkspaceCheckpoint(key??null);setWorkspaceTab(true);}} onMessage={(personId)=>{ void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}${personId?`&participant=${encodeURIComponent(personId)}`:""}`); }} onSubmitContribution={(summary,url,artifactKey)=>{contribute.mutate({id:selected.work.assignment.id,summary,url,artifactKey});}} saving={contribute.isPending} saveError={contribute.isError} onStart={()=>{ start.mutate(selected.work.assignment.id); }} starting={start.isPending} startError={start.isError}/></div>;
   return <div className="mpv2" data-project-screen={layout}>
     <header className="mp-page-title"><div className="mp-page-title__row"><div><p className="mp-eyebrow">ПРАКТИКА И ЛИЧНЫЙ ВКЛАД</p><h1 id="workspace-title">Мои проекты</h1><p>Активно работай над проектами, развивай навыки в команде, отслеживай свой вклад и получай реальные выгоды.</p></div><button type="button" className="mp-help" onClick={()=>{setShowHelp(value=>!value);}} aria-expanded={showHelp} aria-controls="mp-help-panel"><Info size={15}/> Как это работает?</button></div></header>
     {showHelp&&<div id="mp-help-panel" className="mp-help-banner" role="region" aria-label="Как работают мои проекты"><span><strong>1.</strong> Проекты появляются после принятия назначения</span><span><strong>2.</strong> Работайте с командой и отправляйте личный вклад</span><span><strong>3.</strong> Заказчик проверяет результат, а возможности и награды зависят от условий программы</span></div>}
