@@ -511,3 +511,112 @@
     width: 205px;
   }
 }
+
+
+/* tasks-filter-rail-source-parity: respect the width of the actual workspace,
+   not the browser window (the app sidebar occupies up to ~240px).
+   The approved 01 reference has a readable full-width sort selector.
+   Advanced toggles remain functional at all breakpoints. */
+.catalog-v2 .catalog-v2-filters {
+  container-type: inline-size;
+  min-width: 0;
+}
+@media (min-width: 1121px) {
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(7) {
+    position: relative;
+    flex: 1 1 208px;
+    max-width: 235px;
+    min-width: 170px;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(7)::before {
+    content: "Сортировка:";
+    display: block;
+    position: absolute;
+    z-index: 1;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.71rem;
+    line-height: 1;
+    color: var(--catalog-muted);
+    pointer-events: none;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(7) select {
+    padding-left: 89px;
+    font-size: 0.71rem;
+    text-overflow: ellipsis;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-filter-expander {
+    justify-content: center;
+    width: 39px;
+    min-width: 39px;
+    padding: 6px;
+    font-size: 0;
+    overflow: hidden;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-filter-expander svg {
+    flex: none;
+    width: 17px;
+    height: 17px;
+  }
+}
+/* This deliberately follows the original desktop rules so a narrow content
+   container overrides desktop display:contents, even on a wide monitor. */
+@container (max-width: 1180px) {
+  .catalog-v2 .catalog-v2-filter-rail {
+    flex-wrap: wrap;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters[data-open="false"] {
+    display: none;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters[data-open="true"] {
+    display: grid;
+    flex: 0 0 100%;
+    order: 10;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    padding-top: 8px;
+    min-width: 0;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters[data-open="true"] label {
+    min-width: 0;
+    max-width: none;
+    font-size: 0.74rem;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(7)::before {
+    display: none;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(7) select {
+    padding-left: 9px;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-filter-expander {
+    width: auto;
+    min-width: 39px;
+    padding: 6px 9px;
+    font-size: 0.72rem;
+  }
+}
+@container (max-width: 650px) {
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters[data-open="true"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@container (max-width: 380px) {
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters[data-open="true"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* The shared shell adds its own top padding. Keep the Tasks content itself
+   close to the original compact first fold without affecting other pages. */
+@media (min-width: 1550px) {
+  .catalog-v2 {
+    row-gap: 12px;
+  }
+  .catalog-v2 .catalog-v2-heading h1 {
+    margin-bottom: 2px;
+    line-height: 1.12;
+  }
+  .catalog-v2 .catalog-v2-heading > div:first-child > p:last-child {
+    line-height: 1.32;
+  }
+}
