@@ -90,6 +90,15 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
 
   await expect(page.locator(".catalog-v2-stage-track li")).toHaveCount(5);
   await expect(page.locator(".catalog-v2-benefits-section li")).toHaveCount(4);
+  // Exact source benefit pictograms: learning passport / portfolio case /
+  // supported teamwork / mentor review. The categories are canonical API
+  // values, never inferred from arbitrary customer-facing benefit text.
+  const benefitIcons = page.locator(".catalog-v2-benefits-section .catalog-v2-benefit-icon");
+  await expect(benefitIcons).toHaveCount(4);
+  for (const [index, tone] of ["violet", "blue", "teal", "amber"].entries()) {
+    await expect(benefitIcons.nth(index)).toHaveAttribute("data-tone", tone);
+    await expect(benefitIcons.nth(index).locator("svg")).toBeVisible();
+  }
   // Every branded source mark in approved 01/03 must be the original SVG
   // from Impulse_Tasks_UI (1); it is shown only with an explicit demo label.
   const sourceMarks = [
