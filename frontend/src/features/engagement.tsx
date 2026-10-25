@@ -26,6 +26,13 @@ const WEEKDAY_LABELS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 function dateKey(day: Date): string {
   return [day.getFullYear(), String(day.getMonth()+1).padStart(2, "0"), String(day.getDate()).padStart(2, "0")].join("-");
 }
+function dayCountLabel(count: number): string {
+  const lastTwo = count % 100;
+  const last = count % 10;
+  const suffix = lastTwo >= 11 && lastTwo <= 14 ? "дней" :
+    last === 1 ? "день" : last >= 2 && last <= 4 ? "дня" : "дней";
+  return `${String(count)} ${suffix}`;
+}
 function recentDays(): Array<{ date: string; label: string }> {
   const now = new Date();
   return Array.from({ length: 7 }, (_, index) => {
@@ -230,7 +237,7 @@ export function TopbarEngagementIndicator() {
                 </button>
                 <div className="streak-facts" aria-label="Статистика серии">
                   <div className="streak-fact"><span className="streak-fact-icon is-growth"><BarChart3 size={26}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : `${String(currentDays)} дней`}</strong><small>Текущая серия</small></div></div>
-                  <div className="streak-fact"><span className="streak-fact-icon is-best"><Trophy size={27}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : bestDays > 0 ? `${String(bestDays)} дней` : "Пока ноль"}</strong><small>Лучший результат</small></div></div>
+                  <div className="streak-fact"><span className="streak-fact-icon is-best"><Trophy size={27}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : bestDays > 0 ? dayCountLabel(bestDays) : "Пока ноль"}</strong><small>Лучший результат</small></div></div>
                   <div className="streak-fact"><span className="streak-fact-icon is-freeze"><Snowflake size={27}/></span><div><strong>{freezeQuery.isPending || freezeQuery.isError ? "—" : `${String(freezeStock)} в запасе`}</strong><small>Использовано: {freezeQuery.data?.consumed_total ?? 0}</small></div></div>
                 </div>
                 <div className="streak-rule">
