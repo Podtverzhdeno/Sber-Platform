@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import asyncio
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from uuid import UUID, uuid4
 
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
@@ -26,7 +26,7 @@ API = "/api/v1/me/bootcamp/impulse-study/demo-course-1"
 
 
 def actor(person_id: UUID, role: Role) -> ActorContext:
-    scopes = frozenset({"verification:write"}) if role is Role.OPERATOR else frozenset()
+    scopes: frozenset[str] = frozenset({"verification:write"}) if role is Role.OPERATOR else frozenset()
     return ActorContext(
         person_id=person_id,
         display_name="Test learner",
@@ -74,7 +74,7 @@ def test_study_progress_requires_order_and_practice_requires_review(
                 )
 
     @asynccontextmanager
-    async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
         # Keep all asyncpg connections in TestClient's single event loop.
         await create_people()
         yield
@@ -155,17 +155,13 @@ def test_study_cannot_advance_locked_course(monkeypatch: pytest.MonkeyPatch) -> 
         return [SimpleNamespace(key="demo-course-10", access_state="prerequisite_not_met")]
 
     monkeypatch.setattr(editorial_learning.BootcampCatalogService, "catalog", catalog)
-    request = SimpleNamespace(
-        app=SimpleNamespace(
-            state=SimpleNamespace(
-                development_service=SimpleNamespace(store=object()),
-                competency_service=None,
-            )
-        )
-    )
+    app = FastAPI()
+    app.state.development_service = SimpleNamespace(store=object())
+    app.state.competency_service = None
+    request = Request({"type": "http", "app": app})
     with pytest.raises(ApiError) as exception:
         asyncio.run(
-            editorial_learning._assert_course_access(
+            editorial_learning.assert_course_access(
                 request,
                 session(person, Role.PARTICIPANT),
                 "demo-course-10",
