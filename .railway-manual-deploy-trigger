@@ -11,3 +11,6 @@ release_request=2026-10-25-why-dialog-close-0b2f215519ea
 
 # Restore Bootcamp panel alignment and non-overlapping catalog across responsive breakpoints
 release_request=2026-10-25-bootcamp-layout-e27518446123
+
+# Restore lesson-start position on next/previous Bootcamp navigation
+release_request=2026-10-25-bootcamp-lesson-scroll-f8574242445b
