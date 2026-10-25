@@ -225,3 +225,65 @@
 .bc-reference .bc-ref-required-close{margin-top:12px;width:100%;display:flex;justify-content:center;align-items:center;gap:11px;padding:10px;border:1px solid #05a9bc;border-radius:8px;background:#0d3b50;color:#26f3ee;font-weight:800}
 .bc-ref-required-close svg{height:17px;width:17px}
 .bc-ref-required-empty{border:1px dashed #3a5b74;border-radius:9px;padding:15px;color:#aac6df}
+
+/* Measured against Chromium rendering of the supplied five-state reference.
+   Preserve the canonical global sidebar; only Bootcamp's inner layout changes.
+   At 1448px the reference starts: heading y74, tabs y144, overview y203,
+   category bar y473, filters y523, first course row y577. */
+.workspace-content:has(> .bc-reference),
+.workspace-content:has(.bc-reference){padding-top:10px}
+@media(min-width:1321px){
+  .bc-reference .bc-ref-continue{min-height:241px}
+  .bc-reference .bc-ref-hero-grid{margin-bottom:-51px}
+  .bc-reference .bc-ref-right-panels{position:relative;top:-24px;grid-template-columns:1fr}
+  .bc-reference .bc-ref-role-summary{min-height:123px}
+  .bc-reference .bc-ref-grade{min-height:191px}
+  .bc-reference .bc-ref-course-card{min-height:296px}
+  .bc-reference .bc-ref-course-card[data-access="prerequisite_not_met"]{
+    min-height:184px;
+  }
+}
+@media(min-width:1121px) and (max-width:1320px){
+  .bc-reference .bc-ref-hero-grid{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);margin-bottom:-18px}
+  .bc-reference .bc-ref-continue{min-height:241px}
+  .bc-reference .bc-ref-right-panels{grid-template-columns:1fr;position:relative;top:-12px}
+  .bc-reference .bc-ref-role-summary{min-height:123px}
+  .bc-reference .bc-ref-grade{min-height:187px}
+  .bc-reference .bc-ref-course-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .bc-reference .bc-ref-course-card{min-height:296px}
+  .bc-reference .bc-ref-course-card[data-access="prerequisite_not_met"]{min-height:184px}
+}
+@media(min-width:821px) and (max-width:1120px){
+  .bc-reference .bc-ref-hero-grid{grid-template-columns:1fr;gap:4px;margin-bottom:-18px}
+  .bc-reference .bc-ref-continue{min-height:239px}
+  .bc-reference .bc-ref-right-panels{position:static;grid-template-columns:1fr 1.2fr;gap:7px}
+  .bc-reference .bc-ref-role-summary{min-height:164px}
+  .bc-reference .bc-ref-grade{min-height:174px}
+  .bc-reference .bc-ref-course-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .bc-reference .bc-ref-category-tabs{max-width:520px;min-height:89px;align-content:start}
+}
+@media(min-width:591px) and (max-width:820px){
+  .bc-reference .bc-ref-hero-grid{grid-template-columns:1fr;gap:16px;margin-bottom:19px}
+  .bc-reference .bc-ref-continue{margin-top:22px;min-height:239px}
+  .bc-reference .bc-ref-right-panels{position:static;grid-template-columns:1fr 1.2fr;gap:7px}
+  .bc-reference .bc-ref-role-summary{min-height:164px}
+  .bc-reference .bc-ref-grade{min-height:174px}
+  .bc-reference .bc-ref-course-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:590px){
+  .bc-reference .bc-ref-hero-grid{grid-template-columns:1fr;gap:10px;margin-bottom:19px}
+  .bc-reference .bc-ref-continue{margin-top:22px;min-height:368px}
+  .bc-reference .bc-ref-right-panels{grid-template-columns:1fr;gap:7px}
+  .bc-reference .bc-ref-role-summary{min-height:167px}
+  .bc-reference .bc-ref-grade{min-height:188px}
+  .bc-reference .bc-ref-course-grid{grid-template-columns:1fr}
+  .bc-reference .bc-ref-course-card{min-height:265px}
+}
+/* Accessible actions remain within their cards at every viewport size. */
+.bc-reference .bc-ref-course-card,.bc-reference .bc-ref-course-row{
+  overflow-wrap:anywhere;
+}
+.bc-reference .bc-ref-primary{max-width:100%}
+.bc-reference .bc-ref-course-card[data-access="prerequisite_not_met"]{
+  opacity:1;align-self:start;
+}
