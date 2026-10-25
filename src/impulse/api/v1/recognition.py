@@ -451,6 +451,14 @@ async def rebuild_standings_projection(
     return [_standing_view(item) for item in await service.rebuild(authenticated.actor, season_id)]
 
 
+@router.get("/rating-seasons", response_model=list[SeasonView])
+async def published_rating_seasons(
+    service: Annotated[RecognitionService, Depends(_service)],
+) -> list[SeasonView]:
+    """Publicly discover published seasons; scheduled drafts are not exposed."""
+    return [_season_view(item) for item in await service.public_seasons()]
+
+
 @router.get(
     "/rating-seasons/{season_id}/leaderboard",
     response_model=list[LeaderboardEntryView],
