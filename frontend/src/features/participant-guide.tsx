@@ -163,9 +163,9 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
     const toggle = () => { startManually(); };
     const openFull = () => { openLibrary(); };
     const openTopic = (event: Event) => {
-      const detail = (event as CustomEvent<{ topicId?: string }>).detail;
-      const id = detail?.topicId;
-      if (id && HELP_TOPICS.some((topic) => topic.id === id)) openLibrary(id);
+      const detail: unknown = (event as CustomEvent<unknown>).detail;
+      const id = detail !== null && typeof detail === "object" && "topicId" in detail ? detail.topicId : null;
+      if (typeof id === "string" && HELP_TOPICS.some((topic) => topic.id === id)) openLibrary(id);
     };
     window.addEventListener("impulse:guide:toggle", toggle);
     window.addEventListener("impulse:guide:library", openFull);
