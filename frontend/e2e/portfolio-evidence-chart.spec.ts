@@ -61,9 +61,11 @@ for (const viewport of [{width:1440,height:900},{width:390,height:844}]) {
     await page.getByRole("tab",{name:"Skill Passport"}).click();
     const evidence = page.getByRole("region", { name:"Подтверждающие кейсы" });
     await expect(evidence.locator(".p2-skill-evidence")).toHaveCount(2);
-    await evidence.getByText("Доказательства и принятые результаты · 2").click();
-    await expect(evidence.getByText("Принята проверяемая практика: python")).toHaveCount(2);
-    await expect(evidence.getByText("Артефакты: evidence-report.md")).toHaveCount(2);
+    const pythonEvidence = evidence.locator(".p2-skill-evidence").first();
+    await pythonEvidence.getByText("Доказательства и принятые результаты · 2").click();
+    await expect(pythonEvidence.locator(".p2-skill-evidence-list > div")).toHaveCount(2);
+    await expect(pythonEvidence.getByText("Принята проверяемая практика: python")).toHaveCount(2);
+    await expect(pythonEvidence.getByText("Артефакты: evidence-report.md")).toHaveCount(2);
     await page.getByRole("tab",{name:"Обзор"}).click();
     await panel.getByRole("button",{name:/Открыть Skill Passport/}).click();
     await expect(page).toHaveURL(/analyticsTab=passport$/);
