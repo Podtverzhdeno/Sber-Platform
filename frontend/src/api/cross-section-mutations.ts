@@ -19,6 +19,9 @@ const materialWrites = [
   "/api/v1/me/project-credentials",
   "/api/v1/ops/cases/",
   "/api/v1/customer/tasks/",
+  "/api/v1/operations/rating-seasons/",
+  "/api/v1/operations/score-entries/",
+  "/api/v1/operations/offer-evidence",
 ] as const;
 
 export const participantProjectionKeys = [
@@ -38,6 +41,8 @@ export const participantProjectionKeys = [
   "participant-development-overview",
   "task-recommendations",
   "rating",
+  "rating-seasons",
+  "rating-season-leaderboard",
   "achievements",
 ] as const;
 
