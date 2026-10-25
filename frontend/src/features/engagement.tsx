@@ -267,7 +267,7 @@ export function TopbarEngagementIndicator() {
                           aria-expanded={rhythmHelpOpen} aria-describedby="engagement-rhythm-tooltip"
                           onClick={() => { setRhythmHelpOpen(value => !value); }}>?</button>
                         <span id="engagement-rhythm-tooltip" className={`engagement-help-tooltip${rhythmHelpOpen ? " is-open" : ""}`} role="tooltip">
-                          Недельный ритм — дни, в которые ты планируешь поддерживать серию. По нему строятся напоминания и ожидание активности. Сам по себе ритм не засчитывает дни.
+                          Недельный ритм — это дни, в которые ты планируешь поддерживать серию. По ним строятся напоминания и ожидание активности.<span className="sr-only">Сам по себе ритм не засчитывает дни.</span>
                         </span>
                       </span>
                     </h3>
