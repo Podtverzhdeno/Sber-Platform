@@ -172,13 +172,13 @@ function BenefitsPreview({ onDetails }: { onDetails: () => void }) {
     <p>Дополнительные возможности: стажировка, закрытое сообщество и подтверждение вклада</p>
   </section>;
 }
-function PanelPreview({ project, onOpen, onRewards }: { project: Project; onOpen: () => void; onRewards: () => void }) {
+function PanelPreview({ project, onOpen, onRewards }: { project: Project; onOpen: (tab?: Tab) => void; onRewards: () => void }) {
   const checkpoints = project.detail?.checkpoints ?? [];
   const progress = completion(project);
   const contributions = project.work.contributions.slice(-4);
   return <aside className="mp-preview mp-surface">
     <header className="mp-preview__header"><CompanyIcon name={projectCompany(project)}/><div><small>{projectCompany(project)} · Заказчик</small><h2>{project.work.task.title}</h2><p>{project.work.terms.deliverable}</p></div><Status status={project.work.assignment.status}/></header>
-    <div className="mp-preview__tabs"><button type="button" className="is-active" onClick={onOpen}>Обзор</button><button type="button" onClick={onOpen}>Прогресс</button><button type="button" onClick={onOpen}>Мой вклад</button><button type="button" onClick={onOpen}>Команда</button><button type="button" onClick={onRewards}>Бонусы и выгоды</button></div>
+    <div className="mp-preview__tabs"><button type="button" className="is-active" onClick={()=>onOpen("overview")}>Обзор</button><button type="button" onClick={()=>onOpen("progress")}>Прогресс</button><button type="button" onClick={()=>onOpen("contribution")}>Мой вклад</button><button type="button" onClick={()=>onOpen("team")}>Команда</button><button type="button" onClick={onRewards}>Бонусы и выгоды</button></div>
     <div className="mp-preview__content">
       <div className="mp-preview__left">
         <section className="mp-surface mp-panel-inset"><header><h3>Прогресс по этапам</h3><strong>{progress === null ? "Нет оценки" : `${String(progress)}%`}</strong></header>
@@ -195,11 +195,11 @@ function PanelPreview({ project, onOpen, onRewards }: { project: Project; onOpen
     <div className="mp-preview__actions"><button className="mp-primary" type="button" onClick={onOpen}>Открыть проект <ArrowRight size={17}/></button><span>{dateLabel(project.work.terms.deadline_at)} · {daysLabel(project.work.terms.deadline_at)}</span></div>
   </aside>;
 }
-function ProjectDetail({ project, onBack, onWorkspace, onMessage, onSubmitContribution, saving, saveError, onStart, starting }: {
-  project: Project; onBack: () => void; onWorkspace: () => void; onMessage: () => void;
+function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, onSubmitContribution, saving, saveError, onStart, starting }: {
+  project: Project; initialTab: Tab; onBack: () => void; onWorkspace: () => void; onMessage: () => void;
   onSubmitContribution: (summary: string, url: string) => void; saving: boolean; saveError: boolean; onStart: () => void; starting: boolean;
 }) {
-  const [tab,setTab] = useState<Tab>("overview");
+  const [tab,setTab] = useState<Tab>(initialTab);
   const [summary,setSummary] = useState("");
   const [artifact,setArtifact] = useState("");
   const [rewardFocus,setRewardFocus] = useState<string | null>(null);
@@ -304,6 +304,7 @@ export function ParticipantProjectsV2() {
   const [company,setCompany]=useState("all");
   const [sort,setSort]=useState("deadline");
   const [workspaceTab,setWorkspaceTab]=useState(false);
+  const [showHelp,setShowHelp]=useState(false);
   const work=useQuery({queryKey:["my-work"],queryFn:()=>apiRequest<WorkItem[]>("/api/v1/me/work"),refetchOnMount:"always"});
   const details=useQueries({queries:(work.data??[]).slice(0,30).map(item=>({
     queryKey:["workspace-task-detail",item.task.id],
@@ -313,8 +314,8 @@ export function ParticipantProjectsV2() {
   const projects:Project[]=(work.data??[]).map((item,index)=>({work:item,detail:details[index]?.data}));
   const selected=projects.find(x=>x.work.assignment.id===selectedId);
   const focused=projects.find(x=>x.work.assignment.id===focus)||projects[0];
-  const open=(id:string)=>{setWorkspaceTab(false);setParams(previous=>{const next=new URLSearchParams(previous);next.set("project",id);return next;});};
-  const back=()=>{setWorkspaceTab(false);setParams(previous=>{const next=new URLSearchParams(previous);next.delete("project");return next;});};
+  const open=(id:string,tab:Tab="overview")=>{setWorkspaceTab(false);setParams(previous=>{const next=new URLSearchParams(previous);next.set("project",id);next.set("tab",tab);return next;});};
+  const back=()=>{setWorkspaceTab(false);setParams(previous=>{const next=new URLSearchParams(previous);next.delete("project");next.delete("tab");return next;});};
   const setLayout=(value:View)=>setParams(previous=>{const next=new URLSearchParams(previous);next.set("layout",value);return next;});
   const setFilter=(value:Filter)=>setParams(previous=>{const next=new URLSearchParams(previous);if(value==="all")next.delete("filter");else next.set("filter",value);return next;});
   const start=useMutation({mutationFn:(id:string)=>apiRequest(`/api/v1/me/assignments/${id}/start`,{method:"POST",headers:{"X-CSRF-Token":sessionStorage.getItem("impulse_csrf")??""}}),onSuccess:()=>client.invalidateQueries({queryKey:["my-work"]})});
@@ -335,9 +336,10 @@ export function ParticipantProjectsV2() {
     if(body?.hidden) upload?.querySelector<HTMLButtonElement>(".ctw-section-toggle")?.click();
     upload?.scrollIntoView({behavior:"smooth",block:"start"});
   }}/></div>;
-  if(selected)return <div className="mpv2"><ProjectDetail key={selected.work.assignment.id} project={selected} onBack={back} onWorkspace={()=>{ setWorkspaceTab(true); }} onMessage={()=>{ void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}`); }} onSubmitContribution={(summary,url)=>contribute.mutate({id:selected.work.assignment.id,summary,url})} saving={contribute.isPending} saveError={contribute.isError} onStart={()=>{ start.mutate(selected.work.assignment.id); }} starting={start.isPending}/></div>;
+  if(selected)return <div className="mpv2"><ProjectDetail key={selected.work.assignment.id} initialTab={(["overview","tasks","progress","contribution","team","rewards"] as const).find(tab=>tab===params.get("tab"))??"overview"} project={selected} onBack={back} onWorkspace={()=>{ setWorkspaceTab(true); }} onMessage={()=>{ void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}`); }} onSubmitContribution={(summary,url)=>contribute.mutate({id:selected.work.assignment.id,summary,url})} saving={contribute.isPending} saveError={contribute.isError} onStart={()=>{ start.mutate(selected.work.assignment.id); }} starting={start.isPending}/></div>;
   return <div className="mpv2" data-project-screen={layout}>
-    <header className="mp-page-title"><p className="mp-eyebrow">ПРАКТИКА И ЛИЧНЫЙ ВКЛАД</p><h1 id="workspace-title">Мои проекты</h1><p>Активно работай над проектами, развивай навыки в команде, отслеживай свой вклад и получай реальные выгоды.</p></header>
+    <header className="mp-page-title"><div className="mp-page-title__row"><div><p className="mp-eyebrow">ПРАКТИКА И ЛИЧНЫЙ ВКЛАД</p><h1 id="workspace-title">Мои проекты</h1><p>Активно работай над проектами, развивай навыки в команде, отслеживай свой вклад и получай реальные выгоды.</p></div><button type="button" className="mp-help" onClick={()=>setShowHelp(value=>!value)} aria-expanded={showHelp} aria-controls="mp-help-panel"><Info size={15}/> Как это работает?</button></div></header>
+    {showHelp&&<div id="mp-help-panel" className="mp-help-banner" role="region" aria-label="Как работают мои проекты"><span><strong>1.</strong> Проекты появляются после принятия назначения</span><span><strong>2.</strong> Работайте с командой и отправляйте личный вклад</span><span><strong>3.</strong> Заказчик проверяет результат, а возможности и награды зависят от условий программы</span></div>
     <RewardsPath completedCount={finished} onSelect={setRewardFocus}/>
     {rewardFocus&&<div className="mp-reward-popup" role="status"><div><Gift size={17}/><span><strong>{benefits.find(x=>x.id===rewardFocus)?.title}</strong> — {benefits.find(x=>x.id===rewardFocus)?.unlock}. Условия участия и выдачи подтверждаются организатором.</span></div><button type="button" onClick={()=>{ setRewardFocus(null); }} aria-label="Закрыть информацию о бонусе">×</button></div>}
     <section className="mp-toolbar" aria-label="Управление проектами">
@@ -355,7 +357,7 @@ export function ParticipantProjectsV2() {
           {visible.map(project=><ProjectSummary key={project.work.assignment.id} project={project} selected={focus===project.work.assignment.id} onSelect={()=>{ setFocus(previous=>previous===project.work.assignment.id?null:project.work.assignment.id); }} onOpen={()=>{ open(project.work.assignment.id); }} saved={saved.includes(project.work.assignment.id)} onBookmark={()=>{ setSaved(prev=>prev.includes(project.work.assignment.id)?prev.filter(i=>i!==project.work.assignment.id):[...prev,project.work.assignment.id]); }}/>)}
         </div>
         {!visible.length&&<p className="mp-muted mp-empty-row">Подходящих проектов нет. Измените фильтры.</p>}
-        {focused && focus && visible.some(project=>project.work.assignment.id===focus) && <div className="mp-quick-preview"><PanelPreview project={focused} onOpen={()=>{ open(focused.work.assignment.id); }} onRewards={()=>{setRewardFocus("gigacode");window.scrollTo({top:0,behavior:"smooth"});}}/></div>}
+        {focused && focus && visible.some(project=>project.work.assignment.id===focus) && <div className="mp-quick-preview"><PanelPreview project={focused} onOpen={(tab)=>{ open(focused.work.assignment.id,tab); }} onRewards={()=>{open(focused.work.assignment.id,"rewards");}}/></div>}
       </div>:<div className="mp-list-layout"><div className="mp-list-search"><Search size={17}/><input aria-label="Поиск проектов" value={text} onChange={e=>{ setText(e.target.value); }} placeholder="Поиск по проектам, компаниям и результатам"/><SlidersHorizontal size={17}/></div>{visible.length?<ProjectList projects={visible} onOpen={open}/>:<div className="mp-empty-row">По заданным условиям проекты не найдены</div>}</div>}
       </>}
   </div>;
