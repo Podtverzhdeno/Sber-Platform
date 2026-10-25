@@ -81,7 +81,7 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await expect(page.getByTestId("achievement-detail")).toHaveCount(0);
   await expect(page).not.toHaveURL(/achievement=/);
 
-  await screen.getByTestId("achievements-empty").getByRole("button", { name: /Добавить достижение/ }).click();
+  await screen.locator(".ach-gallery-hero").getByRole("button", { name: /Добавить достижение/ }).click();
   await expect(page.getByTestId("achievements-add-dialog")).toBeVisible();
   await page.getByTestId("achievements-add-dialog").getByRole("button", { name: /Событие/ }).click();
   await page.getByTestId("achievements-add-dialog").getByRole("button", { name: /Продолжить/ }).click();
@@ -103,7 +103,7 @@ test("achievements v2: empty state, no fabricated metrics, and mobile layout", a
   const scrollWidth = await screen.evaluate(element => element.scrollWidth);
   expect(scrollWidth).toBeLessThanOrEqual(width + 2);
   await page.screenshot({ path: "test-results/achievements-v2/mobile.png", animations: "disabled", fullPage: true });
-  await screen.getByRole("button", { name: /Добавить достижение/ }).click();
+  await screen.getByTestId("achievements-empty").getByRole("button", { name: /Добавить достижение/ }).click();
   await expect(page.getByTestId("achievements-add-dialog")).toBeVisible();
   await page.getByTestId("achievements-add-dialog").getByRole("button", { name: "Закрыть" }).click();
   await expect(page.getByTestId("achievements-add-dialog")).toHaveCount(0);
