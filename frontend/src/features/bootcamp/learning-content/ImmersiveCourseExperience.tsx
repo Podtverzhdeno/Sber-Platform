@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import { apiRequest, type RuntimeApiPath } from "../../../api/client";
 import { invalidateLearningProjections } from "../../learning-progress";
+import { fetchEngagementOverview } from "../../engagement-client";
+import { StreakCelebration } from "../../streak-celebration";
 import { learningProgramFor } from "./programs";
 import { knowledgeCheckFor } from "./knowledge-checks";
 import { LessonFrame } from "./LessonFrame";
@@ -53,6 +55,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const [practiceDescription, setPracticeDescription] = useState("");
   const [practiceUrl, setPracticeUrl] = useState("");
   const [printKind, setPrintKind] = useState<"study" | "practice">("study");
+  const [courseCelebrationDays, setCourseCelebrationDays] = useState<number | null>(null);
   const path = studyPath(courseKey);
   const progress = useQuery({
     queryKey: ["impulse-study", courseKey],
@@ -92,9 +95,25 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     mutationFn: () => apiRequest<Progress>((path + "/finish") as RuntimeApiPath,
       { method: "POST", headers: csrfHeaders() }),
     onSuccess: (state) => {
+      const previouslyFinished = client.getQueryData<Progress>(["impulse-study", courseKey])?.finished === true;
       client.setQueryData(["impulse-study", courseKey], state);
       invalidateLearningProjections(client);
       setView("success");
+      // Celebrate a newly completed course only after reading the verified streak.
+      // Lessons already count for today; completing the course must not add a fake day.
+      if (state.finished && !previouslyFinished) {
+        void client.fetchQuery({
+          queryKey: ["engagement-overview"],
+          queryFn: fetchEngagementOverview,
+          staleTime: 0,
+        }).then((overview) => {
+          if (overview.today_saved && overview.current_days > 0) {
+            setCourseCelebrationDays(overview.current_days);
+          }
+        }).catch(() => {
+          // The saved completion still succeeds when streak verification is unavailable.
+        });
+      }
     },
   });
   if (!program) return <p>Для этого курса программа Impulse пока не подготовлена.</p>;
@@ -180,6 +199,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const isLearning = ["overview", "theory", "example", "practice", "check"].includes(view);
 
   return <div className="imp-study" data-course={courseKey} data-view={view} data-testid="impulse-immersive-reader">
+    {courseCelebrationDays !== null && <StreakCelebration from={courseCelebrationDays} to={courseCelebrationDays} mode="course-complete" onClose={() => { setCourseCelebrationDays(null); }} />}
     <div className="imp-study__hero">
       <div className="imp-study__intro">
         <span className="imp-study__chips"><span>Нужно для роли</span>{accessible ? <span className="ok"><Check size={13}/> Доступен</span> : <span className="locked"><LockKeyhole size={13}/> Доступ ограничен</span>}</span>
