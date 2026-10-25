@@ -7,6 +7,7 @@ type StreakCelebrationProps = {
   from: number;
   to: number;
   onClose: () => void;
+  mode?: "streak-increase" | "course-complete";
 };
 
 /**
@@ -14,7 +15,8 @@ type StreakCelebrationProps = {
  * video. Unlike a baked video, the award number is server-derived, responsive,
  * accessible and never claims more days than the verified projection reports.
  */
-export function StreakCelebration({ from, to, onClose }: StreakCelebrationProps) {
+export function StreakCelebration({ from, to, onClose, mode = "streak-increase" }: StreakCelebrationProps) {
+  const courseComplete = mode === "course-complete";
   const closeRef = useRef(onClose);
   const dismissRef = useRef<HTMLButtonElement>(null);
   useEffect(() => { closeRef.current = onClose; }, [onClose]);
@@ -51,7 +53,7 @@ export function StreakCelebration({ from, to, onClose }: StreakCelebrationProps)
 
   return createPortal(
     <div className="impulse-streak-celebration" role="dialog" aria-modal="true"
-      aria-label={`Серия продолжена: ${String(to)} дней подряд`}
+      aria-label={courseComplete ? `Курс завершён. Текущая серия: ${String(to)} дней` : `Серия продолжена: ${String(to)} дней подряд`}
       data-testid="streak-celebration">
       <div className="impulse-streak-grid" aria-hidden="true" />
       <div className="impulse-streak-burst" aria-hidden="true" />
@@ -69,7 +71,7 @@ export function StreakCelebration({ from, to, onClose }: StreakCelebrationProps)
       <main className="impulse-streak-content">
         <div className="impulse-streak-confirmed">
           <span className="impulse-streak-confirmed-icon"><Check size={19} strokeWidth={3} /></span>
-          <span>ЗАДАНИЕ ЗАСЧИТАНО</span>
+          <span>{courseComplete ? "ОБУЧЕНИЕ ЗАВЕРШЕНО" : "ЗАДАНИЕ ЗАСЧИТАНО"}</span>
         </div>
         <div className="impulse-streak-ring">
           <div className="impulse-streak-ring-inner" aria-hidden="true" />
@@ -77,20 +79,20 @@ export function StreakCelebration({ from, to, onClose }: StreakCelebrationProps)
           <span className="impulse-streak-orbit impulse-streak-orbit-one" aria-hidden="true" />
           <span className="impulse-streak-orbit impulse-streak-orbit-two" aria-hidden="true" />
           <div className="impulse-streak-milestone">
-            <span className="impulse-streak-overline"><Sparkles size={20} /> СЕРИЯ ПРОДОЛЖЕНА</span>
+            <span className="impulse-streak-overline"><Sparkles size={20} /> {courseComplete ? "КУРС ЗАВЕРШЁН" : "СЕРИЯ ПРОДОЛЖЕНА"}</span>
             <div className="impulse-streak-number">
-              <span className="impulse-streak-previous" aria-hidden="true">{from}</span>
+              {!courseComplete && <span className="impulse-streak-previous" aria-hidden="true">{from}</span>}
               <strong>{to}</strong>
             </div>
             <span className="impulse-streak-days">ДНЕЙ ПОДРЯД</span>
-            <span className="impulse-streak-award"><Flame size={18} fill="currentColor" aria-hidden="true" /> +{to - from} день к твоей серии</span>
+            <span className="impulse-streak-award"><Flame size={18} fill="currentColor" aria-hidden="true" /> {courseComplete ? "Твоя серия подтверждена" : `+${String(to - from)} день к твоей серии`}</span>
           </div>
         </div>
-        <p className="impulse-streak-footer-copy">Каждый выполненный шаг приближает тебя к цели</p>
+        <p className="impulse-streak-footer-copy">{courseComplete ? "Обучение сохранено. Продолжай практику и сохраняй ритм" : "Каждый выполненный шаг приближает тебя к цели"}</p>
         <button type="button" className="impulse-streak-continue" onClick={onClose}>Продолжить <span aria-hidden="true">→</span></button>
       </main>
       <div className="impulse-streak-bottomline" aria-hidden="true">
-        <span>КВАЛИФИЦИРУЕМОЕ ДЕЙСТВИЕ</span><span>УРОВЕНЬ ВЫШЕ</span>
+        <span>{courseComplete ? "КУРС ЗАВЕРШЁН" : "КВАЛИФИЦИРУЕМОЕ ДЕЙСТВИЕ"}</span><span>{courseComplete ? "ПРОГРЕСС СОХРАНЁН" : "УРОВЕНЬ ВЫШЕ"}</span>
         <div className="impulse-streak-progress"><i /></div>
       </div>
     </div>,
