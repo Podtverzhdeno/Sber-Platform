@@ -8,7 +8,6 @@ certificates MUST NOT be replayed as evidence for a new level.
 
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID
 
