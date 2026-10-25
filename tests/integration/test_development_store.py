@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from datetime import date
 
 import httpx
 import pytest
@@ -109,7 +110,7 @@ async def test_track_swap_reported_completion_and_one_learning_day() -> None:
                 )
                 .where(
                     enrollments.c.person_id == demo_id("participant-alex"),
-                    enrollments.c.data_origin == "demo_runtime",
+                    learning_days.c.local_date == date(2026, 9, 27),
                 )
             )
             or 0
