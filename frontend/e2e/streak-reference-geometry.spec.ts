@@ -68,6 +68,11 @@ test("compact streak composition: desktop 1122px", async ({ page }) => {
   if (!milestone || !closeButton) throw new Error("Milestone callout or close button missing");
   expect(milestone.x + milestone.width).toBeLessThanOrEqual(closeButton.x - 3);
   const help = dialog.getByRole("button", { name: "Что такое недельный ритм?" });
+  const helpBounds = await help.boundingBox();
+  if (!helpBounds) throw new Error("Weekly rhythm help control is missing");
+  expect(Math.abs(helpBounds.width - helpBounds.height)).toBeLessThanOrEqual(1);
+  expect(helpBounds.width).toBeGreaterThanOrEqual(23);
+  expect(helpBounds.width).toBeLessThanOrEqual(25);
   await help.hover();
   await expect(dialog.getByRole("tooltip")).toBeVisible();
   await page.screenshot({ path: "test-results/streak-reference-desktop.png" });
@@ -116,7 +121,11 @@ test("streak mobile 390px: no clipping and all actions reachable", async ({ page
   expect(geometry.right).toBeLessThanOrEqual(391);
   expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 2);
   await page.screenshot({ path: "test-results/streak-reference-mobile.png" });
-  await dialog.getByRole("button", { name: "Что такое недельный ритм?" }).click();
+  const mobileHelp = dialog.getByRole("button", { name: "Что такое недельный ритм?" });
+  const mobileHelpBounds = await mobileHelp.boundingBox();
+  if (!mobileHelpBounds) throw new Error("Mobile weekly rhythm help control is missing");
+  expect(Math.abs(mobileHelpBounds.width - mobileHelpBounds.height)).toBeLessThanOrEqual(1);
+  await mobileHelp.click();
   await expect(dialog.getByRole("tooltip")).toBeVisible();
   await dialog.getByRole("button", { name: "Открыть полный календарь серии" }).click();
   await expect(dialog.getByText("2026-10-24")).toBeVisible();
