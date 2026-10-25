@@ -462,6 +462,13 @@ test("rating filters, ordering and profile actions are interactive", async ({ pa
   await page.getByRole("searchbox", { name: "Поиск участников" }).fill("Алекс");
   await expect(allRows).toHaveCount(1);
   await expect(allRows.first()).toContainText("Алекс Речной");
+  // Restore the fixture user on reload; the default auth mock otherwise
+  // correctly returns 401 and would exercise login rather than URL state.
+  await page.route("**/api/v1/me", (route) => route.fulfill({ json: {
+    person_id: "1", display_name: "Алекс Речной", active_role: "participant",
+    assigned_roles: ["participant"], scopes: [], consent_scopes: [], navigation,
+    csrf_token: "csrf",
+  } }));
   await page.reload();
   await expect(allRows).toHaveCount(1);
   await page.getByRole("button", { name: "Алекс Речной" }).click();
@@ -476,6 +483,7 @@ test("rating buttons animate smoothly and remain inside the viewport on mobile",
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("button", { name: /Меню/ }).click();
   await page.getByRole("link", { name: "Рейтинг" }).click();
   const cta = page.getByRole("button", { name: "Подробнее о рейтинге и наградах" });
   await expect(cta).toBeVisible();
@@ -597,5 +605,5 @@ test("header notifications and rating indicators open real destinations", async 
   await expect(page.getByText("До 2 места")).toBeVisible();
   await page.getByRole("link", { name: "Открыть рейтинг →" }).click();
   await expect(page).toHaveURL(/\/workspace\/6$/);
-  await expect(page.getByRole("heading", { name: "Рейтинг подтверждённого опыта" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
 });
