@@ -57,6 +57,42 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
   expect(Math.abs((tabs.y - hero.y - hero.height) - 12)).toBeLessThanOrEqual(3);
   expect(projects.x).toBeLessThan(passport.x);
   expect(Math.abs(projects.y - passport.y)).toBeLessThanOrEqual(2);
+  // The overview has two stacked right-hand cards and three lower cards.
+  // All their baselines must align; no empty strip is allowed below projects.
+  const checkAlignedRows = async () => {
+    const boxes = await Promise.all(
+      [".p2-projects-panel", ".p2-passport-panel", ".p2-certs-panel", ".p2-about-panel", ".p2-trust-panel", ".p2-visibility-panel", ".p2-project-list"]
+        .map(async selector => {
+          const box = await page.locator(selector).boundingBox();
+          if (!box) throw new Error("Missing overview panel: " + selector);
+          return { selector, top:box.y, bottom:box.y+box.height, height:box.height };
+        })
+    );
+    const panel = (selector: string) => {
+      const value = boxes.find(item => item.selector === selector);
+      if (!value) throw new Error("Overview panel lost: " + selector);
+      return value;
+    };
+    const projectsPanel = panel(".p2-projects-panel");
+    const lastRight = panel(".p2-certs-panel");
+    const aboutPanel = panel(".p2-about-panel");
+    const trustPanel = panel(".p2-trust-panel");
+    const visibilityPanel = panel(".p2-visibility-panel");
+    expect(Math.abs(projectsPanel.bottom-lastRight.bottom), "Projects and certification should end on same line").toBeLessThanOrEqual(3);
+    expect(Math.abs(aboutPanel.top-visibilityPanel.top), "Lower cards top should align").toBeLessThanOrEqual(3);
+    expect(Math.abs(aboutPanel.bottom-visibilityPanel.bottom), "About should extend to the longest lower card").toBeLessThanOrEqual(3);
+    expect(Math.abs(trustPanel.bottom-visibilityPanel.bottom), "Trust should extend to the longest lower card").toBeLessThanOrEqual(3);
+    const projectList = panel(".p2-project-list");
+    expect(projectList.bottom, "Project cards must occupy the project panel instead of leaving unused bottom space")
+      .toBeGreaterThan(projectsPanel.bottom-20);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth+2)).toBe(true);
+  };
+  await checkAlignedRows();
+  await page.setViewportSize({width:1440,height:900});
+  await checkAlignedRows();
+  await page.setViewportSize({width:1100,height:900});
+  await checkAlignedRows();
+  await page.setViewportSize({width:1672,height:941});
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2)).toBe(true);
 
   await page.getByRole("button", { name: /Открыть кейс/ }).first().click();
