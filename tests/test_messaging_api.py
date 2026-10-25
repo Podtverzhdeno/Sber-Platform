@@ -364,7 +364,8 @@ def test_restored_session_csrf_unblocks_message_send_without_disabling_protectio
 
     opened = api.post(
         "/api/v1/me/messaging/channels/personal",
-        json={"peer_id": str(ELENA)}, headers={"X-CSRF-Token": recovered},
+        json={"peer_id": str(ELENA)},
+        headers={"X-CSRF-Token": recovered},
     )
     assert opened.status_code == 200
     cid = opened.json()["id"]
@@ -375,10 +376,14 @@ def test_restored_session_csrf_unblocks_message_send_without_disabling_protectio
     )
     assert delivered.status_code == 200
     assert delivered.json()["body"] == "Сообщение доставлено после перезагрузки."
-    assert api.post(
-        f"/api/v1/me/messaging/channels/{cid}/mute",
-        json={"muted": True}, headers={"X-CSRF-Token": recovered},
-    ).status_code == 200
+    assert (
+        api.post(
+            f"/api/v1/me/messaging/channels/{cid}/mute",
+            json={"muted": True},
+            headers={"X-CSRF-Token": recovered},
+        ).status_code
+        == 200
+    )
 
 
 def test_demo_contact_directory_and_group_creation_round_trip() -> None:
@@ -412,7 +417,8 @@ def test_demo_contact_directory_and_group_creation_round_trip() -> None:
     elena_csrf = api.get("/api/v1/me").json()["csrf_token"]
     marked = api.post(
         f"/api/v1/me/messaging/channels/{chat['id']}/read",
-        json={"message_id": sent.json()["id"]}, headers={"X-CSRF-Token": elena_csrf},
+        json={"message_id": sent.json()["id"]},
+        headers={"X-CSRF-Token": elena_csrf},
     )
     assert marked.status_code == 200 and marked.json()["unread"] == 0
 
