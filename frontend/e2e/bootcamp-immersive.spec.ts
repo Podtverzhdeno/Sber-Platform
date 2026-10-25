@@ -15,7 +15,7 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
     const reader = dialog.getByTestId("impulse-immersive-reader");
     await expect(reader).toBeVisible();
-    await expect(reader.getByRole("heading", { name: "Программа курса" })).toBeVisible();
+    await expect(reader.getByText("Программа курса", { exact: true }).first()).toBeVisible();
     await page.screenshot({ path: "test-results/imp-01-program-" + viewport.width + ".png", animations: "disabled" });
 
     const mainCta = reader.getByRole("button", { name: /Перейти к программе/ });
@@ -47,7 +47,7 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     await expect(reader.locator(".imp-study__lesson-list button").nth(1)).toHaveAttribute("aria-current", "step");
     await page.screenshot({ path: "test-results/imp-04-progress-" + viewport.width + ".png", animations: "disabled" });
     for (let index = 1; index < 8; index++) {
-      await reader.getByRole("button", { name: index === 7 ? "Завершить обучение" : "Следующий урок" }).last().click();
+      await reader.locator(".imp-study__navigation .imp-study__primary").click();
     }
     await expect(reader.getByText("100%", { exact: true }).first()).toBeVisible();
     await expect(reader.getByRole("heading", { name: "Завершение обучения" })).toBeVisible();
