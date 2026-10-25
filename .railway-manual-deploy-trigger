@@ -38,3 +38,6 @@ release_request=2026-10-25-my-projects-final-detail-b2a0208
 
 # Verify latest Events UI and repair Railway TypeScript/Ruff blockers
 release_request=2026-10-25-events-railway-repair-11e73cd
+
+# Rebuild after fixing three optional project-team TypeScript failures
+release_request=2026-10-25-events-team-optional-ts-18181082
