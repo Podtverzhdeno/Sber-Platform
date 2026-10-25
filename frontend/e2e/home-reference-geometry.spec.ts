@@ -150,14 +150,64 @@ for (const scenario of intermediateViewports) {
   test(`home geometry follows ZIP at ${scenario.name}`, async ({ page }) => {
     await page.setViewportSize({ width: scenario.width, height: 920 });
     await openReferenceHome(page);
-    for (const [selector, x, y, width, height] of scenario.expected) {
-      await expectReferenceRect(page, selector, { x, y, width, height }, 14);
+    if (scenario.width >= 1024) {
+      // Changing only the sidebar width necessarily shifts/shrinks the home grid.
+      // Validate the shared 244px shell and usable, non-overlapping cards instead
+      // of the obsolete screenshot coordinates from the home-specific sidebar.
+      await expect(page.locator(".sidebar")).toHaveCSS("width", "244px");
+      const sidebar = await page.locator(".sidebar").boundingBox();
+      expect(sidebar).not.toBeNull();
+      for (const [selector] of scenario.expected) {
+        const box = await page.locator(selector).boundingBox();
+        expect(box, `${selector} must be visible`).not.toBeNull();
+        expect(box!.x, `${selector} must clear the fixed sidebar`).toBeGreaterThanOrEqual(sidebar!.x + sidebar!.width + 10);
+        expect(box!.x + box!.width, `${selector} must fit inside viewport`).toBeLessThanOrEqual(scenario.width - 10);
+        expect(box!.width, `${selector} must retain usable card width`).toBeGreaterThan(180);
+      }
+      const hero = await page.locator(".home-v2-hero").boundingBox();
+      const grade = await page.locator(".home-v2-grade").boundingBox();
+      expect(hero!.x + hero!.width).toBeLessThan(grade!.x);
+    } else {
+      for (const [selector, x, y, width, height] of scenario.expected) {
+        await expectReferenceRect(page, selector, { x, y, width, height }, 14);
+      }
     }
     await expect
       .poll(async () => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
       .toBe(true);
   });
 }
+
+
+test("canonical desktop sidebar stays visually identical across Home and Trajectory", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 920 });
+  await openReferenceHome(page);
+  const sidebar = page.getByRole("complementary", { name: "Боковая панель" });
+  const snapshot = async () => sidebar.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const brand = element.querySelector(".brand-mark");
+    const brandStyle = brand ? getComputedStyle(brand) : null;
+    return {
+      width: style.width,
+      left: style.left,
+      top: style.top,
+      padding: style.padding,
+      background: style.backgroundImage,
+      brandWidth: brandStyle?.width,
+      brandBackground: brandStyle?.backgroundImage,
+      homeGlyph: element.querySelector(".nav-icon")?.textContent,
+      hasStandardServiceCard: Boolean(element.querySelector(".sidebar-art")),
+      hasHomeOnlyNudge: Boolean(element.querySelector(".sidebar-nudge")),
+    };
+  });
+  const homeStyle = await snapshot();
+  expect(homeStyle.width).toBe("244px");
+  expect(homeStyle.hasStandardServiceCard).toBe(true);
+  expect(homeStyle.hasHomeOnlyNudge).toBe(false);
+  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Моя траектория" }).click();
+  await expect(page).toHaveURL(/\/workspace\/1/);
+  expect(await snapshot()).toEqual(homeStyle);
+});
 
 
 test("grade drawer matches the source 456px geometry and restores focus at desktop", async ({ page }) => {
