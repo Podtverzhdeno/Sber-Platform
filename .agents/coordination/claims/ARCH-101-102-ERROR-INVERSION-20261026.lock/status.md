@@ -41,10 +41,17 @@
   - src/impulse/infrastructure/reward_store.py
   - src/impulse/infrastructure/work_store.py
   - src/impulse/infrastructure/development_store.py
+  - src/impulse/application/ai_curriculum_details.py
+  - src/impulse/application/ai_reading_resources.py
+  - src/impulse/application/ai_stage_guides.py
+  - src/impulse/bootstrap/ai_curriculum_details.py
+  - src/impulse/bootstrap/ai_reading_resources.py
+  - src/impulse/bootstrap/ai_stage_guides.py
+  - tests/test_architecture_curriculum_boundary.py
   - tests/test_architecture_error_boundary.py
   - .agents/coordination/claims/ARCH-101-102-ERROR-INVERSION-20261026.lock/status.md
 - shared_files: []
-- progress: Compatibility-first inversion of 30 imports of impulse.api.errors in application/infrastructure, leaving HTTP envelope unchanged. Architecture review required.
+- progress: Compatibility-first inversion of 30 imports of impulse.api.errors in application/infrastructure, and one bootstrap source-content import, leaving legacy public imports and HTTP envelope unchanged. Architecture review required.
 - verification:
   - Ruff/Pyright backend checks
   - API error-envelope and backend unit tests
