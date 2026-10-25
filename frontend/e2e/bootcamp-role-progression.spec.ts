@@ -40,6 +40,7 @@ test("finishing a saved required Impulse course refreshes the role's learning st
   const celebration=page.getByTestId("grade-milestone-celebration");
   await expect(celebration).toHaveAttribute("data-mode","stage-unlocked");
   await expect(celebration).toContainText("НОВЫЙ ЭТАП");
+  await page.screenshot({path:"test-results/bootcamp-new-stage-animation.png",animations:"disabled"});
   await expect(celebration).not.toContainText("ГРЕЙД ПОВЫШЕН");
   await celebration.getByRole("button",{name:"Начать следующий этап"}).click();
   await expect(celebration).toHaveCount(0);
