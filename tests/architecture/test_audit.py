@@ -82,5 +82,19 @@ class ArchitectureAuditTests(unittest.TestCase):
         self.assertEqual(len(audit_module.baseline_regressions(report, baseline)), 1)
 
 
+    def test_type_only_edges_do_not_create_runtime_cycles(self) -> None:
+        self.assertTrue(audit_module.type_only_ts_import(
+            'import type { Foo } from "./bar";', len('import type { Foo } ')
+        ))
+        self.assertFalse(audit_module.type_only_ts_import(
+            'import { Foo } from "./bar";', len('import { Foo } ')
+        ))
+        import ast
+        tree = ast.parse("from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    from app.a import A\nfrom app.b import B\n")
+        modules = [n.module for n in audit_module.runtime_ast_nodes(tree)
+                   if isinstance(n, ast.ImportFrom)]
+        self.assertEqual(modules, ["typing", "app.b"])
+
+
 if __name__ == "__main__":
     unittest.main()
