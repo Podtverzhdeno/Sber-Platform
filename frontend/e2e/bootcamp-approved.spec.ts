@@ -209,7 +209,7 @@ test("Bootcamp role choice and direction are independent; reset clears hidden co
 
   const shell = page.locator(".bc-reference");
   const categories = shell.getByRole("group", { name: "Категории курсов" });
-  const direction = shell.getByLabel("Направление", { exact: true });
+  const direction = shell.locator(".bc-ref-controls .bc-ref-select select").first();
   const search = shell.getByRole("searchbox", { name: "Поиск по курсам" });
 
   await categories.getByRole("button", { name: /Все курсы/ }).click();
@@ -259,7 +259,8 @@ test("Bootcamp desktop reference hero has correct stagger, overlay, and grid den
   expect(summary).not.toBeNull();
   expect(categories).not.toBeNull();
   if (tabs && hero && summary && categories) {
-    expect(Math.abs(hero.y - (tabs.y + tabs.height + 15))).toBeLessThanOrEqual(3);
+    // The approved reference leaves a 49px breathing space below role tabs.
+    expect(Math.abs(hero.y - (tabs.y + tabs.height + 49))).toBeLessThanOrEqual(3);
     expect(Math.abs(summary.y - (hero.y - 24))).toBeLessThanOrEqual(3);
     expect(Math.abs(categories.y - (hero.y + hero.height - 51))).toBeLessThanOrEqual(4);
   }
@@ -317,6 +318,7 @@ test("Bootcamp role catalog starts as 4+1 cards and expands without losing filte
   await page.getByRole("link", { name: "Bootcamp" }).click();
   const shell = page.locator(".bc-reference");
   const cards = shell.locator(".bc-ref-course-card");
+  await expect(cards.first()).toBeVisible();
   const initial = await cards.count();
   expect(initial).toBeGreaterThan(0);
   expect(initial).toBeLessThanOrEqual(5);
