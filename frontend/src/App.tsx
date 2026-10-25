@@ -572,7 +572,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Достижения" ? (
-          <ParticipantAchievements />
+          <ParticipantAchievements navigation={navigation} />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "AI-Buddy" ? (
