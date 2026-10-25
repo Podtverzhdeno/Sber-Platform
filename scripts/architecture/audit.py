@@ -116,10 +116,20 @@ def frontend_feature_owner(path: str) -> str | None:
     if len(parts) > 4:
         return parts[3]
     name = parts[3]
-    for suffix in (".test.tsx", ".test.ts", ".spec.tsx", ".spec.ts", ".tsx", ".ts",
-                   ".jsx", ".js", ".scss", ".css"):
+    for suffix in (
+        ".test.tsx",
+        ".test.ts",
+        ".spec.tsx",
+        ".spec.ts",
+        ".tsx",
+        ".ts",
+        ".jsx",
+        ".js",
+        ".scss",
+        ".css",
+    ):
         if name.endswith(suffix):
-            return name[:-len(suffix)]
+            return name[: -len(suffix)]
     return name
 
 
