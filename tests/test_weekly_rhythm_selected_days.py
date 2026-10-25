@@ -16,12 +16,14 @@ def test_rhythm_counts_only_selected_weekdays() -> None:
     )
     result = weekly_rhythm_projection(
         rhythm,
-        frozenset({
-            date(2026, 10, 19),  # Monday: selected
-            date(2026, 10, 20),  # Tuesday: streak yes, rhythm no
-            date(2026, 10, 22),  # Thursday: selected
-            date(2026, 10, 24),  # Saturday: streak yes, rhythm no
-        }),
+        frozenset(
+            {
+                date(2026, 10, 19),  # Monday: selected
+                date(2026, 10, 20),  # Tuesday: streak yes, rhythm no
+                date(2026, 10, 22),  # Thursday: selected
+                date(2026, 10, 24),  # Saturday: streak yes, rhythm no
+            }
+        ),
         local_today=date(2026, 10, 25),
     )
     assert result.target_days == 2
