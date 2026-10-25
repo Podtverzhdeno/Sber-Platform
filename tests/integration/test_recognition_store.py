@@ -57,7 +57,7 @@ async def test_policy_round_trip_and_season_binding() -> None:
         uuid4(),
         season.season_id,
         1,
-        CohortRule("python", "Python", "impulse-demo", ("python",), 2),
+        CohortRule("product", "AI Architect", "impulse-demo", ("product",), 2),
         (ScoreSourceRule("project", "project", Decimal("1.5"), Decimal("600")),),
         (TieBreaker.SUCCESSFUL_PROJECTS, TieBreaker.PERSON_ID),
         (DiplomaThreshold("gold", 1, 3, "I degree"),),
