@@ -41,6 +41,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const [checks, setChecks] = useState<ReadonlySet<string>>(() => new Set());
   const [answer, setAnswer] = useState<number | null>(null);
   const [showExpected, setShowExpected] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "copied" | "failed">("idle");
   const [error, setError] = useState("");
   const [practiceDescription, setPracticeDescription] = useState("");
   const [practiceUrl, setPracticeUrl] = useState("");
@@ -148,6 +149,15 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     });
   }
   const checkedCount = unit.checklist.filter((_, i) => checks.has(unit.id + ":" + String(i))).length;
+
+  async function copyExampleCode(code: string) {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopyStatus("copied");
+    } catch {
+      setCopyStatus("failed");
+    }
+  }
 
   function printCertificate(kind: "study" | "practice") {
     setPrintKind(kind);
@@ -341,7 +351,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           {view === "example" && <section className="imp-study__content" aria-label="Пример"><h3>Пример</h3><h4>{authReference ? "JWT-аутентификация в API" : "Применение материала урока"}</h4>
             <p>{authReference ? "Разберём проверку JWT в FastAPI. Токен подтверждает личность, а доступ к отдельным объектам проверяется дополнительно." : "Практический пример применения материала урока"}</p>
             <div className={authReference ? "imp-study__example-grid" : ""}>
-              <div className="imp-study__code-column"><div className="imp-study__example-head"><Code2 size={17}/> main.py <button type="button" onClick={() => { void navigator.clipboard.writeText(exampleText); }}><Copy size={14}/> Копировать код</button></div>
+              <div className="imp-study__code-column"><div className="imp-study__example-head"><Code2 size={17}/> main.py <button type="button" onClick={() => { void copyExampleCode(exampleText); }}><Copy size={14}/> {copyStatus === "copied" ? "Скопировано" : copyStatus === "failed" ? "Не удалось скопировать" : "Копировать код"}</button></div>
                 <pre className="imp-study__code"><code>{exampleText}</code></pre></div>
               {authReference ? <div className="imp-study__walkthrough"><h4>Разбор</h4>{authorizationWalkthrough.map((step,index)=><article key={step.title}><span>{index+1}</span><div><strong>{step.title}</strong><p>{step.detail}</p></div></article>)}</div>
               : <div className="imp-study__callout"><CheckCircle2 size={18}/><p><strong>Разбор</strong>Сравните пример с задачей и объясните каждый ключевой шаг.</p></div>}
