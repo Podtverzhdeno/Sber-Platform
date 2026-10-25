@@ -119,3 +119,27 @@
   .participant-guide-trigger { transition: none; }
   .participant-guide-trigger:hover { transform: none; }
 }
+
+/* Keep the affordance visible without covering page CTAs. Reveal the label only on interaction. */
+.participant-guide-trigger {
+  width: 45px;
+  min-width: 45px;
+  padding: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  gap: 0;
+}
+.participant-guide-trigger span { display: inline-block; max-width: 0; opacity: 0; overflow: hidden; transition: max-width .17s ease, opacity .17s ease, margin .17s ease; }
+@media (hover: hover) and (min-width: 641px) {
+  .participant-guide-trigger:hover,
+  .participant-guide-trigger:focus-visible { width: auto; gap: 8px; }
+  .participant-guide-trigger:hover span,
+  .participant-guide-trigger:focus-visible span { max-width: 190px; opacity: 1; }
+}
+@media (max-width: 640px) {
+  .participant-guide-trigger { width: 42px; min-width: 42px; padding: 9px; }
+  .participant-guide-trigger span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .participant-guide-trigger span { transition: none; }
+}
