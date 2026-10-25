@@ -31,7 +31,7 @@ describe("Bootcamp editorial course curriculum", () => {
 
   it("makes a real technical handbook visible within the lesson and updates by chapter", () => {
     render(<CourseLearningContent courseKey="demo-course-3" />);
-    expect(screen.getByText(/Заказчик пишет/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Заказчик пишет/)).not.toBeInTheDocument();
     expect(screen.getByText(/Функция принимает/)).toBeInTheDocument();
     const source = screen.getByRole("link", { name: /Читать Python — The Python Tutorial/ });
     expect(source).toHaveAttribute("href", "https://docs.python.org/3/tutorial/");
