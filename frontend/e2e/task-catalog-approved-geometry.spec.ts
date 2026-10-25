@@ -355,6 +355,54 @@ test("benefit cards and full conditions remain inside the detail at screenshot d
   }
 });
 
+test("filter rail stays inside its actual workspace width with full sorting and usable disclosure", async ({ page }) => {
+  await openReferenceVolumeCatalog(page);
+  // The source desktop strip is always visible. Other widths must expose
+  // every server-backed filter without overflow when "Все фильтры" is clicked.
+  await page.getByRole("button", { name: "Все фильтры" }).click();
+  for (const viewport of [
+    { width: 1672, height: 941 },
+    { width: 1538, height: 960 },
+    { width: 1360, height: 900 },
+    { width: 1280, height: 800 },
+    { width: 1100, height: 844 },
+    { width: 768, height: 1024 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await expect(page.getByLabel("Сортировка", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Заказчик", { exact: true })).toBeVisible();
+    const result = await page.evaluate(() => {
+      const rail = document.querySelector<HTMLElement>(".catalog-v2-filter-rail");
+      const form = document.querySelector<HTMLElement>(".catalog-v2-filters");
+      const elements = Array.from(rail?.querySelectorAll<HTMLElement>("button, input, select") ?? []);
+      if (!rail || !form || !elements.length) return { issues: ["Filter controls missing"], overflow: true };
+      const parent = form.getBoundingClientRect();
+      const issues: string[] = [];
+      for (const el of elements) {
+        const style = getComputedStyle(el);
+        if (style.display === "none" || style.visibility === "hidden") continue;
+        const rect = el.getBoundingClientRect();
+        if (rect.width < 1 || rect.height < 1) continue;
+        if (rect.left < parent.left - 2 || rect.right > parent.right + 2) {
+          issues.push(`A control is outside the filter panel: ${el.tagName}`);
+        }
+      }
+      return {
+        issues,
+        overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+      };
+    });
+    expect(result.issues, `Filter at ${String(viewport.width)}px`).toEqual([]);
+    expect(result.overflow, `Horizontal page overflow at ${String(viewport.width)}px`).toBe(false);
+    if (viewport.width === 1672) {
+      const sort = page.getByLabel("Сортировка", { exact: true });
+      await expect(sort).toHaveValue("match-default");
+      await expect(page.locator(".catalog-v2-filter-rail .catalog-v2-advanced-filters label").last()).toContainText("Сортировка");
+    }
+  }
+});
+
 test("approved terms modal: four top fact cards, two-column content, two actions and consent safety", async ({ page }) => {
   await openReferenceVolumeCatalog(page);
   const sourceCard = page.locator(".catalog-v2-card").first();
