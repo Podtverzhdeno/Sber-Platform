@@ -3,7 +3,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { StatePanel } from "../../components/ui";
-import { apiRequest } from "../../api/client";
+import { apiRequest, type RuntimeApiPath } from "../../api/client";
+import type { BootcampOverview } from "../bootcamp/page";
+import { trajectoryStudyProgress } from "./study-progress";
 import {
   loadDevelopmentOverview,
   loadRoadmaps,
@@ -129,6 +131,24 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
       : (catalogueRoles[0]?.track_key ?? null);
   }, [catalogueRoles, overview.next_outcome, roleParam]);
   const selected = catalogueRoles.find((role) => role.track_key === selectedKey) ?? null;
+  const roleGrade = useQuery({
+    queryKey:["bootcamp-v2-overview",selectedKey],
+    queryFn:()=>apiRequest<BootcampOverview>(
+      (`/api/v1/me/bootcamp/overview?track=${encodeURIComponent(selectedKey??"")}`) as RuntimeApiPath,
+    ),
+    enabled:selectedKey!==null,
+    retry:false,
+  });
+  const officialRoleGrade=roleGrade.data?.selected_track_key===selectedKey
+    && roleGrade.data.role_summary.grade_state==="known"
+    ? roleGrade.data.role_summary : null;
+  const readyPercent=officialRoleGrade?.readiness?.percent !== undefined
+    ? Number(officialRoleGrade.readiness.percent)
+    : overview.concepts.career_grade.readiness_percent;
+  const displayReadiness=Number.isFinite(readyPercent) ? readyPercent : null;
+  const currentGrade=officialRoleGrade?.current_grade_title ?? overview.concepts.career_grade.current_grade;
+  const gradeCatalogKnown=officialRoleGrade!==null || overview.concepts.career_grade.catalog_version!==null;
+
   const passportSkills = Array.isArray(passport.data?.skills) ? passport.data.skills : [];
   const completedMilestones = overview.roles.reduce((sum, role) => sum + role.completed_milestones, 0);
   const activeTrajectories = overview.roles.filter((role) => role.state === "active").length;
@@ -332,19 +352,19 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         <section className="trajectory-v2-grade-panel">
           <header><h3>Твой грейд</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => { gradeTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setGradesOpen(true); }}>Все уровни →</button></header>
           <div className="trajectory-v2-grade-body">
-            <div className="trajectory-v2-grade-ring" style={{ background: `conic-gradient(#0de5d6 0 ${String(overview.concepts.career_grade.readiness_percent ?? 0)}%, #204a68 ${String(overview.concepts.career_grade.readiness_percent ?? 0)}% 100%)` }}><strong>{overview.concepts.career_grade.current_grade === null ? "—" : `Грейд ${overview.concepts.career_grade.current_grade}`}</strong><small>{selected?.title ?? "Моя роль"}</small></div>
+            <div className="trajectory-v2-grade-ring" style={{ background: `conic-gradient(#0de5d6 0 ${String(displayReadiness ?? 0)}%, #204a68 ${String(displayReadiness ?? 0)}% 100%)` }}><strong data-testid="trajectory-official-grade">{currentGrade ?? "—"}</strong><small>{selected?.title ?? "Моя роль"}</small></div>
             <div className="trajectory-v2-grade-progress">
               <small>До следующего грейда</small>
-              <strong>{overview.concepts.career_grade.readiness_percent === null ? "Проверяем" : `${String(100 - overview.concepts.career_grade.readiness_percent)}%`}</strong>
-              <progress max={100} value={overview.concepts.career_grade.readiness_percent ?? 0} aria-label="Готовность к следующему грейду" />
-              <small>{overview.concepts.career_grade.hint ?? overview.concepts.career_grade.reason ?? "По проверенным результатам"}</small>
+              <strong>{displayReadiness === null ? (gradeCatalogKnown?"Нет оценки":"Не опубликовано") : `${String(100 - displayReadiness)}%`}</strong>
+              <progress max={100} value={displayReadiness ?? 0} aria-label="Готовность к следующему грейду" />
+              <small>{officialRoleGrade ? (roleGrade.data?.curriculum.state==="known" ? "Требования опубликованной программы подтверждаются сервером" : "Требования грейда пока не опубликованы") : (overview.concepts.career_grade.hint ?? "Карьерный грейд появится после публикации утверждённых правил")}</small>
             </div>
           </div>
           <div className="trajectory-v2-grade-callout">
             <span aria-hidden="true" className="trajectory-v2-grade-callout-icon">⌁</span>
             <span>{overview.concepts.career_grade.state === "ready"
               ? (overview.next_outcome !== null ? `Заверши текущий шаг «${overview.next_outcome.target_title}», чтобы приблизиться к следующему грейду. После проверки прогресс обновится.` : "Прогресс рассчитывается по проверенным результатам")
-              : "Грейд рассчитывается по серверной политике и проверенным результатам"}</span>
+              : gradeCatalogKnown ? "Грейд рассчитывается по серверной политике и проверенным результатам" : "Учебные курсы уже учитываются отдельно. Присвоение грейда станет доступно после публикации официальной программы."}</span>
           </div>
         </section>
         <section className="trajectory-v2-next-panel">
@@ -765,14 +785,15 @@ export function StagePathSection(props: {
     .filter(milestone => milestone.target_kind === "course")
     .map(milestone => props.learningCourses?.find(course => course.course_key === milestone.target_key))
     .filter((course): course is LearningCourse => course !== undefined);
-  const lessonsDone = studyMilestones.reduce((sum,course)=>sum+course.completed_units,0);
-  const lessonsTotal = studyMilestones.reduce((sum,course)=>sum+course.total_units,0);
+  const studyProgress=trajectoryStudyProgress(roadmap.milestones,props.learningCourses,role.attempt_number!==null);
+  const lessonsDone=studyProgress.lessonsDone;
+  const lessonsTotal=studyProgress.lessonsTotal;
   return (
     <section className="trajectory-v2-stage-block" aria-label="Этапы" data-testid="trajectory-stages">
       <header>
         <h4>Путь освоения роли</h4>
         <small>
-          {role.completed_milestones} завершено · {roadmap.milestones.length} этапов
+          {role.completed_milestones} этапов подтверждено · {roadmap.milestones.length} всего
         </small>
       </header>
       <ol className="trajectory-v2-stage-path">
@@ -786,7 +807,7 @@ export function StagePathSection(props: {
                 className="trajectory-v2-stage"
                 aria-pressed={milestone.key === visibleStageKey}
                 data-stage-state={state}
-                data-study-state={studied?.finished ? "studied" : studied?.completed_units ? "learning" : "none"}
+                data-study-state={studyProgress.studiedKeys.has(milestone.key) ? "studied" : studied?.completed_units ? "learning" : "none"}
                 title={studied ? `Обучение: ${String(studied.completed_units)} из ${String(studied.total_units)} уроков. ${studied.finished ? "Курс изучен, подтверждение этапа отдельно" : "Обучение в процессе"}` : milestone.title}
                 onClick={() => {
                   props.onStageSelect(milestone.key);
@@ -795,7 +816,7 @@ export function StagePathSection(props: {
                 <span className="trajectory-v2-milestone-node" aria-hidden="true">{state === "completed" ? "✓" : state === "current" ? "◉" : state === "locked" ? "♙" : String(milestone.position)}</span>
                 <strong className="trajectory-v2-milestone-position">{milestone.position}</strong>
                 <span className="trajectory-v2-milestone-title">{milestone.title}</span>
-                {studied && studied.completed_units > 0 && <small className="trajectory-v2-stage-study-tag">{studied.finished ? "Учебный курс ✓" : `${String(Math.round(100*studied.completed_units/Math.max(1,studied.total_units)))}% обучения`}</small>}
+                {studied && studied.completed_units > 0 && <small className="trajectory-v2-stage-study-tag">{studyProgress.studiedKeys.has(milestone.key) ? "Обучение ✓ · на проверке" : `${String(Math.round(100*studied.completed_units/Math.max(1,studied.total_units)))}% обучения`}</small>}
               </button>
             </li>
           );
@@ -813,6 +834,13 @@ export function StagePathSection(props: {
           );
         })}
       </ol>
+      {studyProgress.finishedCourses>0 && <div className="trajectory-v2-study-evidence" data-testid="trajectory-study-evidence" role="status">
+        <span className="trajectory-v2-study-evidence__symbol" aria-hidden="true">✓</span>
+        <div><strong>{studyProgress.finishedCourses} из {studyProgress.matchedCourses} учебных курсов завершено</strong>
+          <small>{studyProgress.pendingEvidence>0 ? `${String(studyProgress.pendingEvidence)} курс(а) изучено, но этап ещё ожидает независимого подтверждения` : "Все учебные результаты синхронизированы"}</small>
+        </div>
+        <span className="trajectory-v2-study-evidence__count">{role.completed_milestones} из {roadmap.milestones.length} этапов подтверждено</span>
+      </div>}
       {lessonsTotal > 0 && <div className="trajectory-v2-studying" data-testid="trajectory-study-progress">
         <div><strong>Освоение курсов траектории</strong><small>{lessonsDone} из {lessonsTotal} уроков · подтверждение этапов отдельно</small></div>
         <progress max={lessonsTotal} value={lessonsDone} aria-label="Учебный прогресс выбранной траектории"/>
