@@ -7,6 +7,7 @@ import argparse
 import ast
 import json
 import re
+import shutil
 import subprocess
 import tomllib
 from collections import Counter, defaultdict
@@ -40,9 +41,16 @@ MIGRATION = re.compile(r"(?m)^\s*(revision|down_revision)\s*(?::[^=\n]+)?=\s*(.+
 
 
 def filenames(root: Path) -> list[str]:
-    p = subprocess.run(["git", "-C", str(root), "ls-files", "-z"], capture_output=True, check=False)
-    if p.returncode == 0:
-        return sorted(x.decode() for x in p.stdout.split(b"\0") if x)
+    git_executable = shutil.which("git")
+    if git_executable is not None:
+        # Shell is disabled; argv and executable are fixed, only the checkout directory varies.
+        p = subprocess.run(
+            [git_executable, "-C", str(root), "ls-files", "-z"],
+            capture_output=True,
+            check=False,
+        )  # noqa: S603
+        if p.returncode == 0:
+            return sorted(x.decode() for x in p.stdout.split(b"\0") if x)
     return sorted(
         p.relative_to(root).as_posix()
         for p in root.rglob("*")
