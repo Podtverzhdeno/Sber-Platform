@@ -324,47 +324,21 @@
   .home-v2 *, .home-v2 *::before, .home-v2 *::after {transition:none!important;animation:none!important;}
 }
 
-/* Desktop shell geometry is specific to the approved home screen.
-   The sidebar and topbar of Trajectory, Tasks, Bootcamp, etc. retain their
-   existing shell dimensions. At 1448px the artwork starts at x=252/y=111. */
+/* Home keeps its content/header presentation but reuses the canonical
+   workspace sidebar (brand, navigation and service card) on every route. */
 @media (min-width: 1400px) {
   .page-shell:has(.home-v2) {
     background:radial-gradient(circle at 51% -28%,#06436d 0%,#051626 38%,#03111d 90%);
   }
   .page-shell:has(.home-v2) .workspace {
-    padding:94px 13px 0 236px;
+    padding:94px 13px 0 244px;
     min-height:100vh;
     background:linear-gradient(180deg,#051827 0%,#031420 100%);
-  }
-  .page-shell:has(.home-v2) .sidebar {
-    top:13px;
-    bottom:13px;
-    left:13px;
-    width:223px;
-    padding:17px 11px 25px 8px;
-    border:1px solid #17344a;
-    border-radius:16px 0 0 16px;
-    background:linear-gradient(170deg,#031425 0%,#041423 70%,#05182a 100%);
-  }
-  .page-shell:has(.home-v2) .sidebar-brand {
-    min-height:56px;
-    font-size:24px;
-    border-bottom:0;
-  }
-  .page-shell:has(.home-v2) .brand-mark {
-    width:38px;
-    height:38px;
-    flex:none;
-    border-radius:0;
-    background:transparent url("/home-reference/brand-symbol.svg") center / contain no-repeat;
-    box-shadow:none;
-    color:transparent;
-    font-size:0;
   }
   .page-shell:has(.home-v2) .topbar {
     top:13px;
     right:13px;
-    left:236px;
+    left:244px;
     min-height:81px;
     padding:0 15px 0 21px;
     border:1px solid #16334a;
@@ -408,18 +382,11 @@
 .home-v2-passport-open:hover:not(:disabled) {border-color:#06e4f0;background:#0e405a;box-shadow:0 0 15px #00edec31;}
 @media (max-width:1399px) and (min-width:1024px) {
   .page-shell:has(.home-v2) .workspace {
-    padding-left:206px;
     padding-top:94px;
     background:#041726;
   }
-  .page-shell:has(.home-v2) .sidebar {width:206px; background:linear-gradient(170deg,#031425,#05182a);}
-  .page-shell:has(.home-v2) .topbar {left:206px;min-height:81px;background:#051727;}
+  .page-shell:has(.home-v2) .topbar {min-height:81px;background:#051727;}
   .page-shell:has(.home-v2) .workspace-content {padding:16px 29px 80px;}
-  .page-shell:has(.home-v2) .brand-mark {
-    flex:none;width:37px;height:37px;border-radius:0;box-shadow:none;
-    background:transparent url("/home-reference/brand-symbol.svg") center / contain no-repeat;
-    color:transparent;font-size:0;
-  }
   .home-v2-weekly {
     display:grid;grid-template-columns:minmax(0,1fr) minmax(230px,.78fr);
     gap:9px 18px;align-items:center;min-height:160px;height:auto;
@@ -432,9 +399,6 @@
   .home-v2-bottom-grid {grid-template-columns:minmax(0,1.5fr) minmax(290px,1fr);}
 }
 @media (max-width:1040px) and (min-width:791px) {
-  .page-shell:has(.home-v2) .workspace {padding-left:190px;}
-  .page-shell:has(.home-v2) .sidebar {width:190px;}
-  .page-shell:has(.home-v2) .topbar {left:190px;}
   .home-v2-first-row {grid-template-columns:minmax(0,1.5fr) minmax(230px,1fr);}
   .home-v2-bottom-grid {grid-template-columns:1fr;}
   .home-v2-insights-column {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;}
@@ -524,50 +488,6 @@
 @media (min-width:631px) and (max-width:1040px) {
   .home-v2-buddy,.home-v2-passport {min-height:262px;}
 }
-
-
-/* Sidebar of the approved home: original spacing, icon strokes and gift CTA.
-   Other workspace routes keep their existing navigation. */
-.page-shell:has(.home-v2) .sidebar nav {gap:3px;margin-top:12px;}
-.page-shell:has(.home-v2) .sidebar nav a {
-  display:flex;min-height:48px;gap:17px;align-items:center;
-  padding:0 11px 0 15px;border:0;border-radius:7px;
-  color:#bdd0e8;font-size:14px;font-weight:520;
-  transition:color .18s,background .2s,box-shadow .2s,transform .2s;
-}
-.page-shell:has(.home-v2) .sidebar nav a:hover {
-  color:#f6ffff;background:#083b4d;box-shadow:inset 3px 0 #0ce8ee77;
-  transform:translateX(2px);
-}
-.page-shell:has(.home-v2) .sidebar nav a.active,
-.page-shell:has(.home-v2) .sidebar nav a[aria-current="page"] {
-  color:#02e6e8;font-weight:700;
-  background:linear-gradient(90deg,#064657,#063448 95%);
-}
-.page-shell:has(.home-v2) .sidebar nav a.active::before,
-.page-shell:has(.home-v2) .sidebar nav a[aria-current="page"]::before {
-  left:0;top:3px;bottom:3px;width:3px;border-radius:2px;
-  background:#02e6e8;box-shadow:0 0 9px #0ae9f9aa;
-}
-.page-shell:has(.home-v2) .sidebar nav .nav-icon {width:21px;height:21px;flex:none;}
-.page-shell:has(.home-v2) .sidebar nav .nav-icon svg {display:block;width:21px;height:21px;}
-.page-shell:has(.home-v2) .sidebar nav a:has(.lucide-sparkles) {color:#bd8aff;}
-.page-shell:has(.home-v2) .sidebar-nudge {
-  display:block;width:100%;padding:15px 12px 19px;text-align:left;
-  border:1px solid #0e3149;border-radius:9px;
-  background:linear-gradient(145deg,#09213a,#071a2e);
-  color:#b9cce4;font-size:13px;line-height:1.55;
-  transition:transform .2s,border-color .2s,box-shadow .2s;
-}
-.page-shell:has(.home-v2) .sidebar-nudge:hover:not(:disabled) {
-  border-color:#137e92;box-shadow:0 0 21px #00cbfa12;transform:translateY(-2px);
-}
-.page-shell:has(.home-v2) .sidebar-nudge-title {
-  display:flex;gap:11px;align-items:flex-start;margin-bottom:16px;
-  color:#f8fdff;font-size:13px;font-weight:700;line-height:1.4;
-}
-.page-shell:has(.home-v2) .sidebar-nudge-title svg {flex:none;color:#02e6e8;}
-.page-shell:has(.home-v2) .sidebar-nudge>span:last-child {color:#b9cce4;font-size:12.5px;line-height:1.55;}
 
 
 /* At 768px the reference keeps the weekly calendar and recommendation
