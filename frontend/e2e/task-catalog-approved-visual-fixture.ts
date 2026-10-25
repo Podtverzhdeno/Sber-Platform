@@ -35,9 +35,9 @@ const stages: CatalogItem["stage_plan"]["stages"] = [
 ];
 
 const benefits: CatalogItem["benefits"] = [
-  { code: "growth", label: "Развитие компетенций", benefit_type: "skill_growth", state: "potential", condition: "Только после верификации", rule_kind: null, evidence_refs: [] },
+  { code: "growth", label: "Развитие компетенций", benefit_type: "learning", state: "potential", condition: "Только после верификации", rule_kind: null, evidence_refs: [] },
   { code: "case", label: "Потенциальный кейс в портфолио", benefit_type: "portfolio", state: "potential", condition: "По условиям заказчика", rule_kind: null, evidence_refs: [] },
-  { code: "team", label: "Работа над реальным процессом", benefit_type: "experience", state: "potential", condition: "После согласования участия", rule_kind: null, evidence_refs: [] },
+  { code: "team", label: "Работа над реальным процессом", benefit_type: "support", state: "potential", condition: "После согласования участия", rule_kind: null, evidence_refs: [] },
   { code: "feedback", label: "Обратная связь от ментора", benefit_type: "mentorship", state: "potential", condition: "При наличии назначенного ментора", rule_kind: null, evidence_refs: [] },
 ];
 
