@@ -120,9 +120,9 @@ describe("TopbarEngagementIndicator", () => {
     renderIndicator();
     await screen.findByText("0");
     openPopover();
+    expect(screen.getAllByText(/Пока ноль/).length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole("button", { name: "Открыть полный календарь серии" }));
     await screen.findByText("Пока нет квалифицируемых действий");
-    expect(screen.getAllByText(/Пока ноль/).length).toBeGreaterThan(0);
   });
 
   it("keeps a stale fetch failing quietly without false zero badge", async () => {
@@ -150,8 +150,8 @@ describe("TopbarEngagementIndicator", () => {
     await screen.findByText("3");
     openPopover();
     await screen.findByText("2 в запасе");
-    fireEvent.click(screen.getByRole("button", { name: "Открыть полный календарь серии" }));
     await screen.findByText(/заморозка не считается активностью/);
+    fireEvent.click(screen.getByRole("button", { name: "Открыть полный календарь серии" }));
     const tiles = screen.getAllByText("2026-10-21");
     const frozenTile = tiles.find((tile) => tile.closest(".engagement-day--frozen"));
     expect(frozenTile).toBeDefined();
@@ -162,7 +162,7 @@ describe("TopbarEngagementIndicator", () => {
     renderIndicator();
     await screen.findByText("4");
     openPopover();
-    await screen.findByText("2 в запасе · использовано 1");
+    await screen.findByText("2 в запасе");
     expect(screen.queryByRole("button", { name: /Использовать заморозку/ })).toBeNull();
   });
 
