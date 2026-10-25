@@ -90,8 +90,8 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
   await root.getByLabel("Компания",{exact:true}).selectOption("all");
   await expect(root.locator(".mp-project-tile")).toHaveCount(3);
   await root.getByRole("button",{name:/Токены GigaCode/}).first().click();
-  await expect(root.locator(".mp-reward-popup")).toBeVisible();
-  await root.getByRole("button",{name:"Закрыть информацию о бонусе"}).click();
+  await expect(page.getByRole("dialog", { name: "Награда: Токены GigaCode" })).toBeVisible();
+  await page.getByRole("button",{name:"Закрыть информацию о бонусе"}).click();
   await root.getByRole("textbox",{name:"Поиск проектов"}).fill("не существует");
   await expect(root.locator(".mp-project-tile")).toHaveCount(0);
   await root.getByRole("textbox",{name:"Поиск проектов"}).fill("");
@@ -347,4 +347,64 @@ test("pixel-reference tabs remain interactive at 1548×1016",async({page})=>{
   await detail.getByRole("tab",{name:"Бонусы и выгоды"}).click();
   await detail.getByRole("button",{name:/Результат в портфолио/}).click();
   await expect(detail.locator(".mp-ref-reward-note")).toBeVisible();
+});
+
+
+test("My Projects: golden Skill Passport details and all rewards are interactive",async({page})=>{
+  await page.setViewportSize({width:1672,height:941});
+  await fixture(page,"list");
+  const root=page.locator(".mpv2");
+  await expect(root.locator(".mpr-stage")).toHaveCount(6);
+  await expect(root.locator(".mpr-perk")).toHaveCount(2);
+  await expect(root.locator(".mpr-stage--green")).toContainText("Стать ментором");
+  await expect(root.locator(".mpr-golden")).toBeVisible();
+  const passportButton=root.getByRole("button",{name:"Skill Passport. Узнать подробнее"});
+  await passportButton.click();
+  const dialog=page.getByRole("dialog",{name:"Skill Passport"});
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText("Признание среди работодателей")).toBeVisible();
+  await expect(dialog.getByText("Приоритетное внимание к кандидатуре")).toBeVisible();
+  await expect(dialog.getByText("Ускоренный карьерный рост")).toBeVisible();
+  await expect(dialog.getByText("Эксклюзивные рабочие возможности")).toBeVisible();
+  await expect(dialog.getByText(/Логотипы не означают партнёрство/)).toBeVisible();
+  await page.screenshot({path:"test-results/my-projects-v2/05_passport_1672.png",animations:"disabled"});
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+  await expect(passportButton).toBeFocused();
+
+  for(const title of ["Токены GitVerse","Токены GigaCode","Премиум GigaAgent",
+    "Возможность стажировки в Сбере","Закрытое сообщество лучших","Стать ментором"]){
+    await root.getByRole("button",{name:new RegExp(title)}).first().click();
+    const rewardDialog=page.getByRole("dialog",{name:new RegExp("Награда: "+title)});
+    await expect(rewardDialog).toBeVisible();
+    await expect(rewardDialog.getByText("Что ты получаешь")).toBeVisible();
+    await rewardDialog.getByRole("button",{name:"Понятно"}).click();
+    await expect(rewardDialog).toHaveCount(0);
+  }
+  for(const title of ["Оценка личного вклада","Пополнение портфолио"]){
+    await root.locator(".mpr-perk").filter({hasText:title}).click();
+    await expect(page.getByRole("dialog",{name:"Награда: "+title})).toBeVisible();
+    await page.keyboard.press("Escape");
+  }
+});
+
+test("My Projects: reward area and modal fit on 390px mobile",async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await fixture(page,"list");
+  const root=page.locator(".mpv2");
+  await expect(root.locator(".mpr-stage")).toHaveCount(6);
+  const overflows=await root.evaluate(element=>element.scrollWidth-element.clientWidth);
+  expect(overflows).toBeLessThanOrEqual(2);
+  await root.getByRole("button",{name:"Skill Passport. Узнать подробнее"}).click();
+  const dialog=page.getByRole("dialog",{name:"Skill Passport"});
+  await expect(dialog).toBeVisible();
+  const bounds=await dialog.boundingBox();
+  if(!bounds)throw new Error("Passport modal is missing");
+  expect(bounds.x).toBeGreaterThanOrEqual(0);
+  expect(bounds.x+bounds.width).toBeLessThanOrEqual(391);
+  await dialog.getByRole("button",{name:"Понятно"}).scrollIntoViewIfNeeded();
+  await expect(dialog.getByRole("button",{name:"Понятно"})).toBeVisible();
+  await page.screenshot({path:"test-results/my-projects-v2/06_passport_mobile.png",animations:"disabled"});
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
 });
