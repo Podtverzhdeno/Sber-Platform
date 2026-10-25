@@ -9,6 +9,7 @@ on:
       - "tests/integration/test_demo_seed_idempotency.py"
       - "src/impulse/bootstrap/ai_role_catalog.py"
       - "src/impulse/bootstrap/ai_curriculum_details.py"
+      - "src/impulse/bootstrap/ai_reading_resources.py"
       - "tests/test_ai_curriculum_details.py"
       - "src/impulse/application/development.py"
       - "src/impulse/api/v1/development.py"
