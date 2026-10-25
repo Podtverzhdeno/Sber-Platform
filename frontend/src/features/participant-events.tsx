@@ -141,11 +141,6 @@ export function ParticipantEventCatalog() {
     if(next.has(key))next.delete(key);else next.add(key);
     setParam("focus", [...next].join(","), "");
   };
-  const openRegistration = (item: EventItem) => {
-    setDetailTab("about");
-    setRegistrationOpen(true);
-    setParam("event", item.key, "");
-  };
   const resetFilters = () => {
     setParam("focus","","");
     setParam("track","all");
@@ -176,7 +171,7 @@ export function ParticipantEventCatalog() {
         {visible.length===0?<div className="ev-empty"><h3>События не найдены</h3><p>Измените фильтры или направление развития</p><button className="ev-primary" type="button" onClick={resetFilters}>Сбросить фильтры</button></div>:
          <div className={`ev-event-list ev-event-list--${view}`}>{visible.map((item,index)=>{
            const claim=claimByEvent.get(item.key);
-           return <div key={item.key}><EventsCard item={item} index={index} focus={focus} frozen={claimByEvent.get(item.key)?.evidence_state === "provisional"} saved={savedEvents.has(item.key)} onSave={()=> { toggleSaved(item.key); }} onDetails={()=> { openEvent(item.key); }} onRegister={()=> { openRegistration(item); }}/>
+           return <div key={item.key}><EventsCard item={item} index={index} focus={focus} frozen={claimByEvent.get(item.key)?.evidence_state === "provisional"} saved={savedEvents.has(item.key)} onSave={()=> { toggleSaved(item.key); }} onDetails={()=> { openEvent(item.key); }}/>
              {claim&&<div className="claim-state" aria-live="polite"><Badge tone={claim.evidence_state==="verified"?"success":"warning"}>{claim.evidence_state==="verified"?"Подтверждено":"Предварительно"}</Badge><p>{claim.verification_explanation}</p></div>}
              {item.status!=="open"&&!claim&&<button className="ev-quick-register" type="button" onClick={()=> { setSelectedEvent(item); }}>Подтвердить результат</button>}
            </div>;
