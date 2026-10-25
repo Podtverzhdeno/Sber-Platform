@@ -343,3 +343,22 @@
   .bc-reference .bc-ref-required-list button{grid-column:2;justify-self:end}
   .bc-reference .bc-ref-detail-hero{min-height:245px}
 }
+
+/* Five initial role cards, as in the archived HTML; expansion is fully interactive. */
+.bc-reference .bc-ref-show-more{
+  display:flex;justify-content:center;align-items:center;gap:12px;
+  width:max-content;max-width:100%;min-height:42px;
+  margin:22px auto 8px;padding:11px 20px;border:1px solid #195674;
+  border-radius:9px;background:#0b2841;color:#89dce9;font-weight:800;
+}
+.bc-reference .bc-ref-show-more:hover{background:#123d57;color:#f4ffff;box-shadow:0 0 20px #00d2dd27}
+.bc-reference .bc-ref-show-more svg{width:16px;height:16px}
+.bc-reference .bc-ref-role-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.bc-reference .bc-ref-role-tabs::-webkit-scrollbar{display:none}
+.bc-reference .bc-ref-role-tabs>button{flex:none}
+.bc-reference .bc-ref-grade-list button{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bc-reference .bc-ref-grade-body{overflow:hidden}
+@media(max-width:590px){
+  .bc-reference .bc-ref-show-more{width:100%}
+  .bc-reference .bc-ref-role-tabs>button{flex:0 0 auto;min-width:135px}
+}
