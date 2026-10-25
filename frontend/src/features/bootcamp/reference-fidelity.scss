@@ -455,3 +455,39 @@
   }
   .bc-reference .bc-ref-role-scroll { transition: none; }
 }
+
+
+/* Primary call to action for entering real lesson content in the fullscreen
+   reader, not a plain outlined utility button. */
+.bc-reference .bc-learning-launch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 20px;
+  border: 1px solid #23eaf1;
+  border-radius: 10px;
+  background: linear-gradient(105deg, #00e9db 0%, #04d3ee 100%);
+  color: #041928;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+  box-shadow: 0 4px 15px #00cdd41d;
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.bc-reference .bc-learning-launch svg { width: 19px; height: 19px; flex: none; }
+.bc-reference .bc-learning-launch:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 24px #03e8ee47;
+  filter: brightness(1.05);
+}
+.bc-reference .bc-learning-launch:focus-visible {
+  outline: 3px solid #7dfffb;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .bc-reference .bc-learning-launch { transition: none; }
+  .bc-reference .bc-learning-launch:hover { transform: none; }
+}
