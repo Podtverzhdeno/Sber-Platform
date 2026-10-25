@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ParticipantHelpTrigger } from "../participant-help-trigger";
 import { useSearchParams } from "react-router-dom";
 import { ArrowRight, Bot, Check, Clock3, FileText, GitBranch, GraduationCap, List, LockKeyhole, Search, Sparkles, ChartNoAxesCombined, LayoutGrid, ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -162,6 +163,7 @@ export function CardActions({ card }: { card: CourseCardState }) {
 
   return (
     <div className="course-actions">
+      <ParticipantHelpTrigger topicId="course-complete" label="Когда курс засчитается" />
       <button type="button" onClick={openTrajectory}>
         Открыть траекторию
       </button>
@@ -339,6 +341,7 @@ function CourseDetails({
       <div className="bc-ref-detail-facts"><span><Clock3 />{detail?.workload_hours ? String(detail.workload_hours) + " часов" : "Длительность уточняется"}</span>
         <span><GraduationCap />{detail?.program_competencies.length ? String(detail.program_competencies.length) + " групп навыков" : "Навыки уточняются"}</span></div>
       <div className="bc-ref-detail-actions">
+      <ParticipantHelpTrigger topicId="course-choose" label="Что даст курс" />
         {card.access_state === "available" ? <SafeExternalLink href={card.source_url}>Открыть курс <ArrowRight /></SafeExternalLink> : <p>{card.access_note || "Требуется выполнение условий доступа"}</p>}
         <button type="button" onClick={onReason}>Почему рекомендован</button>
       </div>
@@ -399,6 +402,7 @@ function CourseDetails({
     </div>
     <section className="bc-certificate">
       <h3>Сертификат завершения курса</h3>
+      <ParticipantHelpTrigger topicId="certification" label="Условия сертификата" />
       {certificate ? <a href={`/verify/${encodeURIComponent(certificate.verification_id)}`}>Открыть выданный сертификат →</a> :
        card.completion_state === "verified" ? (
          certificatesLoading ? <p role="status">Проверяем наличие сертификата…</p> :
