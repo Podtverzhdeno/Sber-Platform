@@ -437,7 +437,7 @@ function RequirementsDetails({ cards, onSelect, onClose }: { cards: CourseCardSt
     ? "курс" : new Intl.PluralRules("ru-RU").select(pending.length) === "few" ? "курса" : "курсов";
   return <div className="bc-panel-content bc-ref-required-panel" data-reference="BC-R05">
     <div className="bc-ref-required-hero">
-      <span className="bc-ref-required-kicker">♜ До следующего грейда</span>
+      <span className="bc-ref-required-kicker">♜ Требования активной траектории</span>
       <h2>{pending.length === 0 ? "Обязательное обучение завершено" :
         `Осталось ${String(pending.length)} ${pending.length === 1 ? "обязательный" : "обязательных"} ${requiredWord}`}</h2>
       <p>Здесь отображаются учебные требования выбранной роли. Для перехода на следующий грейд могут потребоваться практика и подтверждённые результаты по опубликованной программе.</p>
@@ -684,9 +684,9 @@ export function BootcampCatalog({
           <section className="bc-ref-grade" aria-labelledby="bc-grade-title">
             <img className="bc-ref-trophy" alt="" src="/bootcamp/trophy.svg" />
             <div className="bc-ref-grade-body">
-              <div className="bc-ref-grade-kicker">♛ &nbsp; До следующего грейда</div>
-              <h2 id="bc-grade-title">{pendingRequired.length > 0 ? <>{pendingRequired.length === 1 ? "Остался" : "Осталось"} <em>{pendingRequired.length}</em> {pendingRequired.length === 1 ? "обязательный" : "обязательных"} {requiredWord}</> : "Требования к грейду"}</h2>
-              <p>{pendingRequired.length > 0 ? "Заверши учебные требования. Практика и подтверждение проверяются отдельно." : "Учебные требования уточняются по опубликованной программе."}</p>
+              <div className="bc-ref-grade-kicker">♛ &nbsp; Учебные требования роли</div>
+              <h2 id="bc-grade-title">{pendingRequired.length > 0 ? <>{pendingRequired.length === 1 ? "Остался" : "Осталось"} <em>{pendingRequired.length}</em> {pendingRequired.length === 1 ? "обязательный" : "обязательных"} {requiredWord}</> : "Обязательные курсы"}</h2>
+              <p>{pendingRequired.length > 0 ? "Заверши учебные требования. Практика и подтверждение проверяются отдельно." : "В текущем каталоге незавершённых обязательных курсов нет."}</p>
               <div className="bc-ref-grade-list">{pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => { openPanel("detail",card.key); }}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
             </div>
             <button className="bc-ref-grade-button" type="button" onClick={() => { openPanel("requirements"); }}>Посмотреть курсы <ArrowRight /></button>
