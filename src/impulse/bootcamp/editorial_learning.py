@@ -83,7 +83,8 @@ async def _view(request: Request, person_id: UUID, course_key: str) -> ImpulseSt
         )
     async with request.app.state.database.sessions() as session:
         practice = (await session.execute(
-            text("SELECT status, practical_certificate_id FROM impulse_practical_submissions WHERE person_id = :person AND course_key = :course"),
+            text("SELECT status, practical_certificate_id FROM impulse_practical_submissions "
+                 "WHERE person_id = :person AND course_key = :course"),
             {"person": person_id, "course": course_key},
         )).mappings().one_or_none()
     return ImpulseStudyView(
