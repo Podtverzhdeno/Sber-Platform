@@ -1419,7 +1419,7 @@ function ImpulseApp() {
   const chatNotificationsQuery = useQuery({
     queryKey: ["messaging-channels"],
     queryFn: () => apiRequest<ChatNotification[]>("/api/v1/me/messaging/channels"),
-    enabled: Boolean(actor) && actor.navigation.includes("Сообщения"),
+    enabled: actor?.navigation.includes("Сообщения") ?? false,
     refetchInterval: 12_000,
     refetchIntervalInBackground: false,
   });
