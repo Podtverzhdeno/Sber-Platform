@@ -155,7 +155,7 @@ describe("Bootcamp editorial course curriculum", () => {
     fireEvent.click(selfCheck);
     expect(selfCheck).toHaveAttribute("aria-expanded", "true");
     expect(within(lesson).getAllByRole("checkbox").length).toBeGreaterThan(0);
-    fireEvent.click(frames[3]!);
+    fireEvent.click(selfCheck);
     expect(within(lesson).queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
