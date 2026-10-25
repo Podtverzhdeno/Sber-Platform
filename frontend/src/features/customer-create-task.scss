@@ -331,3 +331,205 @@
   .customer-create-v2 .create-v2-readiness-track > span,
   .customer-create-v2 .create-stepper button { transition: none; }
 }
+
+
+/* Variant 3: reference-aligned customer task composer.
+   Visual structure: step rail → main form + live preview → collapsed next steps. */
+.customer-scenario .customer-create-v2 { gap: 12px; --v3-accent: #25e5d0; --v3-outline: #29495f; }
+.customer-create-v2 .create-v3-intro { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-width: 0; padding: 2px 3px; color: #9cb2c5; }
+.customer-create-v2 .create-v3-back { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; }
+.customer-create-v2 .create-v3-intro > div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+.customer-create-v2 .create-v3-intro-flag, .customer-create-v2 .create-v3-autosave { display: inline-flex; align-items: center; gap: 6px; color: #43dfc9; font-size: 11px; }
+.customer-create-v2 .create-v3-autosave { color: #7f9db4; }
+.customer-scenario .customer-create-v2 .create-stepper {
+  position: relative; isolation: isolate; display: grid;
+  grid-template-columns: repeat(5, minmax(0,1fr));
+  align-items: stretch; gap: 5px; margin: 7px 0 12px; padding: 0 10px; list-style: none;
+}
+.customer-create-v2 .create-stepper::before { content: ""; position: absolute; z-index: -1; top: 19px; left: 10%; right: 10%; height: 1px; background: #38556b; }
+.customer-scenario .customer-create-v2 .create-stepper button,
+.customer-scenario .customer-create-v2 .create-stepper button:hover {
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+  gap: 7px; min-height: 70px; padding: 0 5px;
+  background: transparent; border: 0; box-shadow: none;
+  color: #7894ac; text-align: center; transform: none;
+}
+.customer-create-v2 .create-stepper button:hover .create-v2-step-number { border-color: #34d9c3; }
+.customer-create-v2 .create-stepper .create-v2-step-number {
+  flex: 0 0 36px; width: 36px; height: 36px;
+  border: 1px solid #3d607b; border-radius: 50%; background: #102538; color: #86a0b8;
+  font-size: 12px; font-weight: 700; transition: border-color .2s, background .2s;
+}
+.customer-create-v2 .create-stepper button.active .create-v2-step-number,
+.customer-create-v2 .create-stepper button.done .create-v2-step-number {
+  color: #06313a; border: 1px solid #1cf0d7; background: linear-gradient(155deg,#21e4cf,#24afc8);
+}
+.customer-create-v2 .create-stepper button.active .create-v2-step-name b { color: #40e6d5; }
+.customer-create-v2 .create-stepper .create-v2-step-name b { font-size: 12px; font-weight: 650; }
+.customer-scenario .customer-create-v2 .create-task-grid {
+  grid-template-columns: minmax(0, 1.84fr) minmax(270px, .86fr);
+  align-items: start; gap: 14px;
+}
+.customer-scenario .customer-create-v2 .create-form-card {
+  padding: 23px 25px 18px; border: 1px solid #2b4861; border-radius: 15px;
+  background: linear-gradient(153deg,#0c2134,#0a1a2c);
+}
+.customer-create-v2 .create-v2-section-top { display: flex; align-items: center; gap: 9px; }
+.customer-create-v2 .create-v2-section-icon {
+  width: 32px; height: 32px; background: #0b3b43;
+  border: 1px solid #1b827d; color: #30e9d1; border-radius: 9px;
+}
+.customer-create-v2 .create-v2-label { color: #48d9cc; font-size: 11px; letter-spacing: .075em; }
+.customer-create-v2 .create-v3-step-pill {
+  margin-left: auto; display: inline-flex; align-items: center; white-space: nowrap;
+  padding: 6px 9px; color: #9bf1e4; background: #153b47;
+  border: 1px solid #215d67; border-radius: 7px; font-size: 10px; font-weight: 700;
+}
+.customer-create-v2 .create-v2-section-heading { margin: 13px 0 24px; }
+.customer-scenario .customer-create-v2 .create-form-card .create-v2-section-heading h2 { margin-bottom: 6px; font-size: clamp(21px,2vw,27px); }
+.customer-create-v2 .create-v2-section-heading p { font-size: 12px; line-height: 1.45; }
+.customer-scenario .customer-create-v2 .create-fields { gap: 16px 12px; }
+.customer-scenario .customer-create-v2 .create-fields label { font-size: 12px; font-weight: 700; }
+.customer-scenario .customer-create-v2 .create-fields input:not([type="checkbox"]),
+.customer-scenario .customer-create-v2 .create-fields select,
+.customer-scenario .customer-create-v2 .create-fields textarea {
+  margin-top: 8px; background: #10263b; color: #edf8fe;
+  border: 1px solid #31516a; border-radius: 8px; font-size: 12px;
+  padding: 11px 12px;
+}
+.customer-scenario .customer-create-v2 .create-v3-brief-fields > label > textarea { min-height: 70px; resize: vertical; }
+.customer-create-v2 .create-v3-counter {
+  display: block; text-align: right; margin-top: 5px;
+  color: #6f90a8; font-size: 10px; font-variant-numeric: tabular-nums;
+}
+.customer-create-v2 .create-v3-description { display: grid; min-width: 0; }
+.customer-create-v2 .create-v3-description > label { display: block; margin-bottom: 8px; }
+.customer-create-v2 .create-v3-editor { overflow: hidden; background: #10263b; border: 1px solid #31516a; border-radius: 9px; }
+.customer-create-v2 .create-v3-editor:focus-within { border-color: #25e5d0; box-shadow: 0 0 0 3px rgba(37,229,208,.08); }
+.customer-create-v2 .create-v3-toolbar { display: flex; align-items: center; gap: 3px; padding: 6px; background: #0d2437; border-bottom: 1px solid #2d4960; }
+.customer-create-v2 .create-v3-toolbar span { margin-left: auto; padding-right: 6px; color: #7495a9; font-size: 9px; }
+.customer-scenario .customer-create-v2 .create-v3-toolbar button {
+  display: inline-grid; place-items: center; padding: 0;
+  width: 30px; height: 27px; min-height: 27px; border: 0; border-radius: 5px;
+  background: transparent; color: #bad2dc;
+}
+.customer-scenario .customer-create-v2 .create-v3-toolbar button:hover { color: #3aefdb; background: #193d4f; }
+.customer-scenario .customer-create-v2 .create-v3-editor textarea {
+  margin: 0 !important; width: 100%; border: 0 !important; border-radius: 0 !important;
+  outline: none !important; box-shadow: none !important; min-height: 134px; background: transparent !important; resize: vertical;
+}
+.customer-create-v2 .create-v3-skills { display: grid; }
+.customer-create-v2 .create-v3-skills > label { margin: 0 0 8px !important; }
+.customer-create-v2 .create-v3-skill-search { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 0 10px; border: 1px solid #31516a; border-radius: 8px; background: #10263b; color: #7d9bae; }
+.customer-create-v2 .create-v3-skill-search:focus-within { border-color: #22dbc7; }
+.customer-scenario .customer-create-v2 .create-v3-skill-search input {
+  flex: 1; min-width: 0; margin: 0; padding: 11px 0; background: transparent !important;
+  box-shadow: none; border: 0 !important; outline: none !important;
+}
+.customer-scenario .customer-create-v2 .create-v3-skill-search button { display: grid; place-items: center; padding: 3px; min-height: 28px; width: 28px; border: 0; color: #55e3cf; background: transparent; }
+.customer-create-v2 .create-v3-skills p { margin: 11px 0 7px; color: #7795a9; font-size: 10px; }
+.customer-create-v2 .create-v3-skill-chips, .customer-create-v2 .create-v3-selected-skills { display: flex; flex-wrap: wrap; gap: 6px; }
+.customer-scenario .customer-create-v2 .create-v3-skill-chips button,
+.customer-scenario .customer-create-v2 .create-v3-selected-skills button {
+  min-height: 26px; display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px;
+  border: 1px solid #36576b; border-radius: 16px; background: #11293b;
+  color: #bed9e9; font-size: 10px; font-weight: 550; transition: background .15s, border-color .15s;
+}
+.customer-scenario .customer-create-v2 .create-v3-skill-chips button:hover { border-color: #31dfc6; background: #16453f; }
+.customer-create-v2 .create-v3-selected-skills { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #31516a; }
+.customer-scenario .customer-create-v2 .create-v3-selected-skills button { border-color: #1ba99c; color: #5bf2de; background: #10443f; }
+.customer-scenario .customer-create-v2 .create-actions {
+  position: static; display: block; bottom: auto; margin: 21px 0 0; padding: 18px 0 0;
+  border: 0; border-top: 1px solid #264357; border-radius: 0;
+  background: transparent; box-shadow: none; backdrop-filter: none;
+}
+.customer-create-v2 .create-v3-primary-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 9px; }
+.customer-scenario .customer-create-v2 .create-actions .create-v3-primary-actions button {
+  min-height: 38px; border-radius: 8px; font-size: 12px; padding: 8px 12px;
+  box-shadow: none;
+}
+.customer-scenario .customer-create-v2 .create-actions .create-v3-primary-actions button.primary { margin-left: auto; min-width: 130px; font-weight: 850; }
+.customer-scenario .customer-create-v2 .create-v3-right { position: sticky; top: 12px; display: grid; align-content: start; gap: 12px; min-width: 0; }
+.customer-create-v2 .create-v3-preview-card { overflow: hidden; padding: 17px; border: 1px solid #2d4868; border-radius: 14px; background: linear-gradient(159deg,#10243a 2%,#0a1c30 70%); }
+.customer-create-v2 .create-v3-preview-card > header { display: flex; align-items: start; justify-content: space-between; gap: 8px; margin-bottom: 13px; color: #36e5d0; }
+.customer-create-v2 .create-v3-preview-card > header h3 { margin: 0 0 4px; color: #d8f5fc; font-size: 17px; }
+.customer-create-v2 .create-v3-preview-card > header p { margin: 0; color: #91adbb; font-size: 11px; }
+.customer-create-v2 .create-v3-preview-art {
+  position: relative; height: 153px; overflow: hidden; border-radius: 12px;
+  background: radial-gradient(ellipse at 48% 62%,#243c8c 0,transparent 54%),radial-gradient(circle at 100% 10%,#244b85,transparent 43%),linear-gradient(140deg,#0c2344,#151534 70%,#0d2340);
+  isolation: isolate;
+}
+.customer-create-v2 .create-v3-preview-art::before { content: ""; position: absolute; inset: -28px; background: repeating-radial-gradient(ellipse at 50% 56%,transparent 0 24px,rgba(48,151,242,.11) 25px 26px,transparent 27px 48px); transform: rotate(-18deg); }
+.customer-create-v2 .create-v3-art-ring { position: absolute; left: 17%; top: 26%; width: 66%; height: 49%; border: 2px solid rgba(65,230,224,.38); border-radius: 50%; filter: drop-shadow(0 0 7px rgba(30,169,255,.34)); transform: rotate(-19deg); }
+.customer-create-v2 .create-v3-art-layer { position: absolute; left: 37%; top: 29%; width: 31%; height: 43%; display: grid; place-items: center; color: #69e3f1; border: 1px solid #377ae3; border-radius: 12px; background: linear-gradient(130deg,#234bb6,#14195b 60%,#0b4070); box-shadow: -14px 13px 17px rgba(0,0,0,.30), 0 0 32px rgba(67,112,251,.28); transform: rotate(-22deg) skew(4deg,8deg); }
+.customer-create-v2 .create-v3-art-layer--back { transform: translate(22px,-21px) rotate(18deg) skew(4deg,8deg); opacity: .62; background: linear-gradient(140deg,#21b6d4,#1d3ca4); }
+.customer-create-v2 .create-v3-art-layer--front { box-shadow: 0 0 0 8px rgba(44,164,246,.05), -10px 15px 17px rgba(0,0,0,.38), 0 0 28px rgba(94,103,239,.42); }
+.customer-create-v2 .create-v3-preview-content h4 { font-size: 15px; line-height: 1.4; color: #fff; margin: 14px 0 8px; overflow-wrap: anywhere; }
+.customer-create-v2 .create-v3-preview-excerpt { margin: 0 0 9px; color: #9eb8cc; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+.customer-create-v2 .create-v3-preview-tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0 17px; }
+.customer-create-v2 .create-v3-preview-tags span { display: inline-flex; padding: 5px 8px; border-radius: 10px; font-size: 10px; color: #cfd9ff; background: #30386b; }
+.customer-create-v2 .create-v3-preview-card dl { display: grid; gap: 13px; margin: 0; }
+.customer-create-v2 .create-v3-preview-card dl > div { display: grid; grid-template-columns: minmax(0,1fr); gap: 3px; padding: 0 0 12px; border-bottom: 1px solid #294055; }
+.customer-create-v2 .create-v3-preview-card dt { display: flex; align-items: center; gap: 7px; color: #abc2d2; font-size: 11px; }
+.customer-create-v2 .create-v3-preview-card dt svg { color: #93b6d3; }
+.customer-create-v2 .create-v3-preview-card dd { margin: 0 0 0 24px; color: #d7ecf3; font-size: 11px; line-height: 1.4; overflow-wrap: anywhere; }
+.customer-scenario .customer-create-v2 .create-v3-preview-content > button {
+  display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%;
+  margin-top: 14px; min-height: 35px; padding: 7px 10px; font-size: 11px;
+  border: 1px solid #3d6783; border-radius: 8px; color: #bfe7ee; background: #163349;
+}
+.customer-create-v2 .create-v3-advice-card { padding: 17px; border: 1px solid #334e71; border-radius: 14px; background: linear-gradient(148deg,#122944,#0d233c); }
+.customer-create-v2 .create-v3-advice-title { display: flex; align-items: center; gap: 9px; color: #eec470; }
+.customer-create-v2 .create-v3-advice-title strong { color: #e6f0f8; font-size: 12px; }
+.customer-create-v2 .create-v3-advice-card p { margin: 10px 0; font-size: 11px; line-height: 1.6; color: #aec3d4; }
+.customer-scenario .customer-create-v2 .create-v3-advice-card button { display: inline-flex; align-items: center; gap: 5px; min-height: 28px; padding: 3px 0; border: 0; color: #88a6ff; background: transparent; font-size: 11px; }
+.customer-create-v2 .create-v3-progress-card { padding: 15px; border: 1px solid #2c485f; border-radius: 12px; background: #0f2235; }
+.customer-create-v2 .create-v3-progress-card > div:first-child { display: flex; gap: 8px; align-items: center; justify-content: space-between; font-size: 11px; color: #91acbd; }
+.customer-create-v2 .create-v3-progress-card strong { color: #3fe9cc; font-size: 17px; }
+.customer-create-v2 .create-v3-readiness-track { height: 5px; overflow: hidden; border-radius: 6px; margin: 10px 0; background: #2c4159; }
+.customer-create-v2 .create-v3-readiness-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#20ddc6,#519bf3); transition: width .2s ease; }
+.customer-scenario .customer-create-v2 .create-v3-progress-card button, .customer-create-v2 .create-v3-progress-card p { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 10px; color: #8fbbd2; }
+.customer-scenario .customer-create-v2 .create-v3-progress-card button { padding: 3px 0; min-height: 26px; border: 0; background: transparent; text-align: left; }
+.customer-create-v2 .create-v3-next-steps { display: grid; gap: 8px; }
+.customer-scenario .customer-create-v2 .create-v3-next-steps > button {
+  display: flex; align-items: center; gap: 14px; width: 100%; min-height: 63px;
+  padding: 12px 15px; border: 1px solid #29485e; border-radius: 11px;
+  color: #b8ccda; background: linear-gradient(115deg,#0c2032,#0a1b2a); text-align: left;
+  transition: border-color .16s, transform .16s;
+}
+.customer-scenario .customer-create-v2 .create-v3-next-steps > button:hover { border-color: #28baa8; transform: translateY(-1px); background: #112b3b; }
+.customer-create-v2 .create-v3-card-index { display: grid; flex: 0 0 33px; place-items: center; width: 33px; height: 33px; border: 1px solid #30526a; border-radius: 50%; background: #142f43; color: #bcd7e5; font-size: 13px; font-weight: 850; }
+.customer-create-v2 .create-v3-card-text { display: grid; flex: 1; gap: 4px; min-width: 0; }
+.customer-create-v2 .create-v3-card-text strong { font-size: 13px; color: #e4f2f9; }
+.customer-create-v2 .create-v3-card-text small { font-size: 11px; color: #849eaf; line-height: 1.45; }
+.customer-create-v2 .create-v3-next-steps > button > svg { color: #7daabf; }
+@media (max-width: 1120px) {
+  .customer-scenario .customer-create-v2 .create-task-grid { grid-template-columns: minmax(0,1.4fr) minmax(240px,.74fr); gap: 10px; }
+  .customer-scenario .customer-create-v2 .create-form-card { padding: 18px; }
+  .customer-create-v2 .create-v3-toolbar span { display: none; }
+}
+@media (max-width: 850px) {
+  .customer-scenario .customer-create-v2 .create-task-grid { grid-template-columns: 1fr; }
+  .customer-scenario .customer-create-v2 .create-v3-right { position: static; display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .customer-create-v2 .create-v3-preview-card { grid-row: span 2; }
+}
+@media (max-width: 650px) {
+  .customer-create-v2 .create-v3-intro { align-items: flex-start; flex-direction: column; }
+  .customer-create-v2 .create-v3-intro > div { justify-content: flex-start; }
+  .customer-scenario .customer-create-v2 .create-stepper { margin-bottom: 4px; }
+  .customer-scenario .customer-create-v2 .create-stepper button { min-height: 53px; }
+  .customer-create-v2 .create-v2-step-name { display: none; }
+  .customer-create-v2 .create-stepper .create-v2-step-number { width: 31px; height: 31px; flex-basis: 31px; }
+  .customer-create-v2 .create-stepper::before { top: 16px; }
+  .customer-scenario .customer-create-v2 .create-v3-right { display: grid; grid-template-columns: 1fr; }
+  .customer-scenario .customer-create-v2 .create-form-card { padding: 17px 14px; }
+  .customer-scenario .customer-create-v2 .create-v3-brief-fields { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .customer-create-v2 .create-v3-brief-fields .wide { grid-column: 1 / -1; }
+  .customer-create-v2 .create-v3-primary-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .customer-scenario .customer-create-v2 .create-actions .create-v3-primary-actions .primary { min-width: 0; margin: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .customer-create-v2 .create-v3-readiness-track span,
+  .customer-create-v2 .create-v3-next-steps > button,
+  .customer-create-v2 .create-v3-skill-chips button { transition: none !important; }
+}
