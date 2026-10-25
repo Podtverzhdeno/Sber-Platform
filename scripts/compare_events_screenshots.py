@@ -35,9 +35,7 @@ def compare(
     reference: Image.Image, capture: Image.Image, threshold: int
 ) -> tuple[dict, Image.Image, Image.Image]:
     if reference.size != capture.size:
-        raise ValueError(
-            f"dimension mismatch: reference={reference.size}, capture={capture.size}"
-        )
+        raise ValueError(f"dimension mismatch: reference={reference.size}, capture={capture.size}")
     difference = ImageChops.difference(reference, capture)
     pixels = list(difference.getdata())
     total = reference.width * reference.height
