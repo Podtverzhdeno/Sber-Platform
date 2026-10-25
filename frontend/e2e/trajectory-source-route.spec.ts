@@ -67,7 +67,7 @@ test("source-driven trajectory renders approved catalog and sparse stage truth f
   });
 
   await source.getByRole("button", { name: /^О роли/ }).click();
-  await expect(page.getByRole("dialog", { name: /Python-разработчик/ })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: /AI Security Engineer/ })).toBeVisible();
   await test.info().attach("TRJ-SCREEN-03-role-info-react", {
     body: await page.screenshot({ animations: "disabled" }), contentType: "image/png",
   });
@@ -117,7 +117,7 @@ test("source-driven trajectory switches to a catalog-only direction without inve
   await test.info().attach("source-real-api-mobile-390x844", {
     body: await page.screenshot({ animations: "disabled", fullPage: true }), contentType: "image/png",
   });
-  await source.getByRole("button", { name: /UX\/UI-дизайнер/ }).click();
+  await source.getByRole("button", { name: /AI Agent Engineer/ }).click();
   await expect(source.getByText(/Роль ещё не выбрана/)).toBeVisible();
   await expect(source.getByText(/этапы, задачи и подтверждённый прогресс/)).toBeVisible();
   await expect(source.getByText("Грейд —")).toBeVisible();
