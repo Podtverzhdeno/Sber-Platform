@@ -168,7 +168,6 @@ def analyze(root: Path) -> dict[str, Any]:
     type_edges_skipped = 0
     manifest: list[dict[str, Any]] = []
     for path in all_files:
-        name = PurePosixPath(path).name
         manifest.append({"path": path, "bytes": (root / path).stat().st_size, "kind": (
             "generated" if path in GENERATED else category(path) if Path(path).suffix in EXT else "asset_or_document")})
         if Path(path).suffix not in EXT:
