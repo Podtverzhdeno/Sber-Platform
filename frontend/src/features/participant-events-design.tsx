@@ -171,8 +171,8 @@ export function EventExperienceDetail({detail,aggregate,tab,onTabChange,onClose,
   </div>;
 }
 
-export function EventRegistrationForm({event,onClose,onInterest}:{
- event:EventDetail;onClose:()=>void;onInterest:()=>void;
+export function EventRegistrationForm({event,onClose}:{
+ event:EventDetail;onClose:()=>void;
 }) {
  const [step,setStep]=useState(0);
  const [name,setName]=useState("");
@@ -183,7 +183,7 @@ export function EventRegistrationForm({event,onClose,onInterest}:{
  const [notes,setNotes]=useState("");
  const [consent,setConsent]=useState(false);
  const [finished,setFinished]=useState(false);
- const next=(e:SyntheticEvent<HTMLFormElement>)=>{e.preventDefault();if(step<2)setStep(step+1);else {setStep(3);setFinished(true);onInterest();}};
+ const next=(e:SyntheticEvent<HTMLFormElement>)=>{e.preventDefault();if(step<2)setStep(step+1);else {setStep(3);setFinished(true);}};
  return <div className="ev-registration-cover" data-testid="event-registration">
    <section className="ev-registration-card" aria-label="Регистрация на событие">
      <div className="ev-reg-top"><div><h3>Подготовка заявки</h3><p>{event.title} · Демонстрационная анкета, данные не отправляются организатору</p></div><button type="button" aria-label="Закрыть регистрацию" onClick={onClose}><X size={20}/></button></div>
