@@ -26,7 +26,9 @@ class LearningDetails(LearningModule):
 
 
 # ruff: noqa: E501 -- curated human-readable Russian lesson descriptions.
-AI_CURRICULUM_DETAILS: dict[str, list[LearningModule]] = cast(dict[str, list[LearningModule]], json.loads(r"""{
+AI_CURRICULUM_DETAILS: dict[str, list[LearningModule]] = cast(
+    dict[str, list[LearningModule]],
+    json.loads(r"""{
   "product": [
     {
       "theory": [
@@ -678,7 +680,8 @@ AI_CURRICULUM_DETAILS: dict[str, list[LearningModule]] = cast(dict[str, list[Lea
       "estimated_hours": 12
     }
   ]
-}"""))
+}"""),
+)
 
 
 def learning_details(track_key: str, stage_position: int) -> LearningDetails:
