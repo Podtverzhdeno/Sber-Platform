@@ -4926,6 +4926,76 @@
         "title": "CursorPage[EventView]",
         "type": "object"
       },
+      "CustomerActivityEventView": {
+        "description": "One dated, verified event inside a task owned by this customer.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "project_created",
+              "participant_assigned",
+              "result_submitted",
+              "result_accepted",
+              "revision_requested"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "task_id": {
+            "format": "uuid",
+            "title": "Task Id",
+            "type": "string"
+          },
+          "task_title": {
+            "title": "Task Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "task_id",
+          "task_title",
+          "kind",
+          "occurred_at"
+        ],
+        "title": "CustomerActivityEventView",
+        "type": "object"
+      },
+      "CustomerActivityView": {
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/CustomerActivityEventView"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "generated_at": {
+            "format": "date-time",
+            "title": "Generated At",
+            "type": "string"
+          },
+          "window_days": {
+            "default": 84,
+            "title": "Window Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "generated_at",
+          "events"
+        ],
+        "title": "CustomerActivityView",
+        "type": "object"
+      },
       "CustomerTaskDetailView": {
         "properties": {
           "acceptance_criteria": {
@@ -15137,6 +15207,25 @@
           }
         },
         "summary": "Accept Candidate"
+      }
+    },
+    "/api/v1/customer/analytics/activity": {
+      "get": {
+        "description": "Real project activity; data is restricted to the authenticated customer's tasks.",
+        "operationId": "customer_analytics_activity_api_v1_customer_analytics_activity_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerActivityView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Customer Analytics Activity"
       }
     },
     "/api/v1/customer/cases": {

@@ -182,6 +182,10 @@ uv run pyright
 uv run pytest
 uv run impulse-secret-scan
 uv run python scripts/check_markdown_links.py
+uv run python scripts/check_ai_release_docs.py
+uv run python scripts/check_ci_docs.py
+# CI-артефакты: docs/ci-intentional-failure-evidence.md
+# .github/workflows/ci.yml
 
 # Frontend — из каталога frontend/
 npm run lint
@@ -262,3 +266,13 @@ npx -y @fission-ai/openspec@latest validate impulse-ecosystem --strict --no-inte
   </p>
   <sub>Проект находится в активной разработке. README описывает архитектуру и сценарии, а не гарантирует готовность каждого компонента для production.</sub>
 </div>
+
+### Дополнительные проверки и эксплуатационные документы
+
+- Документ: [observability-alerts.md](docs/observability-alerts.md)
+- Проверка: `scripts/check_contract_docs.py`
+- Проверка: `scripts/check_journey_docs.py`
+- Проверка: `scripts/check_post_deploy_docs.py`
+- Проверка: `scripts/check_release_acceptance_docs.py`
+- Проверка: `scripts/check_security_docs.py`
+- Проверка: `scripts/check_ci_evidence_docs.py`
