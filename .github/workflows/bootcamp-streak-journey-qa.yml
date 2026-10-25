@@ -1,0 +1,61 @@
+name: Bootcamp Streak Journey QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/impulse/bootcamp/editorial_learning.py"
+      - "frontend/src/features/engagement.tsx"
+      - "frontend/src/features/streak-celebration.tsx"
+      - "frontend/src/features/streak-celebration.scss"
+      - "frontend/src/api/cross-section-mutations.ts"
+      - "frontend/src/api/client.ts"
+      - "frontend/src/features/bootcamp/learning-content/ImmersiveCourseExperience.tsx"
+      - "frontend/e2e/bootcamp-immersive.spec.ts"
+      - "frontend/e2e/bootcamp-reference-fixtures.ts"
+      - ".github/workflows/bootcamp-streak-journey-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bootcamp-streak-journey-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  course-to-streak-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Install Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install frontend dependencies
+        run: npm ci
+      - name: Check static types
+        run: npm run typecheck
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Complete course and verify one real streak animation
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test bootcamp-immersive.spec.ts --grep "completing an actual Bootcamp course triggers one verified streak celebration" --project=chromium --reporter=line
+      - name: Preserve browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bootcamp-streak-journey-evidence
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
