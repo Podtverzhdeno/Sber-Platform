@@ -66,5 +66,21 @@ class ArchitectureAuditTests(unittest.TestCase):
             self.assertEqual(len(report["cross_feature_imports"]), 2)
 
 
+    def test_ratchet_blocks_new_debt_and_expired_allowlist(self) -> None:
+        report = {"forbidden_imports": [
+            {"path": "src/impulse/application/work.py", "module": "impulse.api.errors"}],
+            "cycles": [["a.py", "b.py"]]}
+        baseline = {"exceptions": [], "allowed_cycles": []}
+        self.assertEqual(len(audit_module.baseline_regressions(report, baseline)), 2)
+        baseline["exceptions"] = [{
+            "path": "src/impulse/application/work.py", "module": "impulse.api.errors",
+            "owner": "team", "expires": "2099-01-01"
+        }]
+        baseline["allowed_cycles"] = [["b.py", "a.py"]]
+        self.assertEqual(audit_module.baseline_regressions(report, baseline), [])
+        baseline["exceptions"][0]["expires"] = "2020-01-01"
+        self.assertEqual(len(audit_module.baseline_regressions(report, baseline)), 1)
+
+
 if __name__ == "__main__":
     unittest.main()
