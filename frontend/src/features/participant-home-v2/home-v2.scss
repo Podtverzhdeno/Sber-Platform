@@ -826,3 +826,37 @@ body:has(.home-v2-drawer-layer) {overflow:hidden;}
     border-radius: 12px;
   }
 }
+
+
+/* Overview overflow safety: real API titles and translations may be longer
+   than the short snapshot labels used in the reference screenshots. */
+.home-v2-hero,
+.home-v2-grade,
+.home-v2-weekly,
+.home-v2-next-outcome {
+  height: auto;
+}
+.home-v2-hero-inner { min-height: 310px; height: auto; }
+.home-v2-hero h2,
+.home-v2-outcome-content,
+.home-v2-task-copy,
+.home-v2-task-copy strong,
+.home-v2-buddy-content,
+.home-v2-passport,
+.home-v2-grade-readiness {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.home-v2-next-outcome { min-height: 172px; }
+.home-v2-outcome-main { min-height: 0; }
+.home-v2-bottom-grid { min-width: 0; }
+@media (max-width: 790px) {
+  .home-v2-hero-inner { min-height: 295px; }
+}
+@media (max-width: 630px) {
+  .home-v2-hero-inner { min-height: 285px; }
+  .home-v2-next-outcome { min-height: 208px; }
+  .home-v2-hero-actions { flex-wrap: wrap; }
+  .home-v2-outcome-stats { flex-wrap: wrap; white-space: normal; overflow: visible; }
+  .home-v2-outcome-stats > span { white-space: normal; }
+}
