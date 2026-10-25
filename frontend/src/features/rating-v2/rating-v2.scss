@@ -2,7 +2,7 @@
 .ir-page {
   --ir-bg: #03101f; --ir-panel: #06172a; --ir-line: #1b3c56;
   --ir-text: #f6fbff; --ir-muted: #9cbbd1; --ir-cyan: #1ce8dc;
-  position: relative; display: grid; align-content: start; gap: 18px;
+  position: relative; display: grid; align-content: start; gap: 11px;
   width: 100%; min-width: 0; padding: 10px 0 40px; color: var(--ir-text);
   font-family: Inter, "SB Sans Text", system-ui, sans-serif;
   isolation: isolate;
@@ -23,7 +23,7 @@
   button {border:0;background:none;color:#a7cadc;padding:4px 0;font-weight:700;}
   strong {color:#3af3e7;} .ir-divider-chevron {font-size:23px;color:#508097;line-height:1;}}
 .ir-eyebrow {font-size:11px;letter-spacing:.09em;color:#20e9da;font-weight:850;text-transform:uppercase;}
-.ir-hero {min-height:145px;position:relative;display:flex;align-items:center;justify-content:space-between;padding:18px 18px 19px 0;gap:16px;overflow:hidden;border-radius:10px;
+.ir-hero {min-height:110px;position:relative;display:flex;align-items:center;justify-content:space-between;padding:18px 18px 19px 0;gap:16px;overflow:hidden;border-radius:10px;
   &::after {content:"";position:absolute;pointer-events:none;z-index:-1;inset:0;background:linear-gradient(90deg,#031120f9 1%,#031120e6 38%,#03112036 77%,#04122090 100%),radial-gradient(ellipse 60% 90% at 73% 99%,#05284299,transparent);}
   .ir-hero-copy {position:relative;z-index:2;flex:1;max-width:810px;display:grid;gap:11px;}
   .ir-hero-copy >p:last-child {max-width:730px;line-height:1.5;font-size:15px;color:#a6bfce;}
@@ -33,7 +33,7 @@
     .ir-season-status{white-space:nowrap;align-self:flex-start;margin-left:auto;font-size:10px;padding:5px 7px;border:1px solid #087d80;border-radius:7px;color:#4ef9e8;background:#083a42;}
   }
 }
-.ir-hero--compact {min-height:148px;flex:1;max-width:none; .ir-art{right:1%;} .ir-hero-copy>p:last-child{max-width:680px;}}
+.ir-hero--compact {min-height:126px;flex:1;max-width:none; .ir-art{right:1%;} .ir-hero-copy>p:last-child{max-width:680px;}}
 /* Illustrated trophy art — CSS geometry keeps the UI lightweight and responsive. */
 .ir-art {position:relative;width:100%;height:100%;overflow:hidden;pointer-events:none;
   .ir-art-glow {position:absolute;inset:12% 9% 0;background:radial-gradient(ellipse at 58% 63%,#13fffa6b 0%,#138ae02d 30%,transparent 73%);filter:blur(9px);}
@@ -66,7 +66,7 @@
   &--top50{border-color:#956725;background:linear-gradient(128deg,#251b0e,#121a20 60%,#33230d);}
   &--top50 .ir-benefit-title{color:#ffd277;} &--top50 li svg{color:#f6c45f;} &--top50 .ir-benefit-arr{border-color:#a47737;color:#ffdf9f;background:#372713;}
 }
-.ir-benefit--compact {min-height:91px;padding:17px 20px;
+.ir-benefit--compact {min-height:78px;padding:17px 20px;
   .ir-art{width:39%;right:0;opacity:.8;}
   .ir-art .ir-art-crystal{top:4%;height:73%;}
   .ir-benefit-text{gap:5px;} .ir-benefit-title{font-size:18px;} .ir-benefit-title svg{width:20px;height:20px;} strong{max-width:73%;font-size:13px;line-height:1.23;}.ir-benefit-subtitle{display:none;}
@@ -85,7 +85,7 @@
 .ir-control--search {flex:1 1 220px;max-width:none;}
 .ir-select{white-space:nowrap;min-width:145px;}
 .ir-control--sort {min-width:170px;select{appearance:none;cursor:pointer;}select option{background:#0a2032;}}
-.ir-list-bar {display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;min-height:39px;
+.ir-list-bar {display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;min-height:31px;
   p{font-size:11px;color:#93b3ca;}p strong{color:#22eddb;}
 }
 .ir-btn {display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:9px;padding:11px 17px;font-size:12px;font-weight:800;border:1px solid #208b91;color:#c7fffd;background:#072c37;}
@@ -93,7 +93,7 @@
 .ir-leaderboard{display:grid;gap:3px;min-width:0;}
 .ir-list-head,.ir-leader-row {display:grid;grid-template-columns:48px minmax(145px,2fr) minmax(96px,1.2fr) 100px 70px 92px minmax(90px,1fr) 104px;align-items:center;gap:9px;padding:0 12px;}
 .ir-list-head{min-height:27px;color:#88a8c2;font-size:11px;}
-.ir-leader-row{min-height:63px;border:1px solid #13344f;border-radius:11px;background:linear-gradient(90deg,#04192c,#051324);box-shadow:inset 0 1px #ffffff06;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+.ir-leader-row{min-height:52px;border:1px solid #13344f;border-radius:11px;background:linear-gradient(90deg,#04192c,#051324);box-shadow:inset 0 1px #ffffff06;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
   &:hover{transform:translateY(-1px);border-color:#31a7b8;box-shadow:0 0 14px #0ce0df18;}
   &--1{border-color:#be9b44;background:linear-gradient(90deg,#29200f,#0c1824 28%,#171913);box-shadow:inset 0 0 12px #e9ae341e;}
   &--2{border-color:#437fa8;background:linear-gradient(90deg,#0d2e45,#051526 29%,#0c1b33);}
@@ -239,3 +239,13 @@
  .ir-profile-tabs button{padding:11px;min-width:auto;}
 }
 @media(prefers-reduced-motion:reduce){.ir-page *,.ir-page *::before,.ir-page *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;}}
+
+/* Desktop reference density: 10 leaderboard rows should fit in the first fold. */
+.ir-page[data-screen="list"] .ir-hero .ir-eyebrow {display:none;}
+.ir-page[data-screen="list"] .ir-hero {padding-block:8px;}
+.ir-page[data-screen="list"] .ir-hero .ir-hero-copy {gap:7px;}
+.ir-page[data-screen="list"] .ir-list-head {min-height:24px;}
+@media(max-width:900px) {
+  .ir-page[data-screen="list"] .ir-hero {min-height:130px;}
+  .ir-leader-row {min-height:62px;}
+}
