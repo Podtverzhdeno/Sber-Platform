@@ -381,3 +381,35 @@
 @media (prefers-reduced-motion: reduce) {
   .catalog-v2 .catalog-v2-kpi-ring-value { transition: none; }
 }
+
+/* reference-desktop-filter-strip-v2: at the approved 1672px viewport,
+   preserve the full single-row set of direction/skill/difficulty/company/
+   format/timeframe/sorting filters instead of squeezing option labels. */
+@media (min-width: 1650px) {
+  .catalog-v2 .catalog-v2-filter-rail {
+    gap: 7px;
+    flex-wrap: nowrap;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label {
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(1) { width: 117px; max-width: 117px; }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(2) { width: 96px; max-width: 96px; }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(3) { width: 115px; max-width: 115px; }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(4) { width: 111px; max-width: 111px; }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(5) { width: 94px; max-width: 94px; }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(6) { width: 96px; max-width: 96px; }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(7) { width: 207px; max-width: 207px; }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters input,
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters select {
+    width: 100%;
+    min-width: 0;
+    font-size: 0.79rem;
+  }
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:focus-within input,
+  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:focus-within select {
+    outline: 2px solid var(--catalog-highlight);
+    outline-offset: 2px;
+  }
+}
