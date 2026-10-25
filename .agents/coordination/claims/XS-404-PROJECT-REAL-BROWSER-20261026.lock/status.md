@@ -1,0 +1,19 @@
+# Claim XS-404-PROJECT-REAL-BROWSER-20261026
+- session_id: gpt6-20261026-project-evidence-browser
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: cdf8d6a4d765879e7a34ab7529aaa02e7056b743
+- depends_on:
+  - XS-403-PROJECT-EVIDENCE-E2E-20261026 (REVIEW, API test green)
+- write_scope:
+  - frontend/e2e/cross-section-project-real-api.spec.ts
+  - .github/workflows/cross-section-project-real-qa.yml
+  - .agents/coordination/claims/XS-404-PROJECT-REAL-BROWSER-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - Real migrated PostgreSQL, demo seed, FastAPI, Chromium Playwright
+  - Strict E2E ESLint and TypeScript
+  - Verify task->application->assignment->contribution->customer acceptance->participant project/passport/portfolio/journey UI; no false rating, no cross-owner leak
+- progress: Independent browser evidence for accepted project lifecycle. No mocked HTTP handlers and no UI production changes.
+- blockers: Independent reviewer, full CI at integration revision, live deployment acceptance
