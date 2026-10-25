@@ -60,6 +60,11 @@
 .p2-project { display:grid; grid-template-columns:186px minmax(0,1fr); gap:15px; min-height:170px; padding:9px; border:1px solid #133851; border-radius:11px; background:linear-gradient(115deg,#0a2538,#071b2c); }
 .p2-project-art { position:relative; isolation:isolate; overflow:hidden; border:1px solid #12436e; border-radius:9px; min-height:149px; background:radial-gradient(circle at 80% 70%,#172e76,#05162b 65%); padding:12px; box-shadow:inset 0 0 24px #040816; transform:perspective(460px) rotateY(-2deg); }
 .p2-project-art--1 { background:radial-gradient(circle at 72% 60%,#343277,#071528 65%); }
+/* Preserve authored reference thumbnails for demo cases only; actual projects retain neutral art. */
+.p2-project-art.is-reference { background-image:url("/portfolio-reference/project-sprite.svg"); background-repeat:no-repeat; background-size:200% 100%; background-position:left center; transform:none; }
+.p2-project-art.is-reference.p2-project-art--1 { background-position:right center; }
+.p2-project-art.is-reference > * { display:none; }
+
 .p2-project-art--2 { background:radial-gradient(circle at 72% 60%,#044e58,#071528 65%); }
 .p2-art-top { display:flex; align-items:center; gap:4px; height:6px; }
 .p2-art-top i { width:4px; height:4px; border-radius:50%; background:#16cddd; opacity:.7; }
