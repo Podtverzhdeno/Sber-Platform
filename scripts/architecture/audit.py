@@ -415,10 +415,8 @@ def as_markdown(r: dict[str, Any]) -> str:
     lines += ["", "## Import cycles", ""]
     lines += ["- " + " -> ".join(c) for c in r["cycles"][:30]]
     lines += ["", "## Frontend runtime cross-feature imports", ""]
-    lines += [
-        f"- {x['path']}:{x['line']} -> {x['target']}"
-        for x in r["cross_feature_imports"][:40]
-    ]
+    imported = r["cross_feature_imports"][:40]
+    lines += [f"- {x['path']}:{x['line']} -> {x['target']}" for x in imported]
     lines += [
         "",
         "## CSS review signals (size and overrides do not alone prove defects)",
