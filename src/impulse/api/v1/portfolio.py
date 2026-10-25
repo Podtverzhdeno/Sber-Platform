@@ -138,8 +138,7 @@ async def _recognition_evidence(
     if authenticated.actor.active_role is Role.HR and ConsentScope.HR_PROFILE in consents:
         settings = await auth.store.hr_visibility(persona.person_id)
         authorized_hr = (
-            settings.get("hr_achievements", False)
-            and ConsentScope.PUBLIC_TROPHIES in consents
+            settings.get("hr_achievements", False) and ConsentScope.PUBLIC_TROPHIES in consents
         )
     recognition = request.app.state.recognition_service
     if not (own or authorized_hr):
