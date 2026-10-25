@@ -58,7 +58,7 @@ test("real project lifecycle propagates accepted evidence to all participant scr
   const customer = await signIn(page, "customer-roman");
   const title = "Проверка реального проекта: интеграция API и доказательства";
   const task = await post<{ id: string }>(
-    page, "/api/v1/customer/projects/cross-section/tasks", customer,
+    page, "/api/v1/customer/projects/demo-rd-lab/tasks", customer,
     {
       task_key: "browser-project-evidence-2026",
       title,
