@@ -57,6 +57,7 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
   await expect(root.locator(".mp-project-tile")).toHaveCount(3);
   await expect(root.locator(".mp-benefit-step")).toHaveCount(7);
   await expect(root.locator(".mp-project-grid .mp-project-tile")).toHaveCount(3);
+  await expect(root.locator(".mp-project-card-heading small").first()).toContainText("Сбер");
   await expect(root.locator(".mp-preview")).toHaveCount(0);
   await page.screenshot({path:"test-results/my-projects-v2/01_cards_1672.png",fullPage:true,animations:"disabled"});
   await root.getByRole("button",{name:"Быстрый просмотр"}).first().click();
@@ -68,6 +69,10 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
   await root.getByRole("button",{name:/На ревью \(1\)/}).click();
   await expect(root.locator(".mp-project-tile")).toHaveCount(1);
   await root.getByRole("button",{name:/Все проекты \(3\)/}).click();
+  await root.getByLabel("Компания",{exact:true}).selectOption("Т-Банк");
+  await expect(root.locator(".mp-project-tile")).toHaveCount(1);
+  await root.getByLabel("Компания",{exact:true}).selectOption("all");
+  await expect(root.locator(".mp-project-tile")).toHaveCount(3);
   await root.getByRole("button",{name:/Токены GigaCode/}).first().click();
   await expect(root.locator(".mp-reward-popup")).toBeVisible();
   await root.getByRole("button",{name:"Закрыть информацию о бонусе"}).click();
@@ -88,6 +93,8 @@ test("My Projects: list has genuine rows and opens full project page",async({pag
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
   await page.screenshot({path:"test-results/my-projects-v2/03_detail_1672.png",fullPage:true,animations:"disabled"});
   await expect(page.getByRole("tab",{name:"Бонусы и выгоды"})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Ключевая информация"})).toBeVisible();
+  await expect(page.locator(".mp-detail-grid--reference > .mp-detail-column")).toHaveCount(3);
   await page.getByRole("tab",{name:"Команда"}).click();
   await expect(page.getByRole("heading",{name:"Команда проекта"})).toBeVisible();
   await page.getByRole("tab",{name:"Мой вклад"}).click();
