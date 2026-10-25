@@ -79,7 +79,7 @@ function LevelLine({ mustTake }: { mustTake: MustTake }) {
   );
 }
 
-function CardStates({ card }: { card: CourseCardState }) {
+export function CardStates({ card }: { card: CourseCardState }) {
   const access = accessLabels[card.access_state];
   const completion = completionLabels[card.completion_state];
   return (
@@ -90,7 +90,7 @@ function CardStates({ card }: { card: CourseCardState }) {
   );
 }
 
-function CardExplanation({
+export function CardExplanation({
   card,
   relevanceOnly,
 }: {
