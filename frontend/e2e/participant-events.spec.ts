@@ -237,3 +237,30 @@ test("events reference: filters, favorite, motion and empty state", async ({ pag
   await expect(page.getByRole("button", { name: "Список" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Карточки" })).toHaveCount(0);
 });
+
+test("compact events filters remain functional and contained on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await api(page, true);
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("button", { name: "Меню", exact: true }).click();
+  await page.getByRole("link", { name: "События" }).click();
+  await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
+  const catalog = page.locator(".ev-catalog-v3");
+  const box = await catalog.boundingBox();
+  if (!box) throw new Error("No mobile catalog");
+  expect(box.x).toBeGreaterThanOrEqual(-2);
+  expect(box.x + box.width).toBeLessThanOrEqual(392);
+  const button = page.getByRole("button", { name: /Фильтры/ });
+  await button.click();
+  const panel = page.locator(".ev-v3-popover");
+  await expect(panel).toBeVisible();
+  const pop = await panel.boundingBox();
+  if (!pop) throw new Error("No mobile filter panel");
+  expect(pop.x).toBeGreaterThanOrEqual(-2);
+  expect(pop.x + pop.width).toBeLessThanOrEqual(392);
+  await panel.locator(".ev-v3-filter-section").first().getByRole("button", { name: "python" }).click();
+  await panel.getByRole("button", { name: /Показать события/ }).click();
+  await expect(page.getByRole("button", { name: "Убрать направление python" })).toBeVisible();
+  await page.screenshot({ path: "test-results/event-reference/compact-mobile-390x844.png", animations: "disabled", fullPage: false });
+});
