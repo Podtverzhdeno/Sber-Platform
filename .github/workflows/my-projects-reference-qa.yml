@@ -38,7 +38,9 @@ jobs:
       - name: Install locked frontend dependencies
         run: npm ci
       - name: Lint implementation and reference tests
-        run: npx eslint src/features/my-projects/page.tsx e2e/my-projects-v2.spec.ts --max-warnings 0
+        run: npx eslint src/features/my-projects/page.tsx src/features/my-projects/project-detail-reference.tsx e2e/my-projects-v2.spec.ts --max-warnings 0
+      - name: Check TypeScript contracts for every reference tab
+        run: npm run typecheck
       - name: Bundle isolated React application
         run: npx vite build
       - name: Install Chromium
