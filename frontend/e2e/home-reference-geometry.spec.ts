@@ -156,17 +156,18 @@ for (const scenario of intermediateViewports) {
       // of the obsolete screenshot coordinates from the home-specific sidebar.
       await expect(page.locator(".sidebar")).toHaveCSS("width", "244px");
       const sidebar = await page.locator(".sidebar").boundingBox();
-      expect(sidebar).not.toBeNull();
+      if (!sidebar) throw new Error("Canonical sidebar must be visible");
       for (const [selector] of scenario.expected) {
         const box = await page.locator(selector).boundingBox();
-        expect(box, `${selector} must be visible`).not.toBeNull();
-        expect(box!.x, `${selector} must clear the fixed sidebar`).toBeGreaterThanOrEqual(sidebar!.x + sidebar!.width + 10);
-        expect(box!.x + box!.width, `${selector} must fit inside viewport`).toBeLessThanOrEqual(scenario.width - 10);
-        expect(box!.width, `${selector} must retain usable card width`).toBeGreaterThan(180);
+        if (!box) throw new Error(`${selector} must be visible`);
+        expect(box.x, `${selector} must clear the fixed sidebar`).toBeGreaterThanOrEqual(sidebar.x + sidebar.width + 10);
+        expect(box.x + box.width, `${selector} must fit inside viewport`).toBeLessThanOrEqual(scenario.width - 10);
+        expect(box.width, `${selector} must retain usable card width`).toBeGreaterThan(180);
       }
       const hero = await page.locator(".home-v2-hero").boundingBox();
       const grade = await page.locator(".home-v2-grade").boundingBox();
-      expect(hero!.x + hero!.width).toBeLessThan(grade!.x);
+      if (!hero || !grade) throw new Error("Home hero and grade cards must be visible");
+      expect(hero.x + hero.width).toBeLessThan(grade.x);
     } else {
       for (const [selector, x, y, width, height] of scenario.expected) {
         await expectReferenceRect(page, selector, { x, y, width, height }, 14);
