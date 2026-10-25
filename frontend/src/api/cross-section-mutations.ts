@@ -69,6 +69,7 @@ export const participantProjectionKeys = [
   "participant-growth-analytics",
   "participant-analytics",
   "agentic-coding-profile",
+  "impulse-study",
   "impulse-learning-summary",
   "bootcamp-catalog",
   "bootcamp-v2-overview",
