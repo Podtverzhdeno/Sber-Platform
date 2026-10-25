@@ -25,6 +25,7 @@ import { CustomerMark } from "./customer-mark";
 import { BenefitMark } from "./benefit-mark";
 import { SkillMark } from "./skill-mark";
 import { TaskCatalogList } from "./list";
+import { displayCatalogTopic } from "./topic-labels";
 import type {
   CatalogFilters,
   CatalogItem,
@@ -193,7 +194,7 @@ function TaskSummary(props: {
         </button>
       </header>
       <ul className="catalog-v2-tags" aria-label="Компетенции">
-        {item.competency_tags.slice(0, 3).map((tag) => <li key={tag}>{tag}</li>)}
+        {item.competency_tags.slice(0, 3).map((tag) => <li key={tag}>{displayCatalogTopic(tag)}</li>)}
       </ul>
       <dl className="catalog-v2-card-quickfacts">
         <div><dt><ChartNoAxesColumnIncreasing size={15} aria-hidden="true" /> Сложность</dt><dd>{item.difficulty === null ? "Не указана" : difficultyLabels[item.difficulty] ?? item.difficulty}</dd></div>
@@ -248,7 +249,7 @@ function TaskDetail(props: {
           <h2 id="catalog-detail-title">{item.title}</h2>
           <p className="catalog-v2-detail-description">{item.brief_summary}</p>
           <ul className="catalog-v2-tags" aria-label="Компетенции">
-            {item.competency_tags.map((tag) => <li key={tag}>{tag}</li>)}
+            {item.competency_tags.map((tag) => <li key={tag}>{displayCatalogTopic(tag)}</li>)}
           </ul>
         </div>
         <div className="catalog-v2-detail-score"><MatchBadge item={item} showRing /><small>Соответствие твоей траектории</small></div>
@@ -281,7 +282,7 @@ function TaskDetail(props: {
                   const delta = current !== null && projected !== null ? projected - current : null;
                   return (
                     <li key={impact.skill_id}>
-                      <strong className="catalog-v2-skill-name"><SkillMark title={impact.title} /> {impact.title}</strong>
+                      <strong className="catalog-v2-skill-name"><SkillMark title={impact.title} /> {displayCatalogTopic(impact.title)}</strong>
                       <div className="catalog-v2-skill-transition">
                         <span><small>Текущий уровень</small><b>{impact.current_level ?? "Нет подтверждённого уровня"}</b>{current !== null ? <span className="catalog-v2-skill-bar"><i style={{ width: String(current) + "%" }} /></span> : null}</span>
                         <span className="catalog-v2-skill-arrow" aria-hidden="true">→</span>
@@ -297,7 +298,7 @@ function TaskDetail(props: {
                 <summary>Пояснения к прогнозу навыков</summary>
                 <ul>{item.skill_impact.map((impact) => (
                   <li key={impact.skill_id}>
-                    <strong>{impact.title}</strong>
+                    <strong>{displayCatalogTopic(impact.title)}</strong>
                     <p>{impact.explanation}</p>
                     <small>{impact.status === "calculated" ? "Потенциальный рост рассчитан; необходима верификация." : "Потенциальный рост пока не рассчитан."} {impact.verification_required ? "Навык не подтверждается автоматически." : "Статус проверки не указан."}</small>
                   </li>
