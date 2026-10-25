@@ -159,7 +159,9 @@ describe("participant home v2", () => {
 
   it("uses the real target kind for the hero CTA, without inventing XP or duration", () => {
     const { onOpenTarget } = renderHome({ active_tasks: [] });
-    fireEvent.click(screen.getByRole("button", { name: /Продолжить обучение/ }));
+    const courseCta = screen.getByRole("button", { name: /Продолжить обучение/ });
+    expect(courseCta).toHaveClass("home-v2-primary--learning");
+    fireEvent.click(courseCta);
     expect(onOpenTarget).toHaveBeenCalledWith("course", "python-base");
     const nextStep = screen.getByTestId("next-outcome-course");
     expect(nextStep).toHaveTextContent("Этап 1");
@@ -171,7 +173,9 @@ describe("participant home v2", () => {
 
   it("retains task wording when a real active task is recommended", () => {
     const { onOpenTarget } = renderHome();
-    fireEvent.click(screen.getByRole("button", { name: /Продолжить задачу/ }));
+    const taskCta = screen.getByRole("button", { name: /Продолжить задачу/ });
+    expect(taskCta).not.toHaveClass("home-v2-primary--learning");
+    fireEvent.click(taskCta);
     expect(onOpenTarget).toHaveBeenCalledWith("task", overview.active_tasks[0]?.task_id);
   });
 
