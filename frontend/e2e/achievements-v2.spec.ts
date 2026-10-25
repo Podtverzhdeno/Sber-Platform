@@ -92,7 +92,8 @@ test("achievements v2: empty state, no fabricated metrics, and mobile layout", a
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.goto("/workspace/8");
+  await page.getByRole("button", { name: /Меню/ }).click();
+  await page.getByRole("link", { name: "Достижения" }).click();
   const screen = page.getByTestId("achievements-v2");
   await expect(screen.getByTestId("achievements-empty")).toBeVisible();
   await expect(screen.getByTestId("achievement-card")).toHaveCount(0);
