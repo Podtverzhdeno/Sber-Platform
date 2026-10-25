@@ -11,6 +11,7 @@ import "./checkpoint-workspace.scss";
 export type CheckpointInfo = { key:string; title:string; status:string; description?:string; deliverable?:string; acceptance_criteria?:string[]; estimated_minutes?:number|null };
 export type SubmittedCheckpoint = {
   checkpoint_key:string; contribution_id:string; version:number; status:string;
+  files?:{id:string;filename:string;size_bytes:number;download_url:string}[];
 };
 
 const finished=new Set(["completed","accepted","done","closed","verified"]);
@@ -224,6 +225,12 @@ export function CheckpointWorkspace({
               {assignmentStatus==="staffed"&&onStartWork&&<button type="button" className="mpc-submit" disabled={loading} onClick={()=>{setLoading(true);setError("");void onStartWork().catch(()=>{setError("Не удалось начать проект");}).finally(()=>{setLoading(false);});}}>Начать работу <ArrowRight size={17}/></button>}
               {error&&<p role="alert" className="mpc-error">{error}</p>}
               {previous&&<small>Последняя версия по этапу: {previous.version} · {statusLabels[previous.status]??previous.status}</small>}
+              {(previous?.files?.length??0)>0&&<div className="mpc-previous-files">
+                <strong>Загруженные доказательства</strong>
+                {previous?.files?.map(file=><a key={file.id} href={file.download_url} download>
+                  <FileArchive size={15}/><span>{file.filename}</span><small>{formatSize(file.size_bytes)}</small><ExternalLink size={13}/>
+                </a>)}
+              </div>}
             </div>}
           </section>
           <section className="mpc-card mpc-facts"><div className="mpc-card-heading"><span className="mpc-icon"><FileCheck2 size={19}/></span><h3>Условия сдачи</h3></div>
