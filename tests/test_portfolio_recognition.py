@@ -119,7 +119,10 @@ def test_owner_portfolio_shows_issued_valid_revoked_and_public_evidence() -> Non
         response = api.get("/api/v1/me/portfolio")
         assert response.status_code == 200, response.text
         result = response.json()
-        assert [(credential["verification_id"], credential["status"]) for credential in result["credentials"]] == [
+        assert [
+            (credential["verification_id"], credential["status"])
+            for credential in result["credentials"]
+        ] == [
             ("credential-current", "valid"),
             ("credential-revoked", "revoked"),
         ]
