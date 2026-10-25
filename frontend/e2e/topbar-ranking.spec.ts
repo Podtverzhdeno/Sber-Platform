@@ -54,7 +54,7 @@ test("compact flame chip and miniature bell retain their interactions", async ({
   await expect(bell.locator("svg")).toHaveCSS("width", "16px");
   await streak.click();
   await expect(page.getByRole("dialog", { name: "Учебный стрик" })).toBeVisible();
-  await page.getByRole("button", { name: "Закрыть серию" }).click();
+  await page.getByRole("dialog", { name: "Учебный стрик" }).getByRole("button", { name: "Закрыть", exact: true }).click();
   await bell.click();
   await expect(page.getByRole("dialog", { name: "Центр уведомлений" })).toBeVisible();
 });
