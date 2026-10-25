@@ -4,9 +4,10 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
 import { apiRequest, ApiClientError } from "../api/client";
+import { Bell, BellOff } from "lucide-react";
 import type { RuntimeApiPath } from "../api/client";
 import { StatePanel } from "../components/ui";
 import "./collaboration.scss";
@@ -110,6 +111,8 @@ export function MessagingWorkspace({
   const channelsQuery = useQuery({
     queryKey: ["messaging-channels"],
     queryFn: () => apiRequest<ChannelView[]>("/api/v1/me/messaging/channels"),
+    refetchInterval: 12_000,
+    refetchIntervalInBackground: false,
   });
   const channels = useMemo(() => channelsQuery.data ?? [], [channelsQuery.data]);
   const contactsQuery = useQuery({
@@ -146,7 +149,8 @@ export function MessagingWorkspace({
     return stored ?? "";
   });
   const [mobilePane, setMobilePane] = useState<MobilePane>("list");
-  const [contextOpen, setContextOpen] = useState(true);
+  const [contextOpen, setContextOpen] = useState(false);
+  const readsInFlight = useRef(new Set<string>());
   const [createSignal, setCreateSignal] = useState(0);
   const [findSignal, setFindSignal] = useState(0);
   const [pending, setPending] = useState<PendingMessageOverlay[]>([]);
@@ -166,7 +170,7 @@ export function MessagingWorkspace({
   useEffect(() => {
     if (requestedChannel && UUID_PATTERN.test(requestedChannel)) {
       setSelectedId(requestedChannel);
-      setContextOpen(true);
+      setContextOpen(false);
       if (isNarrow) setMobilePane("chat");
     }
   }, [requestedChannel, isNarrow]);
@@ -210,11 +214,43 @@ export function MessagingWorkspace({
     }
   }, [selectedId]);
 
+  // Mark each conversation read immediately when actually opened, then confirm
+  // with the server. The cache update makes badges disappear without waiting
+  // for the next poll. A failed request restores only this conversation.
+  const markChannelRead = useCallback((channel: ChannelView) => {
+    if (channel.unread <= 0 || !channel.last_message) return;
+    const key = `${channel.id}:${channel.last_message.id}`;
+    if (readsInFlight.current.has(key)) return;
+    readsInFlight.current.add(key);
+    client.setQueryData<ChannelView[]>(["messaging-channels"], (list) =>
+      list?.map((entry) => entry.id === channel.id && entry.last_message?.id === channel.last_message?.id
+        ? { ...entry, unread: 0 } : entry),
+    );
+    void apiRequest<ChannelView>(`/api/v1/me/messaging/channels/${channel.id}/read`, {
+      method: "POST", headers: csrfHeaders(),
+      body: JSON.stringify({ message_id: channel.last_message.id }),
+    }).then(async () => {
+      await Promise.all([
+        client.invalidateQueries({ queryKey: ["messaging-channels"] }),
+        client.invalidateQueries({ queryKey: ["notifications"] }),
+      ]);
+    }).catch(() => {
+      client.setQueryData<ChannelView[]>(["messaging-channels"], (list) =>
+        list?.map((entry) => entry.id === channel.id && entry.last_message?.id === channel.last_message?.id
+          ? { ...entry, unread: channel.unread } : entry),
+      );
+      setActionError("Не удалось отметить сообщения прочитанными. Повторите открытие чата.");
+    }).finally(() => { readsInFlight.current.delete(key); });
+  }, [client]);
+
   const selectChannel = (channelId: string) => {
     setSelectedId(channelId);
-    setContextOpen(true);
+    setContextOpen(false);
+    setActionError("");
     setReplyId(null);
     setPending([]);
+    const opening = channels.find((entry) => entry.id === channelId);
+    if (opening) markChannelRead(opening);
     if (isNarrow) setMobilePane("chat");
   };
 
@@ -255,23 +291,8 @@ export function MessagingWorkspace({
   });
 
   useEffect(() => {
-    if (!selected || selected.unread <= 0 || !selected.last_message) return;
-    void apiRequest<ChannelView>(
-      `/api/v1/me/messaging/channels/${selected.id}/read`,
-      {
-        method: "POST",
-        headers: csrfHeaders(),
-        body: JSON.stringify({ message_id: selected.last_message.id }),
-      },
-    )
-      .then(() =>
-        Promise.all([
-          client.invalidateQueries({ queryKey: ["messaging-channels"] }),
-          client.invalidateQueries({ queryKey: ["notifications"] }),
-        ]),
-      )
-      .catch(() => {});
-  }, [client, selected]);
+    if (selected && document.visibilityState !== "hidden") markChannelRead(selected);
+  }, [selected?.id, selected?.last_message?.id, selected?.unread, markChannelRead]);
 
   const sendMessage = useMutation({
     mutationFn: (payload: ComposerSendPayload) =>
@@ -325,19 +346,25 @@ export function MessagingWorkspace({
   };
 
   const toggleMute = useMutation({
-    mutationFn: (muted: boolean) =>
-      apiRequest<ChannelView>(
-        `/api/v1/me/messaging/channels/${selected?.id ?? ""}/mute`,
-        {
-          method: "POST",
-          headers: csrfHeaders(),
-          body: JSON.stringify({ muted }),
-        },
-      ),
-    onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: ["messaging-channels"] });
+    mutationFn: ({ channelId, muted }: { channelId: string; muted: boolean }) =>
+      apiRequest<ChannelView>(`/api/v1/me/messaging/channels/${channelId}/mute`, {
+        method: "POST", headers: csrfHeaders(), body: JSON.stringify({ muted }),
+      }),
+    onSuccess: async (updated) => {
+      client.setQueryData<ChannelView[]>(["messaging-channels"], (list) =>
+        list?.map((entry) => entry.id === updated.id ? { ...entry, muted: updated.muted } : entry),
+      );
+      await Promise.all([
+        client.invalidateQueries({ queryKey: ["messaging-channels"] }),
+        client.invalidateQueries({ queryKey: ["notifications"] }),
+      ]);
+      setActionError("");
     },
+    onError: (error) => { setActionError(actionErrorText(error)); },
   });
+  const requestMute = () => {
+    if (selected && !toggleMute.isPending) toggleMute.mutate({ channelId: selected.id, muted: !selected.muted });
+  };
 
   const createDialog = async (peerId: string): Promise<void> => {
     if (!UUID_PATTERN.test(peerId)) {
@@ -351,7 +378,7 @@ export function MessagingWorkspace({
         body: JSON.stringify({peer_id:peerId}),
       });
       setSelectedId(channel.id);
-      setContextOpen(true);
+      setContextOpen(false);
       setMobilePane("chat");
       await client.invalidateQueries({queryKey:["messaging-channels"]});
     } catch (error) {
@@ -410,15 +437,16 @@ export function MessagingWorkspace({
       )}
       <button
         type="button"
-        className="msg-chat__header-action"
         aria-pressed={selected.muted}
+        disabled={toggleMute.isPending}
+        className="msg-chat__header-action msg-chat__header-action--mute"
         onClick={() => {
-          toggleMute.mutate(!selected.muted);
+          requestMute();
         }}
       >
-        {selected.muted ? "🔔" : "🔕"}
+        {selected.muted ? <Bell size={18} aria-hidden="true" /> : <BellOff size={18} aria-hidden="true" />}
         <span className="sr-only">
-          {selected.muted ? "Включить уведомления" : "Заглушить чат"}
+          {selected.muted ? "Включить уведомления" : "Отключить уведомления"}
         </span>
       </button>
     </>
@@ -575,7 +603,7 @@ export function MessagingWorkspace({
             workContext={contextQuery.data ?? null}
             open={contextVisible}
             onClose={() => { if (isNarrow) setMobilePane("chat"); else setContextOpen(false); }}
-            onToggleMute={() => { toggleMute.mutate(!selected.muted); }}
+            onToggleMute={requestMute}
             messageRefs={messages.flatMap((message) => message.artifact_refs)}
             onOpenTask={quickTargets?.task !== undefined && quickTargets.task >= 0
               ? (taskId) => {
