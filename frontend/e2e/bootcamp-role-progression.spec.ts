@@ -81,6 +81,10 @@ test("finishing from the real course player updates the requirement banner witho
   await expect(reader.getByRole("heading",{name:"Завершение обучения"})).toBeVisible();
   await reader.locator(".imp-study__finish").click();
   await expect(reader.getByRole("heading",{name:"Обучение завершено!"})).toBeVisible();
+  const coursePopup=page.getByTestId("grade-milestone-celebration");
+  await expect(coursePopup).toHaveAttribute("data-mode","course-complete");
+  await coursePopup.getByRole("button",{name:"Вернуться к курсу"}).click();
+  await expect(coursePopup).toHaveCount(0);
   // React Query invalidation must update the underlying role summary even
   // while the completed course's drawer stays open.
   await expect(page.locator("#bc-grade-title")).toContainText("Учебная часть завершена");
@@ -123,7 +127,12 @@ test("official grade promotion animation requires an actual change in the server
     await route.fallback();
   });
   await reader.locator(".imp-study__finish").click();
+  const coursePopup=page.getByTestId("grade-milestone-celebration");
+  await expect(coursePopup).toHaveAttribute("data-mode","course-complete");
+  // Server grade promotion can arrive at the same time: queue it, never stack dialogs.
+  await expect(page.locator('[data-mode="official-grade-up"]')).toHaveCount(0);
   await expect(page.getByTestId("bootcamp-official-grade")).toContainText("L2");
+  await coursePopup.getByRole("button",{name:"Вернуться к курсу"}).click();
   const animation=page.getByTestId("grade-milestone-celebration");
   await expect(animation).toHaveAttribute("data-mode","official-grade-up");
   await expect(page.locator("#bc-grade-title")).toContainText("Остался");
