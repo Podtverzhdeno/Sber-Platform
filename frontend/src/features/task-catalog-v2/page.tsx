@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Award, Bookmark, ChartNoAxesColumnIncreasing, ChevronDown, ClipboardList, Clock3, Info, Laptop2, LayoutGrid, List, Search, Share2, SlidersHorizontal, Sparkles, Users } from "lucide-react";
+import { Award, Bookmark, ChartNoAxesColumnIncreasing, CircleHelp, ChevronDown, ClipboardList, Clock3, Info, Laptop2, LayoutGrid, List, Search, Share2, SlidersHorizontal, Sparkles, Users } from "lucide-react";
 
 import { ApiClientError } from "../../api/client";
 import { StatePanel } from "../../components/ui";
@@ -254,6 +254,7 @@ function TaskDetail(props: {
           </ul>
         </div>
         <div className="catalog-v2-detail-score"><MatchBadge item={item} showRing /><small>Соответствие твоей траектории</small></div>
+        <button type="button" className="catalog-v2-detail-help" aria-label="Подсказки по задаче" title="Как работать над задачей" onClick={() => { window.dispatchEvent(new Event("impulse:guide:toggle")); }}><CircleHelp size={19} aria-hidden="true" /></button>
         <button type="button" className="catalog-v2-detail-close" aria-label="Закрыть детали" onClick={props.onClose}>×</button>
       </header>
 
