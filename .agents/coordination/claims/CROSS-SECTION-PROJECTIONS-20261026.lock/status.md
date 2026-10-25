@@ -1,7 +1,7 @@
 # Claim CROSS-SECTION-PROJECTIONS-20261026
 
 - session_id: gpt6-20261026-cross-section-01
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 5b472e5a86cceefe5cd903f9be697a625dbe5d6b
@@ -16,5 +16,16 @@
 - verification:
   - frontend npm test -- cross-section-mutations.test.ts query.test.ts
   - frontend npm run typecheck
-- progress: Исследование существующих API и расхождений; сначала SDD, затем изолированная коррекция refresh контракта.
+- progress: SDD proposal/design/spec/tasks и inventory сохранены; mutation/query-key registry расширен; добавлены unit tests и negative cases. Передано в REVIEW без отметок [x].
+- changed_files:
+  - openspec/changes/participant-cross-section-data/**
+  - frontend/src/api/cross-section-mutations.ts
+  - frontend/src/api/cross-section-mutations.test.ts
+- verification_evidence:
+  - OpenSpec/Docs CI: success on cdd563be
+  - Backend persisted-learning API QA: success on cdd563be
+  - Cross-section browser QA: failed (backend 127.0.0.1:8000 ECONNREFUSED; no live API)
+  - Global CI: failed due pre-existing lint errors in unrelated E2E, ImmersiveCourseExperience and streak-celebration, not the changed registry files
+  - Focused Vitest for changed files: not yet executed (runner unavailable in connector)
+- independent_review: required before DONE
 - blockers: Connector provides remote repo only; local git status and local test runner unavailable. UI/Bootcamp/Trajectory/Rating files claimed by other workers and excluded from scope.
