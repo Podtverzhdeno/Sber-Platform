@@ -197,6 +197,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
   onSubmitContribution: (summary: string, url: string, artifactKey: string) => void; saving: boolean; saveError: boolean; onStart: () => void; starting: boolean; startError: boolean;
 }) {
   const [tab,setTab] = useState<Tab>(initialTab);
+  useEffect(()=>{setTab(initialTab);},[initialTab]);
   const [summary,setSummary] = useState("");
   const [artifact,setArtifact] = useState("");
   const [artifactKey,setArtifactKey] = useState(project.work.allowed_artifacts?.[0] || "personal-proof");
