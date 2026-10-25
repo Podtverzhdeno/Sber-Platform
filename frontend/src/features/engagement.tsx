@@ -84,6 +84,8 @@ export function TopbarEngagementIndicator() {
   const loading = indicatorQuery.isPending;
   const currentDays = indicatorQuery.data?.current_days ?? 0;
   const bestDays = indicatorQuery.data?.best_days ?? 0;
+  const nextGoal = [7, 14, 30, 60, 100, 365].find(days => days > currentDays);
+  const daysToGoal = nextGoal === undefined ? null : nextGoal - currentDays;
   const todaySaved = indicatorQuery.data?.today_saved ?? false;
   const reason = indicatorQuery.data?.reason ?? "";
   const qualifiedDates = indicatorQuery.data?.qualified_dates ?? [];
@@ -203,15 +205,16 @@ export function TopbarEngagementIndicator() {
                     <div className="streak-heading"><span className="streak-emoji" aria-hidden="true">🔥</span>
                       <h2>Квалифицированная серия</h2></div>
                     <div className="streak-headline">
-                      <strong>{loading || indicatorQuery.isError ? "Загрузка…" : `${String(currentDays)} дней`}</strong> подряд
+                      <strong>{loading || indicatorQuery.isError ? "Загрузка…" : dayCountLabel(currentDays)}</strong> подряд
                     </div>
                     <p className="engagement-reason">
                       {indicatorQuery.isError ? "Не удалось загрузить данные о серии. Повторите попытку." :
-                        todaySaved ? "Сегодняшнее квалифицируемое действие сохранено. Продолжай развиваться, и серия будет расти." :
+                        todaySaved ? <>Отличный результат! Продолжай развиваться, и серия будет расти.<span className="sr-only">Сегодняшнее квалифицируемое действие сохранено.</span></> :
                         reason || "Выполни квалифицируемое действие, чтобы продолжить серию."}
                     </p>
                   </div>
                   <div className="streak-hero-illustration" aria-hidden="true">
+                    {daysToGoal !== null && <div className="streak-next-goal"><strong>Ещё {dayCountLabel(daysToGoal)}</strong><span>до нового достижения!</span></div>}
                     <span className="streak-hero-spark">✦</span>
                     <span className="streak-hero-flame">🔥</span>
                     <img src="/streak-reference/mascot.svg" alt="" />
@@ -219,6 +222,7 @@ export function TopbarEngagementIndicator() {
                 </div>
                 <button type="button" className="streak-week-card" onClick={() => { setCalendarOpen(true); }}
                   aria-label="Открыть полный календарь серии">
+                  <span className="streak-week-arrow" aria-hidden="true"><ChevronDown size={26}/></span>
                   <span className="streak-week-days">
                     {week.map(({date, label}) => {
                       const qualified = qualifiedSet.has(date);
@@ -236,9 +240,9 @@ export function TopbarEngagementIndicator() {
                   </span>
                 </button>
                 <div className="streak-facts" aria-label="Статистика серии">
-                  <div className="streak-fact"><span className="streak-fact-icon is-growth"><BarChart3 size={26}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : `${String(currentDays)} дней`}</strong><small>Текущая серия</small></div></div>
+                  <div className="streak-fact"><span className="streak-fact-icon is-growth"><BarChart3 size={26}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : dayCountLabel(currentDays)}</strong><small>Текущая серия</small></div></div>
                   <div className="streak-fact"><span className="streak-fact-icon is-best"><Trophy size={27}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : bestDays > 0 ? dayCountLabel(bestDays) : "Пока ноль"}</strong><small>Лучший результат</small></div></div>
-                  <div className="streak-fact"><span className="streak-fact-icon is-freeze"><Snowflake size={27}/></span><div><strong>{freezeQuery.isPending || freezeQuery.isError ? "—" : `${String(freezeStock)} в запасе`}</strong><small>Использовано: {freezeQuery.data?.consumed_total ?? 0}</small></div></div>
+                  <div className="streak-fact"><span className="streak-fact-icon is-freeze"><Snowflake size={27}/></span><div><strong>{freezeQuery.isPending || freezeQuery.isError ? "—" : dayCountLabel(freezeQuery.data?.consumed_total ?? 0)}</strong><small>Заморозки использовано<span className="streak-freeze-stock">{freezeQuery.isPending || freezeQuery.isError ? "—" : `${String(freezeStock)} в запасе`}</span></small></div></div>
                 </div>
                 <div className="streak-rule">
                   <CircleHelp size={23} aria-hidden="true" /><div>
@@ -255,7 +259,7 @@ export function TopbarEngagementIndicator() {
                     <p className="engagement-freeze-note" role="status">Заморозка не применяется: серия прервана глубже одного пропущенного дня.</p>}
                   {freezeUse.isError && <p className="engagement-freeze-error" role="alert">Не удалось применить заморозку. Запас не подтверждён как изменённый.</p>}
                 </div>}
-                {rhythmData && <section className="engagement-rhythm-block" aria-label="Недельный ритм">
+                {rhythmData && <div className="streak-rhythm-group"><section className="engagement-rhythm-block" aria-label="Недельный ритм">
                   <div className="engagement-rhythm-header">
                     <h3>Недельный ритм
                       <span className="engagement-help-wrap">
@@ -312,12 +316,13 @@ export function TopbarEngagementIndicator() {
                         value={effectiveDate} onChange={e => { setChosenEffective(e.target.value); }} />
                     </label>
                   </div>
-                  {rhythmData.versioned && <p className="engagement-rhythm-version">Соглашение v{rhythmData.version ?? 1}; всего версий {rhythmData.history_count}</p>}
+                  {rhythmData.versioned && <p className="engagement-rhythm-version sr-only">Соглашение v{rhythmData.version ?? 1}; всего версий {rhythmData.history_count}</p>}
+                </section>
                   <button type="button" className="streak-save-button" disabled={rhythmSave.isPending || (preset === "custom" && activeDays.length === 0) || !effectiveDate}
                     onClick={saveRhythm}>{rhythmSave.isPending ? "Сохраняем…" : "Сохранить ритм"}</button>
                   {rhythmSave.isSuccess && <p role="status" className="engagement-rhythm-note">Соглашение v{rhythmSave.data.version ?? 1} сохранено; начинает действовать с {rhythmSave.data.effective_from ?? "даты начала"}.</p>}
                   {rhythmSave.isError && <p role="alert" className="engagement-freeze-error">{serverErrorMessage(rhythmSave.error)}</p>}
-                </section>}
+                </div>}
               </>
             )}
           </section>
