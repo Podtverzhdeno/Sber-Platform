@@ -16,6 +16,7 @@ test("all twelve Bootcamp AI courses expose eight substantive lessons and four i
     const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
     const reader = dialog.getByTestId("impulse-immersive-reader");
     await expect(reader).toBeVisible();
+    await reader.getByRole("button", { name: /Перейти к программе/ }).click();
     const outline = reader.locator(".imp-study__program-list button");
     await expect(outline).toHaveCount(8);
     if (index === 10) continue; // Prerequisite-locked provider course: no unauthorized lesson entry.
@@ -43,6 +44,7 @@ test("mobile interactive reader has no horizontal overflow and reaches its lesso
   await page.goto(path + "?course=demo-course-3");
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   const reader = dialog.getByTestId("impulse-immersive-reader");
+  await reader.getByRole("button", { name: /Перейти к программе/ }).click();
   await reader.locator(".imp-study__program-list button").first().click();
   await expect(reader.locator(".imp-study__content")).toBeVisible();
   const overflow = await dialog.evaluate(node => node.scrollWidth > node.clientWidth + 1);
