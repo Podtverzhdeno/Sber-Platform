@@ -9,6 +9,8 @@ on:
       - "src/impulse/infrastructure/work_store.py"
       - "migrations/versions/20261025_0032_checkpoint_evidence.py"
       - "tests/projects/test_checkpoint_evidence.py"
+      - "tests/projects/test_checkpoint_review.py"
+      - "src/impulse/bootstrap/demo_seed.py"
       - "frontend/src/features/my-projects/**"
       - "frontend/e2e/my-projects-v2.spec.ts"
       - "frontend/src/api/client.ts"
@@ -53,13 +55,13 @@ jobs:
           enable-cache: true
       - run: uv sync --frozen
       - name: Check Python formatting
-        run: uv run ruff format --check src/impulse/api/v1/work.py src/impulse/infrastructure/work_store.py migrations/versions/20261025_0032_checkpoint_evidence.py tests/projects/test_checkpoint_evidence.py
+        run: uv run ruff format --check src/impulse/api/v1/work.py src/impulse/infrastructure/work_store.py migrations/versions/20261025_0032_checkpoint_evidence.py tests/projects/test_checkpoint_evidence.py tests/projects/test_checkpoint_review.py
       - name: Check Python lint
-        run: uv run ruff check src/impulse/api/v1/work.py src/impulse/infrastructure/work_store.py migrations/versions/20261025_0032_checkpoint_evidence.py tests/projects/test_checkpoint_evidence.py
+        run: uv run ruff check src/impulse/api/v1/work.py src/impulse/infrastructure/work_store.py migrations/versions/20261025_0032_checkpoint_evidence.py tests/projects/test_checkpoint_evidence.py tests/projects/test_checkpoint_review.py
       - name: Apply all migrations
         run: uv run alembic upgrade head
       - name: Exercise private file persistence and permissions
-        run: uv run pytest tests/projects/test_checkpoint_evidence.py -q -rs
+        run: uv run pytest tests/projects/test_checkpoint_evidence.py tests/projects/test_checkpoint_review.py -q -rs
   checkpoint-browser:
     name: checkpoint-browser
     runs-on: ubuntu-24.04
