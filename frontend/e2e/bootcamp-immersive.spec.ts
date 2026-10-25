@@ -63,6 +63,14 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     await expect(reader.getByText("Выдан автоматически")).toBeVisible();
     await expect(reader.getByText("Требуется проверка практики")).toBeVisible();
     await page.screenshot({ path: "test-results/imp-07-certificates-" + String(viewport.width) + ".png", animations: "disabled" });
+    await reader.getByRole("button", { name: /Перейти к практике/ }).click();
+    await reader.getByLabel("Опишите, что сделали и как проверили результат").fill(
+      "Выполнил практическое задание: создал тестовый сценарий и проверил основное поведение, " +
+      "обработку ошибок и негативные случаи. Добавил результаты проверки."
+    );
+    await reader.getByRole("button", { name: /Отправить на проверку/ }).click();
+    await expect(reader.getByText(/Практическая работа получена/)).toBeVisible();
+    await page.screenshot({ path: "test-results/imp-08-practice-pending-" + viewport.width + ".png", animations: "disabled" });
     const overflow = await dialog.evaluate(el => el.scrollWidth > el.clientWidth + 1);
     expect(overflow).toBe(false);
   });
