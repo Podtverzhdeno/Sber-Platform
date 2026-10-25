@@ -10,6 +10,11 @@ import {
 } from "lucide-react";
 
 import { apiRequest, type RuntimeApiPath } from "../api/client";
+import {
+  activeBuddyProjects, completedStudyCourses, countConfirmedSkills, firstOwnPlace,
+  loadBuddyAnalytics, loadBuddyJourney, loadBuddyOwnStandings, loadBuddyPassport,
+  normalizeNextAction,
+} from "./buddy-live-data";
 import "./buddy-chat-v2.scss";
 
 type BuddyProfile = { person_id: string; display_name: string; primary_track: string };
@@ -115,9 +120,42 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
     queryFn: () => apiRequest<Suggestion>("/api/v1/agents/buddy/suggestion"),
     retry: false,
   });
+  // These read models are all owner-scoped, kept separate from public leaderboards.
+  // Every query key includes person_id, so switching personas never reuses a
+  // private projection. Existing progress mutations invalidate these prefixes.
+  const journey = useQuery({
+    queryKey: ["development-overview", "buddy-journey", profile.person_id],
+    queryFn: loadBuddyJourney,
+    retry: false,
+  });
+  const passport = useQuery({
+    queryKey: ["talent-passport", "buddy", profile.person_id],
+    queryFn: loadBuddyPassport,
+    retry: false,
+  });
+  const personalRank = useQuery({
+    queryKey: ["rating-seasons", "buddy-own-standing", profile.person_id],
+    queryFn: loadBuddyOwnStandings,
+    retry: false,
+  });
+  const analytics = useQuery({
+    queryKey: ["participant-analytics", "buddy", profile.person_id],
+    queryFn: loadBuddyAnalytics,
+    retry: false,
+  });
   const visibleCourses = useMemo(() =>
     (courses.data ?? []).filter(course => course.availability === "available").slice(0, 2),
   [courses.data]);
+  const learningFacts = journey.data && journey.data.person_id === profile.person_id
+    ? journey.data
+    : null;
+  const finishedCourses = learningFacts ? completedStudyCourses(learningFacts) : [];
+  const activeProjects = learningFacts ? activeBuddyProjects(learningFacts) : [];
+  const verifiedSkills = passport.data?.person_id === profile.person_id
+    ? countConfirmedSkills(passport.data)
+    : null;
+  const ownPlace = personalRank.data ? firstOwnPlace(personalRank.data) : null;
+  const nextAction = normalizeNextAction(analytics.data);
   const selected = visibleCourses[0] ?? null;
   const messages = thread.data?.messages ?? [];
   const hasChat = messages.length > 0;
@@ -245,6 +283,44 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
           </article>
         )}</div>}
         <div className="buddy2-assets">
+          <section className="buddy2-live" aria-label="Данные моего прогресса" data-testid="buddy-live-context">
+            <div className="buddy2-section-label"><ShieldCheck size={17}/> Мой прогресс <small>Сохранённые результаты платформы</small></div>
+            {journey.isPending && <p className="buddy2-live-note" role="status">Загружаем реальные результаты…</p>}
+            {!journey.isPending && !learningFacts && <div className="buddy2-live-unavailable" role="status">
+              Не удалось получить общий снимок прогресса. Результаты не заменяются демонстрационными данными.
+              <button type="button" onClick={() => { void journey.refetch(); }}>Повторить</button>
+            </div>}
+            {learningFacts && <>
+              <div className="buddy2-live-metrics">
+                <div><strong data-testid="buddy-finished-count">{finishedCourses.length}</strong><span>Курсов завершено самостоятельно</span></div>
+                <div><strong data-testid="buddy-accepted-count">{learningFacts.accepted_case_count}</strong><span>Принятых личных кейсов</span></div>
+                <div><strong data-testid="buddy-skills-count">{verifiedSkills ?? "—"}</strong><span>Практически подтверждённых навыков</span></div>
+                <div><strong data-testid="buddy-rank">{ownPlace ?? "—"}</strong><span>Место в опубликованном рейтинге</span></div>
+              </div>
+              <div className="buddy2-live-results">
+                <div className="buddy2-live-result">
+                  <span className="buddy2-live-heading"><BookOpen size={15}/> Обучение</span>
+                  {finishedCourses.length > 0 ? finishedCourses.slice(0, 2).map(course =>
+                    <div className="buddy2-live-record" key={course.course_key}>
+                      <span><strong>{course.title}</strong><small>Самостоятельно пройден · не подтверждённый навык</small></span>
+                      <button type="button" aria-label={"Открыть курс " + course.title} onClick={() => { navigateSection("Bootcamp", "?course=" + encodeURIComponent(course.course_key)); }}><ArrowRight size={15}/></button>
+                    </div>,
+                  ) : <p className="buddy2-live-empty">Завершённых курсов пока нет</p>}
+                </div>
+                <div className="buddy2-live-result">
+                  <span className="buddy2-live-heading"><FolderKanban size={15}/> Мои проекты</span>
+                  {activeProjects.length > 0 ? activeProjects.slice(0, 2).map(project =>
+                    <div className="buddy2-live-record" key={project.assignment_id}>
+                      <span><strong>{project.title}</strong><small>{project.accepted_contribution_ids.length > 0 ? "Принятых вкладов: " + String(project.accepted_contribution_ids.length) : "В работе · вклад ещё не подтверждён"}</small></span>
+                      <button type="button" aria-label={"Открыть проект " + project.title} onClick={() => { navigateSection(navigation.includes("Мои проекты") ? "Мои проекты" : "Проекты"); }}><ArrowRight size={15}/></button>
+                    </div>,
+                  ) : <p className="buddy2-live-empty">Назначенных активных проектов пока нет</p>}
+                </div>
+              </div>
+              {nextAction && <p className="buddy2-live-note">Следующее действие из аналитики: <strong>{nextAction}</strong></p>}
+              {(passport.isError || personalRank.isError || analytics.isError) && <p className="buddy2-live-note" role="status">Некоторые связанные данные временно недоступны. Показаны только полученные подтверждённые значения.</p>}
+            </>}
+          </section>
           <div className="buddy2-section-label"><FileText size={17}/> Полезные материалы <small>Из каталога Impulse</small></div>
           <div className="buddy2-file-grid">
             <article className="buddy2-file"><span className="buddy2-file-icon"><FileDown size={26}/></span><div><strong>Чек-лист разработки</strong><small>Шаблон · Markdown</small></div><button type="button" aria-label="Скачать чек-лист" title="Скачать чек-лист" onClick={()=>{downloadChecklist(selected);}}><Download size={20}/></button></article>
