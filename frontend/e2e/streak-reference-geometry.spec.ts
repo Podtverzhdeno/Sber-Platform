@@ -63,6 +63,10 @@ test("compact streak composition: desktop 1122px", async ({ page }) => {
   expect(cards.y).toBeGreaterThanOrEqual(week.y + week.height);
   expect(rhythm.y).toBeGreaterThanOrEqual(cards.y + cards.height);
   expect(save.y).toBeGreaterThanOrEqual(rhythm.y + rhythm.height);
+  const milestone = await dialog.locator(".streak-next-goal").boundingBox();
+  const closeButton = await dialog.getByRole("button", { name: "Закрыть", exact: true }).boundingBox();
+  if (!milestone || !closeButton) throw new Error("Milestone callout or close button missing");
+  expect(milestone.x + milestone.width).toBeLessThanOrEqual(closeButton.x - 3);
   const help = dialog.getByRole("button", { name: "Что такое недельный ритм?" });
   await help.hover();
   await expect(dialog.getByRole("tooltip")).toBeVisible();
