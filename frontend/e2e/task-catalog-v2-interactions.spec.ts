@@ -167,6 +167,21 @@ test.describe("task catalog interactive controls and motion", () => {
     await expect(page).toHaveURL(new RegExp(`task=${catalogItem.task_id}`));
   });
 
+  test("source-style competency labels are readable but filters still use exact API keys", async ({ page }) => {
+    await openCatalog(page);
+    const first = page.locator(".catalog-v2-card").first();
+    await expect(first.locator(".catalog-v2-tags")).toContainText("Python");
+    await expect(first.locator(".catalog-v2-tags")).toContainText("Рекомендательные системы");
+    await page.getByRole("button", { name: "Список" }).click();
+    const directions = page.locator(".catalog-v2-table-row").first().locator(".catalog-v2-table-directions");
+    await expect(directions).toContainText("ML / AI");
+    await expect(directions).toContainText("Python");
+    await page.getByRole("button", { name: "Все фильтры" }).click();
+    await page.getByLabel("Навык", { exact: true }).fill("python");
+    await expect.poll(() => new URL(page.url()).searchParams.get("competency")).toBe("python");
+    await expect(page.locator(".catalog-v2-table-row")).toHaveCount(2);
+  });
+
   test("search, saved filter and reset buttons update the server-bound URL", async ({ page }) => {
     await openCatalog(page);
     await page.getByRole("button", { name: "Все фильтры" }).click();
