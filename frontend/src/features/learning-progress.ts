@@ -1,4 +1,5 @@
 /** Authoritative Impulse self-study projection, not a verified competency score. */
+import type { QueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../api/client";
 
 export type LearningCourse = {
@@ -27,4 +28,27 @@ export function loadLearningSummary(): Promise<LearningSummary> {
   return apiRequest<LearningSummary>("/api/v1/me/bootcamp/impulse-study/summary", {
     cache: "no-store",
   });
+}
+
+/**
+ * Shared invalidation contract for any server-confirmed study mutation.
+ * Self-study and provider-verified completions remain separate, but every
+ * screen reading the self-study projection must refresh on mutation.
+ */
+export function invalidateLearningProjections(client: QueryClient): void {
+  const prefixes = [
+    learningSummaryQueryKey,
+    ["bootcamp-catalog"],
+    ["bootcamp-v2-overview"],
+    ["participant-growth-analytics"],
+    ["bootcamp-certificates"],
+    ["certificates"],
+    ["trajectory-roadmaps"],
+    ["trajectory-roadmap-catalog"],
+    ["development-overview"],
+    ["portfolio"],
+  ] as const;
+  for (const queryKey of prefixes) {
+    void client.invalidateQueries({ queryKey });
+  }
 }
