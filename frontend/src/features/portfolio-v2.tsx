@@ -181,7 +181,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
   };
   const share = async () => {
     const url = portfolio.public_url;
-    if (!portfolio.visibility?.public_profile || !url) {
+    if (!portfolio.visibility.public_profile || !url) {
       setNotice("Публичная ссылка пока недоступна. Проверьте настройки видимости профиля.");
       setTab("about");
       return;
@@ -197,7 +197,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
     {notice && <div className="p2-notice" role="status">{notice}</div>}
     <section className="p2-hero" aria-labelledby="workspace-title">
       <div className="p2-hero-top">
-        <div className="p2-avatar" aria-hidden="true">{portfolio.demo_data && portfolio.display_name === "Алекс Речной" ? <img src="/home-reference/avatar.svg" alt="" /> : <span>{portfolio.display_name.split(" ").map(part => part[0]).slice(0,2).join("").toUpperCase()}</span>}{verified && <i><Check size={14}/></i>}</div>
+        <div className="p2-avatar" aria-hidden="true">{portfolio.demo_data && portfolio.display_name === "Алекс Речной" ? <img src="/portfolio-reference/alex-avatar.svg" alt="" /> : <span>{portfolio.display_name.split(" ").map(part => part[0]).slice(0,2).join("").toUpperCase()}</span>}{verified && <i><Check size={14}/></i>}</div>
         <div className="p2-person"><div className="p2-overline">ПОДТВЕРЖДЁННЫЙ ПРОФИЛЬ УЧАСТНИКА</div><div className="p2-name-line"><h1 id="workspace-title">{portfolio.display_name}</h1>{verified && <span className="p2-identity-badge"><BadgeCheck size={15}/> Есть подтверждённые результаты</span>}</div><p>Участник Impulse</p><div className="p2-person-about">{portfolio.headline || bio || "Здесь появится описание профессиональных интересов, специализации и практического опыта."}</div></div>
         <div className="p2-hero-controls"><div className="p2-hero-buttons"><button className="p2-primary" type="button" onClick={() => { navigateTo(["Настройки"]); }}><Pencil size={16}/> Редактировать профиль</button><button className="p2-outline" type="button" onClick={() => void share()}><Share2 size={16}/> Поделиться</button><button className="p2-outline p2-more" aria-label="Настроить видимость" type="button" onClick={() => { openTab("about"); }}><MoreHorizontal size={19}/></button></div><div className="p2-skill-chips">{skills.slice(0,4).map(s => <span key={s.key}>{s.key}</span>)}{skills.length>4 && <span>+{skills.length-4}</span>}{skills.length === 0 && <span>Навыки пока не подтверждены</span>}</div></div>
       </div>
@@ -237,8 +237,8 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
           {tab==="certification" && (documentsQuery.data??[]).length>0 && <div className="p2-document-list"><h3>Документы проектного опыта</h3>{(documentsQuery.data??[]).map(item=><a key={item.verification_id} href={"/verify/projects/"+encodeURIComponent(item.verification_id)}><FileCheck2 size={20}/><span>{item.task_title}<small>{item.customer_name} · {item.grade_label}</small></span><ExternalLink size={15}/></a>)}</div>}
         </section>}
         {showAchievements && <section className="p2-panel p2-achievements-panel" aria-label="Достижения">
-          <PanelHeading icon={Trophy} title="ДОСТИЖЕНИЯ" action={tab==="overview"?"Все достижения":"Перейти в достижения"} onAction={()=>{ if(tab==="overview") openTab("achievements"); else navigateTo(["Достижения"]); }}/>
-          {trophies.length>0?<div className="p2-trophies">{trophies.slice(0,tab==="overview"?2:30).map((item,i)=><a href={item.source_url} target="_blank" rel="noopener noreferrer" key={item.title+"-"+String(i)}><span className="p2-trophy-icon"><Medal size={23}/></span><span><strong>{item.title}</strong><small>{item.organizer} · {item.trophy_type}</small></span><ExternalLink size={14}/></a>)}</div>:<div className="p2-inline-empty">Подтверждённых достижений пока нет.</div>}
+          <PanelHeading icon={Trophy} title="ДОСТИЖЕНИЯ" action="Перейти в достижения" onAction={()=>{ navigateTo(["Достижения"]); }}/>
+          {trophies.length>0?<div className="p2-trophies">{trophies.slice(0,30).map((item,i)=><a href={item.source_url} target="_blank" rel="noopener noreferrer" key={item.title+"-"+String(i)}><span className="p2-trophy-icon"><Medal size={23}/></span><span><strong>{item.title}</strong><small>{item.organizer} · {item.trophy_type}</small></span><ExternalLink size={14}/></a>)}</div>:<div className="p2-inline-empty">Подтверждённых достижений пока нет.</div>}
         </section>}
         {showAbout && <section className="p2-panel p2-about-panel" aria-label="О себе">
           <PanelHeading icon={Users} title="О СЕБЕ" action="Редактировать" onAction={()=>{ navigateTo(["Настройки"]); }}/>

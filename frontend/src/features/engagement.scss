@@ -233,3 +233,109 @@
 @media(prefers-reduced-motion:reduce) {
   .streak-utility *, .streak-modal-root *, .engagement-flash {transition:none!important;animation:none!important;}
 }
+
+
+/* 1122 × 1402 reference calibration — the modal deliberately sits 28px
+   above the viewport centre, as in the approved visual. All interactive
+   regions remain real React elements rather than a raster overlay. */
+.streak-rhythm-group { display: grid; gap: 0; }
+.streak-next-goal {
+  position:absolute; z-index:7; top:-1px; right:21px;
+  display:grid; gap:5px; width:264px; min-height:96px;
+  padding:17px 21px; border:1.5px solid #05bfff;border-radius:15px;
+  color:#e5f5ff;background:linear-gradient(150deg,#0c2946,#081a2f 85%);
+  box-shadow:0 0 25px #008cff45,inset 0 1px #a0eeff2b;
+  font-size:19px;line-height:1.27;
+}
+.streak-next-goal strong {font-size:19px;font-weight:830;color:#fff;}
+.streak-next-goal span {font-size:17px;color:#e3eefe;}
+.streak-next-goal::after {content:"";position:absolute;right:111px;bottom:-12px;
+  width:19px;height:19px;border-right:1.5px solid #05bfff;border-bottom:1.5px solid #05bfff;
+  background:#081a2f;transform:rotate(45deg);}
+.streak-week-arrow {position:absolute;right:15px;top:68px;display:grid;place-items:center;
+  color:#a4d6ff;transform:rotate(-90deg);}
+.streak-freeze-stock {display:block;margin-top:2px;font-size:10px;color:#82b9d2;}
+@media(min-width:1050px) {
+  .streak-modal-root .streak-redesign {
+    width:996px;padding:40px 43px 39px;transform:translate(-8px,-28px);
+  }
+  .streak-hero {min-height:195px;}
+  .streak-heading {gap:33px;margin-bottom:6px;}
+  .streak-emoji {font-size:47px;}
+  .streak-modal-root .streak-heading h2 {font-size:29px;letter-spacing:-.6px;}
+  .streak-headline {margin:0 0 10px 83px;font-size:34px;line-height:1.23;}
+  .streak-headline strong {font-size:39px;}
+  .streak-redesign .engagement-reason {margin:0 0 0 83px;max-width:475px;
+    font-size:18px;line-height:1.55;}
+  .streak-hero-illustration {right:-10px;top:12px;width:40%;height:333px;}
+  .streak-hero-illustration img {right:0;top:95px;width:305px;height:285px;max-width:92%;
+    filter:drop-shadow(0 0 20px #6869f5aa);}
+  .streak-hero-flame {left:10px;top:183px;font-size:76px;}
+  .streak-hero-spark {left:10px;top:102px;font-size:39px;}
+  .streak-next-goal {right:19px;top:21px;}
+  .streak-redesign .streak-week-card {
+    width:60%;min-height:189px;margin-bottom:27px;padding:21px 0 0;
+    border-radius:20px;
+  }
+  .streak-week-days {padding:8px 20px 21px;gap:3px;}
+  .streak-week-cell {gap:13px;font-size:16px;}
+  .streak-week-dot {width:45px;height:45px;border-width:2px;}
+  .streak-week-dot svg {width:29px;height:29px;}
+  .streak-week-link {min-height:58px;padding:16px 25px;font-size:15px;}
+  .streak-week-link > span:last-child {font-size:15px;}
+  .streak-week-arrow {right:16px;top:76px;}
+  .streak-facts {gap:18px;margin-bottom:25px;}
+  .streak-fact {min-height:128px;padding:16px;gap:21px;border-radius:19px;}
+  .streak-fact-icon {width:78px;height:78px;border-radius:19px;}
+  .streak-fact-icon svg {width:38px;height:38px;}
+  .streak-fact div {gap:8px;}
+  .streak-fact strong {font-size:24px;}
+  .streak-fact small {font-size:15px;line-height:1.32;}
+  .streak-freeze-stock {font-size:11px;}
+  .streak-rule {min-height:126px;gap:21px;padding:22px 29px 21px;
+    margin-bottom:25px;border-radius:18px;}
+  .streak-rule > svg {width:28px;height:28px;}
+  .streak-rule h3 {font-size:19px;margin-bottom:11px;}
+  .streak-rule p {font-size:16px;line-height:1.46;}
+  .streak-redesign .engagement-rhythm-block {
+    min-height:248px;padding:23px 24px 17px;gap:24px;border-radius:18px;
+  }
+  .streak-redesign .engagement-rhythm-header h3 {font-size:23px;}
+  .streak-redesign .engagement-help-button {width:29px;height:29px;font-size:16px;}
+  .streak-redesign .engagement-rhythm-presets {gap:12px;}
+  .streak-redesign .engagement-rhythm-chip {min-height:54px;
+    padding:10px 19px;font-size:16px;border-radius:30px;}
+  .streak-redesign .engagement-rhythm-schedule {
+    grid-template-columns:minmax(380px,1fr) 119px 110px 178px;
+    align-items:end;gap:13px;margin-top:0;
+  }
+  .streak-reminder-icon {width:57px;height:57px;border-radius:13px;}
+  .streak-reminder-icon svg {width:26px;height:26px;}
+  .engagement-rhythm-reminder {gap:20px;}
+  .engagement-rhythm-reminder strong {font-size:16px;}
+  .engagement-rhythm-reminder small {font-size:14px;}
+  .streak-redesign .engagement-rhythm-schedule label {font-size:0;gap:0;}
+  .streak-redesign .engagement-rhythm-schedule select,
+  .streak-redesign .engagement-rhythm-schedule input {
+    height:60px;padding:0 12px;font-size:17px;border-radius:10px;
+  }
+  .streak-redesign .streak-save-button {min-height:67px;margin-top:18px;
+    border-radius:18px;color:#f6ffff;font-size:22px;letter-spacing:-.2px;
+    box-shadow:0 0 20px #00d5f038;}
+  .engagement-help-tooltip {width:340px;max-width:340px;
+    font-size:15px;line-height:1.5;padding:16px 20px;}
+}
+@media(min-width:701px) and (max-width:1049px) {
+  .streak-next-goal {top:0;right:12px;width:220px;min-height:80px;
+    font-size:16px;padding:13px;}
+  .streak-next-goal strong,.streak-next-goal span {font-size:15px;}
+  .streak-redesign .streak-save-button {margin-top:17px;}
+}
+@media(max-width:700px) {
+  .streak-next-goal {display:none;}
+  .streak-week-arrow {right:5px;top:54px;}
+  .streak-freeze-stock {font-size:10px;}
+  .streak-redesign .streak-save-button {margin-top:14px;}
+  .streak-hero-illustration {top:14px;}
+  .streak-redesign .engagement-rhythm-version {display:none;}
+}
