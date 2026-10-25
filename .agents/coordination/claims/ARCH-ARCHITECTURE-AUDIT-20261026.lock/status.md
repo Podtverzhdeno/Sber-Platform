@@ -2,7 +2,7 @@
 
 - task_id: ARCH-ARCHITECTURE-AUDIT-20261026
 - session_id: gpt6-20261026-architecture-audit-01
-- status: REVIEW
+- status: IN_PROGRESS
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 35ab781abeeb16a67e84c51e8f8893b4050da2c0
@@ -26,5 +26,5 @@
   - 9 Requirements, 17 Scenarios, 26 unchecked tasks
   - Read-only Python import check: 19 domain files (no explicit forbidden from imports), 20/31 application files and 10/19 infrastructure files with ApiError imports
   - OpenSpec CLI validation and executable CI: NOT_RUN (remote connector only)
-- independent_review: REQUIRED; do not mark DONE
+- independent_review: CI rejection: first requirement description exceeds OpenSpec strict length; rework authorized, then return to REVIEW. Do not mark DONE.
 - blockers: Local Git checkout and OpenSpec CLI unavailable; static analysis conducted through connected GitHub, executable test results unavailable
