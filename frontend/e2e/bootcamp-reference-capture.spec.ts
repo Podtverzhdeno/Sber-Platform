@@ -30,7 +30,7 @@ for (const viewport of sizes) {
     await page.getByRole("link", { name: "Bootcamp" }).click();
 
     const prefix = `test-results/bootcamp-reference/${viewport.width}x${viewport.height}`;
-    const shell = page.locator('[data-reference="BC-R01"]');
+    const shell = page.locator(".bc-reference");
     await expect(shell).toBeVisible();
     await expect(shell.locator(".bc-ref-course-card").first()).toBeVisible();
     await page.screenshot({ path: `${prefix}_BC-R01_cards.png`, fullPage: true, animations: "disabled" });
