@@ -429,41 +429,40 @@ function RecommendationDetails({ card, track, onOpenCourse }: { card: CourseCard
 }
 
 function RequirementsDetails({ cards, onSelect, onClose }: { cards: CourseCardState[]; onSelect: (key: string) => void; onClose: () => void }) {
-  const required = cards.filter(card => card.must_take !== null);
-  const pending = required.filter(card => card.completion_state !== "verified");
-  const verifiedCount = required.length - pending.length;
-  const percent = required.length > 0 ? Math.round(100 * verifiedCount / required.length) : null;
+  // A verified course has must_take=null in the authoritative projection.
+  // Never derive a misleading completion percentage from the pending-only list.
+  const pending = cards.filter(card => card.must_take !== null && card.completion_state !== "verified");
+  const requiredWord = new Intl.PluralRules("ru-RU").select(pending.length) === "one"
+    ? "курс" : new Intl.PluralRules("ru-RU").select(pending.length) === "few" ? "курса" : "курсов";
   return <div className="bc-panel-content bc-ref-required-panel" data-reference="BC-R05">
-    <p className="bc-ref-required-kicker">ПУТЬ К СЛЕДУЮЩЕМУ ЭТАПУ</p>
-    <h2>Обязательное обучение</h2>
-    <h3>{pending.length === 0 ? "Незавершённых обязательных курсов нет" : "Осталось " + String(pending.length) + " обязательных курсов"}</h3>
-    <p className="bc-muted">Просмотрите требования активной траектории. Практические критерии проверяются отдельно.</p>
-    <section className="bc-ref-required-progress" aria-label="Подтверждение обязательных курсов">
-      <div><small>ПОДТВЕРЖДЁННЫЕ КУРСЫ</small><strong>{percent === null ? "Нет данных" : String(percent) + "%"}</strong></div>
-      <p>{verifiedCount} из {required.length} подтверждено</p>
-      <div className="bc-ref-track"><i style={{width: percent === null ? "0%" : String(percent) + "%"}}/></div>
-    </section>
-    {pending.length === 0 ? <p className="bc-ref-required-empty">Оставшихся обязательных курсов в каталоге нет. Это не означает, что все условия перехода на следующую ступень выполнены.</p> :
-      <ol className="bc-ref-required-list">{pending.map(card =>
-        <li key={card.key}>
-          <div className="bc-ref-required-card-head"><CourseArtwork title={card.title}/><div>
-            <h4>{card.title}</h4><span>{card.access_state === "available" ? "Обязательный" : "Нужны условия доступа"}</span>
-          </div></div>
-          <p>{card.must_take?.explanation || card.recommendation_reason}</p>
-          <div className="bc-ref-required-card-bottom">
-            <small>{completionLabels[card.completion_state]?.label ?? accessLabels[card.access_state].label}</small>
-            <button type="button" onClick={() => onSelect(card.key)}>{card.access_state === "available" ? "Открыть курс" : "Смотреть условия"} <ArrowRight /></button>
-          </div>
-        </li>,
-      )}</ol>}
-    <section className="bc-ref-required-about">
-      <h3>Как это влияет на траекторию?</h3>
-      <p>Подтверждённые курсы закрывают учебную часть. Следующие этапы могут включать практические задания, проверку результатов и подтверждение компетенций.</p>
-    </section>
-    <button type="button" className="bc-ref-required-close" onClick={onClose}>Вернуться в каталог <ArrowRight /></button>
+    <div className="bc-ref-required-hero">
+      <span className="bc-ref-required-kicker">♜ До следующего грейда</span>
+      <h2>{pending.length === 0 ? "Обязательное обучение завершено" :
+        `Осталось ${String(pending.length)} ${pending.length === 1 ? "обязательный" : "обязательных"} ${requiredWord}`}</h2>
+      <p>Здесь отображаются учебные требования выбранной роли. Для перехода на следующий грейд могут потребоваться практика и подтверждённые результаты по опубликованной программе.</p>
+    </div>
+    <div className="bc-ref-required-body">
+      <h3>Что нужно завершить</h3>
+      {pending.length === 0 ? <p className="bc-ref-required-empty">Незавершённых обязательных курсов нет. Это не означает, что все требования к грейду подтверждены.</p> :
+        <ol className="bc-ref-required-list">{pending.map(card =>
+          <li key={card.key}>
+            <CourseArtwork title={card.title}/>
+            <div className="bc-ref-required-course-info">
+              <h4>{card.title}</h4>
+              <small>{completionLabels[card.completion_state]?.label ?? accessLabels[card.access_state].label}</small>
+            </div>
+            <button type="button" onClick={() => onSelect(card.key)}>
+              {card.access_state === "available" ? "Открыть" : "Условия"} <ArrowRight/>
+            </button>
+          </li>)}</ol>}
+      <section className="bc-ref-required-about">
+        <h3>Что будет после завершения</h3>
+        <p>Курсы закрывают учебную часть требований. Следующий грейд назначается только после выполнения остальных условий и проверки результатов.</p>
+      </section>
+      <button type="button" className="bc-ref-required-close" onClick={onClose}>Вернуться в каталог <ArrowRight /></button>
+    </div>
   </div>;
 }
-
 
 function CourseArtwork({ title }: { title: string }) {
   const key = title.toLocaleLowerCase("ru-RU");
