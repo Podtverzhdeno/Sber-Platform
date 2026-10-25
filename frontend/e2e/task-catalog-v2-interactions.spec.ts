@@ -411,7 +411,7 @@ test.describe("task catalog interactive controls and motion", () => {
     const rows = page.locator(".catalog-v2-table-row");
     await expect(rows).toHaveCount(2);
     await rows.first().getByRole("button", { name: "Подробнее" }).click();
-    await expect(page.getByRole("heading", { name: "Этапы задачи" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Работа над задачей" })).toBeVisible();
     const hasOverflow = await page.evaluate(() =>
       document.documentElement.scrollWidth > window.innerWidth + 1);
     expect(hasOverflow).toBe(false);
