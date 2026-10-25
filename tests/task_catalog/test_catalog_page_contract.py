@@ -326,8 +326,14 @@ def test_product_filters_for_mentor_portfolio_and_open_application() -> None:
     )
     catalog = (mentor, portfolio, closed, base[3])
 
-    def titles(**params: bool) -> list[str]:
-        page = build_catalog_page(catalog, CatalogQuery(page_size=10, **params))
+    def titles(
+        *, mentored: bool | None = None, portfolio: bool | None = None,
+        available: bool | None = None,
+    ) -> list[str]:
+        page = build_catalog_page(
+            catalog,
+            CatalogQuery(page_size=10, mentored=mentored, portfolio=portfolio, available=available),
+        )
         return [item.title for item in page.items]
 
     assert titles(mentored=True) == [mentor.title]
