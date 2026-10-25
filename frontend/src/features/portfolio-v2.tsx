@@ -89,7 +89,7 @@ function MiniArt({ index }: { index: number }) {
 function Radar({ skills }: { skills: Passport["skills"] }) {
   const values = Array.from({ length: 5 }, (_, i) => {
     const item = skills[i];
-    const raw = item?.practical_level?.match(/[1-5]/)?.[0];
+    const raw = item?.practical_level.match(/[1-5]/)?.[0];
     return raw ? Math.min(5, Math.max(1, Number(raw))) : item?.confirmed_case_count ? 1 : 0;
   });
   const pt = (index: number, scale: number) => {
@@ -155,12 +155,12 @@ export function ParticipantPortfolioV2() {
 
   if (profileQuery.isPending) return <div className="p2-loading" role="status">Загружаем подтверждённое портфолио…</div>;
   const portfolio = profileQuery.data ?? demoPortfolio;
-  const contributions = portfolio.contributions ?? [];
+  const contributions = Array.isArray(portfolio.contributions) ? portfolio.contributions : [];
   const verifiedProjects = contributions.filter(isAccepted);
   const skills = passportQuery.data?.skills ?? [];
-  const credentials = portfolio.credentials ?? [];
+  const credentials = Array.isArray(portfolio.credentials) ? portfolio.credentials : [];
   const certificates = credentials.filter(i => i.credential_type === "course");
-  const trophies = portfolio.trophies ?? [];
+  const trophies = Array.isArray(portfolio.trophies) ? portfolio.trophies : [];
   const allGrades = verifiedProjects.map(x => numberForGrade(x.grade)).filter((n): n is number => n !== null);
   const grade = allGrades.length ? (allGrades.reduce((a,b)=>a+b,0) / allGrades.length).toFixed(1) : "—";
   const bio = portfolio.about || portfolio.bio || (portfolio.demo_data ? demoPortfolio.about : null);
@@ -210,7 +210,7 @@ export function ParticipantPortfolioV2() {
         {showPassport && <section className="p2-panel p2-passport-panel" aria-label="Skill Passport">
           <PanelHeading icon={BarChart3} title="SKILL PASSPORT" action={tab==="overview"?"Открыть":"Подробнее в аналитике"} onAction={()=>{ tab==="overview"?openTab("passport"):navigateTo(9); }}/>
           <div className="p2-passport-body"><div className="p2-radar-wrap"><Radar skills={skills}/></div><div className="p2-skill-levels"><h3>Уровень компетенций</h3>{skills.slice(0,5).map((s)=>{
-            const m=s.practical_level?.match(/[1-5]/);
+            const m=s.practical_level.match(/[1-5]/);
             const level=m ? Math.min(5,Number(m[0])) : null;
             return <div className="p2-skill-level" key={s.key}><span>{s.key}</span><i><b style={{width:level?String(level*20)+"%":"0%"}}/></i><em>{level?String(level)+"/5":"—"}</em></div>;
           })}{skills.length===0 && <p className="p2-inline-empty">Подтверждённые компетенции появятся после оценки кейсов.</p>}</div></div>
@@ -246,7 +246,7 @@ export function ParticipantPortfolioV2() {
               ["hr_profile","Резюме для HR"],
               ["public_profile","Публичный профиль"],
               ["public_trophies","Публичные достижения"],
-            ] as [Scope,string][]).map(([scope,label])=><label key={scope}><span>{label}</span><input type="checkbox" aria-label={label} checked={Boolean(portfolio.visibility?.[scope])} disabled={consent.isPending || profileQuery.isError} onChange={e=>{ consent.mutate({scope,granted:e.target.checked}); }}/></label>)}
+            ] as [Scope,string][]).map(([scope,label])=><label key={scope}><span>{label}</span><input type="checkbox" aria-label={label} checked={Boolean(portfolio.visibility[scope])} disabled={consent.isPending || profileQuery.isError} onChange={e=>{ consent.mutate({scope,granted:e.target.checked}); }}/></label>)}
           </div>
           <button type="button" className="p2-visibility-share" onClick={()=>void share()}><Copy size={14}/>{portfolio.public_url?"Скопировать публичную ссылку":"Поделиться страницей"}<ChevronRight size={15}/></button>
         </section>}
@@ -256,7 +256,7 @@ export function ParticipantPortfolioV2() {
     </div>
     {(openCase || openCredential) && <div className="p2-modal-scrim" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget){setOpenCase(null);setOpenCredential(null);}}}>
       <section className="p2-modal" role="dialog" aria-modal="true" aria-label={openCase?"Подтверждённый проект":"Сертификат"}><button type="button" className="p2-modal-close" aria-label="Закрыть" onClick={()=>{setOpenCase(null);setOpenCredential(null);}}><X size={22}/></button>
-        {openCase ? <><div className="p2-overline">КЕЙС И ДОКАЗАТЕЛЬСТВА</div><h2>{openCase.project_title}</h2><span className="p2-identity-badge"><BadgeCheck size={16}/>{isAccepted(openCase)?"Принят заказчиком":"Статус: "+openCase.verification_status}</span><h3>Личный вклад</h3><p>{openCase.personal_summary}</p><h3>Оценка и комментарий</h3><p>{openCase.grade??"Без оценки"} · {openCase.review_reason||"Комментарий ещё не предоставлен"}</p><h3>Связанные артефакты</h3><ul>{openCase.artifact_keys.map((key,i)=><li key={key+"-"+i}><FileCheck2 size={17}/>{key}</li>)}</ul><p className="p2-modal-note">Для доступа к исходным файлам требуется разрешённая ссылка на артефакт. Названия файлов не являются прямыми ссылками.</p></> :
+        {openCase ? <><div className="p2-overline">КЕЙС И ДОКАЗАТЕЛЬСТВА</div><h2>{openCase.project_title}</h2><span className="p2-identity-badge"><BadgeCheck size={16}/>{isAccepted(openCase)?"Принят заказчиком":"Статус: "+openCase.verification_status}</span><h3>Личный вклад</h3><p>{openCase.personal_summary}</p><h3>Оценка и комментарий</h3><p>{openCase.grade??"Без оценки"} · {openCase.review_reason||"Комментарий ещё не предоставлен"}</p><h3>Связанные артефакты</h3><ul>{openCase.artifact_keys.map((key,i)=><li key={`${key}-${String(i)}`}><FileCheck2 size={17}/>{key}</li>)}</ul><p className="p2-modal-note">Для доступа к исходным файлам требуется разрешённая ссылка на артефакт. Названия файлов не являются прямыми ссылками.</p></> :
         openCredential && <><div className="p2-overline">СЕРТИФИКАЦИЯ</div><h2>{openCredential.title}</h2><p>{openCredential.issuer || "Impulse"}</p><h3>Идентификатор документа</h3><p>{openCredential.verification_id}</p><h3>Статус</h3><p>{openCredential.status}</p><p className="p2-modal-note">Информация получена из реестра портфолио.</p></>}
       </section>
     </div>}
