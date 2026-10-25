@@ -11,6 +11,8 @@ import { ImmersiveCourseExperience } from "./learning-content/ImmersiveCourseExp
 import { LearningProgressPanel } from "../learning-progress-panel";
 import { learningSummaryQueryKey, loadLearningSummary, type LearningCourse } from "../learning-progress";
 import { aiRoleTitle, bootcampRoleKeys, courseRoleTitles, isCourseInAiRole, orderRoleCourses } from "./trajectory-content";
+import { projectRoleStudy, satisfiesStudyRequirement, type StudyRecord } from "./role-study-progression";
+import type { BootcampOverview } from "./page";
 import "./bootcamp-ux.scss";
 import "./bootcamp-approved.scss";
 import "./reference-fidelity.scss";
@@ -461,10 +463,10 @@ function RecommendationDetails({ card, track, onOpenCourse, onOpenProgram }: { c
   </div>;
 }
 
-function RequirementsDetails({ cards, onSelect, onClose }: { cards: CourseCardState[]; onSelect: (key: string) => void; onClose: () => void }) {
+function RequirementsDetails({ cards, studyRecords, onSelect, onClose }: { cards: CourseCardState[]; studyRecords: readonly StudyRecord[]; onSelect: (key: string) => void; onClose: () => void }) {
   // A verified course has must_take=null in the authoritative projection.
   // Never derive a misleading completion percentage from the pending-only list.
-  const pending = cards.filter(card => card.must_take !== null && card.completion_state !== "verified");
+  const pending = projectRoleStudy(cards, studyRecords).pending;
   const requiredWord = new Intl.PluralRules("ru-RU").select(pending.length) === "one"
     ? "курс" : new Intl.PluralRules("ru-RU").select(pending.length) === "few" ? "курса" : "курсов";
   return <div className="bc-panel-content bc-ref-required-panel" data-reference="BC-R05">
@@ -472,11 +474,11 @@ function RequirementsDetails({ cards, onSelect, onClose }: { cards: CourseCardSt
       <span className="bc-ref-required-kicker">♜ Требования активной траектории</span>
       <h2>{pending.length === 0 ? "Обязательное обучение завершено" :
         `Осталось ${String(pending.length)} ${pending.length === 1 ? "обязательный" : "обязательных"} ${requiredWord}`}</h2>
-      <p>Здесь отображаются учебные требования выбранной роли. Для перехода на следующий грейд могут потребоваться практика и подтверждённые результаты по опубликованной программе.</p>
+      <p>{pending.length === 0 ? "Учебные требования выполнены. Далее — практика, проверка результатов и требования опубликованной программы грейдов." : "Завершённые курсы Impulse засчитываются в учебной части автоматически. Профессиональный грейд зависит от подтверждения всех условий программы."}</p>
     </div>
     <div className="bc-ref-required-body">
-      <h3>Что нужно завершить</h3>
-      {pending.length === 0 ? <p className="bc-ref-required-empty">Незавершённых обязательных курсов нет. Это не означает, что все требования к грейду подтверждены.</p> :
+      <h3>{pending.length===0?"Следующий этап развития":"Что нужно завершить"}</h3>
+      {pending.length === 0 ? <p className="bc-ref-required-empty">Учебные требования текущей роли закрыты. Следующий шаг — выполнение практических задач и получение проверенных доказательств компетенций. Новый профессиональный грейд отображается только после серверного подтверждения.</p> :
         <ol className="bc-ref-required-list">{pending.map(card =>
           <li key={card.key}>
             <CourseArtwork title={card.title}/>
@@ -636,6 +638,21 @@ export function BootcampCatalog({
     retry: retrySafeRead,
   });
   const study = useQuery({ queryKey: learningSummaryQueryKey, queryFn: loadLearningSummary, retry: retrySafeRead });
+  // The versioned role-grade projection is the only allowed source for a
+  // professional grade. Never infer a corporate grade from finished lessons.
+  const [gradeRequestParams] = useSearchParams();
+  const gradeRoleOptions = bootcampRoleKeys(catalog.data ?? []);
+  const gradeRequestedRole = gradeRequestParams.get("role");
+  const gradeRole = gradeRequestedRole!==null&&gradeRoleOptions.includes(gradeRequestedRole)
+    ? gradeRequestedRole : gradeRoleOptions[0]??null;
+  const gradeOverview = useQuery({
+    queryKey:["bootcamp-v2-overview",gradeRole],
+    queryFn:()=>apiRequest<BootcampOverview>(
+      ("/api/v1/me/bootcamp/overview?track="+encodeURIComponent(gradeRole??"")) as RuntimeApiPath
+    ),
+    enabled:gradeRole!==null,
+    retry:false,
+  });
   const studyFor = (key: string): LearningCourse | undefined => study.data?.courses.find(item => item.course_key === key);
   const studyStarted = (key: string) => (studyFor(key)?.completed_units ?? 0) > 0;
   const studyFinished = (key: string) => studyFor(key)?.finished === true;
@@ -744,7 +761,12 @@ export function BootcampCatalog({
     { key: "progress", label: "В процессе", count: catalog.data.filter((card) => forTrack(card) && (card.completion_state === "reported" || (studyStarted(card.key) && !studyFinished(card.key)))).length },
     { key: "completed", label: "Завершённые", count: catalog.data.filter((card) => forTrack(card) && (card.completion_state === "verified" || studyFinished(card.key))).length },
   ];
-  const pendingRequired = catalog.data.filter((card) => forRole(card) && card.must_take && card.completion_state !== "verified");
+  const roleCourses = catalog.data.filter(forRole);
+  const roleStudy = projectRoleStudy(roleCourses,study.data?.courses ?? []);
+  const pendingRequired = roleStudy.pending;
+  const officialGrade = gradeOverview.data?.role_summary.track_key===selectedRole && gradeOverview.data.role_summary.grade_state==="known"
+    ? gradeOverview.data.role_summary.current_grade_title : null;
+  const progressionComplete = roleStudy.required.length>0 && pendingRequired.length===0;
   const requiredWord = new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "one" ? "курс" :
     new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "few" ? "курса" : "курсов";
   const suggestedCourses = orderRoleCourses(catalog.data.filter(forRole), selectedRole).filter((card) => card.access_state === "available" && card.completion_state === "not_started" && !studyFinished(card.key) && (selectedRole !== "all" || card.relevant));
@@ -753,7 +775,7 @@ export function BootcampCatalog({
   const visible = catalog.data
     .filter((card) => relevanceFilter !== "relevant" || card.relevant)
     .filter(forTrack)
-    .filter((card) => category === "all" || (category === "role" && forRole(card)) || (category === "required" && forRole(card) && card.must_take !== null) || (category === "progress" && (card.completion_state === "reported" || (studyStarted(card.key) && !studyFinished(card.key)))) || (category === "completed" && (card.completion_state === "verified" || studyFinished(card.key))))
+    .filter((card) => category === "all" || (category === "role" && forRole(card)) || (category === "required" && forRole(card) && card.must_take !== null && !satisfiesStudyRequirement(card,study.data?.courses ?? [])) || (category === "progress" && (card.completion_state === "reported" || (studyStarted(card.key) && !studyFinished(card.key)))) || (category === "completed" && (card.completion_state === "verified" || studyFinished(card.key))))
     .filter((card) => !query || [card.title, card.recommendation_reason, card.must_take?.skill ?? ""].some((value) => value.toLocaleLowerCase("ru-RU").includes(query)));
   const deepLinkedKey = searchParams.get("course");
   const deepLinked =
@@ -797,19 +819,19 @@ export function BootcampCatalog({
         <div className="bc-ref-right-panels">
           <section className="bc-ref-role-summary" aria-labelledby="bc-role-title">
             <div><h2 id="bc-role-title">Моя роль: {selectedRoleTitle}</h2>
-              <div className="bc-ref-summary-tags"><span>♜ Грейд: не установлен</span><span>▦ Курсов: {catalog.data.filter(forRole).length}</span></div>
+              <div className="bc-ref-summary-tags"><span data-testid="bootcamp-official-grade">♜ {officialGrade ? "Грейд: "+officialGrade : "Грейд: не присвоен"}</span><span>▦ Курсов: {roleStudy.totalRoleCourses}</span><span data-testid="bootcamp-study-level">Учебный этап: {roleStudy.studied.length} из {roleStudy.totalRoleCourses}</span></div>
             </div>
-            <div className="bc-ref-ring" aria-label="Число подтверждённых курсов, не оценка освоения навыков"><strong>{catalog.data.filter(card => forRole(card) && card.completion_state === "verified").length}</strong><small>курсов<br/>подтверждено</small></div>
+            <div className="bc-ref-ring" aria-label="Завершённые учебные курсы роли, не профессиональный грейд"><strong data-testid="bootcamp-study-count">{roleStudy.studied.length}</strong><small>курсов<br/>пройдено</small></div>
           </section>
           <section className="bc-ref-grade" aria-labelledby="bc-grade-title">
             <img className="bc-ref-trophy" alt="" src="/bootcamp/trophy.svg" />
             <div className="bc-ref-grade-body">
               <div className="bc-ref-grade-kicker">♛ &nbsp; Учебные требования роли</div>
-              <h2 id="bc-grade-title">{pendingRequired.length > 0 ? <>{pendingRequired.length === 1 ? "Остался" : "Осталось"} <em>{pendingRequired.length}</em> {pendingRequired.length === 1 ? "обязательный" : "обязательных"} {requiredWord}</> : "Обязательные курсы"}</h2>
-              <p>{pendingRequired.length > 0 ? "Заверши учебные требования. Практика и подтверждение проверяются отдельно." : "В текущем каталоге незавершённых обязательных курсов нет."}</p>
-              <div className="bc-ref-grade-list">{pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => { openPanel("detail",card.key); }}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
+              <h2 id="bc-grade-title" aria-live="polite">{pendingRequired.length > 0 ? <>{pendingRequired.length === 1 ? "Остался" : "Осталось"} <em>{pendingRequired.length}</em> {pendingRequired.length === 1 ? "обязательный" : "обязательных"} {requiredWord}</> : progressionComplete ? "Учебная часть завершена" : "Обязательные курсы"}</h2>
+              <p>{pendingRequired.length > 0 ? "Оставшиеся учебные требования обновляются после завершения курса. Практика и подтверждение проверяются отдельно." : progressionComplete ? "Следующий этап — практические задачи и подтверждение компетенций. Профессиональный грейд обновится после проверки требований опубликованной программы." : "Обязательные курсы пока не указаны. Дальнейшие требования смотри в траектории."}</p>
+              <div className="bc-ref-grade-list">{progressionComplete ? <span className="bc-ref-grade-next" data-testid="bootcamp-next-stage">◆ Следующий этап: практика и проверка результатов</span> : pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => { openPanel("detail",card.key); }}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
             </div>
-            <button className="bc-ref-grade-button" type="button" onClick={() => { openPanel("requirements"); }}>Посмотреть курсы <ArrowRight /></button>
+            <button className="bc-ref-grade-button" type="button" onClick={() => { openPanel("requirements"); }}>{progressionComplete ? "Следующий этап" : "Посмотреть курсы"} <ArrowRight /></button>
           </section>
         </div>
       </div>
@@ -868,7 +890,7 @@ export function BootcampCatalog({
             onReason={() => { openPanel("reason", deepLinked.key); }} />)}
       </Drawer>
       <Drawer title="Требования к обучению" open={panel === "requirements"} onClose={closePanel}>
-        <RequirementsDetails cards={catalog.data.filter(forRole)} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} />
+        <RequirementsDetails cards={roleCourses} studyRecords={study.data?.courses ?? []} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} />
       </Drawer>
       {honorBoardEnabled && honorBoardConsent && (
         <Card title="Зал славы курсов">
