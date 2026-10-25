@@ -74,7 +74,19 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await page.getByRole("link", { name: "Главная" }).click();
   await page.getByRole("link", { name: "Достижения" }).click();
   await expect(screen.getByTestId("achievement-card").first().getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
+  const columns = await screen.locator(".ach-gallery-grid").evaluate(element =>
+    getComputedStyle(element).gridTemplateColumns.split(" ").filter(Boolean).length);
+  expect(columns).toBe(4);
+  const hero = screen.locator(".ach-gallery-hero");
+  const titleBox = await hero.locator("h1").boundingBox();
+  const heroBox = await hero.boundingBox();
+  if (!titleBox || !heroBox) throw new Error("Achievements hero geometry unavailable");
+  expect(titleBox.y).toBeGreaterThanOrEqual(heroBox.y - 1);
+  expect(titleBox.y + titleBox.height).toBeLessThanOrEqual(heroBox.y + heroBox.height + 1);
   await page.screenshot({ path: "test-results/achievements-v2/desktop.png", animations: "disabled", fullPage: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await expect(screen.getByTestId("achievement-card")).toHaveCount(4);
+  await page.screenshot({ path: "test-results/achievements-v2/wide-desktop.png", animations: "disabled", fullPage: true });
 
   await screen.getByRole("button", { name: /^Проекты/ }).click();
   await expect(screen.getByTestId("achievement-card")).toHaveCount(1);
