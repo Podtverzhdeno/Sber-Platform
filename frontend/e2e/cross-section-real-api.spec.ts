@@ -112,8 +112,10 @@ test("real PostgreSQL course completion propagates to analytics, trajectory and 
   await expect(bridge.getByTestId("learn-finished")).toHaveText(String(summaryAfter.finished_courses));
 
   await page.goto(`/workspace/${String(buddyIndex)}`);
-  await expect(page.getByTestId("buddy-live-context")).toBeVisible();
-  await expect(page.getByTestId("buddy-finished-count")).toHaveText(String(summaryAfter.finished_courses));
+  const buddyContext = page.getByTestId("buddy-live-context");
+  await expect(buddyContext).toBeVisible();
+  await expect(buddyContext).toContainText("Курсов завершено самостоятельно", { timeout: 15_000 });
+  await expect(buddyContext.getByTestId("buddy-finished-count")).toHaveText(String(summaryAfter.finished_courses));
 
   await api(page, "/api/v1/auth/demo-login", {
     method: "POST", data: { persona_key: "customer-roman" },
