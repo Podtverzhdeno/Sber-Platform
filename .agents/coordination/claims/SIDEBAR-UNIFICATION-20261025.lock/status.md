@@ -1,0 +1,21 @@
+# Claim SIDEBAR-UNIFICATION-20261025
+
+- task_id: SIDEBAR-UNIFICATION-20261025
+- session_id: gpt6-20261025-participant-sidebar-unification
+- status: IN_PROGRESS
+- started_at: 2026-10-25T03:17:00+03:00
+- heartbeat_at: 2026-10-25T03:17:00+03:00
+- base_revision: 39b6d1acc8075e8ed6b980a08e236173997c3887
+- depends_on: []
+- write_scope:
+  - frontend/src/App.tsx (sidebar rendering only; trajectory route integration remains outside scope)
+  - frontend/src/features/participant-home-v2/home-v2.scss (home-specific shell/sidebar overrides only)
+  - frontend/src/App.test.tsx (canonical navigation regression)
+  - .agents/coordination/claims/SIDEBAR-UNIFICATION-20261025.lock/status.md
+- shared_files: []
+- verification:
+  - frontend vitest App.test.tsx
+  - frontend typecheck and lint
+  - desktop/mobile route navigation and sidebar comparison
+- progress: Read-only audit completed. Canonical sidebar preserved for all participant routes; changes are confined to removing home-specific sidebar JSX and visual overrides.
+- blockers: The separate TRJ-SOURCE-ROUTE-INTEGRATION claim owns only the trajectory route conditional in App.tsx. That area is untouched. Direct git status unavailable without a git worktree; current main read via GitHub API.
