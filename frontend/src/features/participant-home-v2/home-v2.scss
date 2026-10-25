@@ -16,7 +16,15 @@
   padding-bottom: 35px;
   font-family: Inter, "Segoe UI", Arial, sans-serif;
   font-size: 13px;
-  button {font: inherit; cursor: pointer;}
+  button {
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color .20s ease, color .20s ease,
+      border-color .20s ease, box-shadow .20s ease, filter .20s ease,
+      text-shadow .20s ease, transform .20s cubic-bezier(.22,.82,.26,1);
+  }
+  button:not(:disabled):active {transform: translateY(0) scale(.985);}
   button:disabled {opacity: .55;cursor: not-allowed;}
   button:focus-visible {outline: 2px solid #8bfcff;outline-offset: 3px;}
   .sr-only {position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;}
@@ -48,8 +56,9 @@
   display:inline-flex;align-items:center;justify-content:center;gap:9px;
   min-height:43px;padding:0 16px;border:1px solid transparent;border-radius:8px;
   background:linear-gradient(110deg,#05e1e7,#08f3f4);color:#012331;font-size:12.5px;font-weight:750!important;
-  white-space:nowrap;box-shadow:0 3px 12px #01f6ff20;transition:background .18s,box-shadow .18s,transform .18s;
-  &:hover:not(:disabled) {background:#5dfaff;box-shadow:0 0 18px #0ef5f45f;transform:translateY(-1px);}
+  white-space:nowrap;box-shadow:0 3px 12px #01f6ff20;
+  /* Keep the gradient stable: gradient-to-solid "background" transitions blink. */
+  &:hover:not(:disabled) {filter:brightness(1.13);box-shadow:0 0 18px #0ef5f45f;transform:translateY(-1px);}
 }
 .home-v2-secondary {
   display:inline-flex;justify-content:center;align-items:center;min-height:38px;
@@ -377,7 +386,7 @@
 .home-v2-day:hover { border-color:#07dfef;background:#0b3653;box-shadow:0 0 13px #02e7e43b;transform:translateY(-2px); }
 .home-v2-inline-link:hover:not(:disabled) { transform:translateX(2px);text-shadow:0 0 9px #00edff91; }
 .home-v2-task-open:hover:not(:disabled) {transform:translateY(-1px); box-shadow:0 0 15px #03e9e940;}
-.home-v2-next-grade:hover:not(:disabled) { background:#0b2e48;box-shadow:0 0 16px #00bddd22;transform:translateY(-1px);}
+.home-v2-next-grade:hover:not(:disabled) {filter:brightness(1.10);box-shadow:0 0 16px #00bddd22;transform:translateY(-1px);}
 .home-v2-buddy-tip:hover:not(:disabled) {border-color:#1de5e8;background:#09364a;box-shadow:0 0 13px #05dce52b;}
 .home-v2-passport-open:hover:not(:disabled) {border-color:#06e4f0;background:#0e405a;box-shadow:0 0 15px #00edec31;}
 @media (max-width:1399px) and (min-width:1024px) {
