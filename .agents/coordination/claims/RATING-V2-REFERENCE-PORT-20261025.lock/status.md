@@ -9,13 +9,13 @@
 - depends_on: []
 - write_scope:
   - frontend/src/features/rating-v2/**
-  - frontend/src/App.tsx (rating import and route only)
-  - frontend/e2e/rating-v2.spec.ts
+  - frontend/src/features/portfolio.tsx (rating export shim only)
+  - .github/workflows/rating-reference-qa.yml
   - frontend/e2e/participant-interactions.spec.ts (rating assertions only)
   - .agents/coordination/claims/RATING-V2-REFERENCE-PORT-20261025.lock/status.md
-- shared_files: frontend/src/App.tsx (small import/route swap)
+- shared_files: frontend/src/features/portfolio.tsx (rating export shim only; portfolio UI preserved)
 - verification:
   - frontend typecheck, lint, build, vitest
   - Playwright 3 rating views, filters, search, hover, keyboard, responsive
   - visual QA against 3 image references
-- progress: Initial scoped implementation based on generated 1672x941px PNGs. Main ranking list first, rewards via CTA, profile via buttons.
+- progress: Rating reference QA 40194797563 green 5/5, scoped lint/typecheck/build. The integration is moved behind the existing ParticipantRating export to avoid App.tsx conflicts. Main list first, benefits via CTA, profile via buttons. Pixel-exact visual acceptance not yet claimed.

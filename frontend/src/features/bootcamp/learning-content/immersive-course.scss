@@ -349,3 +349,49 @@
   .bc-reference .bc-ref-why-role-banner { flex-direction: column; align-items: stretch; }
   .bc-reference .bc-ref-why-panel .bc-ref-why-actions { flex-direction: column; }
 }
+
+
+/* Pixel-oriented enhancements for the approved Authorization lesson mockups. */
+.imp-study__methods-grid {
+  display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 11px; margin-top: 12px;
+}
+.imp-study__method-card {
+  min-width: 0; display: flex; gap: 13px; padding: 15px; border-radius: 11px;
+  background: #0a2b43; border: 1px solid #1e6a88; color: #e5f6ff;
+}
+.imp-study__method-card > span {
+  flex: 0 0 42px; width: 42px; height: 42px; border-radius: 10px;
+  display: grid; place-items: center; color: #06f5ea;
+  background: linear-gradient(125deg,#075c75,#121f78); font-size: 22px; font-weight: 800;
+}
+.imp-study__method-card strong { font-size: 14px; line-height: 1.25; }
+.imp-study__method-card p { margin: 7px 0 0; font-size: 13px; line-height: 1.5; }
+.imp-study__example-grid { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,.85fr); gap: 14px; margin-top: 15px; }
+.imp-study__code-column { min-width: 0; }
+.imp-study__example-grid .imp-study__code { max-height: 470px; overflow: auto; }
+.imp-study__walkthrough {
+  display: flex; flex-direction: column; gap: 8px; background: #0b3044;
+  border: 1px solid #156682; border-radius: 11px; padding: 12px;
+}
+.imp-study__walkthrough > h4 { margin: 5px 0 2px; font-size: 18px; }
+.imp-study__walkthrough article {
+  display: flex; align-items: start; gap: 10px; border: 1px solid #196381;
+  border-radius: 9px; background: #092239; padding: 10px; flex: 1;
+}
+.imp-study__walkthrough article > span {
+  flex: 0 0 31px; width: 31px; height: 31px; display: grid; place-items: center;
+  border-radius: 50%; background: #0ba5af; color: #032d39; font-weight: 900;
+}
+.imp-study__walkthrough article strong { font-size: 14px; }
+.imp-study__walkthrough article p { font-size: 12px; line-height: 1.45; margin: 4px 0 0; }
+.imp-study__practice-columns .imp-study__requirement > div { flex: 1; min-width: 0; }
+.imp-study__practice-columns .imp-study__requirement strong { color: #f1ffff; }
+.imp-study__practice-columns .imp-study__requirement p { font-size: 12px; margin: 3px 0 0; }
+@media (max-width: 1100px) {
+  .imp-study__example-grid { grid-template-columns: minmax(0,1fr); }
+  .imp-study__walkthrough { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .imp-study__walkthrough > h4 { grid-column: 1/-1; }
+}
+@media (max-width: 780px) {
+  .imp-study__methods-grid,.imp-study__walkthrough { grid-template-columns: minmax(0,1fr); }
+}

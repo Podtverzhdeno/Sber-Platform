@@ -6,14 +6,11 @@
   --events-aqua:#1ee8d6; --events-bg:#031421; --events-border:#123c4f;
   color:#eef7ff; min-width:0; gap:0; margin-top:-27px;
   .ev-hero {
-    min-height:216px;height:216px;padding:18px 23px;border-radius:0;border:0;
-    background:linear-gradient(90deg,#031421 1%,#041e2e 53%,#05393c 73%,#072432 100%);
+    min-height:216px;height:216px;padding:18px 8px;border-radius:0;border:0;
+    background:linear-gradient(90deg,#031421 0%,#041e2e 41%,#07243224 72%),url("/events/reference-hero-banner.svg") right center/auto 100% no-repeat,#031421;
     isolation:isolate;overflow:hidden;
   }
-  .ev-hero::before { content:"";position:absolute;inset:0;background:
-      radial-gradient(ellipse at 72% 65%,#04b79f85,transparent 39%),
-      radial-gradient(ellipse at 97% 8%,#06788799,transparent 34%),
-      repeating-linear-gradient(145deg,transparent 0 80px,#00edca10 81px 82px,transparent 83px 140px);opacity:.95;z-index:-1; }
+  .ev-hero::before {content:none}
   .ev-hero-copy {position:relative;z-index:3;width:70%;min-width:0;}
   .ev-kicker {display:inline-flex;align-items:center;gap:17px;min-height:42px;margin:0 0 7px;
     border:1px solid #076e70;border-radius:14px;background:#073039be;
@@ -24,7 +21,7 @@
   .ev-hero p {max-width:650px;color:#bed0e1;font-size:15px;line-height:1.4;margin:0}
   .ev-hero-action {position:absolute;top:100%;left:0;opacity:0;pointer-events:none}
   .ev-hero-action:focus-visible {position:static;opacity:1;pointer-events:auto;margin-top:8px}
-  .ev-hero-art {inset:0 0 0 auto; width:45%;opacity:1;overflow:hidden;z-index:1;perspective:none}
+  .ev-hero-art {display:none}
   .ev-hero-art::before {content:"";position:absolute;right:3%;top:0;width:230px;height:230px;
     border-radius:50% 50% 40% 40%;background:linear-gradient(130deg,#1c4151,#052132 66%);
     box-shadow:0 25px 50px #0009,0 -5px 22px #19caab55;transform:rotate(-9deg)}
@@ -158,9 +155,8 @@
   .ev-detail-top button {font-size:13px}
   .ev-detail-hero {height:220px;min-height:220px;flex-shrink:0;margin:0 20px;padding:20px 28px;
     border:1px solid #19605d;border-radius:12px;
-    background:linear-gradient(90deg,#031723 0%,#031823f5 33%,#032128c2 55%,#06222110 95%),
-      radial-gradient(ellipse at 77% 58%,#046e5f 0,#053c3e 29%,#021724 73%);overflow:hidden}
-  .ev-detail-hero::after {content:"";position:absolute;right:-5%;top:-25%;width:53%;height:160%;border:0;
+    background:linear-gradient(90deg,#031723 0%,#031823f5 33%,#032128c2 55%,#06222110 95%), url("/events/reference-hero-detail.svg") right center/auto 100% no-repeat,#043332;overflow:hidden}
+  .ev-detail-hero::after {content:none;position:absolute;right:-5%;top:-25%;width:53%;height:160%;border:0;
     border-radius:0;transform:skew(-21deg) rotate(-7deg);
     background:repeating-linear-gradient(142deg,#13b5a41c 0 31px,#06856c38 33px 62px,#01171964 64px 91px);
     opacity:.7;filter:drop-shadow(0 0 17px #02d4ac30)}
