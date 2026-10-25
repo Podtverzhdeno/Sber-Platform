@@ -1,6 +1,6 @@
 # Claim XS-601-BUDDY-RATING-PARITY-20261026
 - session_id: gpt6-20261026-buddy-ranking-parity
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: f6c3ee5e38a69719fe8bb33b25fe68435828a7f9
@@ -18,5 +18,16 @@
   - frontend/src/features/rating-v2/own-standing.ts (read-only shared hook and selector)
 - verification:
   - ESLint, TypeScript, Vitest Buddy and owner rating
-- progress: Ensure Buddy and Topbar use same owner-scoped query and strict published season+version mapping.
+- progress: AI Buddy now reuses the same private standing query key, published season list, and season/version guard as TopbarRank. Duplicate rank parsing code removed. Scoped tests and full TypeScript passed; independent review pending.
+- changed_files:
+  - frontend/src/features/buddy-chat-v2.tsx
+  - frontend/src/features/buddy-chat-v2.test.tsx
+  - frontend/src/features/buddy-live-data.ts
+  - frontend/src/features/buddy-live-data.test.ts
+  - .github/workflows/buddy-ranking-parity-qa.yml
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40245131050
+  - ESLint, Buddy/Topbar Vitest and TypeScript: PASS
+- unverified:
+  - Independent cross-role review; whole-system CI and deployment on exact integration revision
 - blockers: Independent review and all-app CI.
