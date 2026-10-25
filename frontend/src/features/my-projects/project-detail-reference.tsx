@@ -65,7 +65,7 @@ export function ProjectReferenceTasks({checkpoints,decisions,projectDescription,
             aria-pressed={isSelected} onClick={()=>setSelected(c.key)}>
               <span className={`mp-ref-index ${passed?"is-done":""}`}>{passed?<Check size={18}/>:String(checkpoints.findIndex(v=>v.key===c.key)+1).padStart(2,"0")}</span>
               <span className="mp-ref-task-copy"><strong>{c.title}</strong><small>{passed?"Контрольный этап подтверждён":statusLabel(c.status)}</small><em>Этап {checkpoints.findIndex(v=>v.key===c.key)+1}</em></span>
-              <span className="mp-ref-task-state"><b>{statusLabel(c.status)}</b><i style={{width:passed?"100%":isSelected?"18%":"0%"}}/></span>
+              <span className="mp-ref-task-state"><b>{statusLabel(c.status)}</b><i style={{width:passed?"100%":"0%"}}/></span>
             </button>;
         }):<p className="mp-ref-empty">В этой категории пока нет задач</p>}
         {!checkpoints.length&&<div className="mp-ref-empty"><strong>Заказчик ещё не опубликовал этапы</strong><p>Подробная постановка и критерии доступны в проекте</p><button type="button" onClick={onWorkspace}>Открыть рабочую область <ArrowRight size={15}/></button></div>}
