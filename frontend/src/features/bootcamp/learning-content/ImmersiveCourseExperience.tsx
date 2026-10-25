@@ -10,6 +10,7 @@ import { invalidateLearningProjections } from "../../learning-progress";
 import { learningProgramFor } from "./programs";
 import { knowledgeCheckFor } from "./knowledge-checks";
 import { LessonFrame } from "./LessonFrame";
+import { StarterCaseCard } from "./StarterCaseCard";
 import { ManualCompanionCard } from "./ManualCompanionCard";
 import "./learning-content.scss";
 import { authorizationMethods, authorizationWalkthrough, authorizationRequirements, authorizationCriteria, authorizationExample } from "./security-lesson-reference";
@@ -365,6 +366,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
             </div>
           </section>}</LessonFrame>
           <LessonFrame key={unit.id + "-practice"} unitId={unit.id} kind="practice">{() => <section className="imp-study__content" aria-label="Практическое задание"><h3>Практическое задание</h3><p>{authReference ? "Реализуйте защищённый API на FastAPI: проверяйте JWT и возвращайте профиль текущего пользователя только по доверенному токену. Добавьте негативные проверки и запрет доступа к чужим объектам." : unit.practice}</p>
+            <StarterCaseCard courseKey={courseKey} unitTitle={unit.title}/>
             <div className="imp-study__practice-columns"><div><h4><Target size={18}/> Требования</h4>
               {authReference ? authorizationRequirements.map((item,index)=><div className="imp-study__requirement" key={item.title}><span>{index+1}</span><div><strong>{item.title}</strong><p>{item.detail}</p></div></div>)
               : unit.checklist.map((item,index)=><div className="imp-study__requirement" key={item}><span>{index+1}</span>{item}</div>)}</div>
