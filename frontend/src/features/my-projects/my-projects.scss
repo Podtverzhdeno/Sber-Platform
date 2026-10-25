@@ -1091,3 +1091,27 @@
   background:repeating-linear-gradient(35deg,transparent 0 50px,#33dfea12 51px,#33dfea12 52px);
   pointer-events:none;
 }
+
+/* Overview next checkpoint action for novice participants. */
+.mpv2 .mp-overview-next{border-color:#168a96;background:linear-gradient(135deg,#082d42,#092237 70%);box-shadow:0 0 22px #06d8bf0b}
+.mpv2 .mp-overview-next>header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px}
+.mpv2 .mp-overview-next>header h2{display:flex;align-items:center;gap:10px;color:#f4feff;font-size:17px}
+.mpv2 .mp-overview-next>header h2 svg{color:#1ff2d5}
+.mpv2 .mp-overview-next-body{display:flex;align-items:flex-start;gap:15px}
+.mpv2 .mp-overview-next-count{display:grid;place-items:center;flex:none;width:49px;height:49px;border:1px solid #11c1b4;border-radius:13px;background:#07584e;color:#83fce3;font-size:18px;font-weight:900}
+.mpv2 .mp-overview-next-body>div{flex:1;min-width:0}
+.mpv2 .mp-overview-next-body strong{display:block;color:#f5ffff;font-size:16px;line-height:1.3}
+.mpv2 .mp-overview-next-body p{color:#a1cbd9;font-size:12px;line-height:1.6;margin:7px 0 10px}
+.mpv2 .mp-overview-next-body ol{display:flex;gap:9px;flex-wrap:wrap;margin:0 0 13px;padding:0;list-style:none;counter-reset:project-step}
+.mpv2 .mp-overview-next-body li{display:flex;align-items:center;gap:7px;padding:7px 9px;background:#0a354e;border:1px solid #1b5c6f;border-radius:8px;color:#c5ebeb;font-size:10px;counter-increment:project-step}
+.mpv2 .mp-overview-next-body li::before{content:counter(project-step);display:grid;place-items:center;height:18px;width:18px;border-radius:50%;background:#106f6b;color:#d9fff5;font-weight:800}
+.mpv2 .mp-overview-next-body .mp-primary{display:inline-flex;align-items:center;gap:9px;min-height:37px;padding:8px 14px;background:linear-gradient(100deg,#2eebbc,#09c9dd);border:0;border-radius:9px;color:#03353d;font-weight:800;font-size:11px}
+.mpv2 .mp-overview-checkpoint{width:100%;text-align:left;cursor:pointer;color:inherit}
+.mpv2 .mp-overview-checkpoint:hover,.mpv2 .mp-overview-checkpoint:focus-visible{background:#0a4050;border-color:#0abda6}
+.mpv2 .mp-overview-checkpoint>svg{margin-left:auto;flex:none;color:#29e7d4}
+@media(max-width:700px){
+ .mpv2 .mp-overview-next-body{gap:10px}
+ .mpv2 .mp-overview-next-count{width:34px;height:34px;font-size:13px}
+ .mpv2 .mp-overview-next-body strong{font-size:13px}
+ .mpv2 .mp-overview-next-body ol{display:grid}
+}
