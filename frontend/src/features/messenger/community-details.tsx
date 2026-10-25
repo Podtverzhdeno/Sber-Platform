@@ -105,7 +105,7 @@ export function CommunityDetails({
         <p>{channel.participants.length} {channel.participants.length % 10 === 1 && channel.participants.length % 100 !== 11 ? "участник" : [2,3,4].includes(channel.participants.length % 10) && ![12,13,14].includes(channel.participants.length % 100) ? "участника" : "участников"}</p>
         {channel.title.trim().toLocaleLowerCase("ru") === "маяки" && <small>Сообщество для развития, проектов и новых возможностей</small>}
         <div className="msg-community__hero-actions">
-          <button type="button" onClick={onToggleMute} disabled={!onToggleMute} aria-pressed={channel.muted}>
+          <button type="button" onClick={onToggleMute} disabled={!onToggleMute} aria-pressed={channel.muted} aria-label={channel.muted ? "Включить уведомления" : "Отключить уведомления"}>
             {channel.muted ? <Bell size={18}/> : <BellOff size={18}/>}
             <span>{channel.muted ? "Включить звук" : "Без звука"}</span>
           </button>
