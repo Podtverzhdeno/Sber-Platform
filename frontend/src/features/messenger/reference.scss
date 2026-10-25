@@ -1,54 +1,9 @@
-/* Reference decomposition of the user's three 2026 Impulse Messenger PNGs.
-   At 1448px: sidebar 156, messages 334, conversation 606, context 352.
-   Keep React/API behavior; do not copy demo counters into production. */
-
-.page-shell:has(.sberchat-reference) {
-  background:#040d17;
-}
-@media(min-width:960px) {
-  .page-shell:has(.sberchat-reference) .workspace {
-    padding:65px 0 0 clamp(156px,10.2vw,170px);
-    min-height:100dvh;
-    background:#040d17;
-  }
-  .page-shell:has(.sberchat-reference) .sidebar {
-    left:0;top:0;bottom:0;
-    width:clamp(156px,10.2vw,170px);
-    border-radius:0;
-    padding:11px 6px 16px;
-    background:linear-gradient(180deg,#041324,#020a14);
-    border-right:1px solid #123252;
-  }
-  .page-shell:has(.sberchat-reference) .sidebar-brand {
-    min-height:54px;
-    padding:4px 11px;
-  }
-  .page-shell:has(.sberchat-reference) .topbar {
-    top:0;right:0;left:clamp(156px,10.2vw,170px);
-    height:65px;min-height:65px;padding:0 15px 0 20px;
-    border:0;border-bottom:1px solid #153752;
-    border-radius:0;background:#041120;
-    backdrop-filter:none;
-  }
+/* Messenger content matches its reference; the outer navigation and topbar
+   are shared with every other workspace route. */
+.page-shell:has(.sberchat-reference) { background:#040d17; }
+@media (min-width:1024px) {
   .page-shell:has(.sberchat-reference) .workspace-content {
     padding:0;margin:0;border:0;background:transparent;
-  }
-  .page-shell:has(.sberchat-reference) .global-search {
-    min-height:42px;max-width:650px;border-radius:9px;
-    background:linear-gradient(90deg,#05172a,#071d35);
-    border-color:#173c59;
-  }
-  .page-shell:has(.sberchat-reference) .sidebar nav a {
-    min-height:49px;border-radius:8px;color:#bad3ed;font-size:13px;
-    transition:background .15s,color .15s,transform .15s;
-  }
-  .page-shell:has(.sberchat-reference) .sidebar nav a:hover {
-    background:#0b2e48;color:#fff;transform:translateX(2px);
-  }
-  .page-shell:has(.sberchat-reference) .sidebar nav a.active,
-  .page-shell:has(.sberchat-reference) .sidebar nav a[aria-current="page"] {
-    background:linear-gradient(90deg,#0a3557,#08223c);
-    color:#01e2ed;box-shadow:inset 4px 0 0 #00ecf3;
   }
 }
 .sberchat-reference {
@@ -63,7 +18,7 @@
   --msg-bubble-in:linear-gradient(180deg,#092842,#071f36);
   --msg-bubble-out:linear-gradient(180deg,#0a3f5c,#07344b);
   --msg-bubble-border:#113b56;
-  height:calc(100dvh - 65px);
+  height:calc(100dvh - 64px);
   min-height:460px;
   max-height:none;
   width:100%;
@@ -564,10 +519,10 @@
 /* Full-screen messenger surface: the app's legacy .messenger-page grid may
    constrain a full-height section independently of its inner three columns.
    Anchor only the messages view to the known global shell viewport. */
-@media (min-width:960px) {
+@media (min-width:1024px) {
   .page-shell:has(.sberchat-reference) .workspace-content > .sberchat-reference {
     position:fixed;
-    inset:65px 0 0 clamp(156px,10.2vw,170px);
+    inset:64px 0 0 244px;
     z-index:1;
     width:auto;
     height:auto;
@@ -584,7 +539,7 @@
     min-height:0;
   }
 }
-@media (max-width:959px) {
+@media (max-width:1023px) {
   .page-shell:has(.sberchat-reference) .workspace-content > .sberchat-reference {
     position:relative;
     width:100%;
@@ -602,7 +557,7 @@
   gap:0;
   grid-template-rows:none;
   width:100%;
-  height:calc(100dvh - 65px);
+  height:calc(100dvh - 64px);
   min-height:460px;
   margin:0;
   padding:0;
@@ -647,40 +602,15 @@
 .sberchat-reference .msg-context__materials {padding-bottom:4px;}
 
 
-/* Each supplied PNG was exported with its own canvas proportions.
-   Empty (1448×1086): sidebar 164, topbar 70, list 367, context 298,
-   and a 44px right breathing gutter.
-   Mayaki (1448×1086): sidebar 156, topbar 64, list 334, context 352.
-   Direct (1672×941): sidebar 172, topbar 69, list 391, context 357.
-   These are state-scoped to Messages only; other routes are untouched. */
+/* Canvas variations adjust the chat columns, never the application shell. */
 @media (min-width: 1400px) {
-  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .workspace {
-    padding-left:164px;
-    padding-top:70px;
-  }
-  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .sidebar {width:164px;}
-  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .topbar {
-    left:164px;height:70px;min-height:70px;
-  }
-  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .workspace-content {
-    padding:0;
-  }
   .messenger-page.sberchat-reference[data-message-state="empty"] {
-    height:calc(100dvh - 70px);
-    width:calc(100% - 44px);
+    height:calc(100dvh - 64px);width:calc(100% - 44px);
     overflow:hidden;border-radius:0 14px 14px 0;
     border:1px solid #123251;border-left:0;
   }
   .messenger-page.sberchat-reference[data-message-state="empty"] > .messenger-shell {
     grid-template-columns:367px minmax(0,1fr) 298px;
-  }
-
-  .page-shell:has(.sberchat-reference[data-message-state="community"]) .workspace {
-    padding-left:156px;padding-top:64px;
-  }
-  .page-shell:has(.sberchat-reference[data-message-state="community"]) .sidebar {width:156px;}
-  .page-shell:has(.sberchat-reference[data-message-state="community"]) .topbar {
-    left:156px;height:64px;min-height:64px;
   }
   .messenger-page.sberchat-reference[data-message-state="community"] {
     width:100%;height:calc(100dvh - 64px);
@@ -690,15 +620,8 @@
   }
 }
 @media (min-width: 1600px) {
-  .page-shell:has(.sberchat-reference[data-message-state="direct"]) .workspace {
-    padding-left:172px;padding-top:69px;
-  }
-  .page-shell:has(.sberchat-reference[data-message-state="direct"]) .sidebar {width:172px;}
-  .page-shell:has(.sberchat-reference[data-message-state="direct"]) .topbar {
-    left:172px;height:69px;min-height:69px;
-  }
   .messenger-page.sberchat-reference[data-message-state="direct"] {
-    width:100%;height:calc(100dvh - 69px);
+    width:100%;height:calc(100dvh - 64px);
   }
   .messenger-page.sberchat-reference[data-message-state="direct"] > .messenger-shell {
     grid-template-columns:391px minmax(0,1fr) 357px;
@@ -785,28 +708,6 @@
 }
 
 
-/* Resolve fixed-position shell rule inherited from the previous messenger UI.
-   Use PNG-specific viewport insets so the actual canvas (not just columns)
-   starts at the right point. No override outside the Messages section. */
-@media (min-width: 1400px) {
-  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .workspace-content > .sberchat-reference[data-message-state="empty"] {
-    inset:70px 44px 0 164px;
-    width:auto;height:auto;min-height:0;
-    border-radius:0 14px 14px 0;
-  }
-  .page-shell:has(.sberchat-reference[data-message-state="community"]) .workspace-content > .sberchat-reference[data-message-state="community"] {
-    inset:64px 0 0 156px;
-    width:auto;height:auto;min-height:0;
-  }
-}
-@media (min-width: 1600px) {
-  .page-shell:has(.sberchat-reference[data-message-state="direct"]) .workspace-content > .sberchat-reference[data-message-state="direct"] {
-    inset:69px 0 0 172px;
-    width:auto;height:auto;min-height:0;
-  }
-}
-
-
 /* Structured file cards: no invented KB/MB or fake download buttons. */
 .sberchat-reference .msg-chat__artifact-refs {
   display:grid;gap:7px;list-style:none;margin:11px 0 0;padding:0;
@@ -883,64 +784,6 @@
 }
 .sberchat-reference .msg-chat__group.outgoing .msg-chat__group-author {
   justify-content:flex-end;color:#bfe6ff;
-}
-
-
-/* The original Messages PNG has a small bottom-left collapse control, not the
-   cross-product promotional card. Collapse is fully interactive and scoped. */
-.page-shell:has(.sberchat-reference) .messages-sidebar-collapse {
-  width:42px;height:42px;min-height:42px;margin:auto 6px 6px;
-  display:grid;place-items:center;border:1px solid #20466a;
-  border-radius:11px;background:#061c2f;color:#c3def8;
-  cursor:pointer;font-size:24px;line-height:1;
-  transition:background .18s,color .18s,border-color .18s,transform .18s;
-}
-.page-shell:has(.sberchat-reference) .messages-sidebar-collapse:hover {
-  background:#0b3551;border-color:#06dbe8;color:#f4ffff;transform:translateX(-2px);
-}
-.page-shell:has(.sberchat-reference) .sidebar-brand strong {
-  font-size:19px;font-weight:750;letter-spacing:-.5px;text-transform:lowercase;
-}
-.page-shell:has(.sberchat-reference) .sidebar nav .nav-icon {
-  display:grid;place-items:center;width:24px;height:24px;flex:none;
-  font-size:0;
-}
-.page-shell:has(.sberchat-reference) .sidebar nav .nav-icon svg {width:20px;height:20px;}
-.page-shell:has(.sberchat-reference) .sidebar nav a {
-  gap:10px;min-height:48px;padding-left:15px;color:#a5c3df;font-size:13px;
-}
-.page-shell:has(.sberchat-reference) .sidebar nav a.active {
-  color:#24f0f2;border-radius:7px;
-  background:linear-gradient(100deg,#052e4d,#061f36);
-  box-shadow:inset 3px 0 0 #1cebe9;
-}
-@media(min-width:960px) {
-  .page-shell:has(.sberchat-reference) .workspace.workspace--messages-compact {
-    padding-left:80px;
-  }
-  .page-shell:has(.sberchat-reference) .workspace--messages-compact .sidebar {
-    width:80px;padding-left:8px;padding-right:8px;
-  }
-  .page-shell:has(.sberchat-reference) .workspace--messages-compact .sidebar-brand {
-    justify-content:center;padding-left:0;padding-right:0;
-  }
-  .page-shell:has(.sberchat-reference) .workspace--messages-compact .sidebar-brand strong,
-  .page-shell:has(.sberchat-reference) .workspace--messages-compact .sidebar nav a>span:last-child {
-    display:none;
-  }
-  .page-shell:has(.sberchat-reference) .workspace--messages-compact .sidebar nav a {
-    justify-content:center;padding:0;
-  }
-  .page-shell:has(.sberchat-reference) .workspace--messages-compact .messages-sidebar-collapse {
-    margin-left:auto;margin-right:auto;
-  }
-  .page-shell:has(.sberchat-reference) .workspace--messages-compact .topbar {left:80px;}
-  .page-shell:has(.sberchat-reference) .workspace--messages-compact .workspace-content > .sberchat-reference {
-    left:80px;right:0;
-  }
-  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .workspace--messages-compact .workspace-content > .sberchat-reference {
-    right:44px;
-  }
 }
 
 
