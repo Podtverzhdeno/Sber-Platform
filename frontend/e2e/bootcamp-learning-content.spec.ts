@@ -47,7 +47,7 @@ test("mobile interactive reader has no horizontal overflow and reaches its lesso
   const reader = dialog.getByTestId("impulse-immersive-reader");
   await reader.getByRole("button", { name: /Перейти к программе/ }).click();
   await reader.locator(".imp-study__program-list button").first().click();
-  await expect(reader.locator(".imp-study__content")).toBeVisible();
+  await expect(reader.locator(".imp-study__content").first()).toBeVisible();
   const overflow = await dialog.evaluate(node => node.scrollWidth > node.clientWidth + 1);
   expect(overflow).toBe(false);
 });
