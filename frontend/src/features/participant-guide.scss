@@ -1,0 +1,121 @@
+/* Contextual participant help: intentionally lightweight, dismissible, and non-modal. */
+.participant-guide {
+  position: fixed;
+  right: max(19px, env(safe-area-inset-right));
+  bottom: max(19px, env(safe-area-inset-bottom));
+  z-index: 180;
+  display: grid;
+  justify-items: end;
+  gap: 12px;
+  pointer-events: none;
+  max-width: calc(100vw - 28px);
+}
+.participant-guide > * { pointer-events: auto; }
+.participant-guide-trigger {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 15px;
+  min-height: 43px;
+  border: 1px solid rgba(69, 223, 145, .45);
+  border-radius: 14px;
+  color: var(--color-text, #f2fff8);
+  background: linear-gradient(130deg, #163b32, #12283e);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, .23);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 760;
+  cursor: pointer;
+  transition: transform .15s ease, background .15s ease, border-color .15s ease;
+}
+.participant-guide-trigger svg { color: #6eebb5; flex: 0 0 auto; }
+.participant-guide-trigger:hover {
+  border-color: #6eebb5;
+  background: linear-gradient(130deg, #1b493e, #19374c);
+  transform: translateY(-2px);
+}
+.participant-guide-trigger:focus-visible,
+.participant-guide-card button:focus-visible { outline: 3px solid #64e9ad; outline-offset: 3px; }
+.participant-guide-card {
+  width: min(366px, calc(100vw - 28px));
+  max-height: min(600px, calc(100dvh - 105px));
+  overflow-y: auto;
+  padding: 18px 18px 14px;
+  border: 1px solid var(--color-border-strong, #365d51);
+  border-radius: 17px;
+  background: var(--color-surface-raised, #132e25);
+  color: var(--color-text, #f2fff8);
+  box-shadow: 0 22px 65px rgba(0, 0, 0, .29);
+}
+.participant-guide-header { display: flex; gap: 9px; align-items: center; }
+.participant-guide-icon {
+  display: grid; place-items: center; flex: 0 0 34px;
+  width: 34px; height: 34px;
+  border: 1px solid rgba(69, 223, 145, .28);
+  border-radius: 11px;
+  color: var(--color-accent, #45df91);
+  background: rgba(69, 223, 145, .1);
+}
+.participant-guide-context {
+  font-size: 10px; font-weight: 850; letter-spacing: .075em;
+  color: var(--color-accent, #45df91);
+}
+.participant-guide-close {
+  display: grid; place-items: center; margin-left: auto; flex: 0 0 31px;
+  width: 31px; height: 31px; min-height: 31px;
+  padding: 0; border: 0; border-radius: 9px;
+  color: var(--color-muted, #aabdb4);
+  background: transparent; cursor: pointer;
+}
+.participant-guide-close:hover { background: rgba(145,169,158,.15); color: var(--color-text); }
+.participant-guide-card h2 {
+  margin: 15px 0 9px;
+  color: var(--color-text, #f2fff8);
+  font-size: 19px;
+  font-weight: 790;
+  line-height: 1.23;
+  letter-spacing: -.015em;
+}
+.participant-guide-card > p {
+  margin: 0;
+  font-size: 12px; line-height: 1.65;
+  color: var(--color-muted, #aabdb4);
+}
+.participant-guide-advice {
+  display: flex; align-items: flex-start; gap: 9px;
+  margin-top: 15px;
+  padding: 12px;
+  border: 1px solid rgba(69, 223, 145, .19);
+  border-radius: 11px;
+  background: rgba(69, 223, 145, .055);
+}
+.participant-guide-advice svg { color: var(--color-accent, #45df91); flex: 0 0 auto; margin-top: 2px; }
+.participant-guide-advice strong { color: var(--color-text); font-size: 12px; }
+.participant-guide-advice p { margin: 5px 0 0; color: var(--color-muted); font-size: 11px; line-height: 1.55; }
+.participant-guide-benefit { display: flex; align-items: flex-start; gap: 8px; margin: 13px 1px; color: var(--color-text); font-size: 11px; line-height: 1.55; }
+.participant-guide-benefit svg { flex: 0 0 auto; color: #78c9ee; margin-top: 1px; }
+.participant-guide-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 15px 0; }
+.participant-guide-actions button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 8px 12px; border: 1px solid var(--color-border-strong, #365d51); border-radius: 10px; font: inherit; font-size: 11px; font-weight: 720; cursor: pointer; }
+.participant-guide-actions .participant-guide-done { background: var(--color-accent, #45df91); color: #0a281e; border-color: transparent; }
+.participant-guide-actions .participant-guide-done:hover { filter: brightness(1.07); }
+.participant-guide-actions .participant-guide-next { background: transparent; color: var(--color-text); }
+.participant-guide-actions .participant-guide-next:hover { border-color: var(--color-accent); }
+.participant-guide-footer { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; border-top: 1px solid var(--color-border, #345447); padding-top: 12px; }
+.participant-guide-footer > span { min-width: 0; color: var(--color-muted); font-size: 10px; line-height: 1.5; }
+.participant-guide-footer button {
+  padding: 0; border: 0; min-height: 24px;
+  background: none; color: var(--color-muted); flex: 0 0 auto;
+  text-align: right; font: inherit; font-size: 10px; text-decoration: underline;
+  text-underline-offset: 3px; cursor: pointer;
+}
+.participant-guide-footer button:hover { color: var(--color-text); }
+@media (max-width: 640px) {
+  .participant-guide { right: max(11px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); }
+  .participant-guide-trigger { min-height: 40px; padding: 9px 11px; border-radius: 12px; font-size: 11px; }
+  .participant-guide-card { padding: 15px; width: min(350px, calc(100vw - 22px)); max-height: min(550px, calc(100dvh - 95px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .participant-guide-trigger { transition: none; }
+  .participant-guide-trigger:hover { transform: none; }
+}
