@@ -629,10 +629,14 @@ class MessagingService:
         """Create a persistent group with only validated directory members."""
         normalized = title.strip()
         if not 2 <= len(normalized) <= 120:
-            raise ApiError("MESSAGE_GROUP_TITLE_INVALID", "Укажите название чата (2–120 символов).", 422)
+            raise ApiError(
+                "MESSAGE_GROUP_TITLE_INVALID", "Укажите название чата (2–120 символов).", 422
+            )
         peers = tuple(dict.fromkeys(peer_ids))
         if not peers or len(peers) > 24 or actor_context.person_id in peers:
-            raise ApiError("MESSAGE_GROUP_MEMBERS_INVALID", "Выберите от 1 до 24 других участников.", 422)
+            raise ApiError(
+                "MESSAGE_GROUP_MEMBERS_INVALID", "Выберите от 1 до 24 других участников.", 422
+            )
         channel = await self.store.ensure_channel(
             ChannelKind.COMMUNITY, f"group:{uuid4()}", title=normalized
         )
