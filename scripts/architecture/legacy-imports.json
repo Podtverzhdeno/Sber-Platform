@@ -221,14 +221,6 @@
       "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
     }
   ],
-  "allowed_cycles": [
-    [
-      "frontend/src/features/participant-events-design.tsx",
-      "frontend/src/features/participant-events.tsx"
-    ],
-    [
-      "src/impulse/application/task_concurrency.py",
-      "src/impulse/application/task_terms_read.py"
-    ]
-  ]
+  "allowed_cycles": [],
+  "note": "Only executable import cycles count. Previous two reported pairs were TYPE_CHECKING / import type dependencies, not runtime cycles."
 }
