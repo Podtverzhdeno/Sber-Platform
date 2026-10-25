@@ -23,6 +23,7 @@ beforeEach(() => { vi.resetAllMocks(); });
 describe("published rating integration", () => {
   it("renders a transparent no-season state without fake users, ranks or scores", async () => {
     vi.mocked(apiRequest).mockImplementation(async path => {
+      await Promise.resolve();
       if (path === "/api/v1/rating-seasons") return [];
       throw new Error("Unexpected request: " + path);
     });
@@ -42,7 +43,7 @@ describe("published rating integration", () => {
     });
     show();
     const board = await screen.findByRole("region", { name: "Все участники рейтинга" });
-    await waitFor(() => expect(within(board).getAllByRole("article")).toHaveLength(2));
+    await waitFor(() => { expect(within(board).getAllByRole("article")).toHaveLength(2); });
     expect(within(board).getByText("100")).toBeInTheDocument();
     expect(within(board).getByText("75")).toBeInTheDocument();
     expect(within(board).getByText("Тестовый участник")).toBeInTheDocument();
@@ -50,7 +51,8 @@ describe("published rating integration", () => {
     expect(anonymous).toBeDisabled();
     const profile = within(board).getAllByRole("button", { name: /Профиль/ })[1];
     expect(profile).toBeEnabled();
-    fireEvent.click(profile!);
+    if (!profile) throw new Error("Participant profile button is missing");
+    fireEvent.click(profile);
     expect(screen.getByText("Подтверждённая победа")).toBeInTheDocument();
     expect(screen.queryByText("AI Study Assistant")).not.toBeInTheDocument();
     expect(screen.queryByText("5.0")).not.toBeInTheDocument();
