@@ -388,7 +388,7 @@ function CourseDetails({
       {issueError && <p role="alert">Сертификат не выдан. Повторите запрос позже.</p>}
     </section>
     <div className="bc-panel-footer">
-      <button type="button" className="secondary-button" onClick={onReason}>Почему рекомендован</button>
+      <span className="bc-muted">Основание рекомендации доступно в начале панели.</span>
       {card.access_state === "available" && <SafeExternalLink href={card.source_url}>Открыть курс ↗</SafeExternalLink>}
       {card.access_state === "prerequisite_not_met" && <p className="bc-muted">Сначала выполните необходимые условия доступа.</p>}
     </div>
