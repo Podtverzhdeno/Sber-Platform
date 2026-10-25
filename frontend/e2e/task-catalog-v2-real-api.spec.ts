@@ -99,6 +99,8 @@ async function openRealCatalog(page: Page): Promise<void> {
   await expect(
     page.getByRole("heading", { name: "Задачи для твоего развития" }),
   ).toBeVisible();
+  // These regression cases explicitly exercise card ordering and actions.
+  await page.getByRole("button", { name: "Карточки", exact: true }).click();
 }
 
 test("real seeded API preserves card/list order and opens the canonical assigned workspace", async ({ page }) => {
@@ -582,7 +584,7 @@ test("real server keeps equal-score ordering stable across requests, cards and l
 
   await openRealCatalog(page);
   const taskPath = new URL(page.url()).pathname;
-  await page.goto(`${taskPath}?competency=data-analysis`);
+  await page.goto(`${taskPath}?competency=data-analysis&catalog_view=cards`);
   const expectedTitles = expected.map((item) => item.title);
   await expect(page.locator('[role="listitem"]')).toHaveCount(2);
   await expect(page.locator('[role="listitem"] h2')).toHaveText(expectedTitles);
