@@ -166,6 +166,17 @@
   min-height:0;
   grid-template-rows:repeat(2,minmax(170px,1fr));
 }
+.p2-content-grid:not(.p2-content-grid--single) .p2-project-list:has(> .p2-project:only-child) {
+  grid-template-rows:minmax(170px,1fr);
+}
+.p2-content-grid:not(.p2-content-grid--single) .p2-project-list:empty {
+  flex:0 0 auto;
+  grid-template-rows:none;
+}
+.p2-content-grid:not(.p2-content-grid--single) .p2-projects-panel > .p2-empty {
+  flex:1 1 auto;
+  align-content:center;
+}
 .p2-content-grid:not(.p2-content-grid--single) .p2-project {
   min-height:0;
   height:100%;
