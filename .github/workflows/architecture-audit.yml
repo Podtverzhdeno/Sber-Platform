@@ -22,6 +22,31 @@ permissions:
   contents: read
 
 jobs:
+  formatter_once:
+    if: github.ref == 'refs/heads/audit/ruff-architecture-20261026'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Ruff safe fixes and formatter
+        run: |
+          python -m pip install --quiet ruff==0.14.1
+          ruff check --fix --exit-zero scripts/architecture tests/architecture
+          ruff format scripts/architecture tests/architecture
+      - name: Commit only claimed formatting paths to review branch
+        run: |
+          git config user.name 'architecture-format-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- scripts/architecture/audit.py tests/architecture/test_audit.py
+          if ! git diff --cached --quiet; then
+            git commit -m 'style(architecture): apply pinned Ruff formatting'
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
   architecture:
     name: Static architecture inventory and domain boundary gate
     runs-on: ubuntu-latest
