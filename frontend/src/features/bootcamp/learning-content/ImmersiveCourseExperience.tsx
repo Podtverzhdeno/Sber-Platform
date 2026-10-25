@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCircle2, ChevronRight,
   ClipboardCheck, Clock3, Code2, Copy, Download, FileCode2, FileText, GraduationCap,
-  LockKeyhole, Medal, ShieldCheck, Sparkles, Target, Trophy,
+  LockKeyhole, Medal, BadgeCheck, ShieldCheck, Sparkles, Target, Trophy,
 } from "lucide-react";
 import { apiRequest, type RuntimeApiPath } from "../../../api/client";
 import { learningProgramFor } from "./programs";
@@ -20,7 +20,7 @@ type Progress = {
   practice_status?: "pending" | "approved" | "needs_revision" | null;
   practical_certificate_id?: string | null;
 };
-type View = "overview" | "program" | "theory" | "example" | "practice" | "check" | "finish" | "success" | "certificates";
+type View = "overview" | "program" | "skills" | "reviews" | "theory" | "example" | "practice" | "check" | "finish" | "success" | "certificates";
 type Props = {
   courseKey: string;
   courseTitle: string;
@@ -152,7 +152,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   ];
   const isLearning = ["overview", "theory", "example", "practice", "check"].includes(view);
 
-  return <div className="imp-study" data-view={view} data-testid="impulse-immersive-reader">
+  return <div className="imp-study" data-course={courseKey} data-view={view} data-testid="impulse-immersive-reader">
     <div className="imp-study__hero">
       <div className="imp-study__intro">
         <span className="imp-study__chips"><span>Нужно для роли</span>{accessible ? <span className="ok"><Check size={13}/> Доступен</span> : <span className="locked"><LockKeyhole size={13}/> Доступ ограничен</span>}</span>
@@ -205,31 +205,107 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           <p className="imp-study__disclaimer">Учебные материалы Impulse не равны подтверждению практических компетенций. Сертификат прохождения и проверка навыков выдаются раздельно.</p>
           <div className="imp-study__program-list">{program.units.map((lesson,index)=><button type="button" key={lesson.id} disabled={index > completed && !certificateId} onClick={()=>{ selectLesson(index); }}>
             <span className="imp-study__lesson-number">{index+1}</span><strong>{lesson.title}</strong><small>{lesson.minutes} мин</small><span>{index < completed ? "Пройден" : index === completed ? "Начать" : "Закрыт"}</span><ChevronRight size={17}/></button>)}</div>
-        </> : view === "finish" || view === "success" || view === "certificates" ? <>
-          <div className="imp-study__final-head">
-            <div className="imp-study__final-ring"><strong>{percent}%</strong><span>{completed} из {total}</span></div>
-            <div><span className="imp-study__eyebrow">Результат обучения</span>
-              <h2>{view === "finish" ? "Завершение обучения" : view === "success" ? "Обучение завершено!" : "Ваши сертификаты"}</h2>
-              <p>{view === "finish" ? "После завершения курса система проверит, что все восемь уроков пройдены, и автоматически выпустит учебный сертификат Impulse." :
-                  "Теоретическое прохождение и подтверждение практических знаний — два разных достижения."}</p></div>
+        </> : view === "finish" || view === "success" || view === "certificates" || view === "skills" || view === "reviews" ? <>
+          <div className={"imp-study__final-head imp-study__final-head--" + view}>
+            <div className="imp-study__final-ring"><strong>{percent}%</strong><span>{completed} из {total} уроков</span></div>
+            <div className="imp-study__final-copy">
+              <span className="imp-study__eyebrow"><CheckCircle2 size={15}/> {certificateId ? "Курс пройден" : "Последний шаг"}</span>
+              <h2>{view === "finish" ? "Завершение обучения" : view === "success" ? "Обучение завершено!" : view === "skills" ? "Навыки курса" : view === "reviews" ? "Отзывы о курсе" : "Ваши сертификаты"}</h2>
+              <p>{view === "finish"
+                ? "Все уроки изучены. Подтвердите завершение: платформа проверит прогресс и автоматически выдаст сертификат прохождения."
+                : view === "success"
+                  ? "Поздравляем! Вы прошли учебную программу и получили сертификат прохождения. Следующий шаг — подтвердить навыки на практике."
+                  : view === "skills" ? "Учебные цели и практические навыки, формируемые на протяжении восьми уроков."
+                  : view === "reviews" ? "Отзывы публикуются только после поступления проверенных оценок реальных участников."
+                  : "Два независимых достижения: завершение учебной программы и подтверждение практических знаний после проверки."}</p>
+            </div>
+            {view === "success" && <div className="imp-study__final-art" aria-hidden="true">
+              <div className="imp-study__final-art-paper"><FileText size={64}/><BadgeCheck size={38}/></div>
+            </div>}
           </div>
+          {(view === "certificates" || view === "skills" || view === "reviews") && <nav className="imp-study__course-tabs" aria-label="Разделы информации о курсе">
+            {([
+              ["overview","О курсе"],["program","Программа"],["skills","Навыки"],["reviews","Отзывы"],["certificates","Сертификаты"],
+            ] as const).map(([target,label]) => <button type="button" key={target}
+              className={view===target ? "active" : ""}
+              aria-current={view===target ? "page" : undefined}
+              onClick={() => { openView(target); }}>{label}</button>)}
+          </nav>}
+          {view === "skills" && <section className="imp-study__skills-panel" aria-label="Навыки курса">
+            <h3>Что вы изучите</h3><p>Темы основаны на учебной программе курса «{courseTitle}».</p>
+            <div>{program.units.map((lesson,index) => <article key={lesson.id}>
+              <span>{index+1}</span><div><strong>{lesson.title}</strong><p>{lesson.purpose}</p></div>
+              {index < completed && <CheckCircle2 size={20} aria-label="Изучено"/>}
+            </article>)}</div>
+            <button type="button" className="imp-study__primary" onClick={() => { openView("program"); }}>Посмотреть программу <ArrowRight size={17}/></button>
+          </section>}
+          {view === "reviews" && <section className="imp-study__reviews-panel" aria-label="Отзывы о курсе">
+            <BookOpen size={42}/><h3>Проверенных отзывов пока нет</h3>
+            <p>Здесь будут отображаться только опубликованные отзывы реальных участников. Учебные отметки самопроверки не считаются отзывами и не подменяют оценку качества курса.</p>
+            <button type="button" className="imp-study__secondary" onClick={() => { openView("program"); }}>Вернуться к программе <ArrowRight size={17}/></button>
+          </section>}
+          {view === "success" && <div className="imp-study__final-milestones">
+            <div><BookOpen size={26}/><strong>{total} из {total} уроков</strong><span>Все уроки завершены</span></div>
+            <div><CheckCircle2 size={26}/><strong>{percent}%</strong><span>Учебная программа пройдена</span></div>
+            <div><Award size={26}/><strong>Сертификат выдан</strong><span>Автоматически после проверки</span></div>
+          </div>}
+          {view !== "skills" && view !== "reviews" && <>
           <div className="imp-study__cert-grid">
-            <section className="imp-study__cert-card is-ready"><GraduationCap size={29}/><h3>Сертификат прохождения курса</h3>
-              <p>Подтверждает завершение всех учебных материалов курса «{courseTitle}»</p>
-              <span className="imp-study__cert-status">{certificateId ? "Выдан автоматически" : "После завершения всех уроков"}</span>
-              {certificateId && <><small>Идентификатор: {certificateId}</small><button type="button" className="imp-study__primary" onClick={() => { printCertificate("study"); }}><Download size={17}/> Сохранить сертификат PDF</button></>}
+            <section className="imp-study__cert-card is-ready">
+              <div className="imp-study__cert-card-top"><GraduationCap size={29}/>
+                <span className="imp-study__cert-status"><Check size={14}/>{certificateId ? "Получен автоматически" : "После завершения уроков"}</span>
+              </div>
+              <div className="imp-study__cert-body"><div className="imp-study__cert-details">
+                <h3>Сертификат прохождения курса</h3>
+                <p>Подтверждает завершение учебной программы «{courseTitle}» и изучение всех {total} уроков.</p>
+                <ul>
+                  <li><CheckCircle2 size={16}/> Все {total} уроков изучены</li>
+                  <li><CheckCircle2 size={16}/> {percent}% прогресса обучения</li>
+                  <li><CheckCircle2 size={16}/> Отдельная проверка проекта не требуется</li>
+                </ul>
+              </div>
+              <div className="imp-study__cert-preview" aria-hidden="true"><span>IMPULSE</span><FileText size={48}/><strong>СЕРТИФИКАТ</strong><BadgeCheck size={32}/></div></div>
+              {certificateId && <small className="imp-study__cert-id">Номер: {certificateId}</small>}
+              {certificateId ? <button type="button" className="imp-study__primary" onClick={() => { printCertificate("study"); }}><Download size={17}/> Распечатать / сохранить PDF</button>
+                : <p className="imp-study__cert-await">Будет выдан автоматически после завершения курса</p>}
             </section>
-            <section className="imp-study__cert-card"><Medal size={29}/><h3>Сертификат подтверждения знаний</h3>
-              <p>Требует практического задания и проверки результата наставником. Не выдаётся автоматически за просмотр уроков.</p><span className="imp-study__cert-status">{practiceState === "approved" ? "Практика подтверждена" : practiceState === "pending" ? "Работа отправлена на проверку" : "Требуется проверка практики"}</span>
-              {practicalCertificateId && <><small>Идентификатор: {practicalCertificateId}</small>
-                <button type="button" className="imp-study__primary" onClick={() => { printCertificate("practice"); }}>
-                  <Download size={17}/> Сохранить сертификат PDF
-                </button></>}
-              {!practicalCertificateId && <button type="button" className="imp-study__secondary" onClick={() => { setView("practice"); setCurrent(total-1); }}>Перейти к практике <ArrowRight size={16}/></button>}
+            <section className="imp-study__cert-card imp-study__cert-card--practice">
+              <div className="imp-study__cert-card-top"><Medal size={29}/>
+                <span className="imp-study__cert-status imp-study__cert-status--practice">
+                  {practiceState === "approved" ? "Знания подтверждены" : practiceState === "pending" ? "На проверке" : "Нужна практика"}
+                </span>
+              </div>
+              <div className="imp-study__cert-body"><div className="imp-study__cert-details">
+                <h3>Сертификат подтверждения знаний</h3>
+                <p>Подтверждает практические навыки после выполнения задания и независимой проверки результата.</p>
+                <ul>
+                  <li><CheckCircle2 size={16}/> Теоретическая программа завершена</li>
+                  <li className={practiceState ? "complete" : "pending"}><Clock3 size={16}/> {practiceState === "pending" ? "Работа ожидает проверки" : practiceState === "approved" ? "Практика принята" : "Выполните практическое задание"}</li>
+                  <li className={practicalCertificateId ? "complete" : "pending"}><Medal size={16}/> {practicalCertificateId ? "Компетенции подтверждены" : "Требуется решение проверяющего"}</li>
+                </ul>
+              </div><div className="imp-study__cert-preview imp-study__cert-preview--practice" aria-hidden="true">
+                <span>IMPULSE</span><Medal size={48}/><strong>СЕРТИФИКАТ</strong><Clock3 size={30}/>
+              </div></div>
+              {practicalCertificateId && <small className="imp-study__cert-id">Номер: {practicalCertificateId}</small>}
+              {practicalCertificateId
+                ? <button type="button" className="imp-study__primary" onClick={() => { printCertificate("practice"); }}><Download size={17}/> Распечатать / сохранить PDF</button>
+                : <button type="button" className="imp-study__secondary" disabled={!certificateId} onClick={() => { setView("practice"); setCurrent(total-1); }}>
+                  {practiceState === "pending" ? "Посмотреть отправленную практику" : "Перейти к практике"} <ArrowRight size={16}/>
+                </button>}
             </section>
           </div>
-          {view === "finish" && <button type="button" className="imp-study__primary imp-study__finish" disabled={busy || !ready} onClick={() => { void completeCourse(); }}><CheckCircle2/> {busy ? "Проверяем и выдаём…" : "Завершить обучение"}</button>}
-          {view === "success" && <button type="button" className="imp-study__secondary imp-study__finish" onClick={() => { openView("certificates"); }}>Посмотреть два сертификата <ArrowRight size={18}/></button>}
+          </>}
+          {view === "certificates" && <section className="imp-study__cert-timeline" aria-label="Как получить сертификаты">
+            <h3>Как получить каждый сертификат</h3><div>
+              <div><BookOpen size={22}/><span><strong>1. Пройти все уроки</strong><small>Завершить {total} из {total} уроков</small></span><ChevronRight size={18}/><CheckCircle2 size={25}/><span><strong>Сертификат прохождения</strong><small>Выдаётся автоматически</small></span></div>
+              <div><Code2 size={22}/><span><strong>2. Выполнить практику</strong><small>Отправить решение на проверку</small></span><ChevronRight size={18}/><Medal size={25}/><span><strong>Подтверждение знаний</strong><small>Только после успешной проверки</small></span></div>
+            </div>
+          </section>}
+          {view === "finish" && <button type="button" className="imp-study__primary imp-study__finish" disabled={busy || !ready} onClick={() => { void completeCourse(); }}><CheckCircle2/> {busy ? "Проверяем и выдаём…" : "Завершить обучение"} <ArrowRight size={17}/></button>}
+          {view === "success" && <div className="imp-study__success-actions">
+            <button type="button" className="imp-study__secondary" onClick={() => { openView("certificates"); }}>Посмотреть два сертификата <ArrowRight size={18}/></button>
+            <button type="button" className="imp-study__primary" disabled={!certificateId} onClick={() => { printCertificate("study"); }}><Download size={17}/> Распечатать / сохранить PDF</button>
+          </div>}
           <div className="imp-study__print-certificate" aria-hidden="true"><h2>IMPULSE · {printKind === "study" ? "Сертификат прохождения" : "Сертификат подтверждения знаний"}</h2><p>{printKind === "study" ? "Подтверждается прохождение курса" : "Подтверждается проверка практической работы по курсу"} «{courseTitle}»</p><p>Номер {printKind === "study" ? certificateId : practicalCertificateId}</p></div>
         </> : <>
           <div className="imp-study__lesson-heading"><div><span className="imp-study__eyebrow">Урок {current+1} из {total}</span><h2>{unit.title}</h2><p>{unit.purpose}</p></div><div className="imp-study__progress-top"><strong>{percent}% прохождения</strong><div className="imp-study__bar"><span style={{width:String(percent)+"%"}}/></div></div></div>

@@ -60,9 +60,23 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     await page.screenshot({ path: "test-results/imp-06-success-" + String(viewport.width) + ".png", animations: "disabled" });
     await reader.getByRole("button", { name: /Посмотреть два сертификата/ }).click();
     await expect(reader.getByRole("heading", { name: "Ваши сертификаты" })).toBeVisible();
-    await expect(reader.getByText("Выдан автоматически")).toBeVisible();
-    await expect(reader.getByText("Требуется проверка практики")).toBeVisible();
+    await expect(reader.getByText("Получен автоматически")).toBeVisible();
+    await expect(reader.getByText("Нужна практика")).toBeVisible();
+    await expect(reader.locator(".imp-study__cert-preview")).toHaveCount(2);
+    await expect(reader.locator(".imp-study__cert-timeline > div > div")).toHaveCount(2);
+    const pdfButton = reader.getByRole("button", { name: /Распечатать \/ сохранить PDF/ });
+    await expect(pdfButton).toBeEnabled();
+    const hoverStyle = await pdfButton.evaluate(el => getComputedStyle(el).transitionProperty);
+    expect(hoverStyle).not.toBe("none");
     await page.screenshot({ path: "test-results/imp-07-certificates-" + String(viewport.width) + ".png", animations: "disabled" });
+    const infoTabs = reader.getByRole("navigation", { name: "Разделы информации о курсе" });
+    await expect(infoTabs.getByRole("button")).toHaveCount(5);
+    await infoTabs.getByRole("button", { name: "Навыки" }).click();
+    await expect(reader.getByRole("region", { name: "Навыки курса" }).locator("article")).toHaveCount(8);
+    await infoTabs.getByRole("button", { name: "Отзывы" }).click();
+    await expect(reader.getByText("Проверенных отзывов пока нет")).toBeVisible();
+    await infoTabs.getByRole("button", { name: "Сертификаты" }).click();
+    await expect(reader.locator(".imp-study__cert-grid .imp-study__cert-card")).toHaveCount(2);
     await reader.getByRole("button", { name: /Перейти к практике/ }).click();
     await reader.getByLabel("Опишите, что сделали и как проверили результат").fill(
       "Выполнил практическое задание: создал тестовый сценарий и проверил основное поведение, " +
@@ -86,6 +100,11 @@ test("data-security reference: theory methods, JWT example, practice requirement
   await page.goto(path + "?course=demo-course-10");
   const reader = page.getByTestId("impulse-immersive-reader");
   await expect(reader).toBeVisible();
+  await expect(reader).toHaveAttribute("data-course", "demo-course-10");
+  const illustration = await page.request.get("/bootcamp/security-hero.svg");
+  expect(illustration.ok()).toBe(true);
+  expect(await illustration.text()).toContain("Защищённые серверы");
+  await page.screenshot({ path: "test-results/reference-security-00-overview.png", animations: "disabled" });
   await reader.getByRole("button", { name: /Перейти к программе/ }).click();
   await reader.locator(".imp-study__program-list button").first().click();
   await reader.locator(".imp-study__navigation .imp-study__primary").click();

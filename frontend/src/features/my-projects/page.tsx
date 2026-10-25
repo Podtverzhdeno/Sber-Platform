@@ -5,7 +5,7 @@ import {
   ArrowLeft, ArrowRight, Award, Bookmark, BriefcaseBusiness, CalendarDays,
   Check, CheckCircle2, ChevronDown, Code2, Crown, FileText,
   FolderKanban, Gift, Info, Layers3, LayoutGrid, List,
-  Clock3, MessageCircle, MoreHorizontal, Search, Share2, SlidersHorizontal, Star, Users,
+  MessageCircle, Search, Share2, SlidersHorizontal, Star, Users,
 } from "lucide-react";
 import { apiRequest } from "../../api/client";
 import { StatePanel } from "../../components/ui";
@@ -122,37 +122,6 @@ function RewardsPath({ completedCount, onSelect }: { completedCount: number; onS
     </div>
   </section>;
 }
-function ProjectSummary({ project, selected, expanded, onSelect, onOpen, onBookmark, saved }: {
-  project: Project; selected: boolean; expanded: boolean; onSelect: () => void; onOpen: () => void; onBookmark: () => void; saved: boolean;
-}) {
-  const company = projectCompany(project);
-  const progress = completion(project);
-  const status = project.work.assignment.status;
-  const active = activeStatuses.has(status);
-  return <article className={`mp-project-tile mp-project-tile--grid ${selected ? "is-selected" : ""}`} data-testid={`my-project-${project.work.assignment.id}`}>
-    <div className="mp-project-card-top">
-      <CompanyIcon name={company}/>
-      <div className="mp-project-card-heading"><small>{company} · Заказчик</small><h2>{project.work.task.title}</h2></div>
-      <button type="button" className="mp-icon-button" aria-label={saved ? "Убрать из избранного" : "В избранное"} aria-pressed={saved} onClick={onBookmark}><Bookmark size={17} fill={saved ? "currentColor" : "none"}/></button>
-    </div>
-    <div className="mp-chip-row"><em>Проект</em><em>Командная работа</em><em>Практика</em></div>
-    <div className="mp-project-card-progress"><div><span>Твой прогресс</span><strong>{progress === null ? "Не оценён" : `${String(progress)}%`}</strong></div><ProgressBar value={progress} compact/></div>
-    <div className="mp-project-card-meta">
-      <span><Clock3 size={15}/>{statusText[status] || status}</span>
-      <span><CalendarDays size={15}/>{dateLabel(project.work.terms.deadline_at)}</span>
-      <span className="mp-project-card-team" aria-label="Команда проекта">
-        {(project.detail?.team?.length ?? 0)>0 ? <>
-          <span className="mp-team-avatars" aria-hidden="true">{(project.detail?.team ?? []).slice(0,3).map(person=><i key={person.person_id} title={person.display_name}>{person.display_name.trim().slice(0,1).toUpperCase()}</i>)}</span>
-          {(project.detail?.team?.length ?? 0)>3&&<small>+{(project.detail?.team?.length ?? 0)-3}</small>}
-        </> : <><Users size={15}/> Команда уточняется</>}
-      </span>
-    </div>
-    <div className="mp-project-card-actions">
-      <button className={`mp-primary ${active ? "" : "mp-primary--quiet"}`} type="button" onClick={onOpen}>{active ? "Продолжить работу" : finishedStatuses.has(status) ? "Открыть результат" : "Открыть проект"} <ArrowRight size={16}/></button>
-      <button type="button" className="mp-icon-button" aria-pressed={expanded} aria-label={expanded ? "Скрыть предпросмотр" : "Быстрый просмотр"} title="Быстрый просмотр" onClick={onSelect}><MoreHorizontal size={20}/></button>
-    </div>
-  </article>;
-}
 function ProjectSidebarRow({ project, selected, onSelect, onOpen, onBookmark, saved }: {
   project: Project; selected: boolean; onSelect: () => void; onOpen: () => void; onBookmark: () => void; saved: boolean;
 }) {
@@ -205,18 +174,18 @@ function PanelPreview({ project, onOpen, onRewards }: { project: Project; onOpen
   const progress = completion(project);
   const contributions = project.work.contributions.slice(-4);
   return <aside className="mp-preview mp-surface">
-    <header className="mp-preview__header"><CompanyIcon name={projectCompany(project)}/><div><small>{projectCompany(project)} · Заказчик</small><h2>{project.work.task.title}</h2><p>{project.work.terms.deliverable}</p></div><Status status={project.work.assignment.status}/></header>
+    <header className="mp-preview__header"><CompanyIcon name={projectCompany(project)}/><div className="mp-preview__intro"><small>{projectCompany(project)} · Заказчик</small><h2>{project.work.task.title}</h2>{(project.work.task.competency_tags?.length ?? 0)>0&&<div className="mp-chip-row">{project.work.task.competency_tags?.slice(0,3).map(skill=><em key={skill}>{skill}</em>)}</div>}<p>{project.work.terms.deliverable}</p></div><div className="mp-preview__aside"><Status status={project.work.assignment.status}/><span className="mp-preview__deadline"><CalendarDays size={15}/> {dateLabel(project.work.terms.deadline_at)}<small>{daysLabel(project.work.terms.deadline_at)}</small></span></div></header>
     <div className="mp-preview__tabs"><button type="button" className="is-active" onClick={()=>{onOpen("overview");}}>Обзор</button><button type="button" onClick={()=>{onOpen("progress");}}>Прогресс</button><button type="button" onClick={()=>{onOpen("contribution");}}>Мой вклад</button><button type="button" onClick={()=>{onOpen("team");}}>Команда</button><button type="button" onClick={onRewards}>Бонусы и выгоды</button></div>
     <div className="mp-preview__content">
       <div className="mp-preview__left">
         <section className="mp-surface mp-panel-inset"><header><h3>Прогресс по этапам</h3><strong>{progress === null ? "Нет оценки" : `${String(progress)}%`}</strong></header>
           {checkpoints.length ? checkpoints.slice(0,5).map((cp,index)=><div className="mp-stage" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"done":""}>{finishedCheckpoint.has(cp.status)?<Check size={15}/>:index+1}</span><div><p>{cp.title}</p><ProgressBar value={finishedCheckpoint.has(cp.status)?100:null} compact/></div></div>) : <p className="mp-muted">План этапов появится после публикации заказчиком</p>}
         </section>
-        <section className="mp-surface mp-panel-inset"><header><h3>Команда проекта</h3><small>{project.detail?.team?.length ?? "—"} участников</small></header><p>{project.detail?.mentor?.display_name ? `Ментор: ${project.detail.mentor.display_name}` : "Состав команды уточняется"}</p></section>
+        <section className="mp-surface mp-panel-inset mp-preview-team"><header><h3>Команда проекта</h3><small>{project.detail?.team?.length ?? "—"} участников</small></header>{(project.detail?.team?.length ?? 0)>0?<div className="mp-preview-team__members">{(project.detail?.team ?? []).slice(0,3).map(person=><div key={person.person_id} className="mp-preview-team__person"><span aria-hidden="true">{person.display_name.trim().slice(0,1).toUpperCase()}</span><div><strong>{person.display_name}</strong><small>{person.status}</small></div></div>)}</div>:<p className="mp-muted">Состав команды уточняется</p>}{project.detail?.mentor?.display_name&&<p className="mp-preview-team__mentor">Ментор · {project.detail.mentor.display_name}</p>}</section>
       </div>
       <div className="mp-preview__right">
         <section className="mp-surface mp-panel-inset"><header><h3>Мой вклад</h3><small>{contributions.length} версий</small></header>
-          {contributions.length ? contributions.map(item=><p className="mp-contrib-line" key={item.id}><FileText size={15}/><span>{item.personal_summary}</span></p>) : <p className="mp-muted">Отправьте свой первый вклад, чтобы он появился здесь</p>}
+          {contributions.length ? contributions.map(item=><div className="mp-contrib-line" key={item.id}><FileText size={15}/><span><strong>Версия {String(item.version)} · {item.status}</strong><small>{item.personal_summary}</small></span></div>) : <p className="mp-muted">Отправьте свой первый вклад, чтобы он появился здесь</p>}
         </section><BenefitsPreview onDetails={onRewards}/>
       </div>
     </div>
@@ -344,7 +313,7 @@ export function ParticipantProjectsV2() {
   }))});
   const projects:Project[]=(work.data??[]).map((item,index)=>({work:item,detail:details[index]?.data}));
   const selected=projects.find(x=>x.work.assignment.id===selectedId);
-  const focused=projects.find(x=>x.work.assignment.id===focus)||projects[0];
+
   const open=(id:string,tab:Tab="overview")=>{setWorkspaceTab(false);setParams(previous=>{const next=new URLSearchParams(previous);next.set("project",id);next.set("tab",tab);return next;});};
   const back=()=>{setWorkspaceTab(false);setParams(previous=>{const next=new URLSearchParams(previous);next.delete("project");next.delete("tab");return next;});};
   const setLayout=(value:View)=>{setParams(previous=>{const next=new URLSearchParams(previous);next.set("layout",value);return next;});};
