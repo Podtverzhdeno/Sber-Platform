@@ -261,6 +261,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 <RoleCardOverview
                   role={role}
                   courseProgress={role.track_key===selectedKey && roleLevel?.curriculum_state==="published" ? `${String(roleLevel.completed_courses)} из ${String(roleLevel.required_courses)} курсов` : null}
+                  nextCycle={role.track_key===selectedKey && nextCycleUnpublished && roleLevel ? `L${String(roleLevel.level)} · цикл ${String(roleLevel.cycle_number)}` : null}
                   primary={role.track_key === primaryKey}
                   selected={role.track_key === selectedKey}
                   pinned={role.track_key === pinnedTrack}
@@ -365,6 +366,12 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           </div>
         </section>
         <section className="trajectory-v2-next-panel">
+          {nextCycleUnpublished ? <div className="trajectory-v2-next-task" role="status">
+            <div className="trajectory-v2-next-task-description">
+              <strong>Следующий цикл ожидает новую программу</strong>
+              <small>Старые этапы и курсы сохранены в истории и не засчитываются повторно.</small>
+            </div>
+          </div> : <>
           <header>
             <h3>Следующий шаг</h3>
             <span>{overview.next_outcome?.trajectory_title ?? "Маршрут"}</span>
@@ -392,6 +399,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               setDrawerKey(outcome.milestone_key);
             }}>→</button>}
           </div>
+          </>}
         </section>
         <LearningProgressPanel compact bootcampIndex={Math.max(0, (navigation.data?.navigation ?? []).indexOf("Bootcamp"))} />
         <section className="trajectory-v2-passport-panel">
@@ -555,6 +563,7 @@ function formatAsOf(asOf: string): string {
 export function RoleCardOverview(props: {
   role: RoleCardView;
   courseProgress?: string | null;
+  nextCycle?: string | null;
   primary: boolean;
   selected: boolean;
   pinned: boolean;
@@ -606,7 +615,7 @@ export function RoleCardOverview(props: {
       </span>
       {props.primary && <span className="trajectory-v2-primary-check" aria-label="Основная роль">✓</span>}
       <strong>{role.title}</strong>
-      {role.attempt_number !== null ? (
+      {props.nextCycle ? <small>{props.nextCycle} · ожидает новые этапы</small> : role.attempt_number !== null ? (
         <>
           <progress max={Math.max(1,role.total_milestones)} value={Math.min(role.total_milestones,role.completed_milestones)} aria-label="Прогресс этапов роли" />
           <small>{role.completed_milestones} из {role.total_milestones} этапов подтверждено{role.state === "paused" ? " · пауза" : ""}{props.courseProgress ? ` · ${props.courseProgress}` : ""}</small>
