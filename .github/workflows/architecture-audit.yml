@@ -35,11 +35,12 @@ jobs:
         run: python -m unittest discover -s tests/architecture -p 'test_*.py' -v
       - name: Analyze all tracked code, imports and Alembic graph
         run: python scripts/architecture/audit.py --root . --output-dir architecture-report --fail-on-domain-violations
-      - name: Publish concise audit summary
+      - name: Print and publish architecture findings
         if: always()
         run: |
           if [ -f architecture-report/architecture.md ]; then
-            head -n 35 architecture-report/architecture.md >> "$GITHUB_STEP_SUMMARY"
+            cat architecture-report/architecture.md
+            head -n 80 architecture-report/architecture.md >> "$GITHUB_STEP_SUMMARY"
           fi
       - name: Archive full dependency report
         if: always()
