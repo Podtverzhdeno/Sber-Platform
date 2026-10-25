@@ -17,8 +17,8 @@ from sqlalchemy import text
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
-from impulse.domain.identity import Role
 from impulse.bootcamp.service import BootcampCatalogService
+from impulse.domain.identity import Role
 
 router = APIRouter(tags=["bootcamp"])
 UNIT_COUNT = 8
@@ -49,7 +49,9 @@ def _check_actor(authenticated: AuthenticatedSession, course_key: str) -> None:
         raise ApiError(code="NOT_FOUND", message="Курс не найден.", status_code=404)
 
 
-async def _assert_course_access(request: Request, authenticated: AuthenticatedSession, course_key: str) -> None:
+async def _assert_course_access(
+    request: Request, authenticated: AuthenticatedSession, course_key: str
+) -> None:
     """A demo course must really be in the participant's available catalog.
 
     Client-side locked buttons are never the authorization boundary.
@@ -58,12 +60,18 @@ async def _assert_course_access(request: Request, authenticated: AuthenticatedSe
     if development is None:
         raise ApiError(code="BOOTCAMP_UNAVAILABLE", message="Каталог недоступен.", status_code=503)
     competency = getattr(request.app.state, "competency_service", None)
-    catalog = await BootcampCatalogService(development.store, competency).catalog(authenticated.actor)
+    catalog = await BootcampCatalogService(development.store, competency).catalog(
+        authenticated.actor
+    )
     card = next((item for item in catalog if item.key == course_key), None)
     if card is None:
         raise ApiError(code="NOT_FOUND", message="Курс не найден.", status_code=404)
     if card.access_state != "available":
-        raise ApiError(code="COURSE_UNAVAILABLE", message="Условия доступа к курсу не выполнены.", status_code=409)
+        raise ApiError(
+            code="COURSE_UNAVAILABLE",
+            message="Условия доступа к курсу не выполнены.",
+            status_code=409,
+        )
 
 
 async def _view(request: Request, person_id: UUID, course_key: str) -> ImpulseStudyView:
@@ -82,12 +90,20 @@ async def _view(request: Request, person_id: UUID, course_key: str) -> ImpulseSt
             .one_or_none()
         )
     async with request.app.state.database.sessions() as session:
-        practice = (await session.execute(
-            text("SELECT status, practical_certificate_id "
-                 "FROM impulse_practical_submissions WHERE person_id = :person "
-                 "AND course_key = :course"),
-            {"person": person_id, "course": course_key},
-        )).mappings().one_or_none()
+        practice = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT status, practical_certificate_id "
+                        "FROM impulse_practical_submissions WHERE person_id = :person "
+                        "AND course_key = :course"
+                    ),
+                    {"person": person_id, "course": course_key},
+                )
+            )
+            .mappings()
+            .one_or_none()
+        )
     return ImpulseStudyView(
         course_key=course_key,
         completed_units=int(row["completed_units"]) if row else 0,
@@ -215,26 +231,40 @@ async def submit_impulse_practice(
     _check_actor(authenticated, course_key)
     await _assert_course_access(request, authenticated, course_key)
     if body.artifact_url and not body.artifact_url.startswith("https://"):
-        raise ApiError(code="INVALID_ARTIFACT_URL", message="Допускаются только ссылки HTTPS.", status_code=422)
+        raise ApiError(
+            code="INVALID_ARTIFACT_URL", message="Допускаются только ссылки HTTPS.", status_code=422
+        )
     person = authenticated.actor.person_id
     async with request.app.state.database.session() as session:
-        progress = (await session.execute(
-            text("SELECT certificate_id FROM impulse_course_progress "
-                 "WHERE person_id = :person AND course_key = :course"),
-            {"person": person, "course": course_key},
-        )).scalar_one_or_none()
+        progress = (
+            await session.execute(
+                text(
+                    "SELECT certificate_id FROM impulse_course_progress "
+                    "WHERE person_id = :person AND course_key = :course"
+                ),
+                {"person": person, "course": course_key},
+            )
+        ).scalar_one_or_none()
         if progress is None:
-            raise ApiError(code="COURSE_INCOMPLETE", message="Сначала завершите курс.", status_code=409)
+            raise ApiError(
+                code="COURSE_INCOMPLETE", message="Сначала завершите курс.", status_code=409
+            )
         await session.execute(
-            text("INSERT INTO impulse_practical_submissions "
-                 "(person_id, course_key, description, artifact_url, status) "
-                 "VALUES (:person, :course, :description, :artifact_url, 'pending') "
-                 "ON CONFLICT (person_id, course_key) DO UPDATE SET "
-                 "description = EXCLUDED.description, artifact_url = EXCLUDED.artifact_url, "
-                 "status = 'pending', submitted_at = now() "
-                 "WHERE impulse_practical_submissions.status <> 'approved'"),
-            {"person": person, "course": course_key, "description": body.description,
-             "artifact_url": body.artifact_url},
+            text(
+                "INSERT INTO impulse_practical_submissions "
+                "(person_id, course_key, description, artifact_url, status) "
+                "VALUES (:person, :course, :description, :artifact_url, 'pending') "
+                "ON CONFLICT (person_id, course_key) DO UPDATE SET "
+                "description = EXCLUDED.description, artifact_url = EXCLUDED.artifact_url, "
+                "status = 'pending', submitted_at = now() "
+                "WHERE impulse_practical_submissions.status <> 'approved'"
+            ),
+            {
+                "person": person,
+                "course": course_key,
+                "description": body.description,
+                "artifact_url": body.artifact_url,
+            },
         )
     return await _view(request, person, course_key)
 
@@ -254,22 +284,39 @@ async def review_impulse_practice(
 
     Normal participants/mentors never gain this power through the learner UI.
     """
-    if authenticated.actor.active_role is not Role.OPERATOR or "verification:write" not in authenticated.actor.scopes:
+    if (
+        authenticated.actor.active_role is not Role.OPERATOR
+        or "verification:write" not in authenticated.actor.scopes
+    ):
         raise ApiError(code="FORBIDDEN", message="Доступ запрещён.", status_code=403)
     if course_key not in ELIGIBLE_KEYS:
         raise ApiError(code="NOT_FOUND", message="Курс не найден.", status_code=404)
     async with request.app.state.database.session() as session:
-        row = (await session.execute(
-            text("UPDATE impulse_practical_submissions SET status = :decision, "
-                 "practical_certificate_id = CASE WHEN :decision = 'approved' "
-                 "THEN COALESCE(practical_certificate_id, :new_certificate) ELSE NULL END, "
-                 "reviewed_by = :reviewer, reviewed_at = now() "
-                 "WHERE person_id = :person AND course_key = :course "
-                 "RETURNING status, practical_certificate_id"),
-            {"decision": body.decision, "new_certificate": uuid4(),
-             "reviewer": authenticated.actor.person_id, "person": person_id,
-             "course": course_key},
-        )).mappings().one_or_none()
+        row = (
+            (
+                await session.execute(
+                    text(
+                        "UPDATE impulse_practical_submissions SET status = :decision, "
+                        "practical_certificate_id = CASE WHEN :decision = 'approved' "
+                        "THEN COALESCE(practical_certificate_id, :new_certificate) ELSE NULL END, "
+                        "reviewed_by = :reviewer, reviewed_at = now() "
+                        "WHERE person_id = :person AND course_key = :course "
+                        "RETURNING status, practical_certificate_id"
+                    ),
+                    {
+                        "decision": body.decision,
+                        "new_certificate": uuid4(),
+                        "reviewer": authenticated.actor.person_id,
+                        "person": person_id,
+                        "course": course_key,
+                    },
+                )
+            )
+            .mappings()
+            .one_or_none()
+        )
         if not row:
-            raise ApiError(code="NOT_FOUND", message="Практическая работа не найдена.", status_code=404)
+            raise ApiError(
+                code="NOT_FOUND", message="Практическая работа не найдена.", status_code=404
+            )
     return await _view(request, person_id, course_key)

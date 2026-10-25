@@ -1,4 +1,5 @@
 """End-to-end Impulse lesson persistence, award separation, and review authorization."""
+
 from __future__ import annotations
 
 import asyncio
@@ -25,8 +26,12 @@ API = "/api/v1/me/bootcamp/impulse-study/demo-course-1"
 def actor(person_id: UUID, role: Role) -> ActorContext:
     scopes = frozenset({"verification:write"}) if role is Role.OPERATOR else frozenset()
     return ActorContext(
-        person_id=person_id, display_name="Test learner", active_role=role,
-        assigned_roles=(role,), scopes=scopes, program_key="test",
+        person_id=person_id,
+        display_name="Test learner",
+        active_role=role,
+        assigned_roles=(role,),
+        scopes=scopes,
+        program_key="test",
         consent_scopes=frozenset(),
     )
 
@@ -35,15 +40,20 @@ def session(person_id: UUID, role: Role) -> AuthenticatedSession:
     return AuthenticatedSession(
         actor=actor(person_id, role),
         session=SessionRecord(
-            session_id=uuid4(), person_id=person_id, token_digest="test-digest",
-            csrf_digest="test-csrf-digest", active_role=role,
+            session_id=uuid4(),
+            person_id=person_id,
+            token_digest="test-digest",
+            csrf_digest="test-csrf-digest",
+            active_role=role,
             expires_at=datetime.now(UTC) + timedelta(hours=1),
         ),
     )
 
 
 @pytest.mark.spec("bootcamp/impulse-study-persistence")
-def test_study_progress_requires_order_and_practice_requires_review(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_study_progress_requires_order_and_practice_requires_review(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     url = os.environ.get("TEST_DATABASE_URL")
     if not url:
         pytest.skip("PostgreSQL integration test requires TEST_DATABASE_URL")
@@ -54,8 +64,10 @@ def test_study_progress_requires_order_and_practice_requires_review(monkeypatch:
         async with database.session() as db:
             for person, label in ((learner, "learner"), (operator, "reviewer")):
                 await db.execute(
-                    text("INSERT INTO persons(id, display_name, external_key) "
-                         "VALUES (:id, :name, :key)"),
+                    text(
+                        "INSERT INTO persons(id, display_name, external_key) "
+                        "VALUES (:id, :name, :key)"
+                    ),
                     {"id": person, "name": label, "key": str(person)},
                 )
 
@@ -100,7 +112,10 @@ def test_study_progress_requires_order_and_practice_requires_review(monkeypatch:
 
         invalid = client.post(API + "/practice", json={"description": "small"})
         assert invalid.status_code == 422
-        submitted = client.post(API + "/practice", json={"description": "S" * 80, "artifact_url": "https://example.com/review"})
+        submitted = client.post(
+            API + "/practice",
+            json={"description": "S" * 80, "artifact_url": "https://example.com/review"},
+        )
         assert submitted.status_code == 200
         assert submitted.json()["practice_status"] == "pending"
         assert submitted.json()["practical_certificate_id"] is None
@@ -113,7 +128,10 @@ def test_study_progress_requires_order_and_practice_requires_review(monkeypatch:
         assert approved.json()["practice_status"] == "approved"
         practical = approved.json()["practical_certificate_id"]
         assert practical is not None and practical != first
-        assert client.post(path, json={"decision": "approved"}).json()["practical_certificate_id"] == practical
+        assert (
+            client.post(path, json={"decision": "approved"}).json()["practical_certificate_id"]
+            == practical
+        )
 
         active_role[0] = Role.PARTICIPANT
         read = client.get(API)
@@ -132,11 +150,20 @@ def test_study_cannot_advance_locked_course(monkeypatch: pytest.MonkeyPatch) -> 
         return [SimpleNamespace(key="demo-course-10", access_state="prerequisite_not_met")]
 
     monkeypatch.setattr(editorial_learning.BootcampCatalogService, "catalog", catalog)
-    request = SimpleNamespace(app=SimpleNamespace(state=SimpleNamespace(
-        development_service=SimpleNamespace(store=object()), competency_service=None,
-    )))
+    request = SimpleNamespace(
+        app=SimpleNamespace(
+            state=SimpleNamespace(
+                development_service=SimpleNamespace(store=object()),
+                competency_service=None,
+            )
+        )
+    )
     with pytest.raises(ApiError) as exception:
-        asyncio.run(editorial_learning._assert_course_access(
-            request, session(person, Role.PARTICIPANT), "demo-course-10",
-        ))
+        asyncio.run(
+            editorial_learning._assert_course_access(
+                request,
+                session(person, Role.PARTICIPANT),
+                "demo-course-10",
+            )
+        )
     assert exception.value.status_code == 409
