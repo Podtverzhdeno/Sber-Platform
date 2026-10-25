@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { components } from "../../api/schema";
+import { ParticipantHelpTrigger } from "../participant-help-trigger";
 
 export type BootcampOverview = components["schemas"]["BootcampOverviewV2"];
 export type CourseSnapshot = components["schemas"]["CourseSnapshot"];
@@ -42,7 +43,7 @@ export function ContinueLearning({
   if (item === null) {
     return (
       <section aria-labelledby="continue-title" className="ui-card">
-        <h2 id="continue-title">Продолжить обучение</h2>
+        <h2 id="continue-title">Продолжить обучение</h2><ParticipantHelpTrigger topicId="course-choose" label="Как выбрать курс" />
         <p>Активного шага пока нет. Выберите курс в каталоге.</p>
       </section>
     );
@@ -50,7 +51,7 @@ export function ContinueLearning({
   return (
     <section aria-labelledby="continue-title" className="ui-card">
       <p className="eyebrow">Следующий шаг</p>
-      <h2 id="continue-title">{courseTitle ?? item.course_key}</h2>
+      <h2 id="continue-title">{courseTitle ?? item.course_key}</h2><ParticipantHelpTrigger topicId="course-complete" label="Как засчитывается прогресс" />
       {item.progress && (
         <p>
           Пройдено {item.progress.numerator} из {item.progress.denominator} · {item.progress.percent}%
