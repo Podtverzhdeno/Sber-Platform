@@ -41,10 +41,10 @@ export function StreakCelebration({ from, to, onClose }: StreakCelebrationProps)
     return {
       index,
       style: {
-        "--spark-x": `${Math.cos(angle) * spread}vw`,
-        "--spark-y": `${Math.sin(angle) * spread}vh`,
-        "--spark-delay": `${(index % 8) * 0.068}s`,
-        "--spark-size": `${3 + index % 4}px`,
+        "--spark-x": `${(Math.cos(angle) * spread).toFixed(2)}vw`,
+        "--spark-y": `${(Math.sin(angle) * spread).toFixed(2)}vh`,
+        "--spark-delay": `${((index % 8) * 0.068).toFixed(3)}s`,
+        "--spark-size": `${String(3 + index % 4)}px`,
       } as CSSProperties,
     };
   });
