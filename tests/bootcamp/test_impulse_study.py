@@ -90,12 +90,11 @@ def test_study_progress_requires_order_and_practice_requires_review(
     install_error_handlers(app)
     app.include_router(editorial_learning.router, prefix="/api/v1")
     app.state.database = database
+
     async def course_catalog() -> tuple[SimpleNamespace, ...]:
         return (SimpleNamespace(key="demo-course-1", title="Практикум Impulse"),)
 
-    app.state.development_service = SimpleNamespace(
-        store=SimpleNamespace(courses=course_catalog)
-    )
+    app.state.development_service = SimpleNamespace(store=SimpleNamespace(courses=course_catalog))
     active_role = [Role.PARTICIPANT]
 
     def credentials() -> AuthenticatedSession:
