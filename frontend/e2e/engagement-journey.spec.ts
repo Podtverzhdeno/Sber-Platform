@@ -544,8 +544,7 @@ test.describe("engagement journey: desktop acceptance", () => {
   await page.locator('[data-persona="participant-alex"]').click();
   await expect(page).toHaveURL(/\/workspace\/0$/);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  const themeToggle = page.locator(".theme-toggle");
-  await expect(themeToggle).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator(".theme-toggle")).toHaveCount(0);
 
   // Claim goal: buddy-карта активируется кнопкой («Анализ запускается только
   // по кнопке», 22.3), получает объяснимую рекомендацию и предсказуемое действие.
@@ -576,17 +575,16 @@ test.describe("engagement journey: desktop acceptance", () => {
   await streakButton.click();
   await expect(dialog).toBeVisible();
 
-  await expect(dialog.getByRole("img", { name: "Квалифицированные дни: 4, лучшая серия 9 дней" })).toBeVisible();
-  await expect(dialog).toContainText("Пропущен вчерашний день. Заморозка может закрыть его один раз.");
-  await expect(dialog).toContainText("2 в запасе · использовано 1");
-  await expect(dialog).toContainText("Календарь показывает только квалифицированные дни; счёт без входов и сообщений.");
+  await expect(dialog).toContainText("9 дней");
+  await expect(dialog).toContainText("Пропущен вчерашний день. Можно использовать заморозку, если условия позволяют.");
+  await expect(dialog).toContainText("2 в запасе");
 
   // Freeze restore: 24.2 применяет заморозку ровно один раз и восстанавливает серию.
   await dialog.getByRole("button", { name: "Использовать заморозку" }).click();
   await expect(page.locator(".engagement-flash", { hasText: "4 → 5" })).toBeVisible();
   await expect(streakButton.locator("strong")).toHaveText("5");
-  await expect(dialog.getByRole("img", { name: "Квалифицированные дни: 4, лучшая серия 9 дней" })).toBeVisible();
-  await expect(dialog).toContainText("1 в запасе · использовано 2");
+  await expect(dialog).toContainText("9 дней");
+  await expect(dialog).toContainText("1 в запасе");
   await expect(dialog).toContainText("Вчерашний день закрыт заморозкой; заморозка не считается активностью.");
   await expect(dialog.getByRole("button", { name: "Использовать заморозку" })).not.toBeVisible();
 
@@ -595,15 +593,15 @@ test.describe("engagement journey: desktop acceptance", () => {
   await expect(rhythm).toBeVisible();
   await expect(rhythm).toContainText("не настроен");
   await rhythm.getByRole("button", { name: "Вся неделя" }).click();
-  await rhythm.getByLabel("Напоминание").selectOption("18");
+  await rhythm.getByLabel("Время").selectOption("18");
   await rhythm.getByLabel("Окно напоминания").selectOption("3");
   await rhythm.getByRole("button", { name: "Сохранить ритм" }).click();
   await expect(rhythm).toContainText("Соглашение v1 сохранено; начинает действовать с 2026-10-26.");
-  await expect(rhythm).toContainText("1 из 7 в этой неделе");
+  await expect(rhythm).toContainText("1 из 7 за неделю");
   await expect(rhythm).toContainText("Соглашение v1; всего версий 1");
 
   // Закрыть поповер и записать квалифицируемый учебный день в списке каталога.
-  await streakButton.click();
+  await dialog.getByRole("button", { name: "Закрыть" }).click();
   await expect(dialog).toBeHidden();
   await expect(page.getByRole("dialog", { name: "Информация о курсе" })).toHaveCount(0);
   const courseCard = page.getByTestId("course-python-base");
@@ -650,19 +648,18 @@ test.describe("engagement journey: desktop acceptance", () => {
   await expect(page.locator(".engagement-flash")).toHaveCount(0);
   await streakReloaded.click();
   await expect(dialog).toBeVisible();
-  await expect(dialog.getByRole("img", { name: "Квалифицированные дни: 5, лучшая серия 9 дней" })).toBeVisible();
+  await expect(dialog).toContainText("9 дней");
   await expect(dialog).toContainText("Сегодняшнее квалифицируемое действие сохранено.");
   const rhythmReloaded = dialog.locator(".engagement-rhythm-block");
-  await expect(rhythmReloaded).toContainText("1 из 7 в этой неделе");
+  await expect(rhythmReloaded).toContainText("1 из 7 за неделю");
   await expect(rhythmReloaded).toContainText("Соглашение v1; всего версий 1");
 
-  // Обе темы: светлая тема держит тот же journey честности.
-  await themeToggle.click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  // Переключателя темы нет: сценарий не зависит от управления цветовой схемой.
+  await expect(page.locator(".theme-toggle")).toHaveCount(0);
   await expect(dialog.getByRole("button", { name: "Вся неделя" })).toBeVisible();
-  // Клавиатура: focusable streak-тогл продолжает управлять поповером.
-  await streakReloaded.focus();
-  await page.keyboard.press("Enter");
+  // Клавиатура: Escape закрывает диалог и возвращает фокус к индикатору.
+  await dialog.focus();
+  await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
 
   expect(apiFailures, "неожиданные HTTP-ошибки API").toEqual([]);
@@ -682,10 +679,7 @@ test.describe("mobile touch journey: engagement goal through freeze and rhythm i
 
     await page.goto("/");
     await page.locator('[data-persona="participant-alex"]').click();
-    const themeToggle = page.locator(".theme-toggle");
-    await themeToggle.tap();
-    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-    await expect(themeToggle).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator(".theme-toggle")).toHaveCount(0);
 
     await page.getByTestId("buddy-suggestion-activate").click();
     await page.getByRole("button", { name: "Записать учебный день сегодня" }).tap();
@@ -705,18 +699,18 @@ test.describe("mobile touch journey: engagement goal through freeze and rhythm i
     await streakButton.tap();
     const dialog = page.getByRole("dialog", { name: "Учебный стрик" });
     await expect(dialog).toBeVisible();
-    await expect(dialog).toContainText("Пропущен вчерашний день. Заморозка может закрыть его один раз.");
+    await expect(dialog).toContainText("Пропущен вчерашний день. Можно использовать заморозку, если условия позволяют.");
     await dialog.getByRole("button", { name: "Использовать заморозку" }).tap();
     await expect(page.locator(".engagement-flash", { hasText: "4 → 6" })).toBeVisible();
 
     const rhythm = dialog.locator(".engagement-rhythm-block");
     await expect(rhythm).toBeVisible();
     await rhythm.getByRole("button", { name: "Вся неделя" }).tap();
-    await rhythm.getByLabel("Напоминание").selectOption("18");
+    await rhythm.getByLabel("Время").selectOption("18");
     await rhythm.getByLabel("Окно напоминания").selectOption("3");
     await rhythm.getByRole("button", { name: "Сохранить ритм" }).tap();
     await expect(rhythm).toContainText("Соглашение v1 сохранено; начинает действовать с 2026-10-26.");
-    await expect(rhythm).toContainText("1 из 7 в этой неделе");
+    await expect(rhythm).toContainText("1 из 7 за неделю");
 
     expect(consoleErrors, "необработанные ошибки страницы").toEqual([]);
   });
@@ -744,8 +738,10 @@ test("engagement surfaces stay honest when the engagement API is unavailable", a
   const dialog = page.getByRole("dialog", { name: "Учебный стрик" });
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText("Пока ноль");
+  await dialog.getByRole("button", { name: "Открыть полный календарь серии" }).click();
   await expect(dialog.getByText("Пока нет квалифицируемых действий")).toBeVisible();
-  await expect(dialog).toContainText("0 в запасе · использовано 0");
+  await dialog.getByRole("button", { name: /Вернуться к серии/ }).click();
+  await expect(dialog).toContainText("0 в запасе");
   await expect(dialog.getByRole("button", { name: "Использовать заморозку" })).not.toBeVisible();
   await expect(dialog.locator(".engagement-rhythm-block")).toBeHidden();
 
