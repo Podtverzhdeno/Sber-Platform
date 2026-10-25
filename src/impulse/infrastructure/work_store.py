@@ -1439,22 +1439,16 @@ class SqlWorkStore(WorkStore):
                 )
                 if checkpoint_key is not None:
                     task_id = await session.scalar(
-                        select(assignments.c.task_id).where(
-                            assignments.c.id == row.assignment_id
-                        )
+                        select(assignments.c.task_id).where(assignments.c.id == row.assignment_id)
                     )
                     task_row = (
                         await session.execute(
-                            select(tasks.c.payload)
-                            .where(tasks.c.id == task_id)
-                            .with_for_update()
+                            select(tasks.c.payload).where(tasks.c.id == task_id).with_for_update()
                         )
                     ).one_or_none()
                     if task_row is not None:
                         payload = dict(task_row.payload or {})
-                        checkpoints = [
-                            dict(stage) for stage in payload.get("checkpoints", [])
-                        ]
+                        checkpoints = [dict(stage) for stage in payload.get("checkpoints", [])]
                         found = False
                         for stage in checkpoints:
                             if stage.get("key") == checkpoint_key:
@@ -1471,11 +1465,14 @@ class SqlWorkStore(WorkStore):
                                 )
                             )
                             complete_states = {
-                                "accepted", "completed", "verified", "done", "closed"
+                                "accepted",
+                                "completed",
+                                "verified",
+                                "done",
+                                "closed",
                             }
                             if any(
-                                stage.get("status") not in complete_states
-                                for stage in checkpoints
+                                stage.get("status") not in complete_states for stage in checkpoints
                             ):
                                 assignment_status = AssignmentStatus.IN_PROGRESS
             await session.execute(
