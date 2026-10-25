@@ -55,7 +55,7 @@ test("responsive analytics navigation, range selectors and stable button animati
  await expect(root.locator(".av3-week-columns > div")).toHaveCount(4);
  await root.getByRole("button",{name:"Сертификация",exact:true}).click();
  await expect(root.getByRole("heading",{name:"Твоя сертификация"})).toBeVisible();
- const w=await root.evaluate(el=>({viewport:window.innerWidth,width:document.documentElement.scrollWidth,transition:getComputedStyle(el.querySelector("button")!).transitionProperty}));
+ const w=await root.evaluate(el=>({viewport:window.innerWidth,width:document.documentElement.scrollWidth,transition:getComputedStyle(el.querySelector("button")??el).transitionProperty}));
  expect(w.width).toBeLessThanOrEqual(w.viewport+2);
  expect(w.transition).toContain("transform");
 });
