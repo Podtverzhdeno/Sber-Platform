@@ -1,3 +1,4 @@
+import { MemoryRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -168,10 +169,10 @@ describe("participant settings", () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
       <QueryClientProvider client={client}>
-        <ParticipantBuddy />
+        <MemoryRouter><ParticipantBuddy /></MemoryRouter>
       </QueryClientProvider>,
     );
     await waitFor(() => { expect(screen.getByLabelText("Сообщение AI-Buddy")).toBeInTheDocument(); });
-    expect(screen.getByText(/Советы основаны на разрешённых данных/)).toBeInTheDocument();
+    expect(screen.getByText(/Помогаю разбираться в задачах/)).toBeInTheDocument();
   });
 });

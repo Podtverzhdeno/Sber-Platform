@@ -579,7 +579,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "AI-Buddy" ? (
-          <ParticipantBuddy />
+          <ParticipantBuddy navigation={actor.navigation} />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Настройки" ? (
