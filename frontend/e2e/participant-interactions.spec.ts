@@ -411,16 +411,80 @@ test("participant home actions open project, buddy and linked routes", async ({ 
   await expect(page).toHaveURL(/\/workspace\/3$/);
 });
 
-test("rating opens selected public profile", async ({ page }) => {
+test("rating list opens participant profile and returns to the same ranking", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Рейтинг" }).click();
+  await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
   await page.getByRole("button", { name: "Кирилл Меньшев" }).click();
+  await expect(page).toHaveURL(/ratingView=profile/);
   await expect(page.getByRole("heading", { name: "Кирилл Меньшев" })).toBeVisible();
-  await expect(page.getByText("Оценка A")).toBeVisible();
   await expect(page.getByText("Победитель МАЯКИ")).toBeVisible();
+  await page.getByRole("tab", { name: "Проекты" }).click();
+  await expect(page.getByText("AI Study Assistant")).toBeVisible();
   await page.getByRole("button", { name: /Вернуться в рейтинг/ }).click();
+  await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
+});
+
+test("rating benefits navigate from the default list and back", async ({ page }) => {
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Рейтинг" }).click();
+  await page.getByRole("button", { name: "Подробнее о рейтинге и наградах" }).click();
+  await expect(page).toHaveURL(/ratingView=benefits/);
   await expect(page.getByRole("heading", { name: "Рейтинг подтверждённого опыта" })).toBeVisible();
+  const rewards = page.locator(".ir-benefits-showcase .ir-benefit");
+  await expect(rewards).toHaveCount(3);
+  await expect(rewards.nth(0)).toContainText("ТОП 30");
+  await expect(rewards.nth(1)).toContainText("ТОП 1");
+  await expect(rewards.nth(2)).toContainText("ТОП 50");
+  await rewards.nth(1).click();
+  await expect(page.getByRole("dialog", { name: /ТОП 1/ })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: /ТОП 1/ })).toHaveCount(0);
+  await page.getByRole("button", { name: "Смотреть весь список" }).click();
+  await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
+});
+
+test("rating filters, ordering and profile actions are interactive", async ({ page }) => {
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Рейтинг" }).click();
+  const allRows = page.locator(".ir-leader-row");
+  await expect(allRows).toHaveCount(12);
+  await page.getByRole("button", { name: "ТОП 10", exact: true }).click();
+  await expect(allRows).toHaveCount(10);
+  await page.getByRole("searchbox", { name: "Поиск участников" }).fill("Алекс");
+  await expect(allRows).toHaveCount(1);
+  await expect(allRows.first()).toContainText("Алекс Речной");
+  await page.reload();
+  await expect(allRows).toHaveCount(1);
+  await page.getByRole("button", { name: "Алекс Речной" }).click();
+  await expect(page.getByRole("heading", { name: "Алекс Речной" })).toBeVisible();
+  await page.getByRole("button", { name: "В избранное" }).click();
+  await expect(page.getByRole("button", { name: "В избранном" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("button", { name: "Написать" }).click();
+  await expect(page).toHaveURL(/\/workspace\/10/);
+});
+
+test("rating buttons animate smoothly and remain inside the viewport on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Рейтинг" }).click();
+  const cta = page.getByRole("button", { name: "Подробнее о рейтинге и наградах" });
+  await expect(cta).toBeVisible();
+  const props = await cta.evaluate((el) => ({ transition: getComputedStyle(el).transitionProperty }));
+  expect(props.transition).toContain("transform");
+  await cta.click();
+  await expect(page.locator(".ir-benefits-showcase .ir-benefit")).toHaveCount(3);
+  const dimensions = await page.locator(".ir-page").evaluate((el) => ({
+    viewportWidth: window.innerWidth,
+    docWidth: document.documentElement.scrollWidth,
+    pageWidth: el.getBoundingClientRect().width,
+  }));
+  expect(dimensions.docWidth).toBeLessThanOrEqual(dimensions.viewportWidth + 2);
+  expect(dimensions.pageWidth).toBeLessThanOrEqual(dimensions.viewportWidth + 2);
 });
 
 test("trajectory views keep selection and open overview by deep link", async ({ page }) => {
