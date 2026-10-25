@@ -1,0 +1,22 @@
+# Claim XS-201-JOURNEY-20261026
+
+- session_id: gpt6-20261026-journey01
+- status: IN_PROGRESS
+- started_at: 2026-10-26T00:55:00+03:00
+- heartbeat_at: 2026-10-26T00:55:00+03:00
+- base_revision: d6dde0b7271884a4bf582827ca88d373ba30fce3
+- depends_on: []
+- write_scope:
+  - src/impulse/api/v1/journey.py
+  - src/impulse/api/v1/__init__.py (only journey router)
+  - tests/test_journey_projection.py
+  - .github/workflows/journey-projection-qa.yml
+  - .agents/coordination/claims/XS-201-JOURNEY-20261026.lock/status.md
+- shared_files:
+  - src/impulse/api/v1/__init__.py (isolated integration registry)
+- verification:
+  - uv run ruff check and format --check on owned Python files
+  - uv run pytest tests/test_journey_projection.py
+  - independent review before DONE
+- progress: Claims inspected; no current claim holds the declared backend API module/registry scope. Read-only inspection confirmed separate enrollment, study, work, and leaderboard read models; implementing authorized joined read projection.
+- blockers: Local Git checkout unavailable (GitHub DNS blocked); server-based CI evidence required
