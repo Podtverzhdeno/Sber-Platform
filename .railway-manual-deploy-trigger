@@ -9,3 +9,6 @@ release_request=2026-10-25-projects-quickview-65e985a
 
 # My Projects final acceptance after events type cleanup
 release_request=2026-10-25-projects-qa-fix-921a938
+
+# My Projects reference refinements: compact cards, team avatars, deadline filter, stable E2E
+release_request=2026-10-25-my-projects-compact-1fb317ca
