@@ -6673,6 +6673,126 @@
         "title": "ImportClaimRequest",
         "type": "object"
       },
+      "ImpulseCourseSummary": {
+        "description": "Participation is distinct from provider-verified competency evidence.",
+        "properties": {
+          "completed_units": {
+            "minimum": 0.0,
+            "title": "Completed Units",
+            "type": "integer"
+          },
+          "course_key": {
+            "title": "Course Key",
+            "type": "string"
+          },
+          "finished": {
+            "title": "Finished",
+            "type": "boolean"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "practical_certificate_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practical Certificate Id"
+          },
+          "practice_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Status"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "total_units": {
+            "minimum": 1.0,
+            "title": "Total Units",
+            "type": "integer"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "course_key",
+          "title",
+          "completed_units",
+          "total_units",
+          "finished",
+          "finished_at",
+          "updated_at",
+          "practice_status",
+          "practical_certificate_id"
+        ],
+        "title": "ImpulseCourseSummary",
+        "type": "object"
+      },
+      "ImpulseStudySummary": {
+        "properties": {
+          "approved_practices": {
+            "minimum": 0.0,
+            "title": "Approved Practices",
+            "type": "integer"
+          },
+          "completed_lessons": {
+            "minimum": 0.0,
+            "title": "Completed Lessons",
+            "type": "integer"
+          },
+          "courses": {
+            "items": {
+              "$ref": "#/components/schemas/ImpulseCourseSummary"
+            },
+            "title": "Courses",
+            "type": "array"
+          },
+          "finished_courses": {
+            "minimum": 0.0,
+            "title": "Finished Courses",
+            "type": "integer"
+          },
+          "started_courses": {
+            "minimum": 0.0,
+            "title": "Started Courses",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "started_courses",
+          "finished_courses",
+          "completed_lessons",
+          "approved_practices",
+          "courses"
+        ],
+        "title": "ImpulseStudySummary",
+        "type": "object"
+      },
       "ImpulseStudyView": {
         "properties": {
           "certificate_id": {
@@ -17477,6 +17597,28 @@
           }
         },
         "summary": "Bootcamp Learning Command",
+        "tags": [
+          "bootcamp"
+        ]
+      }
+    },
+    "/api/v1/me/bootcamp/impulse-study/summary": {
+      "get": {
+        "description": "One DB-backed read model shared by Bootcamp, Analytics and Trajectory.\n\nA study certificate proves completion of Impulse lessons, not an awarded\ncompetency level, professional grade or verified external qualification.",
+        "operationId": "impulse_study_summary_api_v1_me_bootcamp_impulse_study_summary_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImpulseStudySummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Impulse Study Summary",
         "tags": [
           "bootcamp"
         ]

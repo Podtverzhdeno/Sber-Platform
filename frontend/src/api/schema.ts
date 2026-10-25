@@ -282,6 +282,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/bootcamp/impulse-study/{course_key}/practice/{person_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Review Impulse Practice
+         * @description A privileged operator independently verifies practical evidence.
+         *
+         *     Normal participants/mentors never gain this power through the learner UI.
+         */
+        post: operations["review_impulse_practice_api_v1_bootcamp_impulse_study__course_key__practice__person_id__review_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/config": {
         parameters: {
             query?: never;
@@ -1162,6 +1184,97 @@ export interface paths {
         put?: never;
         /** Bootcamp Learning Command */
         post: operations["bootcamp_learning_command_api_v1_me_bootcamp_courses__course_key___action__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/bootcamp/impulse-study/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Impulse Study Summary
+         * @description One DB-backed read model shared by Bootcamp, Analytics and Trajectory.
+         *
+         *     A study certificate proves completion of Impulse lessons, not an awarded
+         *     competency level, professional grade or verified external qualification.
+         */
+        get: operations["impulse_study_summary_api_v1_me_bootcamp_impulse_study_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/bootcamp/impulse-study/{course_key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Impulse Study */
+        get: operations["get_impulse_study_api_v1_me_bootcamp_impulse_study__course_key__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/bootcamp/impulse-study/{course_key}/finish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Finish Impulse Study */
+        post: operations["finish_impulse_study_api_v1_me_bootcamp_impulse_study__course_key__finish_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/bootcamp/impulse-study/{course_key}/lessons/{index}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Complete Impulse Lesson */
+        post: operations["complete_impulse_lesson_api_v1_me_bootcamp_impulse_study__course_key__lessons__index__complete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/bootcamp/impulse-study/{course_key}/practice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Impulse Practice */
+        post: operations["submit_impulse_practice_api_v1_me_bootcamp_impulse_study__course_key__practice_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5263,6 +5376,66 @@ export interface components {
             /** Provider Id */
             provider_id: string;
         };
+        /**
+         * ImpulseCourseSummary
+         * @description Participation is distinct from provider-verified competency evidence.
+         */
+        ImpulseCourseSummary: {
+            /** Completed Units */
+            completed_units: number;
+            /** Course Key */
+            course_key: string;
+            /** Finished */
+            finished: boolean;
+            /** Finished At */
+            finished_at: string | null;
+            /** Practical Certificate Id */
+            practical_certificate_id: string | null;
+            /** Practice Status */
+            practice_status: string | null;
+            /** Title */
+            title: string;
+            /** Total Units */
+            total_units: number;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** ImpulseStudySummary */
+        ImpulseStudySummary: {
+            /** Approved Practices */
+            approved_practices: number;
+            /** Completed Lessons */
+            completed_lessons: number;
+            /** Courses */
+            courses: components["schemas"]["ImpulseCourseSummary"][];
+            /** Finished Courses */
+            finished_courses: number;
+            /** Started Courses */
+            started_courses: number;
+        };
+        /** ImpulseStudyView */
+        ImpulseStudyView: {
+            /** Certificate Id */
+            certificate_id: string | null;
+            /** Completed Units */
+            completed_units: number;
+            /** Course Key */
+            course_key: string;
+            /** Finished */
+            finished: boolean;
+            /** Practical Certificate Id */
+            practical_certificate_id?: string | null;
+            /** Practice Status */
+            practice_status?: string | null;
+            /**
+             * Total Units
+             * @default 8
+             */
+            total_units: number;
+        };
         /** InvitationView */
         InvitationView: {
             /** Expires At */
@@ -6258,6 +6431,21 @@ export interface components {
             artifact_refs?: string[];
             /** Body */
             body: string;
+        };
+        /** PracticeReviewBody */
+        PracticeReviewBody: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "approved" | "needs_revision";
+        };
+        /** PracticeSubmissionBody */
+        PracticeSubmissionBody: {
+            /** Artifact Url */
+            artifact_url?: string | null;
+            /** Description */
+            description: string;
         };
         /** PrerequisiteFactView */
         PrerequisiteFactView: {
@@ -8402,6 +8590,44 @@ export interface operations {
             };
         };
     };
+    review_impulse_practice_api_v1_bootcamp_impulse_study__course_key__practice__person_id__review_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                course_key: string;
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PracticeReviewBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpulseStudyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     public_config_api_v1_config_get: {
         parameters: {
             query?: never;
@@ -10032,6 +10258,161 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LearningCommandResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    impulse_study_summary_api_v1_me_bootcamp_impulse_study_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpulseStudySummary"];
+                };
+            };
+        };
+    };
+    get_impulse_study_api_v1_me_bootcamp_impulse_study__course_key__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpulseStudyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    finish_impulse_study_api_v1_me_bootcamp_impulse_study__course_key__finish_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                course_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpulseStudyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    complete_impulse_lesson_api_v1_me_bootcamp_impulse_study__course_key__lessons__index__complete_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                course_key: string;
+                index: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpulseStudyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_impulse_practice_api_v1_me_bootcamp_impulse_study__course_key__practice_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                course_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PracticeSubmissionBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpulseStudyView"];
                 };
             };
             /** @description Validation Error */
