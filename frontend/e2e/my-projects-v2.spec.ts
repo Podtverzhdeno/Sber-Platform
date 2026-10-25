@@ -141,7 +141,7 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   await expect(info).toBeVisible();
   await expect(info.getByText("Какую проблему решаем")).toBeVisible();
   await expect(info.getByText("Что заказчик хочет получить")).toBeVisible();
-  await expect(info.getByText("Исследование требований")).toBeVisible();
+  await expect(info.locator(".mpd-criteria li").filter({hasText:"Исследование требований"})).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(info).toHaveCount(0);
   await page.getByRole("button",{name:"Этапы",exact:true}).click();
