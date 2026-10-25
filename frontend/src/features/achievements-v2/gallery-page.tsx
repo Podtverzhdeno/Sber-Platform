@@ -84,6 +84,18 @@ export function ParticipantAchievementsGallery({ navigation = [] }: {navigation?
     queryFn:()=>apiRequest<AchievementEventsPage>("/api/v1/ecosystem/events"),
     enabled:(claims.data?.length ?? 0)>0,
   });
+  const favoriteStorageKey = portfolio.data?.person_id
+    ? `impulse:achievement-favorites:${portfolio.data.person_id}`
+    : null;
+  useEffect(() => {
+    if (!favoriteStorageKey) return;
+    try {
+      const stored: unknown = JSON.parse(window.localStorage.getItem(favoriteStorageKey) ?? "[]");
+      setFavorites(Array.isArray(stored) ? stored.filter((value): value is string => typeof value === "string") : []);
+    } catch {
+      setFavorites([]);
+    }
+  }, [favoriteStorageKey]);
   const records = useMemo(
     ()=>buildAchievements(portfolio.data,claims.data,events.data?.items),
     [portfolio.data,claims.data,events.data],
@@ -128,8 +140,16 @@ export function ParticipantAchievementsGallery({ navigation = [] }: {navigation?
     const index=navigation.indexOf(name);
     if(index>=0) void navigate(`/workspace/${String(index)}`);
   };
-  const selectFavorite=(id:string) => {
-    setFavorites(existing=>existing.includes(id)?existing.filter(key=>key!==id):[...existing,id]);
+  const selectFavorite = (id: string) => {
+    const next = favorites.includes(id) ? favorites.filter(key => key !== id) : [...favorites, id];
+    setFavorites(next);
+    if (favoriteStorageKey) {
+      try {
+        window.localStorage.setItem(favoriteStorageKey, JSON.stringify(next));
+      } catch {
+        // Browsers with disabled storage still support session-local favorites.
+      }
+    }
   };
   const reset = () => {setTab("all");setStatus("all");setYear("all");setSort("new");setTerm("");};
   useEffect(()=>{
