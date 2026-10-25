@@ -6673,6 +6673,72 @@
         "title": "ImportClaimRequest",
         "type": "object"
       },
+      "ImpulseStudyView": {
+        "properties": {
+          "certificate_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Certificate Id"
+          },
+          "completed_units": {
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Completed Units",
+            "type": "integer"
+          },
+          "course_key": {
+            "title": "Course Key",
+            "type": "string"
+          },
+          "finished": {
+            "title": "Finished",
+            "type": "boolean"
+          },
+          "practical_certificate_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practical Certificate Id"
+          },
+          "practice_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Status"
+          },
+          "total_units": {
+            "default": 8,
+            "title": "Total Units",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "course_key",
+          "completed_units",
+          "certificate_id",
+          "finished"
+        ],
+        "title": "ImpulseStudyView",
+        "type": "object"
+      },
       "InvitationView": {
         "properties": {
           "expires_at": {
@@ -9262,6 +9328,50 @@
           "body"
         ],
         "title": "PostMessageRequest",
+        "type": "object"
+      },
+      "PracticeReviewBody": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "approved",
+              "needs_revision"
+            ],
+            "title": "Decision",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "PracticeReviewBody",
+        "type": "object"
+      },
+      "PracticeSubmissionBody": {
+        "properties": {
+          "artifact_url": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artifact Url"
+          },
+          "description": {
+            "maxLength": 5000,
+            "minLength": 50,
+            "title": "Description",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "title": "PracticeSubmissionBody",
         "type": "object"
       },
       "PrerequisiteFactView": {
@@ -14696,6 +14806,85 @@
         "summary": "Verify Certificate"
       }
     },
+    "/api/v1/bootcamp/impulse-study/{course_key}/practice/{person_id}/review": {
+      "post": {
+        "description": "A privileged operator independently verifies practical evidence.\n\nNormal participants/mentors never gain this power through the learner UI.",
+        "operationId": "review_impulse_practice_api_v1_bootcamp_impulse_study__course_key__practice__person_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_key",
+            "required": true,
+            "schema": {
+              "title": "Course Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "person_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Person Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PracticeReviewBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImpulseStudyView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Review Impulse Practice",
+        "tags": [
+          "bootcamp"
+        ]
+      }
+    },
     "/api/v1/config": {
       "get": {
         "operationId": "public_config_api_v1_config_get",
@@ -15230,7 +15419,7 @@
                   "items": {
                     "$ref": "#/components/schemas/ApplicationView"
                   },
-                  "title": "Response Task Applications Api V1 Customer Tasks Task Id Applications Get",
+                  "title": "Response Task Applications Api V1 Customer Tasks  Task Id  Applications Get",
                   "type": "array"
                 }
               }
@@ -15340,7 +15529,7 @@
                   "items": {
                     "$ref": "#/components/schemas/DeadlineChangeView"
                   },
-                  "title": "Response Customer Deadline Requests Api V1 Customer Tasks Task Id Deadline Requests Get",
+                  "title": "Response Customer Deadline Requests Api V1 Customer Tasks  Task Id  Deadline Requests Get",
                   "type": "array"
                 }
               }
@@ -15516,7 +15705,7 @@
                   "items": {
                     "$ref": "#/components/schemas/WorkItemView"
                   },
-                  "title": "Response Participant Preview Api V1 Customer Tasks Task Id Participant Preview Get",
+                  "title": "Response Participant Preview Api V1 Customer Tasks  Task Id  Participant Preview Get",
                   "type": "array"
                 }
               }
@@ -15974,7 +16163,7 @@
                   "items": {
                     "$ref": "#/components/schemas/CandidateMatchView"
                   },
-                  "title": "Response Team Request Matches Api V1 Customer Team Requests Request Id Matches Get",
+                  "title": "Response Team Request Matches Api V1 Customer Team Requests  Request Id  Matches Get",
                   "type": "array"
                 }
               }
@@ -16864,7 +17053,7 @@
                   "items": {
                     "$ref": "#/components/schemas/DeadlineChangeView"
                   },
-                  "title": "Response My Deadline Requests Api V1 Me Assignments Assignment Id Deadline Requests Get",
+                  "title": "Response My Deadline Requests Api V1 Me Assignments  Assignment Id  Deadline Requests Get",
                   "type": "array"
                 }
               }
@@ -17288,6 +17477,241 @@
           }
         },
         "summary": "Bootcamp Learning Command",
+        "tags": [
+          "bootcamp"
+        ]
+      }
+    },
+    "/api/v1/me/bootcamp/impulse-study/{course_key}": {
+      "get": {
+        "operationId": "get_impulse_study_api_v1_me_bootcamp_impulse_study__course_key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_key",
+            "required": true,
+            "schema": {
+              "title": "Course Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImpulseStudyView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Impulse Study",
+        "tags": [
+          "bootcamp"
+        ]
+      }
+    },
+    "/api/v1/me/bootcamp/impulse-study/{course_key}/finish": {
+      "post": {
+        "operationId": "finish_impulse_study_api_v1_me_bootcamp_impulse_study__course_key__finish_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_key",
+            "required": true,
+            "schema": {
+              "title": "Course Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImpulseStudyView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Finish Impulse Study",
+        "tags": [
+          "bootcamp"
+        ]
+      }
+    },
+    "/api/v1/me/bootcamp/impulse-study/{course_key}/lessons/{index}/complete": {
+      "post": {
+        "operationId": "complete_impulse_lesson_api_v1_me_bootcamp_impulse_study__course_key__lessons__index__complete_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_key",
+            "required": true,
+            "schema": {
+              "title": "Course Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "index",
+            "required": true,
+            "schema": {
+              "title": "Index",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImpulseStudyView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Complete Impulse Lesson",
+        "tags": [
+          "bootcamp"
+        ]
+      }
+    },
+    "/api/v1/me/bootcamp/impulse-study/{course_key}/practice": {
+      "post": {
+        "operationId": "submit_impulse_practice_api_v1_me_bootcamp_impulse_study__course_key__practice_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "course_key",
+            "required": true,
+            "schema": {
+              "title": "Course Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PracticeSubmissionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImpulseStudyView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Impulse Practice",
         "tags": [
           "bootcamp"
         ]
@@ -18494,7 +18918,7 @@
                       "type": "null"
                     }
                   ],
-                  "title": "Response Channel Context Api V1 Me Messaging Channels Channel Id Context Get"
+                  "title": "Response Channel Context Api V1 Me Messaging Channels  Channel Id  Context Get"
                 }
               }
             },
@@ -18566,7 +18990,7 @@
                   "items": {
                     "$ref": "#/components/schemas/impulse__api__v1__messaging__MessageView"
                   },
-                  "title": "Response Messages Api V1 Me Messaging Channels Channel Id Messages Get",
+                  "title": "Response Messages Api V1 Me Messaging Channels  Channel Id  Messages Get",
                   "type": "array"
                 }
               }
@@ -21630,7 +22054,7 @@
                   "items": {
                     "$ref": "#/components/schemas/StandingView"
                   },
-                  "title": "Response Rebuild Standings Projection Api V1 Operations Rating Seasons Season Id Standings Rebuild Post",
+                  "title": "Response Rebuild Standings Projection Api V1 Operations Rating Seasons  Season Id  Standings Rebuild Post",
                   "type": "array"
                 }
               }
@@ -22128,7 +22552,7 @@
                   "items": {
                     "$ref": "#/components/schemas/DecisionView"
                   },
-                  "title": "Response Timeline Api V1 Ops Cases Case Id Timeline Get",
+                  "title": "Response Timeline Api V1 Ops Cases  Case Id  Timeline Get",
                   "type": "array"
                 }
               }
@@ -22863,7 +23287,7 @@
                   "items": {
                     "$ref": "#/components/schemas/LeaderboardEntryView"
                   },
-                  "title": "Response Leaderboard Api V1 Rating Seasons Season Id Leaderboard Get",
+                  "title": "Response Leaderboard Api V1 Rating Seasons  Season Id  Leaderboard Get",
                   "type": "array"
                 }
               }
