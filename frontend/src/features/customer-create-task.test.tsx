@@ -10,8 +10,8 @@ const create = (publish = vi.fn()) => {
 const completeBrief = () => {
   fireEvent.change(screen.getByPlaceholderText("Например, AI-агент для анализа обращений"), { target: { value: "AI-агент для обращений" } });
   fireEvent.change(screen.getByPlaceholderText("Опишите задачу в 2–3 предложениях"), { target: { value: "Автоматизировать распределение обращений" } });
-  fireEvent.change(screen.getByPlaceholderText("Что сейчас не работает, почему это важно и какое изменение нужно получить?"), { target: { value: "Обращения маршрутизируются вручную" } });
-  fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: "Критерии" }));
+  fireEvent.change(screen.getByPlaceholderText("Добавьте детали, контекст, текущие ограничения и ожидаемый эффект"), { target: { value: "Обращения маршрутизируются вручную" } });
+  fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: /Критерии/ }));
   fireEvent.change(screen.getByPlaceholderText("Что нужно передать: код, API, демо, отчёт, инструкции, метрики?"), { target: { value: "Прототип, API и README" } });
   fireEvent.change(screen.getByPlaceholderText(/Каждый критерий с новой строки/), { target: { value: "Запуск по инструкции; отчёт по точности" } });
 };
@@ -21,18 +21,18 @@ describe("customer task creation wizard", () => {
   it("keeps draft fields and step after reopening", () => {
     const { unmount } = create();
     fireEvent.change(screen.getByPlaceholderText("Например, AI-агент для анализа обращений"), { target: { value: "Новая задача" } });
-    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: "Критерии" }));
+    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: /Критерии/ }));
     expect(localStorage.getItem("impulse-customer-task-wizard-v2")).toContain("Новая задача");
     unmount();
     create();
     expect(screen.getByRole("heading", { name: "Критерии и сроки" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: "Бриф" }));
+    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: /Бриф/ }));
     expect(screen.getByPlaceholderText("Например, AI-агент для анализа обращений")).toHaveValue("Новая задача");
   });
 
   it("prevents publication without mandatory requirements", () => {
     const { publish } = create();
-    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: "Публикация" }));
+    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: /Публикация/ }));
     expect(screen.getByRole("button", { name: "Опубликовать" })).toBeDisabled();
     expect(screen.getByText("Остались обязательные поля")).toBeInTheDocument();
     expect(publish).not.toHaveBeenCalled();
@@ -41,7 +41,7 @@ describe("customer task creation wizard", () => {
   it("publishes a complete open task and clears only the wizard draft", () => {
     const { publish } = create();
     completeBrief();
-    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: "Публикация" }));
+    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: /Публикация/ }));
     expect(screen.getByRole("button", { name: "Опубликовать" })).toBeEnabled();
     fireEvent.click(screen.getByRole("button", { name: "Опубликовать" }));
     expect(publish).toHaveBeenCalledWith(expect.objectContaining({ title: "AI-агент для обращений", criteria: "Запуск по инструкции; отчёт по точности" }), []);
@@ -53,11 +53,11 @@ describe("customer task creation wizard", () => {
     completeBrief();
     fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: "Формат" }));
     fireEvent.click(screen.getByRole("button", { name: /По приглашению/ }));
-    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: "Публикация" }));
+    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: /Публикация/ }));
     expect(screen.getByRole("button", { name: "Опубликовать" })).toBeDisabled();
     fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: "Поддержка" }));
     fireEvent.click(screen.getByRole("checkbox"));
-    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: "Публикация" }));
+    fireEvent.click(screen.getByRole("navigation", { name: "Этапы создания задачи" }).getByRole("button", { name: /Публикация/ }));
     expect(screen.getByRole("button", { name: "Опубликовать" })).toBeEnabled();
     fireEvent.click(screen.getByRole("button", { name: "Опубликовать" }));
     expect(publish).toHaveBeenCalledWith(expect.objectContaining({ mode: "invitation_only" }), ["p1"]);
@@ -85,7 +85,7 @@ describe("customer task creation wizard", () => {
 
   it("opens participant preview without publishing", () => {
     const { publish } = create();
-    fireEvent.click(screen.getByRole("button", { name: "Предпросмотр" }));
+    fireEvent.click(screen.getByRole("button", { name: "Открыть полный предпросмотр" }));
     expect(screen.getByRole("dialog", { name: "Название ещё не задано" })).toBeInTheDocument();
     expect(screen.getByText(/задача ещё не опубликована/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Закрыть предпросмотр" }));
