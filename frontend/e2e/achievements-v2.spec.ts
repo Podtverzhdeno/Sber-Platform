@@ -24,6 +24,7 @@ async function setup(page: Page, empty = false) {
   await page.route("**/api/v1/auth/demo-login", route => route.fulfill({ json: actor }));
   await page.route("**/api/v1/me/portfolio", route => route.fulfill({
     json: {
+      person_id: actor.person_id,
       contributions: empty ? [] : [
         { contribution_id: "project-one", project_title: "Рекомендательная система",
           personal_summary: "Создал прототип ранжирования и продемонстрировал результат",
@@ -67,6 +68,12 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await expect(screen.locator(".ach-gallery-stat").nth(0).locator("strong")).toHaveText("4");
   await expect(screen.locator(".ach-gallery-stat").nth(1).locator("strong")).toHaveText("1");
   await expect(screen.locator(".ach-gallery-stat").nth(2).locator("strong")).toHaveText("1");
+  const firstStar = screen.getByTestId("achievement-card").first().getByRole("button", { name: "В избранное" });
+  await firstStar.click();
+  await expect(screen.getByTestId("achievement-card").first().getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
+  await page.getByRole("link", { name: "Главная" }).click();
+  await page.getByRole("link", { name: "Достижения" }).click();
+  await expect(screen.getByTestId("achievement-card").first().getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
   await page.screenshot({ path: "test-results/achievements-v2/desktop.png", animations: "disabled", fullPage: true });
 
   await screen.getByRole("button", { name: /^Проекты/ }).click();
