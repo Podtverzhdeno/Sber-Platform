@@ -2109,70 +2109,57 @@
   color: #8293a3;
 }
 
-/* Separate, server-persisted course study progress from verified roadmap milestones. */
+
+/* Compact, evidence-based trajectory summary.
+   Course completion is different from independent milestone approval. */
 .workspace-content .trajectory-v2 .trajectory-v2-stage-study-tag{
-  display:block;max-width:100%;margin-top:4px;color:#27d8ce;font-size:9px;font-weight:700;line-height:1.2;
+  display:block;max-width:100%;margin-top:3px;color:#27d8ce;font-size:9px;font-weight:700;line-height:1.2;
 }
 .workspace-content .trajectory-v2 .trajectory-v2-stage[data-study-state="studied"] .trajectory-v2-milestone-node{
-  box-shadow:0 0 0 2px #0d665d,0 0 12px #03c6ae40;
+  border-color:#09eedb;background:#075e67;color:#baffee;
+  box-shadow:0 0 0 3px #02e6c922,0 0 14px #05dce868;
 }
-.workspace-content .trajectory-v2 .trajectory-v2-studying{
-  display:grid;gap:7px;margin-top:13px;padding:11px 14px;border:1px solid #146d70;
-  border-radius:10px;background:#052c34cc;
+.workspace-content .trajectory-v2 .trajectory-v2-stage[data-study-state="studied"][data-stage-state="locked"]{opacity:1}
+.workspace-content .trajectory-v2 .trajectory-v2-study-summary{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(120px,.42fr);
+  align-items:center;gap:14px;margin-top:8px;padding:11px 13px;
+  border:1px solid #176174;border-radius:10px;background:#082b3c;
 }
-.workspace-content .trajectory-v2 .trajectory-v2-studying>div,
-.workspace-content .trajectory-v2 .trajectory-v2-studied-course>div{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+.workspace-content .trajectory-v2 .trajectory-v2-study-summary__text{display:grid;gap:4px;min-width:0}
+.workspace-content .trajectory-v2 .trajectory-v2-study-summary strong{
+  color:#e3fff9;font-size:12px;font-weight:800;
 }
-.workspace-content .trajectory-v2 .trajectory-v2-studying strong,
-.workspace-content .trajectory-v2 .trajectory-v2-studied-course strong{color:#e6fff9;font-size:12px;}
-.workspace-content .trajectory-v2 .trajectory-v2-studying small,
-.workspace-content .trajectory-v2 .trajectory-v2-studied-course small,
-.workspace-content .trajectory-v2 .trajectory-v2-studied-course span{color:#9acbc8;font-size:10px;}
-.workspace-content .trajectory-v2 .trajectory-v2-studying progress,
-.workspace-content .trajectory-v2 .trajectory-v2-studied-course progress{
-  appearance:none;width:100%;height:7px;border:0;border-radius:10px;overflow:hidden;background:#1e4c55;
+.workspace-content .trajectory-v2 .trajectory-v2-study-summary small{
+  color:#9cc5d3;font-size:10px;line-height:1.4;
 }
-.workspace-content .trajectory-v2 .trajectory-v2-studying progress::-webkit-progress-bar,
-.workspace-content .trajectory-v2 .trajectory-v2-studied-course progress::-webkit-progress-bar{background:#1e4c55;}
-.workspace-content .trajectory-v2 .trajectory-v2-studying progress::-webkit-progress-value,
-.workspace-content .trajectory-v2 .trajectory-v2-studied-course progress::-webkit-progress-value{
-  background:linear-gradient(90deg,#1389cf,#05dbc5);border-radius:10px;
+.workspace-content .trajectory-v2 .trajectory-v2-study-summary .trajectory-v2-studying{
+  margin:0;padding:0;min-width:0;display:block;border:0;border-radius:0;background:transparent;
 }
-.workspace-content .trajectory-v2 .trajectory-v2-studying progress::-moz-progress-bar,
-.workspace-content .trajectory-v2 .trajectory-v2-studied-course progress::-moz-progress-bar{background:#06d7bf;}
-.workspace-content .trajectory-v2 .trajectory-v2-studied-course{
-  display:grid;gap:7px;margin-top:8px;margin-bottom:12px;padding:12px 14px;
-  background:linear-gradient(125deg,#08313e,#062533);border:1px solid #126e7b;border-radius:11px;
+.workspace-content .trajectory-v2 .trajectory-v2-study-summary progress{
+  appearance:none;display:block;width:100%;height:7px;border:0;border-radius:9px;overflow:hidden;background:#1c4654;
 }
-
-
-/* Qualified self-study is shown prominently, but never masquerades as an
-   accepted roadmap milestone or a server-issued professional grade. */
-.trajectory-v2 .trajectory-v2-study-evidence{
- display:flex;align-items:center;gap:11px;min-width:0;margin:14px 0 7px;padding:11px 13px;
- border:1px solid #16b7bb;border-radius:11px;
- background:linear-gradient(105deg,#054047,#073a4b 65%,#172756);
- box-shadow:inset 0 0 20px #00e6d91d,0 0 15px #00bad628;
+.workspace-content .trajectory-v2 .trajectory-v2-study-summary progress::-webkit-progress-bar{background:#1c4654}
+.workspace-content .trajectory-v2 .trajectory-v2-study-summary progress::-webkit-progress-value{
+  background:linear-gradient(90deg,#128eca,#04d8bd);border-radius:9px;
 }
-.trajectory-v2-study-evidence__symbol{display:grid;place-items:center;flex:none;
- width:34px;height:34px;border-radius:50%;background:#0fe6c2;color:#042a30;
- font-weight:900;box-shadow:0 0 17px #00ecad67;}
-.trajectory-v2-study-evidence>div{min-width:0;flex:1;display:grid;gap:4px}
-.trajectory-v2-study-evidence strong{color:#d7fff5;font-size:12px}
-.trajectory-v2-study-evidence small{color:#96cedb;font-size:10px;line-height:1.35}
-.trajectory-v2-study-evidence__count{color:#b2dbf3;font-size:11px;text-align:right;flex:none}
-.trajectory-v2 .trajectory-v2-stage[data-study-state="studied"] .trajectory-v2-milestone-node{
- border-color:#09eedb;background:#075e67;color:#baffee;
- box-shadow:0 0 0 3px #02e6c922,0 0 18px #05dce868;
+.workspace-content .trajectory-v2 .trajectory-v2-study-summary progress::-moz-progress-bar{background:#04d8bd}
+.workspace-content .trajectory-v2 .trajectory-v2-stage-detail{min-height:0}
+.workspace-content .trajectory-v2 .trajectory-v2-stage-header{margin-bottom:0}
+.workspace-content .trajectory-v2 .trajectory-v2-stage-header > .trajectory-v2-stage-state{
+  align-self:flex-start;flex:0 0 auto;margin:0;
 }
-.trajectory-v2 .trajectory-v2-stage[data-study-state="studied"] .trajectory-v2-stage-study-tag{
- color:#25f5dd;text-shadow:0 0 9px #01bdaf77;font-weight:850;
+.workspace-content .trajectory-v2 .trajectory-v2-study-caption{
+  margin:0;padding:0 3px;color:#88d5d2;font-size:11px;line-height:1.45;
 }
-.trajectory-v2 .trajectory-v2-stage[data-study-state="studied"][data-stage-state="locked"]{
- opacity:1;
+.workspace-content .trajectory-v2 .trajectory-v2-study-caption span{color:#93aec3}
+.workspace-content .trajectory-v2 .trajectory-v2-stage-meta{padding-bottom:13px}
+.workspace-content .trajectory-v2 .trajectory-v2-stage-meta dl{display:flex;flex-wrap:wrap;gap:8px;margin:0}
+.workspace-content .trajectory-v2 .trajectory-v2-stage-meta dl>div{
+  display:flex;gap:7px;align-items:baseline;border-radius:7px;background:#092c40;padding:7px 9px;
 }
+.workspace-content .trajectory-v2 .trajectory-v2-stage-meta dt{font-size:10px;color:#92b1c4}
+.workspace-content .trajectory-v2 .trajectory-v2-stage-meta dd{margin:0;font-size:11px;color:#cde5ee}
 @media(max-width:700px){
- .trajectory-v2 .trajectory-v2-study-evidence{flex-wrap:wrap}
- .trajectory-v2-study-evidence__count{width:100%;text-align:left;padding-left:45px}
+  .workspace-content .trajectory-v2 .trajectory-v2-study-summary{grid-template-columns:1fr;gap:9px}
+  .workspace-content .trajectory-v2 .trajectory-v2-stage-header > .trajectory-v2-stage-state{justify-self:start}
 }
