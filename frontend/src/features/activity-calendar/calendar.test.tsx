@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { ActivityCalendar, buildActivityDays, type ActivityFeed } from "./calendar";
+import { ActivityCalendar } from "./calendar";
+import { buildActivityDays, type ActivityFeed } from "./calendar-model";
 
 const exampleEvent = (occurred_at: string) => ({
   occurred_at,
