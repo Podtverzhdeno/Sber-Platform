@@ -23,7 +23,7 @@ export type CreateTaskBrief = {
 type Candidate = { id: string; name: string; direction: string; cases: { title: string }[] };
 type Tip = { id: string; title: string; detail: string; patch: (brief: CreateTaskBrief) => CreateTaskBrief };
 type WizardData = { step: number; brief: CreateTaskBrief; invited: string[]; applied: string[] };
-type Props = { candidates: Candidate[]; onPublish: (brief: CreateTaskBrief, invited: string[]) => void };
+type Props = { candidates: Candidate[]; onPublish: (brief: CreateTaskBrief, invited: string[]) => void; onBack?: () => void };
 
 const draftKey = "impulse-customer-task-wizard-v2";
 const stages = [
@@ -91,7 +91,7 @@ const tips: Record<number, Tip[]> = {
   4: [],
 };
 
-export function CustomerCreateTask({ candidates, onPublish }: Props) {
+export function CustomerCreateTask({ candidates, onPublish, onBack }: Props) {
   const [data, setData] = useState<WizardData>(restore);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
@@ -141,7 +141,7 @@ export function CustomerCreateTask({ candidates, onPublish }: Props) {
   const formatMode = brief.mode === "open" ? "Открытый набор" : "По приглашению";
   return <section className="create-task-workspace customer-create-v2" aria-label="Создание задачи заказчиком" data-reference="R-CUS-03">
     <div className="create-v3-intro">
-      <span className="create-v3-back"><ArrowLeft size={14} aria-hidden="true" /> Рабочее пространство заказчика</span>
+      {onBack ? <button type="button" className="create-v3-back" onClick={onBack}><ArrowLeft size={14} aria-hidden="true" /> К моим задачам</button> : <span className="create-v3-back">Новая задача</span>}
       <div><span className="create-v3-intro-flag"><Sparkles size={14} /> Новый проект</span><span className="create-v3-autosave"><CheckCircle2 size={14} /> Черновик сохраняется в браузере</span></div>
     </div>
     <nav className="create-stepper" aria-label="Этапы создания задачи">

@@ -135,7 +135,7 @@ export function ParticipantAchievementsGallery({ navigation = [] }: {navigation?
   useEffect(()=>{
     if(!selected && !addDialog) return;
     const onKey=(event:KeyboardEvent) => {
-      if(event.key==="Escape") {if(addDialog) setAddDialog(false);else close();}
+      if(event.key==="Escape") { if(addDialog) setAddDialog(false); else { const next=new URLSearchParams(params);next.delete("achievement");setParams(next,{replace:true}); } }
     };
     document.addEventListener("keydown",onKey);
     return ()=>{document.removeEventListener("keydown",onKey);};

@@ -533,3 +533,6 @@
   .customer-create-v2 .create-v3-next-steps > button,
   .customer-create-v2 .create-v3-skill-chips button { transition: none !important; }
 }
+
+.customer-scenario .customer-create-v2 button.create-v3-back { min-height: 24px; padding: 0; border: 0; border-radius: 0; background: transparent; color: #a0bdd0; font-weight: 500; font-size: 11px; }
+.customer-scenario .customer-create-v2 button.create-v3-back:hover { color: #46e6cc; background: transparent; border: 0; }
