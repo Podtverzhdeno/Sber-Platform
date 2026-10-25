@@ -85,9 +85,7 @@ def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -
         _post(api, f"/api/v1/customer/tasks/{task_id}/submit", customer)
         operator = _login(api, "operator-pavel")
         _post(api, f"/api/v1/operations/tasks/{task_id}/moderate", operator)
-        _post(
-            api, f"/api/v1/operations/tasks/{task_id}/support", operator, {"mode": "operator"}
-        )
+        _post(api, f"/api/v1/operations/tasks/{task_id}/support", operator, {"mode": "operator"})
         _post(api, f"/api/v1/operations/tasks/{task_id}/publish", operator)
 
         participant = _login(api, "participant-alex")
@@ -162,23 +160,21 @@ def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -
         participant = _login(api, "participant-alex")
         work_after = _get(api, "/api/v1/me/work")
         assert any(
-            contribution["id"] == contribution_id
-            and contribution["status"] == "accepted"
+            contribution["id"] == contribution_id and contribution["status"] == "accepted"
             for item in work_after
             for contribution in item["contributions"]
         )
         passport = _get(api, "/api/v1/me/talent-passport")
         assert passport["person_id"] == person
         assert [case["contribution_id"] for case in passport["cases"]] == [contribution_id]
-        assert {
-            item["key"]: item["confirmed_case_count"] for item in passport["skills"]
-        } == {"architecture": 1, "python": 1}
+        assert {item["key"]: item["confirmed_case_count"] for item in passport["skills"]} == {
+            "architecture": 1,
+            "python": 1,
+        }
 
         portfolio = _get(api, "/api/v1/me/portfolio")
         assert portfolio["person_id"] == person
-        assert [item["contribution_id"] for item in portfolio["contributions"]] == [
-            contribution_id
-        ]
+        assert [item["contribution_id"] for item in portfolio["contributions"]] == [contribution_id]
         assert portfolio["contributions"][0]["verification_status"] == "verified"
         journey = _get(api, "/api/v1/me/journey/snapshot")
         assert journey["person_id"] == person
