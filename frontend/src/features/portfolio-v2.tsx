@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useState } from "react";
+import { ParticipantHelpTrigger } from "./participant-help-trigger";
 import { useNavigate } from "react-router-dom";
 import {
   Award, ArrowRight, BarChart3, BadgeCheck, BookOpen, BriefcaseBusiness,
@@ -209,6 +210,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
         <Metric Icon={Star} count={grade} label="Средняя оценка"/>
       </div>
     </section>
+    <div className="pg-portfolio-help"><ParticipantHelpTrigger topicId={tab==="passport"?"passport":tab==="certification"?"certification":"profile-case"} label="Как использовать портфолио" /></div>
     <nav className="p2-tabs" role="tablist" aria-label="Разделы портфолио">
       {sections.map(({id,name,Icon}) => <button key={id} id={panelId+"-"+id} role="tab" aria-selected={tab===id} aria-controls={panelId+"-panel"} className={tab===id ? "is-active" : ""} type="button" onClick={()=>{ openTab(id); }}><Icon size={18}/>{name}</button>)}
     </nav>
