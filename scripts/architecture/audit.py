@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import ast
 from collections import Counter, defaultdict
+from datetime import date
 import json
 from pathlib import Path, PurePosixPath
 import re
@@ -167,10 +168,16 @@ def analyze(root: Path) -> dict[str, Any]:
             for node in ast.walk(tree):
                 if isinstance(node, ast.Import):
                     modules = [alias.name for alias in node.names]
-                elif isinstance(node, ast.ImportFrom) and node.level == 0:
-                    modules = [node.module] if node.module else []
+                elif isinstance(node, ast.ImportFrom):
+                    if node.level:
+                        package = PurePosixPath(path).parts[1:-1]
+                        ancestor = package[:len(package) - (node.level - 1)]
+                        base = ".".join((*ancestor, *(node.module.split(".") if node.module else [])))
+                    else:
+                        base = node.module or ""
+                    modules = [base] if base else []
                     for alias in node.names:
-                        child = (node.module or "") + "." + alias.name
+                        child = base + "." + alias.name
                         if python_file(child, known):
                             modules.append(child)
                 else:
@@ -218,17 +225,50 @@ def as_markdown(r: dict[str, Any]) -> str:
     return "\n".join(lines) + "\n"
 
 
+
+def baseline_regressions(report: dict[str, Any], baseline: dict[str, Any]) -> list[str]:
+    allowed = {
+        (x["path"], x["module"]): x
+        for x in baseline.get("exceptions", [])
+    }
+    errors = []
+    for violation in report["forbidden_imports"]:
+        key = (violation["path"], violation["module"])
+        existing = allowed.get(key)
+        if existing is None:
+            errors.append("New forbidden import: " + violation["path"] + " -> " + violation["module"])
+        elif not existing.get("owner") or not existing.get("expires"):
+            errors.append("Unowned legacy exception: " + violation["path"])
+        elif date.fromisoformat(existing["expires"]) < date.today():
+            errors.append("Expired legacy exception: " + violation["path"])
+    allowed_cycles = {tuple(sorted(x)) for x in baseline.get("allowed_cycles", [])}
+    for group in report["cycles"]:
+        if tuple(sorted(group)) not in allowed_cycles:
+            errors.append("New import cycle: " + " -> ".join(group))
+    return errors
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=Path("."))
     parser.add_argument("--output-dir", type=Path, default=Path("/tmp/impulse-architecture"))
     parser.add_argument("--fail-on-domain-violations", action="store_true")
+    parser.add_argument("--fail-on-new", action="store_true")
+    parser.add_argument("--baseline", type=Path)
     args = parser.parse_args()
     report = analyze(args.root.resolve())
     args.output_dir.mkdir(parents=True, exist_ok=True)
     (args.output_dir / "architecture.json").write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     (args.output_dir / "architecture.md").write_text(as_markdown(report), encoding="utf-8")
     print(as_markdown(report).split("## Forbidden imports")[0])
+    if args.fail_on_new:
+        baseline_path = args.baseline or (args.root / "scripts/architecture/legacy-imports.json")
+        baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
+        problems = baseline_regressions(report, baseline)
+        for problem in problems:
+            print("ARCHITECTURE REGRESSION: " + problem)
+        if problems:
+            return 1
     if args.fail_on_domain_violations and any(
         category(x["path"]) == "domain" for x in report["forbidden_imports"]
     ):
