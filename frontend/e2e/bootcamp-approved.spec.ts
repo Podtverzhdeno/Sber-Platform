@@ -1,4 +1,7 @@
 import { expect, test } from "@playwright/test";
+import { installBootcampReferenceApi } from "./bootcamp-reference-fixtures";
+
+test.beforeEach(async ({ page }) => { await installBootcampReferenceApi(page); });
 
 /**
  * BC-R01..BC-R05 responsive, interaction and navigation invariants.
@@ -132,7 +135,7 @@ test("course reader fills viewport and lesson navigation never clips", async ({ 
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
-  await page.getByTestId("course-agent-development").getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
+  await page.getByTestId("course-demo-course-2").getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(dialog).toBeVisible();
   await dialog.getByRole("tab", { name: "Программа" }).click();
@@ -169,7 +172,7 @@ test("mobile fullscreen reader keeps lesson controls usable", async ({ page }) =
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("button", { name: "Меню", exact: true }).click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
-  await page.getByTestId("course-agent-development").getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
+  await page.getByTestId("course-demo-course-2").getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(dialog).toBeVisible();
   await dialog.getByRole("tab", { name: "Программа" }).click();
