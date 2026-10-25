@@ -113,7 +113,8 @@ async def test_messaging_messages_persist_to_postgresql_and_reset_clears() -> No
         rows = history.json()
         assert len(rows) == len(previous_rows) + 1
         assert rows[-1]["body"] == "Транзакционная проверка записи в PostgreSQL."
-        assert rows[-1]["sequence"] == (previous_rows[-1]["sequence"] + 1 if previous_rows else 1)
+        expected_sequence = previous_rows[-1]["sequence"] + 1 if previous_rows else 1
+        assert rows[-1]["sequence"] == expected_sequence
         assert rows[-1]["author_id"] == str(demo_id(PERSONA))
 
     async with database.sessions() as session:
@@ -148,12 +149,6 @@ async def test_messaging_messages_persist_to_postgresql_and_reset_clears() -> No
             .all()
         )
     channel_rows = [row for row in rows if row["payload"].get("channel_id") == str(created_id)]
-    channel_created = [
-        row
-        for row in channel_rows
-        if row["event_type"] == "messaging.channel.created"
-        and row["entity_type"] == "messaging_channels"
-    ]
     message_events = [
         row
         for row in rows
@@ -166,7 +161,7 @@ async def test_messaging_messages_persist_to_postgresql_and_reset_clears() -> No
         forbidden = {"body", "chat_text", "raw_chat", "prompt", "response"}
         assert forbidden.isdisjoint(event["payload"])
         assert event["payload"].get("kind") == "text"
-        assert event["payload"].get("sequence") == rows[-1]["sequence"]
+        assert event["payload"].get("sequence") == expected_sequence
 
     await reset_demo_data(database, demo_mode=True)
 
