@@ -525,3 +525,30 @@ test("satellite reference asset is sharp and vector brand marks load",async({pag
   expect(await logo.getAttribute("src")).toMatch(/\.svg$/);
   expect(await logo.evaluate((img:HTMLImageElement)=>img.complete&&img.naturalWidth>=64)).toBe(true);
 });
+
+
+test("sharing the active tab creates a useful deep link and handles clipboard failures",async({page})=>{
+  await page.addInitScript(()=>{
+    Object.defineProperty(navigator,"clipboard",{configurable:true,value:{
+      writeText:async(value:string)=>{sessionStorage.setItem("qa-copied-project-link",value);}
+    }});
+  });
+  await page.setViewportSize({width:1548,height:1016});
+  await fixture(page);
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
+  const detail=page.getByRole("dialog",{name:/Прототип рекомендательной системы/});
+  await detail.getByRole("tab",{name:"Команда"}).click();
+  await expect(page).toHaveURL(/tab=team/);
+  await detail.getByRole("button",{name:"Поделиться"}).click();
+  await expect(detail.getByRole("button",{name:"Ссылка скопирована"})).toBeVisible();
+  const copied=await page.evaluate(()=>sessionStorage.getItem("qa-copied-project-link"));
+  expect(copied).toContain("project=assignment-1");
+  expect(copied).toContain("tab=team");
+  await page.evaluate(()=>{
+    Object.defineProperty(navigator,"clipboard",{configurable:true,value:{
+      writeText:async()=>Promise.reject(new Error("Clipboard blocked")),
+    }});
+  });
+  await detail.getByRole("button",{name:"Ссылка скопирована"}).click();
+  await expect(detail.getByRole("button",{name:"Не удалось скопировать"})).toBeVisible();
+});
