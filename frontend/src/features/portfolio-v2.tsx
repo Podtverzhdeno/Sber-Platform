@@ -10,6 +10,7 @@ import {
   Users, X, type LucideIcon,
 } from "lucide-react";
 import { apiRequest } from "../api/client";
+import { learningSummaryQueryKey, loadLearningSummary } from "./learning-progress";
 import "./portfolio-v2.scss";
 
 type Contribution = {
@@ -139,6 +140,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
   const [notice, setNotice] = useState("");
   const panelId = useId();
   const profileQuery = useQuery({ queryKey: ["portfolio"], queryFn: () => apiRequest<Portfolio>("/api/v1/me/portfolio"), refetchOnMount: "always" });
+  const learningQuery = useQuery({ queryKey: learningSummaryQueryKey, queryFn: loadLearningSummary });
   const passportQuery = useQuery({ queryKey: ["talent-passport"], queryFn: () => apiRequest<Passport>("/api/v1/me/talent-passport"), refetchOnMount: "always" });
   const documentsQuery = useQuery({ queryKey: ["project-credentials"], queryFn: () => apiRequest<ProjectDocument[]>("/api/v1/me/project-credentials"), refetchOnMount: "always" });
   const consent = useMutation({
@@ -161,6 +163,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
   const skills = passportQuery.data?.skills ?? [];
   const credentials = portfolio.credentials;
   const certificates = credentials.filter(i => i.credential_type === "course");
+  const studyCertificates = (learningQuery.data?.courses ?? []).filter(course => course.finished && course.certificate_id !== null);
   const trophies = portfolio.trophies;
   const allGrades = verifiedProjects.map(x => numberForGrade(x.grade)).filter((n): n is number => n !== null);
   const grade = allGrades.length ? (allGrades.reduce((a,b)=>a+b,0) / allGrades.length).toFixed(1) : "—";
@@ -205,7 +208,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
       <div className="p2-metrics">
         <Metric Icon={FolderKanban} count={verifiedProjects.length} label="Принятых проектов"/>
         <Metric Icon={Users} count={passportQuery.isError ? "—" : skills.filter(s => s.confirmed_case_count > 0).length} label="Подтверждённых навыков"/>
-        <Metric Icon={FileBadge2} count={certificates.length} label="Сертификатов курсов"/>
+        <Metric Icon={FileBadge2} count={certificates.length + studyCertificates.length} label="Сертификатов обучения"/>
         <Metric Icon={Trophy} count={trophies.length} label="Достижений"/>
         <Metric Icon={Star} count={grade} label="Средняя оценка"/>
       </div>
@@ -233,8 +236,17 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
         {showCerts && <section className="p2-panel p2-certs-panel" aria-label="Сертификация">
           <PanelHeading icon={FileBadge2} title="СЕРТИФИКАЦИЯ" action={tab==="overview"?"Все сертификаты":"Перейти в аналитику"} onAction={()=>{ if(tab==="overview") openTab("certification"); else navigateTo(["Аналитика"], "?analyticsTab=certification"); }}/>
           <div className="p2-cert-list">{certificates.slice(0,tab==="overview"?3:20).map(item=><CredentialCard key={item.verification_id} item={item} onSelect={setOpenCredential}/>)}</div>
-          {certificates.length===0 && portfolio.courses.length>0 && <><p className="p2-learning-subtitle">Завершённые курсы · сертификат ещё не выдан</p><div className="p2-cert-list">{portfolio.courses.slice(0,tab==="overview"?3:20).map(course=><button className="p2-certificate" key={course.key} type="button" onClick={()=>{ navigateTo(["Bootcamp"]); }}><span className="p2-certificate-symbol"><BookOpen size={23}/></span><span className="p2-certificate-description"><strong>{course.title}</strong><small>Bootcamp · завершённый курс</small><em>Сертификат отдельно</em></span><span className="p2-verified"><CheckCircle2 size={13}/> Завершён</span></button>)}</div></>}
-          {certificates.length===0 && portfolio.courses.length===0 && <div className="p2-inline-empty">Проверяемые сертификаты курсов пока не выданы. Пройденные курсы доступны в Bootcamp.</div>}
+          {studyCertificates.length>0 && <section className="p2-study-certificates" aria-label="Учебные сертификаты Impulse">
+            <h3>Завершённое обучение Impulse <span>Не является подтверждением профессионального уровня</span></h3>
+            <div className="p2-cert-list">{studyCertificates.slice(0,tab==="overview"?3:20).map(course=><button className="p2-certificate" key={course.course_key} type="button" onClick={()=>{navigateTo(["Bootcamp"]);}}>
+              <span className="p2-certificate-symbol"><GraduationCap size={23}/></span>
+              <span className="p2-certificate-description"><strong>{course.title}</strong><small>Курс пройден · {course.completed_units} из {course.total_units} уроков</small><em>Учебный сертификат № {course.certificate_id}</em></span>
+              <span className="p2-verified"><CheckCircle2 size={13}/> Завершён</span>
+            </button>)}</div>
+          </section>}
+          {learningQuery.isError && <p className="p2-inline-empty" role="status">Не удалось получить учебные сертификаты. <button type="button" onClick={()=>{void learningQuery.refetch();}}>Обновить</button></p>}
+          {certificates.length===0 && studyCertificates.length===0 && portfolio.courses.length>0 && <><p className="p2-learning-subtitle">Завершённые курсы · сертификат ещё не выдан</p><div className="p2-cert-list">{portfolio.courses.slice(0,tab==="overview"?3:20).map(course=><button className="p2-certificate" key={course.key} type="button" onClick={()=>{ navigateTo(["Bootcamp"]); }}><span className="p2-certificate-symbol"><BookOpen size={23}/></span><span className="p2-certificate-description"><strong>{course.title}</strong><small>Bootcamp · завершённый курс</small><em>Сертификат отдельно</em></span><span className="p2-verified"><CheckCircle2 size={13}/> Завершён</span></button>)}</div></>}
+          {certificates.length===0 && studyCertificates.length===0 && portfolio.courses.length===0 && <div className="p2-inline-empty">Проверяемые сертификаты курсов пока не выданы. Пройденные курсы доступны в Bootcamp.</div>}
           {tab==="certification" && (documentsQuery.data??[]).length>0 && <div className="p2-document-list"><h3>Документы проектного опыта</h3>{(documentsQuery.data??[]).map(item=><a key={item.verification_id} href={"/verify/projects/"+encodeURIComponent(item.verification_id)}><FileCheck2 size={20}/><span>{item.task_title}<small>{item.customer_name} · {item.grade_label}</small></span><ExternalLink size={15}/></a>)}</div>}
         </section>}
         {showAchievements && <section className="p2-panel p2-achievements-panel" aria-label="Достижения">
