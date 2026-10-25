@@ -14,7 +14,7 @@ const participant = {
   csrf_token: "csrf-task-actions",
 };
 
-async function openCatalog(page: Page, items: CatalogItem[] = [catalogItem, insufficientItem]) {
+async function openCatalog(page: Page, items: CatalogItem[] = [catalogItem, insufficientItem], initialView: "cards" | "default" = "cards") {
   let demoAuthenticated = false;
   // All endpoints not explicitly mocked below return a deterministic 404;
   // this suite is an isolated browser contract and does not depend on a running backend.
@@ -53,11 +53,23 @@ async function openCatalog(page: Page, items: CatalogItem[] = [catalogItem, insu
   await page.locator('[data-persona="participant-synthetic"]').click();
   await page.getByRole("link", { name: "Задачи" }).click();
   await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
-  await page.getByRole("button", { name: "Карточки" }).click();
+  if (initialView === "cards") await page.getByRole("button", { name: "Карточки" }).click();
 }
 
 test.describe("task catalog interactive controls and motion", () => {
   test.use({ viewport: { width: 1672, height: 941 } });
+
+  test("Tasks defaults to list but honors an explicit cards selection", async ({ page }) => {
+    await openCatalog(page, [catalogItem, insufficientItem], "default");
+    await expect(page.getByRole("button", { name: "Список" })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("table", { name: "Список рекомендованных задач" })).toBeVisible();
+    await page.getByRole("button", { name: "Карточки" }).click();
+    await expect(page.getByRole("button", { name: "Карточки" })).toHaveAttribute("aria-pressed", "true");
+    await expect(page.locator(".catalog-v2-card")).toHaveCount(2);
+    await page.reload();
+    await expect(page.getByRole("button", { name: "Карточки" })).toHaveAttribute("aria-pressed", "true");
+  });
+
 
   test("card hover highlights it; bookmark and share work without selecting a task", async ({ page }) => {
     let bookmarkSaved: boolean | undefined;
