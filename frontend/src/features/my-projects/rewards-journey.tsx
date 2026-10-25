@@ -176,7 +176,7 @@ export function RewardsJourney({ completedCount }: { completedCount: number }) {
         <button type="button" className="mpr-golden__click" onClick={() => { openDetails("passport"); }} aria-label="Skill Passport. Узнать подробнее">
           <PassportArtwork />
           <span className="mpr-golden__intro">
-            <span className="mpr-golden__title">SKILL PASSPORT <span className="mpr-golden__question" aria-hidden="true">?</span></span>
+            <span className="mpr-golden__title">SKILL PASSPORT</span>
             <span className="mpr-golden__caption">Живое подтверждение твоих навыков, результатов и компетенций</span>
             <span className="mpr-golden__subcaption">Обновляется по мере твоего развития в проектах</span>
           </span>
