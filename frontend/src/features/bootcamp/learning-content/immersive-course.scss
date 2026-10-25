@@ -825,3 +825,49 @@
   .bc-reference .bc-ref-why-panel .bc-ref-why-hero h2 { font-size: 21px !important; }
   .bc-reference .bc-ref-why-role-banner { gap: 10px; }
 }
+
+
+/* Match screenshot reading sequence: section tabs precede the lesson heading.
+   Preserve the semantic DOM order and lesson navigation event handlers. */
+.imp-study[data-view="theory"] .imp-study__main,
+.imp-study[data-view="example"] .imp-study__main,
+.imp-study[data-view="practice"] .imp-study__main,
+.imp-study[data-view="check"] .imp-study__main {
+  display: flex;
+  flex-direction: column;
+}
+.imp-study[data-view="theory"] .imp-study__tabs,
+.imp-study[data-view="example"] .imp-study__tabs,
+.imp-study[data-view="practice"] .imp-study__tabs,
+.imp-study[data-view="check"] .imp-study__tabs {
+  order: 0;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+.imp-study[data-view="theory"] .imp-study__lesson-heading,
+.imp-study[data-view="example"] .imp-study__lesson-heading,
+.imp-study[data-view="practice"] .imp-study__lesson-heading,
+.imp-study[data-view="check"] .imp-study__lesson-heading {
+  order: 1;
+}
+.imp-study[data-view="theory"] .imp-study__content,
+.imp-study[data-view="example"] .imp-study__content,
+.imp-study[data-view="practice"] .imp-study__content,
+.imp-study[data-view="check"] .imp-study__content {
+  order: 2;
+  flex: 1;
+}
+.imp-study[data-view="theory"] .imp-study__navigation,
+.imp-study[data-view="example"] .imp-study__navigation,
+.imp-study[data-view="practice"] .imp-study__navigation,
+.imp-study[data-view="check"] .imp-study__navigation { order: 3; }
+.imp-study[data-view="theory"] .imp-study__error,
+.imp-study[data-view="example"] .imp-study__error,
+.imp-study[data-view="practice"] .imp-study__error,
+.imp-study[data-view="check"] .imp-study__error { order: 4; }
+@media (min-width: 1280px) {
+  .imp-study[data-view="theory"] .imp-study__main,
+  .imp-study[data-view="example"] .imp-study__main,
+  .imp-study[data-view="practice"] .imp-study__main,
+  .imp-study[data-view="check"] .imp-study__main { padding-top: 16px; }
+}
