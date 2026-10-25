@@ -177,3 +177,27 @@
 @media(prefers-reduced-motion:reduce){.avp-activity *, .avp-activity *::before,.avp-activity *::after{animation:none!important;transition:none!important}}
 
 @media(max-width:700px){.analytics-v3[data-tab="activity"]{overflow-x:clip}}
+
+
+/* Final visual pass: course cards must be three across on desktop, while
+   a day in the heatmap must remain a tile rather than a stretched pill. */
+.analytics-v3[data-tab="activity"] .avp-courses.av3-study-list {
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;
+}
+.analytics-v3[data-tab="activity"] .avp-courses .avp-course.av3-study-course {
+  display:flex;flex-direction:row;align-items:flex-start;gap:10px;min-height:136px;
+}
+.analytics-v3[data-tab="activity"] .avp-courses .avp-course .avp-icon{width:51px;height:51px}
+.analytics-v3[data-tab="activity"] .avp-courses .avp-course__copy{flex:1;min-width:0}
+.analytics-v3[data-tab="activity"] .avp-heat-grid {max-width:690px}
+.analytics-v3[data-tab="activity"] .avp-heat-weeks .av3-heat-cell {
+  width:21px;height:17px;justify-self:center;border-radius:4px;
+}
+@media(max-width:1100px){
+ .analytics-v3[data-tab="activity"] .avp-courses.av3-study-list{grid-template-columns:1fr}
+ .analytics-v3[data-tab="activity"] .avp-courses .avp-course.av3-study-course{min-height:90px}
+}
+@media(max-width:700px){
+ .analytics-v3[data-tab="activity"] .avp-heat-grid{min-width:0;max-width:none}
+ .analytics-v3[data-tab="activity"] .avp-heat-weeks .av3-heat-cell{width:min(100%,21px);height:17px}
+}
