@@ -174,18 +174,18 @@ function PanelPreview({ project, onOpen, onRewards }: { project: Project; onOpen
   const progress = completion(project);
   const contributions = project.work.contributions.slice(-4);
   return <aside className="mp-preview mp-surface">
-    <header className="mp-preview__header"><CompanyIcon name={projectCompany(project)}/><div><small>{projectCompany(project)} · Заказчик</small><h2>{project.work.task.title}</h2><p>{project.work.terms.deliverable}</p></div><Status status={project.work.assignment.status}/></header>
+    <header className="mp-preview__header"><CompanyIcon name={projectCompany(project)}/><div className="mp-preview__intro"><small>{projectCompany(project)} · Заказчик</small><h2>{project.work.task.title}</h2>{(project.work.task.competency_tags?.length ?? 0)>0&&<div className="mp-chip-row">{project.work.task.competency_tags?.slice(0,3).map(skill=><em key={skill}>{skill}</em>)}</div>}<p>{project.work.terms.deliverable}</p></div><div className="mp-preview__aside"><Status status={project.work.assignment.status}/><span className="mp-preview__deadline"><CalendarDays size={15}/> {dateLabel(project.work.terms.deadline_at)}<small>{daysLabel(project.work.terms.deadline_at)}</small></span></div></header>
     <div className="mp-preview__tabs"><button type="button" className="is-active" onClick={()=>{onOpen("overview");}}>Обзор</button><button type="button" onClick={()=>{onOpen("progress");}}>Прогресс</button><button type="button" onClick={()=>{onOpen("contribution");}}>Мой вклад</button><button type="button" onClick={()=>{onOpen("team");}}>Команда</button><button type="button" onClick={onRewards}>Бонусы и выгоды</button></div>
     <div className="mp-preview__content">
       <div className="mp-preview__left">
         <section className="mp-surface mp-panel-inset"><header><h3>Прогресс по этапам</h3><strong>{progress === null ? "Нет оценки" : `${String(progress)}%`}</strong></header>
           {checkpoints.length ? checkpoints.slice(0,5).map((cp,index)=><div className="mp-stage" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"done":""}>{finishedCheckpoint.has(cp.status)?<Check size={15}/>:index+1}</span><div><p>{cp.title}</p><ProgressBar value={finishedCheckpoint.has(cp.status)?100:null} compact/></div></div>) : <p className="mp-muted">План этапов появится после публикации заказчиком</p>}
         </section>
-        <section className="mp-surface mp-panel-inset"><header><h3>Команда проекта</h3><small>{project.detail?.team?.length ?? "—"} участников</small></header><p>{project.detail?.mentor?.display_name ? `Ментор: ${project.detail.mentor.display_name}` : "Состав команды уточняется"}</p></section>
+        <section className="mp-surface mp-panel-inset mp-preview-team"><header><h3>Команда проекта</h3><small>{project.detail?.team?.length ?? "—"} участников</small></header>{(project.detail?.team?.length ?? 0)>0?<div className="mp-preview-team__members">{(project.detail?.team ?? []).slice(0,3).map(person=><div key={person.person_id} className="mp-preview-team__person"><span aria-hidden="true">{person.display_name.trim().slice(0,1).toUpperCase()}</span><div><strong>{person.display_name}</strong><small>{person.status}</small></div></div>)}</div>:<p className="mp-muted">Состав команды уточняется</p>}{project.detail?.mentor?.display_name&&<p className="mp-preview-team__mentor">Ментор · {project.detail.mentor.display_name}</p>}</section>
       </div>
       <div className="mp-preview__right">
         <section className="mp-surface mp-panel-inset"><header><h3>Мой вклад</h3><small>{contributions.length} версий</small></header>
-          {contributions.length ? contributions.map(item=><p className="mp-contrib-line" key={item.id}><FileText size={15}/><span>{item.personal_summary}</span></p>) : <p className="mp-muted">Отправьте свой первый вклад, чтобы он появился здесь</p>}
+          {contributions.length ? contributions.map(item=><div className="mp-contrib-line" key={item.id}><FileText size={15}/><span><strong>Версия {String(item.version)} · {item.status}</strong><small>{item.personal_summary}</small></span></div>) : <p className="mp-muted">Отправьте свой первый вклад, чтобы он появился здесь</p>}
         </section><BenefitsPreview onDetails={onRewards}/>
       </div>
     </div>
