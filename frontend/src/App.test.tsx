@@ -180,7 +180,7 @@ describe("App", () => {
 
     const sidebar = await screen.findByRole("complementary", { name: "Боковая панель" });
     const signature = () => ({
-      brand: sidebar.querySelector(".sidebar-brand")?.innerHTML,
+      brand: sidebar.querySelector(".sidebar-brand .brand-mark")?.textContent?.trim() + " " + sidebar.querySelector(".sidebar-brand strong")?.textContent?.trim(),
       icons: Array.from(sidebar.querySelectorAll("nav .nav-icon"), (icon) => icon.innerHTML),
       promo: sidebar.querySelector(".sidebar-message")?.innerHTML,
     });
