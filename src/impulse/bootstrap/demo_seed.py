@@ -1131,7 +1131,8 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
             (
                 (
                     "mentor-elena",
-                    "Добро пожаловать в сообщество «Маяки»! Здесь обсуждаем карьеру, обучение и проекты.",
+                    ("Добро пожаловать в сообщество «Маяки»! Здесь обсуждаем "
+                     "карьеру, обучение и проекты."),
                 ),
                 (
                     "participant-maria",
@@ -1210,14 +1211,14 @@ def build_work_and_rating_batches() -> list[SeedBatch]:
                     status="active",
                 )
             )
-        for index, (author, text) in enumerate(posts, start=1):
+        for index, (author, message_body) in enumerate(posts, start=1):
             message_rows.append(
                 demo_row(
                     f"messaging-message:community:{slug}:{index}",
                     channel_id=channel_id,
                     author_id=demo_id(author),
                     kind="text",
-                    body=text,
+                    body=message_body,
                     sequence=index,
                     status="active",
                     payload={"artifact_refs": []},
