@@ -1,0 +1,7 @@
+# Manual release trigger for Sber-Platform / Railway production
+# Project: spirited-healing
+# Service: Sber-Platform
+# Reason: rebuild after TypeScript nullable last_message fix on main.
+# This file is watched by Railway to trigger a new build.
+# No database reset or schema mutation is requested by this marker.
+triggered_on=2026-10-25
