@@ -2,7 +2,7 @@
 
 - task_id: ARCH-101-102-ERROR-INVERSION-20261026
 - session_id: gpt6-20261026-error-inversion-wave
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 3fe623c786ca49003a8580954ee7f310b274db91
@@ -58,3 +58,9 @@
   - API error-envelope and backend unit tests
   - import boundary architecture gate
 - blockers: Remaining bootstrap import in infrastructure/development_store.py requires separate behavior-preserving refactor; no deployment. Full CI must pass on integration revision.
+
+- review_handoff_2026_10_26: Draft PR #88 implements 30 application/infrastructure ApiError import inversions, and moves shared curriculum content source out of bootstrap with compatibility facades. Architecture audit run #40244498605 reports zero forbidden layer imports and zero runtime import cycles.
+- compatibility_evidence: Focused error/curriculum QA run #40244498489 error-compatibility SUCCESS (FastAPI error response characterization, Python source import gate, Ruff, Pyright). PostgreSQL migrations applied, and 8/9 selected integration files produced no failing tests.
+- blocker_baseline_proved: isolated test_track_swap_reported_completion_and_one_learning_day returns 409 instead of 200 both in refactor run #40244498489 and clean pre-refactor baseline run #40244669094. Seed data has product/ml active and python frozen; selecting data without freeze conflicts with max two active tracks. Test belongs to separate CI-COURSE-COMPLETION-ASSERT-20261025 claim. Do not weaken domain policy.
+- full_ci_evidence: unified PR run #40244498438 remains red due unchanged OpenAPI snapshot, frontend lint/TS errors and unrelated format debt. Full CI gate not accepted.
+- independent_review: REQUIRED before merging PR #88 or marking ARCH-101/ARCH-102 DONE.
