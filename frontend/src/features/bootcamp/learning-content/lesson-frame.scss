@@ -57,3 +57,21 @@
 @media (prefers-reduced-motion: reduce) {
   .lesson-frame, .lesson-frame__chevron { transition: none; }
 }
+
+/* Final lesson: complete applied project, acceptance rubric, and evidence. */
+.imp-study__capstone {margin:16px 0;padding:17px;border:1px solid #3d8c83;border-radius:12px;background:linear-gradient(130deg,#103940,#0b2a3c);}
+.imp-study__capstone-header>span {display:block;color:#53e8d7;font-size:10px;font-weight:850;letter-spacing:.085em;margin-bottom:7px;}
+.imp-study__capstone h4 {font-size:19px;color:#f1ffff;margin:5px 0 9px;}
+.imp-study__capstone-header p {max-width:90ch;font-size:12px;line-height:1.65;color:#bde0df;}
+.imp-study__capstone-grid {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin:15px 0;}
+.imp-study__capstone-grid>div {padding:12px;border:1px solid #315e67;border-radius:10px;background:#0b2c3d;}
+.imp-study__capstone h5 {color:#f5fbff;font-size:12px;margin:5px 0 9px;}
+.imp-study__capstone li {color:#c4e3e5;font-size:11px;line-height:1.65;margin:6px 0;}
+.imp-study__capstone ol,.imp-study__capstone ul {padding-left:21px;margin:0 0 12px;}
+.imp-study__capstone-rubric {padding:13px;border-radius:10px;border:1px solid #356b7b;background:#0b253c;}
+.imp-study__capstone-rubric > div {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+.imp-study__capstone-rubric article {padding:10px;border:1px solid #32516c;border-radius:9px;background:#122c42;}
+.imp-study__capstone-rubric article strong {display:inline;font-size:12px;color:#efffff;}
+.imp-study__capstone-rubric article span {float:right;font-size:12px;color:#4ee3d2;font-weight:800;}
+.imp-study__capstone-rubric article p {margin:7px 0 0;font-size:11px;line-height:1.5;color:#a5c9d8;}
+@media(max-width:700px){.imp-study__capstone{padding:12px}.imp-study__capstone-grid,.imp-study__capstone-rubric>div{grid-template-columns:1fr}}
