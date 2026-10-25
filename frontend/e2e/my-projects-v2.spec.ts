@@ -315,3 +315,36 @@ test("Project dashboard and detailed popup remain usable on a narrow phone",asyn
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(2);
 });
+
+
+test("pixel-reference tabs remain interactive at 1548×1016",async({page})=>{
+  test.setTimeout(75_000);
+  await page.setViewportSize({width:1548,height:1016});
+  await fixture(page);
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
+  const detail=page.locator('[data-project-screen="detail"]');
+  await expect(detail.locator(".mp-ref-hero")).toBeVisible();
+  const cases=[
+    ["Задачи","01_tasks",".mp-ref-task-list"],
+    ["Прогресс","02_progress",".mp-ref-progress-summary"],
+    ["Мой вклад","03_contribution",".mp-ref-contrib-metrics"],
+    ["Команда","04_team",".mp-ref-team-list"],
+    ["Бонусы и выгоды","05_rewards",".mp-ref-rewards"],
+  ] as const;
+  for(const [name,filename,selector] of cases){
+    const tab=detail.getByRole("tab",{name,exact:true});
+    await tab.click();
+    await expect(tab).toHaveAttribute("aria-selected","true");
+    await expect(detail.locator(selector)).toBeVisible();
+    const outside=await detail.evaluate(node=>node.scrollWidth>node.clientWidth+2);
+    expect(outside).toBe(false);
+    await page.screenshot({path:`test-results/my-projects-v2/ref_${filename}_1548.png`,fullPage:false,animations:"disabled"});
+  }
+  await detail.getByRole("tab",{name:"Задачи"}).click();
+  const filter=detail.getByRole("button",{name:/В работе ·/});
+  await filter.click();
+  await expect(filter).toHaveAttribute("aria-pressed","true");
+  await detail.getByRole("tab",{name:"Бонусы и выгоды"}).click();
+  await detail.getByRole("button",{name:/Результат в портфолио/}).click();
+  await expect(detail.locator(".mp-ref-reward-note")).toBeVisible();
+});
