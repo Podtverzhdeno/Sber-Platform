@@ -908,7 +908,7 @@ export function BootcampCatalog({
             onReason={() => { openPanel("reason", deepLinked.key); }} />)}
       </Drawer>
       <Drawer title="Требования к обучению" open={panel === "requirements"} onClose={closePanel}>
-        <RequirementsDetails cards={roleCourses} studyRecords={study.data?.courses ?? []} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} onStartPractice={() => { navigate("/workspace/1"); }} />
+        <RequirementsDetails cards={roleCourses} studyRecords={study.data?.courses ?? []} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} onStartPractice={() => { void navigate("/workspace/1"); }} />
       </Drawer>
       {milestoneCelebration && <GradeMilestoneCelebration mode={milestoneCelebration.mode}
         roleTitle={milestoneCelebration.roleTitle} fromGrade={milestoneCelebration.fromGrade} toGrade={milestoneCelebration.toGrade}
