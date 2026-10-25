@@ -39,8 +39,11 @@ SCREENS = (
 def reference_image(path: Path, file_name: str) -> Image.Image:
     if path.is_file() and path.suffix.lower() == ".zip":
         with ZipFile(path) as archive:
-            matches = [name for name in archive.namelist()
-                       if name.endswith("/references/" + file_name)]
+            matches = [
+                name
+                for name in archive.namelist()
+                if name.endswith("/references/" + file_name)
+            ]
             if len(matches) != 1:
                 raise ValueError(f"Expected one reference {file_name}, got {len(matches)}")
             return Image.open(io.BytesIO(archive.read(matches[0]))).convert("RGB")
@@ -63,7 +66,9 @@ def capture_image(root: Path, width: int, height: int, key: str, view: str) -> P
     return None
 
 
-def compare(expected: Image.Image, actual: Image.Image, threshold: int) -> tuple[dict, Image.Image, Image.Image]:
+def compare(
+    expected: Image.Image, actual: Image.Image, threshold: int
+) -> tuple[dict, Image.Image, Image.Image]:
     if expected.size != actual.size:
         raise ValueError(
             f"Different dimensions: reference={expected.size}, capture={actual.size}; "
@@ -102,8 +107,10 @@ def main() -> int:
     args.output.mkdir(parents=True, exist_ok=True)
 
     result = {
-        "viewport": args.viewport, "reference": str(args.reference),
-        "captures": str(args.captures), "screens": {},
+        "viewport": args.viewport,
+        "reference": str(args.reference),
+        "captures": str(args.captures),
+        "screens": {},
     }
     all_compared = True
     for key, view, filename in SCREENS:
