@@ -35,3 +35,6 @@ release_request=2026-10-25-portfolio-compact-columns-31411e447393
 
 # Correct NodeList iteration for release of compact Portfolio cards
 release_request=2026-10-25-portfolio-compact-typescript-0855a1e3d082
+
+# Retry verified community release after unrelated portfolio typecheck repair
+release_request=2026-10-26-community-retry-13320840ba8f
