@@ -14,3 +14,6 @@ release_request=2026-10-25-bootcamp-reference-0477de18
 
 # Bootcamp: truthful grade requirements and repeatable 5-state/6-viewport capture
 release_request=2026-10-25-bootcamp-capture-419d6885
+
+# Build reference My Projects V2: card, list, detail
+release_request=2026-10-25-projects-three-screens-1a84a93
