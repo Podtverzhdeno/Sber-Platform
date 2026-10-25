@@ -1,13 +1,15 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
+import { resetAppQueryCacheForTests } from "./app/query";
 import { overviewFixture } from "./features/participant-home-v2/fixture";
 
 const personas = [
   { key: "participant-alex", display_name: "Алекс Речной", roles: ["participant"] },
 ];
 
+beforeEach(() => { resetAppQueryCacheForTests(); });
 afterEach(() => vi.restoreAllMocks());
 
 function requestUrl(input: RequestInfo | URL): string {
