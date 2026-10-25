@@ -3,15 +3,45 @@ import { expect, test, type Page } from "@playwright/test";
 const actor = { person_id: "00000000-0000-0000-0000-000000000001", display_name: "Алекс Речной", active_role: "participant", assigned_roles: ["participant"], scopes: [], consent_scopes: [], navigation: ["Главная", "События"], csrf_token: "csrf-events" };
 const event = { key: "ai-journey", title: "AI Journey 2026", event_type: "Хакатон", organizer: "Сбер", conditions: "Команда до четырёх человек", source_url: "https://example.test/event", deadline_at: null, starts_at: null, status: "open", track_keys: ["python"], recommendation_reason: "Соответствует активной траектории", source_checked_at: "2026-10-20T08:00:00Z", source_status: "current" };
 
-async function api(page: Page) {
+const visualEvent = {
+  ...event,
+  title: "Хакатон Сбера: AI для реальных продуктов",
+  event_type: "Хакатон",
+  track_keys: ["python", "ai", "ml", "data", "product"],
+  recommendation_reason: "Соответствует вашей траектории в AI и разработке",
+  deadline_at: "2026-11-02T20:00:00Z",
+};
+const visualEvents = [
+  visualEvent,
+  { ...event, key: "product-analyst", title: "Образовательная программа «Продуктовый аналитик»",
+    event_type: "Образовательная программа", track_keys: ["product", "data", "analytics"],
+    recommendation_reason: "Подходит для развития аналитики, продукта и работы с данными",
+    deadline_at: "2026-11-11T20:00:00Z" },
+  { ...event, key: "student-grant", title: "Грантовый конкурс студенческих проектов",
+    event_type: "Грант", track_keys: ["product", "python", "ai", "engineering"],
+    recommendation_reason: "Практическая реализация инженерных и AI-проектов",
+    deadline_at: "2026-11-18T20:00:00Z" },
+];
+const visualProgram = [
+  { day: "День 1", title: "Открытие и знакомство", detail: "Регистрация, приветствие участников и рассказ о программе" },
+  { day: "День 1", title: "Постановка кейсов", detail: "Выбор задач и постановка продуктовых гипотез" },
+  { day: "День 1", title: "Формирование команд", detail: "Поиск единомышленников и распределение ролей" },
+  { day: "День 1", title: "Работа с менторами", detail: "Разбор идей, архитектуры и планов решения" },
+  { day: "День 1", title: "Промежуточная сдача", detail: "Проверка прогресса и демонстрация первых результатов" },
+  { day: "День 1", title: "Итоги дня", detail: "Обратная связь и следующий этап" },
+  { day: "День 2", title: "Прототипирование", detail: "Реализация продукта и проверка гипотез" },
+  { day: "День 2", title: "Тестирование", detail: "Подготовка демонстрации и оценка качества" },
+  { day: "День 3", title: "Защита решения", detail: "Презентация результата и вопросы экспертов" },
+];
+async function api(page: Page, visualReference = false) {
   let loggedIn = false;
   await page.route("**/api/v1/**", (route) => route.fulfill({ status: 404, json: {} }));
   await page.route("**/api/v1/config", (route) => route.fulfill({ json: { demo_mode: true } }));
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: actor.display_name, roles: ["participant"] }] }));
   await page.route("**/api/v1/me", (route) => loggedIn ? route.fulfill({ json: actor }) : route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
   await page.route("**/api/v1/auth/demo-login", (route) => { loggedIn = true; return route.fulfill({ json: actor }); });
-  await page.route("**/api/v1/ecosystem/events", (route) => route.fulfill({ json: { items: [event], next_cursor: null, has_more: false } }));
-  await page.route("**/api/v1/ecosystem/events/ai-journey", (route) => route.fulfill({ json: { ...event, description: "Практический хакатон", target_audience: "Разработчики", prerequisites: ["Python"], program: [{ day: "День 1", title: "Прототип", detail: "Собрать решение" }], expected_result: "Рабочий прототип", participation_rules: "По регистрации", venue_format: "Онлайн", timezone: "Europe/Moscow", ends_at: null, rewards: [] } }));
+  await page.route("**/api/v1/ecosystem/events", (route) => route.fulfill({ json: { items: visualReference ? visualEvents : [event], next_cursor: null, has_more: false } }));
+  await page.route("**/api/v1/ecosystem/events/ai-journey", (route) => route.fulfill({ json: { ...(visualReference ? visualEvent : event), description: visualReference ? "Создайте AI-решение вместе с экспертами Сбера, получите опыт реальной продуктовой разработки и возможность попасть на стажировку" : "Практический хакатон", target_audience: visualReference ? "Студенты и молодые специалисты, интересующиеся AI, ML и продуктовой разработкой" : "Разработчики", prerequisites: ["Python", "Основы ML", "Навыки работы в команде"], program: visualReference ? visualProgram : [{ day: "День 1", title: "Прототип", detail: "Собрать решение" }], expected_result: "Рабочий прототип", participation_rules: "По регистрации", venue_format: "Офлайн + онлайн", timezone: "Europe/Moscow", ends_at: null, rewards: [] } }));
   await page.route("**/api/v1/ecosystem/events/ai-journey/registration", (route) => route.fulfill({ json: { event_key: "ai-journey", started_registrations: 25, confirmed_registrations: 18, participations: 7, counter_state: "ok", computed_at: "2026-10-20T08:00:00Z", source_checked_at: "2026-10-20T08:00:00Z", definition: "confirmed_registrations", definition_version: 1, definition_text: "Подтверждённые регистрации", contains_personal_data: false } }));
 }
 
@@ -32,17 +62,18 @@ test("event detail remains readable on mobile", async ({ page }) => {
 
 
 test("events reference: all six detail states, registration flow and keyboard navigation", async ({ page }) => {
-  await api(page);
+  await api(page, true);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "События" }).click();
   await expect(page.getByTestId("events-v2")).toBeVisible();
+  await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
   await page.setViewportSize({ width: 1586, height: 1081 });
   await page.screenshot({ path: "test-results/event-reference/catalog.png", animations: "disabled", fullPage: false });
   await page.setViewportSize({ width: 1703, height: 924 });
   await expect(page.getByText("События, которые дают")).toBeVisible();
-  await page.getByRole("button", { name: "Подробнее" }).click();
-  const dialog = page.getByRole("dialog", { name: "AI Journey 2026" });
+  await page.getByRole("button", { name: "Подробнее" }).first().click();
+  const dialog = page.getByRole("dialog", { name: visualEvent.title });
   await expect(dialog).toBeVisible();
   await page.screenshot({ path: "test-results/event-reference/about.png", animations: "disabled" });
   const bounds = await dialog.boundingBox();
@@ -54,7 +85,8 @@ test("events reference: all six detail states, registration flow and keyboard na
   const nav = dialog.getByRole("navigation", { name: "Разделы события" });
   await nav.getByRole("button", { name: "Программа" }).click();
   await expect(dialog.getByText("Программа мероприятия")).toBeVisible();
-  await expect(dialog.getByText("Собрать решение")).toBeVisible();
+  await expect(dialog.getByText("Открытие и знакомство")).toBeVisible();
+  await expect(dialog.locator(".ev-program-timeline li")).toHaveCount(6);
   await page.screenshot({ path: "test-results/event-reference/program.png", animations: "disabled" });
   await nav.getByRole("button", { name: "Призы и возможности" }).click();
   await expect(dialog.getByRole("heading", { name: "Призы и возможности" })).toBeVisible();
@@ -69,7 +101,7 @@ test("events reference: all six detail states, registration flow and keyboard na
   await expect(dialog.getByText("Частые вопросы")).toBeVisible();
   await page.screenshot({ path: "test-results/event-reference/faq.png", animations: "disabled" });
   await dialog.locator("summary").first().click();
-  await expect(dialog.getByText("Разработчики")).toBeVisible();
+  await expect(dialog.getByText(/Студенты и молодые специалисты/)).toBeVisible();
   await nav.getByRole("button", { name: "Зарегистрироваться" }).click();
   const registration = dialog.getByTestId("event-registration");
   await expect(registration).toBeVisible();
