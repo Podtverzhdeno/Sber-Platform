@@ -166,6 +166,11 @@ function BenefitsPreview({ onDetails }: { onDetails: () => void }) {
 }
 function PanelPreview({ project, onOpen, onRewards }: { project: Project; onOpen: (tab?: Tab) => void; onRewards: () => void }) {
   const checkpoints = project.detail?.checkpoints ?? [];
+  const acceptedEvidenceCount=project.work.contributions.filter(item=>
+    ["accepted","verified","approved"].includes(item.status)||
+    (project.detail?.feedback??[]).some(review=>
+      review.contribution_id===item.id&&["accepted","verified","approved"].includes(review.status))
+  ).length;
   const progress = completion(project);
   const contributions = project.work.contributions.slice(-4);
   return <aside className="mp-preview mp-surface">
@@ -320,7 +325,7 @@ function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, 
         <h2>Мой вклад в проект <span>Подтверждённые действия и материалы</span></h2>
         <div className="mp-ref-contrib-metrics">
           <div><span className="mp-ref-title-icon"><FileText size={18}/></span><strong>{project.work.contributions.length}</strong><small>Отправлено версий</small></div>
-          <div><span className="mp-ref-title-icon"><CheckCircle2 size={18}/></span><strong>{project.detail?.feedback?.filter(v=>v.status==="accepted"||v.status==="verified"||v.status==="approved").length ?? 0}</strong><small>Принятых результатов</small></div>
+          <div><span className="mp-ref-title-icon"><CheckCircle2 size={18}/></span><strong>{acceptedEvidenceCount}</strong><small>Принятых результатов</small></div>
           <div><span className="mp-ref-title-icon"><Award size={18}/></span><strong>{project.detail?.feedback?.length ?? 0}</strong><small>Проверок</small></div>
           <div><span className="mp-ref-title-icon"><Layers3 size={18}/></span><strong>{project.work.contributions.reduce((count,item)=>count+item.artifact_keys.length,0)}</strong><small>Типов материалов</small></div>
         </div>
@@ -355,7 +360,7 @@ function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, 
     {tab==="team" && <ProjectReferenceTeam team={project.detail?.team??[]} customer={projectCompany(project)}
       mentor={project.detail?.mentor?.display_name??null} onMessage={onMessage} onContribution={()=>{selectTab("contribution");}}/>}
     {tab==="rewards" && <ProjectReferenceRewards selected={rewardFocus} onSelected={(id)=>{setRewardFocus(id);}}
-      acceptedContributions={project.work.contributions.filter(item=>["accepted","verified","approved"].includes(item.status)).length}
+      acceptedContributions={acceptedEvidenceCount}
       mentorAssigned={Boolean(project.detail?.mentor)}
       activeMembers={(project.detail?.team??[]).filter(person=>["active","accepted","joined","confirmed","in_progress","staffed"].includes(person.status)).length}
       onContribution={()=>{selectTab("contribution");}} onWorkspace={onWorkspace}/>}
