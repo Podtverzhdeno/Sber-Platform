@@ -17,3 +17,6 @@ release_request=2026-10-25-bootcamp-lesson-scroll-f8574242445b
 
 # Messaging QA: 58 unit + 14 browser passed, responsive context, read and notification synchronization, mute and working actions
 release_request=2026-10-25-messaging-audit-415662d3a4f9
+
+# Publish evidence-backed Skill Passport charts and skill case provenance
+release_request=2026-10-25-portfolio-evidence-ca9499195fdf
