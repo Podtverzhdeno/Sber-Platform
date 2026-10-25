@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { apiRequest, type RuntimeApiPath } from "../../../api/client";
 import { invalidateLearningProjections } from "../../learning-progress";
-import { fetchEngagementOverview } from "../../engagement-client";
+import { fetchEngagementOverview, type EngagementOverview } from "../../engagement-client";
 import { StreakCelebration } from "../../streak-celebration";
 import { learningProgramFor } from "./programs";
 import { knowledgeCheckFor } from "./knowledge-checks";
@@ -56,6 +56,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const [practiceUrl, setPracticeUrl] = useState("");
   const [printKind, setPrintKind] = useState<"study" | "practice">("study");
   const [courseCelebrationDays, setCourseCelebrationDays] = useState<number | null>(null);
+  const finishBaselineDays = useRef<number | null>(null);
   const path = studyPath(courseKey);
   const progress = useQuery({
     queryKey: ["impulse-study", courseKey],
@@ -107,7 +108,10 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           queryFn: fetchEngagementOverview,
           staleTime: 0,
         }).then((overview) => {
-          if (overview.today_saved && overview.current_days > 0) {
+          const grewOnFinish = finishBaselineDays.current !== null &&
+            overview.current_days > finishBaselineDays.current;
+          // The topbar already animates an actual new day. Never stack two dialogs.
+          if (overview.today_saved && overview.current_days > 0 && !grewOnFinish) {
             setCourseCelebrationDays(overview.current_days);
           }
         }).catch(() => {
@@ -167,6 +171,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     if (!accessible || progress.isError) { setError("Для выдачи сертификата необходимо подключение к серверу."); return; }
     try {
       if (completed < total && current === total - 1) await advance.mutateAsync(current);
+      finishBaselineDays.current = client.getQueryData<EngagementOverview>(["engagement-overview"])?.current_days ?? null;
       await finish.mutateAsync();
     } catch {
       setError("Сертификат не выдан: сначала завершите все уроки и повторите попытку.");
