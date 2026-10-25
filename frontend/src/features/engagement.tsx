@@ -119,7 +119,8 @@ export function TopbarEngagementIndicator() {
   const activeDays = chosenDays ?? rhythmData?.active_days ?? [];
   const reminderHour = chosenHour ?? rhythmData?.reminder_hour ?? 18;
   const reminderWindow = chosenWindow ?? rhythmData?.reminder_window_hours ?? 3;
-  const effectiveDate = chosenEffective ?? rhythmData?.week_start ?? "";
+  // A new agreement starts today by default, never last Monday (a retroactive date).
+  const effectiveDate = chosenEffective ?? today;
   const close = () => {
     setOpen(false);
     setCalendarOpen(false);
@@ -276,6 +277,9 @@ export function TopbarEngagementIndicator() {
                         ? `${String(rhythmData.done_days)} из ${String(rhythmData.target_days)} за неделю` : "Не настроен"}
                     </span>
                   </div>
+                  <p className="engagement-rhythm-hint" role="note">
+                    Выбранные дни определяют недельную цель. Стрик по-прежнему растёт только от подтверждённых действий, даже вне расписания.
+                  </p>
                   {rhythmData.scheduled_from && <p className="engagement-rhythm-hint">
                     {rhythmData.versioned ? "Новое расписание" : "Будущее расписание"}: {RHYTHM_PRESETS[rhythmData.scheduled_preset ?? ""] ?? rhythmData.scheduled_preset ?? "—"}, с {rhythmData.scheduled_from}
                   </p>}
@@ -312,15 +316,15 @@ export function TopbarEngagementIndicator() {
                       </select>
                     </label>
                     <label>Действует с
-                      <input type="date" min={rhythmData.week_start ?? undefined}
+                      <input type="date" min={today}
                         value={effectiveDate} onChange={e => { setChosenEffective(e.target.value); }} />
                     </label>
                   </div>
                   {rhythmData.versioned && <p className="engagement-rhythm-version sr-only">Соглашение v{rhythmData.version ?? 1}; всего версий {rhythmData.history_count}</p>}
                 </section>
-                  <button type="button" className="streak-save-button" disabled={rhythmSave.isPending || (preset === "custom" && activeDays.length === 0) || !effectiveDate}
+                  <button type="button" className="streak-save-button" disabled={rhythmSave.isPending || rhythmQuery.isError || (preset === "custom" && activeDays.length === 0) || !effectiveDate || effectiveDate < today}
                     onClick={saveRhythm}>{rhythmSave.isPending ? "Сохраняем…" : "Сохранить ритм"}</button>
-                  {rhythmSave.isSuccess && <p role="status" className="engagement-rhythm-note">Соглашение v{rhythmSave.data.version ?? 1} сохранено; начинает действовать с {rhythmSave.data.effective_from ?? "даты начала"}.</p>}
+                  {rhythmSave.isSuccess && <p role="status" className="engagement-rhythm-note">Ритм сохранён ✓ Версия {rhythmSave.data.version ?? 1} действует с {rhythmSave.data.effective_from ?? "выбранной даты"}. Настройки сохраняются в профиле.</p>}
                   {rhythmSave.isError && <p role="alert" className="engagement-freeze-error">{serverErrorMessage(rhythmSave.error)}</p>}
                 </div>}
               </>
