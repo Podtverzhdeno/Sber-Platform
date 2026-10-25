@@ -66,8 +66,9 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     await expect(reader.locator(".imp-study__cert-timeline > div > div")).toHaveCount(2);
     const pdfButton = reader.getByRole("button", { name: /Распечатать \/ сохранить PDF/ });
     await expect(pdfButton).toBeEnabled();
-    const hoverStyle = await pdfButton.evaluate(el => getComputedStyle(el).transitionProperty);
-    expect(hoverStyle).not.toBe("none");
+    await pdfButton.hover();
+    await expect.poll(() => pdfButton.evaluate(el => getComputedStyle(el).transform)).not.toBe("none");
+
     await page.screenshot({ path: "test-results/imp-07-certificates-" + String(viewport.width) + ".png", animations: "disabled" });
     const infoTabs = reader.getByRole("navigation", { name: "Разделы информации о курсе" });
     await expect(infoTabs.getByRole("button")).toHaveCount(5);
