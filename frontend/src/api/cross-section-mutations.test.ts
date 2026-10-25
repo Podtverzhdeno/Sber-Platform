@@ -12,6 +12,8 @@ describe("cross-section progress mutation policy", () => {
     "/api/v1/mentor/reviews/123/confirm",
     "/api/v1/me/courses/course-a/completion",
     "/api/v1/me/monthly-goal",
+    "/api/v1/operations/rating-seasons/season-1/standings/rebuild",
+    "/api/v1/operations/score-entries/entry-1/corrections",
   ])("refreshes all projections after successful %s", path => {
     expect(isCrossSectionMutation(path, "POST")).toBe(true);
   });
@@ -38,6 +40,8 @@ describe("cross-section progress mutation policy", () => {
       "talent-passport",
       "portfolio",
       "bootcamp-catalog",
+      "rating-seasons",
+      "rating-season-leaderboard",
     ]));
   });
 });
