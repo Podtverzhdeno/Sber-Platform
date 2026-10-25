@@ -1,5 +1,5 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Award, Bookmark, BriefcaseBusiness, CalendarDays,
@@ -242,7 +242,7 @@ export function ParticipantProjectsV2() {
   const setFilter=(value:Filter)=>setParams(previous=>{const next=new URLSearchParams(previous);if(value==="all")next.delete("filter");else next.set("filter",value);return next;});
   const start=useMutation({mutationFn:(id:string)=>apiRequest(`/api/v1/me/assignments/${id}/start`,{method:"POST",headers:{"X-CSRF-Token":sessionStorage.getItem("impulse_csrf")??""}}),onSuccess:()=>client.invalidateQueries({queryKey:["my-work"]})});
   const contribute=useMutation({mutationFn:({id,summary,url}:{id:string;summary:string;url:string})=>apiRequest(`/api/v1/me/assignments/${id}/contributions`,{method:"POST",headers:{"X-CSRF-Token":sessionStorage.getItem("impulse_csrf")??""},body:JSON.stringify({personal_summary:summary,artifacts:url?[{key:"personal-proof",uri:url}]:[]})}),onSuccess:()=>client.invalidateQueries({queryKey:["my-work"]})});
-  const companies=useMemo(()=>[...new Set(projects.map(projectCompany))].sort(),[work.data,details.map(query=>query.dataUpdatedAt).join(":")]);
+  const companies=[...new Set(projects.map(projectCompany))].sort();
   const visible=projects.filter(project=>{
     const status=project.work.assignment.status;
     if(filter==="active"&&!activeStatuses.has(status)||filter==="review"&&!reviewStatuses.has(status)||filter==="finished"&&!finishedStatuses.has(status))return false;
