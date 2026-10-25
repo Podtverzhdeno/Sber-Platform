@@ -14,3 +14,6 @@ release_request=2026-10-25-bootcamp-reference-ts-fix-529455ff
 
 # Bootcamp role projections scope fix
 release_request=2026-10-25-bootcamp-role-scope-829d46c
+
+# Deploy final Bootcamp BC-R04/05 source-aligned drawers
+release_request=2026-10-25-bootcamp-panels-bdea0515
