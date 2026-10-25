@@ -781,10 +781,6 @@ export function StagePathSection(props: {
   const currentKey = nextStep?.key ?? roadmapsDefaultKey(roadmap);
   const visibleStageKey = isSelectedStage(props.stageKey, roadmap.milestones, currentKey);
   const visibleMilestone = roadmap.milestones.find((m) => m.key === visibleStageKey);
-  const studyMilestones = role.attempt_number === null ? [] : roadmap.milestones
-    .filter(milestone => milestone.target_kind === "course")
-    .map(milestone => props.learningCourses?.find(course => course.course_key === milestone.target_key))
-    .filter((course): course is LearningCourse => course !== undefined);
   const studyProgress=trajectoryStudyProgress(roadmap.milestones,props.learningCourses,role.attempt_number!==null);
   const lessonsDone=studyProgress.lessonsDone;
   const lessonsTotal=studyProgress.lessonsTotal;
