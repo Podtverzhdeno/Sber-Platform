@@ -71,6 +71,7 @@ class ArchitectureAuditTests(unittest.TestCase):
                 "frontend/src/features/a/view.tsx": 'import { X } from "../b/view";\n',
                 "frontend/src/features/b/view.tsx": 'import { Y } from "../a/view";\n',
                 "migrations/versions/001_first.py": 'revision = "first"\ndown_revision = None\n',
+                "frontend/src/styles.scss": ".legacy { margin: 0 !important; }\n",
             }
             for relative, text in examples.items():
                 path = root / relative
@@ -82,6 +83,7 @@ class ArchitectureAuditTests(unittest.TestCase):
             self.assertEqual(report["migration_graph"]["heads"], ["first"])
             self.assertEqual(len(report["cycles"]), 1)
             self.assertEqual(len(report["cross_feature_imports"]), 2)
+            self.assertEqual(report["css_risks"][0]["important_count"], 1)
 
     def test_ratchet_blocks_new_debt_and_expired_allowlist(self) -> None:
         report = {
