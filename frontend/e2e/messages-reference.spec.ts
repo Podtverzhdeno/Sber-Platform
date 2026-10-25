@@ -381,7 +381,7 @@ test("chat details collapse into full width for direct, community and Events con
     if(after && container){
       expect(Math.abs(after.x+after.width-(container.x+container.width))).toBeLessThanOrEqual(2);
     }
-    await page.getByRole("button",{name:new RegExp("Информация о чате «"+name+"»")}).click();
+    await page.getByRole("button",{name:new RegExp("Профиль чата «"+name+"»")}).click();
     await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toBeVisible();
     await page.getByRole("button",{name:"Показать участников чата",exact:false}).click();
     await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toHaveCount(0);
