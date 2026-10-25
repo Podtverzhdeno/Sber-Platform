@@ -46,6 +46,7 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
   await expect(page.getByText("Самостоятельность", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("OpenSpec и SDD").first()).toBeVisible();
 
+  await page.screenshot({path:"test-results/portfolio-reference-1672x941.png",fullPage:true});
   const hero = await page.locator(".p2-hero").boundingBox();
   const tabs = await page.locator(".p2-tabs").boundingBox();
   const projects = await page.locator(".p2-projects-panel").boundingBox();
@@ -99,6 +100,8 @@ test("portfolio: narrow layout never overflows and all six tabs remain reachable
   }}));
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
+  const menu = page.getByRole("button", { name: /Меню/ });
+  if (await menu.isVisible()) await menu.click();
   await page.getByRole("link", { name: "Портфолио" }).click();
   await expect(page.getByTestId("portfolio-v2")).toBeVisible();
   for (const name of ["Обзор","Skill Passport","Проекты","Сертификация","Достижения","О себе"]) {
@@ -107,4 +110,5 @@ test("portfolio: narrow layout never overflows and all six tabs remain reachable
   }
   await expect(page.getByRole("heading",{name:"Алекс Речной"})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
+  await page.screenshot({path:"test-results/portfolio-mobile-390x844.png",fullPage:true});
 });
