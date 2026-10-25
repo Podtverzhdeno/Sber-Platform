@@ -77,12 +77,23 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await screen.getByRole("button", { name: /AI Journey 2026/ }).click();
   await expect(page.getByTestId("achievement-detail")).toBeVisible();
   await expect(page.getByTestId("achievement-detail").locator(".ach-gallery-intro")).toContainText("Ожидаем проверку");
+  const drawer = page.getByTestId("achievement-detail");
+  const drawerBox = await drawer.boundingBox();
+  const viewport = page.viewportSize();
+  if (!drawerBox || !viewport) throw new Error("Detail drawer geometry unavailable");
+  expect(drawerBox.x + drawerBox.width).toBeGreaterThanOrEqual(viewport.width - 2);
+  expect(drawerBox.width).toBeLessThanOrEqual(550);
+  await drawer.getByRole("tab", { name: "Материалы" }).click();
+  await expect(drawer.getByRole("heading", { name: "Подтверждающие материалы" })).toBeVisible();
+  await drawer.getByRole("tab", { name: "Описание" }).click();
+  await page.screenshot({ path:"test-results/achievements-v2/detail.png", animations:"disabled", fullPage:false });
   await page.keyboard.press("Escape");
   await expect(page.getByTestId("achievement-detail")).toHaveCount(0);
   await expect(page).not.toHaveURL(/achievement=/);
 
   await screen.locator(".ach-gallery-hero").getByRole("button", { name: /Добавить достижение/ }).click();
   await expect(page.getByTestId("achievements-add-dialog")).toBeVisible();
+  await page.screenshot({ path:"test-results/achievements-v2/add.png", animations:"disabled", fullPage:false });
   await page.getByTestId("achievements-add-dialog").getByRole("button", { name: /Событие/ }).click();
   await page.getByTestId("achievements-add-dialog").getByRole("button", { name: /Продолжить/ }).click();
   await expect(page).toHaveURL(/\/workspace\/5/);
