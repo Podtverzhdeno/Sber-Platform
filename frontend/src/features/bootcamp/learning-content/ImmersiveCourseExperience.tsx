@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCircle2, ChevronRight,
-  ClipboardCheck, Clock3, Code2, Copy, Download, FileCode2, FileText, GraduationCap,
+  Clock3, Code2, Copy, Download, FileCode2, FileText, GraduationCap,
   LockKeyhole, Medal, BadgeCheck, ShieldCheck, Sparkles, Target, Trophy,
 } from "lucide-react";
 import { apiRequest, type RuntimeApiPath } from "../../../api/client";
 import { invalidateLearningProjections } from "../../learning-progress";
 import { learningProgramFor } from "./programs";
 import { knowledgeCheckFor } from "./knowledge-checks";
+import { LessonFrame } from "./LessonFrame";
 import { authorizationMethods, authorizationWalkthrough, authorizationRequirements, authorizationCriteria, authorizationExample } from "./security-lesson-reference";
 import "./immersive-course.scss";
 
@@ -171,12 +172,6 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     setPrintKind(kind);
     window.requestAnimationFrame(() => { window.print(); });
   }
-  const sectionTabs: Array<{ id: View; name: string; Icon: typeof BookOpen }> = [
-    { id: "theory", name: "Теория", Icon: BookOpen },
-    { id: "example", name: "Пример", Icon: Code2 },
-    { id: "practice", name: "Практическое задание", Icon: FileCode2 },
-    { id: "check", name: "Самопроверка", Icon: ClipboardCheck },
-  ];
   const isLearning = ["overview", "theory", "example", "practice", "check"].includes(view);
 
   return <div className="imp-study" data-course={courseKey} data-view={view} data-testid="impulse-immersive-reader">
@@ -350,13 +345,14 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           <div className="imp-study__print-certificate" aria-hidden="true"><h2>IMPULSE · {printKind === "study" ? "Сертификат прохождения" : "Сертификат подтверждения знаний"}</h2><p>{printKind === "study" ? "Подтверждается прохождение курса" : "Подтверждается проверка практической работы по курсу"} «{courseTitle}»</p><p>Номер {printKind === "study" ? certificateId : practicalCertificateId}</p></div>
         </> : <>
           <div className="imp-study__lesson-heading"><div><span className="imp-study__eyebrow">Урок {current+1} из {total}</span><h2>{unit.title}</h2><p>{unit.purpose}</p></div><div className="imp-study__progress-top"><strong>{percent}% прохождения</strong><div className="imp-study__bar"><span style={{width:String(percent)+"%"}}/></div></div></div>
-          <nav className="imp-study__tabs" aria-label="Разделы урока">{sectionTabs.map(({id,name,Icon})=><button type="button" key={id} aria-current={(view===id || (view==="overview" && id==="check")) ? "page" : undefined} className={(view===id || (view==="overview" && id==="check"))?"active":""} onClick={() => { openView(id); }}><Icon size={18}/>{name}</button>)}</nav>
-          {view === "theory" && <section className="imp-study__content" aria-label="Теория"><h3>Теория</h3><h4>{unit.title}</h4>
+          <div className="lesson-frames" data-testid="unified-course-lesson">
+            <div className="lesson-frames__intro"><strong>Изучай и сразу применяй</strong>Все материалы урока собраны ниже: теория, разобранный пример, самостоятельное задание и скрытая до открытия самопроверка. Блоки можно сворачивать. Серверный прогресс сохраняется отдельно кнопкой «Следующий урок».</div>
+          <LessonFrame key={unit.id + "-theory"} unitId={unit.id} kind="theory">{() => <section className="imp-study__content" aria-label="Теория"><h3>Теория</h3><h4>{unit.title}</h4>
             {unit.theory.map((text,index)=><p key={index}>{text}</p>)}
             {authReference && <><h4>Основные способы аутентификации</h4><div className="imp-study__methods-grid">{authorizationMethods.map((method,index)=><article key={method.title} className="imp-study__method-card"><span>{index+1}</span><div><strong>{method.title}</strong><p>{method.detail}</p></div></article>)}</div></>}
             <div className="imp-study__callout"><Sparkles size={21}/><p><strong>Важно</strong>Используйте принципы из урока на реальных задачах и проверяйте результат самостоятельно.</p></div>
-          </section>}
-          {view === "example" && <section className="imp-study__content" aria-label="Пример"><h3>Пример</h3><h4>{authReference ? "JWT-аутентификация в API" : "Применение материала урока"}</h4>
+          </section>}</LessonFrame>
+          <LessonFrame key={unit.id + "-example"} unitId={unit.id} kind="example">{() => <section className="imp-study__content" aria-label="Пример"><h3>Пример</h3><h4>{authReference ? "JWT-аутентификация в API" : "Применение материала урока"}</h4>
             <p>{authReference ? "Разберём проверку JWT в FastAPI. Токен подтверждает личность, а доступ к отдельным объектам проверяется дополнительно." : "Практический пример применения материала урока"}</p>
             <div className={authReference ? "imp-study__example-grid" : ""}>
               <div className="imp-study__code-column"><div className="imp-study__example-head"><Code2 size={17}/> main.py <button type="button" onClick={() => { void copyExampleCode(exampleText); }}><Copy size={14}/> {copyStatus === "copied" ? "Скопировано" : copyStatus === "failed" ? "Не удалось скопировать" : "Копировать код"}</button></div>
@@ -364,8 +360,8 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
               {authReference ? <div className="imp-study__walkthrough"><h4>Разбор</h4>{authorizationWalkthrough.map((step,index)=><article key={step.title}><span>{index+1}</span><div><strong>{step.title}</strong><p>{step.detail}</p></div></article>)}</div>
               : <div className="imp-study__callout"><CheckCircle2 size={18}/><p><strong>Разбор</strong>Сравните пример с задачей и объясните каждый ключевой шаг.</p></div>}
             </div>
-          </section>}
-          {view === "practice" && <section className="imp-study__content" aria-label="Практическое задание"><h3>Практическое задание</h3><p>{authReference ? "Реализуйте защищённый API на FastAPI: проверяйте JWT и возвращайте профиль текущего пользователя только по доверенному токену. Добавьте негативные проверки и запрет доступа к чужим объектам." : unit.practice}</p>
+          </section>}</LessonFrame>
+          <LessonFrame key={unit.id + "-practice"} unitId={unit.id} kind="practice">{() => <section className="imp-study__content" aria-label="Практическое задание"><h3>Практическое задание</h3><p>{authReference ? "Реализуйте защищённый API на FastAPI: проверяйте JWT и возвращайте профиль текущего пользователя только по доверенному токену. Добавьте негативные проверки и запрет доступа к чужим объектам." : unit.practice}</p>
             <div className="imp-study__practice-columns"><div><h4><Target size={18}/> Требования</h4>
               {authReference ? authorizationRequirements.map((item,index)=><div className="imp-study__requirement" key={item.title}><span>{index+1}</span><div><strong>{item.title}</strong><p>{item.detail}</p></div></div>)
               : unit.checklist.map((item,index)=><div className="imp-study__requirement" key={item}><span>{index+1}</span>{item}</div>)}</div>
@@ -397,8 +393,8 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
               {practiceState === "pending" && <p role="status">Практическая работа получена. Сертификат знаний будет доступен только после проверки.</p>}
               {submitPractice.isError && <p role="alert">Не удалось отправить работу. Проверьте соединение и повторите попытку.</p>}
             </form>
-          </section>}
-          {(view === "check" || view === "overview") && <section className="imp-study__content" aria-label="Самопроверка"><h3>Проверьте себя</h3>
+          </section>}</LessonFrame>
+          <LessonFrame key={unit.id + "-check"} unitId={unit.id} kind="check">{() => <section className="imp-study__content" aria-label="Самопроверка"><h3>Проверьте себя</h3>
             <p>Отметьте пункты, которые действительно проверили на своём примере. Галочки не увеличивают процент прохождения и не подтверждают компетенции.</p>
             <div className="imp-study__check-status"><CheckCircle2 size={19}/>{checkedCount} из {unit.checklist.length} пунктов отмечено
               <strong>{unit.checklist.length ? Math.round(checkedCount / unit.checklist.length * 100) : 0}%</strong></div>
@@ -411,7 +407,8 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
               {answer!==null && <p role="status"><strong>{answer === question.correctIndex ? "Верно!" : "Попробуйте ещё раз."}</strong> {question.explanation}</p>}</section>}
             <button type="button" className="imp-study__secondary" onClick={() => { setShowExpected(value=>!value); }}>{showExpected?"Скрыть ожидаемый результат":"Показать ожидаемый результат"}</button>
             {showExpected && <div role="status" className="imp-study__callout">{unit.expected}</div>}
-          </section>}
+          </section>}</LessonFrame>
+          </div>
         </>}
         {isLearning && <div className="imp-study__navigation"><button type="button" className="imp-study__secondary" disabled={current===0} onClick={() => { selectLesson(current-1); }}><ArrowLeft size={17}/> Предыдущий урок</button>
           <span>{current+1} / {total}</span><button type="button" className="imp-study__primary" disabled={busy || !accessible || progress.isPending} onClick={() => { void nextLesson(); }}>{busy?"Сохраняем…":current===total-1 ? "Завершить обучение" : "Следующий урок"} <ArrowRight size={18}/></button></div>}
