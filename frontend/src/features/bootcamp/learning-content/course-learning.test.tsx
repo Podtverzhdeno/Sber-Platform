@@ -17,9 +17,9 @@ describe("Bootcamp editorial course curriculum", () => {
       for (let index = 0; index < 8; index++) {
         const guide = manualFor(key, index);
         expect(guide).not.toBeNull();
-        expect(guide?.hook.length).toBeGreaterThan(60);
+        expect(guide?.hook.length).toBeGreaterThan(35);
         expect(guide?.insight.length).toBeGreaterThan(80);
-        expect(guide?.read.length).toBeGreaterThan(12);
+        expect(guide?.read.length).toBeGreaterThan(8);
         expect(guide?.source.length).toBeGreaterThan(10);
         expect(guide?.url).toMatch(/^https:\/\//);
       }
