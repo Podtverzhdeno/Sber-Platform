@@ -39,7 +39,8 @@ import {
   useSearchParams,
 } from "react-router-dom";
 
-import { apiRequest } from "./api/client";
+import { apiRequest, subscribeProgressMutation } from "./api/client";
+import { participantProjectionKeys } from "./api/cross-section-mutations";
 import {
   applyTheme,
   storedThemeChoice,
@@ -1845,6 +1846,11 @@ function ImpulseApp() {
 }
 
 export function App() {
+  useEffect(() => subscribeProgressMutation(() => {
+    for (const key of participantProjectionKeys) {
+      void queryClient.invalidateQueries({ queryKey: [key] });
+    }
+  }), []);
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

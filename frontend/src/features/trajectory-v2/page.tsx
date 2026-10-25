@@ -16,6 +16,7 @@ import {
   writePinnedTrack,
 } from "./client";
 import { RoleComparePanel, TrajectoryActions } from "./actions";
+import { LearningProgressPanel } from "../learning-progress-panel";
 import { RoleInfoDialog, StageTaskDrawer } from "./details";
 import { canonicalAiRoles } from "./source-reference/source-catalog";
 import type {
@@ -371,6 +372,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
             }}>→</button>}
           </div>
         </section>
+        <LearningProgressPanel compact bootcampIndex={Math.max(0, (navigation.data?.navigation ?? []).indexOf("Bootcamp"))} />
         <section className="trajectory-v2-passport-panel">
           <header>
             <h3>Мой скилл-паспорт</h3>

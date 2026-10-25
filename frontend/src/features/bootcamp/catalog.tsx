@@ -7,6 +7,7 @@ import { apiRequest, retrySafeRead, RuntimeApiPath } from "../../api/client";
 import { Badge, Card, Drawer, SafeExternalLink, StatePanel } from "../../components/ui";
 import { CourseLearningContent } from "./learning-content/CourseLearningContent";
 import { ImmersiveCourseExperience } from "./learning-content/ImmersiveCourseExperience";
+import { LearningProgressPanel } from "../learning-progress-panel";
 import { aiRoleTitle, bootcampRoleKeys, courseRoleTitles, isCourseInAiRole, orderRoleCourses } from "./trajectory-content";
 import "./bootcamp-ux.scss";
 import "./bootcamp-approved.scss";
@@ -841,6 +842,7 @@ export function BootcampCatalog({
         {additionalCourses > 0 && <button className="bc-ref-show-more" type="button" onClick={() => { setExpandedRoleCatalog(true); }}>Показать ещё {additionalCourses} курсов для роли <ArrowRight /></button>}
         {visible.length === 0 && <div className="bc-ref-empty" role="status">Курсов по условиям не найдено. <button type="button" onClick={resetFilters}>Сбросить фильтры</button></div>}
       </section>
+      <LearningProgressPanel bootcampIndex={2} compact />
       <Drawer key={`${panel}:${deepLinked?.key ?? ""}`} title={panel === "reason" ? "Почему рекомендован" : "Информация о курсе"} open={deepLinked !== null && panel !== "requirements"} onClose={closePanel}>
         {deepLinked && (panel === "reason" ? <RecommendationDetails card={deepLinked} track={selectedRoleTitle} onOpenCourse={() => { openPanel("detail", deepLinked.key); }} onOpenProgram={() => { const next = new URLSearchParams(searchParams); next.set("course", deepLinked.key); next.set("panel", "detail"); next.set("study", "program"); setSearchParams(next); }} /> :
           <CourseDetails key={deepLinked.key} card={deepLinked} initialLearningView={searchParams.get("study") === "program" ? "program" : "overview"}

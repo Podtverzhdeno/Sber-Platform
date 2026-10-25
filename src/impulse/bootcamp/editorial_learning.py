@@ -7,6 +7,7 @@ remain exclusively on the verified provider/reviewer track.
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
@@ -33,6 +34,28 @@ class ImpulseStudyView(BaseModel):
     finished: bool
     practice_status: str | None = None
     practical_certificate_id: UUID | None = None
+
+
+class ImpulseCourseSummary(BaseModel):
+    """Participation is distinct from provider-verified competency evidence."""
+
+    course_key: str
+    title: str
+    completed_units: int = Field(ge=0)
+    total_units: int = Field(ge=1)
+    finished: bool
+    finished_at: datetime | None
+    updated_at: datetime
+    practice_status: str | None
+    practical_certificate_id: UUID | None
+
+
+class ImpulseStudySummary(BaseModel):
+    started_courses: int = Field(ge=0)
+    finished_courses: int = Field(ge=0)
+    completed_lessons: int = Field(ge=0)
+    approved_practices: int = Field(ge=0)
+    courses: list[ImpulseCourseSummary]
 
 
 class PracticeReviewBody(BaseModel):
@@ -111,6 +134,63 @@ async def _view(request: Request, person_id: UUID, course_key: str) -> ImpulseSt
         finished=bool(row and row["certificate_id"]),
         practice_status=practice["status"] if practice else None,
         practical_certificate_id=practice["practical_certificate_id"] if practice else None,
+    )
+
+
+@router.get("/me/bootcamp/impulse-study/summary", response_model=ImpulseStudySummary)
+async def impulse_study_summary(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    request: Request,
+) -> ImpulseStudySummary:
+    """One DB-backed read model shared by Bootcamp, Analytics and Trajectory.
+
+    A study certificate proves completion of Impulse lessons, not an awarded
+    competency level, professional grade or verified external qualification.
+    """
+    if authenticated.actor.active_role is not Role.PARTICIPANT:
+        raise ApiError(code="FORBIDDEN", message="Доступно только участнику.", status_code=403)
+    person = authenticated.actor.person_id
+    async with request.app.state.database.sessions() as session:
+        rows = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT p.course_key, p.completed_units, p.total_units, "
+                        "p.finished_at, p.certificate_id, p.updated_at, "
+                        "s.status AS practice_status, s.practical_certificate_id "
+                        "FROM impulse_course_progress AS p "
+                        "LEFT JOIN impulse_practical_submissions AS s "
+                        "ON s.person_id = p.person_id AND s.course_key = p.course_key "
+                        "WHERE p.person_id = :person ORDER BY p.updated_at DESC, p.course_key"
+                    ),
+                    {"person": person},
+                )
+            )
+            .mappings()
+            .all()
+        )
+    development = request.app.state.development_service
+    titles = {course.key: course.title for course in await development.store.courses()}
+    courses = [
+        ImpulseCourseSummary(
+            course_key=row["course_key"],
+            title=titles.get(row["course_key"], row["course_key"]),
+            completed_units=int(row["completed_units"]),
+            total_units=int(row["total_units"]),
+            finished=row["certificate_id"] is not None,
+            finished_at=row["finished_at"],
+            updated_at=row["updated_at"],
+            practice_status=row["practice_status"],
+            practical_certificate_id=row["practical_certificate_id"],
+        )
+        for row in rows
+    ]
+    return ImpulseStudySummary(
+        started_courses=len(courses),
+        finished_courses=sum(course.finished for course in courses),
+        completed_lessons=sum(course.completed_units for course in courses),
+        approved_practices=sum(course.practical_certificate_id is not None for course in courses),
+        courses=courses,
     )
 
 

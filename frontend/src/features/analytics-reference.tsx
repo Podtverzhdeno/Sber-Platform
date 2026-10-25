@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { apiRequest } from "../api/client";
 import { Modal } from "../components/ui";
+import { LearningProgressPanel } from "./learning-progress-panel";
 import type { AgenticServerProfile } from "./agentic-coding-profile";
 import "./analytics-reference.scss";
 
@@ -314,6 +315,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
         <section className="ref-panel ref-growth"><span className="ref-cap">ТОЧКА РОСТА</span><span className="ref-growth-icon">◎</span><h2>{focus ? "Следующее подтверждение — " + focusTitle : "Следующий шаг развития"}</h2><p>{focus ? "Сейчас " + pString(focus.current_level) + " / " + pString(focus.target_level) + ". Нужно дополнительное подтверждение." : "Продолжайте документировать результаты."}</p><div className="ref-progress"><i style={{ width: String(focus && focus.current_level !== null && focus.target_level !== null && focus.target_level > 0 ? focus.current_level / focus.target_level * 100 : 0) + "%" }} /></div><a className="ref-primary-cta" href={tasksUrl}>Посмотреть план →</a></section>
       </div>
     </>}
+    <LearningProgressPanel bootcampIndex={Math.max(0, navigation.indexOf("Bootcamp"))} />
     <p className="ref-footer-note">Данные берутся из текущих источников Impulse. Неизвестные уровни не заменяются нулём. Официальный корпоративный L1 здесь не выдаётся.</p>
     <Modal title={detailed ? "Подтверждение навыка " + detailed.title : "Подтверждение навыка"} open={detailed !== undefined} onClose={() => { setOpenDetail(null); }}>
       {detailed && <div className="ref-modal-content"><span className="ref-cap">SKILL PASSPORT · КОМПЕТЕНЦИЯ</span>

@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { overviewFixture } from "../src/features/participant-home-v2/fixture";
 
 /** Deterministic UI-only API fixtures. Never represent real completion, LMS or
  * participant progress; intended exclusively for screenshot/interaction QA. */
@@ -35,7 +36,7 @@ const actor = {
   active_role: "participant",
   assigned_roles: ["participant"],
   scopes: [], consent_scopes: [],
-  navigation: ["Главная", "Моя траектория", "Bootcamp", "Задачи", "Портфолио"],
+  navigation: ["Главная", "Моя траектория", "Bootcamp", "Задачи", "Портфолио", "Аналитика"],
   csrf_token: "csrf-e2e-bootcamp-reader",
 };
 
@@ -53,6 +54,19 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
     return route.fulfill({ json: actor });
   });
   await page.route("**/api/v1/me/bootcamp/catalog", route => route.fulfill({ json: catalog }));
+  // Trajectory requires its own server-authored role snapshot; failing closed
+  // without a fixture is correct, but would hide the shared learning panel.
+  await page.route("**/api/v1/participant/me/development-overview", route =>
+    route.fulfill({ json: overviewFixture }));
+  await page.route("**/api/v1/me/roadmaps", route => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/roadmap-catalog", route => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/talent-passport", route => route.fulfill({
+    json: { verified_courses: [], cases: [], skills: [] },
+  }));
+  await page.route("**/api/v1/me/portfolio", route => route.fulfill({
+    json: { demo_data: true, courses: [], contributions: [] },
+  }));
+
   const study = new Map<string, { completed_units: number; certificate_id: string | null; practice_status: string | null }>();
   await page.route("**/api/v1/me/bootcamp/impulse-study/**", async route => {
     const path = new URL(route.request().url()).pathname;
@@ -79,6 +93,29 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
       course_key: course, completed_units: record.completed_units, total_units: 8,
       certificate_id: record.certificate_id, finished: Boolean(record.certificate_id),
       practice_status: record.practice_status,
+    } });
+  });
+
+  // The same mutable fixture answers the cross-section summary: finishing in
+  // Bootcamp must become observable in both Analytics and Trajectory.
+  await page.route("**/api/v1/me/bootcamp/impulse-study/summary", route => {
+    const courses = Array.from(study.entries()).map(([key, state]) => ({
+      course_key: key,
+      title: catalog.find(item => item.key === key)?.title ?? key,
+      completed_units: state.completed_units,
+      total_units: 8,
+      finished: Boolean(state.certificate_id),
+      finished_at: state.certificate_id ? "2026-10-25T12:00:00Z" : null,
+      updated_at: "2026-10-25T12:00:00Z",
+      practice_status: state.practice_status,
+      practical_certificate_id: null,
+    }));
+    return route.fulfill({ json: {
+      started_courses: courses.length,
+      finished_courses: courses.filter(course => course.finished).length,
+      completed_lessons: courses.reduce((sum, course) => sum + course.completed_units, 0),
+      approved_practices: 0,
+      courses,
     } });
   });
 

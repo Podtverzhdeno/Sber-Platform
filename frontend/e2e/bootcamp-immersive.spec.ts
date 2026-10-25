@@ -206,3 +206,37 @@ test("continue-learning card reflects server progress after a completed lesson",
   await continueCard.getByRole("button", { name: "Продолжить обучение" }).click();
   await expect(dialog.getByTestId("impulse-immersive-reader")).toBeVisible();
 });
+
+test("finished course appears in Analytics and Trajectory from one persisted learning source", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 900 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.goto("/workspace/2?course=demo-course-1");
+  const reader = page.getByTestId("impulse-immersive-reader");
+  await expect(reader).toBeVisible();
+  await reader.getByRole("button", { name: /Перейти к программе/ }).click();
+  await reader.locator(".imp-study__program-list button").first().click();
+  for (let lesson = 0; lesson < 8; lesson++) {
+    await reader.locator(".imp-study__navigation .imp-study__primary").click();
+  }
+  await reader.locator(".imp-study__finish").click();
+  await expect(reader.getByRole("heading", { name: "Обучение завершено!" })).toBeVisible();
+
+  // The browser is reloaded: the counter must survive navigation rather than
+  // living only in a React component or a temporary notification.
+  await page.goto("/workspace/5");
+  await expect(page.getByTestId("analytics-v3")).toBeVisible();
+  const analytics = page.getByTestId("learning-progress-bridge");
+  await expect(analytics.getByTestId("learn-finished")).toHaveText("1");
+  await expect(analytics.getByTestId("learn-lessons")).toHaveText("8");
+  await expect(analytics.getByTestId("learn-reviewed")).toHaveText("0");
+  await expect(analytics).toContainText("OpenSpec и SDD");
+  await expect(page.getByTestId("analytics-v3")).toContainText("Пройден курс Impulse: OpenSpec и SDD");
+
+  await page.goto("/workspace/1");
+  const trajectory = page.getByTestId("learning-progress-bridge");
+  await expect(trajectory.getByTestId("learn-finished")).toHaveText("1");
+  await expect(trajectory.getByTestId("learn-lessons")).toHaveText("8");
+  await expect(trajectory.getByTestId("learn-reviewed")).toHaveText("0");
+  await expect(trajectory).toContainText("Самостоятельное обучение");
+});
