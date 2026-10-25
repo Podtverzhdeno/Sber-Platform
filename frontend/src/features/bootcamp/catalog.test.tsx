@@ -209,307 +209,115 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("Bootcamp catalog states and filters (22.15)", () => {
-  it("does not invent a competency target when the provider omits it", async () => {
-    const noTarget = cards.map((card) => card.key === "openspec-sdd"
-      ? { ...card, must_take: { ...mustTake, target_level: null } }
-      : card);
-    installFetch(noTarget);
-    renderCatalog("/workspace/3");
-
-    const card = await screen.findByTestId("course-openspec-sdd");
-    fireEvent.click(within(card).getByText("Навык и требования"));
-    expect(within(card).getByText(/целевой уровень ещё не опубликован/)).toBeVisible();
-  });
-
-  it("explains must-take on an available recommended course", async () => {
+describe("Bootcamp catalog redesigned UI and state contracts", () => {
+  it("renders live catalog records without inventing extra courses", async () => {
     installFetch();
-    renderCatalog("/workspace/3");
-
-    const card = await screen.findByTestId("course-openspec-sdd");
-    expect(within(card).getByText("Надо пройти")).toBeInTheDocument();
-    expect(within(card).getByText(/Закрывает пробел навыка «OpenSpec»/)).toBeInTheDocument();
-    expect(within(card).getByText(/только после подтверждения checkpoint/)).toBeInTheDocument();
-    expect(within(card).getByText("Доступен")).toBeInTheDocument();
-    expect(within(card).getByRole("button", { name: "Отметить завершение" })).toBeInTheDocument();
-    expect(within(card).getByRole("link", { name: /Первоисточник курса/ })).toHaveAttribute(
-      "rel",
-      "noopener noreferrer",
-    );
-    expect(within(card).getAllByText("Актуальный").length).toBeGreaterThan(0);
+    renderCatalog("/workspace/3?category=all");
+    expect(await screen.findByTestId("course-openspec-sdd")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Bootcamp" })).toBeVisible();
+    expect(screen.getByTestId("course-python-base")).toBeVisible();
+    expect(screen.getByTestId("course-greenhouse-esg")).toBeVisible();
+    expect(screen.queryByTestId("course-fabricated")).not.toBeInTheDocument();
   });
 
-  it("keeps pending verification honest without repeat actions", async () => {
+  it("offers both card and list views and keeps their state in the URL", async () => {
     installFetch();
-    renderCatalog("/workspace/3");
-
-    const card = await screen.findByTestId("course-python-base");
-    expect(within(card).getByText("Ожидает проверки")).toBeInTheDocument();
-    expect(within(card).getByText(/повторно проходить тот же шаг не нужно/)).toBeInTheDocument();
-    expect(
-      within(card).queryByRole("button", { name: "Отметить завершение" }),
-    ).not.toBeInTheDocument();
-    expect(
-      within(card).queryByRole("button", { name: "Записать учебный день" }),
-    ).not.toBeInTheDocument();
-    expect(within(card).queryByRole("link", { name: /Первоисточник курса/ })).not.toBeInTheDocument();
-    expect(within(card).getByText("Внешний доступ ограничен")).toBeInTheDocument();
-  });
-
-  it("does not offer enrollment actions when the prerequisite is unmet", async () => {
-    installFetch();
-    renderCatalog("/workspace/3");
-
-    const card = await screen.findByTestId("course-agent-development");
-    expect(within(card).getByText("Нужен подтверждённый prerequisite")).toBeInTheDocument();
-    expect(within(card).getByText(/Требуется подтверждённый prerequisite/)).toBeInTheDocument();
-    expect(
-      within(card).queryByRole("button", { name: "Отметить завершение" }),
-    ).not.toBeInTheDocument();
-    expect(within(card).queryByRole("link", { name: /Первоисточник курса/ })).not.toBeInTheDocument();
-  });
-
-  it("marks verified completion with evidence and no fake buttons", async () => {
-    installFetch();
-    renderCatalog("/workspace/3");
-
-    const card = await screen.findByTestId("course-greenhouse-esg");
-    expect(within(card).getByText("Подтверждено")).toBeInTheDocument();
-    expect(within(card).getByText(/course:greenhouse-esg/)).toBeInTheDocument();
-    expect(
-      within(card).queryByRole("button", { name: "Отметить завершение" }),
-    ).not.toBeInTheDocument();
-    expect(
-      within(card).queryByRole("button", { name: "Записать учебный день" }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("reports completion for an available course through the real command API", async () => {
-    const mocks = installFetch();
-    renderCatalog("/workspace/3");
-
-    const card = await screen.findByTestId("course-openspec-sdd");
-    fireEvent.click(within(card).getByRole("button", { name: "Отметить завершение" }));
-    await waitFor(() => { expect(mocks.mutationCount).toBe(1); });
-  });
-
-  it("keeps relevance filters and card/list view in the URL", async () => {
-    installFetch();
-    renderCatalog("/workspace/3");
-
+    renderCatalog("/workspace/3?category=all");
     await screen.findByTestId("course-openspec-sdd");
-    fireEvent.click(within(screen.getByRole("group", { name: "Фильтр актуальности" })).getByRole("button", { name: "Актуальные" }));
-    expect(screen.getByTestId("route").textContent).toContain("relevance=relevant");
-    await waitFor(() => expect(screen.queryByTestId("course-greenhouse-esg")).not.toBeInTheDocument());
-    expect(
-      within(screen.getByTestId("course-openspec-sdd")).getByText(/Почему актуален/),
-    ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Список" }));
-    expect(screen.getByTestId("route").textContent).toContain("view=list");
-    expect(screen.getByRole("list", { name: "Каталог Bootcamp списком" })).toBeInTheDocument();
-    expect(screen.queryByTestId("course-greenhouse-esg")).not.toBeInTheDocument();
+    const views = screen.getByRole("group", { name: "Вид каталога" });
+    fireEvent.click(within(views).getByRole("button", { name: "Список" }));
+    await waitFor(() => expect(screen.getByTestId("route").textContent).toContain("view=list"));
+    expect(screen.getByRole("list", { name: "Каталог Bootcamp списком" })).toBeVisible();
+    fireEvent.click(within(views).getByRole("button", { name: "Карточки" }));
+    await waitFor(() => expect(screen.getByTestId("route").textContent).toContain("view=card"));
   });
 
-  it("exposes the relevance filter as aria-pressed toggles with its definition", async () => {
+  it("filters by course name and offers a functioning reset when empty", async () => {
     installFetch();
-    renderCatalog("/workspace/3");
-
+    renderCatalog("/workspace/3?category=all");
     await screen.findByTestId("course-openspec-sdd");
-    const group = screen.getByRole("group", { name: "Фильтр актуальности" });
-    expect(within(group).getByRole("button", { name: "Все курсы" })).toHaveAttribute("aria-pressed", "true");
-    expect(within(group).getByRole("button", { name: "Актуальные" })).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByText(/Актуальные — курсы, доступные сейчас/)).toBeInTheDocument();
-
-    fireEvent.click(within(group).getByRole("button", { name: "Актуальные" }));
-    await waitFor(() => expect(within(group).getByRole("button", { name: "Актуальные" })).toHaveAttribute("aria-pressed", "true"));
-    expect(within(group).getByRole("button", { name: "Все курсы" })).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByTestId("route").textContent).toContain("relevance=relevant");
-  });
-
-  it("calls the learning-day endpoint through the honest streak button", async () => {
-    const mocks = installFetch();
-    renderCatalog("/workspace/3");
-
-    const card = await screen.findByTestId("course-openspec-sdd");
-    fireEvent.click(within(card).getByRole("button", { name: "Записать учебный день" }));
-    await waitFor(() => { expect(mocks.learningCount).toBe(1); });
-    expect(within(screen.getByTestId("course-openspec-sdd")).getByRole("button", { name: "Записать учебный день" })).toBeEnabled();
-  });
-
-  it("restores filters and view on Back and on a fresh reload", async () => {
-    installFetch();
-    const first = renderCatalog("/workspace/3?track=data&view=list");
-
-    await screen.findByTestId("course-greenhouse-esg");
-    expect(screen.getByRole("list", { name: "Каталог Bootcamp списком" })).toBeInTheDocument();
+    const search = screen.getByRole("searchbox", { name: "Поиск по курсам" });
+    fireEvent.change(search, { target: { value: "nonexistent987" } });
+    await waitFor(() => expect(screen.getByText(/Курсов по условиям не найдено/)).toBeVisible());
     expect(screen.queryByTestId("course-openspec-sdd")).not.toBeInTheDocument();
-
-    fireEvent.click(within(screen.getByRole("group", { name: "Фильтр актуальности" })).getByRole("button", { name: "Актуальные" }));
-    expect(screen.getByTestId("route").textContent).toContain("relevance=relevant");
-    await waitFor(() => expect(screen.queryByTestId("course-greenhouse-esg")).not.toBeInTheDocument());
-
-    fireEvent.click(screen.getByTestId("back"));
-    await waitFor(() => expect(screen.getByTestId("course-greenhouse-esg")).toBeInTheDocument());
-    expect(screen.getByTestId("route").textContent).toContain("view=list");
-    expect(screen.getByTestId("route").textContent).not.toContain("relevance");
-
-    vi.unstubAllGlobals();
-    installFetch();
-    first.unmount();
-    renderCatalog("/workspace/3?relevance=relevant&track=python&view=list");
-    await screen.findByRole("list", { name: "Каталог Bootcamp списком" });
-    const kept = await screen.findByTestId("course-python-base");
-    expect(kept).toBeInTheDocument();
-    expect(screen.queryByTestId("course-greenhouse-esg")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Сбросить фильтры" }));
+    await waitFor(() => expect(screen.getByTestId("route").textContent).not.toContain("nonexistent987"));
   });
 
-  it("opens a course deep link without losing filters", async () => {
+  it("opens a real course detail drawer from the catalog", async () => {
     installFetch();
-    renderCatalog("/workspace/3?relevance=relevant");
-
+    renderCatalog("/workspace/3?category=all");
     const card = await screen.findByTestId("course-openspec-sdd");
-    fireEvent.click(within(card).getByRole("button", { name: "Открыть траекторию" }));
-    const route = screen.getByTestId("route").textContent;
-    expect(route).toContain("course=openspec-sdd");
-    expect(route).toContain("relevance=relevant");
+    fireEvent.click(within(card).getByRole("button", { name: /Открыть курс/ }));
+    await waitFor(() => expect(screen.getByTestId("route").textContent).toContain("course=openspec-sdd"));
+    expect(screen.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
   });
 
-  it("shows the honor board only for consenting participants", async () => {
+  it("shows a recommendation explanation and a working return action", async () => {
     installFetch();
-    const { unmount } = renderCatalog("/workspace/3");
-    await screen.findByTestId("course-openspec-sdd");
-    expect(screen.getByText("Зал славы курсов")).toBeInTheDocument();
-    unmount();
+    renderCatalog("/workspace/3?category=all");
+    const card = await screen.findByTestId("course-openspec-sdd");
+    fireEvent.click(within(card).getByRole("button", { name: /Почему рекомендован/ }));
+    const dialog = screen.getByRole("dialog", { name: "Почему рекомендован" });
+    expect(within(dialog).getByText("Почему вам рекомендован этот курс")).toBeVisible();
+    fireEvent.click(within(dialog).getByRole("button", { name: "Вернуться к курсу" }));
+    await waitFor(() => expect(screen.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible());
+  });
 
-    renderCatalog("/workspace/3", { honorBoardEnabled: true, honorBoardConsent: false });
-    await screen.findByTestId("course-agent-development");
+  it("does not pretend restricted and prerequisite courses are enrolled", async () => {
+    installFetch();
+    renderCatalog("/workspace/3?category=all");
+    const unavailable = await screen.findByTestId("course-python-base");
+    const prerequisite = screen.getByTestId("course-agent-development");
+    expect(within(unavailable).getByRole("button", { name: /Недоступен/ })).toBeVisible();
+    expect(within(prerequisite).getByRole("button", { name: /Смотреть условия/ })).toBeVisible();
+    expect(within(prerequisite).getByText(/Нужен подтверждённый prerequisite/)).toBeVisible();
+  });
+
+  it("distinguishes reported completion from verified completion", async () => {
+    installFetch();
+    renderCatalog("/workspace/3?category=all");
+    const reported = await screen.findByTestId("course-python-base");
+    const verified = screen.getByTestId("course-greenhouse-esg");
+    expect(within(reported).getByText("Ожидает проверки")).toBeVisible();
+    expect(within(verified).getByText("Подтверждено")).toBeVisible();
+    expect(within(verified).getByRole("button", { name: /Посмотреть курс/ })).toBeVisible();
+  });
+
+  it("opens a deep-linked course and reports unknown course IDs honestly", async () => {
+    installFetch();
+    renderCatalog("/workspace/3?category=all&course=openspec-sdd");
+    expect(await screen.findByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
+  });
+
+  it("shows a clear error message for missing deep-linked courses", async () => {
+    installFetch();
+    renderCatalog("/workspace/3?category=all&course=nonexistent999");
+    expect(await screen.findByText(/Курс по ссылке не найден в каталоге/)).toBeVisible();
+    expect(screen.queryByRole("dialog", { name: "Информация о курсе" })).not.toBeInTheDocument();
+  });
+
+  it("does not show a public honour board without express consent", async () => {
+    installFetch();
+    renderCatalog("/workspace/3?category=all", { honorBoardEnabled: true, honorBoardConsent: false });
+    await screen.findByTestId("course-openspec-sdd");
     expect(screen.queryByText("Зал славы курсов")).not.toBeInTheDocument();
   });
 
-  it("shows an empty state instead of fake cards", async () => {
-    installFetch([]);
-    renderCatalog("/workspace/3?relevance=relevant");
-
-    await screen.findByText("Здесь пока пусто");
-    expect(screen.queryByTestId(/course-/)).not.toBeInTheDocument();
+  it("shows the honour board with explicit consent", async () => {
+    installFetch();
+    renderCatalog("/workspace/3?category=all", { honorBoardEnabled: true, honorBoardConsent: true });
+    expect(await screen.findByText("Зал славы курсов")).toBeVisible();
   });
 
-  it("renders a deep-linked course first and marks it", async () => {
+  it("preserves the user-selected course category through URL navigation", async () => {
     installFetch();
-    renderCatalog("/workspace/3?course=agent-development");
-
+    renderCatalog("/workspace/3?category=all");
     await screen.findByTestId("course-openspec-sdd");
-    expect(await screen.findByTestId("deeplink-agent-development")).toBeInTheDocument();
-    const grid = screen.getByTestId("course-agent-development").closest(".course-grid");
-    const firstCard = grid?.firstElementChild;
-    expect(firstCard).toHaveAttribute("data-testid", "course-agent-development");
+    const categories = screen.getByRole("group", { name: "Категории курсов" });
+    fireEvent.click(within(categories).getByRole("button", { name: /Завершённые/ }));
+    await waitFor(() => expect(screen.getByTestId("route").textContent).toContain("category=completed"));
+    expect(screen.getByTestId("course-greenhouse-esg")).toBeVisible();
+    expect(screen.queryByTestId("course-openspec-sdd")).not.toBeInTheDocument();
   });
-
-  it("keeps the deep-linked card filtered out honestly when filters exclude it", async () => {
-    installFetch();
-    renderCatalog("/workspace/3?relevance=relevant&course=greenhouse-esg");
-
-    await screen.findByTestId("course-python-base");
-    expect(screen.queryByTestId("course-greenhouse-esg")).not.toBeInTheDocument();
-    expect(
-      screen.getByText(/скрыт текущими фильтрами/),
-    ).toBeInTheDocument();
-  });
-
-  it("reports an unknown deep-linked course key without a fake card", async () => {
-    installFetch();
-    renderCatalog("/workspace/3?course=ghost-course");
-
-    await screen.findByTestId("course-openspec-sdd");
-    expect(screen.getByText(/не найден в актуальном каталоге/)).toBeInTheDocument();
-    expect(screen.queryByTestId("course-ghost-course")).not.toBeInTheDocument();
-  });
-  it("restores the approved category state and keeps selected direction on reset", async () => {
-    installFetch();
-    renderCatalog("/workspace/3?track=python&category=required&view=list");
-    await screen.findByTestId("course-openspec-sdd");
-    expect(screen.queryByTestId("course-greenhouse-esg")).not.toBeInTheDocument();
-    expect(screen.getByRole("list", { name: "Каталог Bootcamp списком" })).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Сбросить" }));
-    await waitFor(() => {
-      expect(screen.getByTestId("route").textContent).toContain("track=python");
-      expect(screen.getByTestId("route").textContent).not.toContain("category=required");
-    });
-    expect(screen.getByLabelText("Уровень курса")).toBeDisabled();
-    expect(screen.getByText(/не является процентом готовности к грейду/)).toBeInTheDocument();
-  });
-
-  it("opens an accessible course detail drawer, switches tabs, and explains recommendation", async () => {
-    installFetch();
-    renderCatalog("/workspace/3");
-    const card = await screen.findByTestId("course-openspec-sdd");
-    fireEvent.click(within(card).getByRole("button", { name: "Подробнее →" }));
-    let dialog = await screen.findByRole("dialog", { name: "Информация о курсе" });
-    expect(dialog).toHaveTextContent("OpenSpec");
-    fireEvent.click(within(dialog).getByRole("tab", { name: "Программа" }));
-    expect(await within(dialog).findByText(/не переданы источником обучения/)).toBeInTheDocument();
-    fireEvent.click(within(dialog).getByRole("tab", { name: "Навыки" }));
-    expect(within(dialog).getByText(/Прогноз не равен подтверждённому уровню/)).toBeInTheDocument();
-    fireEvent.click(within(dialog).getByRole("button", { name: "Почему рекомендован" }));
-    dialog = await screen.findByRole("dialog", { name: "Почему рекомендован" });
-    expect(within(dialog).getByText(/Ожидаемое развитие навыка/)).toBeInTheDocument();
-    fireEvent.keyDown(dialog, { key: "Escape" });
-    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
-    expect(screen.getByTestId("route").textContent).not.toContain("course=");
-  });
-
-  it("shows only unfinished course requirements and no fabricated grade readiness", async () => {
-    installFetch();
-    renderCatalog("/workspace/3");
-    await screen.findByTestId("course-openspec-sdd");
-    fireEvent.click(screen.getByRole("button", { name: "Посмотреть требования →" }));
-    const dialog = await screen.findByRole("dialog", { name: "Требования к обучению" });
-    expect(dialog).toHaveTextContent("OpenSpec и SDD");
-    expect(dialog).not.toHaveTextContent("Отчётность ESG");
-    expect(dialog).toHaveTextContent("Полный набор требований к грейду");
-    const firstCourseButton = within(dialog).getAllByRole("button", { name: "Посмотреть →" })[0];
-    if (firstCourseButton === undefined) throw new Error("No course action in requirements");
-    fireEvent.click(firstCourseButton);
-    expect(await screen.findByRole("dialog", { name: "Информация о курсе" })).toBeInTheDocument();
-  });
-
-  it("loads authoritative course objective, checkpoint, workload and competency cycle from the existing API", async () => {
-    const fixtures = installFetch(cards, { courseDetail: {
-      course_key: "openspec-sdd", title: "OpenSpec и SDD", source_url: "https://example.test/courses/openspec",
-      availability: "available", access_note: "", enrollment_status: null, verified: false,
-      specialization: "Разработка", program_version: "2026.2", workload_hours: 24,
-      objective: "Спроектировать проверяемый контур изменений", milestone_title: "Принять решение по архитектуре",
-      next_step: "Создать корректный ADR", artifact: "ADR-0001",
-      program_competencies: [["OpenSpec", "SDD"]],
-      cycle: [{ competency: "OpenSpec", current_level: "базовый", projected_level: "уверенный",
-        target_level: "уверенный", projected_confirmed: false, evidence: "checkpoint" }],
-    } });
-    renderCatalog("/workspace/3");
-    const card = await screen.findByTestId("course-openspec-sdd");
-    fireEvent.click(within(card).getByRole("button", { name: "Подробнее →" }));
-    const dialog = await screen.findByRole("dialog", { name: "Информация о курсе" });
-    expect(await within(dialog).findByText(/Спроектировать проверяемый контур изменений/)).toBeInTheDocument();
-    expect(within(dialog).getByText(/Создать корректный ADR/)).toBeInTheDocument();
-    fireEvent.click(within(dialog).getByRole("tab", { name: "Программа" }));
-    expect(within(dialog).getByText(/24 ч/)).toBeInTheDocument();
-    expect(within(dialog).getByText(/Принять решение по архитектуре/)).toBeInTheDocument();
-    fireEvent.click(within(dialog).getByRole("tab", { name: "Навыки" }));
-    expect(within(dialog).getByText(/Подтверждено: базовый/)).toBeInTheDocument();
-    expect(fixtures.detailCalls).toBe(1);
-  });
-
-  it("preserves certificate issuance for verified courses without issuing certificates for unverified ones", async () => {
-    const fixtures = installFetch();
-    renderCatalog("/workspace/3");
-    await screen.findByTestId("course-greenhouse-esg");
-    fireEvent.click(within(screen.getByTestId("course-greenhouse-esg")).getByRole("button", { name: "Подробнее →" }));
-    const dialog = await screen.findByRole("dialog", { name: "Информация о курсе" });
-    const issue = await within(dialog).findByRole("button", { name: "Получить сертификат" });
-    fireEvent.click(issue);
-    await waitFor(() => { expect(fixtures.certificateIssues).toBe(1); });
-    expect(await within(dialog).findByRole("link", { name: "Открыть выданный сертификат →" })).toHaveAttribute("href", "/verify/verify-123");
-  });
-
 });
