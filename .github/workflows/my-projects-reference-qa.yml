@@ -1,0 +1,61 @@
+name: My Projects Reference QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/my-projects/**"
+      - "frontend/e2e/my-projects-v2.spec.ts"
+      - "frontend/src/components/task-workspace-page.tsx"
+      - "frontend/src/App.tsx"
+      - ".github/workflows/my-projects-reference-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A busy main branch must not cancel visual proof for this exact commit.
+concurrency:
+  group: my-projects-qa-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  projects-browser:
+    name: projects-three-screen-browser
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install locked frontend dependencies
+        run: npm ci
+      - name: Lint implementation and reference tests
+        run: npx eslint src/features/my-projects/page.tsx e2e/my-projects-v2.spec.ts --max-warnings 0
+      - name: Bundle isolated React application
+        run: npx vite build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Exercise cards, list, details and contribution API
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+          LANG: ru_RU.UTF-8
+        run: npx playwright test my-projects-v2.spec.ts --project=chromium --reporter=line
+      - name: Upload browser screenshots, traces and failures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: my-projects-three-screens-evidence
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
