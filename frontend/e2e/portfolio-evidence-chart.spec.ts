@@ -27,7 +27,8 @@ async function openPortfolio(page: import("@playwright/test").Page, skills: {key
   await page.route("**/api/v1/me/project-credentials", route => route.fulfill({ json:[] }));
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name:"Портфолио" }).click();
+  // SPA navigation preserves the demo session when the mobile sidebar is collapsed.
+  await page.locator('a[href="/workspace/5"]').evaluate(node => { (node as HTMLAnchorElement).click(); });
   await expect(page.getByTestId("portfolio-v2")).toBeVisible();
 }
 
