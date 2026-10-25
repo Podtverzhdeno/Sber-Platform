@@ -253,6 +253,10 @@ class TalentPassportView(BaseModel):
 class CheckpointRequest(BaseModel):
     key: str = Field(min_length=1, max_length=128)
     title: str = Field(min_length=1, max_length=300)
+    description: str = Field(default="", max_length=3000)
+    deliverable: str = Field(default="", max_length=2000)
+    acceptance_criteria: list[str] = Field(default_factory=list, max_length=20)
+    estimated_minutes: int | None = Field(default=None, ge=1, le=100_000)
 
 
 class ArtifactRequest(BaseModel):
@@ -332,6 +336,10 @@ class CheckpointView(BaseModel):
     key: str
     title: str
     status: str
+    description: str = ""
+    deliverable: str = ""
+    acceptance_criteria: list[str] = Field(default_factory=list)
+    estimated_minutes: int | None = None
 
 
 class ContributionView(BaseModel):
@@ -812,7 +820,12 @@ def _participant_task_detail_view(
         team=team,
         membership=(_assignment_view(detail.membership) if detail.membership is not None else None),
         checkpoints=[
-            CheckpointView(key=item.key, title=item.title, status=item.status)
+            CheckpointView(
+                key=item.key, title=item.title, status=item.status,
+                description=item.description, deliverable=item.deliverable,
+                acceptance_criteria=list(item.acceptance_criteria),
+                estimated_minutes=item.estimated_minutes,
+            )
             for item in detail.checkpoints
         ],
         personal=[_contribution_view(item) for item in detail.contributions],
@@ -1495,9 +1508,18 @@ async def add_checkpoint(
     service: Annotated[WorkService, Depends(_service)],
 ) -> CheckpointView:
     item = await service.add_checkpoint(
-        authenticated.actor, task_id, CheckpointRecord(command.key, command.title)
+        authenticated.actor, task_id, CheckpointRecord(
+            command.key, command.title, "planned", command.description,
+            command.deliverable, tuple(command.acceptance_criteria),
+            command.estimated_minutes,
+        )
     )
-    return CheckpointView(key=item.key, title=item.title, status=item.status)
+    return CheckpointView(
+                key=item.key, title=item.title, status=item.status,
+                description=item.description, deliverable=item.deliverable,
+                acceptance_criteria=list(item.acceptance_criteria),
+                estimated_minutes=item.estimated_minutes,
+            )
 
 
 @router.post("/customer/tasks/{task_id}/team-artifacts", response_model=ArtifactView)
