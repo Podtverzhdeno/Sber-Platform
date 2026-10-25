@@ -197,7 +197,7 @@ def test_page_size_bound_mirrors_contract() -> None:
 def test_every_catalog_filter_controls_real_api_results() -> None:
     """The filter bar must narrow actual server data, not just rewrite URL params."""
     api = _client(Role.PARTICIPANT)
-    cases = (
+    cases: tuple[tuple[dict[str, str], list[str]], ...] = (
         ({"q": "task-102"}, ["Задача task-102"]),
         (
             {"competency": "python"},
