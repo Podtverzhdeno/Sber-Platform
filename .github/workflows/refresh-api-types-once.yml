@@ -1,0 +1,39 @@
+name: Refresh generated API types once
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/refresh-api-types-once.yml
+permissions:
+  contents: write
+jobs:
+  regenerate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Regenerate strictly from the checked-in OpenAPI contract
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run api:generate
+          npm run api:check
+      - name: Commit generated types without bypassing branch conflicts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add frontend/src/api/schema.ts
+          if git diff --cached --quiet; then
+            echo "Schema already matches OpenAPI"
+            exit 0
+          fi
+          git commit -m "chore(api): regenerate TypeScript schema for new messenger endpoints"
+          git fetch origin main
+          git rebase origin/main
+          git push origin HEAD:main
