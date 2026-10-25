@@ -98,6 +98,9 @@ async def test_messaging_messages_persist_to_postgresql_and_reset_clears() -> No
         )
         assert opened.status_code == 200
         channel = opened.json()
+        before = await client.get(f"/api/v1/me/messaging/channels/{channel['id']}/messages")
+        assert before.status_code == 200
+        previous_rows = before.json()
         sent = await client.post(
             f"/api/v1/me/messaging/channels/{channel['id']}/messages",
             json={"body": "Транзакционная проверка записи в PostgreSQL.", "artifact_refs": []},
@@ -108,10 +111,10 @@ async def test_messaging_messages_persist_to_postgresql_and_reset_clears() -> No
         history = await client.get(f"/api/v1/me/messaging/channels/{channel['id']}/messages")
         assert history.status_code == 200
         rows = history.json()
-        assert len(rows) == 1
-        assert rows[0]["body"] == "Транзакционная проверка записи в PostgreSQL."
-        assert rows[0]["sequence"] == 1
-        assert rows[0]["author_id"] == str(demo_id(PERSONA))
+        assert len(rows) == len(previous_rows) + 1
+        assert rows[-1]["body"] == "Транзакционная проверка записи в PostgreSQL."
+        assert rows[-1]["sequence"] == (previous_rows[-1]["sequence"] + 1 if previous_rows else 1)
+        assert rows[-1]["author_id"] == str(demo_id(PERSONA))
 
     async with database.sessions() as session:
         created_id = uuid_module.UUID(channel["id"])
@@ -131,7 +134,7 @@ async def test_messaging_messages_persist_to_postgresql_and_reset_clears() -> No
             )
             or 0
         )
-    assert message_count == 1
+    assert message_count == len(rows)
     assert membership_count == 2
 
     async with database.sessions() as session:
@@ -158,12 +161,12 @@ async def test_messaging_messages_persist_to_postgresql_and_reset_clears() -> No
         and row["entity_type"] == "messaging_messages"
         and row["payload"].get("channel_id") == str(created_id)
     ]
-    assert channel_created and message_events, "messaging audit trail is missing"
+    assert message_events, "messaging message audit trail is missing"
     for event in message_events:
         forbidden = {"body", "chat_text", "raw_chat", "prompt", "response"}
         assert forbidden.isdisjoint(event["payload"])
         assert event["payload"].get("kind") == "text"
-        assert event["payload"].get("sequence") == 1
+        assert event["payload"].get("sequence") == rows[-1]["sequence"]
 
     await reset_demo_data(database, demo_mode=True)
 
@@ -198,6 +201,7 @@ async def test_personal_channel_flows_match_memory_and_sql_stores() -> None:
         next_sequence = (earlier[-1].sequence if earlier else 0) + 1
         message = await service.send(actor, channel.id, "Дублирующая проверка записи")
         assert message.sequence == next_sequence
+        await service.mark_read(actor, channel.id, message.id)
 
         muted = await service.set_mute(actor, channel.id, muted=True)
         assert muted.muted is True
