@@ -351,7 +351,12 @@ def weekly_rhythm_projection(
     week_start, week_end = iso_week_bounds(local_today)
     started = rhythm.effective_from <= local_today
     week_days = {week_start + timedelta(days=offset) for offset in range(7)}
-    effective_days = {day for day in week_days if day >= rhythm.effective_from}
+    # Count only achieved *planned* days. Completing a course on an unscheduled
+    # day still qualifies for the continuous streak, but not for the rhythm goal.
+    effective_days = {
+        day for day in week_days
+        if day >= rhythm.effective_from and day.isoweekday() in rhythm.active_days
+    }
     active_in_week = achieved_dates & effective_days
     done = len(active_in_week) if started else 0
     return WeeklyRhythmProjection(
