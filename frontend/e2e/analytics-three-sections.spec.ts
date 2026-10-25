@@ -86,7 +86,7 @@ for (const viewport of [
    await page.evaluate(async()=>{await document.fonts.ready;});
    return nav.evaluate((el)=>{
     const r=el.getBoundingClientRect();
-    const buttons=[...el.querySelectorAll("button")].map(x=>{
+    const buttons=Array.from(el.querySelectorAll<HTMLButtonElement>("button"), x=>{
      const rect=x.getBoundingClientRect();
      return {x:rect.x,y:rect.y,width:rect.width,height:rect.height};
     });
@@ -104,15 +104,14 @@ for (const viewport of [
    for(const k of ["x","y","width","height"] as const){
     expect(Math.abs(next[k]-initial[k]),viewport.name+": nav "+k+" moved on "+label).toBeLessThanOrEqual(1);
    }
-   for(let i=0;i<initial.buttons.length;i++){
-    const first=initial.buttons[i],current=next.buttons[i];
-    expect(first, "Switcher button exists").toBeDefined();
-    expect(current, "Switcher button remains mounted").toBeDefined();
-    if(!first||!current)continue;
+   expect(next.buttons.length).toBe(initial.buttons.length);
+   initial.buttons.forEach((first,i)=>{
+    const current=next.buttons.at(i);
+    if(current===undefined)throw new Error("Missing analytics tab at index "+String(i));
     for(const k of ["x","y","width","height"] as const){
      expect(Math.abs(current[k]-first[k]),viewport.name+": button "+String(i)+" "+k+" moved on "+label).toBeLessThanOrEqual(1);
     }
-   }
+   });
    expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(2);
   }
  });
