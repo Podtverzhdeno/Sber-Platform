@@ -24,7 +24,7 @@ async function openMessages(page: Page, opts: { unreadContact?: boolean; eventCo
       unread: opts.unreadContact && channel.title === "Елена Наставник" ? 3 : channel.unread,
     }));
   if (opts.eventCommunity) channels.push({
-    ...channels[1]!, id: "00000000-0000-4000-8000-000000004444",
+    ...channels[1], id: "00000000-0000-4000-8000-000000004444",
     title: "События", unread: 2,
   });
   const sentMessages: string[] = [];
