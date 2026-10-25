@@ -183,8 +183,9 @@ test("chosen weekly rhythm saves via the API and survives a fresh read", async (
   expect(lastSaved.preset).toBe("weekends");
   expect(lastSaved.effective_from).toBe(selectedDate);
   await page.reload();
-  const signIn = page.locator('[data-persona="participant-alex"]');
-  if (await signIn.isVisible()) await signIn.click();
+  // The fixture intentionally returns 401 from /me, so the demo persona must
+  // be reselected after a reload; wait for the sign-in UI to finish loading.
+  await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("button", { name: /Учебный стрик: 11 дней/ }).click();
   const nextDialog = page.getByRole("dialog", { name: "Учебный стрик" });
   await expect(nextDialog.getByRole("button", { name: "Выходные", exact: true })).toHaveAttribute("aria-pressed", "true");
