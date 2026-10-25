@@ -81,7 +81,7 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
   await expect(page.locator(".p2-project")).toHaveCount(2);
 
   // Portfolio actions must resolve sections by name, not hard-coded numeric offsets.
-  await page.getByRole("button", { name: "Поделиться" }).click();
+  await page.getByRole("button", { name: "Поделиться", exact: true }).click();
   await expect(page.getByRole("status").filter({ hasText: "Публичная ссылка пока недоступна" })).toBeVisible();
   await page.getByRole("tab", { name: "Обзор" }).click();
   await page.getByRole("button", { name: /Открыть Skill Passport/ }).click();
