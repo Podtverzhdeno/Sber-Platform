@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "frontend/src/features/my-projects/**"
+      - "frontend/public/my-projects/**"
       - "frontend/e2e/my-projects-v2.spec.ts"
       - "frontend/src/components/task-workspace-page.tsx"
       - "frontend/src/App.tsx"
