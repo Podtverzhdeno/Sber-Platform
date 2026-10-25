@@ -292,3 +292,18 @@
 @media(max-width:1180px){.mpv2 .mp-detail-top{grid-template-columns:1fr}.mpv2 .mp-detail-top .mp-detail-hero{min-height:170px}.mpv2 .mp-detail-earnings__grid>button{min-height:83px}}
 @media(max-width:710px){.mpv2 .mp-detail-hero__upper{flex-wrap:wrap}.mpv2 .mp-detail-hero__upper>.mp-status{order:3}.mpv2 .mp-detail-hero__lower{flex-direction:column;align-items:stretch}.mpv2 .mp-detail-hero__lower .mp-primary{width:100%}.mpv2 .mp-detail-opportunities{grid-template-columns:1fr}}
 @media(max-width:420px){.mpv2 .mp-detail-earnings__grid>button{padding:7px;gap:5px}.mpv2 .mp-detail-earnings__grid strong{font-size:10px}}
+
+/* Third approved mockup: three lower columns (description / facts / team). */
+.mpv2 .mp-detail-grid--reference{grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr) minmax(0,1fr);gap:11px}
+.mpv2 .mp-detail-grid--reference .mp-detail-panel{height:100%;min-height:0}
+.mpv2 .mp-detail-grid--reference .mp-detail-panel h2{font-size:15px}
+.mpv2 .mp-key-facts{display:grid;gap:0}
+.mpv2 .mp-key-facts>span{display:grid;grid-template-columns:19px minmax(0,.8fr) minmax(0,1.25fr);gap:9px;align-items:center;min-height:42px;padding:9px 2px;border-bottom:1px solid #1b4059;color:#95b9d3;font-size:11px}
+.mpv2 .mp-key-facts>span:last-child{border-bottom:0}
+.mpv2 .mp-key-facts svg{color:#12e3dd}
+.mpv2 .mp-key-facts strong{font-size:12px;color:#ebf8ff;text-align:right;font-weight:700;overflow-wrap:anywhere}
+.mpv2 .mp-detail-grid--reference .mp-team-member{padding:8px 0}
+.mpv2 .mp-detail-grid--reference .mp-team-member>.mp-secondary{padding:7px;min-height:28px;width:31px}
+@media(max-width:1300px){.mpv2 .mp-detail-grid--reference{grid-template-columns:repeat(2,minmax(0,1fr))}.mpv2 .mp-detail-grid--reference>.mp-detail-column:last-child{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:780px){.mpv2 .mp-detail-grid--reference{grid-template-columns:1fr}.mpv2 .mp-detail-grid--reference>.mp-detail-column:last-child{grid-column:auto;grid-template-columns:1fr}}
+[data-theme="light"] .mpv2 .mp-key-facts strong{color:#16344a}
