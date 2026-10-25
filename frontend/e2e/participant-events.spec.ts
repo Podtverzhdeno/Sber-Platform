@@ -45,15 +45,19 @@ async function api(page: Page, visualReference = false) {
   await page.route("**/api/v1/ecosystem/events/ai-journey/registration", (route) => route.fulfill({ json: { event_key: "ai-journey", started_registrations: 25, confirmed_registrations: 18, participations: 7, counter_state: "ok", computed_at: "2026-10-20T08:00:00Z", source_checked_at: "2026-10-20T08:00:00Z", definition: "confirmed_registrations", definition_version: 1, definition_text: "Подтверждённые регистрации", contains_personal_data: false } }));
 }
 
-test("event catalog preserves list/filter/detail through URL, reload and Back", async ({ page }) => {
+test("event catalog keeps cards and preserves filter/detail through URL, reload and Back", async ({ page }) => {
   await api(page); await page.goto("/"); await page.locator('[data-persona="participant-alex"]').click(); await page.getByRole("link", { name: "События" }).click();
-  await page.getByRole("button", { name: "Список" }).click();
+  await expect(page.getByRole("button", { name: "Список" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Карточки" })).toHaveCount(0);
   await page.getByLabel("Направление").selectOption("python");
-  await expect(page).toHaveURL(/view=list/); await expect(page).toHaveURL(/track=python/);
+  await expect(page).not.toHaveURL(/view=/);
+  await expect(page).toHaveURL(/track=python/);
   await page.getByRole("button", { name: "Подробнее" }).focus(); await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/event=ai-journey/); await expect(page.getByTestId("event-detail")).toContainText("18");
   await page.reload(); await expect(page.getByTestId("event-detail")).toContainText("Практический хакатон");
-  await page.goBack(); await expect(page).not.toHaveURL(/event=/); await expect(page.getByRole("button", { name: "Список" })).toHaveAttribute("aria-pressed", "true");
+  await page.goBack();
+  await expect(page).not.toHaveURL(/event=/);
+  await expect(page.getByTestId("event-reference-card")).toHaveCount(1);
 });
 
 test("event detail remains readable on mobile", async ({ page }) => {
@@ -72,6 +76,18 @@ test("events reference: all six detail states, registration flow and keyboard na
   await expect(referenceCards.locator(".ev-card-radar")).toHaveCount(0);
   await expect(referenceCards.locator(".ev-event-capabilities")).toHaveCount(0);
   await expect(referenceCards.locator(".ev-role-score")).toHaveCount(3);
+  await expect(page.getByRole("button", { name: "Список" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Карточки" })).toHaveCount(0);
+  await expect(page.locator(".claim-state")).toHaveCount(0);
+  for (const card of await referenceCards.all()) {
+    const action = card.getByRole("button", { name: "Подробнее" });
+    const actionBounds = await action.boundingBox();
+    if (!actionBounds) throw new Error("Event details action is not visible");
+    expect(actionBounds.height).toBeLessThanOrEqual(42);
+    expect(actionBounds.width).toBeLessThanOrEqual(160);
+    expect(actionBounds.height).toBeGreaterThanOrEqual(32);
+  }
+
   for (const card of await referenceCards.all()) {
     const cardBox = await card.boundingBox();
     const titleBox = await card.locator(".ev-event-main h3").boundingBox();
@@ -147,6 +163,6 @@ test("events reference: filters, favorite, motion and empty state", async ({ pag
   await expect(page.getByText("События не найдены")).toBeVisible();
   await page.getByRole("button", { name: "Сбросить фильтры" }).click();
   await expect(eventCard).toHaveCount(1);
-  await page.getByRole("button", { name: "Список" }).click();
-  await expect(page).toHaveURL(/view=list/);
+  await expect(page.getByRole("button", { name: "Список" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Карточки" })).toHaveCount(0);
 });
