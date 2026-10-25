@@ -7,7 +7,10 @@ from uuid import UUID
 
 from impulse.application.career_grade_transition import CareerGradeTransitionService
 from impulse.domain.career_grade_policy import (
-    EvidenceState, GradeEvidence, GradeRequirement, PublishedGradePolicy,
+    EvidenceState,
+    GradeEvidence,
+    GradeRequirement,
+    PublishedGradePolicy,
 )
 
 PERSON = UUID("00000000-0000-0000-0000-000000000001")
