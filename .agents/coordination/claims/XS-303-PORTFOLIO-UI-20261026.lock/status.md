@@ -1,0 +1,21 @@
+# Claim XS-303-PORTFOLIO-UI-20261026
+
+- session_id: gpt6-20261026-portfolio-ui03
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 0ce012a548366f3911480fc4a63ee18ca6ff580a
+- depends_on: []
+- write_scope:
+  - frontend/src/features/portfolio-v2.tsx
+  - frontend/src/features/portfolio-v2-data.ts
+  - frontend/src/features/portfolio-v2-data.test.ts
+  - .github/workflows/portfolio-ui-data-qa.yml
+  - .agents/coordination/claims/XS-303-PORTFOLIO-UI-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - npm run typecheck; focused Vitest and ESLint
+  - no fabricated portfolio on failed API
+  - no revoked credential shown as verified
+- progress: removing unsafe demo fallback; render real issued rating credentials and verified self-study certificates with distinct semantics
+- blockers: Full screenshot test is an integration step owned separately
