@@ -141,7 +141,7 @@ export function ParticipantPortfolioV2() {
   const passportQuery = useQuery({ queryKey: ["talent-passport"], queryFn: () => apiRequest<Passport>("/api/v1/me/talent-passport"), refetchOnMount: "always" });
   const documentsQuery = useQuery({ queryKey: ["project-credentials"], queryFn: () => apiRequest<ProjectDocument[]>("/api/v1/me/project-credentials"), refetchOnMount: "always" });
   const consent = useMutation({
-    mutationFn: ({ scope, granted }: { scope: Scope; granted: boolean }) => apiRequest("/api/v1/me/consents/" + scope, { method: "PUT", headers: csrf(), body: JSON.stringify({ granted }) }),
+    mutationFn: ({ scope, granted }: { scope: Scope; granted: boolean }) => apiRequest(`/api/v1/me/consents/${scope}`, { method: "PUT", headers: csrf(), body: JSON.stringify({ granted }) }),
     onSuccess: async () => { await client.invalidateQueries({ queryKey: ["portfolio"] }); },
     onError: () => setNotice("Не удалось сохранить настройку видимости. Попробуйте ещё раз."),
   });
