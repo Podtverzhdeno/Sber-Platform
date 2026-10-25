@@ -1,0 +1,52 @@
+name: My Projects Compact Header QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/my-projects/page.tsx"
+      - "frontend/e2e/my-projects-v2.spec.ts"
+      - ".github/workflows/my-projects-compact-header-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compact-header:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - name: Lint
+        run: npx eslint src/features/my-projects/page.tsx e2e/my-projects-v2.spec.ts --max-warnings 0
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Build
+        run: npm run build
+      - name: Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Compact My Projects browser acceptance
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test my-projects-v2.spec.ts --project=chromium --grep "introductory copy" --reporter=line
+      - name: Save browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: compact-projects-visual-evidence
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
