@@ -42,6 +42,9 @@ async function fixture(page: Page) {
   });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
+  if (page.viewportSize() && page.viewportSize()!.width < 1024) {
+    await page.getByRole("button", { name: "Меню", exact: true }).click();
+  }
   await page.getByRole("link",{name:"Мои проекты"}).click();
   await expect(page.locator(".mpv2")).toBeVisible();
 }
