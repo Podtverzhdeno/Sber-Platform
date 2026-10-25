@@ -29,3 +29,69 @@ test("event catalog preserves list/filter/detail through URL, reload and Back", 
 test("event detail remains readable on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 }); await api(page); await page.goto("/"); await page.locator('[data-persona="participant-alex"]').click(); await page.getByRole("button", { name: "Меню", exact: true }).click(); await page.getByRole("link", { name: "События" }).click(); await page.getByRole("button", { name: "Подробнее" }).click(); await expect(page.getByRole("dialog", { name: "AI Journey 2026" })).toBeVisible(); await expect(page.getByText("7")).toBeVisible();
 });
+
+
+test("events reference: all six detail states, registration flow and keyboard navigation", async ({ page }) => {
+  await api(page);
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "События" }).click();
+  await expect(page.getByTestId("events-v2")).toBeVisible();
+  await expect(page.getByText("События, которые подходят")).toBeVisible();
+  await page.getByRole("button", { name: "Подробнее" }).click();
+  const dialog = page.getByRole("dialog", { name: "AI Journey 2026" });
+  await expect(dialog).toBeVisible();
+  const bounds = await dialog.boundingBox();
+  if (!bounds) throw new Error("Detail modal is missing");
+  const viewport = page.viewportSize();
+  if (!viewport) throw new Error("Missing browser viewport");
+  expect(Math.abs(bounds.x + bounds.width / 2 - viewport.width / 2)).toBeLessThan(4);
+  const nav = dialog.getByRole("navigation", { name: "Разделы события" });
+  await nav.getByRole("button", { name: "Программа" }).click();
+  await expect(dialog.getByText("Программа мероприятия")).toBeVisible();
+  await expect(dialog.getByText("Собрать решение")).toBeVisible();
+  await nav.getByRole("button", { name: "Призы и возможности" }).click();
+  await expect(dialog.getByText("Призы", { exact: true })).toBeVisible();
+  await nav.getByRole("button", { name: "Требования" }).click();
+  await expect(dialog.getByText("Требования к участникам")).toBeVisible();
+  await nav.getByRole("button", { name: "Организаторы" }).click();
+  await expect(dialog.getByText("Организаторы и партнёры")).toBeVisible();
+  await nav.getByRole("button", { name: "FAQ" }).click();
+  await expect(dialog.getByText("Частые вопросы")).toBeVisible();
+  await dialog.locator("summary").first().click();
+  await expect(dialog.getByText("Разработчики")).toBeVisible();
+  await nav.getByRole("button", { name: "Зарегистрироваться" }).click();
+  const registration = dialog.getByTestId("event-registration");
+  await expect(registration).toBeVisible();
+  await registration.getByPlaceholder("Иван Иванов").fill("Тест Участник");
+  await registration.getByPlaceholder("example@mail.ru").fill("participant@example.test");
+  await registration.getByRole("button", { name: "Далее" }).click();
+  await registration.getByRole("button", { name: "Далее" }).click();
+  await registration.getByRole("checkbox").check();
+  await registration.getByRole("button", { name: "Подготовить заявку" }).click();
+  await expect(registration.getByText("Анкета подготовлена")).toBeVisible();
+  await expect(registration.getByRole("link", { name: /Перейти к регистрации/ })).toHaveAttribute("href", event.source_url);
+  await registration.getByRole("button", { name: "Закрыть регистрацию" }).click();
+  await expect(registration).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+});
+
+test("events reference: filters, favorite, motion and empty state", async ({ page }) => {
+  await api(page);
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "События" }).click();
+  const eventCard = page.getByTestId("event-reference-card");
+  await expect(eventCard).toHaveCount(1);
+  await eventCard.getByRole("button", { name: "В избранное" }).click();
+  await expect(eventCard.getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
+  const duration = await eventCard.evaluate(el => getComputedStyle(el).transitionDuration);
+  expect(duration).not.toBe("0s");
+  await page.getByRole("textbox", { name: "Поиск событий" }).fill("нет такого мероприятия");
+  await expect(page.getByText("События не найдены")).toBeVisible();
+  await page.getByRole("button", { name: "Сбросить фильтры" }).click();
+  await expect(eventCard).toHaveCount(1);
+  await page.getByRole("button", { name: "Список" }).click();
+  await expect(page).toHaveURL(/view=list/);
+});
