@@ -1,5 +1,6 @@
 import type { KeyboardEvent, ReactNode } from "react";
 import { useEffect, useId, useRef } from "react";
+import { X } from "lucide-react";
 
 export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "success" | "warning" }) {
   return <span className={`ui-badge ui-badge--${tone}`}>{children}</span>;
@@ -19,7 +20,7 @@ export function DataTable({ caption, headers, rows }: { caption: string; headers
   );
 }
 
-function Overlay({ title, open, onClose, kind, children }: { title: string; open: boolean; onClose: () => void; kind: "dialog" | "drawer"; children: ReactNode }) {
+function Overlay({ title, open, onClose, kind, children, preciseCloseIcon = false }: { title: string; open: boolean; onClose: () => void; kind: "dialog" | "drawer"; children: ReactNode; preciseCloseIcon?: boolean }) {
   const titleId = useId();
   const closeRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
@@ -70,7 +71,7 @@ function Overlay({ title, open, onClose, kind, children }: { title: string; open
     <div className="overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <section ref={dialogRef} className={`overlay-panel overlay-panel--${kind}`} role="dialog"
         aria-modal="true" aria-labelledby={titleId} onKeyDown={handleKeyDown}>
-        <header><h2 id={titleId}>{title}</h2><button ref={closeRef} type="button" aria-label="Закрыть" onClick={onClose}>×</button></header>
+        <header><h2 id={titleId}>{title}</h2><button ref={closeRef} type="button" aria-label="Закрыть" onClick={onClose}>{preciseCloseIcon ? <X size={20} strokeWidth={2.5} aria-hidden="true" /> : "×"}</button></header>
         {children}
       </section>
     </div>
