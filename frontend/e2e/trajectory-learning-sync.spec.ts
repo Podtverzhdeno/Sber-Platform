@@ -45,6 +45,15 @@ test("saved Bootcamp certificate appears in selected trajectory without inventin
  await expect(page.getByTestId("trajectory-study-evidence")).toContainText("0 из 2 этапов подтверждено");
  await expect(page.locator(".trajectory-v2-stage[data-study-state='studied']")).toHaveCount(1);
  await expect(page.locator(".trajectory-v2-stage[data-stage-state='completed']")).toHaveCount(0);
+ // The overview keeps one compact study summary; no repeated full-size progress boxes.
+ const summary=page.getByTestId("trajectory-study-evidence");
+ await expect(summary).toContainText("8 из 8 уроков");
+ await expect(summary.getByTestId("trajectory-study-progress").locator("progress")).toHaveCount(1);
+ await expect(page.locator(".trajectory-v2-stage-detail .trajectory-v2-stage-progress")).toHaveCount(0);
+ await expect(page.locator(".trajectory-v2-stage-detail .trajectory-v2-studied-course")).toHaveCount(0);
+ await expect(page.getByTestId("trajectory-course-learning")).toContainText("учебный сертификат выдан");
+ await expect(page.getByTestId("trajectory-stage-detail")).toContainText("План этапа", { ignoreCase:true });
+ await expect(page.locator(".trajectory-v2-stage-more")).toHaveCount(0);
  await expect(page.getByTestId("trajectory-official-grade")).toHaveText("—");
  await expect(page.getByText("Не опубликовано")).toBeVisible();
  await page.screenshot({path:"test-results/trajectory-learning-sync-desktop.png",fullPage:true,animations:"disabled"});
