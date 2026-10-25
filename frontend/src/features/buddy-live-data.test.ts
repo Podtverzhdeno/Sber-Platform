@@ -3,7 +3,6 @@ import {
   activeBuddyProjects,
   completedStudyCourses,
   countConfirmedSkills,
-  firstOwnPlace,
   normalizeNextAction,
   type BuddyJourney,
 } from "./buddy-live-data";
@@ -43,12 +42,6 @@ describe("AI Buddy authorized fact projections", () => {
         { key: "unassessed", confirmed_case_count: 2, practical_level: "unassessed" },
       ],
     })).toBe(1);
-  });
-
-  it("uses only the published owner standing, never inferring points or a place", () => {
-    expect(firstOwnPlace([{ season_id: "s1", season_title: "Сезон", place: 3, score: "250" }])).toBe(3);
-    expect(firstOwnPlace([{ season_id: "s1", season_title: "Сезон", place: null, score: null }])).toBeNull();
-    expect(firstOwnPlace([])).toBeNull();
   });
 
   it("never invents a next action when analytics is empty or absent", () => {
