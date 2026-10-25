@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Award, Bookmark, CalendarDays, ChevronRight, Share2 } from "lucide-react";
+import { Award, Bookmark, CalendarDays, ChevronRight, MoreHorizontal, Share2 } from "lucide-react";
 import type { CatalogItem } from "./types";
 import { CustomerMark } from "./customer-mark";
 
@@ -30,7 +30,7 @@ export function TaskCatalogList(props: {
         <span role="columnheader">Срок</span>
         <span role="columnheader">Что ты получишь</span>
         <span role="columnheader">Почему подходит</span>
-        <span role="columnheader">Действия</span>
+        <span role="columnheader"><span className="catalog-v2-visually-hidden">Действия</span></span>
       </div>
       {props.items.map((item, index) => {
         const canApply = item.allowed_actions.includes("apply") && item.eligibility.status === "eligible" && item.application_state === "none";
@@ -44,7 +44,7 @@ export function TaskCatalogList(props: {
             tabIndex={0}
             aria-selected={props.selectedTaskId === item.task_id}
             onClick={(event) => {
-              if (event.target instanceof Element && event.target.closest("button")) return;
+              if (event.target instanceof Element && event.target.closest("button, summary, .catalog-v2-table-menu")) return;
               props.onOpen(item);
             }}
             onKeyDown={(event) => {
@@ -93,13 +93,22 @@ export function TaskCatalogList(props: {
             </span>
             <span role="cell" className="catalog-v2-table-actions" data-label="Действия">
               <button type="button" aria-label="Подробнее" title="Подробнее" onClick={() => { props.onOpen(item); }}><ChevronRight size={19} aria-hidden="true" /></button>
-              {canApply ? <button type="button" className="catalog-v2-list-apply" onClick={() => { props.onConditions(item); }}>Отклик</button> : null}
-              <button type="button" className="catalog-v2-icon-action" aria-label={item.bookmarked ? "Сохранено" : "Сохранить"}
-                title={item.bookmarked ? "Удалить из сохранённых" : "Сохранить задачу"} aria-pressed={item.bookmarked}
-                disabled={props.bookmarkPendingId === item.task_id || !item.allowed_actions.includes("bookmark")} onClick={() => { props.onBookmark(item); }}>
-                <Bookmark size={17} fill={item.bookmarked ? "currentColor" : "none"} aria-hidden="true" />
-              </button>
-              {item.allowed_actions.includes("share") ? <button type="button" className="catalog-v2-icon-action" aria-label="Поделиться" title="Скопировать ссылку" onClick={() => { props.onShare(item); }}><Share2 size={17} aria-hidden="true" /></button> : null}
+              <details className="catalog-v2-table-menu" onClick={(event) => { event.stopPropagation(); }}>
+                <summary aria-label={`Действия с задачей: ${item.title}`} title="Действия с задачей">
+                  <MoreHorizontal size={19} aria-hidden="true" />
+                </summary>
+                <div className="catalog-v2-table-menu-popover" role="group" aria-label={`Действия: ${item.title}`}>
+                  {canApply ? <button type="button" onClick={() => { props.onConditions(item); }}>Условия и отклик</button> : item.allowed_actions.includes("open_conditions")
+                    ? <button type="button" onClick={() => { props.onConditions(item); }}>Посмотреть условия</button> : null}
+                  <button type="button" className="catalog-v2-icon-action" aria-label={item.bookmarked ? "Сохранено" : "Сохранить"}
+                    title={item.bookmarked ? "Удалить из сохранённых" : "Сохранить задачу"} aria-pressed={item.bookmarked}
+                    disabled={props.bookmarkPendingId === item.task_id || !item.allowed_actions.includes("bookmark")} onClick={() => { props.onBookmark(item); }}>
+                    <Bookmark size={17} fill={item.bookmarked ? "currentColor" : "none"} aria-hidden="true" />
+                    {item.bookmarked ? "Удалить из сохранённых" : "Сохранить задачу"}
+                  </button>
+                  {item.allowed_actions.includes("share") ? <button type="button" className="catalog-v2-icon-action" onClick={() => { props.onShare(item); }}><Share2 size={17} aria-hidden="true" />Поделиться</button> : null}
+                </div>
+              </details>
             </span>
           </div>
         );
