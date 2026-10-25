@@ -3460,3 +3460,50 @@ html[data-theme="light"] .catalog-v2 .catalog-v2-growth-delta {
   flex: none;
   color: var(--color-info-text, #63adff);
 }
+
+
+/* Task detail: actionable workflow replacing the static stage timeline. */
+.catalog-v2-workflow-section .catalog-v2-workflow-tabs {
+  display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0;
+}
+.catalog-v2-workflow-tabs button {
+  appearance: none; padding: 10px 15px; border: 1px solid var(--catalog-border, #d8e3df);
+  border-radius: 12px; background: transparent; color: inherit;
+  font: inherit; font-size: 0.82rem; font-weight: 650; cursor: pointer;
+  transition: background .16s ease, border-color .16s ease, transform .16s ease;
+}
+.catalog-v2-workflow-tabs button:hover { transform: translateY(-1px); border-color: #20a467; }
+.catalog-v2-workflow-tabs button.is-active {
+  background: #127a4c; border-color: #127a4c; color: #fff;
+}
+.catalog-v2-workflow-tabs button:focus-visible,
+.catalog-v2-workflow-action:focus-visible { outline: 3px solid #58c998; outline-offset: 3px; }
+.catalog-v2-workflow-panel {
+  padding: 20px; border: 1px solid var(--catalog-border, #d8e3df); border-radius: 16px;
+  background: var(--catalog-surface, transparent); min-height: 145px;
+}
+.catalog-v2-workflow-panel h4 { margin: 0 0 12px; font-size: 1rem; }
+.catalog-v2-detail-grid .catalog-v2-workflow-panel p {
+  font-size: .86rem; line-height: 1.65; margin: 8px 0;
+}
+.catalog-v2-workflow-facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.catalog-v2-workflow-facts span {
+  padding: 7px 11px; border-radius: 9px; background: rgba(77, 165, 119, .1);
+  font-size: .78rem;
+}
+.catalog-v2-workflow-extra { margin-top: 14px; font-size: .83rem; }
+.catalog-v2-workflow-extra summary { cursor: pointer; font-weight: 650; }
+.catalog-v2-workflow-extra li { margin: 9px 0; line-height: 1.5; }
+.catalog-v2-workflow-action {
+  margin-top: 12px; padding: 11px 16px; background: #127a4c; color: #fff;
+  border: none; border-radius: 11px; font: inherit; font-size: .84rem; font-weight: 650; cursor: pointer;
+}
+.catalog-v2-workflow-action:hover { background: #0d653e; }
+.catalog-v2-detail-grid .catalog-v2-workflow-panel .catalog-v2-workflow-hint {
+  margin-top: 14px; opacity: .75; font-size: .76rem;
+}
+@media (max-width: 540px) {
+  .catalog-v2-workflow-tabs { display: grid !important; grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .catalog-v2-workflow-tabs button { min-width: 0; padding: 9px 6px; }
+  .catalog-v2-workflow-panel { padding: 14px; }
+}
