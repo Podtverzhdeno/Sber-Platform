@@ -19,8 +19,8 @@ from impulse.api.errors import ApiError
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.bootcamp.service import BootcampCatalogService
-from impulse.domain.identity import Role
 from impulse.domain.development import local_learning_days
+from impulse.domain.identity import Role
 
 router = APIRouter(tags=["bootcamp"])
 UNIT_COUNT = 8
