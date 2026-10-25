@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest, type RuntimeApiPath } from "../../api/client";
 import { useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Award, BadgeCheck, BriefcaseBusiness, CalendarDays,
@@ -10,6 +12,7 @@ import {
 import "./rating-v2.scss";
 
 type Person = {
+  personId: string | null;
   place: number;
   name: string;
   projects: number;
@@ -23,22 +26,29 @@ type Screen = "list" | "benefits" | "profile";
 type RankingFilter = "all" | "10" | "30" | "50";
 type Benefit = { key: "top30" | "top1" | "top50"; place: string; title: string; copy: string; Icon: typeof Trophy; perks: string[] };
 
-const participantAlex: Person = { place: 3, name: "Алекс Речной", projects: 6, points: 450, achievements: ["Вы в рейтинге"], activity: "Вчера, 19:45", initials: "АР", palette: "teal" };
+type Season = { id: string; key: string; title: string; status: string; version: number; policy_version: number | null };
+type PublishedEntry = {
+  place: number; person_id: string | null; display_name: string; score: string | number;
+  successful_projects: number; anonymized: boolean;
+  trophies: { title: string; trophy_type: string; source_url: string }[];
+  offers: { event_title: string; source_url: string; basis: string }[];
+};
 
-const people: Person[] = [
-  { place: 1, name: "Кирилл Меньшев", projects: 8, points: 550, achievements: ["Победитель МАЯКИ", "Получил оффер"], activity: "Сегодня, 14:32", initials: "КМ", palette: "gold" },
-  { place: 2, name: "Мария Северова", projects: 7, points: 500, achievements: ["Призёр AI Journey"], activity: "Сегодня, 11:21", initials: "МС", palette: "silver" },
-  participantAlex,
-  { place: 4, name: "Елизавета Кравченко", projects: 6, points: 420, achievements: [], activity: "Вчера, 16:20", initials: "ЕК", palette: "blue" },
-  { place: 5, name: "Дмитрий Волков", projects: 5, points: 390, achievements: [], activity: "2 дня назад", initials: "ДВ", palette: "blue" },
-  { place: 6, name: "Анна Соколова", projects: 5, points: 360, achievements: [], activity: "2 дня назад", initials: "АС", palette: "silver" },
-  { place: 7, name: "Иван Петров", projects: 5, points: 320, achievements: [], activity: "3 дня назад", initials: "ИП", palette: "blue" },
-  { place: 8, name: "Сергей Новиков", projects: 4, points: 280, achievements: [], activity: "3 дня назад", initials: "СН", palette: "blue" },
-  { place: 9, name: "Ольга Фёдорова", projects: 4, points: 260, achievements: [], activity: "4 дня назад", initials: "ОФ", palette: "silver" },
-  { place: 10, name: "Максим Галкин", projects: 4, points: 240, achievements: [], activity: "4 дня назад", initials: "МГ", palette: "blue" },
-  { place: 11, name: "Екатерина Фролова", projects: 3, points: 220, achievements: [], activity: "5 дней назад", initials: "ЕФ", palette: "silver" },
-  { place: 12, name: "Артём Крылов", projects: 3, points: 200, achievements: [], activity: "5 дней назад", initials: "АК", palette: "blue" },
-];
+/** The ranking has no synthetic fallback. Never infer activity or skill evidence. */
+function toPerson(entry: PublishedEntry): Person {
+  const words = entry.display_name.split(/\\s+/).filter(Boolean);
+  return {
+    personId: entry.anonymized ? null : entry.person_id,
+    place: entry.place,
+    name: entry.display_name,
+    projects: entry.successful_projects,
+    points: Number(entry.score),
+    achievements: entry.trophies.map(trophy => trophy.title),
+    activity: "Не опубликована",
+    initials: entry.anonymized ? "•" : words.slice(0, 2).map(word => word.charAt(0)).join("").toLocaleUpperCase("ru-RU"),
+    palette: entry.place === 1 ? "gold" : entry.place === 2 ? "silver" : entry.place === 3 ? "teal" : "blue",
+  };
+}
 
 const benefits: Benefit[] = [
   { key: "top30", place: "ТОП 30", title: "Премиум-подписка GigaCode", copy: "Доступ к премиальным инструментам и ускорение работы над проектами.", Icon: Gem,
@@ -106,7 +116,7 @@ function RewardDialog({ benefit, onClose }: { benefit: Benefit; onClose: () => v
   </div>;
 }
 
-function RatingHero({ title, eyebrow, description, compact = false }: { title: string; eyebrow: string; description: string; compact?: boolean }) {
+function RatingHero({ title, eyebrow, description, seasonTitle, compact = false }: { title: string; eyebrow: string; description: string; seasonTitle: string; compact?: boolean }) {
   return <header className={["ir-hero", compact ? "ir-hero--compact" : ""].join(" ")}>
     <TrophyArtwork type="hero" />
     <div className="ir-hero-copy">
@@ -116,27 +126,40 @@ function RatingHero({ title, eyebrow, description, compact = false }: { title: s
     </div>
     {!compact && <aside className="ir-season" aria-label="Текущий сезон">
       <CalendarDays size={26} />
-      <div><strong>Сезон 2026</strong><b>Python-разработка</b><span>Сентябрь — декабрь 2026</span></div>
+      <div><strong>{seasonTitle}</strong><b>Опубликованный рейтинг</b><span>По подтверждённым результатам</span></div>
       <span className="ir-season-status">Текущий сезон</span>
     </aside>}
   </header>;
 }
 
-export function ParticipantRatingV2({ onOpenMessages }: { onOpenMessages?: () => void }) {
+export function ParticipantRatingV2({ onOpenMessages, currentPersonId }: { onOpenMessages?: () => void; currentPersonId?: string }) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const seasonsQuery = useQuery({
+    queryKey: ["rating-seasons"],
+    queryFn: () => apiRequest<Season[]>("/api/v1/rating-seasons" as RuntimeApiPath, { cache: "no-store" }),
+  });
+  const seasons = seasonsQuery.data ?? [];
+  const requestedSeason = searchParams.get("season");
+  const season = seasons.find(item => item.id === requestedSeason) ?? seasons[0] ?? null;
+  const leadersQuery = useQuery({
+    queryKey: ["rating-season-leaderboard", season?.id],
+    enabled: season !== null,
+    queryFn: () => apiRequest<PublishedEntry[]>(`/api/v1/rating-seasons/${encodeURIComponent(season?.id ?? "")}/leaderboard` as RuntimeApiPath, { cache: "no-store" }),
+  });
+  const people = useMemo(() => (leadersQuery.data ?? []).map(toPerson), [leadersQuery.data]);
   const [selectedBenefit, setSelectedBenefit] = useState<Benefit | null>(null);
   const [feedback, setFeedback] = useState("");
   const [tab, setTab] = useState("Обзор");
   const [favorites, setFavorites] = useState<Set<number>>(() => new Set());
   const screenValue = searchParams.get("ratingView");
   const screen: Screen = screenValue === "benefits" || screenValue === "profile" ? screenValue : "list";
-  const profileId = Number(searchParams.get("participant") ?? "3");
-  const person = people.find(item => item.place === profileId) ?? participantAlex;
+  const profileId = searchParams.get("participant");
+  const person = people.find(item => item.personId !== null && item.personId === profileId) ?? null;
   const rankValue = searchParams.get("rank");
   const filter: RankingFilter = rankValue === "10" || rankValue === "30" || rankValue === "50" ? rankValue : "all";
   const query = searchParams.get("q") ?? "";
   const order = searchParams.get("order") ?? "points";
-  const current = participantAlex;
+  const current = people.find(item => item.personId !== null && item.personId === currentPersonId) ?? null;
   const visible = useMemo(() => {
     const limit = filter === "all" ? Infinity : Number(filter);
     const text = query.trim().toLocaleLowerCase("ru-RU");
@@ -151,7 +174,8 @@ export function ParticipantRatingV2({ onOpenMessages }: { onOpenMessages?: () =>
   }
   function openProfile(item: Person) {
     setTab("Обзор");
-    updateParams({ ratingView: "profile", participant: String(item.place) });
+    if (item.personId === null) return;
+    updateParams({ ratingView: "profile", participant: item.personId });
   }
   function backToList() {
     updateParams({ ratingView: null, participant: null });
@@ -166,9 +190,13 @@ export function ParticipantRatingV2({ onOpenMessages }: { onOpenMessages?: () =>
   }
 
   return <div className="ir-page" data-testid="rating-v2" data-screen={screen}>
+    {(seasonsQuery.isLoading || (season !== null && leadersQuery.isLoading)) && <p role="status" className="ir-disclaimer">Загружаем опубликованные данные рейтинга…</p>}
+    {(seasonsQuery.isError || leadersQuery.isError) && <p role="alert" className="ir-disclaimer">Не удалось загрузить рейтинг. <button type="button" onClick={() => { void seasonsQuery.refetch(); void leadersQuery.refetch(); }}>Повторить</button></p>}
+    {!seasonsQuery.isLoading && !seasonsQuery.isError && season === null && <p role="status" className="ir-disclaimer">Опубликованных сезонов рейтинга пока нет. Баллы и места не присваиваются автоматически.</p>}
+
     {screen === "list" && <>
       <div className="ir-breadcrumb"><span>Рейтинг</span><span className="ir-divider-chevron">›</span><strong>Все участники</strong></div>
-      <RatingHero title="Все участники рейтинга" eyebrow="РЕЙТИНГ · СЕЗОН 2026" description="Участники, которые развивают навыки, создают проекты и вносят вклад в экосистему Impulse." />
+      <RatingHero title="Все участники рейтинга" eyebrow="РЕЙТИНГ · ОПУБЛИКОВАННЫЙ СЕЗОН" description="Результаты участников из опубликованного рейтинга с учётом настроек приватности." seasonTitle={season?.title ?? "Сезон не опубликован"} />
       <div className="ir-reward-strip" aria-label="Награды за места в рейтинге">
         {benefits.map(benefit => <BenefitTile key={benefit.key} benefit={benefit} compact onOpen={() => {setSelectedBenefit(benefit);}} />)}
       </div>
@@ -177,36 +205,36 @@ export function ParticipantRatingV2({ onOpenMessages }: { onOpenMessages?: () =>
           {(["all", "10", "30", "50"] as const).map(value => <button type="button" key={value} aria-pressed={filter === value} onClick={() => {updateParams({rank:value==="all"?null:value});}}>{value === "all" ? "Все" : "ТОП " + value}</button>)}
         </div>
         <label className="ir-control ir-control--search"><Search size={18} /><span className="ir-sr">Поиск участников</span><input type="search" value={query} placeholder="Поиск по участникам..." onChange={event => {updateParams({q:event.target.value});}} /></label>
-        <div className="ir-control ir-select" aria-label="Сезон рейтинга"><CalendarDays size={18} /><span>Сезон 2026</span></div>
+        <label className="ir-control ir-select" aria-label="Сезон рейтинга"><CalendarDays size={18} /><select aria-label="Выбрать сезон" value={season?.id ?? ""} disabled={seasons.length === 0} onChange={event => { updateParams({ season: event.target.value, participant: null, ratingView: null }); }}><option value="" disabled>Нет опубликованного сезона</option>{seasons.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>
         <label className="ir-control ir-control--sort"><span className="ir-sr">Сортировка рейтинга</span><span>↕</span><select value={order} onChange={event => {updateParams({order:event.target.value==="points"?null:event.target.value});}}><option value="points">По баллам</option><option value="projects">По проектам</option><option value="name">По имени</option></select><ChevronDown size={16}/></label>
       </div>
-      <div className="ir-list-bar"><p><strong>{visible.length}</strong> участников показано · демо-когорта 124 участника</p><button className="ir-btn ir-btn--solid" type="button" onClick={viewBenefits}>Подробнее о рейтинге и наградах <ArrowRight size={18}/></button></div>
+      <div className="ir-list-bar"><p><strong>{visible.length}</strong> участников показано · из {people.length} опубликованных</p><button className="ir-btn ir-btn--solid" type="button" onClick={viewBenefits}>Подробнее о рейтинге и наградах <ArrowRight size={18}/></button></div>
       <section className="ir-leaderboard" aria-label="Все участники рейтинга">
         <div className="ir-list-head"><span>#</span><span>Участник</span><span>Статус</span><span>Баллы</span><span>Проекты</span><span>Достижения</span><span>Активность</span><span /></div>
-        {visible.length === 0 && <div className="ir-empty"><Search size={30}/><strong>Участники не найдены</strong><p>Измените поиск или фильтр рейтинга.</p><button type="button" onClick={() => {updateParams({q:null,rank:null});}}>Сбросить фильтры</button></div>}
-        {visible.map(item => <article key={item.place} className={["ir-leader-row", item.place <= 3 ? "ir-leader-row--"+String(item.place) : "", item.place === current.place ? "ir-leader-row--me" : ""].join(" ")}>
+        {visible.length === 0 && <div className="ir-empty"><Search size={30}/><strong>Участники не найдены</strong><p>{people.length === 0 ? "Подтверждённых записей пока нет." : "Измените поиск или фильтр рейтинга."}</p><button type="button" onClick={() => {updateParams({q:null,rank:null});}}>Сбросить фильтры</button></div>}
+        {visible.map(item => <article key={item.place} className={["ir-leader-row", item.place <= 3 ? "ir-leader-row--"+String(item.place) : "", item.personId !== null && item.personId === current?.personId ? "ir-leader-row--me" : ""].join(" ")}>
           <span className="ir-rank">{item.place <= 3 ? <Crown size={22} /> : null}{item.place}</span>
-          <div className="ir-person"><PersonAvatar person={item}/><div><button type="button" onClick={() => {openProfile(item);}}>{item.name}</button><small>{item.projects} успешно выполненных проектов</small></div></div>
-          <span className={"ir-status ir-status--" + (item.place <= 3 ? String(item.place) : "normal")}>{item.place === 1 ? "Лидер сезона" : item.place === 3 ? "Вы в рейтинге" : item.place <= 30 ? "Топ-участник" : "Участник"}</span>
+          <div className="ir-person"><PersonAvatar person={item}/><div><button type="button" disabled={item.personId === null} onClick={() => {openProfile(item);}}>{item.name}</button><small>{item.projects} успешно выполненных проектов</small></div></div>
+          <span className={"ir-status ir-status--" + (item.place <= 3 ? String(item.place) : "normal")}>{item.place === 1 ? "Лидер сезона" : item.personId !== null && item.personId === current?.personId ? "Ваш результат" : item.place <= 30 ? "Топ-участник" : "Участник"}</span>
           <strong className="ir-points">{item.points}<small> баллов</small></strong>
           <span className="ir-count"><BriefcaseBusiness size={16}/>{item.projects}</span>
-          <div className="ir-achievements" aria-label={"Достижения " + item.name}><Medal size={16}/><Flame size={16}/><Star size={16}/></div>
+          <div className="ir-achievements" aria-label={"Достижения " + item.name}>{item.achievements.length > 0 ? item.achievements.map(title => <Medal key={title} size={16} aria-label={title}/>) : "—"}</div>
           <span className="ir-activity">{item.activity}</span>
-          <button type="button" className="ir-outline-button" onClick={() => {openProfile(item);}}>Профиль <ArrowRight size={16} /></button>
+          <button type="button" className="ir-outline-button" disabled={item.personId === null} onClick={() => {openProfile(item);}}>Профиль <ArrowRight size={16} /></button>
         </article>)}
       </section>
-      <div className="ir-disclaimer">Позиции, баллы и профили на этом демонстрационном экране — примеры. Привилегии не означают автоматическое получение подписки, токенов или сертификата.</div>
+      <div className="ir-disclaimer">Позиции и баллы берутся из опубликованного рейтинга. Анонимизированные профили защищены. Привилегии и сертификаты не выдаются автоматически.</div>
     </>}
     {screen === "benefits" && <>
       <div className="ir-breadcrumb"><button type="button" onClick={backToList}>Рейтинг</button><span className="ir-divider-chevron">›</span><strong>Награды и возможности</strong></div>
-      <div className="ir-benefits-heading"><RatingHero compact title="Рейтинг подтверждённого опыта" eyebrow="СЕЗОН 2026 · PYTHON-РАЗРАБОТКА" description="Твой вклад, проекты и достижения формируют рейтинг. Попадая в топ, ты открываешь признание, новые возможности и доступ к закрытым привилегиям." />
-        <div className="ir-my-rank"><span><Crown size={20}/> Ваше место</span><strong>3</strong><p>450 баллов · 6 проектов</p><small>В зоне ТОП 3</small></div>
+      <div className="ir-benefits-heading"><RatingHero compact title="Рейтинг подтверждённого опыта" eyebrow="ОПУБЛИКОВАННЫЙ РЕЙТИНГ" description="Баллы начисляются по опубликованным правилам сезона, а привилегии требуют отдельного подтверждения." seasonTitle={season?.title ?? "Нет сезона"} />
+        <div className="ir-my-rank"><span><Crown size={20}/> Ваше место</span><strong>{current?.place ?? "—"}</strong><p>{current ? `${String(current.points)} баллов · ${String(current.projects)} проектов` : "Нет опубликованной позиции"}</p><small>{current ? `Место №${String(current.place)}` : "Результат не опубликован"}</small></div>
       </div>
       <div className="ir-benefits-showcase">{benefits.map(benefit => <BenefitTile key={benefit.key} benefit={benefit} onOpen={() => {setSelectedBenefit(benefit);}} />)}</div>
       <section className="ir-why"><div><h2>Почему это важно</h2><p>Рейтинг — не просто позиция. Это возможности для твоего роста.</p></div>
         {[{Icon:BriefcaseBusiness,title:"Реальные возможности",body:"Проекты, стажировки и доступ к партнёрам"},{Icon:ShieldCheck,title:"Больше доверия",body:"Результаты и достижения подтверждены"},{Icon:Users,title:"Доступ к сообществу",body:"Нетворкинг, наставники и закрытые события"},{Icon:Star,title:"Персональный рост",body:"Признание, поддержка и обратная связь"}].map(x=><article key={x.title}><x.Icon size={26}/><div><strong>{x.title}</strong><p>{x.body}</p></div></article>)}
       </section>
-      <div className="ir-leaders-header"><div><span className="ir-eyebrow">ЛИДЕРЫ СЕЗОНА</span><h2>Участники, которые уже открыли возможности</h2></div><div className="ir-micro-stats"><span><Users size={17}/> 124 участника</span><span><Award size={17}/> Сезон 2026</span></div><button className="ir-outline-button" type="button" onClick={backToList}>Смотреть весь список <ArrowRight size={17}/></button></div>
+      <div className="ir-leaders-header"><div><span className="ir-eyebrow">ЛИДЕРЫ СЕЗОНА</span><h2>Участники, которые уже открыли возможности</h2></div><div className="ir-micro-stats"><span><Users size={17}/> {people.length} участников</span><span><Award size={17}/> {season?.title ?? "Сезон не опубликован"}</span></div><button className="ir-outline-button" type="button" onClick={backToList}>Смотреть весь список <ArrowRight size={17}/></button></div>
       <div className="ir-top-three">{people.slice(0,3).map(item => <article className={["ir-top-card","ir-top-card--"+item.palette].join(" ")} key={item.place}>
         <TrophyArtwork type={item.place===1?"top1":item.place===2?"top30":"hero"}/>
         <div className="ir-top-card-head"><span><Crown size={19}/> {item.place}</span><b>{item.points} баллов</b></div>
@@ -217,22 +245,23 @@ export function ParticipantRatingV2({ onOpenMessages }: { onOpenMessages?: () =>
     </>}
     {screen === "profile" && <>
       <div className="ir-breadcrumb"><button type="button" onClick={backToList}>Рейтинг</button><span className="ir-divider-chevron">›</span><strong>Профиль участника</strong></div>
-      <header className="ir-profile-hero">
+      {person !== null && <header className="ir-profile-hero">
         <TrophyArtwork type="hero"/>
-        <div className="ir-profile-identity"><PersonAvatar big person={person}/><div><span className="ir-eyebrow">ПРОФИЛЬ УЧАСТНИКА · СЕЗОН 2026</span><h1 id="workspace-title">{person.name} <BadgeCheck size={26}/></h1><p>Участник · Python-разработка · Impulse</p><div className="ir-profile-tags">{["Python","Backend","AI / ML","Командные проекты"].map(x=><span key={x}>{x}</span>)}</div></div></div>
+        <div className="ir-profile-identity"><PersonAvatar big person={person}/><div><span className="ir-eyebrow">ПРОФИЛЬ УЧАСТНИКА · СЕЗОН 2026</span><h1 id="workspace-title">{person.name} <BadgeCheck size={26}/></h1><p>Участник опубликованного рейтинга Impulse</p></div></div>
         <span className="ir-profile-position"><Crown size={17}/> ТОП {person.place}</span>
         <aside className="ir-profile-tools"><div className="ir-profile-buttons"><button type="button" className="ir-btn ir-btn--solid" onClick={() => {if(onOpenMessages)onOpenMessages();else setFeedback("Перейдите в раздел Сообщения для связи");}}><Mail size={17}/> Написать</button><button className="ir-outline-button" type="button" aria-pressed={favorites.has(person.place)} onClick={() => {setFavorites(previous => { const next = new Set(previous); if (next.has(person.place)) next.delete(person.place); else next.add(person.place); return next; });}}><Heart size={17} fill={favorites.has(person.place)?"currentColor":"none"}/>{favorites.has(person.place)?"В избранном":"В избранное"}</button><button type="button" className="ir-outline-button ir-icon-btn" aria-label="Поделиться профилем" onClick={() => {void shareProfile();}}><Share2 size={17}/></button></div>
           <div className="ir-profile-stats"><span><Crown size={19}/><strong>{person.place}</strong><small>Место в рейтинге</small></span><span><Flame size={19}/><strong>{person.points}</strong><small>Всего баллов</small></span><span><BriefcaseBusiness size={19}/><strong>{person.projects}</strong><small>Проектов</small></span></div></aside>
       </header>
-      <div className="ir-profile-tabs" role="tablist" aria-label="Разделы профиля">{["Обзор","Достижения","Проекты","Оценки","Награды"].map(value=><button key={value} type="button" role="tab" aria-selected={tab===value} onClick={() => {setTab(value);}}>{value}</button>)}</div>
-      {feedback && <div className="ir-feedback" role="status"><CircleCheck size={18}/>{feedback}<button type="button" onClick={()=>{setFeedback("");}} aria-label="Закрыть уведомление">×</button></div>}
-      {(tab==="Обзор"||tab==="Награды")&&<section className="ir-unlocks"><h2><LockKeyhole size={20}/> Открытые возможности</h2><div className="ir-unlock-grid">{levels.map((item)=>{const qualifies=item.label==="ТОП 1"?person.place===1:item.label==="ТОП 30"?person.place<=30:person.place<=50;const reward=benefits.find(benefit => benefit.place === item.label);if (!reward) return null;return <button type="button" key={item.label} className={"ir-unlock ir-unlock--"+reward.key} onClick={() => {setSelectedBenefit(reward);}}><item.icon size={25}/><strong>{item.label}</strong><span>{item.benefit}</span><small>{qualifies?<><Check size={15}/> В призовой зоне</>:<><LockKeyhole size={15}/> Пока недоступно</>}</small></button>;})}</div><p>Попадание в призовую зону не подтверждает фактическую выдачу награды. Организаторы проверяют результаты и утверждают условия.</p></section>}
-      <div className="ir-profile-grid">
-        {(tab==="Обзор"||tab==="Достижения")&&<section className="ir-profile-panel"><h2><Trophy size={19}/> Ключевые достижения</h2>{(person.achievements.length?person.achievements:["Участник программы Impulse"]).map((item,index)=><div className="ir-proof-row" key={item}><span><Medal size={20}/></span><div><strong>{item}</strong><small>{index===0?"Демо-достижение сезона":"Демонстрационные данные рейтинга"}</small></div></div>)}<button type="button" className="ir-subtle-action" onClick={viewBenefits}>Награды программы <ArrowRight size={16}/></button></section>}
-        {(tab==="Обзор"||tab==="Проекты")&&<section className="ir-profile-panel"><h2><BriefcaseBusiness size={19}/> Завершённые проекты</h2>{["AI Study Assistant","DataLens Analytics","Open Source · DevTools"].slice(0,Math.min(person.projects,3)).map((name,index)=><div className="ir-project-line" key={name}><span><Code2 size={20}/></span><div><strong>{name}</strong><small>{["Практический AI-прототип","Аналитическая платформа","Инструменты разработчика"][index]} · демо</small></div><strong className="ir-project-grade"><Star size={15}/> {index===1?"4.8":"5.0"}</strong></div>)}<p className="ir-small-note">Проекты приведены для иллюстрации макета. Подтверждённый профиль должен загружаться из портфолио участника с учётом разрешений.</p></section>}
-        {(tab==="Обзор"||tab==="Оценки")&&<section className="ir-profile-panel ir-evaluation"><h2><Star size={19}/> Оценки и вклад</h2><div className="ir-grade"><strong>5+</strong><span>Оценка качества в демо-программе</span></div>{["Качество работы","Командная работа","Инициативность"].map((label,i)=><div className="ir-eval-row" key={label}><span>{label}</span><i><b style={{width:String(96-i*4)+"%"}}/></i></div>)}<p className="ir-small-note">Не является независимой оценкой компетенций без проверки доказательств.</p></section>}
-        {(tab==="Обзор"||tab==="Достижения"||tab==="Награды")&&<section className="ir-profile-panel"><h2><BadgeCheck size={19}/> Skill Passport и признание</h2><div className="ir-skill-passport"><FileBadge2 size={35}/><div><strong>Skill Passport</strong><span>Данные о результатах и достижениях</span><small>{person.place===1?"Кандидат на отметку победителя сезона":"Победа в сезоне ещё не подтверждена"}</small></div></div><button type="button" className="ir-subtle-action" onClick={viewBenefits}>Условия признания <ArrowRight size={16}/></button></section>}
-      </div>
+      {person === null && <p role="status" className="ir-disclaimer">Профиль недоступен или скрыт настройками приватности. Вернитесь в список участников.</p>}
+      {person !== null && <div className="ir-profile-tabs" role="tablist" aria-label="Разделы профиля">{["Обзор","Достижения","Проекты","Оценки","Награды"].map(value=><button key={value} type="button" role="tab" aria-selected={tab===value} onClick={() => {setTab(value);}}>{value}</button>)}</div>
+      {person !== null && feedback && <div className="ir-feedback" role="status"><CircleCheck size={18}/>{feedback}<button type="button" onClick={()=>{setFeedback("");}} aria-label="Закрыть уведомление">×</button></div>}
+      {person !== null && (tab==="Обзор"||tab==="Награды")&&<section className="ir-unlocks"><h2><LockKeyhole size={20}/> Открытые возможности</h2><div className="ir-unlock-grid">{levels.map((item)=>{const qualifies=item.label==="ТОП 1"?person.place===1:item.label==="ТОП 30"?person.place<=30:person.place<=50;const reward=benefits.find(benefit => benefit.place === item.label);if (!reward) return null;return <button type="button" key={item.label} className={"ir-unlock ir-unlock--"+reward.key} onClick={() => {setSelectedBenefit(reward);}}><item.icon size={25}/><strong>{item.label}</strong><span>{item.benefit}</span><small>{qualifies?<><Check size={15}/> В призовой зоне</>:<><LockKeyhole size={15}/> Пока недоступно</>}</small></button>;})}</div><p>Попадание в призовую зону не подтверждает фактическую выдачу награды. Организаторы проверяют результаты и утверждают условия.</p></section>}
+      {person !== null && <div className="ir-profile-grid">
+        {(tab==="Обзор"||tab==="Достижения")&&<section className="ir-profile-panel"><h2><Trophy size={19}/> Ключевые достижения</h2>{(person.achievements.length?person.achievements:["Участник программы Impulse"]).map((item,index)=><div className="ir-proof-row" key={item}><span><Medal size={20}/></span><div><strong>{item}</strong><small>Заявлено в опубликованном рейтинге</small></div></div>)}<button type="button" className="ir-subtle-action" onClick={viewBenefits}>Награды программы <ArrowRight size={16}/></button></section>}
+        {(tab==="Обзор"||tab==="Проекты")&&<section className="ir-profile-panel"><h2><BriefcaseBusiness size={19}/> Завершённые проекты</h2><p className="ir-small-note">Подтверждённых проектов: {person.projects}. Детали проектов доступны только в портфолио с разрешением владельца.</p></section>}
+        {(tab==="Обзор"||tab==="Оценки")&&<section className="ir-profile-panel ir-evaluation"><h2><Star size={19}/> Оценки и вклад</h2><p className="ir-small-note">Оценки компетенций не выводятся из позиции в рейтинге. Требуется отдельная подтверждённая оценка.</p></section>}
+        {(tab==="Обзор"||tab==="Достижения"||tab==="Награды")&&<section className="ir-profile-panel"><h2><BadgeCheck size={19}/> Skill Passport и признание</h2><div className="ir-skill-passport"><FileBadge2 size={35}/><div><strong>Skill Passport</strong><span>Данные о результатах и достижениях</span><small>Награды проверяются отдельно от таблицы рейтинга</small></div></div><button type="button" className="ir-subtle-action" onClick={viewBenefits}>Условия признания <ArrowRight size={16}/></button></section>}
+      </div>}
       <button type="button" className="ir-back-button" onClick={backToList}><ArrowLeft size={18}/> Вернуться в рейтинг</button>
     </>}
     {selectedBenefit && <RewardDialog benefit={selectedBenefit} onClose={() => {setSelectedBenefit(null);}} />}
