@@ -8,7 +8,7 @@ import {
 import { apiRequest } from "../../api/client";
 import "./checkpoint-workspace.scss";
 
-export type CheckpointInfo = { key:string; title:string; status:string };
+export type CheckpointInfo = { key:string; title:string; status:string; description?:string; deliverable?:string; acceptance_criteria?:string[]; estimated_minutes?:number|null };
 export type SubmittedCheckpoint = {
   checkpoint_key:string; contribution_id:string; version:number; status:string;
 };
@@ -156,7 +156,7 @@ export function CheckpointWorkspace({
     event.preventDefault();setDragging(false);if(canSubmit)addFiles(event.dataTransfer.files);
   };
   const showUpload=assignmentStatus==="in_progress"&&!isDone&&!isInReview;
-  const expectations=criteria.length?criteria:[];
+  const expectations=checkpoint.acceptance_criteria?.length?checkpoint.acceptance_criteria:criteria;
 
   return <div className="mpc-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget&&!loading)onClose();}}>
     <section className="mpc-dialog" role="dialog" aria-modal="true" aria-labelledby="mpc-heading" data-testid="checkpoint-solution-popup">
@@ -173,12 +173,12 @@ export function CheckpointWorkspace({
           <section className="mpc-card mpc-brief">
             <div className="mpc-card-heading"><span className="mpc-icon"><ClipboardCheck size={19}/></span><h3>Что нужно сделать</h3></div>
             <p className="mpc-action-lead">{checkpoint.title}</p>
-            <p className="mpc-description">Это этап проекта. Заказчик проверяет итоговый результат по опубликованным критериям, поэтому перед сдачей опиши выполненную работу и приложи подтверждение.</p>
-            <div className="mpc-outcome"><strong>Результат проекта, на который работает этап</strong><span>{deliverable}</span></div>
+            <p className="mpc-description">{checkpoint.description?.trim()||"Заказчик указал название этапа, но не добавил отдельную инструкцию. Уточни детали у заказчика и подготовь результат, который можно проверить."}</p>
+            <div className="mpc-outcome"><strong>{checkpoint.deliverable?.trim()?"Что нужно сдать по этому этапу":"Общий ожидаемый результат проекта"}</strong><span>{checkpoint.deliverable?.trim()||deliverable}</span></div>
           </section>
           <section className="mpc-card">
             <div className="mpc-card-heading"><span className="mpc-icon"><CheckCircle2 size={19}/></span><h3>По каким критериям проверят</h3></div>
-            <small className="mpc-muted">Общие критерии приёмки проекта — не отдельная оценка чекпоинта</small>
+            <small className="mpc-muted">{checkpoint.acceptance_criteria?.length?"Критерии, опубликованные заказчиком для этого чекпоинта":"Общие критерии проекта — для этапа отдельные условия не опубликованы"}</small>
             {expectations.length?<ol className="mpc-criteria">{expectations.map((item,index)=><li key={index}><span>{index+1}</span>{item}</li>)}</ol>:
               <p className="mpc-muted">Отдельные критерии ещё не опубликованы. Уточни ожидаемый результат у заказчика перед отправкой.</p>}
           </section>
@@ -228,6 +228,7 @@ export function CheckpointWorkspace({
           </section>
           <section className="mpc-card mpc-facts"><div className="mpc-card-heading"><span className="mpc-icon"><FileCheck2 size={19}/></span><h3>Условия сдачи</h3></div>
             <div><CalendarDays size={15}/><span>Срок проекта</span><strong>{validDue?due.toLocaleDateString("ru-RU",{day:"numeric",month:"short",year:"numeric"}):"Уточняется"}</strong></div>
+            {checkpoint.estimated_minutes!=null&&<div><Info size={15}/><span>Оценка времени</span><strong>{Math.ceil(checkpoint.estimated_minutes/60)} ч.</strong></div>}
             <div><Paperclip size={15}/><span>Формат</span><strong>Файлы или ссылка</strong></div>
             <div><ShieldCheck size={15}/><span>Подтверждение</span><strong>После проверки заказчиком</strong></div>
             <p><ExternalLink size={13}/> Отправка не завершает этап автоматически</p>
