@@ -44,7 +44,7 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
   test("analytics canonical reference variants " + viewport.name, async ({ page }, testInfo) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     // A design screenshot is not a login test: start from a deterministic authenticated actor.
-    await page.goto("/workspace/9");
+    await page.goto("/workspace/9?analyticsTab=passport");
     const root = page.getByTestId("analytics-reference");
     await expect(root).toBeVisible();
     await expect(page.getByRole("heading", { name: "Ваш Skill Passport" })).toBeVisible();
