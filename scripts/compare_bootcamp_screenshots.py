@@ -15,7 +15,6 @@ Usage:
       --captures frontend/test-results/bootcamp-reference --output /tmp/bootcamp-diff
 """
 
-
 from __future__ import annotations
 
 import argparse
