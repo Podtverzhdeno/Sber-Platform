@@ -147,12 +147,12 @@ export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMemb
     {selectedStage&&<p role="status" className="mpd-stage-note">{checkpoints.find(item=>item.key===selectedStage)?.title}: {checkpoints.find(item=>item.key===selectedStage)?.status}. Подтверждение этапов выполняется по данным заказчика.</p>}
   </section>;
   const ContributionPanel = () => <section className="mpd-panel mpd-artifacts">
-    <div className="mpd-panel-head"><h2><Layers3/> Последние артефакты</h2><button type="button" onClick={current("artifacts")}>Все артефакты <ChevronRight size={15}/></button></div>
-    <div className="mpd-artifact-grid">{artifacts.length?artifacts.slice(0,3).map((item,i)=><article key={`${item.id}-${item.key}`}><span className="mpd-artifact-symbol">{i===0?<FileCode2 size={22}/>:i===1?<Code2 size={22}/>:<Database size={22}/>}</span><div><b>{item.key}</b><small>Версия {String(item.version)} · {item.status}</small></div><span className="mpd-artifact-state">В составе вклада</span></article>):<p className="mpd-empty">Артефактов пока нет. Отправьте первую версию результата.</p>}</div>
+    <div className="mpd-panel-head"><h2><Layers3/> {activeTab==="artifacts"?"Все артефакты":"Последние артефакты"}</h2>{activeTab!=="artifacts"&&<button type="button" onClick={current("artifacts")}>Все артефакты <ChevronRight size={15}/></button>}</div>
+    <div className="mpd-artifact-grid">{artifacts.length?(activeTab==="artifacts"?artifacts:artifacts.slice(0,3)).map((item,i)=><article key={`${item.id}-${item.key}`}><span className="mpd-artifact-symbol">{i===0?<FileCode2 size={22}/>:i===1?<Code2 size={22}/>:<Database size={22}/>}</span><div><b>{item.key}</b><small>Версия {String(item.version)} · {item.status}</small></div><span className="mpd-artifact-state">В составе вклада</span></article>):<p className="mpd-empty">Артефактов пока нет. Отправьте первую версию результата.</p>}</div>
   </section>;
   const TeamPanel = () => <section className="mpd-panel mpd-team">
-    <div className="mpd-panel-head"><h2><Users/> Команда</h2><button type="button" onClick={current("team")}>Участники <ChevronRight size={15}/></button></div>
-    {project.team.length?project.team.slice(0,2).map(member=><button type="button" key={member.person_id} onClick={()=>{onOpenMember(member.person_id);}} className="mpd-team-person"><span>{member.display_name.trim().slice(0,1).toUpperCase()}</span><div><b>{member.display_name}</b><small>{member.status}</small></div><ChevronRight size={17}/></button>):<p className="mpd-empty">Состав команды уточняется.</p>}
+    <div className="mpd-panel-head"><h2><Users/> Команда</h2>{activeTab!=="team"&&<button type="button" onClick={current("team")}>Все участники <ChevronRight size={15}/></button>}</div>
+    {project.team.length?(activeTab==="team"?project.team:project.team.slice(0,2)).map(member=><button type="button" key={member.person_id} onClick={()=>{onOpenMember(member.person_id);}} className="mpd-team-person"><span>{member.display_name.trim().slice(0,1).toUpperCase()}</span><div><b>{member.display_name}</b><small>{member.status}</small></div><ChevronRight size={17}/></button>):<p className="mpd-empty">Состав команды уточняется.</p>}
   </section>;
   return <div className="mpd-page" data-project-screen="dashboard">
     <div className="mpd-hero">
