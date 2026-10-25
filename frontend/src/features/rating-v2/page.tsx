@@ -36,7 +36,7 @@ type PublishedEntry = {
 
 /** The ranking has no synthetic fallback. Never infer activity or skill evidence. */
 function toPerson(entry: PublishedEntry): Person {
-  const words = entry.display_name.split(/\\s+/).filter(Boolean);
+  const words = entry.display_name.split(/\s+/).filter(Boolean);
   return {
     personId: entry.anonymized ? null : entry.person_id,
     place: entry.place,
