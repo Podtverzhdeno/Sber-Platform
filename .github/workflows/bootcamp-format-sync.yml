@@ -1,0 +1,37 @@
+name: Bootcamp Format Sync
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/bootcamp-format-sync.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: true
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Format only the Impulse backend files
+        run: |
+          uv run ruff check --fix src/impulse/bootcamp/editorial_learning.py migrations/versions/20261025_0029_impulse_course_progress.py migrations/versions/20261025_0030_impulse_practical_submissions.py migrations/versions/20261025_0031_impulse_practice_review.py tests/bootcamp/test_impulse_study.py
+          uv run ruff format src/impulse/bootcamp/editorial_learning.py migrations/versions/20261025_0029_impulse_course_progress.py migrations/versions/20261025_0030_impulse_practical_submissions.py migrations/versions/20261025_0031_impulse_practice_review.py tests/bootcamp/test_impulse_study.py
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/impulse/bootcamp/editorial_learning.py migrations/versions/20261025_0029_impulse_course_progress.py migrations/versions/20261025_0030_impulse_practical_submissions.py migrations/versions/20261025_0031_impulse_practice_review.py tests/bootcamp/test_impulse_study.py
+          if git diff --cached --quiet; then
+            echo "Files are already formatted"
+          else
+            git commit -m "style(bootcamp): apply Ruff formatting to Impulse progress and practice"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
