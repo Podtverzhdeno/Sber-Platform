@@ -138,6 +138,7 @@ export function TopbarEngagementIndicator({ personId = "participant" }: { person
     const storageKey = `${ANIMATION_STORAGE_KEY}:${personId}`;
     const identityChanged = lastPersonId.current !== personId;
     lastPersonId.current = personId;
+    if (identityChanged) setCelebration(null);
     try {
       const previousRaw = window.localStorage.getItem(storageKey) ??
         (personId === "participant" ? window.localStorage.getItem(ANIMATION_STORAGE_KEY) : null);
