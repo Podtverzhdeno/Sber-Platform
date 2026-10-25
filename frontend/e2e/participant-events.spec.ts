@@ -39,7 +39,7 @@ test("events reference: all six detail states, registration flow and keyboard na
   await expect(page.getByTestId("events-v2")).toBeVisible();
   await page.setViewportSize({ width: 1586, height: 1081 });
   await page.screenshot({ path: "test-results/event-reference/catalog.png", animations: "disabled", fullPage: false });
-  await page.setViewportSize({ width: 1667, height: 939 });
+  await page.setViewportSize({ width: 1703, height: 924 });
   await expect(page.getByText("События, которые подходят")).toBeVisible();
   await page.getByRole("button", { name: "Подробнее" }).click();
   const dialog = page.getByRole("dialog", { name: "AI Journey 2026" });
@@ -50,6 +50,7 @@ test("events reference: all six detail states, registration flow and keyboard na
   const viewport = page.viewportSize();
   if (!viewport) throw new Error("Missing browser viewport");
   expect(Math.abs(bounds.x + bounds.width / 2 - viewport.width / 2)).toBeLessThan(4);
+  await page.setViewportSize({ width: 1667, height: 939 });
   const nav = dialog.getByRole("navigation", { name: "Разделы события" });
   await nav.getByRole("button", { name: "Программа" }).click();
   await expect(dialog.getByText("Программа мероприятия")).toBeVisible();
