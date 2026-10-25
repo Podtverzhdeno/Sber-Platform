@@ -60,6 +60,10 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
       "Представлен проверяемый артефакт",
     ],
     estimated_hours: 8,
+    resources: [
+      { title: "C4 Model — официальное руководство", url: "https://c4model.com/diagrams" },
+      { title: "NIST AI Risk Management Framework", url: "https://www.nist.gov/itl/ai-risk-management-framework" },
+    ],
   }));
   const roadmapCatalog = roles.map((role) => ({
     track_key: role.track_key, policy_version: 1, replacement_reason: null,
@@ -115,6 +119,10 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await expect(page.getByTestId("trajectory-stage-activities").locator("li")).toHaveCount(3);
   const teaching = page.getByTestId("trajectory-learning-material");
   await expect(teaching).toHaveCount(1);
+  const source = teaching.getByRole("link", { name: /C4 Model/ });
+  await expect(source).toHaveAttribute("href", "https://c4model.com/diagrams");
+  await expect(source).toHaveAttribute("rel", "noopener noreferrer");
+  await expect(source).toHaveAttribute("target", "_blank");
   await teaching.locator("summary").click();
   await expect(teaching.getByText("Границы доверия AI-сервиса")).toBeVisible();
   await expect(teaching.getByText(/Подготовить рабочий архитектурный прототип/)).toBeVisible();
