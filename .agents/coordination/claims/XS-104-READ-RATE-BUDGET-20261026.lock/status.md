@@ -1,0 +1,19 @@
+# Claim XS-104-READ-RATE-BUDGET-20261026
+- session_id: gpt6-20261026-xs-read-rate-budget
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: eaf4e333743ca5b31ba8c630a95d939abbfd1f82
+- depends_on: []
+- write_scope:
+  - src/impulse/api/security.py (rate category split only)
+  - tests/test_security_read_budget.py
+  - .github/workflows/read-rate-budget-qa.yml
+  - .agents/coordination/claims/XS-104-READ-RATE-BUDGET-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - Ruff check/format
+  - pytest categories, burst and reset tests
+  - real PostgreSQL browser E2E in XS-304 owner
+- progress: Fix overbroad rate limiter: generic GETs use search bucket, saturating on cross-screen navigation and causing Buddy 429. Preserve strict auth/search/agents/writes while assigning separate bounded read budget.
+- blockers: Independent review and complete security risk audit required before DONE.
