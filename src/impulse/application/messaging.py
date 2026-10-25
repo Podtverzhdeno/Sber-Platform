@@ -667,7 +667,11 @@ class MessagingService:
         self._assert_sender_enabled(channel, membership)
         unique = tuple(dict.fromkeys(person_ids))
         if not unique or len(unique) > 24 or actor_context.person_id in unique:
-            raise ApiError("MESSAGE_INVITE_INVALID", "Выберите от 1 до 24 других пользователей.", 422)
+            raise ApiError(
+                "MESSAGE_INVITE_INVALID",
+                "Выберите от 1 до 24 других пользователей.",
+                422,
+            )
         for person_id in unique:
             if await self.store.membership(channel_id, person_id) is None:
                 await self.store.upsert_membership(
