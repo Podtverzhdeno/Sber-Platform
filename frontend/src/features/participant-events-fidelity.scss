@@ -7,7 +7,13 @@
   color:#eef7ff; min-width:0; gap:0; margin-top:-27px;
   .ev-hero {
     min-height:216px;height:216px;padding:18px 8px;border-radius:0;border:0;
-    background-color:#031421;\n    background-image:linear-gradient(90deg,#031421 0%,#041e2ef2 34%,#041e2e9c 55%,#03142112 79%),url("/events/cyberpunk-hero.png");\n    background-repeat:no-repeat,no-repeat;\n    background-position:center,right center;\n    background-size:100% 100%,auto 100%;
+    background-color:#031421;
+    background-image:
+      linear-gradient(90deg,#031421 0%,#041e2ef2 34%,#041e2e9c 55%,#03142112 79%),
+      url("/events/cyberpunk-hero.png");
+    background-repeat:no-repeat,no-repeat;
+    background-position:center,right center;
+    background-size:100% 100%,auto 100%;
     isolation:isolate;overflow:hidden;
   }
   .ev-hero::before {content:none}
