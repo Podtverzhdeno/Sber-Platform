@@ -98,6 +98,17 @@ function ProjectInfoModal({ project, close }: { project: DashboardProject; close
             </dl>
           </section>
         </div>
+        {project.checkpoints.length>0&&<section className="mpd-info-checkpoints">
+          <div className="mpd-info-checkpoints__heading"><h3><ListTodo size={18}/> План выполнения</h3><small>Контрольные точки заказчика</small></div>
+          <ol>{project.checkpoints.map((item,index)=><li key={item.key}>
+            <span className={passed.has(item.status)?"is-done":""}>{passed.has(item.status)?<Check size={15}/>:String(index+1)}</span>
+            <div><strong>{item.title}</strong><small>{passed.has(item.status)?"Завершён":item.status==="in_progress"?"В работе":"Ожидает выполнения"}</small></div>
+          </li>)}</ol>
+        </section>}
+        {project.feedback.length>0&&<section className="mpd-info-feedback">
+          <h3><MessageCircle size={18}/> Обратная связь по результатам</h3>
+          {project.feedback.map((item,index)=><div key={`${item.contribution_id}-${String(index)}`}><strong>{item.status}</strong><p>{item.explanation}</p></div>)}
+        </section>}
         <section className="mpd-info-bottom"><h3><Code2 size={18}/> Требуемые навыки и форматы</h3>
           <div className="mpd-tags">{project.competencyTags.length?project.competencyTags.map(skill=><span key={skill}>{skill}</span>):<span>Навыки уточняются</span>}</div>
           <p><strong>Подтверждение результата:</strong> {project.allowedArtifacts.length?project.allowedArtifacts.join(", "):"формат доказательств уточняется"}</p>
