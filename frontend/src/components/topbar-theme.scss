@@ -19,3 +19,22 @@
 .topbar .top-persona > span:last-child {
   min-width: 0;
 }
+
+
+/* Comfortable icon scale and an accessible identity shortcut. */
+.topbar .notification-button > svg { width:19px;height:19px; }
+.topbar .ranking-utility > span { font-size:16px; }
+.topbar .streak-button-fire { font-size:20px; }
+.topbar .streak-utility .streak-button { height:40px;min-width:88px;gap:7px;padding:0 11px;font-size:16px; }
+.topbar .streak-utility .streak-button strong { font-size:17px; }
+.topbar .streak-utility .streak-button > svg { width:15px;height:15px; }
+.topbar .top-persona-link {
+  appearance:none;border-top:0;border-right:0;border-bottom:0;
+  background:transparent;text-align:left;color:inherit;font:inherit;
+  cursor:pointer;border-radius:0 9px 9px 0;padding:3px 7px 3px 14px;
+  transition:background-color .18s ease;
+}
+.topbar .top-persona-link:hover:not(:disabled) { background:#16314785; }
+.topbar .top-persona-link:focus-visible { outline:2px solid #55e5d7;outline-offset:3px; }
+.topbar .top-persona-link:disabled { cursor:default; }
+.topbar .top-persona-link .mini-avatar { width:34px;height:34px;flex-basis:34px; }
