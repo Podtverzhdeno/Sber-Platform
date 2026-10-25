@@ -5,7 +5,7 @@ import {
   ArrowLeft, ArrowRight, Award, Bookmark, BriefcaseBusiness, CalendarDays,
   Check, CheckCircle2, ChevronDown, Code2, Crown, FileText,
   FolderKanban, Gift, Info, Layers3, LayoutGrid, List,
-  Clock3, MessageCircle, MoreHorizontal, Search, Share2, SlidersHorizontal, Star, Users,
+  MessageCircle, Search, Share2, SlidersHorizontal, Star, Users,
 } from "lucide-react";
 import { apiRequest } from "../../api/client";
 import { StatePanel } from "../../components/ui";
