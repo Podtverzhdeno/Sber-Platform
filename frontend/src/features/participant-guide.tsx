@@ -315,7 +315,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
     </div>}
     {view === "library" && <ParticipantHelpCenter key={selectedHelpTopic ?? section} section={section} initialTopicId={selectedHelpTopic} onClose={close}
       onOpenTour={() => { setView("walkthrough"); setStepIndex(0); setContext(pickContext()); }}
-      onNavigateSection={(name) => { const target = navigation.indexOf(name); if (target >= 0) onNavigate(target); }} />}
+      availableSections={navigation} onNavigateSection={(name) => { const target = navigation.indexOf(name); if (target >= 0) onNavigate(target); }} />}
     <button type="button" className="participant-guide-trigger" aria-expanded={view !== "closed"}
       aria-controls={showTip ? "participant-guide-panel" : undefined}
       aria-label={view === "closed" ? "Как здесь всё устроено?" : "Скрыть помощь"}
