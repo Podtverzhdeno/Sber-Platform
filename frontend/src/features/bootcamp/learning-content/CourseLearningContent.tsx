@@ -6,6 +6,7 @@ import { blueprintFor } from "./course-blueprints";
 import { knowledgeCheckFor } from "./knowledge-checks";
 import { ManualCompanionCard } from "./ManualCompanionCard";
 import { LessonFrame } from "./LessonFrame";
+import { StarterCaseCard } from "./StarterCaseCard";
 import "./learning-content.scss";
 
 type Props = {
@@ -187,6 +188,7 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
             <LessonFrame key={unit.id + "-practice"} unitId={unit.id} kind="practice">{() => <div>
               <h5>Что нужно сделать</h5>
               <p>{unit.practice}</p>
+              <StarterCaseCard courseKey={courseKey} unitTitle={unit.title}/>
               <p className="bc-learning__review-note">Сначала сохраните собственный результат и проверьте хотя бы один негативный случай. Эталонные ожидания находятся только в раскрываемой самопроверке.</p>
             </div>}</LessonFrame>
             <LessonFrame key={unit.id + "-check"} unitId={unit.id} kind="check">{() => <>
