@@ -11,3 +11,6 @@ release_request=2026-10-25-bootcamp-atomic-review-0e2068d
 
 # Pixel-oriented Bootcamp final: measured geometry, role fold, 3 overlay panels
 release_request=2026-10-25-bootcamp-reference-0477de18
+
+# Bootcamp: truthful grade requirements and repeatable 5-state/6-viewport capture
+release_request=2026-10-25-bootcamp-capture-419d6885
