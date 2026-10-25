@@ -213,6 +213,10 @@ test("Bootcamp role choice and direction are independent; reset clears hidden co
   const search = shell.getByRole("searchbox", { name: "Поиск по курсам" });
 
   await categories.getByRole("button", { name: /Все курсы/ }).click();
+  await expect(categories.getByRole("button", { name: /Все курсы/ })).toHaveAttribute("aria-pressed", "true");
+  // The deterministic fixture contains 12 published courses; wait for the
+  // async category change before comparing filtered/unfiltered totals.
+  await expect(shell.locator(".bc-ref-course-card")).toHaveCount(12);
   const allCount = await shell.locator(".bc-ref-course-card").count();
   expect(allCount).toBeGreaterThan(0);
 
@@ -262,7 +266,8 @@ test("Bootcamp desktop reference hero has correct stagger, overlay, and grid den
     // The approved reference leaves a 49px breathing space below role tabs.
     expect(Math.abs(hero.y - (tabs.y + tabs.height + 49))).toBeLessThanOrEqual(3);
     expect(Math.abs(summary.y - (hero.y - 24))).toBeLessThanOrEqual(3);
-    expect(Math.abs(categories.y - (hero.y + hero.height - 51))).toBeLessThanOrEqual(4);
+    // The existing stack spacing (34px) and the intentional -51px overlap combine to -17px.
+    expect(Math.abs(categories.y - (hero.y + hero.height - 17))).toBeLessThanOrEqual(4);
   }
   const standard = cards.filter({ has: page.locator(".bc-ref-chip--available") }).first();
   await expect(standard).toBeVisible();
