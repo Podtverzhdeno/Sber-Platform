@@ -5,3 +5,6 @@
 # This file is watched by Railway to trigger a new build.
 # No database reset or schema mutation is requested by this marker.
 triggered_on=2026-10-25
+
+# Requested production verification of latest main; keep existing database and previous rollback image.
+release_request=2026-10-25-main-integration-9bc9a00d7aed
