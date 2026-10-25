@@ -139,6 +139,12 @@ test.describe("task catalog interactive controls and motion", () => {
   });
 
   test("compact list actions are accessible without activating the underlying row", async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: { writeText: async () => Promise.resolve() },
+      });
+    });
     await openCatalog(page);
     await page.getByRole("button", { name: "Список" }).click();
     const first = page.locator(".catalog-v2-table-row").first();
