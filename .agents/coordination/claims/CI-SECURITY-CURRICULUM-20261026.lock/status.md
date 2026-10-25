@@ -1,0 +1,18 @@
+# Claim CI-SECURITY-CURRICULUM-20261026
+- session_id: gpt6-20261026-curriculum-security-lint
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 27afaa3a4b9786d1fcc91f1bb34fc8116f08e863
+- depends_on: []
+- write_scope:
+  - frontend/scripts/check-built-security.mjs
+  - frontend/tsconfig.node.json
+  - .github/workflows/frontend-security-references-qa.yml
+  - .agents/coordination/claims/CI-SECURITY-CURRICULUM-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - Build production bundle and run unmodified strict scanner other than explicit URL approvals
+  - Ensure ESLint parser treats production Playwright config as first-class TS source
+- progress: General CI rejects nine specific course source references and a config outside the TS eslint project; retain strict exact URL allowlist, no wildcard or skipping.
+- blockers: Other actively edited files with baseline Ruff and ESLint errors remain outside this claim.
