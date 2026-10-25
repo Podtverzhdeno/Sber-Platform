@@ -1976,3 +1976,19 @@
   border-radius:14px;background:#12435a;padding:4px 8px;color:#26dace;font-size:10px;
 }
 .workspace-content .trajectory-v2-learning-content>small {font-size:10px;color:#88a9bd}
+
+
+/* Curated first-party/official documentation: readable and keyboard accessible. */
+.workspace-content .trajectory-v2-reading-resources ul {
+  display:grid;gap:7px;margin:0;padding-left:18px;
+}
+.workspace-content .trajectory-v2-reading-resources a {
+  color:#69e8f2;text-decoration:underline;text-decoration-thickness:1px;
+  text-underline-offset:3px;overflow-wrap:anywhere;font-size:11px;
+}
+.workspace-content .trajectory-v2-reading-resources a:hover {
+  color:#e2ffff;text-decoration-thickness:2px;
+}
+.workspace-content .trajectory-v2-reading-resources a:focus-visible {
+  outline:2px solid #72ecfb;outline-offset:3px;border-radius:3px;
+}
