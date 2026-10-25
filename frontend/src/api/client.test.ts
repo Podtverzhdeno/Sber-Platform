@@ -21,6 +21,40 @@ describe("typed API client policy", () => {
     expect(createQueryClient().getDefaultOptions().mutations?.retry).toBe(false);
   });
 
+  it("recovers a stale CSRF header from the current cookie session and retries the protected write exactly once", async () => {
+    sessionStorage.setItem("impulse_csrf", "stale");
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify({code:"CSRF_INVALID",message:"Проверка запроса не пройдена."}),{status:403}))
+      .mockResolvedValueOnce(new Response(JSON.stringify({csrf_token:"new-session-token"}),{status:200}))
+      .mockResolvedValueOnce(new Response(JSON.stringify({id:"sent"}),{status:200}));
+    await expect(apiRequest<{id:string}>("/api/v1/me/messaging/channels/test-id/messages",{
+      method:"POST",headers:{"X-CSRF-Token":"stale"},body:JSON.stringify({body:"Привет"}),
+    })).resolves.toEqual({id:"sent"});
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[1]?.[0]).toBe("/api/v1/me");
+    expect(new Headers(fetchMock.mock.calls[2]?.[1]?.headers).get("X-CSRF-Token")).toBe("new-session-token");
+    expect(sessionStorage.getItem("impulse_csrf")).toBe("new-session-token");
+  });
+
+  it("never retries unrelated 403 authorization failures or weakens forbidden actions", async () => {
+    const fetchMock=vi.spyOn(globalThis,"fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify({code:"MESSAGING_READ_ONLY",message:"Доступ запрещён"}),{status:403}));
+    await expect(apiRequest("/api/v1/me/messaging/channels/test-id/messages",{
+      method:"POST",headers:{"X-CSRF-Token":"current"},body:"{}",
+    })).rejects.toMatchObject({status:403,code:"MESSAGING_READ_ONLY"});
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not replay a rejected write when session recovery returns no usable CSRF", async () => {
+    const fetchMock=vi.spyOn(globalThis,"fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify({code:"CSRF_INVALID"}),{status:403}))
+      .mockResolvedValueOnce(new Response(null,{status:401}));
+    await expect(apiRequest("/api/v1/me/messaging/channels/test-id/messages",{
+      method:"POST",headers:{"X-CSRF-Token":"stale"},body:"{}",
+    })).rejects.toMatchObject({status:403,code:"CSRF_INVALID"});
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("maps the stable backend error envelope", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(new Response(JSON.stringify({ code: "TEMPORARY", message: "Позже", retryable: true }), { status: 503 }));
     await expect(apiRequest("/api/v1/me")).rejects.toMatchObject({ status: 503, code: "TEMPORARY", retryable: true });
