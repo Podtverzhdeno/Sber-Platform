@@ -208,3 +208,28 @@
   color: #fff;
   background: transparent;
 }
+
+
+/* Match the reference prototype's interactive emphasis without layout shifts. */
+.bc-approved .bootcamp-course-card,
+.bc-approved .course-row {
+  transition: border-color .18s ease, box-shadow .22s ease, background-color .18s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .bc-approved .bootcamp-course-card:is(:hover, :focus-within) {
+    border-color: #00c9d7;
+    box-shadow: 0 0 0 1px #00f9e31b, 0 10px 30px #0004;
+  }
+  .bc-approved .bootcamp-course-card[data-access="prerequisite_not_met"]:hover {
+    border-color: #256182;
+    box-shadow: 0 0 22px #37bdca13;
+  }
+  .bc-approved .course-row:is(:hover, :focus-within) {
+    border-color: #00dadb;
+    box-shadow: 0 0 14px #00f3e31c;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bc-approved .bootcamp-course-card,
+  .bc-approved .course-row { transition: none; }
+}
