@@ -111,7 +111,7 @@ export function MessagingWorkspace({
     queryKey: ["messaging-channels"],
     queryFn: () => apiRequest<ChannelView[]>("/api/v1/me/messaging/channels"),
   });
-  const channels = useMemo(() => channelsQuery.data ?? [], [channelsQuery.data]);
+  const channels = useMemo(() => Array.isArray(channelsQuery.data) ? channelsQuery.data : [], [channelsQuery.data]);
   const contactsQuery = useQuery({
     queryKey: ["messaging-contacts"],
     queryFn: () => apiRequest<Array<{id:string;display_name:string;role:string}>>("/api/v1/me/messaging/contacts"),
