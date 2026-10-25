@@ -59,7 +59,7 @@ function ProjectInfoModal({ project, close }: { project: DashboardProject; close
       if (focusable.length === 0) return;
       const first = focusable[0], last = focusable[focusable.length-1];
       if (!first || !last) return;
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === heading.current)) { event.preventDefault(); last.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
     document.addEventListener("keydown", keyHandler);

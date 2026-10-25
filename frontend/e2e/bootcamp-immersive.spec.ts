@@ -25,7 +25,20 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
       .not.toBe("none");
 
     await reader.getByRole("button", { name: "Почему рекомендован" }).click();
-    await expect(page.getByRole("dialog", { name: "Почему рекомендован" })).toBeVisible();
+    const whyDialog = page.getByRole("dialog", { name: "Почему рекомендован" });
+    await expect(whyDialog).toBeVisible();
+    await expect(whyDialog.locator(".bc-ref-why-item")).toHaveCount(4);
+    if (viewport.width >= 1280) {
+      const bounds = await whyDialog.boundingBox();
+      expect(bounds).not.toBeNull();
+      if (bounds) {
+        expect(bounds.width).toBeGreaterThanOrEqual(840);
+        expect(bounds.width).toBeLessThanOrEqual(900);
+        expect(bounds.height).toBeGreaterThanOrEqual(570);
+        expect(bounds.height).toBeLessThanOrEqual(820);
+        expect(Math.abs((bounds.y + bounds.height / 2) - (viewport.height / 2))).toBeLessThan(35);
+      }
+    }
     await page.screenshot({ path: "test-results/imp-02-recommendation-" + String(viewport.width) + ".png", animations: "disabled" });
     await page.getByRole("dialog", { name: "Почему рекомендован" })
       .getByRole("button", { name: /Открыть курс|Вернуться/ }).click();

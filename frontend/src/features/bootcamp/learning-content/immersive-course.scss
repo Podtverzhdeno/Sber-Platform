@@ -743,3 +743,85 @@
   }
   .imp-study__course-emblem { width: 42px; height: 42px; }
 }
+
+
+/* 05 - recommendation overlay, reference: centered 868x630 at 1672x941. */
+.bc-reference .overlay:has(.bc-ref-why-panel) .overlay-panel--drawer {
+  position: relative; width: min(868px, 100%); max-width: 868px;
+  max-height: calc(100dvh - 28px); padding: 0;
+}
+.bc-reference .overlay:has(.bc-ref-why-panel) .overlay-panel--drawer > header {
+  position: absolute; inset: 15px 15px auto auto; z-index: 3;
+  width: 42px; height: 42px; min-height: 42px; padding: 0;
+  background: transparent; display: flex; justify-content: center;
+  border: none;
+}
+.bc-reference .overlay:has(.bc-ref-why-panel) .overlay-panel--drawer > header button {
+  display: grid; place-items: center; width: 40px; height: 40px;
+  background: #103c53; border: 1px solid #2a708b; border-radius: 10px;
+  color: #f2ffff;
+  transition: background .18s ease, transform .18s ease;
+}
+.bc-reference .overlay:has(.bc-ref-why-panel) .overlay-panel--drawer > header button:hover {
+  transform: rotate(90deg); background: #1a5265;
+}
+.bc-reference .bc-ref-why-panel {
+  display: grid; grid-template-columns: repeat(2,minmax(0,1fr));
+  gap: 12px; padding: 28px 29px 25px;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-hero {
+  grid-column: 1 / -1; margin: 0 52px 5px 0; padding: 0;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-hero h2 {
+  font-size: 27px !important; font-weight: 800; line-height: 1.2; margin: 0 0 10px;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-hero p {
+  font-size: 14px; line-height: 1.45; margin: 0;
+}
+.bc-reference .bc-ref-why-role-banner {
+  grid-column: 1 / -1; display: flex; align-items: center; gap: 15px;
+  min-height: 76px; margin: 1px 0 5px; padding: 14px 17px;
+  background: linear-gradient(95deg,#064c5a,#073546);
+  border-color: #05cfdf; border-radius: 12px;
+}
+.bc-reference .bc-ref-why-role-banner .bc-ref-why-banner-symbol {
+  flex: 0 0 44px; width: 44px; height: 44px; padding: 0;
+  display: grid; place-items: center; border: 1px solid #03bacd;
+  border-radius: 9px; background: #075771; color: #16f7ee;
+}
+.bc-reference .bc-ref-why-role-banner .bc-ref-why-banner-symbol svg { width: 21px; height: 21px; }
+.bc-reference .bc-ref-why-role-banner > div { flex: 1; }
+.bc-reference .bc-ref-why-role-banner > div strong { font-size: 16px; }
+.bc-reference .bc-ref-why-role-banner > div span { font-size: 12px; }
+.bc-reference .bc-ref-why-role-banner > span:last-child {
+  display: grid; text-align: right; gap: 1px;
+  color: #22f2e5;
+}
+.bc-reference .bc-ref-why-role-banner > span:last-child strong { font-size: 19px; }
+.bc-reference .bc-ref-why-role-banner > span:last-child small { color: #9dcddd; font-size: 11px; }
+.bc-reference .bc-ref-why-panel .bc-ref-why-item {
+  min-height: 123px; display: flex; gap: 12px; padding: 18px 15px;
+  border: 1px solid #256581; border-radius: 11px; background: #0b2e47;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-item h3 {
+  font-size: 15px !important; margin: 0 0 7px;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-item p { font-size: 13px; line-height: 1.5; }
+.bc-reference .bc-ref-why-panel .bc-ref-why-symbol {
+  flex: 0 0 40px; width: 40px; height: 40px;
+  background: #095068; color: #00eeee; border: 1px solid #087d91;
+  border-radius: 10px; display: grid; place-items: center;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-warning {
+  grid-column: 1 / -1; margin: 3px 0 0;
+  padding: 12px 0 0; border: 0; border-top: 1px solid #295672;
+  border-radius: 0; background: transparent;
+  color: #9dbbd3; font-size: 12px;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-actions { margin-top: 3px; }
+@media (max-width: 650px) {
+  .bc-reference .bc-ref-why-panel { grid-template-columns: minmax(0,1fr); padding: 24px 15px 19px; }
+  .bc-reference .bc-ref-why-panel .bc-ref-why-item { min-height: 0; }
+  .bc-reference .bc-ref-why-panel .bc-ref-why-hero h2 { font-size: 21px !important; }
+  .bc-reference .bc-ref-why-role-banner { gap: 10px; }
+}
