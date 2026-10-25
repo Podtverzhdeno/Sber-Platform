@@ -26,7 +26,25 @@ concurrency:
 jobs:
   joined-evidence-contract:
     runs-on: ubuntu-24.04
-    timeout-minutes: 16
+    timeout-minutes: 22
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-journey-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-journey-ci@127.0.0.1:5432/impulse
+      TEST_DATABASE_URL: postgresql+asyncpg://impulse:impulse-journey-ci@127.0.0.1:5432/impulse
+      APP_ENV: test
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
@@ -39,5 +57,7 @@ jobs:
         run: uv run ruff format --check src/impulse/api/v1/journey.py src/impulse/api/v1/__init__.py tests/test_journey_projection.py
       - name: Check lint
         run: uv run ruff check src/impulse/api/v1/journey.py src/impulse/api/v1/__init__.py tests/test_journey_projection.py
-      - name: Verify self-study, role, projects and rating projections
+      - name: Apply migrations to isolated PostgreSQL
+        run: uv run alembic upgrade head
+      - name: Verify self-study, persisted reads and authorization
         run: uv run pytest tests/test_journey_projection.py -q
