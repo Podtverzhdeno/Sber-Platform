@@ -81,7 +81,7 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await expect(page.getByTestId("achievement-detail")).toHaveCount(0);
   await expect(page).not.toHaveURL(/achievement=/);
 
-  await screen.getByRole("button", { name: /Добавить достижение/ }).click();
+  await screen.getByTestId("achievements-empty").getByRole("button", { name: /Добавить достижение/ }).click();
   await expect(page.getByTestId("achievements-add-dialog")).toBeVisible();
   await page.getByTestId("achievements-add-dialog").getByRole("button", { name: /Событие/ }).click();
   await page.getByTestId("achievements-add-dialog").getByRole("button", { name: /Продолжить/ }).click();
