@@ -44,9 +44,9 @@ test("finishing a saved required Impulse course refreshes the role's learning st
   await expect(celebration).not.toContainText("ГРЕЙД ПОВЫШЕН");
   await celebration.getByRole("button",{name:"Начать следующий этап"}).click();
   await expect(celebration).toHaveCount(0);
-  const drawer=page.getByRole("dialog",{name:"Требования к обучению"});
-  await expect(drawer.getByText(/Обязательное обучение завершено/)).toBeVisible();
-  await expect(drawer.getByText(/Следующий этап развития/)).toBeVisible();
+  await expect(page).toHaveURL(/\/workspace\/1\?role=product/);
+  await expect(page.locator(".trajectory-v2")).toBeVisible();
+  await expect(page.getByTestId("trajectory-role-detail")).toHaveAttribute("data-role-key","product");
   await page.screenshot({path:"test-results/bootcamp-role-after-course.png",animations:"disabled"});
 });
 
@@ -142,5 +142,6 @@ test("official grade promotion animation requires an actual change in the server
   await page.screenshot({path:"test-results/bootcamp-official-grade-promotion.png",animations:"disabled"});
   await animation.getByRole("button",{name:"К новым требованиям"}).click();
   await expect(animation).toHaveCount(0);
-  await expect(page.getByRole("dialog",{name:"Требования к обучению"})).toBeVisible();
+  await expect(page).toHaveURL(/\/workspace\/1\?role=product/);
+  await expect(page.getByTestId("trajectory-role-detail")).toHaveAttribute("data-role-key","product");
 });
