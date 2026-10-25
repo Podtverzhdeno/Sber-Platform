@@ -152,8 +152,11 @@ export function ProjectReferenceTeam({team,customer,mentor,onMessage,onContribut
    </div>
  </div>;
 }
-type RewardsProps={onContribution:()=>void;onWorkspace:()=>void;selected:string|null;onSelected:(id:string)=>void;};
-export function ProjectReferenceRewards({onContribution,onWorkspace,selected,onSelected}:RewardsProps) {
+type RewardsProps={
+  onContribution:()=>void;onWorkspace:()=>void;selected:string|null;onSelected:(id:string)=>void;
+  acceptedContributions:number;mentorAssigned:boolean;activeMembers:number;
+};
+export function ProjectReferenceRewards({onContribution,onWorkspace,selected,onSelected,acceptedContributions,mentorAssigned,activeMembers}:RewardsProps) {
   const items=[
     {id:"portfolio",title:"Результат в портфолио",desc:"Подтверждённый результат может стать частью портфолио",when:"После приёмки",icon:FileText},
     {id:"assessment",title:"Развитие компетенций",desc:"Практические навыки подтверждаются после проверки результата",when:"По итогам проверки",icon:Award},
@@ -162,10 +165,42 @@ export function ProjectReferenceRewards({onContribution,onWorkspace,selected,onS
     {id:"team",title:"Командная практика",desc:"Совместная работа, обсуждение и демонстрация решений",when:"При участии в команде",icon:MessageCircle},
     {id:"community",title:"Рекомендации и возможности",desc:"Возможны дополнительные предложения по результатам отбора",when:"По решению заказчика",icon:Star},
   ];
+  const explanations:Record<string,{requirements:string;state:string}> = {
+    portfolio:{
+      requirements:"Подготовь личный результат, передай ссылку или артефакт и дождись решения заказчика. Только принятый результат можно использовать как подтверждённый кейс.",
+      state:acceptedContributions>0?`Принятых результатов: ${String(acceptedContributions)}`:"Пока нет подтверждённых результатов",
+    },
+    assessment:{
+      requirements:"Покажи конкретные навыки в выполненной задаче и приложи проверяемые доказательства. Уровень компетенций определяется оценкой, а не фактом отправки.",
+      state:acceptedContributions>0?"Есть принятые результаты для оценки":"Ожидается проверенный вклад",
+    },
+    mentor:{
+      requirements:"Задавай вопросы по постановке, разбирай замечания и согласуй решения с назначенным наставником. Если наставник отсутствует, обратись к заказчику.",
+      state:mentorAssigned?"Ментор назначен":"Ментор пока не назначен",
+    },
+    case:{
+      requirements:"Сохрани исходную задачу, ход решения, измеримые результаты и итоговую приёмку — так кейс будет воспроизводимым и понятным.",
+      state:acceptedContributions>0?"Есть подтверждённая основа кейса":"Кейс требует принятого результата",
+    },
+    team:{
+      requirements:"Фиксируй свою роль, договорённости и совместные результаты. Командный опыт подтверждается фактическим участием, не приглашением.",
+      state:activeMembers>1?`В команде ${String(activeMembers)} участников`:"Данные о совместной работе пока не подтверждены",
+    },
+    community:{
+      requirements:"Заказчик рассматривает результаты и условия конкретной программы. Выполнение проекта не означает автоматической рекомендации или предложения.",
+      state:"Решение принимается индивидуально",
+    },
+  };
+  const highlighted=selected?items.find(item=>item.id===selected):undefined;
+  const explanation=selected?explanations[selected]:undefined;
   return <div className="mp-ref-columns" role="tabpanel" aria-label="Бонусы и выгоды">
     <div className="mp-ref-stack"><Card><header className="mp-ref-card-head"><h2>Что даст участие в проекте</h2><small>Возможности и условия</small></header>
       <div className="mp-ref-rewards">{items.map(item=>{const Icon=item.icon;return <button key={item.id} type="button" aria-pressed={selected===item.id} className={selected===item.id?"is-selected":""} onClick={()=>{onSelected(item.id);}}><span className="mp-ref-blue-square"><Icon size={19}/></span><span><strong>{item.title}</strong><small>{item.desc}</small></span><span className="mp-ref-reward-when">{item.when}</span><ChevronRight size={17}/></button>;})}</div>
-      {selected&&<p className="mp-ref-reward-note" role="status">Предоставление возможности зависит от подтверждения результата и правил программы; автоматическая выдача не гарантируется</p>}
+      {highlighted&&explanation&&<div className="mp-ref-reward-note" role="status" aria-live="polite">
+        <strong>{highlighted.title}</strong>
+        <p>{explanation.requirements}</p>
+        <small>{explanation.state}</small>
+      </div>}
     </Card>
     <Card><Title icon={Award}>Что формируется по итогам</Title><div className="mp-ref-skill-grid"><div className="mp-ref-skill"><FileText size={20}/><strong>Результат</strong><small>Код и документы после приёмки</small></div><div className="mp-ref-skill"><Award size={20}/><strong>Компетенции</strong><small>После оценки</small></div><div className="mp-ref-skill"><Star size={20}/><strong>Портфолио</strong><small>Подтверждённый кейс</small></div></div></Card>
     </div>
