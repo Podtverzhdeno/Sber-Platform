@@ -33,6 +33,7 @@ describe("cross-section progress mutation policy", () => {
 
   it("includes all visible projections of one accepted result", () => {
     expect(participantProjectionKeys).toEqual(expect.arrayContaining([
+      "engagement-overview",
       "participant-growth-analytics",
       "participant-analytics",
       "impulse-learning-summary",
