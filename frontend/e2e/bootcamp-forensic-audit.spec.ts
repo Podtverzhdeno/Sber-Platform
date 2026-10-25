@@ -71,6 +71,11 @@ for (const viewport of [{ width: 1448, height: 1086 }, { width: 390, height: 844
     // The CTA must actually reveal learning material, not leave it below the fold.
     await expect.poll(() => lesson.evaluate(element => element.getBoundingClientRect().top))
       .toBeLessThan(180);
+    if (viewport.width < 800) {
+      // Mobile should reveal real learning material, not only an eight-item plan.
+      await expect.poll(() => dialog.locator(".bc-learning__lesson")
+        .evaluate(element => element.getBoundingClientRect().top)).toBeLessThan(500);
+    }
     await expect(dialog.getByRole("navigation", { name: "Шаги обучения" }).getByRole("button")).toHaveCount(8);
     const dimensions = await dialog.evaluate(element => {
       const box = element.getBoundingClientRect();
