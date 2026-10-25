@@ -6,6 +6,7 @@ on:
     paths:
       - "frontend/src/features/bootcamp/trajectory-content.ts"
       - "frontend/src/features/bootcamp/trajectory-content.test.ts"
+      - "frontend/src/features/bootcamp/trajectory-catalog-ui.test.tsx"
       - "frontend/src/features/bootcamp/catalog.tsx"
       - "frontend/src/features/trajectory-v2/source-reference/source-catalog.ts"
       - ".github/workflows/bootcamp-trajectory-sync-qa.yml"
@@ -36,9 +37,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Lint course-role mapping
-        run: npx eslint src/features/bootcamp/trajectory-content.ts src/features/bootcamp/trajectory-content.test.ts --max-warnings 0
+        run: npx eslint src/features/bootcamp/trajectory-content.ts src/features/bootcamp/trajectory-content.test.ts src/features/bootcamp/trajectory-catalog-ui.test.tsx --max-warnings 0
       - name: Test role-course mapping
-        run: npx vitest run src/features/bootcamp/trajectory-content.test.ts
+        run: npx vitest run src/features/bootcamp/trajectory-content.test.ts src/features/bootcamp/trajectory-catalog-ui.test.tsx
       - name: TypeScript contract check
         run: npm run typecheck
       - name: Bundle catalog
