@@ -50,6 +50,10 @@ test("annual calendar shows real source events on hover and in the day popup", a
  await expect(populated).toBeVisible();
  const geometry = await populated.evaluate(element => element.getBoundingClientRect().height);
  expect(geometry).toBeLessThanOrEqual(15);
+ const activeColor=await populated.evaluate(element => getComputedStyle(element).backgroundColor);
+ const emptyColor=await calendar.locator(".ac-day.ac-level-0:not(.ac-unknown)").first()
+   .evaluate(element => getComputedStyle(element).backgroundColor);
+ expect(activeColor).not.toBe(emptyColor);
  await populated.hover();
  await expect(page.getByRole("tooltip")).toContainText("зарегистрированных действий");
  await populated.click();
