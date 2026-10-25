@@ -149,7 +149,7 @@ export function MessagingWorkspace({
     return stored ?? "";
   });
   const [mobilePane, setMobilePane] = useState<MobilePane>("list");
-  const [contextOpen, setContextOpen] = useState(false);
+  const [contextOpen, setContextOpen] = useState(true);
   const readsInFlight = useRef(new Set<string>());
   const [createSignal, setCreateSignal] = useState(0);
   const [findSignal, setFindSignal] = useState(0);
@@ -170,7 +170,7 @@ export function MessagingWorkspace({
   useEffect(() => {
     if (requestedChannel && UUID_PATTERN.test(requestedChannel)) {
       setSelectedId(requestedChannel);
-      setContextOpen(false);
+      setContextOpen(true);
       if (isNarrow) setMobilePane("chat");
     }
   }, [requestedChannel, isNarrow]);
@@ -245,7 +245,7 @@ export function MessagingWorkspace({
 
   const selectChannel = (channelId: string) => {
     setSelectedId(channelId);
-    setContextOpen(false);
+    setContextOpen(true);
     setActionError("");
     setReplyId(null);
     setPending([]);
