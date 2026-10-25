@@ -24,14 +24,23 @@ async function openTopbar(page: Page, place: number | null, published = true) {
     loggedIn = true;
     return route.fulfill({ json: actor });
   });
+  // A private standing is visible to the owner, even when the public row is anonymous.
+  await page.route("**/api/v1/me/rating/standings", route => route.fulfill({
+    json: published ? [{
+      season_id: "autumn", season_key: "autumn", season_title: "Осень",
+      season_status: "published", season_version: 1, policy_version: 1,
+      place, score: place === null ? null : "80",
+      successful_projects: place === null ? null : 1,
+    }] : [],
+  }));
   await page.route("**/api/v1/rating-seasons", route => route.fulfill({
-    json: published ? [{ id: "autumn", key: "autumn", status: "published", version: 1, title: "Осень" }] : [],
+    json: published ? [{ id: "autumn", key: "autumn", status: "published", version: 1, policy_version: 1, title: "Осень" }] : [],
   }));
   await page.route("**/api/v1/rating-seasons/autumn/leaderboard", route => route.fulfill({
     json: place === null ? [
       { person_id: "someone-else", place: 1, anonymized: false, score: "100", successful_projects: 1, display_name: "Другой", trophies: [], offers: [] },
     ] : [
-      { person_id: actor.person_id, place, anonymized: false, score: "80", successful_projects: 1, display_name: actor.display_name, trophies: [], offers: [] },
+      { person_id: null, place, anonymized: true, score: "80", successful_projects: 1, display_name: "Участник №8", trophies: [], offers: [] },
     ],
   }));
   await page.route("**/api/v1/participant/me/development-overview", route => route.fulfill({ status: 503, json: { code: "SERVICE_UNAVAILABLE" } }));
