@@ -4,7 +4,7 @@
  * shared workspace/sidebar components. No coordinates are applied globally. */
 .participant-events {
   --events-aqua:#1ee8d6; --events-bg:#031421; --events-border:#123c4f;
-  color:#eef7ff; min-width:0; gap:0;
+  color:#eef7ff; min-width:0; gap:0; margin-top:-27px;
   .ev-hero {
     min-height:216px;height:216px;padding:18px 23px;border-radius:0;border:0;
     background:linear-gradient(90deg,#031421 1%,#041e2e 53%,#05393c 73%,#072432 100%);
@@ -50,7 +50,7 @@
   .ev-average-ring {display:grid;place-items:center;flex-shrink:0;border:6px solid #19e6cb;
     width:56px;height:56px;border-radius:50%;box-shadow:inset 0 0 7px #17d8ce66}
   .ev-average-ring strong {font-size:13px;color:#fff}
-  .ev-catalog {grid-template-columns:255px minmax(0,1fr);gap:14px;align-items:start}
+  .ev-catalog {grid-template-columns:255px minmax(0,1fr);gap:14px;align-items:start;margin-top:-30px}
   .ev-filters {gap:10px;padding:13px 12px 18px;border-radius:13px;background:#041a2b;border-color:#154057}
   .ev-filters h2 {font-size:17px;letter-spacing:-.1px}
   .ev-filters header button {font-size:11px}
@@ -112,6 +112,8 @@
     .ev-catalog {grid-template-columns:230px minmax(0,1fr)}
   }
   @media(max-width:950px){
+    margin-top:0;
+    .ev-catalog {margin-top:0}
     .ev-hero {height:auto;min-height:185px}
     .ev-hero-copy {width:85%}
     .ev-hero h1 {font-size:29px}
@@ -143,7 +145,7 @@
 
 .participant-events .ev-detail-modal {
   .overlay {position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:0;
-    background:#010d17cf;backdrop-filter:blur(3px)}
+    background:#010d17be;backdrop-filter:none}
   .overlay-panel--dialog {position:relative!important;width:min(1165px,calc(100vw - 36px))!important;
     height:min(840px,calc(100dvh - 46px))!important;max-height:none!important;
     min-height:0!important;max-width:none!important;margin:39px 0 0!important;padding:0!important;
