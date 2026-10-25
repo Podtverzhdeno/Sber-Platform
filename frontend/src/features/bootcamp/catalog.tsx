@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ParticipantHelpTrigger } from "../participant-help-trigger";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowRight, Bot, Check, Clock3, FileText, GitBranch, GraduationCap, List, LockKeyhole, Search, Sparkles, ChartNoAxesCombined, LayoutGrid, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { apiRequest, retrySafeRead, RuntimeApiPath } from "../../api/client";
@@ -12,6 +12,7 @@ import { LearningProgressPanel } from "../learning-progress-panel";
 import { learningSummaryQueryKey, loadLearningSummary, type LearningCourse } from "../learning-progress";
 import { aiRoleTitle, bootcampRoleKeys, courseRoleTitles, isCourseInAiRole, orderRoleCourses } from "./trajectory-content";
 import { projectRoleStudy, satisfiesStudyRequirement, type StudyRecord } from "./role-study-progression";
+import { GradeMilestoneCelebration } from "./grade-milestone-celebration";
 import type { BootcampOverview } from "./page";
 import "./bootcamp-ux.scss";
 import "./bootcamp-approved.scss";
@@ -463,7 +464,7 @@ function RecommendationDetails({ card, track, onOpenCourse, onOpenProgram }: { c
   </div>;
 }
 
-function RequirementsDetails({ cards, studyRecords, onSelect, onClose }: { cards: CourseCardState[]; studyRecords: readonly StudyRecord[]; onSelect: (key: string) => void; onClose: () => void }) {
+function RequirementsDetails({ cards, studyRecords, onSelect, onClose, onStartPractice }: { cards: CourseCardState[]; studyRecords: readonly StudyRecord[]; onSelect: (key: string) => void; onClose: () => void; onStartPractice:()=>void }) {
   // A verified course has must_take=null in the authoritative projection.
   // Never derive a misleading completion percentage from the pending-only list.
   const pending = projectRoleStudy(cards, studyRecords).pending;
@@ -494,6 +495,7 @@ function RequirementsDetails({ cards, studyRecords, onSelect, onClose }: { cards
         <h3>Что будет после завершения</h3>
         <p>Курсы закрывают учебную часть требований. Следующий грейд назначается только после выполнения остальных условий и проверки результатов.</p>
       </section>
+      {pending.length===0 && <button type="button" className="bc-ref-required-start-practice" onClick={onStartPractice}>Перейти к практическим задачам <ArrowRight/></button>}
       <button type="button" className="bc-ref-required-close" onClick={onClose}>Вернуться в каталог <ArrowRight /></button>
     </div>
   </div>;
@@ -624,6 +626,8 @@ export function StudyCourseProgress({course,compact=false}:{course?:LearningCour
   </div>;
 }
 
+type MilestoneCelebration = { mode: "stage-unlocked" | "official-grade-up"; roleTitle: string; fromGrade?:string; toGrade?:string };
+
 export function BootcampCatalog({
   honorBoardEnabled,
   honorBoardConsent,
@@ -632,6 +636,9 @@ export function BootcampCatalog({
   honorBoardConsent: boolean;
 }) {
   const client = useQueryClient();
+  const navigate = useNavigate();
+  const [milestoneCelebration, setMilestoneCelebration] = useState<MilestoneCelebration | null>(null);
+  const previousServerGrades = useRef(new Map<string, { key:string; title:string }>());
   const catalog = useQuery({
     queryKey: ["bootcamp-catalog"],
     queryFn: () => apiRequest<CourseCardState[]>(CATALOG_PATH),
@@ -652,7 +659,18 @@ export function BootcampCatalog({
     ),
     enabled:gradeRole!==null,
     retry:false,
+    refetchInterval:(query)=>query.state.data?.role_summary.grade_state==="known"?20000:false,
   });
+  const serverGradeState = gradeOverview.data?.role_summary;
+  useEffect(() => {
+    if (!gradeRole || serverGradeState?.grade_state!=="known" || !serverGradeState.current_grade_key || !serverGradeState.current_grade_title) return;
+    const before = previousServerGrades.current.get(gradeRole);
+    const current = {key:serverGradeState.current_grade_key,title:serverGradeState.current_grade_title};
+    previousServerGrades.current.set(gradeRole,current);
+    if (before && before.key!==current.key) {
+      setMilestoneCelebration({ mode:"official-grade-up",roleTitle:aiRoleTitle(gradeRole),fromGrade:before.title,toGrade:current.title });
+    }
+  },[gradeRole,serverGradeState?.grade_state,serverGradeState?.current_grade_key,serverGradeState?.current_grade_title]);
   const studyFor = (key: string): LearningCourse | undefined => study.data?.courses.find(item => item.course_key === key);
   const studyStarted = (key: string) => (studyFor(key)?.completed_units ?? 0) > 0;
   const studyFinished = (key: string) => studyFor(key)?.finished === true;
@@ -823,7 +841,7 @@ export function BootcampCatalog({
             </div>
             <div className="bc-ref-ring" aria-label="Завершённые учебные курсы роли, не профессиональный грейд"><strong data-testid="bootcamp-study-count">{roleStudy.studied.length}</strong><small>курсов<br/>пройдено</small></div>
           </section>
-          <section className="bc-ref-grade" aria-labelledby="bc-grade-title">
+          <section className={"bc-ref-grade"+(progressionComplete?" bc-ref-grade--ready":"")} aria-labelledby="bc-grade-title" data-study-ready={progressionComplete}>
             <img className="bc-ref-trophy" alt="" src="/bootcamp/trophy.svg" />
             <div className="bc-ref-grade-body">
               <div className="bc-ref-grade-kicker">♛ &nbsp; Учебные требования роли</div>
@@ -831,7 +849,7 @@ export function BootcampCatalog({
               <p>{pendingRequired.length > 0 ? "Оставшиеся учебные требования обновляются после завершения курса. Практика и подтверждение проверяются отдельно." : progressionComplete ? "Следующий этап — практические задачи и подтверждение компетенций. Профессиональный грейд обновится после проверки требований опубликованной программы." : "Обязательные курсы пока не указаны. Дальнейшие требования смотри в траектории."}</p>
               <div className="bc-ref-grade-list">{progressionComplete ? <span className="bc-ref-grade-next" data-testid="bootcamp-next-stage">◆ Следующий этап: практика и проверка результатов</span> : pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => { openPanel("detail",card.key); }}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
             </div>
-            <button className="bc-ref-grade-button" type="button" onClick={() => { openPanel("requirements"); }}>{progressionComplete ? "Следующий этап" : "Посмотреть курсы"} <ArrowRight /></button>
+            <button className={"bc-ref-grade-button"+(progressionComplete?" bc-ref-grade-button--unlock":"")} type="button" onClick={() => { if(progressionComplete){setMilestoneCelebration({mode:"stage-unlocked",roleTitle:selectedRoleTitle});}else{openPanel("requirements");} }} aria-label={progressionComplete?"Следующий этап — открыть новую ступень развития":"Посмотреть курсы"}>{progressionComplete ? <><Sparkles size={17} aria-hidden="true"/>Следующий этап</> : "Посмотреть курсы"} <ArrowRight /></button>
           </section>
         </div>
       </div>
@@ -890,8 +908,13 @@ export function BootcampCatalog({
             onReason={() => { openPanel("reason", deepLinked.key); }} />)}
       </Drawer>
       <Drawer title="Требования к обучению" open={panel === "requirements"} onClose={closePanel}>
-        <RequirementsDetails cards={roleCourses} studyRecords={study.data?.courses ?? []} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} />
+        <RequirementsDetails cards={roleCourses} studyRecords={study.data?.courses ?? []} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} onStartPractice={() => { navigate("/workspace/1"); }} />
       </Drawer>
+      {milestoneCelebration && <GradeMilestoneCelebration mode={milestoneCelebration.mode}
+        roleTitle={milestoneCelebration.roleTitle} fromGrade={milestoneCelebration.fromGrade} toGrade={milestoneCelebration.toGrade}
+        onClose={() => { setMilestoneCelebration(null); }}
+        onContinue={() => { const mode=milestoneCelebration.mode;setMilestoneCelebration(null);if(mode==="official-grade-up"){void gradeOverview.refetch();}openPanel("requirements"); }}
+      />}
       {honorBoardEnabled && honorBoardConsent && (
         <Card title="Зал славы курсов">
           <p>
