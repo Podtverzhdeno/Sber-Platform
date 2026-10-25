@@ -234,4 +234,3 @@ async def test_checkpoint_files_persist_and_restrict_access() -> None:
             client.get(f"/api/v1/me/assignments/{assignment_id}/checkpoint-submissions").status_code
             == 404
         )
-
