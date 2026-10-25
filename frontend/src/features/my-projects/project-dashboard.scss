@@ -216,3 +216,30 @@
   .mpd-page .mpd-heading{margin-left:210px;min-height:177px}
   .mpd-page .mpd-tabs{margin-top:12px}
 }
+
+/* Modal details are scrollable independently of the fixed actions. */
+.mpd-info-checkpoints,.mpd-info-feedback{
+  border:1px solid #1e506a;
+  border-radius:11px;
+  padding:18px;
+  background:#081f32;
+}
+.mpd-info-checkpoints__heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.mpd-info-checkpoints__heading h3,.mpd-info-feedback>h3{
+  display:flex;align-items:center;gap:9px;margin:0;
+  color:#effaff;font-size:16px;
+}
+.mpd-info-checkpoints__heading h3 svg,.mpd-info-feedback>h3 svg{color:#00e7d4}
+.mpd-info-checkpoints__heading>small{font-size:11px;color:#88b6cf}
+.mpd-info-checkpoints ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.mpd-info-checkpoints li{display:flex;align-items:center;gap:9px;min-width:0;padding:10px;border:1px solid #1a425b;border-radius:8px;background:#08283b}
+.mpd-info-checkpoints li>span{flex:none;display:grid;place-items:center;width:28px;height:28px;border:1px solid #237492;border-radius:50%;color:#b3d5e9;font-size:12px}
+.mpd-info-checkpoints li>span.is-done{border-color:#0ad2aa;background:#0b625e;color:#efffff}
+.mpd-info-checkpoints li>div{display:grid;gap:2px;min-width:0}
+.mpd-info-checkpoints li strong{font-size:12px;line-height:1.35;color:#d9f5fd}
+.mpd-info-checkpoints li small{font-size:10px;color:#8cbad3}
+.mpd-info-feedback>h3{margin-bottom:10px}
+.mpd-info-feedback>div{padding:9px 0;border-top:1px solid #1b4c63}
+.mpd-info-feedback strong{font-size:11px;color:#06e9d4}
+.mpd-info-feedback p{font-size:12px;line-height:1.5;color:#b3cedf;margin:5px 0 0}
+@media(max-width:590px){.mpd-info-checkpoints ol{grid-template-columns:1fr}.mpd-info-checkpoints__heading{flex-direction:column;align-items:start}}
