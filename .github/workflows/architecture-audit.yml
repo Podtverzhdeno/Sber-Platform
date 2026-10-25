@@ -1,0 +1,50 @@
+name: Architecture audit
+on:
+  push:
+    paths:
+      - 'scripts/architecture/**'
+      - 'tests/architecture/**'
+      - '.github/workflows/architecture-audit.yml'
+      - 'src/impulse/**'
+      - 'frontend/src/**'
+      - 'migrations/versions/**'
+  pull_request:
+    paths:
+      - 'scripts/architecture/**'
+      - 'tests/architecture/**'
+      - '.github/workflows/architecture-audit.yml'
+      - 'src/impulse/**'
+      - 'frontend/src/**'
+      - 'migrations/versions/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  architecture:
+    name: Static architecture inventory and domain boundary gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Focused audit unit tests
+        run: python -m unittest discover -s tests/architecture -p 'test_*.py' -v
+      - name: Analyze all tracked code, imports and Alembic graph
+        run: python scripts/architecture/audit.py --root . --output-dir architecture-report --fail-on-domain-violations
+      - name: Publish concise audit summary
+        if: always()
+        run: |
+          if [ -f architecture-report/architecture.md ]; then
+            head -n 35 architecture-report/architecture.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Archive full dependency report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-audit
+          path: architecture-report/
+          if-no-files-found: ignore
