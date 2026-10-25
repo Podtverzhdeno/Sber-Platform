@@ -29,7 +29,9 @@ class AiRoleProfile(TypedDict):
 
 # ruff: noqa: E501 -- long text inside the JSON curriculum is user-facing copy.
 
-AI_ROLE_PROFILES: dict[str, AiRoleProfile] = cast(dict[str, AiRoleProfile], json.loads(r"""{
+AI_ROLE_PROFILES: dict[str, AiRoleProfile] = cast(
+    dict[str, AiRoleProfile],
+    json.loads(r"""{
   "product": {
     "title": "AI Architect",
     "description": "Проектирует надёжные корпоративные AI-системы, определяет границы сервисов, интеграции и критерии качества.",
@@ -709,7 +711,8 @@ AI_ROLE_PROFILES: dict[str, AiRoleProfile] = cast(dict[str, AiRoleProfile], json
       }
     ]
   }
-}"""))
+}"""),
+)
 
 
 def role_title(track_key: str) -> str:
