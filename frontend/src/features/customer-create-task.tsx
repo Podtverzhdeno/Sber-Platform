@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, CalendarDays, Check, CheckCircle2, ChevronRight, CircleAlert, ClipboardCheck, Eye, FileText, Lightbulb, List, ListOrdered, Plus, Save, Search, ShieldCheck, Sparkles, UsersRound, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Check, CheckCircle2, ChevronRight, CircleAlert, ClipboardCheck, Eye, FileText, Lightbulb, List, ListOrdered, Plus, Save, Search, Sparkles, UsersRound, X } from "lucide-react";
 import "./customer-create-task.scss";
 
 export type CreateTaskBrief = {
