@@ -426,11 +426,12 @@ def test_demo_contact_directory_and_group_creation_round_trip() -> None:
 def test_group_creation_rejects_unknown_people_and_foreign_channels() -> None:
     api, _store = build()
     csrf = login(api, "participant-alex")
-    post = lambda ids: api.post(
-        "/api/v1/me/messaging/channels/group",
-        json={"title": "Проверка доступа", "peer_ids": ids},
-        headers={"X-CSRF-Token": csrf},
-    )
+    def post(ids: list[str]):
+        return api.post(
+            "/api/v1/me/messaging/channels/group",
+            json={"title": "Проверка доступа", "peer_ids": ids},
+            headers={"X-CSRF-Token": csrf},
+        )
     assert post([str(ALEX)]).status_code == 422
     assert post([str(UUID(int=999))]).status_code == 422
     assert post([]).status_code == 422
