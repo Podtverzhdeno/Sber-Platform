@@ -9,3 +9,6 @@ release_request=2026-10-26-trajectory-compact-ui-29b774b7afb6
 
 # Publish subtle animated course CTA on participant home, reduced motion supported
 release_request=2026-10-26-home-learning-cta-4e7ab55c188b
+
+# Publish server-persisted Impulse L0-L1 cycle and cross-screen projections
+release_request=2026-10-26-impulse-role-levels-ae44b004261a
