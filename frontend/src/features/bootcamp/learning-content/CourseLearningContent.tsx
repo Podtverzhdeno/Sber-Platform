@@ -35,7 +35,8 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
   // After switching lessons, make the updated material visible under the sticky reader header.
   useEffect(() => {
     if (current === 0) return;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reducedMotion = typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const lesson = lessonRef.current;
     if (lesson && typeof lesson.scrollIntoView === "function") {
       lesson.scrollIntoView({
