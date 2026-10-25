@@ -655,8 +655,15 @@ class MessagingService:
         callers must still be existing, send-enabled community members.
         """
         channel, membership = await self._visible(actor_context, channel_id)
-        if channel.kind is not ChannelKind.COMMUNITY or channel.status is not ChannelStatus.ACTIVE:
-            raise ApiError("MESSAGE_INVITE_UNAVAILABLE", "Участников можно добавлять только в активное сообщество.", 403)
+        if (
+            channel.kind is not ChannelKind.COMMUNITY
+            or channel.status is not ChannelStatus.ACTIVE
+        ):
+            raise ApiError(
+                "MESSAGE_INVITE_UNAVAILABLE",
+                "Участников можно добавлять только в активное сообщество.",
+                403,
+            )
         self._assert_sender_enabled(channel, membership)
         unique = tuple(dict.fromkeys(person_ids))
         if not unique or len(unique) > 24 or actor_context.person_id in unique:
