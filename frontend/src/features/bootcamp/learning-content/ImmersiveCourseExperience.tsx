@@ -17,7 +17,7 @@ type Progress = {
   certificate_id: string | null;
   finished: boolean;
 };
-type View = "program" | "theory" | "example" | "practice" | "check" | "finish" | "success" | "certificates";
+type View = "overview" | "program" | "theory" | "example" | "practice" | "check" | "finish" | "success" | "certificates";
 type Props = {
   courseKey: string;
   courseTitle: string;
@@ -32,7 +32,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const program = learningProgramFor(courseKey);
   const client = useQueryClient();
   const [current, setCurrent] = useState(0);
-  const [view, setView] = useState<View>("program");
+  const [view, setView] = useState<View>("overview");
   const [checks, setChecks] = useState<ReadonlySet<string>>(() => new Set());
   const [answer, setAnswer] = useState<number | null>(null);
   const [showExpected, setShowExpected] = useState(false);
@@ -131,9 +131,9 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     { id: "practice", name: "Практическое задание", Icon: FileCode2 },
     { id: "check", name: "Самопроверка", Icon: ClipboardCheck },
   ];
-  const isLearning = ["theory", "example", "practice", "check"].includes(view);
+  const isLearning = ["overview", "theory", "example", "practice", "check"].includes(view);
 
-  return <div className="imp-study" data-testid="impulse-immersive-reader">
+  return <div className="imp-study" data-view={view} data-testid="impulse-immersive-reader">
     <div className="imp-study__hero">
       <div className="imp-study__intro">
         <span className="imp-study__chips"><span>Нужно для роли</span><span className="ok"><Check size={13}/> Доступен</span></span>
@@ -210,7 +210,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           <div className="imp-study__print-certificate" aria-hidden="true"><h2>IMPULSE · Сертификат прохождения</h2><p>Подтверждается прохождение курса «{courseTitle}»</p><p>Номер {certificateId}</p></div>
         </> : <>
           <div className="imp-study__lesson-heading"><div><span className="imp-study__eyebrow">Урок {current+1} из {total}</span><h2>{unit.title}</h2><p>{unit.purpose}</p></div><div className="imp-study__progress-top"><strong>{percent}% прохождения</strong><div className="imp-study__bar"><span style={{width:String(percent)+"%"}}/></div></div></div>
-          <nav className="imp-study__tabs" aria-label="Разделы урока">{sectionTabs.map(({id,name,Icon})=><button type="button" key={id} aria-current={view===id ? "page" : undefined} className={view===id?"active":""} onClick={() => { openView(id); }}><Icon size={18}/>{name}</button>)}</nav>
+          <nav className="imp-study__tabs" aria-label="Разделы урока">{sectionTabs.map(({id,name,Icon})=><button type="button" key={id} aria-current={(view===id || (view==="overview" && id==="check")) ? "page" : undefined} className={(view===id || (view==="overview" && id==="check"))?"active":""} onClick={() => { openView(id); }}><Icon size={18}/>{name}</button>)}</nav>
           {view === "theory" && <section className="imp-study__content" aria-label="Теория"><h3>Теория</h3><h4>{unit.title}</h4>
             {unit.theory.map((text,index)=><p key={index}>{text}</p>)}
             <div className="imp-study__callout"><Sparkles size={21}/><p><strong>Важно</strong>Используйте принципы из урока на реальных задачах и проверяйте результат самостоятельно.</p></div>
@@ -227,7 +227,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
                 <p>Должны быть продемонстрированы работоспособность, полнота решения и корректность обработки ошибок.</p></div></div>
             <p className="imp-study__disclaimer">Практическая работа требует отдельной проверки для сертификата подтверждения знаний.</p>
           </section>}
-          {view === "check" && <section className="imp-study__content" aria-label="Самопроверка"><h3>Проверьте себя</h3>
+          {(view === "check" || view === "overview") && <section className="imp-study__content" aria-label="Самопроверка"><h3>Проверьте себя</h3>
             <p>Отметьте пункты, которые действительно проверили на своём примере. Галочки не увеличивают процент прохождения и не подтверждают компетенции.</p>
             <div className="imp-study__check-status"><CheckCircle2 size={19}/>{checkedCount} из {unit.checklist.length} пунктов отмечено
               <strong>{unit.checklist.length ? Math.round(checkedCount / unit.checklist.length * 100) : 0}%</strong></div>
