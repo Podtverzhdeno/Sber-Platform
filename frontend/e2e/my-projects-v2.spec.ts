@@ -73,7 +73,7 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
   const root=page.locator(".mpv2");
   await expect(root).toHaveAttribute("data-project-screen","cards");
   await expect(root.locator(".mp-project-tile")).toHaveCount(3);
-  await expect(root.locator(".mp-benefit-step")).toHaveCount(7);
+  await expect(root.locator(".mp-benefit-step")).toHaveCount(4);
   await expect(root.locator(".mp-card-list .mp-project-tile")).toHaveCount(3);
   await expect(root.locator(".mp-project-tile__identity small").first()).toContainText("Сбер");
   await expect(root.locator(".mp-preview")).toBeVisible();
@@ -110,15 +110,15 @@ test("My Projects: list has genuine rows and opens full project page",async({pag
   await page.screenshot({path:"test-results/my-projects-v2/03_detail_1672.png",fullPage:true,animations:"disabled"});
   await expect(page.getByRole("tab",{name:"Бонусы и выгоды"})).toBeVisible();
   await expect(page.getByRole("heading",{name:"Ключевая информация"})).toBeVisible();
-  await expect(page.locator(".mp-detail-grid--reference > .mp-detail-column")).toHaveCount(3);
+  await expect(page.locator(".mp-overview-layout > .mp-detail-stack")).toHaveCount(3);
   await page.getByRole("tab",{name:"Команда"}).click();
   await expect(page.getByRole("heading",{name:"Команда проекта"})).toBeVisible();
   await page.getByRole("tab",{name:"Мой вклад"}).click();
   await expect(page.getByRole("heading",{name:"Мой личный вклад"})).toBeVisible();
   await page.getByRole("tab",{name:"Бонусы и выгоды"}).click();
-  await expect(page.locator(".mp-rewards-full button")).toHaveCount(7);
-  await page.getByRole("button",{name:/Токены GitVerse/}).last().click();
-  await expect(page.locator(".mp-reward-notice")).toBeVisible();
+  await expect(page.locator(".mp-ref-rewards button")).toHaveCount(4);
+  await page.getByRole("button",{name:/Результат в портфолио/}).last().click();
+  await expect(page.locator(".mp-ref-reward-note")).toBeVisible();
   await page.getByRole("button",{name:/Все проекты/}).last().click();
   await expect(root).toHaveAttribute("data-project-screen","list");
   await root.getByRole("group",{name:"Режим проектов"}).getByRole("button",{name:"Карточки"}).click();
@@ -149,7 +149,7 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   await expect.poll(()=>tile.evaluate(node=>getComputedStyle(node).transform)).not.toBe(initial);
   await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
-  await page.locator(".mp-detail-hero__lower").getByRole("button",{name:"Продолжить работу"}).click();
+  await page.locator(".mp-detail-footer").getByRole("button",{name:"Перейти к задачам"}).click();
   await expect(page.locator('[data-project-screen="dashboard"]')).toBeVisible();
   await page.screenshot({path:"test-results/my-projects-v2/04_dashboard_1672.png",fullPage:true,animations:"disabled"});
   await expect(page.getByRole("heading",{name:"Этапы проекта"})).toBeVisible();
@@ -194,11 +194,11 @@ test("My Projects: quick preview tabs open correct deep-linked details",async({p
   await root.locator(".mp-preview__tabs").getByRole("button",{name:"Прогресс"}).click();
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
   await expect(page.getByRole("tab",{name:"Прогресс"})).toHaveAttribute("aria-selected","true");
-  await expect(page.getByRole("heading",{name:"Прогресс по этапам"})).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Прогресс выполнения проекта"})).toBeVisible();
   await page.getByRole("button",{name:/Мои проекты/}).first().click();
   await root.locator(".mp-preview__tabs").getByRole("button",{name:"Бонусы и выгоды"}).click();
   await expect(page.getByRole("tab",{name:"Бонусы и выгоды"})).toHaveAttribute("aria-selected","true");
-  await expect(page.locator(".mp-rewards-full button")).toHaveCount(7);
+  await expect(page.locator(".mp-ref-rewards button")).toHaveCount(4);
 });
 
 test("My Projects: writing to a teammate targets the selected participant",async({page})=>{
@@ -206,8 +206,8 @@ test("My Projects: writing to a teammate targets the selected participant",async
   await fixture(page);
   await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
   await page.getByRole("tab",{name:"Команда"}).click();
-  await expect(page.locator(".mp-team-member")).toHaveCount(2);
-  await page.locator(".mp-team-member").nth(1).getByRole("button",{name:"Написать"}).click();
+  await expect(page.locator(".mp-ref-person")).toHaveCount(2);
+  await page.locator(".mp-ref-person").nth(1).getByRole("button",{name:/Написать/}).click();
   await expect(page).toHaveURL(/participant=mentor-1/);
   await expect(page).toHaveURL(/task=task-assignment-1/);
 });
@@ -272,7 +272,7 @@ test("Project information popup is read-only, detailed, responsive and dismissib
   await page.setViewportSize({width:1672,height:941});
   await fixture(page);
   await page.locator(".mp-card-list .mp-open-tile").first().click();
-  await page.locator(".mp-detail-hero__lower").getByRole("button",{name:"Продолжить работу"}).click();
+  await page.locator(".mp-detail-footer").getByRole("button",{name:"Перейти к задачам"}).click();
   const dashboard=page.locator('[data-project-screen="dashboard"]');
   await expect(dashboard).toBeVisible();
   await dashboard.getByRole("button",{name:"Подробнее"}).click();
@@ -300,7 +300,7 @@ test("Project dashboard and detailed popup remain usable on a narrow phone",asyn
   await page.setViewportSize({width:390,height:844});
   await fixture(page);
   await page.locator(".mp-card-list .mp-open-tile").first().click();
-  await page.locator(".mp-detail-hero__lower").getByRole("button",{name:"Продолжить работу"}).click();
+  await page.locator(".mp-detail-footer").getByRole("button",{name:"Перейти к задачам"}).click();
   const dashboard=page.locator('[data-project-screen="dashboard"]');
   await expect(dashboard).toBeVisible();
   await dashboard.getByRole("button",{name:"Подробнее"}).click();
