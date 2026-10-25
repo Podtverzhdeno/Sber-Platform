@@ -136,6 +136,8 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   await expect(page.locator('[data-project-screen="dashboard"]')).toBeVisible();
   await page.screenshot({path:"test-results/my-projects-v2/04_dashboard_1672.png",fullPage:true,animations:"disabled"});
   await expect(page.getByRole("heading",{name:"Этапы проекта"})).toBeVisible();
+  await expect(page.getByRole("img",{name:"Выполнено 60%"})).toBeVisible();
+  await expect(page.getByText("Условия проекта · версия 1")).toBeVisible();
   await page.getByRole("button",{name:"Подробнее"}).click();
   const info=page.getByRole("dialog",{name:"Подробнее о проекте"});
   await expect(info).toBeVisible();
