@@ -166,7 +166,6 @@ export function ParticipantEventCatalog() {
     (search.trim() === "" || [item.title,item.organizer,item.recommendation_reason,...item.track_keys].join(" ").toLowerCase().includes(search.trim().toLowerCase()))
   ).sort((a,b) => sortBy === "deadline" || activeCategory === "deadline"
     ? (new Date(a.deadline_at ?? "9999-01-01").getTime() - new Date(b.deadline_at ?? "9999-01-01").getTime())
-    : sortBy === "newest" ? new Date(b.source_checked_at||"1970-01-01").getTime()-new Date(a.source_checked_at||"1970-01-01").getTime()
     : activeCategory === "popular" ? b.track_keys.length - a.track_keys.length : 0);
   const focus = selectedFocus.length ? selectedFocus : ["python","product","ai","ml","data"];
   const toggleSaved = (key: string) => { setSavedEvents(old => { const next=new Set(old); if(next.has(key))next.delete(key);else next.add(key);return next; }); };
@@ -214,7 +213,7 @@ export function ParticipantEventCatalog() {
               </div>
             </section>}
           </div>
-          <div className="ev-result-order"><label>Сортировка: <select aria-label="Сортировка событий" value={sortBy} onChange={e=>{setSortBy(e.target.value);}}><option value="relevance">По соответствию</option><option value="deadline">По дедлайну</option><option value="newest">Недавно проверены</option></select></label></div>
+          <div className="ev-result-order"><label>Сортировка: <select aria-label="Сортировка событий" value={sortBy} onChange={e=>{setSortBy(e.target.value);}}><option value="relevance">По соответствию</option><option value="deadline">По дедлайну</option></select></label></div>
         </div>
         {activeFilterCount>0&&<div className="ev-compact-applied" aria-label="Активные фильтры">
           {activeTracks.map(key=><button type="button" key={key} aria-label={"Убрать направление "+key} onClick={()=>{removeDirection(key);}}>{key}<X size={12}/></button>)}
