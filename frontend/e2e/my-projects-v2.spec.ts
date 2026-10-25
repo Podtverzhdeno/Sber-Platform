@@ -116,7 +116,7 @@ test("My Projects: list has genuine rows and opens full project page",async({pag
   await page.getByRole("tab",{name:"Мой вклад"}).click();
   await expect(page.getByRole("heading",{name:"Мой личный вклад"})).toBeVisible();
   await page.getByRole("tab",{name:"Бонусы и выгоды"}).click();
-  await expect(page.locator(".mp-ref-rewards button")).toHaveCount(4);
+  await expect(page.locator(".mp-ref-rewards button")).toHaveCount(6);
   await page.getByRole("button",{name:/Результат в портфолио/}).last().click();
   await expect(page.locator(".mp-ref-reward-note")).toBeVisible();
   await page.getByRole("button",{name:/Все проекты/}).last().click();
@@ -198,7 +198,7 @@ test("My Projects: quick preview tabs open correct deep-linked details",async({p
   await page.getByRole("button",{name:/Мои проекты/}).first().click();
   await root.locator(".mp-preview__tabs").getByRole("button",{name:"Бонусы и выгоды"}).click();
   await expect(page.getByRole("tab",{name:"Бонусы и выгоды"})).toHaveAttribute("aria-selected","true");
-  await expect(page.locator(".mp-ref-rewards button")).toHaveCount(4);
+  await expect(page.locator(".mp-ref-rewards button")).toHaveCount(6);
 });
 
 test("My Projects: writing to a teammate targets the selected participant",async({page})=>{
