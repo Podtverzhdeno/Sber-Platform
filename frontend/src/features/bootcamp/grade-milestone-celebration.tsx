@@ -1,10 +1,10 @@
 import { useEffect, useRef, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { ArrowRight, Award, Check, Crown, Sparkles, X } from "lucide-react";
+import { ArrowRight, Award, Check, Crown, GraduationCap, Sparkles, X } from "lucide-react";
 import "./grade-milestone-celebration.scss";
 
 type CelebrationProps = {
-  mode: "stage-unlocked" | "official-grade-up";
+  mode: "stage-unlocked" | "official-grade-up" | "course-complete";
   roleTitle: string;
   fromGrade?: string;
   toGrade?: string;
@@ -19,6 +19,7 @@ export function GradeMilestoneCelebration({
   mode, roleTitle, fromGrade, toGrade, onClose, onContinue,
 }: CelebrationProps) {
   const official = mode === "official-grade-up";
+  const courseComplete = mode === "course-complete";
   const closeRef = useRef(onClose);
   const primaryRef = useRef<HTMLButtonElement>(null);
   useEffect(() => { closeRef.current = onClose; }, [onClose]);
@@ -51,7 +52,7 @@ export function GradeMilestoneCelebration({
 
   return createPortal(
     <div className="imp-grade-celebration" role="dialog" aria-modal="true"
-      aria-label={official ? "Грейд повышен" : "Новый учебный этап открыт"}
+      aria-label={official ? "Грейд повышен" : courseComplete ? "Курс успешно завершён" : "Новый учебный этап открыт"}
       data-testid="grade-milestone-celebration" data-mode={mode}>
       <div className="imp-grade-celebration__aurora" aria-hidden="true" />
       <div className="imp-grade-celebration__grid" aria-hidden="true" />
@@ -60,31 +61,33 @@ export function GradeMilestoneCelebration({
       </div>
       <div className="imp-grade-celebration__panel">
         <button className="imp-grade-celebration__close" type="button" onClick={onClose} aria-label="Закрыть анимацию"><X size={23}/></button>
-        <div className="imp-grade-celebration__badge"><Sparkles size={15}/>{official ? "ОФИЦИАЛЬНЫЙ ПЕРЕХОД ПОДТВЕРЖДЁН" : "ТВОЁ РАЗВИТИЕ ПРОДОЛЖАЕТСЯ"}</div>
+        <div className="imp-grade-celebration__badge"><Sparkles size={15}/>{official ? "ОФИЦИАЛЬНЫЙ ПЕРЕХОД ПОДТВЕРЖДЁН" : courseComplete ? "ОБУЧЕНИЕ УСПЕШНО ЗАВЕРШЕНО" : "ТВОЁ РАЗВИТИЕ ПРОДОЛЖАЕТСЯ"}</div>
         <div className="imp-grade-celebration__crest" aria-hidden="true">
           <div className="imp-grade-celebration__orbit imp-grade-celebration__orbit--one" />
           <div className="imp-grade-celebration__orbit imp-grade-celebration__orbit--two" />
-          <span className="imp-grade-celebration__crown">{official ? <Crown size={79} strokeWidth={1.55} /> : <Award size={75} strokeWidth={1.65}/>}</span>
+          <span className="imp-grade-celebration__crown">{official ? <Crown size={79} strokeWidth={1.55} /> : courseComplete ? <GraduationCap size={79} strokeWidth={1.55}/> : <Award size={75} strokeWidth={1.65}/>}</span>
           <span className="imp-grade-celebration__check"><Check size={21}/></span>
         </div>
         <div className="imp-grade-celebration__eyebrow">{roleTitle}</div>
-        <h2>{official ? <>ГРЕЙД <span>ПОВЫШЕН!</span></> : <>НОВЫЙ ЭТАП <span>ОТКРЫТ!</span></>}</h2>
+        <h2>{official ? <>ГРЕЙД <span>ПОВЫШЕН!</span></> : courseComplete ? <>КУРС <span>ЗАВЕРШЁН!</span></> : <>НОВЫЙ ЭТАП <span>ОТКРЫТ!</span></>}</h2>
         {official ? (
           <div className="imp-grade-celebration__ladder" data-testid="grade-promotion-ladder">
             <span>{fromGrade ?? "Предыдущий грейд"}</span><ArrowRight size={24}/><strong>{toGrade}</strong>
           </div>
         ) : (
           <div className="imp-grade-celebration__stage" data-testid="study-stage-unlocked">
-            <Check size={19}/> Учебные требования пройдены
+            <Check size={19}/> {courseComplete ? "Все уроки пройдены · результат сохранён" : "Учебные требования пройдены"}
           </div>
         )}
         <p>{official
           ? "Все условия опубликованной программы подтверждены. Новый грейд официально закреплён за твоим профилем."
-          : "Теперь начинается следующий шаг: практические задачи, реальные результаты и подтверждение компетенций. Покажи, на что способен!"}</p>
+          : courseComplete
+            ? "Поздравляем! Обучение успешно завершено, а учебный сертификат сохранён в твоём профиле. Практические компетенции подтверждаются отдельно."
+            : "Теперь начинается следующий шаг: практические задачи, реальные результаты и подтверждение компетенций. Покажи, на что способен!"}</p>
         <button ref={primaryRef} type="button" className="imp-grade-celebration__cta" onClick={onContinue}>
-          {official ? "К новым требованиям" : "Начать следующий этап"}<ArrowRight size={19}/>
+          {official ? "К новым требованиям" : courseComplete ? "Посмотреть сертификаты" : "Начать следующий этап"}<ArrowRight size={19}/>
         </button>
-        <button className="imp-grade-celebration__skip" type="button" onClick={onClose}>Продолжить позже</button>
+        <button className="imp-grade-celebration__skip" type="button" onClick={onClose}>{courseComplete ? "Вернуться к курсу" : "Продолжить позже"}</button>
       </div>
     </div>,
     document.body,
