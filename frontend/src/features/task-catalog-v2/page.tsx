@@ -424,7 +424,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
     available: searchParams.get("available") === "true",
     sort: sortValue(searchParams.get("sort")),
   }), [searchParams]);
-  const layout: CatalogLayout = searchParams.get("catalog_view") === "list" ? "list" : "cards";
+  const layout: CatalogLayout = searchParams.get("catalog_view") === "cards" ? "cards" : "list";
   const selectedTaskId = searchParams.get("task");
   const [searchInput, setSearchInput] = useState(filters.q);
   const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
