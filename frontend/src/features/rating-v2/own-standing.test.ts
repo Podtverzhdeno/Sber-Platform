@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ownStandingQueryKey, selectOwnPublishedStanding, type OwnPublishedStanding } from "./own-standing";
 
-const own: OwnPublishedStanding[] = [{
+const publishedStanding: OwnPublishedStanding = {
   season_id: "autumn",
   season_key: "autumn-2026",
   season_title: "Осень",
@@ -11,7 +11,8 @@ const own: OwnPublishedStanding[] = [{
   place: 6,
   score: "135.50",
   successful_projects: 2,
-}];
+};
+const own = [publishedStanding];
 
 describe("owner-only rating projection", () => {
   it("selects precisely the published season and policy version", () => {
@@ -25,10 +26,10 @@ describe("owner-only rating projection", () => {
   it("never fabricates a place from invalid or missing standings", () => {
     const season = { id: "autumn", version: 3, policy_version: 2 };
     expect(selectOwnPublishedStanding([], season)).toBeNull();
-    expect(selectOwnPublishedStanding([{ ...own[0], place: null }], season)).toBeNull();
-    expect(selectOwnPublishedStanding([{ ...own[0], place: 0 }], season)).toBeNull();
-    expect(selectOwnPublishedStanding([{ ...own[0], place: -1 }], season)).toBeNull();
-    expect(selectOwnPublishedStanding([{ ...own[0], place: 1.5 }], season)).toBeNull();
+    expect(selectOwnPublishedStanding([{ ...publishedStanding, place: null }], season)).toBeNull();
+    expect(selectOwnPublishedStanding([{ ...publishedStanding, place: 0 }], season)).toBeNull();
+    expect(selectOwnPublishedStanding([{ ...publishedStanding, place: -1 }], season)).toBeNull();
+    expect(selectOwnPublishedStanding([{ ...publishedStanding, place: 1.5 }], season)).toBeNull();
   });
 
   it("isolates cache entries by participant, never by public leaderboard", () => {
