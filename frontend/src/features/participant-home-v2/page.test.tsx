@@ -248,8 +248,8 @@ describe("participant home v2", () => {
       career_grade: {
         ...overview.concepts.career_grade,
         state: "evaluable" as const,
-        current_grade: 2,
-        target_grade: 3,
+        current_grade: "2",
+        target_grade: "3",
         readiness_percent: 50,
       },
     };
