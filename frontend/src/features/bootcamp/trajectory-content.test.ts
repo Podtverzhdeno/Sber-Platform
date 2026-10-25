@@ -34,12 +34,17 @@ describe("Bootcamp matches AI trajectory without modifying verified course data"
       );
       expect(matching.map(course => course.key)).toEqual(AI_ROLE_COURSE_KEYS[role.key]);
     }
-    expect(isCourseInAiRole(demo[0]!, "product")).toBe(true);
-    expect(isCourseInAiRole(demo[0]!, "ml")).toBe(false);
+    const firstCourse = demo[0];
+    expect(firstCourse).toBeDefined();
+    if (!firstCourse) throw new Error("Missing demo course fixture");
+    expect(isCourseInAiRole(firstCourse, "product")).toBe(true);
+    expect(isCourseInAiRole(firstCourse, "ml")).toBe(false);
   });
 
   it("shows role names rather than raw slugs on course chips", () => {
-    const architects = courseRoleTitles(demo[0]!);
+    const firstCourse = demo[0];
+    if (!firstCourse) throw new Error("Missing demo course fixture");
+    const architects = courseRoleTitles(firstCourse);
     expect(architects).toContain("AI Architect");
     expect(architects).toContain("AI Security Engineer");
     expect(architects).not.toContain("product");
