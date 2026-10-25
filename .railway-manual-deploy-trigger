@@ -24,3 +24,6 @@ release_request=2026-10-25-rating-retry-2cd1f44d87d4
 
 # Bootcamp: immersive ten-state reader, reviewed practice and two certificate flows
 release_request=2026-10-25-bootcamp-10state-ff43c34331ea
+
+# Three-screen My Projects split preview: 10/10 Chromium UI tests, API artifact keys, responsive and rewards.
+release_request=2026-10-25-projects-10of10-split-preview-103a2c7
