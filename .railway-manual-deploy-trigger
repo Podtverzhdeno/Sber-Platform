@@ -32,3 +32,6 @@ release_request=2026-10-26-community-members-222f0cf3523b
 
 # Publish compact masonry portfolio overview, no stretched cards or images
 release_request=2026-10-25-portfolio-compact-columns-31411e447393
+
+# Correct NodeList iteration for release of compact Portfolio cards
+release_request=2026-10-25-portfolio-compact-typescript-0855a1e3d082
