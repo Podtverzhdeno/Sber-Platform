@@ -1818,7 +1818,7 @@ async def download_checkpoint_evidence(
         content=bytes(record["data"]),
         media_type="application/octet-stream",
         headers={
-            "Content-Disposition": f'attachment; filename="evidence-{str(file_id)}"',
+            "Content-Disposition": f'attachment; filename="evidence-{file_id!s}"',
             "X-Content-Type-Options": "nosniff",
             "Cache-Control": "private, no-store",
         },
