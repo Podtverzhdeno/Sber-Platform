@@ -6,15 +6,12 @@ remain exclusively on the verified provider/reviewer track.
 """
 from __future__ import annotations
 
-from datetime import UTC, datetime
 from typing import Annotated
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import text
-from sqlalchemy.dialects.postgresql import insert
-from sqlalchemy.sql import table, column
 
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import current_session, csrf_session
