@@ -310,3 +310,16 @@
 .topbar-guide-btn:focus-visible { outline: 3px solid #54f4eb; outline-offset: 3px; }
 @media (min-width: 651px) { body:has(.topbar-guide-btn) .participant-guide-trigger { display: none; } }
 @media (max-width: 650px) { .topbar-guide-btn { display: none; } }
+
+
+/* Task detail dialog lives above the normal app shell; help must remain visible above it. */
+.participant-guide { z-index: 1600; }
+.catalog-v2-detail-help {
+  display: inline-grid; place-items: center; flex: 0 0 33px;
+  width: 33px; height: 33px; padding: 0;
+  border: 1px solid rgba(44,224,237,.65); border-radius: 50%;
+  background: rgba(9,46,66,.8); color: #5df5ed; cursor: pointer;
+  transition: box-shadow .16s, border-color .16s;
+}
+.catalog-v2-detail-help:hover { border-color: #83fff5; box-shadow: 0 0 12px rgba(31,218,239,.24); color: #fff; }
+.catalog-v2-detail-help:focus-visible { outline: 3px solid #65ebef; outline-offset: 2px; }
