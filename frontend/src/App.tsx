@@ -45,7 +45,6 @@ import {
   applyTheme,
   storedThemeChoice,
   subscribeSystemTheme,
-  type ThemeChoice,
 } from "./app/theme";
 import { createQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
@@ -1266,25 +1265,13 @@ function ImpulseApp() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [rankingOpen, setRankingOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
-  const [themeChoice, setThemeChoice] = useState<ThemeChoice>(() =>
-    storedThemeChoice(),
-  );
-  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() =>
-    document.documentElement.dataset.theme === "light" ? "light" : "dark",
-  );
-
+  const [themeChoice, setThemeChoice] = useState(() => storedThemeChoice());
+  useEffect(() => { applyTheme(themeChoice); }, [themeChoice]);
   useEffect(() => {
-    setResolvedTheme(applyTheme(themeChoice));
-  }, [themeChoice]);
-
-  useEffect(() => {
-    const subscription = subscribeSystemTheme((next) => {
-      if (storedThemeChoice() !== "system") return;
-      setResolvedTheme(next);
+    const unsubscribe = subscribeSystemTheme(() => {
+      if (storedThemeChoice() === "system") applyTheme("system");
     });
-    return () => {
-      subscription();
-    };
+    return unsubscribe;
   }, []);
 
   useEffect(() => {
@@ -1297,21 +1284,6 @@ function ImpulseApp() {
       window.removeEventListener("storage", onStorage);
     };
   }, []);
-
-  function toggleTheme() {
-    const next: ThemeChoice = resolvedTheme === "dark" ? "light" : "dark";
-    setThemeChoice(next);
-    setResolvedTheme(applyTheme(next));
-    if (actor?.active_role === "participant") {
-      void apiRequest("/api/v1/me/theme", {
-        method: "PUT",
-        headers: {
-          "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "",
-        },
-        body: JSON.stringify({ theme: next }),
-      }).catch(() => undefined);
-    }
-  }
 
   useEffect(() => {
     if (meQuery.data && !explicitSignOut.current) {
@@ -1595,23 +1567,6 @@ function ImpulseApp() {
               )}
             </div>
             <div className="header-actions">
-              <div className="theme-utility">
-                <button
-                  type="button"
-                  className="theme-toggle"
-                  aria-pressed={resolvedTheme === "dark"}
-                  aria-label={
-                    resolvedTheme === "dark"
-                      ? "Тёмная тема включена. Переключить на светлую."
-                      : "Светлая тема включена. Переключить на тёмную."
-                  }
-                  onClick={toggleTheme}
-                >
-                  <span aria-hidden="true">
-                    {resolvedTheme === "dark" ? "☾" : "☀"}
-                  </span>
-                </button>
-              </div>
               {actor.active_role === "participant" && (
                 <TopbarEngagementIndicator />
               )}
