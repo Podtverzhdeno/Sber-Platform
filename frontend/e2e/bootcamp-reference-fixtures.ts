@@ -53,13 +53,13 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
     return route.fulfill({ json: actor });
   });
   await page.route("**/api/v1/me/bootcamp/catalog", route => route.fulfill({ json: catalog }));
-  const study = new Map<string, { completed_units: number; certificate_id: string | null }>();
+  const study = new Map<string, { completed_units: number; certificate_id: string | null; practice_status: string | null }>();
   await page.route("**/api/v1/me/bootcamp/impulse-study/**", async route => {
     const path = new URL(route.request().url()).pathname;
-    const match = path.match(/\/impulse-study\/(demo-course-\d+)(?:\/lessons\/(\d+)\/complete|\/(finish))?$/);
+    const match = path.match(/\/impulse-study\/(demo-course-\d+)(?:\/lessons\/(\d+)\/complete|\/(finish)|\/(practice))?$/);
     if (!match) { await route.fulfill({ status: 404, json: { code: "NOT_FOUND" } }); return; }
     const course = match[1] ?? "";
-    const previous = study.get(course) ?? { completed_units: 0, certificate_id: null };
+    const previous = study.get(course) ?? { completed_units: 0, certificate_id: null, practice_status: null };
     const record = { ...previous };
     if (route.request().method() === "POST" && match[2]) {
       const index = Number(match[2]);
@@ -70,10 +70,15 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
       if (record.completed_units !== 8) { await route.fulfill({ status: 409, json: { code: "COURSE_INCOMPLETE" } }); return; }
       record.certificate_id = "a1b2c3d4-e5f6-47ab-8c12-000000000099";
     }
+    if (route.request().method() === "POST" && match[4]) {
+      if (!record.certificate_id) { await route.fulfill({ status: 409, json: { code: "COURSE_INCOMPLETE" } }); return; }
+      record.practice_status = "pending";
+    }
     study.set(course, record);
     await route.fulfill({ json: {
       course_key: course, completed_units: record.completed_units, total_units: 8,
       certificate_id: record.certificate_id, finished: Boolean(record.certificate_id),
+      practice_status: record.practice_status,
     } });
   });
 
