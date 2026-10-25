@@ -97,7 +97,7 @@ describe("ContextPanel", () => {
       ],
     };
     const onToggleMute = vi.fn();
-    const onOpenMember = vi.fn(async () => undefined);
+    const onOpenMember = vi.fn<(personId: string) => Promise<void>>(() => Promise.resolve());
     render(<ContextPanel channel={community} viewerId="u3" open
       onToggleMute={onToggleMute} onOpenMember={onOpenMember}
       messageRefs={["files/guide.pdf"]}
@@ -126,7 +126,7 @@ describe("ContextPanel", () => {
   it("можно выбрать только доступных, ещё не состоящих в сообществе коллег", async () => {
     const community: ApiChannelView = {...channel,kind:"community",task_id:null,
       participants:[{id:"u1",display_name:"Алексей",role:"member"}]};
-    const onInvite = vi.fn(async (_ids: string[]) => undefined);
+    const onInvite = vi.fn<(ids: string[]) => Promise<void>>(() => Promise.resolve());
     render(<ContextPanel channel={community} viewerId="u1" open onInvite={onInvite}
       contacts={[{id:"u1",display_name:"Алексей",role:"participant"},
         {id:"u2",display_name:"Новый коллега",role:"participant"}]} />);
