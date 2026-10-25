@@ -224,3 +224,44 @@
   .imp-study__print-certificate, .imp-study__print-certificate * { display: block !important; visibility: visible !important; }
   .imp-study__print-certificate { position: fixed; inset: 12% 7%; padding: 40px; border: 5px double #0a6d70; text-align: center; background: white !important; color: #143842 !important; }
 }
+
+
+/* Recommendation is a centered modal rather than a narrow drawer. */
+.bc-reference .overlay:has(.bc-ref-why-panel) {
+  display: flex; justify-content: center; align-items: center;
+  background: #00101fd8; backdrop-filter: blur(8px); padding: 16px;
+}
+.bc-reference .overlay:has(.bc-ref-why-panel) .overlay-panel--drawer {
+  width: min(880px, 100%); max-width: 880px; height: auto;
+  max-height: calc(100dvh - 32px); margin: auto; overflow-y: auto;
+  border: 1px solid #06adc8; border-radius: 19px;
+  background: linear-gradient(140deg, #0e3653, #03192d);
+  box-shadow: 0 20px 60px #000a;
+}
+.bc-reference .overlay:has(.bc-ref-why-panel) .overlay-panel--drawer > header {
+  min-height: 54px; justify-content: flex-end; border: 0; background: transparent;
+}
+.bc-reference .overlay:has(.bc-ref-why-panel) .overlay-panel--drawer > header h2 { display: none; }
+.bc-reference .overlay:has(.bc-ref-why-panel) .bc-ref-why-panel {
+  display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px;
+  padding: 7px 30px 24px;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-hero,
+.bc-reference .bc-ref-why-panel .bc-ref-why-forecast,
+.bc-reference .bc-ref-why-panel .bc-ref-why-cta { grid-column: 1 / -1; }
+.bc-reference .bc-ref-why-panel .bc-ref-why-hero { padding: 0; margin: 0 0 8px; }
+.bc-reference .bc-ref-why-panel .bc-ref-why-hero h2 { font-size: clamp(21px,2vw,30px); }
+.bc-reference .bc-ref-why-panel .bc-ref-why-item {
+  display: flex; gap: 12px; padding: 17px; border: 1px solid #1a617e; border-radius: 11px;
+  background: #0b2f49;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-item h3 { margin: 0 0 8px; font-size: 16px; }
+.bc-reference .bc-ref-why-panel .bc-ref-why-item p { font-size: 14px; margin: 0; }
+.bc-reference .bc-ref-why-panel .bc-ref-why-cta {
+  background: linear-gradient(95deg,#00daea,#00e8cc); color: #042032;
+  border: 0; border-radius: 9px; min-height: 48px; font-weight: 800;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-cta:hover { filter: brightness(1.12); transform: translateY(-2px); }
+@media(max-width:650px) {
+  .bc-reference .overlay:has(.bc-ref-why-panel) .bc-ref-why-panel { grid-template-columns: 1fr; padding: 6px 16px 20px; }
+}
