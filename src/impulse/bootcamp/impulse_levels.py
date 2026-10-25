@@ -150,6 +150,10 @@ async def advance_impulse_level(
 ) -> ImpulseLevelView:
     await _actor_track(request, authenticated, track)
     current = await _project(request, authenticated, track)
+    # A repeated POST after a successful award is a read-only replay.
+    # Higher-level curricula are not published; never advance beyond L1.
+    if current.level >= 1:
+        return current
     if current.curriculum_state != "published":
         raise ApiError(
             code="IMPULSE_CURRICULUM_UNPUBLISHED",
