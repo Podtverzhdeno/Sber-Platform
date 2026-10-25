@@ -49,6 +49,9 @@ export type RuntimeApiPath =
   | `/api/v1/me/tasks/${string}/invitation`
   | `/api/v1/me/assignments/${string}/start`
   | `/api/v1/me/assignments/${string}/contributions`
+  | `/api/v1/me/assignments/${string}/checkpoint-submissions`
+  | `/api/v1/me/assignments/${string}/checkpoints/${string}/files`
+  | `/api/v1/me/assignments/${string}/checkpoints/${string}/submit`
   | `/api/v1/me/assignments/${string}/deadline-requests`
   | `/api/v1/customer/tasks/${string}/participant-preview`
   | `/api/v1/customer/tasks/${string}`
