@@ -58,7 +58,7 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
     const path = new URL(route.request().url()).pathname;
     const match = path.match(/\/impulse-study\/(demo-course-\d+)(?:\/lessons\/(\d+)\/complete|\/(finish)|\/(practice))?$/);
     if (!match) { await route.fulfill({ status: 404, json: { code: "NOT_FOUND" } }); return; }
-    const course = match[1] ?? "";
+    const course = match[1];
     const previous = study.get(course) ?? { completed_units: 0, certificate_id: null, practice_status: null };
     const record = { ...previous };
     if (route.request().method() === "POST" && match[2]) {
