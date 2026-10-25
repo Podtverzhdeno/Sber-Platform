@@ -141,6 +141,12 @@ test("data-security reference: theory methods, JWT example, practice requirement
   await reader.getByRole("button", { name: "Пример", exact: true }).click();
   await expect(reader.locator(".imp-study__walkthrough article")).toHaveCount(4);
   await expect(reader.locator(".imp-study__code")).toContainText('JWT_SECRET');
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  const copyButton = reader.getByRole("button", { name: "Копировать код" });
+  await copyButton.hover();
+  await copyButton.click();
+  await expect(reader.getByRole("button", { name: "Скопировано" })).toBeVisible();
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("JWT_SECRET");
   await page.screenshot({ path: "test-results/reference-security-05-example.png", animations: "disabled" });
   await reader.getByRole("button", { name: "Практическое задание", exact: true }).click();
   await expect(reader.locator(".imp-study__practice-columns .imp-study__requirement")).toHaveCount(8);
