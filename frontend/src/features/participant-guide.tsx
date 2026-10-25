@@ -48,6 +48,13 @@ function markWelcome(personId: string) {
   try { localStorage.setItem(welcomeKey(personId), "1"); } catch { /* Optional local preference. */ }
 }
 function getStepAnchor(anchor: string, navigation: string[]): HTMLElement | null {
+  const isSuitable = (node: HTMLElement): boolean => {
+    const rect = node.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0 &&
+      rect.right > 8 && rect.left < window.innerWidth - 8 &&
+      rect.bottom > 8 && rect.top < window.innerHeight - 8 &&
+      rect.height < window.innerHeight * 0.85;
+  };
   const selectors = anchor.split(",").map((value) => value.trim());
   for (const selector of selectors) {
     if (selector.startsWith("nav:")) {
@@ -55,7 +62,7 @@ function getStepAnchor(anchor: string, navigation: string[]): HTMLElement | null
       const index = navigation.indexOf(target);
       if (index < 0) continue;
       const node = document.querySelector<HTMLElement>(`.sidebar nav[aria-label="Навигация роли"] a[href="/workspace/${String(index)}"]`);
-      if (node && node.getBoundingClientRect().width > 0) return node;
+      if (node && isSuitable(node)) return node;
     } else {
       const node = document.querySelector<HTMLElement>(selector);
       if (node && node.getBoundingClientRect().width > 0) return node;
