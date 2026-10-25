@@ -8,3 +8,6 @@ release_request=2026-10-25-home-smooth-0e9c9fb2bc3d
 
 # Bootcamp BC-R01..BC-R05 reference layout release; requires fresh Railway build.
 release_request=2026-10-25-bootcamp-reference-86908dae
+
+# Retest Bootcamp TypeScript after trackOptions fix
+release_request=2026-10-25-bootcamp-reference-ts-fix-529455ff
