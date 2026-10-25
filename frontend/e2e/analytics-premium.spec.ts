@@ -66,6 +66,12 @@ test("premium analytics fits mobile and period and tabs remain interactive",asyn
  await root.getByRole("combobox",{name:"Период аналитики"}).selectOption("4");
  await expect(premium.locator(".av3-week-columns > div")).toHaveCount(4);
  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+ if(overflow>2){
+  const offenders=await page.evaluate(()=>Array.from(document.querySelectorAll<HTMLElement>("body *")).map(el=>{
+    const rect=el.getBoundingClientRect();return {tag:el.tagName,className:String(el.className).slice(0,60),left:Math.round(rect.left),right:Math.round(rect.right),width:Math.round(rect.width)};
+  }).filter(x=>x.right>window.innerWidth+2||x.left< -2).slice(0,20));
+  throw new Error("Horizontal overflow "+String(overflow)+": "+JSON.stringify(offenders));
+ }
  expect(overflow).toBeLessThanOrEqual(2);
  await page.screenshot({path:"test-results/analytics-premium-mobile-390.png",fullPage:true,animations:"disabled"});
  await root.getByRole("button",{name:"Skill Passport",exact:true}).click();
