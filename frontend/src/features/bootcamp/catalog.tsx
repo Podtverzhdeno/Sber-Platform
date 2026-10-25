@@ -124,7 +124,7 @@ function CardExplanation({
   );
 }
 
-function CardActions({ card }: { card: CourseCardState }) {
+export function CardActions({ card }: { card: CourseCardState }) {
   const client = useQueryClient();
   const [searchParams, setSearchParams] = useSearchParams();
   const canAct = card.access_state === "available" && card.completion_state === "not_started";
@@ -187,7 +187,7 @@ function CardActions({ card }: { card: CourseCardState }) {
   );
 }
 
-function CatalogFilters({
+export function CatalogFilters({
   searchParams,
   updateFilter,
   trackOptions,
@@ -510,7 +510,7 @@ export function BootcampCatalog({
 
   function updateFilter(key: string, value: string) {
     const next = new URLSearchParams(searchParams);
-    if (value === "all" && key !== "category") next.delete(key);
+    if (value === "all" && key !== "category" && key !== "track") next.delete(key);
     else next.set(key, value);
     next.delete("course");
     next.delete("panel");
@@ -543,7 +543,6 @@ export function BootcampCatalog({
   const category = searchParams.get("category") ?? "all";
   const query = (searchParams.get("q") ?? "").trim().toLocaleLowerCase("ru-RU");
   const setTrack = (track: string) => { updateFilter("track", track); };
-  const relevantCount = catalog.data.filter((card) => card.relevant).length;
   const forTrack = (card: CourseCardState) => trackFilter === "all" || card.track_keys.includes(trackFilter);
   const categoryCounts = [
     { key: "role", label: "Для моей роли", count: catalog.data.filter((card) => forTrack(card) && card.relevant).length },
@@ -552,6 +551,8 @@ export function BootcampCatalog({
     { key: "completed", label: "Завершённые", count: catalog.data.filter((card) => forTrack(card) && card.completion_state === "verified").length },
   ];
   const pendingRequired = catalog.data.filter((card) => forTrack(card) && card.must_take && card.completion_state !== "verified");
+  const requiredWord = new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "one" ? "курс" :
+    new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "few" ? "курса" : "курсов";
   const nextCourse = catalog.data.find((card) => forTrack(card) && card.relevant && card.access_state === "available" && card.completion_state === "not_started") ?? null;
   const selectedRoleTitle = trackOptions.find((key) => key === trackFilter) ?? (trackFilter === "all" ? "Все активные направления" : trackFilter);
   const visible = catalog.data
@@ -559,7 +560,6 @@ export function BootcampCatalog({
     .filter(forTrack)
     .filter((card) => category === "all" || (category === "role" && card.relevant) || (category === "required" && card.must_take !== null) || (category === "progress" && card.completion_state === "reported") || (category === "completed" && card.completion_state === "verified"))
     .filter((card) => !query || [card.title, card.recommendation_reason, card.must_take?.skill ?? ""].some((value) => value.toLocaleLowerCase("ru-RU").includes(query)));
-  const relevanceOnly = relevanceFilter === "relevant";
   const deepLinkedKey = searchParams.get("course");
   const deepLinked =
     deepLinkedKey !== null ? (catalog.data.find((card) => card.key === deepLinkedKey) ?? null) : null;
@@ -612,7 +612,7 @@ export function BootcampCatalog({
             <img className="bc-ref-trophy" alt="" src="/bootcamp/trophy.svg" />
             <div className="bc-ref-grade-body">
               <div className="bc-ref-grade-kicker">♛ &nbsp; До следующего грейда</div>
-              <h2 id="bc-grade-title">{pendingRequired.length > 0 ? <>Осталось <em>{pendingRequired.length}</em> обязательных курса</> : "Требования к грейду"}</h2>
+              <h2 id="bc-grade-title">{pendingRequired.length > 0 ? <>Осталось <em>{pendingRequired.length}</em> обязательных {requiredWord}</> : "Требования к грейду"}</h2>
               <p>{pendingRequired.length > 0 ? "Заверши учебные требования. Практика и подтверждение проверяются отдельно." : "Учебные требования уточняются по опубликованной программе."}</p>
               <div className="bc-ref-grade-list">{pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => openPanel("detail",card.key)}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
             </div>
