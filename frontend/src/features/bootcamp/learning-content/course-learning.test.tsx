@@ -5,8 +5,45 @@ import { CourseLearningContent } from "./CourseLearningContent";
 import { learningPrograms, learningProgramFor } from "./programs";
 import { courseBlueprints } from "./course-blueprints";
 import { allKnowledgeChecks } from "./knowledge-checks";
+import { allManualChapters, manualFor } from "./manuals";
 
 describe("Bootcamp editorial course curriculum", () => {
+  it("offers 96 distinct original explanations and accountable primary reading links", () => {
+    const chapters = allManualChapters();
+    expect(chapters).toHaveLength(96);
+    expect(new Set(chapters.map(item => item.hook)).size).toBe(96);
+    for (let course = 1; course <= 12; course++) {
+      const key = `demo-course-${String(course)}`;
+      for (let index = 0; index < 8; index++) {
+        const guide = manualFor(key, index);
+        expect(guide).not.toBeNull();
+        expect(guide?.hook.length).toBeGreaterThan(60);
+        expect(guide?.insight.length).toBeGreaterThan(80);
+        expect(guide?.read.length).toBeGreaterThan(12);
+        expect(guide?.source.length).toBeGreaterThan(10);
+        expect(guide?.url).toMatch(/^https:\/\//);
+      }
+      expect(manualFor(key, 8)).toBeNull();
+    }
+    expect(manualFor("unknown-course", 0)).toBeNull();
+    expect(manualFor("demo-course-1", -1)).toBeNull();
+  });
+
+  it("makes a real technical handbook visible within the lesson and updates by chapter", () => {
+    render(<CourseLearningContent courseKey="demo-course-3" />);
+    expect(screen.getByText(/Заказчик пишет/)).not.toBeInTheDocument();
+    expect(screen.getByText(/Функция принимает/)).toBeInTheDocument();
+    const source = screen.getByRole("link", { name: /Читать Python — The Python Tutorial/ });
+    expect(source).toHaveAttribute("href", "https://docs.python.org/3/tutorial/");
+    expect(source).toHaveAttribute("rel", "noopener noreferrer");
+    const snippet = document.querySelector(".bc-manual__snippet pre code");
+    expect(snippet?.textContent).toContain("def normalize_amount(raw: str)");
+    expect(snippet?.textContent).toContain("\n    value = int(raw)");
+    fireEvent.click(screen.getByRole("button", { name: "Следующий урок" }));
+    expect(screen.getByText(/В списке 1000 заявок/)).toBeInTheDocument();
+    expect(document.querySelector(".bc-manual__snippet")).toBeNull();
+  });
+
   it("contains exactly twelve catalog courses and eight concrete lessons per course", () => {
     expect(learningPrograms).toHaveLength(12);
     expect(new Set(learningPrograms.map(item => item.courseKey)).size).toBe(12);
