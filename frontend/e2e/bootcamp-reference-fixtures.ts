@@ -105,6 +105,7 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
       completed_units: state.completed_units,
       total_units: 8,
       finished: Boolean(state.certificate_id),
+      certificate_id: state.certificate_id,
       finished_at: state.certificate_id ? "2026-10-25T12:00:00Z" : null,
       updated_at: "2026-10-25T12:00:00Z",
       practice_status: state.practice_status,
