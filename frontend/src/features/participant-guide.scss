@@ -427,3 +427,17 @@
   .pg-help-bottom button { width:100%; justify-content:center; }
 }
 @media(prefers-reduced-motion:reduce){ .pg-help-topics>button {transition:none;} }
+
+/* Automatic suggestions must stay quiet; stronger spotlight is reserved for a voluntary tour. */
+.pg-highlight--soft {
+  box-shadow:0 0 0 2px rgba(22,223,228,.15),0 0 13px rgba(31,226,239,.26) !important;
+  border-color:rgba(30,236,231,.65);
+}
+.pg-welcome-library {
+  border:0; background:transparent; color:#88e8e7;
+  font:inherit; font-size:11px; font-weight:700; cursor:pointer; padding:6px 2px;
+  text-decoration:underline; text-decoration-color:rgba(136,232,231,.35); text-underline-offset:4px;
+}
+.pg-welcome-library:hover { color:white; }
+.pg-welcome-library:focus-visible { outline:3px solid #3ee9dd; outline-offset:3px; }
+@media (max-width:400px) { .pg-welcome-footer {flex-wrap:wrap;justify-content:center;} }
