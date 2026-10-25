@@ -9,6 +9,8 @@ on:
       - "frontend/src/features/participant-events.scss"
       - "frontend/src/features/participant-events-reference.scss"
       - "frontend/src/features/participant-events-fidelity.scss"
+      - "frontend/src/features/participant-events-compact.scss"
+      - "frontend/src/features/participant-events.test.tsx"
       - "frontend/public/events/**"
       - "frontend/src/components/ui.tsx"
       - "frontend/e2e/participant-events.spec.ts"
@@ -42,6 +44,10 @@ jobs:
         run: npm ci
       - name: Bundle browser build
         run: npx vite build
+      - name: Strict TypeScript check
+        run: npm run typecheck
+      - name: Participant events unit tests
+        run: npx vitest run src/features/participant-events.test.tsx
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Verify all Events states and interactions
