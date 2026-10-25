@@ -15,7 +15,7 @@ const completeBrief = () => {
   fireEvent.change(screen.getByPlaceholderText("Что нужно передать: код, API, демо, отчёт, инструкции, метрики?"), { target: { value: "Прототип, API и README" } });
   fireEvent.change(screen.getByPlaceholderText(/Каждый критерий с новой строки/), { target: { value: "Запуск по инструкции; отчёт по точности" } });
 };
-beforeEach(() => localStorage.clear());
+beforeEach(() => { localStorage.clear(); });
 
 describe("customer task creation wizard", () => {
   it("keeps draft fields and step after reopening", () => {
