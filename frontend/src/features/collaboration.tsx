@@ -420,6 +420,20 @@ export function MessagingWorkspace({
     }
   };
 
+  const inviteCommunityMembers = async (ids: string[]): Promise<void> => {
+    if (!selected || selected.kind !== "community" || ids.length === 0) {
+      throw new Error("Выберите сообщество и участников.");
+    }
+    const updated = await apiRequest<ChannelView>(
+      `/api/v1/me/messaging/channels/${selected.id}/members`,
+      { method: "POST", headers: csrfHeaders(), body: JSON.stringify({person_ids:ids}) },
+    );
+    client.setQueryData<ChannelView[]>(["messaging-channels"], previous =>
+      previous?.map(channel => channel.id === updated.id ? updated : channel)
+    );
+    await client.invalidateQueries({ queryKey: ["messaging-channels"] });
+  };
+
   const createGroup = async (title: string, peerIds: string[]): Promise<void> => {
     setActionError("");
     try {
@@ -638,6 +652,10 @@ export function MessagingWorkspace({
             onClose={() => { if (isNarrow) setMobilePane("chat"); else setContextOpen(false); }}
             onToggleMute={requestMute}
             messageRefs={messages.flatMap((message) => message.artifact_refs)}
+            messages={messages}
+            contacts={contactsQuery.data ?? []}
+            onOpenMember={createDialog}
+            onInvite={inviteCommunityMembers}
             onOpenTask={quickTargets?.task !== undefined && quickTargets.task >= 0
               ? (taskId) => {
                   navigateClient(`/workspace/${String(quickTargets.task)}?task=${encodeURIComponent(taskId)}`);
