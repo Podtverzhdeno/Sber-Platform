@@ -1992,3 +1992,106 @@
 .workspace-content .trajectory-v2-reading-resources a:focus-visible {
   outline:2px solid #72ecfb;outline-offset:3px;border-radius:3px;
 }
+
+
+/* Role status palette: gold = the sole primary trajectory, blue = enrolled
+   supplementary study, grey = not enrolled. Clicking a card changes its
+   detail selection, never its underlying enrollment/primary status. */
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="primary"] {
+  border: 2px solid #e8aa36;
+  background: linear-gradient(150deg, #392b14 0%, #1c251e 49%, #0c2131 100%);
+  box-shadow: 0 0 0 1px #bf852952, inset 0 1px 0 #ffc96418;
+  opacity: 1;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="primary"][aria-pressed="true"] {
+  border-color: #ffcc61;
+  box-shadow: 0 0 0 1px #f0b849a1, 0 0 20px #d894242d, inset 0 1px 0 #ffe4a334;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="primary"] .trajectory-v2-role-icon,
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="primary"] .trajectory-v2-role-icon[data-glyph] {
+  background: linear-gradient(145deg, #78501e, #503513);
+  color: #ffd374;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="primary"] progress {
+  accent-color: #e9a936;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="primary"] progress::-webkit-progress-value {
+  background: #e9a936;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="primary"] progress::-moz-progress-bar {
+  background: #e9a936;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="primary"] .trajectory-v2-primary-check {
+  background: #f5bd49;
+  color: #302006;
+  box-shadow: 0 0 12px #f7b84744;
+}
+
+/* Additional enrolled roles remain blue even if they are not selected. */
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="learning"] {
+  border: 1px solid #235c83;
+  background: linear-gradient(145deg, #082439, #081c30);
+  box-shadow: none;
+  opacity: 1;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="learning"][aria-pressed="true"] {
+  border: 2px solid #36a7f7;
+  background: linear-gradient(145deg, #0a3658, #092238);
+  box-shadow: 0 0 0 1px #2e87d84f;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="learning"] .trajectory-v2-role-icon,
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="learning"] .trajectory-v2-role-icon[data-glyph] {
+  background: #134677;
+  color: #4cb7ff;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="learning"] progress {
+  accent-color: #319ff3;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="learning"] progress::-webkit-progress-value {
+  background: #319ff3;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="learning"] progress::-moz-progress-bar {
+  background: #319ff3;
+}
+
+/* An unchosen catalogue role stays neutral, even when its details are open. */
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="unselected"],
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="unselected"][aria-pressed="true"] {
+  border: 1px solid #273b4c;
+  background: #081724;
+  box-shadow: none;
+  opacity: .78;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="unselected"][aria-pressed="true"] {
+  border-color: #8194a4;
+  outline: 1px solid #596e8066;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="unselected"] .trajectory-v2-role-icon,
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="unselected"] .trajectory-v2-role-icon[data-glyph] {
+  background: #1c2a36;
+  color: #8293a3;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="unselected"] strong,
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="unselected"] small {
+  color: #95a8ba;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-card[data-tone="unselected"]:hover {
+  opacity: 1;
+  border-color: #8495a7;
+}
+
+/* Detail panel reinforces the primary path, not just whichever card was clicked. */
+.workspace-content .trajectory-v2 .trajectory-v2-role-detail[data-tone="primary"] {
+  border-left-color: #e8aa36;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-detail[data-tone="learning"] {
+  border-left-color: #2c9ef4;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-detail[data-tone="unselected"] {
+  border-left-color: #526777;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-detail[data-tone="primary"] .trajectory-v2-role-badge {
+  background: #513916;
+  border-color: #c28e32;
+  color: #ffd379;
+}
