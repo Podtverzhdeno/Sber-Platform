@@ -8,7 +8,7 @@ import {
   MoreHorizontal, Pencil, Rocket, Share2, ShieldCheck, Sparkles, Star, Target, Trophy,
   Users, X, type LucideIcon,
 } from "lucide-react";
-import { apiRequest, type RuntimeApiPath } from "../api/client";
+import { apiRequest } from "../api/client";
 import "./portfolio-v2.scss";
 
 type Contribution = {
@@ -141,7 +141,7 @@ export function ParticipantPortfolioV2() {
   const passportQuery = useQuery({ queryKey: ["talent-passport"], queryFn: () => apiRequest<Passport>("/api/v1/me/talent-passport"), refetchOnMount: "always" });
   const documentsQuery = useQuery({ queryKey: ["project-credentials"], queryFn: () => apiRequest<ProjectDocument[]>("/api/v1/me/project-credentials"), refetchOnMount: "always" });
   const consent = useMutation({
-    mutationFn: ({ scope, granted }: { scope: Scope; granted: boolean }) => apiRequest(`/api/v1/me/consents/${scope}` as RuntimeApiPath, { method: "PUT", headers: csrf(), body: JSON.stringify({ granted }) }),
+    mutationFn: ({ scope, granted }: { scope: Scope; granted: boolean }) => apiRequest(`/api/v1/me/consents/${scope}`, { method: "PUT", headers: csrf(), body: JSON.stringify({ granted }) }),
     onSuccess: async () => { await client.invalidateQueries({ queryKey: ["portfolio"] }); },
     onError: () => setNotice("Не удалось сохранить настройку видимости. Попробуйте ещё раз."),
   });
@@ -184,7 +184,7 @@ export function ParticipantPortfolioV2() {
     {notice && <div className="p2-notice" role="status">{notice}</div>}
     <section className="p2-hero" aria-labelledby="workspace-title">
       <div className="p2-hero-top">
-        <div className="p2-avatar" aria-hidden="true"><span>{portfolio.display_name.split(" ").map(part => part[0]).slice(0,2).join("").toUpperCase()}</span>{verified && <i><Check size={14}/></i>}</div>
+        <div className="p2-avatar" aria-hidden="true">{portfolio.demo_data && portfolio.display_name === "Алекс Речной" ? <img src="/home-reference/avatar.svg" alt="" /> : <span>{portfolio.display_name.split(" ").map(part => part[0]).slice(0,2).join("").toUpperCase()}</span>}{verified && <i><Check size={14}/></i>}</div>
         <div className="p2-person"><div className="p2-overline">ПОДТВЕРЖДЁННЫЙ ПРОФИЛЬ УЧАСТНИКА</div><div className="p2-name-line"><h1 id="workspace-title">{portfolio.display_name}</h1>{verified && <span className="p2-identity-badge"><BadgeCheck size={15}/> Есть подтверждённые результаты</span>}</div><p>Участник Impulse</p><div className="p2-person-about">{portfolio.headline || bio || "Здесь появится описание профессиональных интересов, специализации и практического опыта."}</div></div>
         <div className="p2-hero-controls"><div className="p2-hero-buttons"><button className="p2-primary" type="button" onClick={() => navigateTo(12)}><Pencil size={16}/> Редактировать профиль</button><button className="p2-outline" type="button" onClick={() => void share()}><Share2 size={16}/> Поделиться</button><button className="p2-outline p2-more" aria-label="Настроить видимость" type="button" onClick={() => openTab("about")}><MoreHorizontal size={19}/></button></div><div className="p2-skill-chips">{skills.slice(0,4).map(s => <span key={s.key}>{s.key}</span>)}{skills.length>4 && <span>+{skills.length-4}</span>}{skills.length === 0 && <span>Навыки пока не подтверждены</span>}</div></div>
       </div>
