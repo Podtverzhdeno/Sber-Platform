@@ -11,6 +11,8 @@ on:
       - "frontend/src/features/bootcamp/route-v2.tsx"
       - "frontend/src/features/bootcamp/learning-content/CourseLearningContent.tsx"
       - "frontend/src/features/bootcamp/learning-content/learning-content.scss"
+      - "frontend/src/features/bootcamp/learning-content/ImmersiveCourseExperience.tsx"
+      - "frontend/src/features/bootcamp/learning-content/immersive-course.scss"
       - "frontend/src/components/ui.tsx"
       - "frontend/e2e/bootcamp-approved.spec.ts"
       - "frontend/e2e/bootcamp-immersive.spec.ts"
