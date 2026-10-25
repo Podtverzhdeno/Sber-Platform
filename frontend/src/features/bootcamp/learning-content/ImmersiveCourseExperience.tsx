@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCircle2, ChevronRight,
@@ -46,6 +46,8 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const client = useQueryClient();
   const [current, setCurrent] = useState(0);
   const resumedCourse = useRef<string | null>(null);
+  const lessonMainRef = useRef<HTMLElement>(null);
+  const scrollOnLessonChange = useRef(false);
   const [view, setView] = useState<View>(initialView);
   const [checks, setChecks] = useState<ReadonlySet<string>>(() => new Set());
   const [answer, setAnswer] = useState<number | null>(null);
@@ -58,6 +60,19 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const [courseCelebrationDays, setCourseCelebrationDays] = useState<number | null>(null);
   const finishBaselineDays = useRef<number | null>(null);
   const path = studyPath(courseKey);
+  // The course lives in a scrollable Drawer, not in the document scroll.
+  // After React renders the next lesson, align its content below the sticky header.
+  useLayoutEffect(() => {
+    if (!scrollOnLessonChange.current) return;
+    scrollOnLessonChange.current = false;
+    const main = lessonMainRef.current;
+    const drawer = main?.closest<HTMLElement>(".overlay-panel--drawer");
+    if (!main || !drawer) return;
+    const header = drawer.querySelector<HTMLElement>(":scope > header");
+    const targetTop = drawer.scrollTop + main.getBoundingClientRect().top
+      - drawer.getBoundingClientRect().top - (header?.offsetHeight ?? 0) - 12;
+    drawer.scrollTo({ top: Math.max(0, targetTop), behavior: "auto" });
+  }, [current, view]);
   const progress = useQuery({
     queryKey: ["impulse-study", courseKey],
     queryFn: () => apiRequest<Progress>(path),
@@ -144,6 +159,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   }
   function selectLesson(index: number) {
     if (index > completed && !certificateId) return;
+    scrollOnLessonChange.current = true;
     setCurrent(index);
     setAnswer(null);
     setShowExpected(false);
@@ -155,11 +171,13 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     try {
       if (current === completed) await advance.mutateAsync(current);
       if (current < total - 1) {
+        scrollOnLessonChange.current = true;
         setCurrent(current + 1);
         setView("theory");
         setAnswer(null);
         setShowExpected(false);
       } else {
+        scrollOnLessonChange.current = true;
         setView("finish");
       }
     } catch {
@@ -263,7 +281,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           })}
         </ol>
       </aside>
-      <main className="imp-study__main">
+      <main ref={lessonMainRef} className="imp-study__main">
         {view === "program" ? <>
           <div className="imp-study__section-heading"><span>Программа курса</span><h2>{courseTitle}</h2>
             <p>{program.description}</p></div>
