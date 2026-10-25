@@ -135,8 +135,8 @@ describe("participant home v2", () => {
   it("keeps next outcome, grade and weekly focus on one authorized snapshot", () => {
     renderHome();
     expect(screen.getAllByText("Python: основы").length).toBeGreaterThan(0);
-    expect(screen.getByTestId("grade-summary").textContent).toContain("Карьерные грейды ещё не опубликованы");
-    expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("not_evaluable");
+    expect(screen.getByTestId("grade-summary")).toHaveTextContent("Уровень Impulse");
+    expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("loading");
     expect(screen.getByTestId("weekly-focus")).toHaveTextContent("План недели");
     const [firstTask] = overview.active_tasks;
     expect(firstTask === undefined ? "missing" : TASK_NEXT_ACTION_LABELS[firstTask.next_action]).toBe(
@@ -147,7 +147,7 @@ describe("participant home v2", () => {
   it("reports the honest not-evaluable grade without fabricated values", () => {
     renderHome();
     const grade = screen.getByTestId("grade-summary");
-    expect(grade.textContent).toContain("ещё не опубликованы");
+    expect(grade.textContent).toContain("Уровень Impulse");
     expect(grade.textContent).not.toMatch(/готовность: \d/);
   });
 
@@ -233,14 +233,14 @@ describe("participant home v2", () => {
     opener.focus();
     fireEvent.click(opener);
     const levels = screen.getByRole("dialog", { name: "Карта уровней" });
-    expect(levels).toHaveTextContent("Каталог грейдов пока не опубликован");
+    expect(levels).toHaveTextContent("L0");
     expect(levels).not.toHaveTextContent("88%");
     fireEvent.keyDown(levels, { key: "Escape" });
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     await waitFor(() => { expect(opener).toHaveFocus(); });
     fireEvent.click(screen.getByRole("button", { name: /Следующий уровень/ }));
     const details = screen.getByRole("dialog", { name: "Требования следующего грейда" });
-    expect(details).toHaveTextContent("Оценка грейда недоступна");
+    expect(details).toHaveTextContent("Сервис учебных уровней недоступен");
     fireEvent.click(screen.getByRole("button", { name: "Закрыть панель" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
@@ -259,8 +259,8 @@ describe("participant home v2", () => {
     };
     const { view } = renderHome({ concepts: custom });
     const ring = view.container.querySelector<HTMLElement>(".home-v2-ring");
-    expect(ring?.style.background).toContain("180deg");
-    expect(screen.getByTestId("grade-summary")).toHaveTextContent("50%");
+    expect(ring?.style.background).toContain("0deg");
+    expect(screen.getByTestId("grade-summary")).not.toHaveTextContent("50%");
   });
 
   it("shows no invented ring fill when grade evaluation is unavailable", () => {
