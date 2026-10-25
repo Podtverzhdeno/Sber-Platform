@@ -211,7 +211,7 @@ describe("trajectory v2 stage path", () => {
     if (!unselected) throw new Error("Missing preview role");
     const view = { ...overviewFixture, roles: [unselected, ...rolesFixture.filter(role => role.track_key !== "product")], next_outcome:null };
     renderShell("/workspace/1", { overview:view });
-    await waitFor(() => { expect(screen.getByTestId("trajectory-role-detail")).toHaveTextContent("Python-разработчик"); });
+    await waitFor(() => { expect(screen.getByTestId("trajectory-role-detail")).toHaveTextContent("AI Security Engineer"); });
     expect(screen.getByTestId("trajectory-role-detail")).not.toHaveAttribute("data-tone","unselected");
   });
 
