@@ -1,8 +1,18 @@
 import { expect, test } from "@playwright/test";
 import { installBootcampReferenceApi } from "./bootcamp-reference-fixtures";
+import { overviewFixture } from "../src/features/participant-home-v2/fixture";
+
+async function productTrajectoryFixture(page:import("@playwright/test").Page){
+  await page.route("**/api/v1/participant/me/development-overview",route=>route.fulfill({json:{
+    ...overviewFixture,
+    roles:[...overviewFixture.roles,{track_key:"product",title:"AI Architect",state:"active",attempt_number:1,completed_milestones:0,total_milestones:2}],
+  }}));
+}
+
 
 test("finishing a saved required Impulse course refreshes the role's learning stage and removes stale demand", async ({ page }) => {
   await installBootcampReferenceApi(page);
+  await productTrajectoryFixture(page);
   await page.setViewportSize({ width:1448, height:950 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
@@ -95,6 +105,7 @@ test("finishing from the real course player updates the requirement banner witho
 
 test("official grade promotion animation requires an actual change in the server projection",async({page})=>{
   await installBootcampReferenceApi(page);
+  await productTrajectoryFixture(page);
   let currentGrade="L1";
   await page.route("**/api/v1/me/bootcamp/overview?track=product",route=>route.fulfill({json:{
     selected_track_key:"product",
