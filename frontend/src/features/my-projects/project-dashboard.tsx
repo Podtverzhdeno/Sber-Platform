@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import {
-  Activity, ArrowLeft, ArrowRight, CalendarDays, Check, CheckCheck,
-  ChevronRight, CircleDot, ClipboardCheck, Code2, Database, ExternalLink,
-  FileCode2, FileText, FolderOpen, GitBranch, Info, Layers3, Link2,
-  ListTodo, MessageCircle, Network, Plus, ShieldCheck, Sparkles,
-  Target, Trophy, UploadCloud, Users, X,
+  Activity, ArrowLeft, ArrowRight, CalendarDays, Check,
+  ChevronRight, CircleDot, ClipboardCheck, Code2, Database,
+  FileCode2, FileText, GitBranch, Info, Layers3, Link2,
+  ListTodo, MessageCircle, Plus, ShieldCheck, Sparkles,
+  Target, UploadCloud, Users, X,
 } from "lucide-react";
 import "./project-dashboard.scss";
 
