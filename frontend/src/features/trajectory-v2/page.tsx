@@ -782,8 +782,6 @@ export function StagePathSection(props: {
   const visibleStageKey = isSelectedStage(props.stageKey, roadmap.milestones, currentKey);
   const visibleMilestone = roadmap.milestones.find((m) => m.key === visibleStageKey);
   const studyProgress=trajectoryStudyProgress(roadmap.milestones,props.learningCourses,role.attempt_number!==null);
-  const lessonsDone=studyProgress.lessonsDone;
-  const lessonsTotal=studyProgress.lessonsTotal;
   return (
     <section className="trajectory-v2-stage-block" aria-label="Этапы" data-testid="trajectory-stages">
       <header>
@@ -827,14 +825,14 @@ export function StagePathSection(props: {
           );
         })}
       </ol>
-      {(studyProgress.matchedCourses > 0 || lessonsTotal > 0) && <div className="trajectory-v2-study-summary" data-testid="trajectory-study-evidence" role="status">
+      {studyProgress.matchedCourses > 0 && <div className="trajectory-v2-study-summary" data-testid="trajectory-study-evidence" role="status">
         <div className="trajectory-v2-study-summary__text">
           <strong>{studyProgress.finishedCourses} из {studyProgress.matchedCourses} учебных курсов завершено</strong>
-          <small>{lessonsDone} из {lessonsTotal} уроков · {role.completed_milestones} из {roadmap.milestones.length} этапов подтверждено</small>
+          <small>{role.completed_milestones} из {roadmap.milestones.length} этапов подтверждено</small>
         </div>
-        {lessonsTotal > 0 && <div className="trajectory-v2-studying" data-testid="trajectory-study-progress">
-          <progress max={lessonsTotal} value={lessonsDone} aria-label="Учебный прогресс выбранной траектории"/>
-        </div>}
+        <div className="trajectory-v2-studying" data-testid="trajectory-study-progress">
+          <progress max={studyProgress.matchedCourses} value={studyProgress.finishedCourses} aria-label="Завершённые курсы выбранной траектории"/>
+        </div>
       </div>}
       {visibleMilestone === undefined || props.showDetails === false ? null : (
         <StageDetail
