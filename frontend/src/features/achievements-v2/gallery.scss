@@ -229,7 +229,7 @@
   .ach-gallery-add-preview p {font-size:12px;color:#aac2d4;line-height:1.5;max-width:330px;margin:0 0 18px;}
 }
 @media(max-width:1380px) {
-  .ach-gallery .ach-gallery-hero {padding:23px 28px;min-height:218px;height:auto;}\n  .ach-gallery .ach-gallery-copy {max-width:62%;}\n  .ach-gallery .ach-gallery-copy h1 {font-size:31px;}
+  .ach-gallery .ach-gallery-hero {padding:23px 28px;min-height:218px;height:auto;}\n  .ach-gallery .ach-gallery-copy {max-width:62%;}\n  .ach-gallery .ach-gallery-copy h1 {font-size:clamp(27px,2.25vw,34px);letter-spacing:-1.15px;}
   .ach-gallery .ach-gallery-scene {right:11%;transform:scale(.85);}
   .ach-gallery .ach-gallery-tools {display:grid;gap:10px;}
   .ach-gallery .ach-gallery-filterbar {width:100%;margin:0;justify-content:flex-start;}
@@ -276,6 +276,44 @@
   .ach-gallery .ach-gallery-add nav button svg:last-child {display:none;}
   .ach-gallery .ach-gallery-add {padding:18px;}
 }
+/* Fidelity adjustments: preserve the two-line hero composition from the reference and
+   add a cinematic, layered treatment to each category's illustrated surface. */
+@media (min-width:721px) and (max-width:1380px) {
+  .ach-gallery .ach-gallery-copy {max-width:69%;}
+  .ach-gallery .ach-gallery-hero {min-height:218px;}
+  .ach-gallery .ach-gallery-copy h1 {max-width:630px;line-height:1.13;letter-spacing:-1.3px;}
+  .ach-gallery .ach-gallery-scene {right:4%;opacity:.92;}
+}
+.ach-gallery .ach-gallery-card .ach-gallery-art {
+  box-shadow:inset 0 0 22px #080e2f77,0 0 11px #071d3e63;
+}
+.ach-gallery .ach-gallery-art-grid {opacity:.22;}
+.ach-gallery .ach-gallery-card--project .ach-gallery-art {
+  background:
+    radial-gradient(ellipse at 55% 65%,#21fad947,transparent 41%),
+    linear-gradient(140deg,#052d35,#074b4b 42%,#001a2c 100%);
+}
+.ach-gallery .ach-gallery-card--certificate .ach-gallery-art {
+  background:
+    radial-gradient(ellipse at 44% 62%,#82b3ff90,transparent 40%),
+    linear-gradient(140deg,#0b4ed4,#19329b 46%,#091136 100%);
+}
+.ach-gallery .ach-gallery-card--event .ach-gallery-art {
+  background:
+    radial-gradient(ellipse at 55% 80%,#e36af580,transparent 46%),
+    linear-gradient(140deg,#311075,#5815ac 51%,#090a2d 100%);
+}
+.ach-gallery .ach-gallery-card--trophy .ach-gallery-art {
+  background:
+    radial-gradient(ellipse at 50% 55%,#ff5ef350,transparent 42%),
+    linear-gradient(140deg,#651367,#350f56 60%,#0d0d32 100%);
+}
+.ach-gallery .ach-gallery-art>svg {filter:drop-shadow(0 0 10px var(--ag-art-primary)) drop-shadow(0 12px 12px #0008);}
+.ach-gallery .ach-gallery-art>img {filter:hue-rotate(88deg) saturate(1.8) drop-shadow(0 0 17px #f541debb);}
+.ach-gallery .ach-gallery-art-orb {filter:blur(30px);opacity:.49;}
+.ach-gallery .ach-gallery-drawer-content {padding-top:20px;}
+.ach-gallery .ach-gallery-drawer-art {border-color:#317089;}
+.ach-gallery .ach-gallery-drawer-cover {background:#010c1bcc;backdrop-filter:blur(4px);}
 @media(min-width:500px) and (max-width:720px) {
   .ach-gallery .ach-gallery-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
 }
