@@ -1,0 +1,18 @@
+# Claim ARCH-001
+- task_id: ARCH-001
+- session_id: gpt6-20261026-architecture-inventory-02
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: bd64ac98d6179820fb49883b64e7619ac9109a9e
+- depends_on: []
+- write_scope:
+  - scripts/architecture/**
+  - tests/architecture/**
+  - .agents/coordination/claims/ARCH-001.lock/status.md
+- shared_files: []
+- verification:
+  - python -m unittest discover -s tests/architecture -v
+  - python scripts/architecture/audit.py --root . --output-dir /tmp/architecture-audit
+- progress: inventory manifests read from GitHub recursive tree; developing reproducible stdlib-only audit and unit tests
+- blockers: no local Git checkout; execute all-source checks through GitHub CI after committing the isolated audit tool
