@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, BookOpenText, CheckCircle2, CircleHelp, Compass, Search, ShieldCheck, Sparkles, X } from "lucide-react";
 import { HELP_CATEGORIES, HELP_TOPICS, searchHelpTopics, topicsForSection, type HelpCategory } from "./participant-help-content";
 
-type Props = { section: string; initialTopicId: string | null; onClose: () => void; onOpenTour: () => void; onNavigateSection?: (section: string) => void };
-export function ParticipantHelpCenter({ section, initialTopicId, onClose, onOpenTour, onNavigateSection }: Props) {
+type Props = { section: string; initialTopicId: string | null; onClose: () => void; onOpenTour: () => void; availableSections?: string[]; onNavigateSection?: (section: string) => void };
+export function ParticipantHelpCenter({ section, initialTopicId, onClose, onOpenTour, availableSections, onNavigateSection }: Props) {
   const [category, setCategory] = useState<"related" | "all" | HelpCategory>(initialTopicId ? "all" : "related");
   const [query, setQuery] = useState("");
   const [topicId, setTopicId] = useState<string | null>(initialTopicId);
@@ -60,7 +60,7 @@ export function ParticipantHelpCenter({ section, initialTopicId, onClose, onOpen
             <div className="pg-help-article-bottom"><section><h4><CheckCircle2 size={16}/> Перед следующим шагом проверь</h4>{selected.checklist.map((line) => <p key={line}><CheckCircle2 size={14}/>{line}</p>)}</section><section className="pg-help-watch"><h4><CircleHelp size={16}/> На что обратить внимание</h4><p>{selected.caution}</p></section></div>
             <div className="pg-help-article-actions">
               <button type="button" className="pg-help-main-btn" onClick={() => { setTopicId(null); }}><BookOpenText size={15}/> Другие инструкции</button>
-              {selected.section && onNavigateSection && selected.section !== section && <button type="button" onClick={() => { onNavigateSection(selected.section ?? section); onClose(); }}>К разделу «{selected.section}» <ArrowRight size={15}/></button>}
+              {selected.section && onNavigateSection && selected.section !== section && (!availableSections || availableSections.includes(selected.section)) && <button type="button" onClick={() => { onNavigateSection(selected.section ?? section); onClose(); }}>К разделу «{selected.section}» <ArrowRight size={15}/></button>}
             </div>
           </> : <>
             <div className="pg-help-search"><Search size={19}/><input ref={searchRef} aria-label="Поиск по инструкциям" value={query} onChange={(event) => { setQuery(event.target.value); }} placeholder="Например: как отправить решение, что такое Skill Passport…" /></div>
