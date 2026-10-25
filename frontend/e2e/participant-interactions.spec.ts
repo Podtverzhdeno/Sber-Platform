@@ -445,12 +445,14 @@ test("rating benefits navigate from the default list and back", async ({ page })
   await expect(rewards.nth(2)).toContainText("ТОП 50");
   const rewardArt = rewards.locator(".ir-art");
   await expect(rewardArt).toHaveCount(3);
-  await expect(rewardArt.nth(0)).toHaveCSS("background-position", "0% 50%");
-  await expect(rewardArt.nth(1)).toHaveCSS("background-position", "50% 50%");
-  await expect(rewardArt.nth(2)).toHaveCSS("background-position", "100% 50%");
-  const asset = await page.request.get("/rating-reference/rewards.svg");
-  expect(asset.status()).toBe(200);
-  expect(asset.headers()["content-type"]).toContain("image/svg+xml");
+  for (const [index, tier] of ["top30", "top1", "top50"].entries()) {
+    await expect(rewardArt.nth(index)).toHaveCSS(
+      "background-image", new RegExp("/rating-reference/" + tier + "\\.svg"),
+    );
+    const asset = await page.request.get("/rating-reference/" + tier + ".svg");
+    expect(asset.status()).toBe(200);
+    expect(asset.headers()["content-type"]).toContain("image/svg+xml");
+  }
   await rewards.nth(1).click();
   await expect(page.getByRole("dialog", { name: /ТОП 1/ })).toBeVisible();
   await page.keyboard.press("Escape");
