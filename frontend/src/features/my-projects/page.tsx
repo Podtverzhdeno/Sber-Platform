@@ -3,10 +3,9 @@ import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Award, Bookmark, BriefcaseBusiness, CalendarDays,
-  Check, CheckCircle2, ChevronDown, Clock3, Code2, Crown, FileText,
-  FolderKanban, Gift, Info, Layers3, LayoutGrid, List, LockKeyhole,
-  MessageCircle, MoreHorizontal, Search, Share2, ShieldCheck, SlidersHorizontal,
-  Sparkles, Star, Trophy, Users, Zap,
+  Check, CheckCircle2, ChevronDown, Code2, Crown, FileText,
+  FolderKanban, Gift, Info, Layers3, LayoutGrid, List,
+  MessageCircle, Search, Share2, SlidersHorizontal, Star, Users,
 } from "lucide-react";
 import { apiRequest } from "../../api/client";
 import { StatePanel } from "../../components/ui";
@@ -273,7 +272,7 @@ export function ParticipantProjectsV2() {
           {visible.map(project=><ProjectSummary key={project.work.assignment.id} project={project} selected={focused?.work.assignment.id===project.work.assignment.id} onSelect={()=>setFocus(project.work.assignment.id)} onOpen={()=>open(project.work.assignment.id)} saved={saved.includes(project.work.assignment.id)} onBookmark={()=>setSaved(prev=>prev.includes(project.work.assignment.id)?prev.filter(i=>i!==project.work.assignment.id):[...prev,project.work.assignment.id])}/>)}
           {!visible.length&&<p className="mp-muted mp-empty-row">Подходящих проектов нет. Измените фильтры.</p>}
         </div>
-        {visible.length>0&&<PanelPreview project={visible.find(p=>p.work.assignment.id===focus)||visible[0]} onOpen={()=>open((visible.find(p=>p.work.assignment.id===focus)||visible[0]).work.assignment.id)} onRewards={()=>{setRewardFocus("gigacode");window.scrollTo({top:0,behavior:"smooth"});}}/>}
+        {visible.map(project=>project.work.assignment.id===(visible.find(p=>p.work.assignment.id===focus)?.work.assignment.id ?? visible[0]?.work.assignment.id) ? <PanelPreview key={project.work.assignment.id} project={project} onOpen={()=>open(project.work.assignment.id)} onRewards={()=>{setRewardFocus("gigacode");window.scrollTo({top:0,behavior:"smooth"});}}/> : null)}
       </div>:<div className="mp-list-layout"><div className="mp-list-search"><Search size={17}/><input aria-label="Поиск проектов" value={text} onChange={e=>setText(e.target.value)} placeholder="Поиск по проектам, компаниям и результатам"/><SlidersHorizontal size={17}/></div>{visible.length?<ProjectList projects={visible} onOpen={open}/>:<div className="mp-empty-row">По заданным условиям проекты не найдены</div>}</div>}
       </>}
   </div>;
