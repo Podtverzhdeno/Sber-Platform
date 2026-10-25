@@ -240,3 +240,64 @@ test("finished course appears in Analytics and Trajectory from one persisted lea
   await expect(trajectory.getByTestId("learn-reviewed")).toHaveText("0");
   await expect(trajectory).toContainText("Самостоятельное обучение");
 });
+
+
+test("completing an actual Bootcamp course triggers one verified streak celebration", async ({ page }) => {
+  test.setTimeout(90_000);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  let qualifyingLessonSaved = false;
+  await page.route("**/api/v1/me/engagement/overview", route => route.fulfill({
+    json: {
+      current_days: qualifyingLessonSaved ? 12 : 11,
+      best_days: 12,
+      qualified_dates: qualifyingLessonSaved
+        ? ["2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17",
+          "2026-10-18", "2026-10-19", "2026-10-20", "2026-10-21",
+          "2026-10-22", "2026-10-23", "2026-10-24", "2026-10-25"]
+        : ["2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17",
+          "2026-10-18", "2026-10-19", "2026-10-20", "2026-10-21",
+          "2026-10-22", "2026-10-23", "2026-10-24"],
+      today_saved: qualifyingLessonSaved,
+      grace_available: !qualifyingLessonSaved,
+      frozen_dates: [],
+      freeze_state: "idle",
+      reason: qualifyingLessonSaved
+        ? "Урок засчитан в сегодняшнюю активность."
+        : "Сегодня ещё не было учебного действия.",
+    },
+  }));
+  // Fall back to the existing course-progression fixture, then let the
+  // authoritative engagement overview reflect the committed first lesson.
+  await page.route("**/api/v1/me/bootcamp/impulse-study/demo-course-1/lessons/0/complete", async route => {
+    qualifyingLessonSaved = true;
+    await route.fallback();
+  });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByRole("button", { name: /Учебный стрик: 11 дней/ })).toBeVisible();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const path = new URL(page.url()).pathname;
+  await page.goto(path + "?course=demo-course-1");
+  const reader = page.getByTestId("impulse-immersive-reader");
+  await expect(reader).toBeVisible();
+  await reader.getByRole("button", { name: /Перейти к программе/ }).click();
+  await reader.locator(".imp-study__program-list button").first().click();
+  await reader.getByRole("button", { name: "Следующий урок" }).click();
+  const celebration = page.getByTestId("streak-celebration");
+  await expect(celebration).toBeVisible();
+  await expect(celebration).toHaveAttribute("aria-label", /12 дней подряд/);
+  await expect(celebration).toContainText("СЕРИЯ ПРОДОЛЖЕНА");
+  await celebration.getByRole("button", { name: "Пропустить анимацию" }).click();
+  await expect(celebration).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /Учебный стрик: 12 дней/ })).toBeVisible();
+  for (let index = 1; index < 8; index++) {
+    await reader.locator(".imp-study__navigation .imp-study__primary").click();
+  }
+  await reader.locator(".imp-study__finish").click();
+  await expect(reader.getByRole("heading", { name: "Обучение завершено!" })).toBeVisible();
+  await expect(page.getByRole("button", { name: /Учебный стрик: 12 дней/ })).toBeVisible();
+  await expect(page.getByTestId("streak-celebration")).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("button", { name: /Учебный стрик: 12 дней/ })).toBeVisible();
+  await expect(page.getByTestId("streak-celebration")).toHaveCount(0);
+});
