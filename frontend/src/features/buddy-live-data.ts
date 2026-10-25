@@ -36,13 +36,6 @@ export type BuddyPassport = {
   skills: { key: string; practical_level: string; confirmed_case_count: number }[];
 };
 
-export type BuddyOwnStanding = {
-  season_id: string;
-  season_title: string;
-  place: number | null;
-  score: string | number | null;
-};
-
 export type BuddyAnalytics = {
   next_action: string;
   freshness: string;
@@ -56,12 +49,6 @@ export function loadBuddyJourney(): Promise<BuddyJourney> {
 
 export function loadBuddyPassport(): Promise<BuddyPassport> {
   return apiRequest<BuddyPassport>("/api/v1/me/talent-passport", { cache: "no-store" });
-}
-
-export function loadBuddyOwnStandings(): Promise<BuddyOwnStanding[]> {
-  return apiRequest<BuddyOwnStanding[]>("/api/v1/me/rating/standings" as RuntimeApiPath, {
-    cache: "no-store",
-  });
 }
 
 export function loadBuddyAnalytics(): Promise<BuddyAnalytics> {
@@ -82,13 +69,6 @@ export function countConfirmedSkills(passport: BuddyPassport): number {
   return passport.skills.filter(skill =>
     skill.confirmed_case_count > 0 && skill.practical_level === "confirmed"
   ).length;
-}
-
-export function firstOwnPlace(standings: BuddyOwnStanding[]): number | null {
-  const place = standings[0]?.place;
-  return typeof place === "number" && Number.isInteger(place) && place > 0
-    ? place
-    : null;
 }
 
 export function normalizeNextAction(analytics: BuddyAnalytics | undefined): string | null {
