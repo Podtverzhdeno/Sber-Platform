@@ -39,6 +39,7 @@ async function openReferenceVolumeCatalog(page: Page) {
   await page.locator('[data-persona="participant-synthetic"]').click();
   await page.getByRole("link", { name: "Задачи", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
+  await page.getByRole("button", { name: "Карточки" }).click();
   await expect(page.locator(".catalog-v2-card")).toHaveCount(10);
   await page.evaluate(() => document.fonts.ready);
 }
