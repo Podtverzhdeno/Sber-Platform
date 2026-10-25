@@ -23,3 +23,6 @@ release_request=2026-10-25-projects-ts-clean-3b71e75
 
 # 3 My Projects screens with verified SVG logos and 3-state E2E screenshots
 release_request=2026-10-25-my-projects-v2-logos-cf6612f
+
+# Verify final My Projects 3 views: logos, bookmarks, hover animations, workspace and E2E captures
+release_request=2026-10-25-my-projects-final-61e86e1
