@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   ArrowRight, Award, BriefcaseBusiness, CalendarDays, Check, CheckCircle2,
   ChevronRight, Clock3, Code2, FileCheck2, FileText, Gift, Info,
@@ -27,10 +27,10 @@ function StageRing({ value, size = "large" }:{value:number|null;size?:"large"|"s
     <strong>{value===null?"—":`${value}%`}</strong>
   </div>;
 }
-function Card({children, className=""}:{children:React.ReactNode;className?:string}) {
+function Card({children, className=""}:{children:ReactNode;className?:string}) {
   return <section className={`mp-ref-card ${className}`}>{children}</section>;
 }
-function Title({children,icon:Icon}:{children:React.ReactNode;icon:typeof Target}) {
+function Title({children,icon:Icon}:{children:ReactNode;icon:typeof Target}) {
   return <h2 className="mp-ref-title"><span className="mp-ref-title-icon"><Icon size={18}/></span>{children}</h2>;
 }
 type TasksProps={
@@ -57,12 +57,12 @@ export function ProjectReferenceTasks({checkpoints,decisions,projectDescription,
           {([{id:"all",title:"Все задачи",count:checkpoints.length},{id:"active",title:"В работе",count:active},
             {id:"review",title:"На проверке",count:review},{id:"done",title:"Завершено",count:finished}] as const).map(item=>
             <button type="button" key={item.id} className={filter===item.id?"is-active":""} aria-pressed={filter===item.id}
-              onClick={()=>setFilter(item.id)}>{item.title} · {item.count}</button>)}
+              onClick={()=>{setFilter(item.id);}}>{item.title} · {item.count}</button>)}
         </div>
         {shown.length?shown.map((c)=>{
           const passed=doneStates.has(c.status),isSelected=current?.key===c.key;
           return <button type="button" className={`mp-ref-task-row ${isSelected?"is-selected":""}`} key={c.key}
-            aria-pressed={isSelected} onClick={()=>setSelected(c.key)}>
+            aria-pressed={isSelected} onClick={()=>{setSelected(c.key);}}>
               <span className={`mp-ref-index ${passed?"is-done":""}`}>{passed?<Check size={18}/>:String(checkpoints.findIndex(v=>v.key===c.key)+1).padStart(2,"0")}</span>
               <span className="mp-ref-task-copy"><strong>{c.title}</strong><small>{passed?"Контрольный этап подтверждён":statusLabel(c.status)}</small><em>Этап {checkpoints.findIndex(v=>v.key===c.key)+1}</em></span>
               <span className="mp-ref-task-state"><b>{statusLabel(c.status)}</b><i style={{width:passed?"100%":"0%"}}/></span>
@@ -130,7 +130,7 @@ export function ProjectReferenceTeam({team,customer,mentor,onMessage,onContribut
      <div className="mp-ref-team-list">{team.map(person=><div className="mp-ref-person" key={person.person_id}>
        <span className="mp-ref-avatar">{person.display_name.trim().charAt(0).toUpperCase()}</span><div><strong>{person.display_name}</strong><small>{statusLabel(person.status)}</small></div>
        <span className="mp-ref-pill">Участник</span>
-       <button type="button" aria-label={`Написать ${person.display_name}`} onClick={()=>onMessage(person.person_id)}><MessageCircle size={17}/></button>
+       <button type="button" aria-label={`Написать ${person.display_name}`} onClick={()=>{onMessage(person.person_id);}}><MessageCircle size={17}/></button>
      </div>)}
      {!team.length&&<p className="mp-ref-empty">Состав команды ещё не опубликован</p>}
      </div></Card>
@@ -139,7 +139,7 @@ export function ProjectReferenceTeam({team,customer,mentor,onMessage,onContribut
        <div><span className="mp-ref-blue-square"><Award size={16}/></span><b>Ментор</b><small>{mentor||"Не назначен"}</small></div>
        <div><span className="mp-ref-blue-square"><BriefcaseBusiness size={16}/></span><b>Заказчик</b><small>{customer}</small></div></div>
      </Card>
-     <Card className="mp-ref-tip"><MessageCircle size={19}/><span><strong>Рабочее обсуждение</strong><small>Вопросы и решения удобнее обсуждать в сообщениях</small></span><button type="button" onClick={()=>onMessage()}>Открыть сообщения <ChevronRight size={15}/></button></Card>
+     <Card className="mp-ref-tip"><MessageCircle size={19}/><span><strong>Рабочее обсуждение</strong><small>Вопросы и решения удобнее обсуждать в сообщениях</small></span><button type="button" onClick={()=>{onMessage();}}>Открыть сообщения <ChevronRight size={15}/></button></Card>
    </div>
    <div className="mp-ref-stack"><Card><Title icon={Users}>Состав команды</Title><div className="mp-ref-team-count"><StageRing value={null} size="small"/><div><strong>{team.length} участников</strong><small>Доступных мест не указано</small><p>Заказчик и ментор — отдельные роли</p></div></div></Card>
      <Card><Title icon={Clock3}>Активность команды</Title><p className="mp-ref-muted">Подтверждённые личные результаты и обратная связь доступны в разделе «Мой вклад»</p><button type="button" className="mp-ref-outline" onClick={onContribution}>Посмотреть мой вклад <ArrowRight size={15}/></button></Card>
@@ -157,7 +157,7 @@ export function ProjectReferenceRewards({onContribution,onWorkspace,selected,onS
   ];
   return <div className="mp-ref-columns" role="tabpanel" aria-label="Бонусы и выгоды">
     <div className="mp-ref-stack"><Card><header className="mp-ref-card-head"><h2>Что даст участие в проекте</h2><small>Возможности и условия</small></header>
-      <div className="mp-ref-rewards">{items.map(item=>{const Icon=item.icon;return <button key={item.id} type="button" className={selected===item.id?"is-selected":""} onClick={()=>onSelected(item.id)}><span className="mp-ref-blue-square"><Icon size={19}/></span><span><strong>{item.title}</strong><small>{item.desc}</small></span><span className="mp-ref-reward-when">{item.when}</span><ChevronRight size={17}/></button>;})}</div>
+      <div className="mp-ref-rewards">{items.map(item=>{const Icon=item.icon;return <button key={item.id} type="button" className={selected===item.id?"is-selected":""} onClick={()=>{onSelected(item.id);}}><span className="mp-ref-blue-square"><Icon size={19}/></span><span><strong>{item.title}</strong><small>{item.desc}</small></span><span className="mp-ref-reward-when">{item.when}</span><ChevronRight size={17}/></button>;})}</div>
       {selected&&<p className="mp-ref-reward-note" role="status">Предоставление возможности зависит от подтверждения результата и правил программы; автоматическая выдача не гарантируется</p>}
     </Card>
     <Card><Title icon={Award}>Что формируется по итогам</Title><div className="mp-ref-skill-grid"><div className="mp-ref-skill"><FileText size={20}/><strong>Результат</strong><small>Код и документы после приёмки</small></div><div className="mp-ref-skill"><Award size={20}/><strong>Компетенции</strong><small>После оценки</small></div><div className="mp-ref-skill"><Star size={20}/><strong>Портфолио</strong><small>Подтверждённый кейс</small></div></div></Card>
