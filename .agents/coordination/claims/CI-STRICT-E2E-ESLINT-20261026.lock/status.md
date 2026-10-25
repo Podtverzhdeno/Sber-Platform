@@ -1,6 +1,6 @@
 # Claim CI-STRICT-E2E-ESLINT-20261026
 - session_id: gpt6-20261026-e2e-eslint-small-fixes
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 9b16fcefd78e0e6ef73fea37c4dadc3319203192
@@ -16,5 +16,16 @@
 - shared_files: []
 - verification:
   - scoped strict ESLint; targeted TypeScript check; potential existing feature unit test
-- progress: Resolve TypeScript strict lint errors uncovered in full CI without excluding files or weakening lint configuration; preserve scenario behavior.
+- progress: Fixed strict numeric interpolation, removed unsafe non-null assertions in the production trajectory audit, corrected unknown JSON typing, and guarded prefers-reduced-motion when matchMedia is missing. No relaxed lint rules. Ready for independent review.
+- changed_files:
+  - frontend/e2e/bootcamp-layout-alignment.spec.ts
+  - frontend/e2e/bootcamp-lesson-scroll.spec.ts
+  - frontend/e2e/portfolio-evidence-chart.spec.ts
+  - frontend/e2e/production-trajectory-audit.spec.ts
+  - frontend/src/features/streak-celebration.tsx
+  - .github/workflows/strict-e2e-eslint-qa.yml
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40244805678
+- verification: scoped strict ESLint and tsconfig.node TypeScript PASS
+- unverified: independent review, remaining app-wide TS/format/lint and whole required-gates.
 - blockers: Independent review and complete integration CI.
