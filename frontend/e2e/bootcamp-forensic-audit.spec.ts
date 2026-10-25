@@ -1,4 +1,7 @@
 import { expect, test } from "@playwright/test";
+import { installBootcampReferenceApi } from "./bootcamp-reference-fixtures";
+
+test.beforeEach(async ({ page }) => { await installBootcampReferenceApi(page); });
 
 /**
  * Forensic, read-only screenshot capture of all five BC-R01..BC-R05 screens
@@ -21,7 +24,7 @@ test("forensic Bootcamp five screens at 1448x1086", async ({ page }) => {
   await page.screenshot({ path: "test-results/forensic-bc-r02-list.png", animations: "disabled" });
 
   await view.getByRole("button", { name: "Карточки" }).click();
-  const agentCourse = page.getByTestId("course-agent-development");
+  const agentCourse = page.getByTestId("course-demo-course-2");
   await expect(agentCourse).toBeVisible();
   await agentCourse.getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
   await expect(page.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
