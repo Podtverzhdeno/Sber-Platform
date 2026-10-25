@@ -1,44 +1,56 @@
 import type { RoleCardView } from "../client";
 
-/** Approved role cards missing from some actor snapshots.
- * They are only catalog previews, never enrolled trajectories or progress. */
-const REFERENCE_CATALOG: ReadonlyArray<{ title: string; key: string; order: number; aliases: string[] }> = [
-  { title: "Продуктовый аналитик", key: "catalog-product-reference", order: 0, aliases: ["продуктовый аналитик"] },
-  { title: "ML-инженер", key: "catalog-ml-reference", order: 1, aliases: ["ml-инженер", "ml engineer"] },
-  { title: "Python-разработчик", key: "catalog-python-reference", order: 2, aliases: ["python-разработчик", "python developer"] },
-  { title: "Аналитик данных", key: "catalog-data-reference", order: 3, aliases: ["аналитик данных", "data analyst"] },
-  { title: "Backend-разработчик", key: "catalog-backend-reference", order: 4, aliases: ["backend-разработчик", "backend developer"] },
-  { title: "UX/UI-дизайнер", key: "catalog-design-reference", order: 5, aliases: ["ux/ui-дизайнер", "ux/ui дизайнер"] },
-  { title: "Менеджер проекта", key: "catalog-manager-reference", order: 6, aliases: ["менеджер проекта", "project manager"] },
-];
+/** Canonical names and legacy stable slugs of the demo AI career catalogue.
+ * Slugs MUST NOT change: attempts, deep links and progress refer to them.
+ * Server remains authoritative for all progress, status and enrollment data. */
+export const AI_ROLE_CATALOG = [
+  { key: "product", title: "AI Architect" },
+  { key: "ml", title: "AI Engineer" },
+  { key: "python", title: "AI Security Engineer" },
+  { key: "data", title: "AI Data Engineer" },
+  { key: "backend", title: "MLOps Engineer" },
+  { key: "design", title: "AI Agent Engineer" },
+  { key: "manager", title: "AI Product Engineer" },
+] as const;
 
-function categoryIndex(role: RoleCardView): number {
-  const normalized = role.title.trim().toLocaleLowerCase("ru-RU");
-  const found = REFERENCE_CATALOG.find(item => item.aliases.includes(normalized));
-  return found?.order ?? Number.MAX_SAFE_INTEGER;
+const catalogByKey = new Map<string, { title: string; order: number }>(
+  AI_ROLE_CATALOG.map((item, order) => [item.key, { title: item.title, order }]),
+);
+
+/** Upgrade stale demo display names without rewriting server progress.
+ * Non-demo/unknown role keys are deliberately left untouched. */
+export function canonicalAiRoles(serverRoles: readonly RoleCardView[]): RoleCardView[] {
+  return serverRoles
+    .map(role => {
+      const canonical = catalogByKey.get(role.track_key);
+      return canonical ? { ...role, title: canonical.title } : role;
+    })
+    .sort((a, b) =>
+      (catalogByKey.get(a.track_key)?.order ?? Number.MAX_SAFE_INTEGER)
+      - (catalogByKey.get(b.track_key)?.order ?? Number.MAX_SAFE_INTEGER),
+    );
 }
 
-/** Display server roles without mutation; insert only missing approved cards.
- * A synthetic catalog card may open an empty preview, but must never
- * display progress, action completion, or a server-granted enrollment.
- */
+/** Insert only read-only previews for tracks not yet published in a server
+ * snapshot; never invent enrollment, completed work or earned grade. */
 export function sourceCatalogueRoles(serverRoles: readonly RoleCardView[]): RoleCardView[] {
-  const result = [...serverRoles];
-  const known = new Set(serverRoles.map(item => item.title.trim().toLocaleLowerCase("ru-RU")));
-  const keys = new Set(serverRoles.map(item => item.track_key));
-
-  for (const candidate of REFERENCE_CATALOG) {
-    if (candidate.aliases.some(alias => known.has(alias))) continue;
-    if (keys.has(candidate.key)) continue;
+  const result = canonicalAiRoles(serverRoles);
+  const known = new Set(result.map(role => role.track_key));
+  const knownTitles = new Set(result.map(role => role.title.trim().toLocaleLowerCase("en-US")));
+  for (const item of AI_ROLE_CATALOG) {
+    if (known.has(item.key) || knownTitles.has(item.title.toLocaleLowerCase("en-US"))) continue;
     result.push({
-      track_key: candidate.key,
-      title: candidate.title,
+      track_key: `catalog-${item.key}-reference`,
+      title: item.title,
       state: "unselected",
       attempt_number: null,
       completed_milestones: 0,
       total_milestones: 0,
     });
-    keys.add(candidate.key);
   }
-  return result.sort((a, b) => categoryIndex(a) - categoryIndex(b));
+  return result.sort((a, b) => {
+    const normalized = (key: string) => key.replace(/^catalog-/, "").replace(/-reference$/, "");
+    return (catalogByKey.get(normalized(a.track_key))?.order ?? Number.MAX_SAFE_INTEGER)
+      - (catalogByKey.get(normalized(b.track_key))?.order ?? Number.MAX_SAFE_INTEGER);
+  });
 }
