@@ -9,6 +9,7 @@ export type LearningCourse = {
   total_units: number;
   finished: boolean;
   finished_at: string | null;
+  certificate_id: string | null;
   updated_at: string;
   practice_status: string | null;
   practical_certificate_id: string | null;
