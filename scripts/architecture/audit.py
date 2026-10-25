@@ -9,6 +9,7 @@ import json
 from pathlib import Path, PurePosixPath
 import re
 import subprocess
+import tomllib
 from typing import Any
 
 EXT = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".css", ".scss", ".sql", ".yaml", ".yml", ".json", ".toml", ".ini", ".html"}
@@ -185,6 +186,16 @@ def analyze(root: Path) -> dict[str, Any]:
             mig[path] = source
         if kind == "generated":
             continue
+        if path.endswith(".json"):
+            try:
+                json.loads(source)
+            except json.JSONDecodeError:
+                failures.append(path)
+        elif path.endswith(".toml"):
+            try:
+                tomllib.loads(source)
+            except tomllib.TOMLDecodeError:
+                failures.append(path)
         if path.endswith(".py"):
             try:
                 tree = ast.parse(source, filename=path)
@@ -295,6 +306,11 @@ def main() -> int:
         baseline_path = args.baseline or (args.root / "scripts/architecture/legacy-imports.json")
         baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
         problems = baseline_regressions(report, baseline)
+        if report["unreadable_or_invalid"]:
+            problems.append("Invalid or unreadable tracked sources: " + ", ".join(report["unreadable_or_invalid"]))
+        migration = report["migration_graph"]
+        if len(migration["heads"]) != 1 or migration["orphan_parents"] or migration["missing_revision"]:
+            problems.append("Migration graph invalid: " + json.dumps(migration))
         for problem in problems:
             print("ARCHITECTURE REGRESSION: " + problem)
         if problems:
