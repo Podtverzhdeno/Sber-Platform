@@ -5,7 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { overviewFixture } from "../participant-home-v2/fixture";
 import type { DevelopmentOverviewView } from "../participant-home-v2/client";
-import { StageDetail, TrajectoryV2Body, primaryTrajectoryKey, roleVisualTone } from "./page";
+import { StageDetail, TrajectoryV2Body } from "./page";
+import { primaryTrajectoryKey, roleVisualTone } from "./role-state";
 import { milestoneState } from "./client";
 import type { RoadmapView } from "./client";
 
