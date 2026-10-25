@@ -41,7 +41,9 @@ jobs:
       - name: Verify typed config and browser tests
         run: npx tsc --noEmit -p tsconfig.node.json
       - name: Build the actual production bundle for isolated security verification
-        # App-wide tsc remains a required gate in ci.yml. Avoid unrelated\n        # in-flight UI type errors preventing this independent security scan.\n        run: npx vite build
+        # App-wide tsc remains a required gate in ci.yml.
+        # Isolate this security test from concurrent app TS errors.
+        run: npx vite build
       - name: Verify strict CSP and exact public-source allowlist
         run: npm run security:check
       - name: Ensure an unapproved external link is still rejected
