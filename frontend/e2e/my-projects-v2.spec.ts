@@ -133,12 +133,22 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
   await page.locator(".mp-detail-hero__lower").getByRole("button",{name:"Продолжить работу"}).click();
-  await expect(page.locator(".mpv2--workspace")).toBeVisible();
+  await expect(page.locator('[data-project-screen="dashboard"]')).toBeVisible();
+  await expect(page.getByRole("heading",{name:"Этапы проекта"})).toBeVisible();
+  await page.getByRole("button",{name:"Подробнее"}).click();
+  const info=page.getByRole("dialog",{name:"Подробнее о проекте"});
+  await expect(info).toBeVisible();
+  await expect(info.getByText("Какую проблему решаем")).toBeVisible();
+  await expect(info.getByText("Что заказчик хочет получить")).toBeVisible();
+  await expect(info.getByText("Исследование требований")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(info).toHaveCount(0);
+  await page.getByRole("button",{name:"Этапы",exact:true}).click();
+  await expect(page.getByRole("button",{name:"Назад к обзору"})).toBeVisible();
+  await page.getByRole("button",{name:"Назад к обзору"}).click();
   await page.getByRole("button",{name:"Загрузить новую версию"}).click();
-  await expect(page.locator(".mpv2--workspace .ctw-upload")).toBeVisible();
-  await expect(page.locator(".mpv2--workspace .ctw-upload .ctw-section-toggle")).toHaveAttribute("aria-expanded","true");
-  await page.getByRole("button",{name:"К странице проекта"}).click();
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
+  await expect(page.getByRole("tab",{name:"Мой вклад"})).toHaveAttribute("aria-selected","true");
 });
 
 test("My Projects: reference desktop grid and contextual help",async({page})=>{
@@ -236,4 +246,25 @@ test("My Projects: contribution upload uses allowed artifact key and real API pa
   expect(posted).toMatchObject({
     artifacts:[{key:"report",uri:"https://example.org/reports/final"}],
   });
+});
+
+test("Project information popup is read-only, detailed, responsive and dismissible",async({page})=>{
+  await page.setViewportSize({width:1280,height:900});
+  await fixture(page);
+  await page.locator(".mp-card-list .mp-open-tile").first().click();
+  await page.locator(".mp-detail-hero__lower").getByRole("button",{name:"Продолжить работу"}).click();
+  const dashboard=page.locator('[data-project-screen="dashboard"]');
+  await expect(dashboard).toBeVisible();
+  await dashboard.getByRole("button",{name:"Подробнее"}).click();
+  const dialog=page.getByRole("dialog",{name:"Подробнее о проекте"});
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText("Реальный исследовательский проект")).toBeVisible();
+  await expect(dialog.getByText("Прототип")).toBeVisible();
+  await expect(dialog.getByText("Версия условий")).toBeVisible();
+  await expect(dialog.locator(".mpd-criteria li")).toHaveCount(5);
+  await expect(dialog.getByText("Заказчик")).toBeVisible();
+  await expect(dialog.getByText("Сбер")).toBeVisible();
+  await dialog.getByRole("button",{name:"Вернуться к работе"}).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(dashboard).toBeVisible();
 });
