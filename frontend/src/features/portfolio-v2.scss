@@ -153,6 +153,49 @@
 .p2-empty { display:grid; justify-items:center; gap:10px; text-align:center; padding:25px 18px; color:#9fc4d7; }
 .p2-empty svg { color:#1ae8d6; }.p2-empty strong { color:#f1fcff; font-size:14px; }.p2-empty p { font-size:12px; }
 .p2-inline-empty { color:#9bb9ca; font-size:11px; line-height:1.5; padding:10px 0; }
+/* Overview: all cards share the height of their grid row.
+   Previous align-items:start left a large empty gap under projects/about/trust. */
+.p2-content-grid:not(.p2-content-grid--single) { align-items:stretch; }
+.p2-content-grid:not(.p2-content-grid--single) .p2-projects-panel {
+  display:flex;
+  flex-direction:column;
+  align-self:stretch;
+}
+.p2-content-grid:not(.p2-content-grid--single) .p2-project-list {
+  flex:1 1 auto;
+  min-height:0;
+  grid-template-rows:repeat(2,minmax(170px,1fr));
+}
+.p2-content-grid:not(.p2-content-grid--single) .p2-project {
+  min-height:0;
+  height:100%;
+}
+.p2-content-grid:not(.p2-content-grid--single) .p2-project-art {
+  max-height:none;
+}
+.p2-content-grid:not(.p2-content-grid--single) .p2-about-panel,
+.p2-content-grid:not(.p2-content-grid--single) .p2-trust-panel {
+  display:flex;
+  flex-direction:column;
+}
+.p2-content-grid:not(.p2-content-grid--single) .p2-about-panel > p { flex:1 1 auto; }
+.p2-content-grid:not(.p2-content-grid--single) .p2-trust-list {
+  flex:1 1 auto;
+  align-content:start;
+}
+@media(max-width:850px) {
+  /* On stacked screens use natural heights; never force tall empty cards. */
+  .p2-content-grid:not(.p2-content-grid--single) .p2-projects-panel { display:block; }
+  .p2-content-grid:not(.p2-content-grid--single) .p2-project-list {
+    grid-template-rows:none;
+  }
+  .p2-content-grid:not(.p2-content-grid--single) .p2-project { min-height:170px; height:auto; }
+  .p2-content-grid:not(.p2-content-grid--single) .p2-project-art { max-height:130px; }
+  .p2-content-grid:not(.p2-content-grid--single) .p2-about-panel > p { flex:initial; }
+}
+@media(max-width:560px) {
+  .p2-content-grid:not(.p2-content-grid--single) .p2-project-art { max-height:none; }
+}
 .p2-content-grid--single { grid-template-columns:minmax(0,1fr); }
 .p2-content-grid--single>.p2-panel { grid-area:auto; grid-column:1; min-height:auto; }
 .p2-content-grid--single .p2-project-list { grid-template-columns:repeat(2,minmax(0,1fr)); }
