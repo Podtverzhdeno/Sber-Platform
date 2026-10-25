@@ -1,0 +1,137 @@
+
+/* BC-R01..BC-R05: scoped reference layout. Real API state replaces prototype fixtures. */
+.bc-reference {
+  --bc-r-bg:#04101f; --bc-r-panel:#061b30; --bc-r-raised:#092039;
+  --bc-r-line:#153754; --bc-r-text:#f4f9ff; --bc-r-muted:#92b0d1;
+  --bc-r-accent:#00e9e9;
+  display:flex;flex-direction:column;gap:0;min-width:0;width:100%;
+  color:var(--bc-r-text);font-size:13px;line-height:1.4;
+}
+.bc-reference :is(button,input,select) { font:inherit; }
+.bc-reference button { cursor:pointer; }
+.bc-reference :is(button,input,select):focus-visible { outline:2px solid var(--bc-r-accent);outline-offset:3px; }
+.bc-ref-sr-only{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.bc-reference .bc-ref-heading {display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:10px;}
+.bc-reference .bc-ref-heading h1 {font-size:31px!important;letter-spacing:-.8px;line-height:1.1;margin:0 0 4px;font-weight:800}
+.bc-reference .bc-ref-heading p {font-size:16px;color:var(--bc-r-muted);margin:0}
+.bc-ref-streak{white-space:nowrap;flex:none;padding:9px 14px;border:1px solid var(--bc-r-line);border-radius:10px;background:var(--bc-r-panel);font-size:12px;font-weight:700}
+.bc-ref-role-tabs{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 15px}
+.bc-ref-role-tabs button {min-height:44px;padding:0 23px;display:flex;align-items:center;justify-content:center;gap:12px;border-radius:8px;border:1px solid #173f5b;background:#071b31;color:#afd2f4;font-weight:750}
+.bc-ref-role-tabs button svg{width:19px;height:19px}
+.bc-ref-role-tabs button[aria-pressed=true]{background:linear-gradient(180deg,#30ffff,#00e0e7);color:#031527;border-color:#10d9e6;box-shadow:0 0 13px #06ecf326}
+.bc-ref-role-tabs button:hover:not([aria-pressed=true]){background:#0e344b;border-color:#276987}
+.bc-ref-hero-grid{display:grid;grid-template-columns:minmax(0,1.335fr) minmax(0,1fr);gap:16px;align-items:start;margin-bottom:25px}
+.bc-ref-continue{min-width:0;min-height:235px;border:1px solid #00c8d1;border-radius:10px;padding:14px;background:radial-gradient(ellipse at 100% 0,#122855,#061a31 80%);box-shadow:inset 0 0 0 1px #00dfdf18}
+.bc-reference .bc-ref-continue h2{font-size:21px!important;font-weight:800;margin:0 0 12px;letter-spacing:-.35px;color:var(--bc-r-text)}
+.bc-ref-continue h2 span{font-weight:500;margin-left:3px}
+.bc-ref-continue-columns{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:12px;min-height:168px}
+.bc-ref-continue-course,.bc-ref-continue-status{min-width:0;border:1px solid #123e5d;border-radius:8px;background:#0b253e;display:flex}
+.bc-ref-continue-course{padding:13px;gap:14px;align-items:start}
+.bc-ref-continue-text{min-width:0}
+.bc-ref-continue-text h3{margin:2px 0 11px;font-size:17px;line-height:1.25;font-weight:800}
+.bc-ref-continue-text p{margin:0 0 10px;color:#a6c6e2;font-size:12px;line-height:1.48;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bc-ref-tags{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.bc-ref-tags span{font-size:11px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;color:#b9d5ef;background:#12304a;padding:4px 9px;border-radius:7px}
+.bc-ref-continue-status{padding:12px;flex-direction:column;gap:10px}
+.bc-ref-stat-top{display:flex;justify-content:space-between;gap:10px}
+.bc-ref-stat-top strong{font-size:12px}
+.bc-ref-track{height:7px;border-radius:99px;background:#193a5a;overflow:hidden}
+.bc-ref-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#00e9d8,#14dce9)}
+.bc-ref-continue-status p{display:flex;align-items:flex-start;gap:6px;color:#a7c6df;font-size:11px;line-height:1.4;margin:0}
+.bc-ref-continue-status p svg{width:15px;height:15px;flex:none}
+.bc-reference .bc-ref-continue-status button{margin-top:auto;min-height:37px;border-radius:7px;background:#08e8ed;border:0;color:#021a2a;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:12px}
+.bc-ref-continue-status button svg,.bc-ref-primary svg,.bc-ref-grade-button svg{width:17px;height:17px}
+.bc-ref-right-panels{display:grid;gap:7px;min-width:0}
+.bc-ref-role-summary{display:flex;justify-content:space-between;align-items:center;gap:14px;min-height:113px;padding:13px 16px;border:1px solid #1d4a6b;border-radius:9px;background:linear-gradient(140deg,#06192c,#071f38);min-width:0}
+.bc-reference .bc-ref-role-summary h2{font-size:16px!important;line-height:1.3;margin:0 0 13px;font-weight:800}
+.bc-ref-summary-tags{display:flex;flex-wrap:wrap;gap:8px}
+.bc-ref-summary-tags span{padding:8px 9px;border-radius:7px;border:1px solid #1b4367;background:#0b2340;color:#d5e3fb;font-size:11px}
+.bc-ref-ring{flex:none;display:flex;flex-direction:column;justify-content:center;align-items:center;width:89px;height:89px;border:8px solid var(--bc-r-accent);border-left-color:#1a4065;border-radius:50%;text-align:center;box-shadow:0 0 8px #03f7e425}
+.bc-ref-ring strong{font-size:18px;line-height:1.1}
+.bc-ref-ring small{font-size:9px;line-height:1.25;color:#a6c8df}
+.bc-ref-grade{position:relative;overflow:hidden;min-height:183px;padding:13px 15px;border:1px solid #bb54c2;border-radius:10px;background:radial-gradient(ellipse at 94% 0,#533573 0%,#32144d 35%,#1c0e42 75%);box-shadow:0 0 23px #5e20b133}
+.bc-ref-grade-body{position:relative;z-index:1;max-width:72%}
+.bc-ref-grade-kicker{display:inline-flex;align-items:center;background:#6b274a;color:#ffc5e8;padding:6px 9px;border-radius:7px;font-weight:800;font-size:12px;margin-bottom:8px}
+.bc-reference .bc-ref-grade h2{font-size:18px!important;line-height:1.2;font-weight:800;margin:0 0 4px}
+.bc-ref-grade h2 em{color:#f8d153;font-size:23px;font-style:normal}
+.bc-ref-grade-body > p{max-width:310px;color:#d2bddf;margin:0 0 12px;font-size:11px;line-height:1.35}
+.bc-ref-grade-list{max-width:280px}
+.bc-ref-grade-list button{display:flex;align-items:center;gap:8px;width:100%;border:0;border-bottom:1px solid #593a75;color:#e5d7ee;text-align:left;background:transparent;padding:5px 0;font-size:11px}
+.bc-ref-grade-list button span:last-child{margin-left:auto}
+.bc-ref-grade-list button:hover{color:#fff}
+.bc-ref-trophy{position:absolute;right:-16px;top:8px;width:191px;height:160px;object-fit:contain;pointer-events:none}
+.bc-reference .bc-ref-grade-button{position:absolute;z-index:2;bottom:12px;right:14px;display:flex;align-items:center;gap:10px;padding:9px 14px;min-height:38px;border:0;border-radius:7px;background:linear-gradient(90deg,#dd68ee,#02ddf3);color:#07112a;font-weight:800}
+.bc-reference .bc-ref-catalog{min-width:0}
+.bc-ref-category-tabs{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 11px}
+.bc-reference .bc-ref-category-tabs button{display:inline-flex;align-items:center;gap:8px;min-height:38px;padding:8px 14px;background:#061b30;border:1px solid #17405d;border-radius:9px;color:#a9c7e5;font-size:12px;font-weight:800}
+.bc-reference .bc-ref-category-tabs button[aria-pressed=true]{background:linear-gradient(180deg,#24e9ed,#00d8e7);border-color:#04e7e8;color:#04182c;box-shadow:0 0 18px #00eddb2a}
+.bc-ref-category-tabs button span{padding:3px 8px;border-radius:99px;background:#183953;color:#cde7f8}
+.bc-ref-category-tabs button[aria-pressed=true] span{background:#03b9c7;color:#032334}
+.bc-ref-controls{display:grid;grid-template-columns:minmax(180px,1fr) minmax(155px,.46fr) minmax(130px,.35fr) auto;gap:10px;align-items:stretch;margin-bottom:10px}
+.bc-ref-search,.bc-ref-select{min-width:0;min-height:44px;border:1px solid #173d58;background:#092038;border-radius:9px;display:flex;align-items:center;gap:10px;padding:0 12px;color:#a2c4df}
+.bc-ref-search svg{width:17px;height:17px;flex:none}
+.bc-ref-search input{width:100%;min-width:0;border:0!important;background:transparent!important;box-shadow:none!important;color:var(--bc-r-text);outline:0!important;font-size:12px}
+.bc-ref-search input::placeholder{color:#719cbf}
+.bc-ref-select{position:relative;flex-direction:column;justify-content:center;align-items:stretch;gap:0;padding:5px 9px;font-size:10px}
+.bc-ref-select select{width:100%;max-width:100%;border:0;background:transparent;color:var(--bc-r-text);font-size:12px;padding:0;cursor:pointer;outline:0}
+.bc-ref-select select option{color:var(--bc-r-text);background:#092039}
+.bc-ref-select select:disabled{opacity:.75;cursor:not-allowed}
+.bc-ref-views{display:flex;align-items:stretch;gap:0;justify-content:flex-end;border:1px solid #17405d;border-radius:9px;overflow:hidden;margin-left:12px}
+.bc-reference .bc-ref-views button{display:flex;align-items:center;gap:8px;border:0;border-radius:0;background:#061b30;color:#a9c7e5;font-weight:800;padding:7px 12px;min-width:102px;justify-content:center}
+.bc-ref-views button svg{width:16px;height:16px}
+.bc-reference .bc-ref-views button[aria-pressed=true]{background:#07334a;color:#0ef4f4;box-shadow:inset 0 2px 0 #00e9e9}
+.bc-ref-course-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;align-items:stretch}
+.bc-ref-course-card{display:flex;flex-direction:column;min-width:0;min-height:283px;padding:11px 12px 10px;border:1px solid #163e5b;border-radius:10px;background:#061b30;transition:border-color .18s,box-shadow .18s,transform .18s}
+.bc-ref-course-card:hover,.bc-ref-course-card:focus-within,.bc-ref-course-row:hover{border-color:#00cad4;box-shadow:0 0 0 1px #00f9e327,0 10px 28px #0004}
+.bc-ref-course-card[data-access=prerequisite_not_met]{grid-column:span 1!important;width:100%;max-width:none}
+.bc-ref-flags{display:flex;gap:5px;flex-wrap:wrap;align-items:center;min-height:24px}
+.bc-ref-chip{display:inline-flex;align-items:center;gap:4px;border-radius:99px;padding:4px 8px;font-size:10px;line-height:1.2;font-weight:800;white-space:nowrap}
+.bc-ref-chip svg{width:12px;height:12px}
+.bc-ref-chip--required,.bc-ref-chip--locked{background:#48152f;color:#ff6b9f}
+.bc-ref-chip--recommended{background:#3c155a;color:#d98aff}
+.bc-ref-chip--available{background:#003d41;color:#15f8df}
+.bc-ref-chip--progress{background:#0a3562;color:#3acdfb}
+.bc-ref-card-intro{display:flex;align-items:flex-start;gap:10px;margin:7px 0;min-width:0}
+.bc-ref-card-intro > div{min-width:0}
+.bc-ref-art{flex:none;display:grid;place-items:center;width:54px;height:54px;border-radius:10px;background:linear-gradient(130deg,#00518b,#05367b);color:#02e9ff}
+.bc-ref-art svg{width:28px;height:28px}
+.bc-ref-art--git{background:linear-gradient(130deg,#4c231f,#211725);color:#ff6164}
+.bc-ref-art--agent{background:linear-gradient(135deg,#7125bc,#291076);color:#c885ff}
+.bc-ref-art--python{background:linear-gradient(135deg,#075682,#0b295c);color:#ffd351}
+.bc-ref-art--api{background:linear-gradient(130deg,#064c52,#064a51);color:#00f2cb;font-size:32px}
+.bc-ref-art--default{background:linear-gradient(130deg,#0b537e,#063466)}
+.bc-ref-card-intro h3,.bc-ref-row-info h3{margin:2px 0 3px;color:#f4f9ff;font-size:13px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
+.bc-ref-card-intro p,.bc-ref-row-info p{font-size:11px;line-height:1.38;color:#a7c8e4;margin:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:anywhere}
+.bc-ref-card-meta{margin:7px 0;color:#a7c4df;display:flex;align-items:center;gap:6px;font-size:10px}
+.bc-ref-card-meta svg{width:13px;height:13px}
+.bc-ref-card-bottom{margin-top:auto;display:grid;gap:5px}
+.bc-reference .bc-ref-primary{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;min-height:36px;border-radius:7px;border:1px solid transparent;background:#05e0e9;color:#02192b;font-size:12px;font-weight:800}
+.bc-reference .bc-ref-primary--locked{border-color:#285574;background:#0c2d47;color:#b9d3ef}
+.bc-reference .bc-ref-primary:hover:not(:disabled),.bc-reference .bc-ref-continue-status button:hover{transform:translateY(-1px);background:#40f5fa;box-shadow:0 0 20px #00e7e74d}
+.bc-reference .bc-ref-primary--locked:hover:not(:disabled){color:white;background:#15405d}
+.bc-reference .bc-ref-reason{background:none;border:0;color:#22e9eb;text-align:left;font-size:10px;padding:3px 0 0;text-decoration:underline;text-underline-offset:3px}
+.bc-ref-course-list{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.bc-ref-course-row{display:grid;grid-template-columns:minmax(220px,1.5fr) minmax(130px,.8fr) minmax(110px,.7fr) minmax(130px,.75fr) minmax(155px,.8fr);align-items:center;gap:12px;border:1px solid #18445f;border-radius:10px;background:#061b30;padding:12px;min-width:0}
+.bc-ref-row-info{display:flex;align-items:center;gap:14px;min-width:0}
+.bc-ref-row-info>div{min-width:0}
+.bc-ref-row-flags{display:grid;gap:8px}
+.bc-ref-row-meta{display:flex;align-items:center;gap:6px;font-size:11px;color:#b3cde5}
+.bc-ref-row-meta svg{width:16px;height:16px;flex:none}
+.bc-ref-row-progress{font-size:11px;color:#c5dcf4}
+.bc-ref-row-progress .bc-ref-track{margin-top:8px}
+.bc-ref-empty{padding:32px;text-align:center;border:1px solid var(--bc-r-line);border-radius:12px;background:var(--bc-r-panel);color:var(--bc-r-muted)}
+.bc-ref-empty button{border:0;background:none;color:var(--bc-r-accent);text-decoration:underline}
+@media(min-width:1250px){.bc-reference .bc-ref-course-card{min-height:280px}}
+@media(max-width:1250px){.bc-ref-course-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.bc-ref-hero-grid{grid-template-columns:1fr}.bc-ref-right-panels{grid-template-columns:1fr 1.12fr}.bc-ref-grade{min-height:170px}.bc-ref-course-row{grid-template-columns:minmax(180px,1.6fr) minmax(130px,.9fr) minmax(140px,.8fr) minmax(145px,.9fr)}.bc-ref-row-meta{display:none}}
+@media(max-width:940px){.bc-ref-controls{grid-template-columns:minmax(0,1fr) minmax(140px,.65fr);}.bc-ref-views{margin-left:0}.bc-ref-course-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bc-ref-course-row{grid-template-columns:minmax(0,1.4fr) minmax(130px,1fr) minmax(120px,.75fr)}.bc-ref-row-progress{display:none}.bc-ref-right-panels{grid-template-columns:1fr}.bc-ref-grade-body{max-width:75%}}
+@media(max-width:620px){.bc-reference .bc-ref-heading h1{font-size:27px!important}.bc-reference .bc-ref-heading p{font-size:13px}.bc-ref-streak{display:none}.bc-ref-role-tabs button{flex:1;padding:8px;min-width:125px;font-size:11px}.bc-ref-continue-columns{grid-template-columns:1fr}.bc-ref-continue{min-height:0}.bc-ref-right-panels{grid-template-columns:1fr}.bc-ref-hero-grid{gap:10px;margin-bottom:15px}.bc-ref-grade{min-height:188px}.bc-ref-grade-body{max-width:78%}.bc-ref-trophy{width:160px;right:-40px}.bc-ref-category-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}.bc-reference .bc-ref-category-tabs button{flex:none;padding:8px 10px;font-size:11px}.bc-ref-controls{grid-template-columns:1fr 1fr;gap:8px}.bc-ref-search{grid-column:1/-1}.bc-ref-views{grid-column:1/-1;justify-content:flex-end}.bc-ref-course-grid{grid-template-columns:1fr}.bc-ref-course-card{min-height:240px}.bc-ref-course-row{grid-template-columns:1fr;gap:8px}.bc-ref-row-flags{display:flex;align-items:center;justify-content:space-between;gap:8px}.bc-ref-row-progress{display:block}.bc-ref-row-meta{display:none}.bc-reference .bc-ref-primary{width:100%}}
+@media(prefers-reduced-motion:reduce){.bc-reference :is(button,.bc-ref-course-card,.bc-ref-course-row){transition:none!important;transform:none!important}}
+/* Light mode translates the same hierarchy rather than forcing dark backgrounds. */
+[data-theme="light"] .bc-reference{--bc-r-bg:#edf5fb;--bc-r-panel:#fff;--bc-r-raised:#f1f7fb;--bc-r-line:#c5dce9;--bc-r-text:#123046;--bc-r-muted:#547189;color:#123046}
+[data-theme="light"] .bc-reference :is(.bc-ref-role-summary,.bc-ref-continue,.bc-ref-continue-course,.bc-ref-continue-status,.bc-ref-course-card,.bc-ref-course-row,.bc-ref-search,.bc-ref-select,.bc-ref-views button,.bc-ref-streak){background:#fff;color:#123046;border-color:#c5dce9}
+[data-theme="light"] .bc-reference :is(.bc-ref-card-intro h3,.bc-ref-row-info h3,.bc-ref-continue-text h3,.bc-ref-role-summary h2){color:#143247}
+[data-theme="light"] .bc-reference :is(.bc-ref-card-intro p,.bc-ref-row-info p,.bc-ref-continue-text p,.bc-ref-row-progress){color:#547189}
+[data-theme="light"] .bc-reference .bc-ref-select select,[data-theme="light"] .bc-reference .bc-ref-search input{color:#123046}
+[data-theme="light"] .bc-reference .bc-ref-category-tabs button{background:#fff;color:#365c73}
+[data-theme="light"] .bc-reference .bc-ref-category-tabs button[aria-pressed=true]{background:#00dfe5;color:#09243b}
+[data-theme="light"] .bc-reference .bc-ref-summary-tags span{background:#eef6fb;color:#345a73;border-color:#bdd8e8}
