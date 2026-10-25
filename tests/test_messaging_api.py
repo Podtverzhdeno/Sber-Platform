@@ -464,7 +464,9 @@ def test_contact_directory_and_group_creation_work_with_demo_flag_disabled() -> 
     channel_id = created.json()["id"]
     assert created.json()["kind"] == "community"
     assert {part["id"] for part in created.json()["participants"]} == {
-        str(ALEX), str(ELENA), str(ROMAN),
+        str(ALEX),
+        str(ELENA),
+        str(ROMAN),
     }
 
     message = api.post(
