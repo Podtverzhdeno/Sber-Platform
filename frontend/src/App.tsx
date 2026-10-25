@@ -428,7 +428,7 @@ function Workspace({
     >
       <aside className="sidebar" aria-label="Боковая панель">
         <div className="sidebar-brand">
-          <NavLink className="sidebar-brand-home" to="/workspace/0" aria-label="Impulse — на главную" onClick={() => setNavigationOpen(false)}>
+          <NavLink className="sidebar-brand-home" to="/workspace/0" aria-label="Impulse — на главную" onClick={() => { setNavigationOpen(false); }}>
             <span className="brand-mark" aria-hidden="true">
               ϟ
             </span>
