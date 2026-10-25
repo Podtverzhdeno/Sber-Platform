@@ -103,6 +103,7 @@ describe("AI-Buddy single-pane conversation", () => {
       { id: thread.id, title: "Предыдущая переписка", updated: "2026-10-25T08:00:00Z" },
     ]));
     vi.mocked(apiRequest).mockImplementation(async path => {
+      await Promise.resolve();
       if (path === "/api/v1/development/courses") return courses;
       if (path === "/api/v1/agents/buddy/suggestion") return { suggestion: null };
       if (path === "/api/v1/agents/buddy/threads") return created;
@@ -119,7 +120,7 @@ describe("AI-Buddy single-pane conversation", () => {
     await waitFor(() => expect(apiRequest).toHaveBeenCalledWith(
       "/api/v1/agents/buddy/threads", expect.objectContaining({ method: "POST" }),
     ));
-    await waitFor(() => expect(container.querySelector(".buddy2-dialog.active")).toHaveTextContent("Новый диалог"));
+    await waitFor(() => { expect(container.querySelector(".buddy2-dialog.active")).toHaveTextContent("Новый диалог"); });
     expect(screen.getByRole("textbox", { name: "Сообщение AI-Buddy" })).toHaveValue("");
     expect(screen.queryByText(oldMessage.content)).not.toBeInTheDocument();
     expect(screen.getByText(/Начните разговор: напишите вопрос/)).toBeVisible();
