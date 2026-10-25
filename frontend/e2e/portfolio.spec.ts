@@ -5,7 +5,7 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
   const actor = {
     person_id: "00000000-0000-0000-0000-000000000001", display_name: "Алекс Речной",
     active_role: "participant", assigned_roles: ["participant"], scopes: [], consent_scopes: [],
-    navigation: ["Мой путь", "Bootcamp", "Задачи", "События", "Рейтинг", "Портфолио", "Аналитика"], csrf_token: "csrf",
+    navigation: ["Мой путь", "Bootcamp", "Задачи", "События", "Рейтинг", "Портфолио", "Аналитика", "Настройки"], csrf_token: "csrf",
   };
   let hrVisible = false;
   await page.route("**/api/v1/config", route => route.fulfill({ json: { honor_board_enabled: false } }));
@@ -79,6 +79,16 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
   await expect(page.getByRole("checkbox", { name: "Резюме для HR" })).toBeChecked();
   await page.getByRole("tab", { name: "Обзор" }).click();
   await expect(page.locator(".p2-project")).toHaveCount(2);
+
+  // Portfolio actions must resolve sections by name, not hard-coded numeric offsets.
+  await page.getByRole("button", { name: "Поделиться" }).click();
+  await expect(page.getByRole("status").filter({ hasText: "Публичная ссылка пока недоступна" })).toBeVisible();
+  await page.getByRole("tab", { name: "Обзор" }).click();
+  await page.getByRole("button", { name: /Открыть Skill Passport/ }).click();
+  await expect(page).toHaveURL(/\/workspace\/6\?analyticsTab=passport$/);
+  await page.getByRole("link", { name: "Портфолио" }).click();
+  await page.getByRole("button", { name: /Редактировать профиль/ }).click();
+  await expect(page).toHaveURL(/\/workspace\/7$/);
 });
 
 test("portfolio: narrow layout never overflows and all six tabs remain reachable", async ({ page }) => {
