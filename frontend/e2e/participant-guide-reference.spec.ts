@@ -3,20 +3,20 @@ import { expect, test, type Page } from "@playwright/test";
 const participantId = "ea5738ef-196d-4bfa-a58d-04488a219951";
 const navigation = ["Главная", "Задачи", "Мои проекты", "Bootcamp", "Моя траектория", "Аналитика", "Портфолио", "Сообщения"];
 
-function mockParticipant(page: Page): void {
-  void page.route("**/api/v1/**", (route) => route.fulfill({ status: 404, json: {} }));
-  void page.route("**/api/v1/config", (route) => route.fulfill({ json: { demo_mode: false } }));
-  void page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [
+async function mockParticipant(page: Page): Promise<void> {
+  await page.route("**/api/v1/**", (route) => route.fulfill({ status: 404, json: {} }));
+  await page.route("**/api/v1/config", (route) => route.fulfill({ json: { demo_mode: false } }));
+  await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [
     { key: "participant-guide", display_name: "Участник", roles: ["participant"] },
   ] }));
-  void page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: {} }));
-  void page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: {
+  await page.route("**/api/v1/me", (route) => route.fulfill({ status: 401, json: {} }));
+  await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: {
     person_id: participantId, display_name: "Участник", active_role: "participant",
     assigned_roles: ["participant"], scopes: [], consent_scopes: [], navigation, csrf_token: "csrf",
   } }));
 }
 test("reference onboarding: welcome, highlighted navigation, completion and real action", async ({ page }) => {
-  mockParticipant(page);
+  await mockParticipant(page);
   await page.goto("/");
   await page.locator('[data-persona="participant-guide"]').click();
   const welcome = page.getByRole("dialog", { name: /Добро пожаловать/ });
@@ -43,7 +43,7 @@ test("reference onboarding: welcome, highlighted navigation, completion and real
 
 test("manual contextual help can be dismissed, stays within a phone viewport", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
-  mockParticipant(page);
+  await mockParticipant(page);
   await page.addInitScript((id) => {
     localStorage.setItem(`impulse:guide:welcome:v2:${id}`, "1");
     localStorage.setItem(`impulse:guide:v1:${id}`, JSON.stringify({ seen: [], lastAutoAt: 0, autoDisabled: true }));
