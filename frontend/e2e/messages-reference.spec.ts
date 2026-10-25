@@ -16,10 +16,15 @@ const makeMessage = (id: string, body: string, author_name = "Елена Нас�
   kind: "text", body, artifact_refs: [], sequence: 1,
   created_at: "2026-10-20T09:14:00Z",
 });
-async function openMessages(page: Page) {
+async function openMessages(page: Page, opts: { unreadContact?: boolean } = {}) {
   let loggedIn = false;
-  const channels: Array<Omit<(typeof referenceChannels)[number], "last_message"> & { last_message: (typeof referenceChannels)[number]["last_message"] | null }> = [...referenceChannels];
+  const channels: Array<Omit<(typeof referenceChannels)[number], "last_message"> & { last_message: (typeof referenceChannels)[number]["last_message"] | null }> =
+    referenceChannels.map((channel) => ({
+      ...channel,
+      unread: opts.unreadContact && channel.title === "Елена Наставник" ? 3 : channel.unread,
+    }));
   const sentMessages: string[] = [];
+  const readRequests: string[] = [];
   await page.route("**/api/v1/config", route => route.fulfill({json:{demo_mode:true}}));
   await page.route("**/api/v1/auth/personas", route => route.fulfill({
     json:[{key:"participant-alex",display_name:actor.display_name,roles:["participant"]}],
@@ -31,6 +36,7 @@ async function openMessages(page: Page) {
     loggedIn = true;
     return route.fulfill({json:actor});
   });
+  await page.route("**/api/v1/me/notifications", route => route.fulfill({json:{items:[],unread:0}}));
   await page.route("**/api/v1/me/messaging/contacts", route => route.fulfill({json:[
     {id:"00000000-0000-4000-8000-000000000005",display_name:"Елена Наставник",role:"mentor"},
     {id:"00000000-0000-4000-8000-000000000006",display_name:"Роман Заказчик",role:"customer"},
@@ -66,13 +72,19 @@ async function openMessages(page: Page) {
     return route.fulfill({json:fixture ?? [makeMessage("msg-"+String(id),"Задача в работе")]});
   });
   await page.route("**/api/v1/me/messaging/channels/*/mute", route => route.fulfill({json:{...channels[0],muted:true}}));
-  await page.route("**/api/v1/me/messaging/channels/*/read", route => route.fulfill({json:channels[0]}));
+  await page.route("**/api/v1/me/messaging/channels/*/read", route => {
+    const channelId=new URL(route.request().url()).pathname.split("/").at(-2);
+    if(channelId) readRequests.push(channelId);
+    const channel=channels.find(item=>item.id===channelId) ?? channels[0];
+    if(channel) channel.unread=0;
+    return route.fulfill({json:channel});
+  });
   await page.clock.install({ time: new Date("2026-10-20T14:00:00+03:00") });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.goto("/workspace/4");
   await expect(page.getByRole("complementary",{name:"Список диалогов"})).toBeVisible();
-  return {sentMessages};
+  return {sentMessages,readRequests,channels};
 }
 
 async function expectRect(page:Page, selector:string, expected:{x:number,y:number,width:number,height:number}, tolerance=8) {
@@ -83,6 +95,22 @@ async function expectRect(page:Page, selector:string, expected:{x:number,y:numbe
     expect(actual?.[key],selector+" "+key).toBeLessThanOrEqual(expected[key]+tolerance);
   }
 }
+
+test("notification identifies the exact sender and marks only that dialog read on click",async ({page})=>{
+  await page.setViewportSize({width:1448,height:1086});
+  const {readRequests,channels}=await openMessages(page,{unreadContact:true});
+  await page.getByRole("button",{name:/Уведомления:/}).click();
+  const named=page.locator(".notification-chat-unread").filter({hasText:"Елена Наставник"});
+  await expect(named).toBeVisible();
+  await expect(named).toContainText("непрочитанных");
+  await named.click();
+  await expect(page.locator(".msg-chat__header-title")).toContainText("Елена Наставник");
+  await expect.poll(()=>readRequests.length).toBeGreaterThan(0);
+  const direct=channels.find(item=>item.title==="Елена Наставник");
+  expect(readRequests.every(id=>id===direct?.id)).toBe(true);
+  await expect.poll(()=>direct?.unread).toBe(0);
+  await expect(page.locator(".notification-chat-unread").filter({hasText:"Елена Наставник"})).toHaveCount(0);
+});
 
 test("messages empty state uses reference three-column composition at 1448px",async ({page})=>{
   await page.setViewportSize({width:1448,height:1086});
