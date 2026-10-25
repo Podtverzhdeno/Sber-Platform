@@ -491,6 +491,7 @@ def test_contact_directory_and_group_creation_work_with_demo_flag_disabled() -> 
     assert invalid.status_code == 403
     assert invalid.json()["code"] == "MESSAGE_PEER_INVALID"
 
+
 def test_community_invites_are_persisted_and_scoped_to_members_and_program() -> None:
     api, _store = build()
     alex_csrf = login(api, "participant-alex")
@@ -502,28 +503,32 @@ def test_community_invites_are_persisted_and_scoped_to_members_and_program() -> 
     assert created.status_code == 201
     channel_id = created.json()["id"]
     path = f"/api/v1/me/messaging/channels/{channel_id}/members"
-    wrong_program = api.post(
+    unavailable_contact = api.post(
         path,
-        json={"person_ids": [str(uuid5(PERSONA_NAMESPACE, "v1:hr-nina"))]},
+        json={"person_ids": [str(UUID(int=999))]},
         headers={"X-CSRF-Token": alex_csrf},
     )
-    # Existing program restrictions must be enforced by the directory.
-    assert wrong_program.status_code in (200, 403)
+    assert unavailable_contact.status_code == 403
     added = api.post(
-        path, json={"person_ids": [str(ROMAN)]},
+        path,
+        json={"person_ids": [str(ROMAN)]},
         headers={"X-CSRF-Token": alex_csrf},
     )
     assert added.status_code == 200
     assert str(ROMAN) in {person["id"] for person in added.json()["participants"]}
     again = api.post(
-        path, json={"person_ids": [str(ROMAN)]},
+        path,
+        json={"person_ids": [str(ROMAN)]},
         headers={"X-CSRF-Token": alex_csrf},
     )
     assert again.status_code == 200
     assert len([person for person in again.json()["participants"] if person["id"] == str(ROMAN)]) == 1
     no_csrf = api.post(path, json={"person_ids": [str(ROMAN)]})
     assert no_csrf.status_code in (401, 403)
-    login(api, "hr-nina")
-    hidden = api.post(path, json={"person_ids": [str(ROMAN)]},
-                      headers={"X-CSRF-Token": login(api, "hr-nina")})
+    hr_csrf = login(api, "hr-nina")
+    hidden = api.post(
+        path,
+        json={"person_ids": [str(ROMAN)]},
+        headers={"X-CSRF-Token": hr_csrf},
+    )
     assert hidden.status_code in (403, 404)
