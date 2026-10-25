@@ -135,17 +135,17 @@ function ProjectSummary({ project, selected, expanded, onSelect, onOpen, onBookm
       <div className="mp-project-card-heading"><small>{company} · Заказчик</small><h2>{project.work.task.title}</h2></div>
       <button type="button" className="mp-icon-button" aria-label={saved ? "Убрать из избранного" : "В избранное"} aria-pressed={saved} onClick={onBookmark}><Bookmark size={17} fill={saved ? "currentColor" : "none"}/></button>
     </div>
-    <div className="mp-chip-row"><em>Практика</em><em>Команда</em><em>Проверяемый результат</em></div>
+    <div className="mp-chip-row"><em>Проект</em><em>Командная работа</em><em>Практика</em></div>
     <div className="mp-project-card-progress"><div><span>Твой прогресс</span><strong>{progress === null ? "Не оценён" : `${String(progress)}%`}</strong></div><ProgressBar value={progress} compact/></div>
     <div className="mp-project-card-meta">
       <span><Clock3 size={15}/>{statusText[status] || status}</span>
       <span><CalendarDays size={15}/>{dateLabel(project.work.terms.deadline_at)}</span>
-      <span><Users size={15}/>{project.detail?.team?.length ?? "—"} участников</span>
-    </div>
-    <div className="mp-project-card-rewards" aria-label="Возможные награды за участие">
-      <span title="Возможность получения токенов GitVerse"><Layers3 size={15}/> GitVerse</span>
-      <span title="Возможность получения токенов GigaCode"><Code2 size={15}/> GigaCode</span>
-      <span title="Премиум GigaAgent по правилам программы"><Crown size={15}/> GigaAgent</span>
+      <span className="mp-project-card-team" aria-label="Команда проекта">
+        {(project.detail?.team?.length ?? 0)>0 ? <>
+          <span className="mp-team-avatars" aria-hidden="true">{(project.detail?.team ?? []).slice(0,3).map(person=><i key={person.person_id} title={person.display_name}>{person.display_name.trim().slice(0,1).toUpperCase()}</i>)}</span>
+          {(project.detail?.team?.length ?? 0)>3&&<small>+{(project.detail?.team?.length ?? 0)-3}</small>}
+        </> : <><Users size={15}/> Команда уточняется</>}
+      </span>
     </div>
     <div className="mp-project-card-actions">
       <button className={`mp-primary ${active ? "" : "mp-primary--quiet"}`} type="button" onClick={onOpen}>{active ? "Продолжить работу" : finishedStatuses.has(status) ? "Открыть результат" : "Открыть проект"} <ArrowRight size={16}/></button>
