@@ -12,6 +12,7 @@ on:
       - "frontend/src/features/bootcamp/learning-content/learning-content.scss"
       - "frontend/src/components/ui.tsx"
       - "frontend/e2e/bootcamp-approved.spec.ts"
+      - "frontend/e2e/bootcamp-reference-fixtures.ts"
       - "frontend/e2e/bootcamp-forensic-audit.spec.ts"
       - ".github/workflows/bootcamp-reader-qa.yml"
   workflow_dispatch:
