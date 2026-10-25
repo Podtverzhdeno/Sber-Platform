@@ -5,7 +5,7 @@
   <p>Платформа, которая соединяет карьерную траекторию, обучение, командную работу и доказуемое портфолио</p>
   <p>
     <a href="https://github.com/Podtverzhdeno/Sber-Platform/actions/workflows/ci.yml"><img src="https://github.com/Podtverzhdeno/Sber-Platform/actions/workflows/ci.yml/badge.svg" alt="GitHub CI" /></a>
-    <img src="https://img.shields.io/badge/Python-3.13%2B-122b3f?logo=python&amp;logoColor=white" alt="Python 3.13+" />
+    <img src="https://img.shields.io/badge/Python-3.13%E2%80%933.14-122b3f?logo=python&amp;logoColor=white" alt="Python 3.13–3.14" />
     <img src="https://img.shields.io/badge/React-19-122b3f?logo=react&amp;logoColor=61dafb" alt="React 19" />
     <img src="https://img.shields.io/badge/TypeScript-5-122b3f?logo=typescript&amp;logoColor=3178c6" alt="TypeScript 5" />
     <img src="https://img.shields.io/badge/FastAPI-0.115%2B-122b3f?logo=fastapi&amp;logoColor=00c7aa" alt="FastAPI" />
@@ -91,7 +91,7 @@ flowchart TB
 | Слой | Стек | Назначение |
 |---|---|---|
 | **Frontend** | React 19, TypeScript 5, Vite 7, TanStack Query, React Router | Интерфейсы ролей, состояние запросов, клиентская навигация |
-| **Backend** | Python 3.13+, FastAPI, Pydantic | API, права, бизнес-правила и сценарии |
+| **Backend** | Python 3.13–3.14, FastAPI, Pydantic | API, права, бизнес-правила и сценарии |
 | **Data** | PostgreSQL, SQLAlchemy async, Alembic | Хранение, миграции и транзакции |
 | **AI** | LangChain, LangGraph, OpenRouter; Langfuse опционально | Подсказки, инструменты, наблюдаемость |
 | **Quality** | Pytest, Ruff, Pyright, Vitest, ESLint, Playwright | Контракты, регрессии, безопасность, UI |
