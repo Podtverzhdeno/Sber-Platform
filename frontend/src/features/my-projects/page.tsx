@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Award, Bookmark, BriefcaseBusiness, CalendarDays,
-  Check, CheckCircle2, ChevronDown, Code2, Crown, FileText,
+  Check, CheckCircle2, ChevronDown, ClipboardCheck, Code2, Crown, FileText,
   FolderKanban, Gift, Info, Layers3, LayoutGrid, List,
   MessageCircle, Search, Share2, SlidersHorizontal, Star, Users,
 } from "lucide-react";
@@ -377,7 +377,7 @@ function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, 
       mentorAssigned={Boolean(project.detail?.mentor)}
       activeMembers={(project.detail?.team??[]).filter(person=>["active","accepted","joined","confirmed","in_progress","staffed"].includes(person.status)).length}
       onContribution={()=>{selectTab("contribution");}} onWorkspace={onWorkspace}/>}
-    <footer className="mp-detail-footer"><button type="button" className="mp-secondary" onClick={onBack}><ArrowLeft size={15}/> Все проекты</button><button type="button" className="mp-secondary" onClick={()=>{onMessage();}}><MessageCircle size={15}/> Обсуждение</button><button className="mp-secondary" type="button" onClick={()=>{if(!("clipboard" in navigator)){setCopyFailed(true);setCopied(false);return;}void navigator.clipboard.writeText(window.location.href).then(()=>{setCopied(true);setCopyFailed(false);}).catch(()=>{setCopied(false);setCopyFailed(true);});}}><Share2 size={15}/>{copyFailed?"Не удалось скопировать":copied?"Ссылка скопирована":"Поделиться"}</button><button className="mp-primary" type="button" onClick={onWorkspace}>Перейти к задачам <ArrowRight size={16}/></button></footer>
+    <footer className="mp-detail-footer"><button type="button" className="mp-secondary" onClick={onBack}><ArrowLeft size={15}/> Все проекты</button><button type="button" className="mp-secondary" onClick={()=>{onMessage();}}><MessageCircle size={15}/> Обсуждение</button><button className="mp-secondary" type="button" onClick={()=>{if(!("clipboard" in navigator)){setCopyFailed(true);setCopied(false);return;}void navigator.clipboard.writeText(window.location.href).then(()=>{setCopied(true);setCopyFailed(false);}).catch(()=>{setCopied(false);setCopyFailed(true);});}}><Share2 size={15}/>{copyFailed?"Не удалось скопировать":copied?"Ссылка скопирована":"Поделиться"}</button><button className="mp-primary" type="button" onClick={()=>{onWorkspace();}}>Перейти к задачам <ArrowRight size={16}/></button></footer>
   </div>;
 }
 export function ParticipantProjectsV2() {
