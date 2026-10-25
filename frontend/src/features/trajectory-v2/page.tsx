@@ -17,6 +17,7 @@ import {
 } from "./client";
 import { RoleComparePanel, TrajectoryActions } from "./actions";
 import { LearningProgressPanel } from "../learning-progress-panel";
+import { learningSummaryQueryKey, loadLearningSummary, type LearningCourse } from "../learning-progress";
 import { RoleInfoDialog, StageTaskDrawer } from "./details";
 import { canonicalAiRoles } from "./source-reference/source-catalog";
 import { primaryTrajectoryKey, roleVisualTone } from "./role-state";
@@ -83,6 +84,7 @@ export function TrajectoryV2() {
 
 export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const { overview } = props;
+  const learning = useQuery({ queryKey: learningSummaryQueryKey, queryFn: loadLearningSummary });
   const [searchParams, setSearchParams] = useSearchParams();
   const roadmaps = useQuery({
     queryKey: roadmapsQueryKey,
@@ -272,6 +274,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 role={selected}
               primary={selected.track_key === primaryKey}
               roadmap={selectedRoadmap}
+              learningCourses={learning.data?.courses}
               roadmapPending={roadmapCatalog.isPending && roadmaps.isPending}
               roadmapError={roadmapCatalog.isError && roadmaps.isError}
               roadmapRetry={() => {
@@ -615,6 +618,7 @@ export function RoleDetailPanel(props: {
   role: RoleCardView;
   primary: boolean;
   roadmap: RoadmapView | null;
+  learningCourses?: LearningCourse[];
   roadmapPending: boolean;
   roadmapError: boolean;
   roadmapRetry: () => void;
@@ -682,6 +686,7 @@ export function RoleDetailPanel(props: {
       <StagePathSection
         role={role}
         roadmap={props.roadmap}
+        learningCourses={props.learningCourses}
         pending={props.roadmapPending}
         error={props.roadmapError}
         retry={props.roadmapRetry}
@@ -691,24 +696,25 @@ export function RoleDetailPanel(props: {
         showDetails={false}
       />
     </article>
-    <SelectedStageCard role={role} roadmap={props.roadmap} stageKey={props.stageKey} onOpenDetails={props.onOpenStageDetails}/>
+    <SelectedStageCard role={role} roadmap={props.roadmap} learningCourses={props.learningCourses} stageKey={props.stageKey} onOpenDetails={props.onOpenStageDetails}/>
     </div>
   );
 }
 
-function SelectedStageCard(props: { role: RoleCardView; roadmap: RoadmapView | null; stageKey: string | null; onOpenDetails: (stageKey: string) => void }) {
+function SelectedStageCard(props: { role: RoleCardView; roadmap: RoadmapView | null; learningCourses?: LearningCourse[]; stageKey: string | null; onOpenDetails: (stageKey: string) => void }) {
   const { roadmap, role } = props;
   if (roadmap === null || roadmap.track_key !== role.track_key) return null;
   const currentKey = roadmap.next_step?.key ?? roadmap.milestones[0]?.key ?? "";
   const activeKey = isSelectedStage(props.stageKey, roadmap.milestones, currentKey);
   const active = roadmap.milestones.find((milestone) => milestone.key === activeKey);
   if (active === undefined) return null;
-  return <StageDetail milestone={active} state={role.attempt_number === null ? "preview" : milestoneState(active, roadmap.next_step)} nextStep={roadmap.next_step} role={role} onOpenDetails={props.onOpenDetails}/>;
+  return <StageDetail milestone={active} state={role.attempt_number === null ? "preview" : milestoneState(active, roadmap.next_step)} nextStep={roadmap.next_step} role={role} learningCourses={props.learningCourses} onOpenDetails={props.onOpenDetails}/>;
 }
 
 export function StagePathSection(props: {
   role: RoleCardView;
   roadmap: RoadmapView | null;
+  learningCourses?: LearningCourse[];
   pending: boolean;
   error: boolean;
   retry: () => void;
@@ -755,6 +761,12 @@ export function StagePathSection(props: {
   const currentKey = nextStep?.key ?? roadmapsDefaultKey(roadmap);
   const visibleStageKey = isSelectedStage(props.stageKey, roadmap.milestones, currentKey);
   const visibleMilestone = roadmap.milestones.find((m) => m.key === visibleStageKey);
+  const studyMilestones = role.attempt_number === null ? [] : roadmap.milestones
+    .filter(milestone => milestone.target_kind === "course")
+    .map(milestone => props.learningCourses?.find(course => course.course_key === milestone.target_key))
+    .filter((course): course is LearningCourse => course !== undefined);
+  const lessonsDone = studyMilestones.reduce((sum,course)=>sum+course.completed_units,0);
+  const lessonsTotal = studyMilestones.reduce((sum,course)=>sum+course.total_units,0);
   return (
     <section className="trajectory-v2-stage-block" aria-label="Этапы" data-testid="trajectory-stages">
       <header>
@@ -766,6 +778,7 @@ export function StagePathSection(props: {
       <ol className="trajectory-v2-stage-path">
         {roadmap.milestones.map((milestone) => {
           const state = role.attempt_number === null ? "preview" : milestoneState(milestone, nextStep);
+          const studied = role.attempt_number === null || milestone.target_kind !== "course" ? undefined : props.learningCourses?.find(course => course.course_key === milestone.target_key);
           return (
             <li key={milestone.key}>
               <button
@@ -773,6 +786,8 @@ export function StagePathSection(props: {
                 className="trajectory-v2-stage"
                 aria-pressed={milestone.key === visibleStageKey}
                 data-stage-state={state}
+                data-study-state={studied?.finished ? "studied" : studied?.completed_units ? "learning" : "none"}
+                title={studied ? `Обучение: ${String(studied.completed_units)} из ${String(studied.total_units)} уроков. ${studied.finished ? "Курс изучен, подтверждение этапа отдельно" : "Обучение в процессе"}` : milestone.title}
                 onClick={() => {
                   props.onStageSelect(milestone.key);
                 }}
@@ -780,6 +795,7 @@ export function StagePathSection(props: {
                 <span className="trajectory-v2-milestone-node" aria-hidden="true">{state === "completed" ? "✓" : state === "current" ? "◉" : state === "locked" ? "♙" : String(milestone.position)}</span>
                 <strong className="trajectory-v2-milestone-position">{milestone.position}</strong>
                 <span className="trajectory-v2-milestone-title">{milestone.title}</span>
+                {studied && studied.completed_units > 0 && <small className="trajectory-v2-stage-study-tag">{studied.finished ? "Учебный курс ✓" : `${String(Math.round(100*studied.completed_units/Math.max(1,studied.total_units)))}% обучения`}</small>}
               </button>
             </li>
           );
@@ -797,12 +813,17 @@ export function StagePathSection(props: {
           );
         })}
       </ol>
+      {lessonsTotal > 0 && <div className="trajectory-v2-studying" data-testid="trajectory-study-progress">
+        <div><strong>Освоение курсов траектории</strong><small>{lessonsDone} из {lessonsTotal} уроков · подтверждение этапов отдельно</small></div>
+        <progress max={lessonsTotal} value={lessonsDone} aria-label="Учебный прогресс выбранной траектории"/>
+      </div>}
       {visibleMilestone === undefined || props.showDetails === false ? null : (
         <StageDetail
           milestone={visibleMilestone}
           state={role.attempt_number === null ? "preview" : milestoneState(visibleMilestone, nextStep)}
           nextStep={nextStep}
           role={role}
+          learningCourses={props.learningCourses}
           onOpenDetails={props.onOpenDetails}
         />
       )}
@@ -819,11 +840,13 @@ export function StageDetail(props: {
   state: string;
   nextStep: MilestoneView | null;
   role: RoleCardView;
+  learningCourses?: LearningCourse[];
   onOpenDetails?: (stageKey: string) => void;
 }) {
   const { milestone, nextStep, role } = props;
   const canOpen = props.onOpenDetails !== undefined && props.state !== "locked";
   const total = Math.max(1, role.total_milestones);
+  const studied = role.attempt_number !== null && milestone.target_kind === "course" ? props.learningCourses?.find(course => course.course_key === milestone.target_key) : undefined;
   return (
     <section className="trajectory-v2-stage-detail" data-testid="trajectory-stage-detail" data-stage-key={milestone.key}>
       <div className="trajectory-v2-stage-header">
@@ -855,6 +878,11 @@ export function StageDetail(props: {
           </button>
         ) : null}
       </div>
+      {studied && <div className="trajectory-v2-studied-course" data-testid="trajectory-course-learning" data-course-key={studied.course_key}>
+        <div><strong>{studied.finished ? "Учебный курс завершён" : "Сохранён прогресс обучения"}</strong><span>{studied.completed_units} из {studied.total_units} уроков</span></div>
+        <progress max={studied.total_units} value={studied.completed_units} aria-label={`Прогресс обучения ${studied.title}`}/>
+        <small>{studied.finished ? "Сертификат обучения выдан. Этап траектории и практические навыки подтверждаются отдельно." : "Учебный прогресс сохранён в Bootcamp. Это не подтверждение профессионального навыка."}</small>
+      </div>}
       {milestone.activities && milestone.activities.length > 0 && (
         <div className="trajectory-v2-activities" data-testid="trajectory-stage-activities">
           <h4>Что предстоит сделать</h4>
