@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, ArrowRight, Award, BookOpen, Check, CheckCircle2, ChevronRight,
@@ -36,6 +36,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const program = learningProgramFor(courseKey);
   const client = useQueryClient();
   const [current, setCurrent] = useState(0);
+  const resumedCourse = useRef<string | null>(null);
   const [view, setView] = useState<View>(initialView);
   const [checks, setChecks] = useState<ReadonlySet<string>>(() => new Set());
   const [answer, setAnswer] = useState<number | null>(null);
@@ -51,7 +52,15 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     enabled: accessible && Boolean(program),
     retry: 1,
   });
-  const advance = useMutation({
+  // Resume from the server-confirmed first uncompleted lesson on a new reader.
+  // Keep the user's manual lesson selection after the first hydration.
+  useEffect(() => {
+    if (!program || !progress.data || progress.data.course_key !== courseKey) return;
+    if (resumedCourse.current === courseKey) return;
+    resumedCourse.current = courseKey;
+    setCurrent(Math.min(progress.data.completed_units, Math.max(0, program.units.length - 1)));
+  }, [courseKey, program, progress.data]);
+    const advance = useMutation({
     mutationFn: (lessonIndex: number) => apiRequest<Progress>(
       (path + "/lessons/" + String(lessonIndex) + "/complete") as RuntimeApiPath,
       { method: "POST", headers: csrfHeaders() },
