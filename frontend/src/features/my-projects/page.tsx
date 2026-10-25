@@ -166,11 +166,6 @@ function BenefitsPreview({ onDetails }: { onDetails: () => void }) {
 }
 function PanelPreview({ project, onOpen, onRewards }: { project: Project; onOpen: (tab?: Tab) => void; onRewards: () => void }) {
   const checkpoints = project.detail?.checkpoints ?? [];
-  const acceptedEvidenceCount=project.work.contributions.filter(item=>
-    ["accepted","verified","approved"].includes(item.status)||
-    (project.detail?.feedback??[]).some(review=>
-      review.contribution_id===item.id&&["accepted","verified","approved"].includes(review.status))
-  ).length;
   const progress = completion(project);
   const contributions = project.work.contributions.slice(-4);
   return <aside className="mp-preview mp-surface">
@@ -242,6 +237,11 @@ function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, 
   const [copied,setCopied] = useState(false);
   const [copyFailed,setCopyFailed] = useState(false);
   const checkpoints = project.detail?.checkpoints ?? [];
+  const acceptedEvidenceCount=project.work.contributions.filter(item=>
+    ["accepted","verified","approved"].includes(item.status)||
+    (project.detail?.feedback??[]).some(review=>
+      review.contribution_id===item.id&&["accepted","verified","approved"].includes(review.status))
+  ).length;
   const progress = completion(project);
   const projectTopic=[project.work.task.title,project.detail?.problem??"",...(project.work.task.competency_tags??[])].join(" ").toLowerCase();
   const heroArtKind=/(спутник|satellite|космич|earth observation)/.test(projectTopic)?"satellite":
