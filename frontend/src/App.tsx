@@ -59,7 +59,8 @@ import { ManagerWorkspace } from "./features/manager";
 import { HrWorkspace } from "./features/hr";
 import { OperatorWorkspace } from "./features/operator";
 import { ManagerVisualPage, OperatorVisualPage } from "./features/visual-gap-pages";
-import { ParticipantAnalytics, RoleAnalytics } from "./features/analytics";
+import { RoleAnalytics } from "./features/analytics";
+import { AnalyticsDashboardV3 } from "./features/analytics-v3/page";
 import { ParticipantPortfolio, ParticipantRating } from "./features/portfolio";
 import { MentorReviewWorkspace } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
@@ -566,7 +567,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Аналитика" ? (
-          <ParticipantAnalytics navigation={actor.navigation} />
+          <AnalyticsDashboardV3 navigation={actor.navigation} />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Достижения" ? (
