@@ -4,7 +4,12 @@ on:
   push:
     branches: [main]
     paths:
-      - "frontend/src/features/bootcamp/**"
+      # Keep this expensive browser suite scoped to the lesson reader.
+      # Broader catalog redraws have their own reference QA and may commit rapidly.
+      - "frontend/src/features/bootcamp/bootcamp-approved.scss"
+      - "frontend/src/features/bootcamp/route-v2.tsx"
+      - "frontend/src/features/bootcamp/learning-content/CourseLearningContent.tsx"
+      - "frontend/src/features/bootcamp/learning-content/learning-content.scss"
       - "frontend/src/components/ui.tsx"
       - "frontend/e2e/bootcamp-approved.spec.ts"
       - "frontend/e2e/bootcamp-forensic-audit.spec.ts"
