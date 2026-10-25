@@ -5,6 +5,7 @@ Install: pip install "fastapi>=0.115" "uvicorn>=0.30" "PyJWT>=2.9"
 Set JWT_SECRET to a strong, private secret in the environment.
 Never ship a hardcoded real credential or rely on this example alone in production.
 """
+
 from __future__ import annotations
 
 import os
@@ -27,8 +28,11 @@ def get_current_user(token: Annotated[str, Depends(bearer)]) -> dict[str, str]:
         raise RuntimeError("JWT_SECRET must be set outside source control")
     try:
         payload = jwt.decode(
-            token, secret, algorithms=["HS256"],
-            issuer=ISSUER, audience=AUDIENCE,
+            token,
+            secret,
+            algorithms=["HS256"],
+            issuer=ISSUER,
+            audience=AUDIENCE,
             options={"require": ["exp", "sub", "iss", "aud"]},
         )
     except jwt.PyJWTError as exc:
