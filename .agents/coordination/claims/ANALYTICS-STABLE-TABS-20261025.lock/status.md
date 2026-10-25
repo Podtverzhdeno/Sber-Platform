@@ -1,0 +1,13 @@
+# Claim ANALYTICS-STABLE-TABS-20261025
+- task_id: ANALYTICS-STABLE-TABS-20261025
+- session_id: gpt6-20261025-stable-analytics-tab-switcher
+- status: IN_PROGRESS
+- base_revision: ac0aced05304ee4f61d559c303fae2d1abb386ab
+- started_at: 2026-10-25
+- write_scope:
+  - frontend/src/features/analytics-v3/analytics-v3.scss (header/tab/filter layout only)
+  - frontend/e2e/analytics-three-sections.spec.ts (tab-geometry regression test only)
+  - .agents/coordination/claims/ANALYTICS-STABLE-TABS-20261025.lock/status.md
+- shared_files: none
+- verification: compare tab switcher x/y/width at desktop 1586, intermediate 1366, and mobile 390 across all three analytics sections, plus build and browser interactions
+- progress: User reports horizontal switcher movement between Activity, Skill Passport and Certification; root cause is grid auto tracks reacting to header contents and changing fresh-data labels. Fix with fixed-width tab and filters columns; don't affect other workspace views.
