@@ -1,7 +1,7 @@
 # Claim XS-403-PROJECT-EVIDENCE-E2E-20261026
 
 - session_id: gpt6-20261026-project-evidence-e2e-01
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: ac31eada3343940d6f1ebfa4fa12fcab5dc9aab4
@@ -14,5 +14,17 @@
 - verification:
   - Ruff lint/format on exact test file
   - pytest tests/test_project_journey_consistency.py
-- progress: Build real HTTP regression test through publish, application, assignment, contribution, acceptance and read projections. No UI/bootcamp edits.
+- progress: Cross-role HTTP integration regression added: publish→terms→apply→staff→submit→accept→work/passport/portfolio/journey, with negative pre-acceptance and cross-person checks. Focused CI green, awaiting independent review.
+- changed_files:
+  - tests/test_project_journey_consistency.py
+  - .github/workflows/project-journey-consistency-qa.yml
+- verification_evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40240659048
+  - Ruff format: success
+  - Ruff check: success
+  - pytest acceptance: success
+- unverified:
+  - PostgreSQL production lifecycle
+  - Browser E2E for project→passport→portfolio screens
+  - Independent reviewer and full integration gate
 - blockers: Real-browser and PostgreSQL E2E remain separate integration gates.
