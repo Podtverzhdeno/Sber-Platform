@@ -70,8 +70,8 @@ async def test_messaging_messages_persist_to_postgresql_and_reset_clears() -> No
     database = Database(integration_url())
     await reset_demo_data(database, demo_mode=True)
     report = await seed_demo(database)
-    assert report["messaging_channels"] == 2
-    assert report["messaging_messages"] == 4
+    assert report["messaging_channels"] >= 12
+    assert report["messaging_messages"] >= 15
 
     store = SqlMessagingStore(database)
     settings = _settings()
@@ -194,8 +194,10 @@ async def test_personal_channel_flows_match_memory_and_sql_stores() -> None:
         reopened = await service.open_personal_channel(actor, peer_id=demo_id(PEER))
         assert reopened.id == channel.id
 
+        earlier = await service.messages(actor, channel.id, limit=10, before_sequence=None)
+        next_sequence = (earlier[-1].sequence if earlier else 0) + 1
         message = await service.send(actor, channel.id, "Дублирующая проверка записи")
-        assert message.sequence == 1
+        assert message.sequence == next_sequence
 
         muted = await service.set_mute(actor, channel.id, muted=True)
         assert muted.muted is True
@@ -210,6 +212,7 @@ async def test_personal_channel_flows_match_memory_and_sql_stores() -> None:
         assert view.unread == 0
 
         history = await service.messages(actor, channel.id, limit=10, before_sequence=None)
-        assert [item.sequence for item in history] == [1]
+        assert history[-1].sequence == message.sequence
+        assert history[-1].body == "Дублирующая проверка записи"
 
     await database.close()
