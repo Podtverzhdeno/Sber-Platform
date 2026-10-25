@@ -133,16 +133,16 @@ def test_snapshot_is_self_scoped_and_denies_other_roles() -> None:
         session_secret=SecretStr("journey-test-secret-long-enough"),
     )
     with TestClient(create_app(settings)) as api:
-        participant = next(
-            person for person in demo_personas() if Role.PARTICIPANT in person.roles
-        )
+        participant = next(person for person in demo_personas() if Role.PARTICIPANT in person.roles)
         other = next(
-            person for person in demo_personas() if Role.CUSTOMER in person.roles
-            and Role.PARTICIPANT not in person.roles
+            person
+            for person in demo_personas()
+            if Role.CUSTOMER in person.roles and Role.PARTICIPANT not in person.roles
         )
-        assert api.post(
-            "/api/v1/auth/demo-login", json={"persona_key": participant.key}
-        ).status_code == 200
+        assert (
+            api.post("/api/v1/auth/demo-login", json={"persona_key": participant.key}).status_code
+            == 200
+        )
         snapshot_response = api.get("/api/v1/me/journey/snapshot")
         assert snapshot_response.status_code == 200, snapshot_response.text
         snapshot = snapshot_response.json()
@@ -151,9 +151,9 @@ def test_snapshot_is_self_scoped_and_denies_other_roles() -> None:
         assert isinstance(snapshot["projects"], list)
         assert isinstance(snapshot["courses"], list)
         assert "grade_awarded" not in snapshot
-        assert api.post(
-            "/api/v1/auth/demo-login", json={"persona_key": other.key}
-        ).status_code == 200
+        assert (
+            api.post("/api/v1/auth/demo-login", json={"persona_key": other.key}).status_code == 200
+        )
         forbidden = api.get("/api/v1/me/journey/snapshot")
         assert forbidden.status_code == 404
         assert str(participant.person_id) not in forbidden.text
