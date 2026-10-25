@@ -2,8 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useId, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Award, ArrowRight, BarChart3, BadgeCheck, BookOpen, BriefcaseBusiness, CalendarDays,
-  Check, CheckCircle2, ChevronRight, CircleHelp, ClipboardCheck, Copy, ExternalLink,
+  Award, ArrowRight, BarChart3, BadgeCheck, BriefcaseBusiness,
+  Check, CheckCircle2, ChevronRight, ClipboardCheck, Copy, ExternalLink,
   Eye, FileBadge2, FileCheck2, FolderKanban, GraduationCap, Link2, MapPin, Medal,
   MoreHorizontal, Pencil, Rocket, Share2, ShieldCheck, Sparkles, Star, Target, Trophy,
   Users, X, type LucideIcon,
