@@ -10,7 +10,7 @@ from uuid import UUID
 from sqlalchemy import delete, func, insert, select, update
 from sqlalchemy.dialects.postgresql import insert as postgres_insert
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.identity import (
     CustomerVerificationState,
     IdentityStore,

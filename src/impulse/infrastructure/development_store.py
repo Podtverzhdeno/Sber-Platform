@@ -9,7 +9,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as postgres_insert
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.development import (
     CourseRecord,
     DevelopmentStore,

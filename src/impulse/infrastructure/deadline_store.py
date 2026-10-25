@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.deadline import DeadlineChangeRequest, DeadlineChangeStore
 from impulse.application.work import TermsRecord, WorkStore
 from impulse.domain.deadline import DeadlineChangeStatus
