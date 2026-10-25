@@ -37,6 +37,7 @@ import {
   type DevelopmentOverviewView,
   type OpenTarget,
 } from "./client";
+import { levelCoursesProgress, loadRoleLevel, roleLevelQueryKey, type ImpulseRoleLevel } from "../impulse-role-level";
 import "./home-v2.scss";
 
 type HomeGrade = DevelopmentOverviewView["concepts"]["career_grade"];
@@ -98,7 +99,15 @@ export function ParticipantHomeV2Body(props: {
   const panelRef = useRef<HTMLDivElement>(null);
   const returnFocusRef = useRef<HTMLElement | null>(null);
   const grade = overview.concepts.career_grade;
-  const activeRole = overview.roles.find((item) => item.state === "active") ?? overview.roles[0] ?? null;
+  const activeRole = overview.roles.find(item => item.track_key === overview.next_outcome?.trajectory_key && item.state === "active")
+    ?? overview.roles.find((item) => item.state === "active") ?? overview.roles[0] ?? null;
+  const levelRoleKey = activeRole?.track_key ?? null;
+  const impulseLevel = useQuery({
+    queryKey:roleLevelQueryKey(levelRoleKey),
+    queryFn:()=>loadRoleLevel(levelRoleKey ?? ""),
+    enabled:levelRoleKey!==null,
+    retry:false,
+  });
   const recommendedTask = overview.active_tasks.find((task) => task.next_action !== "await_review") ?? null;
   const heroKind = recommendedTask ? "task" : overview.next_outcome?.target_kind ?? null;
   const heroKey = recommendedTask?.task_id ?? overview.next_outcome?.target_key ?? null;
@@ -170,7 +179,7 @@ export function ParticipantHomeV2Body(props: {
           )}
         </section>
 
-        <GradeSummaryPanel grade={grade} hint={overview.concepts} roleTitle={activeRole?.title ?? null} onOpenLevels={() => { openPanel("levels"); }} onOpenDetails={() => { openPanel("grade-details"); }} />
+        <GradeSummaryPanel grade={grade} hint={overview.concepts} levelData={impulseLevel.data ?? null} levelPending={impulseLevel.isPending} roleTitle={activeRole?.title ?? null} onOpenLevels={() => { openPanel("levels"); }} onOpenDetails={() => { openPanel("grade-details"); }} />
         <WeeklyFocusPanel focus={overview.weekly_focus} today={overview.local_today} />
       </div>
 
@@ -278,24 +287,43 @@ export function NextOutcomePanel(props: {
 export function GradeSummaryPanel(props: {
   grade: HomeGrade;
   hint: DevelopmentOverviewView["concepts"];
+  levelData: ImpulseRoleLevel | null;
+  levelPending: boolean;
   roleTitle?: string | null;
   onOpenLevels?: () => void;
   onOpenDetails?: () => void;
 }) {
   const { grade } = props;
-  const valid = grade.state !== "not_evaluable";
+  const {levelData:level,levelPending} = props;
+  const pct = level ? levelCoursesProgress(level) : 0;
   return (
-    <section className="home-v2-block home-v2-grade" data-testid="grade-summary" data-grade-state={grade.state}>
-      <header><h2>Твой уровень</h2><button type="button" className="home-v2-inline-link" onClick={props.onOpenLevels} disabled={!props.onOpenLevels}>Все уровни <ArrowRight size={16}/></button></header>
+    <section className="home-v2-block home-v2-grade" data-testid="grade-summary"
+      data-grade-state={level ? "impulse-known" : levelPending ? "loading" : "unavailable"}>
+      <header><h2>Уровень Impulse</h2>
+        <button type="button" className="home-v2-inline-link" onClick={props.onOpenLevels} disabled={!props.onOpenLevels}>Все уровни <ArrowRight size={16}/></button>
+      </header>
       <div className="home-v2-grade-overview">
-        <div className="home-v2-ring" style={{ background: `conic-gradient(#04e8e9 0deg ${String(valid && grade.readiness_percent !== null ? Math.max(0, Math.min(100, grade.readiness_percent)) * 3.6 : 0)}deg, #1d4666 0deg 360deg)` }} aria-label={valid && grade.current_grade !== null ? `Текущий грейд ${grade.current_grade}` : "Карьерный грейд пока не вычисляется"}><div><strong>{valid && grade.current_grade !== null ? grade.current_grade : "—"}</strong><span>{valid && grade.current_grade !== null ? `Грейд ${grade.current_grade}` : "Грейд не назначен"}</span></div></div>
-        <div className="home-v2-grade-readiness"><small>{valid && grade.target_grade !== null ? `До грейда ${grade.target_grade}` : "До следующего грейда"}</small><strong>{valid && grade.readiness_percent !== null ? `${String(Math.max(0,100-grade.readiness_percent))}%` : "—"}</strong><div className="home-v2-progress"><span style={{width: valid && grade.readiness_percent !== null ? `${String(grade.readiness_percent)}%` : "0%"}} /></div><small>{valid && grade.readiness_percent !== null ? "Осталось до следующего уровня" : "Прогресс не утверждён"}</small></div>
+        <div className="home-v2-ring"
+          style={{background:`conic-gradient(#04e8e9 0deg ${String(pct*3.6)}deg, #1d4666 ${String(pct*3.6)}deg 360deg)`}}
+          aria-label={level ? `Уровень Impulse L${String(level.level)}` : "Данные уровня загружаются"}>
+          <div><strong>{level ? `L${String(level.level)}` : "—"}</strong><span>{level ? `Цикл ${String(level.cycle_number)}` : "Загрузка"}</span></div>
+        </div>
+        <div className="home-v2-grade-readiness">
+          <small>{level ? `До L${String(level.level+1)}` : "До следующего уровня"}</small>
+          <strong>{level?.curriculum_state === "published" ? `${String(level.completed_courses)}/${String(level.required_courses)}` : "—"}</strong>
+          <div className="home-v2-progress"><span style={{width:`${String(pct)}%`}}/></div>
+          <small>{level?.curriculum_state === "published"
+            ? `Практика: ${String(level.approved_practices)} из ${String(level.required_practices)}`
+            : level ? "Следующий цикл ожидает новой программы" : "Уровень пока недоступен"}</small>
+        </div>
       </div>
       <button type="button" className="home-v2-next-grade" onClick={props.onOpenDetails} disabled={!props.onOpenDetails}>
-        <div className="home-v2-next-grade-name"><span>{valid && grade.target_grade !== null ? grade.target_grade : "—"}</span><strong>{valid && grade.target_grade !== null ? `Грейд ${grade.target_grade}` : "Следующий уровень"}</strong><ChevronRight size={17}/></div>
+        <div className="home-v2-next-grade-name"><span>{level ? `L${String(level.level+1)}` : "—"}</span>
+          <strong>{level?.advance_ready ? "Готов к повышению" : "Следующий уровень"}</strong>
+          <ChevronRight size={17}/></div>
         <p>{props.roleTitle ?? "Выберите профессиональную роль"}</p>
       </button>
-      {!valid && <p className="home-v2-grade-disclaimer" role="status">Карьерные грейды ещё не опубликованы. Прогресс появится после утверждения требований.</p>}
+      <p className="home-v2-grade-disclaimer" role="status">Это уровень развития Impulse, не официальный карьерный грейд Сбера.</p>
     </section>
   );
 }
