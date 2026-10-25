@@ -307,3 +307,33 @@
     transition:none!important;animation:none!important;
   }
 }
+
+/* Runtime rhythm reminder: only appears in the saved schedule window. */
+.streak-rhythm-reminder-toast {
+  position:fixed;z-index:2200;right:24px;bottom:24px;
+  display:grid;grid-template-columns:36px minmax(0,1fr) 26px;
+  gap:11px;align-items:start;width:min(380px,calc(100vw - 32px));
+  box-sizing:border-box;padding:13px;border:1px solid #258878;
+  border-radius:14px;color:#e7fcf7;background:#082838;
+  box-shadow:0 15px 45px #000a,0 0 24px #1debc51c;
+  animation:rhythm-reminder-entrance .27s ease-out;
+}
+.streak-rhythm-reminder-symbol {
+  display:grid;place-items:center;width:36px;height:36px;border-radius:10px;
+  color:#43ebce;background:#074d4c;
+}
+.streak-rhythm-reminder-toast > span:nth-child(2) {display:grid;gap:4px;}
+.streak-rhythm-reminder-toast strong {font-size:13px;line-height:1.3;}
+.streak-rhythm-reminder-toast small {color:#bad4df;font-size:11px;line-height:1.45;}
+.streak-rhythm-reminder-toast > button {
+  display:grid;place-items:center;box-sizing:border-box;
+  width:26px;height:26px;min-height:26px;min-width:26px;
+  padding:0;border:0;border-radius:7px;background:transparent;color:#bdd9e3;cursor:pointer;
+}
+.streak-rhythm-reminder-toast > button:hover {background:#174859;}
+@keyframes rhythm-reminder-entrance {
+  from{opacity:0;transform:translateY(12px) scale(.98)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+@media(max-width:600px){.streak-rhythm-reminder-toast{right:16px;bottom:16px;}}
+@media(prefers-reduced-motion:reduce){.streak-rhythm-reminder-toast{animation:none;}}
