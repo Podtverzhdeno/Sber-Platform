@@ -76,6 +76,13 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     await expect(reader.locator(".imp-study__lesson-list button").nth(1)).toHaveAttribute("aria-current", "step");
     await page.screenshot({ path: "test-results/imp-04-progress-" + String(viewport.width) + ".png", animations: "disabled" });
     for (let index = 1; index < 8; index++) {
+      if (index === 7) {
+        const capstone = reader.locator(".imp-study__capstone");
+        await expect(capstone).toBeVisible();
+        await expect(capstone.locator(".imp-study__capstone-rubric article")).toHaveCount(4);
+        await expect(capstone).toContainText("100 баллов");
+        await page.screenshot({path:"test-results/imp-capstone-" + String(viewport.width) + ".png", animations:"disabled"});
+      }
       await reader.locator(".imp-study__navigation .imp-study__primary").click();
     }
     await expect(reader.locator(".imp-study__aside-heading > span")).toHaveText("100%");
