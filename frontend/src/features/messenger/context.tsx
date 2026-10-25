@@ -1,6 +1,8 @@
 import { Bell, BellOff, FileText, Link2, Users, X } from "lucide-react";
 import { useState } from "react";
-import type { ApiChannelView } from "./contracts";
+import type { ApiChannelView, ApiMessageView } from "./contracts";
+import type { DirectoryContact } from "./group-creator";
+import { CommunityDetails } from "./community-details";
 import {
   type ChannelWorkContextView,
   contextDateLabel,
@@ -21,6 +23,10 @@ export type ContextPanelProps = {
   onClose?: () => void;
   onToggleMute?: () => void;
   messageRefs?: string[];
+  messages?: readonly ApiMessageView[];
+  contacts?: readonly DirectoryContact[];
+  onOpenMember?: (personId: string) => Promise<void>;
+  onInvite?: (personIds: string[]) => Promise<void>;
   className?: string;
 };
 
@@ -35,6 +41,10 @@ export function ContextPanel({
   onClose,
   onToggleMute,
   messageRefs = [],
+  messages = [],
+  contacts = [],
+  onOpenMember,
+  onInvite,
   className,
 }: ContextPanelProps) {
   const [copyStatus, setCopyStatus] = useState<"ready" | "copied" | "unavailable">("ready");
@@ -48,6 +58,12 @@ export function ContextPanel({
   const isCommunity = channel.kind === "community";
   const moderators = channel.participants.filter((person) => ["owner", "admin", "moderator"].includes(person.role));
   const visiblePeople = showAllPeople ? channel.participants : channel.participants.slice(0, 4);
+  if (isCommunity) {
+    return <CommunityDetails key={channel.id} channel={channel} viewerId={viewerId}
+      messages={messages} attachmentRefs={messageRefs} contacts={contacts}
+      onClose={onClose} onToggleMute={onToggleMute}
+      onOpenMember={onOpenMember} onInvite={onInvite} />;
+  }
   return (
     <aside className={classes} id="messenger-context-panel" aria-label="Контекст диалога">
       {onClose !== undefined && (
