@@ -11,6 +11,8 @@ on:
       - "src/impulse/bootstrap/demo_seed.py"
       - "src/impulse/infrastructure/messaging_store.py"
       - "frontend/src/api/client.ts"
+      - "frontend/src/api/client.test.ts"
+      - "src/impulse/bootstrap/predeploy.py"
       - "tests/test_messaging_api.py"
       - "tests/test_demo_seed_graph.py"
       - "tests/test_identity_access.py"
@@ -57,3 +59,14 @@ jobs:
         env:
           DEMO_MODE: "true"
       - run: uv run pytest -q tests/test_messaging_api.py tests/test_notifications_api.py tests/test_identity_access.py tests/test_demo_seed_graph.py tests/integration/test_demo_seed_idempotency.py
+      - name: Node.js for CSRF recovery contract
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+      - name: Validate stale-session CSRF recovery and protected-write behavior
+        run: npx vitest run src/api/client.test.ts
+        working-directory: frontend
