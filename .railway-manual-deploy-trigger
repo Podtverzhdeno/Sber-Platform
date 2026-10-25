@@ -5,3 +5,6 @@ release_request=2026-10-25-achievements-gallery-polish-97e95c9d88
 
 # Achievements final wide-desktop hero fix: eyebrow and two-line title confirmed by Playwright QA
 release_request=2026-10-25-achievements-wide-fix-de3591ff7
+
+# Contextual participant onboarding, task-detail help and reference-anchored hints
+release_request=2026-10-25-participant-guide-f32d9f7481
