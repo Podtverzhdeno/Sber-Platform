@@ -73,6 +73,7 @@ describe("cross-section progress mutation policy", () => {
       "engagement-rhythm",
       "participant-growth-analytics",
       "participant-analytics",
+      "impulse-study",
       "impulse-learning-summary",
       "bootcamp-catalog",
       "bootcamp-v2-overview",
