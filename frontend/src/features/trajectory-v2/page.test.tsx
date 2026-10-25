@@ -171,16 +171,19 @@ describe("trajectory role palette and single primary", () => {
     const overview = { ...overviewFixture, roles: twoActive };
     expect(primaryTrajectoryKey(overview)).toBe("python");
     expect(primaryTrajectoryKey({ ...overview, next_outcome: null })).toBe("python");
+    const next = overviewFixture.next_outcome;
+    const unselected = rolesFixture[2];
+    if (next === null || unselected === undefined) throw new Error("Missing primary or unselected fixture");
     expect(primaryTrajectoryKey({
       ...overview,
-      next_outcome: { ...overviewFixture.next_outcome!, trajectory_key: "product" },
+      next_outcome: { ...next, trajectory_key: "product" },
     })).toBe("python");
     expect(primaryTrajectoryKey({
       ...overview,
       next_outcome: null,
-      roles: [rolesFixture[2]!],
+      roles: [unselected],
     })).toBeNull();
-    expect(roleVisualTone(rolesFixture[2]!, true)).toBe("unselected");
+    expect(roleVisualTone(unselected, true)).toBe("unselected");
   });
 });
 
