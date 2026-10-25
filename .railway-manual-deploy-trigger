@@ -5,3 +5,6 @@ release_request=2026-10-25-postqa-ff5f752b156b08f2
 
 # Home hover/pressed smoothness fix: Home reference QA 40151958605 passed.
 release_request=2026-10-25-home-smooth-0e9c9fb2bc3d
+
+# Bootcamp BC-R01..BC-R05 reference layout release; requires fresh Railway build.
+release_request=2026-10-25-bootcamp-reference-86908dae
