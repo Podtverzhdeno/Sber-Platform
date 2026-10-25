@@ -75,3 +75,31 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     expect(overflow).toBe(false);
   });
 }
+
+
+test("data-security reference: theory methods, JWT example, practice requirements and checklist", async ({ page }) => {
+  await page.setViewportSize({ width: 1672, height: 941 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const path = new URL(page.url()).pathname;
+  await page.goto(path + "?course=demo-course-10");
+  const reader = page.getByTestId("impulse-immersive-reader");
+  await expect(reader).toBeVisible();
+  await reader.getByRole("button", { name: /Перейти к программе/ }).click();
+  await reader.locator(".imp-study__program-list button").first().click();
+  await reader.locator(".imp-study__navigation .imp-study__primary").click();
+  await expect(reader.locator(".imp-study__lesson-heading")).toContainText("Аутентификация и авторизация");
+  await expect(reader.locator(".imp-study__method-card")).toHaveCount(4);
+  await page.screenshot({ path: "test-results/reference-security-04-theory.png", animations: "disabled" });
+  await reader.getByRole("button", { name: "Пример", exact: true }).click();
+  await expect(reader.locator(".imp-study__walkthrough article")).toHaveCount(4);
+  await expect(reader.locator(".imp-study__code")).toContainText('JWT_SECRET');
+  await page.screenshot({ path: "test-results/reference-security-05-example.png", animations: "disabled" });
+  await reader.getByRole("button", { name: "Практическое задание", exact: true }).click();
+  await expect(reader.locator(".imp-study__practice-columns .imp-study__requirement")).toHaveCount(8);
+  await page.screenshot({ path: "test-results/reference-security-06-practice.png", animations: "disabled" });
+  await reader.getByRole("button", { name: "Самопроверка", exact: true }).click();
+  await expect(reader.locator(".imp-study__check-grid button")).toHaveCount(3);
+  await page.screenshot({ path: "test-results/reference-security-07-check.png", animations: "disabled" });
+});
