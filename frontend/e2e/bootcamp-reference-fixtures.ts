@@ -53,6 +53,30 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
     return route.fulfill({ json: actor });
   });
   await page.route("**/api/v1/me/bootcamp/catalog", route => route.fulfill({ json: catalog }));
+  const study = new Map<string, { completed_units: number; certificate_id: string | null }>();
+  await page.route("**/api/v1/me/bootcamp/impulse-study/**", async route => {
+    const path = new URL(route.request().url()).pathname;
+    const match = path.match(/\/impulse-study\/(demo-course-\d+)(?:\/lessons\/(\d+)\/complete|\/(finish))?$/);
+    if (!match) { await route.fulfill({ status: 404, json: { code: "NOT_FOUND" } }); return; }
+    const course = match[1] ?? "";
+    const previous = study.get(course) ?? { completed_units: 0, certificate_id: null };
+    const record = { ...previous };
+    if (route.request().method() === "POST" && match[2]) {
+      const index = Number(match[2]);
+      if (index === record.completed_units) record.completed_units += 1;
+      else if (index > record.completed_units) { await route.fulfill({ status: 409, json: { code: "LESSON_ORDER" } }); return; }
+    }
+    if (route.request().method() === "POST" && match[3]) {
+      if (record.completed_units !== 8) { await route.fulfill({ status: 409, json: { code: "COURSE_INCOMPLETE" } }); return; }
+      record.certificate_id ??= "a1b2c3d4-e5f6-47ab-8c12-000000000099";
+    }
+    study.set(course, record);
+    await route.fulfill({ json: {
+      course_key: course, completed_units: record.completed_units, total_units: 8,
+      certificate_id: record.certificate_id, finished: Boolean(record.certificate_id),
+    } });
+  });
+
   await page.route("**/api/v1/me/learning/streak", route =>
     route.fulfill({ json: { current_days: 11, qualified_dates: [], reason: "Демо-показ" } }));
   await page.route("**/api/v1/me/bootcamp/certificates", route => route.fulfill({ json: [] }));
