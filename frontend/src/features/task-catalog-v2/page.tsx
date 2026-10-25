@@ -609,7 +609,16 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
           <div><strong>{totals?.total_available ?? 0}</strong><b>доступных задач</b><small>Доступно для отклика во всём каталоге</small></div>
         </div>
         <div className="catalog-v2-kpi">
-          <span className="catalog-v2-kpi-ring" aria-hidden="true">{averageMatch === null ? "—" : `${String(averageMatch)}%`}</span>
+          <span className="catalog-v2-kpi-ring" aria-hidden="true">
+            <svg viewBox="0 0 44 44" focusable="false">
+              <circle className="catalog-v2-kpi-ring-track" cx="22" cy="22" r="18" pathLength="100" />
+              {averageMatch !== null ? (
+                <circle className="catalog-v2-kpi-ring-value" cx="22" cy="22" r="18" pathLength="100"
+                  strokeDasharray={`${String(Math.min(100, Math.max(0, averageMatch)))} 100`} />
+              ) : null}
+            </svg>
+            <span>{averageMatch === null ? "—" : `${String(averageMatch)}%`}</span>
+          </span>
           <div><strong>{averageMatch === null ? "—" : `${String(averageMatch)}%`}</strong><b>среднее соответствие</b><small>По {scoredItems.length} из {items.length} загруженных</small></div>
         </div>
         <div className="catalog-v2-kpi">
@@ -626,7 +635,7 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
         <div className="catalog-v2-filter-rail">
           <button type="button" className="catalog-v2-all-tasks" onClick={() => {
             updateParams({ q: null, difficulty: null, work_format: null, customer: null, direction: null, competency: null, timeframe: null, saved: null, mentored: null, portfolio: null, available: null, sort: null }, true);
-          }}><SlidersHorizontal size={15} aria-hidden="true" /> Все задачи{activeFilterChips.length === 0 ? ` (${String(totals?.total_found ?? 0)})` : ""}</button>
+          }} aria-pressed={activeFilterChips.length === 0}><SlidersHorizontal size={15} aria-hidden="true" /> Все задачи{activeFilterChips.length === 0 ? ` (${String(totals?.total_found ?? 0)})` : ""}</button>
           <div id="catalog-v2-advanced-filters" className="catalog-v2-advanced-filters" data-open={advancedFiltersOpen}>
             <label>Направление<input list="catalog-v2-direction-options" value={filters.direction} onChange={(event) => { updateParams({ direction: event.target.value }, true); }} placeholder="Направление" autoComplete="off" /></label>
             <label>Навык<input list="catalog-v2-competency-options" value={filters.competency} onChange={(event) => { updateParams({ competency: event.target.value }, true); }} placeholder="Навыки" autoComplete="off" /></label>
