@@ -946,12 +946,24 @@ export function BootcampCatalog({
             onReason={() => { openPanel("reason", deepLinked.key); }} />)}
       </Drawer>
       <Drawer title="Требования к обучению" open={panel === "requirements"} onClose={closePanel}>
-        <RequirementsDetails cards={roleCourses} studyRecords={study.data?.courses ?? []} policyCurriculum={gradeCurriculum} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} onStartPractice={() => { void navigate("/workspace/1"); }} />
+        <RequirementsDetails cards={roleCourses} studyRecords={study.data?.courses ?? []} policyCurriculum={gradeCurriculum} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} onStartPractice={() => { void navigate(`/workspace/1?role=${encodeURIComponent(selectedRole)}`); }} />
       </Drawer>
       {milestoneCelebration && <GradeMilestoneCelebration mode={milestoneCelebration.mode}
         roleTitle={milestoneCelebration.roleTitle} fromGrade={milestoneCelebration.fromGrade} toGrade={milestoneCelebration.toGrade}
         onClose={() => { setMilestoneCelebration(null); }}
-        onContinue={() => { const mode=milestoneCelebration.mode;setMilestoneCelebration(null);if(mode==="official-grade-up"){void gradeOverview.refetch();}openPanel("requirements"); }}
+        onContinue={() => {
+          setMilestoneCelebration(null);
+          // Continue in the SAME role, not an unrelated default trajectory.
+          // Fresh server projections own stage/grade status; learning certificates
+          // remain a separate signal until the roadmap owner verifies milestones.
+          void Promise.all([
+            client.invalidateQueries({queryKey:["development-overview"]}),
+            client.invalidateQueries({queryKey:["trajectory-roadmaps"]}),
+            client.invalidateQueries({queryKey:["trajectory-roadmap-catalog"]}),
+            client.invalidateQueries({queryKey:learningSummaryQueryKey}),
+            client.invalidateQueries({queryKey:["bootcamp-v2-overview",selectedRole]}),
+          ]).then(() => navigate(`/workspace/1?role=${encodeURIComponent(selectedRole)}`));
+        }}
       />}
       {honorBoardEnabled && honorBoardConsent && (
         <Card title="Зал славы курсов">
