@@ -8,3 +8,6 @@ release_request=2026-10-25-achievements-wide-fix-de3591ff7
 
 # Contextual participant onboarding, task-detail help and reference-anchored hints
 release_request=2026-10-25-participant-guide-f32d9f7481
+
+# Participant detailed help center: 35 topics, section tours, inline explainers and checklists
+release_request=2026-10-25-participant-help-center-a1b678d77844
