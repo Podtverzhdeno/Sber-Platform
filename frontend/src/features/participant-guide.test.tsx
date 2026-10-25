@@ -89,6 +89,27 @@ describe("contextual participant guide", () => {
     expect(screen.queryByText("Выбирай задачи под свой интерес")).not.toBeInTheDocument();
   });
 
+  it("opens full contextual instructions from a lightweight coachmark", () => {
+    renderGuide("Задачи");
+    fireEvent.click(screen.getByRole("button", { name: "Как здесь всё устроено?" }));
+    expect(screen.getByRole("heading", { name: "Выбирай задачи под свой интерес" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Подробная помощь/ }));
+    expect(screen.getByRole("dialog", { name: "Центр помощи" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Как выбрать подходящую задачу?" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Показать подсказки на странице/ }));
+    expect(screen.getByRole("heading", { name: "Выбирай задачи под свой интерес" })).toBeInTheDocument();
+  });
+
+  it("opens exactly the requested just-in-time topic and returns to the page", () => {
+    renderGuide("Мои проекты");
+    fireEvent(window, new CustomEvent("impulse:guide:topic", { detail: { topicId: "task-submit" } }));
+    expect(screen.getByRole("dialog", { name: "Центр помощи" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Как передать решение на проверку?" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Закрыть центр помощи" }));
+    expect(screen.queryByRole("dialog", { name: "Центр помощи" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Как здесь всё устроено?" })).toBeInTheDocument();
+  });
+
   it("keeps coachmarks inside the viewport at both screen edges", () => {
     const right = locatePopover({left: 10,right: 150,top: 100,bottom: 140,width: 140,height: 40}, {width:290,height:205}, {width:1000,height:700});
     expect(right.side).toBe("right");
