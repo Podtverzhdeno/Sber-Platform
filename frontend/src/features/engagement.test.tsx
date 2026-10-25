@@ -338,16 +338,19 @@ describe("TopbarEngagementIndicator", () => {
     if (!dateInput) {
       throw new Error("date input missing");
     }
-    fireEvent.change(dateInput, { target: { value: "2026-10-22" } });
+    // Effective dates cannot be backdated; the UI defaults to the browser's current day.
+    const effectiveDate = dateInput.min;
+    if (!effectiveDate) throw new Error("rhythm date must have a valid minimum");
+    fireEvent.change(dateInput, { target: { value: effectiveDate } });
     fireEvent.click(screen.getByRole("button", { name: "Сохранить ритм" }));
-    await screen.findByText(/Соглашение v2 сохранено/);
+    await screen.findByText(/Ритм сохранён/);
     expect(savedBody).toEqual(
       expect.objectContaining({
         preset: "custom",
         custom_days: [3, 5],
         reminder_hour: 18,
         reminder_window_hours: 3,
-        effective_from: "2026-10-22",
+        effective_from: effectiveDate,
       }),
     );
     const saveCall = fetchMock.mock.calls.find((call) => {
