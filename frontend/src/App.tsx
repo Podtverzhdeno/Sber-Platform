@@ -1264,7 +1264,7 @@ function ImpulseApp() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [rankingOpen, setRankingOpen] = useState(false);
+  const [, setRankingOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [themeChoice, setThemeChoice] = useState<ThemeChoice>(() =>
     storedThemeChoice(),
