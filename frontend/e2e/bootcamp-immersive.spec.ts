@@ -60,8 +60,14 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     await page.screenshot({ path: "test-results/imp-06-success-" + String(viewport.width) + ".png", animations: "disabled" });
     await reader.getByRole("button", { name: /Посмотреть два сертификата/ }).click();
     await expect(reader.getByRole("heading", { name: "Ваши сертификаты" })).toBeVisible();
-    await expect(reader.getByText("Выдан автоматически")).toBeVisible();
-    await expect(reader.getByText("Требуется проверка практики")).toBeVisible();
+    await expect(reader.getByText("Получен автоматически")).toBeVisible();
+    await expect(reader.getByText("Нужна практика")).toBeVisible();
+    await expect(reader.locator(".imp-study__cert-preview")).toHaveCount(2);
+    await expect(reader.locator(".imp-study__cert-timeline > div > div")).toHaveCount(2);
+    const pdfButton = reader.getByRole("button", { name: /Распечатать \/ сохранить PDF/ });
+    await expect(pdfButton).toBeEnabled();
+    const hoverStyle = await pdfButton.evaluate(el => getComputedStyle(el).transitionProperty);
+    expect(hoverStyle).not.toBe("none");
     await page.screenshot({ path: "test-results/imp-07-certificates-" + String(viewport.width) + ".png", animations: "disabled" });
     await reader.getByRole("button", { name: /Перейти к практике/ }).click();
     await reader.getByLabel("Опишите, что сделали и как проверили результат").fill(
