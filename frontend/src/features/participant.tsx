@@ -1,11 +1,12 @@
 ﻿import { useQuery } from "@tanstack/react-query";
-import { SyntheticEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { apiRequest } from "../api/client";
 import { applyTheme } from "../app/theme";
 import { Badge, StatePanel } from "../components/ui";
 import { ParticipantAchievementsGallery } from "./achievements-v2/gallery-page";
+import { BuddyChatV2 } from "./buddy-chat-v2";
 
 const settingsTabs = ["Профиль", "Безопасность", "Предпочтения", "Согласия", "Подбор", "Уведомления", "Видимость для HR", "AI-Buddy"] as const;
 type SettingsTab = typeof settingsTabs[number];
@@ -91,18 +92,23 @@ export function ParticipantSettings({ actorName, consentScopes, role = "particip
   </div>;
 }
 
-export function ParticipantBuddy() {
-  const profileQuery = useQuery({ queryKey: ["participant-profile"], queryFn: () => apiRequest<ParticipantProfile>("/api/v1/me/profile"), refetchOnMount: "always" });
-  const [messages, setMessages] = useState([{ from: "buddy", text: "Привет! Я вижу ваш прогресс в Python и текущий проект. Могу объяснить следующий шаг или подобрать задачу." }]);
-  const [value, setValue] = useState("");
-  const send = (event: SyntheticEvent<HTMLFormElement>) => { event.preventDefault(); const text = value.trim(); if (!text) return; setMessages((items) => [...items, { from: "user", text }, { from: "buddy", text: "Сейчас лучше завершить checkpoint по API: он нужен текущему проекту и подтвердит навык FastAPI. Связанный модуль доступен в Bootcamp." }]); setValue(""); };
-  const actions = ["Что делать дальше?", "Объясни тему", "Подбери курс", "Разбери задачу", "Совет по карьере"];
-  if (profileQuery.data && !profileQuery.data.buddy_enabled) {
-    return <div className="buddy-page feature-stack" data-reference="R-PAR-11"><header className="participant-page-heading"><div><p className="eyebrow">Персональный навигатор</p><h1 id="workspace-title">AI-Buddy</h1><p className="lead">AI-Buddy отключён в настройках.</p></div><Badge tone="warning">Модельные вызовы остановлены</Badge></header><section className="buddy-optout" role="status"><strong>AI-Buddy выключен — модельные вызовы не выполняются</strong><p>Панель не отправляет запросы к модели и не передаёт персональную память. Включить помощника можно в настройках на вкладке «AI-Buddy».</p><button type="button" className="secondary-button" onClick={() => { window.location.assign("/workspace/15"); }}>Открыть настройки</button></section></div>;
+export function ParticipantBuddy({ navigation = [] }: { navigation?: string[] }) {
+  const profileQuery = useQuery({
+    queryKey: ["participant-profile"],
+    queryFn: () => apiRequest<ParticipantProfile>("/api/v1/me/profile"),
+    refetchOnMount: "always",
+  });
+  if (profileQuery.isPending) return <StatePanel kind="loading" />;
+  if (profileQuery.isError) {
+    return <StatePanel kind="error" action="Обновить" onAction={() => {void profileQuery.refetch();}} />;
   }
-  // The index is combined with the sender only for ephemeral chat rendering.
-  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-  return <div className="buddy-page feature-stack" data-reference="R-PAR-11"><header className="participant-page-heading"><div><p className="eyebrow">Персональный навигатор</p><h1 id="workspace-title">AI-Buddy</h1><p className="lead">Советы основаны на разрешённых данных вашего маршрута и не заменяют решения ментора.</p></div><Badge tone="warning">Бета · AI</Badge></header><div className="buddy-layout">{profileQuery.isPending || !profileQuery.data ? <StatePanel kind="loading" /> : <><main className="buddy-chat" style={{ gridColumn: "1 / -1", width: "100%", minWidth: 0 }}><div className="quick-prompts">{actions.map((action) => <button type="button" key={action} onClick={() => { setValue(action); }}>{action}</button>)}</div><div className="buddy-messages">{messages.map((message, index) => <article className={`buddy-message buddy-message--${message.from}`} key={`${message.from}-${index}`}><span>{message.from === "buddy" ? "✧" : "Вы"}</span><p>{message.text}</p></article>)}</div><form onSubmit={send}><input aria-label="Сообщение AI-Buddy" value={value} onChange={(event) => { setValue(event.target.value); }} placeholder="Спросите о курсе, задаче или следующем шаге…" /><button type="submit">Отправить</button></form></main></>}</div></div>;
+  if (!profileQuery.data.buddy_enabled) {
+    return <div className="buddy-page feature-stack" data-reference="R-PAR-11">
+      <header className="participant-page-heading"><div><p className="eyebrow">Персональный навигатор</p><h1 id="workspace-title">AI-Buddy</h1><p className="lead">AI-Buddy отключён в настройках.</p></div><Badge tone="warning">Модельные вызовы остановлены</Badge></header>
+      <section className="buddy-optout" role="status"><strong>AI-Buddy выключен — модельные вызовы не выполняются</strong><p>Персональные сообщения не отправляются. Настройки можно изменить в разделе AI-Buddy.</p><button className="secondary-button" type="button" onClick={() => { const index=navigation.indexOf("Настройки"); if(index>=0)window.location.assign("/workspace/"+String(index)); }}>Открыть настройки</button></section>
+    </div>;
+  }
+  return <div className="buddy-page feature-stack" data-reference="R-PAR-11"><BuddyChatV2 profile={profileQuery.data} navigation={navigation} /></div>;
 }
 
 /** Retain the established route while the experience is powered by live evidence. */
