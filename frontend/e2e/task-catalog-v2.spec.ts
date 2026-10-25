@@ -45,6 +45,7 @@ async function openCatalog(
   await page.locator('[data-persona="participant-synthetic"]').click();
   await page.getByRole("link", { name: "Задачи" }).click();
   await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
+  await page.getByRole("button", { name: "Карточки" }).click();
 }
 
 test("catalog filters, view parity and one idempotent apply", async ({ page }) => {
