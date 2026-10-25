@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 
 from impulse.api.errors import ApiError
-from impulse.api.v1.identity import current_session, csrf_session
+from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.domain.identity import Role
 
@@ -87,7 +87,8 @@ async def complete_impulse_lesson(
     async with request.app.state.database.session() as session:
         await session.execute(
             text(
-                "INSERT INTO impulse_course_progress(person_id,course_key,completed_units,total_units) "
+                "INSERT INTO impulse_course_progress("
+                "person_id,course_key,completed_units,total_units) "
                 "VALUES (:person,:course,0,8) ON CONFLICT (person_id,course_key) DO NOTHING"
             ),
             {"person": person, "course": course_key},
@@ -95,8 +96,10 @@ async def complete_impulse_lesson(
         changed = (
             await session.execute(
                 text(
-                    "UPDATE impulse_course_progress SET completed_units = :next, updated_at = now() "
-                    "WHERE person_id = :person AND course_key = :course AND completed_units = :current "
+                    "UPDATE impulse_course_progress SET completed_units = :next, "
+                    "updated_at = now() "
+                    "WHERE person_id = :person AND course_key = :course "
+                    "AND completed_units = :current "
                     "RETURNING completed_units"
                 ),
                 {"person": person, "course": course_key, "current": index, "next": index + 1},
