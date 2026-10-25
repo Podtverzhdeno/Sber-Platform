@@ -20,3 +20,6 @@ release_request=2026-10-25-projects-three-screens-1a84a93
 
 # Rebuild My Projects V2 after strict TypeScript and unrelated events import fix
 release_request=2026-10-25-projects-ts-clean-3b71e75
+
+# 3 My Projects screens with verified SVG logos and 3-state E2E screenshots
+release_request=2026-10-25-my-projects-v2-logos-cf6612f
