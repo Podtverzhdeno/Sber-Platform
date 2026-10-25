@@ -25,7 +25,7 @@ export function trajectoryStudyProgress(
   );
   const studied = matched.filter(item => item.course.finished && item.course.certificate_id !== null);
   return {
-    matchedCourses: matched.length,
+    matchedCourses: scoped.length,
     finishedCourses: studied.length,
     pendingEvidence: studied.filter(item => !item.milestone.completed).length,
     lessonsDone: matched.reduce((sum,item)=>sum+item.course.completed_units,0),
