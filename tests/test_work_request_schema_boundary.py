@@ -83,3 +83,11 @@ def test_customer_routes_and_body_models_remain_registered() -> None:
     assert ("/customer/projects/{project_key}/tasks", "POST") in routes
     assert ("/customer/team-requests", "POST") in routes
     assert ("/me/assignments/{assignment_id}/contributions", "POST") in routes
+
+
+def test_checkpoint_file_defaults_preserve_empty_uuid_list() -> None:
+    record = work.CheckpointSubmissionPayload(
+        summary="Проверяем, что вложения не возникают автоматически.",
+        artifact_key="release-evidence",
+    )
+    assert record.file_ids == []
