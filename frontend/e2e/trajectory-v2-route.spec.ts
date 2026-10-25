@@ -146,7 +146,7 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await expect(untouchedRole).toHaveAttribute("data-tone", "unselected");
   await expect(untouchedRole).toHaveCSS("border-top-color", "rgb(132, 149, 167)");
   await expect(mainRole).toHaveAttribute("data-tone", "primary");
-
+  await page.locator('.trajectory-v2-role-card[data-role-key="python"]').click();
   await expect(page.locator(".trajectory-v2-stage-path button")).toHaveCount(7);
   await expect(page.getByRole("heading", { name: "AI Security Engineer" })).toBeVisible();
   await page.locator('.trajectory-v2-role-card[data-role-key="product"]').click();
