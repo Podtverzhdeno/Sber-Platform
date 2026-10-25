@@ -323,3 +323,29 @@
 .imp-study__submission small { color: #a6bed2; }
 .imp-study__submission [role="status"] { color: #1ef9dc; }
 .imp-study__submission [role="alert"] { color: #ffb6c5; }
+
+
+/* Why recommended: role emphasis, 2x2 reasons, and genuine two-action footer. */
+.bc-reference .bc-ref-why-panel .bc-ref-why-role-banner {
+  grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center;
+  gap: 15px; padding: 17px 19px; border: 1px solid #00cfe0;
+  border-radius: 11px; background: linear-gradient(100deg,#064b56,#08283f);
+}
+.bc-ref-why-role-banner > div { display: grid; gap: 4px; }
+.bc-ref-why-role-banner strong { font-size: 18px; color: #d7faff; }
+.bc-ref-why-role-banner div span { color: #9bc7d8; font-size: 12px; }
+.bc-ref-why-role-banner > span { color: #36fff0; font-weight: 800; text-align: right; }
+.bc-reference .bc-ref-why-panel .bc-ref-why-actions {
+  grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-actions > button {
+  display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+  min-height: 46px; padding: 10px 20px; border-radius: 9px;
+  font-size: 14px; font-weight: 800; transition: transform .16s, background .16s, border-color .16s;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-back { color: #c5e9f8; border: 1px solid #257a93; background: #0a3448; }
+.bc-reference .bc-ref-why-panel .bc-ref-why-back:hover { transform: translateY(-2px); border-color: #13d5e4; background: #0c4a5d; }
+@media(max-width:650px) {
+  .bc-reference .bc-ref-why-role-banner { flex-direction: column; align-items: stretch; }
+  .bc-reference .bc-ref-why-panel .bc-ref-why-actions { flex-direction: column; }
+}
