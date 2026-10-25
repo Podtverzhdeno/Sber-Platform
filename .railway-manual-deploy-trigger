@@ -8,3 +8,6 @@ triggered_on=2026-10-25
 
 # Requested production verification of latest main; keep existing database and previous rollback image.
 release_request=2026-10-25-main-integration-9bc9a00d7aed
+
+# Sync HEAD after auth and canonical-sidebar changes.
+release_request=2026-10-25-final-main-ec7ba899191b
