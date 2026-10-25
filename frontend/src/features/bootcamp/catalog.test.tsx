@@ -226,10 +226,10 @@ describe("Bootcamp catalog redesigned UI and state contracts", () => {
     await screen.findByTestId("course-openspec-sdd");
     const views = screen.getByRole("group", { name: "Вид каталога" });
     fireEvent.click(within(views).getByRole("button", { name: "Список" }));
-    await waitFor(() => expect(screen.getByTestId("route").textContent).toContain("view=list"));
+    await waitFor(() => { expect(screen.getByTestId("route").textContent).toContain("view=list"); });
     expect(screen.getByRole("list", { name: "Каталог Bootcamp списком" })).toBeVisible();
     fireEvent.click(within(views).getByRole("button", { name: "Карточки" }));
-    await waitFor(() => expect(screen.getByTestId("route").textContent).toContain("view=card"));
+    await waitFor(() => { expect(screen.getByTestId("route").textContent).toContain("view=card"); });
   });
 
   it("filters by course name and offers a functioning reset when empty", async () => {
@@ -241,7 +241,7 @@ describe("Bootcamp catalog redesigned UI and state contracts", () => {
     await waitFor(() => expect(screen.getByText(/Курсов по условиям не найдено/)).toBeVisible());
     expect(screen.queryByTestId("course-openspec-sdd")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Сбросить фильтры" }));
-    await waitFor(() => expect(screen.getByTestId("route").textContent).not.toContain("nonexistent987"));
+    await waitFor(() => { expect(screen.getByTestId("route").textContent).not.toContain("nonexistent987"); });
   });
 
   it("opens a real course detail drawer from the catalog", async () => {
@@ -249,7 +249,7 @@ describe("Bootcamp catalog redesigned UI and state contracts", () => {
     renderCatalog("/workspace/3?category=all");
     const card = await screen.findByTestId("course-openspec-sdd");
     fireEvent.click(within(card).getByRole("button", { name: /Открыть курс/ }));
-    await waitFor(() => expect(screen.getByTestId("route").textContent).toContain("course=openspec-sdd"));
+    await waitFor(() => { expect(screen.getByTestId("route").textContent).toContain("course=openspec-sdd"); });
     expect(screen.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
   });
 
@@ -316,7 +316,7 @@ describe("Bootcamp catalog redesigned UI and state contracts", () => {
     await screen.findByTestId("course-openspec-sdd");
     const categories = screen.getByRole("group", { name: "Категории курсов" });
     fireEvent.click(within(categories).getByRole("button", { name: /Завершённые/ }));
-    await waitFor(() => expect(screen.getByTestId("route").textContent).toContain("category=completed"));
+    await waitFor(() => { expect(screen.getByTestId("route").textContent).toContain("category=completed"); });
     expect(screen.getByTestId("course-greenhouse-esg")).toBeVisible();
     expect(screen.queryByTestId("course-openspec-sdd")).not.toBeInTheDocument();
   });
