@@ -7,7 +7,7 @@ remain exclusively on the verified provider/reviewer track.
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, Request
@@ -32,6 +32,11 @@ class ImpulseStudyView(BaseModel):
     certificate_id: UUID | None
     finished: bool
     practice_status: str | None = None
+    practical_certificate_id: UUID | None = None
+
+
+class PracticeReviewBody(BaseModel):
+    decision: Literal["approved", "needs_revision"]
 
 
 class PracticeSubmissionBody(BaseModel):
@@ -78,15 +83,16 @@ async def _view(request: Request, person_id: UUID, course_key: str) -> ImpulseSt
         )
     async with request.app.state.database.sessions() as session:
         practice = (await session.execute(
-            text("SELECT status FROM impulse_practical_submissions WHERE person_id = :person AND course_key = :course"),
+            text("SELECT status, practical_certificate_id FROM impulse_practical_submissions WHERE person_id = :person AND course_key = :course"),
             {"person": person_id, "course": course_key},
-        )).scalar_one_or_none()
+        )).mappings().one_or_none()
     return ImpulseStudyView(
         course_key=course_key,
         completed_units=int(row["completed_units"]) if row else 0,
         certificate_id=row["certificate_id"] if row else None,
         finished=bool(row and row["certificate_id"]),
-        practice_status=practice,
+        practice_status=practice["status"] if practice else None,
+        practical_certificate_id=practice["practical_certificate_id"] if practice else None,
     )
 
 
@@ -229,3 +235,39 @@ async def submit_impulse_practice(
              "artifact_url": body.artifact_url},
         )
     return await _view(request, person, course_key)
+
+
+@router.post(
+    "/bootcamp/impulse-study/{course_key}/practice/{person_id}/review",
+    response_model=ImpulseStudyView,
+)
+async def review_impulse_practice(
+    course_key: str,
+    person_id: UUID,
+    body: PracticeReviewBody,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    request: Request,
+) -> ImpulseStudyView:
+    """A privileged operator independently verifies practical evidence.
+
+    Normal participants/mentors never gain this power through the learner UI.
+    """
+    if authenticated.actor.active_role is not Role.OPERATOR or "verification:write" not in authenticated.actor.scopes:
+        raise ApiError(code="FORBIDDEN", message="Доступ запрещён.", status_code=403)
+    if course_key not in ELIGIBLE_KEYS:
+        raise ApiError(code="NOT_FOUND", message="Курс не найден.", status_code=404)
+    async with request.app.state.database.session() as session:
+        row = (await session.execute(
+            text("UPDATE impulse_practical_submissions SET status = :decision, "
+                 "practical_certificate_id = CASE WHEN :decision = 'approved' "
+                 "THEN COALESCE(practical_certificate_id, :new_certificate) ELSE NULL END, "
+                 "reviewed_by = :reviewer, reviewed_at = now() "
+                 "WHERE person_id = :person AND course_key = :course "
+                 "RETURNING status, practical_certificate_id"),
+            {"decision": body.decision, "new_certificate": uuid4(),
+             "reviewer": authenticated.actor.person_id, "person": person_id,
+             "course": course_key},
+        )).mappings().one_or_none()
+        if not row:
+            raise ApiError(code="NOT_FOUND", message="Практическая работа не найдена.", status_code=404)
+    return await _view(request, person_id, course_key)
