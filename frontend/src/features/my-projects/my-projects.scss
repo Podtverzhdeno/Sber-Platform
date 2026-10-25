@@ -892,3 +892,17 @@
 .mpv2 .mp-ref-evidence-list>div small{color:#8db2cb;font-size:10px}
 @media(max-width:730px){.mpv2 .mp-ref-contrib-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:450px){.mpv2 .mp-ref-contrib-head{padding:11px}.mpv2 .mp-ref-contrib-metrics>div{padding:9px}}
+
+/* Exact approved satellite image, not a CSS approximation. */
+.mpv2 .mp-ref-hero-art{
+  inset:0 0 0 43%;
+  opacity:.98;
+  background:
+    linear-gradient(90deg,#06192b 0%,#06192be6 6%,#06192b33 42%,transparent 85%),
+    url("/my-projects/astra-orbit.svg") center right / cover no-repeat;
+}
+.mpv2 .mp-ref-hero-art::after{
+  background:linear-gradient(0deg,#06192c 0%,transparent 29%),
+    linear-gradient(90deg,#06192c 0%,transparent 65%);
+}
+@media(max-width:860px){.mpv2 .mp-ref-hero-art{inset:0 0 0 29%;opacity:.62}}
