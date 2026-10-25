@@ -1,0 +1,63 @@
+name: Analytics Three Sections QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/analytics-v3/**"
+      - "frontend/src/App.tsx"
+      - "frontend/e2e/analytics-three-sections.spec.ts"
+      - ".github/workflows/analytics-three-sections-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/analytics-v3/**"
+      - "frontend/e2e/analytics-three-sections.spec.ts"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: analytics-three-sections-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  visual-and-functional-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint new analytics screens and E2E
+        run: npx eslint src/features/analytics-v3/page.tsx e2e/analytics-three-sections.spec.ts --max-warnings 0
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Build production frontend
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Check three screens at reference and mobile sizes
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test analytics-three-sections.spec.ts --project=chromium --reporter=line
+      - name: Save reference screenshots and traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: analytics-v3-visual-evidence
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
