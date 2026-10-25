@@ -125,11 +125,13 @@ function renderShell(
 function mockRoadmapsFetch() {
   return vi
     .spyOn(globalThis, "fetch")
-    .mockImplementation(() =>
-      Promise.resolve(
-        new Response(JSON.stringify([roadmapWithNext, dataRoadmap]), { status: 200 }),
-      ),
-    );
+    .mockImplementation((input) => {
+      const url = input instanceof Request ? input.url : String(input);
+      const payload = url.includes("/bootcamp/impulse-study/summary")
+        ? { started_courses:0, finished_courses:0, completed_lessons:0, approved_practices:0, courses:[] }
+        : [roadmapWithNext, dataRoadmap];
+      return Promise.resolve(new Response(JSON.stringify(payload), { status:200 }));
+    });
 }
 
 afterEach(() => {
@@ -199,7 +201,7 @@ describe("trajectory v2 stage path", () => {
     expect(stages[0]).toHaveAttribute("data-stage-state", "completed");
     expect(stages[1]).toHaveAttribute("data-stage-state", "current");
     expect(stages[2]).toHaveAttribute("data-stage-state", "locked");
-    expect(screen.getByTestId("trajectory-stages").textContent).toContain("1 завершено · 3 этапов");
+    expect(screen.getAllByRole("button", { name: /Фундамент|API и сервисы|Итоговый проект/ })).toHaveLength(3);
     fetchSpy.mockRestore();
   });
 
@@ -214,7 +216,7 @@ describe("trajectory v2 stage path", () => {
     expect(locationRef()).toContain("stage=foundation");
     expect(screen.getByTestId("trajectory-stage-detail").textContent).toContain("База языка");
     expect(screen.getByTestId("trajectory-stage-detail").textContent).toContain(
-      "Курс · python-base",
+      "Курс в Bootcamp",
     );
   });
 
@@ -272,7 +274,7 @@ describe("trajectory v2 stage path", () => {
       />,
     );
     expect(screen.getByTestId("trajectory-stage-detail").textContent).toContain(
-      "Задача · demo-task-1",
+      "Практическая задача",
     );
   });
 });
@@ -306,12 +308,11 @@ describe("Persisted course learning versus verified milestone state", () => {
     const api = screen.getByRole("button", {name:/API и сервисы/});
     expect(api).toHaveAttribute("data-stage-state","current");
     expect(api).toHaveAttribute("data-study-state","studied");
-    expect(api).toHaveTextContent("Учебный курс ✓");
-    expect(screen.getByTestId("trajectory-study-progress")).toHaveTextContent("8 из 8 уроков");
-    const progress=screen.getByRole("progressbar",{name:"Учебный прогресс выбранной траектории"});
-    expect(progress).toHaveAttribute("value","8");
-    expect(progress).toHaveAttribute("max","8");
-    expect(screen.getByText(/1 завершено · 3 этапов/)).toBeInTheDocument();
+    expect(api).toHaveTextContent("✓ Курс пройден");
+    expect(screen.getByTestId("trajectory-study-evidence")).toHaveTextContent("1 из 2 учебных курсов завершено");
+    const progress=screen.getByRole("progressbar",{name:"Завершённые курсы выбранной траектории"});
+    expect(progress).toHaveAttribute("value","1");
+    expect(progress).toHaveAttribute("max","2");
   });
 
   it("does not attribute any self-study progress to a role the participant has not chosen", () => {
