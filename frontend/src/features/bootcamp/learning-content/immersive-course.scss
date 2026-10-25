@@ -395,3 +395,37 @@
 @media (max-width: 780px) {
   .imp-study__methods-grid,.imp-study__walkthrough { grid-template-columns: minmax(0,1fr); }
 }
+
+
+/* Fidelity/readability: locked lessons retain normal contrast; disabling a
+   navigation action should never make its title illegible. */
+.imp-study__lesson-list button:disabled { opacity: 1; color: #c0d7eb; }
+.imp-study__lesson-list button:disabled .imp-study__lesson-number {
+  background: #103b58; color: #a5c8dd;
+}
+.imp-study__lesson-list button:disabled .imp-study__lesson-text strong { color: #d0e3f4; }
+.imp-study__lesson-list button:disabled .imp-study__lesson-text small { color: #93c3d9; }
+.imp-study__lesson-text strong { font-size: 14px; }
+.imp-study__lesson-text small { font-size: 12px; }
+.imp-study__aside { background: #061e34; }
+.imp-study[data-view="theory"] .imp-study__content,
+.imp-study[data-view="example"] .imp-study__content,
+.imp-study[data-view="practice"] .imp-study__content,
+.imp-study[data-view="check"] .imp-study__content {
+  border-color: #1b5577;
+  background: linear-gradient(120deg,#08243c,#0a2845);
+}
+.imp-study[data-view="theory"] .imp-study__lesson-heading,
+.imp-study[data-view="example"] .imp-study__lesson-heading,
+.imp-study[data-view="practice"] .imp-study__lesson-heading,
+.imp-study[data-view="check"] .imp-study__lesson-heading {
+  margin-bottom: 4px;
+}
+.imp-study__content > p { font-size: 15px; }
+.imp-study__method-card p, .imp-study__walkthrough article p { color: #b9d4e7; }
+@media (min-width: 1000px) {
+  .imp-study[data-view="example"] .imp-study__example-grid .imp-study__code {
+    font-size: 13.5px;
+    min-height: 380px;
+  }
+}
