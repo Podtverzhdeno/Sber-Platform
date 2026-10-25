@@ -193,6 +193,13 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
 }) {
   const [tab,setTab] = useState<Tab>(initialTab);
   useEffect(()=>{setTab(initialTab);},[initialTab]);
+  // This workspace follows the approved full-screen modal reference; its
+  // underlying page must remain fixed until the participant closes it.
+  useEffect(()=>{
+    const originalOverflow=document.body.style.overflow;
+    document.body.style.overflow="hidden";
+    return ()=>{document.body.style.overflow=originalOverflow;};
+  },[]);
   const [summary,setSummary] = useState("");
   const [artifact,setArtifact] = useState("");
   const [artifactKey,setArtifactKey] = useState(project.work.allowed_artifacts?.[0] || "personal-proof");
@@ -201,7 +208,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
   const checkpoints = project.detail?.checkpoints ?? [];
   const progress = completion(project);
   const tabs: {id:Tab;title:string}[]=[{id:"overview",title:"Обзор"},{id:"tasks",title:"Задачи"},{id:"progress",title:"Прогресс"},{id:"contribution",title:"Мой вклад"},{id:"team",title:"Команда"},{id:"rewards",title:"Бонусы и выгоды"}];
-  return <div className="mp-detail" data-project-screen="detail">
+  return <div className="mp-detail" data-project-screen="detail" role="dialog" aria-modal="true" aria-label="Подробности проекта">
     <nav className="mp-breadcrumb" aria-label="Путь"><button type="button" onClick={onBack}><ArrowLeft size={16}/> Мои проекты</button><span>/</span><span>{project.work.task.title}</span></nav>
     <div className="mp-ref-hero" role="banner">
       <div className="mp-ref-hero-art" aria-hidden="true"/>
