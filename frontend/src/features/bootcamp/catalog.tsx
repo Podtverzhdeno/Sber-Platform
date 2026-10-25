@@ -567,6 +567,41 @@ function AiRoleTabs({
   );
 }
 
+type MiniStudyProgress = { completed_units: number; total_units: number; finished: boolean };
+function CourseContinueStatus({ card, onOpen, onCatalog }: {
+  card: CourseCardState | null;
+  onOpen: (key: string) => void;
+  onCatalog: () => void;
+}) {
+  const impulse = card !== null && /^demo-course-(?:[1-9]|1[0-2])$/.test(card.key);
+  const progress = useQuery({
+    queryKey: ["impulse-study", card?.key ?? ""],
+    queryFn: () => apiRequest<MiniStudyProgress>(
+      (`/api/v1/me/bootcamp/impulse-study/${encodeURIComponent(card?.key ?? "")}`) as RuntimeApiPath,
+    ),
+    enabled: impulse,
+    retry: false,
+  });
+  const total = progress.data?.total_units ?? 8;
+  const completed = progress.data?.completed_units ?? 0;
+  const percent = Math.round((completed / Math.max(1, total)) * 100);
+  const loaded = impulse && progress.isSuccess;
+  return <div className="bc-ref-continue-status">
+    <div className="bc-ref-stat-top"><span>{card ? "Обучение" : "Следующий курс"}</span>
+      <strong>{loaded ? `${String(percent)}% пройдено` : card ? "Доступен" : "Не выбран"}</strong></div>
+    <div className="bc-ref-track" aria-label={loaded ? `Прогресс обучения: ${String(percent)}%` : "Прогресс ещё не определён"}>
+      <i style={{ width: loaded ? String(percent) + "%" : "0%" }}/></div>
+    <p><Clock3/>{loaded ? `${String(completed)} из ${String(total)} уроков завершено`
+      : !card ? "Нет активных учебных шагов"
+        : impulse && progress.isError ? "Нет соединения с прогрессом курса"
+          : "Прогресс появится после синхронизации"}</p>
+    <button type="button" onClick={() => {
+      if (card) onOpen(card.key);
+      else onCatalog();
+    }}>{!card ? "Смотреть каталог" : loaded && completed > 0 ? "Продолжить обучение" : "Открыть курс"} <ArrowRight/></button>
+  </div>;
+}
+
 export function BootcampCatalog({
   honorBoardEnabled,
   honorBoardConsent,
@@ -736,14 +771,9 @@ export function BootcampCatalog({
                   <div className="bc-ref-tags">{courseRoleTitles(nextCourse).slice(0,3).map(title => <span key={title}>{title}</span>)}</div>
                 </div></> : <p>Выберите курс в каталоге, чтобы начать обучение.</p>}
             </div>
-            <div className="bc-ref-continue-status">
-              <div className="bc-ref-stat-top"><span>{nextCourse ? "Следующий курс" : "Обучение"}</span><strong>{nextCourse ? "Доступен" : "Не выбран"}</strong></div>
-              <div className="bc-ref-track"><i style={{ width: "0%" }} /></div>
-              <p><Clock3 />{nextCourse ? "Прогресс появится после синхронизации с LMS" : "Нет активных учебных шагов"}</p>
-              <button type="button" onClick={() => { if(nextCourse) openPanel("detail",nextCourse.key); else document.getElementById("bc-catalog-title")?.scrollIntoView({ behavior: "smooth" }); }}>
-                {nextCourse ? "Открыть курс" : "Смотреть каталог"} <ArrowRight />
-              </button>
-            </div>
+            <CourseContinueStatus card={nextCourse}
+              onOpen={(key) => { openPanel("detail", key); }}
+              onCatalog={() => { document.getElementById("bc-catalog-title")?.scrollIntoView({ behavior: "smooth" }); }}/>
           </div>
         </section>
         <div className="bc-ref-right-panels">
