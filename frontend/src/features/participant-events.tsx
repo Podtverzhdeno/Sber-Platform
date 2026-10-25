@@ -170,10 +170,13 @@ export function ParticipantEventCatalog() {
     : activeCategory === "popular" ? b.track_keys.length - a.track_keys.length : 0);
   const focus = selectedFocus.length ? selectedFocus : ["python","product","ai","ml","data"];
   const toggleSaved = (key: string) => { setSavedEvents(old => { const next=new Set(old); if(next.has(key))next.delete(key);else next.add(key);return next; }); };
-  const toggleFocus = (key: string) => {
-    const next=new Set(selectedFocus);
-    if(next.has(key))next.delete(key);else next.add(key);
-    setParam("focus", [...next].join(","), "");
+  const removeDirection = (key: string) => {
+    const next = new URLSearchParams(pendingParams.current);
+    if (next.get("track") === key) next.delete("track");
+    const remaining = selectedFocus.filter(item => item !== key);
+    if (remaining.length) next.set("focus",remaining.join(",")); else next.delete("focus");
+    pendingParams.current = next;
+    setParams(next);
   };
   const resetFilters = () => {
     const next = new URLSearchParams(pendingParams.current);
@@ -198,9 +201,7 @@ export function ParticipantEventCatalog() {
         </button>
         <label className="ev-v3-search"><Search size={20}/><input type="search" value={search} onChange={event=>{setSearch(event.target.value);}} placeholder="Найти событие" aria-label="Поиск событий"/></label>
         <div className="ev-v3-active-filters" aria-label="Активные фильтры">
-          {activeTracks.map(key=><button key={"track-"+key} type="button" className="ev-v3-active-chip" aria-label={"Убрать направление "+key} onClick={()=> {
-            if (track===key) setParam("track","all"); else toggleFocus(key);
-          }}>{key}<X size={13}/></button>)}
+          {activeTracks.map(key=><button key={"track-"+key} type="button" className="ev-v3-active-chip" aria-label={"Убрать направление "+key} onClick={()=>{removeDirection(key);}}>{key}<X size={13}/></button>)}
           {eventType!=="all"&&<button type="button" className="ev-v3-active-chip" aria-label={"Убрать тип "+typeName(eventType)} onClick={()=>{setParam("type","all");}}>{typeName(eventType)}<X size={13}/></button>}
           {activeCategory==="sber"&&<button type="button" className="ev-v3-active-chip" onClick={()=>{setActiveCategory("for-you");}}>От Сбера<X size={13}/></button>}
           <button type="button" className="ev-v3-add" aria-label="Добавить фильтр" onClick={openFilters}><Plus size={18}/></button>
