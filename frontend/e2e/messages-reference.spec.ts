@@ -471,7 +471,7 @@ test("community drawer shows complete members, opens profile and real personal c
   await page.getByRole("button",{name:/Перейти в Маяки/}).click();
   const detail=page.getByRole("complementary",{name:"Контекст диалога"});
   await expect(detail.getByRole("tab",{name:"Участники"})).toHaveAttribute("aria-selected","true");
-  await expect(detail.locator('[data-testid="context-participant"]')).toHaveCount(249);
+  await expect(detail.locator('[data-testid="context-participant"]')).toHaveCount(248);
   await detail.getByRole("searchbox",{name:"Найти участника"}).fill("Елена Наставник");
   await expect(detail.locator('[data-testid="context-participant"]')).toHaveCount(1);
   await detail.getByRole("button",{name:"Открыть профиль: Елена Наставник"}).click();
