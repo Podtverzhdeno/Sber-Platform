@@ -100,6 +100,7 @@ const facts = [
   {icon:Code2,title:"Практический опыт",text:"Кейсы и решение задач"},
   {icon:Users,title:"Новые контакты",text:"Общение с участниками"},
   {icon:GraduationCap,title:"Развитие компетенций",text:"Опыт для портфолио"},
+  {icon:Trophy,title:"Новый результат",text:"После подтверждения участия"},
 ];
 export function EventExperienceDetail({detail,aggregate,tab,onTabChange,onClose,onRegister,isSaved,onSave}:{
  detail:EventDetail; aggregate:RegistrationAggregate; tab:EventTab; onTabChange:(tab:EventTab)=>void;
@@ -110,7 +111,7 @@ export function EventExperienceDetail({detail,aggregate,tab,onTabChange,onClose,
   const days=[...new Set(program.map(stage=>stage.day))];
   const shown=program.filter(stage=>stage.day===days[day]);
   const isOpen=detail.status==="open";
-  return <div className="ev-detail-v2" data-testid="event-detail">
+  return <div className={`ev-detail-v2 ev-detail--${tab}`} data-testid="event-detail">
     <div className="ev-detail-top"><button type="button" onClick={onClose}><ArrowLeft size={16}/> К списку событий</button><button type="button" onClick={onClose} aria-label="Закрыть подробности"><X size={21}/></button></div>
     <section className="ev-detail-hero">
       <div className="ev-detail-hero-top"><span>{detail.event_type}</span><span className="ev-hero-tag"><CheckCircle2 size={14}/> Совпадает с вашей траекторией</span><span className="ev-demo-stamp">{detail.organizer}</span></div>
@@ -124,7 +125,7 @@ export function EventExperienceDetail({detail,aggregate,tab,onTabChange,onClose,
         {tab==="about"&&<>
           <InformationPanel title="О событии"><p className="ev-paragraph">{detail.description || "Описание ещё не опубликовано"}</p><div className="ev-benefit-grid">{facts.map(({icon:Icon,title,text})=><div key={title}><Icon/><b>{title}</b><small>{text}</small></div>)}</div></InformationPanel>
           <InformationPanel title="Для кого"><p className="ev-paragraph">{detail.target_audience || "Аудиторию уточняйте у организатора"}</p><div className="ev-tags">{detail.track_keys.map(tag=><span key={tag}>{tag}</span>)}</div></InformationPanel>
-          <InformationPanel title="Содержание и результат"><p className="ev-paragraph">{detail.expected_result || "Результаты участия уточняются"}</p><p className="ev-paragraph">{detail.conditions}</p></InformationPanel>
+          <InformationPanel title="Направления и кейсы"><p className="ev-paragraph">{detail.expected_result || "Результаты участия уточняются"}</p><p className="ev-paragraph">{detail.conditions}</p></InformationPanel>
         </>}
         {tab==="program"&&<InformationPanel title="Программа мероприятия" subtitle="Этапы из программы, опубликованной организатором">
           {days.length ? <><div className="ev-day-tabs">{days.map((name,i)=><button key={name} type="button" className={day===i?"active":""} onClick={()=> { setDay(i); }}>{name}</button>)}</div><ol className="ev-program-timeline">{shown.map((stage,i)=><li key={`${stage.title}-${String(i)}`}><time>Этап {String(i+1)}</time><span className="ev-timeline-node" aria-hidden="true"/><div><b>{stage.title}</b><small>{stage.detail}</small></div></li>)}</ol></>:<p className="ev-paragraph">Программа пока не опубликована. Актуальные этапы доступны у организатора.</p>}
@@ -156,9 +157,9 @@ export function EventExperienceDetail({detail,aggregate,tab,onTabChange,onClose,
           ].map(([q,a])=><details key={q}><summary>{q}<ChevronDown size={16}/></summary><p>{a}</p></details>)}</div></InformationPanel>}
       </main>
       <aside className="ev-detail-side">
-        <InformationPanel title={tab==="program" ? "Что вас ждёт" : tab==="prizes" ? "Карьерные возможности" : "Ваши направления"}>
+        <InformationPanel title={tab==="program" ? "Что вас ждёт" : tab==="prizes" ? "Карьерные возможности" : tab==="about" ? "Ваше совпадение" : "Ваши направления"}>
           {tab==="program" && <div className="ev-side-features">
-            {facts.map(({icon:Icon,title,text}) => <div className="ev-side-feature" key={title}><Icon size={21}/><span><b>{title}</b><small>{text}</small></span></div>)}
+            {facts.slice(0,3).map(({icon:Icon,title,text}) => <div className="ev-side-feature" key={title}><Icon size={21}/><span><b>{title}</b><small>{text}</small></span></div>)}
             <div className="ev-side-feature"><Sparkles size={21}/><span><b>Результат для портфолио</b><small>После подтверждения результата</small></span></div>
           </div>}
           {tab==="prizes" && <div className="ev-side-features"><div className="ev-side-feature"><BriefcaseBusiness size={21}/><span><b>Возможность быть замеченным</b><small>При наличии программы отбора у организатора</small></span></div><div className="ev-side-feature"><Target size={21}/><span><b>Следующий шаг в траектории</b><small>Опыт решения задач и работы в команде</small></span></div></div>}
