@@ -1,6 +1,6 @@
 # Claim XS-603-ROLES-REAL-BROWSER-20261026
 - session_id: gpt6-20261026-xs-all-roles
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: a34210c7a89d318fb258a88b889652f46af54320
@@ -13,5 +13,18 @@
 - verification:
   - migrated PostgreSQL, real API, Chromium, user role switch
   - scoped ESLint, TypeScript and Playwright
-- progress: Verify participant vs mentor/customer/manager/hr/operator on owner-only journey/ranking/passport/profile and Buddy visibility.
+- progress: Real PostgreSQL/Chromium checked Alex→Maria→mentor→customer→manager→HR→operator→Alex, all owner-only journey/rating/passport/portfolio/Buddy endpoints and role navigation. CI green; awaiting independent review.
+- changed_files:
+  - frontend/e2e/cross-section-role-privacy.spec.ts
+  - .github/workflows/cross-section-role-privacy-qa.yml
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40243138783
+- verification:
+  - PostgreSQL migrated and seeded: PASS
+  - Real API and Chromium test: PASS
+  - TypeScript and ESLint: PASS
+- unverified:
+  - HR consent details under toggles
+  - Customer→mentor review→reward multi-role workflow
+  - Independent integration acceptance and production smoke
 - blockers: Full cross-role task creation, reviews, HR consent and page-by-page visual acceptance remain separate gates.
