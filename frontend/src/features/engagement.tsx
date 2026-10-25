@@ -242,7 +242,7 @@ export function TopbarEngagementIndicator() {
                 <div className="streak-facts" aria-label="Статистика серии">
                   <div className="streak-fact"><span className="streak-fact-icon is-growth"><BarChart3 size={26}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : dayCountLabel(currentDays)}</strong><small>Текущая серия</small></div></div>
                   <div className="streak-fact"><span className="streak-fact-icon is-best"><Trophy size={27}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : bestDays > 0 ? dayCountLabel(bestDays) : "Пока ноль"}</strong><small>Лучший результат</small></div></div>
-                  <div className="streak-fact"><span className="streak-fact-icon is-freeze"><Snowflake size={27}/></span><div><strong>{freezeQuery.isPending || freezeQuery.isError ? "—" : dayCountLabel(freezeQuery.data?.consumed_total ?? 0)}</strong><small>Заморозки использовано<span className="streak-freeze-stock">{freezeQuery.isPending || freezeQuery.isError ? "—" : `${String(freezeStock)} в запасе`}</span></small></div></div>
+                  <div className="streak-fact"><span className="streak-fact-icon is-freeze"><Snowflake size={27}/></span><div><strong>{freezeQuery.isPending || freezeQuery.isError ? "—" : dayCountLabel(freezeQuery.data.consumed_total)}</strong><small>Заморозки использовано<span className="streak-freeze-stock">{freezeQuery.isPending || freezeQuery.isError ? "—" : `${String(freezeStock)} в запасе`}</span></small></div></div>
                 </div>
                 <div className="streak-rule">
                   <CircleHelp size={23} aria-hidden="true" /><div>
