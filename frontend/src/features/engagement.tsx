@@ -112,7 +112,7 @@ export function TopbarEngagementIndicator() {
   useEffect(() => {
     const dueDate = rhythmReminderDueDate(rhythmData, qualifiedDates, reminderClock);
     if (!dueDate) { setReminderVisible(false); return; }
-    const reminderKey = `impulse:rhythm:reminded:${rhythmData?.version ?? "v0"}:${dueDate}`;
+    const reminderKey = `impulse:rhythm:reminded:${String(rhythmData?.version ?? "v0")}:${dueDate}`;
     try {
       if (window.sessionStorage.getItem(reminderKey) === "1") return;
       window.sessionStorage.setItem(reminderKey, "1");
