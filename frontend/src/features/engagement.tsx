@@ -195,7 +195,6 @@ export function TopbarEngagementIndicator() {
         onClick={() => { setOpen(value => !value); setCalendarOpen(false); }}>
         <span className="streak-button-fire" aria-hidden="true">🔥</span>
         <strong>{loading || indicatorQuery.isError ? "…" : String(currentDays)}</strong>
-        <ChevronDown size={16} aria-hidden="true" />
       </button>
       {flashDays && <span className="engagement-flash" role="status">Эффективность серии выросла: {flashDays}</span>}
       {reminderVisible && createPortal(<aside className="streak-rhythm-reminder-toast" role="status">
