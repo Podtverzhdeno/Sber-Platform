@@ -87,9 +87,7 @@ async def test_checkpoint_files_persist_and_restrict_access() -> None:
             _artifacts: object,
         ) -> ContributionRecord:
             assert actor.person_id == person and assignment == assignment_id
-            contribution = ContributionRecord(
-                uuid4(), assignment_id, 1, summary, ("report",)
-            )
+            contribution = ContributionRecord(uuid4(), assignment_id, 1, summary, ("report",))
             async with database.session() as session:
                 await session.execute(
                     insert(contributions).values(
@@ -179,9 +177,7 @@ async def test_checkpoint_files_persist_and_restrict_access() -> None:
     app.dependency_overrides[csrf_session] = credentials
     app.dependency_overrides[current_session] = credentials
 
-    route = (
-        f"/api/v1/me/assignments/{assignment_id}/checkpoints/{checkpoint.key}"
-    )
+    route = f"/api/v1/me/assignments/{assignment_id}/checkpoints/{checkpoint.key}"
     raw = b"checkpoint evidence is persisted and downloadable"
     with TestClient(app) as client:
         invalid = client.post(
@@ -210,18 +206,19 @@ async def test_checkpoint_files_persist_and_restrict_access() -> None:
         current_actor[0] = person
         assert client.get(f"/api/v1/checkpoint-evidence-files/{file_id}").content == raw
 
-        assert client.post(
-            route + "/submit",
-            json={
-                "summary": "Я подготовил воспроизводимый отчёт и оценил качество решения.",
-                "artifact_key": "report",
-                "file_ids": [file_id],
-            },
-        ).status_code == 200
-
-        history = client.get(
-            f"/api/v1/me/assignments/{assignment_id}/checkpoint-submissions"
+        assert (
+            client.post(
+                route + "/submit",
+                json={
+                    "summary": "Я подготовил воспроизводимый отчёт и оценил качество решения.",
+                    "artifact_key": "report",
+                    "file_ids": [file_id],
+                },
+            ).status_code
+            == 200
         )
+
+        history = client.get(f"/api/v1/me/assignments/{assignment_id}/checkpoint-submissions")
         assert history.status_code == 200, history.text
         rows = history.json()
         assert len(rows) == 1
@@ -233,7 +230,8 @@ async def test_checkpoint_files_persist_and_restrict_access() -> None:
         current_actor[0], current_role[0] = customer, Role.CUSTOMER
         assert client.get(f"/api/v1/checkpoint-evidence-files/{file_id}").content == raw
         current_actor[0], current_role[0] = outsider, Role.PARTICIPANT
-        assert client.get(
-            f"/api/v1/me/assignments/{assignment_id}/checkpoint-submissions"
-        ).status_code == 404
+        assert (
+            client.get(f"/api/v1/me/assignments/{assignment_id}/checkpoint-submissions").status_code
+            == 404
+        )
 
