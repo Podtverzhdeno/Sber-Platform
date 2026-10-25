@@ -62,7 +62,7 @@ describe("topbar own published ranking", () => {
     });
     show();
     const button = await screen.findByRole("button", { name: /Ваше место: —/ });
-    await waitFor(() => expect(vi.mocked(apiRequest)).toHaveBeenCalledTimes(2));
+    await waitFor(() => { expect(vi.mocked(apiRequest)).toHaveBeenCalledTimes(2); });
     expect(button).toHaveTextContent("Место —");
   });
 
@@ -74,7 +74,7 @@ describe("topbar own published ranking", () => {
       throw new Error("Unexpected request");
     });
     show();
-    await waitFor(() => expect(vi.mocked(apiRequest)).toHaveBeenCalledTimes(2));
+    await waitFor(() => { expect(vi.mocked(apiRequest)).toHaveBeenCalledTimes(2); });
     expect(screen.getByRole("button", { name: /Ваше место: —/ })).toHaveTextContent("Место —");
   });
 
