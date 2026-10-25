@@ -70,8 +70,8 @@ def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -
                 "allowed_artifacts": ["repo"],
                 "competency_tags": ["python", "architecture"],
                 "compensation": {
-                    "paid": False,
-                    "base_amount_per_assignee": "0",
+                    "paid": True,
+                    "base_amount_per_assignee": "10000.00",
                     "currency": "RUB",
                     "a_multiplier": "2.50",
                     "quantum": "0.01",
