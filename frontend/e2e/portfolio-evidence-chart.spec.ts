@@ -22,7 +22,18 @@ async function openPortfolio(page: import("@playwright/test").Page, skills: {key
     contributions:[], courses:[], credentials:[], trophies:[], offers:[],
   } }));
   await page.route("**/api/v1/me/talent-passport", route => route.fulfill({json:{
-    verified_courses:[], cases:[], skills,
+    verified_courses:[],
+    cases: skills.flatMap((skill, index) => Array.from({ length: skill.confirmed_case_count }, (_, caseIndex) => ({
+      task_id: "00000000-0000-0000-0000-" + String(index * 10 + caseIndex + 1).padStart(12, "0"),
+      contribution_id: "10000000-0000-0000-0000-" + String(index * 10 + caseIndex + 1).padStart(12, "0"),
+      personal_summary: "Принята проверяемая практика: " + skill.key,
+      competency_tags: [skill.key],
+      artifact_keys: ["evidence-report.md"],
+      submitted_at: "2026-10-25T12:00:00Z",
+      reviewer_id: "20000000-0000-0000-0000-000000000001",
+      freshness: "current",
+    }))),
+    skills,
   }}));
   await page.route("**/api/v1/me/project-credentials", route => route.fulfill({ json:[] }));
   await page.goto("/");
@@ -47,6 +58,13 @@ for (const viewport of [{width:1440,height:900},{width:390,height:844}]) {
     await expect(panel.getByText("Число кейсов не означает уровень компетенции")).toBeVisible();
     await expect(panel.getByText("2",{exact:true}).first()).toBeVisible();
     await expect(panel.locator(".p2-skill-level")).toHaveCount(2);
+    await page.getByRole("tab",{name:"Skill Passport"}).click();
+    const evidence = page.getByRole("region", { name:"Подтверждающие кейсы" });
+    await expect(evidence.locator(".p2-skill-evidence")).toHaveCount(2);
+    await evidence.getByText("Доказательства и принятые результаты · 2").click();
+    await expect(evidence.getByText("Принята проверяемая практика: python")).toHaveCount(2);
+    await expect(evidence.getByText("Артефакты: evidence-report.md")).toHaveCount(2);
+    await page.getByRole("tab",{name:"Обзор"}).click();
     await panel.getByRole("button",{name:/Открыть Skill Passport/}).click();
     await expect(page).toHaveURL(/analyticsTab=passport$/);
   });
