@@ -16,7 +16,7 @@ const makeMessage = (id: string, body: string, author_name = "Елена Нас�
   kind: "text", body, artifact_refs: [], sequence: 1,
   created_at: "2026-10-20T09:14:00Z",
 });
-async function openMessages(page: Page, opts: { unreadContact?: boolean; eventCommunity?: boolean } = {}) {
+async function openMessages(page: Page, opts: { unreadContact?: boolean; eventCommunity?: boolean; linkedNotification?: boolean } = {}) {
   let loggedIn = false;
   const channels: Array<Omit<(typeof referenceChannels)[number], "last_message"> & { last_message: (typeof referenceChannels)[number]["last_message"] | null }> =
     referenceChannels.map((channel) => ({
@@ -30,6 +30,13 @@ async function openMessages(page: Page, opts: { unreadContact?: boolean; eventCo
   const sentMessages: string[] = [];
   const readRequests: string[] = [];
   const mutedRequests: Array<{channelId:string;muted:boolean}> = [];
+  const linkedNotificationReads: string[] = [];
+  const feed = opts.linkedNotification ? [{
+    id:"00000000-0000-4000-8000-000000006666",kind:"message",read:false,
+    title:"Новое сообщение от ментора",body:"Проверьте диалог",
+    entity_type:"messaging_channel",entity_id:"00000000-0000-4000-8000-000000000102",
+    created_at:"2026-10-20T10:00:00Z",
+  }] : [];
   await page.route("**/api/v1/config", route => route.fulfill({json:{demo_mode:true}}));
   await page.route("**/api/v1/auth/personas", route => route.fulfill({
     json:[{key:"participant-alex",display_name:actor.display_name,roles:["participant"]}],
@@ -41,7 +48,16 @@ async function openMessages(page: Page, opts: { unreadContact?: boolean; eventCo
     loggedIn = true;
     return route.fulfill({json:actor});
   });
-  await page.route("**/api/v1/me/notifications", route => route.fulfill({json:{items:[],unread:0}}));
+  await page.route("**/api/v1/me/notifications", route =>
+    route.fulfill({json:{items:feed,unread:feed.filter(item=>!item.read).length}}));
+  await page.route("**/api/v1/me/notifications/*/read", route => {
+    const id=new URL(route.request().url()).pathname.split("/").at(-2) ?? "";
+    linkedNotificationReads.push(id);
+    const entry=feed.find(item=>item.id===id);
+    if (!entry) return route.fulfill({status:404,json:{}});
+    entry.read=true;
+    return route.fulfill({json:entry});
+  });
   await page.route("**/api/v1/me/messaging/contacts", route => route.fulfill({json:[
     {id:"00000000-0000-4000-8000-000000000005",display_name:"Елена Наставник",role:"mentor"},
     {id:"00000000-0000-4000-8000-000000000006",display_name:"Роман Заказчик",role:"customer"},
@@ -97,7 +113,7 @@ async function openMessages(page: Page, opts: { unreadContact?: boolean; eventCo
   await page.locator('[data-persona="participant-alex"]').click();
   await page.goto("/workspace/4");
   await expect(page.getByRole("complementary",{name:"Список диалогов"})).toBeVisible();
-  return {sentMessages,readRequests,mutedRequests,channels};
+  return {sentMessages,readRequests,mutedRequests,linkedNotificationReads,channels};
 }
 
 async function expectRect(page:Page, selector:string, expected:{x:number,y:number,width:number,height:number}, tolerance=8) {
@@ -413,4 +429,20 @@ test("reading a chat instantly clears only its badge and notification; mute icon
   await page.getByRole("button",{name:"Включить уведомления"}).first().click();
   await expect.poll(()=>mutedRequests.some(item=>item.channelId===mentor?.id && !item.muted)).toBe(true);
   await expect(page.getByRole("button",{name:"Отключить уведомления"}).first()).toBeVisible();
+});
+
+test("linked generic notifications are deduplicated and marked read with the exact chat",async ({page})=>{
+  await page.setViewportSize({width:1448,height:1086});
+  const {channels,readRequests,linkedNotificationReads}=await openMessages(page,{unreadContact:true,linkedNotification:true});
+  const mentor=channels.find(channel=>channel.title==="Елена Наставник");
+  await page.getByRole("button",{name:/Уведомления:/}).click();
+  await expect(page.locator(".notification-chat-unread").filter({hasText:"Елена Наставник"})).toHaveCount(1);
+  // The same chat alert is never duplicated as a generic notification.
+  await expect(page.getByRole("dialog",{name:"Центр уведомлений"}).getByRole("button",{name:/Новое сообщение от ментора/})).toHaveCount(0);
+  await page.getByRole("button",{name:/Уведомления:/}).click();
+  await page.getByRole("button",{name:/Елена Наставник/}).first().click();
+  await expect.poll(()=>readRequests.includes(mentor?.id ?? "")).toBe(true);
+  await expect.poll(()=>linkedNotificationReads).toContain("00000000-0000-4000-8000-000000006666");
+  await page.getByRole("button",{name:/Уведомления:/}).click();
+  await expect(page.locator(".notification-chat-unread").filter({hasText:"Елена Наставник"})).toHaveCount(0);
 });
