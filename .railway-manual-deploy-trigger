@@ -26,3 +26,6 @@ release_request=2026-10-25-portfolio-evidence-typefix-c79ef143adf9
 
 # Stretch Portfolio overview project and bottom-card rows without empty gaps
 release_request=2026-10-25-portfolio-row-alignment-badc6d18a601
+
+# Community member directory: verified 16 browser cases and secured invite API
+release_request=2026-10-26-community-members-222f0cf3523b
