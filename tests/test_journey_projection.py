@@ -2,14 +2,27 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+import os
+from contextlib import asynccontextmanager
+from collections.abc import AsyncGenerator
 from types import SimpleNamespace
 from uuid import uuid4
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
+import pytest
+from sqlalchemy import text
 from pydantic import SecretStr
 
 from impulse.api.v1.journey import _merge_courses
+from impulse.api.v1 import journey
+from impulse.api.errors import install_error_handlers
+from impulse.api.v1.identity import current_session, csrf_session
+from impulse.application.identity import AuthenticatedSession, SessionRecord
+from impulse.domain.identity import ActorContext
+from impulse.bootcamp import editorial_learning
+from impulse.infrastructure.database import Database
 from impulse.application.development import EnrollmentRecord
 from impulse.application.identity import demo_personas
 from impulse.bootcamp.editorial_learning import ImpulseCourseSummary, ImpulseStudySummary
@@ -157,3 +170,129 @@ def test_snapshot_is_self_scoped_and_denies_other_roles() -> None:
         forbidden = api.get("/api/v1/me/journey/snapshot")
         assert forbidden.status_code == 404
         assert str(participant.person_id) not in forbidden.text
+
+
+@pytest.mark.spec("cross-section-progress/persisted-study-joined-snapshot")
+def test_postgres_course_finish_reflects_in_joined_snapshot_without_fake_awards(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    url = os.environ.get("TEST_DATABASE_URL")
+    if not url:
+        pytest.skip("Requires isolated PostgreSQL database and migrated schema")
+    database = Database(url)
+    learner = uuid4()
+
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
+        async with database.session() as connection:
+            await connection.execute(
+                text(
+                    "INSERT INTO persons(id, display_name, external_key) "
+                    "VALUES (:id, :name, :key)"
+                ),
+                {"id": learner, "name": "Journey QA", "key": str(learner)},
+            )
+        yield
+        await database.close()
+
+    async def allow_course(*_args: object) -> None:
+        return None
+
+    monkeypatch.setattr(editorial_learning, "assert_course_access", allow_course)
+
+    async def courses() -> tuple[SimpleNamespace, ...]:
+        return (SimpleNamespace(key="demo-course-1", title="Impulse: испытание"),)
+
+    async def enrollments(_person: object) -> tuple[EnrollmentRecord, ...]:
+        return (EnrollmentRecord("demo-course-1", CompletionStatus.REPORTED),)
+
+    async def roadmaps(_actor: object) -> tuple[SimpleNamespace, ...]:
+        return (_role_roadmap(completed=False),)
+
+    async def empty(_actor: object) -> tuple[object, ...]:
+        return ()
+
+    async def seasons() -> tuple[object, ...]:
+        return ()
+
+    active_role = [Role.PARTICIPANT]
+
+    def credentials() -> AuthenticatedSession:
+        role = active_role[0]
+        return AuthenticatedSession(
+            actor=ActorContext(
+                person_id=learner,
+                display_name="Journey QA",
+                active_role=role,
+                assigned_roles=(role,),
+                scopes=frozenset(),
+                program_key="test",
+                consent_scopes=frozenset(),
+            ),
+            session=SessionRecord(
+                session_id=uuid4(),
+                person_id=learner,
+                token_digest="journey-sql-test",
+                csrf_digest="journey-sql-csrf",
+                active_role=role,
+                expires_at=datetime.now(UTC) + timedelta(hours=1),
+            ),
+        )
+
+    api = FastAPI(lifespan=lifespan)
+    install_error_handlers(api)
+    api.include_router(editorial_learning.router, prefix="/api/v1")
+    api.include_router(journey.router, prefix="/api/v1")
+    api.state.database = database
+    api.state.development_service = SimpleNamespace(
+        store=SimpleNamespace(courses=courses, enrollments=enrollments),
+        catalog_roadmaps=roadmaps,
+    )
+    api.state.work_service = SimpleNamespace(
+        participant_work=empty,
+        participant_case_evidence=empty,
+    )
+    api.state.recognition_service = SimpleNamespace(
+        public_seasons=seasons,
+    )
+    api.dependency_overrides[current_session] = credentials
+    api.dependency_overrides[csrf_session] = credentials
+
+    study_path = "/api/v1/me/bootcamp/impulse-study/demo-course-1"
+    snapshot_path = "/api/v1/me/journey/snapshot"
+    with TestClient(api) as client:
+        before = client.get(snapshot_path)
+        assert before.status_code == 200, before.text
+        before_course = before.json()["courses"][0]
+        assert before_course["self_study"] is None
+        assert before_course["provider_status"] == "reported"
+        assert not before_course["provider_verified"]
+        assert before_course["roadmap_links"][0]["milestone_completed"] is False
+
+        for lesson in range(8):
+            response = client.post(f"{study_path}/lessons/{lesson}/complete")
+            assert response.status_code == 200, response.text
+        finish = client.post(f"{study_path}/finish")
+        assert finish.status_code == 200, finish.text
+        certificate_id = finish.json()["certificate_id"]
+        assert certificate_id
+        assert client.post(f"{study_path}/finish").json()["certificate_id"] == certificate_id
+
+        after = client.get(snapshot_path)
+        assert after.status_code == 200, after.text
+        result = after.json()
+        course = result["courses"][0]
+        assert course["self_study"]["finished"] is True
+        assert course["self_study"]["completed_units"] == 8
+        assert course["self_study"]["certificate_id"] == certificate_id
+        assert course["provider_status"] == "reported"
+        assert course["provider_verified"] is False
+        assert course["roadmap_links"][0]["milestone_completed"] is False
+        assert result["accepted_case_count"] == 0
+        assert result["ratings"] == []
+        assert result["verified_provider_course_count"] == 0
+
+        active_role[0] = Role.CUSTOMER
+        denied = client.get(snapshot_path)
+        assert denied.status_code == 404
+        assert str(learner) not in denied.text
