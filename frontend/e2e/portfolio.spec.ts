@@ -70,10 +70,10 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
         groups:groups.map(selector=>{
           const group=document.querySelector(selector);
           if(!group) throw new Error("Missing overview group "+selector);
-          return [...group.querySelectorAll(":scope > .p2-panel")].map(rect);
+          return Array.from(group.querySelectorAll(":scope > .p2-panel")).map(rect);
         }),
-        projectTiles:[...document.querySelectorAll(".p2-project")].map(rect),
-        picture:[...document.querySelectorAll(".p2-project-art")].map(rect),
+        projectTiles:Array.from(document.querySelectorAll(".p2-project")).map(rect),
+        picture:Array.from(document.querySelectorAll(".p2-project-art")).map(rect),
       };
     });
     expect(geometry.projectTiles.length).toBe(2);
