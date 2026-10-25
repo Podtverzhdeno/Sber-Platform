@@ -126,7 +126,7 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await expect(source).toHaveAttribute("target", "_blank");
   await expect(teaching.getByText("Границы доверия AI-сервиса")).toBeVisible();
   await expect(teaching.getByText(/Подготовить рабочий архитектурный прототип/)).toBeVisible();
-  await expect(teaching.locator("ul").last().locator("li")).toHaveCount(3);
+  await expect(teaching.locator("ul").nth(1).locator("li")).toHaveCount(3);
   await teaching.locator("summary").click();
   await page.locator('.trajectory-v2-role-card[data-role-key="python"]').click();
   await expect(page.locator(".trajectory-v2-stage-path button")).toHaveCount(7);
