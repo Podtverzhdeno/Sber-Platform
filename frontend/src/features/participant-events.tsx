@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { apiRequest, type RuntimeApiPath } from "../api/client";
-import { Badge, Modal, SafeExternalLink, StatePanel } from "../components/ui";
+import { Modal, SafeExternalLink, StatePanel } from "../components/ui";
 import { Award, BriefcaseBusiness, GraduationCap, Users } from "lucide-react";
 import { EventsHero, EventsCard, EventExperienceDetail, EventRegistrationForm, type EventTab } from "./participant-events-design";
 import "./participant-events-reference.scss";
@@ -76,7 +76,6 @@ export function ParticipantEventCatalog() {
   }, [params]);
   const track = params.get("track") ?? "all";
   const eventType = params.get("type") ?? "all";
-  const view = params.get("view") === "list" ? "list" : "cards";
   const eventKey = params.get("event");
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
   const [activeCategory, setActiveCategory] = useState("for-you");
@@ -166,14 +165,13 @@ export function ParticipantEventCatalog() {
           <div className="ev-result-tabs">
             {([["for-you","Для вас"],["sber","От Сбера"],["popular","Популярные"],["deadline","Скоро дедлайн"]] as const).map(([key,label])=><button type="button" key={key} className={activeCategory===key?"active":""} onClick={()=> { setActiveCategory(key); }}>{label}{key==="for-you"?` (${String(visible.length)})`:""}</button>)}
           </div>
-          <div className="ev-result-order"><label>Сортировка: <select value={sortBy} aria-label="Сортировка событий" onChange={e=> { setSortBy(e.target.value); }}><option value="relevance">По соответствию</option><option value="deadline">По дедлайну</option></select></label><div className="ev-layout-select" role="group" aria-label="Вид событий"><button type="button" className={view==="cards"?"active":""} aria-pressed={view==="cards"} onClick={()=> { setParam("view","cards","cards"); }}>Карточки</button><button type="button" className={view==="list"?"active":""} aria-pressed={view==="list"} onClick={()=> { setParam("view","list","cards"); }}>Список</button></div></div>
+          <div className="ev-result-order"><label>Сортировка: <select value={sortBy} aria-label="Сортировка событий" onChange={e=> { setSortBy(e.target.value); }}><option value="relevance">По соответствию</option><option value="deadline">По дедлайну</option></select></label></div>
         </div>
         {visible.length===0?<div className="ev-empty"><h3>События не найдены</h3><p>Измените фильтры или направление развития</p><button className="ev-primary" type="button" onClick={resetFilters}>Сбросить фильтры</button></div>:
-         <div className={`ev-event-list ev-event-list--${view}`}>{visible.map((item,index)=>{
+         <div className="ev-event-list">{visible.map((item,index)=>{
            const claim=claimByEvent.get(item.key);
-           return <div key={item.key}><EventsCard item={item} index={index} focus={focus} frozen={claimByEvent.get(item.key)?.evidence_state === "provisional"} saved={savedEvents.has(item.key)} onSave={()=> { toggleSaved(item.key); }} onDetails={()=> { openEvent(item.key); }}/>
-             {claim&&<div className="claim-state" aria-live="polite"><Badge tone={claim.evidence_state==="verified"?"success":"warning"}>{claim.evidence_state==="verified"?"Подтверждено":"Предварительно"}</Badge><p>{claim.verification_explanation}</p></div>}
-             {item.status!=="open"&&!claim&&<button className="ev-quick-register" type="button" onClick={()=> { setSelectedEvent(item); }}>Подтвердить результат</button>}
+           return <div key={item.key}><EventsCard item={item} index={index} focus={focus} evidenceState={claim?.evidence_state} verificationExplanation={claim?.verification_explanation} canReportResult={item.status !== "open" && !claim} onReportResult={() => { setSelectedEvent(item); }} saved={savedEvents.has(item.key)} onSave={()=> { toggleSaved(item.key); }} onDetails={()=> { openEvent(item.key); }}/>
+             
            </div>;
          })}</div>}
         <div className="ev-benefits-bottom"><strong>После участия вы получите</strong><span><BriefcaseBusiness/> Практический опыт</span><span><Award/> Подтверждённые достижения</span><span><GraduationCap/> Развитие навыков</span><span><Users/> Новые контакты</span></div>
