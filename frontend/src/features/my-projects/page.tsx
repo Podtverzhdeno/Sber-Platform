@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "../../api/client";
 import { StatePanel } from "../../components/ui";
-import { TaskWorkspacePage } from "../../components/task-workspace-page";
+import { ProjectDashboard } from "./project-dashboard";
 import "./my-projects.scss";
 
 type WorkItem = {
@@ -337,12 +337,38 @@ export function ParticipantProjectsV2() {
   const finished=projects.filter(p=>finishedStatuses.has(p.work.assignment.status)).length;
   if(work.isPending) return <StatePanel kind="loading"/>;
   if(work.isError)return <StatePanel kind="error" action="Повторить" onAction={()=>{void work.refetch();}}/>;
-  if(selected&&workspaceTab)return <div className="mpv2 mpv2--workspace"><button type="button" className="mp-secondary" onClick={()=>{ setWorkspaceTab(false); }}><ArrowLeft size={16}/> К странице проекта</button><TaskWorkspacePage mode="participant" title={selected.work.task.title} taskId={selected.work.task.id} projectId={selected.work.task.id} description={selected.work.terms.deliverable} deadline={dateLabel(selected.work.terms.deadline_at)} tags={["Практика","Командный проект"]} workspace={selected.detail?{team:selected.detail.team??[],checkpoints:selected.detail.checkpoints??[],contributions:selected.detail.personal??[],feedback:selected.detail.feedback??[],freshness:`Условия версии ${String(selected.work.terms.version)}`}:undefined} onMessage={()=>{ void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}`); }} onPrimaryAction={()=>{
-    const upload=document.querySelector(".mpv2--workspace .ctw-upload");
-    const body=upload?.querySelector<HTMLElement>("#ctw-body-solution");
-    if(body?.hidden) upload?.querySelector<HTMLButtonElement>(".ctw-section-toggle")?.click();
-    upload?.scrollIntoView({behavior:"smooth",block:"start"});
-  }}/></div>;
+  if(selected&&workspaceTab)return <div className="mpv2 mpv2--workspace">
+    <ProjectDashboard
+      project={{
+        title:selected.work.task.title,
+        customer:projectCompany(selected),
+        status:selected.work.assignment.status,
+        deadline:selected.work.terms.deadline_at,
+        deliverable:selected.detail?.deliverable || selected.work.terms.deliverable,
+        problem:selected.detail?.problem,
+        version:selected.work.terms.version,
+        competencyTags:selected.work.task.competency_tags ?? [],
+        criteria:selected.work.terms.acceptance_criteria,
+        allowedArtifacts:selected.work.allowed_artifacts ?? [],
+        team:selected.detail?.team ?? [],
+        mentor:selected.detail?.mentor?.display_name,
+        checkpoints:selected.detail?.checkpoints ?? [],
+        contributions:selected.work.contributions,
+        feedback:selected.detail?.feedback ?? [],
+      }}
+      onBack={()=>{setWorkspaceTab(false);}}
+      onChat={()=>{void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}`);}}
+      onOpenMember={personId=>{void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}&participant=${encodeURIComponent(personId)}`);}}
+      onUpload={()=>{
+        setWorkspaceTab(false);
+        setParams(previous=>{
+          const next=new URLSearchParams(previous);
+          next.set("tab","contribution");
+          return next;
+        });
+      }}
+    />
+  </div>;
   if(selected)return <div className="mpv2"><ProjectDetail key={selected.work.assignment.id} initialTab={(["overview","tasks","progress","contribution","team","rewards"] as const).find(tab=>tab===params.get("tab"))??"overview"} project={selected} onBack={back} onWorkspace={()=>{ setWorkspaceTab(true); }} onMessage={(personId)=>{ void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}${personId?`&participant=${encodeURIComponent(personId)}`:""}`); }} onSubmitContribution={(summary,url,artifactKey)=>{contribute.mutate({id:selected.work.assignment.id,summary,url,artifactKey});}} saving={contribute.isPending} saveError={contribute.isError} onStart={()=>{ start.mutate(selected.work.assignment.id); }} starting={start.isPending} startError={start.isError}/></div>;
   return <div className="mpv2" data-project-screen={layout}>
     <header className="mp-page-title"><div className="mp-page-title__row"><div><p className="mp-eyebrow">ПРАКТИКА И ЛИЧНЫЙ ВКЛАД</p><h1 id="workspace-title">Мои проекты</h1><p>Активно работай над проектами, развивай навыки в команде, отслеживай свой вклад и получай реальные выгоды.</p></div><button type="button" className="mp-help" onClick={()=>{setShowHelp(value=>!value);}} aria-expanded={showHelp} aria-controls="mp-help-panel"><Info size={15}/> Как это работает?</button></div></header>
