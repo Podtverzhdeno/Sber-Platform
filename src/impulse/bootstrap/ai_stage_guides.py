@@ -23,7 +23,9 @@ class RoleGuides(TypedDict):
 
 
 # ruff: noqa: E501 -- explicit teaching examples are intentionally descriptive.
-_GUIDES: dict[str, RoleGuides] = cast(dict[str, RoleGuides], json.loads(r"""{
+_GUIDES: dict[str, RoleGuides] = cast(
+    dict[str, RoleGuides],
+    json.loads(r"""{
   "product": {
     "context": "Корпоративный AI-помощник обрабатывает заявки нескольких организаций: ищет договоры, предлагает ответ и передаёт действия специалисту на подтверждение. Во всех упражнениях используются синтетические данные.",
     "lessons": [
@@ -304,7 +306,8 @@ _GUIDES: dict[str, RoleGuides] = cast(dict[str, RoleGuides], json.loads(r"""{
       ]
     ]
   }
-}"""))
+}"""),
+)
 
 
 def stage_guide(track_key: str, stage_position: int) -> StageGuide:
