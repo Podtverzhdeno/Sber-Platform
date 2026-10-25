@@ -233,3 +233,14 @@
   .bc-approved .bootcamp-course-card,
   .bc-approved .course-row { transition: none; }
 }
+
+
+/* The approved screenshot palette is the dark mode only. Preserve accessible light mode. */
+:root[data-theme="light"] .bc-approved {
+  --bc2-line: var(--color-border, #cbdfee);
+  --bc2-surface: var(--color-surface, #fff);
+  --bc2-raised: var(--color-surface-raised, #fff);
+  --bc2-text: var(--color-text, #0c2438);
+  --bc2-muted: var(--color-muted, #4f6981);
+  --bc2-teal: var(--color-primary, #08766e);
+}
