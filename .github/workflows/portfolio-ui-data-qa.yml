@@ -1,0 +1,46 @@
+name: Portfolio Evidence UI QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/portfolio-v2.tsx"
+      - "frontend/src/features/portfolio-v2-data.ts"
+      - "frontend/src/features/portfolio-v2-data.test.ts"
+      - ".github/workflows/portfolio-ui-data-qa.yml"
+  pull_request:
+    paths:
+      - "frontend/src/features/portfolio-v2.tsx"
+      - "frontend/src/features/portfolio-v2-data.ts"
+      - "frontend/src/features/portfolio-v2-data.test.ts"
+      - ".github/workflows/portfolio-ui-data-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-evidence-ui-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portfolio-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Typecheck cross-section consumers
+        run: npm run typecheck
+      - name: Lint portfolio components and evidence policy
+        run: npx eslint src/features/portfolio-v2.tsx src/features/portfolio-v2-data.ts src/features/portfolio-v2-data.test.ts --max-warnings 0
+      - name: Test verified, revoked and unknown evidence
+        run: npm run test -- src/features/portfolio-v2-data.test.ts
