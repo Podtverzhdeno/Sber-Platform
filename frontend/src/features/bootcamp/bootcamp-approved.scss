@@ -244,3 +244,22 @@
   --bc2-muted: var(--color-muted, #4f6981);
   --bc2-teal: var(--color-primary, #08766e);
 }
+
+
+/* Reference CSS: compact 296px cards; locked cards are deliberately shorter. */
+@media (min-width: 591px) {
+  .bc-approved .bootcamp-course-card { min-height: 296px; }
+  .bc-approved .bootcamp-course-card[data-access="prerequisite_not_met"] {
+    min-height: 184px;
+  }
+}
+@media (min-width: 821px) and (max-width: 1120px) {
+  .bc-approved .course-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 591px) and (max-width: 820px) {
+  .bc-approved .course-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 590px) {
+  .bc-approved .bootcamp-course-card { min-height: 265px; }
+  .bc-approved .course-grid { grid-template-columns: minmax(0, 1fr); }
+}
