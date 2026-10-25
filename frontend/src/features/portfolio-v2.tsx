@@ -78,8 +78,8 @@ const csrf = (): HeadersInit => ({ "X-CSRF-Token": sessionStorage.getItem("impul
 function PanelHeading({ icon: Icon, title, action, onAction }: { icon: LucideIcon; title: string; action?: string; onAction?: () => void }) {
   return <header className="p2-panel-heading"><span><Icon size={17} strokeWidth={2.4}/>{title}</span>{action && <button type="button" onClick={onAction}>{action}<ArrowRight size={14}/></button>}</header>;
 }
-function MiniArt({ index }: { index: number }) {
-  return <div className={"p2-project-art p2-project-art--" + String(index % 3)} aria-hidden="true">
+function MiniArt({ index, demo }: { index: number; demo: boolean }) {
+  return <div className={"p2-project-art p2-project-art--" + String(index % 3) + (demo ? " is-reference" : "")} aria-hidden="true">
     <div className="p2-art-top"><i/><i/><i/><span/></div>
     <div className="p2-art-heading"/>
     <div className="p2-art-board"><div className="p2-art-bars"><i/><i/><i/><i/><i/><i/><i/><i/></div><svg viewBox="0 0 140 70" preserveAspectRatio="none"><polyline points="0,61 15,51 29,57 46,31 59,38 76,16 90,26 104,11 121,20 140,3" fill="none" stroke="#31e6dd" strokeWidth="2.3"/></svg></div>
@@ -118,9 +118,9 @@ function CredentialCard({ item, onSelect }: { item: Credential; onSelect: (item:
     <span className="p2-verified"><CheckCircle2 size={13}/> {item.status}</span>
   </button>;
 }
-function ProjectCard({ item, index, onSelect }: { item: Contribution; index: number; onSelect: (item: Contribution) => void }) {
+function ProjectCard({ item, index, demo, onSelect }: { item: Contribution; index: number; demo: boolean; onSelect: (item: Contribution) => void }) {
   return <article className="p2-project">
-    <MiniArt index={index}/>
+    <MiniArt index={index} demo={demo}/>
     <div className="p2-project-info">
       <div className="p2-project-top"><h3>{item.project_title}</h3><span className={"p2-project-status" + (isAccepted(item) ? " is-accepted" : "")}><CheckCircle2 size={13}/>{isAccepted(item) ? "Принят заказчиком" : item.verification_status}</span></div>
       <p>{item.personal_summary}</p>
@@ -216,7 +216,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
       <div className={"p2-content-grid" + (tab !== "overview" ? " p2-content-grid--single" : "")}>
         {showProjects && <section className="p2-panel p2-projects-panel" aria-label="Лучшие проекты">
           <PanelHeading icon={Star} title={tab==="overview"?"ЛУЧШИЕ ПРОЕКТЫ":"ПРОЕКТЫ И ПРАКТИЧЕСКИЙ ОПЫТ"} action={tab==="overview"?"Все проекты":"Открыть раздел проектов"} onAction={()=>{ if(tab==="overview") openTab("projects"); else navigateTo(["Мои проекты", "Проекты"]); }}/>
-          <div className="p2-project-list">{(tab==="overview"?verifiedProjects.slice(0,2):contributions).map((item,index)=><ProjectCard item={item} index={index} key={item.contribution_id} onSelect={setOpenCase}/>)}</div>
+          <div className="p2-project-list">{(tab==="overview"?verifiedProjects.slice(0,2):contributions).map((item,index)=><ProjectCard item={item} index={index} demo={portfolio.demo_data} key={item.contribution_id} onSelect={setOpenCase}/>)}</div>
           {(tab==="overview"?verifiedProjects:contributions).length===0 && <div className="p2-empty"><FolderKanban size={27}/><strong>Пока нет принятых проектов</strong><p>После проверки личного вклада здесь появятся кейсы с доказательствами.</p><button type="button" className="p2-primary" onClick={()=>{ navigateTo(["Мои проекты", "Проекты"]); }}>Мои проекты <ArrowRight size={14}/></button></div>}
           {tab==="overview"&&verifiedProjects.length>2 && <button type="button" className="p2-show-all" onClick={()=>{ openTab("projects"); }}>Показать все {verifiedProjects.length} проектов <ArrowRight size={15}/></button>}
         </section>}
