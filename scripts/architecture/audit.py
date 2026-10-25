@@ -108,6 +108,21 @@ def ts_file(origin: str, imported: str, known: set[str]) -> str | None:
     )
 
 
+def frontend_feature_owner(path: str) -> str | None:
+    """Infer owner from a feature folder or a feature-root file and its test/style."""
+    parts = PurePosixPath(path).parts
+    if len(parts) < 4 or parts[:3] != ("frontend", "src", "features"):
+        return None
+    if len(parts) > 4:
+        return parts[3]
+    name = parts[3]
+    for suffix in (".test.tsx", ".test.ts", ".spec.tsx", ".spec.ts", ".tsx", ".ts",
+                   ".jsx", ".js", ".scss", ".css"):
+        if name.endswith(suffix):
+            return name[:-len(suffix)]
+    return name
+
+
 def prohibited(source: str, module: str) -> bool:
     if not module.startswith("impulse."):
         return False
@@ -363,13 +378,9 @@ def analyze(root: Path) -> dict[str, Any]:
                 dest = ts_file(path, spec, known)
                 if dest and dest != path:
                     graph[path].add(dest)
-                    a, b = PurePosixPath(path).parts, PurePosixPath(dest).parts
-                    if (
-                        kind == category(dest) == "frontend/feature"
-                        and len(a) > 3
-                        and len(b) > 3
-                        and a[3] != b[3]
-                    ):
+                    source_owner = frontend_feature_owner(path)
+                    target_owner = frontend_feature_owner(dest)
+                    if source_owner and target_owner and source_owner != target_owner:
                         cross_features.append(
                             {
                                 "path": path,
