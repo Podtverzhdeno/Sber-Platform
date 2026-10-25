@@ -122,8 +122,8 @@ function RewardsPath({ completedCount, onSelect }: { completedCount: number; onS
     </div>
   </section>;
 }
-function ProjectSummary({ project, selected, onSelect, onOpen, onBookmark, saved }: {
-  project: Project; selected: boolean; onSelect: () => void; onOpen: () => void; onBookmark: () => void; saved: boolean;
+function ProjectSummary({ project, selected, expanded, onSelect, onOpen, onBookmark, saved }: {
+  project: Project; selected: boolean; expanded: boolean; onSelect: () => void; onOpen: () => void; onBookmark: () => void; saved: boolean;
 }) {
   const company = projectCompany(project);
   const progress = completion(project);
@@ -149,7 +149,7 @@ function ProjectSummary({ project, selected, onSelect, onOpen, onBookmark, saved
     </div>
     <div className="mp-project-card-actions">
       <button className={`mp-primary ${active ? "" : "mp-primary--quiet"}`} type="button" onClick={onOpen}>{active ? "Продолжить работу" : finishedStatuses.has(status) ? "Открыть результат" : "Открыть проект"} <ArrowRight size={16}/></button>
-      <button type="button" className="mp-icon-button" aria-pressed={selected} aria-label={selected ? "Скрыть предпросмотр" : "Быстрый просмотр"} title="Быстрый просмотр" onClick={onSelect}><MoreHorizontal size={20}/></button>
+      <button type="button" className="mp-icon-button" aria-pressed={expanded} aria-label={expanded ? "Скрыть предпросмотр" : "Быстрый просмотр"} title="Быстрый просмотр" onClick={onSelect}><MoreHorizontal size={20}/></button>
     </div>
   </article>;
 }
@@ -355,7 +355,7 @@ export function ParticipantProjectsV2() {
       {layout==="cards"?<div className="mp-card-view">
         <label className="mp-card-search"><Search size={17}/><input aria-label="Поиск проектов" placeholder="Поиск по проектам и компаниям" value={text} onChange={e=>{ setText(e.target.value); }}/></label>
         <div className="mp-project-grid">
-          {visible.map(project=><ProjectSummary key={project.work.assignment.id} project={project} selected={(focus??visible[0]?.work.assignment.id)===project.work.assignment.id} onSelect={()=>{ setFocus(previous=>previous===project.work.assignment.id?null:project.work.assignment.id); }} onOpen={()=>{ open(project.work.assignment.id); }} saved={saved.includes(project.work.assignment.id)} onBookmark={()=>{ setSaved(prev=>prev.includes(project.work.assignment.id)?prev.filter(i=>i!==project.work.assignment.id):[...prev,project.work.assignment.id]); }}/>)}
+          {visible.map(project=><ProjectSummary key={project.work.assignment.id} project={project} selected={(focus??visible[0]?.work.assignment.id)===project.work.assignment.id} expanded={focus===project.work.assignment.id} onSelect={()=>{ setFocus(previous=>previous===project.work.assignment.id?null:project.work.assignment.id); }} onOpen={()=>{ open(project.work.assignment.id); }} saved={saved.includes(project.work.assignment.id)} onBookmark={()=>{ setSaved(prev=>prev.includes(project.work.assignment.id)?prev.filter(i=>i!==project.work.assignment.id):[...prev,project.work.assignment.id]); }}/>)}
         </div>
         {!visible.length&&<p className="mp-muted mp-empty-row">Подходящих проектов нет. Измените фильтры.</p>}
         {focused && focus && visible.some(project=>project.work.assignment.id===focus) && <div className="mp-quick-preview"><PanelPreview project={focused} onOpen={(tab)=>{ open(focused.work.assignment.id,tab); }} onRewards={()=>{open(focused.work.assignment.id,"rewards");}}/></div>}
