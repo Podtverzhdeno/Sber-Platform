@@ -117,9 +117,11 @@ describe("AI-Buddy single-pane conversation", () => {
       target: { value: "Черновик старого диалога" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Новый диалог" }));
-    await waitFor(() => expect(apiRequest).toHaveBeenCalledWith(
-      "/api/v1/agents/buddy/threads", expect.objectContaining({ method: "POST" }),
-    ));
+    await waitFor(() => {
+      expect(apiRequest).toHaveBeenCalledWith(
+        "/api/v1/agents/buddy/threads", expect.objectContaining({ method: "POST" }),
+      );
+    });
     await waitFor(() => { expect(container.querySelector(".buddy2-dialog.active")).toHaveTextContent("Новый диалог"); });
     expect(screen.getByRole("textbox", { name: "Сообщение AI-Buddy" })).toHaveValue("");
     expect(screen.queryByText(oldMessage.content)).not.toBeInTheDocument();
