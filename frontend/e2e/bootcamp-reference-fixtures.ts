@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { overviewFixture } from "../src/features/participant-home-v2/fixture";
 
 /** Deterministic UI-only API fixtures. Never represent real completion, LMS or
  * participant progress; intended exclusively for screenshot/interaction QA. */
@@ -53,6 +54,19 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
     return route.fulfill({ json: actor });
   });
   await page.route("**/api/v1/me/bootcamp/catalog", route => route.fulfill({ json: catalog }));
+  // Trajectory requires its own server-authored role snapshot; failing closed
+  // without a fixture is correct, but would hide the shared learning panel.
+  await page.route("**/api/v1/participant/me/development-overview", route =>
+    route.fulfill({ json: overviewFixture }));
+  await page.route("**/api/v1/me/roadmaps", route => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/roadmap-catalog", route => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/talent-passport", route => route.fulfill({
+    json: { verified_courses: [], cases: [], skills: [] },
+  }));
+  await page.route("**/api/v1/me/portfolio", route => route.fulfill({
+    json: { demo_data: true, courses: [], contributions: [] },
+  }));
+
   const study = new Map<string, { completed_units: number; certificate_id: string | null; practice_status: string | null }>();
   await page.route("**/api/v1/me/bootcamp/impulse-study/**", async route => {
     const path = new URL(route.request().url()).pathname;
