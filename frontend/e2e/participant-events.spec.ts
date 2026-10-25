@@ -51,58 +51,15 @@ test("event catalog keeps cards and preserves filter/detail through URL, reload 
   await expect(page.getByRole("button", { name: "Карточки" })).toHaveCount(0);
   await page.getByRole("button", { name: /Фильтры/ }).click();
   await page.locator(".ev-v3-filter-section").first().getByRole("button", { name: "python" }).click();
-  await page.getByRole("button", { name: /Показать события/ }).click();
+  await page.getByRole("button", { name: /Показать/ }).click();
   await expect(page).not.toHaveURL(/view=/);
   await expect(page).toHaveURL(/focus=python/);
-  await expect(page.getByRole("button", { name: "Убрать направление python" })).toBeVisible();
   await page.getByRole("button", { name: "Подробнее" }).focus(); await page.keyboard.press("Enter");
   await expect(page).toHaveURL(/event=ai-journey/); await expect(page.getByTestId("event-detail")).toContainText("18");
   await page.reload(); await expect(page.getByTestId("event-detail")).toContainText("Практический хакатон");
   await page.goBack();
   await expect(page).not.toHaveURL(/event=/);
   await expect(page.getByTestId("event-reference-card")).toHaveCount(1);
-});
-
-test("events compact filtering: staged filters, chips, reset, keyboard and full-width grid", async ({ page }) => {
-  await page.setViewportSize({ width: 1703, height: 924 });
-  await api(page, true);
-  await page.goto("/");
-  await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "События" }).click();
-  await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
-  const toolbar = page.locator(".ev-v3-toolbar");
-  const filtersButton = toolbar.getByRole("button", { name: /Фильтры/ });
-  await expect(filtersButton).toHaveAttribute("aria-expanded", "false");
-  const cards = await page.getByTestId("event-reference-card").all();
-  const first = await cards[0]?.boundingBox();
-  const second = await cards[1]?.boundingBox();
-  const third = await cards[2]?.boundingBox();
-  if (!first || !second || !third) throw new Error("Missing reference card geometry");
-  expect(second.x).toBeGreaterThan(first.x);
-  expect(third.x).toBeGreaterThan(second.x);
-  expect(Math.abs(first.y-second.y)).toBeLessThan(2);
-  await filtersButton.click();
-  await expect(filtersButton).toHaveAttribute("aria-expanded", "true");
-  const panel = page.locator(".ev-v3-popover");
-  await expect(panel).toBeVisible();
-  await panel.locator(".ev-v3-filter-section").first().getByRole("button", { name: "python" }).click();
-  await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
-  await panel.locator(".ev-v3-filter-section").nth(1).getByRole("button", { name: "Хакатон" }).click();
-  await panel.getByRole("button", { name: /Показать события/ }).click();
-  await expect(panel).toHaveCount(0);
-  await expect(page.getByTestId("event-reference-card")).toHaveCount(1);
-  await expect(page.getByRole("button", { name: "Убрать направление python" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Убрать тип Хакатон" })).toBeVisible();
-  await expect(filtersButton).toContainText("2");
-  await filtersButton.click();
-  await page.keyboard.press("Escape");
-  await expect(panel).toHaveCount(0);
-  await page.getByRole("button", { name: "Сбросить всё" }).click();
-  await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
-  await expect(page).not.toHaveURL(/focus=|type=/);
-  await page.screenshot({ path: "test-results/event-reference/compact-1703x924.png", animations: "disabled", fullPage: false });
-  await filtersButton.click();
-  await page.screenshot({ path: "test-results/event-reference/compact-popover-1703x924.png", animations: "disabled", fullPage: false });
 });
 
 test("event detail remains readable on mobile", async ({ page }) => {
@@ -116,15 +73,18 @@ test("events reference: all six detail states, registration flow and keyboard na
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "События" }).click();
   await expect(page.getByTestId("events-v2")).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Подбор событий" })).toBeVisible();
-  await expect(page.locator(".participant-events .ev-filters")).toHaveCount(0);
-  await expect(page.locator(".ev-v3-toolbar")).toBeVisible();
-  await expect(page.locator(".ev-v3-event-grid")).toBeVisible();
+  const hero = page.locator(".participant-events .ev-hero");
+  await expect(hero.locator(".ev-kicker")).toHaveText("События от Сбера и партнёров");
+  const heroBackground = await hero.evaluate((element) => getComputedStyle(element).backgroundImage);
+  expect(heroBackground).toContain("/events/cyberpunk-hero.png");
+  const heroImage = await page.request.get("/events/cyberpunk-hero.png");
+  expect(heroImage.ok()).toBeTruthy();
+  expect(heroImage.headers()["content-type"]).toContain("image/png");
   await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
   const referenceCards = page.getByTestId("event-reference-card");
   await expect(referenceCards.locator(".ev-card-radar")).toHaveCount(0);
   await expect(referenceCards.locator(".ev-event-capabilities")).toHaveCount(0);
-  await expect(referenceCards.locator(".ev-v3-tile-body")).toHaveCount(3);
+  await expect(referenceCards.locator(".ev-role-score")).toHaveCount(3);
   await expect(page.getByRole("button", { name: "Список" })).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Карточки" })).toHaveCount(0);
   await expect(page.locator(".claim-state")).toHaveCount(0);
@@ -139,7 +99,7 @@ test("events reference: all six detail states, registration flow and keyboard na
 
   for (const card of await referenceCards.all()) {
     const cardBox = await card.boundingBox();
-    const titleBox = await card.locator(".ev-v3-tile-body h3").boundingBox();
+    const titleBox = await card.locator(".ev-event-main h3").boundingBox();
     if (!cardBox || !titleBox) throw new Error("Reference card title bounds are unavailable");
     expect(titleBox.y).toBeGreaterThanOrEqual(cardBox.y - 1);
     expect(titleBox.y + titleBox.height).toBeLessThanOrEqual(cardBox.y + cardBox.height + 1);
@@ -147,7 +107,7 @@ test("events reference: all six detail states, registration flow and keyboard na
   await page.setViewportSize({ width: 1586, height: 1081 });
   await page.screenshot({ path: "test-results/event-reference/catalog.png", animations: "disabled", fullPage: false });
   await page.setViewportSize({ width: 1703, height: 924 });
-  await expect(page.getByRole("heading", { name: "Подбор событий" })).toBeVisible();
+  await expect(page.getByText("События, которые дают")).toBeVisible();
   await page.getByRole("button", { name: "Подробнее" }).first().click();
   const dialog = page.getByRole("dialog", { name: visualEvent.title });
   await expect(dialog).toBeVisible();
@@ -205,10 +165,10 @@ test("events reference: filters, favorite, motion and empty state", async ({ pag
   const eventCard = page.getByTestId("event-reference-card");
   await expect(eventCard).toHaveCount(1);
   await expect(page.locator(".ev-filters")).toHaveCount(0);
-  await expect(page.locator(".ev-v3-toolbar")).toBeVisible();
+  await expect(page.locator(".ev-compact-trigger")).toBeVisible();
   await page.getByRole("searchbox", { name: "Поиск событий" }).fill("несуществующая тема");
   await expect(page.getByText("События не найдены")).toBeVisible();
-  await page.getByRole("button", { name: "Сбросить всё" }).click();
+  await page.getByRole("button", { name: "Сбросить фильтры" }).click();
   await expect(eventCard).toHaveCount(1);
   const categoryTabs = page.locator(".ev-result-tabs");
   await expect(categoryTabs.getByRole("button", { name: /Для вас/ })).toHaveAttribute("aria-pressed", "true");
@@ -224,8 +184,8 @@ test("events reference: filters, favorite, motion and empty state", async ({ pag
   });
   expect(detailStyle.height).toBeGreaterThanOrEqual(34);
   expect(detailStyle.height).toBeLessThanOrEqual(40);
-  expect(detailStyle.width).toBeLessThanOrEqual(44);
-  expect(parseFloat(detailStyle.fontSize)).toBeLessThanOrEqual(16);
+  expect(detailStyle.width).toBeLessThanOrEqual(144);
+  expect(parseFloat(detailStyle.fontSize)).toBeLessThanOrEqual(12);
   await eventCard.getByRole("button", { name: "В избранное" }).click();
   await expect(eventCard.getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
   const duration = await eventCard.evaluate(el => getComputedStyle(el).transitionDuration);
@@ -238,29 +198,75 @@ test("events reference: filters, favorite, motion and empty state", async ({ pag
   await expect(page.getByRole("button", { name: "Карточки" })).toHaveCount(0);
 });
 
-test("compact events filters remain functional and contained on mobile", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+// The original hero, three metrics and compact horizontal cards are intentionally unchanged.
+test("events preserve the original banner/cards while the filter is miniature and inline", async ({ page }) => {
+  await page.setViewportSize({width:1586,height:1081});
   await api(page, true);
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "События" }).click();
+
+  await expect(page.locator(".ev-hero")).toBeVisible();
+  await expect(page.locator(".ev-metrics>div")).toHaveCount(3);
+  await expect(page.locator(".ev-filters")).toHaveCount(0);
+  const cards = page.getByTestId("event-reference-card");
+  await expect(cards).toHaveCount(3);
+  await expect(cards.locator(".ev-event-card--compact")).toHaveCount(0);
+  for(const card of await cards.all()){
+    await expect(card).toHaveClass(/ev-event-card--compact/);
+    await expect(card.locator(".ev-role-score")).toBeVisible();
+  }
+  const filter = page.locator(".ev-compact-trigger");
+  await expect(filter).toBeVisible();
+  const filterBox = await filter.boundingBox();
+  if(!filterBox) throw Error("Missing filter button");
+  expect(filterBox.height).toBeLessThanOrEqual(38);
+  expect(filterBox.width).toBeLessThanOrEqual(130);
+  const heroStyle = await page.locator(".ev-hero").evaluate(el => getComputedStyle(el).backgroundImage);
+  expect(heroStyle).toContain("/events/cyberpunk-hero.png");
+  await page.screenshot({path:"test-results/event-reference/restored-hero-compact-filter.png",animations:"disabled",fullPage:false});
+});
+
+test("events filter popup: staged selection, count, reset, chip removal and Escape", async ({ page }) => {
+  await page.setViewportSize({width:1586,height:1081});
+  await api(page,true);
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "События" }).click();
+  const toggle = page.getByRole("button", { name: /Фильтры/ });
+  await toggle.click();
+  const panel = page.locator(".ev-v3-popover");
+  await expect(panel).toBeVisible();
+  await panel.locator(".ev-v3-filter-section").first().getByRole("button", { name: "python" }).click();
+  await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
+  await panel.locator(".ev-v3-filter-section").nth(1).getByRole("button", { name: "Хакатон" }).click();
+  await panel.getByRole("button", { name: /Показать/ }).click();
+  await expect(page.getByTestId("event-reference-card")).toHaveCount(1);
+  await expect(toggle).toContainText("2");
+  await page.getByRole("button", { name: "Убрать тип Хакатон" }).click();
+  await expect(page.getByTestId("event-reference-card")).toHaveCount(2);
+  await toggle.click();
+  await page.keyboard.press("Escape");
+  await expect(panel).toHaveCount(0);
+  await toggle.click();
+  await panel.getByRole("button", { name: "Сбросить всё" }).click();
+  await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
+  await expect(page).not.toHaveURL(/focus=|type=/);
+});
+
+test("mini filter stays inside mobile viewport without changing original event cards", async ({ page }) => {
+  await page.setViewportSize({width:390,height:844});
+  await api(page,true);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("button", { name: "Меню", exact: true }).click();
   await page.getByRole("link", { name: "События" }).click();
   await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
-  const catalog = page.locator(".ev-catalog-v3");
-  const box = await catalog.boundingBox();
-  if (!box) throw new Error("No mobile catalog");
-  expect(box.x).toBeGreaterThanOrEqual(-2);
-  expect(box.x + box.width).toBeLessThanOrEqual(392);
-  const button = page.getByRole("button", { name: /Фильтры/ });
-  await button.click();
-  const panel = page.locator(".ev-v3-popover");
-  await expect(panel).toBeVisible();
-  const pop = await panel.boundingBox();
-  if (!pop) throw new Error("No mobile filter panel");
-  expect(pop.x).toBeGreaterThanOrEqual(-2);
-  expect(pop.x + pop.width).toBeLessThanOrEqual(392);
-  await panel.locator(".ev-v3-filter-section").first().getByRole("button", { name: "python" }).click();
-  await panel.getByRole("button", { name: /Показать события/ }).click();
-  await expect(page.getByRole("button", { name: "Убрать направление python" })).toBeVisible();
-  await page.screenshot({ path: "test-results/event-reference/compact-mobile-390x844.png", animations: "disabled", fullPage: false });
+  const toggle = page.locator(".ev-compact-trigger");
+  await toggle.click();
+  const b = await page.locator(".ev-v3-popover").boundingBox();
+  if (!b) throw Error("Filter popup not displayed");
+  expect(b.x).toBeGreaterThanOrEqual(-2);
+  expect(b.x+b.width).toBeLessThanOrEqual(392);
+  await page.screenshot({path:"test-results/event-reference/restored-mobile-filter.png",animations:"disabled",fullPage:false});
 });
