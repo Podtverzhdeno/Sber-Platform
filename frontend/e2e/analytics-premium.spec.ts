@@ -50,6 +50,14 @@ test("premium analytics is bound to Bootcamp, streak and activity sources",async
  await expect(premium.getByText("11 дней")).toBeVisible();
  await expect(premium.getByRole("heading",{name:"Текущие курсы"})).toBeVisible();
  await expect(premium.locator(".avp-course")).toHaveCount(3);
+ const coursePositions=await premium.locator(".avp-course").evaluateAll(nodes=>nodes.map(el=>({x:Math.round(el.getBoundingClientRect().x),y:Math.round(el.getBoundingClientRect().y)})));
+ expect(coursePositions[0]?.y).toBe(coursePositions[1]?.y);
+ expect(coursePositions[1]?.y).toBe(coursePositions[2]?.y);
+ const tileDimensions=await premium.locator(".avp-heat-weeks .av3-heat-cell").first().evaluate(el=>{
+  const box=el.getBoundingClientRect();return {width:box.width,height:box.height};
+ });
+ expect(tileDimensions.width).toBeLessThanOrEqual(24);
+ expect(tileDimensions.height).toBeLessThanOrEqual(21);
  await expect(premium.locator(".av3-week-columns > div")).toHaveCount(8);
  await expect(premium.locator(".avp-profile__legend > div")).toHaveCount(5);
  await expect(premium.getByText("Длительность сессий не измеряется")).toBeVisible();
