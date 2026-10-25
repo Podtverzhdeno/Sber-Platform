@@ -169,3 +169,13 @@
 [data-theme="light"] .bc-reference .overlay-panel--drawer>header{background:#eaf4fb}
 [data-theme="light"] .bc-reference .bc-ref-detail-hero{background:#e5effb}
 [data-theme="light"] .bc-reference .bc-ref-detail-hero h2{color:#123046}
+
+/* Opening an actual interactive lesson expands the detail panel into the reader.
+   The ordinary course-details drawer remains 505px, as in BC-R03. */
+.bc-reference .overlay-panel--drawer:has(.bc-learning__body){
+  width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;
+  margin:0;inset:0;overflow-x:hidden;
+}
+.bc-reference .overlay-panel--drawer:has(.bc-learning__body) .bc-panel-content{
+  max-width:none;width:100%;
+}
