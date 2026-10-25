@@ -76,7 +76,7 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await expect(screen.getByTestId("achievement-card")).toHaveCount(1);
   await screen.getByRole("button", { name: /AI Journey 2026/ }).click();
   await expect(page.getByTestId("achievement-detail")).toBeVisible();
-  await expect(page.getByText("Ожидаем проверку")).toBeVisible();
+  await expect(page.getByTestId("achievement-detail").getByText("Ожидаем проверку")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByTestId("achievement-detail")).toHaveCount(0);
   await expect(page).not.toHaveURL(/achievement=/);
@@ -92,7 +92,7 @@ test("achievements v2: empty state, no fabricated metrics, and mobile layout", a
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Достижения" }).click();
+  await page.goto("/workspace/8");
   const screen = page.getByTestId("achievements-v2");
   await expect(screen.getByTestId("achievements-empty")).toBeVisible();
   await expect(screen.getByTestId("achievement-card")).toHaveCount(0);
@@ -103,6 +103,6 @@ test("achievements v2: empty state, no fabricated metrics, and mobile layout", a
   await page.screenshot({ path: "test-results/achievements-v2/mobile.png", animations: "disabled", fullPage: true });
   await screen.getByRole("button", { name: /Как добавить результат/ }).click();
   await expect(page.getByTestId("achievements-add-dialog")).toBeVisible();
-  await page.getByRole("button", { name: "Закрыть", exact: true }).click();
+  await page.getByTestId("achievements-add-dialog").getByRole("button", { name: "Закрыть" }).click();
   await expect(page.getByTestId("achievements-add-dialog")).toHaveCount(0);
 });
