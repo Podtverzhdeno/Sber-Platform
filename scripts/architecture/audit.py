@@ -44,7 +44,7 @@ def filenames(root: Path) -> list[str]:
     git_executable = shutil.which("git")
     if git_executable is not None:
         # Shell is disabled; argv and executable are fixed, only the checkout directory varies.
-        p = subprocess.run(
+        p = subprocess.run(  # noqa: S603 - fixed argv; shell=False
             [git_executable, "-C", str(root), "ls-files", "-z"],
             capture_output=True,
             check=False,
@@ -343,7 +343,11 @@ def as_markdown(r: dict[str, Any]) -> str:
         "# Architecture audit",
         "",
         f"Tracked: {r['tracked']}, sources: {r['sources']}, dependency edges: {r['edges']}",
-        f"Forbidden imports: {len(r['forbidden_imports'])}, cycles: {len(r['cycles'])}, migration heads: {len(r['migration_graph']['heads'])}",
+        (
+            f"Forbidden imports: {len(r['forbidden_imports'])}, "
+            f"cycles: {len(r['cycles'])}, "
+            f"migration heads: {len(r['migration_graph']['heads'])}"
+        ),
         "",
         "## Forbidden imports",
         "",
@@ -388,7 +392,7 @@ def baseline_regressions(report: dict[str, Any], baseline: dict[str, Any]) -> li
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=Path("."))
-    parser.add_argument("--output-dir", type=Path, default=Path("/tmp/impulse-architecture"))
+    parser.add_argument("--output-dir", type=Path, default=Path.cwd() / ".architecture-report")
     parser.add_argument("--fail-on-domain-violations", action="store_true")
     parser.add_argument("--fail-on-new", action="store_true")
     parser.add_argument("--baseline", type=Path)
