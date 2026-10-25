@@ -25,16 +25,17 @@ type Props = {
   courseTitle: string;
   recommendation: string;
   accessible: boolean;
+  initialView?: "overview" | "program";
   onReason: () => void;
 };
 const csrfHeaders = () => ({ "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" });
 const studyPath = (key: string) => ("/api/v1/me/bootcamp/impulse-study/" + encodeURIComponent(key)) as RuntimeApiPath;
 
-export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendation, accessible, onReason }: Props) {
+export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendation, accessible, initialView = "overview", onReason }: Props) {
   const program = learningProgramFor(courseKey);
   const client = useQueryClient();
   const [current, setCurrent] = useState(0);
-  const [view, setView] = useState<View>("overview");
+  const [view, setView] = useState<View>(initialView);
   const [checks, setChecks] = useState<ReadonlySet<string>>(() => new Set());
   const [answer, setAnswer] = useState<number | null>(null);
   const [showExpected, setShowExpected] = useState(false);
