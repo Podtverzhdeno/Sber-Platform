@@ -8,6 +8,8 @@ on:
       - "frontend/src/features/participant-events-design.tsx"
       - "frontend/src/features/participant-events.scss"
       - "frontend/src/features/participant-events-reference.scss"
+      - "frontend/src/features/participant-events-fidelity.scss"
+      - "frontend/public/events/**"
       - "frontend/src/components/ui.tsx"
       - "frontend/e2e/participant-events.spec.ts"
       - ".github/workflows/events-reference-qa.yml"
