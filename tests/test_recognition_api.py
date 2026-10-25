@@ -122,6 +122,40 @@ def test_operator_publishes_policy_before_opening_season() -> None:
         assert frozen.json()["code"] == "SEASON_POLICY_FROZEN"
 
 
+def test_public_seasons_exclude_drafts_and_discover_open_leaderboard() -> None:
+    api = client()
+    with api:
+        assert api.get("/api/v1/rating-seasons").json() == []
+        csrf = login(api, "operator-pavel")
+        headers = {"X-CSRF-Token": csrf}
+        scheduled = api.post(
+            "/api/v1/operations/rating-seasons",
+            json={"key": "spring-2027", "title": "Spring 2027"},
+            headers=headers,
+        )
+        assert scheduled.status_code == 200
+        season_id = scheduled.json()["id"]
+        assert api.get("/api/v1/rating-seasons").json() == []
+        policy_result = api.post(
+            f"/api/v1/operations/rating-seasons/{season_id}/policies",
+            json=policy_payload(),
+            headers=headers,
+        )
+        assert policy_result.status_code == 200
+        opened_result = api.post(
+            f"/api/v1/operations/rating-seasons/{season_id}/open",
+            json={"expected_version": 1},
+            headers=headers,
+        )
+        assert opened_result.status_code == 200
+        public = api.get("/api/v1/rating-seasons")
+        assert public.status_code == 200
+        assert [(row["id"], row["title"], row["status"]) for row in public.json()] == [
+            (season_id, "Spring 2027", "open")
+        ]
+        assert api.get(f"/api/v1/rating-seasons/{season_id}/leaderboard").status_code == 200
+
+
 def test_participant_cannot_create_rating_season() -> None:
     api = client()
     with api:
