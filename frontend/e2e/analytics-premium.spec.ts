@@ -70,12 +70,16 @@ test("calendar is scrollable on mobile and period selector controls weeks", asyn
  const root = page.getByTestId("analytics-v3");
  const calendar = root.getByTestId("activity-calendar");
  await expect(calendar.locator(".ac-week")).toHaveCount(52);
+ const scroll = calendar.getByRole("region", { name: /горизонтальная прокрутка/ });
+ await expect(scroll).toBeVisible();
+ await expect.poll(async () => scroll.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+ const scrollEnd = await scroll.evaluate(element => element.scrollWidth - element.clientWidth - element.scrollLeft);
+ expect(scrollEnd).toBeLessThanOrEqual(2);
  await root.getByRole("combobox", { name: "Период аналитики" }).selectOption("12");
  await expect(calendar.locator(".ac-week")).toHaveCount(12);
  const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
  expect(horizontalOverflow).toBeLessThanOrEqual(2);
- const scroll = calendar.getByRole("region", { name: /горизонтальная прокрутка/ });
- await expect(scroll).toBeVisible();
+ await expect.poll(async () => scroll.evaluate(element => element.scrollLeft)).toBe(0);
  await page.screenshot({ path: "test-results/activity-calendar-mobile.png", fullPage: true, animations: "disabled" });
  await root.getByRole("button", { name: "Skill Passport", exact: true }).click();
  await expect(root).toHaveAttribute("data-tab", "passport");
