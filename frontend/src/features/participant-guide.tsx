@@ -207,7 +207,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
     setPrefs(next);
   };
   return <div className="participant-guide" ref={container} data-testid="participant-guide">
-    {open && <section className="participant-guide-card" aria-labelledby="participant-guide-title" aria-describedby="participant-guide-description">
+    {open && <section id="participant-guide-panel" className="participant-guide-card" aria-labelledby="participant-guide-title" aria-describedby="participant-guide-description">
       <header className="participant-guide-header">
         <span className="participant-guide-icon"><Compass size={19} aria-hidden="true" /></span>
         <span className="participant-guide-context">ПОДСКАЗКА ПО РАЗДЕЛУ</span>
@@ -226,7 +226,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
         {!prefs.autoDisabled ? <button type="button" onClick={disableAutomatic}>Не показывать автоматически</button> : <button type="button" onClick={enableAutomatic}>Включить автоподсказки</button>}
       </footer>
     </section>}
-    <button type="button" className="participant-guide-trigger" aria-expanded={open} aria-controls="participant-guide-title" title="Зачем этот раздел и что здесь делать" onClick={openManually}>
+    <button type="button" className="participant-guide-trigger" aria-expanded={open} aria-controls={open ? "participant-guide-panel" : undefined} aria-label={open ? "Скрыть помощь" : "Как здесь всё устроено?"} title="Зачем этот раздел и что здесь делать" onClick={openManually}>
       {open ? <BookOpenText size={18} aria-hidden="true" /> : <CircleHelp size={19} aria-hidden="true" />}
       <span>{open ? "Скрыть помощь" : "Как здесь всё устроено?"}</span>
     </button>
