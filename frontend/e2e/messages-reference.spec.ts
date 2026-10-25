@@ -78,8 +78,26 @@ async function openMessages(page: Page, opts: { unreadContact?: boolean; eventCo
   });
   await page.route("**/api/v1/me/messaging/channels", route => route.fulfill({json:channels}));
   await page.route("**/api/v1/me/messaging/channels/personal", route => {
-    const existing = channels[0];
-    return route.fulfill({status:201,json:existing});
+    const body=route.request().postDataJSON() as {peer_id:string};
+    const existing = channels.find(item=>item.kind==="personal" && item.participants.some(person=>person.id===body.peer_id));
+    if (!existing) return route.fulfill({status:403,json:{code:"MESSAGE_PEER_INVALID"}});
+    return route.fulfill({status:200,json:existing});
+  });
+  await page.route("**/api/v1/me/messaging/channels/*/members", route => {
+    const channelId=new URL(route.request().url()).pathname.split("/").at(-2) ?? "";
+    const updated=channels.find(item=>item.id===channelId);
+    if (!updated || updated.kind!=="community") return route.fulfill({status:403,json:{code:"MESSAGE_INVITE_UNAVAILABLE"}});
+    const payload=route.request().postDataJSON() as {person_ids:string[]};
+    const directory=[
+      {id:"00000000-0000-4000-8000-000000000005",display_name:"Елена Наставник",role:"member"},
+      {id:"00000000-0000-4000-8000-000000000006",display_name:"Роман Заказчик",role:"member"},
+      {id:"00000000-0000-4000-8000-000000000007",display_name:"Мария Северова",role:"member"},
+    ];
+    for(const id of payload.person_ids){
+      const candidate=directory.find(person=>person.id===id);
+      if(candidate && !updated.participants.some(person=>person.id===id))updated.participants.push(candidate);
+    }
+    return route.fulfill({json:updated});
   });
   await page.route("**/api/v1/me/messaging/channels/*/messages*", async route => {
     const url = new URL(route.request().url());
@@ -445,4 +463,42 @@ test("linked generic notifications are deduplicated and marked read with the exa
   await expect.poll(()=>linkedNotificationReads).toContain("00000000-0000-4000-8000-000000006666");
   await page.getByRole("button",{name:/Уведомления:/}).click();
   await expect(page.locator(".notification-chat-unread").filter({hasText:"Елена Наставник"})).toHaveCount(0);
+});
+
+test("community drawer shows complete members, opens profile and real personal chat",async ({page})=>{
+  await page.setViewportSize({width:1448,height:1086});
+  await openMessages(page);
+  await page.getByRole("button",{name:/Перейти в Маяки/}).click();
+  const detail=page.getByRole("complementary",{name:"Контекст диалога"});
+  await expect(detail.getByRole("tab",{name:"Участники"})).toHaveAttribute("aria-selected","true");
+  await expect(detail.locator('[data-testid="context-participant"]')).toHaveCount(249);
+  await detail.getByRole("searchbox",{name:"Найти участника"}).fill("Елена Наставник");
+  await expect(detail.locator('[data-testid="context-participant"]')).toHaveCount(1);
+  await detail.getByRole("button",{name:"Открыть профиль: Елена Наставник"}).click();
+  await expect(detail.getByRole("dialog",{name:"Профиль участника: Елена Наставник"})).toBeVisible();
+  await detail.getByRole("button",{name:"Написать"}).click();
+  await expect(page.locator(".msg-chat__header-title")).toContainText("Елена Наставник");
+});
+
+test("community tabs list actual attachments, links and can add directory contacts",async ({page})=>{
+  await page.setViewportSize({width:1448,height:1086});
+  const {channels}=await openMessages(page);
+  await page.getByRole("button",{name:/Перейти в Маяки/}).click();
+  const detail=page.getByRole("complementary",{name:"Контекст диалога"});
+  await detail.getByRole("tab",{name:"Файлы"}).click();
+  await expect(detail.getByRole("tabpanel",{name:"Файлы"})).toContainText("Программа_Карьера_в_IT.pdf");
+  await detail.getByRole("tab",{name:"Ссылки"}).click();
+  await expect(detail.getByRole("tabpanel",{name:"Ссылки"})).toContainText("docs.google.com");
+  await detail.getByRole("tab",{name:"Боты"}).click();
+  await expect(detail.getByRole("tabpanel",{name:"Боты"})).toContainText("Боты не подключены");
+  await detail.getByRole("tab",{name:"Участники"}).click();
+  await detail.getByRole("button",{name:"Добавить участников"}).click();
+  const modal=page.getByRole("dialog",{name:"Добавить участников"});
+  await expect(modal).toBeVisible();
+  await modal.getByRole("checkbox",{name:/Роман Заказчик/}).check();
+  await modal.getByRole("button",{name:"Добавить (1)"}).click();
+  await expect(modal).toHaveCount(0);
+  await expect.poll(()=>channels.find(item=>item.title==="Маяки")?.participants.some(person=>person.id.endsWith("006"))).toBe(true);
+  await detail.getByRole("searchbox",{name:"Найти участника"}).fill("Роман Заказчик");
+  await expect(detail.getByRole("button",{name:"Открыть профиль: Роман Заказчик"})).toBeVisible();
 });
