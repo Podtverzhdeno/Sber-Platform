@@ -2,7 +2,7 @@
 
 - task_id: CI-COURSE-COMPLETION-ASSERT-20261025
 - session_id: gpt6-20261025-development-course-assertion
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-25T12:11:00+03:00
 - heartbeat_at: 2026-10-25T12:11:00+03:00
 - base_revision: cf05fede18fefde2219ac13964d75bbd836008cc
@@ -14,5 +14,6 @@
 - verification:
   - backend-format-lint-types (GitHub CI)
   - backend-unit-api-integration (GitHub CI with PostgreSQL)
-- progress: Read-only audit confirmed seed enrollments are data_origin demo_seed, and SqlDevelopmentStore.report_completion preserves provenance when updating enrollment status. Old test filters demo_runtime, resulting in None despite successful completion. Scope only test assertion.
+- progress: PR #61 merged into main at 3ed08c50ec029115f7a2d031f296f6789f68a71b. CI run 40179964918: backend format/lint/types PASS; backend PostgreSQL integration improved from 2 failures to 1 (775 passed), and the course-completion test passes. Remaining failure is independent OpenAPI contract snapshot (shared integration surface).
+- handoff: Independent reviewer to confirm diff and mark DONE. No production code, seed, database schema, or external services changed.
 - blockers: none
