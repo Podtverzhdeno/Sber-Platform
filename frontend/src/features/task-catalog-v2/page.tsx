@@ -335,7 +335,7 @@ function TaskDetail(props: {
               <h4>Задача и ожидаемый результат</h4>
               <p>{item.brief_summary}</p>
               <div className="catalog-v2-workflow-facts"><span>Уровень: {item.difficulty === null ? "не указан" : difficultyLabels[item.difficulty] ?? item.difficulty}</span><span>Время: {formatDuration(item.duration_minutes)}</span></div>
-              {item.stage_plan.stages.length > 0 && <details className="catalog-v2-workflow-extra"><summary>План выполнения ({item.stage_plan.stages.length})</summary><ol>{item.stage_plan.stages.map(stage => <li key={stage.key}><strong>{stage.title}</strong> — {stage.summary}</li>)}</ol></details>}
+              {item.stage_plan.stages.length > 0 && <details className="catalog-v2-workflow-extra"><summary>План выполнения ({item.stage_plan.stages.length})</summary><p className="catalog-v2-workflow-hint">Это план, а не прогресс выполнения. Этап засчитывается после проверки результата.</p><ol>{item.stage_plan.stages.map(stage => <li key={stage.key}><strong>{stage.title}</strong> — {stage.summary}</li>)}</ol></details>}
             </>}
             {detailTab === "criteria" && <>
               <h4>Что требуется для успешной сдачи</h4>
