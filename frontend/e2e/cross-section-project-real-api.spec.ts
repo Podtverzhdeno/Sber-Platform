@@ -158,9 +158,13 @@ test("real project lifecycle propagates accepted evidence to all participant scr
   const passportAfter = await api<Passport>(page, "/api/v1/me/talent-passport");
   expect(passportAfter.person_id).toBe(actor.person_id);
   expect(passportAfter.cases.some(item => item.contribution_id === contributionId)).toBe(true);
-  expect(passportAfter.skills.some(item => item.key === "python" && item.confirmed_case_count > 0)).toBe(true);
+  const previousPythonCases = passportBefore.skills.find(item => item.key === "python")?.confirmed_case_count ?? 0;
+  expect(passportAfter.skills.find(item => item.key === "python")?.confirmed_case_count).toBe(
+    previousPythonCases + 1,
+  );
   const portfolioAfter = await api<Portfolio>(page, "/api/v1/me/portfolio");
   expect(portfolioAfter.person_id).toBe(actor.person_id);
+  expect(portfolioAfter.contributions).toHaveLength(portfolioBefore.contributions.length + 1);
   expect(portfolioAfter.contributions.some(item =>
     item.contribution_id === contributionId &&
     item.project_title === title &&
@@ -173,7 +177,7 @@ test("real project lifecycle propagates accepted evidence to all participant scr
     item.assignment_id === assignmentId &&
     item.accepted_contribution_ids.includes(contributionId)
   )).toBe(true);
-  expect(journey.ratings).toEqual([]);
+  expect(journey.ratings).toEqual(baselineJourney.ratings);
   expect(await api<unknown[]>(page, "/api/v1/me/rating/standings")).toEqual(ratingBefore);
 
   // These screens must independently render persisted source data after a hard navigation.
