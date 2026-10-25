@@ -5,3 +5,6 @@ release_request=2026-10-25-my-projects-pixel-pass-63fe43d
 
 # Events banner: original 2172x724 asset, lime Sber label removed, browser QA passed
 release_request=2026-10-25-events-hires-cyberpunk-cacf530a7
+
+# Cross-section persisted course progression accepted via Postgres + browser tests
+release_request=2026-10-25-learning-sync-5819d84
