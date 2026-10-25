@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from typing import Protocol
 from uuid import UUID
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.identity import IdentityStore
 from impulse.application.notifications import NotificationFeedService
 from impulse.application.work import AssignmentRecord, TermsRecord, WorkStore

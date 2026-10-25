@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import TYPE_CHECKING
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.development import DevelopmentService, TrackRecord
 from impulse.application.growth import GrowthService
 from impulse.application.identity import Role

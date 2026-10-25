@@ -9,7 +9,7 @@ from datetime import UTC, date, datetime, timedelta
 from typing import Protocol, TypedDict
 from uuid import UUID, uuid4
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.domain.competencies import LEVEL_RANK, UNKNOWN_LEVEL
 from impulse.domain.development import (
     CompletionStatus,
