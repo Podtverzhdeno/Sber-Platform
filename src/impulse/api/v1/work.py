@@ -16,26 +16,24 @@ from sqlalchemy import text
 
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import csrf_session, current_session
-from impulse.api.v1.work_requests import (
-    AcceptApplicationRequest as AcceptApplicationRequest,
-    AcceptTermsRequest as AcceptTermsRequest,
-    ArtifactRequest as ArtifactRequest,
-    AuthorshipDisputeRequest as AuthorshipDisputeRequest,
-    CaseRubricRequest as CaseRubricRequest,
-    CatalogStageRequest as CatalogStageRequest,
-    CheckpointRequest as CheckpointRequest,
-    CompensationRequest as CompensationRequest,
-    ContributionDecisionRequest as ContributionDecisionRequest,
-    ContributionRequest as ContributionRequest,
-    CreateTaskRequest as CreateTaskRequest,
-    DecideInvitationRequest as DecideInvitationRequest,
-    InviteCandidateRequest as InviteCandidateRequest,
-    RepeatTaskRequest as RepeatTaskRequest,
-    ReviseTermsRequest as ReviseTermsRequest,
-    SupportRequest as SupportRequest,
-    TaskCatalogMetadataRequest as TaskCatalogMetadataRequest,
-    TeamRequestCommand as TeamRequestCommand,
-)
+from impulse.api.v1.work_requests import AcceptApplicationRequest as AcceptApplicationRequest
+from impulse.api.v1.work_requests import AcceptTermsRequest as AcceptTermsRequest
+from impulse.api.v1.work_requests import ArtifactRequest as ArtifactRequest
+from impulse.api.v1.work_requests import AuthorshipDisputeRequest as AuthorshipDisputeRequest
+from impulse.api.v1.work_requests import CaseRubricRequest as CaseRubricRequest
+from impulse.api.v1.work_requests import CatalogStageRequest as CatalogStageRequest
+from impulse.api.v1.work_requests import CheckpointRequest as CheckpointRequest
+from impulse.api.v1.work_requests import CompensationRequest as CompensationRequest
+from impulse.api.v1.work_requests import ContributionDecisionRequest as ContributionDecisionRequest
+from impulse.api.v1.work_requests import ContributionRequest as ContributionRequest
+from impulse.api.v1.work_requests import CreateTaskRequest as CreateTaskRequest
+from impulse.api.v1.work_requests import DecideInvitationRequest as DecideInvitationRequest
+from impulse.api.v1.work_requests import InviteCandidateRequest as InviteCandidateRequest
+from impulse.api.v1.work_requests import RepeatTaskRequest as RepeatTaskRequest
+from impulse.api.v1.work_requests import ReviseTermsRequest as ReviseTermsRequest
+from impulse.api.v1.work_requests import SupportRequest as SupportRequest
+from impulse.api.v1.work_requests import TaskCatalogMetadataRequest as TaskCatalogMetadataRequest
+from impulse.api.v1.work_requests import TeamRequestCommand as TeamRequestCommand
 from impulse.application.identity import AuthenticatedSession, PersonaRecord
 from impulse.application.project_credentials import ProjectCredentialService
 from impulse.application.work import (
