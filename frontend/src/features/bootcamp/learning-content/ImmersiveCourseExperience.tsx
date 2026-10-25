@@ -216,7 +216,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
             <div className="imp-study__callout"><Sparkles size={21}/><p><strong>Важно</strong>Используйте принципы из урока на реальных задачах и проверяйте результат самостоятельно.</p></div>
           </section>}
           {view === "example" && <section className="imp-study__content" aria-label="Пример"><h3>Пример</h3><p>Практический пример применения материала урока</p>
-            <div className="imp-study__example-head"><Code2 size={17}/> Пример решения <button type="button" onClick={() => { if (navigator.clipboard) { void navigator.clipboard.writeText(unit.example); } }}><Copy size={14}/> Копировать</button></div>
+            <div className="imp-study__example-head"><Code2 size={17}/> Пример решения <button type="button" onClick={() => { void navigator.clipboard.writeText(unit.example); }}><Copy size={14}/> Копировать</button></div>
             <pre className="imp-study__code"><code>{unit.example}</code></pre>
             <div className="imp-study__callout"><CheckCircle2 size={18}/><p><strong>Разбор</strong>Сравните пример с задачей и объясните каждый ключевой шаг.</p></div>
           </section>}
