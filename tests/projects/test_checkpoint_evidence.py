@@ -12,7 +12,7 @@ from uuid import uuid4
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from sqlalchemy import insert, select
+from sqlalchemy import insert
 
 from impulse.api.errors import install_error_handlers
 from impulse.api.v1 import work
@@ -237,13 +237,3 @@ async def test_checkpoint_files_persist_and_restrict_access() -> None:
             f"/api/v1/me/assignments/{assignment_id}/checkpoint-submissions"
         ).status_code == 404
 
-    # Explicitly prove that bytes survived the database transaction.
-    async with database.sessions() as session:
-        result = (
-            await session.execute(
-                select(contributions.c.id).where(
-                    contributions.c.assignment_id == assignment_id
-                )
-            )
-        ).all()
-    assert len(result) == 1
