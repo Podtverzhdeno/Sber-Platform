@@ -46,7 +46,7 @@ import {
   storedThemeChoice,
   subscribeSystemTheme,
 } from "./app/theme";
-import { createQueryClient } from "./app/query";
+import { appQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
 import { DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
 import { BootcampCatalog } from "./features/bootcamp";
@@ -335,7 +335,7 @@ const participantMetricSeries = [
   [8, 10, 11, 12, 13, 14],
 ];
 
-const queryClient = createQueryClient();
+const queryClient = appQueryClient;
 
 function LoginScreen({
   personas,
@@ -564,7 +564,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Рейтинг" ? (
-          <ParticipantRating />
+          <ParticipantRating personId={actor.person_id} />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Аналитика" ? (
@@ -1264,7 +1264,7 @@ function ImpulseApp() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
-  const [rankingOpen, setRankingOpen] = useState(false);
+  const [, setRankingOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [themeChoice, setThemeChoice] = useState(() => storedThemeChoice());
   useEffect(() => { applyTheme(themeChoice); }, [themeChoice]);
@@ -1370,7 +1370,7 @@ function ImpulseApp() {
     refetchInterval: 12_000,
     refetchIntervalInBackground: false,
   });
-  const unreadChats = (chatNotificationsQuery.data ?? [])
+  const unreadChats = (Array.isArray(chatNotificationsQuery.data) ? chatNotificationsQuery.data : [])
     .filter((channel) => channel.unread > 0 && !channel.muted)
     .sort((a,b) => (b.last_message?.created_at ?? "").localeCompare(a.last_message?.created_at ?? ""));
   const chatNotificationTitle = (channel: ChatNotification): string => {
@@ -1571,7 +1571,11 @@ function ImpulseApp() {
               {actor.active_role === "participant" && (
                 <TopbarEngagementIndicator />
               )}
-              {actor.active_role === "participant" && <div className="ranking-wrapper"><button className="ranking-utility" type="button" aria-label="Рейтинг: 3 место, 450 баллов" aria-expanded={rankingOpen} onClick={()=>{setRankingOpen(value=>!value);setNotificationOpen(false);setSearchOpen(false);}}><span aria-hidden="true">♜</span><strong>3 место</strong><small>450 баллов</small></button>{rankingOpen&&<div className="ranking-popover" role="dialog" aria-label="Баллы и место в рейтинге"><header><div><span>Рейтинг сезона</span><strong>3 место</strong></div><b>ТОП 5%</b></header><div className="ranking-score-grid"><article><strong>450</strong><span>постоянных баллов</span></article><article><strong>+5</strong><span>заморожено</span></article></div><div className="ranking-next"><span>До 2 места</span><strong>50 баллов</strong><i><b/></i></div><a href={`/workspace/${String(actor.navigation.indexOf("Рейтинг"))}`} onClick={event=>{event.preventDefault();setRankingOpen(false);openSearchItem("Рейтинг");}}>Открыть рейтинг →</a></div>}</div>}
+              {actor.active_role === "participant" && actor.navigation.includes("Рейтинг") && <div className="ranking-wrapper">
+                <button className="ranking-utility" type="button" aria-label="Открыть рейтинг участников" onClick={() => { setRankingOpen(false); openSearchItem("Рейтинг"); }}>
+                  <span aria-hidden="true">♜</span><strong>Рейтинг</strong>
+                </button>
+              </div>}
               <div className="notification-utility">
                 <button
                   className="notification-button"
