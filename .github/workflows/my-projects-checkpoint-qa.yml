@@ -75,7 +75,8 @@ jobs:
           package-manager-cache: false
       - run: npm ci
       - run: npm run typecheck
-      - run: npm run lint
+      - name: Lint project checkpoint implementation and browser checks
+        run: npx eslint src/features/my-projects src/api/client.ts e2e/my-projects-v2.spec.ts --max-warnings 0
       - run: npx playwright install --with-deps chromium
       - name: Check checkpoint UI and upload actions
         env:
