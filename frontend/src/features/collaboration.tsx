@@ -89,10 +89,11 @@ function channelTitleFallback(
   channel: ChannelView,
   viewerId: string | null,
 ): string {
-  if (channel.title) return channel.title;
   const peers = channel.participants
     .filter((person) => person.id !== viewerId && person.display_name)
     .map((person) => person.display_name);
+  if (channel.kind === "personal" && peers.length > 0) return peers.join(", ");
+  if (channel.title) return channel.title;
   return peers.length ? peers.join(", ") : "Личный чат";
 }
 
