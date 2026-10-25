@@ -56,6 +56,9 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
   await expect(root).toHaveAttribute("data-project-screen","cards");
   await expect(root.locator(".mp-project-tile")).toHaveCount(3);
   await expect(root.locator(".mp-benefit-step")).toHaveCount(7);
+  await expect(root.locator(".mp-project-grid .mp-project-tile")).toHaveCount(3);
+  await expect(root.locator(".mp-preview")).toHaveCount(0);
+  await root.getByRole("button",{name:"Быстрый просмотр"}).first().click();
   await expect(root.locator(".mp-preview")).toBeVisible();
   await page.screenshot({path:"test-results/my-projects-v2/01_cards_1648.png",fullPage:true,animations:"disabled"});
   await root.locator(".mp-project-tile").first().hover();
@@ -121,7 +124,7 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   expect(duration).not.toBe("0s");
   await tile.hover();
   await expect.poll(()=>tile.evaluate(node=>getComputedStyle(node).transform)).not.toBe(initial);
-  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Открыть/}).click();
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить работу|Открыть проект/}).click();
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
   await page.getByRole("button",{name:/Продолжить работу/}).click();
   await expect(page.locator(".mpv2--workspace")).toBeVisible();
