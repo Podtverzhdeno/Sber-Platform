@@ -271,7 +271,7 @@ describe("Bootcamp catalog redesigned UI and state contracts", () => {
     const prerequisite = screen.getByTestId("course-agent-development");
     expect(within(unavailable).getByRole("button", { name: /Недоступен/ })).toBeVisible();
     expect(within(prerequisite).getByRole("button", { name: /Смотреть условия/ })).toBeVisible();
-    expect(within(prerequisite).getByText(/Нужен подтверждённый prerequisite/)).toBeVisible();
+    expect(within(prerequisite).getByText("Заблокирован")).toBeVisible();
   });
 
   it("distinguishes reported completion from verified completion", async () => {
@@ -279,7 +279,7 @@ describe("Bootcamp catalog redesigned UI and state contracts", () => {
     renderCatalog("/workspace/3?category=all");
     const reported = await screen.findByTestId("course-python-base");
     const verified = screen.getByTestId("course-greenhouse-esg");
-    expect(within(reported).getByText("Ожидает проверки")).toBeVisible();
+    expect(within(reported).getByText("На проверке")).toBeVisible();
     expect(within(verified).getByText("Подтверждено")).toBeVisible();
     expect(within(verified).getByRole("button", { name: /Посмотреть курс/ })).toBeVisible();
   });
