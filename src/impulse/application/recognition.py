@@ -41,6 +41,7 @@ T = TypeVar("T")
 
 class RecognitionStore(Protocol):
     async def season(self, season_id: UUID) -> RatingSeason | None: ...
+    async def public_seasons(self) -> tuple[RatingSeason, ...]: ...
     async def add_season(self, season: RatingSeason) -> RatingSeason: ...
     async def latest_policy(self, season_id: UUID) -> RatingPolicy | None: ...
     async def add_policy(self, policy: RatingPolicy) -> RatingPolicy: ...
@@ -89,6 +90,19 @@ class MemoryRecognitionStore:
 
     async def season(self, season_id: UUID) -> RatingSeason | None:
         return self._seasons.get(season_id)
+
+    async def public_seasons(self) -> tuple[RatingSeason, ...]:
+        return tuple(
+            sorted(
+                (
+                    season
+                    for season in self._seasons.values()
+                    if season.status is not SeasonStatus.SCHEDULED
+                ),
+                key=lambda season: (season.key, str(season.season_id)),
+                reverse=True,
+            )
+        )
 
     async def add_season(self, season: RatingSeason) -> RatingSeason:
         if any(item.key == season.key for item in self._seasons.values()):
@@ -362,6 +376,9 @@ class RecognitionService:
         entries = await self.store.score_entries(season_id)
         rows = rebuild_standings(policy, members, entries)
         return await self.store.replace_standings(season_id, rows)
+
+    async def public_seasons(self) -> tuple[RatingSeason, ...]:
+        return await self.store.public_seasons()
 
     async def leaderboard(self, season_id: UUID) -> tuple[LeaderboardEntry, ...]:
         season = await self.store.season(season_id)
