@@ -272,7 +272,7 @@ describe("TopbarEngagementIndicator", () => {
     expect(screen.getByText(/не тождественен серии/)).toBeTruthy();
     expect(screen.getByText(/Соглашение v1/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Сохранить ритм" })).toBeTruthy();
-    expect(document.querySelector(".streak-headline")?.textContent).toContain("4 дней подряд");
+    expect(document.querySelector(".streak-headline")?.textContent).toContain("4 дня подряд");
   });
 
   it("keeps the active contract visible when a future version is scheduled", async () => {
