@@ -47,7 +47,7 @@ import {
   subscribeSystemTheme,
   type ThemeChoice,
 } from "./app/theme";
-import { createQueryClient } from "./app/query";
+import { appQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
 import { DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
 import { BootcampCatalog } from "./features/bootcamp";
@@ -335,11 +335,7 @@ const participantMetricSeries = [
   [8, 10, 11, 12, 13, 14],
 ];
 
-const queryClient = createQueryClient();
-/** Test isolation only: the production QueryClient remains shared across routes. */
-export function resetAppQueryCacheForTests(): void {
-  queryClient.clear();
-}
+const queryClient = appQueryClient;
 
 
 function LoginScreen({
