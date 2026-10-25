@@ -14,6 +14,7 @@ import {
   useFreezeDay,
 } from "./engagement-client";
 import "./engagement.scss";
+import { StreakCelebration } from "./streak-celebration";
 import { rhythmReminderDueDate } from "./rhythm-reminder";
 
 const RHYTHM_PRESETS: Readonly<Record<string, string>> = {
@@ -54,7 +55,7 @@ function serverErrorMessage(error: unknown): string {
   return "Не удалось сохранить недельный ритм.";
 }
 
-export function TopbarEngagementIndicator() {
+export function TopbarEngagementIndicator({ personId = "participant" }: { personId?: string }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -128,15 +129,28 @@ export function TopbarEngagementIndicator() {
     } catch { /* The in-page reminder still works without system notifications. */ }
   }, [rhythmData, qualifiedDates, reminderClock]);
 
-  const [flashDays, setFlashDays] = useState<string | null>(null);
+  const [celebration, setCelebration] = useState<{ from: number; to: number } | null>(null);
+  const lastPersonId = useRef(personId);
   useEffect(() => {
     if (loading || indicatorQuery.isError) return;
-    const stored = Number(window.localStorage.getItem(ANIMATION_STORAGE_KEY) ?? Number.NaN);
-    if (Number.isFinite(stored) && stored < currentDays) {
-      setFlashDays(`${String(stored)} → ${String(currentDays)}`);
+    // The verified overview is the source of truth. Never celebrate an
+    // unverified click, a freeze, or a second activity already credited today.
+    const storageKey = `${ANIMATION_STORAGE_KEY}:${personId}`;
+    const identityChanged = lastPersonId.current !== personId;
+    lastPersonId.current = personId;
+    try {
+      const previousRaw = window.localStorage.getItem(storageKey) ??
+        (personId === "participant" ? window.localStorage.getItem(ANIMATION_STORAGE_KEY) : null);
+      const previous = previousRaw === null ? null : Number(previousRaw);
+      if (!identityChanged && previous !== null && Number.isFinite(previous) &&
+          currentDays === previous + 1 && todaySaved && qualifiedDates.length > 0) {
+        setCelebration({ from: previous, to: currentDays });
+      }
+      window.localStorage.setItem(storageKey, String(currentDays));
+    } catch {
+      // Some browsers block storage; the real count still renders normally.
     }
-    window.localStorage.setItem(ANIMATION_STORAGE_KEY, String(currentDays));
-  }, [loading, currentDays, indicatorQuery.isError]);
+  }, [personId, loading, currentDays, todaySaved, qualifiedDates, indicatorQuery.isError]);
 
   const [chosenPreset, setChosenPreset] = useState<string | null>(null);
   const [chosenDays, setChosenDays] = useState<number[] | null>(null);
@@ -196,7 +210,7 @@ export function TopbarEngagementIndicator() {
         <span className="streak-button-fire" aria-hidden="true">🔥</span>
         <strong>{loading || indicatorQuery.isError ? "…" : String(currentDays)}</strong>
       </button>
-      {flashDays && <span className="engagement-flash" role="status">Эффективность серии выросла: {flashDays}</span>}
+      {celebration && <StreakCelebration from={celebration.from} to={celebration.to} onClose={() => { setCelebration(null); }} />}
       {reminderVisible && createPortal(<aside className="streak-rhythm-reminder-toast" role="status">
         <span className="streak-rhythm-reminder-symbol" aria-hidden="true"><Bell size={19}/></span>
         <span><strong>Время для практики</strong><small>Сегодня день твоего ритма. Короткий шаг в курсе или задаче поможет сохранить серию.</small></span>
