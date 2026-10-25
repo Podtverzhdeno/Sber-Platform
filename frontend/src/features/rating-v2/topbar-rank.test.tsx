@@ -25,6 +25,7 @@ beforeEach(() => { vi.resetAllMocks(); });
 describe("topbar personal published rating", () => {
   it("shows the actual published place for this person, not someone else's", async () => {
     vi.mocked(apiRequest).mockImplementation(async path => {
+      await Promise.resolve();
       if (path === "/api/v1/rating-seasons") return [season];
       if (path.includes("/rating-seasons/s1/leaderboard")) return [
         { place: 1, person_id: "other", anonymized: false },
@@ -42,6 +43,7 @@ describe("topbar personal published rating", () => {
 
   it("shows a dash when the participant is not in published standings", async () => {
     vi.mocked(apiRequest).mockImplementation(async path => {
+      await Promise.resolve();
       if (path === "/api/v1/rating-seasons") return [season];
       if (path.includes("/rating-seasons/s1/leaderboard")) return [
         { place: 2, person_id: "another", anonymized: false },
@@ -54,6 +56,7 @@ describe("topbar personal published rating", () => {
 
   it("does not expose an anonymized record as the user's position", async () => {
     vi.mocked(apiRequest).mockImplementation(async path => {
+      await Promise.resolve();
       if (path === "/api/v1/rating-seasons") return [season];
       if (path.includes("/rating-seasons/s1/leaderboard")) return [
         { place: 3, person_id: "me", anonymized: true },
@@ -68,6 +71,7 @@ describe("topbar personal published rating", () => {
 
   it("does not fabricate a position or request a leaderboard without a published season", async () => {
     vi.mocked(apiRequest).mockImplementation(async path => {
+      await Promise.resolve();
       if (path === "/api/v1/rating-seasons") return [];
       throw new Error("A leaderboard must not be requested without a season");
     });
