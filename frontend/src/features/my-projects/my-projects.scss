@@ -985,3 +985,34 @@
     width:52px;height:52px;min-width:52px;
   }
 }
+
+/* Six-column-adaptable reference reward tiles: 3 × 2 on the 1548px design. */
+.mpv2 .mp-ref-rewards{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.mpv2 .mp-ref-rewards button{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  align-items:flex-start;
+  gap:8px;
+  min-height:169px;
+  padding:12px 13px 13px;
+  border-radius:12px;
+  background:#0a253e;
+}
+.mpv2 .mp-ref-rewards button>.mp-ref-blue-square{width:36px;height:36px;background:#075249;color:#54ebcd}
+.mpv2 .mp-ref-rewards button:nth-child(2)>.mp-ref-blue-square{background:#312464;color:#c9a6ff}
+.mpv2 .mp-ref-rewards button:nth-child(3)>.mp-ref-blue-square{background:#103f70;color:#64c5ff}
+.mpv2 .mp-ref-rewards button:nth-child(4)>.mp-ref-blue-square{background:#50380d;color:#f6ca6e}
+.mpv2 .mp-ref-rewards button:nth-child(5)>.mp-ref-blue-square{background:#06584d;color:#4ef5ca}
+.mpv2 .mp-ref-rewards button:nth-child(6)>.mp-ref-blue-square{background:#123e73;color:#61c6ff}
+.mpv2 .mp-ref-rewards button>span:nth-child(2){display:grid;gap:5px;flex:none}
+.mpv2 .mp-ref-rewards button strong{font-size:12px;line-height:1.25}
+.mpv2 .mp-ref-rewards button small{font-size:10px;line-height:1.45}
+.mpv2 .mp-ref-rewards .mp-ref-reward-when{max-width:none;text-align:left;font-size:10px;color:#9bd1d4;margin-top:auto;padding-top:8px;border-top:1px solid #1e4964;width:100%}
+.mpv2 .mp-ref-rewards button>svg:last-child{position:absolute;right:13px;bottom:11px;color:#44ceeb}
+@media(max-width:1140px){.mpv2 .mp-ref-rewards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.mpv2 .mp-ref-rewards{grid-template-columns:1fr}.mpv2 .mp-ref-rewards button{min-height:115px}}
