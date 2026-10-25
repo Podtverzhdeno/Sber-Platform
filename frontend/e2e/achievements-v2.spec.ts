@@ -61,12 +61,12 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await page.getByRole("link", { name: "Достижения" }).click();
   const screen = page.getByTestId("achievements-v2");
   await expect(screen).toBeVisible();
-  await expect(screen.getByRole("heading", { name: /Достижения со смыслом/ })).toBeVisible();
+  await expect(screen.getByRole("heading", { name: /Твои результаты/ })).toBeVisible();
   await expect(screen.getByTestId("achievement-card")).toHaveCount(4);
   await expect(screen.getByText("Топ 8%")).toHaveCount(0);
-  await expect(screen.locator(".achv-metric").nth(0).locator("strong")).toHaveText("4");
-  await expect(screen.locator(".achv-metric").nth(1).locator("strong")).toHaveText("3");
-  await expect(screen.locator(".achv-metric").nth(2).locator("strong")).toHaveText("1");
+  await expect(screen.locator(".ach-gallery-stat").nth(0).locator("strong")).toHaveText("4");
+  await expect(screen.locator(".ach-gallery-stat").nth(1).locator("strong")).toHaveText("1");
+  await expect(screen.locator(".ach-gallery-stat").nth(2).locator("strong")).toHaveText("1");
   await page.screenshot({ path: "test-results/achievements-v2/desktop.png", animations: "disabled", fullPage: true });
 
   await screen.getByRole("button", { name: /^Проекты/ }).click();
@@ -76,14 +76,15 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await expect(screen.getByTestId("achievement-card")).toHaveCount(1);
   await screen.getByRole("button", { name: /AI Journey 2026/ }).click();
   await expect(page.getByTestId("achievement-detail")).toBeVisible();
-  await expect(page.getByTestId("achievement-detail").getByText("Ожидаем проверку")).toBeVisible();
+  await expect(page.getByTestId("achievement-detail").locator(".ach-gallery-intro")).toContainText("Ожидаем проверку");
   await page.keyboard.press("Escape");
   await expect(page.getByTestId("achievement-detail")).toHaveCount(0);
   await expect(page).not.toHaveURL(/achievement=/);
 
-  await screen.getByRole("button", { name: /Добавить результат/ }).click();
+  await screen.getByRole("button", { name: /Добавить достижение/ }).click();
   await expect(page.getByTestId("achievements-add-dialog")).toBeVisible();
-  await page.getByTestId("achievements-add-dialog").getByRole("button", { name: /Победа или участие/ }).click();
+  await page.getByTestId("achievements-add-dialog").getByRole("button", { name: /Событие/ }).click();
+  await page.getByTestId("achievements-add-dialog").getByRole("button", { name: /Продолжить/ }).click();
   await expect(page).toHaveURL(/\/workspace\/5/);
 });
 
@@ -97,12 +98,12 @@ test("achievements v2: empty state, no fabricated metrics, and mobile layout", a
   const screen = page.getByTestId("achievements-v2");
   await expect(screen.getByTestId("achievements-empty")).toBeVisible();
   await expect(screen.getByTestId("achievement-card")).toHaveCount(0);
-  await expect(screen.locator(".achv-metric").nth(0).locator("strong")).toHaveText("0");
+  await expect(screen.locator(".ach-gallery-stat").nth(0).locator("strong")).toHaveText("0");
   const width = await screen.evaluate(element => element.getBoundingClientRect().width);
   const scrollWidth = await screen.evaluate(element => element.scrollWidth);
   expect(scrollWidth).toBeLessThanOrEqual(width + 2);
   await page.screenshot({ path: "test-results/achievements-v2/mobile.png", animations: "disabled", fullPage: true });
-  await screen.getByRole("button", { name: /Как добавить результат/ }).click();
+  await screen.getByRole("button", { name: /Добавить достижение/ }).click();
   await expect(page.getByTestId("achievements-add-dialog")).toBeVisible();
   await page.getByTestId("achievements-add-dialog").getByRole("button", { name: "Закрыть" }).click();
   await expect(page.getByTestId("achievements-add-dialog")).toHaveCount(0);
