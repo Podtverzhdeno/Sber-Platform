@@ -264,8 +264,14 @@ test("Project information popup is read-only, detailed, responsive and dismissib
   await expect(dialog.getByRole("heading",{name:"Подробнее о проекте"})).toBeVisible();
   await expect(dialog.getByText("Версия условий")).toBeVisible();
   await expect(dialog.locator(".mpd-criteria li")).toHaveCount(5);
+  await expect(dialog.getByRole("heading",{name:"План выполнения"})).toBeVisible();
+  await expect(dialog.locator(".mpd-info-checkpoints li")).toHaveCount(5);
+  await expect(dialog.getByRole("heading",{name:"Требуемые навыки и форматы"})).toBeVisible();
   await expect(dialog.getByText("Заказчик",{exact:true})).toBeVisible();
   await expect(dialog.getByText("Сбер",{exact:true})).toBeVisible();
+  await dialog.getByRole("button",{name:"Закрыть подробности о проекте"}).focus();
+  await page.keyboard.press("Shift+Tab");
+  await expect(dialog.getByRole("button",{name:"Вернуться к работе"})).toBeFocused();
   await dialog.getByRole("button",{name:"Вернуться к работе"}).click();
   await expect(dialog).toHaveCount(0);
   await expect(dashboard).toBeVisible();
