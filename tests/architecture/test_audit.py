@@ -47,6 +47,20 @@ class ArchitectureAuditTests(unittest.TestCase):
         self.assertEqual(m["orphan_parents"], [])
         self.assertEqual(m["missing_revision"], [])
 
+    def test_migration_duplicate_and_disconnected_cycle(self) -> None:
+        data = {
+            "migrations/versions/001_a.py": 'revision = "a"\ndown_revision = None',
+            "migrations/versions/002_b.py": 'revision = "b"\ndown_revision = "a"',
+            "migrations/versions/002_b_duplicate.py": 'revision = "b"\ndown_revision = "a"',
+            "migrations/versions/003_c.py": 'revision = "c"\ndown_revision = "d"',
+            "migrations/versions/004_d.py": 'revision = "d"\ndown_revision = "c"',
+        }
+        result = audit_module.migrations(data)
+        self.assertEqual(result["heads"], ["b"])
+        self.assertIn("b", result["duplicate_revision"])
+        self.assertEqual(result["cyclic_revisions"], ["c"])
+        self.assertEqual(result["unreachable_from_heads"], ["c", "d"])
+
     def test_full_fixture_audit(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
