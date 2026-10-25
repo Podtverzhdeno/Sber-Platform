@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type FocusEvent, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { ArrowRight, CalendarDays, Clock3, Info, X } from "lucide-react";
 
@@ -138,7 +138,7 @@ export function ActivityCalendar({ snapshot, weeks, onOpenCourses, onOpenProject
   });
 
   useEffect(() => {
-    if (!selected) return;
+    if (!selectedKey) return;
     closeRef.current?.focus();
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -165,13 +165,13 @@ export function ActivityCalendar({ snapshot, weeks, onOpenCourses, onOpenProject
       document.removeEventListener("keydown", onKey);
       openerRef.current?.focus();
     };
-  }, [selected?.key]);
+  }, [selectedKey]);
 
-  const showTip = (event: React.MouseEvent<HTMLButtonElement> | React.FocusEvent<HTMLButtonElement>, day: Day) => {
+  const showTip = (event: MouseEvent<HTMLButtonElement> | FocusEvent<HTMLButtonElement>, day: Day) => {
     const rect = event.currentTarget.getBoundingClientRect();
     setHover({ key: day.key, x: Math.min(window.innerWidth - 234, Math.max(8, rect.left - 95)), y: rect.top });
   };
-  const openDay = (event: React.MouseEvent<HTMLButtonElement>, day: Day) => {
+  const openDay = (event: MouseEvent<HTMLButtonElement>, day: Day) => {
     openerRef.current = event.currentTarget;
     setHover(null);
     setSelectedKey(day.key);
