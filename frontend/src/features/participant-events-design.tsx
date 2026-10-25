@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import {
   ArrowLeft, ArrowRight, Award, Bookmark, BookOpen, CalendarDays,
   CheckCircle2, ChevronDown, Code2, ExternalLink, Gift, GraduationCap,
@@ -86,10 +86,10 @@ export function EventsCard({ item, focus, index, frozen, saved, onDetails, onReg
         <span className="ev-match-chip">{match}% по направлениям</span>
         <div className="ev-radar" role="img" aria-label={`Совпадение направлений ${String(match)}%`}><span>{match}%</span></div>
       </>:<span className="ev-match-chip">Ознакомьтесь с событием</span>}
-      <div className="ev-match-bars">{item.track_keys.slice(0,4).map(t => <div key={t}><span>{t}</span><i style={{"--ev-fill":focus.includes(t)?"100%":"30%"} as React.CSSProperties}/></div>)}</div>
+      <div className="ev-match-bars">{item.track_keys.slice(0,4).map(t => <div key={t}><span>{t}</span><i style={{"--ev-fill":focus.includes(t)?"100%":"30%"} as CSSProperties}/></div>)}</div>
       <div className="ev-card-actions"><button type="button" className="ev-primary" onClick={onDetails}>Подробнее <ArrowRight size={16}/></button></div>
     </aside>
-    <div className="ev-card-footer">
+    <div className="ev-card-footer"><SafeExternalLink href={item.source_url} className="ev-source-link">{item.status==="open"?"Перейти к событию":"Открыть первоисточник"} <ExternalLink size={12}/></SafeExternalLink>
       <span className={`ev-status ${status==="Актуальное"?"ev-status-open":""}`}>{status}</span>
       {frozen && <span className="ev-points-frozen">+5 frozen · ожидают подтверждения</span>}
       {item.status==="open" && !frozen && <button type="button" className="ev-quick-register" onClick={onRegister}>Зарегистрироваться · +5</button>}
@@ -97,7 +97,7 @@ export function EventsCard({ item, focus, index, frozen, saved, onDetails, onReg
   </article>;
 }
 
-function InformationPanel({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+function InformationPanel({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   return <section className="ev-panel"><h3>{title}</h3>{subtitle&&<p className="ev-subtitle">{subtitle}</p>}{children}</section>;
 }
 const facts = [
