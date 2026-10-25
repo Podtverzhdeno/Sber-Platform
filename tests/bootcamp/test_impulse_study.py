@@ -54,7 +54,8 @@ def test_study_progress_requires_order_and_practice_requires_review(monkeypatch:
         async with database.session() as db:
             for person, label in ((learner, "learner"), (operator, "reviewer")):
                 await db.execute(
-                    text("INSERT INTO persons(id, display_name, external_key) VALUES (:id, :name, :key)"),
+                    text("INSERT INTO persons(id, display_name, external_key) "
+                         "VALUES (:id, :name, :key)"),
                     {"id": person, "name": label, "key": str(person)},
                 )
 
