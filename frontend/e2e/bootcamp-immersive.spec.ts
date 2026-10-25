@@ -250,12 +250,14 @@ test("finished course appears in Analytics and Trajectory from one persisted lea
   // living only in a React component or a temporary notification.
   await page.goto("/workspace/5");
   await expect(page.getByTestId("analytics-v3")).toBeVisible();
-  const analytics = page.getByTestId("learning-progress-bridge");
-  await expect(analytics.getByTestId("learn-finished")).toHaveText("1");
-  await expect(analytics.getByTestId("learn-lessons")).toHaveText("8");
-  await expect(analytics.getByTestId("learn-reviewed")).toHaveText("0");
-  await expect(analytics).toContainText("OpenSpec и SDD");
-  await expect(page.getByTestId("analytics-v3")).toContainText("Пройден курс Impulse: OpenSpec и SDD");
+  // Activity now uses PremiumActivity, not the legacy learning-progress-bridge.
+  // Assert the same persisted data through the current four metric cards.
+  const analytics = page.getByTestId("analytics-study-results");
+  await expect(analytics).toBeVisible();
+  await expect(analytics.locator(".avp-study-number").filter({hasText:"уроков завершено"}).locator("strong")).toHaveText("8");
+  await expect(analytics.locator(".avp-study-number").filter({hasText:"курсов пройдено"}).locator("strong")).toHaveText("1");
+  await expect(analytics.locator(".avp-study-number").filter({hasText:"практик одобрено"}).locator("strong")).toHaveText("0");
+  await expect(analytics.locator(".avp-course")).toContainText(["OpenSpec и SDD"]);
 
   await page.goto("/workspace/1");
   const trajectory = page.getByTestId("learning-progress-bridge");
