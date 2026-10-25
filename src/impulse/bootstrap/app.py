@@ -67,6 +67,7 @@ from impulse.application.task_catalog_page import TaskCatalogPageService
 from impulse.application.task_terms_read import TaskDetailReadService
 from impulse.application.work import MemoryWorkStore, WorkService
 from impulse.bootcamp import catalog_router as bootcamp_catalog_router
+from impulse.bootcamp.impulse_levels import router as impulse_levels_router
 from impulse.bootstrap.demo_seed import demo_id
 from impulse.bootstrap.logging import configure_logging
 from impulse.bootstrap.settings import Settings
@@ -421,6 +422,7 @@ def create_app(
     # so including catalog_router from the api/v1 package would deadlock the
     # package __init__; assemble it here like deadline and participant events.
     app.include_router(bootcamp_catalog_router, prefix="/api/v1")
+    app.include_router(impulse_levels_router, prefix="/api/v1")
     frontend_directory = Path("frontend/dist")
     if frontend_directory.is_dir():
         install_spa_fallback(app, frontend_directory)
