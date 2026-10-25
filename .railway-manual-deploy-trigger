@@ -1,1 +1,4 @@
 2aeeb1b0059a60f099877ef8fd89d3799c0a0d4e
+
+# QA release: build verified frontend/backend fixes without database reset.
+release_request=2026-10-25-postqa-ff5f752b156b08f2
