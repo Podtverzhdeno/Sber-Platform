@@ -27,6 +27,9 @@ export type ContextPanelProps = {
   contacts?: readonly DirectoryContact[];
   onOpenMember?: (personId: string) => Promise<void>;
   onInvite?: (personIds: string[]) => Promise<void>;
+  onLoadOlder?: () => void;
+  hasMoreOlder?: boolean;
+  isPaginating?: boolean;
   className?: string;
 };
 
@@ -45,6 +48,9 @@ export function ContextPanel({
   contacts = [],
   onOpenMember,
   onInvite,
+  onLoadOlder,
+  hasMoreOlder,
+  isPaginating,
   className,
 }: ContextPanelProps) {
   const [copyStatus, setCopyStatus] = useState<"ready" | "copied" | "unavailable">("ready");
@@ -61,7 +67,8 @@ export function ContextPanel({
     return <CommunityDetails key={channel.id} channel={channel} viewerId={viewerId}
       messages={messages} attachmentRefs={messageRefs} contacts={contacts}
       onClose={onClose} onToggleMute={onToggleMute}
-      onOpenMember={onOpenMember} onInvite={onInvite} />;
+      onOpenMember={onOpenMember} onInvite={onInvite}
+      onLoadOlder={onLoadOlder} hasMoreOlder={hasMoreOlder} isPaginating={isPaginating} />;
   }
   return (
     <aside className={classes} id="messenger-context-panel" aria-label="Контекст диалога">
