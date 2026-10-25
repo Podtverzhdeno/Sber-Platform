@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { storeCustomerTask } from "./customer-task-storage";
+import { submitCustomerBrief } from "./customer-task-api";
 import { CustomerCreateTask, type CreateTaskBrief } from "./customer-create-task";
 
 type Section = "Главная" | "Мои задачи" | "Создать задачу" | "Заявки" | "Приёмка" | "Аналитика" | "AI-помощник" | "Кандидаты" | "Сообщения";
@@ -87,6 +88,7 @@ export function CustomerScenario({ section }: { section: string }) {
   const [state, setState] = useState<Scenario>(initial);
   const [page, setPage] = useState<Page>(section === "Мои задачи" && participantParam ? "Профиль" : section === "Мои задачи" && taskParam ? "Задача" : pages.includes(section as Section) ? section as Section : "Главная");
   const [selected, setSelected] = useState(taskParam ?? "IMP-101");
+  const queryClient = useQueryClient();
   const [selectedPerson, setSelectedPerson] = useState(participantParam ?? "p1");
   const [chatPerson, setChatPerson] = useState(participantParam ?? "p1");
   const [filter, setFilter] = useState("Все");
@@ -111,12 +113,14 @@ export function CustomerScenario({ section }: { section: string }) {
     setState((current) => ({ ...current, results: current.results.map((item) => item.taskId === resultId ? { ...item, status: next, comment } : item), tasks: current.tasks.map((item) => item.id === resultId ? { ...item, status: next === "accepted" ? "completed" : "in_progress" } : item) }));
     setNotice(next === "accepted" ? "Результат принят" : next === "revision" ? "Результат возвращён на доработку" : "Спор открыт");
   };
-  const saveTask = (brief: CreateTaskBrief, chosenCandidates: string[]) => {
-    if (brief.mode === "invitation_only" && chosenCandidates.length === 0) { setNotice("Для задачи по приглашению выберите хотя бы одного участника с подтверждённым кейсом"); return; }
-    const created: Task = { ...brief, id: `IMP-${String(Date.now())}`, status: "published", version: 1 };
-    storeCustomerTask({ id: created.id, title: created.title, type: brief.taskType, tags: [...new Set([created.direction, ...brief.skills])], state: "Опубликована", applications: 0, people: chosenCandidates.map((candidateId) => state.candidates.find((candidate) => candidate.id === candidateId)?.name).filter((candidate): candidate is string => Boolean(candidate)), deadline: new Date(created.deadline).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" }).replace(" г.", ""), result: "—", problem: created.problem, expected: created.deliverable, criteria: created.criteria.split(/\n|;/).map((item) => item.trim()).filter(Boolean) });
-    setState((current) => ({ ...current, tasks: [created, ...current.tasks], taskInvitations: [...(current.taskInvitations ?? []), ...chosenCandidates.map((candidateId) => ({ taskId: created.id, candidateId }))] }));
-    setSelected(created.id); void navigate(`/workspace/1?created=${encodeURIComponent(created.id)}`);
+  const saveTask = async (brief: CreateTaskBrief, chosenCandidates: string[], taskKey: string): Promise<void> => {
+    if (chosenCandidates.length > 0 || brief.mode === "invitation_only") {
+      throw new Error("Приглашения требуют подтверждённых аккаунтов. Опубликуйте открытую задачу.");
+    }
+    const created = await submitCustomerBrief(brief, taskKey);
+    await queryClient.invalidateQueries({ queryKey: ["customer-tasks"] });
+    setSelected(created.id);
+    void navigate(`/workspace/1?created=${encodeURIComponent(created.id)}`);
   };
   const repeat = () => { const copy: Task = { ...task, id: `IMP-${String(Date.now())}`, title: `${task.title} — новый набор`, status: "draft", version: 1 }; setState((current) => ({ ...current, tasks: [copy, ...current.tasks] })); setSelected(copy.id); setNotice("Создан черновик на основе задачи"); };
   const currentResult = state.results.find((item) => item.taskId === selected) ?? pending[0];
@@ -127,7 +131,7 @@ export function CustomerScenario({ section }: { section: string }) {
     {page === pages[1] && <CustomerTaskList state={state} filter={filter} onFilter={setFilter} onOpen={openTask} />}
     {page === "Задача" && <CustomerTaskDetail task={task} state={state} onBack={() => { go("Мои задачи"); }} onProfile={openProfile} onMessages={openMessages} onApplications={() => { go("Заявки"); }} onResults={() => { go("Приёмка"); }} onRepeat={repeat} />}
     {page === "Профиль" && state.candidates.find((item) => item.id === selectedPerson) && <CustomerCandidateProfile person={state.candidates.find((item) => item.id === selectedPerson) ?? state.candidates[0] as Candidate} task={task} onBack={() => { openTask(task.id); }} onMessage={() => { openMessages(selectedPerson); }} />}
-    {page === "Создать задачу" && <CustomerCreateTask candidates={state.candidates} onBack={() => { go("Мои задачи"); }} onPublish={(newBrief, invitees) => { saveTask(newBrief, invitees); }} />}
+    {page === "Создать задачу" && <CustomerCreateTask candidates={state.candidates} onBack={() => { go("Мои задачи"); }} onPublish={saveTask} />}
     {page === "Заявки" && <section className="compact-panel"><h2>Заявки на {task.title}</h2><p>Всего {state.applications.filter((item) => item.taskId === selected).length} · шорт-лист {state.applications.filter((item) => item.taskId === selected && item.status === "shortlisted").length} · назначено {state.applications.filter((item) => item.taskId === selected && item.status === "assigned").length}</p>{state.applications.filter((item) => item.taskId === selected).map((item) => { const person = state.candidates.find((candidate) => candidate.id === item.candidateId); return <article key={item.candidateId} style={{ borderTop: "1px solid #ddd", padding: 12 }}><h3>{person?.name}</h3><p>{person?.direction} · {person?.cases.map((entry) => `${entry.title}: ${entry.artifact}`).join("; ")}</p><p>Статус: {item.status}</p><div style={{ display: "flex", gap: 8 }}><button type="button" onClick={() => { updateApplication(item.candidateId, "shortlisted"); }}>В шорт-лист</button><button type="button" onClick={() => { updateApplication(item.candidateId, "waitlisted"); }}>Лист ожидания</button><button type="button" onClick={() => { updateApplication(item.candidateId, "assigned"); }}>Назначить</button></div></article>; })}{!state.applications.some((item) => item.taskId === selected) && <p>Заявок пока нет</p>}</section>}
     {page === "Приёмка" && <><div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>{state.results.map((item) => <button type="button" key={item.taskId} onClick={() => { setSelected(item.taskId); }}>{state.tasks.find((entry) => entry.id === item.taskId)?.title}</button>)}</div><section className="compact-panel"><p>Бриф → Работа → Сдача → Ревью → Приёмка</p><h2>{state.tasks.find((item) => item.id === currentResult?.taskId)?.title ?? task.title}</h2>{currentResult ? <><p>Участник: {name(state, currentResult.candidateId)}</p><p>{currentResult.summary}</p><p>Артефакты: {currentResult.artifact}</p><p>Условия версии {state.tasks.find((item) => item.id === currentResult.taskId)?.version}: {state.tasks.find((item) => item.id === currentResult.taskId)?.criteria}</p><label><input type="checkbox" /> Артефакты соответствуют ожидаемому результату</label><p>Текущее решение: {currentResult.status}</p><label>Комментарий <textarea value={comment} onChange={(event) => { setComment(event.target.value); }} /></label><div style={{ display: "flex", gap: 8 }}><button type="button" onClick={() => { setSelected(currentResult.taskId); decide("accepted"); }}>Принять</button><button type="button" onClick={() => { setSelected(currentResult.taskId); decide("revision"); }}>Вернуть на доработку</button><button type="button" onClick={() => { setSelected(currentResult.taskId); decide("disputed"); }}>Открыть спор</button></div></> : <p>Результатов пока нет</p>}</section></>}
     {page === "Аналитика" && <><div className="customer-kpi-grid">{[["Задач", state.tasks.filter((item) => item.status !== "draft").length], ["С заявками", new Set(state.applications.map((item) => item.taskId)).size], ["С результатом", new Set(state.results.map((item) => item.taskId)).size], ["Принято", accepted.length]].map(([label, value]) => <article className="compact-panel" key={label}><small>{label}</small><h2>{value}</h2></article>)}</div><section className="compact-panel"><h2>Воронка задач</h2><p>Опубликовано → Есть заявки → Назначены участники → Есть результаты → Приняты результаты</p><p>{state.tasks.filter((item) => item.status !== "draft").length} → {new Set(state.applications.map((item) => item.taskId)).size} → {new Set(state.applications.filter((item) => item.status === "assigned").map((item) => item.taskId)).size} → {new Set(state.results.map((item) => item.taskId)).size} → {accepted.length}</p><p>Время до результата: появится после фиксации дат. Экономия времени отбора: нет базы для сравнения.</p><p>Направления: Аналитика данных · AI / ML. Подразделения: Розничный бизнес · Клиентский сервис · R&D.</p></section></>}
