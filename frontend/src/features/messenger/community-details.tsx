@@ -60,6 +60,7 @@ export function CommunityDetails({
   const [feedback, setFeedback] = useState("");
   const [inviteError, setInviteError] = useState("");
   const dialogClose = useRef<HTMLButtonElement>(null);
+  const inviteTrigger = useRef<HTMLButtonElement>(null);
   useEffect(() => { if (inviteOpen) dialogClose.current?.focus(); }, [inviteOpen]);
   const participants = [...channel.participants].sort((a,b) => {
     const priority = (person: ApiParticipantView) => ["owner","admin","moderator"].includes(person.role) ? 0 : 1;
@@ -77,13 +78,13 @@ export function CommunityDetails({
     person.id !== viewerId && !channel.participants.some(member => member.id === person.id)
     && person.display_name.toLocaleLowerCase("ru").includes(filter.toLocaleLowerCase("ru"))
   );
-  const closeInvite = () => { if (!busy) { setInviteOpen(false); setChosen([]); setInviteError(""); } };
+  const closeInvite = () => { if (!busy) { setInviteOpen(false); setChosen([]); setInviteError(""); inviteTrigger.current?.focus(); } };
   const doInvite = async () => {
     if (!onInvite || chosen.length === 0) return;
     setBusy(true);setInviteError("");
     try {
       await onInvite(chosen);
-      setChosen([]);setInviteOpen(false);setFilter("");setFeedback("Участники добавлены в сообщество");
+      setChosen([]);setInviteOpen(false);setFilter("");setFeedback("Участники добавлены в сообщество");inviteTrigger.current?.focus();
     } catch (reason) {
       setInviteError(reason instanceof Error ? reason.message : "Не удалось добавить участников");
     } finally {setBusy(false);}
@@ -136,7 +137,7 @@ export function CommunityDetails({
           <div className="msg-community__section-head">
             <strong>Участники <span>{channel.participants.length}</span></strong>
           </div>
-          {canInvite && <button className="msg-community__add" type="button" onClick={openDialog}><Plus size={20}/>Добавить участников</button>}
+          {canInvite && <button className="msg-community__add" ref={inviteTrigger} type="button" onClick={openDialog}><Plus size={20}/>Добавить участников</button>}
           <label className="msg-community__search"><Search size={16}/><input type="search" aria-label="Найти участника" placeholder="Поиск по участникам" value={filter} onChange={event=>{setFilter(event.target.value);}}/></label>
           <ul className="msg-community__members">
             {visible.map((person,index) => <li key={person.id} data-testid="context-participant">
@@ -182,7 +183,15 @@ export function CommunityDetails({
       </div>}
       {inviteOpen && <div className="msg-community__layer">
         <button type="button" className="msg-community__backdrop" aria-label="Отменить приглашение" onClick={() => {closeInvite();}}/>
-        <section className="msg-community__invite" role="dialog" aria-modal="true" aria-label="Добавить участников" onKeyDown={event => {if(event.key==="Escape")closeInvite();}}>
+        <section className="msg-community__invite" role="dialog" aria-modal="true" aria-label="Добавить участников" onKeyDown={event => {
+          if (event.key === "Escape") {event.preventDefault(); closeInvite();}
+          if (event.key !== "Tab") return;
+          const items = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),[tabindex]:not([tabindex="-1"])'));
+          const first = items[0], last = items[items.length - 1];
+          if (!first || !last) return;
+          if (event.shiftKey && document.activeElement === first) {event.preventDefault();last.focus();}
+          else if (!event.shiftKey && document.activeElement === last) {event.preventDefault();first.focus();}
+        }}>
           <header><strong>Добавить участников</strong><button type="button" ref={dialogClose} aria-label="Закрыть" disabled={busy} onClick={closeInvite}><X size={19}/></button></header>
           <p>Выберите коллег из вашей программы, которые ещё не состоят в сообществе.</p>
           <label className="msg-community__search"><Search size={16}/><input type="search" placeholder="Поиск контактов" aria-label="Поиск контактов" value={filter} onChange={event=>{setFilter(event.target.value);}}/></label>
