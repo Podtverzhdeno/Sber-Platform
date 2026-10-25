@@ -11,6 +11,9 @@ on:
       - ".github/workflows/task-catalog-qa.yml"
       - "src/impulse/api/v1/task_catalog.py"
       - "src/impulse/application/task_catalog_page.py"
+      - "src/impulse/application/task_catalog_matching.py"
+      - "src/impulse/application/task_catalog_demo_brands.py"
+      - "tests/task_catalog/test_demo_brand_projection.py"
       - "tests/task_catalog/test_catalog_page_contract.py"
       - "tests/test_task_catalog_api.py"
   workflow_dispatch:
@@ -92,7 +95,7 @@ jobs:
         run: uv sync --frozen
       - name: Verify Tasks backend formatting and lint
         run: |
-          uv run ruff format --check src/impulse/application/task_catalog_page.py src/impulse/api/v1/task_catalog.py tests/task_catalog/test_catalog_page_contract.py tests/test_task_catalog_api.py
-          uv run ruff check src/impulse/application/task_catalog_page.py src/impulse/api/v1/task_catalog.py tests/task_catalog/test_catalog_page_contract.py tests/test_task_catalog_api.py
+          uv run ruff format --check src/impulse/application/task_catalog_page.py src/impulse/api/v1/task_catalog.py tests/task_catalog/test_catalog_page_contract.py tests/test_task_catalog_api.py src/impulse/application/task_catalog_matching.py src/impulse/application/task_catalog_demo_brands.py tests/task_catalog/test_demo_brand_projection.py
+          uv run ruff check src/impulse/application/task_catalog_page.py src/impulse/api/v1/task_catalog.py tests/task_catalog/test_catalog_page_contract.py tests/test_task_catalog_api.py src/impulse/application/task_catalog_matching.py src/impulse/application/task_catalog_demo_brands.py tests/task_catalog/test_demo_brand_projection.py
       - name: Exercise real API filters and cursor contracts
-        run: uv run pytest -q tests/task_catalog/test_catalog_page_contract.py tests/test_task_catalog_api.py tests/task_catalog/test_visibility_contract.py
+        run: uv run pytest -q tests/task_catalog/test_catalog_page_contract.py tests/test_task_catalog_api.py tests/task_catalog/test_visibility_contract.py tests/task_catalog/test_demo_brand_projection.py tests/task_catalog/test_projection_service.py
