@@ -13,6 +13,7 @@ on:
       - "frontend/src/features/bootcamp/learning-content/learning-content.scss"
       - "frontend/src/components/ui.tsx"
       - "frontend/e2e/bootcamp-approved.spec.ts"
+      - "frontend/e2e/bootcamp-immersive.spec.ts"
       - "frontend/e2e/bootcamp-reference-fixtures.ts"
       - "frontend/e2e/bootcamp-forensic-audit.spec.ts"
       - ".github/workflows/bootcamp-reader-qa.yml"
@@ -54,7 +55,7 @@ jobs:
         env:
           CI: "true"
           TZ: Europe/Moscow
-        run: npx playwright test bootcamp-approved.spec.ts bootcamp-forensic-audit.spec.ts --project=chromium --reporter=line
+        run: npx playwright test bootcamp-approved.spec.ts bootcamp-forensic-audit.spec.ts bootcamp-immersive.spec.ts --project=chromium --reporter=line
       - name: Lint Bootcamp components and browser tests
         if: always()
         run: npx eslint src/features/bootcamp e2e/bootcamp-approved.spec.ts e2e/bootcamp-forensic-audit.spec.ts --max-warnings 0
