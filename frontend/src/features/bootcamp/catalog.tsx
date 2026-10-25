@@ -512,6 +512,7 @@ export function BootcampCatalog({
     retry: retrySafeRead,
   });
   const [searchParams, setSearchParams] = useSearchParams();
+  const [expandedRoleCatalog, setExpandedRoleCatalog] = useState(false);
   const selectedCourseKey = searchParams.get("course");
   const activePanel = searchParams.get("panel") ?? "detail";
   const showDetail = selectedCourseKey !== null && activePanel === "detail";
@@ -559,12 +560,14 @@ export function BootcampCatalog({
     else next.set(key, value);
     next.delete("course");
     next.delete("panel");
+    setExpandedRoleCatalog(false);
     setSearchParams(next);
   }
 
   function resetFilters() {
     const next = new URLSearchParams(searchParams);
     for (const key of ["relevance", "track", "category", "q", "level", "course", "panel"]) next.delete(key);
+    setExpandedRoleCatalog(false);
     setSearchParams(next);
   }
 
@@ -601,6 +604,7 @@ export function BootcampCatalog({
     next.delete("course");
     next.delete("panel");
     next.delete("category");
+    setExpandedRoleCatalog(false);
     setSearchParams(next);
   };
   const forTrack = (card: CourseCardState) => isCourseInAiRole(card, trackFilter);
@@ -627,6 +631,12 @@ export function BootcampCatalog({
   const passesFilters = (card: CourseCardState) => visible.includes(card);
   const sortedVisible = category === "role" ? orderRoleCourses(visible, selectedRole) : visible;
   const orderedVisible = deepLinked && passesFilters(deepLinked) ? ([deepLinked, ...sortedVisible.filter((card) => card !== deepLinked)]) : sortedVisible;
+  // The approved first screen exposes five cards (4 + 1), with the rest on demand.
+  // Searching or restricting by direction must show the complete filtered set.
+  const foldedRole = category === "role" && !expandedRoleCatalog && query.length === 0 &&
+    trackFilter === "all" && relevanceFilter === "all" && searchParams.get("level") === null;
+  const displayedCourses = foldedRole ? orderedVisible.slice(0, 5) : orderedVisible;
+  const additionalCourses = foldedRole ? Math.max(0, orderedVisible.length - displayedCourses.length) : 0;
   const deepLinkFilteredOut = deepLinked !== null && !passesFilters(deepLinked);
   const panel = searchParams.get("panel") ?? "detail";
 
@@ -702,7 +712,7 @@ export function BootcampCatalog({
           </div>
         </div>
         {view !== "list" ? <div className="bc-ref-course-grid">
-          {orderedVisible.map(card => <article className="bc-ref-course-card" key={card.key} data-access={card.access_state} data-testid={"course-" + card.key}>
+          {displayedCourses.map(card => <article className="bc-ref-course-card" key={card.key} data-access={card.access_state} data-testid={"course-" + card.key}>
             <CourseFlags card={card}/>
             <div className="bc-ref-card-intro"><CourseArtwork title={card.title}/><div><h3>{card.title}</h3><p>{card.recommendation_reason || "Описание пока не опубликовано"}</p></div></div>
             <div className="bc-ref-tags">{courseRoleTitles(card).slice(0,3).map(title => <span key={title}>{title}</span>)}</div>
@@ -713,7 +723,7 @@ export function BootcampCatalog({
             </div>
           </article>)}
         </div> : <ul className="bc-ref-course-list" aria-label="Каталог Bootcamp списком">
-          {orderedVisible.map(card => <li className="bc-ref-course-row" key={card.key} data-access={card.access_state} data-testid={"course-" + card.key}>
+          {displayedCourses.map(card => <li className="bc-ref-course-row" key={card.key} data-access={card.access_state} data-testid={"course-" + card.key}>
             <div className="bc-ref-row-info"><CourseArtwork title={card.title}/><div><h3>{card.title}</h3><p>{card.recommendation_reason || "Описание пока не опубликовано"}</p></div></div>
             <div className="bc-ref-row-flags"><CourseFlags card={card}/><div className="bc-ref-tags">{courseRoleTitles(card).slice(0,3).map(title => <span key={title}>{title}</span>)}</div></div>
             <div className="bc-ref-row-meta"><Clock3 /> Длительность уточняется</div>
@@ -721,6 +731,7 @@ export function BootcampCatalog({
             <CoursePrimaryAction card={card} onOpen={key => openPanel("detail",key)}/>
           </li>)}
         </ul>}
+        {additionalCourses > 0 && <button className="bc-ref-show-more" type="button" onClick={() => setExpandedRoleCatalog(true)}>Показать ещё {additionalCourses} курсов для роли <ArrowRight /></button>}
         {visible.length === 0 && <div className="bc-ref-empty" role="status">Курсов по условиям не найдено. <button type="button" onClick={resetFilters}>Сбросить фильтры</button></div>}
       </section>
       <Drawer key={`${panel}:${deepLinked?.key ?? ""}`} title={panel === "reason" ? "Почему рекомендован" : "Информация о курсе"} open={deepLinked !== null && panel !== "requirements"} onClose={closePanel}>
