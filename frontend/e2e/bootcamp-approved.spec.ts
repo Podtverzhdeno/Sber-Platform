@@ -263,11 +263,11 @@ test("Bootcamp desktop reference hero has correct stagger, overlay, and grid den
   expect(summary).not.toBeNull();
   expect(categories).not.toBeNull();
   if (tabs && hero && summary && categories) {
-    // The approved reference leaves a 49px breathing space below role tabs.
-    expect(Math.abs(hero.y - (tabs.y + tabs.height + 49))).toBeLessThanOrEqual(3);
+    // The role tabs use their own 15px bottom margin, without the global 34px grid gap.
+    expect(Math.abs(hero.y - (tabs.y + tabs.height + 15))).toBeLessThanOrEqual(3);
     expect(Math.abs(summary.y - (hero.y - 24))).toBeLessThanOrEqual(3);
-    // The existing stack spacing (34px) and the intentional -51px overlap combine to -17px.
-    expect(Math.abs(categories.y - (hero.y + hero.height - 17))).toBeLessThanOrEqual(4);
+    // The approved hero intentionally overlaps the catalog tabs by 51px.
+    expect(Math.abs(categories.y - (hero.y + hero.height - 51))).toBeLessThanOrEqual(4);
   }
   const standard = cards.filter({ has: page.locator(".bc-ref-chip--available") }).first();
   await expect(standard).toBeVisible();
