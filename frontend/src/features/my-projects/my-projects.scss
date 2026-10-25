@@ -1045,3 +1045,49 @@
     grid-template-columns:minmax(0,1.92fr) minmax(330px,1fr);
   }
 }
+
+/* Topic-aware, resolution-independent project header artwork. The satellite
+   reference is only relevant to aerospace work, not every company/project. */
+.mpv2 .mp-detail[data-project-screen="detail"] .mp-ref-hero-art--research,
+.mpv2 .mp-detail[data-project-screen="detail"] .mp-ref-hero-art--agent,
+.mpv2 .mp-detail[data-project-screen="detail"] .mp-ref-hero-art--abstract{
+  background-size:auto;
+  opacity:1;
+}
+.mpv2 .mp-ref-hero-art--research{
+  background:
+    radial-gradient(circle at 64% 37%,#1ef2d4c2 0 3px,#00e4c328 4px 14px,transparent 15px),
+    radial-gradient(circle at 86% 59%,#44bff2c9 0 4px,#3cbee733 5px 14px,transparent 15px),
+    radial-gradient(circle at 39% 72%,#54d2fad1 0 3px,transparent 9px),
+    radial-gradient(ellipse at 74% 30%,#1579a26d 0%,transparent 60%),
+    repeating-linear-gradient(90deg,transparent 0 43px,#51d8df13 44px,#51d8df13 45px),
+    repeating-linear-gradient(0deg,transparent 0 43px,#51d8df12 44px,#51d8df12 45px),
+    linear-gradient(110deg,#06192a,#062b46 58%,#082c3b);
+}
+.mpv2 .mp-ref-hero-art--agent{
+  background:
+    radial-gradient(circle at 64% 51%,#3affd7 0 6px,#00f1c533 7px 21px,transparent 24px),
+    radial-gradient(circle at 33% 38%,#43b4ef 0 4px,#43b4ef33 5px 16px,transparent 20px),
+    radial-gradient(circle at 86% 22%,#56a9ff 0 4px,transparent 16px),
+    radial-gradient(circle at 81% 78%,#65eddd 0 4px,transparent 16px),
+    linear-gradient(145deg,transparent 33%,#2ec2e655 33.2%,transparent 33.6% 51%,#3beace44 51.2%,transparent 51.6%),
+    radial-gradient(ellipse at 65% 40%,#0874778c,transparent 65%),
+    linear-gradient(105deg,#051b2e,#092d43);
+}
+.mpv2 .mp-ref-hero-art--abstract{
+  background:
+    radial-gradient(ellipse at 83% 11%,#12aab877,transparent 65%),
+    repeating-radial-gradient(circle at 83% 38%,transparent 0 30px,#55ddec33 31px,#55ddec33 32px,transparent 33px 65px),
+    linear-gradient(125deg,#051a2c,#092f45);
+}
+.mpv2 .mp-detail[data-project-screen="detail"] .mp-ref-hero-art--research::after,
+.mpv2 .mp-detail[data-project-screen="detail"] .mp-ref-hero-art--agent::after,
+.mpv2 .mp-detail[data-project-screen="detail"] .mp-ref-hero-art--abstract::after{
+  background:linear-gradient(90deg,#06192b 0%,#06192b6b 20%,transparent 64%),
+    linear-gradient(0deg,#06192b 0%,transparent 30%);
+}
+.mpv2 .mp-ref-hero-art--satellite::before{
+  content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(35deg,transparent 0 50px,#33dfea12 51px,#33dfea12 52px);
+  pointer-events:none;
+}
