@@ -322,6 +322,29 @@ async def finish_impulse_study(
                     message="Завершите все восемь уроков.",
                     status_code=409,
                 )
+        else:
+            # Finishing a previously completed course on another day is a new
+            # substantive learning event, but never a duplicate certificate.
+            local_day = next(
+                iter(local_learning_days((datetime.now(UTC),), authenticated.actor.timezone))
+            )
+            await session.execute(
+                text(
+                    "INSERT INTO qualification_events "
+                    "(id, person_id, source, source_ref, local_date, timezone, "
+                    "data_origin, created_by) VALUES "
+                    "(:id, :person, 'course_learning', :source_ref, :day, "
+                    ":timezone, 'impulse_study', :person) "
+                    "ON CONFLICT (person_id, source, source_ref) DO NOTHING"
+                ),
+                {
+                    "id": uuid4(),
+                    "person": person,
+                    "source_ref": f"impulse-study:{course_key}:finish",
+                    "day": local_day,
+                    "timezone": authenticated.actor.timezone,
+                },
+            )
     return await _view(request, person, course_key)
 
 
