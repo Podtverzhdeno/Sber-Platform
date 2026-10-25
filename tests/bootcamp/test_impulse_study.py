@@ -91,6 +91,24 @@ def test_study_progress_requires_order_and_practice_requires_review(
     app.include_router(editorial_learning.router, prefix="/api/v1")
     app.state.database = database
 
+    @app.get("/test/qualified")
+    async def qualification_evidence() -> list[dict[str, str]]:
+        async with database.sessions() as db:
+            rows = (
+                await db.execute(
+                    text(
+                        "SELECT source_ref, local_date FROM qualification_events "
+                        "WHERE person_id = :person AND source = 'course_learning' "
+                        "ORDER BY source_ref"
+                    ),
+                    {"person": learner},
+                )
+            ).mappings().all()
+        return [
+            {"source_ref": str(row["source_ref"]), "local_date": row["local_date"].isoformat()}
+            for row in rows
+        ]
+
     async def course_catalog() -> tuple[SimpleNamespace, ...]:
         return (SimpleNamespace(key="demo-course-1", title="Практикум Impulse"),)
 
@@ -107,6 +125,7 @@ def test_study_progress_requires_order_and_practice_requires_review(
 
     with TestClient(app) as client:
         assert client.get(API).json()["completed_units"] == 0
+        assert client.get("/test/qualified").json() == []
         initial = client.get("/api/v1/me/bootcamp/impulse-study/summary")
         assert initial.status_code == 200
         assert initial.json()["started_courses"] == 0
@@ -114,12 +133,20 @@ def test_study_progress_requires_order_and_practice_requires_review(
         assert out_of_order.status_code == 409
         assert client.post(API + "/finish").status_code == 409
         assert client.post(API + "/practice", json={"description": "A" * 80}).status_code == 409
+        assert client.get("/test/qualified").json() == []
 
         for lesson in range(8):
             response = client.post(API + f"/lessons/{lesson}/complete")
             assert response.status_code == 200, response.text
             assert response.json()["completed_units"] == lesson + 1
         assert client.post(API + "/lessons/0/complete").json()["completed_units"] == 8
+        lesson_events = client.get("/test/qualified").json()
+        assert len(lesson_events) == 8
+        assert {event["source_ref"] for event in lesson_events} == {
+            f"impulse-study:demo-course-1:lesson:{index}" for index in range(8)
+        }
+        # All lessons today count as one qualified day, not eight streak days.
+        assert len({event["local_date"] for event in lesson_events}) == 1
         lessons_summary = client.get("/api/v1/me/bootcamp/impulse-study/summary").json()
         assert lessons_summary["started_courses"] == 1
         assert lessons_summary["completed_lessons"] == 8
@@ -130,6 +157,12 @@ def test_study_progress_requires_order_and_practice_requires_review(
         first = completed.json()["certificate_id"]
         assert first is not None
         assert client.post(API + "/finish").json()["certificate_id"] == first
+        events_after_finish = client.get("/test/qualified").json()
+        assert len(events_after_finish) == 9
+        assert {event["source_ref"] for event in events_after_finish} - {
+            event["source_ref"] for event in lesson_events
+        } == {"impulse-study:demo-course-1:finish"}
+        assert len({event["local_date"] for event in events_after_finish}) == 1
         assert client.get(API).json()["finished"] is True
         finished_summary = client.get("/api/v1/me/bootcamp/impulse-study/summary").json()
         assert finished_summary["finished_courses"] == 1
