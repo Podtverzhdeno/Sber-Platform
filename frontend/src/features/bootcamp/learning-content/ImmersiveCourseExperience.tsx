@@ -6,6 +6,7 @@ import {
   LockKeyhole, Medal, BadgeCheck, ShieldCheck, Sparkles, Target, Trophy,
 } from "lucide-react";
 import { apiRequest, type RuntimeApiPath } from "../../../api/client";
+import { learningSummaryQueryKey } from "../../learning-progress";
 import { learningProgramFor } from "./programs";
 import { knowledgeCheckFor } from "./knowledge-checks";
 import { authorizationMethods, authorizationWalkthrough, authorizationRequirements, authorizationCriteria, authorizationExample } from "./security-lesson-reference";
@@ -65,20 +66,31 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
       (path + "/lessons/" + String(lessonIndex) + "/complete") as RuntimeApiPath,
       { method: "POST", headers: csrfHeaders() },
     ),
-    onSuccess: (state) => { client.setQueryData(["impulse-study", courseKey], state); },
+    onSuccess: (state) => {
+      client.setQueryData(["impulse-study", courseKey], state);
+      void client.invalidateQueries({ queryKey: learningSummaryQueryKey });
+      void client.invalidateQueries({ queryKey: ["bootcamp-v2-overview"] });
+    },
   });
   const submitPractice = useMutation({
     mutationFn: () => apiRequest<Progress>((path + "/practice") as RuntimeApiPath, {
       method: "POST", headers: { ...csrfHeaders(), "Content-Type": "application/json" },
       body: JSON.stringify({ description: practiceDescription, artifact_url: practiceUrl || null }),
     }),
-    onSuccess: (state) => { client.setQueryData(["impulse-study", courseKey], state); },
+    onSuccess: (state) => {
+      client.setQueryData(["impulse-study", courseKey], state);
+      void client.invalidateQueries({ queryKey: learningSummaryQueryKey });
+      void client.invalidateQueries({ queryKey: ["bootcamp-v2-overview"] });
+    },
   });
   const finish = useMutation({
     mutationFn: () => apiRequest<Progress>((path + "/finish") as RuntimeApiPath,
       { method: "POST", headers: csrfHeaders() }),
     onSuccess: (state) => {
       client.setQueryData(["impulse-study", courseKey], state);
+      void client.invalidateQueries({ queryKey: learningSummaryQueryKey });
+      void client.invalidateQueries({ queryKey: ["bootcamp-v2-overview"] });
+      void client.invalidateQueries({ queryKey: ["participant-growth-analytics"] });
       setView("success");
     },
   });
