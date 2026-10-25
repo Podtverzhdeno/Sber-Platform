@@ -140,6 +140,7 @@ test("course reader fills viewport and lesson navigation never clips", async ({ 
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByTestId("impulse-immersive-reader")).toBeVisible();
+  await dialog.getByRole("button", { name: /Перейти к программе/ }).click();
   await dialog.locator(".imp-study__program-list button").first().click();
   await expect(dialog.locator(".imp-study__grid")).toBeVisible();
   const geometry = await dialog.evaluate(node => {
@@ -176,6 +177,7 @@ test("mobile fullscreen reader keeps lesson controls usable", async ({ page }) =
   await page.getByTestId("course-demo-course-2").getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: /Перейти к программе/ }).click();
   await dialog.locator(".imp-study__program-list button").first().click();
   await expect(dialog.locator(".imp-study__grid")).toBeVisible();
   const dimensions = await dialog.evaluate(node => {
