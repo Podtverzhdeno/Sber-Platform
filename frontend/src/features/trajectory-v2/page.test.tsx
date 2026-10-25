@@ -177,7 +177,7 @@ describe("trajectory v2 stage path", () => {
   it("stages never mix across switched roles", async () => {
     mockRoadmapsFetch();
     renderShell("/workspace/1");
-    fireEvent.click(await screen.findByRole("button", { name: /Data-аналитик/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /AI Data Engineer/ }));
     await waitFor(() =>
       expect(screen.getAllByRole("button", { name: /API и сервисы/ })[0]).toHaveAttribute(
         "data-stage-state",
