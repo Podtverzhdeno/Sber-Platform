@@ -1561,6 +1561,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/messaging/channels/group": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Group */
+        post: operations["create_group_api_v1_me_messaging_channels_group_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/messaging/channels/personal": {
         parameters: {
             query?: never;
@@ -1658,6 +1675,26 @@ export interface paths {
         put?: never;
         /** Mark Read */
         post: operations["mark_read_api_v1_me_messaging_channels__channel_id__read_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/messaging/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Contact Directory
+         * @description Only expose contacts from the authenticated member's own program.
+         */
+        get: operations["contact_directory_api_v1_me_messaging_contacts_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1808,7 +1845,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Roadmap Catalog */
+        /**
+         * Roadmap Catalog
+         * @description All role roadmaps; only the authenticated participant's completions appear.
+         */
         get: operations["roadmap_catalog_api_v1_me_roadmap_catalog_get"];
         put?: never;
         post?: never;
@@ -4162,6 +4202,18 @@ export interface components {
             granted_scopes: components["schemas"]["ConsentScope"][];
             scope: components["schemas"]["ConsentScope"];
         };
+        /** ContactView */
+        ContactView: {
+            /** Display Name */
+            display_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Role */
+            role: string;
+        };
         /** ContinueLearning */
         ContinueLearning: {
             /** Action */
@@ -4445,6 +4497,13 @@ export interface components {
             title: string;
             /** Track Keys */
             track_keys: string[];
+        };
+        /** CreateGroupRequest */
+        CreateGroupRequest: {
+            /** Peer Ids */
+            peer_ids: string[];
+            /** Title */
+            title: string;
         };
         /** CreateReviewRequest */
         CreateReviewRequest: {
@@ -7774,23 +7833,14 @@ export interface components {
             activities?: string[];
             /** Completed */
             completed: boolean;
-            /**
-             * Deliverable
-             * @default null
-             */
-            deliverable: string | null;
-            /**
-             * Estimated Hours
-             * @default null
-             */
-            estimated_hours: number | null;
+            /** Deliverable */
+            deliverable?: string | null;
+            /** Estimated Hours */
+            estimated_hours?: number | null;
             /** Key */
             key: string;
-            /**
-             * Lab
-             * @default null
-             */
-            lab: string | null;
+            /** Lab */
+            lab?: string | null;
             /** Position */
             position: number;
             /** Purpose */
@@ -10706,6 +10756,41 @@ export interface operations {
             };
         };
     };
+    create_group_api_v1_me_messaging_channels_group_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateGroupRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     open_personal_api_v1_me_messaging_channels_personal_post: {
         parameters: {
             query?: never;
@@ -10944,6 +11029,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    contact_directory_api_v1_me_messaging_contacts_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactView"][];
                 };
             };
         };
