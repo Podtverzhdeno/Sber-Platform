@@ -150,8 +150,10 @@ describe("Bootcamp editorial course curriculum", () => {
     expect(frames).toHaveLength(4);
     expect(frames.map(button => button.getAttribute("aria-expanded"))).toEqual(["true", "true", "true", "false"]);
     expect(within(lesson).queryByRole("checkbox")).not.toBeInTheDocument();
-    fireEvent.click(frames[3]!);
-    expect(frames[3]).toHaveAttribute("aria-expanded", "true");
+    const selfCheck = frames[3];
+    if (!selfCheck) throw new Error("Expected self-check frame");
+    fireEvent.click(selfCheck);
+    expect(selfCheck).toHaveAttribute("aria-expanded", "true");
     expect(within(lesson).getAllByRole("checkbox").length).toBeGreaterThan(0);
     fireEvent.click(frames[3]!);
     expect(within(lesson).queryByRole("checkbox")).not.toBeInTheDocument();
