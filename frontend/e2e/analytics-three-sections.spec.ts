@@ -63,7 +63,7 @@ test("missing-source values never masquerade as issued certification or verified
  await page.route("**/api/v1/me/growth/snapshot",r=>r.fulfill({status:503,json:{detail:"down"}}));
  await page.route("**/api/v1/me/bootcamp/certificates",r=>r.fulfill({status:503,json:{detail:"down"}}));
  await page.goto("/workspace/9");
- await expect(page.getByRole("alert",{name:undefined}).first()).toContainText("История активности недоступна");
+ await expect(page.getByRole("alert").filter({hasText:"История активности недоступна"})).toBeVisible();
  await page.getByRole("button",{name:"Сертификация",exact:true}).click();
  await expect(page.getByText("ID сертификата")).toBeVisible();
  await expect(page.getByText("Не присвоен")).toBeVisible();
