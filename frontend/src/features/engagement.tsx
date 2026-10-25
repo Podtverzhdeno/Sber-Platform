@@ -14,6 +14,7 @@ import {
   useFreezeDay,
 } from "./engagement-client";
 import "./engagement.scss";
+import { rhythmReminderDueDate } from "./rhythm-reminder";
 
 const RHYTHM_PRESETS: Readonly<Record<string, string>> = {
   workdays: "Будни",
@@ -57,10 +58,13 @@ export function TopbarEngagementIndicator() {
   const [open, setOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [rhythmHelpOpen, setRhythmHelpOpen] = useState(false);
+  const [reminderClock, setReminderClock] = useState(() => new Date());
+  const [reminderVisible, setReminderVisible] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
   const indicatorQuery = useQuery({
     queryKey: ["engagement-overview"], queryFn: fetchEngagementOverview, retry: false,
+    refetchInterval: 60_000,
   });
   const freezeQuery = useQuery({
     queryKey: ["engagement-freeze"], queryFn: fetchFreezeSummary, retry: false,
@@ -99,6 +103,29 @@ export function TopbarEngagementIndicator() {
   const freezeStock = freezeQuery.data?.available ?? 0;
   const freezeUsable = freezeState === "break" && freezeStock > 0;
   const rhythmData = rhythmQuery.data ?? null;
+  // Open-tab reminders use persisted server preferences; browser notifications
+  // are emitted only when permission was granted previously, never requested here.
+  useEffect(() => {
+    const timer = window.setInterval(() => { setReminderClock(new Date()); }, 60_000);
+    return () => { window.clearInterval(timer); };
+  }, []);
+  useEffect(() => {
+    const dueDate = rhythmReminderDueDate(rhythmData, qualifiedDates, reminderClock);
+    if (!dueDate) { setReminderVisible(false); return; }
+    const reminderKey = `impulse:rhythm:reminded:${rhythmData?.version ?? "v0"}:${dueDate}`;
+    try {
+      if (window.sessionStorage.getItem(reminderKey) === "1") return;
+      window.sessionStorage.setItem(reminderKey, "1");
+    } catch { /* Privacy mode can block storage: in-tab reminder remains available. */ }
+    setReminderVisible(true);
+    try {
+      if (typeof Notification !== "undefined" && Notification.permission === "granted" && document.hidden) {
+        new Notification("Impulse · Время для практики", {
+          body: "Сегодня запланирован день твоего ритма. Сделай шаг в курсе или проекте!",
+        });
+      }
+    } catch { /* The in-page reminder still works without system notifications. */ }
+  }, [rhythmData, indicatorQuery.data, reminderClock]);
 
   const [flashDays, setFlashDays] = useState<string | null>(null);
   useEffect(() => {
@@ -170,6 +197,11 @@ export function TopbarEngagementIndicator() {
         <ChevronDown size={16} aria-hidden="true" />
       </button>
       {flashDays && <span className="engagement-flash" role="status">Эффективность серии выросла: {flashDays}</span>}
+      {reminderVisible && createPortal(<aside className="streak-rhythm-reminder-toast" role="status">
+        <span className="streak-rhythm-reminder-symbol" aria-hidden="true"><Bell size={19}/></span>
+        <span><strong>Время для практики</strong><small>Сегодня день твоего ритма. Короткий шаг в курсе или задаче поможет сохранить серию.</small></span>
+        <button type="button" aria-label="Закрыть напоминание" onClick={() => { setReminderVisible(false); }}><X size={17}/></button>
+      </aside>, document.body)}
       {open && createPortal(
         <div className="streak-modal-root">
           <button type="button" className="streak-modal-backdrop" aria-label="Закрыть серию" onClick={close} />
