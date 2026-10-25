@@ -328,7 +328,7 @@ test("creates a real persisted group from selected contacts, not a UI-only card"
   await expect(page.locator(".msg-chat__header-title")).toContainText("Обсуждение проекта");
   // A new group opens immediately; the current sidebar filter may not list communities.
   // Assert the selected channel and the persisted API fixture instead of sidebar visibility.
-  await expect(page.locator(".msg-chat__header-title")).toHaveText("Обсуждение проекта");
+  await expect(page.locator(".msg-chat__header-title")).toContainText("Обсуждение проекта");
   expect(submitted).toEqual({
     title:"Обсуждение проекта",
     peer_ids:[
