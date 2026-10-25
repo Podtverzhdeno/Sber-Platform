@@ -1,0 +1,16 @@
+# Claim ARCH-401
+- task_id: ARCH-401
+- session_id: gpt6-20261026-architecture-gate-02
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 882cc2a35a5043c2ecf400720b29f962e7bc5106
+- depends_on: []
+- write_scope:
+  - .github/workflows/architecture-audit.yml
+  - .agents/coordination/claims/ARCH-401.lock/status.md
+- shared_files: []
+- verification:
+  - GitHub Actions Python unittest and audit on exact head revision
+- progress: isolated read-only inventory gate will enforce clean domain imports; existing legacy application/infrastructure debt reported
+- blockers: comprehensive layer ratchet not yet accepted; independent review required
