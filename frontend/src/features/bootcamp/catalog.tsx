@@ -302,12 +302,13 @@ type CatalogPanel = "detail" | "reason" | "requirements";
 
 function CourseDetails({
   card, onReason, initialLearningView, detail, loading, detailError, certificate, certificatesLoading,
-  certificateError, issuing, issueError, onIssue,
+  certificateError, issuing, issueError, onIssue, onCelebrationChange,
 }: {
   card: CourseCardState; onReason: () => void; initialLearningView?: "overview" | "program"; detail: CourseDetail | null;
   loading: boolean; detailError: boolean; certificate: CourseCertificate | null;
   certificatesLoading: boolean; certificateError: boolean; issuing: boolean;
   issueError: boolean; onIssue: (key: string) => void;
+  onCelebrationChange?: (active: boolean) => void;
 }) {
   const [tab, setTab] = useState<"about" | "program" | "skills" | "reviews">("about");
   const lessonSection = useRef<HTMLDivElement>(null);
@@ -334,7 +335,7 @@ function CourseDetails({
       recommendation={card.recommendation_reason}
       initialView={initialLearningView}
       accessible={card.access_state === "available"}
-      onReason={onReason} />;
+      onReason={onReason} onCelebrationChange={onCelebrationChange} />;
   }
   return <div ref={lessonSection} className="bc-panel-content" data-reference="BC-R03">
     <div className="bc-ref-detail-hero">
@@ -670,6 +671,7 @@ export function BootcampCatalog({
   const client = useQueryClient();
   const navigate = useNavigate();
   const [milestoneCelebration, setMilestoneCelebration] = useState<MilestoneCelebration | null>(null);
+  const [courseCelebrationOpen, setCourseCelebrationOpen] = useState(false);
   const previousServerGrades = useRef(new Map<string, { key:string; title:string }>());
   const catalog = useQuery({
     queryKey: ["bootcamp-catalog"],
@@ -943,12 +945,13 @@ export function BootcampCatalog({
             certificatesLoading={certificatesQuery.isPending} certificateError={certificatesQuery.isError}
             issuing={issueCertificate.isPending} issueError={issueCertificate.isError}
             onIssue={(courseKey) => { issueCertificate.mutate(courseKey); }}
-            onReason={() => { openPanel("reason", deepLinked.key); }} />)}
+            onReason={() => { openPanel("reason", deepLinked.key); }}
+            onCelebrationChange={setCourseCelebrationOpen} />)}
       </Drawer>
       <Drawer title="Требования к обучению" open={panel === "requirements"} onClose={closePanel}>
         <RequirementsDetails cards={roleCourses} studyRecords={study.data?.courses ?? []} policyCurriculum={gradeCurriculum} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} onStartPractice={() => { void navigate(`/workspace/1?role=${encodeURIComponent(selectedRole)}`); }} />
       </Drawer>
-      {milestoneCelebration && <GradeMilestoneCelebration mode={milestoneCelebration.mode}
+      {milestoneCelebration && !courseCelebrationOpen && <GradeMilestoneCelebration mode={milestoneCelebration.mode}
         roleTitle={milestoneCelebration.roleTitle} fromGrade={milestoneCelebration.fromGrade} toGrade={milestoneCelebration.toGrade}
         onClose={() => { setMilestoneCelebration(null); }}
         onContinue={() => {
