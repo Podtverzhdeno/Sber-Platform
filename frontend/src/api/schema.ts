@@ -304,6 +304,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/checkpoint-evidence-files/{file_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Checkpoint Evidence */
+        get: operations["download_checkpoint_evidence_api_v1_checkpoint_evidence_files__file_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/config": {
         parameters: {
             query?: never;
@@ -1056,6 +1073,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/assignments/{assignment_id}/checkpoint-submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Checkpoint Submissions */
+        get: operations["list_checkpoint_submissions_api_v1_me_assignments__assignment_id__checkpoint_submissions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/assignments/{assignment_id}/checkpoints/{checkpoint_key}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Checkpoint File */
+        post: operations["upload_checkpoint_file_api_v1_me_assignments__assignment_id__checkpoints__checkpoint_key__files_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/assignments/{assignment_id}/checkpoints/{checkpoint_key}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit Checkpoint Solution */
+        post: operations["submit_checkpoint_solution_api_v1_me_assignments__assignment_id__checkpoints__checkpoint_key__submit_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/assignments/{assignment_id}/contributions": {
         parameters: {
             query?: never;
@@ -1204,6 +1272,40 @@ export interface paths {
         put?: never;
         /** Bootcamp Learning Command */
         post: operations["bootcamp_learning_command_api_v1_me_bootcamp_courses__course_key___action__post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/bootcamp/impulse-level": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Impulse Level */
+        get: operations["impulse_level_api_v1_me_bootcamp_impulse_level_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/bootcamp/impulse-level/advance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Advance Impulse Level */
+        post: operations["advance_impulse_level_api_v1_me_bootcamp_impulse_level_advance_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1660,6 +1762,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/journey/snapshot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My Journey Snapshot
+         * @description Read participant-owned state; never expose another person's evidence.
+         */
+        get: operations["my_journey_snapshot_api_v1_me_journey_snapshot_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/learning/streak": {
         parameters: {
             query?: never;
@@ -1946,6 +2068,29 @@ export interface paths {
         };
         /** My Project Credentials */
         get: operations["my_project_credentials_api_v1_me_project_credentials_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/rating/standings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My Rating Standings
+         * @description Show one's own place without requiring public-rating publication consent.
+         *
+         *     Never enumerate other people. Only discoverable seasons are considered,
+         *     and missing standings are explicitly unknown (None), not an invented zero.
+         */
+        get: operations["my_rating_standings_api_v1_me_rating_standings_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4179,15 +4324,63 @@ export interface components {
             /** Task Title */
             task_title: string;
         };
+        /** CheckpointFilePayload */
+        CheckpointFilePayload: {
+            /** Base64 Data */
+            base64_data: string;
+            /** Content Type */
+            content_type: string;
+            /** Filename */
+            filename: string;
+        };
         /** CheckpointRequest */
         CheckpointRequest: {
+            /** Acceptance Criteria */
+            acceptance_criteria?: string[];
+            /**
+             * Deliverable
+             * @default
+             */
+            deliverable: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Estimated Minutes */
+            estimated_minutes?: number | null;
             /** Key */
             key: string;
             /** Title */
             title: string;
         };
+        /** CheckpointSubmissionPayload */
+        CheckpointSubmissionPayload: {
+            /** Artifact Key */
+            artifact_key: string;
+            /** External Url */
+            external_url?: string | null;
+            /** File Ids */
+            file_ids?: string[];
+            /** Summary */
+            summary: string;
+        };
         /** CheckpointView */
         CheckpointView: {
+            /** Acceptance Criteria */
+            acceptance_criteria?: string[];
+            /**
+             * Deliverable
+             * @default
+             */
+            deliverable: string;
+            /**
+             * Description
+             * @default
+             */
+            description: string;
+            /** Estimated Minutes */
+            estimated_minutes?: number | null;
             /** Key */
             key: string;
             /** Status */
@@ -5483,6 +5676,8 @@ export interface components {
          * @description Participation is distinct from provider-verified competency evidence.
          */
         ImpulseCourseSummary: {
+            /** Certificate Id */
+            certificate_id: string | null;
             /** Completed Units */
             completed_units: number;
             /** Course Key */
@@ -5504,6 +5699,39 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
+        };
+        /** ImpulseLevelView */
+        ImpulseLevelView: {
+            /** Advance Ready */
+            advance_ready: boolean;
+            /** Approved Practices */
+            approved_practices: number;
+            /** Completed Courses */
+            completed_courses: number;
+            /**
+             * Curriculum State
+             * @enum {string}
+             */
+            curriculum_state: "published" | "unpublished";
+            /** Cycle Number */
+            cycle_number: number;
+            /** History */
+            history?: {
+                [key: string]: unknown;
+            }[];
+            /** Level */
+            level: number;
+            /**
+             * Policy Version
+             * @default 1
+             */
+            policy_version: number;
+            /** Required Courses */
+            required_courses: number;
+            /** Required Practices */
+            required_practices: number;
+            /** Track Key */
+            track_key: string;
         };
         /** ImpulseStudySummary */
         ImpulseStudySummary: {
@@ -5586,6 +5814,92 @@ export interface components {
         IssueCredentialRequest: {
             /** Correction Reason */
             correction_reason?: string | null;
+        };
+        /** JourneyCourseView */
+        JourneyCourseView: {
+            /** Course Key */
+            course_key: string;
+            provider_status: components["schemas"]["CompletionStatus"] | null;
+            /** Provider Verified */
+            provider_verified: boolean;
+            /** Roadmap Links */
+            roadmap_links: components["schemas"]["RoadmapEvidenceLink"][];
+            self_study: components["schemas"]["StudyEvidenceView"] | null;
+            /** Title */
+            title: string;
+        };
+        /** JourneyProjectView */
+        JourneyProjectView: {
+            /** Accepted Contribution Ids */
+            accepted_contribution_ids: string[];
+            /**
+             * Assignment Id
+             * Format: uuid
+             */
+            assignment_id: string;
+            /** Assignment Status */
+            assignment_status: string;
+            /** Submitted Contribution Ids */
+            submitted_contribution_ids: string[];
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+            /** Title */
+            title: string;
+        };
+        /** JourneyRatingView */
+        JourneyRatingView: {
+            /** Place */
+            place: number;
+            /** Points */
+            points: string;
+            /** Policy Version */
+            policy_version: number | null;
+            /**
+             * Season Id
+             * Format: uuid
+             */
+            season_id: string;
+            /** Season Version */
+            season_version: number;
+            /** Successful Projects */
+            successful_projects: number;
+            /** Trophy Titles */
+            trophy_titles: string[];
+            /** Verified Offer Titles */
+            verified_offer_titles: string[];
+        };
+        /**
+         * JourneySnapshotView
+         * @description Null means not available; zero is reserved for a known empty collection.
+         */
+        JourneySnapshotView: {
+            /** Accepted Case Count */
+            accepted_case_count: number;
+            /** Courses */
+            courses: components["schemas"]["JourneyCourseView"][];
+            /**
+             * Observed At
+             * Format: date-time
+             */
+            observed_at: string;
+            /**
+             * Person Id
+             * Format: uuid
+             */
+            person_id: string;
+            /** Projects */
+            projects: components["schemas"]["JourneyProjectView"][];
+            /** Published Rating Seasons */
+            published_rating_seasons: number;
+            /** Ratings */
+            ratings: components["schemas"]["JourneyRatingView"][];
+            /** Self Study Available */
+            self_study_available: boolean;
+            /** Verified Provider Course Count */
+            verified_provider_course_count: number;
         };
         /**
          * KnowledgeState
@@ -6217,6 +6531,32 @@ export interface components {
             readiness_percent: components["schemas"]["OverviewConceptView"];
             review_grade: components["schemas"]["OverviewConceptView"];
             stage_progress: components["schemas"]["OverviewConceptView"];
+        };
+        /**
+         * OwnStandingView
+         * @description Owner-only published-season standing; never copied into public leaderboard.
+         */
+        OwnStandingView: {
+            /** Place */
+            place: number | null;
+            /** Policy Version */
+            policy_version: number | null;
+            /** Score */
+            score: string | null;
+            /**
+             * Season Id
+             * Format: uuid
+             */
+            season_id: string;
+            /** Season Key */
+            season_key: string;
+            season_status: components["schemas"]["SeasonStatus"];
+            /** Season Title */
+            season_title: string;
+            /** Season Version */
+            season_version: number;
+            /** Successful Projects */
+            successful_projects: number | null;
         };
         /** ParticipantAnalyticsView */
         ParticipantAnalyticsView: {
@@ -7003,6 +7343,17 @@ export interface components {
             payout: components["schemas"]["PayoutClaimView"] | null;
             review: components["schemas"]["ReviewView"];
         };
+        /** RoadmapEvidenceLink */
+        RoadmapEvidenceLink: {
+            /** Milestone Completed */
+            milestone_completed: boolean;
+            /** Milestone Key */
+            milestone_key: string;
+            /** Policy Version */
+            policy_version: number;
+            /** Track Key */
+            track_key: string;
+        };
         /** RoadmapView */
         RoadmapView: {
             /** Milestones */
@@ -7408,6 +7759,28 @@ export interface components {
             qualified_dates: string[];
             /** Reason */
             reason: string;
+        };
+        /** StudyEvidenceView */
+        StudyEvidenceView: {
+            /** Certificate Id */
+            certificate_id: string | null;
+            /** Completed Units */
+            completed_units: number;
+            /** Finished */
+            finished: boolean;
+            /** Finished At */
+            finished_at: string | null;
+            /** Practical Certificate Id */
+            practical_certificate_id: string | null;
+            /** Practice Status */
+            practice_status: string | null;
+            /**
+             * Source Updated At
+             * Format: date-time
+             */
+            source_updated_at: string;
+            /** Total Units */
+            total_units: number;
         };
         /** SuggestionDismissRequest */
         SuggestionDismissRequest: {
@@ -8717,6 +9090,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ImpulseStudyView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_checkpoint_evidence_api_v1_checkpoint_evidence_files__file_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -10076,6 +10480,117 @@ export interface operations {
             };
         };
     };
+    list_checkpoint_submissions_api_v1_me_assignments__assignment_id__checkpoint_submissions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_checkpoint_file_api_v1_me_assignments__assignment_id__checkpoints__checkpoint_key__files_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                assignment_id: string;
+                checkpoint_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckpointFilePayload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string | number;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    submit_checkpoint_solution_api_v1_me_assignments__assignment_id__checkpoints__checkpoint_key__submit_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                assignment_id: string;
+                checkpoint_key: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckpointSubmissionPayload"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContributionView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     submit_contribution_api_v1_me_assignments__assignment_id__contributions_post: {
         parameters: {
             query?: never;
@@ -10380,6 +10895,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LearningCommandResult"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    impulse_level_api_v1_me_bootcamp_impulse_level_get: {
+        parameters: {
+            query: {
+                track: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpulseLevelView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    advance_impulse_level_api_v1_me_bootcamp_impulse_level_advance_post: {
+        parameters: {
+            query: {
+                track: string;
+            };
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ImpulseLevelView"];
                 };
             };
             /** @description Validation Error */
@@ -11219,6 +11798,26 @@ export interface operations {
             };
         };
     };
+    my_journey_snapshot_api_v1_me_journey_snapshot_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JourneySnapshotView"];
+                };
+            };
+        };
+    };
     streak_api_v1_me_learning_streak_get: {
         parameters: {
             query?: never;
@@ -11768,6 +12367,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectCredentialView"][];
+                };
+            };
+        };
+    };
+    my_rating_standings_api_v1_me_rating_standings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnStandingView"][];
                 };
             };
         };
