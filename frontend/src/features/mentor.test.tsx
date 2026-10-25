@@ -171,7 +171,7 @@ describe("mentor workspace", () => {
             <MessagingWorkspace
               role="mentor"
               personId={viewerId}
-              quickTargets={{ review: 1, plan: 6 }}
+              quickTargets={{ task: 3, review: 1, plan: 6 }}
             />
           </QueryClientProvider>
         </MemoryRouter>,
