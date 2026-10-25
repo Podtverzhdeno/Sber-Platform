@@ -305,3 +305,28 @@ test("Bootcamp recommendation popup opens real course details", async ({ page })
   await dialog.getByRole("button", { name: /Посмотреть программу курса/ }).click();
   await expect(page.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
 });
+
+
+test("Bootcamp role catalog starts as 4+1 cards and expands without losing filters", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1086 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const shell = page.locator('[data-reference="BC-R01"]');
+  const cards = shell.locator(".bc-ref-course-card");
+  const initial = await cards.count();
+  expect(initial).toBeGreaterThan(0);
+  expect(initial).toBeLessThanOrEqual(5);
+
+  const more = shell.getByRole("button", { name: /Показать ещё.*курсов для роли/ });
+  if (await more.count()) {
+    await more.click();
+    expect(await cards.count()).toBeGreaterThan(initial);
+  }
+  await shell.getByRole("group", { name: "Вид каталога" })
+    .getByRole("button", { name: "Список" }).click();
+  await expect(shell.getByRole("list", { name: "Каталог Bootcamp списком" })).toBeVisible();
+  await shell.getByRole("group", { name: "Вид каталога" })
+    .getByRole("button", { name: "Карточки" }).click();
+  await expect(cards.first()).toBeVisible();
+});
