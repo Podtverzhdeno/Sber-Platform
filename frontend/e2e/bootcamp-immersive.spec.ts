@@ -317,14 +317,22 @@ test("Bootcamp celebrates the earned streak day and shows truthful flame at cour
   }
   await reader.locator(".imp-study__finish").click();
   await expect(reader.getByRole("heading", { name: "Обучение завершено!" })).toBeVisible();
-  await expect(celebration).toBeVisible();
-  await expect(celebration).toHaveAttribute("aria-label", /Курс завершён\. Текущая серия: 12 дней/);
-  await expect(celebration).toContainText("КУРС ЗАВЕРШЁН");
-  await expect(celebration).not.toContainText("+1 день к твоей серии");
-  await celebration.getByRole("button", { name: "Пропустить анимацию" }).click();
+  // Same premium animation as 'Следующий этап', but with truthful course wording.
+  const coursePopup = page.getByTestId("grade-milestone-celebration");
+  await expect(coursePopup).toHaveAttribute("data-mode", "course-complete");
+  await expect(coursePopup).toHaveAttribute("aria-label", "Курс успешно завершён");
+  await expect(coursePopup).toContainText("КУРС");
+  await expect(coursePopup).toContainText("ЗАВЕРШЁН!");
+  await expect(coursePopup).toContainText("Все уроки пройдены · результат сохранён");
+  await expect(coursePopup).not.toContainText("ГРЕЙД ПОВЫШЕН");
+  await expect(celebration).toHaveCount(0);
+  await coursePopup.getByRole("button", { name: "Посмотреть сертификаты" }).click();
+  await expect(coursePopup).toHaveCount(0);
+  await expect(reader.getByRole("heading", { name: "Ваши сертификаты" })).toBeVisible();
   await expect(page.getByRole("button", { name: /Учебный стрик: 12 дней/ })).toBeVisible();
   await expect(page.getByTestId("streak-celebration")).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole("button", { name: /Учебный стрик: 12 дней/ })).toBeVisible();
   await expect(page.getByTestId("streak-celebration")).toHaveCount(0);
+  await expect(page.getByTestId("grade-milestone-celebration")).toHaveCount(0);
 });
