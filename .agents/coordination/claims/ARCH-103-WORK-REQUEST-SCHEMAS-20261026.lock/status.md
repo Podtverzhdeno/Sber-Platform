@@ -1,0 +1,21 @@
+# Claim ARCH-103-WORK-REQUEST-SCHEMAS-20261026
+- task_id: ARCH-103-WORK-REQUEST-SCHEMAS-20261026
+- session_id: gpt6-20261026-work-requests-01
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 59459dfbaefeb8afa2366837efa71826468465a8
+- depends_on: []
+- write_scope:
+  - src/impulse/api/v1/work.py
+  - src/impulse/api/v1/work_requests.py
+  - tests/test_work_request_schema_boundary.py
+  - .github/workflows/work-request-boundary-qa.yml
+  - .agents/coordination/claims/ARCH-103-WORK-REQUEST-SCHEMAS-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - OpenAPI snapshot on exact SHA
+  - Ruff, Pyright, work API focused tests
+  - independent reviewer for schema/type backward compatibility
+- progress: Extract request-only schemas from oversized work API without changing routes, payload schema, or handlers.
+- blockers: Full CI has concurrently edited unrelated backend/frontend, shared OpenAPI generated snapshot belongs to integration lane and is not in scope.
