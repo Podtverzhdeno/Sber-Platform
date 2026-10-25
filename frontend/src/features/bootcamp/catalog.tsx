@@ -6,6 +6,7 @@ import { ArrowRight, Bot, Check, Clock3, FileText, GitBranch, GraduationCap, Lis
 import { apiRequest, retrySafeRead, RuntimeApiPath } from "../../api/client";
 import { Badge, Card, Drawer, SafeExternalLink, StatePanel } from "../../components/ui";
 import { CourseLearningContent } from "./learning-content/CourseLearningContent";
+import { aiRoleTitle, bootcampRoleKeys, courseRoleTitles, isCourseInAiRole, orderRoleCourses } from "./trajectory-content";
 import "./bootcamp-ux.scss";
 import "./bootcamp-approved.scss";
 import "./reference-fidelity.scss";
@@ -583,7 +584,7 @@ export function BootcampCatalog({
   }
 
   const relevanceFilter = searchParams.get("relevance") ?? "all";
-  const trackOptions: string[] = [...new Set(catalog.data.flatMap(card => card.track_keys))];
+  const trackOptions = bootcampRoleKeys(catalog.data);
   // Role selection and catalog direction are independent state dimensions.
   // Otherwise 'Все курсы' silently only showed the first role's courses.
   const requestedRole = searchParams.get("role");
@@ -603,8 +604,8 @@ export function BootcampCatalog({
     next.delete("category");
     setSearchParams(next);
   };
-  const forTrack = (card: CourseCardState) => trackFilter === "all" || card.track_keys.includes(trackFilter);
-  const forRole = (card: CourseCardState) => selectedRole === "all" || card.track_keys.includes(selectedRole);
+  const forTrack = (card: CourseCardState) => isCourseInAiRole(card, trackFilter);
+  const forRole = (card: CourseCardState) => isCourseInAiRole(card, selectedRole);
   const categoryCounts = [
     { key: "role", label: "Для моей роли", count: catalog.data.filter((card) => forTrack(card) && forRole(card)).length },
     { key: "all", label: "Все курсы", count: catalog.data.filter(forTrack).length },
@@ -614,8 +615,8 @@ export function BootcampCatalog({
   const pendingRequired = catalog.data.filter((card) => forRole(card) && card.must_take && card.completion_state !== "verified");
   const requiredWord = new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "one" ? "курс" :
     new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "few" ? "курса" : "курсов";
-  const nextCourse = catalog.data.find((card) => forRole(card) && card.relevant && card.access_state === "available" && card.completion_state === "not_started") ?? null;
-  const selectedRoleTitle = selectedRole === "all" ? "Все активные направления" : selectedRole;
+  const nextCourse = orderRoleCourses(catalog.data.filter(forRole), selectedRole).find((card) => card.access_state === "available" && card.completion_state === "not_started" && (selectedRole !== "all" || card.relevant)) ?? null;
+  const selectedRoleTitle = selectedRole === "all" ? "Все активные направления" : aiRoleTitle(selectedRole);
   const visible = catalog.data
     .filter((card) => relevanceFilter !== "relevant" || card.relevant)
     .filter(forTrack)
@@ -625,7 +626,8 @@ export function BootcampCatalog({
   const deepLinked =
     deepLinkedKey !== null ? (catalog.data.find((card) => card.key === deepLinkedKey) ?? null) : null;
   const passesFilters = (card: CourseCardState) => visible.includes(card);
-  const orderedVisible = deepLinked && passesFilters(deepLinked) ? ([deepLinked, ...visible.filter((card) => card !== deepLinked)]) : visible;
+  const sortedVisible = category === "role" ? orderRoleCourses(visible, selectedRole) : visible;
+  const orderedVisible = deepLinked && passesFilters(deepLinked) ? ([deepLinked, ...sortedVisible.filter((card) => card !== deepLinked)]) : sortedVisible;
   const deepLinkFilteredOut = deepLinked !== null && !passesFilters(deepLinked);
   const panel = searchParams.get("panel") ?? "detail";
 
@@ -639,7 +641,7 @@ export function BootcampCatalog({
       {catalog.isError && <p className="notice" role="status">Обновление каталога недоступно. <button type="button" onClick={() => { void catalog.refetch(); }}>Повторить</button></p>}
       <div className="bc-ref-role-tabs" role="group" aria-label="Направление обучения">
         {trackOptions.map((role, index) => <button type="button" key={role} aria-pressed={selectedRole === role}
-          onClick={() => setRole(role)}>{index === 0 ? <Bot /> : <ChartNoAxesCombined />}{role}</button>)}
+          onClick={() => setRole(role)}>{index === 0 ? <Bot /> : <ChartNoAxesCombined />}{aiRoleTitle(role)}</button>)}
       </div>
       <div className="bc-ref-hero-grid">
         <section className="bc-ref-continue" aria-labelledby="bc-continue-title">
@@ -649,7 +651,7 @@ export function BootcampCatalog({
               {nextCourse ? <><CourseArtwork title={nextCourse.title} />
                 <div className="bc-ref-continue-text"><h3>{nextCourse.title}</h3>
                   <p>{nextCourse.recommendation_reason || "Курс для развития навыков выбранной роли"}</p>
-                  <div className="bc-ref-tags">{nextCourse.track_keys.slice(0,3).map(key => <span key={key}>{key}</span>)}</div>
+                  <div className="bc-ref-tags">{courseRoleTitles(nextCourse).slice(0,3).map(title => <span key={title}>{title}</span>)}</div>
                 </div></> : <p>Выберите курс в каталоге, чтобы начать обучение.</p>}
             </div>
             <div className="bc-ref-continue-status">
@@ -692,7 +694,7 @@ export function BootcampCatalog({
           <label className="bc-ref-search"><Search aria-hidden="true" /><span className="bc-ref-sr-only">Поиск курсов</span>
             <input type="search" aria-label="Поиск по курсам" value={searchParams.get("q") ?? ""} placeholder="Поиск по названию курса, навыку или технологии…" onChange={event => updateFilter("q",event.target.value)} /></label>
           <label className="bc-ref-select">Направление
-            <select value={trackFilter} onChange={event => setTrack(event.target.value)}><option value="all">Все направления</option>{trackOptions.map(role => <option key={role} value={role}>{role}</option>)}</select></label>
+            <select value={trackFilter} onChange={event => setTrack(event.target.value)}><option value="all">Все направления</option>{trackOptions.map(role => <option key={role} value={role}>{aiRoleTitle(role)}</option>)}</select></label>
           <label className="bc-ref-select">Уровень
             <select disabled title="Уровень станет доступен после публикации классификации"><option>Все уровни</option></select></label>
           <div className="bc-ref-views" role="group" aria-label="Вид каталога">
@@ -704,7 +706,7 @@ export function BootcampCatalog({
           {orderedVisible.map(card => <article className="bc-ref-course-card" key={card.key} data-access={card.access_state} data-testid={"course-" + card.key}>
             <CourseFlags card={card}/>
             <div className="bc-ref-card-intro"><CourseArtwork title={card.title}/><div><h3>{card.title}</h3><p>{card.recommendation_reason || "Описание пока не опубликовано"}</p></div></div>
-            <div className="bc-ref-tags">{card.track_keys.slice(0,3).map(key => <span key={key}>{key}</span>)}</div>
+            <div className="bc-ref-tags">{courseRoleTitles(card).slice(0,3).map(title => <span key={title}>{title}</span>)}</div>
             <p className="bc-ref-card-meta"><Clock3/> Длительность уточняется</p>
             <div className="bc-ref-card-bottom">
               <CoursePrimaryAction card={card} onOpen={key => openPanel("detail",key)}/>
@@ -714,7 +716,7 @@ export function BootcampCatalog({
         </div> : <ul className="bc-ref-course-list" aria-label="Каталог Bootcamp списком">
           {orderedVisible.map(card => <li className="bc-ref-course-row" key={card.key} data-access={card.access_state} data-testid={"course-" + card.key}>
             <div className="bc-ref-row-info"><CourseArtwork title={card.title}/><div><h3>{card.title}</h3><p>{card.recommendation_reason || "Описание пока не опубликовано"}</p></div></div>
-            <div className="bc-ref-row-flags"><CourseFlags card={card}/><div className="bc-ref-tags">{card.track_keys.slice(0,3).map(key => <span key={key}>{key}</span>)}</div></div>
+            <div className="bc-ref-row-flags"><CourseFlags card={card}/><div className="bc-ref-tags">{courseRoleTitles(card).slice(0,3).map(title => <span key={title}>{title}</span>)}</div></div>
             <div className="bc-ref-row-meta"><Clock3 /> Длительность уточняется</div>
             <div className="bc-ref-row-progress">{card.completion_state === "verified" ? "Подтверждено" : card.completion_state === "reported" ? "На проверке" : "Нет данных о прогрессе"}<div className="bc-ref-track"><i style={{ width: card.completion_state === "verified" ? "100%" : "0%" }}/></div></div>
             <CoursePrimaryAction card={card} onOpen={key => openPanel("detail",key)}/>
