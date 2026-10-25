@@ -24,6 +24,7 @@ const RHYTHM_PRESETS: Readonly<Record<string, string>> = {
   custom: "Свой список",
 };
 const WEEKDAY_LABELS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
+const EMPTY_QUALIFIED_DATES: string[] = [];
 function dateKey(day: Date): string {
   return [day.getFullYear(), String(day.getMonth()+1).padStart(2, "0"), String(day.getDate()).padStart(2, "0")].join("-");
 }
@@ -92,7 +93,7 @@ export function TopbarEngagementIndicator() {
   const daysToGoal = nextGoal === undefined ? null : nextGoal - currentDays;
   const todaySaved = indicatorQuery.data?.today_saved ?? false;
   const reason = indicatorQuery.data?.reason ?? "";
-  const qualifiedDates = indicatorQuery.data?.qualified_dates ?? [];
+  const qualifiedDates = indicatorQuery.data?.qualified_dates ?? EMPTY_QUALIFIED_DATES;
   const frozenDates = indicatorQuery.data?.frozen_dates ?? [];
   const qualifiedSet = new Set(qualifiedDates);
   const frozenSet = new Set(frozenDates);
@@ -125,7 +126,7 @@ export function TopbarEngagementIndicator() {
         });
       }
     } catch { /* The in-page reminder still works without system notifications. */ }
-  }, [rhythmData, indicatorQuery.data, reminderClock]);
+  }, [rhythmData, qualifiedDates, reminderClock]);
 
   const [flashDays, setFlashDays] = useState<string | null>(null);
   useEffect(() => {
