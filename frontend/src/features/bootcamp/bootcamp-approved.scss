@@ -1,9 +1,9 @@
 
 /* Bootcamp v2 participant composition — BC-R01..BC-R05.
    No image-based UI, fabricated scores or privileged content. */
-.bc-approved { --bc2-line: var(--color-border, #1c3147); --bc2-surface: var(--color-surface, #0b1726);
-  --bc2-raised: var(--color-surface-raised, #0e1d2f); --bc2-text: var(--color-text, #f4f7fb);
-  --bc2-muted: var(--color-muted, #91a2ba); --bc2-teal: var(--color-primary, #22e6d0);
+.bc-approved { --bc2-line: #153754; --bc2-surface: #061b30;
+  --bc2-raised: #092039; --bc2-text: #f4f9ff;
+  --bc2-muted: #92b0d1; --bc2-teal: #00e9e9;
   gap: 18px; min-width: 0; width: 100%; }
 .bc-approved :is(button,a,select,input,summary):focus-visible { outline: 2px solid var(--bc2-teal); outline-offset: 3px; }
 .bc-approved button { cursor: pointer; }
