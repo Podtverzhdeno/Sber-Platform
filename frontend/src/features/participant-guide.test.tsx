@@ -119,6 +119,22 @@ describe("contextual participant guide", () => {
     expect(screen.getByRole("button", { name: "Как здесь всё устроено?" })).toBeInTheDocument();
   });
 
+  it("never spotlights offscreen task controls on small layouts", () => {
+    const offscreen = document.createElement("div");
+    offscreen.className = "catalog-v2-filters";
+    offscreen.getBoundingClientRect = () => ({
+      x: 2400, y: 0, left: 2400, top: 0, right: 2700, bottom: 50,
+      width: 300, height: 50, toJSON: () => ({}),
+    });
+    document.body.appendChild(offscreen);
+    const { unmount } = renderGuide("Задачи");
+    fireEvent.click(screen.getByRole("button", { name: "Как здесь всё устроено?" }));
+    expect(screen.getByRole("heading", { name: "Выбирай задачи под свой интерес" })).toBeInTheDocument();
+    expect(document.querySelector(".pg-highlight")).toBeNull();
+    unmount();
+    offscreen.remove();
+  });
+
   it("keeps coachmarks inside the viewport at both screen edges", () => {
     const right = locatePopover({left: 10,right: 150,top: 100,bottom: 140,width: 140,height: 40}, {width:290,height:205}, {width:1000,height:700});
     expect(right.side).toBe("right");
