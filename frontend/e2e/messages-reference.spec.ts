@@ -129,9 +129,9 @@ test("messages empty state uses reference three-column composition at 1448px",as
       return {selector,x:r.x,y:r.y,width:r.width,height:r.height,display:css.display,position:css.position,flex:css.flex,gridTemplateRows:css.gridTemplateRows,minHeight:css.minHeight,heightCss:css.height,overflow:css.overflow};
     });
   })));
-  await expectRect(page,".msg-dialog-list",{x:164,y:70,width:367,height:1016},12);
-  await expectRect(page,".chat-thread",{x:531,y:70,width:575,height:1016},14);
-  await expectRect(page,".msg-reference-context-empty",{x:1106,y:70,width:298,height:1016},14);
+  await expectRect(page,".msg-dialog-list",{x:244,y:64,width:367,height:1022},12);
+  await expectRect(page,".chat-thread",{x:611,y:64,width:495,height:1022},14);
+  await expectRect(page,".msg-reference-context-empty",{x:1106,y:64,width:298,height:1022},14);
   await expect(page.locator(".msg-reference-empty__exact-art")).toHaveAttribute("src","/messages-reference/empty-hero-original.svg");
   await page.mouse.move(5,5);
   await page.screenshot({path:"test-results/messages-empty-1448.png",fullPage:false});
@@ -144,8 +144,8 @@ test("quick actions, search, tabs, context, mute, chat input operate end to end"
   await expect(page.locator(".msg-chat__header-title")).toContainText("Маяки");
   await expect(page.locator(".msg-chat__avatar img")).toHaveAttribute("src","/messages-reference/mayaki-avatar.svg");
   await expect(page.locator(".messenger-page")).toHaveAttribute("data-message-state","community");
-  await expectRect(page,".msg-dialog-list",{x:156,y:64,width:334,height:1022},12);
-  await expectRect(page,".chat-thread",{x:490,y:64,width:606,height:1022},14);
+  await expectRect(page,".msg-dialog-list",{x:244,y:64,width:334,height:1022},12);
+  await expectRect(page,".chat-thread",{x:578,y:64,width:518,height:1022},14);
   await expectRect(page,".msg-context",{x:1096,y:64,width:352,height:1022},14);
   await page.locator(".msg-chat__scroll").evaluate(element => {element.scrollTop=0;});
   await page.mouse.move(5,5);
@@ -180,9 +180,9 @@ test("direct chat follows 1672px personal PNG geometry with working editor",asyn
   await page.getByRole("button",{name:/Открыть последний чат/}).click();
   await expect(page.locator(".messenger-page")).toHaveAttribute("data-message-state","direct");
   await expect(page.locator(".msg-chat__header-title")).toContainText("Елена Наставник");
-  await expectRect(page,".msg-dialog-list",{x:172,y:69,width:391,height:872},12);
-  await expectRect(page,".chat-thread",{x:563,y:69,width:752,height:872},14);
-  await expectRect(page,".msg-context",{x:1315,y:69,width:357,height:872},14);
+  await expectRect(page,".msg-dialog-list",{x:244,y:64,width:391,height:877},12);
+  await expectRect(page,".chat-thread",{x:635,y:64,width:680,height:877},14);
+  await expectRect(page,".msg-context",{x:1315,y:64,width:357,height:877},14);
   await page.locator(".msg-chat__scroll").evaluate(element => {element.scrollTop=0;});
   await page.mouse.move(5,5);
   await page.screenshot({path:"test-results/messages-personal-1672.png",fullPage:false});
@@ -193,22 +193,31 @@ test("direct chat follows 1672px personal PNG geometry with working editor",asyn
   await expect(page.getByRole("searchbox",{name:"Поиск по сообщениям чата"})).toHaveCount(0);
 });
 
-test("Messages sidebar collapse actually changes layout and restores it without losing chat",async ({page})=>{
+test("Messages shares the exact navigation shell with Analytics and preserves the active chat", async ({page}) => {
   await page.setViewportSize({width:1448,height:1086});
   await openMessages(page);
-  const toggle=page.getByRole("button",{name:"Свернуть навигацию"});
-  await expect(toggle).toBeVisible();
-  await toggle.click();
-  await expect(page.locator(".workspace")).toHaveClass(/workspace--messages-compact/);
-  await expect(page.getByRole("button",{name:"Развернуть навигацию"})).toBeVisible();
-  const small=await page.locator(".sidebar").boundingBox();
-  expect(small?.width).toBe(80);
-  await page.getByRole("button",{name:"Развернуть навигацию"}).click();
-  await expect(page.locator(".workspace")).not.toHaveClass(/workspace--messages-compact/);
-  const normal=await page.locator(".sidebar").boundingBox();
-  expect(normal?.width).toBeGreaterThan(150);
+  const sidebar=page.getByRole("complementary",{name:"Боковая панель"});
+  const signature=async () => sidebar.evaluate(el=>({
+    brand:el.querySelector(".sidebar-brand")?.innerHTML,
+    icons:Array.from(el.querySelectorAll("nav .nav-icon"),icon=>icon.innerHTML),
+    promo:el.querySelector(".sidebar-message")?.innerHTML,
+  }));
+  const expected=await signature();
+  await expectRect(page,".sidebar",{x:0,y:0,width:244,height:1086},2);
+  await expect(sidebar.locator(".sidebar-message")).toContainText("Развиваем технологии вместе");
+  await expect(page.getByRole("button",{name:"Свернуть навигацию"})).toHaveCount(0);
+
+  await page.getByRole("link",{name:"Аналитика",exact:true}).click();
+  await expect(page.getByRole("link",{name:"Аналитика",exact:true})).toHaveAttribute("aria-current","page");
+  expect(await signature()).toEqual(expected);
+  await expectRect(page,".sidebar",{x:0,y:0,width:244,height:1086},2);
+
+  await page.getByRole("link",{name:"Сообщения",exact:true}).click();
+  await expect(page.getByRole("complementary",{name:"Список диалогов"})).toBeVisible();
+  expect(await signature()).toEqual(expected);
   await page.getByRole("button",{name:/Перейти в Маяки/}).click();
   await expect(page.locator(".msg-chat__header-title")).toContainText("Маяки");
+  expect(await signature()).toEqual(expected);
 });
 
 test("group creation selects real contacts and persists a chat in API list",async ({page})=>{
