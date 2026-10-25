@@ -127,7 +127,7 @@ export function ParticipantRatingV2({ onOpenMessages }: { onOpenMessages?: () =>
   const [selectedBenefit, setSelectedBenefit] = useState<Benefit | null>(null);
   const [feedback, setFeedback] = useState("");
   const [tab, setTab] = useState("Обзор");
-  const [favorite, setFavorite] = useState(false);
+  const [favorites, setFavorites] = useState<Set<number>>(() => new Set());
   const screenValue = searchParams.get("ratingView");
   const screen: Screen = screenValue === "benefits" || screenValue === "profile" ? screenValue : "list";
   const profileId = Number(searchParams.get("participant") ?? "3");
@@ -177,7 +177,7 @@ export function ParticipantRatingV2({ onOpenMessages }: { onOpenMessages?: () =>
           {(["all", "10", "30", "50"] as const).map(value => <button type="button" key={value} aria-pressed={filter === value} onClick={() => {updateParams({rank:value==="all"?null:value});}}>{value === "all" ? "Все" : "ТОП " + value}</button>)}
         </div>
         <label className="ir-control ir-control--search"><Search size={18} /><span className="ir-sr">Поиск участников</span><input type="search" value={query} placeholder="Поиск по участникам..." onChange={event => {updateParams({q:event.target.value});}} /></label>
-        <div className="ir-control ir-select"><CalendarDays size={18} /><span>Сезон 2026</span><ChevronDown size={17} /></div>
+        <div className="ir-control ir-select" aria-label="Сезон рейтинга"><CalendarDays size={18} /><span>Сезон 2026</span></div>
         <label className="ir-control ir-control--sort"><span className="ir-sr">Сортировка рейтинга</span><span>↕</span><select value={order} onChange={event => {updateParams({order:event.target.value==="points"?null:event.target.value});}}><option value="points">По баллам</option><option value="projects">По проектам</option><option value="name">По имени</option></select><ChevronDown size={16}/></label>
       </div>
       <div className="ir-list-bar"><p><strong>{visible.length}</strong> участников показано · демо-когорта 124 участника</p><button className="ir-btn ir-btn--solid" type="button" onClick={viewBenefits}>Подробнее о рейтинге и наградах <ArrowRight size={18}/></button></div>
@@ -221,7 +221,7 @@ export function ParticipantRatingV2({ onOpenMessages }: { onOpenMessages?: () =>
         <TrophyArtwork type="hero"/>
         <div className="ir-profile-identity"><PersonAvatar big person={person}/><div><span className="ir-eyebrow">ПРОФИЛЬ УЧАСТНИКА · СЕЗОН 2026</span><h1 id="workspace-title">{person.name} <BadgeCheck size={26}/></h1><p>Участник · Python-разработка · Impulse</p><div className="ir-profile-tags">{["Python","Backend","AI / ML","Командные проекты"].map(x=><span key={x}>{x}</span>)}</div></div></div>
         <span className="ir-profile-position"><Crown size={17}/> ТОП {person.place}</span>
-        <aside className="ir-profile-tools"><div className="ir-profile-buttons"><button type="button" className="ir-btn ir-btn--solid" onClick={() => {if(onOpenMessages)onOpenMessages();else setFeedback("Перейдите в раздел Сообщения для связи");}}><Mail size={17}/> Написать</button><button className="ir-outline-button" type="button" aria-pressed={favorite} onClick={() => {setFavorite(x=>!x);}}><Heart size={17} fill={favorite?"currentColor":"none"}/>{favorite?"В избранном":"В избранное"}</button><button type="button" className="ir-outline-button ir-icon-btn" aria-label="Поделиться профилем" onClick={() => {void shareProfile();}}><Share2 size={17}/></button></div>
+        <aside className="ir-profile-tools"><div className="ir-profile-buttons"><button type="button" className="ir-btn ir-btn--solid" onClick={() => {if(onOpenMessages)onOpenMessages();else setFeedback("Перейдите в раздел Сообщения для связи");}}><Mail size={17}/> Написать</button><button className="ir-outline-button" type="button" aria-pressed={favorites.has(person.place)} onClick={() => {setFavorites(previous => { const next = new Set(previous); if (next.has(person.place)) next.delete(person.place); else next.add(person.place); return next; });}}><Heart size={17} fill={favorites.has(person.place)?"currentColor":"none"}/>{favorites.has(person.place)?"В избранном":"В избранное"}</button><button type="button" className="ir-outline-button ir-icon-btn" aria-label="Поделиться профилем" onClick={() => {void shareProfile();}}><Share2 size={17}/></button></div>
           <div className="ir-profile-stats"><span><Crown size={19}/><strong>{person.place}</strong><small>Место в рейтинге</small></span><span><Flame size={19}/><strong>{person.points}</strong><small>Всего баллов</small></span><span><BriefcaseBusiness size={19}/><strong>{person.projects}</strong><small>Проектов</small></span></div></aside>
       </header>
       <div className="ir-profile-tabs" role="tablist" aria-label="Разделы профиля">{["Обзор","Достижения","Проекты","Оценки","Награды"].map(value=><button key={value} type="button" role="tab" aria-selected={tab===value} onClick={() => {setTab(value);}}>{value}</button>)}</div>
