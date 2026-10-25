@@ -21,7 +21,7 @@ const work = projects.map(item=>({
   contributions: item.status==="in_progress" ? [{ id:"contribution-1", version:1, personal_summary:"Подготовлен воспроизводимый модуль рекомендаций", artifact_keys:[], status:"reported" }] : [],
   decisions: [], allowed_artifacts: ["git-commit", "report"],
 }));
-async function fixture(page: Page) {
+async function fixture(page: Page, requestedView: "cards" | "list" = "cards") {
   await page.clock.setFixedTime(new Date("2026-10-25T12:00:00Z"));
   let authenticated=false;
   await page.route("**/api/v1/config", route=>route.fulfill({json:{demo_mode:true,honor_board_enabled:false}}));
@@ -48,7 +48,24 @@ async function fixture(page: Page) {
   }
   await page.getByRole("link",{name:"Мои проекты"}).click();
   await expect(page.locator(".mpv2")).toBeVisible();
+  if (requestedView === "cards") {
+    await page.locator(".mpv2").getByRole("group", { name: "Режим проектов" }).getByRole("button", { name: "Карточки" }).click();
+  }
 }
+
+test("My Projects: default layout is list and manual cards choice remains available",async({page})=>{
+  await page.setViewportSize({width:1672,height:941});
+  await fixture(page, "list");
+  const root=page.locator(".mpv2");
+  await expect(root).toHaveAttribute("data-project-screen","list");
+  await expect(root.locator(".mp-table tbody tr")).toHaveCount(3);
+  await expect(root.getByRole("group",{name:"Режим проектов"}).getByRole("button",{name:"Список"})).toHaveAttribute("aria-pressed","true");
+  await root.getByRole("group",{name:"Режим проектов"}).getByRole("button",{name:"Карточки"}).click();
+  await expect(root).toHaveAttribute("data-project-screen","cards");
+  await expect(page).toHaveURL(/layout=cards/);
+  await page.reload();
+  await expect(page.locator(".mpv2")).toHaveAttribute("data-project-screen","cards");
+});
 
 test("My Projects: cards, selection, filtering, bookmarks and rewards",async({page})=>{
   await page.setViewportSize({width:1672,height:941});
@@ -82,7 +99,7 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
 });
 test("My Projects: list has genuine rows and opens full project page",async({page})=>{
   await page.setViewportSize({width:1672,height:941});
-  await fixture(page);
+  await fixture(page, "list");
   const root=page.locator(".mpv2");
   await root.getByRole("group",{name:"Режим проектов"}).getByRole("button",{name:"Список"}).click();
   await expect(root).toHaveAttribute("data-project-screen","list");
