@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "frontend/src/features/task-catalog-v2/**"
+      - "frontend/src/App.tsx" # authenticated Tasks deep links must survive app shell changes
       - "frontend/e2e/task-catalog-v2-interactions.spec.ts"
       - "frontend/e2e/task-catalog-approved-geometry.spec.ts"
       - "frontend/e2e/task-catalog-approved-visual-fixture.ts"
