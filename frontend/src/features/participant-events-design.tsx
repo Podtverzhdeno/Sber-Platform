@@ -91,7 +91,7 @@ export function EventsCard({ item, focus, index, frozen, saved, onDetails, onReg
     </aside>
     <div className="ev-card-footer"><SafeExternalLink href={item.source_url} className="ev-source-link">{item.status==="open"?"Перейти к событию":"Открыть первоисточник"} <ExternalLink size={12}/></SafeExternalLink>
       <span className={`ev-status ${status==="Актуальное"?"ev-status-open":""}`}>{status}</span>
-      {frozen && <span className="ev-points-frozen">+5 frozen · ожидают подтверждения</span>}
+      {frozen && <><span className="ev-points-frozen"><b>+5 frozen</b></span><span className="ev-frozen-message">5 баллов заморожены до окончания события и проверки результата.</span></>}
       {item.status==="open" && !frozen && <button type="button" className="ev-quick-register" onClick={onRegister}>Зарегистрироваться · +5</button>}
     </div>
   </article>;
