@@ -115,6 +115,17 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   const stageCard = page.locator(".trajectory-v2-stage-detail");
   const rightRail = page.locator(".trajectory-v2-reference-sidebar");
   await expect(page.locator(".trajectory-v2-role-card")).toHaveCount(7);
+  const mainRole = page.locator('.trajectory-v2-role-card[data-role-key="product"]');
+  const secondaryRole = page.locator('.trajectory-v2-role-card[data-role-key="ml"]');
+  const untouchedRole = page.locator('.trajectory-v2-role-card[data-role-key="data"]');
+  await expect(page.locator('.trajectory-v2-role-card[data-tone="primary"]')).toHaveCount(1);
+  await expect(mainRole).toHaveAttribute("data-tone", "primary");
+  await expect(mainRole).toHaveCSS("border-top-color", "rgb(255, 204, 97)");
+  await expect(secondaryRole).toHaveAttribute("data-tone", "learning");
+  await expect(secondaryRole).toHaveCSS("border-top-color", "rgb(35, 92, 131)");
+  await expect(untouchedRole).toHaveAttribute("data-tone", "unselected");
+  await expect(untouchedRole).toHaveCSS("border-top-color", "rgb(39, 59, 76)");
+
   await expect(stageCard).toBeVisible();
   await expect(page.getByTestId("trajectory-stage-activities").locator("li")).toHaveCount(3);
   const teaching = page.getByTestId("trajectory-learning-material");
@@ -129,6 +140,13 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await expect(teaching.locator("ul").nth(1).locator("li")).toHaveCount(3);
   await teaching.locator("summary").click();
   await page.locator('.trajectory-v2-role-card[data-role-key="python"]').click();
+  await expect(page.locator('.trajectory-v2-role-card[data-role-key="python"]')).toHaveAttribute("data-tone", "learning");
+  await expect(mainRole).toHaveAttribute("data-tone", "primary");
+  await untouchedRole.click();
+  await expect(untouchedRole).toHaveAttribute("data-tone", "unselected");
+  await expect(untouchedRole).toHaveCSS("border-top-color", "rgb(129, 148, 164)");
+  await expect(mainRole).toHaveAttribute("data-tone", "primary");
+
   await expect(page.locator(".trajectory-v2-stage-path button")).toHaveCount(7);
   await expect(page.getByRole("heading", { name: "AI Security Engineer" })).toBeVisible();
   await page.locator('.trajectory-v2-role-card[data-role-key="product"]').click();
