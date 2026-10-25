@@ -483,3 +483,36 @@
     .ev-event-card--compact>.ev-card-actions button {max-width:none}
   }
 }
+
+
+/* Compact-card pixel pass: keep all three label rows inside the 116px art height. */
+.participant-events {
+  .ev-event-card--compact .ev-event-main {
+    display:flex;flex-direction:column;justify-content:center;align-self:stretch;
+    overflow:hidden;gap:0;
+  }
+  .ev-event-card--compact .ev-event-main>h3 {
+    font-size:17px;line-height:1.15;margin:0 0 8px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .ev-event-card--compact .ev-event-meta {flex-wrap:nowrap;gap:12px;min-width:0}
+  .ev-event-card--compact .ev-event-meta>span {
+    flex-shrink:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .ev-event-card--compact .ev-event-meta svg {flex-shrink:0}
+  .ev-event-card--compact .ev-event-tags {gap:6px;flex-wrap:nowrap;margin-top:8px;overflow:hidden;min-width:0}
+  .ev-event-card--compact .ev-event-tags span {
+    padding:5px 9px;max-width:42%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    flex-shrink:0;line-height:1.12;
+  }
+  .ev-event-card--compact .ev-event-tags .ev-event-type {max-width:39%}
+  @media(max-width:1410px) {
+    .ev-event-card--compact .ev-event-main>h3 {font-size:15px}
+    .ev-event-card--compact .ev-event-meta {gap:6px}
+    .ev-event-card--compact .ev-event-tags span {font-size:10px}
+  }
+  @media(max-width:720px) {
+    .ev-event-card--compact .ev-event-main>h3 {font-size:14px}
+    .ev-event-card--compact .ev-event-meta {flex-wrap:wrap;gap:5px}
+  }
+}
