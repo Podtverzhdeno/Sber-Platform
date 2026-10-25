@@ -147,7 +147,6 @@ def test_study_progress_requires_order_and_practice_requires_review(
         assert read.json()["practical_certificate_id"] == practical
 
 
-
 @pytest.mark.spec("bootcamp/impulse-access-check")
 def test_study_cannot_advance_locked_course(monkeypatch: pytest.MonkeyPatch) -> None:
     person = uuid4()
