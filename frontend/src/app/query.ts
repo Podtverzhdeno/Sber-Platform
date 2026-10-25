@@ -24,3 +24,11 @@ export function createQueryClient(): QueryClient {
   });
   return client;
 }
+
+/** One client per application session, shared across workspace routes. */
+export const appQueryClient = createQueryClient();
+
+/** Reset cached test projections between isolated application mounts. */
+export function resetAppQueryCacheForTests(): void {
+  appQueryClient.clear();
+}
