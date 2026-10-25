@@ -99,6 +99,10 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
     await expect(benefitIcons.nth(index)).toHaveAttribute("data-tone", tone);
     await expect(benefitIcons.nth(index).locator("svg")).toBeVisible();
   }
+  const tintBackgrounds = await page.locator(".catalog-v2-benefits-section > ul > li")
+    .evaluateAll((cards) => cards.map((card) => getComputedStyle(card).backgroundImage));
+  expect(tintBackgrounds).toHaveLength(4);
+  expect(tintBackgrounds.every((background) => background.includes("linear-gradient"))).toBe(true);
   // Every branded source mark in approved 01/03 must be the original SVG
   // from Impulse_Tasks_UI (1); it is shown only with an explicit demo label.
   const sourceMarks = [
