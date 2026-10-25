@@ -50,3 +50,6 @@ release_request=2026-10-25-events-qa-passed-focus-546aa70
 
 # My Projects reference QA: four-column cards, tab routing and help controls
 release_request=2026-10-25-projects-view-tabs-59fe4e6
+
+# Projects reference QA: four desktop cards, routed preview tabs, team DM and real review version
+release_request=2026-10-25-my-projects-qa-e415ad8
