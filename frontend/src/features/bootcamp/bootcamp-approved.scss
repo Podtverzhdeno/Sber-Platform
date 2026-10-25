@@ -416,3 +416,56 @@
   outline: 3px solid #1ceee9;
   outline-offset: 3px;
 }
+
+
+/* Opt-in Bootcamp v2 uses the same full-screen learning reader, without
+   changing unrelated small dialogs (requirements, reviews, confirmations). */
+.bootcamp-v2-boundary > .overlay:has(.bc-learning) {
+  z-index: 1000;
+  display: block;
+  padding: 0;
+}
+.bootcamp-v2-boundary > .overlay:has(.bc-learning) .overlay-panel--dialog {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0 clamp(16px, 3vw, 48px) 40px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 0;
+  border-radius: 0;
+  background: var(--color-surface-raised, #061827);
+  overscroll-behavior: contain;
+}
+.bootcamp-v2-boundary > .overlay:has(.bc-learning) .overlay-panel--dialog > header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 14px 0;
+  min-height: 76px;
+  border-bottom: 1px solid var(--color-border, #23506a);
+  background: var(--color-surface-raised, #061827);
+}
+.bootcamp-v2-boundary > .overlay:has(.bc-learning) .bc-learning {
+  max-width: 1600px;
+  margin: 24px auto 0;
+}
+.bootcamp-v2-boundary > .overlay:has(.bc-learning) .bc-learning__body {
+  grid-template-columns: minmax(240px, 290px) minmax(0, 1fr);
+  gap: clamp(16px, 2vw, 30px);
+}
+.bootcamp-v2-boundary > .overlay:has(.bc-learning) .bc-learning__lesson {
+  scroll-margin-top: 94px;
+  padding: clamp(18px, 2.5vw, 34px);
+  font-size: 16px;
+  line-height: 1.7;
+}
+@media (max-width: 800px) {
+  .bootcamp-v2-boundary > .overlay:has(.bc-learning) .bc-learning__body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .bootcamp-v2-boundary > .overlay:has(.bc-learning) .bc-learning__toc { position: static; }
+}
