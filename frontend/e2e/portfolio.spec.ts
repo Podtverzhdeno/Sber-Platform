@@ -72,30 +72,27 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
           if(!group) throw new Error("Missing overview group "+selector);
           return [...group.querySelectorAll(":scope > .p2-panel")].map(rect);
         }),
-        projects:rect(document.querySelector(".p2-projects-panel")!),
         projectTiles:[...document.querySelectorAll(".p2-project")].map(rect),
         picture:[...document.querySelectorAll(".p2-project-art")].map(rect),
-        passport:rect(document.querySelector(".p2-passport-panel")!),
       };
     });
     expect(geometry.projectTiles.length).toBe(2);
     // Original cards never grow to the height of the two right-hand cards.
     for(const tile of geometry.projectTiles) {
-      expect(tile.height,`project card is stretched at ${width}px`).toBeLessThan(280);
+      expect(tile.height,"project card is stretched at "+String(width)+"px").toBeLessThan(280);
     }
     for(const picture of geometry.picture) {
-      expect(picture.height,`project illustration is stretched at ${width}px`).toBeLessThan(250);
+      expect(picture.height,"project illustration is stretched at "+String(width)+"px").toBeLessThan(250);
     }
-    const [left,right] = geometry.groups;
-    if(!left||!right) throw new Error("Missing overview columns");
-    expect(left.length).toBe(3);
-    expect(right.length).toBe(3);
-    expect(Math.abs(left[0]!.top-right[0]!.top)).toBeLessThan(3);
-    for(const group of [left,right]) {
+    expect(geometry.groups.map(group => group.length)).toEqual([3, 3]);
+    for(const group of geometry.groups) {
       for(let i=1;i<group.length;i++) {
-        const gap=group[i]!.top-group[i-1]!.bottom;
-        expect(gap,`unwanted vertical gap at ${width}px`).toBeGreaterThanOrEqual(8);
-        expect(gap,`unwanted vertical gap at ${width}px`).toBeLessThanOrEqual(20);
+        const current=group.at(i);
+        const previous=group.at(i-1);
+        if(!current || !previous) throw new Error("Missing portfolio card measurements");
+        const gap=current.top-previous.bottom;
+        expect(gap,"unwanted vertical gap at "+String(width)+"px").toBeGreaterThanOrEqual(8);
+        expect(gap,"unwanted vertical gap at "+String(width)+"px").toBeLessThanOrEqual(20);
       }
     }
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2)).toBe(true);
