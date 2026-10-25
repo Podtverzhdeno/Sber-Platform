@@ -906,3 +906,82 @@
     linear-gradient(90deg,#06192c 0%,transparent 65%);
 }
 @media(max-width:860px){.mpv2 .mp-ref-hero-art{inset:0 0 0 29%;opacity:.62}}
+
+/* Reference full-screen project detail overlay.
+   Approved PNG geometry: 1548×1016 viewport, 1492×992 canvas at 28×12.
+   Keep the rest of My Projects inside the normal app shell. */
+.mpv2 .mp-detail[data-project-screen="detail"]{
+  position:fixed;
+  z-index:5100;
+  inset:12px 28px;
+  width:auto;
+  height:auto;
+  max-width:none;
+  max-height:none;
+  overflow-x:hidden;
+  overflow-y:auto;
+  scrollbar-width:thin;
+  scrollbar-color:#2a6982 #07192a;
+  overscroll-behavior:contain;
+  box-shadow:0 0 0 100vmax #030d19,0 12px 44px #000b,inset 0 1px #369fc02a;
+  background:linear-gradient(115deg,#031325 0%,#07192d 48%,#051223 100%);
+}
+.mpv2 .mp-detail[data-project-screen="detail"]>.mp-breadcrumb{display:none}
+.mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-hero{
+  min-height:221px;
+  height:221px;
+  flex-shrink:0;
+  border-bottom:1px solid #18506c70;
+}
+.mpv2 .mp-detail[data-project-screen="detail"] .mp-ref-hero-art{
+  inset:0 0 0 auto;
+  width:760px;
+  background-position:center;
+}
+.mpv2 .mp-detail[data-project-screen="detail"] .mp-ref-hero>.mp-company-mark{
+  width:96px;height:94px;min-width:96px;
+}
+.mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-tabs{
+  min-height:54px;
+  margin-bottom:9px;
+}
+.mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-columns{
+  grid-template-columns:946px minmax(0,1fr);
+}
+.mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-columns--progress{
+  grid-template-columns:946px minmax(0,1fr);
+}
+.mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-contribution-layout{
+  grid-template-columns:946px minmax(0,1fr);
+}
+@media (max-width:1530px){
+  .mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-columns,
+  .mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-columns--progress,
+  .mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-contribution-layout{
+    grid-template-columns:minmax(0,1.92fr) minmax(330px,1fr);
+  }
+}
+@media (max-width:1000px){
+  .mpv2 .mp-detail[data-project-screen="detail"]{
+    inset:8px 12px;border-radius:15px;padding:0 12px 20px;
+  }
+  .mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-columns,
+  .mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-columns--progress,
+  .mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-contribution-layout{
+    grid-template-columns:minmax(0,1fr);
+  }
+  .mpv2 .mp-detail[data-project-screen="detail"] .mp-ref-hero-art{
+    width:min(72%,760px);opacity:.6;
+  }
+}
+@media (max-width:560px){
+  .mpv2 .mp-detail[data-project-screen="detail"]{
+    inset:0;border-radius:0;padding:0 11px 20px;
+  }
+  .mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-hero{
+    height:auto;min-height:193px;
+  }
+  .mpv2 .mp-detail[data-project-screen="detail"] .mp-ref-hero>.mp-company-mark{
+    width:52px;height:52px;min-width:52px;
+  }
+}
