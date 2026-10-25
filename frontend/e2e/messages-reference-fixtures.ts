@@ -26,7 +26,10 @@ kind:"text",sequence:1,created_at:baseTime+time+":00Z"
 const c=(id:string,kind:string,title:string,body:string,author_name:string,time:string,unread:number,participantsList=participants)=>({
 id,kind,title,status:"active",task_id:kind==="task_team"?"task-01":null,
 role:"member",muted:false,sender_enabled:true,unread,
-participants:participantsList,last_message:msg("last-"+id,mentor,author_name,body,time),
+participants:kind==="personal" ? [
+  {id:viewer,display_name:"Алекс Речной",role:"member"},
+  {id:id===referenceIds.mentor?mentor:id,display_name:title,role:"member"},
+] : participantsList,last_message:msg("last-"+id,mentor,author_name,body,time),
 created_at:"2026-10-20T08:00:00Z"
 });
 export const referenceChannels=[
