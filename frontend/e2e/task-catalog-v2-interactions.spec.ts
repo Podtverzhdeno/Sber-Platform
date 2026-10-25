@@ -234,6 +234,7 @@ test.describe("task catalog interactive controls and motion", () => {
     await page.getByRole("button", { name: "Список" }).click();
     await expect.poll(() => new URL(page.url()).searchParams.get("competency")).toBe("Python");
     await page.reload();
+    await expect(page).toHaveURL(/\/workspace\/1\?/);
     await expect(page.getByRole("button", { name: "Список" })).toHaveAttribute("aria-pressed", "true");
     await page.getByRole("button", { name: "Все фильтры" }).click();
     await expect(page.getByLabel("Навык", { exact: true })).toHaveValue("Python");
