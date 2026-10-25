@@ -10,8 +10,8 @@ from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 
 from impulse.ai.gateway import JsonObject, JsonValue
-from impulse.application.errors import ApiError
 from impulse.application.agents import AgentCheckpoint, AgentCheckpointStore, RunStatus
+from impulse.application.errors import ApiError
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.assist import agent_runs, agent_threads
 

@@ -7,8 +7,8 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime, timedelta
 from uuid import UUID, uuid4
 
-from impulse.application.errors import ApiError
 from impulse.application.development import DevelopmentService
+from impulse.application.errors import ApiError
 from impulse.application.growth import GrowthService
 from impulse.domain.buddy_suggestion import (
     BOOTCAMP_IDLE_THRESHOLD_DAYS,

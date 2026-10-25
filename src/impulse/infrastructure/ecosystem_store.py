@@ -11,8 +11,8 @@ from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert as postgres_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from impulse.application.errors import ApiError
 from impulse.application.ecosystem import ClaimRecord, EcosystemStore, EventRecord
+from impulse.application.errors import ApiError
 from impulse.domain.ecosystem import ClaimStatus, ExternalIdentity, claim_creates_trophy
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.ecosystem import (
