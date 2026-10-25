@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { overviewFixture } from "../participant-home-v2/fixture";
 import type { DevelopmentOverviewView } from "../participant-home-v2/client";
-import { StageDetail, TrajectoryV2Body } from "./page";
+import { StageDetail, TrajectoryV2Body, primaryTrajectoryKey, roleVisualTone } from "./page";
 import { milestoneState } from "./client";
 import type { RoadmapView } from "./client";
 
@@ -133,6 +133,55 @@ function mockRoadmapsFetch() {
 
 afterEach(() => {
   vi.restoreAllMocks();
+});
+
+describe("trajectory role palette and single primary", () => {
+  it("keeps exactly one gold primary, blue enrolled secondary and grey untouched role", () => {
+    mockRoadmapsFetch();
+    renderShell("/workspace/1", {
+      overview: { ...overviewFixture, roles: rolesFixture },
+    });
+    const roles = screen.getAllByTestId("trajectory-role-card");
+    const primary = roles.find((role) => role.getAttribute("data-role-key") === "python");
+    const secondary = roles.find((role) => role.getAttribute("data-role-key") === "data");
+    const untouched = roles.find((role) => role.getAttribute("data-role-key") === "product");
+    expect(roles.filter((role) => role.getAttribute("data-tone") === "primary")).toHaveLength(1);
+    expect(primary).toHaveAttribute("data-tone", "primary");
+    expect(secondary).toHaveAttribute("data-tone", "learning");
+    expect(untouched).toHaveAttribute("data-tone", "unselected");
+    if (!secondary || !untouched) throw new Error("Secondary and untouched role fixtures are required");
+
+    fireEvent.click(secondary);
+    expect(primary).toHaveAttribute("data-tone", "primary");
+    expect(secondary).toHaveAttribute("aria-pressed", "true");
+    expect(secondary).toHaveAttribute("data-tone", "learning");
+    expect(screen.getByTestId("trajectory-role-detail")).toHaveAttribute("data-tone", "learning");
+
+    fireEvent.click(untouched);
+    expect(untouched).toHaveAttribute("aria-pressed", "true");
+    expect(untouched).toHaveAttribute("data-tone", "unselected");
+    expect(screen.getByTestId("trajectory-role-detail")).toHaveAttribute("data-tone", "unselected");
+    expect(roles.filter((role) => role.getAttribute("data-tone") === "primary")).toHaveLength(1);
+  });
+
+  it("never creates two primary paths or promotes a role without enrollment", () => {
+    const twoActive = rolesFixture.map((role) =>
+      role.track_key === "data" ? { ...role, state: "active" as const } : role,
+    );
+    const overview = { ...overviewFixture, roles: twoActive };
+    expect(primaryTrajectoryKey(overview)).toBe("python");
+    expect(primaryTrajectoryKey({ ...overview, next_outcome: null })).toBe("python");
+    expect(primaryTrajectoryKey({
+      ...overview,
+      next_outcome: { ...overviewFixture.next_outcome!, trajectory_key: "product" },
+    })).toBe("python");
+    expect(primaryTrajectoryKey({
+      ...overview,
+      next_outcome: null,
+      roles: [rolesFixture[2]!],
+    })).toBeNull();
+    expect(roleVisualTone(rolesFixture[2]!, true)).toBe("unselected");
+  });
 });
 
 describe("trajectory v2 stage path", () => {
