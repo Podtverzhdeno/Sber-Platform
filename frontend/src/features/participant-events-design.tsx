@@ -2,8 +2,8 @@ import { useState, type FormEvent } from "react";
 import {
   ArrowLeft, ArrowRight, Award, Bookmark, BookOpen, CalendarDays,
   CheckCircle2, ChevronDown, Code2, ExternalLink, Gift, GraduationCap,
-  HelpCircle, Landmark, Lightbulb, MapPin, Medal, SearchCheck, ShieldCheck,
-  Sparkles, Star, Target, Trophy, Users, X,
+  Landmark, Lightbulb, MapPin, Medal, ShieldCheck,
+Star, Target, Trophy, Users, X,
 } from "lucide-react";
 import { SafeExternalLink } from "../components/ui";
 import type { EventDetail, RegistrationAggregate } from "./participant-events";
