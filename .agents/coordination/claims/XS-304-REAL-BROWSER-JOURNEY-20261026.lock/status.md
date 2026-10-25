@@ -1,0 +1,17 @@
+# Claim XS-304-REAL-BROWSER-JOURNEY-20261026
+- session_id: gpt6-20261026-xs-real-browser
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 90be60dcb2171dc135aa144e69f012c9c99da334
+- depends_on: []
+- write_scope:
+  - frontend/e2e/cross-section-real-api.spec.ts
+  - .github/workflows/cross-section-real-browser-qa.yml
+  - .agents/coordination/claims/XS-304-REAL-BROWSER-JOURNEY-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - Ruff/Python backend startup with migrated PostgreSQL and demo seed
+  - scoped ESLint and real Playwright chromium
+- progress: Real HTTP/browser auth and persisted course finish → Analytics, Trajectory, AI Buddy; privacy and no false grades.
+- blockers: Full six-role domain lifecycle acceptance remains separate.
