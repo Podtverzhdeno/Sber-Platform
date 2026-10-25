@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { App, resetAppQueryCacheForTests } from "./App";
+import { App } from "./App";
+import { resetAppQueryCacheForTests } from "./app/query";
 import { overviewFixture } from "./features/participant-home-v2/fixture";
 
 const personas = [
