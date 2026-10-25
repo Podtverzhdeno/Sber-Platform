@@ -1,0 +1,48 @@
+name: Strict E2E lint and reduced motion QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/e2e/bootcamp-layout-alignment.spec.ts"
+      - "frontend/e2e/bootcamp-lesson-scroll.spec.ts"
+      - "frontend/e2e/portfolio-evidence-chart.spec.ts"
+      - "frontend/e2e/production-trajectory-audit.spec.ts"
+      - "frontend/src/features/streak-celebration.tsx"
+      - ".github/workflows/strict-e2e-eslint-qa.yml"
+  pull_request:
+    paths:
+      - "frontend/e2e/bootcamp-layout-alignment.spec.ts"
+      - "frontend/e2e/bootcamp-lesson-scroll.spec.ts"
+      - "frontend/e2e/portfolio-evidence-chart.spec.ts"
+      - "frontend/e2e/production-trajectory-audit.spec.ts"
+      - "frontend/src/features/streak-celebration.tsx"
+      - ".github/workflows/strict-e2e-eslint-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: strict-browser-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typed-browser-sources:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Strict ESLint on corrected sources
+        run: npx eslint e2e/bootcamp-layout-alignment.spec.ts e2e/bootcamp-lesson-scroll.spec.ts e2e/portfolio-evidence-chart.spec.ts e2e/production-trajectory-audit.spec.ts src/features/streak-celebration.tsx --max-warnings 0
+      - name: Check TypeScript browser sources and production config
+        run: npx tsc --noEmit -p tsconfig.node.json
