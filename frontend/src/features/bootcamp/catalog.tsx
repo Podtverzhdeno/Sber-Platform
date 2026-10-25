@@ -396,35 +396,36 @@ function CourseDetails({
 }
 
 function RecommendationDetails({ card, track, onOpenCourse }: { card: CourseCardState; track: string; onOpenCourse: () => void }) {
-  const reasons = card.relevance_reasons;
   return <div className="bc-panel-content bc-ref-why-panel" data-reference="BC-R04">
-    <p className="bc-ref-why-context">Курс: <strong>{card.title}</strong> · Направление: {track}</p>
+    <div className="bc-ref-why-hero">
+      <span className="bc-ref-chip bc-ref-chip--recommended"><Sparkles/> {card.relevant ? "Рекомендован" : "Обоснование курса"}</span>
+      <h2>Почему рекомендован курс «{card.title}»?</h2>
+      <p>Рекомендация связана с выбранной ролью и доступными данными о навыках. Она не гарантирует повышение грейда.</p>
+    </div>
     <section className="bc-ref-why-item">
       <span className="bc-ref-why-symbol bc-ref-why-symbol--role"><GraduationCap /></span>
-      <div><h3>Связь с выбранной ролью</h3><p>{card.relevant
-        ? "Курс входит в рекомендации для выбранной траектории."
-        : "Курс доступен в общем каталоге. Его связь с выбранной ролью не подтверждена."}</p></div>
+      <div><h3>Связь с ролью</h3>
+        <p>{card.track_keys.includes(track)
+          ? "Курс связан с направлением «" + track + "»."
+          : card.relevance_reasons[0] ?? "Привязка к активной роли уточняется."}</p></div>
     </section>
     <section className="bc-ref-why-item">
       <span className="bc-ref-why-symbol bc-ref-why-symbol--skill"><ChartNoAxesCombined /></span>
-      <div><h3>Какой пробел закрывает</h3>
-        <p>{card.must_take?.explanation ?? "Индивидуальный пробел в матрице навыков для этого курса пока не определён."}</p>
-        {card.must_take && <div className="bc-ref-skill-impact"><strong>{card.must_take.skill}</strong>
-          <span>{card.must_take.current_level ?? "Уровень не определён"} <ArrowRight /> {card.must_take.target_level ?? "Цель не задана"}</span></div>}
-      </div>
+      <div><h3>Текущий пробел</h3>
+        <p>{card.must_take?.explanation ?? "Индивидуальный пробел пока не подтверждён матрицей навыков."}</p></div>
     </section>
     <section className="bc-ref-why-item">
       <span className="bc-ref-why-symbol bc-ref-why-symbol--project"><Sparkles /></span>
-      <div><h3>Зачем проходить</h3><p>{card.recommendation_reason || "Подробное обоснование пока не опубликовано."}</p>
-        {reasons.length > 0 && <ul>{reasons.map(reason => <li key={reason}>{reason}</li>)}</ul>}</div>
+      <div><h3>Практический результат</h3>
+        <p>{card.recommendation_reason || "Обоснование практической применимости не опубликовано."}</p></div>
     </section>
-    <section className="bc-ref-why-item">
-      <span className="bc-ref-why-symbol bc-ref-why-symbol--confirm"><Check /></span>
-      <div><h3>Как подтвердить результат</h3><p>{card.verified_evidence
-        ? "Подтверждённое доказательство: " + card.verified_evidence
-        : card.pending_verification_note || "После обучения необходимо предъявить проверяемый результат. Прохождение курса не означает автоматического повышения грейда."}</p></div>
-    </section>
-    <button className="bc-ref-why-cta" type="button" onClick={onOpenCourse}>Посмотреть программу курса <ArrowRight /></button>
+    <div className="bc-ref-why-forecast">
+      <strong>Прогноз влияния на навыки</strong>
+      <p>{card.must_take?.projected_impact ?? "Достоверного прогноза уровня навыков пока нет."}</p>
+      {card.must_take && <small>{card.must_take.skill}: {card.must_take.current_level ?? "уровень неизвестен"} → {card.must_take.target_level ?? "цель уточняется"}</small>}
+    </div>
+    <p className="bc-ref-why-warning">Прогноз не равен подтверждённому уровню. Реальный прогресс определяется только по проверенным учебным и проектным результатам.</p>
+    <button className="bc-ref-why-cta" type="button" onClick={onOpenCourse}>Открыть курс <ArrowRight /></button>
   </div>;
 }
 
