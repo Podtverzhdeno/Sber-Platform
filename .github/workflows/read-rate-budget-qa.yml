@@ -37,4 +37,4 @@ jobs:
           uv run ruff format --check src/impulse/api/security.py tests/test_security_read_budget.py
           uv run ruff check src/impulse/api/security.py tests/test_security_read_budget.py
       - name: Verify rate window isolation and real reads
-        run: uv run pytest tests/test_security_read_budget.py tests/test_security.py -q
+        run: uv run pytest tests/test_security_read_budget.py tests/test_security_controls.py -q
