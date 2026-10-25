@@ -168,7 +168,7 @@ export function TopbarEngagementIndicator() {
             <button type="button" className="streak-modal-close" aria-label="Закрыть" onClick={close}><X size={22}/></button>
             {calendarOpen ? (
               <div className="streak-history">
-                <button type="button" className="streak-history-back" onClick={() => setCalendarOpen(false)}>
+                <button type="button" className="streak-history-back" onClick={() => { setCalendarOpen(false); }}>
                   <ArrowLeft size={18} /> Вернуться к серии
                 </button>
                 <div className="streak-history-heading">
@@ -210,7 +210,7 @@ export function TopbarEngagementIndicator() {
                     <img src="/home-reference/buddy.svg" alt="" />
                   </div>
                 </div>
-                <button type="button" className="streak-week-card" onClick={() => setCalendarOpen(true)}
+                <button type="button" className="streak-week-card" onClick={() => { setCalendarOpen(true); }}
                   aria-label="Открыть полный календарь серии">
                   <span className="streak-week-days">
                     {week.map(({date, label}) => {
@@ -243,7 +243,7 @@ export function TopbarEngagementIndicator() {
                 {freezeUsable && <div className="engagement-freeze-block">
                   <p>Пропущен вчерашний день. Можно использовать заморозку, если условия позволяют.</p>
                   <button type="button" className="streak-freeze-button" disabled={freezeUse.isPending}
-                    onClick={() => freezeUse.mutate()}>{freezeUse.isPending ? "Применяем…" : "Использовать заморозку"}</button>
+                    onClick={() => { freezeUse.mutate(); }}>{freezeUse.isPending ? "Применяем…" : "Использовать заморозку"}</button>
                   {freezeUse.isSuccess && freezeUse.data.current_days === 0 &&
                     <p className="engagement-freeze-note" role="status">Заморозка не применяется: серия прервана глубже одного пропущенного дня.</p>}
                   {freezeUse.isError && <p className="engagement-freeze-error" role="alert">Не удалось применить заморозку. Запас не подтверждён как изменённый.</p>}
@@ -254,7 +254,7 @@ export function TopbarEngagementIndicator() {
                       <span className="engagement-help-wrap">
                         <button type="button" className="engagement-help-button" aria-label="Что такое недельный ритм?"
                           aria-expanded={rhythmHelpOpen} aria-describedby="engagement-rhythm-tooltip"
-                          onClick={() => setRhythmHelpOpen(value => !value)}>?</button>
+                          onClick={() => { setRhythmHelpOpen(value => !value); }}>?</button>
                         <span id="engagement-rhythm-tooltip" className={`engagement-help-tooltip${rhythmHelpOpen ? " is-open" : ""}`} role="tooltip">
                           Недельный ритм — дни, в которые ты планируешь поддерживать серию. По нему строятся напоминания и ожидание активности. Сам по себе ритм не засчитывает дни.
                         </span>
@@ -280,9 +280,9 @@ export function TopbarEngagementIndicator() {
                       const day = index + 1, selected = activeDays.includes(day);
                       return <button type="button" key={label}
                         className={`engagement-rhythm-chip${selected ? " engagement-rhythm-chip--active" : ""}`}
-                        aria-pressed={selected} onClick={() => setChosenDays(
+                        aria-pressed={selected} onClick={() => { setChosenDays(
                           selected ? activeDays.filter(value => value !== day) : [...activeDays,day].sort((a,b)=>a-b)
-                        )}>{label}</button>;
+                        ); }}>{label}</button>;
                     })}
                   </div>}
                   <div className="engagement-rhythm-schedule">
@@ -291,18 +291,18 @@ export function TopbarEngagementIndicator() {
                       <div><strong>Напоминание</strong><small>Чтобы не прерывать серию</small></div>
                     </div>
                     <label>Время
-                      <select value={String(reminderHour)} onChange={e => setChosenHour(Number(e.target.value))}>
+                      <select value={String(reminderHour)} onChange={e => { setChosenHour(Number(e.target.value)); }}>
                         {Array.from({length:24},(_,i)=>i).map(h=><option key={h} value={h}>{String(h).padStart(2,"0")}:00</option>)}
                       </select>
                     </label>
                     <label>Окно
-                      <select aria-label="Окно напоминания" value={String(reminderWindow)} onChange={e=>setChosenWindow(Number(e.target.value))}>
+                      <select aria-label="Окно напоминания" value={String(reminderWindow)} onChange={e => { setChosenWindow(Number(e.target.value)); }}>
                         {[1,2,3,4,5,6].map(h=><option key={h} value={h}>+{h} ч</option>)}
                       </select>
                     </label>
                     <label>Действует с
                       <input type="date" min={rhythmData.week_start ?? undefined}
-                        value={effectiveDate} onChange={e=>setChosenEffective(e.target.value)} />
+                        value={effectiveDate} onChange={e => { setChosenEffective(e.target.value); }} />
                     </label>
                   </div>
                   {rhythmData.versioned && <p className="engagement-rhythm-version">Соглашение v{rhythmData.version ?? 1}; всего версий {rhythmData.history_count}</p>}
