@@ -16,6 +16,7 @@ type Progress = {
   total_units: number;
   certificate_id: string | null;
   finished: boolean;
+  practice_status?: "pending" | "approved" | "needs_revision" | null;
 };
 type View = "overview" | "program" | "theory" | "example" | "practice" | "check" | "finish" | "success" | "certificates";
 type Props = {
@@ -37,6 +38,8 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const [answer, setAnswer] = useState<number | null>(null);
   const [showExpected, setShowExpected] = useState(false);
   const [error, setError] = useState("");
+  const [practiceDescription, setPracticeDescription] = useState("");
+  const [practiceUrl, setPracticeUrl] = useState("");
   const path = studyPath(courseKey);
   const progress = useQuery({
     queryKey: ["impulse-study", courseKey],
@@ -49,6 +52,13 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
       (path + "/lessons/" + String(lessonIndex) + "/complete") as RuntimeApiPath,
       { method: "POST", headers: csrfHeaders() },
     ),
+    onSuccess: (state) => { client.setQueryData(["impulse-study", courseKey], state); },
+  });
+  const submitPractice = useMutation({
+    mutationFn: () => apiRequest<Progress>((path + "/practice") as RuntimeApiPath, {
+      method: "POST", headers: { ...csrfHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify({ description: practiceDescription, artifact_url: practiceUrl || null }),
+    }),
     onSuccess: (state) => { client.setQueryData(["impulse-study", courseKey], state); },
   });
   const finish = useMutation({
@@ -65,6 +75,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const completed = Math.min(total, progress.data?.completed_units ?? 0);
   const percent = Math.round(100 * completed / total);
   const certificateId = progress.data?.certificate_id;
+  const practiceState = progress.data?.practice_status;
   const unit = program.units[current] ?? program.units[0];
   if (!unit) return null;
   const currentUnitId = unit.id;
@@ -201,7 +212,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
               {certificateId && <><small>Идентификатор: {certificateId}</small><button type="button" className="imp-study__primary" onClick={printCertificate}><Download size={17}/> Распечатать сертификат</button></>}
             </section>
             <section className="imp-study__cert-card"><Medal size={29}/><h3>Сертификат подтверждения знаний</h3>
-              <p>Требует практического задания и проверки результата наставником. Не выдаётся автоматически за просмотр уроков.</p><span className="imp-study__cert-status">Требуется проверка практики</span>
+              <p>Требует практического задания и проверки результата наставником. Не выдаётся автоматически за просмотр уроков.</p><span className="imp-study__cert-status">{practiceState === "approved" ? "Практика подтверждена" : practiceState === "pending" ? "Работа отправлена на проверку" : "Требуется проверка практики"}</span>
               <button type="button" className="imp-study__secondary" onClick={() => { setView("practice"); setCurrent(total-1); }}>Перейти к практике <ArrowRight size={16}/></button>
             </section>
           </div>
@@ -226,6 +237,25 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
               <div><h4><ClipboardCheck size={18}/> Критерии проверки</h4><p>{unit.expected}</p>
                 <p>Должны быть продемонстрированы работоспособность, полнота решения и корректность обработки ошибок.</p></div></div>
             <p className="imp-study__disclaimer">Практическая работа требует отдельной проверки для сертификата подтверждения знаний.</p>
+            <form className="imp-study__submission" onSubmit={event => { event.preventDefault(); void submitPractice.mutateAsync(); }}>
+              <h4>Отправить практическую работу на проверку</h4>
+              <label>Опишите, что сделали и как проверили результат
+                <textarea value={practiceDescription} minLength={50} required
+                  onChange={event => { setPracticeDescription(event.target.value); }}
+                  placeholder="Опишите решение, тестирование и выявленные ограничения (не менее 50 символов)"/>
+              </label>
+              <label>Ссылка на результат (HTTPS, необязательно)
+                <input type="url" value={practiceUrl} pattern="https://.*" placeholder="https://..."
+                  onChange={event => { setPracticeUrl(event.target.value); }}/>
+              </label>
+              <button className="imp-study__primary" type="submit"
+                disabled={!certificateId || submitPractice.isPending || practiceDescription.trim().length < 50}>
+                {submitPractice.isPending ? "Отправляем…" : practiceState === "pending" ? "Обновить работу на проверке" : "Отправить на проверку"} <ArrowRight size={17}/>
+              </button>
+              {!certificateId && <small>Отправка откроется после завершения всех уроков.</small>}
+              {practiceState === "pending" && <p role="status">Практическая работа получена. Сертификат знаний будет доступен только после проверки.</p>}
+              {submitPractice.isError && <p role="alert">Не удалось отправить работу. Проверьте соединение и повторите попытку.</p>}
+            </form>
           </section>}
           {(view === "check" || view === "overview") && <section className="imp-study__content" aria-label="Самопроверка"><h3>Проверьте себя</h3>
             <p>Отметьте пункты, которые действительно проверили на своём примере. Галочки не увеличивают процент прохождения и не подтверждают компетенции.</p>
