@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { BootcampCatalog } from "./catalog";
+import { BootcampCatalog, StudyCourseProgress } from "./catalog";
 
 type CatalogCard = {
   key: string;
@@ -319,5 +319,31 @@ describe("Bootcamp catalog redesigned UI and state contracts", () => {
     await waitFor(() => { expect(screen.getByTestId("route").textContent).toContain("category=completed"); });
     expect(screen.getByTestId("course-greenhouse-esg")).toBeVisible();
     expect(screen.queryByTestId("course-openspec-sdd")).not.toBeInTheDocument();
+  });
+});
+
+describe("Stored Impulse study bar", () => {
+  it("shows the server lesson count without granting verified competency or rating points", () => {
+    render(<StudyCourseProgress course={{
+      course_key:"demo-course-10", title:"AI Threat Landscape",
+      completed_units:3,total_units:8,finished:false,certificate_id:null,
+      finished_at:null,updated_at:"2026-10-25T18:00:00Z",
+      practice_status:null,practical_certificate_id:null,
+    }}/>);
+    const progress=screen.getByRole("progressbar",{name:"Учебный прогресс: AI Threat Landscape"});
+    expect(progress).toHaveAttribute("value","3");
+    expect(progress).toHaveAttribute("max","8");
+    expect(screen.getByText("Уроки: 3 из 8")).toBeInTheDocument();
+    expect(screen.getByText(/не оценка навыков/)).toBeInTheDocument();
+  });
+  it("labels an actually finished study course but requires separate practical verification", () => {
+    render(<StudyCourseProgress course={{
+      course_key:"demo-course-10",title:"AI Threat Landscape",
+      completed_units:8,total_units:8,finished:true,certificate_id:"sample-id",
+      finished_at:"2026-10-25T18:00:00Z",updated_at:"2026-10-25T18:00:00Z",
+      practice_status:"pending",practical_certificate_id:null,
+    }}/>);
+    expect(screen.getByText("Учебный курс пройден")).toBeInTheDocument();
+    expect(screen.getByText(/практические навыки подтверждаются отдельно/)).toBeInTheDocument();
   });
 });
