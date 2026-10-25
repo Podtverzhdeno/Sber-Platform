@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { TopbarEngagementIndicator } from "./engagement";
@@ -45,13 +45,14 @@ function installOverview(overview: Record<string, unknown>): ReturnType<typeof v
   });
 }
 
-function renderIndicator(): void {
+function renderIndicator(): QueryClient {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
       <TopbarEngagementIndicator />
     </QueryClientProvider>,
   );
+  return client;
 }
 
 function openPopover(): void {
@@ -114,6 +115,30 @@ describe("TopbarEngagementIndicator", () => {
     installOverview(OVERVIEW);
     renderIndicator();
     await screen.findByText("4");
+    expect(screen.queryByTestId("streak-celebration")).toBeNull();
+  });
+
+  it("plays once when the live server projection increases after work is completed", async () => {
+    installOverview({ ...OVERVIEW, today_saved: false });
+    const client = renderIndicator();
+    await screen.findByText("4");
+    expect(screen.queryByTestId("streak-celebration")).toBeNull();
+    act(() => {
+      client.setQueryData(["engagement-overview"], {
+        ...OVERVIEW,
+        current_days: 5,
+        best_days: 9,
+        qualified_dates: [...OVERVIEW.qualified_dates, "2026-10-21"],
+        today_saved: true,
+      });
+    });
+    const celebration = await screen.findByTestId("streak-celebration");
+    expect(celebration.getAttribute("aria-label")).toContain("5 дней подряд");
+    fireEvent.click(screen.getByRole("button", { name: "Пропустить анимацию" }));
+    await waitFor(() => { expect(screen.queryByTestId("streak-celebration")).toBeNull(); });
+    act(() => { client.setQueryData(["engagement-overview"], {
+      ...OVERVIEW, current_days: 5, today_saved: true,
+    }); });
     expect(screen.queryByTestId("streak-celebration")).toBeNull();
   });
 
