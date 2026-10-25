@@ -27,6 +27,20 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     await reader.getByRole("button", { name: "Почему рекомендован" }).click();
     const whyDialog = page.getByRole("dialog", { name: "Почему рекомендован" });
     await expect(whyDialog).toBeVisible();
+    // Regression: the vector X must share the center of its existing close hit target.
+    const closeButton = whyDialog.getByRole("button", { name: "Закрыть" });
+    const closeGlyph = closeButton.locator("svg");
+    await expect(closeGlyph).toBeVisible();
+    const buttonBox = await closeButton.boundingBox();
+    const glyphBox = await closeGlyph.boundingBox();
+    expect(buttonBox).not.toBeNull();
+    expect(glyphBox).not.toBeNull();
+    if (buttonBox && glyphBox) {
+      const horizontalOffset = Math.abs(buttonBox.x + buttonBox.width / 2 - glyphBox.x - glyphBox.width / 2);
+      const verticalOffset = Math.abs(buttonBox.y + buttonBox.height / 2 - glyphBox.y - glyphBox.height / 2);
+      expect(horizontalOffset).toBeLessThan(1);
+      expect(verticalOffset).toBeLessThan(1);
+    }
     await expect(whyDialog.locator(".bc-ref-why-item")).toHaveCount(4);
     if (viewport.width >= 1280) {
       const bounds = await whyDialog.boundingBox();
