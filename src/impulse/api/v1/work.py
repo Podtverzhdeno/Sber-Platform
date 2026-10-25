@@ -1831,7 +1831,7 @@ async def list_checkpoint_submissions(
     assignment_id: UUID,
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
     service: Annotated[WorkService, Depends(_service)],
-) -> list[dict[str, str | int]]:
+) -> list[dict[str, object]]:
     assignment = await service.store.assignment(assignment_id)
     if assignment is None or assignment.person_id != authenticated.actor.person_id:
         raise ApiError(code="RESOURCE_NOT_FOUND", message="Проект не найден.", status_code=404)
@@ -1850,6 +1850,32 @@ async def list_checkpoint_submissions(
             .mappings()
             .all()
         )
+        attached = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT id, contribution_id, filename, size_bytes "
+                        "FROM checkpoint_evidence_files "
+                        "WHERE assignment_id = :assignment AND contribution_id IS NOT NULL"
+                    ),
+                    {"assignment": assignment_id},
+                )
+            )
+            .mappings()
+            .all()
+        )
+    files_by_contribution: dict[UUID, list[dict[str, object]]] = {}
+    for file in attached:
+        files_by_contribution.setdefault(file["contribution_id"], []).append(
+            {
+                "id": str(file["id"]),
+                "filename": file["filename"],
+                "size_bytes": file["size_bytes"],
+                "download_url": str(
+                    request.url_for("download_checkpoint_evidence", file_id=file["id"])
+                ),
+            }
+        )
     contributions = await service.store.contributions_for_assignment(assignment_id)
     by_id = {entry.id: entry for entry in contributions}
     return [
@@ -1858,6 +1884,7 @@ async def list_checkpoint_submissions(
             "contribution_id": str(row["contribution_id"]),
             "version": by_id[row["contribution_id"]].version,
             "status": by_id[row["contribution_id"]].status.value,
+            "files": files_by_contribution.get(row["contribution_id"], []),
         }
         for row in rows
         if row["contribution_id"] in by_id
