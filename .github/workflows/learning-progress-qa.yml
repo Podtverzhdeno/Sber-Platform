@@ -60,10 +60,8 @@ jobs:
           python-version: "3.13"
       - run: uv sync --frozen
       - run: uv run ruff check src/impulse/bootcamp/editorial_learning.py tests/bootcamp/test_impulse_study.py
-      - name: Show formatter diff and check source
-        run: |
-          uv run ruff format --diff src/impulse/bootcamp/editorial_learning.py
-          uv run ruff format --check src/impulse/bootcamp/editorial_learning.py tests/bootcamp/test_impulse_study.py
+      - name: Check study API formatting
+        run: uv run ruff format --check src/impulse/bootcamp/editorial_learning.py tests/bootcamp/test_impulse_study.py
       - run: uv run alembic upgrade head
       - run: uv run pytest tests/bootcamp/test_impulse_study.py -q
 
