@@ -152,7 +152,7 @@ describe("task catalog v2", () => {
     expect(document.querySelector(".catalog-v2-match-ring-value")).not.toBeNull();
     expect(screen.getAllByText(catalogItem.title).length).toBeGreaterThan(1);
     expect(screen.getAllByText(/R&D лаборатория · Демо-заказчик/).length).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Длительность не указана/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/9 ч 0 мин/).length).toBeGreaterThan(0);
     expect(screen.getByText(catalogItem.match.source_snapshot_version)).toBeInTheDocument();
     expect(screen.getByText(/Алгоритм: task-match-v1 · расчёт:/)).toBeInTheDocument();
   });
