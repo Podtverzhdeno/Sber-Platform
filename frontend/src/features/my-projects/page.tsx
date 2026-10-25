@@ -355,7 +355,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
     {tab==="rewards" && <ProjectReferenceRewards selected={rewardFocus} onSelected={(id)=>{setRewardFocus(id);}}
       acceptedContributions={project.work.contributions.filter(item=>["accepted","verified","approved"].includes(item.status)).length}
       mentorAssigned={Boolean(project.detail?.mentor)}
-      activeMembers={(project.detail?.team??[]).filter(person=>["active","accepted","joined","confirmed"].includes(person.status)).length}
+      activeMembers={(project.detail?.team??[]).filter(person=>["active","accepted","joined","confirmed","in_progress","staffed"].includes(person.status)).length}
       onContribution={()=>{setTab("contribution");}} onWorkspace={onWorkspace}/>}
     <footer className="mp-detail-footer"><button type="button" className="mp-secondary" onClick={onBack}><ArrowLeft size={15}/> Все проекты</button><button type="button" className="mp-secondary" onClick={()=>{onMessage();}}><MessageCircle size={15}/> Обсуждение</button><button className="mp-secondary" type="button" onClick={()=>{void navigator.clipboard.writeText(window.location.href).then(()=>{setCopied(true);}).catch(()=>{setCopied(false);});}}><Share2 size={15}/>{copied?"Ссылка скопирована":"Поделиться"}</button><button className="mp-primary" type="button" onClick={onWorkspace}>Перейти к задачам <ArrowRight size={16}/></button></footer>
   </div>;
