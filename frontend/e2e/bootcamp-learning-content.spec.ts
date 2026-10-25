@@ -19,7 +19,7 @@ test("all twelve Bootcamp AI courses expose eight substantive lessons and four i
     await reader.getByRole("button", { name: /Перейти к программе/ }).click();
     const outline = reader.locator(".imp-study__program-list button");
     await expect(outline).toHaveCount(8);
-    if (index === 10) continue; // Prerequisite-locked provider course: no unauthorized lesson entry.
+    if (index === 5) continue; // Temporarily unavailable external course: no unauthorized lesson entry.
     await outline.first().click();
     await expect(reader.getByRole("navigation", { name: "Разделы урока" }).getByRole("button")).toHaveCount(4);
     for (const label of ["Теория", "Пример", "Практическое задание", "Самопроверка"]) {
