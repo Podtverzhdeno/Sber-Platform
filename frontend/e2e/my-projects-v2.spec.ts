@@ -57,13 +57,10 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
   await expect(root).toHaveAttribute("data-project-screen","cards");
   await expect(root.locator(".mp-project-tile")).toHaveCount(3);
   await expect(root.locator(".mp-benefit-step")).toHaveCount(7);
-  await expect(root.locator(".mp-project-grid .mp-project-tile")).toHaveCount(3);
-  await expect(root.locator(".mp-project-card-heading small").first()).toContainText("Сбер");
-  await expect(root.locator(".mp-preview")).toHaveCount(0);
-  await expect(root.getByRole("button",{name:"Быстрый просмотр"}).first()).toHaveAttribute("aria-pressed","false");
-  await page.screenshot({path:"test-results/my-projects-v2/01_cards_1672.png",fullPage:true,animations:"disabled"});
-  await root.getByRole("button",{name:"Быстрый просмотр"}).first().click();
+  await expect(root.locator(".mp-card-list .mp-project-tile")).toHaveCount(3);
+  await expect(root.locator(".mp-project-tile__identity small").first()).toContainText("Сбер");
   await expect(root.locator(".mp-preview")).toBeVisible();
+  await page.screenshot({path:"test-results/my-projects-v2/01_cards_1672.png",fullPage:true,animations:"disabled"});
   await root.locator(".mp-project-tile").first().hover();
   await expect(root.locator(".mp-project-tile").first()).toBeVisible();
   await root.getByRole("button",{name:/В избранное/}).first().click();
@@ -133,9 +130,9 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   expect(duration).not.toBe("0s");
   await tile.hover();
   await expect.poll(()=>tile.evaluate(node=>getComputedStyle(node).transform)).not.toBe(initial);
-  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить работу|Открыть проект/}).click();
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
-  await page.getByRole("button",{name:/Продолжить работу/}).click();
+  await page.getByRole("button",{name:/Продолжить|Открыть/}).click();
   await expect(page.locator(".mpv2--workspace")).toBeVisible();
   await page.getByRole("button",{name:"Загрузить новую версию"}).click();
   await expect(page.locator(".mpv2--workspace .ctw-upload")).toBeVisible();
@@ -148,10 +145,10 @@ test("My Projects: reference desktop grid and contextual help",async({page})=>{
   await page.setViewportSize({width:1672,height:941});
   await fixture(page);
   const root=page.locator(".mpv2");
-  const grid=root.locator(".mp-project-grid");
-  await expect(grid.locator(".mp-project-tile")).toHaveCount(3);
-  const columns=await grid.evaluate(element=>getComputedStyle(element).gridTemplateColumns.split(/\s+/).filter(Boolean).length);
-  expect(columns).toBe(4);
+  const layout=root.locator(".mp-card-layout");
+  await expect(layout.locator(".mp-card-list .mp-project-tile")).toHaveCount(3);
+  const columns=await layout.evaluate(element=>getComputedStyle(element).gridTemplateColumns.split(/\s+/).filter(Boolean).length);
+  expect(columns).toBe(2);
   const help=root.getByRole("button",{name:"Как это работает?"});
   await help.click();
   await expect(help).toHaveAttribute("aria-expanded","true");
@@ -164,13 +161,11 @@ test("My Projects: quick preview tabs open correct deep-linked details",async({p
   await page.setViewportSize({width:1672,height:941});
   await fixture(page);
   const root=page.locator(".mpv2");
-  await root.getByRole("button",{name:"Быстрый просмотр"}).first().click();
   await root.locator(".mp-preview__tabs").getByRole("button",{name:"Прогресс"}).click();
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
   await expect(page.getByRole("tab",{name:"Прогресс"})).toHaveAttribute("aria-selected","true");
   await expect(page.getByRole("heading",{name:"Прогресс по этапам"})).toBeVisible();
   await page.getByRole("button",{name:/Мои проекты/}).first().click();
-  await root.getByRole("button",{name:"Быстрый просмотр"}).first().click();
   await root.locator(".mp-preview__tabs").getByRole("button",{name:"Бонусы и выгоды"}).click();
   await expect(page.getByRole("tab",{name:"Бонусы и выгоды"})).toHaveAttribute("aria-selected","true");
   await expect(page.locator(".mp-rewards-full button")).toHaveCount(7);
@@ -190,18 +185,18 @@ test("My Projects: writing to a teammate targets the selected participant",async
 test("My Projects: compact reference cards show real team and no duplicated benefit strip",async({page})=>{
   await page.setViewportSize({width:1672,height:941});
   await fixture(page);
-  const cards=page.locator(".mp-project-grid .mp-project-tile");
+  const cards=page.locator(".mp-card-list .mp-project-tile");
   await expect(cards).toHaveCount(3);
   await expect(cards.first().locator(".mp-team-avatars i")).toHaveCount(2);
   await expect(cards.first().locator(".mp-project-card-rewards")).toHaveCount(0);
   await expect(cards.first()).toHaveClass(/is-selected/);
   const box=await cards.first().boundingBox();
   if(!box) throw new Error("Project card bounding box is unavailable");
-  expect(box.height).toBeLessThanOrEqual(265);
-  await page.getByRole("button",{name:"Быстрый просмотр"}).first().click();
-  await expect(page.locator(".mp-preview")).toBeVisible();
-  await page.getByRole("button",{name:"Скрыть предпросмотр"}).first().click();
-  await expect(page.locator(".mp-preview")).toHaveCount(0);
+  expect(box.height).toBeLessThanOrEqual(175);
+  await cards.nth(1).getByRole("button",{name:/Выбрать проект/}).click();
+  await expect(page.locator(".mp-preview__header h2")).toContainText("MVP чат-ассистента");
+  await cards.first().getByRole("button",{name:/Выбрать проект/}).click();
+  await expect(page.locator(".mp-preview__header h2")).toContainText("Прототип рекомендательной");
 });
 
 test("My Projects: deadline selection filters cards and list consistently",async({page})=>{
