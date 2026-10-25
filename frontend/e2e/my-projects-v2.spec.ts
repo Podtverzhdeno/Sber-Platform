@@ -324,6 +324,12 @@ test("pixel-reference tabs remain interactive at 1548×1016",async({page})=>{
   await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
   const detail=page.locator('[data-project-screen="detail"]');
   await expect(detail.locator(".mp-ref-hero")).toBeVisible();
+  const fullCanvas=await detail.boundingBox();
+  if(!fullCanvas)throw new Error("Project reference canvas is missing");
+  expect(Math.abs(fullCanvas.x-28)).toBeLessThanOrEqual(1);
+  expect(Math.abs(fullCanvas.y-12)).toBeLessThanOrEqual(1);
+  expect(Math.abs(fullCanvas.width-1492)).toBeLessThanOrEqual(2);
+  expect(Math.abs(fullCanvas.height-992)).toBeLessThanOrEqual(2);
   const cases=[
     ["Задачи","01_tasks",".mp-ref-task-list"],
     ["Прогресс","02_progress",".mp-ref-progress-summary"],
