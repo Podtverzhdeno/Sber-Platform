@@ -14,6 +14,9 @@ const statusName: Record<string, string> = {
   completed:"Завершено",accepted:"Принято",verified:"Подтверждено",done:"Завершено",
   closed:"Закрыто",in_progress:"В работе",staffed:"К выполнению",
   revision_requested:"Нужна доработка",submitted:"На проверке",disputed:"На проверке",
+  active:"В команде",accepted_member:"Участие подтверждено",
+  invited:"Приглашён",pending:"Ожидает подтверждения",
+  left:"Вышел из команды",declined:"Приглашение отклонено",
 };
 const statusLabel = (s:string) => statusName[s] ?? (s ? "Статус уточняется" : "Ожидает");
 const dateLabel = (s:string) => {
@@ -125,23 +128,25 @@ export function ProjectReferenceProgress({checkpoints,progress,deadline,decision
 function LayersFallback(){return <FileText size={19}/>;}
 type TeamProps={team:ReferencePerson[];customer:string;mentor:string|null;onMessage:(id?:string)=>void;onContribution:()=>void;};
 export function ProjectReferenceTeam({team,customer,mentor,onMessage,onContribution}:TeamProps){
+ const activeMembers=team.filter(person=>["active","accepted","joined","confirmed"].includes(person.status));
+ const count=activeMembers.length;
  return <div className="mp-ref-columns" role="tabpanel" aria-label="Команда">
-   <div className="mp-ref-stack"><Card><header className="mp-ref-card-head"><h2>Команда проекта</h2><span className="mp-ref-pill">{team.length} участников</span></header>
+   <div className="mp-ref-stack"><Card><header className="mp-ref-card-head"><h2>Команда проекта</h2><span className="mp-ref-pill">{count} участников</span></header>
      <div className="mp-ref-team-list">{team.map(person=><div className="mp-ref-person" key={person.person_id}>
        <span className="mp-ref-avatar">{person.display_name.trim().charAt(0).toUpperCase()}</span><div><strong>{person.display_name}</strong><small>{statusLabel(person.status)}</small></div>
-       <span className="mp-ref-pill">Участник</span>
+       <span className="mp-ref-pill">{["active","accepted","joined","confirmed"].includes(person.status)?"Участник":statusLabel(person.status)}</span>
        <button type="button" aria-label={`Написать ${person.display_name}`} onClick={()=>{onMessage(person.person_id);}}><MessageCircle size={17}/></button>
      </div>)}
      {!team.length&&<p className="mp-ref-empty">Состав команды ещё не опубликован</p>}
      </div></Card>
      <Card><Title icon={Users}>Распределение ответственности</Title>
-       <div className="mp-ref-responsibility"><div><span className="mp-ref-blue-square"><Users size={16}/></span><b>Участники</b><small>{team.length?team.map(p=>p.display_name).join(", "):"Пока нет данных"}</small></div>
+       <div className="mp-ref-responsibility"><div><span className="mp-ref-blue-square"><Users size={16}/></span><b>Участники</b><small>{count?activeMembers.map(p=>p.display_name).join(", "):"Нет подтверждённых участников"}</small></div>
        <div><span className="mp-ref-blue-square"><Award size={16}/></span><b>Ментор</b><small>{mentor||"Не назначен"}</small></div>
        <div><span className="mp-ref-blue-square"><BriefcaseBusiness size={16}/></span><b>Заказчик</b><small>{customer}</small></div></div>
      </Card>
      <Card className="mp-ref-tip"><MessageCircle size={19}/><span><strong>Рабочее обсуждение</strong><small>Вопросы и решения удобнее обсуждать в сообщениях</small></span><button type="button" onClick={()=>{onMessage();}}>Открыть сообщения <ChevronRight size={15}/></button></Card>
    </div>
-   <div className="mp-ref-stack"><Card><Title icon={Users}>Состав команды</Title><div className="mp-ref-team-count"><StageRing value={null} size="small"/><div><strong>{team.length} участников</strong><small>Доступных мест не указано</small><p>Заказчик и ментор — отдельные роли</p></div></div></Card>
+   <div className="mp-ref-stack"><Card><Title icon={Users}>Состав команды</Title><div className="mp-ref-team-count"><StageRing value={null} size="small"/><div><strong>{count} участников</strong><small>{team.length>count?`${String(team.length-count)} ожидают или завершили участие`:"Свободные места не указаны"}</small><p>Заказчик и ментор — отдельные роли</p></div></div></Card>
      <Card><Title icon={Clock3}>Активность команды</Title><p className="mp-ref-muted">Подтверждённые личные результаты и обратная связь доступны в разделе «Мой вклад»</p><button type="button" className="mp-ref-outline" onClick={onContribution}>Посмотреть мой вклад <ArrowRight size={15}/></button></Card>
      <Card><Title icon={ShieldCheck}>Правила взаимодействия</Title><p className="mp-ref-muted">Материалы закрепляйте за задачей, вопросы обсуждайте в чате, результаты передавайте заказчику на проверку</p></Card>
    </div>
