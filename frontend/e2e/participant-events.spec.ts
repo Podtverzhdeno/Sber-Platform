@@ -70,6 +70,7 @@ test("events reference: all six detail states, registration flow and keyboard na
   await nav.getByRole("button", { name: "Зарегистрироваться" }).click();
   const registration = dialog.getByTestId("event-registration");
   await expect(registration).toBeVisible();
+  await page.screenshot({ path: "test-results/event-reference/registration.png", animations: "disabled" });
   await registration.getByPlaceholder("Иван Иванов").fill("Тест Участник");
   await registration.getByPlaceholder("example@mail.ru").fill("participant@example.test");
   await registration.getByRole("button", { name: "Далее" }).click();
@@ -77,7 +78,7 @@ test("events reference: all six detail states, registration flow and keyboard na
   await registration.getByRole("checkbox").check();
   await registration.getByRole("button", { name: "Подготовить заявку" }).click();
   await expect(registration.getByText("Анкета подготовлена")).toBeVisible();
-  await page.screenshot({ path: "test-results/event-reference/registration.png", animations: "disabled" });
+  await page.screenshot({ path: "test-results/event-reference/registration_complete.png", animations: "disabled" });
   await expect(registration.getByRole("link", { name: /Перейти к регистрации/ })).toHaveAttribute("href", event.source_url);
   await registration.getByRole("button", { name: "Закрыть регистрацию" }).click();
   await expect(registration).toHaveCount(0);
