@@ -46,6 +46,35 @@ async function openReferenceVolumeCatalog(page: Page) {
 test("approved cards composition: four KPI cards, detail at right, five planned stages and four conditional benefits", async ({ page }) => {
   await openReferenceVolumeCatalog(page);
   await expect(page.locator(".catalog-v2-kpi")).toHaveCount(4);
+  const filterBounds = await page.evaluate(() => {
+    const rail = document.querySelector<HTMLElement>(".catalog-v2-filter-rail");
+    const all = rail?.querySelector<HTMLElement>(".catalog-v2-all-tasks");
+    const labels = Array.from(rail?.querySelectorAll<HTMLElement>(".catalog-v2-advanced-filters > label") ?? []);
+    const layout = rail?.querySelector<HTMLElement>(".catalog-v2-layout");
+    const range = (node: HTMLElement | null | undefined) => {
+      const box = node?.getBoundingClientRect();
+      return { left: box?.left ?? -1, right: box?.right ?? -1, top: box?.top ?? -1, width: box?.width ?? 0 };
+    };
+    return {
+      rail: range(rail),
+      all: range(all),
+      filters: labels.map(range),
+      layout: range(layout),
+      overflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+    };
+  });
+  expect(filterBounds.filters).toHaveLength(7);
+  expect(filterBounds.overflow).toBe(false);
+  expect(filterBounds.filters[0]?.left).toBeGreaterThan(filterBounds.all.right);
+  expect(filterBounds.filters.at(-1)?.right).toBeLessThan(filterBounds.layout.left);
+  for (const filter of filterBounds.filters) {
+    expect(filter.width).toBeGreaterThan(70);
+    expect(Math.abs(filter.top - filterBounds.all.top)).toBeLessThan(5);
+  }
+  const sortLabel = await page.locator('.catalog-v2-advanced-filters select[aria-label="Сортировка"]').evaluate((el) =>
+    (el as HTMLSelectElement).selectedOptions[0]?.textContent ?? "");
+  expect(sortLabel).toContain("Сортировка");
+
   // The source has a partially filled average-match donut. The stroke must
   // represent the real API average, never an unconditionally complete ring.
   const averageKpi = page.locator(".catalog-v2-kpi").nth(1);
