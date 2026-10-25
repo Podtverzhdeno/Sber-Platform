@@ -1458,6 +1458,21 @@ function ImpulseApp() {
   }
   const openChatNotification = (channelId: string) => {
     setNotificationOpen(false);
+    const channel = unreadChats.find((item) => item.id === channelId);
+    // Read on the click itself: don't require the user to wait for the chat
+    // screen to mount. The endpoint is per-user and idempotent.
+    if (channel?.last_message) {
+      void apiRequest(`/api/v1/me/messaging/channels/${channel.id}/read`, {
+        method: "POST",
+        headers: { "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" },
+        body: JSON.stringify({ message_id: channel.last_message.id }),
+      }).then(() => Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["messaging-channels"] }),
+        queryClient.invalidateQueries({ queryKey: ["notifications"] }),
+      ])).catch(() => {
+        setError("Диалог открыт, но не удалось отметить сообщения прочитанными.");
+      });
+    }
     if (actor) {
       const index = actor.navigation.indexOf("Сообщения");
       if (index >= 0) void navigate(`/workspace/${String(index)}?channel=${encodeURIComponent(channelId)}`);
@@ -1480,6 +1495,12 @@ function ImpulseApp() {
         setError("Не удалось обновить уведомления.");
         return;
       }
+    }
+    // A generic message notification carries the source channel ID.
+    // Route directly to that conversation rather than an unrelated first chat.
+    if (item.kind === "message" && item.entity_type === "messaging_channel" && item.entity_id) {
+      openChatNotification(item.entity_id);
+      return;
     }
     const candidates =
       notificationSections[item.kind] ?? notificationSections.system ?? [];
