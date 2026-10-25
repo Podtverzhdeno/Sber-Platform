@@ -5,6 +5,19 @@ Curriculum content is a proposed learning plan and not verified user evidence.
 
 from __future__ import annotations
 
+from typing import TypedDict, cast
+
+
+class SeedMilestonePayload(TypedDict):
+    theory: list[str]
+    activities: list[str]
+    acceptance: list[str]
+    lab: str
+    deliverable: str
+    estimated_hours: int
+    resources: list[dict[str, str]]
+
+
 from impulse.bootstrap.ai_curriculum_details import AI_CURRICULUM_DETAILS, learning_details
 from impulse.bootstrap.ai_reading_resources import READING_LIBRARY, STAGE_READINGS
 from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
@@ -49,7 +62,7 @@ def test_learning_details_are_persisted_with_existing_milestone_ids() -> None:
     milestones = next(batch.rows for batch in batches if batch.table.name == "milestones")
     assert len(milestones) == 49
     for row in milestones:
-        payload = row["payload"]
+        payload = cast(SeedMilestonePayload, row["payload"])
         assert len(payload["theory"]) == 2
         assert len(payload["activities"]) == 3
         assert len(payload["acceptance"]) == 3
@@ -79,4 +92,4 @@ def test_all_stages_reference_two_verified_official_readings() -> None:
                 assert "example.com" not in item["url"]
 
     rows = next(batch.rows for batch in build_seed_batches() if batch.table.name == "milestones")
-    assert sum(len(row["payload"]["resources"]) for row in rows) == 98
+    assert sum(len(cast(SeedMilestonePayload, row["payload"])["resources"]) for row in rows) == 98
