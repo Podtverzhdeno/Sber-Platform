@@ -17,7 +17,7 @@ export type SubmittedCheckpoint = {
 const finished=new Set(["completed","accepted","done","closed","verified"]);
 const MAX_SIZE=5*1024*1024;
 const allowedExtensions=[".pdf",".png",".jpg",".jpeg",".txt",".zip"];
-const formatSize=(value:number)=>value>=1024*1024?`${(value/1024/1024).toFixed(1)} МБ`:`${Math.ceil(value/1024)} КБ`;
+const formatSize=(value:number)=>value>=1024*1024?`${(value/1024/1024).toFixed(1)} МБ`:`${String(Math.ceil(value/1024))} КБ`;
 const statusLabels:Record<string,string>={
   accepted:"Принято",completed:"Подтверждено",done:"Завершено",verified:"Подтверждено",
   submitted:"На проверке",revision_requested:"Требуется доработка",
