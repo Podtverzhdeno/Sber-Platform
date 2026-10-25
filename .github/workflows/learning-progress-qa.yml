@@ -1,6 +1,20 @@
 name: Cross-section learning integration QA
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "src/impulse/bootcamp/editorial_learning.py"
+      - "tests/bootcamp/test_impulse_study.py"
+      - "frontend/src/features/learning-progress*"
+      - "frontend/src/features/bootcamp/**"
+      - "frontend/src/features/analytics*"
+      - "frontend/src/features/trajectory-v2/**"
+      - "frontend/src/features/portfolio-v2*"
+      - "frontend/src/api/**"
+      - "frontend/e2e/bootcamp-immersive.spec.ts"
+      - "frontend/e2e/bootcamp-reference-fixtures.ts"
+      - ".github/workflows/learning-progress-qa.yml"
   pull_request:
     paths:
       - "src/impulse/bootcamp/editorial_learning.py"
