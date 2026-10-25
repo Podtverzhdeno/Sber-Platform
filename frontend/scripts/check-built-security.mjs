@@ -76,7 +76,7 @@ const approvedLearningUrls = new Set([
   "https://genai.owasp.org/glossary/prompt-injection/",
   "https://airc.nist.gov/airmf-resources/playbook/",
 ]);
-for (const match of bundle.matchAll(/https?:\/\/[A-Za-z0-9._~:/?#@!for (const match of bundle.matchAll(/https?:\/\/[A-Za-z0-9._~:/?#@!$&()+,;=%-]{3,}/gu)) {()+,;=%-]{3,}/gu)) {
+for (const match of bundle.matchAll(/https?:\/\/[A-Za-z0-9._~:/?#@!$&()+,;=%-]{3,}/gu)) {
   if (!approvedLearningUrls.has(match[0]) && !urlAllowlist.some((prefix) => match[0].startsWith(prefix))) {
     failures.push(`URL outside the allowlist leaked into the bundle: ${match[0]}`);
   }
