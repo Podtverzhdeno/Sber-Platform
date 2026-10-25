@@ -1,9 +1,8 @@
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
-import { HomeNavigationIcon } from "./features/participant-home-v2/nav-icon";
 import { MessagesNavigationIcon } from "./features/messenger/navigation-icons";
-import { Bell, Gift, Search } from "lucide-react";
+import { Bell, Search } from "lucide-react";
 import { BootcampV2Route } from "./features/bootcamp/route-v2";
 import { TrajectoryV2 } from "./features/trajectory-v2/page";
 import { SourceTrajectoryPage } from "./features/trajectory-v2/source-reference/source-route";
@@ -421,7 +420,6 @@ function Workspace({
   const [messagesSidebarCollapsed, setMessagesSidebarCollapsed] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const isParticipantHome = actor.active_role === "participant" && currentSection === "Главная" && searchParams.get("v2") !== "0";
   const isMessageRoute = currentSection === "Сообщения";
   return (
     <section
@@ -473,7 +471,7 @@ function Workspace({
               }}
             >
               <span className="nav-icon" aria-hidden="true">
-                {isMessageRoute ? <MessagesNavigationIcon section={item} /> : isParticipantHome ? <HomeNavigationIcon section={item} /> : navigationIcons[item] ?? "•"}
+                {isMessageRoute ? <MessagesNavigationIcon section={item} /> : navigationIcons[item] ?? "•"}
               </span>
               <span>{item}</span>
             </NavLink>
@@ -488,21 +486,6 @@ function Workspace({
             onClick={() => { setMessagesSidebarCollapsed((value) => !value); }}
           >
             <span aria-hidden="true">{messagesSidebarCollapsed ? "›" : "‹"}</span>
-          </button>
-        ) : isParticipantHome ? (
-          <button
-            type="button"
-            className="sidebar-message sidebar-nudge"
-            onClick={() => {
-              const taskIndex = navigation.indexOf("Задачи");
-              const trajectoryIndex = navigation.findIndex((item) => item === "Моя траектория" || item === "Мой путь");
-              const destination = taskIndex >= 0 ? taskIndex : trajectoryIndex;
-              if (destination >= 0) void navigate(`/workspace/${String(destination)}`);
-            }}
-            disabled={!navigation.some((item) => item === "Задачи" || item === "Моя траектория" || item === "Мой путь")}
-          >
-            <span className="sidebar-nudge-title"><Gift size={29} /><strong>Твой прогресс открывает новые возможности</strong></span>
-            <span>Выполняй задачи, развивай навыки, получай новые возможности в Impulse.</span>
           </button>
         ) : (
           <div className="sidebar-message">
