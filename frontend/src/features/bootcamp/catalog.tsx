@@ -207,7 +207,6 @@ export function CatalogFilters({
   onReset: () => void;
 }) {
   const relevanceFilter = searchParams.get("relevance") ?? "all";
-  const trackOptions = [...new Set(catalog.data.flatMap((card) => card.track_keys))];
   const trackFilter = searchParams.get("track") ?? (trackOptions[0] ?? "all");
   const view = searchParams.get("view") ?? "card";
   const category = searchParams.get("category") ?? "role";
