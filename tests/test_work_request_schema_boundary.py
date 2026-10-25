@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import pytest
 from pydantic import ValidationError
 
 from impulse.api.v1 import work, work_requests
@@ -61,11 +62,11 @@ def test_catalog_normalization_and_nested_stage_contract() -> None:
 
 
 def test_existing_validation_bounds_are_preserved() -> None:
-    with __import__("pytest").raises(ValidationError):
+    with pytest.raises(ValidationError):
         work_requests.CatalogStageRequest(
             key="a", title="b", summary="c", estimated_minutes=0
         )
-    with __import__("pytest").raises(ValidationError):
+    with pytest.raises(ValidationError):
         work_requests.CompensationRequest(
             paid=True,
             currency="rub",
