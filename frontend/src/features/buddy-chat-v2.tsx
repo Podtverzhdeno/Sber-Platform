@@ -6,7 +6,7 @@ import {
   ArrowRight, BarChart3, BookOpen, Bot, Check, CheckCircle2, ChevronRight,
   ClipboardList, Code2, Download, FileDown, FileText, FolderKanban,
   GraduationCap, Info, Lightbulb, MessageCircle, Paperclip, Plus, Send,
-  ShieldCheck, Sparkles, Trash2, WandSparkles,
+  ShieldCheck, Sparkles, Trash2, WandSparkles, X,
 } from "lucide-react";
 
 import { apiRequest, type RuntimeApiPath } from "../api/client";
@@ -97,7 +97,12 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [showMore, setShowMore] = useState(false);
+  const [heroDismissed, setHeroDismissed] = useState(() => {
+    try { return sessionStorage.getItem("impulse-buddy-hero-dismissed:" + profile.person_id) === "1"; }
+    catch { return false; }
+  });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLInputElement>(null);
   const thread = useQuery({
     queryKey: ["buddy-thread", profile.person_id, activeId],
     queryFn: () => apiRequest<Thread>(threadPath(activeId ?? "")),
@@ -140,10 +145,34 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
     if (index < 0) { setNotice("Раздел «" + name + "» не доступен для этой роли."); return; }
     void navigate("/workspace/" + String(index) + search);
   };
-  const newChat = () => {
-    setActiveId(null);
-    setDraft("");
+  const dismissHero = () => {
+    setHeroDismissed(true);
+    try { sessionStorage.setItem("impulse-buddy-hero-dismissed:" + profile.person_id, "1"); }
+    catch { /* The banner remains closed for this component even if storage is blocked. */ }
+  };
+  const newChat = async () => {
+    if (busy) return;
+    setBusy(true);
     setNotice("");
+    try {
+      // Create the server-authoritative thread now, not only after the first message.
+      const created = await apiRequest<Thread>("/api/v1/agents/buddy/threads", {
+        method: "POST", headers: csrf(),
+      });
+      if (!created.id || created.status !== "active") throw new Error("Invalid new Buddy thread");
+      queryClient.setQueryData(["buddy-thread", profile.person_id, created.id], created);
+      saveIndex([
+        { id: created.id, title: "Новый диалог", updated: new Date().toISOString() },
+        ...dialogues.filter(item => item.id !== created.id),
+      ]);
+      setActiveId(created.id);
+      setDraft("");
+      composerRef.current?.focus();
+    } catch {
+      setNotice("Не удалось создать новый диалог. Повторите попытку.");
+    } finally {
+      setBusy(false);
+    }
   };
   const send = async (event: SyntheticEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -200,7 +229,7 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
         <div className="buddy2-bot-logo"><Bot size={24}/></div>
         <div><h2>AI-Buddy <span>Бета</span></h2><p>Твой помощник в Impulse</p></div>
       </div>
-      <button type="button" className="buddy2-new" onClick={newChat}><Plus size={19}/> Новый диалог</button>
+      <button type="button" className="buddy2-new" disabled={busy} onClick={() => { void newChat(); }}><Plus size={19}/> Новый диалог</button>
       <div className="buddy2-history-head"><span>Недавние диалоги</span><small>{dialogues.length}</small></div>
       <div className="buddy2-dialogs">
         {dialogues.slice(0, showMore ? 30 : 7).map(item =>
@@ -221,7 +250,8 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
       </div>
     </aside>
     <div className="buddy2-main">
-      <header className="buddy2-hero">
+      {!heroDismissed && <header className="buddy2-hero">
+        <button type="button" className="buddy2-hero-close" aria-label="Закрыть баннер AI-Buddy" title="Закрыть баннер" onClick={dismissHero}><X size={16}/></button>
         <div className="buddy2-robot" aria-hidden="true"><div className="buddy2-antenna"/><div className="buddy2-robot-face"><i/><i/></div><div className="buddy2-robot-body"><Sparkles size={24}/></div></div>
         <div className="buddy2-hero-content">
           <span className="buddy2-overline">ПЕРСОНАЛЬНЫЙ ПОМОЩНИК · IMPULSE</span>
@@ -229,9 +259,13 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
           <p>Помогаю разбираться в задачах, находить курсы и строить траекторию развития. Все ссылки ведут к материалам платформы.</p>
           <div className="buddy2-prompt-row">{promptActions.map(action=>{const Icon=action.icon;return <button type="button" key={action.title} onClick={()=>{quickSend(action.text);}}><Icon size={15}/>{action.title}</button>;})}</div>
         </div>
-      </header>
+      </header>}
       <div className="buddy2-scroll" ref={scrollRef}>
-        {!hasChat ? <div className="buddy2-demo" aria-label="Пример взаимодействия">
+        {activeId && !hasChat ? <div className="buddy2-empty-chat" role="status">
+          <span className="buddy2-empty-chat-icon"><MessageCircle size={24}/></span>
+          <strong>Новый диалог</strong>
+          <p>Начните разговор: напишите вопрос или выберите подсказку выше. Сообщения этого диалога сохраняются отдельно.</p>
+        </div> : !hasChat ? <div className="buddy2-demo" aria-label="Пример взаимодействия">
           <div className="buddy2-demo-tag"><WandSparkles size={14}/> Пример возможностей · не реальный ответ модели</div>
           <div className="buddy2-example-user"><span>Как научиться интеграции с API и что изучать дальше?</span><div className="buddy2-avatar-user">Вы</div></div>
           <div className="buddy2-message buddy2-message-ai"><span className="buddy2-avatar"><Bot size={20}/></span><div className="buddy2-bubble">
@@ -272,7 +306,7 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
         {thread.isPending&&activeId&&<p className="buddy2-notice">Загружаем сохранённую переписку…</p>}
         <form onSubmit={(event)=>{void send(event);}} className="buddy2-composer">
           <button type="button" className="buddy2-attach" title="Скачать шаблон чек-листа" aria-label="Скачать шаблон" onClick={()=>{downloadChecklist(selected);}}><Paperclip size={20}/></button>
-          <input value={draft} onChange={event=>{setDraft(event.target.value);}} maxLength={8000} aria-label="Сообщение AI-Buddy" placeholder="Напишите сообщение или задайте вопрос…" />
+          <input ref={composerRef} value={draft} onChange={event=>{setDraft(event.target.value);}} maxLength={8000} aria-label="Сообщение AI-Buddy" placeholder="Напишите сообщение или задайте вопрос…" />
           <button type="submit" className="buddy2-send" disabled={!canSend} aria-label="Отправить сообщение">{busy?"…":<Send size={19}/>}</button>
         </form>
         <div className="buddy2-composer-note"><span><Check size={12}/> Переписка сохраняется</span><span>Подборки формируются из материалов платформы; генерация ответов ещё не активна</span></div>
