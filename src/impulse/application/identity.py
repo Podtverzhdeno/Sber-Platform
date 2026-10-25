@@ -299,7 +299,7 @@ class DemoAuthService:
         digest = authenticated.session.token_digest
         return hmac.new(
             self._csrf_secret,
-            f"impulse-csrf-v2:{digest}".encode("utf-8"),
+            f"impulse-csrf-v2:{digest}".encode(),
             hashlib.sha256,
         ).hexdigest()
 
