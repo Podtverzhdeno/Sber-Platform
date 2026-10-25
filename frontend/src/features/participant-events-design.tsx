@@ -110,6 +110,51 @@ export function EventsCard({
   </article>;
 }
 
+/** Compact visual tile for the full-width, filter-first event catalogue. */
+export function EventsTile({
+  item, index, focus, saved, evidenceState, verificationExplanation,
+  canReportResult, onDetails, onSave, onReportResult,
+}: {
+  item: EventViewItem; index: number; focus: string[]; saved: boolean;
+  evidenceState?: "provisional" | "verified" | "invalid";
+  verificationExplanation?: string;
+  canReportResult: boolean; onDetails: () => void; onSave: () => void; onReportResult: () => void;
+}) {
+  const kind = item.event_type.toLowerCase();
+  const typeLabel = ({
+    hackathon: "Хакатон", educational_program: "Образовательная программа",
+    grant: "Грант", competition: "Конкурс", workshop: "Практикум",
+  } as Record<string, string>)[kind] ?? item.event_type;
+  const sber = isSber(item.organizer);
+  const recommended = matchPercent(item, focus);
+  const timestamp = item.deadline_at ? new Date(item.deadline_at).getTime() : NaN;
+  const imminent = Number.isFinite(timestamp) && timestamp >= Date.now() && timestamp - Date.now() <= 14*24*60*60*1000;
+  const blurb = item.recommendation_reason || item.conditions;
+  return <article className={"ev-event-card ev-v3-tile ev-v3-tile--"+String(index%6)} data-testid="event-reference-card" data-event-key={item.key}>
+    <div className="ev-v3-tile-art" aria-hidden="true"><span className="ev-v3-art-glow"/><span className="ev-v3-art-object"/><span className="ev-v3-art-object ev-v3-art-object--small"/></div>
+    <div className="ev-v3-tile-head">
+      <div className="ev-v3-tile-labels">
+        <span className="ev-v3-tag ev-v3-tag--type">{typeLabel}</span>
+        {sber&&<span className="ev-v3-tag ev-v3-tag--sber">От Сбера</span>}
+        {!sber&&recommended!==null&&recommended>0&&<span className="ev-v3-tag ev-v3-tag--for-you">Для вас</span>}
+        {imminent&&<span className="ev-v3-tag ev-v3-tag--deadline">Скоро дедлайн</span>}
+      </div>
+      <button type="button" className={"ev-v3-save"+(saved?" is-saved":"")} onClick={onSave} aria-label={saved?"Убрать из избранного":"В избранное"} aria-pressed={saved}><Bookmark size={21} fill={saved?"currentColor":"none"}/></button>
+    </div>
+    <div className="ev-v3-tile-body">
+      <h3>{item.title}</h3>
+      <p>{blurb}</p>
+      {evidenceState&&<span className="ev-v3-evidence" title={verificationExplanation??"Статус проверки"}>{evidenceState==="verified"?"Результат подтверждён":evidenceState==="provisional"?"На проверке":"Подтверждение недоступно"}</span>}
+    </div>
+    <div className="ev-v3-tile-foot">
+      <span><CalendarDays size={15}/>{item.deadline_at?"До "+formatDate(item.deadline_at):"Даты уточняются"}</span>
+      <span className="ev-v3-tile-venue"><MapPin size={14}/>{item.organizer}</span>
+      {canReportResult&&<button className="ev-v3-report" type="button" onClick={onReportResult}>Подтвердить результат</button>}
+      <button type="button" className="ev-v3-tile-open" onClick={onDetails} aria-label="Подробнее" title="Подробнее"><ArrowRight size={20}/></button>
+    </div>
+  </article>;
+}
+
 function InformationPanel({ title, subtitle, children }: { title: string; subtitle?: string; children: ReactNode }) {
   return <section className="ev-panel"><h3>{title}</h3>{subtitle&&<p className="ev-subtitle">{subtitle}</p>}{children}</section>;
 }
