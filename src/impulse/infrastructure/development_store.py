@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
 from sqlalchemy import select
@@ -42,6 +42,23 @@ from impulse.infrastructure.models.development import (
     tracks,
     weekly_rhythm_versions,
 )
+
+
+def _valid_reading_resources(raw: object) -> tuple[dict[str, str], ...]:
+    """Validate JSON citations at the persistence trust boundary."""
+    if not isinstance(raw, list):
+        return ()
+    items = cast(list[object], raw)
+    result: list[dict[str, str]] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        entry = cast(dict[str, object], item)
+        title = entry.get("title")
+        url = entry.get("url")
+        if isinstance(title, str) and isinstance(url, str) and url.startswith("https://"):
+            result.append({"title": title, "url": url})
+    return tuple(result)
 
 
 class SqlDevelopmentStore(DevelopmentStore):
@@ -184,14 +201,7 @@ class SqlDevelopmentStore(DevelopmentStore):
                         if isinstance(row["payload"].get("estimated_hours"), int)
                         else None
                     ),
-                    resources=tuple(
-                        {"title": item["title"], "url": item["url"]}
-                        for item in row["payload"].get("resources", [])
-                        if isinstance(item, dict)
-                        and isinstance(item.get("title"), str)
-                        and isinstance(item.get("url"), str)
-                        and item["url"].startswith("https://")
-                    ),
+                    resources=_valid_reading_resources(row["payload"].get("resources")),
                 )
                 for row in rows
             )
