@@ -57,8 +57,9 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
       await tab.click();
       await expect(tab).toHaveAttribute("aria-current", "page");
       const tabsY = await reader.locator(".imp-study__tabs").evaluate(el => el.getBoundingClientRect().top);
-      const titleY = await reader.locator(".imp-study__lesson-heading").evaluate(el => el.getBoundingClientRect().top);
-      expect(tabsY).toBeLessThan(titleY);
+      const nextSection = state === "practice" ? reader.locator(".imp-study__content") : reader.locator(".imp-study__lesson-heading");
+      const sectionY = await nextSection.evaluate(el => el.getBoundingClientRect().top);
+      expect(tabsY).toBeLessThan(sectionY);
       await page.screenshot({ path: "test-results/imp-03-" + state + "-" + String(viewport.width) + ".png", animations: "disabled" });
     }
     if (viewport.width >= 1280) {
