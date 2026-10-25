@@ -1,0 +1,20 @@
+# Claim CI-STRICT-E2E-ESLINT-20261026
+- session_id: gpt6-20261026-e2e-eslint-small-fixes
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 9b16fcefd78e0e6ef73fea37c4dadc3319203192
+- depends_on: []
+- write_scope:
+  - frontend/e2e/bootcamp-layout-alignment.spec.ts (number string labels)
+  - frontend/e2e/bootcamp-lesson-scroll.spec.ts (number string labels)
+  - frontend/e2e/portfolio-evidence-chart.spec.ts (number string labels)
+  - frontend/e2e/production-trajectory-audit.spec.ts (type guards only)
+  - frontend/src/features/streak-celebration.tsx (matchMedia runtime guard only)
+  - .github/workflows/strict-e2e-eslint-qa.yml
+  - .agents/coordination/claims/CI-STRICT-E2E-ESLINT-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - scoped strict ESLint; targeted TypeScript check; potential existing feature unit test
+- progress: Resolve TypeScript strict lint errors uncovered in full CI without excluding files or weakening lint configuration; preserve scenario behavior.
+- blockers: Independent review and complete integration CI.
