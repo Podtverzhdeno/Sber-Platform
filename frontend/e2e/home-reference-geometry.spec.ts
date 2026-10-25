@@ -211,6 +211,44 @@ test("canonical desktop sidebar stays visually identical across Home and Traject
 });
 
 
+test("home actions keep stable backgrounds and smoothly animate on hover and press", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1057 });
+  await openReferenceHome(page);
+
+  const primary = page.locator(".home-v2-hero-actions .home-v2-primary");
+  const grade = page.locator(".home-v2-next-grade");
+  const primaryGradient = await primary.evaluate((el) => getComputedStyle(el).backgroundImage);
+  const gradeGradient = await grade.evaluate((el) => getComputedStyle(el).backgroundImage);
+  expect(primaryGradient).toContain("linear-gradient");
+  expect(gradeGradient).toContain("linear-gradient");
+
+  const transitions = await primary.evaluate((el) => getComputedStyle(el).transitionProperty);
+  expect(transitions).toContain("filter");
+  expect(transitions).toContain("transform");
+  expect(transitions).not.toContain("background-image");
+
+  await primary.hover();
+  await expect(primary).toHaveCSS("filter", "brightness(1.13)");
+  expect(await primary.evaluate((el) => getComputedStyle(el).backgroundImage)).toBe(primaryGradient);
+
+  await page.mouse.down();
+  expect(await primary.evaluate((el) => getComputedStyle(el).backgroundImage)).toBe(primaryGradient);
+  await page.mouse.move(1, 1);
+  await page.mouse.up();
+
+  await grade.hover();
+  await expect(grade).toHaveCSS("filter", "brightness(1.1)");
+  expect(await grade.evaluate((el) => getComputedStyle(el).backgroundImage)).toBe(gradeGradient);
+  await grade.click();
+  await expect(page.getByRole("dialog", { name: "Требования следующего грейда" })).toBeVisible();
+  await page.keyboard.press("Escape");
+
+  const day = page.locator(".home-v2-week-days .home-v2-day").nth(1);
+  await day.click();
+  await expect(day).toHaveAttribute("aria-pressed", "true");
+  expect(await day.evaluate((el) => getComputedStyle(el).transitionProperty)).toContain("background-color");
+});
+
 test("grade drawer matches the source 456px geometry and restores focus at desktop", async ({ page }) => {
   await page.setViewportSize({ width: 1448, height: 1057 });
   await openReferenceHome(page);
