@@ -24,7 +24,7 @@ for (const viewport of viewports) {
     }
     await page.getByRole("link", { name: "Bootcamp" }).click();
 
-    const shell = page.locator('[data-reference="BC-R01"]');
+    const shell = page.locator(".bc-reference");
     await expect(shell.getByRole("heading", { name: "Bootcamp", exact: true })).toBeVisible();
     await expect(shell.getByRole("heading", { name: "Каталог курсов", exact: true })).toHaveCount(1);
     const cards = shell.locator(".bc-ref-course-card");
@@ -204,7 +204,7 @@ test("Bootcamp role choice and direction are independent; reset clears hidden co
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
 
-  const shell = page.locator('[data-reference="BC-R01"]');
+  const shell = page.locator(".bc-reference");
   const categories = shell.getByRole("group", { name: "Категории курсов" });
   const direction = shell.getByLabel("Направление", { exact: true });
   const search = shell.getByRole("searchbox", { name: "Поиск по курсам" });
@@ -245,7 +245,7 @@ test("Bootcamp desktop reference hero has correct stagger, overlay, and grid den
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
-  const shell = page.locator('[data-reference="BC-R01"]');
+  const shell = page.locator(".bc-reference");
   const tabs = await shell.locator(".bc-ref-role-tabs").boundingBox();
   const hero = await shell.locator(".bc-ref-hero-grid").boundingBox();
   const summary = await shell.locator(".bc-ref-role-summary").boundingBox();
@@ -271,7 +271,7 @@ test("Bootcamp required-course popup follows reference and never invents progres
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
-  const shell = page.locator('[data-reference="BC-R01"]');
+  const shell = page.locator(".bc-reference");
 
   await shell.getByRole("button", { name: /Посмотреть курсы/ }).click();
   const dialog = page.getByRole("dialog", { name: "Требования к обучению" });
@@ -295,7 +295,7 @@ test("Bootcamp recommendation popup opens real course details", async ({ page })
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
-  const shell = page.locator('[data-reference="BC-R01"]');
+  const shell = page.locator(".bc-reference");
   const reason = shell.locator(".bc-ref-reason").first();
   await expect(reason).toBeVisible();
   await reason.click();
@@ -312,7 +312,7 @@ test("Bootcamp role catalog starts as 4+1 cards and expands without losing filte
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
-  const shell = page.locator('[data-reference="BC-R01"]');
+  const shell = page.locator(".bc-reference");
   const cards = shell.locator(".bc-ref-course-card");
   const initial = await cards.count();
   expect(initial).toBeGreaterThan(0);
