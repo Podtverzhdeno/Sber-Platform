@@ -296,8 +296,8 @@ async def review_impulse_practice(
             (
                 await session.execute(
                     text(
-                        "UPDATE impulse_practical_submissions SET status = :decision, "
-                        "practical_certificate_id = CASE WHEN :decision = 'approved' "
+                        "UPDATE impulse_practical_submissions SET status = CAST(:decision AS varchar(32)), "
+                        "practical_certificate_id = CASE WHEN CAST(:decision AS varchar(32)) = 'approved' "
                         "THEN COALESCE(practical_certificate_id, :new_certificate) ELSE NULL END, "
                         "reviewed_by = :reviewer, reviewed_at = now() "
                         "WHERE person_id = :person AND course_key = :course "
