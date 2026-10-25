@@ -470,6 +470,14 @@ test("community drawer shows complete members, opens profile and real personal c
   await openMessages(page);
   await page.getByRole("button",{name:/Перейти в Маяки/}).click();
   const detail=page.getByRole("complementary",{name:"Контекст диалога"});
+  const shell = await page.locator(".messenger-shell").boundingBox();
+  const drawer = await detail.boundingBox();
+  expect(shell).not.toBeNull();
+  expect(drawer).not.toBeNull();
+  if (shell && drawer) {
+    // No unused gutter: the community details must occupy the entire third grid track.
+    expect(Math.abs((drawer.x + drawer.width) - (shell.x + shell.width))).toBeLessThanOrEqual(2);
+  }
   await expect(detail.getByRole("tab",{name:"Участники"})).toHaveAttribute("aria-selected","true");
   await expect(detail.locator('[data-testid="context-participant"]')).toHaveCount(248);
   await detail.getByRole("searchbox",{name:"Найти участника"}).fill("Елена Наставник");
@@ -495,6 +503,7 @@ test("community tabs list actual attachments, links and can add directory contac
   await detail.getByRole("button",{name:"Добавить участников"}).click();
   const modal=page.getByRole("dialog",{name:"Добавить участников"});
   await expect(modal).toBeVisible();
+  await expect(modal.getByRole("button",{name:"Закрыть"})).toBeFocused();
   await modal.getByRole("checkbox",{name:/Роман Заказчик/}).check();
   await modal.getByRole("button",{name:"Добавить (1)"}).click();
   await expect(modal).toHaveCount(0);
