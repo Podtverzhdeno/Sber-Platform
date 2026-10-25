@@ -11,6 +11,7 @@ import { learningProgramFor } from "./programs";
 import { knowledgeCheckFor } from "./knowledge-checks";
 import { LessonFrame } from "./LessonFrame";
 import { StarterCaseCard } from "./StarterCaseCard";
+import { blueprintFor } from "./course-blueprints";
 import { ManualCompanionCard } from "./ManualCompanionCard";
 import "./learning-content.scss";
 import { authorizationMethods, authorizationWalkthrough, authorizationRequirements, authorizationCriteria, authorizationExample } from "./security-lesson-reference";
@@ -39,6 +40,7 @@ const studyPath = (key: string) => ("/api/v1/me/bootcamp/impulse-study/" + encod
 
 export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendation, accessible, initialView = "overview", onReason }: Props) {
   const program = learningProgramFor(courseKey);
+  const blueprint = blueprintFor(courseKey);
   const client = useQueryClient();
   const [current, setCurrent] = useState(0);
   const resumedCourse = useRef<string | null>(null);
@@ -367,6 +369,15 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           </section>}</LessonFrame>
           <LessonFrame key={courseKey + "-" + unit.id + "-practice"} unitId={courseKey + "-" + unit.id} kind="practice">{() => <section className="imp-study__content" aria-label="Практическое задание"><h3>Практическое задание</h3><div className="imp-study__compact-course"><BookOpen size={18}/><strong>{courseTitle}</strong><span>{unit.title}</span></div><p>{authReference ? "Реализуйте защищённый API на FastAPI: проверяйте JWT и возвращайте профиль текущего пользователя только по доверенному токену. Добавьте негативные проверки и запрет доступа к чужим объектам." : unit.practice}</p>
             <StarterCaseCard courseKey={courseKey} unitTitle={unit.title}/>
+            {current === total - 1 && blueprint && <section className="imp-study__capstone" aria-labelledby="imp-study-capstone-heading">
+              <div className="imp-study__capstone-header"><span>Итоговая практика · реальный формат задачи</span><h4 id="imp-study-capstone-heading">{blueprint.capstone.title}</h4><p>{blueprint.capstone.scenario}</p></div>
+              <div className="imp-study__capstone-grid">
+                <div><h5>План реализации</h5><ol>{blueprint.capstone.steps.map(step=><li key={step}>{step}</li>)}</ol></div>
+                <div><h5>Что приложить</h5><ul>{blueprint.capstone.artifacts.map(item=><li key={item}>{item}</li>)}</ul><h5>Как проверить результат</h5><ul>{blueprint.capstone.validation.map(item=><li key={item}>{item}</li>)}</ul></div>
+              </div>
+              <div className="imp-study__capstone-rubric"><h5>Рубрика самостоятельной оценки · 100 баллов</h5><div>{blueprint.capstone.rubric.map(item=><article key={item.criterion}><strong>{item.criterion}</strong><span>{item.weight}%</span><p>{item.pass}</p></article>)}</div></div>
+              <p className="imp-study__disclaimer">Баллы здесь — ориентир для самопроверки, а не официальная оценка. Подтверждение навыков требует отдельной проверки отправленного результата.</p>
+            </section>}
             <div className="imp-study__practice-columns"><div><h4><Target size={18}/> Требования</h4>
               {authReference ? authorizationRequirements.map((item,index)=><div className="imp-study__requirement" key={item.title}><span>{index+1}</span><div><strong>{item.title}</strong><p>{item.detail}</p></div></div>)
               : unit.checklist.map((item,index)=><div className="imp-study__requirement" key={item}><span>{index+1}</span>{item}</div>)}</div>
