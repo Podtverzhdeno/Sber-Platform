@@ -2,7 +2,7 @@
 
 - task_id: ROLE-PICKER-NO-BRAND-20261026
 - session_id: gpt6-20261026-role-picker-no-brand
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 639c98e6106f7223f6438cd9308781d9b9054cad
@@ -17,5 +17,8 @@
   - npm test -- role-selection-header.test.tsx
   - npm run typecheck
   - npm run lint
-- progress: Claim created on isolated branch before product edits.
+- progress: Conditional header visibility implemented; regression test added; PR #83 created for independent review.
 - blockers: GitHub-only access: local git status and test runner unavailable; CI verification required before integration.
+- changed_files: frontend/src/App.tsx; frontend/src/role-selection-header.test.tsx
+- verification_evidence: static GitHub diff/readback only; CI/test results not yet confirmed
+- independent_review: required before DONE
