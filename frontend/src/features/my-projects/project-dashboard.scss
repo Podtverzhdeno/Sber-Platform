@@ -169,3 +169,19 @@
   .workspace:has(.mpd-page)>.sidebar{display:none}
   .workspace:has(.mpd-page)>.workspace-content{padding:20px clamp(26px,4.5vw,76px) 44px}
 }
+
+/* Each About fact gets its own readable two-line block; prevent overlap
+   between long result descriptions and short metadata labels. */
+.mpd-page .mpd-about-facts span{
+  grid-template-columns:18px minmax(0,1fr);
+  grid-template-rows:auto auto;
+  gap:2px 9px;
+}
+.mpd-page .mpd-about-facts span svg{grid-column:1;grid-row:1/span 2}
+.mpd-page .mpd-about-facts span b{grid-column:2;grid-row:1}
+.mpd-page .mpd-about-facts span small{
+  grid-column:2;grid-row:2;
+  min-width:0;line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;overflow-wrap:anywhere;
+}
