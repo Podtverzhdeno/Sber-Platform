@@ -22,9 +22,9 @@ const initialCalls = () => {
   vi.mocked(apiRequest).mockImplementation(async path => {
     await Promise.resolve();
     if (path === "/api/v1/development/courses") return courses;
-    if (path === "/api/v1/me/journey/snapshot") return journeyResult;
+    if (String(path) === "/api/v1/me/journey/snapshot") return journeyResult;
     if (path === "/api/v1/me/talent-passport") return passportResult;
-    if (path === "/api/v1/me/rating/standings") return standingResult;
+    if (String(path) === "/api/v1/me/rating/standings") return standingResult;
     if (path === "/api/v1/me/analytics/journey") return { next_action: "Завершить учебную практику", freshness: "current" };
     if (path === "/api/v1/agents/buddy/suggestion") return { suggestion: null };
     if (path === "/api/v1/agents/buddy/threads") return thread;
