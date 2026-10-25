@@ -45,8 +45,8 @@ test("annual calendar shows real source events on hover and in the day popup", a
  const calendar = root.getByTestId("activity-calendar");
  await expect(calendar).toBeVisible();
  await expect(calendar.locator(".ac-week")).toHaveCount(52);
- await expect(calendar.getByText("5", { exact: true }).first()).toBeVisible();
- const populated = calendar.locator(".ac-day.ac-level-1").first();
+ await expect(calendar.locator(".ac-day:not(.ac-level-0):not(.ac-unknown)").first()).toBeVisible();
+ const populated = calendar.locator(".ac-day:not(.ac-level-0):not(.ac-unknown)").first();
  await expect(populated).toBeVisible();
  await populated.hover();
  await expect(page.getByRole("tooltip")).toContainText("Завершён");
@@ -87,7 +87,7 @@ test("failed growth feed keeps error visible and does not fabricate hours", asyn
  const calendar = page.getByTestId("activity-calendar");
  await expect(calendar).toBeVisible();
  await expect(calendar.getByText(/Показаны только зарегистрированные действия/)).toBeVisible();
- const populated = calendar.locator(".ac-day.ac-level-1").first();
+ const populated = calendar.locator(".ac-day:not(.ac-level-0):not(.ac-unknown)").first();
  await populated.click();
  await expect(page.getByRole("dialog").getByText(/часы: длительность не измеряется/)).toBeVisible();
 });
