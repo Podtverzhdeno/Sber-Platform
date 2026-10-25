@@ -1743,3 +1743,35 @@ def test_acceptance_flow_asks_artifact_allowlist_and_avoids_automatic_rewards() 
         assert metrics["customer_time_to_result_hours"]["numerator"] == 1
         assert metrics["customer_time_to_result_hours"]["value"] is not None
         assert metrics["customer_time_to_result_hours"]["suppressed"] is False
+
+
+def test_customer_activity_uses_only_dated_events_from_owned_tasks() -> None:
+    api = client()
+    with api:
+        csrf = login(api, "customer-roman")
+        created = api.post(
+            "/api/v1/customer/projects/demo-rd-lab/tasks",
+            json=brief(),
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert created.status_code == 200
+        task_id = created.json()["id"]
+
+        response = api.get("/api/v1/customer/analytics/activity")
+        assert response.status_code == 200
+        body = response.json()
+        assert body["window_days"] == 84
+        assert body["generated_at"]
+        created_events = [
+            item
+            for item in body["events"]
+            if item["kind"] == "project_created" and item["task_id"] == task_id
+        ]
+        assert len(created_events) == 1
+        assert created_events[0]["task_title"] == brief()["title"]
+        assert created_events[0]["occurred_at"]
+        assert not any(item["kind"] == "application_received" for item in body["events"])
+
+        login(api, "participant-alex")
+        hidden = api.get("/api/v1/customer/analytics/activity")
+        assert hidden.status_code in {403, 404}

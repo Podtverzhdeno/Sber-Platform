@@ -355,6 +355,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/analytics/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Customer Analytics Activity
+         * @description Real project activity; data is restricted to the authenticated customer\'s tasks.
+         */
+        get: operations["customer_analytics_activity_api_v1_customer_analytics_activity_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/cases": {
         parameters: {
             query?: never;
@@ -4766,6 +4786,46 @@ export interface components {
             /** Next Cursor */
             next_cursor?: string | null;
         };
+        /**
+         * CustomerActivityEventView
+         * @description One dated, verified event inside a task owned by this customer.
+         */
+        CustomerActivityEventView: {
+            /** Id */
+            id: string;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "project_created" | "participant_assigned" | "result_submitted" | "result_accepted" | "revision_requested";
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /**
+             * Task Id
+             * Format: uuid
+             */
+            task_id: string;
+            /** Task Title */
+            task_title: string;
+        };
+        /** CustomerActivityView */
+        CustomerActivityView: {
+            /** Events */
+            events: components["schemas"]["CustomerActivityEventView"][];
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /**
+             * Window Days
+             * @default 84
+             */
+            window_days?: number;
+        };
         /** CustomerTaskDetailView */
         CustomerTaskDetailView: {
             /** Acceptance Criteria */
@@ -8938,6 +8998,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SupportCatalogView"];
+                };
+            };
+        };
+    };
+    customer_analytics_activity_api_v1_customer_analytics_activity_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerActivityView"];
                 };
             };
         };

@@ -857,6 +857,79 @@ def _manager_view(item: ManagerOverview) -> ManagerOverviewView:
     )
 
 
+CustomerEventKind = Literal[
+    "project_created",
+    "participant_assigned",
+    "result_submitted",
+    "result_accepted",
+    "revision_requested",
+]
+
+
+class CustomerActivityEventView(BaseModel):
+    """One dated, verified event inside a task owned by this customer."""
+
+    id: str
+    task_id: UUID
+    task_title: str
+    kind: CustomerEventKind
+    occurred_at: AwareDatetime
+
+
+class CustomerActivityView(BaseModel):
+    generated_at: AwareDatetime
+    # Returned events cover at most the preceding 84 complete days plus today.
+    window_days: int = 84
+    events: list[CustomerActivityEventView]
+
+
+@router.get("/customer/analytics/activity", response_model=CustomerActivityView)
+async def customer_analytics_activity(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> CustomerActivityView:
+    """Real project activity; data is restricted to the authenticated customer's tasks."""
+    end = datetime.now(UTC)
+    start = end - timedelta(days=84)
+    events: list[CustomerActivityEventView] = []
+    for task in await service.customer_tasks(authenticated.actor):
+        task_id = task.aggregate.task_id
+
+        def append(
+            kind: CustomerEventKind,
+            key: str,
+            occurred_at: datetime | None,
+            event_task_id: UUID = task_id,
+            event_task_title: str = task.title,
+        ) -> None:
+            if occurred_at is None or not start <= occurred_at <= end:
+                return
+            events.append(
+                CustomerActivityEventView(
+                    id=f"{kind}:{key}",
+                    task_id=event_task_id,
+                    task_title=event_task_title,
+                    kind=kind,
+                    occurred_at=occurred_at,
+                )
+            )
+
+        append("project_created", str(task_id), task.created_at)
+        detail = await service.customer_task_detail(authenticated.actor, task_id)
+        for assignment in detail.assignments:
+            append("participant_assigned", str(assignment.id), assignment.created_at)
+        for contribution in detail.contributions:
+            append("result_submitted", str(contribution.id), contribution.submitted_at)
+        for decision in detail.decisions:
+            if decision.decision is AcceptanceDecision.ACCEPTED:
+                append("result_accepted", str(decision.id), decision.decided_at)
+            elif decision.decision is AcceptanceDecision.REVISION_REQUESTED:
+                append("revision_requested", str(decision.id), decision.decided_at)
+
+    events.sort(key=lambda item: (item.occurred_at, item.id), reverse=True)
+    return CustomerActivityView(generated_at=end, events=events)
+
+
 @router.get("/customer/tasks", response_model=list[TaskView])
 async def customer_tasks(
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],

@@ -21,6 +21,7 @@ export type RuntimeApiPath =
   | `/api/v1/me/agentic-coding/profile?${string}`
   | "/api/v1/me/analytics/journey"
   | "/api/v1/analytics/role"
+  | "/api/v1/customer/analytics/activity"
   | "/api/v1/ops/cases"
   | `/api/v1/ops/cases/${string}/timeline`
   | `/api/v1/ops/cases/${string}/decide`
