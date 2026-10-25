@@ -8,13 +8,21 @@
 - depends_on: []
 - write_scope:
   - frontend/src/features/my-projects/page.tsx (intro heading and help placement only)
+  - frontend/e2e/my-projects-v2.spec.ts (focused no-gap and help assertions)
+  - .github/workflows/my-projects-compact-header-qa.yml
   - .agents/coordination/claims/PROJECTS-COMPACT-HEADER-20261026.lock/status.md
 - shared_files: []
 - verification:
   - frontend strict lint/typecheck
   - My Projects UI browser regression
 - progress: Removed visible intro; retained a screen-reader-only h1, moved functional help action to toolbar. PR #86 opened for independent review.
-- blockers: Focused browser acceptance and independent review pending; overall CI has unrelated failing jobs.
+- blockers: Independent review and overall integration acceptance pending; code and focused UI QA passed.
 - code_pr: https://github.com/Podtverzhdeno/Sber-Platform/pull/86
-- tested_revision: not yet browser-verified
+- verified_revision: 29785dba5030adb9343e1f32a0b129bdd9f87f9b
+- verification_evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40244036135 (SUCCESS)
+  - Playwright compact header: success
+  - strict ESLint, TypeScript, build: success
+  - screenshot: compact-projects-visual-evidence / projects-compact-header.png
+- visual_review: no intro gap; benefits and project controls follow directly after workspace navbar
 - independent_review: required before DONE
