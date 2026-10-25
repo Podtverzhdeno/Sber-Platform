@@ -24,7 +24,7 @@ export type DashboardProject = {
   allowedArtifacts: string[];
   team: { person_id: string; display_name: string; status: string }[];
   mentor?: string;
-  checkpoints: { key: string; title: string; status: string }[];
+  checkpoints: { key: string; title: string; status: string; description?: string; deliverable?: string; acceptance_criteria?: string[]; estimated_minutes?: number | null }[];
   contributions: { id: string; version: number; personal_summary: string; artifact_keys: string[]; status: string }[];
   feedback: { contribution_id: string; explanation: string; status: string }[];
 };
