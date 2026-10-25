@@ -55,6 +55,7 @@ export function ActivityCalendar({ snapshot, weeks, onOpenCourses, onOpenProject
   const [hover, setHover] = useState<{ key: string; x: number; y: number } | null>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
+  const calendarScrollRef = useRef<HTMLDivElement | null>(null);
   const known = snapshot?.freshness.known === true;
   const days = useMemo(() => buildActivityDays(snapshot, weeks), [snapshot, weeks]);
   const selected = days.find(day => day.key === selectedKey) ?? null;
@@ -68,6 +69,14 @@ export function ActivityCalendar({ snapshot, weeks, onOpenCourses, onOpenProject
     return !previous || new Date(previous.timestamp).getUTCMonth() !== new Date(current.timestamp).getUTCMonth()
       ? MONTH.format(new Date(current.timestamp)) : "";
   });
+
+  // The most recent days should be immediately visible on narrow screens.
+  // Reposition when the user changes the time range, without moving document scroll.
+  useEffect(() => {
+    const container = calendarScrollRef.current;
+    if (!container) return;
+    container.scrollLeft = Math.max(0, container.scrollWidth - container.clientWidth);
+  }, [weeks]);
 
   useEffect(() => {
     if (!selectedKey) return;
@@ -125,7 +134,7 @@ export function ActivityCalendar({ snapshot, weeks, onOpenCourses, onOpenProject
         <span><strong>{known ? String(total) : "—"}</strong> действий за период</span>
       </div>
     </div>
-    <div className="ac-calendar-scroll" role="region" aria-label="Дни активности, горизонтальная прокрутка" tabIndex={0}>
+    <div ref={calendarScrollRef} className="ac-calendar-scroll" role="region" aria-label="Дни активности, горизонтальная прокрутка" tabIndex={0}>
       <div className="ac-calendar-layout">
         <div className="ac-weekdays" aria-hidden="true"><i/>{weekdayNames.map((name, index) =>
           <span key={name}>{index % 2 === 0 ? name : ""}</span>)}</div>
