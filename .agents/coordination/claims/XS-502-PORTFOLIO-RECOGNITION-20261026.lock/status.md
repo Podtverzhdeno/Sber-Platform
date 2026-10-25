@@ -1,7 +1,7 @@
 # Claim XS-502-PORTFOLIO-RECOGNITION-20261026
 
 - session_id: gpt6-20261026-portfolio-recognition02
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 2d73f8c4700ab4c614013c343e34b6955fe66088
@@ -15,5 +15,13 @@
 - verification:
   - Ruff format/check for owned files
   - pytest tests/test_portfolio_recognition.py tests/test_portfolio_api.py
-- progress: User-verified bug: portfolio currently hardcodes credentials/trophies/offers as empty; link to season evidence and consent-safe revocations.
+- progress: Portfolio now uses issued credentials and published consent-filtered trophies/offers rather than empty arrays; status REVOKED is preserved. Focused tests and prior portfolio regression green. Independent review remains required.
+- changed_files:
+  - src/impulse/api/v1/portfolio.py
+  - tests/test_portfolio_recognition.py
+  - .github/workflows/portfolio-recognition-qa.yml
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40239307951
+- unverified:
+  - Full UI browser E2E of rating→profile→awards and downstream cache after all actor decisions
 - blockers: none
