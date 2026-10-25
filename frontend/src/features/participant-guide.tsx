@@ -4,10 +4,12 @@ import {
   Compass, GraduationCap, Layers3, MessageCircle, Rocket, Sparkles, Star, X,
 } from "lucide-react";
 import { shouldAutomaticallySuggest, type PersistedGuide } from "./participant-guide-data";
+import { HELP_TOPICS } from "./participant-help-content";
+import { ParticipantHelpCenter } from "./participant-help-center";
 import { PROJECT_DETAIL_TOUR, SECTION_TOURS, TASK_DETAIL_TOUR, locatePopover, type GuideStep } from "./participant-tour-steps";
 import "./participant-guide.scss";
 
-type View = "closed" | "welcome" | "hint" | "walkthrough" | "complete";
+type View = "closed" | "welcome" | "hint" | "walkthrough" | "complete" | "library";
 type Place = { left: number; top: number; side: "left" | "right" | "top" | "bottom"; rect: { left: number; top: number; width: number; height: number } };
 type Props = { personId: string; section: string; navigation: string[]; onNavigate: (index: number) => void };
 const prefKey = (personId: string) => `impulse:guide:v1:${personId}`;
@@ -92,6 +94,7 @@ function Mascot() {
 export function ParticipantGuide({ personId, section, navigation, onNavigate }: Props) {
   const [view, setView] = useState<View>("closed");
   const [stepIndex, setStepIndex] = useState(0);
+  const [selectedHelpTopic, setSelectedHelpTopic] = useState<string | null>(null);
   const [context, setContext] = useState<"default" | "task-detail" | "project-detail">("default");
   const [preferences, setPreferences] = useState<PersistedGuide>(() => readPrefs(personId));
   const [place, setPlace] = useState<Place | null>(null);
@@ -103,7 +106,8 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
   const destinationIndex = navigation.indexOf("Задачи");
   const isHome = section === "Главная";
 
-  const close = useCallback(() => { setView("closed"); setPlace(null); }, []);
+  const close = useCallback(() => { setView("closed"); setPlace(null); setSelectedHelpTopic(null); }, []);
+  const openLibrary = useCallback((topicId: string | null = null) => { setSelectedHelpTopic(topicId); setPlace(null); setView("library"); }, []);
   const pickContext = useCallback(() => {
     if (section === "Задачи" && document.querySelector(".catalog-v2-detail")) return "task-detail";
     if (section === "Мои проекты" && document.querySelector(".mp-detail")) return "project-detail";
@@ -157,8 +161,20 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
   };
   useEffect(() => {
     const toggle = () => { startManually(); };
+    const openFull = () => { openLibrary(); };
+    const openTopic = (event: Event) => {
+      const detail = (event as CustomEvent<{ topicId?: string }>).detail;
+      const id = detail?.topicId;
+      if (id && HELP_TOPICS.some((topic) => topic.id === id)) openLibrary(id);
+    };
     window.addEventListener("impulse:guide:toggle", toggle);
-    return () => { window.removeEventListener("impulse:guide:toggle", toggle); };
+    window.addEventListener("impulse:guide:library", openFull);
+    window.addEventListener("impulse:guide:topic", openTopic);
+    return () => {
+      window.removeEventListener("impulse:guide:toggle", toggle);
+      window.removeEventListener("impulse:guide:library", openFull);
+      window.removeEventListener("impulse:guide:topic", openTopic);
+    };
   });
   const disableAuto = () => {
     const next = { ...readPrefs(personId), autoDisabled: true };
@@ -277,6 +293,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
           </div>
         </div>
         <div className="pg-tip-footer">
+          <button type="button" className="pg-tip-library" onClick={() => { openLibrary(step.topicId ?? null); }}><BookOpenText size={13}/> Подробная помощь</button>
           <button type="button" onClick={close}>Не сейчас</button>
           <button type="button" onClick={preferences.autoDisabled ? enableAuto : disableAuto}>
             {preferences.autoDisabled ? "Включить автоподсказки" : "Не показывать автоматически"}
@@ -291,10 +308,13 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
         <Mascot />
         <h2 id="pg-complete-title">Ты готов к старту!</h2>
         <p>Теперь ты знаешь, как устроен этот раздел. Выбирай следующий шаг — вернуться к подсказкам можно в любой момент.</p>
-        <button type="button" className="pg-primary-button" onClick={() => { close(); if (destinationIndex >= 0) onNavigate(destinationIndex); }}>К интересным задачам <ArrowRight size={15}/></button>
+        <button type="button" className="pg-primary-button" onClick={() => { close(); if (isHome && destinationIndex >= 0) onNavigate(destinationIndex); }}>{isHome ? "К интересным задачам" : "Вернуться к работе"} <ArrowRight size={15}/></button>
         <button type="button" className="pg-quiet-button" onClick={() => { setStepIndex(0); setView("walkthrough"); }}>Показать подсказки ещё раз</button>
       </section>
     </div>}
+    {view === "library" && <ParticipantHelpCenter section={section} initialTopicId={selectedHelpTopic} onClose={close}
+      onOpenTour={() => { setView("walkthrough"); setStepIndex(0); setContext(pickContext()); }}
+      onNavigateSection={(name) => { const target = navigation.indexOf(name); if (target >= 0) onNavigate(target); }} />}
     <button type="button" className="participant-guide-trigger" aria-expanded={view !== "closed"}
       aria-controls={showTip ? "participant-guide-panel" : undefined}
       aria-label={view === "closed" ? "Как здесь всё устроено?" : "Скрыть помощь"}
