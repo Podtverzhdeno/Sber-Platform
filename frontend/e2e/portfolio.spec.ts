@@ -66,7 +66,7 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
   await expect(page.getByRole("dialog")).toHaveCount(0);
 
   await page.getByRole("tab", { name: "Skill Passport" }).click();
-  await expect(page.locator(".p2-skill-detail")).toContainText("1 подтверждённых кейсов");
+  await expect(page.locator(".p2-skill-detail")).toContainText("1 подтверждённый кейс");
   await page.getByRole("tab", { name: "Сертификация" }).click();
   await page.getByRole("button", { name: /OpenSpec и SDD/ }).click();
   await expect(page.getByRole("dialog", { name: "Сертификат" })).toBeVisible();
