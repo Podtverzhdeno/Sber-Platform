@@ -99,6 +99,7 @@
 .p2-passport-count small { color:#a7c0d3; font-size:10px; }
 .p2-passport-footer .p2-primary { min-height:32px; font-size:10px!important; }
 .p2-certs-panel { grid-area:2/7/3/13; min-height:159px; }
+.p2-learning-subtitle { margin:0 0 8px!important; color:#a9cad8; font-size:11px; }
 .p2-cert-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
 .p2-certificate { display:grid; grid-template-columns:35px minmax(0,1fr); grid-template-rows:minmax(52px,1fr) auto; gap:6px; text-align:left; padding:10px; border:1px solid #163b56; border-radius:9px; background:linear-gradient(145deg,#09243a,#061a2d); color:#e9f7ff; min-height:108px; min-width:0; }
 .p2-certificate-symbol { display:grid; place-items:center; width:34px; height:34px; border-radius:8px; background:#12375a; color:#39d8f8; }
