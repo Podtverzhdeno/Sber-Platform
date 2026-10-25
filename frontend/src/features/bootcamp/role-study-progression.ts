@@ -4,7 +4,7 @@
  */
 export type RequirementCourse = {
   key: string;
-  must_take: unknown | null;
+  must_take: object | null;
   completion_state: string;
 };
 export type StudyRecord = { course_key: string; finished: boolean; certificate_id: string | null };
