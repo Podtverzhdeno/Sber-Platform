@@ -1,16 +1,1 @@
-a48b39fa2b75f01176f7e0bb6eaf83dec60a006d
-
-# My Projects redesigned full-width dashboard, detailed modal, progress ring, all sections verified in Chromium
-release_request=2026-10-25-my-projects-pixel-pass-63fe43d
-
-# Events banner: original 2172x724 asset, lime Sber label removed, browser QA passed
-release_request=2026-10-25-events-hires-cyberpunk-cacf530a7
-
-# Cross-section persisted course progression accepted via Postgres + browser tests
-release_request=2026-10-25-learning-sync-5819d84
-
-# Release Events unified button styling, accessible filter toggles, and reset icon
-release_request=2026-10-25-events-buttons-design-b0ce178dc
-
-# Achievements v2: source-backed hero/cards/filters/details, desktop+mobile QA green
-release_request=2026-10-25-achievements-v2-qa-7770f2002d
+f81aa6444dae7e9be0dc8a62ffe4c1500a34919c
