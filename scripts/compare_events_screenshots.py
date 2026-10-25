@@ -1,7 +1,7 @@
 """Compare the approved Impulse Events mockups against browser captures, pixel by pixel.
 
 Inputs:
-  --references directory containing the original seven PNG mockups
+  --references directory containing the original eight PNG mockups
   --captures frontend/test-results/event-reference
   --output /tmp/events-diff
 
@@ -21,6 +21,7 @@ except ImportError as exc:
     raise SystemExit("Install Pillow: python -m pip install Pillow") from exc
 
 SCREENS = {
+    "about": "wide_dark_themed_ui_screenshot_of_a_web_app_dashb.png",
     "catalog": "Impulse_Events_Combined_V1_V2.png",
     "program": "impulse_events_program.png",
     "prizes": "impulse_events_prizes.png",
