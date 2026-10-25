@@ -107,9 +107,12 @@ test("official grade promotion animation requires an actual change in the server
   for(let i=0;i<8;i++){
     await reader.locator(".imp-study__navigation .imp-study__primary").click();
   }
-  // Represent a grade transition that the server has issued independently,
-  // not a frontend guess from the eighth lesson.
-  currentGrade="L2";
+  // Simulate a separately authorized server transition at the verification
+  // boundary, not during earlier lesson events.
+  await page.route("**/api/v1/me/bootcamp/impulse-study/demo-course-1/finish",async route=>{
+    currentGrade="L2";
+    await route.fallback();
+  });
   await reader.locator(".imp-study__finish").click();
   await expect(page.getByTestId("bootcamp-official-grade")).toContainText("L2");
   const animation=page.getByTestId("grade-milestone-celebration");
