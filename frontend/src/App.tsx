@@ -1,7 +1,7 @@
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
-import { Bell, Search } from "lucide-react";
+import { Bell, CircleHelp, Search } from "lucide-react";
 import { BootcampV2Route } from "./features/bootcamp/route-v2";
 import { TrajectoryV2 } from "./features/trajectory-v2/page";
 import { SourceTrajectoryPage } from "./features/trajectory-v2/source-reference/source-route";
@@ -1581,6 +1581,11 @@ function ImpulseApp() {
               {actor.active_role === "participant" && (
                 <TopbarEngagementIndicator />
               )}
+              {actor.active_role === "participant" && <button type="button" className="topbar-guide-btn"
+                title="Как устроена платформа" aria-label="Как здесь всё устроено?"
+                onClick={() => { window.dispatchEvent(new Event("impulse:guide:toggle")); }}>
+                <CircleHelp size={21} aria-hidden="true" />
+              </button>}
               {actor.active_role === "participant" && actor.navigation.includes("Рейтинг") && <div className="ranking-wrapper">
                 <TopbarRank personId={actor.person_id} onOpen={() => { setRankingOpen(false); openSearchItem("Рейтинг"); }} />
               </div>}
