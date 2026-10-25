@@ -187,8 +187,7 @@ def test_postgres_course_finish_reflects_in_joined_snapshot_without_fake_awards(
         async with database.session() as connection:
             await connection.execute(
                 text(
-                    "INSERT INTO persons(id, display_name, external_key) "
-                    "VALUES (:id, :name, :key)"
+                    "INSERT INTO persons(id, display_name, external_key) VALUES (:id, :name, :key)"
                 ),
                 {"id": learner, "name": "Journey QA", "key": str(learner)},
             )
