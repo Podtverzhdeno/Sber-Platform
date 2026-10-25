@@ -19,7 +19,7 @@ const sizes = [
 ] as const;
 
 for (const viewport of sizes) {
-  test(`BC-R01..R05 screenshot capture ${viewport.width}x${viewport.height}`, async ({ page }) => {
+  test(`BC-R01..R05 screenshot capture ${String(viewport.width)}x${String(viewport.height)}`, async ({ page }) => {
     await installBootcampReferenceApi(page);
     await page.setViewportSize(viewport);
     await page.goto("/");
@@ -29,7 +29,7 @@ for (const viewport of sizes) {
     }
     await page.getByRole("link", { name: "Bootcamp" }).click();
 
-    const prefix = `test-results/bootcamp-reference/${viewport.width}x${viewport.height}`;
+    const prefix = `test-results/bootcamp-reference/${String(viewport.width)}x${String(viewport.height)}`;
     const shell = page.locator(".bc-reference");
     await expect(shell).toBeVisible();
     await expect(shell.locator(".bc-ref-course-card").first()).toBeVisible();
