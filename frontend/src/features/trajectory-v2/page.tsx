@@ -17,6 +17,7 @@ import {
 } from "./client";
 import { RoleComparePanel, TrajectoryActions } from "./actions";
 import { RoleInfoDialog, StageTaskDrawer } from "./details";
+import { canonicalAiRoles } from "./source-reference/source-catalog";
 import type {
   DevelopmentOverviewView,
   MilestoneView,
@@ -113,12 +114,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   };
   // All cards come from the authorized server catalog; never invent
   // frontend-only roles or progress for unselected tracks.
-  const catalogueRoles = useMemo(() => {
-    const rank = new Map(["product", "ml", "python", "design", "data", "backend", "manager"].map((key, i) => [key, i]));
-    return [...overview.roles].sort(
-      (a, b) => (rank.get(a.track_key) ?? 99) - (rank.get(b.track_key) ?? 99),
-    );
-  }, [overview.roles]);
+  const catalogueRoles = useMemo(() => canonicalAiRoles(overview.roles), [overview.roles]);
   const roleParam = searchParams.get("role");
   const selectedKey = useMemo(() => {
     const paramRole = catalogueRoles.find((role) => role.track_key === roleParam);
