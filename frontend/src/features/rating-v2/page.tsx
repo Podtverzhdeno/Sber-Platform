@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
-  ArrowLeft, ArrowRight, Award, BadgeCheck, Bell, BriefcaseBusiness, CalendarDays,
-  Check, ChevronDown, CircleCheck, Clock3, Code2, Crown, ExternalLink,
-  FileBadge2, Flame, Gem, Gift, GraduationCap, Heart, LockKeyhole, Mail,
-  Medal, MessageCircle, Mountain, Search, Share2, ShieldCheck, Sparkles,
-  Star, Target, Trophy, Users, Zap,
+  ArrowLeft, ArrowRight, Award, BadgeCheck, BriefcaseBusiness, CalendarDays,
+  Check, ChevronDown, CircleCheck, Code2, Crown, FileBadge2,
+  Flame, Gem, Heart, LockKeyhole, Mail, Medal,
+  Search, Share2, ShieldCheck, Star, Trophy, Users,
 } from "lucide-react";
 
 import "./rating-v2.scss";
