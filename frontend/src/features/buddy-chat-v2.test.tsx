@@ -109,6 +109,16 @@ describe("AI-Buddy single-pane conversation", () => {
       if (path === "/api/v1/agents/buddy/threads") return created;
       if (path === "/api/v1/agents/buddy/threads/" + thread.id) return { ...thread, messages: [oldMessage] };
       if (path === "/api/v1/agents/buddy/threads/" + created.id) return created;
+      if (path === "/api/v1/agents/buddy/threads/" + created.id + "/messages") {
+        const message = {
+          id: "55555555-5555-4555-8555-555555555555",
+          client_message_id: "new-chat-message",
+          role: "user",
+          content: "Первое сообщение нового диалога",
+        };
+        created.messages.push(message);
+        return message;
+      }
       throw new Error("Unexpected endpoint: " + path);
     });
     const { container } = view();
@@ -128,6 +138,18 @@ describe("AI-Buddy single-pane conversation", () => {
     expect(screen.getByText(/Начните разговор: напишите вопрос/)).toBeVisible();
     expect(screen.queryByLabelText("Пример взаимодействия")).not.toBeInTheDocument();
     expect(localStorage.getItem("impulse-buddy-dialogues:" + profile.person_id)).toContain(created.id);
+    fireEvent.change(screen.getByRole("textbox", { name: "Сообщение AI-Buddy" }), {
+      target: { value: "Первое сообщение нового диалога" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Отправить сообщение" }));
+    await waitFor(() => {
+      expect(apiRequest).toHaveBeenCalledWith(
+        "/api/v1/agents/buddy/threads/" + created.id + "/messages",
+        expect.objectContaining({ method: "POST" }),
+      );
+    });
+    expect(await screen.findAllByText("Первое сообщение нового диалога")).not.toHaveLength(0);
+    expect(container.querySelector(".buddy2-dialog.active")).toHaveTextContent("Первое сообщение нового диалога");
   });
 
   it("preserves the current conversation and draft when creating a new chat fails", async () => {
