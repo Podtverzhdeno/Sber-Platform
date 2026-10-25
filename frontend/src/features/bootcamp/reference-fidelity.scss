@@ -179,3 +179,49 @@
 .bc-reference .overlay-panel--drawer:has(.bc-learning__body) .bc-panel-content{
   max-width:none;width:100%;
 }
+
+/* BC-R04: layered recommendation reasons grounded by domain data */
+.bc-reference .bc-ref-why-panel{padding-top:20px;gap:0}
+.bc-ref-why-context{font-size:11px;color:#8fb5d1;margin:0 0 12px!important}
+.bc-ref-why-context strong{color:#f3f8ff}
+.bc-ref-why-item{display:grid;grid-template-columns:42px minmax(0,1fr);gap:13px;margin:0 0 17px;align-items:start}
+.bc-ref-why-item h3{margin:1px 0 5px!important;font-size:13px!important;font-weight:800;color:#f3f9ff}
+.bc-ref-why-item p{color:#b5d3ed;line-height:1.55;font-size:12px}
+.bc-ref-why-item ul{padding-left:17px;margin:7px 0 0;color:#b5d3ed;font-size:12px}
+.bc-ref-why-symbol{display:grid;place-items:center;width:41px;height:41px;border-radius:9px;background:#291466;color:#c368ff}
+.bc-ref-why-symbol svg{width:22px;height:22px}
+.bc-ref-why-symbol--skill{background:#06483c;color:#06debe}
+.bc-ref-why-symbol--project{background:#142d79;color:#ab6fff}
+.bc-ref-why-symbol--confirm{background:#4b3112;color:#ffd955}
+.bc-ref-skill-impact{padding:9px 10px;margin:9px 0 0;background:#0a2946;border:1px solid #214761;border-radius:8px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px}
+.bc-ref-skill-impact strong,.bc-ref-skill-impact span{font-size:11px;display:flex;align-items:center;gap:9px}
+.bc-ref-skill-impact span svg{height:14px;width:14px;color:#00f3db}
+.bc-reference .bc-ref-why-cta{display:flex;align-items:center;justify-content:center;gap:10px;min-height:42px;background:#0a4051;color:#2ff6e3;border:1px solid #0f9eb5;border-radius:9px;font-weight:800}
+.bc-ref-why-cta svg{height:16px;width:16px}
+/* BC-R05: required courses, verified count and honest progress. */
+.bc-reference .bc-ref-required-panel{gap:12px;padding-top:23px}
+.bc-reference .bc-ref-required-panel h2{font-size:25px!important;font-weight:800;color:#f3f9ff;margin:0}
+.bc-reference .bc-ref-required-panel>h3{font-size:18px!important;font-weight:800;margin:3px 0 0;color:#f3f9ff}
+.bc-ref-required-kicker{display:inline-flex;padding:7px 10px;border-radius:9px;background:#372355;color:#d2b0f9;letter-spacing:.04em;font-size:11px;font-weight:800;width:max-content;max-width:100%}
+.bc-ref-required-progress{padding:15px 16px;background:#0c2842;border:1px solid #25506b;border-radius:10px;display:grid;gap:7px}
+.bc-ref-required-progress>div:first-child{display:flex;align-items:center;justify-content:space-between}
+.bc-ref-required-progress small{font-size:11px;color:#92b4d1}
+.bc-ref-required-progress strong{font-size:16px;color:#00eced}
+.bc-ref-required-progress p{color:#c5def4;margin:0;font-size:13px}
+.bc-ref-required-list{display:grid;gap:13px;list-style:none;margin:0;padding:0}
+.bc-ref-required-list>li{display:grid;gap:10px;padding:15px;background:#0b2843;border:1px solid #245675;border-radius:13px}
+.bc-ref-required-card-head{display:flex;gap:14px;align-items:center}
+.bc-ref-required-card-head>div{display:grid;gap:4px;min-width:0}
+.bc-ref-required-card-head h4{font-size:16px;color:#f4f9ff;margin:0}
+.bc-ref-required-card-head span{background:#513428;color:#ffae79;border-radius:16px;width:max-content;max-width:100%;padding:5px 12px;font-size:11px}
+.bc-ref-required-list>li>p{color:#a7c6de;font-size:12px;margin:0}
+.bc-ref-required-card-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.bc-ref-required-card-bottom small{color:#a9c6db}
+.bc-reference .bc-ref-required-card-bottom button{border:0;border-radius:8px;background:#02e1e7;color:#001a2c;display:flex;align-items:center;gap:9px;padding:9px 13px;font-size:12px;font-weight:800}
+.bc-ref-required-card-bottom button svg{width:15px;height:15px}
+.bc-ref-required-about{border-top:1px solid #2a4e65;padding-top:12px}
+.bc-reference .bc-ref-required-about h3{font-size:16px!important;color:#f2faff;margin:0 0 8px}
+.bc-reference .bc-ref-required-about p{color:#a7c9e3}
+.bc-reference .bc-ref-required-close{margin-top:12px;width:100%;display:flex;justify-content:center;align-items:center;gap:11px;padding:10px;border:1px solid #05a9bc;border-radius:8px;background:#0d3b50;color:#26f3ee;font-weight:800}
+.bc-ref-required-close svg{height:17px;width:17px}
+.bc-ref-required-empty{border:1px dashed #3a5b74;border-radius:9px;padding:15px;color:#aac6df}
