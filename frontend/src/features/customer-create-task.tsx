@@ -22,8 +22,8 @@ export type CreateTaskBrief = {
 };
 type Candidate = { id: string; name: string; direction: string; cases: { title: string }[] };
 type Tip = { id: string; title: string; detail: string; patch: (brief: CreateTaskBrief) => CreateTaskBrief };
-type WizardData = { step: number; brief: CreateTaskBrief; invited: string[]; applied: string[] };
-type Props = { candidates: Candidate[]; onPublish: (brief: CreateTaskBrief, invited: string[]) => void; onBack?: () => void };
+type WizardData = { step: number; brief: CreateTaskBrief; invited: string[]; applied: string[]; taskKey: string };
+type Props = { candidates: Candidate[]; onPublish: (brief: CreateTaskBrief, invited: string[], taskKey: string) => Promise<void>; onBack?: () => void };
 
 const draftKey = "impulse-customer-task-wizard-v2";
 const stages = [
@@ -46,7 +46,7 @@ const emptyBrief = (): CreateTaskBrief => ({
   support: "Ментор и еженедельная встреча по прогрессу",
 });
 function restore(): WizardData {
-  const fallback = { step: 0, brief: emptyBrief(), invited: [], applied: [] };
+  const fallback = { step: 0, brief: emptyBrief(), invited: [], applied: [], taskKey: `brief-${crypto.randomUUID()}` };
   try {
     const saved = JSON.parse(localStorage.getItem(draftKey) ?? "null") as Partial<WizardData> | null;
     if (!saved || !saved.brief || typeof saved.brief !== "object") return fallback;
@@ -55,6 +55,7 @@ function restore(): WizardData {
       brief: { ...fallback.brief, ...saved.brief, skills: Array.isArray(saved.brief.skills) ? saved.brief.skills.filter((x): x is string => typeof x === "string").slice(0, 12) : [] },
       invited: Array.isArray(saved.invited) ? saved.invited.filter((id): id is string => typeof id === "string") : [],
       applied: Array.isArray(saved.applied) ? saved.applied.filter((id): id is string => typeof id === "string") : [],
+      taskKey: typeof saved.taskKey === "string" && /^brief-[a-f0-9-]{36}$/.test(saved.taskKey) ? saved.taskKey : fallback.taskKey,
     };
   } catch { return fallback; }
 }
@@ -96,7 +97,8 @@ export function CustomerCreateTask({ candidates, onPublish, onBack }: Props) {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [skillSearch, setSkillSearch] = useState("");
-  const { step, brief, invited, applied } = data;
+  const [publishing, setPublishing] = useState(false);
+  const { step, brief, invited, applied, taskKey } = data;
   const missing = incomplete(brief, invited);
   const requiredCount = brief.mode === "invitation_only" ? 11 : 10;
   const readiness = Math.round((requiredCount - missing.length) / requiredCount * 100);
@@ -133,19 +135,31 @@ export function CustomerCreateTask({ candidates, onPublish, onBack }: Props) {
     try { localStorage.setItem(draftKey, JSON.stringify(data)); setFeedback("Черновик сохранён в этом браузере. Можно вернуться к нему позже."); }
     catch { setFeedback("Не удалось сохранить черновик в браузере. Скопируйте важные данные перед выходом."); }
   };
-  const publish = () => {
-    if (missing.length > 0) { goStep(missing[0]?.step ?? 0); setFeedback("Заполните обязательные поля перед публикацией."); return; }
-    try { localStorage.removeItem(draftKey); } catch { /* Publishing does not depend on local storage. */ }
-    onPublish(brief, invited);
+  const publish = async () => {
+    if (publishing) return;
+    if (missing.length > 0) {
+      goStep(missing[0]?.step ?? 0);
+      setFeedback("Заполните обязательные поля перед отправкой на модерацию.");
+      return;
+    }
+    setPublishing(true);
+    setFeedback("");
+    try {
+      await onPublish(brief, invited, taskKey);
+      try { localStorage.removeItem(draftKey); } catch { /* Server persistence is authoritative. */ }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Не удалось отправить задачу";
+      setFeedback(`Задача не отправлена: ${message}. Черновик сохранён — повторите попытку.`);
+    } finally { setPublishing(false); }
   };
   const formatMode = brief.mode === "open" ? "Открытый набор" : "По приглашению";
   return <section className="create-task-workspace customer-create-v2" aria-label="Создание задачи заказчиком" data-reference="R-CUS-03">
     <div className="create-v3-intro">
       {onBack ? <button type="button" className="create-v3-back" onClick={onBack}><ArrowLeft size={14} aria-hidden="true" /> К моим задачам</button> : <span className="create-v3-back">Новая задача</span>}
-      <div><span className="create-v3-intro-flag"><Sparkles size={14} /> Новый проект</span><span className="create-v3-autosave"><CheckCircle2 size={14} /> Черновик сохраняется в браузере</span></div>
+      <div><span className="create-v3-intro-flag"><Sparkles size={14} /> Новый проект</span><span className="create-v3-autosave"><CheckCircle2 size={14} /> Автосохранение черновика</span></div>
     </div>
     <nav className="create-stepper" aria-label="Этапы создания задачи">
-      {stages.map((stage, index) => <button type="button" key={stage.title} aria-current={step === index ? "step" : undefined} className={step === index ? "active" : index < step ? "done" : ""} onClick={() => { goStep(index); }}>
+      {stages.map((stage, index) => <button type="button" key={stage.title} aria-label={["Бриф", "Критерии", "Формат", "Поддержка", "Публикация"][index]} aria-current={step === index ? "step" : undefined} className={step === index ? "active" : index < step ? "done" : ""} onClick={() => { goStep(index); }}>
         <span className="create-v2-step-number">{index < step ? <Check size={15} /> : index + 1}</span>
         <span className="create-v2-step-name"><b>{["Бриф", "Критерии", "Формат", "Поддержка", "Публикация"][index]}</b></span>
       </button>)}
@@ -201,20 +215,20 @@ export function CustomerCreateTask({ candidates, onPublish, onBack }: Props) {
           <label>Количество мест <span className="required">*</span><input type="number" min="1" step="1" value={brief.places} onChange={(event) => { updateBrief({ places: Number(event.target.value) }); }} /><small className="create-v2-field-help">Сколько участников может выполнять задачу</small></label>
         </div>}
         {step === 2 && <div className="create-fields">
-          <fieldset className="create-v2-choice-group wide"><legend>Кто может откликнуться</legend><div className="task-type-picker create-v2-mode-picker">{[["open", "Открытая задача", "Участники могут сами выбрать задачу"], ["invitation_only", "По приглашению", "Вы сами выбираете участников"]].map(([kind, title, description]) => <button type="button" key={kind} aria-pressed={brief.mode === kind} className={brief.mode === kind ? "active" : ""} onClick={() => { updateBrief({ mode: kind as CreateTaskBrief["mode"] }); }}><b>{title}</b><small>{description}</small></button>)}</div></fieldset>
+          <fieldset className="create-v2-choice-group wide"><legend>Кто может откликнуться</legend><div className="task-type-picker create-v2-mode-picker">{[["open", "Открытая задача", "Участники могут сами выбрать задачу"], ["invitation_only", "По приглашению", "Вы сами выбираете участников"]].map(([kind, title, description]) => <button type="button" key={kind} disabled={kind === "invitation_only"} title={kind === "invitation_only" ? "Нужны реальные подтверждённые профили и серверные приглашения" : undefined} aria-pressed={brief.mode === kind} className={brief.mode === kind ? "active" : ""} onClick={() => { updateBrief({ mode: kind as CreateTaskBrief["mode"] }); }}><b>{title}</b><small>{description}</small></button>)}</div></fieldset>
           <label className="wide">Данные и ограничения <span className="required">*</span><textarea rows={4} value={brief.dataTerms} onChange={(event) => { updateBrief({ dataTerms: event.target.value }); }} placeholder="Источник и формат данных, требования к доступу и конфиденциальности" /><small className="create-v2-field-help">Не размещайте реальные конфиденциальные данные в описании задачи</small></label>
           <label className="wide">Права на результат <span className="required">*</span><textarea rows={3} value={brief.ipTerms} onChange={(event) => { updateBrief({ ipTerms: event.target.value }); }} placeholder="Кому доступны артефакты, можно ли показывать результат в портфолио" /></label>
         </div>}
         {step === 3 && <div className="create-fields">
           <label className="wide">Модель поддержки <span className="required">*</span><textarea rows={4} value={brief.support} onChange={(event) => { updateBrief({ support: event.target.value }); }} placeholder="Ментор, сроки ответа, регулярные встречи, каналы связи" /><small className="create-v2-field-help">Опишите, кто помогает исполнителю и как быстро он сможет получить ответ</small></label>
-          <fieldset className="create-v2-invites wide"><legend>Пригласить участников <span>{brief.mode === "open" ? "необязательно" : "обязательно"}</span></legend>
-            <p>Список участников с завершёнными кейсами. В демонстрации выбор участников сохраняется в браузере. Реальная отправка приглашений требует серверного подключения.</p>
+          <fieldset className="create-v2-invites wide" disabled><legend>Пригласить участников <span>{brief.mode === "open" ? "необязательно" : "обязательно"}</span></legend>
+            <p>Приглашения доступны после подтверждения личности и кейсов кандидатов. Демонстрационные профили не получают серверные приглашения.</p>
             <div className="create-v2-candidate-list">{candidates.filter((person) => person.cases.length > 0).map((person) => <label key={person.id} className="create-v2-candidate"><input type="checkbox" checked={invited.includes(person.id)} onChange={() => { toggleInvite(person.id); }} /><span className="create-v2-avatar">{person.name.split(" ").slice(0, 2).map((part) => part[0]).join("")}</span><span><strong>{person.name}</strong><small>{person.direction === brief.direction ? "Совпадает с направлением" : person.direction} · {person.cases[0]?.title}</small></span></label>)}</div>
           </fieldset>
         </div>}
         {step === 4 && <div className="create-v2-review">
-          <div className="create-v2-review-intro"><span className={missing.length ? "create-v2-review-status is-warning" : "create-v2-review-status"}>{missing.length ? <CircleAlert size={20} /> : <CheckCircle2 size={20} />}</span><div><h3>{missing.length ? "Остались обязательные поля" : "Бриф готов к публикации"}</h3><p>{missing.length ? "Заполните недостающую информацию, прежде чем открывать задачу участникам." : "Проверьте содержание и при необходимости вернитесь к любому этапу."}</p></div></div>
-          <p className="create-v2-aside-sub">Демонстрационный режим: сохранённую задачу пока нельзя увидеть из аккаунта другого участника. Сквозная публикация будет подключена через API.</p><div className="create-summary">
+          <div className="create-v2-review-intro"><span className={missing.length ? "create-v2-review-status is-warning" : "create-v2-review-status"}>{missing.length ? <CircleAlert size={20} /> : <CheckCircle2 size={20} />}</span><div><h3>{missing.length ? "Остались обязательные поля" : "Бриф готов к отправке"}</h3><p>{missing.length ? "Заполните недостающую информацию, прежде чем открывать задачу участникам." : "Проверьте содержание и при необходимости вернитесь к любому этапу."}</p></div></div>
+          <p className="create-v2-aside-sub">После отправки задача сохранится на сервере и пройдёт модерацию и назначение сопровождения. Участники увидят её в каталоге после публикации оператором.</p><div className="create-summary">
             {[["Задача", brief.title || "Не указано", 0], ["Краткое описание", brief.shortSummary || "Не указано", 0], ["Навыки", brief.skills.join(" · ") || "Не выбраны", 0], ["Тип и направление", brief.taskType + " · " + brief.direction, 0], ["Проблема и цель", brief.problem || "Не указано", 0], ["Результат", brief.deliverable || "Не указано", 0], ["Критерии", brief.criteria || "Не указано", 1], ["Срок и команда", brief.deadline + " · " + String(brief.places) + " мест", 1], ["Доступ", formatMode, 2], ["Данные", brief.dataTerms || "Не указаны", 2], ["Сопровождение", brief.support || "Не указано", 3]].map(([title, value, target]) => <button type="button" key={String(title)} className="create-v2-summary-item" onClick={() => { goStep(Number(target)); }}><small>{title}</small><strong>{value}</strong><span>Изменить <ArrowRight size={13} /></span></button>)}
           </div>
           {missing.length > 0 && <div className="create-v2-missing" role="status"><strong>Нужно дополнить</strong><div>{missing.map((item) => <button key={item.title} type="button" onClick={() => { goStep(item.step); }}>{item.title} <ArrowRight size={13} /></button>)}</div></div>}
@@ -223,7 +237,7 @@ export function CustomerCreateTask({ candidates, onPublish, onBack }: Props) {
           <div className="create-v3-primary-actions">
             {step > 0 && <button type="button" className="create-v2-back" onClick={() => { goStep(step - 1); }}><ArrowLeft size={16} /> Назад</button>}
             <button type="button" onClick={saveDraft}><Save size={16} /> Сохранить черновик</button>
-            {step < 4 ? <button type="button" className="primary" onClick={() => { goStep(step + 1); }}>Далее <ArrowRight size={17} /></button> : <button type="button" className="primary" disabled={missing.length > 0} onClick={publish}><CheckCircle2 size={18} /> Опубликовать</button>}
+            {step < 4 ? <button type="button" className="primary" onClick={() => { goStep(step + 1); }}>Далее <ArrowRight size={17} /></button> : <button type="button" className="primary" disabled={missing.length > 0 || publishing} onClick={()=>{void publish();}}><CheckCircle2 size={18} /> {publishing ? "Отправляем…" : "Отправить на модерацию"}</button>}
           </div>
         </footer>
       </section>
@@ -241,7 +255,7 @@ export function CustomerCreateTask({ candidates, onPublish, onBack }: Props) {
               <div><dt><CalendarDays size={16} /> Сроки</dt><dd>{brief.deadline ? new Date(brief.deadline + "T12:00:00").toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" }) : "Не указаны"}</dd></div>
               <div><dt><ClipboardCheck size={16} /> Формат</dt><dd>{formatMode} · {brief.places} мест</dd></div>
             </dl>
-            <button type="button" onClick={() => { setPreviewOpen(true); }}>Открыть полный предпросмотр <ArrowRight size={14} /></button>
+            <button type="button" onClick={() => { setPreviewOpen(true); }}>Посмотреть глазами участника <ArrowRight size={14} /></button>
           </div>
         </section>
         <section className="create-v3-advice-card">
@@ -271,7 +285,7 @@ export function CustomerCreateTask({ candidates, onPublish, onBack }: Props) {
         <h3>Что требуется на выходе</h3><p>{brief.deliverable || "Результат пока не описан"}</p>
         <h3>Критерии приёмки</h3><p>{brief.criteria || "Критерии пока не опубликованы"}</p>
         <h3>Данные и поддержка</h3><p>{brief.dataTerms}; {brief.support}</p>
-      </div><footer><span>Это предварительный просмотр, задача ещё не опубликована</span><button type="button" onClick={() => { setPreviewOpen(false); }}>Вернуться к редактированию</button></footer>
+      </div><footer><span>Предпросмотр — задача станет доступна участникам после модерации</span><button type="button" onClick={() => { setPreviewOpen(false); }}>Вернуться к редактированию</button></footer>
     </section></div>}
   </section>;
 }

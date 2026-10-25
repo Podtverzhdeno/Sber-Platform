@@ -1,0 +1,56 @@
+name: Customer task creation QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/customer-create-task*"
+      - "frontend/src/features/customer-task-api*"
+      - "frontend/src/features/customer-scenario.tsx"
+      - "frontend/src/features/customer-premium.tsx"
+      - "tests/test_work_api.py"
+      - ".github/workflows/customer-task-creation-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: customer-task-creation-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  customer-wizard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - name: Check all modified customer code
+        run: npx eslint src/features/customer-create-task.tsx src/features/customer-task-api.ts src/features/customer-scenario.tsx src/features/customer-premium.tsx src/features/customer-create-task.test.tsx src/features/customer-task-api.test.ts --max-warnings 0
+      - name: Test the actual wizard and server request builder
+        run: npx vitest run src/features/customer-create-task.test.tsx src/features/customer-task-api.test.ts
+      - name: Typecheck browser application
+        run: npm run typecheck
+
+  customer-cross-role-api:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - name: Install locked backend dependencies
+        run: uv sync --frozen
+      - name: Check cross-role test formatting
+        run: uv run ruff format --check tests/test_work_api.py
+      - name: Verify customer creation through operator approval to participant catalog
+        run: uv run pytest -q tests/test_work_api.py::test_customer_task_cross_role_visibility

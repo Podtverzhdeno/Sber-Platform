@@ -1775,3 +1775,75 @@ def test_customer_activity_uses_only_dated_events_from_owned_tasks() -> None:
         login(api, "participant-alex")
         hidden = api.get("/api/v1/customer/analytics/activity")
         assert hidden.status_code in {403, 404}
+
+
+def test_customer_task_cross_role_visibility() -> None:
+    """The customer and participant must observe the same UUID, never browser-local copies."""
+    api = client()
+    with api:
+        customer_csrf = login(api, "customer-roman")
+        payload = {
+            **brief(),
+            "task_key": f"brief-{uuid4()}",
+            "title": "Реальный проект для проверки публикации",
+            "mode": "open",
+            "competency_tags": ["python", "rag"],
+            "case_rubric": case_rubric(),
+            "compensation": {
+                "paid": False,
+                "base_amount_per_assignee": None,
+                "currency": None,
+                "a_multiplier": "2.50",
+                "quantum": "0.01",
+                "rounding_mode": "half_up",
+                "policy_version": 1,
+                "payout_condition": "Без денежной выплаты; условия программы",
+            },
+        }
+        created = api.post(
+            "/api/v1/customer/projects/demo-rd-lab/tasks",
+            json=payload,
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert created.status_code == 200, created.text
+        task_id = created.json()["id"]
+        assert created.json()["status"] == "draft"
+        sent = api.post(
+            f"/api/v1/customer/tasks/{task_id}/submit",
+            headers={"X-CSRF-Token": customer_csrf},
+        )
+        assert sent.status_code == 200, sent.text
+        assert sent.json()["status"] == "submitted"
+        assert any(item["id"] == task_id for item in api.get("/api/v1/customer/tasks").json())
+
+        login(api, "participant-alex")
+        hidden = api.get("/api/v1/marketplace/tasks")
+        assert hidden.status_code == 200
+        assert all(item["task"]["id"] != task_id for item in hidden.json())
+
+        operator_csrf = login(api, "operator-pavel")
+        approved = api.post(
+            f"/api/v1/operations/tasks/{task_id}/moderate",
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        assert approved.status_code == 200, approved.text
+        supported = api.post(
+            f"/api/v1/operations/tasks/{task_id}/support",
+            json={"mode": "operator", "assignee_id": None},
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        assert supported.status_code == 200, supported.text
+        published = api.post(
+            f"/api/v1/operations/tasks/{task_id}/publish",
+            headers={"X-CSRF-Token": operator_csrf},
+        )
+        assert published.status_code == 200, published.text
+        assert published.json()["status"] == "published"
+
+        login(api, "participant-alex")
+        listing = api.get("/api/v1/marketplace/tasks")
+        assert listing.status_code == 200
+        assert any(item["task"]["id"] == task_id for item in listing.json())
+        detail = api.get(f"/api/v1/marketplace/tasks/{task_id}")
+        assert detail.status_code == 200
+        assert detail.json()["task"]["id"] == task_id
