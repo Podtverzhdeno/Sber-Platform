@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "../api/client";
 import { applyTheme } from "../app/theme";
 import { Badge, StatePanel } from "../components/ui";
-import { ParticipantAchievementsV2 } from "./achievements-v2/page";
+import { ParticipantAchievementsGallery } from "./achievements-v2/gallery-page";
 
 const settingsTabs = ["Профиль", "Безопасность", "Предпочтения", "Согласия", "Подбор", "Уведомления", "Видимость для HR", "AI-Buddy"] as const;
 type SettingsTab = typeof settingsTabs[number];
@@ -107,5 +107,5 @@ export function ParticipantBuddy() {
 
 /** Retain the established route while the experience is powered by live evidence. */
 export function ParticipantAchievements({ navigation = [] }: { navigation?: string[] }) {
-  return <ParticipantAchievementsV2 navigation={navigation} />;
+  return <ParticipantAchievementsGallery navigation={navigation} />;
 }
