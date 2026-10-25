@@ -40,6 +40,7 @@ export type PortfolioTrophy = {
   trophy_type: string;
 };
 export type AchievementsPortfolio = {
+  person_id?: string;
   contributions: PortfolioContribution[];
   courses: PortfolioCourse[];
   credentials: PortfolioCredential[];
