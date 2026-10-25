@@ -1,0 +1,16 @@
+# Claim XS-PROJECTION-QA-20261026
+- session_id: gpt6-20261026-xs-contract-qa-02
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: c3069a90ef8699d3d045fef52564897b8b085a5c
+- depends_on:
+  - CROSS-SECTION-PROJECTIONS-20261026 (in REVIEW)
+- write_scope:
+  - .github/workflows/cross-section-projections-qa.yml
+- shared_files: []
+- verification:
+  - targeted Vitest in GitHub Actions
+  - targeted ESLint for changed registry and tests
+- progress: добавление изолированного CI gate без изменения уже занятых UI и Bootcamp files
+- blockers: none
