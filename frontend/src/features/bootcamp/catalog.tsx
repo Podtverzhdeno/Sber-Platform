@@ -303,13 +303,23 @@ function CourseDetails({
   issueError: boolean; onIssue: (key: string) => void;
 }) {
   const [tab, setTab] = useState<"about" | "program" | "skills" | "reviews">("about");
+  const lessonSection = useRef<HTMLDivElement>(null);
+  const jumpToLesson = useRef(false);
+  useEffect(() => {
+    if (tab !== "program" || !jumpToLesson.current) return;
+    jumpToLesson.current = false;
+    const lesson = lessonSection.current?.querySelector<HTMLElement>(".bc-learning__body");
+    if (lesson && typeof lesson.scrollIntoView === "function") {
+      lesson.scrollIntoView({ block: "start", behavior: "instant" });
+    }
+  }, [tab]);
   const tabs = [
     { key: "about", label: "О курсе" },
     { key: "program", label: "Программа" },
     { key: "skills", label: "Навыки" },
     { key: "reviews", label: "Отзывы" },
   ] as const;
-  return <div className="bc-panel-content" data-reference="BC-R03">
+  return <div ref={lessonSection} className="bc-panel-content" data-reference="BC-R03">
     <div className="bc-ref-detail-hero">
       <CourseFlags card={card}/>
       <h2 className="bc-detail-title">{detail?.title ?? card.title}</h2>
@@ -336,7 +346,7 @@ function CourseDetails({
         {card.verified_evidence ? <p>Подтверждённый результат: {card.verified_evidence}</p> :
           <p>{card.pending_verification_note || "Освоение курса и подтверждение компетенции — разные этапы. Основание для подтверждения появится после проверки результата."}</p>}
         <p className="bc-muted">{card.access_note || accessLabels[card.access_state].label}</p>
-        <button type="button" className="bc-learning-launch" onClick={() => { setTab("program"); }}>Открыть уроки и практику <ArrowRight aria-hidden="true" /></button>
+        <button type="button" className="bc-learning-launch" onClick={() => { jumpToLesson.current = true; setTab("program"); }}>Открыть уроки и практику <ArrowRight aria-hidden="true" /></button>
       </>}
       {tab === "program" && <>
         <h3>Программа курса</h3>
