@@ -654,7 +654,7 @@ class DevelopmentService:
             if record is None:
                 continue
             attempt = attempts.get(track.key)
-            completed = attempt.completed_milestones if attempt is not None else frozenset()
+            completed = attempt.completed_milestones if attempt is not None else frozenset[str]()
             result.append(
                 recalculate_roadmap(
                     RoadmapProjection(
