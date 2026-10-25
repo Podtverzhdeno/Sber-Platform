@@ -2,7 +2,7 @@
 
 - task_id: SIDEBAR-UNIFICATION-20261025
 - session_id: gpt6-20261025-participant-sidebar-unification
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-25T03:17:00+03:00
 - heartbeat_at: 2026-10-25T03:17:00+03:00
 - base_revision: 39b6d1acc8075e8ed6b980a08e236173997c3887
@@ -17,5 +17,10 @@
   - frontend vitest App.test.tsx
   - frontend typecheck and lint
   - desktop/mobile route navigation and sidebar comparison
-- progress: Read-only audit completed. Canonical sidebar preserved for all participant routes; changes are confined to removing home-specific sidebar JSX and visual overrides.
+- progress: PR #57 prepared; three scoped product/test files changed; author writes stopped for independent review.
+- code_pr: https://github.com/Podtverzhdeno/Sber-Platform/pull/57
+- tested_revision: da3cb5bb7f3a35806ad66b8cdc5f693aa79b478f
+- focused_vitest: frontend/src/App.test.tsx — 4/4 PASS in CI job 121028927787.
+- CI: https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40146521637 — not green because backend Ruff formatting outside scope, old trajectory-v2 role-label expectations (6 test failures), and existing security allowlist violations from Bootcamp content URLs. App.test.tsx passed.
+- acceptance: CSS/JSX code-reviewed against canonical route selectors; independent browser screenshot acceptance and complete regression still required before main integration.
 - blockers: The separate TRJ-SOURCE-ROUTE-INTEGRATION claim owns only the trajectory route conditional in App.tsx. That area is untouched. Direct git status unavailable without a git worktree; current main read via GitHub API.
