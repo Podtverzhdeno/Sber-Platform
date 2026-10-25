@@ -124,3 +124,36 @@ test("Bootcamp reference grid column count and card minimum heights", async ({ p
   const height = await available.evaluate((node) => parseFloat(getComputedStyle(node).minHeight));
   expect(height).toBe(296);
 });
+
+
+test("course reader fills viewport and lesson navigation never clips", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1086 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await page.getByTestId("course-agent-development").getByRole("button", { name: "Подробнее →" }).click();
+  const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
+  await expect(dialog).toBeVisible();
+  const geometry = await dialog.evaluate(node => {
+    const rect = node.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+      scrollWidth: node.scrollWidth, clientWidth: node.clientWidth };
+  });
+  expect(geometry.x).toBe(0);
+  expect(geometry.y).toBe(0);
+  expect(geometry.width).toBe(1448);
+  expect(geometry.height).toBe(1086);
+  expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
+  const next = dialog.getByRole("button", { name: /Следующий урок/ });
+  await expect(next).toBeVisible();
+  const buttonBounds = await next.boundingBox();
+  expect(buttonBounds).not.toBeNull();
+  if (buttonBounds) {
+    expect(buttonBounds.x).toBeGreaterThanOrEqual(0);
+    expect(buttonBounds.x + buttonBounds.width).toBeLessThanOrEqual(1449);
+  }
+  await next.click();
+  await expect(dialog.locator(".bc-learning__eyebrow").filter({ hasText: "Урок 2 из" })).toBeVisible();
+  await dialog.getByRole("button", { name: "Закрыть" }).click();
+  await expect(dialog).toHaveCount(0);
+});
