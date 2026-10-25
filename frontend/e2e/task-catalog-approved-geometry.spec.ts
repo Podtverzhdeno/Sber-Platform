@@ -72,7 +72,7 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
     expect(Math.abs(filter.top - filterBounds.all.top)).toBeLessThan(5);
   }
   const sortLabel = await page.locator('.catalog-v2-advanced-filters select[aria-label="Сортировка"]').evaluate((el) =>
-    (el as HTMLSelectElement).selectedOptions[0]?.textContent ?? "");
+    (el as HTMLSelectElement).selectedOptions.item(0)?.textContent ?? "");
   expect(sortLabel).toContain("Сортировка");
 
   // The source has a partially filled average-match donut. The stroke must
