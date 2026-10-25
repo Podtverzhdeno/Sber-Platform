@@ -6,6 +6,7 @@ on:
       - "frontend/src/features/rating-v2/**"
       - "frontend/src/App.tsx"
       - "frontend/e2e/participant-interactions.spec.ts"
+      - "frontend/e2e/topbar-ranking.spec.ts"
       - ".github/workflows/rating-reference-qa.yml"
   push:
     branches: [main]
@@ -41,7 +42,9 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
       - name: Lint rating implementation and interaction tests
-        run: npx eslint src/features/rating-v2/page.tsx e2e/participant-interactions.spec.ts --max-warnings 0
+        run: npx eslint src/features/rating-v2/page.tsx src/features/rating-v2/topbar-rank.tsx src/features/rating-v2/topbar-rank.test.tsx e2e/participant-interactions.spec.ts e2e/topbar-ranking.spec.ts --max-warnings 0
+      - name: Verify personal published rank state tests
+        run: npx vitest run src/features/rating-v2/topbar-rank.test.tsx
       - name: Verify TypeScript
         run: npm run typecheck
       - name: Compile rating styles and build production assets
@@ -53,7 +56,7 @@ jobs:
           CI: "true"
           TZ: Europe/Moscow
           LANG: ru_RU.UTF-8
-        run: npx playwright test participant-interactions.spec.ts --project=chromium --grep "rating" --reporter=line
+        run: npx playwright test participant-interactions.spec.ts topbar-ranking.spec.ts --project=chromium --grep "rating|topbar|flame|bell" --reporter=line
       - name: Retain rating screenshots and failure traces
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
