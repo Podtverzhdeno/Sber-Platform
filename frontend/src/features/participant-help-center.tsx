@@ -30,6 +30,7 @@ export function ParticipantHelpCenter({ section, initialTopicId, onClose, onOpen
         const nodes = dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])');
         if (!nodes?.length) return;
         const first = nodes[0], last = nodes[nodes.length - 1];
+        if (!first || !last) return;
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
       }}>
