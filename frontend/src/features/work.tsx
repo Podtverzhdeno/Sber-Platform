@@ -136,7 +136,7 @@ export function ParticipantTasks({ view = "catalog" }: { view?: "catalog" | "pro
   const [selectedAssignment, setSelectedAssignment] = useState<string | null>(() => { const fromUrl = searchParams.get("project"); if (fromUrl !== null) return fromUrl; const assignmentId = sessionStorage.getItem("impulse_open_assignment"); sessionStorage.removeItem("impulse_open_assignment"); return assignmentId; });
   const [selectedTeamMember, setSelectedTeamMember] = useState<string | null>(null);
   const [applicationNotice, setApplicationNotice] = useState<string | null>(null);
-  const [catalogView, setCatalogView] = useState<"cards" | "list">(() => localStorage.getItem("impulse_task_catalog_view") === "list" ? "list" : "cards");
+  const [catalogView, setCatalogView] = useState<"cards" | "list">(() => localStorage.getItem("impulse_task_catalog_view") === "cards" ? "cards" : "list");
   const [taskCategory, setTaskCategory] = useState<"Все" | "Аналитика" | "ML / AI" | "Разработка">("Все");
   const [appliedTaskIds, setAppliedTaskIds] = useState<string[]>(() => {
     try { return JSON.parse(sessionStorage.getItem("impulse_applied_tasks") ?? "[]") as string[]; } catch { return []; }
