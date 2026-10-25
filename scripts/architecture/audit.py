@@ -157,7 +157,9 @@ def strongly_connected(graph: dict[str, set[str]]) -> list[list[str]]:
 
 
 def migrations(files: dict[str, str]) -> dict[str, Any]:
-    details = {}
+    """Validate static Alembic lineage, including duplicate and cyclic revisions."""
+    details: dict[str, dict[str, Any]] = {}
+    by_revision: dict[str, list[str]] = defaultdict(list)
     for name, contents in files.items():
         parsed: dict[str, Any] = {}
         for match in MIGRATION.finditer(contents):
@@ -166,19 +168,65 @@ def migrations(files: dict[str, str]) -> dict[str, Any]:
             except (ValueError, SyntaxError):
                 parsed[match.group(1)] = None
         details[name] = parsed
-    ids = {x.get("revision") for x in details.values() if isinstance(x.get("revision"), str)}
-    parents: set[str] = set()
-    for x in details.values():
-        prev = x.get("down_revision")
+        revision = parsed.get("revision")
+        if isinstance(revision, str):
+            by_revision[revision].append(name)
+
+    parents_by_revision: dict[str, set[str]] = {}
+    for parsed in details.values():
+        revision = parsed.get("revision")
+        if not isinstance(revision, str):
+            continue
+        prev = parsed.get("down_revision")
         if isinstance(prev, str):
-            parents.add(prev)
+            parents_by_revision[revision] = {prev}
         elif isinstance(prev, (tuple, list)):
-            parents.update(y for y in prev if isinstance(y, str))
+            parents_by_revision[revision] = {x for x in prev if isinstance(x, str)}
+        else:
+            parents_by_revision[revision] = set()
+
+    ids = set(parents_by_revision)
+    all_parents = set().union(*parents_by_revision.values()) if parents_by_revision else set()
+    heads = sorted(ids - all_parents)
+    visited: set[str] = set()
+    visiting: set[str] = set()
+    cycle_nodes: set[str] = set()
+
+    def visit(node: str) -> None:
+        if node in visiting:
+            cycle_nodes.add(node)
+            return
+        if node in visited:
+            return
+        visiting.add(node)
+        for parent in parents_by_revision.get(node, set()) & ids:
+            visit(parent)
+        visiting.remove(node)
+        visited.add(node)
+
+    for revision in sorted(ids):
+        visit(revision)
+    reachable: set[str] = set()
+    pending = list(heads)
+    while pending:
+        node = pending.pop()
+        if node in reachable:
+            continue
+        reachable.add(node)
+        pending.extend(parents_by_revision.get(node, set()) & ids)
+
     return {
         "count": len(details),
-        "heads": sorted(ids - parents),
-        "orphan_parents": sorted(parents - ids),
+        "heads": heads,
+        "orphan_parents": sorted(all_parents - ids),
         "missing_revision": sorted(p for p, x in details.items() if not x.get("revision")),
+        "duplicate_revision": {
+            revision: sorted(names)
+            for revision, names in sorted(by_revision.items())
+            if len(names) > 1
+        },
+        "cyclic_revisions": sorted(cycle_nodes),
+        "unreachable_from_heads": sorted(ids - reachable),
     }
 
 
@@ -418,6 +466,9 @@ def main() -> int:
             len(migration["heads"]) != 1
             or migration["orphan_parents"]
             or migration["missing_revision"]
+            or migration["duplicate_revision"]
+            or migration["cyclic_revisions"]
+            or migration["unreachable_from_heads"]
         ):
             problems.append("Migration graph invalid: " + json.dumps(migration))
         for problem in problems:
