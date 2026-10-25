@@ -1,8 +1,10 @@
 """Messaging workspace acceptance scenarios."""
 
 from dataclasses import replace
+from typing import cast
 from uuid import UUID, uuid5
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
@@ -447,7 +449,9 @@ def test_contact_directory_and_group_creation_work_with_demo_flag_disabled() -> 
     """
     api, _store = build()
     csrf = login(api, "participant-alex")
-    api.app.state.settings.demo_mode = False
+    server = api.app
+    assert isinstance(server, FastAPI)
+    cast(Settings, server.state.settings).demo_mode = False
 
     contacts = api.get("/api/v1/me/messaging/contacts")
     assert contacts.status_code == 200
