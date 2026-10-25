@@ -6,7 +6,7 @@ import {
   LockKeyhole, Medal, BadgeCheck, ShieldCheck, Sparkles, Target, Trophy,
 } from "lucide-react";
 import { apiRequest, type RuntimeApiPath } from "../../../api/client";
-import { learningSummaryQueryKey } from "../../learning-progress";
+import { invalidateLearningProjections } from "../../learning-progress";
 import { learningProgramFor } from "./programs";
 import { knowledgeCheckFor } from "./knowledge-checks";
 import { authorizationMethods, authorizationWalkthrough, authorizationRequirements, authorizationCriteria, authorizationExample } from "./security-lesson-reference";
@@ -69,8 +69,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     ),
     onSuccess: (state) => {
       client.setQueryData(["impulse-study", courseKey], state);
-      void client.invalidateQueries({ queryKey: learningSummaryQueryKey });
-      void client.invalidateQueries({ queryKey: ["bootcamp-v2-overview"] });
+      invalidateLearningProjections(client);
     },
   });
   const submitPractice = useMutation({
@@ -80,8 +79,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     }),
     onSuccess: (state) => {
       client.setQueryData(["impulse-study", courseKey], state);
-      void client.invalidateQueries({ queryKey: learningSummaryQueryKey });
-      void client.invalidateQueries({ queryKey: ["bootcamp-v2-overview"] });
+      invalidateLearningProjections(client);
     },
   });
   const finish = useMutation({
@@ -89,9 +87,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
       { method: "POST", headers: csrfHeaders() }),
     onSuccess: (state) => {
       client.setQueryData(["impulse-study", courseKey], state);
-      void client.invalidateQueries({ queryKey: learningSummaryQueryKey });
-      void client.invalidateQueries({ queryKey: ["bootcamp-v2-overview"] });
-      void client.invalidateQueries({ queryKey: ["participant-growth-analytics"] });
+      invalidateLearningProjections(client);
       setView("success");
     },
   });
