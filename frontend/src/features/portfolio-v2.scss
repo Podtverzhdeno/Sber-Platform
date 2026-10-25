@@ -234,7 +234,7 @@
   .p2-project { grid-template-columns:1fr; }.p2-project-art { min-height:100px; max-height:130px; }
   .p2-passport-body { grid-template-columns:1fr; }.p2-radar-wrap { border-right:0; border-bottom:1px solid #15374f; }.p2-skill-levels { padding:12px; }
   .p2-cert-list { grid-template-columns:1fr; }.p2-certificate { min-height:72px; grid-template-columns:34px minmax(0,1fr); }
-  .p2-visibility-controls { grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .p2-visibility-controls { grid-template-columns:minmax(0,1fr); }
 }
 @media(max-width:850px) {
   .workspace-content:has(.p2-root) { padding:12px 14px 42px; }
