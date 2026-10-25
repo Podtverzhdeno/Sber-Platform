@@ -1,0 +1,224 @@
+{
+  "schema_version": 1,
+  "baseline_run": 40239438996,
+  "source_sha": "c5363831de579bce034870fa9d10acc5bfd555bf",
+  "exceptions": [
+    {
+      "path": "src/impulse/application/access.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/agents.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/buddy.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/deadline.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/development.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/development_overview.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/ecosystem.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/idempotency.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/identity.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/messaging.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/notifications.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/operations.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/project_credentials.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/recognition.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/reward.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/talent.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/task_catalog_analytics.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/task_catalog_page.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/task_terms_read.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/application/work.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/infrastructure/agent_checkpoint_store.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/infrastructure/buddy_store.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/infrastructure/deadline_store.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/infrastructure/development_store.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/infrastructure/development_store.py",
+      "module": "impulse.bootstrap.ai_curriculum_details",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/infrastructure/ecosystem_store.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/infrastructure/identity_store.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/infrastructure/operations_store.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/infrastructure/recognition_store.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/infrastructure/reward_store.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    },
+    {
+      "path": "src/impulse/infrastructure/work_store.py",
+      "module": "impulse.api.errors",
+      "owner": "architecture-hardening",
+      "expires": "2027-01-31",
+      "reason": "Legacy transport coupling; migrate by bounded context with response compatibility tests"
+    }
+  ]
+}
