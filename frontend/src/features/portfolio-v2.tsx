@@ -145,7 +145,7 @@ export function ParticipantPortfolioV2() {
     onSuccess: async () => { await client.invalidateQueries({ queryKey: ["portfolio"] }); },
     onError: () => { setNotice("Не удалось сохранить настройку видимости. Попробуйте ещё раз."); },
   });
-  useEffect(() => { if (!notice) return; const t = window.setTimeout(() => setNotice(""), 4000); return () => { window.clearTimeout(t); }; }, [notice]);
+  useEffect(() => { if (!notice) return; const t = window.setTimeout(() => { setNotice(""); }, 4000); return () => { window.clearTimeout(t); }; }, [notice]);
   useEffect(() => {
     if (!openCase && !openCredential) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") { setOpenCase(null); setOpenCredential(null); } };
