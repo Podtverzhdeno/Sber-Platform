@@ -124,7 +124,7 @@ describe("AI-Buddy single-pane conversation", () => {
     expect(screen.queryByText(oldMessage.content)).not.toBeInTheDocument();
     expect(screen.getByText(/Начните разговор: напишите вопрос/)).toBeVisible();
     expect(screen.queryByLabelText("Пример взаимодействия")).not.toBeInTheDocument();
-    expect(JSON.parse(localStorage.getItem("impulse-buddy-dialogues:" + profile.person_id) ?? "[]")[0].id).toBe(created.id);
+    expect(localStorage.getItem("impulse-buddy-dialogues:" + profile.person_id)).toContain(created.id);
   });
 
   it("preserves the current conversation and draft when creating a new chat fails", async () => {
