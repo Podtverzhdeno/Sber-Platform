@@ -18,7 +18,7 @@ const makeMessage = (id: string, body: string, author_name = "Елена Нас�
 });
 async function openMessages(page: Page) {
   let loggedIn = false;
-  const channels=referenceChannels;
+  const channels: Array<Omit<(typeof referenceChannels)[number], "last_message"> & { last_message: (typeof referenceChannels)[number]["last_message"] | null }> = [...referenceChannels];
   const sentMessages: string[] = [];
   await page.route("**/api/v1/config", route => route.fulfill({json:{demo_mode:true}}));
   await page.route("**/api/v1/auth/personas", route => route.fulfill({
