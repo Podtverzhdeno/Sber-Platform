@@ -11,6 +11,7 @@ from impulse.api.v1.development import router as development_router
 from impulse.api.v1.ecosystem import router as ecosystem_router
 from impulse.api.v1.growth import router as growth_router
 from impulse.api.v1.identity import router as identity_router
+from impulse.api.v1.journey import router as journey_router
 from impulse.api.v1.messaging import router as messaging_router
 from impulse.api.v1.notifications import router as notifications_router
 from impulse.api.v1.operations import router as operations_router
@@ -36,6 +37,7 @@ router.include_router(editorial_study_router)
 router.include_router(growth_router)
 router.include_router(ecosystem_router)
 router.include_router(identity_router)
+router.include_router(journey_router)
 router.include_router(messaging_router)
 router.include_router(notifications_router)
 router.include_router(operations_router)
