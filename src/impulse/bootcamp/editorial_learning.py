@@ -4,6 +4,7 @@ Only the published eight-unit Impulse demo course family is eligible. Checking a
 lesson records participation, not proof of skill. Practical-competency awards
 remain exclusively on the verified provider/reviewer track.
 """
+
 from __future__ import annotations
 
 from typing import Annotated
@@ -38,13 +39,22 @@ def _check_actor(authenticated: AuthenticatedSession, course_key: str) -> None:
 
 async def _view(request: Request, person_id: UUID, course_key: str) -> ImpulseStudyView:
     async with request.app.state.database.sessions() as session:
-        row = (await session.execute(
-            text("SELECT completed_units, certificate_id FROM impulse_course_progress "
-                 "WHERE person_id = :person AND course_key = :course"),
-            {"person": person_id, "course": course_key},
-        )).mappings().one_or_none()
+        row = (
+            (
+                await session.execute(
+                    text(
+                        "SELECT completed_units, certificate_id FROM impulse_course_progress "
+                        "WHERE person_id = :person AND course_key = :course"
+                    ),
+                    {"person": person_id, "course": course_key},
+                )
+            )
+            .mappings()
+            .one_or_none()
+        )
     return ImpulseStudyView(
-        course_key=course_key, completed_units=int(row["completed_units"]) if row else 0,
+        course_key=course_key,
+        completed_units=int(row["completed_units"]) if row else 0,
         certificate_id=row["certificate_id"] if row else None,
         finished=bool(row and row["certificate_id"]),
     )
@@ -60,9 +70,13 @@ async def get_impulse_study(
     return await _view(request, authenticated.actor.person_id, course_key)
 
 
-@router.post("/me/bootcamp/impulse-study/{course_key}/lessons/{index}/complete", response_model=ImpulseStudyView)
+@router.post(
+    "/me/bootcamp/impulse-study/{course_key}/lessons/{index}/complete",
+    response_model=ImpulseStudyView,
+)
 async def complete_impulse_lesson(
-    course_key: str, index: int,
+    course_key: str,
+    index: int,
     authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
     request: Request,
 ) -> ImpulseStudyView:
@@ -72,24 +86,38 @@ async def complete_impulse_lesson(
     person = authenticated.actor.person_id
     async with request.app.state.database.session() as session:
         await session.execute(
-            text("INSERT INTO impulse_course_progress(person_id,course_key,completed_units,total_units) "
-                 "VALUES (:person,:course,0,8) ON CONFLICT (person_id,course_key) DO NOTHING"),
+            text(
+                "INSERT INTO impulse_course_progress(person_id,course_key,completed_units,total_units) "
+                "VALUES (:person,:course,0,8) ON CONFLICT (person_id,course_key) DO NOTHING"
+            ),
             {"person": person, "course": course_key},
         )
-        changed = (await session.execute(
-            text("UPDATE impulse_course_progress SET completed_units = :next, updated_at = now() "
-                 "WHERE person_id = :person AND course_key = :course AND completed_units = :current "
-                 "RETURNING completed_units"),
-            {"person": person, "course": course_key, "current": index, "next": index + 1},
-        )).scalar_one_or_none()
+        changed = (
+            await session.execute(
+                text(
+                    "UPDATE impulse_course_progress SET completed_units = :next, updated_at = now() "
+                    "WHERE person_id = :person AND course_key = :course AND completed_units = :current "
+                    "RETURNING completed_units"
+                ),
+                {"person": person, "course": course_key, "current": index, "next": index + 1},
+            )
+        ).scalar_one_or_none()
         if changed is None:
-            actual = (await session.execute(
-                text("SELECT completed_units FROM impulse_course_progress "
-                     "WHERE person_id = :person AND course_key = :course"),
-                {"person": person, "course": course_key},
-            )).scalar_one()
+            actual = (
+                await session.execute(
+                    text(
+                        "SELECT completed_units FROM impulse_course_progress "
+                        "WHERE person_id = :person AND course_key = :course"
+                    ),
+                    {"person": person, "course": course_key},
+                )
+            ).scalar_one()
             if actual < index + 1:
-                raise ApiError(code="LESSON_ORDER", message="Сначала завершите предыдущий урок.", status_code=409)
+                raise ApiError(
+                    code="LESSON_ORDER",
+                    message="Сначала завершите предыдущий урок.",
+                    status_code=409,
+                )
     return await _view(request, person, course_key)
 
 
@@ -103,18 +131,32 @@ async def finish_impulse_study(
     person = authenticated.actor.person_id
     async with request.app.state.database.session() as session:
         result = await session.execute(
-            text("UPDATE impulse_course_progress "
-                 "SET finished_at = now(), certificate_id = :certificate, updated_at = now() "
-                 "WHERE person_id = :person AND course_key = :course "
-                 "AND completed_units = 8 AND certificate_id IS NULL"),
+            text(
+                "UPDATE impulse_course_progress "
+                "SET finished_at = now(), certificate_id = :certificate, updated_at = now() "
+                "WHERE person_id = :person AND course_key = :course "
+                "AND completed_units = 8 AND certificate_id IS NULL"
+            ),
             {"person": person, "course": course_key, "certificate": uuid4()},
         )
         if result.rowcount == 0:
-            state = (await session.execute(
-                text("SELECT completed_units,certificate_id FROM impulse_course_progress "
-                     "WHERE person_id = :person AND course_key = :course"),
-                {"person": person, "course": course_key},
-            )).mappings().one_or_none()
+            state = (
+                (
+                    await session.execute(
+                        text(
+                            "SELECT completed_units,certificate_id FROM impulse_course_progress "
+                            "WHERE person_id = :person AND course_key = :course"
+                        ),
+                        {"person": person, "course": course_key},
+                    )
+                )
+                .mappings()
+                .one_or_none()
+            )
             if not state or state["completed_units"] != 8:
-                raise ApiError(code="COURSE_INCOMPLETE", message="Завершите все восемь уроков.", status_code=409)
+                raise ApiError(
+                    code="COURSE_INCOMPLETE",
+                    message="Завершите все восемь уроков.",
+                    status_code=409,
+                )
     return await _view(request, person, course_key)
