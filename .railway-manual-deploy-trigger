@@ -3,3 +3,6 @@ release-source=b96d349dd89660bfebdc7c2920435fc00edb2816
 
 # Align primary course action with and without recommended reason link
 release_request=2026-10-26-bootcamp-cta-baselines-c70dc4b52ccf
+
+# Compact role roadmap: one study progress, no repeated course and stage confirmations
+release_request=2026-10-26-trajectory-compact-ui-29b774b7afb6
