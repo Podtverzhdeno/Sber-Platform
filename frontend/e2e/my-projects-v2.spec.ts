@@ -73,7 +73,7 @@ test("My Projects: cards, selection, filtering, bookmarks and rewards",async({pa
   const root=page.locator(".mpv2");
   await expect(root).toHaveAttribute("data-project-screen","cards");
   await expect(root.locator(".mp-project-tile")).toHaveCount(3);
-  await expect(root.locator(".mp-benefit-step")).toHaveCount(6);
+  await expect(root.locator(".mpr-stage")).toHaveCount(6);
   await expect(root.locator(".mp-card-list .mp-project-tile")).toHaveCount(3);
   await expect(root.locator(".mp-project-tile__identity small").first()).toContainText("Сбер");
   await expect(root.locator(".mp-preview")).toBeVisible();
