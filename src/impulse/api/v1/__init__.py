@@ -8,6 +8,7 @@ from impulse.api.v1.assistant import router as assistant_router
 from impulse.api.v1.buddy import router as buddy_router
 from impulse.api.v1.competencies import router as competencies_router
 from impulse.api.v1.development import router as development_router
+from impulse.bootcamp.editorial_learning import router as editorial_study_router
 from impulse.api.v1.ecosystem import router as ecosystem_router
 from impulse.api.v1.growth import router as growth_router
 from impulse.api.v1.identity import router as identity_router
@@ -31,6 +32,7 @@ router.include_router(assistant_router)
 router.include_router(buddy_router)
 router.include_router(competencies_router)
 router.include_router(development_router)
+router.include_router(editorial_study_router)
 router.include_router(growth_router)
 router.include_router(ecosystem_router)
 router.include_router(identity_router)
