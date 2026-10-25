@@ -545,9 +545,10 @@ export function BootcampCatalog({
   }
 
   const relevanceFilter = searchParams.get("relevance") ?? "all";
-  const trackFilter = searchParams.get("track") ?? "all";
+  const trackOptions: string[] = [...new Set(catalog.data.flatMap(card => card.track_keys))];
+  const trackFilter = searchParams.get("track") ?? (trackOptions[0] ?? "all");
   const view = searchParams.get("view") ?? "card";
-  const category = searchParams.get("category") ?? "all";
+  const category = searchParams.get("category") ?? "role";
   const query = (searchParams.get("q") ?? "").trim().toLocaleLowerCase("ru-RU");
   const setTrack = (track: string) => { updateFilter("track", track); };
   const forTrack = (card: CourseCardState) => trackFilter === "all" || card.track_keys.includes(trackFilter);
