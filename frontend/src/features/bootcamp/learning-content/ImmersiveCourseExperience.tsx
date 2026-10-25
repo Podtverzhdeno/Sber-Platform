@@ -8,6 +8,7 @@ import {
 import { apiRequest, type RuntimeApiPath } from "../../../api/client";
 import { learningProgramFor } from "./programs";
 import { knowledgeCheckFor } from "./knowledge-checks";
+import { authorizationMethods, authorizationWalkthrough, authorizationRequirements, authorizationCriteria, authorizationExample } from "./security-lesson-reference";
 import "./immersive-course.scss";
 
 type Progress = {
@@ -84,6 +85,8 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   if (!unit) return null;
   const currentUnitId = unit.id;
   const question = knowledgeCheckFor(courseKey, unit.id);
+  const authReference = courseKey === "demo-course-10" && unit.id === "authorization";
+  const exampleText = authReference ? authorizationExample : unit.example;
   const ready = completed === total;
   const busy = advance.isPending || finish.isPending;
 
@@ -233,18 +236,24 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           <nav className="imp-study__tabs" aria-label="Разделы урока">{sectionTabs.map(({id,name,Icon})=><button type="button" key={id} aria-current={(view===id || (view==="overview" && id==="check")) ? "page" : undefined} className={(view===id || (view==="overview" && id==="check"))?"active":""} onClick={() => { openView(id); }}><Icon size={18}/>{name}</button>)}</nav>
           {view === "theory" && <section className="imp-study__content" aria-label="Теория"><h3>Теория</h3><h4>{unit.title}</h4>
             {unit.theory.map((text,index)=><p key={index}>{text}</p>)}
+            {authReference && <><h4>Основные способы аутентификации</h4><div className="imp-study__methods-grid">{authorizationMethods.map((method,index)=><article key={method.title} className="imp-study__method-card"><span>{index+1}</span><div><strong>{method.title}</strong><p>{method.detail}</p></div></article>)}</div></>}
             <div className="imp-study__callout"><Sparkles size={21}/><p><strong>Важно</strong>Используйте принципы из урока на реальных задачах и проверяйте результат самостоятельно.</p></div>
           </section>}
-          {view === "example" && <section className="imp-study__content" aria-label="Пример"><h3>Пример</h3><p>Практический пример применения материала урока</p>
-            <div className="imp-study__example-head"><Code2 size={17}/> Пример решения <button type="button" onClick={() => { void navigator.clipboard.writeText(unit.example); }}><Copy size={14}/> Копировать</button></div>
-            <pre className="imp-study__code"><code>{unit.example}</code></pre>
-            <div className="imp-study__callout"><CheckCircle2 size={18}/><p><strong>Разбор</strong>Сравните пример с задачей и объясните каждый ключевой шаг.</p></div>
+          {view === "example" && <section className="imp-study__content" aria-label="Пример"><h3>Пример</h3><h4>{authReference ? "JWT-аутентификация в API" : "Применение материала урока"}</h4>
+            <p>{authReference ? "Разберём проверку JWT в FastAPI. Токен подтверждает личность, а доступ к отдельным объектам проверяется дополнительно." : "Практический пример применения материала урока"}</p>
+            <div className={authReference ? "imp-study__example-grid" : ""}>
+              <div className="imp-study__code-column"><div className="imp-study__example-head"><Code2 size={17}/> main.py <button type="button" onClick={() => { void navigator.clipboard.writeText(exampleText); }}><Copy size={14}/> Копировать код</button></div>
+                <pre className="imp-study__code"><code>{exampleText}</code></pre></div>
+              {authReference ? <div className="imp-study__walkthrough"><h4>Разбор</h4>{authorizationWalkthrough.map((step,index)=><article key={step.title}><span>{index+1}</span><div><strong>{step.title}</strong><p>{step.detail}</p></div></article>)}</div>
+              : <div className="imp-study__callout"><CheckCircle2 size={18}/><p><strong>Разбор</strong>Сравните пример с задачей и объясните каждый ключевой шаг.</p></div>}
+            </div>
           </section>}
           {view === "practice" && <section className="imp-study__content" aria-label="Практическое задание"><h3>Практическое задание</h3><p>{unit.practice}</p>
             <div className="imp-study__practice-columns"><div><h4><Target size={18}/> Требования</h4>
-              {unit.checklist.map((item,index)=><div className="imp-study__requirement" key={item}><span>{index+1}</span>{item}</div>)}</div>
-              <div><h4><ClipboardCheck size={18}/> Критерии проверки</h4><p>{unit.expected}</p>
-                <p>Должны быть продемонстрированы работоспособность, полнота решения и корректность обработки ошибок.</p></div></div>
+              {authReference ? authorizationRequirements.map((item,index)=><div className="imp-study__requirement" key={item.title}><span>{index+1}</span><div><strong>{item.title}</strong><p>{item.detail}</p></div></div>)
+              : unit.checklist.map((item,index)=><div className="imp-study__requirement" key={item}><span>{index+1}</span>{item}</div>)}</div>
+              <div><h4><ClipboardCheck size={18}/> Критерии проверки</h4>
+                {authReference ? authorizationCriteria.map((item,index)=><div className="imp-study__requirement" key={item.title}><span>{index+1}</span><div><strong>{item.title}</strong><p>{item.detail}</p></div></div>) : <><p>{unit.expected}</p><p>Должны быть продемонстрированы работоспособность, полнота решения и корректность обработки ошибок.</p></>}</div></div>
             <p className="imp-study__disclaimer">Практическая работа требует отдельной проверки для сертификата подтверждения знаний.</p>
             <form className="imp-study__submission" onSubmit={event => { event.preventDefault(); void submitPractice.mutateAsync(); }}>
               <h4>Отправить практическую работу на проверку</h4>
