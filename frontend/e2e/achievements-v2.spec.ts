@@ -86,6 +86,16 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await page.screenshot({ path: "test-results/achievements-v2/desktop.png", animations: "disabled", fullPage: true });
   await page.setViewportSize({ width: 1440, height: 900 });
   await expect(screen.getByTestId("achievement-card")).toHaveCount(4);
+  const wideHero = screen.locator(".ach-gallery-hero");
+  const wideBounds = await wideHero.boundingBox();
+  const kickerBounds = await wideHero.locator(".ach-gallery-eyebrow").boundingBox();
+  const headingBounds = await wideHero.locator("h1").boundingBox();
+  const headingLineHeight = await wideHero.locator("h1").evaluate(element =>
+    Number.parseFloat(window.getComputedStyle(element).lineHeight));
+  if (!wideBounds || !kickerBounds || !headingBounds) throw new Error("Wide hero geometry unavailable");
+  expect(kickerBounds.y).toBeGreaterThanOrEqual(wideBounds.y);
+  expect(headingBounds.y + headingBounds.height).toBeLessThanOrEqual(wideBounds.y + wideBounds.height);
+  expect(headingBounds.height).toBeLessThanOrEqual(headingLineHeight * 2 + 3);
   await page.screenshot({ path: "test-results/achievements-v2/wide-desktop.png", animations: "disabled", fullPage: true });
 
   await screen.getByRole("button", { name: /^Проекты/ }).click();
