@@ -239,15 +239,41 @@ function ProjectDetail({ project, onBack, onWorkspace, onMessage, onSubmitContri
       <button type="button" onClick={()=>{setTab("rewards");setRewardFocus("community");}}><Users size={19}/><span><strong>Закрытое комьюнити лучших</strong><small>После 10 подтверждённых проектов</small></span><ArrowRight size={15}/></button>
     </div>
     <div className="mp-detail-tabs" role="tablist" aria-label="Разделы проекта">{tabs.map(item=><button key={item.id} type="button" role="tab" aria-selected={tab===item.id} className={tab===item.id?"is-active":""} onClick={()=>setTab(item.id)}>{item.title}</button>)}</div>
-    {tab==="overview" && <div className="mp-detail-grid">
+    {tab==="overview" && <div className="mp-detail-grid mp-detail-grid--reference">
       <div className="mp-detail-column">
-        <section className="mp-surface mp-detail-panel"><h2><FileText/> Описание проекта</h2><p>{project.detail?.problem || project.work.terms.deliverable}</p><h2><CheckCircle2/> Цели проекта</h2><ul className="mp-checklist">{project.work.terms.acceptance_criteria.map(criterion=><li key={criterion}><CheckCircle2 size={18}/>{criterion}</li>)}</ul></section>
-        <section className="mp-surface mp-detail-panel"><h2><Users/> Команда проекта</h2><p>{project.detail?.mentor ? `Ментор: ${project.detail.mentor.display_name}` : "Ментор не назначен"}</p><p>{project.detail?.team?.map(p=>p.display_name).join(" · ") || "Состав команды уточняется"}</p><button className="mp-secondary" onClick={()=>setTab("team")}>Участники <ArrowRight size={16}/></button></section>
+        <section className="mp-surface mp-detail-panel">
+          <h2><FileText/> Описание проекта</h2>
+          <p>{project.detail?.problem || project.work.terms.deliverable}</p>
+          <h2><CheckCircle2/> Цели проекта</h2>
+          <ul className="mp-checklist">{project.work.terms.acceptance_criteria.map(criterion=><li key={criterion}><CheckCircle2 size={18}/>{criterion}</li>)}</ul>
+        </section>
       </div>
       <div className="mp-detail-column">
-        <section className="mp-surface mp-detail-panel"><header><h2>Прогресс проекта</h2><strong>{progress===null?"Нет оценки":`${progress}%`}</strong></header>{checkpoints.length?checkpoints.map((cp,index)=><div className="mp-stage" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"done":""}>{finishedCheckpoint.has(cp.status)?<Check size={15}/>:index+1}</span><div><p>{cp.title}</p><ProgressBar compact value={finishedCheckpoint.has(cp.status)?100:null}/></div></div>):<p className="mp-muted">Этапы проекта пока не опубликованы</p>}</section>
-        <section className="mp-surface mp-detail-panel"><h2>Мой вклад</h2><p>{project.work.contributions.length>0?`Версий результата: ${project.work.contributions.length}`:"Личный вклад ещё не отправлен"}</p><button className="mp-secondary" onClick={()=>setTab("contribution")}>Открыть вклад <ArrowRight size={16}/></button></section>
-        <BenefitsPreview onDetails={()=>setTab("rewards")}/>
+        <section className="mp-surface mp-detail-panel">
+          <h2><Info/> Ключевая информация</h2>
+          <div className="mp-key-facts">
+            <span><BriefcaseBusiness size={17}/> Компания <strong>{projectCompany(project)}</strong></span>
+            <span><CalendarDays size={17}/> Дедлайн <strong>{dateLabel(project.work.terms.deadline_at)}</strong></span>
+            <span><FileText size={17}/> Условия <strong>Версия {project.work.terms.version}</strong></span>
+            <span><Users size={17}/> Команда <strong>{project.detail?.team?.length ?? "Не указано"}</strong></span>
+          </div>
+        </section>
+        <section className="mp-surface mp-detail-panel">
+          <header><h2>Прогресс проекта</h2><strong>{progress===null?"Нет оценки":`${progress}%`}</strong></header>
+          {checkpoints.length ? checkpoints.slice(0,5).map((cp,index)=><div className="mp-stage" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"done":""}>{finishedCheckpoint.has(cp.status)?<Check size={15}/>:index+1}</span><div><p>{cp.title}</p><ProgressBar compact value={finishedCheckpoint.has(cp.status)?100:null}/></div></div>):<p className="mp-muted">Этапы проекта пока не опубликованы</p>}
+        </section>
+      </div>
+      <div className="mp-detail-column">
+        <section className="mp-surface mp-detail-panel">
+          <h2><Users/> Команда проекта</h2>
+          {project.detail?.team?.length?project.detail.team.slice(0,5).map(person=><div className="mp-team-member" key={person.person_id}><span>{person.display_name.slice(0,1)}</span><div><strong>{person.display_name}</strong><small>{person.status}</small></div><button type="button" className="mp-secondary" onClick={onMessage} aria-label={`Написать ${person.display_name}`}><MessageCircle size={15}/></button></div>):<p className="mp-muted">Состав команды уточняется</p>}
+          <button type="button" className="mp-secondary" onClick={()=>setTab("team")}>Все участники <ArrowRight size={16}/></button>
+        </section>
+        <section className="mp-surface mp-detail-panel">
+          <h2><FileText/> Мой вклад</h2>
+          <p>{project.work.contributions.length>0?`Отправленных версий: ${project.work.contributions.length}`:"Личный вклад ещё не отправлен"}</p>
+          <button type="button" className="mp-secondary" onClick={()=>setTab("contribution")}>Открыть вклад <ArrowRight size={16}/></button>
+        </section>
       </div>
     </div>}
     {tab==="tasks" && <section className="mp-surface mp-detail-panel"><h2>Задачи и критерии результата</h2><p className="mp-muted">Здесь представлены проверяемые критерии заказчика. Их выполнение нельзя подтверждать простым нажатием галочки.</p><ul className="mp-checklist">{project.work.terms.acceptance_criteria.map(criterion=><li key={criterion}><CheckCircle2/>{criterion}</li>)}</ul><button className="mp-primary" type="button" onClick={onWorkspace}>Перейти в рабочую область <ArrowRight size={16}/></button></section>}
