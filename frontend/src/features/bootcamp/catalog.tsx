@@ -394,34 +394,72 @@ function CourseDetails({
   </div>;
 }
 
-function RecommendationDetails({ card, track }: { card: CourseCardState; track: string }) {
-  return <div className="bc-panel-content" data-reference="BC-R04">
-    <p className="bc-panel-kicker">ПОЧЕМУ РЕКОМЕНДОВАН</p>
-    <p className="bc-muted">Направление: {track === "all" ? "все активные" : track}</p>
-    <h3>{card.title}</h3>
-    <p>{card.recommendation_reason || "Персональная рекомендация для курса не опубликована."}</p>
-    {card.relevance_reasons.length > 0 && <ul>{card.relevance_reasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>}
-    {card.must_take ? <section className="bc-impact">
-      <span>Ожидаемое развитие навыка</span>
-      <strong>{card.must_take.skill}</strong>
-      <p>{card.must_take.current_level ?? "Уровень не определён"} → {card.must_take.target_level ?? "Цель не определена"}</p>
-      <p>{card.must_take.explanation}</p>
-      <p>{card.must_take.projected_impact}</p>
-    </section> : <p className="bc-muted">Персональный пробел навыка для этого курса не установлен.</p>}
-    <small className="bc-muted">Предполагаемый эффект не означает подтверждённого результата или смены грейда.</small>
+function RecommendationDetails({ card, track, onOpenCourse }: { card: CourseCardState; track: string; onOpenCourse: () => void }) {
+  const reasons = card.relevance_reasons;
+  return <div className="bc-panel-content bc-ref-why-panel" data-reference="BC-R04">
+    <p className="bc-ref-why-context">Курс: <strong>{card.title}</strong> · Направление: {track}</p>
+    <section className="bc-ref-why-item">
+      <span className="bc-ref-why-symbol bc-ref-why-symbol--role"><GraduationCap /></span>
+      <div><h3>Связь с выбранной ролью</h3><p>{card.relevant
+        ? "Курс входит в рекомендации для выбранной траектории."
+        : "Курс доступен в общем каталоге. Его связь с выбранной ролью не подтверждена."}</p></div>
+    </section>
+    <section className="bc-ref-why-item">
+      <span className="bc-ref-why-symbol bc-ref-why-symbol--skill"><ChartNoAxesCombined /></span>
+      <div><h3>Какой пробел закрывает</h3>
+        <p>{card.must_take?.explanation ?? "Индивидуальный пробел в матрице навыков для этого курса пока не определён."}</p>
+        {card.must_take && <div className="bc-ref-skill-impact"><strong>{card.must_take.skill}</strong>
+          <span>{card.must_take.current_level ?? "Уровень не определён"} <ArrowRight /> {card.must_take.target_level ?? "Цель не задана"}</span></div>}
+      </div>
+    </section>
+    <section className="bc-ref-why-item">
+      <span className="bc-ref-why-symbol bc-ref-why-symbol--project"><Sparkles /></span>
+      <div><h3>Зачем проходить</h3><p>{card.recommendation_reason || "Подробное обоснование пока не опубликовано."}</p>
+        {reasons.length > 0 && <ul>{reasons.map(reason => <li key={reason}>{reason}</li>)}</ul>}</div>
+    </section>
+    <section className="bc-ref-why-item">
+      <span className="bc-ref-why-symbol bc-ref-why-symbol--confirm"><Check /></span>
+      <div><h3>Как подтвердить результат</h3><p>{card.verified_evidence
+        ? "Подтверждённое доказательство: " + card.verified_evidence
+        : card.pending_verification_note || "После обучения необходимо предъявить проверяемый результат. Прохождение курса не означает автоматического повышения грейда."}</p></div>
+    </section>
+    <button className="bc-ref-why-cta" type="button" onClick={onOpenCourse}>Посмотреть программу курса <ArrowRight /></button>
   </div>;
 }
 
-function RequirementsDetails({ cards, onSelect }: { cards: CourseCardState[]; onSelect: (key: string) => void }) {
-  const pending = cards.filter((card) => card.must_take && card.completion_state !== "verified");
-  return <div className="bc-panel-content" data-reference="BC-R05">
-    <p className="bc-panel-kicker">ОБЯЗАТЕЛЬНОЕ ОБУЧЕНИЕ</p>
-    <p>Здесь показаны курсы, отмеченные как обязательные в текущем каталоге. Полный набор требований к грейду определяется отдельно опубликованной программой и проверкой практических результатов.</p>
-    {pending.length === 0 ? <p className="bc-muted">Незавершённых обязательных курсов в текущем каталоге нет. Статус готовности к грейду здесь не рассчитан.</p> :
-      <ol className="bc-requirements-list">{pending.map((card) =>
-        <li key={card.key}><div><strong>{card.title}</strong><small>{completionLabels[card.completion_state]?.label ?? accessLabels[card.access_state].label}</small>
-          <p>{card.must_take?.explanation}</p></div><button type="button" onClick={() => { onSelect(card.key); }}>Посмотреть →</button></li>,
+function RequirementsDetails({ cards, onSelect, onClose }: { cards: CourseCardState[]; onSelect: (key: string) => void; onClose: () => void }) {
+  const required = cards.filter(card => card.must_take !== null);
+  const pending = required.filter(card => card.completion_state !== "verified");
+  const verifiedCount = required.length - pending.length;
+  const percent = required.length > 0 ? Math.round(100 * verifiedCount / required.length) : null;
+  return <div className="bc-panel-content bc-ref-required-panel" data-reference="BC-R05">
+    <p className="bc-ref-required-kicker">ПУТЬ К СЛЕДУЮЩЕМУ ЭТАПУ</p>
+    <h2>Обязательное обучение</h2>
+    <h3>{pending.length === 0 ? "Незавершённых обязательных курсов нет" : "Осталось " + String(pending.length) + " обязательных курсов"}</h3>
+    <p className="bc-muted">Просмотрите требования активной траектории. Практические критерии проверяются отдельно.</p>
+    <section className="bc-ref-required-progress" aria-label="Подтверждение обязательных курсов">
+      <div><small>ПОДТВЕРЖДЁННЫЕ КУРСЫ</small><strong>{percent === null ? "Нет данных" : String(percent) + "%"}</strong></div>
+      <p>{verifiedCount} из {required.length} подтверждено</p>
+      <div className="bc-ref-track"><i style={{width: percent === null ? "0%" : String(percent) + "%"}}/></div>
+    </section>
+    {pending.length === 0 ? <p className="bc-ref-required-empty">Оставшихся обязательных курсов в каталоге нет. Это не означает, что все условия перехода на следующую ступень выполнены.</p> :
+      <ol className="bc-ref-required-list">{pending.map(card =>
+        <li key={card.key}>
+          <div className="bc-ref-required-card-head"><CourseArtwork title={card.title}/><div>
+            <h4>{card.title}</h4><span>{card.access_state === "available" ? "Обязательный" : "Нужны условия доступа"}</span>
+          </div></div>
+          <p>{card.must_take?.explanation || card.recommendation_reason}</p>
+          <div className="bc-ref-required-card-bottom">
+            <small>{completionLabels[card.completion_state]?.label ?? accessLabels[card.access_state].label}</small>
+            <button type="button" onClick={() => onSelect(card.key)}>{card.access_state === "available" ? "Открыть курс" : "Смотреть условия"} <ArrowRight /></button>
+          </div>
+        </li>,
       )}</ol>}
+    <section className="bc-ref-required-about">
+      <h3>Как это влияет на траекторию?</h3>
+      <p>Подтверждённые курсы закрывают учебную часть. Следующие этапы могут включать практические задания, проверку результатов и подтверждение компетенций.</p>
+    </section>
+    <button type="button" className="bc-ref-required-close" onClick={onClose}>Вернуться в каталог <ArrowRight /></button>
   </div>;
 }
 
@@ -670,7 +708,7 @@ export function BootcampCatalog({
         {visible.length === 0 && <div className="bc-ref-empty" role="status">Курсов по условиям не найдено. <button type="button" onClick={resetFilters}>Сбросить фильтры</button></div>}
       </section>
       <Drawer key={`${panel}:${deepLinked?.key ?? ""}`} title={panel === "reason" ? "Почему рекомендован" : "Информация о курсе"} open={deepLinked !== null && panel !== "requirements"} onClose={closePanel}>
-        {deepLinked && (panel === "reason" ? <RecommendationDetails card={deepLinked} track={selectedRoleTitle} /> :
+        {deepLinked && (panel === "reason" ? <RecommendationDetails card={deepLinked} track={selectedRoleTitle} onOpenCourse={() => { openPanel("detail", deepLinked.key); }} /> :
           <CourseDetails key={deepLinked.key} card={deepLinked}
             detail={detailQuery.data ?? null} loading={detailQuery.isPending} detailError={detailQuery.isError}
             certificate={certificatesQuery.data?.find((item) => item.course_title === deepLinked.title) ?? null}
@@ -680,7 +718,7 @@ export function BootcampCatalog({
             onReason={() => { openPanel("reason", deepLinked.key); }} />)}
       </Drawer>
       <Drawer title="Требования к обучению" open={panel === "requirements"} onClose={closePanel}>
-        <RequirementsDetails cards={catalog.data.filter(forTrack)} onSelect={(key) => { openPanel("detail", key); }} />
+        <RequirementsDetails cards={catalog.data.filter(forTrack)} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} />
       </Drawer>
       {honorBoardEnabled && honorBoardConsent && (
         <Card title="Зал славы курсов">
