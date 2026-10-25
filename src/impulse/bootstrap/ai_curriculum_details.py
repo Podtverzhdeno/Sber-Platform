@@ -10,6 +10,9 @@ from __future__ import annotations
 import json
 from typing import TypedDict, cast
 
+from impulse.bootstrap.ai_reading_resources import reading_for_stage
+from impulse.bootstrap.ai_stage_guides import stage_guide
+
 
 class LearningModule(TypedDict):
     theory: list[str]
@@ -21,9 +24,6 @@ class LearningModule(TypedDict):
 class LearningDetails(LearningModule):
     resources: list[dict[str, str]]
 
-
-from impulse.bootstrap.ai_reading_resources import reading_for_stage
-from impulse.bootstrap.ai_stage_guides import stage_guide
 
 # ruff: noqa: E501 -- curated human-readable Russian lesson descriptions.
 AI_CURRICULUM_DETAILS: dict[str, list[LearningModule]] = cast(dict[str, list[LearningModule]], json.loads(r"""{
