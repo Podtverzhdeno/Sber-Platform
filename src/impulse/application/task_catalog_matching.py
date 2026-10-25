@@ -17,7 +17,6 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from impulse.application.development import DevelopmentService, RoadmapProjection
 from impulse.application.identity import IdentityStore
-from impulse.application.task_catalog_demo_brands import catalog_demo_company_name
 from impulse.application.task_catalog import (
     TASK_CATALOG_SCHEMA_VERSION,
     ApplicationState,
@@ -39,6 +38,7 @@ from impulse.application.task_catalog import (
     StagePlanState,
     TaskRecommendationProjection,
 )
+from impulse.application.task_catalog_demo_brands import catalog_demo_company_name
 from impulse.application.task_terms_read import TaskTermsSnapshot
 from impulse.application.work import (
     ApplicationRecord,
