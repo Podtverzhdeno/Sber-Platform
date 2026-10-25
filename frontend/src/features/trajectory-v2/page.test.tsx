@@ -205,6 +205,16 @@ describe("trajectory v2 stage path", () => {
     fetchSpy.mockRestore();
   });
 
+  it("starts from the enrolled primary role even when the catalogue begins with an unselected role", async () => {
+    mockRoadmapsFetch();
+    const unselected = rolesFixture[2];
+    if (!unselected) throw new Error("Missing preview role");
+    const view = { ...overviewFixture, roles: [unselected, ...rolesFixture.filter(role => role.track_key !== "product")], next_outcome:null };
+    renderShell("/workspace/1", { overview:view });
+    await waitFor(() => { expect(screen.getByTestId("trajectory-role-detail")).toHaveTextContent("Python-разработчик"); });
+    expect(screen.getByTestId("trajectory-role-detail")).not.toHaveAttribute("data-tone","unselected");
+  });
+
   it("reveals stage detail on selection and keeps it in the URL", async () => {
     mockRoadmapsFetch();
     const { locationRef } = renderShell("/workspace/1");
