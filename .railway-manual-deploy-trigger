@@ -23,3 +23,6 @@ release_request=2026-10-25-portfolio-evidence-ca9499195fdf
 
 # Include typed confirmed-at evidence dates in Portfolio Skill Passport release
 release_request=2026-10-25-portfolio-evidence-typefix-c79ef143adf9
+
+# Stretch Portfolio overview project and bottom-card rows without empty gaps
+release_request=2026-10-25-portfolio-row-alignment-badc6d18a601
