@@ -8,3 +8,6 @@ release_request=2026-10-25-bootcamp-popup-fidelity-ebab15f
 
 # BC-R01..BC-R05 geometry, progressive course list, popup and filter acceptance
 release_request=2026-10-25-bootcamp-atomic-review-0e2068d
+
+# Pixel-oriented Bootcamp final: measured geometry, role fold, 3 overlay panels
+release_request=2026-10-25-bootcamp-reference-0477de18
