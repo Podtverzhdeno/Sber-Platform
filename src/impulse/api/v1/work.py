@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import base64
+import binascii
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Annotated, Literal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, Header, Request
+from fastapi.responses import Response
+from sqlalchemy import text
 from pydantic import AnyHttpUrl, AwareDatetime, BaseModel, Field
 
 from impulse.api.errors import ApiError
@@ -38,7 +42,7 @@ from impulse.application.work import (
     WorkService,
 )
 from impulse.domain.development import CompletionStatus
-from impulse.domain.identity import ConsentScope
+from impulse.domain.identity import ConsentScope, Role
 from impulse.domain.reward import CompensationTerms, RoundingMode
 from impulse.domain.work import (
     AcceptanceDecision,
@@ -1630,3 +1634,268 @@ async def participant_preview(
         _work_item_view(item)
         for item in await service.participant_preview(authenticated.actor, task_id)
     ]
+
+
+# Files are private PostgreSQL evidence, not browser-local object URLs. The
+# server always validates assignment ownership and the published checkpoint.
+_MAX_CHECKPOINT_FILE = 5 * 1024 * 1024
+_ALLOWED_CHECKPOINT_FILES = {
+    "application/pdf",
+    "image/png",
+    "image/jpeg",
+    "text/plain",
+    "application/zip",
+    "application/x-zip-compressed",
+}
+
+
+class CheckpointFilePayload(BaseModel):
+    filename: str = Field(min_length=1, max_length=200)
+    content_type: str = Field(min_length=1, max_length=80)
+    base64_data: str = Field(min_length=1, max_length=7_100_000)
+
+
+class CheckpointSubmissionPayload(BaseModel):
+    summary: str = Field(min_length=20, max_length=1500)
+    artifact_key: str = Field(min_length=1, max_length=128)
+    file_ids: list[UUID] = Field(default_factory=list, max_length=5)
+    external_url: AnyHttpUrl | None = None
+
+
+async def _owned_checkpoint(
+    service: WorkService, person_id: UUID, assignment_id: UUID, checkpoint_key: str
+) -> tuple[AssignmentRecord, CheckpointRecord]:
+    assignment = await service.store.assignment(assignment_id)
+    if assignment is None or assignment.person_id != person_id:
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Этап не найден.", status_code=404)
+    stage = next(
+        (item for item in await service.store.checkpoints(assignment.task_id)
+         if item.key == checkpoint_key),
+        None,
+    )
+    if stage is None:
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Этап не найден.", status_code=404)
+    return assignment, stage
+
+
+@router.post("/me/assignments/{assignment_id}/checkpoints/{checkpoint_key}/files")
+async def upload_checkpoint_file(
+    request: Request,
+    assignment_id: UUID,
+    checkpoint_key: str,
+    command: CheckpointFilePayload,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> dict[str, str | int]:
+    if authenticated.actor.active_role is not Role.PARTICIPANT:
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Этап не найден.", status_code=404)
+    assignment, _ = await _owned_checkpoint(
+        service, authenticated.actor.person_id, assignment_id, checkpoint_key
+    )
+    if assignment.status is not AssignmentStatus.IN_PROGRESS:
+        raise ApiError(
+            code="ASSIGNMENT_NOT_IN_PROGRESS",
+            message="Загрузка доступна только для проекта в работе.",
+            status_code=409,
+        )
+    if command.content_type not in _ALLOWED_CHECKPOINT_FILES:
+        raise ApiError(
+            code="UNSUPPORTED_EVIDENCE_FILE",
+            message="Допустимы PDF, PNG, JPG, TXT и ZIP.",
+            status_code=422,
+        )
+    try:
+        data = base64.b64decode(command.base64_data, validate=True)
+    except (ValueError, binascii.Error) as exc:
+        raise ApiError(
+            code="INVALID_EVIDENCE_FILE", message="Файл повреждён.", status_code=422
+        ) from exc
+    if not data or len(data) > _MAX_CHECKPOINT_FILE:
+        raise ApiError(
+            code="EVIDENCE_FILE_SIZE",
+            message="Размер файла должен быть от 1 байта до 5 МБ.",
+            status_code=422,
+        )
+    filename = command.filename.replace("\\", "/").split("/")[-1].strip()
+    if not filename or any(ord(char) < 32 for char in filename):
+        raise ApiError(
+            code="INVALID_EVIDENCE_FILENAME", message="Недопустимое имя.", status_code=422
+        )
+    file_id = uuid4()
+    async with request.app.state.database.sessions() as session:
+        await session.execute(
+            text(
+                "INSERT INTO checkpoint_evidence_files "
+                "(id, assignment_id, person_id, checkpoint_key, filename, "
+                "content_type, size_bytes, data) "
+                "VALUES (:id, :assignment, :person, :checkpoint, :filename, "
+                ":content_type, :size_bytes, :data)"
+            ),
+            {
+                "id": file_id, "assignment": assignment_id,
+                "person": authenticated.actor.person_id,
+                "checkpoint": checkpoint_key, "filename": filename,
+                "content_type": command.content_type,
+                "size_bytes": len(data), "data": data,
+            },
+        )
+    return {"id": str(file_id), "filename": filename, "size_bytes": len(data)}
+
+
+@router.get("/checkpoint-evidence-files/{file_id}", name="download_checkpoint_evidence")
+async def download_checkpoint_evidence(
+    request: Request,
+    file_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> Response:
+    async with request.app.state.database.sessions() as session:
+        record = (
+            await session.execute(
+                text(
+                    "SELECT assignment_id, filename, content_type, data "
+                    "FROM checkpoint_evidence_files WHERE id = :id"
+                ),
+                {"id": file_id},
+            )
+        ).mappings().one_or_none()
+    if record is None:
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Файл не найден.", status_code=404)
+    assignment = await service.store.assignment(record["assignment_id"])
+    if assignment is None:
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Файл не найден.", status_code=404)
+    task = await service.store.get(assignment.task_id)
+    if (
+        task is None
+        or authenticated.actor.person_id
+        not in (assignment.person_id, task.aggregate.customer_id)
+    ):
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Файл не найден.", status_code=404)
+    return Response(
+        content=bytes(record["data"]),
+        media_type="application/octet-stream",
+        headers={
+            "Content-Disposition": f'attachment; filename="evidence-{str(file_id)}"',
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "private, no-store",
+        },
+    )
+
+
+@router.get("/me/assignments/{assignment_id}/checkpoint-submissions")
+async def list_checkpoint_submissions(
+    request: Request,
+    assignment_id: UUID,
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> list[dict[str, str | int]]:
+    assignment = await service.store.assignment(assignment_id)
+    if assignment is None or assignment.person_id != authenticated.actor.person_id:
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Проект не найден.", status_code=404)
+    async with request.app.state.database.sessions() as session:
+        rows = (
+            await session.execute(
+                text(
+                    "SELECT contribution_id, checkpoint_key, submitted_at "
+                    "FROM checkpoint_submissions WHERE assignment_id = :assignment "
+                    "ORDER BY submitted_at DESC"
+                ),
+                {"assignment": assignment_id},
+            )
+        ).mappings().all()
+    contributions = await service.store.contributions_for_assignment(assignment_id)
+    by_id = {entry.id: entry for entry in contributions}
+    return [
+        {
+            "checkpoint_key": row["checkpoint_key"],
+            "contribution_id": str(row["contribution_id"]),
+            "version": by_id[row["contribution_id"]].version,
+            "status": by_id[row["contribution_id"]].status.value,
+        }
+        for row in rows
+        if row["contribution_id"] in by_id
+    ]
+
+
+@router.post("/me/assignments/{assignment_id}/checkpoints/{checkpoint_key}/submit")
+async def submit_checkpoint_solution(
+    request: Request,
+    assignment_id: UUID,
+    checkpoint_key: str,
+    command: CheckpointSubmissionPayload,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[WorkService, Depends(_service)],
+) -> ContributionView:
+    if authenticated.actor.active_role is not Role.PARTICIPANT:
+        raise ApiError(code="RESOURCE_NOT_FOUND", message="Этап не найден.", status_code=404)
+    assignment, checkpoint = await _owned_checkpoint(
+        service, authenticated.actor.person_id, assignment_id, checkpoint_key
+    )
+    if not command.file_ids and command.external_url is None:
+        raise ApiError(
+            code="EVIDENCE_REQUIRED",
+            message="Приложите файл или ссылку на проверяемый результат.",
+            status_code=422,
+        )
+    file_ids = tuple(dict.fromkeys(command.file_ids))
+    async with request.app.state.database.sessions() as session:
+        for file_id in file_ids:
+            row = (
+                await session.execute(
+                    text(
+                        "SELECT id FROM checkpoint_evidence_files "
+                        "WHERE id = :id AND assignment_id = :assignment "
+                        "AND person_id = :person AND checkpoint_key = :checkpoint "
+                        "AND contribution_id IS NULL"
+                    ),
+                    {
+                        "id": file_id, "assignment": assignment_id,
+                        "person": authenticated.actor.person_id,
+                        "checkpoint": checkpoint_key,
+                    },
+                )
+            ).first()
+            if row is None:
+                raise ApiError(
+                    code="EVIDENCE_NOT_AVAILABLE",
+                    message="Один из файлов недоступен для этого этапа.",
+                    status_code=409,
+                )
+    primary_url = (
+        str(command.external_url)
+        if command.external_url is not None
+        else str(request.url_for("download_checkpoint_evidence", file_id=file_ids[0]))
+    )
+    contribution = await service.submit_contribution(
+        authenticated.actor,
+        assignment.id,
+        f"Чекпоинт «{checkpoint.title}»: {command.summary}",
+        (TeamArtifactRecord(command.artifact_key, primary_url),),
+    )
+    async with request.app.state.database.sessions() as session:
+        await session.execute(
+            text(
+                "INSERT INTO checkpoint_submissions "
+                "(contribution_id, assignment_id, checkpoint_key) "
+                "VALUES (:contribution, :assignment, :checkpoint)"
+            ),
+            {
+                "contribution": contribution.id,
+                "assignment": assignment_id,
+                "checkpoint": checkpoint_key,
+            },
+        )
+        for file_id in file_ids:
+            await session.execute(
+                text(
+                    "UPDATE checkpoint_evidence_files SET contribution_id = :contribution "
+                    "WHERE id = :id AND assignment_id = :assignment "
+                    "AND contribution_id IS NULL"
+                ),
+                {
+                    "contribution": contribution.id,
+                    "id": file_id,
+                    "assignment": assignment_id,
+                },
+            )
+    return _contribution_view(contribution)
