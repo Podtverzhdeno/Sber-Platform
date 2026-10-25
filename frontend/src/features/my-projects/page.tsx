@@ -26,7 +26,7 @@ type TaskDetail = {
   team?: { person_id: string; display_name: string; status: string }[];
   checkpoints?: { key: string; title: string; status: string }[];
   personal?: { id: string; version: number; personal_summary: string; artifact_keys: string[]; status: string }[];
-  feedback?: { contribution_id: string; contribution_version: number; grade: string; explanation: string; status: string }[];
+  feedback?: { contribution_id: string; contribution_version: number; review_version: number; grade: string; explanation: string; status: string }[];
   problem?: string;
   deliverable?: string;
 };
@@ -331,7 +331,7 @@ export function ParticipantProjectsV2() {
   const finished=projects.filter(p=>finishedStatuses.has(p.work.assignment.status)).length;
   if(work.isPending) return <StatePanel kind="loading"/>;
   if(work.isError||!work.data)return <StatePanel kind="error" action="Повторить" onAction={()=>{void work.refetch();}}/>;
-  if(selected&&workspaceTab)return <div className="mpv2 mpv2--workspace"><button type="button" className="mp-secondary" onClick={()=>{ setWorkspaceTab(false); }}><ArrowLeft size={16}/> К странице проекта</button><TaskWorkspacePage mode="participant" title={selected.work.task.title} taskId={selected.work.task.id} projectId={selected.work.task.id} description={selected.work.terms.deliverable} deadline={dateLabel(selected.work.terms.deadline_at)} tags={["Практика","Командный проект"]} workspace={selected.detail?{team:selected.detail.team??[],checkpoints:selected.detail.checkpoints??[],contributions:selected.detail.personal??[],feedback:(selected.detail.feedback??[]).map(f=>({...f,review_version:1})),freshness:`Условия версии ${selected.work.terms.version}`}:undefined} onMessage={()=>{ void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}`); }} onPrimaryAction={()=>{
+  if(selected&&workspaceTab)return <div className="mpv2 mpv2--workspace"><button type="button" className="mp-secondary" onClick={()=>{ setWorkspaceTab(false); }}><ArrowLeft size={16}/> К странице проекта</button><TaskWorkspacePage mode="participant" title={selected.work.task.title} taskId={selected.work.task.id} projectId={selected.work.task.id} description={selected.work.terms.deliverable} deadline={dateLabel(selected.work.terms.deadline_at)} tags={["Практика","Командный проект"]} workspace={selected.detail?{team:selected.detail.team??[],checkpoints:selected.detail.checkpoints??[],contributions:selected.detail.personal??[],feedback:selected.detail.feedback??[],freshness:`Условия версии ${selected.work.terms.version}`}:undefined} onMessage={()=>{ void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}`); }} onPrimaryAction={()=>{
     const upload=document.querySelector(".mpv2--workspace .ctw-upload");
     const body=upload?.querySelector<HTMLElement>("#ctw-body-solution");
     if(body?.hidden) upload?.querySelector<HTMLButtonElement>(".ctw-section-toggle")?.click();
