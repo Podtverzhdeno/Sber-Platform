@@ -1,6 +1,6 @@
 # Claim XS-404-PROJECT-REAL-BROWSER-20261026
 - session_id: gpt6-20261026-project-evidence-browser
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: cdf8d6a4d765879e7a34ab7529aaa02e7056b743
@@ -15,5 +15,16 @@
   - Real migrated PostgreSQL, demo seed, FastAPI, Chromium Playwright
   - Strict E2E ESLint and TypeScript
   - Verify task->application->assignment->contribution->customer acceptance->participant project/passport/portfolio/journey UI; no false rating, no cross-owner leak
-- progress: Independent browser evidence for accepted project lifecycle. No mocked HTTP handlers and no UI production changes.
+- progress: Real PostgreSQL + Chromium project lifecycle successful: customer creates in seeded project, operator publishes, participant consents/applies, customer accepts, participant starts/submits proof, customer accepts contribution; after reload project, portfolio, passport, journey and Buddy reflect accepted evidence; other participant cannot read proof; no incidental rating. Seeded preexisting records compared by exact delta rather than invented zero. Independent review outstanding.
+- changed_files:
+  - frontend/e2e/cross-section-project-real-api.spec.ts
+  - .github/workflows/cross-section-project-real-qa.yml
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40246935042
+  - PostgreSQL migrate/seed and real backend health PASS
+  - ESLint, full frontend TypeScript and Chromium Playwright PASS
+- unverified:
+  - Complete mentor check/revision and HR consent workflow
+  - Independent reviewer and full required CI on one pinned integration revision
+  - Production deployment and real-user smoke.
 - blockers: Independent reviewer, full CI at integration revision, live deployment acceptance
