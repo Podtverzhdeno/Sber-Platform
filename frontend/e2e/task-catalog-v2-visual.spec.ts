@@ -58,6 +58,7 @@ async function openCatalog(page: Page, theme: "light" | "dark"): Promise<void> {
   }
   await page.getByRole("link", { name: "Задачи", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
+  await page.getByRole("button", { name: "Карточки" }).click();
   await expect(page.locator(".catalog-v2-card")).toHaveCount(2);
   await page.evaluate(() => document.fonts.ready);
 }
