@@ -190,3 +190,36 @@ test("chosen weekly rhythm saves via the API and survives a fresh read", async (
   const nextDialog = page.getByRole("dialog", { name: "Учебный стрик" });
   await expect(nextDialog.getByRole("button", { name: "Выходные", exact: true })).toHaveAttribute("aria-pressed", "true");
 });
+
+
+test("verified continuation triggers the cinematic overlay once", async ({ page }) => {
+  test.setTimeout(75_000);
+  await page.setViewportSize({ width: 1280, height: 720 });
+  installRoutes(page);
+  await page.addInitScript(() => {
+    window.localStorage.setItem(
+      "engagement:last-indicator-days:00000000-0000-0000-0000-000000000001", "11",
+    );
+  });
+  await page.route("**/api/v1/me/engagement/overview", route => route.fulfill({ json: {
+    current_days: 12, best_days: 24, qualified_dates: [
+      "2026-10-14", "2026-10-15", "2026-10-16", "2026-10-17", "2026-10-18",
+      "2026-10-19", "2026-10-20", "2026-10-21", "2026-10-22",
+      "2026-10-23", "2026-10-24", "2026-10-25",
+    ],
+    today_saved: true, reason: "Серия сохранена сегодняшним квалифицируемым действием.",
+    grace_available: false, frozen_dates: [], freeze_state: "idle",
+  } }));
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  const celebration = page.getByTestId("streak-celebration");
+  await expect(celebration).toBeVisible();
+  await expect(celebration).toContainText("СЕРИЯ ПРОДОЛЖЕНА");
+  await expect(celebration).toContainText("12");
+  await page.screenshot({ path: "test-results/streak-reference-celebration.png" });
+  await celebration.getByRole("button", { name: "Пропустить анимацию" }).click();
+  await expect(celebration).toHaveCount(0);
+  await page.reload();
+  await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByTestId("streak-celebration")).toHaveCount(0);
+});
