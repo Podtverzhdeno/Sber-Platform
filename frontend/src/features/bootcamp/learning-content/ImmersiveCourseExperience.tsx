@@ -194,6 +194,12 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     </div>}
     <div className="imp-study__grid">
       <aside className="imp-study__aside" aria-label="Программа курса">
+        {view !== "overview" && <div className="imp-study__course-summary">
+          <div className="imp-study__course-emblem"><ShieldCheck size={26} aria-hidden="true"/></div>
+          <div className="imp-study__course-identity"><strong>{courseTitle}</strong>
+            <small>Практикум · {total} уроков · {program.units.reduce((sum, lesson) => sum + lesson.minutes, 0)} мин</small>
+          </div>
+        </div>}
         <div className="imp-study__aside-heading"><strong>Программа курса</strong><span>{percent}%</span></div>
         <div className="imp-study__bar"><span style={{ width: String(percent) + "%" }}/></div>
         <small>{completed} из {total} уроков завершено</small>

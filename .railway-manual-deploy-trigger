@@ -39,3 +39,9 @@ release_request=2026-10-25-rating-art-13abc967e818
 
 # Events: compact actions, no list view, no standalone confirmation rows; 4/4 Chromium tests green
 release_request=2026-10-25-events-cards-only-compact-79e5ff51
+
+# Bootcamp: synchronized course progress on landing card, persisted studies and verified tests
+release_request=2026-10-25-bootcamp-real-progress-5cead636c98d
+
+# 2026-10-25 project workspace: new tabbed full-width dashboard and detailed read-only project popup
+release_request=2026-10-25-project-dashboard-detail-popup-4e67b2d

@@ -161,3 +161,50 @@
 @media(max-width:720px){.mpd-heading{grid-template-columns:1fr}.mpd-hero-side>div:first-child{grid-template-columns:1fr 1fr}.mpd-hero-tags{justify-content:flex-start}.mpd-metrics{grid-template-columns:1fr 1fr}.mpd-metrics .mpd-metric:last-child{grid-column:1/-1}.mpd-aside{grid-template-columns:1fr}.mpd-task-list,.mpd-artifact-grid{grid-template-columns:1fr}.mpd-stage-line{overflow-x:auto;grid-template-columns:repeat(5,minmax(100px,1fr));scrollbar-width:thin}.mpd-info-columns{grid-template-columns:1fr}.mpd-modal-footer{align-items:stretch;flex-direction:column}.mpd-modal-footer .mpd-primary{width:100%}}
 @media(max-width:470px){.mpd-metrics{grid-template-columns:1fr}.mpd-metrics .mpd-metric:last-child{grid-column:auto}.mpd-heading{gap:10px}.mpd-head-copy h1{font-size:24px}.mpd-hero-side>div:first-child{grid-template-columns:1fr}.mpd-modal-backdrop{padding:9px}.mpd-modal-head,.mpd-modal-body,.mpd-modal-footer{padding:16px}.mpd-modal-head h2{font-size:22px}.mpd-tabs button{min-width:88px;padding:9px 10px}}
 @media(prefers-reduced-motion:reduce){.mpd-page *, .mpd-page *::before,.mpd-page *::after{transition:none!important;scroll-behavior:auto!important}}
+
+/* Only the immersive project workspace takes the width of its approved mockup.
+   The application sidebar remains unchanged for every other route/state. */
+@media(min-width:1024px){
+  .workspace:has(.mpd-page){padding-left:0}
+  .workspace:has(.mpd-page)>.sidebar{display:none}
+  .workspace:has(.mpd-page)>.workspace-content{padding:20px clamp(26px,4.5vw,76px) 44px}
+}
+
+/* Each About fact gets its own readable two-line block; prevent overlap
+   between long result descriptions and short metadata labels. */
+.mpd-page .mpd-about-facts span{
+  grid-template-columns:18px minmax(0,1fr);
+  grid-template-rows:auto auto;
+  gap:2px 9px;
+}
+.mpd-page .mpd-about-facts span svg{grid-column:1;grid-row:1/span 2}
+.mpd-page .mpd-about-facts span b{grid-column:2;grid-row:1}
+.mpd-page .mpd-about-facts span small{
+  grid-column:2;grid-row:2;
+  min-width:0;line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+  overflow:hidden;overflow-wrap:anywhere;
+}
+
+/* The mockup keeps a compact Impulse wordmark in its header. Reuse the actual
+   clickable brand instead of adding a decorative non-interactive duplicate. */
+@media(min-width:1024px){
+  .workspace:has(.mpd-page)>.sidebar{
+    display:flex;
+    position:fixed;
+    inset:0 auto auto 0;
+    width:210px;
+    height:64px;
+    min-height:64px;
+    padding:0 8px 0 48px;
+    background:#04111f;
+    border:0;
+    box-shadow:none;
+    z-index:25;
+  }
+  .workspace:has(.mpd-page)>.sidebar .sidebar-brand{border:0;min-height:64px;width:100%;padding:0}
+  .workspace:has(.mpd-page)>.sidebar nav,
+  .workspace:has(.mpd-page)>.sidebar .sidebar-message,
+  .workspace:has(.mpd-page)>.sidebar .role-switcher{display:none}
+  .page-shell:has(.mpd-page) .topbar{left:210px}
+}
