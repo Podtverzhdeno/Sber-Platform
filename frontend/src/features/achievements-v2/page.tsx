@@ -38,6 +38,7 @@ const categoryIcons = {
   trophy: Trophy, certificate: GraduationCap, project: BriefcaseBusiness, event: Sparkles,
 };
 const statusOrder: Record<AchievementStatus, number> = { pending: 0, verified: 1, rejected: 2 };
+const categorySingular: Record<AchievementCategory, string> = { project: "Проект", certificate: "Сертификат", trophy: "Награда", event: "Событие" };
 
 export function ParticipantAchievementsV2({ navigation = [] }: { navigation?: string[] }) {
   const navigate = useNavigate();
@@ -108,7 +109,7 @@ export function ParticipantAchievementsV2({ navigation = [] }: { navigation?: st
       }
     };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => { document.removeEventListener("keydown", onKey); };
   }, [modalOpen, activeId, setParams]);
 
   const goTo = (name: string) => {
@@ -129,8 +130,8 @@ export function ParticipantAchievementsV2({ navigation = [] }: { navigation?: st
         <h1 id="workspace-title">Достижения <span>со смыслом</span></h1>
         <p>Ваш опыт, победы и сертификаты — в одном месте. Сохраняйте доказательства, отслеживайте проверку и показывайте реальные результаты командам Сбера.</p>
         <div className="achv-hero-actions">
-          <button type="button" className="achv-button achv-button-primary" onClick={() => setShowAdd(true)}><Plus size={17}/> Добавить результат</button>
-          <button type="button" className="achv-button achv-button-ghost" onClick={() => goTo("Портфолио")}>Моё портфолио <ArrowRight size={16}/></button>
+          <button type="button" className="achv-button achv-button-primary" onClick={() => { setShowAdd(true); }}><Plus size={17}/> Добавить результат</button>
+          <button type="button" className="achv-button achv-button-ghost" onClick={() => { goTo("Портфолио"); }}>Моё портфолио <ArrowRight size={16}/></button>
         </div>
         {portfolio.data?.demo_data && <small className="achv-demo-label">Демонстрационный профиль · показаны только данные, доступные из источников</small>}
       </div>
@@ -169,12 +170,12 @@ export function ParticipantAchievementsV2({ navigation = [] }: { navigation?: st
         </div>
         <div className="achv-toolbar">
           <div className="achv-tabs" role="group" aria-label="Тип достижений">
-            {categories.map(item => <button key={item.id} type="button" className={filter === item.id ? "active" : ""} aria-pressed={filter === item.id} onClick={() => setFilter(item.id)}>{item.label}<span>{categoryCount(item.id)}</span></button>)}
+            {categories.map(item => <button key={item.id} type="button" className={filter === item.id ? "active" : ""} aria-pressed={filter === item.id} onClick={() => { setFilter(item.id); }}>{item.label}<span>{categoryCount(item.id)}</span></button>)}
           </div>
           <div className="achv-controls">
-            <label className="achv-search"><Search size={16}/><input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Поиск по достижениям" aria-label="Поиск по достижениям"/></label>
-            <label className="achv-select-label"><span>Статус</span><select aria-label="Статус достижения" value={statusFilter} onChange={event => setStatusFilter(event.target.value as StatusFilter)}><option value="all">Все статусы</option><option value="verified">Подтверждено</option><option value="pending">На проверке</option><option value="rejected">Отклонено</option></select></label>
-            <label className="achv-select-label"><span>Сортировка</span><select aria-label="Сортировка достижений" value={sort} onChange={event => setSort(event.target.value as Sort)}><option value="status">По статусу</option><option value="type">По типу</option><option value="name">По названию</option></select></label>
+            <label className="achv-search"><Search size={16}/><input type="search" value={search} onChange={event => { setSearch(event.target.value); }} placeholder="Поиск по достижениям" aria-label="Поиск по достижениям"/></label>
+            <label className="achv-select-label"><span>Статус</span><select aria-label="Статус достижения" value={statusFilter} onChange={event => { setStatusFilter(event.target.value as StatusFilter); }}><option value="all">Все статусы</option><option value="verified">Подтверждено</option><option value="pending">На проверке</option><option value="rejected">Отклонено</option></select></label>
+            <label className="achv-select-label"><span>Сортировка</span><select aria-label="Сортировка достижений" value={sort} onChange={event => { setSort(event.target.value as Sort); }}><option value="status">По статусу</option><option value="type">По типу</option><option value="name">По названию</option></select></label>
           </div>
         </div>
         <div className="achv-list-topline"><span>Найдено <strong>{visible.length}</strong> {visible.length === 1 ? "результат" : "результатов"}</span>{(filter !== "all" || statusFilter !== "all" || search) && <button type="button" onClick={resetFilters}><FilterX size={14}/> Сбросить фильтры</button>}</div>
@@ -184,18 +185,18 @@ export function ParticipantAchievementsV2({ navigation = [] }: { navigation?: st
             <h3>{summary.all ? "Ничего не найдено" : "Ваши достижения появятся здесь"}</h3>
             <p>{summary.all ? "Попробуйте другие фильтры или поисковый запрос." :
               "Завершите обучение, подтвердите результат проекта или участие в событии, чтобы собрать проверяемое портфолио."}</p>
-            <button className="achv-button achv-button-primary" type="button" onClick={() => summary.all ? resetFilters() : setShowAdd(true)}>
+            <button className="achv-button achv-button-primary" type="button" onClick={() => { if (summary.all) resetFilters(); else setShowAdd(true); }}>
               {summary.all ? "Очистить фильтры" : "Как добавить результат"} <ArrowRight size={16}/>
             </button>
           </div> : <div className="achv-grid">
             {visible.map(record => {
               const Icon = categoryIcons[record.category];
-              return <button type="button" className={`achv-item achv-item--${record.category}`} key={record.id} data-testid="achievement-card" onClick={() => changeSelected(record.id)}>
+              return <button type="button" className={`achv-item achv-item--${record.category}`} key={record.id} data-testid="achievement-card" onClick={() => { changeSelected(record.id); }}>
                 <div className="achv-item-top">
                   <span className="achv-item-icon"><Icon size={23}/></span>
                   <span className={`achv-state achv-state--${record.status}`}>{record.status === "verified" ? <Check size={13}/> : record.status === "pending" ? <Clock3 size={13}/> : <X size={13}/>}{achievementStatusLabels[record.status]}</span>
                 </div>
-                <span className="achv-category">{achievementCategoryLabels[record.category].slice(0,-1)}</span>
+                <span className="achv-category">{categorySingular[record.category]}</span>
                 <h3>{record.title}</h3>
                 <p>{record.description}</p>
                 <div className="achv-item-bottom">
@@ -212,7 +213,7 @@ export function ParticipantAchievementsV2({ navigation = [] }: { navigation?: st
           <h3>Портфолио, которому доверяют</h3>
           <p>Подтверждённый результат ценнее неподтверждённой записи — он показывает практический опыт.</p>
           <div className="achv-progress-line"><div><strong>{summary.verified} из {summary.all}</strong><span>подтверждены</span></div><div className="achv-progress-track"><span style={{ width: `${String(confirmedPercent)}%` }}/></div></div>
-          <button type="button" className="achv-side-link" onClick={() => goTo("Портфолио")}>Открыть портфолио <ArrowRight size={16}/></button>
+          <button type="button" className="achv-side-link" onClick={() => { goTo("Портфолио"); }}>Открыть портфолио <ArrowRight size={16}/></button>
         </section>
         <section className="achv-side-panel achv-how">
           <div className="achv-side-kicker"><Sparkles size={14}/> КАК ЭТО РАБОТАЕТ</div>
@@ -227,14 +228,14 @@ export function ParticipantAchievementsV2({ navigation = [] }: { navigation?: st
           <span className="achv-side-promo-icon"><BookOpenCheck size={22}/></span>
           <h3>Следующее достижение ближе, чем кажется</h3>
           <p>Выберите практический курс или событие, чтобы пополнить портфолио.</p>
-          <button type="button" onClick={() => goTo("События")}>Найти событие <ArrowRight size={15}/></button>
+          <button type="button" onClick={() => { goTo("События"); }}>Найти событие <ArrowRight size={15}/></button>
         </section>
       </aside>
     </div>
 
     {selected && <div className="achv-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) changeSelected(null); }}>
       <section className="achv-modal" role="dialog" aria-modal="true" aria-label="Подробности достижения" data-testid="achievement-detail">
-        <button type="button" className="achv-close" onClick={() => changeSelected(null)} aria-label="Закрыть подробности"><X size={18}/></button>
+        <button type="button" className="achv-close" onClick={() => { changeSelected(null); }} aria-label="Закрыть подробности"><X size={18}/></button>
         <span className="achv-modal-type">{achievementCategoryLabels[selected.category]}</span>
         <div className="achv-modal-title"><span className="achv-modal-icon">{(() => { const Icon = categoryIcons[selected.category]; return <Icon size={27}/>; })()}</span><div><h2>{selected.title}</h2><span className={`achv-state achv-state--${selected.status}`}>{achievementStatusLabels[selected.status]}</span></div></div>
         <h3>Что подтверждено</h3><p>{selected.description}</p>
@@ -246,7 +247,7 @@ export function ParticipantAchievementsV2({ navigation = [] }: { navigation?: st
         {selected.evidence.length > 0 && <><h3>Доказательства</h3><div className="achv-evidence">{selected.evidence.map(evidence => <span key={evidence}><FileBadge size={15}/>{evidence}</span>)}</div><p className="achv-modal-note">Артефакты перечислены в записи проекта. Содержимое доступно через исходный рабочий процесс.</p></>}
         <div className="achv-modal-actions">
           {selected.sourceUrl && <SafeExternalLink className="achv-button achv-button-primary" href={selected.sourceUrl}>Первоисточник <ExternalLink size={15}/></SafeExternalLink>}
-          {selected.eventKey && <button className="achv-button achv-button-primary" type="button" onClick={() => goTo("События")}>К событиям <ArrowRight size={16}/></button>}
+          {selected.eventKey && <button className="achv-button achv-button-primary" type="button" onClick={() => { goTo("События"); }}>К событиям <ArrowRight size={16}/></button>}
           <button className="achv-button achv-button-ghost" type="button" onClick={() => { changeSelected(null); goTo(selected.category === "project" ? "Мои проекты" : selected.category === "certificate" ? "Bootcamp" : "Портфолио"); }}>Связанный раздел <ArrowRight size={16}/></button>
         </div>
       </section>
@@ -254,7 +255,7 @@ export function ParticipantAchievementsV2({ navigation = [] }: { navigation?: st
 
     {showAdd && <div className="achv-modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setShowAdd(false); }}>
       <section className="achv-modal achv-add-modal" role="dialog" aria-modal="true" aria-label="Добавить результат" data-testid="achievements-add-dialog">
-        <button type="button" className="achv-close" onClick={() => setShowAdd(false)} aria-label="Закрыть"><X size={18}/></button>
+        <button type="button" className="achv-close" onClick={() => { setShowAdd(false); }} aria-label="Закрыть"><X size={18}/></button>
         <span className="achv-modal-type">ПОПОЛНИТЬ ПОРТФОЛИО</span><h2>Какое достижение добавим?</h2>
         <p>Выберите источник результата. Платформа получает подтверждение из связанного раздела — фиктивное начисление баллов не производится.</p>
         <div className="achv-add-options">
@@ -262,7 +263,7 @@ export function ParticipantAchievementsV2({ navigation = [] }: { navigation?: st
             { name: "События", title: "Победа или участие", description: "Подтвердить результат конкурса или хакатона", Icon: Trophy },
             { name: "Мои проекты", title: "Проектный результат", description: "Представить личный вклад и доказательства", Icon: BriefcaseBusiness },
             { name: "Bootcamp", title: "Сертификат курса", description: "Завершить курс с проверкой результата", Icon: GraduationCap },
-          ] as const).map(option => <button key={option.name} type="button" onClick={() => goTo(option.name)}><span><option.Icon size={21}/></span><div><strong>{option.title}</strong><small>{option.description}</small></div><ChevronRight size={19}/></button>)}
+          ] as const).map(option => <button key={option.name} type="button" onClick={() => { goTo(option.name); }}><span><option.Icon size={21}/></span><div><strong>{option.title}</strong><small>{option.description}</small></div><ChevronRight size={19}/></button>)}
         </div>
       </section>
     </div>}
