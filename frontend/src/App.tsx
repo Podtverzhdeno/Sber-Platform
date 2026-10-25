@@ -428,10 +428,12 @@ function Workspace({
     >
       <aside className="sidebar" aria-label="Боковая панель">
         <div className="sidebar-brand">
-          <span className="brand-mark" aria-hidden="true">
-            ϟ
-          </span>
-          <strong>Impulse</strong>
+          <NavLink className="sidebar-brand-home" to="/workspace/0" aria-label="Impulse — на главную">
+            <span className="brand-mark" aria-hidden="true">
+              ϟ
+            </span>
+            <strong>Impulse</strong>
+          </NavLink>
           <button
             className="sidebar-close"
             type="button"
