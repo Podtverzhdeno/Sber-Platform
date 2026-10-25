@@ -815,7 +815,7 @@ export function BootcampCatalog({
   const roleStudy = projectRoleStudy(roleCourses,study.data?.courses ?? []);
   const pendingRequired = roleStudy.pending;
   const gradeCurriculum=gradeOverview.data?.selected_track_key===selectedRole
-    && gradeOverview.data.curriculum?.state==="known" ? gradeOverview.data.curriculum : null;
+    && gradeOverview.data.curriculum.state==="known" ? gradeOverview.data.curriculum : null;
   const policyRemaining=gradeCurriculum?.requirements.filter(req=>req.state!=="verified")??[];
   const policyCourses=policyRemaining.filter(req=>req.kind==="course");
   const remainingStudyCount=gradeCurriculum?policyCourses.length:pendingRequired.length;
