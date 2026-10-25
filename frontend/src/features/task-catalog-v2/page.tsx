@@ -327,7 +327,7 @@ function TaskDetail(props: {
               ["solution", "Решение"],
               ["review", "Результат"],
             ] as const).map(([key, label]) => (
-              <button key={key} type="button" role="tab" id={`catalog-tab-${key}`} aria-controls="catalog-workflow-panel" aria-selected={detailTab === key} className={detailTab === key ? "is-active" : ""} onClick={() => setDetailTab(key)}>{label}</button>
+              <button key={key} type="button" role="tab" id={`catalog-tab-${key}`} aria-controls="catalog-workflow-panel" aria-selected={detailTab === key} className={detailTab === key ? "is-active" : ""} onClick={() => { setDetailTab(key); }}>{label}</button>
             ))}
           </div>
           <div id="catalog-workflow-panel" role="tabpanel" aria-labelledby={`catalog-tab-${detailTab}`} className="catalog-v2-workflow-panel">
@@ -347,7 +347,7 @@ function TaskDetail(props: {
               <h4>Подготовка решения</h4>
               {item.assignment_id !== null && item.allowed_actions.includes("open_workspace") ? <>
                 <p>Рабочая область доступна после назначения. Здесь можно продолжить выполнение задачи и использовать доступные инструменты команды.</p>
-                <button type="button" className="catalog-v2-workflow-action" onClick={() => props.onWorkspace(item.assignment_id as string)}>Открыть рабочую область</button>
+                <button type="button" className="catalog-v2-workflow-action" onClick={() => { props.onWorkspace(item.assignment_id as string); }}>Открыть рабочую область</button>
               </> : <>
                 <p>Чтобы начать выполнение, ознакомьтесь с условиями и отправьте отклик. Отклик не означает назначение.</p>
                 {canSeeConditions && <button type="button" className="catalog-v2-workflow-action" onClick={props.onConditions}>Условия и отклик</button>}
@@ -356,9 +356,9 @@ function TaskDetail(props: {
             </>}
             {detailTab === "review" && <>
               <h4>Проверка и подтверждение результата</h4>
-              <p>Статус участия: {applicationLabels[item.application_state] ?? item.application_state}.</p>
+              <p>Статус участия: {applicationLabels[item.application_state]}.</p>
               <p>Результат выполнения и подтверждённые компетенции появляются только после фактической проверки, а не после отклика или открытия задачи.</p>
-              {item.assignment_id !== null && item.allowed_actions.includes("open_workspace") && <button type="button" className="catalog-v2-workflow-action" onClick={() => props.onWorkspace(item.assignment_id as string)}>Посмотреть рабочую область</button>}
+              {item.assignment_id !== null && item.allowed_actions.includes("open_workspace") && <button type="button" className="catalog-v2-workflow-action" onClick={() => { props.onWorkspace(item.assignment_id as string); }}>Посмотреть рабочую область</button>}
               <p className="catalog-v2-workflow-hint">Если оценка ещё не опубликована, не показываем вымышленные баллы или прирост навыков.</p>
             </>}
           </div>
