@@ -37,6 +37,7 @@ describe("published rating integration", () => {
 
   it("uses only server standings, keeps anonymous people private, and preserves real sorting", async () => {
     vi.mocked(apiRequest).mockImplementation(async path => {
+      await Promise.resolve();
       if (path === "/api/v1/rating-seasons") return [season];
       if (path.includes("/rating-seasons/season-1/leaderboard")) return published;
       throw new Error("Unexpected request: " + path);
