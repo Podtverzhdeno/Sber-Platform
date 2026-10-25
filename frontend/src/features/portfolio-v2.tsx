@@ -134,13 +134,13 @@ function Radar({ skills }: { skills: Passport["skills"] }) {
     {[1, 2, 3, 4, 5].map(level => <polygon key={level} points={points(measured.map(() => level))}
       fill="none" stroke="#204d66" strokeWidth="1.1" />)}
     {measured.map((skill, i) => {
-      const [x, y] = point(i, 1).split(",").map(Number);
-      return <line key={skill.key} x1="120" y1="100" x2={x} y2={y} stroke="#204d66"/>;
+      const coordinates = point(i, 1).split(",");
+      return <line key={skill.key} x1="120" y1="100" x2={Number(coordinates[0])} y2={Number(coordinates[1])} stroke="#204d66"/>;
     })}
     <polygon points={points(values)} fill="#09dec0" fillOpacity=".26" stroke="#22f3dc" strokeWidth="2.2"/>
     {values.map((value, i) => {
-      const [x, y] = point(i, value / 5).split(",").map(Number);
-      return <circle key={measured[i]?.key ?? i} cx={x} cy={y} r="4" fill="#1df0e5"/>;
+      const coordinates = point(i, value / 5).split(",");
+      return <circle key={measured[i]?.key ?? i} cx={Number(coordinates[0])} cy={Number(coordinates[1])} r="4" fill="#1df0e5"/>;
     })}
   </svg>;
 }
