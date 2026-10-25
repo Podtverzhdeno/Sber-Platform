@@ -297,7 +297,7 @@ export function ParticipantProjectsV2() {
   });
   useEffect(()=>{localStorage.setItem("impulse_favorite_projects",JSON.stringify(saved));},[saved]);
   const [rewardFocus,setRewardFocus] = useState<string|null>(null);
-  const layout:View=params.get("layout")==="list"?"list":"cards";
+  const layout:View=params.get("layout")==="cards"?"cards":"list";
   const filter:Filter=filterChoices.some(c=>c.key===params.get("filter"))?params.get("filter") as Filter:"all";
   const selectedId=params.get("project");
   const [text,setText]=useState("");
