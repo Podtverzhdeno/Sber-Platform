@@ -1,5 +1,5 @@
 name: Bootcamp Format Sync
-# One-shot re-run after extracting overlong SQL literals into adjacent strings.
+# One-shot normalization of final SQL query string splitting.
 on:
   push:
     branches: [main]
