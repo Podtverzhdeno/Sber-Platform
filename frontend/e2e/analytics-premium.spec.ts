@@ -37,64 +37,57 @@ async function stubs(page:Page){
  }}));
  await page.route("**/api/v1/me/bootcamp/certificates",r=>r.fulfill({json:[]}));
 }
-test("premium analytics is bound to Bootcamp, streak and activity sources",async({page})=>{
- await page.setViewportSize({width:1586,height:992});await stubs(page);
- await page.goto("/workspace/9");
- const root=page.getByTestId("analytics-v3");
- await expect(root).toHaveAttribute("data-tab","activity");
- const premium=root.getByTestId("premium-activity");
- await expect(premium).toBeVisible();
- await expect(premium.getByRole("heading",{name:"Учебный прогресс"})).toBeVisible();
- await expect(premium.getByText("17",{exact:true})).toBeVisible();
- await expect(premium.getByText("2",{exact:true}).first()).toBeVisible();
- await expect(premium.getByText("11 дней")).toBeVisible();
- await expect(premium.getByRole("heading",{name:"Текущие курсы"})).toBeVisible();
- await expect(premium.locator(".avp-course")).toHaveCount(3);
- const coursePositions=await premium.locator(".avp-course").evaluateAll(nodes=>nodes.map(el=>({x:Math.round(el.getBoundingClientRect().x),y:Math.round(el.getBoundingClientRect().y)})));
- expect(coursePositions[0]?.y).toBe(coursePositions[1]?.y);
- expect(coursePositions[1]?.y).toBe(coursePositions[2]?.y);
- const tileDimensions=await premium.locator(".avp-heat-weeks .av3-heat-cell").first().evaluate(el=>{
-  const box=el.getBoundingClientRect();return {width:box.width,height:box.height};
- });
- expect(tileDimensions.width).toBeLessThanOrEqual(24);
- expect(tileDimensions.height).toBeLessThanOrEqual(21);
- await expect(premium.locator(".av3-week-columns > div")).toHaveCount(8);
- await expect(premium.locator(".avp-profile__legend > div")).toHaveCount(5);
- await expect(premium.getByText("Длительность сессий не измеряется")).toBeVisible();
- await page.screenshot({path:"test-results/analytics-premium-1586.png",fullPage:true,animations:"disabled"});
- await premium.getByRole("button",{name:"Все курсы"}).click();
- await expect(page).toHaveURL(/workspace\/2/);
-});
-test("premium analytics fits mobile and period and tabs remain interactive",async({page})=>{
- await page.setViewportSize({width:390,height:844});await stubs(page);
- await page.goto("/workspace/9");
- const root=page.getByTestId("analytics-v3");
- const premium=root.getByTestId("premium-activity");
- await expect(premium).toBeVisible();
- await root.getByRole("combobox",{name:"Период аналитики"}).selectOption("4");
- await expect(premium.locator(".av3-week-columns > div")).toHaveCount(4);
- const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
- if(overflow>2){
-  const offenders=await page.evaluate(()=>Array.from(document.querySelectorAll<HTMLElement>("body *")).map(el=>{
-    const rect=el.getBoundingClientRect();return {tag:el.tagName,className:el.className.slice(0,60),left:Math.round(rect.left),right:Math.round(rect.right),width:Math.round(rect.width)};
-  }).filter(x=>x.right>window.innerWidth+2||x.left< -2).slice(0,20));
-  throw new Error("Horizontal overflow "+String(overflow)+": "+JSON.stringify(offenders));
- }
- expect(overflow).toBeLessThanOrEqual(2);
- await page.screenshot({path:"test-results/analytics-premium-mobile-390.png",fullPage:true,animations:"disabled"});
- await root.getByRole("button",{name:"Skill Passport",exact:true}).click();
- await expect(root).toHaveAttribute("data-tab","passport");
- await root.getByRole("button",{name:"Активность",exact:true}).click();
- await expect(root).toHaveAttribute("data-tab","activity");
-});
-test("missing activity or streak source displays unknown, never fake zeros",async({page})=>{
+test("annual calendar shows real source events on hover and in the day popup", async ({ page }) => {
+ await page.setViewportSize({ width: 1586, height: 992 });
  await stubs(page);
- await page.route("**/api/v1/me/growth/snapshot",r=>r.fulfill({status:503,json:{message:"Unavailable"}}));
- await page.route("**/api/v1/me/engagement/overview",r=>r.fulfill({status:503,json:{message:"Unavailable"}}));
  await page.goto("/workspace/9");
- const root=page.getByTestId("premium-activity");
- await expect(root).toBeVisible();
- await expect(root.getByText("Показатель временно недоступен")).toBeVisible();
- await expect(page.getByRole("alert").filter({hasText:"История активности недоступна"})).toBeVisible();
- await expect(root.getByText("Длительность сессий не измеряется")).toBeVisible();
+ const root = page.getByTestId("analytics-v3");
+ const calendar = root.getByTestId("activity-calendar");
+ await expect(calendar).toBeVisible();
+ await expect(calendar.locator(".ac-week")).toHaveCount(52);
+ await expect(calendar.getByText("5", { exact: true }).first()).toBeVisible();
+ const populated = calendar.locator(".ac-day.ac-level-1").first();
+ await expect(populated).toBeVisible();
+ await populated.hover();
+ await expect(page.getByRole("tooltip")).toContainText("Завершён");
+ await populated.click();
+ const modal = page.getByRole("dialog", { name: /Активность/ });
+ await expect(modal).toBeVisible();
+ await expect(modal.getByText(/часы: длительность не измеряется/)).toBeVisible();
+ await expect(modal.locator(".ac-day-events article")).toHaveCount(1);
+ await page.screenshot({ path: "test-results/activity-calendar-desktop.png", fullPage: true, animations: "disabled" });
+ await modal.getByRole("button", { name: "Закрыть подробности дня" }).click();
+ await expect(modal).not.toBeVisible();
+ await expect(populated).toBeFocused();
+});
+
+test("calendar is scrollable on mobile and period selector controls weeks", async ({ page }) => {
+ await page.setViewportSize({ width: 390, height: 844 });
+ await stubs(page);
+ await page.goto("/workspace/9");
+ const root = page.getByTestId("analytics-v3");
+ const calendar = root.getByTestId("activity-calendar");
+ await expect(calendar.locator(".ac-week")).toHaveCount(52);
+ await root.getByRole("combobox", { name: "Период аналитики" }).selectOption("12");
+ await expect(calendar.locator(".ac-week")).toHaveCount(12);
+ const horizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+ expect(horizontalOverflow).toBeLessThanOrEqual(2);
+ const scroll = calendar.getByRole("region", { name: /горизонтальная прокрутка/ });
+ await expect(scroll).toBeVisible();
+ await page.screenshot({ path: "test-results/activity-calendar-mobile.png", fullPage: true, animations: "disabled" });
+ await root.getByRole("button", { name: "Skill Passport", exact: true }).click();
+ await expect(root).toHaveAttribute("data-tab", "passport");
+});
+
+test("failed growth feed keeps error visible and does not fabricate hours", async ({ page }) => {
+ await stubs(page);
+ await page.route("**/api/v1/me/growth/snapshot", route => route.fulfill({ status: 503, json: { message: "Unavailable" } }));
+ await page.goto("/workspace/9");
+ await expect(page.getByRole("alert").filter({ hasText: "История активности недоступна" })).toBeVisible();
+ const calendar = page.getByTestId("activity-calendar");
+ await expect(calendar).toBeVisible();
+ await expect(calendar.getByText(/Показаны только зарегистрированные действия/)).toBeVisible();
+ const populated = calendar.locator(".ac-day.ac-level-1").first();
+ await populated.click();
+ await expect(page.getByRole("dialog").getByText(/часы: длительность не измеряется/)).toBeVisible();
 });
