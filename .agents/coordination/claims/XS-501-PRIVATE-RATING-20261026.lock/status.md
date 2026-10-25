@@ -1,7 +1,7 @@
 # Claim XS-501-PRIVATE-RATING-20261026
 
 - session_id: gpt6-20261026-private-rating-01
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 090ece792f7f26e6065da808f5084986d86f7194
@@ -15,5 +15,15 @@
 - verification:
   - Ruff formatting/check
   - API contract and privacy tests
-- progress: Personal ranking must be readable by the owner even if public rating consent anonymizes leaderboard.
+- progress: Own-only /api/v1/me/rating/standings implemented; private no-store response; published season filter; unknown standing nullable; public leaderboard consent remains unchanged.
+- changed_files:
+  - src/impulse/api/v1/recognition.py
+  - tests/test_private_rating_api.py
+  - .github/workflows/private-rating-qa.yml
+- verification_evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40240984512
+  - Ruff format/check and new plus existing recognition API tests: PASS
+- blockers:
+  - UI TopbarRank and rating-v2 screens owned by other claims; integration handoff required
+  - independent review and full browser QA not yet complete
 - blockers: Rating UI lives in another active claim; integration handoff required.
