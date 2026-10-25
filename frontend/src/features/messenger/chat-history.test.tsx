@@ -130,7 +130,7 @@ describe("ChatHistory", () => {
       task_id: null,
     };
     const { container } = renderChat(new MemoryStorage(), { channel: direct });
-    expect(screen.getByRole("heading", { name: "Елена Васильева" })).toBeInTheDocument();
+    expect(container.querySelector(".msg-chat__header-title strong")?.textContent).toBe("Елена Васильева");
     expect(container.querySelector(".msg-chat__avatar")?.textContent).toBe("Е");
     expect(container.querySelector(".msg-chat__header-title")?.textContent).not.toContain("Алексей Смирнов");
   });
