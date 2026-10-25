@@ -90,12 +90,31 @@ describe("TopbarEngagementIndicator", () => {
     expect(screen.getByText(/Вход, клики и сообщения/)).toBeTruthy();
   });
 
-  it("animates old→new only when stored value is lower, not on first paint", async () => {
+  it("celebrates one newly verified day with the actual server counter", async () => {
     window.localStorage.setItem(ANIMATION_STORAGE_KEY, "3");
     installOverview(OVERVIEW);
     renderIndicator();
-    await screen.findByRole("status");
-    expect(screen.getByRole("status").textContent).toContain("3 → 4");
+    const celebration = await screen.findByRole("dialog", { name: /Серия продолжена: 4 дней подряд/ });
+    expect(celebration.textContent).toContain("СЕРИЯ ПРОДОЛЖЕНА");
+    expect(celebration.textContent).toContain("4");
+    fireEvent.click(screen.getByRole("button", { name: "Пропустить анимацию" }));
+    await waitFor(() => { expect(screen.queryByTestId("streak-celebration")).toBeNull(); });
+  });
+
+  it("does not play when the server has not verified today's action", async () => {
+    window.localStorage.setItem(ANIMATION_STORAGE_KEY, "3");
+    installOverview({ ...OVERVIEW, today_saved: false });
+    renderIndicator();
+    await screen.findByText("4");
+    expect(screen.queryByTestId("streak-celebration")).toBeNull();
+  });
+
+  it("does not play on multi-day jumps or the same day's second action", async () => {
+    window.localStorage.setItem(ANIMATION_STORAGE_KEY, "1");
+    installOverview(OVERVIEW);
+    renderIndicator();
+    await screen.findByText("4");
+    expect(screen.queryByTestId("streak-celebration")).toBeNull();
   });
 
   it("does not repeat the animation after reload with equal stored data", async () => {
@@ -103,7 +122,7 @@ describe("TopbarEngagementIndicator", () => {
     installOverview(OVERVIEW);
     renderIndicator();
     await screen.findByText("4");
-    expect(screen.queryByRole("status")).toBeNull();
+    expect(screen.queryByTestId("streak-celebration")).toBeNull();
   });
 
   it("renders the neutral explanation instead of a zero streak lie", async () => {
