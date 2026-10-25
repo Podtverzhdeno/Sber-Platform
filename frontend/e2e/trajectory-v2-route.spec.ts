@@ -119,11 +119,11 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await expect(page.getByTestId("trajectory-stage-activities").locator("li")).toHaveCount(3);
   const teaching = page.getByTestId("trajectory-learning-material");
   await expect(teaching).toHaveCount(1);
+  await teaching.locator("summary").click();
   const source = teaching.getByRole("link", { name: /C4 Model/ });
   await expect(source).toHaveAttribute("href", "https://c4model.com/diagrams");
   await expect(source).toHaveAttribute("rel", "noopener noreferrer");
   await expect(source).toHaveAttribute("target", "_blank");
-  await teaching.locator("summary").click();
   await expect(teaching.getByText("Границы доверия AI-сервиса")).toBeVisible();
   await expect(teaching.getByText(/Подготовить рабочий архитектурный прототип/)).toBeVisible();
   await expect(teaching.locator("ul").last().locator("li")).toHaveCount(3);
