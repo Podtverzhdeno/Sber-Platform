@@ -89,3 +89,29 @@
 .bc-learning__knowledge-options button:focus-visible{outline:2px solid #2de9e3;outline-offset:2px}
 .bc-learning__knowledge .bc-learning__knowledge-feedback{margin:11px 0 0;padding:12px;border-radius:8px;background:#104157;color:#c4eef4}
 .bc-learning__knowledge-feedback strong{color:#eeffff}
+
+
+/* Source-backed reading companion: editorial notes and external manuals. */
+.bc-manual{display:grid;gap:12px;margin:17px 0 21px}
+.bc-manual__story{border-radius:13px;padding:17px 19px;background:linear-gradient(130deg,#104754 0%,#0b2e45 76%);border:1px solid #28778a}
+.bc-manual__label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.07em;font-weight:750;color:#80f5e6;margin-bottom:10px}
+.bc-learning__lesson .bc-manual__hook{font-size:17px;line-height:1.58;font-weight:600;color:#f0fcff;margin:0;letter-spacing:-.01em}
+.bc-manual__insight{padding:3px 4px 2px 16px;border-left:3px solid #11d4c9}
+.bc-manual__insight strong{display:block;font-size:13px;color:#72f1df;margin-bottom:6px}
+.bc-learning__lesson .bc-manual__insight p{color:#d1e5ee;font-size:14px;line-height:1.7;margin:0}
+.bc-manual__source{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;border:1px solid #28586e;border-radius:11px;background:#09293d;padding:14px 16px}
+.bc-manual__source strong{display:block;color:#e1faff;font-size:14px;margin-bottom:5px}
+.bc-learning__lesson .bc-manual__source p{margin:0 0 6px;color:#bcd7e4;font-size:13px;line-height:1.6}
+.bc-manual__source em{font-style:normal;color:#86eee9;font-weight:650}
+.bc-manual__source small{display:block;font-size:11px;line-height:1.5;color:#94b6c8}
+.bc-manual__source a{color:#79f7ed;display:inline-block;font-size:13px;font-weight:720;text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere;justify-self:start}
+.bc-manual__source a:hover{color:#f4ffff}
+.bc-manual__secondary{font-size:12px!important;font-weight:500!important}
+.bc-manual__source a:focus-visible{outline:2px solid #80f5e6;outline-offset:4px}
+.bc-manual__snippet{overflow:hidden;background:#071725;border:1px solid #2c6476;border-radius:11px}
+.bc-manual__snippet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid #235469}
+.bc-manual__snippet-head strong{font-size:13px;color:#e1fbff}
+.bc-manual__snippet-head small{color:#89b8c7;font:11px/1.4 ui-monospace,Consolas,monospace}
+.bc-manual__snippet pre{margin:0;padding:14px;white-space:pre;overflow-x:auto;color:#a0f0eb;font:12px/1.62 ui-monospace,SFMono-Regular,Consolas,monospace}
+.bc-manual__snippet>small{display:block;padding:0 14px 12px;color:#85a8b8;font-size:11px;line-height:1.4}
+@media(max-width:750px){.bc-manual__story{padding:14px}.bc-learning__lesson .bc-manual__hook{font-size:16px}}
