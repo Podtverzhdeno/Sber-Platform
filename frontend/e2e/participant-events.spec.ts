@@ -40,7 +40,7 @@ test("events reference: all six detail states, registration flow and keyboard na
   await page.setViewportSize({ width: 1586, height: 1081 });
   await page.screenshot({ path: "test-results/event-reference/catalog.png", animations: "disabled", fullPage: false });
   await page.setViewportSize({ width: 1703, height: 924 });
-  await expect(page.getByText("События, которые подходят")).toBeVisible();
+  await expect(page.getByText("События, которые дают")).toBeVisible();
   await page.getByRole("button", { name: "Подробнее" }).click();
   const dialog = page.getByRole("dialog", { name: "AI Journey 2026" });
   await expect(dialog).toBeVisible();
