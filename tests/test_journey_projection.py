@@ -2,35 +2,32 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
 import os
-from contextlib import asynccontextmanager
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from uuid import uuid4
 
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-import pytest
-from sqlalchemy import text
 from pydantic import SecretStr
+from sqlalchemy import text
 
-from impulse.api.v1.journey import _merge_courses
-from impulse.api.v1 import journey
 from impulse.api.errors import install_error_handlers
-from impulse.api.v1.identity import current_session, csrf_session
-from impulse.application.identity import AuthenticatedSession, SessionRecord
-from impulse.domain.identity import ActorContext
-from impulse.bootcamp import editorial_learning
-from impulse.infrastructure.database import Database
+from impulse.api.v1 import journey
+from impulse.api.v1.identity import csrf_session, current_session
+from impulse.api.v1.journey import _merge_courses
 from impulse.application.development import EnrollmentRecord
-from impulse.application.identity import demo_personas
+from impulse.application.identity import AuthenticatedSession, SessionRecord, demo_personas
+from impulse.bootcamp import editorial_learning
 from impulse.bootcamp.editorial_learning import ImpulseCourseSummary, ImpulseStudySummary
 from impulse.bootstrap.app import create_app
 from impulse.bootstrap.settings import AppEnvironment, Settings
 from impulse.domain.development import CompletionStatus
-from impulse.domain.identity import Role
-
+from impulse.domain.identity import ActorContext, Role
+from impulse.infrastructure.database import Database
 
 def _study(*, finished: bool) -> ImpulseStudySummary:
     now = datetime.now(UTC)
