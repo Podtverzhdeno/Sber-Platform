@@ -104,8 +104,11 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     await page.screenshot({ path: "test-results/imp-05-finish-" + String(viewport.width) + ".png", animations: "disabled" });
     await reader.locator(".imp-study__finish").click();
     await expect(reader.getByRole("heading", { name: "Обучение завершено!" })).toBeVisible();
+    const completedPopup=page.getByTestId("grade-milestone-celebration");
+    await expect(completedPopup).toHaveAttribute("data-mode","course-complete");
     await page.screenshot({ path: "test-results/imp-06-success-" + String(viewport.width) + ".png", animations: "disabled" });
-    await reader.getByRole("button", { name: /Посмотреть два сертификата/ }).click();
+    await completedPopup.getByRole("button", { name: "Посмотреть сертификаты" }).click();
+    await expect(completedPopup).toHaveCount(0);
     await expect(reader.getByRole("heading", { name: "Ваши сертификаты" })).toBeVisible();
     await expect(reader.getByText("Получен автоматически")).toBeVisible();
     await expect(reader.getByText("Нужна практика")).toBeVisible();
