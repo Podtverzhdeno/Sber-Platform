@@ -178,8 +178,11 @@ async def contact_directory(
     records = await request.app.state.auth_service.store.list_personas()
     return sorted(
         [
-            ContactView(id=item.person_id, display_name=item.display_name,
-                        role=item.roles[0].value if item.roles else "participant")
+            ContactView(
+                id=item.person_id,
+                display_name=item.display_name,
+                role=item.roles[0].value if item.roles else "participant",
+            )
             for item in records
             if item.person_id != authenticated.actor.person_id
             and item.program_key == "impulse-demo"
