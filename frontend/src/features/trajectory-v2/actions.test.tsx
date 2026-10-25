@@ -11,7 +11,7 @@ import type { RoadmapView } from "./client";
 const rolesFixture: DevelopmentOverviewView["roles"] = [
   {
     track_key: "python",
-    title: "Python-разработчик",
+    title: "AI Security Engineer",
     state: "active",
     attempt_number: 2,
     completed_milestones: 1,
@@ -19,7 +19,7 @@ const rolesFixture: DevelopmentOverviewView["roles"] = [
   },
   {
     track_key: "data",
-    title: "Data-аналитик",
+    title: "AI Data Engineer",
     state: "paused",
     attempt_number: 1,
     completed_milestones: 0,
@@ -27,7 +27,7 @@ const rolesFixture: DevelopmentOverviewView["roles"] = [
   },
   {
     track_key: "product",
-    title: "Продакт-менеджер",
+    title: "AI Architect",
     state: "unselected",
     attempt_number: null,
     completed_milestones: 0,
@@ -165,7 +165,7 @@ describe("trajectory v2 context actions", () => {
   it("pins reorder role cards to the top of the list", async () => {
     shell("/workspace/1?role=data");
     await waitFor(() => {
-      expect(screen.getAllByRole("button", { name: /Data-аналитик/ }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole("button", { name: /AI Data Engineer/ }).length).toBeGreaterThan(0);
     });
     openActionsMenu();
     clickMenuItem("Закрепить");
@@ -181,10 +181,10 @@ describe("trajectory v2 context actions", () => {
     openActionsMenu();
     clickMenuItem("Сравнить роль…");
     expect(screen.getByTestId("trajectory-compare-chooser")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("menuitem", { name: "Data-аналитик" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "AI Data Engineer" }));
     const compare = screen.getByTestId("trajectory-compare");
-    expect(compare.textContent).toContain("Python-разработчик");
-    expect(compare.textContent).toContain("Data-аналитик");
+    expect(compare.textContent).toContain("AI Security Engineer");
+    expect(compare.textContent).toContain("AI Data Engineer");
     expect(compare.textContent).toContain("Этапов в каталоге");
     expect(compare.textContent).toContain("не сворачиваются в одну оценку");
     fireEvent.click(screen.getByRole("button", { name: "Свернуть сравнение" }));
@@ -227,18 +227,18 @@ describe("trajectory v2 context actions", () => {
   it("hides unselected roles and brings them back", async () => {
     shell("/workspace/1");
     await waitFor(() => {
-      expect(screen.getAllByRole("button", { name: /Продакт-менеджер/ }).length).toBeGreaterThan(0);
+      expect(screen.getAllByRole("button", { name: /AI Architect/ }).length).toBeGreaterThan(0);
     });
     openActionsMenu();
     clickMenuItem("Скрыть не выбранные роли");
     await waitFor(() => {
-      expect(screen.queryAllByText("Продакт-менеджер")[0]).toBeUndefined();
+      expect(screen.queryAllByText("AI Architect")[0]).toBeUndefined();
     });
     expect(screen.getByTestId("trajectory-action-status").textContent).toContain("Не выбранные роли скрыты");
     openActionsMenu();
     clickMenuItem("Показать не выбранные роли");
     await waitFor(() => {
-      expect(screen.getAllByText("Продакт-менеджер").length).toBeGreaterThan(0);
+      expect(screen.getAllByText("AI Architect").length).toBeGreaterThan(0);
     });
   });
 
