@@ -555,6 +555,7 @@ export function MessagingWorkspace({
                 canSend={selected.sender_enabled}
                 sending={sendMessage.isPending}
                 sendState={sendState}
+                failureReason={sendMessage.isError ? actionErrorText(sendMessage.error) : undefined}
                 connectionState={connectionState}
                 replySummary={replySummary}
                 onSend={submitSend}
