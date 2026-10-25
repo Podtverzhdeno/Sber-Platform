@@ -47,6 +47,7 @@
   - src/impulse/bootstrap/ai_curriculum_details.py
   - src/impulse/bootstrap/ai_reading_resources.py
   - src/impulse/bootstrap/ai_stage_guides.py
+  - .github/workflows/architecture-error-inversion-qa.yml
   - tests/test_architecture_curriculum_boundary.py
   - tests/test_architecture_error_boundary.py
   - .agents/coordination/claims/ARCH-101-102-ERROR-INVERSION-20261026.lock/status.md
