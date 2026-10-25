@@ -196,6 +196,7 @@ test("group creation selects real contacts and persists a chat in API list",asyn
   await dialog.getByRole("button",{name:"Создать чат"}).click();
   await expect(dialog).toHaveCount(0);
   await expect(page.locator(".msg-chat__header-title")).toContainText("AI исследование");
+  await page.getByRole("tab",{name:/Все/}).click();
   await expect(page.getByRole("button",{name:/AI исследование/}).first()).toBeVisible();
 });
 
