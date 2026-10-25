@@ -25,6 +25,7 @@ describe("published rating integration", () => {
     vi.mocked(apiRequest).mockImplementation(async path => {
       await Promise.resolve();
       if (path === "/api/v1/rating-seasons") return [];
+      if (path.endsWith("/me/rating/standings")) return [];
       throw new Error("Unexpected request: " + path);
     });
     show();
@@ -39,6 +40,12 @@ describe("published rating integration", () => {
     vi.mocked(apiRequest).mockImplementation(async path => {
       await Promise.resolve();
       if (path === "/api/v1/rating-seasons") return [season];
+      if (path.endsWith("/me/rating/standings")) return [{
+        season_id: season.id, season_key: season.key, season_title: season.title,
+        season_status: season.status, season_version: season.version,
+        policy_version: season.policy_version, place: 2,
+        score: "75.00", successful_projects: 1,
+      }];
       if (path.includes("/rating-seasons/season-1/leaderboard")) return published;
       throw new Error("Unexpected request: " + path);
     });
@@ -58,4 +65,32 @@ describe("published rating integration", () => {
     expect(screen.queryByText("AI Study Assistant")).not.toBeInTheDocument();
     expect(screen.queryByText("5.0")).not.toBeInTheDocument();
   });
+  it("shows own season result even if public records anonymize the participant", async () => {
+    vi.mocked(apiRequest).mockImplementation(async path => {
+      await Promise.resolve();
+      if (path === "/api/v1/rating-seasons") return [season];
+      if (path.endsWith("/me/rating/standings")) return [{
+        season_id: season.id, season_key: season.key, season_title: season.title,
+        season_status: season.status, season_version: season.version,
+        policy_version: season.policy_version, place: 6,
+        score: "88.00", successful_projects: 3,
+      }];
+      if (path.includes("/rating-seasons/season-1/leaderboard")) return [
+        { place: 6, person_id: null, display_name: "Участник №6", score: "88.00",
+          successful_projects: 3, trophies: [], offers: [], anonymized: true },
+      ];
+      throw new Error("Unexpected request: " + path);
+    });
+    show();
+    await screen.findByRole("region", { name: "Все участники рейтинга" });
+    const benefitsButton = await screen.findByRole("button", { name: /Подробнее о рейтинге и наградах/ });
+    fireEvent.click(benefitsButton);
+    await waitFor(() => {
+      const ownRank = screen.getByText("Ваше место").closest(".ir-my-rank");
+      expect(ownRank).toHaveTextContent("6");
+      expect(ownRank).toHaveTextContent("88.00 баллов · 3 проектов");
+    });
+    expect(screen.queryByText("Тестовый участник")).not.toBeInTheDocument();
+  });
+
 });
