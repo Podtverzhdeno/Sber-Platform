@@ -722,7 +722,11 @@ export function RoleDetailPanel(props: {
           Это направление пока не выбрано. Персональный прогресс отсутствует; этапы появятся после подключения роли.
         </p>
       )}
-      <StagePathSection
+      {props.nextCycleUnpublished ? <div className="trajectory-v2-next-cycle" role="status" data-testid="trajectory-next-cycle">
+        <h4>Новый виток развития</h4>
+        <p>Уровень Impulse повышен и сохранён. Новая программа курсов и практических задач для следующего цикла пока не опубликована.
+          После публикации здесь появится новая последовательность этапов; старые сертификаты не засчитываются повторно.</p>
+      </div> : <StagePathSection
         role={role}
         roadmap={props.roadmap}
         learningCourses={props.learningCourses}
@@ -733,9 +737,9 @@ export function RoleDetailPanel(props: {
         onStageSelect={props.onStageSelect}
         onOpenDetails={props.onOpenStageDetails}
         showDetails={false}
-      />
+      />}
     </article>
-    <SelectedStageCard role={role} roadmap={props.roadmap} learningCourses={props.learningCourses} stageKey={props.stageKey} onOpenDetails={props.onOpenStageDetails}/>
+    {!props.nextCycleUnpublished && <SelectedStageCard role={role} roadmap={props.roadmap} learningCourses={props.learningCourses} stageKey={props.stageKey} onOpenDetails={props.onOpenStageDetails}/>}
     </div>
   );
 }
