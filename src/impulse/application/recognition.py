@@ -92,11 +92,17 @@ class MemoryRecognitionStore:
         return self._seasons.get(season_id)
 
     async def public_seasons(self) -> tuple[RatingSeason, ...]:
-        return tuple(sorted(
-            (season for season in self._seasons.values() if season.status is not SeasonStatus.SCHEDULED),
-            key=lambda season: (season.key, str(season.season_id)),
-            reverse=True,
-        ))
+        return tuple(
+            sorted(
+                (
+                    season
+                    for season in self._seasons.values()
+                    if season.status is not SeasonStatus.SCHEDULED
+                ),
+                key=lambda season: (season.key, str(season.season_id)),
+                reverse=True,
+            )
+        )
 
     async def add_season(self, season: RatingSeason) -> RatingSeason:
         if any(item.key == season.key for item in self._seasons.values()):
