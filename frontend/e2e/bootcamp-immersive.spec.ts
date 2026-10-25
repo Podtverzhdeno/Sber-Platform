@@ -100,6 +100,11 @@ test("data-security reference: theory methods, JWT example, practice requirement
   await page.goto(path + "?course=demo-course-10");
   const reader = page.getByTestId("impulse-immersive-reader");
   await expect(reader).toBeVisible();
+  await expect(reader).toHaveAttribute("data-course", "demo-course-10");
+  const illustration = await page.request.get("/bootcamp/security-hero.svg");
+  expect(illustration.ok()).toBe(true);
+  expect(await illustration.text()).toContain("Защищённые серверы");
+  await page.screenshot({ path: "test-results/reference-security-00-overview.png", animations: "disabled" });
   await reader.getByRole("button", { name: /Перейти к программе/ }).click();
   await reader.locator(".imp-study__program-list button").first().click();
   await reader.locator(".imp-study__navigation .imp-study__primary").click();
