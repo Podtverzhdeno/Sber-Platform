@@ -578,7 +578,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Рейтинг" ? (
-          <ParticipantRatingV2 />
+          <ParticipantRatingV2 onOpenMessages={() => { const messageIndex = navigation.indexOf("Сообщения"); if (messageIndex >= 0) void navigate(`/workspace/${String(messageIndex)}`); }} />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Аналитика" ? (
