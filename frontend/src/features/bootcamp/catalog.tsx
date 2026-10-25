@@ -568,120 +568,99 @@ export function BootcampCatalog({
   const deepLinkFilteredOut = deepLinked !== null && !passesFilters(deepLinked);
   const panel = searchParams.get("panel") ?? "detail";
 
+
   return (
-    <div className="feature-stack bootcamp-experience bc-approved" data-reference="BC-R01">
-      <header className="bootcamp-hero">
-        <div>
-          <p className="eyebrow">ВАША ТРАЕКТОРИЯ · ОБУЧЕНИЕ</p>
-          <h1 id="workspace-title">Bootcamp <span className="bc-title-mark">/ Развитие навыков</span></h1>
-          <p className="lead">Курсы, которые помогают двигаться к следующему профессиональному результату</p>
-        </div>
-        <div className="bootcamp-hero-pulse" aria-label="Состояние обучения">
-          <strong>{String(catalog.data.filter((card) => card.completion_state === "verified").length)}</strong>
-          <span>подтверждённых курсов</span>
-          <h2 className="bootcamp-streak-heading">{streak.data ? `Серия: ${String(streak.data.current_days)} дн.` : "Серия: данные недоступны"}</h2>
-        </div>
+    <div className="feature-stack bootcamp-experience bc-approved bc-reference" data-reference={view === "list" ? "BC-R02" : "BC-R01"}>
+      <header className="bc-ref-heading">
+        <div><h1 id="workspace-title">Bootcamp</h1><p>Обучение для твоей роли и реальных проектов</p></div>
+        <span className="bc-ref-streak" role="status">🔥 {streak.data ? "Серия: " + String(streak.data.current_days) + " дней" : "Серия недоступна"}</span>
       </header>
-      {deepLinkedKey !== null && deepLinked === null && (
-        <p className="notice" role="status">
-          Курс по ссылке «{deepLinkedKey}» не найден в актуальном каталоге.
-        </p>
-      )}
-      {deepLinkFilteredOut && (
-        <p className="notice" role="status">
-          Курс по ссылке «{deepLinkedKey}» скрыт текущими фильтрами; выберите «Все курсы», чтобы
-          увидеть его.
-        </p>
-      )}
-      {catalog.isError && <p className="notice" role="status">Показаны сохранённые данные каталога. Обновление временно недоступно. <button type="button" onClick={() => { void catalog.refetch(); }}>Повторить</button></p>}
-      {streak.isError && <p className="notice" role="status">Серия обучения временно недоступна. Каталог продолжает работать.</p>}
-      <div className="bc-role-switch-row">
-        <label htmlFor="bc-selected-track">Выбранная траектория</label>
-        <select id="bc-selected-track" value={trackFilter} onChange={(event) => { setTrack(event.target.value); }}>
-          <option value="all">Все активные направления</option>
-          {trackOptions.map((key) => <option key={key} value={key}>{key}</option>)}
-        </select>
-        <span className="bc-muted">Каталог и требования обновляются для выбранной траектории</span>
+      {catalog.isError && <p className="notice" role="status">Обновление каталога недоступно. <button type="button" onClick={() => { void catalog.refetch(); }}>Повторить</button></p>}
+      <div className="bc-ref-role-tabs" role="group" aria-label="Направление обучения">
+        {trackOptions.map((role, index) => <button type="button" key={role} aria-pressed={trackFilter === role}
+          onClick={() => setTrack(role)}>{index === 0 ? <Bot /> : <ChartNoAxesCombined />}{role}</button>)}
       </div>
-      <div className="bc-overview-grid">
-        <section className="bc-continue ui-card" aria-labelledby="bc-continue-title">
-          <p className="bc-panel-kicker">СЛЕДУЮЩЕЕ ДЕЙСТВИЕ</p>
-          <h2 id="bc-continue-title">{nextCourse ? "Начните с подходящего курса" : "Выберите следующий шаг"}</h2>
-          <p className="bc-overview-course">{nextCourse?.title ?? "Доступный курс пока не определён"}</p>
-          <p className="bc-muted">Прогресс и контрольные точки появятся после подключения подтверждённого источника LMS</p>
-          {nextCourse ? <button type="button" onClick={() => { openPanel("detail", nextCourse.key); }}>Перейти к курсу →</button> :
-            <button type="button" className="secondary-button" onClick={() => { resetFilters(); document.getElementById("bc-catalog-title")?.scrollIntoView({ behavior: "smooth" }); }}>Смотреть каталог →</button>}
-        </section>
-        <section className="bc-role-card ui-card" aria-labelledby="bc-role-title">
-          <p className="bc-panel-kicker">МОЯ РОЛЬ</p>
-          <h2 id="bc-role-title">{selectedRoleTitle}</h2>
-          <p className="bc-muted">Карьерный грейд: не определён — требуется опубликованная политика</p>
-          <div className="bc-role-metrics">
-            <div><strong>{catalog.data.filter(forTrack).length}</strong><span>курсов</span></div>
-            <div><strong>{catalog.data.filter((card) => forTrack(card) && card.completion_state === "verified").length}</strong><span>подтверждено</span></div>
-            <div><strong>{pendingRequired.length}</strong><span>ожидают прохождения</span></div>
+      <div className="bc-ref-hero-grid">
+        <section className="bc-ref-continue" aria-labelledby="bc-continue-title">
+          <h2 id="bc-continue-title">Продолжить обучение <span aria-hidden="true">›</span></h2>
+          <div className="bc-ref-continue-columns">
+            <div className="bc-ref-continue-course">
+              {nextCourse ? <><CourseArtwork title={nextCourse.title} />
+                <div className="bc-ref-continue-text"><h3>{nextCourse.title}</h3>
+                  <p>{nextCourse.recommendation_reason || "Курс для развития навыков выбранной роли"}</p>
+                  <div className="bc-ref-tags">{nextCourse.track_keys.slice(0,3).map(key => <span key={key}>{key}</span>)}</div>
+                </div></> : <p>Выберите курс в каталоге, чтобы начать обучение.</p>}
+            </div>
+            <div className="bc-ref-continue-status">
+              <div className="bc-ref-stat-top"><span>{nextCourse ? "Следующий курс" : "Обучение"}</span><strong>{nextCourse ? "Доступен" : "Не выбран"}</strong></div>
+              <div className="bc-ref-track"><i style={{ width: "0%" }} /></div>
+              <p><Clock3 />{nextCourse ? "Прогресс появится после синхронизации с LMS" : "Нет активных учебных шагов"}</p>
+              <button type="button" onClick={() => { if(nextCourse) openPanel("detail",nextCourse.key); else document.getElementById("bc-catalog-title")?.scrollIntoView({ behavior: "smooth" }); }}>
+                {nextCourse ? "Открыть курс" : "Смотреть каталог"} <ArrowRight />
+              </button>
+            </div>
           </div>
-          <small className="bc-muted">Число курсов не является процентом готовности к грейду</small>
         </section>
+        <div className="bc-ref-right-panels">
+          <section className="bc-ref-role-summary" aria-labelledby="bc-role-title">
+            <div><h2 id="bc-role-title">Моя роль: {selectedRoleTitle}</h2>
+              <div className="bc-ref-summary-tags"><span>♜ Грейд: не установлен</span><span>▦ Курсов: {catalog.data.filter(forTrack).length}</span></div>
+            </div>
+            <div className="bc-ref-ring" aria-label="Число подтверждённых курсов, не оценка освоения навыков"><strong>{catalog.data.filter(card => forTrack(card) && card.completion_state === "verified").length}</strong><small>курсов<br/>подтверждено</small></div>
+          </section>
+          <section className="bc-ref-grade" aria-labelledby="bc-grade-title">
+            <img className="bc-ref-trophy" alt="" src="/bootcamp/trophy.svg" />
+            <div className="bc-ref-grade-body">
+              <div className="bc-ref-grade-kicker">♛ &nbsp; До следующего грейда</div>
+              <h2 id="bc-grade-title">{pendingRequired.length > 0 ? <>Осталось <em>{pendingRequired.length}</em> обязательных курса</> : "Требования к грейду"}</h2>
+              <p>{pendingRequired.length > 0 ? "Заверши учебные требования. Практика и подтверждение проверяются отдельно." : "Учебные требования уточняются по опубликованной программе."}</p>
+              <div className="bc-ref-grade-list">{pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => openPanel("detail",card.key)}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
+            </div>
+            <button className="bc-ref-grade-button" type="button" onClick={() => openPanel("requirements")}>Посмотреть курсы <ArrowRight /></button>
+          </section>
+        </div>
       </div>
-      <section className="bc-grade-banner" aria-labelledby="bc-grade-title">
-        <div><p className="bc-panel-kicker">ПУТЬ К СЛЕДУЮЩЕМУ ГРЕЙДУ</p>
-          <h2 id="bc-grade-title">{pendingRequired.length > 0 ? "Остались обязательные курсы" : "Требования к грейду"}</h2>
-          <p>{pendingRequired.length > 0 ? "Просмотрите ещё не подтверждённые учебные требования. Дополнительно могут потребоваться практика и проверка результатов." : "Полный список требований и степень готовности появятся после публикации политики. Отсутствие курсов здесь не означает присвоение грейда."}</p>
+      {deepLinkedKey !== null && deepLinked === null && <p role="status" className="notice">Курс по ссылке не найден в каталоге.</p>}
+      {deepLinkFilteredOut && <p role="status" className="notice">Курс скрыт фильтрами. Выберите «Все курсы».</p>}
+      <section className="bc-ref-catalog" aria-labelledby="bc-catalog-title">
+        <h2 id="bc-catalog-title" className="bc-ref-sr-only">Каталог курсов</h2>
+        <div className="bc-ref-category-tabs" role="group" aria-label="Категории курсов">
+          {categoryCounts.map(item => <button type="button" key={item.key} aria-pressed={category === item.key} onClick={() => updateFilter("category",item.key)}>{item.label}<span>{item.count}</span></button>)}
         </div>
-        <button type="button" onClick={() => { openPanel("requirements"); }}>Посмотреть требования →</button>
+        <div className="bc-ref-controls">
+          <label className="bc-ref-search"><Search aria-hidden="true" /><span className="bc-ref-sr-only">Поиск курсов</span>
+            <input type="search" aria-label="Поиск по курсам" value={searchParams.get("q") ?? ""} placeholder="Поиск по названию курса, навыку или технологии…" onChange={event => updateFilter("q",event.target.value)} /></label>
+          <label className="bc-ref-select">Направление
+            <select value={trackFilter} onChange={event => setTrack(event.target.value)}><option value="all">Все направления</option>{trackOptions.map(role => <option key={role} value={role}>{role}</option>)}</select></label>
+          <label className="bc-ref-select">Уровень
+            <select disabled title="Уровень станет доступен после публикации классификации"><option>Все уровни</option></select></label>
+          <div className="bc-ref-views" role="group" aria-label="Вид каталога">
+            <button type="button" aria-pressed={view !== "list"} onClick={() => updateFilter("view","card")}><LayoutGrid /> Карточки</button>
+            <button type="button" aria-pressed={view === "list"} onClick={() => updateFilter("view","list")}><List /> Список</button>
+          </div>
+        </div>
+        {view !== "list" ? <div className="bc-ref-course-grid">
+          {orderedVisible.map(card => <article className="bc-ref-course-card" key={card.key} data-access={card.access_state} data-testid={"course-" + card.key}>
+            <CourseFlags card={card}/>
+            <div className="bc-ref-card-intro"><CourseArtwork title={card.title}/><div><h3>{card.title}</h3><p>{card.recommendation_reason || "Описание пока не опубликовано"}</p></div></div>
+            <div className="bc-ref-tags">{card.track_keys.slice(0,3).map(key => <span key={key}>{key}</span>)}</div>
+            <p className="bc-ref-card-meta"><Clock3/> Длительность уточняется</p>
+            <div className="bc-ref-card-bottom">
+              <CoursePrimaryAction card={card} onOpen={key => openPanel("detail",key)}/>
+              {card.relevant && <button className="bc-ref-reason" type="button" onClick={() => openPanel("reason",card.key)}>Почему рекомендован? ›</button>}
+            </div>
+          </article>)}
+        </div> : <ul className="bc-ref-course-list" aria-label="Каталог Bootcamp списком">
+          {orderedVisible.map(card => <li className="bc-ref-course-row" key={card.key} data-access={card.access_state} data-testid={"course-" + card.key}>
+            <div className="bc-ref-row-info"><CourseArtwork title={card.title}/><div><h3>{card.title}</h3><p>{card.recommendation_reason || "Описание пока не опубликовано"}</p></div></div>
+            <div className="bc-ref-row-flags"><CourseFlags card={card}/><div className="bc-ref-tags">{card.track_keys.slice(0,3).map(key => <span key={key}>{key}</span>)}</div></div>
+            <div className="bc-ref-row-meta"><Clock3 /> Длительность уточняется</div>
+            <div className="bc-ref-row-progress">{card.completion_state === "verified" ? "Подтверждено" : card.completion_state === "reported" ? "На проверке" : "Нет данных о прогрессе"}<div className="bc-ref-track"><i style={{ width: card.completion_state === "verified" ? "100%" : "0%" }}/></div></div>
+            <CoursePrimaryAction card={card} onOpen={key => openPanel("detail",key)}/>
+          </li>)}
+        </ul>}
+        {visible.length === 0 && <div className="bc-ref-empty" role="status">Курсов по условиям не найдено. <button type="button" onClick={resetFilters}>Сбросить фильтры</button></div>}
       </section>
-      <h2 className="bc-catalog-title" id="bc-catalog-title">Каталог курсов <span>{catalog.data.length}</span></h2>
-      <CatalogFilters
-        searchParams={searchParams}
-        updateFilter={updateFilter}
-        trackOptions={trackOptions}
-        relevantCount={relevantCount}
-        totalCount={catalog.data.length}
-        resultCount={visible.length}
-        categoryCounts={categoryCounts}
-        onReset={resetFilters}
-      />
-      {view === "card" ? (
-        <div className="course-grid">
-          {orderedVisible.map((card) => (
-            <article className="ui-card bootcamp-course-card" key={card.key} data-required={card.must_take !== null} data-access={card.access_state} data-testid={`course-${card.key}`}>
-              <div className="bc-course-labels"><span>{card.must_take ? "ОБЯЗАТЕЛЬНЫЙ" : card.relevant ? "ДЛЯ МОЕЙ РОЛИ" : "ОБУЧЕНИЕ"}</span><span aria-hidden="true">{card.access_state === "available" ? "↗" : "🔒"}</span></div>
-              <h2>{card.title}</h2>
-              {deepLinkedKey === card.key && (
-                <p className="notice" data-testid={`deeplink-${card.key}`}>
-                  Курс открыт по прямой ссылке
-                </p>
-              )}
-              <p className="bc-course-summary">{card.recommendation_reason || "Описание ещё не опубликовано"}</p>
-              <CardStates card={card} />
-              {card.pending_verification_note && <p className="notice" role="status">{card.pending_verification_note}</p>}
-              <details className="bc-explain"><summary>{card.must_take ? "Навык и требования" : "Обоснование курса"}</summary><CardExplanation card={card} relevanceOnly={relevanceOnly} /></details>
-              <div className="bc-open-actions"><button type="button" onClick={() => { openPanel("detail", card.key); }}>Подробнее →</button><button className="secondary-button" type="button" onClick={() => { openPanel("reason", card.key); }}>Почему рекомендован</button></div>
-              <CardActions card={card} />
-            </article>
-          ))}
-        </div>
-      ) : (
-        <ul className="course-rows" aria-label="Каталог Bootcamp списком">
-          {orderedVisible.map((card) => (
-            <li className="course-row bootcamp-course-row" key={card.key} data-required={card.must_take !== null} data-access={card.access_state} data-testid={`course-${card.key}`}>
-              <div className="bc-list-heading"><span className="bc-panel-kicker">{card.must_take ? "ОБЯЗАТЕЛЬНЫЙ" : card.relevant ? "ДЛЯ МОЕЙ РОЛИ" : "ОБУЧЕНИЕ"}</span><strong>{card.title}</strong><small>{card.recommendation_reason || "Описание не опубликовано"}</small></div>
-              {deepLinkedKey === card.key && (
-                <p className="notice" data-testid={`deeplink-${card.key}`}>
-                  Курс открыт по прямой ссылке
-                </p>
-              )}
-              <CardStates card={card} />
-              {card.pending_verification_note && <p className="notice" role="status">{card.pending_verification_note}</p>}
-              <details className="bc-explain"><summary>Основание рекомендации</summary><CardExplanation card={card} relevanceOnly={relevanceOnly} /></details>
-              <div className="bc-open-actions"><button type="button" onClick={() => { openPanel("detail", card.key); }}>Подробнее →</button><button type="button" className="secondary-button" onClick={() => { openPanel("reason", card.key); }}>Почему рекомендован</button></div>
-              <CardActions card={card} />
-            </li>
-          ))}
-        </ul>
-      )}
-      {visible.length === 0 && <StatePanel kind="empty" />}
       <Drawer key={`${panel}:${deepLinked?.key ?? ""}`} title={panel === "reason" ? "Почему рекомендован" : "Информация о курсе"} open={deepLinked !== null && panel !== "requirements"} onClose={closePanel}>
         {deepLinked && (panel === "reason" ? <RecommendationDetails card={deepLinked} track={selectedRoleTitle} /> :
           <CourseDetails key={deepLinked.key} card={deepLinked}
