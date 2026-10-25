@@ -4,7 +4,7 @@ import { apiRequest, type RuntimeApiPath } from "../../api/client";
 import { useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Award, BadgeCheck, BriefcaseBusiness, CalendarDays,
-  Check, ChevronDown, CircleCheck, Code2, Crown, FileBadge2,
+  Check, ChevronDown, CircleCheck, Crown, FileBadge2,
   Flame, Gem, Heart, LockKeyhole, Mail, Medal,
   Search, Share2, ShieldCheck, Star, Trophy, Users,
 } from "lucide-react";
@@ -136,7 +136,7 @@ export function ParticipantRatingV2({ onOpenMessages, currentPersonId }: { onOpe
   const [searchParams, setSearchParams] = useSearchParams();
   const seasonsQuery = useQuery({
     queryKey: ["rating-seasons"],
-    queryFn: () => apiRequest<Season[]>("/api/v1/rating-seasons" as RuntimeApiPath, { cache: "no-store" }),
+    queryFn: () => apiRequest<Season[]>("/api/v1/rating-seasons", { cache: "no-store" }),
   });
   const seasons = seasonsQuery.data ?? [];
   const requestedSeason = searchParams.get("season");
