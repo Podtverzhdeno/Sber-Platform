@@ -60,7 +60,8 @@ import { HrWorkspace } from "./features/hr";
 import { OperatorWorkspace } from "./features/operator";
 import { ManagerVisualPage, OperatorVisualPage } from "./features/visual-gap-pages";
 import { ParticipantAnalytics, RoleAnalytics } from "./features/analytics";
-import { ParticipantPortfolio, ParticipantRating } from "./features/portfolio";
+import { ParticipantPortfolio } from "./features/portfolio";
+import { ParticipantRatingV2 } from "./features/rating-v2/page";
 import { MentorReviewWorkspace } from "./features/reward";
 import { CustomerParticipantPreview, ParticipantTasks } from "./features/work";
 import { MessagingWorkspace } from "./features/collaboration";
@@ -562,7 +563,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Рейтинг" ? (
-          <ParticipantRating />
+          <ParticipantRatingV2 onOpenMessages={() => { const messageIndex = navigation.indexOf("Сообщения"); if (messageIndex >= 0) void navigate(`/workspace/${String(messageIndex)}`); }} />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Аналитика" ? (
