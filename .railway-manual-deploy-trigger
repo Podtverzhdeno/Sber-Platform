@@ -47,3 +47,6 @@ release_request=2026-10-25-my-projects-team-safe-34cc487
 
 # Events seven-state browser acceptance: 4/4, focus restored, release validated interaction changes
 release_request=2026-10-25-events-qa-passed-focus-546aa70
+
+# My Projects reference QA: four-column cards, tab routing and help controls
+release_request=2026-10-25-projects-view-tabs-59fe4e6
