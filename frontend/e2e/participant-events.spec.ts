@@ -57,7 +57,7 @@ test("events reference: all six detail states, registration flow and keyboard na
   await expect(dialog.getByText("Собрать решение")).toBeVisible();
   await page.screenshot({ path: "test-results/event-reference/program.png", animations: "disabled" });
   await nav.getByRole("button", { name: "Призы и возможности" }).click();
-  await expect(dialog.getByText("Призы", { exact: true })).toBeVisible();
+  await expect(dialog.getByRole("heading", { name: "Призы и возможности" })).toBeVisible();
   await page.screenshot({ path: "test-results/event-reference/prizes.png", animations: "disabled" });
   await nav.getByRole("button", { name: "Требования" }).click();
   await expect(dialog.getByText("Требования к участникам")).toBeVisible();
