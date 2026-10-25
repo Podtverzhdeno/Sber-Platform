@@ -2108,3 +2108,40 @@
   background: #1c2a36;
   color: #8293a3;
 }
+
+/* Separate, server-persisted course study progress from verified roadmap milestones. */
+.workspace-content .trajectory-v2 .trajectory-v2-stage-study-tag{
+  display:block;max-width:100%;margin-top:4px;color:#27d8ce;font-size:9px;font-weight:700;line-height:1.2;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-stage[data-study-state="studied"] .trajectory-v2-milestone-node{
+  box-shadow:0 0 0 2px #0d665d,0 0 12px #03c6ae40;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-studying{
+  display:grid;gap:7px;margin-top:13px;padding:11px 14px;border:1px solid #146d70;
+  border-radius:10px;background:#052c34cc;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-studying>div,
+.workspace-content .trajectory-v2 .trajectory-v2-studied-course>div{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-studying strong,
+.workspace-content .trajectory-v2 .trajectory-v2-studied-course strong{color:#e6fff9;font-size:12px;}
+.workspace-content .trajectory-v2 .trajectory-v2-studying small,
+.workspace-content .trajectory-v2 .trajectory-v2-studied-course small,
+.workspace-content .trajectory-v2 .trajectory-v2-studied-course span{color:#9acbc8;font-size:10px;}
+.workspace-content .trajectory-v2 .trajectory-v2-studying progress,
+.workspace-content .trajectory-v2 .trajectory-v2-studied-course progress{
+  appearance:none;width:100%;height:7px;border:0;border-radius:10px;overflow:hidden;background:#1e4c55;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-studying progress::-webkit-progress-bar,
+.workspace-content .trajectory-v2 .trajectory-v2-studied-course progress::-webkit-progress-bar{background:#1e4c55;}
+.workspace-content .trajectory-v2 .trajectory-v2-studying progress::-webkit-progress-value,
+.workspace-content .trajectory-v2 .trajectory-v2-studied-course progress::-webkit-progress-value{
+  background:linear-gradient(90deg,#1389cf,#05dbc5);border-radius:10px;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-studying progress::-moz-progress-bar,
+.workspace-content .trajectory-v2 .trajectory-v2-studied-course progress::-moz-progress-bar{background:#06d7bf;}
+.workspace-content .trajectory-v2 .trajectory-v2-studied-course{
+  display:grid;gap:7px;margin-top:8px;margin-bottom:12px;padding:12px 14px;
+  background:linear-gradient(125deg,#08313e,#062533);border:1px solid #126e7b;border-radius:11px;
+}
