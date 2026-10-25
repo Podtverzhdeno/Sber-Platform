@@ -39,9 +39,9 @@ function Title({children,icon:Icon}:{children:ReactNode;icon:typeof Target}) {
 type TasksProps={
   checkpoints:ReferenceCheckpoint[];decisions:ReferenceDecision[];
   projectDescription:string;deliverable:string;
-  acceptanceCriteria:string[];onWorkspace:()=>void;
+  acceptanceCriteria:string[];onWorkspace:()=>void;onCheckpoint:(key:string)=>void;
 };
-export function ProjectReferenceTasks({checkpoints,decisions,projectDescription,deliverable,acceptanceCriteria,onWorkspace}:TasksProps){
+export function ProjectReferenceTasks({checkpoints,decisions,projectDescription,deliverable,acceptanceCriteria,onWorkspace,onCheckpoint}:TasksProps){
   const [filter,setFilter]=useState<"all"|"active"|"review"|"done">("all");
   const [selected,setSelected]=useState<string|null>(null);
   const finished=checkpoints.filter(c=>doneStates.has(c.status)).length;
@@ -84,12 +84,13 @@ export function ProjectReferenceTasks({checkpoints,decisions,projectDescription,
         <div className="mp-ref-bar"><i style={{width:current&&doneStates.has(current.status)?"100%":"0%"}}/></div>
         <p className="mp-ref-muted">{current&&doneStates.has(current.status)?"Результат подтверждён":"Ожидает подтверждения заказчиком"}</p>
         <div className="mp-ref-separator"/>
-        <strong className="mp-ref-subtitle">Что нужно передать</strong>
+        <strong className="mp-ref-subtitle">Что нужно подготовить</strong>
+        <p className="mp-ref-muted">Изучи задачу, подготовь проверяемый результат и приложи файл или ссылку в окне этапа.</p>
         <div className="mp-ref-requirements">
           {acceptanceCriteria.length?acceptanceCriteria.slice(0,4).map((text,index)=><div key={index}><span className="mp-ref-blue-square"><FileCheck2 size={14}/></span>{text}</div>):
           <div><span className="mp-ref-blue-square"><FileText size={14}/></span>{deliverable}</div>}
         </div>
-        <button type="button" onClick={onWorkspace} className="mp-ref-primary">Продолжить задачу <ArrowRight size={16}/></button>
+        <button type="button" onClick={()=>{if(current)onCheckpoint(current.key);else onWorkspace();}} className="mp-ref-primary">{current?"Открыть этап и сдать решение":"Открыть рабочую область"} <ArrowRight size={16}/></button>
       </Card>
       <Card><Title icon={Clock3}>Последние обновления</Title>
         {decisions.length?decisions.slice(-3).reverse().map(d=><p key={d.id} className="mp-ref-activity"><span>Ревью</span>{d.reason||"Есть новое решение по результату"}</p>):
