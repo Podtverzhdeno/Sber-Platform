@@ -192,6 +192,10 @@ class CheckpointRecord:
     key: str
     title: str
     status: str = "planned"
+    description: str = ""
+    deliverable: str = ""
+    acceptance_criteria: tuple[str, ...] = ()
+    estimated_minutes: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
