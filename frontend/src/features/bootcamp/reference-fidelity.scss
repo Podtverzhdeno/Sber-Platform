@@ -561,3 +561,63 @@
   flex: none;
   margin: 0;
 }
+
+/* Stage progression: active glow only after the server-issued study certificates
+   have cleared every required course in the selected role. */
+.bc-reference .bc-ref-grade--ready{
+  border-color:#30e5e4;
+  box-shadow:0 0 28px #00e7ed39,inset 0 0 22px #1b81ab24;
+  background:radial-gradient(ellipse at 95% 5%,#4c3d86 0%,#2a2059 42%,#111c46 100%);
+}
+.bc-reference .bc-ref-grade--ready::after{
+  position:absolute;inset:0;content:"";pointer-events:none;border-radius:inherit;
+  background:linear-gradient(110deg,transparent 12%,#7bffec19 39%,#bd8cff26 50%,transparent 72%);
+  background-size:250% 100%;animation:bcGradeCardSweep 5.4s ease-in-out infinite;
+}
+.bc-reference .bc-ref-grade--ready .bc-ref-grade-kicker{
+  color:#d7fff8;border:1px solid #5ef9ed5a;background:#12445fa3;
+}
+.bc-reference .bc-ref-grade--ready .bc-ref-grade-next{
+  display:block;font-size:11px;font-weight:750;color:#86fef1;max-width:210px;
+  text-shadow:0 0 12px #00f5e866;
+}
+.bc-reference .bc-ref-grade-button--unlock{
+  isolation:isolate;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  gap:8px;min-height:43px;min-width:170px;
+  border:1px solid #c9b2ff99;border-radius:10px;
+  background:linear-gradient(102deg,#c47af2,#5f9eff,#1ff3e5,#c47af2);
+  background-size:300% 100%;
+  box-shadow:0 0 0 1px #ffffff24,0 0 27px #49a8ff67,0 0 33px #ca5df864;
+  animation:bcGradeButtonGradient 3.2s linear infinite,bcGradeButtonFloat 2.8s ease-in-out infinite;
+  color:#031b31;font-size:12px;font-weight:900;
+  transition:filter .22s,transform .22s,box-shadow .22s;
+}
+.bc-reference .bc-ref-grade-button--unlock::after{
+  position:absolute;inset:-12px -25px;content:"";pointer-events:none;
+  background:linear-gradient(113deg,transparent 30%,#fff9 48%,transparent 61%);
+  transform:translateX(-130%);animation:bcGradeLightSweep 3.5s ease-in-out infinite;
+}
+.bc-reference .bc-ref-grade-button--unlock:hover{
+  animation-play-state:running;filter:brightness(1.18);
+  transform:translateY(-3px) scale(1.025);
+  box-shadow:0 0 0 1px #e9ffff8c,0 0 42px #19f5f4b5,0 0 40px #cb79ff91;
+}
+.bc-reference .bc-ref-grade-button--unlock:active{transform:translateY(0) scale(.98)}
+.bc-reference .bc-ref-grade-button--unlock svg{flex:none;width:16px;height:16px}
+.bc-reference .bc-ref-required-start-practice{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  width:100%;min-height:46px;margin-top:12px;
+  border-radius:10px;border:1px solid #55ffeb;
+  background:linear-gradient(95deg,#24e5de,#85a2ff);
+  color:#06243a;font-weight:900;
+}
+@keyframes bcGradeCardSweep{0%,15%{background-position:130% 0}65%,100%{background-position:-125% 0}}
+@keyframes bcGradeButtonGradient{to{background-position:300% 0}}
+@keyframes bcGradeButtonFloat{0%,100%{box-shadow:0 0 0 1px #ffffff26,0 0 23px #49a8ff64,0 0 25px #ca5df866}50%{box-shadow:0 0 0 1px #fff9,0 0 41px #36e6f5b9,0 0 42px #c775ffb0}}
+@keyframes bcGradeLightSweep{0%,24%{transform:translateX(-135%)}61%,100%{transform:translateX(135%)}}
+@media(max-width:620px){.bc-reference .bc-ref-grade-button--unlock{min-width:0;max-width:50%;font-size:11px}.bc-reference .bc-ref-grade--ready .bc-ref-grade-next{max-width:50%}}
+@media(prefers-reduced-motion:reduce){
+  .bc-reference .bc-ref-grade-button--unlock,
+  .bc-reference .bc-ref-grade-button--unlock::after,
+  .bc-reference .bc-ref-grade--ready::after{animation:none!important}
+}
