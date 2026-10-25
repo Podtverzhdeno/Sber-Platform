@@ -17,7 +17,7 @@ from impulse.application.development import (
     RoadmapRecord,
     TrackRecord,
 )
-from impulse.bootstrap.ai_curriculum_details import AI_CURRICULUM_DETAILS, learning_details
+from impulse.application.ai_curriculum_details import AI_CURRICULUM_DETAILS, learning_details
 from impulse.domain.development import (
     CompletionStatus,
     RoadmapMilestone,
