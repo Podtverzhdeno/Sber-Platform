@@ -2,7 +2,7 @@
 
 - task_id: ACTIVITY-CALENDAR-20261026
 - session_id: gpt6-20261026-activity-calendar
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - depends_on: []
@@ -19,5 +19,11 @@
   - focused Vitest activity calendar tests
   - frontend TypeScript/ESLint
   - browser desktop/mobile calendar hover/click/modal
-- progress: User requested replacement of earlier merged activity screen. Introduce isolated activity-calendar module; leave legacy implementation unchanged for rollback.
-- blockers: Former analytics-v3 claim remains in REVIEW although merged; superseding its design is explicitly requested by owner. No main merge without independent acceptance.
+- progress: GitHub activity heatmap implemented with hover/focus tooltip, accessible day modal, 3/6/12-month periods, evidence data projection and read-only hourly measurement gap. Legacy component retained for rollback. PR #87 is open.
+- blockers: Independent product acceptance and full integration CI remain open; no main merge until policy checks satisfied.
+- changed_files: frontend/src/features/activity-calendar/**; frontend/src/features/analytics-v3/page.tsx; frontend/e2e/analytics-three-sections.spec.ts; frontend/e2e/analytics-premium.spec.ts; .github/workflows/activity-calendar-qa.yml
+- verification_evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40243531859 — Activity Calendar QA success on f99dde025f676aafd8a2bc5d8dcc00734635ea36
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40243531852 — Analytics Three Sections QA success
+  - Browser artifacts: calendar desktop/mobile, three analytics screens, modal visual
+- independent_review: required before DONE
