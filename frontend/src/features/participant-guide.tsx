@@ -53,7 +53,7 @@ function getStepAnchor(anchor: string, navigation: string[]): HTMLElement | null
       const index = navigation.indexOf(target);
       if (index < 0) continue;
       const node = document.querySelector<HTMLElement>(`.sidebar nav[aria-label="Навигация роли"] a[href="/workspace/${String(index)}"]`);
-      if (node) return node;
+      if (node && node.getBoundingClientRect().width > 0) return node;
     } else {
       const node = document.querySelector<HTMLElement>(selector);
       if (node && node.getBoundingClientRect().width > 0) return node;
@@ -155,6 +155,11 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
       setView("walkthrough");
     }
   };
+  useEffect(() => {
+    const toggle = () => { startManually(); };
+    window.addEventListener("impulse:guide:toggle", toggle);
+    return () => { window.removeEventListener("impulse:guide:toggle", toggle); };
+  });
   const disableAuto = () => {
     const next = { ...readPrefs(personId), autoDisabled: true };
     savePrefs(personId, next);
