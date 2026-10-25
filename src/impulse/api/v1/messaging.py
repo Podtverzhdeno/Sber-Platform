@@ -172,10 +172,12 @@ async def contact_directory(
     request: Request,
     authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
 ) -> list[ContactView]:
-    """The demo directory is explicit; no global enumeration of private users."""
-    if not request.app.state.settings.demo_mode:
+    """Only expose contacts from the authenticated member's own program."""
+    store = request.app.state.auth_service.store
+    viewer = await store.get_persona_by_id(authenticated.actor.person_id)
+    if viewer is None:
         return []
-    records = await request.app.state.auth_service.store.list_personas()
+    records = await store.list_personas()
     return sorted(
         [
             ContactView(
@@ -185,7 +187,7 @@ async def contact_directory(
             )
             for item in records
             if item.person_id != authenticated.actor.person_id
-            and item.program_key == "impulse-demo"
+            and item.program_key == viewer.program_key
         ],
         key=lambda item: item.display_name.casefold(),
     )
@@ -198,12 +200,14 @@ async def create_group(
     authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
     service: Annotated[MessagingService, Depends(_service)],
 ) -> ChannelView:
-    if not request.app.state.settings.demo_mode:
-        raise ApiError("GROUP_CREATION_UNAVAILABLE", "Создание группы недоступно.", 403)
+    store = request.app.state.auth_service.store
+    viewer = await store.get_persona_by_id(authenticated.actor.person_id)
+    if viewer is None:
+        raise ApiError("RESOURCE_NOT_FOUND", "Пользователь не найден.", 404)
     allowed = {
         item.person_id
-        for item in await request.app.state.auth_service.store.list_personas()
-        if item.program_key == "impulse-demo"
+        for item in await store.list_personas()
+        if item.program_key == viewer.program_key and item.person_id != viewer.person_id
     }
     if any(peer not in allowed for peer in command.peer_ids):
         raise ApiError("MESSAGE_GROUP_PEER_INVALID", "Участник не найден.", 422)
@@ -225,6 +229,15 @@ async def open_personal(
     authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
     service: Annotated[MessagingService, Depends(_service)],
 ) -> ChannelView:
+    store = request.app.state.auth_service.store
+    viewer = await store.get_persona_by_id(authenticated.actor.person_id)
+    peer = await store.get_persona_by_id(command.peer_id)
+    if (
+        viewer is None
+        or peer is None
+        or viewer.program_key != peer.program_key
+    ):
+        raise ApiError("MESSAGE_PEER_INVALID", "Контакт недоступен.", 403)
     channel = await service.open_personal_channel(authenticated.actor, command.peer_id)
     summary = await service.channel_view(authenticated.actor, channel.id)
     if summary is None:
