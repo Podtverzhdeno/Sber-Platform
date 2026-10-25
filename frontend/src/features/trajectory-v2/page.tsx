@@ -538,8 +538,25 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   );
 }
 
-function primaryTrajectoryKey(overview: DevelopmentOverviewView): string | null {
-  return overview.next_outcome?.trajectory_key ?? null;
+/** At most one primary path: use the server's next-outcome focus if enrolled;
+ * otherwise fall back to the first active enrollment. Never promote a catalog
+ * preview or a mere detail selection to a primary trajectory. */
+export function primaryTrajectoryKey(overview: DevelopmentOverviewView): string | null {
+  const enrolled = overview.roles.filter(
+    (role) => role.attempt_number !== null && role.state !== "unselected",
+  );
+  const serverFocus = overview.next_outcome?.trajectory_key;
+  if (serverFocus && enrolled.some((role) => role.track_key === serverFocus)) {
+    return serverFocus;
+  }
+  return enrolled.find((role) => role.state === "active")?.track_key
+    ?? enrolled[0]?.track_key
+    ?? null;
+}
+
+export function roleVisualTone(role: RoleCardView, primary: boolean): "primary" | "learning" | "unselected" {
+  if (role.attempt_number === null || role.state === "unselected") return "unselected";
+  return primary ? "primary" : "learning";
 }
 
 function formatAsOf(asOf: string): string {
@@ -564,6 +581,7 @@ export function RoleCardOverview(props: {
       data-role-key={role.track_key}
       data-role-state={role.state}
       data-primary={props.primary}
+      data-tone={roleVisualTone(role, props.primary)}
       aria-pressed={props.selected}
       onClick={() => {
         props.onSelect();
@@ -638,6 +656,7 @@ export function RoleDetailPanel(props: {
       className="trajectory-v2-role-detail"
       data-testid="trajectory-role-detail"
       data-role-key={role.track_key}
+      data-tone={roleVisualTone(role, props.primary)}
     >
       <header className="trajectory-v2-detail-heading">
         <div className="trajectory-v2-detail-identity">
