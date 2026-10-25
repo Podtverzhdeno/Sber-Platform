@@ -1,7 +1,7 @@
 import { useState, type CSSProperties, type SyntheticEvent, type ReactNode } from "react";
 import {
   ArrowLeft, ArrowRight, Award, Bookmark, BookOpen, CalendarDays,
-  CheckCircle2, ChevronDown, Code2, ExternalLink, Gift, GraduationCap,
+  CheckCircle2, ChevronDown, Code2, ExternalLink, GraduationCap,
   Landmark, Lightbulb, MapPin, Medal, ShieldCheck, Sparkles, BriefcaseBusiness,
 Star, Target, Trophy, Users, X,
 } from "lucide-react";
@@ -39,7 +39,6 @@ function currentStatus(item: EventViewItem): string {
 }
 export function EventsHero({ events, onChoose }: { events: EventViewItem[]; onChoose: () => void }) {
   const sberEvents = events.filter(item => isSber(item.organizer));
-  const tracks = [...new Set(events.flatMap(item => item.track_keys))];
   return <>
     <section className="ev-hero">
       <div className="ev-hero-copy">
