@@ -18,7 +18,6 @@ import {
   type AchievementCategory,
   type AchievementClaim,
   type AchievementEventsPage,
-  type AchievementRecord,
   type AchievementStatus,
   type AchievementsPortfolio,
 } from "./model";
