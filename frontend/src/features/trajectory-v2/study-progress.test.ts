@@ -33,6 +33,7 @@ describe("role-specific trajectory learning reconciliation",()=>{
       study("demo-course-1",true,null),study("demo-course-8",true,"certificate-for-another-course"),
     ],true);
     expect(progress.finishedCourses).toBe(0);
+    expect(progress.matchedCourses).toBe(1);
     expect(progress.pendingEvidence).toBe(0);
     expect(trajectoryStudyProgress([milestone("target","demo-course-1")],[study("demo-course-1",true,"cert")],false).finishedCourses).toBe(0);
   });
