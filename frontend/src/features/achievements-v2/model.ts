@@ -13,6 +13,7 @@ export type AchievementRecord = {
   sourceUrl?: string;
   eventKey?: string;
   projectId?: string;
+  issuedAt?: string;
 };
 
 export type PortfolioContribution = {
@@ -54,7 +55,7 @@ export type AchievementClaim = {
   verification_explanation: string;
   trophy_created: boolean;
 };
-export type AchievementEvent = { key: string; title: string; organizer: string };
+export type AchievementEvent = { key: string; title: string; organizer: string; starts_at?: string | null };
 export type AchievementEventsPage = { items: AchievementEvent[]; has_more: boolean; next_cursor: string | null };
 
 const normalized = (s: string): string => s.toLocaleLowerCase("ru-RU").trim().replace(/\s+/g, " ");
@@ -161,6 +162,7 @@ export function buildAchievements(
       issuer: event?.organizer || "Внешнее событие",
       source: "event",
       eventKey: claim.event_key,
+      issuedAt: event?.starts_at || undefined,
       verificationId: claim.id,
       evidence: [],
     });
