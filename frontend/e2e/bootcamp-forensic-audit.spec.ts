@@ -58,7 +58,14 @@ for (const viewport of [{ width: 1448, height: 1086 }, { width: 390, height: 844
     await page.goto(`${path}?course=demo-course-2`);
     const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
     await expect(dialog).toBeVisible();
-    await dialog.getByRole("button", { name: /Открыть уроки и практику/ }).click();
+    const launch = dialog.getByRole("button", { name: /Открыть уроки и практику/ });
+    await expect(launch).toBeVisible();
+    const background = await launch.evaluate(element => getComputedStyle(element).backgroundImage);
+    expect(background).toContain("linear-gradient");
+    await launch.hover();
+    await expect.poll(() => launch.evaluate(element => getComputedStyle(element).transform))
+      .not.toBe("none");
+    await launch.click();
     const lesson = dialog.locator(".bc-learning__body");
     await expect(lesson).toBeVisible();
     await expect(dialog.getByRole("navigation", { name: "Шаги обучения" }).getByRole("button")).toHaveCount(8);
