@@ -1,0 +1,52 @@
+# Claim ARCH-101-102-ERROR-INVERSION-20261026
+
+- task_id: ARCH-101-102-ERROR-INVERSION-20261026
+- session_id: gpt6-20261026-error-inversion-wave
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 3fe623c786ca49003a8580954ee7f310b274db91
+- depends_on:
+  - ARCH-001
+- write_scope:
+  - src/impulse/application/errors.py
+  - src/impulse/api/errors.py
+  - src/impulse/application/access.py
+  - src/impulse/application/agents.py
+  - src/impulse/application/buddy.py
+  - src/impulse/application/deadline.py
+  - src/impulse/application/development.py
+  - src/impulse/application/development_overview.py
+  - src/impulse/application/ecosystem.py
+  - src/impulse/application/idempotency.py
+  - src/impulse/application/identity.py
+  - src/impulse/application/messaging.py
+  - src/impulse/application/notifications.py
+  - src/impulse/application/operations.py
+  - src/impulse/application/project_credentials.py
+  - src/impulse/application/recognition.py
+  - src/impulse/application/reward.py
+  - src/impulse/application/talent.py
+  - src/impulse/application/task_catalog_analytics.py
+  - src/impulse/application/task_catalog_page.py
+  - src/impulse/application/task_terms_read.py
+  - src/impulse/application/work.py
+  - src/impulse/infrastructure/agent_checkpoint_store.py
+  - src/impulse/infrastructure/buddy_store.py
+  - src/impulse/infrastructure/deadline_store.py
+  - src/impulse/infrastructure/ecosystem_store.py
+  - src/impulse/infrastructure/identity_store.py
+  - src/impulse/infrastructure/operations_store.py
+  - src/impulse/infrastructure/recognition_store.py
+  - src/impulse/infrastructure/reward_store.py
+  - src/impulse/infrastructure/work_store.py
+  - src/impulse/infrastructure/development_store.py
+  - tests/test_architecture_error_boundary.py
+  - .agents/coordination/claims/ARCH-101-102-ERROR-INVERSION-20261026.lock/status.md
+- shared_files: []
+- progress: Compatibility-first inversion of 30 imports of impulse.api.errors in application/infrastructure, leaving HTTP envelope unchanged. Architecture review required.
+- verification:
+  - Ruff/Pyright backend checks
+  - API error-envelope and backend unit tests
+  - import boundary architecture gate
+- blockers: Remaining bootstrap import in infrastructure/development_store.py requires separate behavior-preserving refactor; no deployment. Full CI must pass on integration revision.
