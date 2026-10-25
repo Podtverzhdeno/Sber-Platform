@@ -65,7 +65,7 @@ function getStepAnchor(anchor: string, navigation: string[]): HTMLElement | null
       if (node && isSuitable(node)) return node;
     } else {
       const node = document.querySelector<HTMLElement>(selector);
-      if (node && node.getBoundingClientRect().width > 0) return node;
+      if (node && isSuitable(node)) return node;
     }
   }
   return null;
