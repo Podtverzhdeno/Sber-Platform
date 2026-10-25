@@ -122,37 +122,6 @@ function RewardsPath({ completedCount, onSelect }: { completedCount: number; onS
     </div>
   </section>;
 }
-function ProjectSummary({ project, selected, expanded, onSelect, onOpen, onBookmark, saved }: {
-  project: Project; selected: boolean; expanded: boolean; onSelect: () => void; onOpen: () => void; onBookmark: () => void; saved: boolean;
-}) {
-  const company = projectCompany(project);
-  const progress = completion(project);
-  const status = project.work.assignment.status;
-  const active = activeStatuses.has(status);
-  return <article className={`mp-project-tile mp-project-tile--grid ${selected ? "is-selected" : ""}`} data-testid={`my-project-${project.work.assignment.id}`}>
-    <div className="mp-project-card-top">
-      <CompanyIcon name={company}/>
-      <div className="mp-project-card-heading"><small>{company} · Заказчик</small><h2>{project.work.task.title}</h2></div>
-      <button type="button" className="mp-icon-button" aria-label={saved ? "Убрать из избранного" : "В избранное"} aria-pressed={saved} onClick={onBookmark}><Bookmark size={17} fill={saved ? "currentColor" : "none"}/></button>
-    </div>
-    <div className="mp-chip-row"><em>Проект</em><em>Командная работа</em><em>Практика</em></div>
-    <div className="mp-project-card-progress"><div><span>Твой прогресс</span><strong>{progress === null ? "Не оценён" : `${String(progress)}%`}</strong></div><ProgressBar value={progress} compact/></div>
-    <div className="mp-project-card-meta">
-      <span><Clock3 size={15}/>{statusText[status] || status}</span>
-      <span><CalendarDays size={15}/>{dateLabel(project.work.terms.deadline_at)}</span>
-      <span className="mp-project-card-team" aria-label="Команда проекта">
-        {(project.detail?.team?.length ?? 0)>0 ? <>
-          <span className="mp-team-avatars" aria-hidden="true">{(project.detail?.team ?? []).slice(0,3).map(person=><i key={person.person_id} title={person.display_name}>{person.display_name.trim().slice(0,1).toUpperCase()}</i>)}</span>
-          {(project.detail?.team?.length ?? 0)>3&&<small>+{(project.detail?.team?.length ?? 0)-3}</small>}
-        </> : <><Users size={15}/> Команда уточняется</>}
-      </span>
-    </div>
-    <div className="mp-project-card-actions">
-      <button className={`mp-primary ${active ? "" : "mp-primary--quiet"}`} type="button" onClick={onOpen}>{active ? "Продолжить работу" : finishedStatuses.has(status) ? "Открыть результат" : "Открыть проект"} <ArrowRight size={16}/></button>
-      <button type="button" className="mp-icon-button" aria-pressed={expanded} aria-label={expanded ? "Скрыть предпросмотр" : "Быстрый просмотр"} title="Быстрый просмотр" onClick={onSelect}><MoreHorizontal size={20}/></button>
-    </div>
-  </article>;
-}
 function ProjectSidebarRow({ project, selected, onSelect, onOpen, onBookmark, saved }: {
   project: Project; selected: boolean; onSelect: () => void; onOpen: () => void; onBookmark: () => void; saved: boolean;
 }) {
@@ -344,7 +313,7 @@ export function ParticipantProjectsV2() {
   }))});
   const projects:Project[]=(work.data??[]).map((item,index)=>({work:item,detail:details[index]?.data}));
   const selected=projects.find(x=>x.work.assignment.id===selectedId);
-  const focused=projects.find(x=>x.work.assignment.id===focus)||projects[0];
+
   const open=(id:string,tab:Tab="overview")=>{setWorkspaceTab(false);setParams(previous=>{const next=new URLSearchParams(previous);next.set("project",id);next.set("tab",tab);return next;});};
   const back=()=>{setWorkspaceTab(false);setParams(previous=>{const next=new URLSearchParams(previous);next.delete("project");next.delete("tab");return next;});};
   const setLayout=(value:View)=>{setParams(previous=>{const next=new URLSearchParams(previous);next.set("layout",value);return next;});};
