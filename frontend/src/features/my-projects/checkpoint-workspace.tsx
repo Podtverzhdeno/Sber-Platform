@@ -220,9 +220,9 @@ export function CheckpointWorkspace({
               <p className="mpc-security"><LockKeyhole size={13}/> Файлы видны тебе и ответственному заказчику</p>
             </div>:
             <div className="mpc-restricted"><span className="mpc-icon"><ShieldCheck size={22}/></span>
-              <strong>{isDone?"Этап подтверждён":isInReview?"Решение рассматривает заказчик":assignmentStatus==="staffed"?"Сначала начни работу":"Сейчас нельзя отправить новую версию"}</strong>
-              <p>{isDone?"Результат уже принят по данным проекта.":isInReview?"После решения заказчика можно будет внести исправления при необходимости.":assignmentStatus==="staffed"?"Нажми ниже, чтобы приступить к проекту.":"Отправка откроется после начала следующей итерации."}</p>
-              {assignmentStatus==="staffed"&&onStartWork&&<button type="button" className="mpc-submit" disabled={loading} onClick={()=>{setLoading(true);setError("");void onStartWork().catch(()=>{setError("Не удалось начать проект");}).finally(()=>{setLoading(false);});}}>Начать работу <ArrowRight size={17}/></button>}
+              <strong>{isDone?"Этап подтверждён":isInReview?"Решение рассматривает заказчик":assignmentStatus==="staffed"?"Сначала начни работу":assignmentStatus==="revision_requested"?"Заказчик запросил доработку":"Сейчас нельзя отправить новую версию"}</strong>
+              <p>{isDone?"Результат уже принят по данным проекта.":isInReview?"После решения заказчика можно будет внести исправления при необходимости.":assignmentStatus==="staffed"?"Нажми ниже, чтобы приступить к проекту.":assignmentStatus==="revision_requested"?"Начни новую итерацию, исправь замечания и отправь обновлённый результат.":"Отправка откроется после начала следующей итерации."}</p>
+              {(assignmentStatus==="staffed"||assignmentStatus==="revision_requested")&&onStartWork&&<button type="button" className="mpc-submit" disabled={loading} onClick={()=>{setLoading(true);setError("");void onStartWork().catch(()=>{setError("Не удалось начать проект");}).finally(()=>{setLoading(false);});}}>{assignmentStatus==="revision_requested"?"Начать доработку":"Начать работу"} <ArrowRight size={17}/></button>}
               {error&&<p role="alert" className="mpc-error">{error}</p>}
               {previous&&<small>Последняя версия по этапу: {previous.version} · {statusLabels[previous.status]??previous.status}</small>}
               {(previous?.files?.length??0)>0&&<div className="mpc-previous-files">
