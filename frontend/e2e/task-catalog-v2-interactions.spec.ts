@@ -53,6 +53,7 @@ async function openCatalog(page: Page, items: CatalogItem[] = [catalogItem, insu
   await page.locator('[data-persona="participant-synthetic"]').click();
   await page.getByRole("link", { name: "Задачи" }).click();
   await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
+  await page.getByRole("button", { name: "Карточки" }).click();
 }
 
 test.describe("task catalog interactive controls and motion", () => {
