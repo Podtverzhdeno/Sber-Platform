@@ -84,7 +84,12 @@ async def test_demo_seed_verifies_twelve_tasks(
             closed.append(True)
 
     async def seed(_database: object) -> dict[str, int]:
-        return {"tasks": 12}
+        return {
+            "tasks": 12,
+            "messaging_channels": 12,
+            "messaging_memberships": 37,
+            "messaging_messages": 15,
+        }
 
     monkeypatch.setattr(predeploy, "Database", FakeDatabase)
     monkeypatch.setattr(predeploy, "seed_demo", seed)
