@@ -1344,7 +1344,7 @@ function ImpulseApp() {
       explicitSignOut.current = false;
       setSignedOut(false);
       setActor(nextActor);
-      navigate("/workspace/0", { replace: true });
+      void navigate("/workspace/0", { replace: true });
     } catch {
       setError("Не удалось войти. Проверьте, что backend запущен.");
     }
@@ -1372,7 +1372,7 @@ function ImpulseApp() {
       predicate: (query) =>
         !["public-config", "demo-personas"].includes(String(query.queryKey[0])),
     });
-    navigate("/choose-role", { replace: true });
+    void navigate("/choose-role", { replace: true });
     try {
       await apiRequest<unknown>("/api/v1/auth/logout", {
         method: "POST",
