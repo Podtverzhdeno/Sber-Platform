@@ -52,10 +52,14 @@ test("production demo session: saved learning, selected trajectory, verified sta
  const expectedStudied=roadmap!.milestones.filter(m=>m.target_kind==="course"&&
   learning.courses.some(c=>c.course_key===m.target_key&&c.finished&&c.certificate_id!==null)).length;
  const expectedAccepted=roadmap!.milestones.filter(m=>m.completed).length;
- const actualStudied=await page.locator(".trajectory-v2-stage[data-study-state='studied']").count();
- const actualAccepted=await page.locator(".trajectory-v2-stage[data-stage-state='completed']").count();
- expect(actualStudied,"Course certificates appear on correct trajectory steps").toBe(expectedStudied);
- expect(actualAccepted,"Accepted steps mirror server roadmap").toBe(expectedAccepted);
+ const studiedSteps=page.locator(".trajectory-v2-stage[data-study-state='studied']");
+ const acceptedSteps=page.locator(".trajectory-v2-stage[data-stage-state='completed']");
+ // The trajectory fetches study evidence separately from the role overview;
+ // never assert against the first render before React Query settles.
+ await expect(studiedSteps,"Course certificates must eventually appear in their trajectory").toHaveCount(expectedStudied,{timeout:20000});
+ await expect(acceptedSteps,"Accepted steps mirror server roadmap").toHaveCount(expectedAccepted,{timeout:12000});
+ const actualStudied=await studiedSteps.count();
+ const actualAccepted=await acceptedSteps.count();
  const stageTitle=page.locator(".trajectory-v2-stage-block header small").first();
  await expect(stageTitle).toContainText(`${String(expectedAccepted)} этапов подтверждено`);
  const gradeResponse=await page.evaluate(async track=>{
