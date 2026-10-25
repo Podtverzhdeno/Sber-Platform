@@ -11,3 +11,6 @@ release_request=2026-10-25-learning-sync-5819d84
 
 # Release Events unified button styling, accessible filter toggles, and reset icon
 release_request=2026-10-25-events-buttons-design-b0ce178dc
+
+# Achievements v2: source-backed hero/cards/filters/details, desktop+mobile QA green
+release_request=2026-10-25-achievements-v2-qa-7770f2002d
