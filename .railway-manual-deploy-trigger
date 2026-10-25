@@ -11,3 +11,6 @@ release_request=2026-10-25-main-integration-9bc9a00d7aed
 
 # Sync HEAD after auth and canonical-sidebar changes.
 release_request=2026-10-25-final-main-ec7ba899191b
+
+# Immediate release requested by user; rebuild latest main without waiting for batch cadence.
+release_request=2026-10-25-immediate-2003e8834304
