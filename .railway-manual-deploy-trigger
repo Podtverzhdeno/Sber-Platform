@@ -38,3 +38,6 @@ release_request=2026-10-25-portfolio-compact-typescript-0855a1e3d082
 
 # Retry verified community release after unrelated portfolio typecheck repair
 release_request=2026-10-26-community-retry-13320840ba8f
+
+# Release server-confirmed cinematic course completion popup matching Next Stage
+release_request=2026-10-26-bootcamp-course-success-75252c8ef566
