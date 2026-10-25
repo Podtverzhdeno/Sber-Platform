@@ -7,6 +7,11 @@ from __future__ import annotations
 
 from typing import TypedDict, cast
 
+from impulse.bootstrap.ai_curriculum_details import AI_CURRICULUM_DETAILS, learning_details
+from impulse.bootstrap.ai_reading_resources import READING_LIBRARY, STAGE_READINGS
+from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
+from impulse.bootstrap.demo_seed import build_seed_batches
+
 
 class SeedMilestonePayload(TypedDict):
     theory: list[str]
@@ -16,12 +21,6 @@ class SeedMilestonePayload(TypedDict):
     deliverable: str
     estimated_hours: int
     resources: list[dict[str, str]]
-
-
-from impulse.bootstrap.ai_curriculum_details import AI_CURRICULUM_DETAILS, learning_details
-from impulse.bootstrap.ai_reading_resources import READING_LIBRARY, STAGE_READINGS
-from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
-from impulse.bootstrap.demo_seed import build_seed_batches
 
 
 def test_all_49_stages_have_distinct_actionable_learning_materials() -> None:
