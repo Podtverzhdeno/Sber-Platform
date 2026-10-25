@@ -69,7 +69,7 @@ test("My Projects: introductory copy is gone and content starts directly with th
   await expect(root.getByRole("region", {name:"Как работают мои проекты"})).toHaveCount(0);
   const screen = await root.evaluate(el => ({
     top: el.getBoundingClientRect().top,
-    firstVisible: el.querySelector(".mpr-journey, .mp-toolbar")?.getBoundingClientRect().top ?? Infinity,
+    firstVisible: el.querySelector(".mpr-main, .mp-toolbar")?.getBoundingClientRect().top ?? Infinity,
   }));
   expect(screen.firstVisible - screen.top).toBeLessThan(90);
 });
