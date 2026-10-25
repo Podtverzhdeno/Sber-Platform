@@ -78,9 +78,5 @@ def test_all_stages_reference_two_verified_official_readings() -> None:
                 assert item["url"].startswith("https://")
                 assert "example.com" not in item["url"]
 
-    rows = next(
-        batch.rows
-        for batch in build_seed_batches()
-        if batch.table.name == "milestones"
-    )
+    rows = next(batch.rows for batch in build_seed_batches() if batch.table.name == "milestones")
     assert sum(len(row["payload"]["resources"]) for row in rows) == 98
