@@ -530,7 +530,7 @@ test("satellite reference asset is sharp and vector brand marks load",async({pag
 test("sharing the active tab creates a useful deep link and handles clipboard failures",async({page})=>{
   await page.addInitScript(()=>{
     Object.defineProperty(navigator,"clipboard",{configurable:true,value:{
-      writeText:async(value:string)=>{sessionStorage.setItem("qa-copied-project-link",value);}
+      writeText:(value:string)=>{sessionStorage.setItem("qa-copied-project-link",value);return Promise.resolve();}
     }});
   });
   await page.setViewportSize({width:1548,height:1016});
@@ -546,7 +546,7 @@ test("sharing the active tab creates a useful deep link and handles clipboard fa
   expect(copied).toContain("tab=team");
   await page.evaluate(()=>{
     Object.defineProperty(navigator,"clipboard",{configurable:true,value:{
-      writeText:async()=>Promise.reject(new Error("Clipboard blocked")),
+      writeText:()=>Promise.reject(new Error("Clipboard blocked")),
     }});
   });
   await detail.getByRole("button",{name:"Ссылка скопирована"}).click();
