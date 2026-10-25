@@ -17,6 +17,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 from impulse.application.development import DevelopmentService, RoadmapProjection
 from impulse.application.identity import IdentityStore
+from impulse.application.task_catalog_demo_brands import catalog_demo_company_name
 from impulse.application.task_catalog import (
     TASK_CATALOG_SCHEMA_VERSION,
     ApplicationState,
@@ -499,6 +500,26 @@ class TaskCatalogProjectionService:
             )
             customer = customers.get(task.aggregate.customer_id)
             customer_name = customer.display_name if customer is not None else "Заказчик не указан"
+            customer_verification = (
+                CustomerVerification(customer.customer_verification)
+                if customer is not None and customer.customer_verification is not None
+                else (
+                    CustomerVerification.DEMO
+                    if self._demo_mode
+                    else CustomerVerification.UNVERIFIED
+                )
+            )
+            # Source logos are visual examples ONLY for known synthetic demo
+            # tasks. Their publisher/person ID remains the authority for every
+            # application, access check, notification and audit record.
+            mock_company = catalog_demo_company_name(
+                demo_mode=self._demo_mode,
+                task_key=task.task_key,
+                customer_name=customer_name,
+                customer_verification=customer_verification.value,
+            )
+            if mock_company is not None:
+                customer_name = mock_company
             match = calculate_task_match(task, context, calculated_at=now)
             impacts = tuple(
                 SkillImpactProjection(
@@ -541,15 +562,7 @@ class TaskCatalogProjectionService:
                 customer=CustomerSummary(
                     id=task.aggregate.customer_id,
                     display_name=customer_name,
-                    verification=(
-                        CustomerVerification(customer.customer_verification)
-                        if customer is not None and customer.customer_verification is not None
-                        else (
-                            CustomerVerification.DEMO
-                            if self._demo_mode
-                            else CustomerVerification.UNVERIFIED
-                        )
-                    ),
+                    verification=customer_verification,
                 ),
                 brief_summary=task.aggregate.brief.problem or "Описание не указано заказчиком.",
                 competency_tags=task.competency_tags,
