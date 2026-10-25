@@ -12,6 +12,8 @@ on:
       - "frontend/src/features/bootcamp/learning-content/CourseLearningContent.tsx"
       - "frontend/src/features/bootcamp/learning-content/learning-content.scss"
       - "frontend/src/features/bootcamp/learning-content/ImmersiveCourseExperience.tsx"
+      - "frontend/src/features/bootcamp/grade-milestone-celebration.tsx"
+      - "frontend/src/features/bootcamp/grade-milestone-celebration.scss"
       - "frontend/src/features/bootcamp/learning-content/LessonFrame.tsx"
       - "frontend/src/features/bootcamp/learning-content/lesson-frame.scss"
       - "frontend/src/features/bootcamp/learning-content/StarterCaseCard.tsx"
