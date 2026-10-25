@@ -120,6 +120,7 @@ class RoadmapMilestone:
     lab: str | None = None
     acceptance: tuple[str, ...] = ()
     estimated_hours: int | None = None
+    resources: tuple[dict[str, str], ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
