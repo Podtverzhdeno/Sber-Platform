@@ -1,7 +1,7 @@
 # Claim ARCH-001
 - task_id: ARCH-001
 - session_id: gpt6-20261026-architecture-inventory-02
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: bd64ac98d6179820fb49883b64e7619ac9109a9e
@@ -16,3 +16,6 @@
   - python scripts/architecture/audit.py --root . --output-dir /tmp/architecture-audit
 - progress: inventory manifests read from GitHub recursive tree; developing reproducible stdlib-only audit and unit tests
 - blockers: no local Git checkout; execute all-source checks through GitHub CI after committing the isolated audit tool
+
+- review_handoff_2026_10_26: Read-only inventory and import/Alembic analyzer implemented. Evidence: successful architecture audit runs #40242060937 and #40242117126; nine unit tests, Ruff lint and format, OpenSpec validation. Still NOT_VERIFIED: dynamic import semantics, production runtime, load/RBAC.
+- acceptance_limit: No full runtime evidence and no independent review. ARCH-001 remains unchecked.
