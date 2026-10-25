@@ -234,6 +234,7 @@ function TaskDetail(props: {
   const { item } = props;
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
   const [growthExpanded, setGrowthExpanded] = useState(true);
+  const [detailTab, setDetailTab] = useState<"overview" | "criteria" | "solution" | "review">("overview");
   const canApply = item.allowed_actions.includes("apply") && item.eligibility.status === "eligible" && item.application_state === "none";
   const canSeeConditions = item.allowed_actions.includes("open_conditions") || canApply;
   const shownBenefits = item.benefits.filter((benefit) => benefit.state !== "unavailable");
@@ -317,23 +318,50 @@ function TaskDetail(props: {
           ) : <p>Дополнительные преимущества не опубликованы.</p>}
         </section>
 
-        <section className="catalog-v2-stage-section">
-          <div className="catalog-v2-section-heading"><h3>Этапы задачи</h3><span>План до начала работы</span></div>
-          {item.stage_plan.stages.length > 0 ? (
-            <>
-              <ol className="catalog-v2-stage-track">{item.stage_plan.stages.map((stage, index) => (
-                <li key={stage.key} data-state={stage.state}>
-                  <span className="catalog-v2-stage-index" aria-hidden="true">{index + 1}</span>
-                  <div className="catalog-v2-stage-content">
-                    <strong>{stage.title}</strong>
-                    <p>{stage.summary}</p>
-                    <small><span className="catalog-v2-stage-state">{stage.state === "locked" ? "Пока недоступен" : "Запланировано"} · {formatDuration(stage.estimated_minutes)}</span><span className="catalog-v2-stage-duration" aria-hidden="true">{formatDuration(stage.estimated_minutes)}</span></small>
-                  </div>
-                </li>
-              ))}</ol>
-              <p className="catalog-v2-plan-note">Это план, а не прогресс. Выполнение этапов будет учитываться только после назначения на задачу.</p>
-            </>
-          ) : <p>Заказчик не опубликовал ориентировочный план. Прогресс появляется только после назначения.</p>}
+        <section className="catalog-v2-stage-section catalog-v2-workflow-section">
+          <div className="catalog-v2-section-heading"><h3>Работа над задачей</h3><span>От условий до подтверждения навыков</span></div>
+          <div className="catalog-v2-workflow-tabs" role="tablist" aria-label="Разделы задачи">
+            {([
+              ["overview", "О задаче"],
+              ["criteria", "Критерии"],
+              ["solution", "Решение"],
+              ["review", "Результат"],
+            ] as const).map(([key, label]) => (
+              <button key={key} type="button" role="tab" id={`catalog-tab-${key}`} aria-controls="catalog-workflow-panel" aria-selected={detailTab === key} className={detailTab === key ? "is-active" : ""} onClick={() => setDetailTab(key)}>{label}</button>
+            ))}
+          </div>
+          <div id="catalog-workflow-panel" role="tabpanel" aria-labelledby={`catalog-tab-${detailTab}`} className="catalog-v2-workflow-panel">
+            {detailTab === "overview" && <>
+              <h4>Задача и ожидаемый результат</h4>
+              <p>{item.brief_summary}</p>
+              <div className="catalog-v2-workflow-facts"><span>Уровень: {item.difficulty === null ? "не указан" : difficultyLabels[item.difficulty] ?? item.difficulty}</span><span>Время: {formatDuration(item.duration_minutes)}</span></div>
+              {item.stage_plan.stages.length > 0 && <details className="catalog-v2-workflow-extra"><summary>План выполнения ({item.stage_plan.stages.length})</summary><ol>{item.stage_plan.stages.map(stage => <li key={stage.key}><strong>{stage.title}</strong> — {stage.summary}</li>)}</ol></details>}
+            </>}
+            {detailTab === "criteria" && <>
+              <h4>Что требуется для успешной сдачи</h4>
+              <p>Подробные критерии приёмки, требования к результату и ограничения публикует заказчик в условиях задачи. Проверяйте актуальную версию перед началом работы.</p>
+              {canSeeConditions ? <button type="button" className="catalog-v2-workflow-action" onClick={props.onConditions}>Открыть критерии и условия</button> : <p>Критерии недоступны для просмотра в текущем статусе.</p>}
+              <p className="catalog-v2-workflow-hint">Прогноз роста навыков выше не является оценкой или гарантией сертификации.</p>
+            </>}
+            {detailTab === "solution" && <>
+              <h4>Подготовка решения</h4>
+              {item.assignment_id !== null && item.allowed_actions.includes("open_workspace") ? <>
+                <p>Рабочая область доступна после назначения. Здесь можно продолжить выполнение задачи и использовать доступные инструменты команды.</p>
+                <button type="button" className="catalog-v2-workflow-action" onClick={() => props.onWorkspace(item.assignment_id as string)}>Открыть рабочую область</button>
+              </> : <>
+                <p>Чтобы начать выполнение, ознакомьтесь с условиями и отправьте отклик. Отклик не означает назначение.</p>
+                {canSeeConditions && <button type="button" className="catalog-v2-workflow-action" onClick={props.onConditions}>Условия и отклик</button>}
+                {!canSeeConditions && <p>Выполнение пока недоступно для текущего статуса заявки.</p>}
+              </>}
+            </>}
+            {detailTab === "review" && <>
+              <h4>Проверка и подтверждение результата</h4>
+              <p>Статус участия: {applicationLabels[item.application_state] ?? item.application_state}.</p>
+              <p>Результат выполнения и подтверждённые компетенции появляются только после фактической проверки, а не после отклика или открытия задачи.</p>
+              {item.assignment_id !== null && item.allowed_actions.includes("open_workspace") && <button type="button" className="catalog-v2-workflow-action" onClick={() => props.onWorkspace(item.assignment_id as string)}>Посмотреть рабочую область</button>}
+              <p className="catalog-v2-workflow-hint">Если оценка ещё не опубликована, не показываем вымышленные баллы или прирост навыков.</p>
+            </>}
+          </div>
         </section>
 
       </div>
