@@ -89,7 +89,7 @@ export function ParticipantPortfolio() {
 
 
 /** Preserve the established participant route; the full UI is scoped to Rating V2. */
-export function ParticipantRating() {
+export function ParticipantRating({ personId }: { personId?: string }) {
   const navigate = useNavigate();
-  return <ParticipantRatingV2 onOpenMessages={() => { void navigate("/workspace/10"); }} />;
+  return <ParticipantRatingV2 currentPersonId={personId} onOpenMessages={() => { void navigate("/workspace/10"); }} />;
 }
