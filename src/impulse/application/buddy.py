@@ -79,6 +79,9 @@ class BuddyStorage:
     async def load_thread(self, owner_id: UUID, thread_id: UUID) -> BuddyThread:
         raise NotImplementedError
 
+    async def list_threads(self, owner_id: UUID) -> tuple[BuddyThread, ...]:
+        raise NotImplementedError
+
     async def append_message(
         self,
         thread_id: UUID,
@@ -155,6 +158,13 @@ class MemoryBuddyStorage(BuddyStorage):
         if thread is None or thread.owner_id != owner_id:
             raise ApiError("RESOURCE_NOT_FOUND", "Buddy thread was not found.", 404)
         return thread
+
+    async def list_threads(self, owner_id: UUID) -> tuple[BuddyThread, ...]:
+        return tuple(
+            thread
+            for thread in self._threads.values()
+            if thread.owner_id == owner_id and not thread.content_deleted
+        )
 
     async def append_message(
         self,
@@ -302,6 +312,30 @@ class BuddyConversationService:
         self._participant(actor)
         await self._memory_allowed(actor)
         return await self._storage.load_thread(actor.person_id, thread_id)
+
+    async def list_threads(self, actor: ActorContext) -> tuple[BuddyThread, ...]:
+        self._participant(actor)
+        await self._memory_allowed(actor)
+        return await self._storage.list_threads(actor.person_id)
+
+    async def add_assistant_message(
+        self,
+        actor: ActorContext,
+        thread_id: UUID,
+        *,
+        client_message_id: str,
+        content: str,
+    ) -> BuddyMessage:
+        thread = await self.thread(actor, thread_id)
+        if thread.status != "active":
+            raise ApiError("THREAD_NOT_ACTIVE", "Buddy thread is not active.", 409)
+        return await self._storage.append_message(
+            thread_id,
+            client_message_id,
+            role="assistant",
+            content=content,
+            created_at=datetime.now(UTC),
+        )
 
     async def add_message(
         self,

@@ -102,7 +102,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** List Threads */
+        get: operations["list_threads_api_v1_agents_buddy_threads_get"];
         put?: never;
         /** Create Thread */
         post: operations["create_thread_api_v1_agents_buddy_threads_post"];
@@ -191,6 +192,23 @@ export interface paths {
         put?: never;
         /** Add Message */
         post: operations["add_message_api_v1_agents_buddy_threads__thread_id__messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/agents/buddy/threads/{thread_id}/reply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reply To Thread */
+        post: operations["reply_to_thread_api_v1_agents_buddy_threads__thread_id__reply_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -338,6 +356,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/customer/applications/{application_id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Candidate */
+        post: operations["accept_candidate_api_v1_customer_applications__application_id__accept_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/customer/analytics/activity": {
         parameters: {
             query?: never;
@@ -352,23 +387,6 @@ export interface paths {
         get: operations["customer_analytics_activity_api_v1_customer_analytics_activity_get"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/customer/applications/{application_id}/accept": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Accept Candidate */
-        post: operations["accept_candidate_api_v1_customer_applications__application_id__accept_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1756,23 +1774,6 @@ export interface paths {
         get: operations["channel_context_api_v1_me_messaging_channels__channel_id__context_get"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/me/messaging/channels/{channel_id}/members": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Add Community Members */
-        post: operations["add_community_members_api_v1_me_messaging_channels__channel_id__members_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3325,11 +3326,6 @@ export interface components {
             scopes: string[];
             /** Timezone */
             timezone: string;
-        };
-        /** AddCommunityMembersRequest */
-        AddCommunityMembersRequest: {
-            /** Person Ids */
-            person_ids: string[];
         };
         /**
          * AppealStatus
@@ -7749,6 +7745,25 @@ export interface components {
              */
             theme: "dark" | "light" | "system";
         };
+        /** ThreadSummaryView */
+        ThreadSummaryView: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Message Count */
+            message_count: number;
+            /** Status */
+            status: string;
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string | null;
+        };
         /** ThreadView */
         ThreadView: {
             /** Content Deleted */
@@ -8412,6 +8427,62 @@ export interface operations {
             };
         };
     };
+    list_threads_api_v1_agents_buddy_threads_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ThreadSummaryView"][];
+                };
+            };
+        };
+    };
+    reply_to_thread_api_v1_agents_buddy_threads__thread_id__reply_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path: {
+                thread_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MessageRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ThreadView"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     cancel_thread_api_v1_agents_buddy_threads__thread_id__cancel_post: {
         parameters: {
             query?: never;
@@ -8783,26 +8854,6 @@ export interface operations {
             };
         };
     };
-    customer_analytics_activity_api_v1_customer_analytics_activity_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomerActivityView"];
-                };
-            };
-        };
-    };
     accept_candidate_api_v1_customer_applications__application_id__accept_post: {
         parameters: {
             query?: never;
@@ -8836,6 +8887,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    customer_analytics_activity_api_v1_customer_analytics_activity_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerActivityView"];
                 };
             };
         };
@@ -11378,43 +11449,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChannelWorkContextView"] | null;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    add_community_members_api_v1_me_messaging_channels__channel_id__members_post: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-CSRF-Token"?: string | null;
-            };
-            path: {
-                channel_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AddCommunityMembersRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ChannelView"];
                 };
             };
             /** @description Validation Error */
