@@ -824,6 +824,14 @@ export function BootcampCatalog({
   const studyNeedsAction=gradeCurriculum?policyRemaining.length>0:pendingRequired.length>0;
   const officialGrade = gradeOverview.data?.role_summary.track_key===selectedRole && gradeOverview.data.role_summary.grade_state==="known"
     ? gradeOverview.data.role_summary.current_grade_title : null;
+  const gradeStatusLabel = gradeOverview.isError
+    ? "Грейд: данные недоступны"
+    : gradeOverview.isPending
+      ? "Грейд: загружается"
+      : officialGrade ? "Грейд: "+officialGrade
+        : gradeOverview.data?.role_summary.grade_state === "not_evaluable"
+          ? "Грейд: правила не опубликованы"
+          : "Грейд: не присвоен";
   const progressionComplete = gradeCurriculum?policyRemaining.length===0:roleStudy.required.length>0 && pendingRequired.length===0;
   const requiredWord = new Intl.PluralRules("ru-RU").select(remainingStudyCount) === "one" ? "курс" :
     new Intl.PluralRules("ru-RU").select(remainingStudyCount) === "few" ? "курса" : "курсов";
@@ -877,7 +885,7 @@ export function BootcampCatalog({
         <div className="bc-ref-right-panels">
           <section className="bc-ref-role-summary" aria-labelledby="bc-role-title">
             <div><h2 id="bc-role-title">Моя роль: {selectedRoleTitle}</h2>
-              <div className="bc-ref-summary-tags"><span data-testid="bootcamp-official-grade">♜ {officialGrade ? "Грейд: "+officialGrade : "Грейд: не присвоен"}</span><span>▦ Курсов: {roleStudy.totalRoleCourses}</span><span data-testid="bootcamp-study-level">Учебный этап: {roleStudy.studied.length} из {roleStudy.totalRoleCourses}</span></div>
+              <div className="bc-ref-summary-tags"><span data-testid="bootcamp-official-grade">♜ {gradeStatusLabel}</span><span>▦ Курсов: {roleStudy.totalRoleCourses}</span><span data-testid="bootcamp-study-level">Учебный этап: {roleStudy.studied.length} из {roleStudy.totalRoleCourses}</span></div>
             </div>
             <div className="bc-ref-ring" aria-label="Завершённые учебные курсы роли, не профессиональный грейд"><strong data-testid="bootcamp-study-count">{roleStudy.studied.length}</strong><small>курсов<br/>пройдено</small></div>
           </section>
