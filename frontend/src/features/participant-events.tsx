@@ -4,11 +4,12 @@ import { useSearchParams } from "react-router-dom";
 
 import { apiRequest, type RuntimeApiPath } from "../api/client";
 import { Modal, SafeExternalLink, StatePanel } from "../components/ui";
-import { Award, BriefcaseBusiness, GraduationCap, Users } from "lucide-react";
-import { EventsHero, EventsCard, EventExperienceDetail, EventRegistrationForm, type EventTab } from "./participant-events-design";
+import { ArrowDownUp, ArrowRight, Award, BriefcaseBusiness, ChevronDown, Filter, GraduationCap, Plus, RotateCcw, Search, Users, X } from "lucide-react";
+import { EventsTile, EventExperienceDetail, EventRegistrationForm, type EventTab } from "./participant-events-design";
 import "./participant-events-reference.scss";
 import "./participant-events.scss";
 import "./participant-events-fidelity.scss";
+import "./participant-events-compact.scss";
 
 type EventItem = {
   key: string; title: string; event_type: string; organizer: string; conditions: string;
@@ -81,6 +82,20 @@ export function ParticipantEventCatalog() {
   const [activeCategory, setActiveCategory] = useState("for-you");
   const [sortBy, setSortBy] = useState("relevance");
   const [search, setSearch] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [draftFocus, setDraftFocus] = useState<string[]>([]);
+  const [draftType, setDraftType] = useState("all");
+  const filtersRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") setFiltersOpen(false); };
+    const onPointer = (event: MouseEvent) => {
+      if (!filtersRef.current?.contains(event.target as Node)) setFiltersOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onPointer);
+    return () => { document.removeEventListener("keydown", onKey); document.removeEventListener("mousedown", onPointer); };
+  }, [filtersOpen]);
   const [savedEvents, setSavedEvents] = useState<Set<string>>(new Set());
   const [detailTab, setDetailTab] = useState<EventTab>("about");
   const [registrationOpen, setRegistrationOpen] = useState(false);
@@ -123,6 +138,26 @@ export function ParticipantEventCatalog() {
   const types = [...new Set(allItems.map((item) => item.event_type))];
   const claimByEvent = new Map((claims.data ?? []).map((item) => [item.event_key, item]));
   const selectedFocus = (params.get("focus") ?? "").split(",").filter(Boolean);
+  const activeTracks = Array.from(new Set([...selectedFocus, ...(track === "all" ? [] : [track])]));
+  const activeFilterCount = activeTracks.length + (eventType === "all" ? 0 : 1) + (activeCategory === "sber" ? 1 : 0);
+  const typeName = (key: string): string => ({ educational_program: "Образовательная программа", hackathon: "Хакатон", grant: "Грант", competition: "Конкурс", workshop: "Практикум" })[key] ?? key;
+  const openFilters = () => { setDraftFocus(activeTracks); setDraftType(eventType); setFiltersOpen(value => !value); };
+  const toggleDraftFocus = (key: string) => { setDraftFocus(value => value.includes(key) ? value.filter(item => item !== key) : [...value, key]); };
+  const applyFilters = () => {
+    const next = new URLSearchParams(pendingParams.current);
+    next.delete("track");
+    if (draftFocus.length) next.set("focus",draftFocus.join(",")); else next.delete("focus");
+    if (draftType === "all") next.delete("type"); else next.set("type",draftType);
+    pendingParams.current = next;
+    setParams(next);
+    setFiltersOpen(false);
+  };
+  const previewCount = allItems.filter(item =>
+    (!draftFocus.length || draftFocus.some(key => item.track_keys.includes(key))) &&
+    (draftType === "all" || item.event_type === draftType) &&
+    (activeCategory !== "sber" || /сбер|sber/i.test(item.organizer)) &&
+    (!search.trim() || [item.title,item.organizer,item.recommendation_reason,...item.track_keys].join(" ").toLowerCase().includes(search.trim().toLowerCase()))
+  ).length;
   const visible = allItems.filter((item) =>
     (track === "all" || item.track_keys.includes(track)) &&
     (eventType === "all" || item.event_type === eventType) &&
@@ -131,6 +166,7 @@ export function ParticipantEventCatalog() {
     (search.trim() === "" || [item.title,item.organizer,item.recommendation_reason,...item.track_keys].join(" ").toLowerCase().includes(search.trim().toLowerCase()))
   ).sort((a,b) => sortBy === "deadline" || activeCategory === "deadline"
     ? (new Date(a.deadline_at ?? "9999-01-01").getTime() - new Date(b.deadline_at ?? "9999-01-01").getTime())
+    : sortBy === "newest" ? new Date(b.source_checked_at||"1970-01-01").getTime()-new Date(a.source_checked_at||"1970-01-01").getTime()
     : activeCategory === "popular" ? b.track_keys.length - a.track_keys.length : 0);
   const focus = selectedFocus.length ? selectedFocus : ["python","product","ai","ml","data"];
   const toggleSaved = (key: string) => { setSavedEvents(old => { const next=new Set(old); if(next.has(key))next.delete(key);else next.add(key);return next; }); };
@@ -140,42 +176,56 @@ export function ParticipantEventCatalog() {
     setParam("focus", [...next].join(","), "");
   };
   const resetFilters = () => {
-    setParam("focus","","");
-    setParam("track","all");
-    setParam("type","all");
-    setActiveCategory("for-you");
-    setSearch("");
+    const next = new URLSearchParams(pendingParams.current);
+    next.delete("focus"); next.delete("track"); next.delete("type");
+    pendingParams.current = next; setParams(next);
+    setDraftFocus([]); setDraftType("all"); setFiltersOpen(false);
+    setActiveCategory("for-you"); setSortBy("relevance"); setSearch("");
   };
   return <div className="feature-stack participant-events" data-testid="events-v2">
-    <EventsHero events={allItems} onChoose={() => { document.getElementById("ev-results")?.scrollIntoView({behavior:"smooth",block:"start"}); }}/>
-    <div className="ev-catalog" id="ev-results">
-      <aside className="ev-filters" aria-label="Фильтры событий">
-        <header><h2>Подбор событий</h2><button type="button" onClick={resetFilters}>Сбросить всё</button></header>
-        <div className="ev-filter-modes"><button type="button" className={activeCategory==="for-you"?"active":""} onClick={()=> { setActiveCategory("for-you"); }}>Рекомендации для вас</button><button type="button" className={activeCategory==="all"?"active":""} onClick={()=> { setActiveCategory("all"); }}>Все события</button></div>
-        <label className="catalog-filter">Направление<select value={track} onChange={event=> { setParam("track",event.target.value); }}><option value="all">Все направления</option>{tracks.map(t=><option key={t} value={t}>{t}</option>)}</select></label>
-        <section className="ev-filter-group"><h3>Ваши направления</h3>{tracks.map(key=><label key={key}><input type="checkbox" checked={selectedFocus.includes(key)} onChange={()=> { toggleFocus(key); }}/>{key}</label>)}</section>
-        <label className="catalog-filter">Формат<select value={eventType} onChange={event=> { setParam("type",event.target.value); }}><option value="all">Все форматы</option>{types.map(t=><option key={t} value={t}>{t}</option>)}</select></label>
-        <section className="ev-filter-group"><h3>Тип события</h3>{types.map(key=><label key={key}><input type="checkbox" checked={eventType===key} onChange={()=> { setParam("type",eventType===key?"all":key); }}/>{key}</label>)}</section>
-        <section className="ev-filter-group"><h3>Найти событие</h3><input className="ev-search" value={search} onChange={e=> { setSearch(e.target.value); }} placeholder="Название, навыки, Сбер..." aria-label="Поиск событий"/></section>
-        <small className="ev-filter-count">Показано: {visible.length} из {allItems.length}</small>
-      </aside>
-      <div className="ev-catalog-results">
-        <div className="ev-result-header">
-          <div className="ev-result-tabs">
-            {([["for-you","Для вас"],["sber","От Сбера"],["popular","Популярные"],["deadline","Скоро дедлайн"]] as const).map(([key,label])=><button type="button" key={key} className={activeCategory===key?"active":""} onClick={()=> { setActiveCategory(key); }}>{label}{key==="for-you"?` (${String(visible.length)})`:""}</button>)}
-          </div>
-          <div className="ev-result-order"><label>Сортировка: <select value={sortBy} aria-label="Сортировка событий" onChange={e=> { setSortBy(e.target.value); }}><option value="relevance">По соответствию</option><option value="deadline">По дедлайну</option></select></label></div>
+    <section className="ev-catalog-v3" id="ev-results" aria-labelledby="workspace-title">
+      <header className="ev-v3-heading">
+        <h1 id="workspace-title">Подбор событий</h1>
+        <button type="button" className="ev-v3-reset" onClick={resetFilters}><RotateCcw size={15}/> Сбросить всё</button>
+      </header>
+      <nav className="ev-result-tabs ev-v3-tabs" aria-label="Категории событий">
+        {([["for-you","Для вас"],["sber","От Сбера"],["popular","Популярные"],["deadline","Скоро дедлайн"]] as const).map(([key,label]) =>
+          <button type="button" key={key} className={activeCategory===key?"active":""} aria-pressed={activeCategory===key} onClick={()=> { setActiveCategory(key); }}>{label}{key==="for-you"?" ("+String(visible.length)+")":""}</button>)}
+      </nav>
+      <div className="ev-v3-toolbar" ref={filtersRef}>
+        <button type="button" className={"ev-v3-filters-trigger"+(filtersOpen?" is-open":"")} aria-expanded={filtersOpen} aria-controls="ev-filter-popover" onClick={openFilters}>
+          <Filter size={19}/><strong>Фильтры</strong>{activeFilterCount>0&&<span className="ev-v3-count">{activeFilterCount}</span>}<ChevronDown className="ev-v3-trigger-chevron" size={17}/>
+        </button>
+        <label className="ev-v3-search"><Search size={20}/><input type="search" value={search} onChange={event=>{setSearch(event.target.value);}} placeholder="Найти событие" aria-label="Поиск событий"/></label>
+        <div className="ev-v3-active-filters" aria-label="Активные фильтры">
+          {activeTracks.map(key=><button key={"track-"+key} type="button" className="ev-v3-active-chip" aria-label={"Убрать направление "+key} onClick={()=> {
+            if (track===key) setParam("track","all"); else toggleFocus(key);
+          }}>{key}<X size={13}/></button>)}
+          {eventType!=="all"&&<button type="button" className="ev-v3-active-chip" aria-label={"Убрать тип "+typeName(eventType)} onClick={()=>{setParam("type","all");}}>{typeName(eventType)}<X size={13}/></button>}
+          {activeCategory==="sber"&&<button type="button" className="ev-v3-active-chip" onClick={()=>{setActiveCategory("for-you");}}>От Сбера<X size={13}/></button>}
+          <button type="button" className="ev-v3-add" aria-label="Добавить фильтр" onClick={openFilters}><Plus size={18}/></button>
         </div>
-        {visible.length===0?<div className="ev-empty"><h3>События не найдены</h3><p>Измените фильтры или направление развития</p><button className="ev-primary" type="button" onClick={resetFilters}>Сбросить фильтры</button></div>:
-         <div className="ev-event-list">{visible.map((item,index)=>{
-           const claim=claimByEvent.get(item.key);
-           return <div key={item.key}><EventsCard item={item} index={index} focus={focus} evidenceState={claim?.evidence_state} verificationExplanation={claim?.verification_explanation} canReportResult={item.status !== "open" && !claim} onReportResult={() => { setSelectedEvent(item); }} saved={savedEvents.has(item.key)} onSave={()=> { toggleSaved(item.key); }} onDetails={()=> { openEvent(item.key); }}/>
-             
-           </div>;
-         })}</div>}
-        <div className="ev-benefits-bottom"><strong>После участия вы получите</strong><span><BriefcaseBusiness/> Практический опыт</span><span><Award/> Подтверждённые достижения</span><span><GraduationCap/> Развитие навыков</span><span><Users/> Новые контакты</span></div>
+        <span className="ev-v3-shown">Показано: {visible.length} из {allItems.length}</span>
+        <label className="ev-v3-order"><ArrowDownUp size={16}/><select value={sortBy} aria-label="Сортировка событий" onChange={e=>{setSortBy(e.target.value);}}><option value="relevance">По соответствию</option><option value="deadline">По дедлайну</option><option value="newest">Недавно проверены</option></select><ChevronDown size={14}/></label>
+        {filtersOpen&&<section id="ev-filter-popover" className="ev-v3-popover" aria-label="Фильтры событий">
+          <header className="ev-v3-popover-head"><div><strong>Фильтры событий</strong><small>Выберите подходящие направления и тип</small></div><button type="button" onClick={()=>{setFiltersOpen(false);}} aria-label="Закрыть фильтры"><X size={18}/></button></header>
+          <div className="ev-v3-filter-section"><h3>Направления</h3><div className="ev-v3-filter-options">
+            {tracks.map(key=><button type="button" key={key} aria-pressed={draftFocus.includes(key)} className={draftFocus.includes(key)?"is-active":""} onClick={()=>{toggleDraftFocus(key);}}>{key}</button>)}
+          </div></div>
+          <div className="ev-v3-filter-section"><h3>Тип события</h3><div className="ev-v3-filter-options">
+            <button type="button" className={draftType==="all"?"is-active":""} aria-pressed={draftType==="all"} onClick={()=>{setDraftType("all");}}>Все типы</button>
+            {types.map(key=><button type="button" key={key} className={draftType===key?"is-active":""} aria-pressed={draftType===key} onClick={()=>{setDraftType(draftType===key?"all":key);}}>{typeName(key)}</button>)}
+          </div></div>
+          <div className="ev-v3-popover-actions"><button type="button" className="ev-v3-apply" onClick={applyFilters}>Показать события · {previewCount} <ArrowRight size={15}/></button><button type="button" className="ev-v3-clear" onClick={()=>{setDraftFocus([]);setDraftType("all");}}>Очистить</button></div>
+        </section>}
       </div>
-    </div>
+      {visible.length===0?<div className="ev-empty"><h3>События не найдены</h3><p>Попробуйте изменить направление, тип события или запрос</p><button className="ev-primary" type="button" onClick={resetFilters}>Сбросить фильтры</button></div>:
+        <div className="ev-event-list ev-v3-event-grid">{visible.map((item,index)=>{
+          const claim=claimByEvent.get(item.key);
+          return <EventsTile key={item.key} item={item} index={index} focus={focus} evidenceState={claim?.evidence_state} verificationExplanation={claim?.verification_explanation} canReportResult={item.status!=="open"&&!claim} onReportResult={()=>{setSelectedEvent(item);}} saved={savedEvents.has(item.key)} onSave={()=>{toggleSaved(item.key);}} onDetails={()=>{openEvent(item.key);}}/>;
+        })}</div>}
+      <div className="ev-benefits-bottom"><strong>После участия вы получите</strong><span><BriefcaseBusiness/> Практический опыт</span><span><Award/> Подтверждённые достижения</span><span><GraduationCap/> Развитие навыков</span><span><Users/> Новые контакты</span></div>
+    </section>
     <div className="ev-detail-modal"><Modal title={detail.data?.title ?? "Подробности события"} open={eventKey !== null} onClose={close}>{detail.isLoading || aggregate.isLoading ? <StatePanel kind="loading" /> : detail.isError || aggregate.isError || !detail.data || !aggregate.data ? <StatePanel kind="error" action="Закрыть" onAction={close} /> : <><EventExperienceDetail detail={detail.data} aggregate={aggregate.data} tab={detailTab} onTabChange={setDetailTab} onClose={close} onRegister={()=> { setRegistrationOpen(true); }} isSaved={savedEvents.has(detail.data.key)} onSave={()=> { toggleSaved(detail.data.key); }}/>{registrationOpen&&<EventRegistrationForm event={detail.data} onClose={closeRegistration}/>}</>}</Modal></div>
     <Modal title={`Подтвердить результат · ${selectedEvent?.title ?? ""}`} open={selectedEvent !== null} onClose={() => { setSelectedEvent(null); }}>
       <form className="event-claim-form" onSubmit={(event) => { event.preventDefault(); if (selectedEvent) report.mutate(selectedEvent.key); }}><p>Событие завершено. После проверки сертификата баллы станут постоянными.</p><label>Результат<select value={claimType} onChange={(event) => { setClaimType(event.target.value); }}><option value="participation">Участие</option><option value="completion">Завершение</option><option value="finalist">Финалист</option><option value="winner">Победа</option></select></label><label>Что вы сделали<textarea required minLength={20} value={result} onChange={(event) => { setResult(event.target.value); }} /></label><label>Ссылка на сертификат или доказательство<input required type="url" value={evidence} onChange={(event) => { setEvidence(event.target.value); }} /></label><div className="modal-actions"><button type="submit" disabled={report.isPending}>{report.isPending ? "Отправляем…" : "Отправить на проверку"}</button><button className="secondary-button" type="button" onClick={() => { setSelectedEvent(null); }}>Отмена</button></div></form>
