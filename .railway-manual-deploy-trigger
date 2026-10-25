@@ -5,3 +5,6 @@ release_request=2026-10-25-bootcamp-geometry-filter-16fe723
 
 # Bootcamp reference overlay 520px, verified interactions and independent filters
 release_request=2026-10-25-bootcamp-popup-fidelity-ebab15f
+
+# BC-R01..BC-R05 geometry, progressive course list, popup and filter acceptance
+release_request=2026-10-25-bootcamp-atomic-review-0e2068d
