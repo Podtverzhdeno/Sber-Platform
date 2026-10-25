@@ -1,5 +1,5 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, ArrowRight, Award, Bookmark, BriefcaseBusiness, CalendarDays,
@@ -229,7 +229,13 @@ export function ParticipantProjectsV2() {
   const navigate = useNavigate();
   const [params,setParams] = useSearchParams();
   const [focus,setFocus] = useState<string|null>(null);
-  const [saved,setSaved] = useState<string[]>([]);
+  const [saved,setSaved] = useState<string[]>(()=>{
+    try {
+      const stored=JSON.parse(localStorage.getItem("impulse_favorite_projects")??"[]") as unknown;
+      return Array.isArray(stored)?stored.filter((value):value is string=>typeof value==="string"):[];
+    } catch { return []; }
+  });
+  useEffect(()=>{localStorage.setItem("impulse_favorite_projects",JSON.stringify(saved));},[saved]);
   const [rewardFocus,setRewardFocus] = useState<string|null>(null);
   const layout:View=params.get("layout")==="list"?"list":"cards";
   const filter:Filter=filterChoices.some(c=>c.key===params.get("filter"))?params.get("filter") as Filter:"all";
