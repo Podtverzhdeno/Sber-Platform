@@ -140,6 +140,91 @@
   }
 }
 
+
+/* Card anatomy follows the approved four-zone reference:
+   event art | event and skill groups | pentagon | matching bars */
+.participant-events {
+  .ev-event-card {
+    display:grid;grid-template-columns:140px minmax(0,1fr) 112px 196px;
+    grid-template-rows:minmax(118px,auto) 32px;
+    gap:8px 12px;min-height:184px;align-items:start;padding:10px 10px 10px;
+    overflow:hidden;
+  }
+  .ev-event-thumb {grid-column:1;grid-row:1;height:118px;min-height:118px}
+  .ev-thumb-match {position:absolute;z-index:5;top:6px;left:6px;border-radius:40px;
+    border:1px solid #43fbe8a3;background:linear-gradient(110deg,#11e9d4,#4be8aa);
+    font-size:10px;line-height:1;color:#012b32;font-weight:900;padding:8px 9px;
+    box-shadow:0 4px 12px #012a2a75;white-space:nowrap}
+  .ev-event-main {grid-column:2;grid-row:1;padding:0;align-self:start}
+  .ev-event-title-line h3 {font-size:15px;line-height:1.25;margin:0 0 8px}
+  .ev-event-meta {font-size:10px;gap:7px;line-height:1.35}
+  .ev-event-meta span {gap:5px;white-space:nowrap}
+  .ev-event-capabilities {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:9px;margin-top:11px}
+  .ev-event-capabilities section + section {border-left:1px solid #174256;padding-left:10px}
+  .ev-event-capabilities h4 {margin:0 0 6px;color:#a8c8df;font-size:11px;font-weight:600}
+  .ev-event-capabilities .ev-event-tags,.ev-skill-tags {display:flex;flex-wrap:wrap;gap:4px;margin:0}
+  .ev-event-capabilities .ev-event-tags span,.ev-skill-tags span {
+    font-size:10px;line-height:1.1;border-radius:20px;padding:5px 8px;white-space:nowrap}
+  .ev-event-capabilities .ev-event-tags span {background:#054443;color:#2af1dc;border:1px solid #0c7a78}
+  .ev-skill-tags span {background:#142d41;color:#c7ddeb;border:1px solid #2b5063}
+  .ev-event-capabilities small {font-size:11px;color:#98b2c1}
+  .ev-card-radar {grid-column:3;grid-row:1;display:grid;place-items:center;height:124px;align-self:start}
+  .ev-card-radar svg {width:112px;height:112px;overflow:visible}
+  .ev-event-match {grid-column:4;grid-row:1;display:flex;flex-direction:column;align-items:stretch;
+    gap:7px;min-width:0;padding:27px 0 0;position:relative}
+  .ev-event-match .ev-save {top:-4px;right:0;z-index:3}
+  .ev-event-match .ev-sber-label {display:none}
+  .ev-event-match .ev-match-chip {position:absolute;top:0;right:34px;max-width:130px;
+    color:#21f1d4;background:#09353c;border:1px solid #145b5a;padding:5px 8px;font-size:10px}
+  .ev-match-label {font-size:11px;line-height:1.25;color:#b7cddd}
+  .ev-match-bars {display:grid;gap:6px;width:100%;min-height:0;margin:0;font-size:10px;color:#c4d6e4}
+  .ev-match-bars>div {display:grid;grid-template-columns:54px minmax(0,1fr) 15px;gap:5px;align-items:center}
+  .ev-match-bars>div span {overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ev-match-bars i {height:6px;border-radius:5px;background:
+    linear-gradient(90deg,#21e8d6 var(--ev-fill),#19374b var(--ev-fill))}
+  .ev-match-bars b {font-size:11px;color:#23ead3;font-weight:750;text-align:center}
+  .ev-event-reason {grid-column:1/4;grid-row:2;position:static;display:flex;align-items:center;
+    min-height:31px;margin:0;right:auto;bottom:auto;padding:5px 10px;gap:6px;
+    width:100%;background:linear-gradient(90deg,#07313e,#07383e);line-height:1.3;
+    border:1px solid #114e58;border-radius:7px;font-size:10px}
+  .ev-event-reason svg {flex:none}
+  .ev-card-actions {grid-column:4;grid-row:2;position:static;margin:0;align-self:stretch;
+    display:flex;justify-content:flex-end}
+  .ev-card-actions button {position:static;width:100%;height:32px;min-height:32px;font-size:11px}
+  .ev-card-footer {display:none}
+  @media(max-width:1280px) {
+    .ev-event-card {grid-template-columns:117px minmax(0,1fr) 90px 175px;gap:8px}
+    .ev-event-thumb {height:115px;min-height:115px}
+    .ev-card-radar svg {width:90px;height:90px}
+    .ev-event-main .ev-event-capabilities {gap:5px}
+    .ev-skill-tags span,.ev-event-capabilities .ev-event-tags span {padding:5px 7px}
+  }
+  @media(max-width:1030px) {
+    .ev-event-card {grid-template-columns:110px minmax(0,1fr) 170px}
+    .ev-card-radar {display:none}
+    .ev-event-match {grid-column:3}
+    .ev-event-reason {grid-column:1/3}
+    .ev-card-actions {grid-column:3}
+  }
+  @media(max-width:760px) {
+    .ev-event-card {grid-template-columns:90px minmax(0,1fr);grid-template-rows:auto auto auto auto;
+      min-height:0;gap:9px;padding:9px}
+    .ev-event-thumb {width:90px;min-height:95px;height:95px}
+    .ev-event-main {grid-column:2;grid-row:1}
+    .ev-event-capabilities {grid-template-columns:1fr;gap:6px}
+    .ev-event-capabilities section + section {border:0;padding:0}
+    .ev-event-meta span {white-space:normal}
+    .ev-event-match {grid-column:1/-1;grid-row:2;min-height:0;padding:22px 0 0}
+    .ev-event-match .ev-match-chip {right:40px}
+    .ev-match-bars {grid-template-columns:repeat(2,minmax(0,1fr))}
+    .ev-match-bars>div {grid-template-columns:70px 1fr 15px}
+    .ev-event-reason {grid-column:1/-1;grid-row:3;min-height:36px;position:static}
+    .ev-card-actions {grid-column:1/-1;grid-row:4}
+    .ev-card-actions button {max-width:160px;margin-left:auto}
+  }
+}
+
 .participant-events .ev-detail-modal {
   .overlay {position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:0;
     background:#010d17be;backdrop-filter:none}
