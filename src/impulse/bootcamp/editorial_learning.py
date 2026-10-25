@@ -49,7 +49,7 @@ def _check_actor(authenticated: AuthenticatedSession, course_key: str) -> None:
         raise ApiError(code="NOT_FOUND", message="Курс не найден.", status_code=404)
 
 
-async def _assert_course_access(
+async def assert_course_access(
     request: Request, authenticated: AuthenticatedSession, course_key: str
 ) -> None:
     """A demo course must really be in the participant's available catalog.
@@ -135,7 +135,7 @@ async def complete_impulse_lesson(
     request: Request,
 ) -> ImpulseStudyView:
     _check_actor(authenticated, course_key)
-    await _assert_course_access(request, authenticated, course_key)
+    await assert_course_access(request, authenticated, course_key)
     if index < 0 or index >= UNIT_COUNT:
         raise ApiError(code="INVALID_LESSON", message="Неверный номер урока.", status_code=422)
     person = authenticated.actor.person_id
@@ -186,7 +186,7 @@ async def finish_impulse_study(
     request: Request,
 ) -> ImpulseStudyView:
     _check_actor(authenticated, course_key)
-    await _assert_course_access(request, authenticated, course_key)
+    await assert_course_access(request, authenticated, course_key)
     person = authenticated.actor.person_id
     async with request.app.state.database.session() as session:
         result = await session.execute(
@@ -229,7 +229,7 @@ async def submit_impulse_practice(
     request: Request,
 ) -> ImpulseStudyView:
     _check_actor(authenticated, course_key)
-    await _assert_course_access(request, authenticated, course_key)
+    await assert_course_access(request, authenticated, course_key)
     if body.artifact_url and not body.artifact_url.startswith("https://"):
         raise ApiError(
             code="INVALID_ARTIFACT_URL", message="Допускаются только ссылки HTTPS.", status_code=422
