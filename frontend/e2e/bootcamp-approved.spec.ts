@@ -340,3 +340,24 @@ test("Bootcamp role catalog starts as 4+1 cards and expands without losing filte
     .getByRole("button", { name: "Карточки" }).click();
   await expect(cards.first()).toBeVisible();
 });
+
+
+test("all seven AI trajectory roles remain reachable through horizontal controls", async ({ page }) => {
+  await installBootcampReferenceApi(page);
+  await page.setViewportSize({ width: 1448, height: 1086 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const tabs = page.getByRole("group", { name: "Направление обучения" });
+  await expect(tabs.getByRole("button", { name: "AI Architect", exact: true })).toHaveAttribute("aria-pressed", "true");
+  const next = page.getByRole("button", { name: "Следующие AI-роли" });
+  await expect(next).toBeVisible();
+  await next.click();
+  await expect.poll(() => tabs.evaluate(element => element.scrollLeft)).toBeGreaterThan(100);
+  const product = tabs.getByRole("button", { name: "AI Product Engineer", exact: true });
+  await product.scrollIntoViewIfNeeded();
+  await product.click();
+  await expect(product).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("heading", { name: "Моя роль: AI Product Engineer" })).toBeVisible();
+  await expect(page.getByTestId("course-demo-course-6")).toBeVisible();
+});
