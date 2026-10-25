@@ -153,6 +153,34 @@ function ProjectSummary({ project, selected, expanded, onSelect, onOpen, onBookm
     </div>
   </article>;
 }
+function ProjectSidebarRow({ project, selected, onSelect, onOpen, onBookmark, saved }: {
+  project: Project; selected: boolean; onSelect: () => void; onOpen: () => void; onBookmark: () => void; saved: boolean;
+}) {
+  const company = projectCompany(project);
+  return <article className={`mp-project-tile mp-project-tile--sidebar ${selected ? "is-selected" : ""}`} data-testid={`my-project-${project.work.assignment.id}`}>
+    <button type="button" className="mp-project-tile__main" onClick={onSelect} aria-pressed={selected} aria-label={`Выбрать проект ${project.work.task.title}`}>
+      <CompanyIcon name={company}/>
+      <span className="mp-project-tile__identity">
+        <small>{company} · Заказчик</small>
+        <strong>{project.work.task.title}</strong>
+        <span className="mp-chip-row"><em>Python</em><em>ML / AI</em><em>Практика</em></span>
+      </span>
+    </button>
+    <div className="mp-project-tile__right">
+      <Status status={project.work.assignment.status}/>
+      <button type="button" className="mp-icon-button" aria-label={saved ? "Убрать из избранного" : "В избранное"} aria-pressed={saved} onClick={onBookmark}><Bookmark size={16} fill={saved ? "currentColor" : "none"}/></button>
+    </div>
+    <div className="mp-project-tile__bottom">
+      <ProgressBar value={completion(project)} compact/>
+      <span className="mp-project-sidebar-team" aria-label="Команда проекта">
+        {(project.detail?.team?.length ?? 0)>0?<span className="mp-team-avatars" aria-hidden="true">{(project.detail?.team ?? []).slice(0,3).map(person=><i key={person.person_id} title={person.display_name}>{person.display_name.trim().slice(0,1).toUpperCase()}</i>)}</span>:<Users size={14}/>}
+        <small>{project.detail?.team?.length ?? "—"}</small>
+      </span>
+      <span className="mp-project-sidebar-deadline"><CalendarDays size={14}/>{dateLabel(project.work.terms.deadline_at)}</span>
+      <button className="mp-open-tile" type="button" onClick={onOpen}>{activeStatuses.has(project.work.assignment.status) ? "Продолжить" : "Открыть"} <ArrowRight size={14}/></button>
+    </div>
+  </article>;
+}
 function ProjectList({ projects, onOpen }: { projects: Project[]; onOpen: (id: string) => void }) {
   return <div className="mp-table-scroll"><table className="mp-table">
     <thead><tr><th>№</th><th>Проект</th><th>Компания</th><th>Статус</th><th>Прогресс</th><th>Срок</th><th>Выгоды</th><th>Действия</th></tr></thead>
@@ -362,13 +390,26 @@ export function ParticipantProjectsV2() {
     </section>
     {work.data.length===0?<div className="mp-empty mp-surface"><FolderKanban size={34}/><h2>Пока нет принятых проектов</h2><p>После принятия назначения проект появится здесь. Откликнуться на новые задачи можно в каталоге.</p><button className="mp-primary" onClick={()=>{ void navigate("/workspace/3"); }}>Перейти к задачам <ArrowRight size={16}/></button></div>:
       <>
-      {layout==="cards"?<div className="mp-card-view">
-        <label className="mp-card-search"><Search size={17}/><input aria-label="Поиск проектов" placeholder="Поиск по проектам и компаниям" value={text} onChange={e=>{ setText(e.target.value); }}/></label>
-        <div className="mp-project-grid">
-          {visible.map(project=><ProjectSummary key={project.work.assignment.id} project={project} selected={(focus??visible[0]?.work.assignment.id)===project.work.assignment.id} expanded={focus===project.work.assignment.id} onSelect={()=>{ setFocus(previous=>previous===project.work.assignment.id?null:project.work.assignment.id); }} onOpen={()=>{ open(project.work.assignment.id); }} saved={saved.includes(project.work.assignment.id)} onBookmark={()=>{ setSaved(prev=>prev.includes(project.work.assignment.id)?prev.filter(i=>i!==project.work.assignment.id):[...prev,project.work.assignment.id]); }}/>)}
+      {layout==="cards"?<div className="mp-card-layout" data-reference="my-projects-approved-cards">
+        <div className="mp-card-list">
+          <div className="mp-card-list__header"><h2>Мои проекты</h2>
+            <label><Search size={17}/><input aria-label="Поиск проектов" placeholder="Поиск проектов" value={text} onChange={e=>{setText(e.target.value);}}/></label>
+          </div>
+          {visible.map(project=><ProjectSidebarRow key={project.work.assignment.id} project={project}
+            selected={(focus??visible[0]?.work.assignment.id)===project.work.assignment.id}
+            onSelect={()=>{setFocus(project.work.assignment.id);}}
+            onOpen={()=>{open(project.work.assignment.id);}}
+            saved={saved.includes(project.work.assignment.id)}
+            onBookmark={()=>{setSaved(prev=>prev.includes(project.work.assignment.id)?prev.filter(id=>id!==project.work.assignment.id):[...prev,project.work.assignment.id]);}}
+          />)}
+          {visible.length===0&&<p className="mp-muted mp-empty-row">Подходящих проектов нет. Измените фильтры.</p>}
         </div>
-        {!visible.length&&<p className="mp-muted mp-empty-row">Подходящих проектов нет. Измените фильтры.</p>}
-        {focused && focus && visible.some(project=>project.work.assignment.id===focus) && <div className="mp-quick-preview"><PanelPreview project={focused} onOpen={(tab)=>{ open(focused.work.assignment.id,tab); }} onRewards={()=>{open(focused.work.assignment.id,"rewards");}}/></div>}
+        {visible.length>0&&visible.filter(project=>project.work.assignment.id===(visible.find(item=>item.work.assignment.id===focus)?.work.assignment.id??visible[0]?.work.assignment.id)).map(project=>
+          <PanelPreview key={project.work.assignment.id} project={project}
+            onOpen={(tab)=>{open(project.work.assignment.id,tab);}}
+            onRewards={()=>{open(project.work.assignment.id,"rewards");}}
+          />
+        )}
       </div>:<div className="mp-list-layout"><div className="mp-list-search"><Search size={17}/><input aria-label="Поиск проектов" value={text} onChange={e=>{ setText(e.target.value); }} placeholder="Поиск по проектам, компаниям и результатам"/><SlidersHorizontal size={17}/></div>{visible.length?<ProjectList projects={visible} onOpen={open}/>:<div className="mp-empty-row">По заданным условиям проекты не найдены</div>}</div>}
       </>}
   </div>;
