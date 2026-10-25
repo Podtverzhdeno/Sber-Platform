@@ -1,0 +1,62 @@
+name: Bootcamp Reader QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/bootcamp/**"
+      - "frontend/src/components/ui.tsx"
+      - "frontend/e2e/bootcamp-approved.spec.ts"
+      - "frontend/e2e/bootcamp-forensic-audit.spec.ts"
+      - ".github/workflows/bootcamp-reader-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Dedicated check: unrelated main branch commits cannot cancel reader QA.
+concurrency:
+  group: bootcamp-reader-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  reader:
+    name: bootcamp-reader-browser
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out exact SHA
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Lint Bootcamp components and browser tests
+        run: npx eslint src/features/bootcamp e2e/bootcamp-approved.spec.ts e2e/bootcamp-forensic-audit.spec.ts --max-warnings 0
+      - name: Check TypeScript contracts
+        run: npm run typecheck
+      - name: Build frontend
+        run: npx vite build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Exercise reader buttons, layout, and five reference states
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test bootcamp-approved.spec.ts bootcamp-forensic-audit.spec.ts --project=chromium --reporter=line
+      - name: Upload five screenshots and browser traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bootcamp-reader-visual-evidence
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
