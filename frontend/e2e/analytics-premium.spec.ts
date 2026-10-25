@@ -48,14 +48,8 @@ test("annual calendar shows real source events on hover and in the day popup", a
  await expect(calendar.locator(".ac-day:not(.ac-level-0):not(.ac-unknown)").first()).toBeVisible();
  const populated = calendar.locator(".ac-day:not(.ac-level-0):not(.ac-unknown)").first();
  await expect(populated).toBeVisible();
- const debug = await populated.evaluate(element => {
-  const rect = element.getBoundingClientRect();
-  const next = element.nextElementSibling?.getBoundingClientRect();
-  const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
-  return { own: { x:rect.x,y:rect.y,width:rect.width,height:rect.height }, next:next ? { x:next.x,y:next.y,width:next.width,height:next.height }:null,
-    computed:{ display:getComputedStyle(element).display, height:getComputedStyle(element).height, margin:getComputedStyle(element).margin }, hit:hit?.getAttribute("aria-label") };
- });
- console.log("HEATMAP_GEOMETRY", JSON.stringify(debug));
+ const geometry = await populated.evaluate(element => element.getBoundingClientRect().height);
+ expect(geometry).toBeLessThanOrEqual(15);
  await populated.hover();
  await expect(page.getByRole("tooltip")).toContainText("Завершён");
  await populated.click();
