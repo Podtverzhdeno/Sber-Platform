@@ -4,7 +4,7 @@
       "AcceptApplicationRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           }
@@ -18,7 +18,7 @@
       "AcceptTermsRequest": {
         "properties": {
           "terms_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Terms Version",
             "type": "integer"
           }
@@ -408,7 +408,7 @@
           "points": {
             "anyOf": [
               {
-                "exclusiveMinimum": 0,
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               },
               {
@@ -783,7 +783,7 @@
           },
           "draft_version": {
             "default": 1,
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Draft Version",
             "type": "integer"
           },
@@ -1584,7 +1584,7 @@
           },
           "version": {
             "default": 1,
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Version",
             "type": "integer"
           }
@@ -1758,7 +1758,7 @@
           "terms_version": {
             "anyOf": [
               {
-                "minimum": 1,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -2494,8 +2494,8 @@
           "estimated_minutes": {
             "anyOf": [
               {
-                "maximum": 100000,
-                "minimum": 1,
+                "maximum": 100000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -2845,8 +2845,70 @@
         "title": "ChannelWorkContextView",
         "type": "object"
       },
+      "CheckpointFilePayload": {
+        "properties": {
+          "base64_data": {
+            "maxLength": 7100000,
+            "minLength": 1,
+            "title": "Base64 Data",
+            "type": "string"
+          },
+          "content_type": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Content Type",
+            "type": "string"
+          },
+          "filename": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Filename",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filename",
+          "content_type",
+          "base64_data"
+        ],
+        "title": "CheckpointFilePayload",
+        "type": "object"
+      },
       "CheckpointRequest": {
         "properties": {
+          "acceptance_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Acceptance Criteria",
+            "type": "array"
+          },
+          "deliverable": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Deliverable",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "maxLength": 3000,
+            "title": "Description",
+            "type": "string"
+          },
+          "estimated_minutes": {
+            "anyOf": [
+              {
+                "maximum": 100000.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Minutes"
+          },
           "key": {
             "maxLength": 128,
             "minLength": 1,
@@ -2867,8 +2929,80 @@
         "title": "CheckpointRequest",
         "type": "object"
       },
+      "CheckpointSubmissionPayload": {
+        "properties": {
+          "artifact_key": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Artifact Key",
+            "type": "string"
+          },
+          "external_url": {
+            "anyOf": [
+              {
+                "format": "uri",
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "External Url"
+          },
+          "file_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 5,
+            "title": "File Ids",
+            "type": "array"
+          },
+          "summary": {
+            "maxLength": 1500,
+            "minLength": 20,
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary",
+          "artifact_key"
+        ],
+        "title": "CheckpointSubmissionPayload",
+        "type": "object"
+      },
       "CheckpointView": {
         "properties": {
+          "acceptance_criteria": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Acceptance Criteria",
+            "type": "array"
+          },
+          "deliverable": {
+            "default": "",
+            "title": "Deliverable",
+            "type": "string"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "estimated_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Minutes"
+          },
           "key": {
             "title": "Key",
             "type": "string"
@@ -2958,7 +3092,7 @@
             "type": "string"
           },
           "minimum_size": {
-            "minimum": 2,
+            "minimum": 2.0,
             "title": "Minimum Size",
             "type": "integer"
           },
@@ -3046,7 +3180,7 @@
             "type": "string"
           },
           "policy_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Policy Version",
             "type": "integer"
           },
@@ -4670,8 +4804,8 @@
           },
           "places": {
             "default": 1,
-            "maximum": 100,
-            "minimum": 1,
+            "maximum": 100.0,
+            "minimum": 1.0,
             "title": "Places",
             "type": "integer"
           },
@@ -5192,7 +5326,7 @@
       "DeadlineChangeProposal": {
         "properties": {
           "base_terms_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Base Terms Version",
             "type": "integer"
           },
@@ -5334,7 +5468,7 @@
       "DecisionCommand": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           },
@@ -5449,7 +5583,7 @@
       "DemoReversalRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           },
@@ -5470,7 +5604,7 @@
       "DemoSettlementRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           },
@@ -5686,12 +5820,12 @@
             "type": "string"
           },
           "place_from": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Place From",
             "type": "integer"
           },
           "place_to": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Place To",
             "type": "integer"
           },
@@ -6339,8 +6473,8 @@
       "FeedbackRequest": {
         "properties": {
           "rating": {
-            "maximum": 1,
-            "minimum": -1,
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Rating",
             "type": "integer"
           }
@@ -6765,8 +6899,20 @@
       "ImpulseCourseSummary": {
         "description": "Participation is distinct from provider-verified competency evidence.",
         "properties": {
+          "certificate_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Certificate Id"
+          },
           "completed_units": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Completed Units",
             "type": "integer"
           },
@@ -6818,7 +6964,7 @@
             "type": "string"
           },
           "total_units": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Total Units",
             "type": "integer"
           },
@@ -6835,6 +6981,7 @@
           "total_units",
           "finished",
           "finished_at",
+          "certificate_id",
           "updated_at",
           "practice_status",
           "practical_certificate_id"
@@ -6842,15 +6989,91 @@
         "title": "ImpulseCourseSummary",
         "type": "object"
       },
+      "ImpulseLevelView": {
+        "properties": {
+          "advance_ready": {
+            "title": "Advance Ready",
+            "type": "boolean"
+          },
+          "approved_practices": {
+            "minimum": 0.0,
+            "title": "Approved Practices",
+            "type": "integer"
+          },
+          "completed_courses": {
+            "minimum": 0.0,
+            "title": "Completed Courses",
+            "type": "integer"
+          },
+          "curriculum_state": {
+            "enum": [
+              "published",
+              "unpublished"
+            ],
+            "title": "Curriculum State",
+            "type": "string"
+          },
+          "cycle_number": {
+            "minimum": 1.0,
+            "title": "Cycle Number",
+            "type": "integer"
+          },
+          "history": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "level": {
+            "minimum": 0.0,
+            "title": "Level",
+            "type": "integer"
+          },
+          "policy_version": {
+            "default": 1,
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "required_courses": {
+            "minimum": 0.0,
+            "title": "Required Courses",
+            "type": "integer"
+          },
+          "required_practices": {
+            "minimum": 1.0,
+            "title": "Required Practices",
+            "type": "integer"
+          },
+          "track_key": {
+            "title": "Track Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_key",
+          "level",
+          "cycle_number",
+          "curriculum_state",
+          "completed_courses",
+          "required_courses",
+          "approved_practices",
+          "required_practices",
+          "advance_ready"
+        ],
+        "title": "ImpulseLevelView",
+        "type": "object"
+      },
       "ImpulseStudySummary": {
         "properties": {
           "approved_practices": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Approved Practices",
             "type": "integer"
           },
           "completed_lessons": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Completed Lessons",
             "type": "integer"
           },
@@ -6862,12 +7085,12 @@
             "type": "array"
           },
           "finished_courses": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Finished Courses",
             "type": "integer"
           },
           "started_courses": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Started Courses",
             "type": "integer"
           }
@@ -6897,8 +7120,8 @@
             "title": "Certificate Id"
           },
           "completed_units": {
-            "maximum": 8,
-            "minimum": 0,
+            "maximum": 8.0,
+            "minimum": 0.0,
             "title": "Completed Units",
             "type": "integer"
           },
@@ -7052,6 +7275,235 @@
           }
         },
         "title": "IssueCredentialRequest",
+        "type": "object"
+      },
+      "JourneyCourseView": {
+        "properties": {
+          "course_key": {
+            "title": "Course Key",
+            "type": "string"
+          },
+          "provider_status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CompletionStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "provider_verified": {
+            "title": "Provider Verified",
+            "type": "boolean"
+          },
+          "roadmap_links": {
+            "items": {
+              "$ref": "#/components/schemas/RoadmapEvidenceLink"
+            },
+            "title": "Roadmap Links",
+            "type": "array"
+          },
+          "self_study": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StudyEvidenceView"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "course_key",
+          "title",
+          "self_study",
+          "provider_status",
+          "provider_verified",
+          "roadmap_links"
+        ],
+        "title": "JourneyCourseView",
+        "type": "object"
+      },
+      "JourneyProjectView": {
+        "properties": {
+          "accepted_contribution_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Accepted Contribution Ids",
+            "type": "array"
+          },
+          "assignment_id": {
+            "format": "uuid",
+            "title": "Assignment Id",
+            "type": "string"
+          },
+          "assignment_status": {
+            "title": "Assignment Status",
+            "type": "string"
+          },
+          "submitted_contribution_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Submitted Contribution Ids",
+            "type": "array"
+          },
+          "task_id": {
+            "format": "uuid",
+            "title": "Task Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "assignment_id",
+          "task_id",
+          "title",
+          "assignment_status",
+          "submitted_contribution_ids",
+          "accepted_contribution_ids"
+        ],
+        "title": "JourneyProjectView",
+        "type": "object"
+      },
+      "JourneyRatingView": {
+        "properties": {
+          "place": {
+            "title": "Place",
+            "type": "integer"
+          },
+          "points": {
+            "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+            "title": "Points",
+            "type": "string"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "season_id": {
+            "format": "uuid",
+            "title": "Season Id",
+            "type": "string"
+          },
+          "season_version": {
+            "title": "Season Version",
+            "type": "integer"
+          },
+          "successful_projects": {
+            "title": "Successful Projects",
+            "type": "integer"
+          },
+          "trophy_titles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Trophy Titles",
+            "type": "array"
+          },
+          "verified_offer_titles": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Verified Offer Titles",
+            "type": "array"
+          }
+        },
+        "required": [
+          "season_id",
+          "season_version",
+          "policy_version",
+          "place",
+          "points",
+          "successful_projects",
+          "trophy_titles",
+          "verified_offer_titles"
+        ],
+        "title": "JourneyRatingView",
+        "type": "object"
+      },
+      "JourneySnapshotView": {
+        "description": "Null means not available; zero is reserved for a known empty collection.",
+        "properties": {
+          "accepted_case_count": {
+            "title": "Accepted Case Count",
+            "type": "integer"
+          },
+          "courses": {
+            "items": {
+              "$ref": "#/components/schemas/JourneyCourseView"
+            },
+            "title": "Courses",
+            "type": "array"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "person_id": {
+            "format": "uuid",
+            "title": "Person Id",
+            "type": "string"
+          },
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/JourneyProjectView"
+            },
+            "title": "Projects",
+            "type": "array"
+          },
+          "published_rating_seasons": {
+            "title": "Published Rating Seasons",
+            "type": "integer"
+          },
+          "ratings": {
+            "items": {
+              "$ref": "#/components/schemas/JourneyRatingView"
+            },
+            "title": "Ratings",
+            "type": "array"
+          },
+          "self_study_available": {
+            "title": "Self Study Available",
+            "type": "boolean"
+          },
+          "verified_provider_course_count": {
+            "title": "Verified Provider Course Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "person_id",
+          "observed_at",
+          "self_study_available",
+          "courses",
+          "projects",
+          "ratings",
+          "published_rating_seasons",
+          "accepted_case_count",
+          "verified_provider_course_count"
+        ],
+        "title": "JourneySnapshotView",
         "type": "object"
       },
       "KnowledgeState": {
@@ -8456,7 +8908,7 @@
       "OpenReviewAppealRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           },
@@ -8477,7 +8929,7 @@
       "OpenSeasonRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           }
@@ -8669,6 +9121,89 @@
           "review_grade"
         ],
         "title": "OverviewConceptsView",
+        "type": "object"
+      },
+      "OwnStandingView": {
+        "description": "Owner-only published-season standing; never copied into public leaderboard.",
+        "properties": {
+          "place": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Place"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "season_id": {
+            "format": "uuid",
+            "title": "Season Id",
+            "type": "string"
+          },
+          "season_key": {
+            "title": "Season Key",
+            "type": "string"
+          },
+          "season_status": {
+            "$ref": "#/components/schemas/SeasonStatus"
+          },
+          "season_title": {
+            "title": "Season Title",
+            "type": "string"
+          },
+          "season_version": {
+            "title": "Season Version",
+            "type": "integer"
+          },
+          "successful_projects": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Successful Projects"
+          }
+        },
+        "required": [
+          "season_id",
+          "season_key",
+          "season_title",
+          "season_status",
+          "season_version",
+          "policy_version",
+          "place",
+          "score",
+          "successful_projects"
+        ],
+        "title": "OwnStandingView",
         "type": "object"
       },
       "ParticipantAnalyticsView": {
@@ -9927,8 +10462,8 @@
       "PublishPolicyRequest": {
         "properties": {
           "appeal_period_days": {
-            "maximum": 365,
-            "minimum": 1,
+            "maximum": 365.0,
+            "minimum": 1.0,
             "title": "Appeal Period Days",
             "type": "integer"
           },
@@ -9945,7 +10480,7 @@
             "type": "array"
           },
           "expected_season_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Season Version",
             "type": "integer"
           },
@@ -10390,12 +10925,12 @@
             "title": "Assessments"
           },
           "expected_appeal_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Appeal Version",
             "type": "integer"
           },
           "expected_review_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Review Version",
             "type": "integer"
           },
@@ -10681,7 +11216,7 @@
       "ReviewTransitionRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           }
@@ -10852,6 +11387,34 @@
           "payout"
         ],
         "title": "RewardWorkspaceItemView",
+        "type": "object"
+      },
+      "RoadmapEvidenceLink": {
+        "properties": {
+          "milestone_completed": {
+            "title": "Milestone Completed",
+            "type": "boolean"
+          },
+          "milestone_key": {
+            "title": "Milestone Key",
+            "type": "string"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "integer"
+          },
+          "track_key": {
+            "title": "Track Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_key",
+          "policy_version",
+          "milestone_key",
+          "milestone_completed"
+        ],
+        "title": "RoadmapEvidenceLink",
         "type": "object"
       },
       "RoadmapView": {
@@ -11305,7 +11868,7 @@
           "cap": {
             "anyOf": [
               {
-                "exclusiveMinimum": 0,
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               },
               {
@@ -11330,7 +11893,7 @@
           "weight": {
             "anyOf": [
               {
-                "exclusiveMinimum": 0,
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               },
               {
@@ -11517,7 +12080,7 @@
       "SeasonTransitionRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           }
@@ -12059,6 +12622,88 @@
         "title": "StreakView",
         "type": "object"
       },
+      "StudyEvidenceView": {
+        "properties": {
+          "certificate_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Certificate Id"
+          },
+          "completed_units": {
+            "minimum": 0.0,
+            "title": "Completed Units",
+            "type": "integer"
+          },
+          "finished": {
+            "title": "Finished",
+            "type": "boolean"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "practical_certificate_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practical Certificate Id"
+          },
+          "practice_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Status"
+          },
+          "source_updated_at": {
+            "format": "date-time",
+            "title": "Source Updated At",
+            "type": "string"
+          },
+          "total_units": {
+            "minimum": 1.0,
+            "title": "Total Units",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "completed_units",
+          "total_units",
+          "finished",
+          "finished_at",
+          "certificate_id",
+          "practice_status",
+          "practical_certificate_id",
+          "source_updated_at"
+        ],
+        "title": "StudyEvidenceView",
+        "type": "object"
+      },
       "SuggestionDismissRequest": {
         "properties": {
           "suggestion_id": {
@@ -12531,8 +13176,8 @@
           "duration_minutes": {
             "anyOf": [
               {
-                "maximum": 100000,
-                "minimum": 1,
+                "maximum": 100000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -12579,8 +13224,8 @@
           "weekly_workload_minutes": {
             "anyOf": [
               {
-                "maximum": 10000,
-                "minimum": 1,
+                "maximum": 10000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -13761,14 +14406,14 @@
             "type": "string"
           },
           "reminder_hour": {
-            "maximum": 23,
-            "minimum": 0,
+            "maximum": 23.0,
+            "minimum": 0.0,
             "title": "Reminder Hour",
             "type": "integer"
           },
           "reminder_window_hours": {
-            "maximum": 6,
-            "minimum": 1,
+            "maximum": 6.0,
+            "minimum": 1.0,
             "title": "Reminder Window Hours",
             "type": "integer"
           }
@@ -14080,8 +14725,8 @@
           "estimated_hours": {
             "anyOf": [
               {
-                "maximum": 80,
-                "minimum": 1,
+                "maximum": 80.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -15092,6 +15737,44 @@
         "tags": [
           "bootcamp"
         ]
+      }
+    },
+    "/api/v1/checkpoint-evidence-files/{file_id}": {
+      "get": {
+        "operationId": "download_checkpoint_evidence_api_v1_checkpoint_evidence_files__file_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "File Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Checkpoint Evidence"
       }
     },
     "/api/v1/config": {
@@ -17192,6 +17875,212 @@
         "summary": "Withdraw Application"
       }
     },
+    "/api/v1/me/assignments/{assignment_id}/checkpoint-submissions": {
+      "get": {
+        "operationId": "list_checkpoint_submissions_api_v1_me_assignments__assignment_id__checkpoint_submissions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Checkpoint Submissions Api V1 Me Assignments  Assignment Id  Checkpoint Submissions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Checkpoint Submissions"
+      }
+    },
+    "/api/v1/me/assignments/{assignment_id}/checkpoints/{checkpoint_key}/files": {
+      "post": {
+        "operationId": "upload_checkpoint_file_api_v1_me_assignments__assignment_id__checkpoints__checkpoint_key__files_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "checkpoint_key",
+            "required": true,
+            "schema": {
+              "title": "Checkpoint Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckpointFilePayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "integer"
+                      }
+                    ]
+                  },
+                  "title": "Response Upload Checkpoint File Api V1 Me Assignments  Assignment Id  Checkpoints  Checkpoint Key  Files Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Checkpoint File"
+      }
+    },
+    "/api/v1/me/assignments/{assignment_id}/checkpoints/{checkpoint_key}/submit": {
+      "post": {
+        "operationId": "submit_checkpoint_solution_api_v1_me_assignments__assignment_id__checkpoints__checkpoint_key__submit_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "checkpoint_key",
+            "required": true,
+            "schema": {
+              "title": "Checkpoint Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CheckpointSubmissionPayload"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContributionView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Checkpoint Solution"
+      }
+    },
     "/api/v1/me/assignments/{assignment_id}/contributions": {
       "post": {
         "operationId": "submit_contribution_api_v1_me_assignments__assignment_id__contributions_post",
@@ -17705,6 +18594,106 @@
           }
         },
         "summary": "Bootcamp Learning Command",
+        "tags": [
+          "bootcamp"
+        ]
+      }
+    },
+    "/api/v1/me/bootcamp/impulse-level": {
+      "get": {
+        "operationId": "impulse_level_api_v1_me_bootcamp_impulse_level_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "track",
+            "required": true,
+            "schema": {
+              "title": "Track",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImpulseLevelView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Impulse Level",
+        "tags": [
+          "bootcamp"
+        ]
+      }
+    },
+    "/api/v1/me/bootcamp/impulse-level/advance": {
+      "post": {
+        "operationId": "advance_impulse_level_api_v1_me_bootcamp_impulse_level_advance_post",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "track",
+            "required": true,
+            "schema": {
+              "title": "Track",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ImpulseLevelView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Advance Impulse Level",
         "tags": [
           "bootcamp"
         ]
@@ -18948,6 +19937,28 @@
         "summary": "Growth Snapshot"
       }
     },
+    "/api/v1/me/journey/snapshot": {
+      "get": {
+        "description": "Read participant-owned state; never expose another person's evidence.",
+        "operationId": "my_journey_snapshot_api_v1_me_journey_snapshot_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JourneySnapshotView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My Journey Snapshot",
+        "tags": [
+          "journey"
+        ]
+      }
+    },
     "/api/v1/me/learning/streak": {
       "get": {
         "operationId": "streak_api_v1_me_learning_streak_get",
@@ -19776,6 +20787,29 @@
           }
         },
         "summary": "My Project Credentials"
+      }
+    },
+    "/api/v1/me/rating/standings": {
+      "get": {
+        "description": "Show one's own place without requiring public-rating publication consent.\n\nNever enumerate other people. Only discoverable seasons are considered,\nand missing standings are explicitly unknown (None), not an invented zero.",
+        "operationId": "my_rating_standings_api_v1_me_rating_standings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OwnStandingView"
+                  },
+                  "title": "Response My Rating Standings Api V1 Me Rating Standings Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "My Rating Standings"
       }
     },
     "/api/v1/me/reviews/{review_id}/appeals": {
