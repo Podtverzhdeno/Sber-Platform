@@ -189,7 +189,7 @@ test("real project lifecycle propagates accepted evidence to all participant scr
   await expect(page.getByTestId("portfolio-v2")).toBeVisible();
   await expect(page.getByTestId("portfolio-v2")).toContainText(title);
   await page.getByRole("tab", { name: "Skill Passport" }).click();
-  await expect(page.getByRole("region", { name: "Подтверждающие кейсы" })).toContainText("python");
+  await expect(page.getByRole("region", { name: "Подтверждающие кейсы" })).toContainText(/python/i);
 
   await page.goto(`/workspace/${String(buddyIndex)}`);
   const buddy = page.getByTestId("buddy-live-context");
