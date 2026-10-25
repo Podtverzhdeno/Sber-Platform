@@ -1,6 +1,6 @@
 # Claim XS-104-READ-RATE-BUDGET-20261026
 - session_id: gpt6-20261026-xs-read-rate-budget
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: eaf4e333743ca5b31ba8c630a95d939abbfd1f82
@@ -15,5 +15,14 @@
   - Ruff check/format
   - pytest categories, burst and reset tests
   - real PostgreSQL browser E2E in XS-304 owner
-- progress: Fix overbroad rate limiter: generic GETs use search bucket, saturating on cross-screen navigation and causing Buddy 429. Preserve strict auth/search/agents/writes while assigning separate bounded read budget.
+- progress: Ordinary reads split into separate bounded read bucket (240/min); auth/search/agents/write budgets unchanged. Focused security tests and real browser rerun passed; independent acceptance outstanding.
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40242779059
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40242705592
+- changed_files:
+  - src/impulse/api/security.py
+  - tests/test_security_read_budget.py
+  - .github/workflows/read-rate-budget-qa.yml
+- verification: Ruff format/check and pytest security controls PASS; browser E2E with PostgreSQL PASS.
+- unverified: independent security review, load tests under sustained traffic, entire project CI on integration revision
 - blockers: Independent review and complete security risk audit required before DONE.
