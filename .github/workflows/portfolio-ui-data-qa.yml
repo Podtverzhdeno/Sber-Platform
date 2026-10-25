@@ -38,9 +38,9 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
-      - name: Typecheck cross-section consumers
-        run: npm run typecheck
       - name: Lint portfolio components and evidence policy
         run: npx eslint src/features/portfolio-v2.tsx src/features/portfolio-v2-data.ts src/features/portfolio-v2-data.test.ts --max-warnings 0
       - name: Test verified, revoked and unknown evidence
         run: npm run test -- src/features/portfolio-v2-data.test.ts
+      - name: Typecheck cross-section consumers
+        run: npm run typecheck
