@@ -154,10 +154,7 @@ async def test_postgresql_api_returns_all_detailed_ai_paths_for_unselected_roles
         assert response.status_code == 200, response.text
         assert tracks_response.status_code == 200, tracks_response.text
         items = {entry["track_key"]: entry for entry in response.json()}
-        titles = {
-            track["key"]: track["title"]
-            for track in tracks_response.json()["tracks"]
-        }
+        titles = {track["key"]: track["title"] for track in tracks_response.json()["tracks"]}
         assert set(items) == set(AI_ROLE_PROFILES) == set(titles)
         for key, plan in items.items():
             assert titles[key] == AI_ROLE_PROFILES[key]["title"]
@@ -168,9 +165,7 @@ async def test_postgresql_api_returns_all_detailed_ai_paths_for_unselected_roles
             assert all(len(stage["acceptance"]) == 3 for stage in plan["milestones"])
             assert all(stage["lab"] for stage in plan["milestones"])
             assert all(4 <= stage["estimated_hours"] <= 16 for stage in plan["milestones"])
-            assert [stage["position"] for stage in plan["milestones"]] == list(
-                range(1, 8)
-            )
+            assert [stage["position"] for stage in plan["milestones"]] == list(range(1, 8))
         assert all(not step["completed"] for step in items["data"]["milestones"])
     finally:
         await database.close()
