@@ -656,6 +656,9 @@ export function MessagingWorkspace({
             contacts={contactsQuery.data ?? []}
             onOpenMember={createDialog}
             onInvite={inviteCommunityMembers}
+            onLoadOlder={() => { void messagesQuery.fetchNextPage(); }}
+            hasMoreOlder={lastPageSize >= 50}
+            isPaginating={messagesQuery.isFetchingNextPage}
             onOpenTask={quickTargets?.task !== undefined && quickTargets.task >= 0
               ? (taskId) => {
                   navigateClient(`/workspace/${String(quickTargets.task)}?task=${encodeURIComponent(taskId)}`);
