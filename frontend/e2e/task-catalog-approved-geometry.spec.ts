@@ -224,6 +224,24 @@ test("approved list density: ten test rows remain scannable without horizontal o
     }),
   );
   expect(matchLayout.every((row) => row.noCollision && row.accessibleMatchHiddenVisually)).toBe(true);
+  // Original approved list has a narrow action tail, not four buttons that
+  // steal space from the task and value columns. The remaining commands are
+  // accessible in a discrete menu and must not overflow or select the row.
+  await expect(page.locator(".catalog-v2-table-menu")).toHaveCount(10);
+  await expect(page.locator(".catalog-v2-table-actions > button")).toHaveCount(10);
+  const dataColumns = await page.locator(".catalog-v2-table-row").first().evaluate((row) => {
+    const action = row.querySelector(".catalog-v2-table-actions")?.getBoundingClientRect();
+    const reason = row.querySelector(".catalog-v2-table-reason")?.getBoundingClientRect();
+    const benefit = row.querySelector(".catalog-v2-table-benefit")?.getBoundingClientRect();
+    return {
+      actionWidth: action?.width ?? 1000,
+      reasonWidth: reason?.width ?? 0,
+      benefitWidth: benefit?.width ?? 0,
+    };
+  });
+  expect(dataColumns.actionWidth).toBeLessThanOrEqual(95);
+  expect(dataColumns.reasonWidth).toBeGreaterThan(120);
+  expect(dataColumns.benefitWidth).toBeGreaterThan(120);
   await expect(page.locator(".catalog-v2-table-benefit")).toHaveCount(10);
   await expect(page.locator(".catalog-v2-table-reason")).toHaveCount(10);
 });
