@@ -105,6 +105,12 @@ export function CustomerCreateTask({ candidates, onPublish }: Props) {
   useEffect(() => {
     try { localStorage.setItem(draftKey, JSON.stringify(data)); } catch { /* Storage may be unavailable. */ }
   }, [data]);
+  useEffect(() => {
+    if (!previewOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setPreviewOpen(false); };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [previewOpen]);
   const saveDraft = () => {
     try { localStorage.setItem(draftKey, JSON.stringify(data)); setFeedback("Черновик сохранён в этом браузере. Можно вернуться к нему позже."); }
     catch { setFeedback("Не удалось сохранить черновик в браузере. Скопируйте важные данные перед выходом."); }
@@ -153,13 +159,13 @@ export function CustomerCreateTask({ candidates, onPublish }: Props) {
         {step === 3 && <div className="create-fields">
           <label className="wide">Модель поддержки <span className="required">*</span><textarea rows={4} value={brief.support} onChange={(event) => updateBrief({ support: event.target.value })} placeholder="Ментор, сроки ответа, регулярные встречи, каналы связи" /><small className="create-v2-field-help">Опишите, кто помогает исполнителю и как быстро он сможет получить ответ</small></label>
           <fieldset className="create-v2-invites wide"><legend>Пригласить участников <span>{brief.mode === "open" ? "необязательно" : "обязательно"}</span></legend>
-            <p>Список участников с завершёнными кейсами. Адресные приглашения отправляются после публикации задачи.</p>
+            <p>Список участников с завершёнными кейсами. В демонстрации выбор участников сохраняется в браузере. Реальная отправка приглашений требует серверного подключения.</p>
             <div className="create-v2-candidate-list">{candidates.filter((person) => person.cases.length > 0).map((person) => <label key={person.id} className="create-v2-candidate"><input type="checkbox" checked={invited.includes(person.id)} onChange={() => toggleInvite(person.id)} /><span className="create-v2-avatar">{person.name.split(" ").slice(0, 2).map((part) => part[0]).join("")}</span><span><strong>{person.name}</strong><small>{person.direction === brief.direction ? "Совпадает с направлением" : person.direction} · {person.cases[0]?.title}</small></span></label>)}</div>
           </fieldset>
         </div>}
         {step === 4 && <div className="create-v2-review">
           <div className="create-v2-review-intro"><span className={missing.length ? "create-v2-review-status is-warning" : "create-v2-review-status"}>{missing.length ? <CircleAlert size={20} /> : <CheckCircle2 size={20} />}</span><div><h3>{missing.length ? "Остались обязательные поля" : "Бриф готов к публикации"}</h3><p>{missing.length ? "Заполните недостающую информацию, прежде чем открывать задачу участникам." : "Проверьте содержание и при необходимости вернитесь к любому этапу."}</p></div></div>
-          <div className="create-summary">
+          <p className="create-v2-aside-sub">Демонстрационный режим: сохранённую задачу пока нельзя увидеть из аккаунта другого участника. Сквозная публикация будет подключена через API.</p><div className="create-summary">
             {[["Задача", brief.title || "Не указано", 0], ["Тип и направление", brief.taskType + " · " + brief.direction, 0], ["Проблема и цель", brief.problem || "Не указано", 0], ["Результат", brief.deliverable || "Не указано", 0], ["Критерии", brief.criteria || "Не указано", 1], ["Срок и команда", brief.deadline + " · " + String(brief.places) + " мест", 1], ["Доступ", formatMode, 2], ["Данные", brief.dataTerms || "Не указаны", 2], ["Сопровождение", brief.support || "Не указано", 3]].map(([title, value, target]) => <button type="button" key={String(title)} className="create-v2-summary-item" onClick={() => goStep(Number(target))}><small>{title}</small><strong>{value}</strong><span>Изменить <ArrowRight size={13} /></span></button>)}
           </div>
           {missing.length > 0 && <div className="create-v2-missing" role="status"><strong>Нужно дополнить</strong><div>{missing.map((item) => <button key={item.title} type="button" onClick={() => goStep(item.step)}>{item.title} <ArrowRight size={13} /></button>)}</div></div>}
