@@ -119,7 +119,29 @@
   }
   .ev-filter-modes button.active:hover { background: #0d4f50; }
 
-  .ev-filters header { gap: 10px; }
+  .ev-filters header { gap: 10px; min-height: 35px; }
+  .ev-filters header h2 { white-space: nowrap; font-size: 16px; letter-spacing: -.25px; }
+  .ev-filters header .ev-filter-reset {
+    flex: 0 0 31px;
+    display: grid;
+    place-items: center;
+    width: 31px;
+    height: 31px;
+    padding: 0;
+    border: 1px solid #254d5c;
+    border-radius: 8px;
+    background: #09283a;
+    color: #59dfcd;
+    text-decoration: none;
+    transition: background-color .16s ease, border-color .16s ease, transform .16s ease;
+  }
+  .ev-filters header .ev-filter-reset:hover {
+    transform: rotate(-18deg);
+    border-color: #1bc2af;
+    background: #0c3b44;
+    color: #9ffdec;
+    text-decoration: none;
+  }
   .ev-filters header button {
     flex: none;
     border: 0;

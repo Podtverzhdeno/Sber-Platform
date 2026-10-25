@@ -162,6 +162,12 @@ test("events reference: filters, favorite, motion and empty state", async ({ pag
   await page.getByRole("link", { name: "События" }).click();
   const eventCard = page.getByTestId("event-reference-card");
   await expect(eventCard).toHaveCount(1);
+  const sidebarHeading = page.locator(".ev-filters h2");
+  expect(await sidebarHeading.evaluate(el => el.getBoundingClientRect().height)).toBeLessThanOrEqual(26);
+  await page.getByRole("textbox", { name: "Поиск событий" }).fill("несуществующая тема");
+  await expect(page.getByText("События не найдены")).toBeVisible();
+  await page.getByRole("button", { name: "Сбросить все фильтры" }).click();
+  await expect(eventCard).toHaveCount(1);
   const categoryTabs = page.locator(".ev-result-tabs");
   await expect(categoryTabs.getByRole("button", { name: /Для вас/ })).toHaveAttribute("aria-pressed", "true");
   await categoryTabs.getByRole("button", { name: "От Сбера" }).click();
