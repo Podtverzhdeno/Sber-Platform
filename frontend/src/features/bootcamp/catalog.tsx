@@ -589,7 +589,7 @@ export function BootcampCatalog({
       </div>
       <div className="bc-ref-hero-grid">
         <section className="bc-ref-continue" aria-labelledby="bc-continue-title">
-          <h2 id="bc-continue-title">Продолжить обучение <span aria-hidden="true">›</span></h2>
+          <h2 id="bc-continue-title">{nextCourse ? "Начать обучение" : "Выбрать обучение"} <span aria-hidden="true">›</span></h2>
           <div className="bc-ref-continue-columns">
             <div className="bc-ref-continue-course">
               {nextCourse ? <><CourseArtwork title={nextCourse.title} />
@@ -619,7 +619,7 @@ export function BootcampCatalog({
             <img className="bc-ref-trophy" alt="" src="/bootcamp/trophy.svg" />
             <div className="bc-ref-grade-body">
               <div className="bc-ref-grade-kicker">♛ &nbsp; До следующего грейда</div>
-              <h2 id="bc-grade-title">{pendingRequired.length > 0 ? <>Осталось <em>{pendingRequired.length}</em> обязательных {requiredWord}</> : "Требования к грейду"}</h2>
+              <h2 id="bc-grade-title">{pendingRequired.length > 0 ? <>{pendingRequired.length === 1 ? "Остался" : "Осталось"} <em>{pendingRequired.length}</em> {pendingRequired.length === 1 ? "обязательный" : "обязательных"} {requiredWord}</> : "Требования к грейду"}</h2>
               <p>{pendingRequired.length > 0 ? "Заверши учебные требования. Практика и подтверждение проверяются отдельно." : "Учебные требования уточняются по опубликованной программе."}</p>
               <div className="bc-ref-grade-list">{pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => openPanel("detail",card.key)}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
             </div>
