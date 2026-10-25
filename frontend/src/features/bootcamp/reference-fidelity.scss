@@ -547,3 +547,18 @@
 .bc-reference .bc-study-progress>progress::-moz-progress-bar {background:#06ddc6;border-radius:9px;}
 .bc-reference .bc-study-progress--compact {margin:0;width:100%;}
 .bc-reference .bc-ref-row-progress .bc-study-progress>small {font-size:10px;}
+
+/* Only BC-R04 uses a vector X: center the actual shape in its existing square hit target. */
+.overlay:has(.bc-ref-why-panel) .overlay-panel--drawer > header button[aria-label="Закрыть"] {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  line-height: 0;
+}
+.overlay:has(.bc-ref-why-panel) .overlay-panel--drawer > header button[aria-label="Закрыть"] > svg {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin: 0;
+}
