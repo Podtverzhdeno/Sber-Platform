@@ -107,7 +107,7 @@ export function PremiumActivity({summary,snapshot,streak,weeks,onTraining,onHist
   const categories=activityKinds.map((category,i)=>({...category,count:counts[i]??0}));
   const segments=categories.map((category,i)=>{
     const begin=categories.slice(0,i).reduce((sum,v)=>sum+v.count,0)/Math.max(1,total)*100;
-    return category.color+" "+begin+"% "+(begin+category.count/Math.max(1,total)*100)+"%";
+    return `${category.color} ${String(begin)}% ${String(begin+category.count/Math.max(1,total)*100)}%`;
   });
   const max=Math.max(1,...days);
   return <div className="avp-activity" data-testid="premium-activity">
