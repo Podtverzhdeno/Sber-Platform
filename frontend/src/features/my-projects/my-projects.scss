@@ -1016,3 +1016,32 @@
 .mpv2 .mp-ref-rewards button>svg:last-child{position:absolute;right:13px;bottom:11px;color:#44ceeb}
 @media(max-width:1140px){.mpv2 .mp-ref-rewards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.mpv2 .mp-ref-rewards{grid-template-columns:1fr}.mpv2 .mp-ref-rewards button{min-height:115px}}
+
+/* Reference progress grid ordering: summary + dynamics + competencies on the left,
+   verified stages + next action + explanation on the right. Data remains server-derived. */
+@media(min-width:1200px){
+  .mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-columns--progress{
+    display:grid;
+    grid-template-columns:946px minmax(0,1fr);
+    grid-template-areas:
+      "summary stages"
+      "chart stages"
+      "skills next"
+      "skills explanation";
+    align-items:stretch;
+    gap:11px 12px;
+  }
+  .mpv2 .mp-ref-columns--progress>.mp-ref-stack{display:contents}
+  .mpv2 .mp-ref-columns--progress>.mp-ref-stack:first-child>.mp-ref-card:nth-child(1){grid-area:summary}
+  .mpv2 .mp-ref-columns--progress>.mp-ref-stack:first-child>.mp-ref-card:nth-child(2){grid-area:skills}
+  .mpv2 .mp-ref-columns--progress>.mp-ref-stack:first-child>.mp-ref-card:nth-child(3){grid-area:stages}
+  .mpv2 .mp-ref-columns--progress>.mp-ref-stack:last-child>.mp-ref-card:nth-child(1){grid-area:chart}
+  .mpv2 .mp-ref-columns--progress>.mp-ref-stack:last-child>.mp-ref-card:nth-child(2){grid-area:next}
+  .mpv2 .mp-ref-columns--progress>.mp-ref-stack:last-child>.mp-ref-card:nth-child(3){grid-area:explanation}
+  .mpv2 .mp-ref-columns--progress .mp-ref-chart-empty{height:182px}
+}
+@media(min-width:1200px) and (max-width:1530px){
+  .mpv2 .mp-detail[data-project-screen="detail"]>.mp-ref-columns--progress{
+    grid-template-columns:minmax(0,1.92fr) minmax(330px,1fr);
+  }
+}
