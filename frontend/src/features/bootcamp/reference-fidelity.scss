@@ -362,3 +362,39 @@
   .bc-reference .bc-ref-show-more{width:100%}
   .bc-reference .bc-ref-role-tabs>button{flex:0 0 auto;min-width:135px}
 }
+
+/* BC-R04 recommendation popup: three concise facts followed by forecast and note. */
+.bc-reference .bc-panel-content[data-reference="BC-R04"]{
+  display:block;padding:0 23px 28px!important;line-height:1.45;
+}
+.bc-ref-why-hero{min-height:160px;display:flex;flex-direction:column;align-items:start;justify-content:center;gap:11px;padding:12px 0}
+.bc-reference .bc-ref-why-hero h2{font-size:20px!important;line-height:1.2;font-weight:800;color:#f4f9ff;margin:0}
+.bc-reference .bc-ref-why-hero p{font-size:12px;color:#a9c9e3;line-height:1.5;margin:0}
+.bc-reference .bc-ref-why-panel .bc-ref-why-item{
+  display:grid;grid-template-columns:37px minmax(0,1fr);gap:12px;
+  min-height:66px;margin:0 0 10px;padding:13px;
+  border-radius:10px;border:1px solid #1a5270;background:#09243e;
+}
+.bc-reference .bc-ref-why-panel .bc-ref-why-symbol{width:37px;height:37px;background:#083755;color:#0ffff1}
+.bc-reference .bc-ref-why-panel .bc-ref-why-symbol svg{width:21px;height:21px}
+.bc-reference .bc-ref-why-panel .bc-ref-why-item h3{font-size:13px!important;margin:0 0 5px;color:#f4f9ff}
+.bc-reference .bc-ref-why-panel .bc-ref-why-item p{font-size:12px;line-height:1.45;color:#b2cce7;margin:0}
+.bc-ref-why-forecast{
+  padding:14px;margin:0 0 15px;border:1px solid #24516f;border-radius:9px;
+  background:#09243e;display:grid;gap:7px;color:#b5cde7;font-size:12px;
+}
+.bc-ref-why-forecast strong{font-size:13px;color:#f1f8ff}
+.bc-ref-why-forecast p,.bc-ref-why-forecast small{margin:0;color:#a1c7df;font-size:11px;line-height:1.5}
+.bc-reference .bc-ref-why-warning{
+  padding:14px;margin:0 0 15px;border:1px solid #493e98;border-radius:9px;
+  background:#191b48;color:#cad3ff;font-size:11px;line-height:1.5;
+}
+.bc-reference .bc-ref-why-cta{
+  display:flex;width:max-content;max-width:100%;min-height:38px;
+  padding:9px 16px;background:#00dfe9;color:#031d2b;border:0;
+  font-size:12px;
+}
+@media(max-width:620px){
+  .bc-reference .bc-panel-content[data-reference="BC-R04"]{padding:0 17px 24px!important}
+  .bc-ref-why-hero{min-height:160px}
+}
