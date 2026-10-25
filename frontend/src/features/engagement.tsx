@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft, ArrowRight, BarChart3, Bell, CalendarDays, Check, ChevronDown,
-  CircleHelp, Flame, Snowflake, Trophy, X,
+  CircleHelp, Snowflake, Trophy, X,
 } from "lucide-react";
 import {
   ANIMATION_STORAGE_KEY,
@@ -231,7 +231,7 @@ export function TopbarEngagementIndicator() {
                 <div className="streak-facts" aria-label="Статистика серии">
                   <div className="streak-fact"><span className="streak-fact-icon is-growth"><BarChart3 size={26}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : `${String(currentDays)} дней`}</strong><small>Текущая серия</small></div></div>
                   <div className="streak-fact"><span className="streak-fact-icon is-best"><Trophy size={27}/></span><div><strong>{loading || indicatorQuery.isError ? "—" : bestDays > 0 ? `${String(bestDays)} дней` : "Пока ноль"}</strong><small>Лучший результат</small></div></div>
-                  <div className="streak-fact"><span className="streak-fact-icon is-freeze"><Snowflake size={27}/></span><div><strong>{freezeQuery.isPending || freezeQuery.isError ? "—" : `${String(freezeQuery.data?.consumed_total ?? 0)} дней`}</strong><small>Заморозки использовано</small></div></div>
+                  <div className="streak-fact"><span className="streak-fact-icon is-freeze"><Snowflake size={27}/></span><div><strong>{freezeQuery.isPending || freezeQuery.isError ? "—" : `${String(freezeStock)} в запасе`}</strong><small>Использовано: {freezeQuery.data?.consumed_total ?? 0}</small></div></div>
                 </div>
                 <div className="streak-rule">
                   <CircleHelp size={23} aria-hidden="true" /><div>
