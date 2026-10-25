@@ -1,0 +1,21 @@
+# Claim BUDDY-HERO-NEW-CHAT-20261026
+
+- task_id: BUDDY-HERO-NEW-CHAT-20261026
+- session_id: gpt6-20261026-buddy-banner-chat
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: main at branch creation
+- depends_on: []
+- write_scope:
+  - frontend/src/features/buddy-chat-v2.tsx
+  - frontend/src/features/buddy-chat-v2.scss
+  - frontend/src/features/buddy-chat-v2.test.tsx
+  - .agents/coordination/claims/BUDDY-HERO-NEW-CHAT-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - cd frontend && npm test -- buddy-chat-v2.test.tsx
+  - cd frontend && npm run typecheck
+  - cd frontend && npm run lint
+- progress: Starting isolated implementation. Main is unchanged until independently reviewed.
+- blockers: Remote GitHub connector provides no local test execution; CI required.
