@@ -250,7 +250,7 @@ export function ChatHistory({
         <button
           type="button"
           className="msg-chat__header-title msg-chat__header-title-button"
-          aria-label={`Информация о чате «${channelTitle}»`}
+          aria-label={`Профиль чата «${channelTitle}»`}
           aria-expanded={contextOpen ?? false}
           aria-controls="messenger-context-panel"
           disabled={onToggleContext === undefined}
