@@ -192,7 +192,7 @@ function PanelPreview({ project, onOpen, onRewards }: { project: Project; onOpen
         </section><BenefitsPreview onDetails={onRewards}/>
       </div>
     </div>
-    <div className="mp-preview__actions"><button className="mp-primary" type="button" onClick={onOpen}>Открыть проект <ArrowRight size={17}/></button><span>{dateLabel(project.work.terms.deadline_at)} · {daysLabel(project.work.terms.deadline_at)}</span></div>
+    <div className="mp-preview__actions"><button className="mp-primary" type="button" onClick={()=>onOpen("overview")}>Открыть проект <ArrowRight size={17}/></button><span>{dateLabel(project.work.terms.deadline_at)} · {daysLabel(project.work.terms.deadline_at)}</span></div>
   </aside>;
 }
 function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, onSubmitContribution, saving, saveError, onStart, starting }: {
