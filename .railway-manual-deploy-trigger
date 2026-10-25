@@ -21,3 +21,6 @@ release_request=2026-10-25-rating-v2-636e1cc7cec7
 
 # Railway builder retry after snapshot unpack/upload failure; release rating UI.
 release_request=2026-10-25-rating-retry-2cd1f44d87d4
+
+# Bootcamp: immersive ten-state reader, reviewed practice and two certificate flows
+release_request=2026-10-25-bootcamp-10state-ff43c34331ea
