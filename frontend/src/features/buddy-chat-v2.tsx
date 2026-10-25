@@ -10,9 +10,10 @@ import {
 } from "lucide-react";
 
 import { apiRequest, type RuntimeApiPath } from "../api/client";
+import { selectOwnPublishedStanding, useOwnPublishedStandings, type PublishedSeasonRef } from "./rating-v2/own-standing";
 import {
-  activeBuddyProjects, completedStudyCourses, countConfirmedSkills, firstOwnPlace,
-  loadBuddyAnalytics, loadBuddyJourney, loadBuddyOwnStandings, loadBuddyPassport,
+  activeBuddyProjects, completedStudyCourses, countConfirmedSkills,
+  loadBuddyAnalytics, loadBuddyJourney, loadBuddyPassport,
   normalizeNextAction,
 } from "./buddy-live-data";
 import "./buddy-chat-v2.scss";
@@ -133,11 +134,13 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
     queryFn: loadBuddyPassport,
     retry: false,
   });
-  const personalRank = useQuery({
-    queryKey: ["rating-seasons", "buddy-own-standing", profile.person_id],
-    queryFn: loadBuddyOwnStandings,
+  const publishedSeasons = useQuery({
+    queryKey: ["rating-seasons"],
+    queryFn: () => apiRequest<PublishedSeasonRef[]>("/api/v1/rating-seasons", { cache: "no-store" }),
     retry: false,
   });
+  // Reuse the exact owner-scoped cache and version guard of the TopbarRank.
+  const personalRank = useOwnPublishedStandings(profile.person_id);
   const analytics = useQuery({
     queryKey: ["participant-analytics", "buddy", profile.person_id],
     queryFn: loadBuddyAnalytics,
@@ -154,7 +157,7 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
   const verifiedSkills = passport.data?.person_id === profile.person_id
     ? countConfirmedSkills(passport.data)
     : null;
-  const ownPlace = personalRank.data ? firstOwnPlace(personalRank.data) : null;
+  const ownPlace = selectOwnPublishedStanding(personalRank.data, publishedSeasons.data?.[0])?.place ?? null;
   const nextAction = normalizeNextAction(analytics.data);
   const selected = visibleCourses[0] ?? null;
   const messages = thread.data?.messages ?? [];
@@ -318,7 +321,7 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
                 </div>
               </div>
               {nextAction && <p className="buddy2-live-note">Следующее действие из аналитики: <strong>{nextAction}</strong></p>}
-              {(passport.isError || personalRank.isError || analytics.isError) && <p className="buddy2-live-note" role="status">Некоторые связанные данные временно недоступны. Показаны только полученные подтверждённые значения.</p>}
+              {(passport.isError || personalRank.isError || publishedSeasons.isError || analytics.isError) && <p className="buddy2-live-note" role="status">Некоторые связанные данные временно недоступны. Показаны только полученные подтверждённые значения.</p>}
             </>}
           </section>
           <div className="buddy2-section-label"><FileText size={17}/> Полезные материалы <small>Из каталога Impulse</small></div>
