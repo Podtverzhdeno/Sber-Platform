@@ -31,7 +31,7 @@ async function sidebarSignature(page: Page) {
   return page.locator(".sidebar").evaluate(sidebar => ({
     brand: sidebar.querySelector(".sidebar-brand")?.innerHTML,
     links: Array.from(sidebar.querySelectorAll("nav a"), link => ({
-      label: link.textContent?.trim(),
+      label: link.textContent.trim(),
       icon: link.querySelector(".nav-icon")?.innerHTML,
     })),
     promotion: sidebar.querySelector(".sidebar-message")?.innerHTML,
