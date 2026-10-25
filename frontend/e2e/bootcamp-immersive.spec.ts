@@ -100,6 +100,6 @@ test("data-security reference: theory methods, JWT example, practice requirement
   await expect(reader.locator(".imp-study__practice-columns .imp-study__requirement")).toHaveCount(8);
   await page.screenshot({ path: "test-results/reference-security-06-practice.png", animations: "disabled" });
   await reader.getByRole("button", { name: "Самопроверка", exact: true }).click();
-  await expect(reader.locator(".imp-study__check-grid button")).toHaveCount(3);
+  await expect(reader.locator(".imp-study__check-grid button")).toHaveCount(4);
   await page.screenshot({ path: "test-results/reference-security-07-check.png", animations: "disabled" });
 });
