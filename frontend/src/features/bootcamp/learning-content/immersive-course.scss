@@ -680,3 +680,66 @@
   .imp-study[data-view="practice"] .imp-study__content { padding:15px; }
   .imp-study[data-view="practice"] .imp-study__tabs { padding:0 0 9px; }
 }
+
+
+/* 10-state 1672x941 reference audit: page gutters, the full course identity
+   above the outline, and readable lesson typography. */
+.bc-reference .overlay-panel--drawer:has(.imp-study) {
+  padding-inline: clamp(22px, 2.8vw, 47px);
+}
+.imp-study__course-summary {
+  display: grid; grid-template-columns: 50px minmax(0,1fr); gap: 13px;
+  align-items: center; padding: 3px 8px 15px; margin-bottom: 10px;
+  border-bottom: 1px solid #22536e;
+}
+.imp-study__course-emblem {
+  display: grid; place-items: center; width: 50px; height: 50px;
+  color: #37f0f4; background: linear-gradient(145deg,#1748ad,#321b7b);
+  border: 1px solid #2269cc; border-radius: 12px;
+}
+.imp-study__course-identity { display: grid; min-width: 0; gap: 5px; }
+.imp-study__course-identity strong {
+  color: #f2fbff; font-size: 16px; line-height: 1.25;
+}
+.imp-study__course-identity small {
+  color: #9ec6e2; font-size: 12px; line-height: 1.45;
+}
+@media (min-width: 1280px) {
+  .imp-study { font-size: 16px; }
+  .imp-study[data-view="theory"] .imp-study__grid,
+  .imp-study[data-view="example"] .imp-study__grid,
+  .imp-study[data-view="practice"] .imp-study__grid,
+  .imp-study[data-view="check"] .imp-study__grid,
+  .imp-study[data-view="program"] .imp-study__grid,
+  .imp-study[data-view="finish"] .imp-study__grid,
+  .imp-study[data-view="success"] .imp-study__grid,
+  .imp-study[data-view="certificates"] .imp-study__grid,
+  .imp-study[data-view="skills"] .imp-study__grid,
+  .imp-study[data-view="reviews"] .imp-study__grid {
+    grid-template-columns: minmax(340px, 365px) minmax(0, 1fr);
+    gap: 20px;
+  }
+  .imp-study__lesson-heading h2 { font-size: 33px; letter-spacing: -.35px; }
+  .imp-study__lesson-heading p { font-size: 16px; line-height: 1.5; }
+  .imp-study__content { padding: 23px 24px; }
+  .imp-study__content h3 { font-size: 27px; }
+  .imp-study__content h4 { font-size: 20px; }
+  .imp-study__content > p { font-size: 16px; line-height: 1.6; }
+  .imp-study__tabs button { font-size: 15px; min-height: 48px; }
+  .imp-study__lesson-list { gap: 5px; }
+  .imp-study__lesson-list button { min-height: 65px; padding: 10px 11px; }
+  .imp-study__lesson-text strong { font-size: 14px; }
+  .imp-study__method-card strong { font-size: 16px; }
+  .imp-study__method-card p { font-size: 14px; }
+  .imp-study__method-card { padding: 18px; }
+  .imp-study__walkthrough article strong { font-size: 15px; }
+  .imp-study__walkthrough article p { font-size: 13px; }
+  .imp-study__navigation { padding-top: 13px; border-top: 1px solid #1b5975; }
+}
+@media (max-width: 780px) {
+  .imp-study__course-summary {
+    grid-template-columns: 42px minmax(0,1fr);
+    gap: 10px; margin-bottom: 10px; padding-bottom: 11px;
+  }
+  .imp-study__course-emblem { width: 42px; height: 42px; }
+}
