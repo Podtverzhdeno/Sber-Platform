@@ -58,37 +58,76 @@ export function EventsHero({ events, onChoose }: { events: EventViewItem[]; onCh
     </div>
   </>;
 }
-export function EventsCard({ item, focus, index, frozen, saved, onDetails, onRegister, onSave }: {
+function skillName(track: string): string {
+  const names: Record<string,string> = {
+    python:"Python",ai:"AI / ML",ml:"AI / ML",data:"Data",product:"Product",
+    analytics:"Аналитика",engineering:"Инженерия",frontend:"Frontend",backend:"Backend",
+  };
+  return names[track.toLowerCase()] ?? track;
+}
+function radarPoints(coverage: number): string {
+  const radius = 41 * Math.max(0,Math.min(1,coverage / 100));
+  const axes = [0.93, 0.85, 0.78, 0.86, 0.91];
+  return axes.map((axis,index) => {
+    const angle = -Math.PI / 2 + index * Math.PI * 2 / axes.length;
+    return `${(55 + Math.cos(angle)*radius*axis).toFixed(1)},${(55 + Math.sin(angle)*radius*axis).toFixed(1)}`;
+  }).join(" ");
+}
+export function EventsCard({ item, focus, index, frozen, saved, onDetails, onSave }: {
   item: EventViewItem; focus: string[]; index: number; frozen: boolean; saved: boolean;
-  onDetails: () => void; onRegister: () => void; onSave: () => void;
+  onDetails: () => void; onSave: () => void;
 }) {
   const match = matchPercent(item,focus);
-  const labels = [item.event_type, ...item.track_keys.slice(0,4)];
+  const tracks = item.track_keys.slice(0,4);
+  const relevant = tracks.filter(track => focus.some(selected => selected.toLowerCase() === track.toLowerCase()));
+  const developed = tracks.map(skillName).filter((track,pos,all) => all.indexOf(track)===pos).slice(0,3);
   const sber = isSber(item.organizer);
   const status = currentStatus(item);
+  const radar = match === null ? null : radarPoints(match);
   return <article className="ev-event-card" data-testid="event-reference-card" data-event-key={item.key}>
     <div className={`ev-event-thumb ev-event-thumb-${String(index%3)}`} aria-hidden="true">
       {index%3===0?<Code2 size={58}/>:index%3===1?<BookOpen size={58}/>:<Trophy size={58}/>}
+      {match!==null&&<span className="ev-thumb-match">{match}% совпадение</span>}
     </div>
     <div className="ev-event-main">
-      <div className="ev-event-title-line"><h3>{item.title}</h3>{sber && <strong className="ev-sber-label"><img src="/task-catalog/brands/sber.svg" alt=""/> Сбер</strong>}</div>
-      <div className="ev-event-meta"><span><Landmark size={14}/>{item.organizer}</span><span><CalendarDays size={14}/>{formatDate(item.deadline_at)}</span><span><MapPin size={14}/>Формат в деталях</span></div>
-      <div className="ev-event-tags">{labels.map(tag => <span key={tag}>{tag}</span>)}</div>
-      <div className="ev-event-reason"><Lightbulb size={17}/><strong>Почему подходит:</strong> {item.recommendation_reason || "Соответствует выбранным направлениям"}</div>
+      <div className="ev-event-title-line"><h3>{item.title}</h3></div>
+      <div className="ev-event-meta">
+        <span><Landmark size={14}/>{item.organizer}</span>
+        <span><BookOpen size={14}/>{item.event_type}</span>
+        <span><CalendarDays size={14}/>{formatDate(item.deadline_at)}</span>
+        <span><MapPin size={14}/>Формат уточняется</span>
+      </div>
+      <div className="ev-event-capabilities">
+        <section><h4>Совпадает с вашими интересами</h4><div className="ev-event-tags">{relevant.length?relevant.map(tag => <span key={tag}>{skillName(tag)}</span>):<small>Выберите направления</small>}</div></section>
+        <section><h4>Развивает навыки</h4><div className="ev-skill-tags">{developed.map(tag => <span key={tag}>{tag}</span>)}</div></section>
+      </div>
+    </div>
+    <div className="ev-card-radar" role="img" aria-label={match===null?"Совпадение направлений пока не рассчитано":`Совпадение направлений ${String(match)}%`}>
+      <svg viewBox="0 0 110 110" aria-hidden="true">
+        <polygon points="55,10 97.8,41.1 81.4,91.4 28.6,91.4 12.2,41.1" fill="none" stroke="#305167" strokeWidth="1"/>
+        <polygon points="55,28 80.7,46.6 70.9,76.7 39.1,76.7 29.3,46.6" fill="none" stroke="#305167" strokeWidth="1"/>
+        <line x1="55" y1="55" x2="55" y2="10" stroke="#244658"/><line x1="55" y1="55" x2="98" y2="41" stroke="#244658"/>
+        <line x1="55" y1="55" x2="81" y2="91" stroke="#244658"/><line x1="55" y1="55" x2="29" y2="91" stroke="#244658"/>
+        <line x1="55" y1="55" x2="12" y2="41" stroke="#244658"/>
+        {radar&&<polygon points={radar} fill="#00ddb477" stroke="#19efdf" strokeWidth="2"/>}
+        <circle cx="55" cy="55" r="3.5" fill="#22f1de"/>
+      </svg>
     </div>
     <aside className="ev-event-match">
       <button className={`ev-save ${saved?"is-saved":""}`} type="button" onClick={onSave} aria-label={saved?"Убрать из избранного":"В избранное"} aria-pressed={saved}><Star size={20} fill={saved?"currentColor":"none"}/></button>
-      {match !== null ? <>
-        <span className="ev-match-chip">{match}% по направлениям</span>
-        <div className="ev-radar" role="img" aria-label={`Совпадение направлений ${String(match)}%`}><span>{match}%</span></div>
-      </>:<span className="ev-match-chip">Ознакомьтесь с событием</span>}
-      <div className="ev-match-bars">{item.track_keys.slice(0,4).map(t => <div key={t}><span>{t}</span><i style={{"--ev-fill":focus.includes(t)?"100%":"30%"} as CSSProperties}/></div>)}</div>
-      <div className="ev-card-actions"><button type="button" className="ev-primary" onClick={onDetails}>Подробнее <ArrowRight size={16}/></button></div>
+      {sber&&<span className="ev-sber-label"><img src="/task-catalog/brands/sber.svg" alt=""/> Сбер</span>}
+      <span className="ev-match-chip">{match===null?"Ознакомьтесь с событием":match>0?"Для вас":"Новые интересы"}</span>
+      <strong className="ev-match-label">Совпадение по направлениям</strong>
+      <div className="ev-match-bars">{tracks.map(t => {
+        const isMatch=focus.some(f=>f.toLowerCase()===t.toLowerCase());
+        return <div key={t}><span>{skillName(t)}</span><i style={{"--ev-fill":isMatch?"100%":"0%"} as CSSProperties}/><b>{isMatch?"✓":"—"}</b></div>;
+      })}</div>
     </aside>
+    <div className="ev-event-reason"><Lightbulb size={17}/><strong>Почему вам подходит:</strong> {item.recommendation_reason || "Соответствует выбранным направлениям"}</div>
+    <div className="ev-card-actions"><button type="button" className="ev-primary" onClick={onDetails}>Подробнее <ArrowRight size={16}/></button></div>
     <div className="ev-card-footer"><SafeExternalLink href={item.source_url} className="ev-source-link">{item.status==="open"?"Перейти к событию":"Открыть первоисточник"} <ExternalLink size={12}/></SafeExternalLink>
       <span className={`ev-status ${status==="Актуальное"?"ev-status-open":""}`}>{status}</span>
-      {frozen && <><span className="ev-points-frozen"><b>+5 frozen</b></span><span className="ev-frozen-message">5 баллов заморожены до окончания события и проверки результата.</span></>}
-      {item.status==="open" && !frozen && <button type="button" className="ev-quick-register" onClick={onRegister}>Зарегистрироваться · +5</button>}
+      {frozen && <span className="ev-points-frozen">Подтверждение на проверке</span>}
     </div>
   </article>;
 }
