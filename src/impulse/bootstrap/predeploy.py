@@ -27,7 +27,27 @@ async def seed_and_verify(database_url: str) -> None:
     # populated. Fail the deploy before switching traffic if it is empty.
     if counts.get("tasks", 0) < 12:
         raise RuntimeError("Demo seed incomplete: published task catalog is missing")
-    print(f"Demo data verified: {counts['tasks']} task rows")
+    # Demo communities, their real memberships and message history must
+    # be present in PostgreSQL, not just represented by static React fixtures.
+    for table, minimum in (
+        ("messaging_channels", 10),
+        ("messaging_memberships", 20),
+        ("messaging_messages", 10),
+    ):
+        if counts.get(table, 0) < minimum:
+            raise RuntimeError(
+                f"Demo seed incomplete: {table} has {counts.get(table, 0)} rows"
+            )
+    print(
+        "Demo data verified: "
+        + ", ".join(
+            f"{name}={counts.get(name, 0)}"
+            for name in (
+                "tasks", "messaging_channels", "messaging_memberships",
+                "messaging_messages",
+            )
+        )
+    )
 
 
 def main() -> None:
