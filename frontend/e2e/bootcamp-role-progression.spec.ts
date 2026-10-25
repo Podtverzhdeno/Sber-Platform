@@ -34,7 +34,15 @@ test("finishing a saved required Impulse course refreshes the role's learning st
   await expect(refreshed.getByTestId("bootcamp-next-stage")).toContainText("практика");
   await expect(refreshed.getByTestId("bootcamp-study-level")).toContainText("1 из 4");
   await expect(refreshed.getByTestId("bootcamp-official-grade")).toContainText("не присвоен");
-  await refreshed.getByRole("button",{name:"Следующий этап"}).click();
+  const nextStageButton=refreshed.getByRole("button",{name:/Следующий этап/});
+  await expect(nextStageButton).toHaveClass(/bc-ref-grade-button--unlock/);
+  await nextStageButton.click();
+  const celebration=page.getByTestId("grade-milestone-celebration");
+  await expect(celebration).toHaveAttribute("data-mode","stage-unlocked");
+  await expect(celebration).toContainText("НОВЫЙ ЭТАП");
+  await expect(celebration).not.toContainText("ГРЕЙД ПОВЫШЕН");
+  await celebration.getByRole("button",{name:"Начать следующий этап"}).click();
+  await expect(celebration).toHaveCount(0);
   const drawer=page.getByRole("dialog",{name:"Требования к обучению"});
   await expect(drawer.getByText(/Обязательное обучение завершено/)).toBeVisible();
   await expect(drawer.getByText(/Следующий этап развития/)).toBeVisible();
@@ -77,4 +85,39 @@ test("finishing from the real course player updates the requirement banner witho
   await expect(page.getByTestId("bootcamp-study-level")).toContainText("1 из 4");
   await expect(page.getByTestId("bootcamp-next-stage")).toContainText("практика");
   await expect(page.getByTestId("bootcamp-official-grade")).toContainText("не присвоен");
+});
+
+test("official grade promotion animation requires an actual change in the server projection",async({page})=>{
+  await installBootcampReferenceApi(page);
+  let currentGrade="L1";
+  await page.route("**/api/v1/me/bootcamp/overview?track=product",route=>route.fulfill({json:{
+    role_summary:{track_key:"product",grade_state:"known",
+      current_grade_key:currentGrade,current_grade_title:currentGrade, target_grade_key:"L3"}
+  }}));
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link",{name:"Bootcamp"}).click();
+  await expect(page.getByTestId("bootcamp-official-grade")).toContainText("L1");
+  await expect(page.getByTestId("grade-milestone-celebration")).toHaveCount(0);
+  const course=page.getByTestId("course-demo-course-1");
+  await course.getByRole("button",{name:/Открыть курс/}).click();
+  const reader=page.getByTestId("impulse-immersive-reader");
+  await reader.getByRole("button",{name:/Перейти к программе/}).click();
+  await reader.locator(".imp-study__program-list button").first().click();
+  for(let i=0;i<8;i++){
+    await reader.locator(".imp-study__navigation .imp-study__primary").click();
+  }
+  // Represent a grade transition that the server has issued independently,
+  // not a frontend guess from the eighth lesson.
+  currentGrade="L2";
+  await reader.locator(".imp-study__finish").click();
+  await expect(page.getByTestId("bootcamp-official-grade")).toContainText("L2");
+  const animation=page.getByTestId("grade-milestone-celebration");
+  await expect(animation).toHaveAttribute("data-mode","official-grade-up");
+  await expect(animation.getByTestId("grade-promotion-ladder")).toContainText("L1");
+  await expect(animation.getByTestId("grade-promotion-ladder")).toContainText("L2");
+  await page.screenshot({path:"test-results/bootcamp-official-grade-promotion.png",animations:"disabled"});
+  await animation.getByRole("button",{name:"К новым требованиям"}).click();
+  await expect(animation).toHaveCount(0);
+  await expect(page.getByRole("dialog",{name:"Требования к обучению"})).toBeVisible();
 });
