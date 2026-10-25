@@ -10,6 +10,8 @@ import { invalidateLearningProjections } from "../../learning-progress";
 import { learningProgramFor } from "./programs";
 import { knowledgeCheckFor } from "./knowledge-checks";
 import { LessonFrame } from "./LessonFrame";
+import { ManualCompanionCard } from "./ManualCompanionCard";
+import "./learning-content.scss";
 import { authorizationMethods, authorizationWalkthrough, authorizationRequirements, authorizationCriteria, authorizationExample } from "./security-lesson-reference";
 import "./immersive-course.scss";
 
@@ -348,6 +350,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           <div className="lesson-frames" data-testid="unified-course-lesson">
             <div className="lesson-frames__intro"><strong>Изучай и сразу применяй</strong>Все материалы урока собраны ниже: теория, разобранный пример, самостоятельное задание и скрытая до открытия самопроверка. Блоки можно сворачивать. Серверный прогресс сохраняется отдельно кнопкой «Следующий урок».</div>
           <LessonFrame key={unit.id + "-theory"} unitId={unit.id} kind="theory">{() => <section className="imp-study__content" aria-label="Теория"><h3>Теория</h3><h4>{unit.title}</h4>
+            <ManualCompanionCard courseKey={courseKey} lessonIndex={current} />
             {unit.theory.map((text,index)=><p key={index}>{text}</p>)}
             {authReference && <><h4>Основные способы аутентификации</h4><div className="imp-study__methods-grid">{authorizationMethods.map((method,index)=><article key={method.title} className="imp-study__method-card"><span>{index+1}</span><div><strong>{method.title}</strong><p>{method.detail}</p></div></article>)}</div></>}
             <div className="imp-study__callout"><Sparkles size={21}/><p><strong>Важно</strong>Используйте принципы из урока на реальных задачах и проверяйте результат самостоятельно.</p></div>
@@ -355,7 +358,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           <LessonFrame key={unit.id + "-example"} unitId={unit.id} kind="example">{() => <section className="imp-study__content" aria-label="Пример"><h3>Пример</h3><h4>{authReference ? "JWT-аутентификация в API" : "Применение материала урока"}</h4>
             <p>{authReference ? "Разберём проверку JWT в FastAPI. Токен подтверждает личность, а доступ к отдельным объектам проверяется дополнительно." : "Практический пример применения материала урока"}</p>
             <div className={authReference ? "imp-study__example-grid" : ""}>
-              <div className="imp-study__code-column"><div className="imp-study__example-head"><Code2 size={17}/> main.py <button type="button" onClick={() => { void copyExampleCode(exampleText); }}><Copy size={14}/> {copyStatus === "copied" ? "Скопировано" : copyStatus === "failed" ? "Не удалось скопировать" : "Копировать код"}</button></div>
+              <div className="imp-study__code-column"><div className="imp-study__example-head"><Code2 size={17}/> Пример · {authReference ? "main.py" : "сценарий"} <button type="button" onClick={() => { void copyExampleCode(exampleText); }}><Copy size={14}/> {copyStatus === "copied" ? "Скопировано" : copyStatus === "failed" ? "Не удалось скопировать" : "Копировать пример"}</button></div>
                 <pre className="imp-study__code"><code>{exampleText}</code></pre></div>
               {authReference ? <div className="imp-study__walkthrough"><h4>Разбор</h4>{authorizationWalkthrough.map((step,index)=><article key={step.title}><span>{index+1}</span><div><strong>{step.title}</strong><p>{step.detail}</p></div></article>)}</div>
               : <div className="imp-study__callout"><CheckCircle2 size={18}/><p><strong>Разбор</strong>Сравните пример с задачей и объясните каждый ключевой шаг.</p></div>}
