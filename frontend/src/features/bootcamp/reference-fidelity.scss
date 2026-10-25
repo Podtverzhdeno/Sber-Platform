@@ -491,3 +491,8 @@
   .bc-reference .bc-learning-launch { transition: none; }
   .bc-reference .bc-learning-launch:hover { transform: none; }
 }
+
+/* The lesson shortcut lands below the fullscreen reader's sticky 76px header. */
+.bc-reference .bc-learning__body {
+  scroll-margin-top: 94px; /* reader title clearance */
+}
