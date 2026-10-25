@@ -35,7 +35,7 @@ const actor = {
   active_role: "participant",
   assigned_roles: ["participant"],
   scopes: [], consent_scopes: [],
-  navigation: ["Главная", "Моя траектория", "Bootcamp", "Задачи", "Портфолио"],
+  navigation: ["Главная", "Моя траектория", "Bootcamp", "Задачи", "Портфолио", "Аналитика"],
   csrf_token: "csrf-e2e-bootcamp-reader",
 };
 
@@ -79,6 +79,29 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
       course_key: course, completed_units: record.completed_units, total_units: 8,
       certificate_id: record.certificate_id, finished: Boolean(record.certificate_id),
       practice_status: record.practice_status,
+    } });
+  });
+
+  // The same mutable fixture answers the cross-section summary: finishing in
+  // Bootcamp must become observable in both Analytics and Trajectory.
+  await page.route("**/api/v1/me/bootcamp/impulse-study/summary", route => {
+    const courses = Array.from(study.entries()).map(([key, state]) => ({
+      course_key: key,
+      title: catalog.find(item => item.key === key)?.title ?? key,
+      completed_units: state.completed_units,
+      total_units: 8,
+      finished: Boolean(state.certificate_id),
+      finished_at: state.certificate_id ? "2026-10-25T12:00:00Z" : null,
+      updated_at: "2026-10-25T12:00:00Z",
+      practice_status: state.practice_status,
+      practical_certificate_id: null,
+    }));
+    return route.fulfill({ json: {
+      started_courses: courses.length,
+      finished_courses: courses.filter(course => course.finished).length,
+      completed_lessons: courses.reduce((sum, course) => sum + course.completed_units, 0),
+      approved_practices: 0,
+      courses,
     } });
   });
 
