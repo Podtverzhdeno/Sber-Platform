@@ -135,3 +135,37 @@
 [data-theme="light"] .bc-reference .bc-ref-category-tabs button{background:#fff;color:#365c73}
 [data-theme="light"] .bc-reference .bc-ref-category-tabs button[aria-pressed=true]{background:#00dfe5;color:#09243b}
 [data-theme="light"] .bc-reference .bc-ref-summary-tags span{background:#eef6fb;color:#345a73;border-color:#bdd8e8}
+
+/* Reference side panels: 1448_course / why / required */
+.bc-reference .overlay { position:fixed;inset:0;display:flex;justify-content:flex-end;align-items:stretch;padding:0;background:#020a17b8;backdrop-filter:blur(4px);z-index:100; }
+.bc-reference .overlay-panel--drawer{width:min(505px,100vw);max-width:505px;height:100dvh;max-height:100dvh;margin:0;border-radius:0;border:0;border-left:1px solid #20506c;background:#04182d;color:#ecf6ff;padding:0;overflow-y:auto;overscroll-behavior:contain}
+.bc-reference .overlay-panel--drawer>header{position:sticky;top:0;z-index:10;min-height:63px;background:#05182a;border-bottom:1px solid #244662;padding:0 24px;margin:0;display:flex;align-items:center}
+.bc-reference .overlay-panel--drawer>header h2{font-size:18px;margin:0;color:#f4f9ff;font-weight:800}
+.bc-reference .overlay-panel--drawer>header button{color:#97c6e3}
+.bc-reference .bc-panel-content{padding:0 24px 28px;color:#e9f6ff;gap:14px}
+.bc-reference .bc-ref-detail-hero{margin:0 -24px;padding:24px;background:radial-gradient(ellipse at 90% 10%,#251257,#081d3b 83%);border-bottom:1px solid #244760;display:grid;gap:11px}
+.bc-reference .bc-ref-detail-hero .bc-ref-flags{justify-content:flex-start}
+.bc-reference .bc-ref-detail-hero h2{font-size:24px;margin:0;line-height:1.22;color:#f4f9ff}
+.bc-reference .bc-ref-detail-hero p{font-size:12px;color:#b2cbe5;line-height:1.5;margin:0}
+.bc-ref-detail-facts{display:flex;gap:8px;flex-wrap:wrap}
+.bc-ref-detail-facts span{display:flex;align-items:center;gap:5px;border-radius:7px;padding:7px 10px;background:#13314d;color:#aac9e2;font-size:11px}
+.bc-ref-detail-facts svg{width:14px;height:14px}
+.bc-ref-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.bc-reference .bc-ref-detail-actions a,.bc-reference .bc-ref-detail-actions button{display:flex;align-items:center;gap:9px;justify-content:center;min-height:38px;padding:8px 10px;border-radius:7px;font-size:12px;font-weight:800;text-decoration:none}
+.bc-reference .bc-ref-detail-actions a{background:#00dbe5;color:#061b30}
+.bc-reference .bc-ref-detail-actions button{background:#113450;color:#bad8ee;border:1px solid #2a5f82}
+.bc-ref-detail-actions svg{width:16px;height:16px}
+.bc-reference .bc-detail-tabs{margin:0 -24px;padding:0 22px;border-bottom:1px solid #25516a;display:flex;align-items:center;gap:8px;overflow-x:auto;flex-wrap:nowrap}
+.bc-reference .bc-detail-tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;padding:13px 4px;margin-right:12px;background:transparent;color:#91b4d0;min-height:42px;font-size:11px;font-weight:800;white-space:nowrap}
+.bc-reference .bc-detail-tabs button[aria-selected=true]{border-bottom-color:#00e9e9;color:#00eded}
+.bc-reference .bc-detail-tabpanel{padding:5px 0;gap:14px;color:#b5cde4;line-height:1.55;font-size:12px}
+.bc-reference .bc-detail-tabpanel h3{color:#f2f9ff;font-size:14px;margin:6px 0 0}
+.bc-reference .bc-detail-tabpanel :is(.bc-impact,.bc-certificate){background:#0b2843;border:1px solid #24506f;border-radius:9px;padding:13px}
+.bc-reference .bc-panel-footer{gap:10px;border-top:1px solid #234960;padding-top:12px}
+.bc-reference .bc-panel-content[data-reference="BC-R04"],.bc-reference .bc-panel-content[data-reference="BC-R05"]{padding-top:24px}
+.bc-reference .bc-requirements-list li{padding:12px;background:#0b2843;border:1px solid #24506f;border-radius:9px}
+@media(max-width:620px){.bc-reference .overlay-panel--drawer{width:100vw;max-width:none}.bc-reference .bc-panel-content{padding-left:16px;padding-right:16px}.bc-reference .bc-ref-detail-hero{margin:0 -16px;padding:18px}.bc-reference .bc-detail-tabs{margin:0 -16px;padding:0 14px}.bc-reference .overlay-panel--drawer>header{padding:0 16px}}
+[data-theme="light"] .bc-reference .overlay-panel--drawer{background:#f4f9fd;color:#133049;border-left-color:#bed9e8}
+[data-theme="light"] .bc-reference .overlay-panel--drawer>header{background:#eaf4fb}
+[data-theme="light"] .bc-reference .bc-ref-detail-hero{background:#e5effb}
+[data-theme="light"] .bc-reference .bc-ref-detail-hero h2{color:#123046}
