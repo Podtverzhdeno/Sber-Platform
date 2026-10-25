@@ -51,7 +51,7 @@ test("annual calendar shows real source events on hover and in the day popup", a
  const geometry = await populated.evaluate(element => element.getBoundingClientRect().height);
  expect(geometry).toBeLessThanOrEqual(15);
  await populated.hover();
- await expect(page.getByRole("tooltip")).toContainText("Завершён");
+ await expect(page.getByRole("tooltip")).toContainText("зарегистрированных действий");
  await populated.click();
  const modal = page.getByRole("dialog", { name: /Активность/ });
  await expect(modal).toBeVisible();
