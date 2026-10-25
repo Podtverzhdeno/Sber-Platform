@@ -1693,7 +1693,14 @@ function ImpulseApp() {
                   </section>
                 )}
               </div>
-              <div className="top-persona">
+              <button
+                type="button"
+                className="top-persona top-persona-link"
+                aria-label={actor.navigation.includes("Портфолио") ? "Открыть моё портфолио" : "Мой профиль"}
+                title={actor.navigation.includes("Портфолио") ? "Перейти в портфолио" : "Мой профиль"}
+                disabled={!actor.navigation.includes("Портфолио")}
+                onClick={() => { openSearchItem("Портфолио"); }}
+              >
                 <span className="mini-avatar" aria-hidden="true">
                   {actor.active_role === "participant" && configQuery.data?.demo_mode === true ? (
                     <img src="/home-reference/avatar.svg" alt="" className="home-reference-avatar" />
@@ -1705,7 +1712,7 @@ function ImpulseApp() {
                   <strong>{actor.display_name}</strong>
                   <small>{roleLabels[actor.active_role]}</small>
                 </span>
-              </div>
+              </button>
               <button
                 className="ghost-button"
                 disabled={loggingOut}
