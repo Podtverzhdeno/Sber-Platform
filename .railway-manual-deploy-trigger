@@ -26,3 +26,6 @@ release_request=2026-10-25-my-projects-v2-logos-cf6612f
 
 # Verify final My Projects 3 views: logos, bookmarks, hover animations, workspace and E2E captures
 release_request=2026-10-25-my-projects-final-61e86e1
+
+# Build after concurrent Bootcamp reader TS fixes, keep My Projects V2
+release_request=2026-10-25-projects-reader-ts-retry-7950006
