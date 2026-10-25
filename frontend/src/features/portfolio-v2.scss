@@ -214,3 +214,8 @@
   .p2-skill-detail { flex-wrap:wrap; }.p2-project-facts { gap:8px; }
 }
 @media(prefers-reduced-motion:reduce) { .p2-root * { transition:none!important; animation:none!important; } }
+
+.p2-study-certificates { margin-top:14px; padding-top:12px; border-top:1px solid #24475b; }
+.p2-study-certificates h3 { display:flex; flex-wrap:wrap; align-items:center; gap:9px; margin:0 0 11px; font-size:13px; color:#effbff; }
+.p2-study-certificates h3 span { font-size:10px; font-weight:500; color:#87aebc; }
+.p2-study-certificates .p2-certificate-description em { overflow-wrap:anywhere; }
