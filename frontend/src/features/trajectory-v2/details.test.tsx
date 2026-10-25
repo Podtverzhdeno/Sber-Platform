@@ -149,9 +149,12 @@ describe("trajectory v2 task/evidence drawer", () => {
         "Самостоятельная проверка: отправить запрос с чужим tenant_id.",
       ].join("\n\n"),
     };
+    const first = roadmapWithNext.milestones[0];
+    const third = roadmapWithNext.milestones[2];
+    if (first === undefined || third === undefined) throw new Error("incomplete roadmap fixture");
     shell("/workspace/1", [{
       ...roadmapWithNext,
-      milestones: [roadmapWithNext.milestones[0]!, enriched, roadmapWithNext.milestones[2]!],
+      milestones: [first, enriched, third],
       next_step: enriched,
     }]);
     fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
