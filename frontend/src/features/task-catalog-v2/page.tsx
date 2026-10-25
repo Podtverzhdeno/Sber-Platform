@@ -647,10 +647,10 @@ export function TaskCatalogV2(props: { onOpenWorkspace: (assignmentId: string) =
             <label>Сортировка<select aria-label="Сортировка" value={filters.sort} onChange={(event) => { updateParams({ sort: event.target.value }, true); }}><option value="match-default">Сортировка: по соответствию</option><option value="deadline">Сортировка: по сроку</option><option value="duration">Сортировка: по длительности</option><option value="newest">Сортировка: сначала новые</option><option value="skill-growth">Сортировка: по росту навыков</option></select></label>
           </div>
           <datalist id="catalog-v2-direction-options">
-            {filterSuggestions.directions.map((value) => <option key={value} value={value} />)}
+            {filterSuggestions.directions.map((value) => <option key={value} value={value} label={displayCatalogTopic(value)} />)}
           </datalist>
           <datalist id="catalog-v2-competency-options">
-            {filterSuggestions.competencies.map((value) => <option key={value} value={value} />)}
+            {filterSuggestions.competencies.map((value) => <option key={value} value={value} label={displayCatalogTopic(value)} />)}
           </datalist>
           <datalist id="catalog-v2-customer-options">
             {filterSuggestions.customers.map((value) => <option key={value} value={value} />)}
