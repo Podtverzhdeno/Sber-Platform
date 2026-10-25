@@ -1342,6 +1342,7 @@ function ImpulseApp() {
       explicitSignOut.current = false;
       setSignedOut(false);
       setActor(nextActor);
+      navigate("/workspace/0", { replace: true });
     } catch {
       setError("Не удалось войти. Проверьте, что backend запущен.");
     }
@@ -1369,7 +1370,7 @@ function ImpulseApp() {
       predicate: (query) =>
         !["public-config", "demo-personas"].includes(String(query.queryKey[0])),
     });
-    window.history.replaceState(null, "", "/");
+    navigate("/choose-role", { replace: true });
     try {
       await apiRequest<unknown>("/api/v1/auth/logout", {
         method: "POST",
@@ -1777,23 +1778,43 @@ function ImpulseApp() {
             element={<ProjectVerificationPage />}
           />
           {!actor ? (
-            <Route
-              path="*"
-              element={
-                <LoginScreen
-                  personas={personasQuery.data ?? []}
-                  loading={personasQuery.isLoading}
-                  error={error}
-                  onLogin={(key) => {
-                    void login(key);
-                  }}
-                />
-              }
-            />
+            <>
+              <Route
+                path="/choose-role"
+                element={
+                  !signedOut && meQuery.isPending ? (
+                    <StatePanel kind="loading" />
+                  ) : (
+                    <LoginScreen
+                      personas={personasQuery.data ?? []}
+                      loading={personasQuery.isLoading}
+                      error={error}
+                      onLogin={(key) => {
+                        void login(key);
+                      }}
+                    />
+                  )
+                }
+              />
+              <Route
+                path="*"
+                element={
+                  !signedOut && meQuery.isPending ? (
+                    <StatePanel kind="loading" />
+                  ) : (
+                    <Navigate to="/choose-role" replace />
+                  )
+                }
+              />
+            </>
           ) : (
             <>
               <Route
                 path="/"
+                element={<Navigate replace to="/workspace/0" />}
+              />
+              <Route
+                path="/choose-role"
                 element={<Navigate replace to="/workspace/0" />}
               />
               <Route
