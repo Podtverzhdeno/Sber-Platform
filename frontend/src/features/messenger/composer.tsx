@@ -25,6 +25,7 @@ export type ComposerProps = {
   canSend: boolean;
   sending: boolean;
   sendState: ComposerSendState;
+  failureReason?: string;
   connectionState: ComposerConnectionState;
   replySummary?: { id: string; summary: string } | null;
   onSend: (payload: ComposerSendPayload) => void;
@@ -48,6 +49,7 @@ export function Composer({
   canSend,
   sending,
   sendState,
+  failureReason,
   connectionState,
   replySummary = null,
   onSend,
@@ -401,8 +403,7 @@ export function Composer({
       )}
       {sendState === "failed" && (
         <p className="msg-composer__notice msg-composer__notice--error" role="alert" data-testid="composer-failed">
-          Не удалось отправить сообщение. Черновик сохранён — исправьте текст
-          или повторите отправку.
+          {failureReason || "Не удалось отправить сообщение. Черновик сохранён — исправьте текст или повторите отправку."}
         </p>
       )}
     </div>
