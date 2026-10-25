@@ -81,7 +81,18 @@ function companyIcon(name: string) {
     n.includes("яндекс") ? "Я" : n.includes("астр") ? "A" : n.includes("vk") ? "VK" : name.slice(0,1).toUpperCase();
 }
 function CompanyIcon({ name }: { name: string }) {
-  return <span className={`mp-company-mark mp-company-mark--${name.toLowerCase().includes("сбер") ? "sber" : name.toLowerCase().includes("яндекс") ? "yandex" : "other"}`} aria-hidden="true">{companyIcon(name)}</span>;
+  const normalized = name.trim().toLocaleLowerCase("ru-RU").replace(/[\\s_.–—-]+/g, " ").trim();
+  const logos: Record<string,string> = {
+    "сбер":"sber", "сбербанк":"sber", "sber":"sber",
+    "т банк":"t-bank", "тбанк":"t-bank", "тинькофф":"tinkoff",
+    "astra":"astra", "астра":"astra", "группа астра":"astra",
+    "яндекс":"yandex", "газпром нефть":"gazprom-neft",
+    "vk":"vk", "вконтакте":"vk", "red mad robot":"red-mad-robot",
+  };
+  const mark = logos[normalized];
+  return <span className={`mp-company-mark ${mark ? "mp-company-mark--logo" : ""}`} aria-hidden="true">
+    {mark ? <img src={`/task-catalog/brands/${mark}.svg`} alt="" width="42" height="42"/> : companyIcon(name)}
+  </span>;
 }
 function ProgressBar({ value, compact = false }: { value: number | null; compact?: boolean }) {
   return <div className={`mp-progress ${compact ? "mp-progress--compact" : ""}`}>
