@@ -1213,7 +1213,15 @@ class SqlWorkStore(WorkStore):
             current = [dict(item) for item in payload.get("checkpoints", [])]
             current = [item for item in current if item.get("key") != checkpoint.key]
             current.append(
-                {"key": checkpoint.key, "title": checkpoint.title, "status": checkpoint.status}
+                {
+                    "key": checkpoint.key,
+                    "title": checkpoint.title,
+                    "status": checkpoint.status,
+                    "description": checkpoint.description,
+                    "deliverable": checkpoint.deliverable,
+                    "acceptance_criteria": list(checkpoint.acceptance_criteria),
+                    "estimated_minutes": checkpoint.estimated_minutes,
+                }
             )
             payload["checkpoints"] = current
             await session.execute(
@@ -1261,6 +1269,14 @@ class SqlWorkStore(WorkStore):
                 str(item.get("key", "")),
                 str(item.get("title", "")),
                 str(item.get("status", "planned")),
+                str(item.get("description") or ""),
+                str(item.get("deliverable") or ""),
+                tuple(str(value) for value in item.get("acceptance_criteria", [])),
+                (
+                    int(item["estimated_minutes"])
+                    if item.get("estimated_minutes") is not None
+                    else None
+                ),
             )
             for item in payload.get("checkpoints", [])
         )
