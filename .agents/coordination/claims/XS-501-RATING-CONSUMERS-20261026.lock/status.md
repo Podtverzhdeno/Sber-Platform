@@ -1,7 +1,7 @@
 # Claim XS-501-RATING-CONSUMERS-20261026
 
 - session_id: gpt6-20261026-owners-ranking-consumers
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 55de5d13dc95a495d50f6e697c93c07605628173
@@ -24,5 +24,20 @@
   - ESLint and typecheck
   - Vitest Topbar and rating page + standing selector
   - Playwright role/consent example
-- progress: Remove public-leaderboard identity dependency for owner ranking; use exact private season+version evidence, no synthetic scores/places; retain public leaderboard privacy.
+- progress: TopbarRank and benefits owner card now use owner-private standings with matching season/version; public leaderboard remains anonymous. Tests cover owner switch, missing/stale season, API failure and browser interactions. Independent review required.
+- changed_files:
+  - frontend/src/features/rating-v2/own-standing.ts
+  - frontend/src/features/rating-v2/own-standing.test.ts
+  - frontend/src/features/rating-v2/topbar-rank.tsx
+  - frontend/src/features/rating-v2/topbar-rank.test.tsx
+  - frontend/src/features/rating-v2/page.tsx
+  - frontend/src/features/rating-v2/page.test.tsx
+  - frontend/e2e/topbar-ranking.spec.ts
+  - .github/workflows/own-rating-consumers-qa.yml
+  - openspec/changes/participant-cross-section-data/specs/cross-section-progress/spec.md
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40244026502
+  - TypeScript + ESLint + Vitest + Chromium: PASS
+- unverified:
+  - Independent cross-section review and full required CI on exact integration SHA.
 - blockers: Independent review; full all-platform CI.
