@@ -19,6 +19,12 @@ test("production demo session: saved learning, selected trajectory, verified sta
  const persona=page.locator('[data-persona="participant-alex"]');
  await expect(persona,"Production demo persona login accessible").toBeVisible({timeout:18000});
  await persona.click();
+ // Demo login is asynchronous; 401 immediately after the click is a race,
+ // not evidence that production authentication failed.
+ await expect.poll(async()=>page.evaluate(async()=>{
+   const response=await fetch("/api/v1/me",{credentials:"same-origin"});
+   return response.status;
+ }),{timeout:20000,intervals:[250,500,1000]}).toBe(200);
  const api=async<T>(path:string):Promise<T>=>{
   const res=await page.evaluate(async path=>{
    const response=await fetch(path,{credentials:"same-origin"});
