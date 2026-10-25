@@ -62,9 +62,7 @@ def test_catalog_normalization_and_nested_stage_contract() -> None:
 
 def test_existing_validation_bounds_are_preserved() -> None:
     with pytest.raises(ValidationError):
-        work_requests.CatalogStageRequest(
-            key="a", title="b", summary="c", estimated_minutes=0
-        )
+        work_requests.CatalogStageRequest(key="a", title="b", summary="c", estimated_minutes=0)
     with pytest.raises(ValidationError):
         work_requests.CompensationRequest(
             paid=True,
