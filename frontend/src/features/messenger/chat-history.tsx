@@ -288,13 +288,18 @@ export function ChatHistory({
             <span className="sr-only">{searchOpen ? "Скрыть поиск в чате" : "Поиск в чате"}</span>
           </button>
           {!searchOpen && channel !== null && channel.participants.length > 0 && (
-            <span
-              className="msg-chat__participants"
+            <button
+              type="button"
+              className="msg-chat__participants msg-chat__header-action"
               title={channel.participants.map((person) => person.display_name).join(", ")}
+              aria-label={`Показать участников чата (${String(channel.participants.length)})`}
+              aria-expanded={contextOpen ?? false}
+              aria-controls="messenger-context-panel"
+              disabled={onToggleContext === undefined}
+              onClick={onToggleContext}
             >
               <Users aria-hidden="true" size={15} />
-              <span className="sr-only">{`Участников: ${String(channel.participants.length)}`}</span>
-            </span>
+            </button>
           )}
           {onToggleContext !== undefined && contextOpen !== undefined && (
             <button
