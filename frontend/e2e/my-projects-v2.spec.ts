@@ -503,3 +503,25 @@ test("all five project detail tabs fit small screens without horizontal overflow
     expect(docOverflow).toBeLessThanOrEqual(2);
   }
 });
+
+
+test("satellite reference asset is sharp and vector brand marks load",async({page})=>{
+  await page.setViewportSize({width:1548,height:1016});
+  await fixture(page);
+  const response=await page.request.get(new URL("/my-projects/astra-orbit.svg",page.url()).toString());
+  expect(response.ok()).toBe(true);
+  const content=await response.text();
+  expect(content).toContain('viewBox="0 0 595 220"');
+  const embedded=content.match(/data:image\/webp;base64,([^"]+)/)?.[1];
+  if(!embedded)throw new Error("Expected a high-quality embedded satellite image");
+  const bytes=Buffer.from(embedded,"base64");
+  expect(bytes.length).toBeGreaterThan(30000);
+  expect(bytes.subarray(8,12).toString("ascii")).toBe("WEBP");
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
+  const modal=page.getByRole("dialog",{name:"Прототип рекомендательной системы для научных статей"});
+  await expect(modal.locator(".mp-ref-hero-art--research")).toBeVisible();
+  await expect(modal.locator(".mp-ref-hero-art--satellite")).toHaveCount(0);
+  const logo=modal.locator(".mp-ref-hero .mp-company-mark img");
+  expect(await logo.getAttribute("src")).toMatch(/\.svg$/);
+  expect(await logo.evaluate((img:HTMLImageElement)=>img.complete&&img.naturalWidth>=64)).toBe(true);
+});
