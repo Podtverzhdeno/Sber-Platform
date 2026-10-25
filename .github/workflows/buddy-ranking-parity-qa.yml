@@ -1,0 +1,48 @@
+name: Buddy and Topbar rating parity QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/buddy-chat-v2.tsx"
+      - "frontend/src/features/buddy-chat-v2.test.tsx"
+      - "frontend/src/features/buddy-live-data.ts"
+      - "frontend/src/features/buddy-live-data.test.ts"
+      - ".github/workflows/buddy-ranking-parity-qa.yml"
+  pull_request:
+    paths:
+      - "frontend/src/features/buddy-chat-v2.tsx"
+      - "frontend/src/features/buddy-chat-v2.test.tsx"
+      - "frontend/src/features/buddy-live-data.ts"
+      - "frontend/src/features/buddy-live-data.test.ts"
+      - ".github/workflows/buddy-ranking-parity-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: buddy-rating-parity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rank-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Lint Buddy and reusable rating policy
+        run: npx eslint src/features/buddy-chat-v2.tsx src/features/buddy-chat-v2.test.tsx src/features/buddy-live-data.ts src/features/buddy-live-data.test.ts src/features/rating-v2/own-standing.ts src/features/rating-v2/own-standing.test.ts --max-warnings 0
+      - name: Verify own rank is consistent across consumers and versions
+        run: npx vitest run src/features/buddy-chat-v2.test.tsx src/features/buddy-live-data.test.ts src/features/rating-v2/topbar-rank.test.tsx src/features/rating-v2/own-standing.test.ts
+      - name: Typecheck frontend consumers
+        run: npm run typecheck
