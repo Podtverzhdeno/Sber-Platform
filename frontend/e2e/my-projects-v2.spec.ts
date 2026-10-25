@@ -552,3 +552,73 @@ test("sharing the active tab creates a useful deep link and handles clipboard fa
   await detail.getByRole("button",{name:"Ссылка скопирована"}).click();
   await expect(detail.getByRole("button",{name:"Не удалось скопировать"})).toBeVisible();
 });
+
+
+test("checkpoint popup stores binary file and submits stage-specific contribution",async({page})=>{
+  test.setTimeout(95_000);
+  await page.setViewportSize({width:1548,height:1016});
+  let uploaded:{filename:string;content_type:string;base64_data:string}|null=null;
+  let submission:{summary:string;artifact_key:string;file_ids:string[];external_url:string|null}|null=null;
+  let stageHistory:{checkpoint_key:string;contribution_id:string;version:number;status:string}[]=[];
+  await fixture(page);
+  await page.route("**/api/v1/me/assignments/assignment-1/checkpoint-submissions",route=>
+    route.fulfill({json:stageHistory}));
+  await page.route("**/api/v1/me/assignments/assignment-1/checkpoints/cp-3/files",route=>{
+    uploaded=route.request().postDataJSON() as typeof uploaded;
+    return route.fulfill({status:200,json:{id:"00000000-0000-0000-0000-000000000221",filename:"prototype.txt",size_bytes:34}});
+  });
+  await page.route("**/api/v1/me/assignments/assignment-1/checkpoints/cp-3/submit",route=>{
+    submission=route.request().postDataJSON() as typeof submission;
+    stageHistory=[{checkpoint_key:"cp-3",contribution_id:"00000000-0000-0000-0000-000000000222",version:2,status:"submitted"}];
+    return route.fulfill({status:200,json:{id:"00000000-0000-0000-0000-000000000222",assignment_id:"assignment-1",version:2,personal_summary:submission?.summary??"",artifact_keys:["report"],status:"submitted"}});
+  });
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
+  const first=page.getByTestId("project-next-action");
+  await expect(first).toContainText("Документация");
+  await first.getByRole("button",{name:/Открыть задачу этапа/}).click();
+  const popup=page.getByTestId("checkpoint-solution-popup");
+  await expect(popup).toBeVisible();
+  await expect(popup).toContainText("ЧЕКПОИНТ 4 / 5");
+  await expect(popup).toContainText("Документация");
+  const send=popup.getByRole("button",{name:/Отправить на проверку/});
+  await expect(send).toBeDisabled();
+  await popup.getByRole("textbox",{name:/Что ты сделал лично/}).fill(
+    "Подготовил документацию прототипа, проверил шаги воспроизведения и сохранил результаты исследования.",
+  );
+  await popup.locator('input[type="file"]').setInputFiles({
+    name:"prototype.txt",mimeType:"text/plain",
+    buffer:Buffer.from("Demonstration experiment and research."),
+  });
+  await expect(popup).toContainText("prototype.txt");
+  await expect(send).toBeEnabled();
+  await send.click();
+  await expect(popup).toContainText("Решение отправлено");
+  await expect.poll(()=>uploaded).not.toBeNull();
+  await expect.poll(()=>submission).not.toBeNull();
+  expect(uploaded?.filename).toBe("prototype.txt");
+  expect(uploaded?.content_type).toBe("text/plain");
+  expect(submission?.file_ids).toEqual(["00000000-0000-0000-0000-000000000221"]);
+  expect(submission?.summary).toContain("Подготовил документацию");
+  await popup.getByRole("button",{name:/Вернуться к проекту/}).first().click();
+  await expect(popup).toHaveCount(0);
+});
+
+test("checkpoint popup validates attachments and supports Escape on a narrow screen",async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await fixture(page);
+  await page.route("**/api/v1/me/assignments/assignment-1/checkpoint-submissions",route=>
+    route.fulfill({json:[]}));
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
+  await page.getByTestId("project-next-action").getByRole("button",{name:/Открыть задачу этапа/}).click();
+  const popup=page.getByTestId("checkpoint-solution-popup");
+  await expect(popup).toBeVisible();
+  await popup.locator('input[type="file"]').setInputFiles({
+    name:"run.exe",mimeType:"application/octet-stream",buffer:Buffer.from("blocked"),
+  });
+  await expect(popup.getByRole("alert")).toContainText("PDF, PNG, JPG, TXT и ZIP");
+  const box=await popup.boundingBox();
+  if(!box)throw new Error("Popup has no bounding box");
+  expect(box.width).toBeLessThanOrEqual(390);
+  await page.keyboard.press("Escape");
+  await expect(popup).toHaveCount(0);
+});
