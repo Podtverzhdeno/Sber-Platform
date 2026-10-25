@@ -7795,6 +7795,10 @@ export interface components {
             position: number;
             /** Purpose */
             purpose: string;
+            /** Resources */
+            resources?: {
+                [key: string]: string;
+            }[];
             /** Skill */
             skill: string;
             /** Target Key */
