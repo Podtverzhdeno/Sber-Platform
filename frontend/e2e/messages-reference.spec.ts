@@ -76,7 +76,7 @@ async function openMessages(page: Page, opts: { unreadContact?: boolean } = {}) 
     const channelId=new URL(route.request().url()).pathname.split("/").at(-2);
     if(channelId) readRequests.push(channelId);
     const channel=channels.find(item=>item.id===channelId) ?? channels[0];
-    if(channel) channel.unread=0;
+    channel.unread=0;
     return route.fulfill({json:channel});
   });
   await page.clock.install({ time: new Date("2026-10-20T14:00:00+03:00") });
