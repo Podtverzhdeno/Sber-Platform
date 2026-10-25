@@ -83,6 +83,7 @@ describe("Interactive activity calendar", () => {
     const cell=container.querySelector<HTMLButtonElement>(".ac-day.ac-level-1");
     if(!cell)throw new Error("Missing test activity");
     cell.focus();
+    fireEvent.mouseEnter(cell);
     expect(screen.getByRole("tooltip")).toBeVisible();
     fireEvent.keyDown(document,{key:"Escape"});
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
