@@ -18,3 +18,6 @@ release_request=2026-10-25-sidebar-audit-44d199d
 
 # Immediate production release: rating three-screen integration and green Chromium QA
 release_request=2026-10-25-rating-v2-636e1cc7cec7
+
+# Railway builder retry after snapshot unpack/upload failure; release rating UI.
+release_request=2026-10-25-rating-retry-2cd1f44d87d4
