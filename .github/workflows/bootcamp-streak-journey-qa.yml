@@ -48,7 +48,7 @@ jobs:
         env:
           CI: "true"
           TZ: Europe/Moscow
-        run: npx playwright test bootcamp-immersive.spec.ts --grep "completing an actual Bootcamp course triggers one verified streak celebration" --project=chromium --reporter=line
+        run: npx playwright test bootcamp-immersive.spec.ts --grep "Bootcamp celebrates the earned streak day and shows truthful flame at course finish" --project=chromium --reporter=line
       - name: Preserve browser evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
