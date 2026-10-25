@@ -320,3 +320,84 @@
 .mpv2 .mp-page-title__row>div>p:last-child{font-size:15px;line-height:1.45;color:#a8c8e4;margin:0;max-width:1080px}
 @media(max-width:760px){.mpv2 .mp-page-title__row>div>p:last-child{font-size:13px}}
 [data-theme="light"] .mpv2 .mp-page-title__row>div>p:last-child{color:#52718a}
+
+/* Approved project-card reference: compact four-up cards, without repeated
+   reward packages (the benefit cascade is displayed above the catalogue). */
+.mpv2 .mp-project-tile--grid{
+  min-height:213px;
+  gap:8px;
+  padding:11px 12px;
+  justify-content:space-between;
+}
+.mpv2 .mp-project-card-top{gap:9px}
+.mpv2 .mp-project-card-top>.mp-company-mark{width:39px;height:39px;border-radius:8px}
+.mpv2 .mp-project-card-heading{gap:2px}
+.mpv2 .mp-project-card-heading small{font-size:10.5px;line-height:1.2}
+.mpv2 .mp-project-card-heading h2{
+  font-size:13px;
+  line-height:1.28;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:3;
+  overflow:hidden;
+}
+.mpv2 .mp-project-tile--grid .mp-chip-row{
+  flex-wrap:nowrap;
+  gap:5px;
+  min-width:0;
+  overflow:hidden;
+}
+.mpv2 .mp-project-tile--grid .mp-chip-row em{
+  flex:0 1 auto;
+  max-width:55%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  padding:2px 6px;
+  font-size:9px;
+}
+.mpv2 .mp-project-card-progress{margin-top:auto;gap:3px}
+.mpv2 .mp-project-card-progress .mp-progress__track{height:6px}
+.mpv2 .mp-project-card-meta{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:5px 9px;
+  padding:5px 0;
+  min-height:28px;
+  font-size:10px;
+  border-top:0;
+  border-bottom:0;
+}
+.mpv2 .mp-project-card-meta>span{gap:4px}
+.mpv2 .mp-project-card-meta svg{width:13px;height:13px}
+.mpv2 .mp-project-card-team{margin-left:auto;min-width:0}
+.mpv2 .mp-team-avatars{display:inline-flex;align-items:center;padding-left:5px}
+.mpv2 .mp-team-avatars>i{
+  width:20px;height:20px;
+  display:grid;place-items:center;
+  border-radius:50%;
+  border:2px solid #08192a;
+  margin-left:-5px;
+  background:linear-gradient(145deg,#1f79a6,#2b415e);
+  color:#f0fbff;
+  font-style:normal;
+  font-size:10px;
+  font-weight:800;
+  line-height:1;
+}
+.mpv2 .mp-project-card-team small{
+  font-size:10px;
+  color:#0fe4e1;
+  font-weight:800;
+}
+.mpv2 .mp-project-card-actions{gap:7px}
+.mpv2 .mp-project-card-actions .mp-primary{min-height:35px;padding:7px 8px;font-size:11px}
+.mpv2 .mp-project-card-actions>.mp-icon-button{min-height:35px;width:35px}
+@media(max-width:1150px){
+  .mpv2 .mp-project-tile--grid{min-height:225px}
+}
+@media(max-width:750px){
+  .mpv2 .mp-project-tile--grid{min-height:210px}
+}
+[data-theme="light"] .mpv2 .mp-team-avatars>i{border-color:#f8fcff;color:white}
