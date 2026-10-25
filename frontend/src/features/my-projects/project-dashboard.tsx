@@ -58,6 +58,7 @@ function ProjectInfoModal({ project, close }: { project: DashboardProject; close
       const focusable = [...(dialog?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), textarea:not([disabled])') ?? [])];
       if (focusable.length === 0) return;
       const first = focusable[0], last = focusable[focusable.length-1];
+      if (!first || !last) return;
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     };
@@ -128,6 +129,7 @@ export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMemb
   const percent = checkpoints.length?Math.round(done/checkpoints.length*100):null;
   const artifacts = project.contributions.flatMap(entry=>entry.artifact_keys.map(key=>({key,version:entry.version,id:entry.id,status:entry.status})));
   const nextStage = checkpoints.find(item=>!passed.has(item.status));
+  const latestContribution = project.contributions.at(-1);
   const openInfo = () => { setShowInfo(true); };
   const current = (id:Section) => () => {setActiveTab(id);};
   const SummaryCard = ({icon:Icon,value,title,caption}: {icon:typeof Target;value:string;title:string;caption:string}) =>
@@ -183,7 +185,7 @@ export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMemb
         <ContributionPanel/>
         <section className="mpd-panel mpd-activity">
           <div className="mpd-panel-head"><h2><Activity/> Последняя активность</h2><button type="button" onClick={current("activity")}>Вся активность <ChevronRight size={15}/></button></div>
-          {project.contributions.length?<div className="mpd-activity-line"><span className="mpd-activity-dot"/><p><strong>Отправлена версия {String(project.contributions[project.contributions.length-1].version)}</strong><small>{project.contributions[project.contributions.length-1].personal_summary}</small></p></div>:<p className="mpd-empty">Действия появятся после первого опубликованного вклада.</p>}
+          {latestContribution?<div className="mpd-activity-line"><span className="mpd-activity-dot"/><p><strong>Отправлена версия {String(latestContribution.version)}</strong><small>{latestContribution.personal_summary}</small></p></div>:<p className="mpd-empty">Действия появятся после первого опубликованного вклада.</p>}
         </section>
       </main>
       <aside className="mpd-aside">
