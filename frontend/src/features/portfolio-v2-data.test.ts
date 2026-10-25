@@ -24,15 +24,14 @@ describe("portfolio credential evidence rules", () => {
   });
 
   it("excludes revoked and superseded documents from active counts", () => {
-    const historical = [
-      { verification_id: "old-1", status: "revoked" },
-      { verification_id: "old-2", status: "superseded" },
-    ];
+    const revoked = { verification_id: "old-1", status: "revoked" };
+    const superseded = { verification_id: "old-2", status: "superseded" };
+    const historical = [revoked, superseded];
     expect(historical.every(isRevokedCredential)).toBe(true);
     expect(historical.some(isCurrentCredential)).toBe(false);
     expect(countCurrentDocuments(historical, 0)).toBe(0);
-    expect(credentialStatusLabel(historical[0]!)).toBe("Отозван");
-    expect(credentialStatusLabel(historical[1]!)).toBe("Заменён");
+    expect(credentialStatusLabel(revoked)).toBe("Отозван");
+    expect(credentialStatusLabel(superseded)).toBe("Заменён");
   });
 
   it("does not infer validity from unknown or unverified status", () => {
