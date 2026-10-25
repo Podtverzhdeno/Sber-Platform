@@ -2095,3 +2095,16 @@
   border-color: #c28e32;
   color: #ffd379;
 }
+
+.workspace-content .trajectory-v2 .trajectory-v2-role-detail[data-tone="primary"] .trajectory-v2-detail-icon {
+  background: linear-gradient(145deg, #754c1d, #503512);
+  color: #ffd374;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-detail[data-tone="learning"] .trajectory-v2-detail-icon {
+  background: #134677;
+  color: #4cb7ff;
+}
+.workspace-content .trajectory-v2 .trajectory-v2-role-detail[data-tone="unselected"] .trajectory-v2-detail-icon {
+  background: #1c2a36;
+  color: #8293a3;
+}
