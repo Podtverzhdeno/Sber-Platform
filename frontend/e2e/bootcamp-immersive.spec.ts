@@ -50,18 +50,18 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     await expect(reader.locator(".imp-study__course-summary")).toBeVisible();
     await expect(reader.locator(".imp-study__course-summary")).toContainText("8 уроков");
     await expect(reader.locator(".imp-study__course-emblem svg")).toBeVisible();
-    for (const state of ["theory","example","practice","check"]) {
-      const tab = reader.locator(".imp-study__tabs button").filter({ has: page.locator("svg") }).nth(
-        ["theory","example","practice","check"].indexOf(state)
-      );
-      await tab.click();
-      await expect(tab).toHaveAttribute("aria-current", "page");
-      const tabsY = await reader.locator(".imp-study__tabs").evaluate(el => el.getBoundingClientRect().top);
-      const nextSection = state === "practice" ? reader.locator(".imp-study__content") : reader.locator(".imp-study__lesson-heading");
-      const sectionY = await nextSection.evaluate(el => el.getBoundingClientRect().top);
-      expect(tabsY).toBeLessThan(sectionY);
-      await page.screenshot({ path: "test-results/imp-03-" + state + "-" + String(viewport.width) + ".png", animations: "disabled" });
+    const frames = reader.locator("[data-learning-block]");
+    await expect(frames).toHaveCount(4);
+    for (const kind of ["theory", "example", "practice"] as const) {
+      await expect(reader.locator('[data-learning-block="' + kind + '"] .lesson-frame__toggle')).toHaveAttribute("aria-expanded", "true");
     }
+    const lockedCheck = reader.locator('[data-learning-block="check"]');
+    await expect(lockedCheck.locator(".lesson-frame__toggle")).toHaveAttribute("aria-expanded", "false");
+    await expect(lockedCheck.locator(".imp-study__check-grid button")).toHaveCount(0);
+    await page.screenshot({ path: "test-results/imp-03-unified-lesson-" + String(viewport.width) + ".png", animations: "disabled" });
+    await lockedCheck.locator(".lesson-frame__toggle").click();
+    await expect(lockedCheck.locator(".imp-study__check-grid button")).toHaveCount(3);
+    await page.screenshot({ path: "test-results/imp-03-selfcheck-open-" + String(viewport.width) + ".png", animations: "disabled" });
     if (viewport.width >= 1280) {
       const title = reader.locator(".imp-study__lesson-heading h2");
       await expect.poll(() => title.evaluate(node => Number.parseFloat(getComputedStyle(node).fontSize))).toBeGreaterThanOrEqual(32);
@@ -138,17 +138,17 @@ test("data-security reference: theory methods, JWT example, practice requirement
   await expect(reader.locator(".imp-study__lesson-heading")).toContainText("Аутентификация и авторизация");
   await expect(reader.locator(".imp-study__method-card")).toHaveCount(4);
   await page.screenshot({ path: "test-results/reference-security-04-theory.png", animations: "disabled" });
-  await reader.getByRole("button", { name: "Пример", exact: true }).click();
+  await expect(reader.locator('[data-learning-block="example"] .lesson-frame__toggle')).toHaveAttribute("aria-expanded", "true");
   await expect(reader.locator(".imp-study__walkthrough article")).toHaveCount(4);
   await expect(reader.locator(".imp-study__code")).toContainText('JWT_SECRET');
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
-  const copyButton = reader.getByRole("button", { name: "Копировать код" });
+  const copyButton = reader.getByRole("button", { name: "Копировать пример" });
   await copyButton.hover();
   await copyButton.click();
   await expect(reader.getByRole("button", { name: "Скопировано" })).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain("JWT_SECRET");
   await page.screenshot({ path: "test-results/reference-security-05-example.png", animations: "disabled" });
-  await reader.getByRole("button", { name: "Практическое задание", exact: true }).click();
+  await expect(reader.locator('[data-learning-block="practice"] .lesson-frame__toggle')).toHaveAttribute("aria-expanded", "true");
   await expect(reader.locator(".imp-study__practice-columns .imp-study__requirement")).toHaveCount(8);
   await expect(reader.locator(".imp-study__compact-course")).toContainText("Безопасность данных");
   await expect(reader.getByText(/Реализуйте защищённый API на FastAPI/)).toBeVisible();
@@ -158,7 +158,7 @@ test("data-security reference: theory methods, JWT example, practice requirement
   expect(templateResponse.ok()).toBe(true);
   expect(await templateResponse.text()).toContain('JWT_SECRET');
   await page.screenshot({ path: "test-results/reference-security-06-practice.png", animations: "disabled" });
-  await reader.getByRole("button", { name: "Самопроверка", exact: true }).click();
+  await reader.locator('[data-learning-block="check"] .lesson-frame__toggle').click();
   await expect(reader.locator(".imp-study__check-grid button")).toHaveCount(4);
   await page.screenshot({ path: "test-results/reference-security-07-check.png", animations: "disabled" });
 });
