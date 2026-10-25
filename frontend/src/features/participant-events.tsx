@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router-dom";
 
 import { apiRequest, type RuntimeApiPath } from "../api/client";
 import { Modal, SafeExternalLink, StatePanel } from "../components/ui";
-import { Award, BriefcaseBusiness, GraduationCap, Users } from "lucide-react";
+import { Award, BriefcaseBusiness, GraduationCap, RotateCcw, Users } from "lucide-react";
 import { EventsHero, EventsCard, EventExperienceDetail, EventRegistrationForm, type EventTab } from "./participant-events-design";
 import "./participant-events-reference.scss";
 import "./participant-events.scss";
@@ -152,7 +152,7 @@ export function ParticipantEventCatalog() {
     <EventsHero events={allItems} onChoose={() => { document.getElementById("ev-results")?.scrollIntoView({behavior:"smooth",block:"start"}); }}/>
     <div className="ev-catalog" id="ev-results">
       <aside className="ev-filters" aria-label="Фильтры событий">
-        <header><h2>Подбор событий</h2><button type="button" onClick={resetFilters}>Сбросить всё</button></header>
+        <header><h2>Подбор событий</h2><button className="ev-filter-reset" type="button" aria-label="Сбросить все фильтры" title="Сбросить все фильтры" onClick={resetFilters}><RotateCcw size={15}/></button></header>
         <div className="ev-filter-modes"><button type="button" aria-pressed={activeCategory==="for-you"} className={activeCategory==="for-you"?"active":""} onClick={()=> { setActiveCategory("for-you"); }}>Рекомендации для вас</button><button type="button" aria-pressed={activeCategory==="all"} className={activeCategory==="all"?"active":""} onClick={()=> { setActiveCategory("all"); }}>Все события</button></div>
         <label className="catalog-filter">Направление<select value={track} onChange={event=> { setParam("track",event.target.value); }}><option value="all">Все направления</option>{tracks.map(t=><option key={t} value={t}>{t}</option>)}</select></label>
         <section className="ev-filter-group"><h3>Ваши направления</h3>{tracks.map(key=><label key={key}><input type="checkbox" checked={selectedFocus.includes(key)} onChange={()=> { toggleFocus(key); }}/>{key}</label>)}</section>
