@@ -417,38 +417,42 @@ function CourseDetails({
 }
 
 function RecommendationDetails({ card, track, onOpenCourse, onOpenProgram }: { card: CourseCardState; track: string; onOpenCourse: () => void; onOpenProgram: () => void }) {
+  const courseMatchesRole = courseRoleTitles(card).includes(track);
   return <div className="bc-panel-content bc-ref-why-panel" data-reference="BC-R04">
     <div className="bc-ref-why-hero">
-      <span className="bc-ref-chip bc-ref-chip--recommended"><Sparkles/> {card.relevant ? "Рекомендован" : "Обоснование курса"}</span>
       <h2>Почему вам рекомендован этот курс</h2>
-      <p>Рекомендация связана с выбранной профессиональной ролью и этапами вашей траектории — не со случайной подборкой материалов.</p>
+      <p>Рекомендация основана на выбранной профессиональной роли и этапах вашей траектории развития — а не на случайной подборке материалов.</p>
     </div>
-    <div className="bc-ref-why-role-banner"><div><strong>{track}</strong><span>Направление профессионального развития</span></div><span>{card.relevant ? "Рекомендован для роли" : "Релевантность уточняется"}</span></div>
-    <section className="bc-ref-why-item">
-      <span className="bc-ref-why-symbol bc-ref-why-symbol--role"><GraduationCap /></span>
-      <div><h3>Связь с ролью</h3>
-        <p>{courseRoleTitles(card).includes(track)
-          ? "Курс связан с направлением «" + track + "»."
-          : card.relevance_reasons[0] ?? "Привязка к активной роли уточняется."}</p></div>
-    </section>
-    <section className="bc-ref-why-item">
-      <span className="bc-ref-why-symbol bc-ref-why-symbol--skill"><ChartNoAxesCombined /></span>
-      <div><h3>Текущий пробел</h3>
-        <p>{card.must_take?.explanation ?? "Индивидуальный пробел пока не подтверждён матрицей навыков."}</p></div>
-    </section>
-    <section className="bc-ref-why-item">
-      <span className="bc-ref-why-symbol bc-ref-why-symbol--project"><Sparkles /></span>
-      <div><h3>Практический результат</h3>
-        <p>{card.recommendation_reason || "Обоснование практической применимости не опубликовано."}</p></div>
-    </section>
-    <section className="bc-ref-why-item"><span className="bc-ref-why-symbol bc-ref-why-symbol--next"><ArrowRight /></span><div><h3>Следующий шаг траектории</h3><p>После прохождения курса закрепите материал на практическом задании и получите отдельную проверку навыков.</p></div></section>
-    <div className="bc-ref-why-forecast">
-      <strong>Прогноз влияния на навыки</strong>
-      <p>{card.must_take?.projected_impact ?? "Достоверного прогноза уровня навыков пока нет."}</p>
-      {card.must_take && <small>{card.must_take.skill}: {card.must_take.current_level ?? "уровень неизвестен"} → {card.must_take.target_level ?? "цель уточняется"}</small>}
+    <div className="bc-ref-why-role-banner">
+      <span className="bc-ref-why-banner-symbol"><Sparkles aria-hidden="true"/></span>
+      <div><strong>{track}</strong><span>Направление развития · навыки для роли</span></div>
+      <span><strong>{card.relevant ? "Высокая" : "Уточняется"}</strong><small>релевантность роли</small></span>
     </div>
-    <p className="bc-ref-why-warning">Прогноз не равен подтверждённому уровню. Реальный прогресс определяется только по проверенным учебным и проектным результатам.</p>
-    <div className="bc-ref-why-actions"><button className="bc-ref-why-back" type="button" onClick={onOpenCourse}>Вернуться к курсу</button><button className="bc-ref-why-cta" type="button" onClick={onOpenProgram}>Перейти к программе <ArrowRight /></button></div>
+    <section className="bc-ref-why-item">
+      <span className="bc-ref-why-symbol bc-ref-why-symbol--role"><GraduationCap aria-hidden="true"/></span>
+      <div><h3>Соответствует AI-роли</h3>
+        <p>{courseMatchesRole ? "Курс связан с направлением «" + track + "»." : card.relevance_reasons[0] ?? "Привязка к активной роли уточняется."}</p></div>
+    </section>
+    <section className="bc-ref-why-item">
+      <span className="bc-ref-why-symbol bc-ref-why-symbol--project"><Sparkles aria-hidden="true"/></span>
+      <div><h3>Поможет в проектах</h3>
+        <p>{card.recommendation_reason || "Практическая применимость для проектов пока уточняется."}</p></div>
+    </section>
+    <section className="bc-ref-why-item">
+      <span className="bc-ref-why-symbol bc-ref-why-symbol--skill"><ChartNoAxesCombined aria-hidden="true"/></span>
+      <div><h3>Закрывает пробелы</h3>
+        <p>{card.must_take?.explanation ?? "Компетенции будут сопоставлены с матрицей роли после проверки."}</p></div>
+    </section>
+    <section className="bc-ref-why-item">
+      <span className="bc-ref-why-symbol bc-ref-why-symbol--next"><ArrowRight aria-hidden="true"/></span>
+      <div><h3>Следующий шаг траектории</h3>
+        <p>После прохождения курса закрепите материал практикой, чтобы подтвердить приобретённые навыки.</p></div>
+    </section>
+    <p className="bc-ref-why-warning">Курс формирует учебную основу. Подтверждение компетенций предполагает отдельную проверку практических навыков.</p>
+    <div className="bc-ref-why-actions">
+      <button className="bc-ref-why-back" type="button" onClick={onOpenCourse}>Вернуться к курсу</button>
+      <button className="bc-ref-why-cta" type="button" onClick={onOpenProgram}>Перейти к программе <ArrowRight aria-hidden="true"/></button>
+    </div>
   </div>;
 }
 
