@@ -27,7 +27,7 @@ type TaskDetail = {
   customer?: { display_name: string; id: string };
   mentor?: { display_name: string; id: string } | null;
   team?: { person_id: string; display_name: string; status: string }[];
-  checkpoints?: { key: string; title: string; status: string }[];
+  checkpoints?: { key: string; title: string; status: string; description?: string; deliverable?: string; acceptance_criteria?: string[]; estimated_minutes?: number | null }[];
   personal?: { id: string; version: number; personal_summary: string; artifact_keys: string[]; status: string }[];
   feedback?: { contribution_id: string; contribution_version: number; review_version: number; grade: string; explanation: string; status: string }[];
   problem?: string;
