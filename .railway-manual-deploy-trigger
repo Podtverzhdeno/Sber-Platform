@@ -8,3 +8,6 @@ release_request=2026-10-25-events-hires-cyberpunk-cacf530a7
 
 # Cross-section persisted course progression accepted via Postgres + browser tests
 release_request=2026-10-25-learning-sync-5819d84
+
+# Release Events unified button styling, accessible filter toggles, and reset icon
+release_request=2026-10-25-events-buttons-design-b0ce178dc
