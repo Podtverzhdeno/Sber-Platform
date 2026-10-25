@@ -154,7 +154,7 @@ export function ParticipantAchievementsGallery({ navigation = [] }: {navigation?
         <span className="ach-gallery-holo holo-a"><FolderOpen size={25}/></span>
         <span className="ach-gallery-holo holo-b"><GraduationCap size={24}/></span>
         <span className="ach-gallery-holo holo-c"><Award size={24}/></span>
-        <img src="/bootcamp/trophy.svg" alt=""/>
+        <img src="/achievements/cyan-trophy.svg" alt=""/>
       </div>
       <button type="button" className="ach-gallery-create" onClick={()=>{setAddDialog(true);}}><Plus size={16}/> Добавить достижение</button>
     </section>
@@ -185,7 +185,7 @@ export function ParticipantAchievementsGallery({ navigation = [] }: {navigation?
 
     {loading?<div className="ach-gallery-empty" role="status"><Clock3 size={36}/><h2>Загружаем достижения</h2><p>Проверяем данные портфолио и событий</p></div>:
      !visible.length?<div className="ach-gallery-empty" data-testid="achievements-empty">
-       <img src="/bootcamp/trophy.svg" alt=""/>
+       <img src="/achievements/cyan-trophy.svg" alt=""/>
        <h2>{stats.all?"По этим условиям ничего не найдено":"Здесь пока нет достижений"}</h2>
        <p>{stats.all?"Попробуй изменить фильтры или поисковый запрос.":"Добавь свой первый проект, сертификат или награду, чтобы начать формировать портфолио."}</p>
        <button type="button" className="ach-gallery-create" onClick={()=>{if(stats.all)reset();else setAddDialog(true);}}>{stats.all?"Сбросить фильтры":"Добавить достижение"} <Plus size={16}/></button>
