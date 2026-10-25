@@ -71,6 +71,13 @@ test("events reference: all six detail states, registration flow and keyboard na
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "События" }).click();
   await expect(page.getByTestId("events-v2")).toBeVisible();
+  const hero = page.locator(".participant-events .ev-hero");
+  await expect(hero.locator(".ev-kicker")).toHaveText("События от Сбера и партнёров");
+  const heroBackground = await hero.evaluate((element) => getComputedStyle(element).backgroundImage);
+  expect(heroBackground).toContain("/events/cyberpunk-hero.png");
+  const heroImage = await page.request.get("/events/cyberpunk-hero.png");
+  expect(heroImage.ok()).toBeTruthy();
+  expect(heroImage.headers()["content-type"]).toContain("image/png");
   await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
   const referenceCards = page.getByTestId("event-reference-card");
   await expect(referenceCards.locator(".ev-card-radar")).toHaveCount(0);
