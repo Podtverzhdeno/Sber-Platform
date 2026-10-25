@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowRight, Bot, Check, Clock3, FileText, GitBranch, GraduationCap, List, LockKeyhole, Search, Sparkles, ChartNoAxesCombined, LayoutGrid } from "lucide-react";
+import { ArrowRight, Bot, Check, Clock3, FileText, GitBranch, GraduationCap, List, LockKeyhole, Search, Sparkles, ChartNoAxesCombined, LayoutGrid, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { apiRequest, retrySafeRead, RuntimeApiPath } from "../../api/client";
 import { Badge, Card, Drawer, SafeExternalLink, StatePanel } from "../../components/ui";
@@ -494,6 +494,56 @@ function CoursePrimaryAction({ card, onOpen }: { card: CourseCardState; onOpen: 
   </button>;
 }
 
+/** Keep all seven trajectory roles reachable without wrapping and moving the
+ * approved hero/catalog geometry. Controls appear only when tabs overflow. */
+function AiRoleTabs({
+  roles, selected, onSelect,
+}: { roles: readonly string[]; selected: string; onSelect: (role: string) => void }) {
+  const scroller = useRef<HTMLDivElement>(null);
+  const [canScroll, setCanScroll] = useState({ back: false, next: false });
+
+  function updateScrollButtons() {
+    const element = scroller.current;
+    if (!element) return;
+    const back = element.scrollLeft > 2;
+    const next = element.scrollLeft + element.clientWidth < element.scrollWidth - 2;
+    setCanScroll(previous =>
+      previous.back === back && previous.next === next ? previous : { back, next });
+  }
+
+  useEffect(() => {
+    updateScrollButtons();
+    window.addEventListener("resize", updateScrollButtons);
+    return () => { window.removeEventListener("resize", updateScrollButtons); };
+  }, [roles.length]);
+
+  function scrollRoles(direction: -1 | 1) {
+    const element = scroller.current;
+    if (!element) return;
+    const amount = Math.max(240, Math.floor(element.clientWidth * 0.65));
+    element.scrollBy({ left: direction * amount, behavior: "smooth" });
+  }
+
+  return (
+    <div className="bc-ref-role-switcher">
+      <div className="bc-ref-role-tabs" ref={scroller} role="group"
+        aria-label="Направление обучения" onScroll={updateScrollButtons}>
+        {roles.map((role, index) =>
+          <button type="button" key={role} aria-pressed={selected === role}
+            onClick={() => { onSelect(role); }}>
+            {index === 0 ? <Bot /> : <ChartNoAxesCombined />}{aiRoleTitle(role)}
+          </button>)}
+      </div>
+      {canScroll.back && <button className="bc-ref-role-scroll bc-ref-role-scroll--back"
+        type="button" aria-label="Предыдущие AI-роли"
+        onClick={() => { scrollRoles(-1); }}><ChevronLeft aria-hidden="true" /></button>}
+      {canScroll.next && <button className="bc-ref-role-scroll bc-ref-role-scroll--next"
+        type="button" aria-label="Следующие AI-роли"
+        onClick={() => { scrollRoles(1); }}><ChevronRight aria-hidden="true" /></button>}
+    </div>
+  );
+}
+
 export function BootcampCatalog({
   honorBoardEnabled,
   honorBoardConsent,
@@ -649,10 +699,7 @@ export function BootcampCatalog({
         <span className="bc-ref-streak" role="status">🔥 {streak.data ? "Серия: " + String(streak.data.current_days) + " дней" : "Серия недоступна"}</span>
       </header>
       {catalog.isError && <p className="notice" role="status">Обновление каталога недоступно. <button type="button" onClick={() => { void catalog.refetch(); }}>Повторить</button></p>}
-      <div className="bc-ref-role-tabs" role="group" aria-label="Направление обучения">
-        {trackOptions.map((role, index) => <button type="button" key={role} aria-pressed={selectedRole === role}
-          onClick={() => { setRole(role); }}>{index === 0 ? <Bot /> : <ChartNoAxesCombined />}{aiRoleTitle(role)}</button>)}
-      </div>
+      <AiRoleTabs roles={trackOptions} selected={selectedRole} onSelect={setRole} />
       <div className="bc-ref-hero-grid">
         <section className="bc-ref-continue" aria-labelledby="bc-continue-title">
           <h2 id="bc-continue-title">{nextCourse ? "Начать обучение" : "Выбрать обучение"} <span aria-hidden="true">›</span></h2>
