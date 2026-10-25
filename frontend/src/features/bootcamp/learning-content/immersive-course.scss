@@ -610,3 +610,49 @@
 }
 .imp-study[data-course="demo-course-10"] .imp-study__shield > svg,
 .imp-study[data-course="demo-course-10"] .imp-study__shield > .imp-study__glow { display:none; }
+
+
+/* Reference practice layout: course progress strip and downloadable project scaffold. */
+.imp-study__compact-course {
+  display:flex; align-items:center; gap:16px; padding:16px 18px;
+  margin:0 0 15px; border:1px solid #225e80; border-radius:12px;
+  background:linear-gradient(110deg,#0c2251,#0b2446 60%,#08243e);
+  min-height:96px;
+}
+.imp-study__compact-shield {
+  flex:0 0 59px; width:59px; height:59px; display:grid; place-items:center;
+  background:linear-gradient(135deg,#283aab,#06467b);
+  border:1px solid #287fbf; border-radius:11px; color:#48dffb;
+}
+.imp-study__compact-identity { flex:1; min-width:0; }
+.imp-study__compact-identity h3 { font-size:19px; margin:0 0 5px; }
+.imp-study__compact-identity p { font-size:13px; margin:0; }
+.imp-study__compact-progress { flex:0 0 min(30%,385px); color:#b4d9ec; }
+.imp-study__compact-progress > span { display:flex; justify-content:space-between; gap:10px; font-size:13px; }
+.imp-study__compact-progress > span strong { font-size:18px; color:#0ff8ec; }
+.imp-study__compact-progress .imp-study__bar { margin:8px 0 4px; }
+.imp-study__compact-progress small { color:#91bfdb; }
+.imp-study__template {
+  display:flex; align-items:center; gap:13px; margin:14px 0;
+  border:1px solid #22738d; border-radius:10px; padding:12px 14px;
+  background:linear-gradient(110deg,#0c314b,#082841);
+}
+.imp-study__template > svg { flex:0 0 40px; width:40px; height:40px; padding:8px; border-radius:9px; background:#293b88; color:#52eefa; }
+.imp-study__template > div { flex:1; min-width:0; }
+.imp-study__template strong { color:#f6ffff; font-size:15px; }
+.imp-study__template p { margin:2px 0 0; font-size:12px; }
+.imp-study__template > a {
+  display:inline-flex; align-items:center; gap:9px; flex:0 0 auto;
+  min-height:41px; padding:9px 13px; border:1px solid #00d7e2; border-radius:9px;
+  color:#14e5e8; background:#043449; text-decoration:none; font-size:13px; font-weight:800;
+  transition:background .18s,transform .18s,box-shadow .18s;
+}
+.imp-study__template > a:hover,.imp-study__template > a:focus-visible {
+  background:#0b5466; color:#57ffff; transform:translateY(-2px); box-shadow:0 0 13px #00e6e82d;
+}
+@media (max-width:780px) {
+  .imp-study__compact-course { flex-wrap:wrap; gap:10px; padding:12px; }
+  .imp-study__compact-progress { flex:0 0 100%; }
+  .imp-study__template { flex-wrap:wrap; }
+  .imp-study__template > a { flex:0 0 100%; justify-content:center; }
+}
