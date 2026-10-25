@@ -25,6 +25,7 @@ def upgrade() -> None:
         ),
         sa.Column("person_id", sa.UUID(), sa.ForeignKey("persons.id"), nullable=False),
         sa.Column("checkpoint_key", sa.String(128), nullable=False),
+        sa.Column("contribution_id", sa.UUID(), sa.ForeignKey("contributions.id"), nullable=True),
         sa.Column("filename", sa.String(200), nullable=False),
         sa.Column("content_type", sa.String(80), nullable=False),
         sa.Column("size_bytes", sa.Integer(), nullable=False),
