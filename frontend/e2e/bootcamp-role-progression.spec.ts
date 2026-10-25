@@ -52,6 +52,7 @@ test("finishing a saved required Impulse course refreshes the role's learning st
 test("an official grade is displayed exclusively from the server's verified projection",async({page})=>{
   await installBootcampReferenceApi(page);
   await page.route("**/api/v1/me/bootcamp/overview?track=product",route=>route.fulfill({json:{
+    selected_track_key:"product",curriculum:{state:"not_evaluable"},
     role_summary:{track_key:"product",grade_state:"known",current_grade_title:"Опубликованный уровень L2"}
   }}));
   await page.goto("/");
@@ -91,6 +92,13 @@ test("official grade promotion animation requires an actual change in the server
   await installBootcampReferenceApi(page);
   let currentGrade="L1";
   await page.route("**/api/v1/me/bootcamp/overview?track=product",route=>route.fulfill({json:{
+    selected_track_key:"product",
+    curriculum:currentGrade==="L2" ? {
+      state:"known",policy_version:"approved-L2",requirements:[
+        {key:"new-learning",title:"Новый курс: Security architecture",kind:"course",
+         state:"open",source_key:"demo-course-10",source_version:"v2",allowed_action:"open_course"}
+      ]
+    }:{state:"not_evaluable"},
     role_summary:{track_key:"product",grade_state:"known",
       current_grade_key:currentGrade,current_grade_title:currentGrade, target_grade_key:"L3"}
   }}));
@@ -117,6 +125,8 @@ test("official grade promotion animation requires an actual change in the server
   await expect(page.getByTestId("bootcamp-official-grade")).toContainText("L2");
   const animation=page.getByTestId("grade-milestone-celebration");
   await expect(animation).toHaveAttribute("data-mode","official-grade-up");
+  await expect(page.locator("#bc-grade-title")).toContainText("Остался");
+  await expect(page.locator(".bc-ref-grade-list")).toContainText("Security architecture");
   await expect(animation.getByTestId("grade-promotion-ladder")).toContainText("L1");
   await expect(animation.getByTestId("grade-promotion-ladder")).toContainText("L2");
   await page.screenshot({path:"test-results/bootcamp-official-grade-promotion.png",animations:"disabled"});
