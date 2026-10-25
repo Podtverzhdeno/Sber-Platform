@@ -11,6 +11,7 @@ import { Award, Bookmark, ChartNoAxesColumnIncreasing, CircleHelp, ChevronDown, 
 
 import { ApiClientError } from "../../api/client";
 import { StatePanel } from "../../components/ui";
+import { ParticipantHelpTrigger } from "../participant-help-trigger";
 import { trackCatalogEvent } from "./analytics";
 import {
   catalogErrorMessage,
@@ -320,7 +321,7 @@ function TaskDetail(props: {
         </section>
 
         <section className="catalog-v2-stage-section catalog-v2-workflow-section">
-          <div className="catalog-v2-section-heading"><h3>Работа над задачей</h3><span>От условий до подтверждения навыков</span></div>
+          <div className="catalog-v2-section-heading"><h3>Работа над задачей</h3><ParticipantHelpTrigger topicId="task-brief" label="Как устроена задача" /></div>
           <div className="catalog-v2-workflow-tabs" role="tablist" aria-label="Разделы задачи">
             {([
               ["overview", "О задаче"],
@@ -339,13 +340,13 @@ function TaskDetail(props: {
               {item.stage_plan.stages.length > 0 && <details className="catalog-v2-workflow-extra"><summary>План выполнения ({item.stage_plan.stages.length})</summary><p className="catalog-v2-workflow-hint">Это план, а не прогресс выполнения. Этап засчитывается после проверки результата.</p><ol>{item.stage_plan.stages.map(stage => <li key={stage.key}><strong>{stage.title}</strong> — {stage.summary}</li>)}</ol></details>}
             </>}
             {detailTab === "criteria" && <>
-              <h4>Что требуется для успешной сдачи</h4>
+              <h4>Что требуется для успешной сдачи</h4><ParticipantHelpTrigger topicId="task-criteria" label="Как проверят результат" />
               <p>Подробные критерии приёмки, требования к результату и ограничения публикует заказчик в условиях задачи. Проверяйте актуальную версию перед началом работы.</p>
               {canSeeConditions ? <button type="button" className="catalog-v2-workflow-action" onClick={props.onConditions}>Открыть критерии и условия</button> : <p>Критерии недоступны для просмотра в текущем статусе.</p>}
               <p className="catalog-v2-workflow-hint">Прогноз роста навыков выше не является оценкой или гарантией сертификации.</p>
             </>}
             {detailTab === "solution" && <>
-              <h4>Подготовка решения</h4>
+              <h4>Подготовка решения</h4><ParticipantHelpTrigger topicId="task-prepare" label="Как начать" />
               {item.assignment_id !== null && item.allowed_actions.includes("open_workspace") ? <>
                 <p>Рабочая область доступна после назначения. Здесь можно продолжить выполнение задачи и использовать доступные инструменты команды.</p>
                 <button type="button" className="catalog-v2-workflow-action" onClick={() => { props.onWorkspace(item.assignment_id as string); }}>Открыть рабочую область</button>
@@ -356,7 +357,7 @@ function TaskDetail(props: {
               </>}
             </>}
             {detailTab === "review" && <>
-              <h4>Проверка и подтверждение результата</h4>
+              <h4>Проверка и подтверждение результата</h4><ParticipantHelpTrigger topicId="task-review" label="После отправки" />
               <p>Статус участия: {applicationLabels[item.application_state]}.</p>
               <p>Результат выполнения и подтверждённые компетенции появляются только после фактической проверки, а не после отклика или открытия задачи.</p>
               {item.assignment_id !== null && item.allowed_actions.includes("open_workspace") && <button type="button" className="catalog-v2-workflow-action" onClick={() => { props.onWorkspace(item.assignment_id as string); }}>Посмотреть рабочую область</button>}
