@@ -9,6 +9,7 @@ import {
   Search, Share2, ShieldCheck, Star, Trophy, Users,
 } from "lucide-react";
 
+import { selectOwnPublishedStanding, useOwnPublishedStandings } from "./own-standing";
 import "./rating-v2.scss";
 
 type Person = {
@@ -147,6 +148,8 @@ export function ParticipantRatingV2({ onOpenMessages, currentPersonId }: { onOpe
     queryFn: () => apiRequest<PublishedEntry[]>(`/api/v1/rating-seasons/${encodeURIComponent(season?.id ?? "")}/leaderboard` as RuntimeApiPath, { cache: "no-store" }),
   });
   const people = useMemo(() => (leadersQuery.data ?? []).map(toPerson), [leadersQuery.data]);
+  const ownQuery = useOwnPublishedStandings(currentPersonId);
+  const ownStanding = selectOwnPublishedStanding(ownQuery.data, season);
   const [selectedBenefit, setSelectedBenefit] = useState<Benefit | null>(null);
   const [feedback, setFeedback] = useState("");
   const [tab, setTab] = useState("Обзор");
@@ -228,7 +231,7 @@ export function ParticipantRatingV2({ onOpenMessages, currentPersonId }: { onOpe
     {screen === "benefits" && <>
       <div className="ir-breadcrumb"><button type="button" onClick={backToList}>Рейтинг</button><span className="ir-divider-chevron">›</span><strong>Награды и возможности</strong></div>
       <div className="ir-benefits-heading"><RatingHero compact title="Рейтинг подтверждённого опыта" eyebrow="ОПУБЛИКОВАННЫЙ РЕЙТИНГ" description="Баллы начисляются по опубликованным правилам сезона, а привилегии требуют отдельного подтверждения." seasonTitle={season?.title ?? "Нет сезона"} />
-        <div className="ir-my-rank"><span><Crown size={20}/> Ваше место</span><strong>{current?.place ?? "—"}</strong><p>{current ? `${String(current.points)} баллов · ${String(current.projects)} проектов` : "Нет опубликованной позиции"}</p><small>{current ? `Место №${String(current.place)}` : "Результат не опубликован"}</small></div>
+        <div className="ir-my-rank"><span><Crown size={20}/> Ваше место</span><strong>{ownStanding?.place ?? "—"}</strong><p>{ownStanding ? `${String(ownStanding.score ?? "—")} баллов · ${String(ownStanding.successful_projects ?? "—")} проектов` : ownQuery.isError ? "Личный результат временно недоступен" : "Нет опубликованной позиции"}</p><small>{ownStanding ? `Место №${String(ownStanding.place)}` : ownQuery.isError ? "Повторите загрузку" : "Результат не опубликован"}</small></div>
       </div>
       <div className="ir-benefits-showcase">{benefits.map(benefit => <BenefitTile key={benefit.key} benefit={benefit} onOpen={() => {setSelectedBenefit(benefit);}} />)}</div>
       <section className="ir-why"><div><h2>Почему это важно</h2><p>Рейтинг — не просто позиция. Это возможности для твоего роста.</p></div>
