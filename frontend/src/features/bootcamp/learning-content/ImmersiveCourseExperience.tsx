@@ -7,8 +7,7 @@ import {
 } from "lucide-react";
 import { apiRequest, type RuntimeApiPath } from "../../../api/client";
 import { invalidateLearningProjections } from "../../learning-progress";
-import { fetchEngagementOverview, type EngagementOverview } from "../../engagement-client";
-import { StreakCelebration } from "../../streak-celebration";
+import { GradeMilestoneCelebration } from "../grade-milestone-celebration";
 import { learningProgramFor } from "./programs";
 import { knowledgeCheckFor } from "./knowledge-checks";
 import { LessonFrame } from "./LessonFrame";
@@ -57,8 +56,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const [practiceDescription, setPracticeDescription] = useState("");
   const [practiceUrl, setPracticeUrl] = useState("");
   const [printKind, setPrintKind] = useState<"study" | "practice">("study");
-  const [courseCelebrationDays, setCourseCelebrationDays] = useState<number | null>(null);
-  const finishBaselineDays = useRef<number | null>(null);
+  const [courseCelebration, setCourseCelebration] = useState(false);
   const path = studyPath(courseKey);
   // The course lives in a scrollable Drawer, not in the document scroll.
   // After React renders the next lesson, align its content below the sticky header.
@@ -115,24 +113,9 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
       client.setQueryData(["impulse-study", courseKey], state);
       invalidateLearningProjections(client);
       setView("success");
-      // Celebrate a newly completed course only after reading the verified streak.
-      // Lessons already count for today; completing the course must not add a fake day.
-      if (state.finished && !previouslyFinished) {
-        void client.fetchQuery({
-          queryKey: ["engagement-overview"],
-          queryFn: fetchEngagementOverview,
-          staleTime: 0,
-        }).then((overview) => {
-          const grewOnFinish = finishBaselineDays.current !== null &&
-            overview.current_days > finishBaselineDays.current;
-          // The topbar already animates an actual new day. Never stack two dialogs.
-          if (overview.today_saved && overview.current_days > 0 && !grewOnFinish) {
-            setCourseCelebrationDays(overview.current_days);
-          }
-        }).catch(() => {
-          // The saved completion still succeeds when streak verification is unavailable.
-        });
-      }
+      // Celebrate only a newly confirmed completion. Streak and grade changes
+      // are independent achievements and must never gate this popup.
+      if (state.finished && !previouslyFinished) setCourseCelebration(true);
     },
   });
   if (!program) return <p>Для этого курса программа Impulse пока не подготовлена.</p>;
@@ -189,7 +172,6 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     if (!accessible || progress.isError) { setError("Для выдачи сертификата необходимо подключение к серверу."); return; }
     try {
       if (completed < total && current === total - 1) await advance.mutateAsync(current);
-      finishBaselineDays.current = client.getQueryData<EngagementOverview>(["engagement-overview"])?.current_days ?? null;
       await finish.mutateAsync();
     } catch {
       setError("Сертификат не выдан: сначала завершите все уроки и повторите попытку.");
@@ -222,7 +204,12 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const isLearning = ["overview", "theory", "example", "practice", "check"].includes(view);
 
   return <div className="imp-study" data-course={courseKey} data-view={view} data-testid="impulse-immersive-reader">
-    {courseCelebrationDays !== null && <StreakCelebration from={courseCelebrationDays} to={courseCelebrationDays} mode="course-complete" onClose={() => { setCourseCelebrationDays(null); }} />}
+    {courseCelebration && <GradeMilestoneCelebration
+      mode="course-complete"
+      roleTitle={courseTitle}
+      onClose={() => { setCourseCelebration(false); }}
+      onContinue={() => { setCourseCelebration(false); setView("certificates"); }}
+    />}
     <div className="imp-study__hero">
       <div className="imp-study__intro">
         <span className="imp-study__chips"><span>Нужно для роли</span>{accessible ? <span className="ok"><Check size={13}/> Доступен</span> : <span className="locked"><LockKeyhole size={13}/> Доступ ограничен</span>}</span>
