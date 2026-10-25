@@ -35,11 +35,12 @@ type Props = {
   accessible: boolean;
   initialView?: "overview" | "program";
   onReason: () => void;
+  onCelebrationChange?: (active: boolean) => void;
 };
 const csrfHeaders = () => ({ "X-CSRF-Token": sessionStorage.getItem("impulse_csrf") ?? "" });
 const studyPath = (key: string) => ("/api/v1/me/bootcamp/impulse-study/" + encodeURIComponent(key)) as RuntimeApiPath;
 
-export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendation, accessible, initialView = "overview", onReason }: Props) {
+export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendation, accessible, initialView = "overview", onReason, onCelebrationChange }: Props) {
   const program = learningProgramFor(courseKey);
   const blueprint = blueprintFor(courseKey);
   const client = useQueryClient();
@@ -57,6 +58,12 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const [practiceUrl, setPracticeUrl] = useState("");
   const [printKind, setPrintKind] = useState<"study" | "practice">("study");
   const [courseCelebration, setCourseCelebration] = useState(false);
+  // Defer an automatic grade-up popup while the course achievement is open.
+  useEffect(() => {
+    if (!courseCelebration) return;
+    onCelebrationChange?.(true);
+    return () => { onCelebrationChange?.(false); };
+  }, [courseCelebration, onCelebrationChange]);
   const path = studyPath(courseKey);
   // The course lives in a scrollable Drawer, not in the document scroll.
   // After React renders the next lesson, align its content below the sticky header.
