@@ -1758,8 +1758,60 @@ async def upload_checkpoint_file(
         raise ApiError(
             code="INVALID_EVIDENCE_FILENAME", message="Недопустимое имя.", status_code=422
         )
+    extension = "." + filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    expected_types = {
+        ".pdf": {"application/pdf"},
+        ".png": {"image/png"},
+        ".jpg": {"image/jpeg"},
+        ".jpeg": {"image/jpeg"},
+        ".txt": {"text/plain"},
+        ".zip": {"application/zip", "application/x-zip-compressed"},
+    }
+    if command.content_type not in expected_types.get(extension, set()):
+        raise ApiError(
+            code="EVIDENCE_TYPE_MISMATCH",
+            message="Расширение файла не соответствует его формату.",
+            status_code=422,
+        )
+    magic = {
+        ".pdf": data.startswith(b"%PDF-"),
+        ".png": data.startswith(b"\\x89PNG\\r\\n\\x1a\\n"),
+        ".jpg": data.startswith(b"\\xff\\xd8\\xff"),
+        ".jpeg": data.startswith(b"\\xff\\xd8\\xff"),
+        ".zip": data.startswith((b"PK\\x03\\x04", b"PK\\x05\\x06")),
+    }
+    if not magic.get(extension, True):
+        raise ApiError(
+            code="EVIDENCE_CONTENT_MISMATCH",
+            message="Содержимое файла не соответствует заявленному формату.",
+            status_code=422,
+        )
     file_id = uuid4()
     async with request.app.state.database.session() as session:
+        # Lock the assignment to serialize parallel uploads and enforce a
+        # server-side quota, not only a limit in the browser.
+        await session.execute(
+            text("SELECT id FROM assignments WHERE id = :id FOR UPDATE"),
+            {"id": assignment_id},
+        )
+        pending = await session.scalar(
+            text(
+                "SELECT COUNT(*) FROM checkpoint_evidence_files "
+                "WHERE assignment_id = :assignment AND person_id = :person "
+                "AND checkpoint_key = :checkpoint AND contribution_id IS NULL"
+            ),
+            {
+                "assignment": assignment_id,
+                "person": authenticated.actor.person_id,
+                "checkpoint": checkpoint_key,
+            },
+        )
+        if int(pending or 0) >= 5:
+            raise ApiError(
+                code="EVIDENCE_FILE_LIMIT",
+                message="Для одного этапа разрешено до 5 неподанных файлов.",
+                status_code=409,
+            )
         await session.execute(
             text(
                 "INSERT INTO checkpoint_evidence_files "
