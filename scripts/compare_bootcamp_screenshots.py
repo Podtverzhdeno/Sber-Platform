@@ -14,6 +14,8 @@ Usage:
   python scripts/compare_bootcamp_screenshots.py --reference reference.zip \
       --captures frontend/test-results/bootcamp-reference --output /tmp/bootcamp-diff
 """
+
+
 from __future__ import annotations
 
 import argparse
