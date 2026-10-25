@@ -243,7 +243,8 @@ test("home actions keep stable backgrounds and smoothly animate on hover and pre
   await expect(page.getByRole("dialog", { name: "Требования следующего грейда" })).toBeVisible();
   await page.keyboard.press("Escape");
 
-  const day = page.locator(".home-v2-week-days .home-v2-day").nth(1);
+  const day = page.locator(".home-v2-week-days .home-v2-day").nth(4);
+  await expect(day).toHaveAttribute("aria-pressed", "false");
   await day.click();
   await expect(day).toHaveAttribute("aria-pressed", "true");
   expect(await day.evaluate((el) => getComputedStyle(el).transitionProperty)).toContain("background-color");
