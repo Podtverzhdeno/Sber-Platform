@@ -264,3 +264,44 @@ test("Bootcamp desktop reference hero has correct stagger, overlay, and grid den
   await expect(standard).toBeVisible();
   expect(await standard.evaluate(node => parseFloat(getComputedStyle(node).minHeight))).toBe(296);
 });
+
+
+test("Bootcamp required-course popup follows reference and never invents progress", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1086 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const shell = page.locator('[data-reference="BC-R01"]');
+
+  await shell.getByRole("button", { name: /Посмотреть курсы/ }).click();
+  const dialog = page.getByRole("dialog", { name: "Требования к обучению" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator(".bc-ref-required-hero")).toBeVisible();
+  await expect(dialog.getByRole("heading", { name: "Что нужно завершить" })).toBeVisible();
+  await expect(dialog.locator(".bc-ref-required-progress")).toHaveCount(0);
+
+  const requirements = dialog.locator(".bc-ref-required-list > li");
+  if (await requirements.count() > 0) {
+    await requirements.first().getByRole("button", { name: /Открыть|Условия/ }).click();
+    await expect(page.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
+  } else {
+    await dialog.getByRole("button", { name: /Вернуться в каталог/ }).click();
+    await expect(dialog).toHaveCount(0);
+  }
+});
+
+test("Bootcamp recommendation popup opens real course details", async ({ page }) => {
+  await page.setViewportSize({ width: 1448, height: 1086 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  const shell = page.locator('[data-reference="BC-R01"]');
+  const reason = shell.locator(".bc-ref-reason").first();
+  await expect(reason).toBeVisible();
+  await reason.click();
+  const dialog = page.getByRole("dialog", { name: "Почему рекомендован" });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator(".bc-ref-why-item")).toHaveCount(4);
+  await dialog.getByRole("button", { name: /Посмотреть программу курса/ }).click();
+  await expect(page.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
+});
