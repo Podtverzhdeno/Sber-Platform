@@ -295,3 +295,18 @@
 @media (prefers-reduced-motion: reduce) {
   .pg-highlight,.participant-guide-trigger {transition:none !important;}
 }
+
+
+/* Compact top-bar help entry (reference frame 9), floating entry remains on narrow screens. */
+.topbar-guide-btn {
+  display: grid; place-items: center; flex: 0 0 39px;
+  width: 39px; height: 39px; min-width: 39px;
+  padding: 0; border: 1px solid #2cdcea; border-radius: 50%;
+  color: #bdfbff; background: #092842;
+  box-shadow: inset 0 0 10px rgba(13,228,237,.08),0 0 12px rgba(33,213,238,.18);
+  cursor: pointer; transition: box-shadow 160ms ease, border-color 160ms ease;
+}
+.topbar-guide-btn:hover { color: white; border-color: #8eefff; box-shadow: 0 0 0 3px rgba(31,227,239,.1),0 0 17px rgba(33,213,238,.38); }
+.topbar-guide-btn:focus-visible { outline: 3px solid #54f4eb; outline-offset: 3px; }
+@media (min-width: 651px) { body:has(.topbar-guide-btn) .participant-guide-trigger { display: none; } }
+@media (max-width: 650px) { .topbar-guide-btn { display: none; } }
