@@ -148,7 +148,7 @@ test("My Projects: reference desktop grid and contextual help",async({page})=>{
   const root=page.locator(".mpv2");
   const grid=root.locator(".mp-project-grid");
   await expect(grid.locator(".mp-project-tile")).toHaveCount(3);
-  const columns=await grid.evaluate(element=>getComputedStyle(element).gridTemplateColumns.split(/\\s+/).filter(Boolean).length);
+  const columns=await grid.evaluate(element=>getComputedStyle(element).gridTemplateColumns.split(/\s+/).filter(Boolean).length);
   expect(columns).toBe(4);
   const help=root.getByRole("button",{name:"Как это работает?"});
   await help.click();
