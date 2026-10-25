@@ -59,7 +59,32 @@ test("manual contextual help can be dismissed, stays within a phone viewport", a
   expect(rect?.x ?? -1).toBeGreaterThanOrEqual(0);
   expect((rect?.x ?? 0) + (rect?.width ?? 0)).toBeLessThanOrEqual(375);
   expect((rect?.y ?? 0) + (rect?.height ?? 0)).toBeLessThanOrEqual(812);
+  const mobileHighlight = page.locator(".pg-highlight");
+  if (await mobileHighlight.count() > 0) {
+    const outline = await mobileHighlight.boundingBox();
+    expect(outline?.x ?? -1).toBeGreaterThanOrEqual(0);
+    expect((outline?.x ?? 0) + (outline?.width ?? 0)).toBeLessThanOrEqual(375);
+  }
   await page.keyboard.press("Escape");
   await expect(panel).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Как здесь всё устроено?" })).toBeVisible();
+});
+
+test("participant can use searchable instructions instead of mandatory tour", async ({ page }) => {
+  await mockParticipant(page);
+  await page.goto("/");
+  await page.locator('[data-persona="participant-guide"]').click();
+  const welcome = page.getByRole("dialog", { name: /Добро пожаловать/ });
+  await expect(welcome).toBeVisible();
+  await welcome.getByRole("button", { name: "Все инструкции" }).click();
+  const library = page.getByRole("dialog", { name: "Центр помощи" });
+  await expect(library).toBeVisible();
+  const search = library.getByRole("textbox", { name: "Поиск по инструкциям" });
+  await search.fill("Skill Passport");
+  await expect(library.getByRole("button", { name: /Что такое Skill Passport/ })).toBeVisible();
+  await library.getByRole("button", { name: /Что такое Skill Passport/ }).click();
+  await expect(library.getByRole("heading", { name: "Что такое Skill Passport?" })).toBeVisible();
+  await expect(library.getByText("Зачем это нужно")).toBeVisible();
+  await library.getByRole("button", { name: "Закрыть центр помощи" }).click();
+  await expect(library).toHaveCount(0);
 });
