@@ -5,6 +5,7 @@ import { learningProgramFor } from "./programs";
 import { blueprintFor } from "./course-blueprints";
 import { knowledgeCheckFor } from "./knowledge-checks";
 import { ManualCompanionCard } from "./ManualCompanionCard";
+import { LessonFrame } from "./LessonFrame";
 import "./learning-content.scss";
 
 type Props = {
@@ -172,13 +173,23 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
           <p className="bc-learning__eyebrow">{current < 4 ? "Основы" : "Прикладная практика"} · Урок {String(current + 1)} из {String(program.units.length)}</p>
           <h4 id="bc-learning-title">{unit.title}</h4>
           <p className="bc-learning__purpose"><strong>Цель:</strong> {unit.purpose}</p>
-          <ManualCompanionCard courseKey={courseKey} lessonIndex={current} />
-          <h5>Разберёмся</h5>
-          {unit.theory.map((paragraph, index) => <p key={String(index)}>{paragraph}</p>)}
-          <h5>Пример</h5>
-          <div className="bc-learning__example">{unit.example}</div>
-          <h5>Практическое задание</h5>
-          <p>{unit.practice}</p>
+          <div className="lesson-frames" data-testid="unified-course-lesson">
+            <div className="lesson-frames__intro"><strong>Изучайте тему, затем решайте задачу</strong>Теория, разобранный пример и практика расположены на одной странице. Самопроверка специально скрыта до вашего нажатия, чтобы вы сначала попробовали решить задачу сами.</div>
+            <LessonFrame key={unit.id + "-theory"} unitId={unit.id} kind="theory">{() => <div className="bc-learning__theory">
+              <ManualCompanionCard courseKey={courseKey} lessonIndex={current} />
+              <h5>Разберёмся</h5>
+              {unit.theory.map((paragraph, index) => <p key={String(index)}>{paragraph}</p>)}
+            </div>}</LessonFrame>
+            <LessonFrame key={unit.id + "-example"} unitId={unit.id} kind="example">{() => <div>
+              <h5>Применение на примере</h5>
+              <div className="bc-learning__example">{unit.example}</div>
+            </div>}</LessonFrame>
+            <LessonFrame key={unit.id + "-practice"} unitId={unit.id} kind="practice">{() => <div>
+              <h5>Что нужно сделать</h5>
+              <p>{unit.practice}</p>
+              <p><strong>Что сдавать:</strong> {unit.expected}</p>
+            </div>}</LessonFrame>
+            <LessonFrame key={unit.id + "-check"} unitId={unit.id} kind="check">{() => <>
           <div className="bc-learning__selfcheck">
             <h5>Самопроверка</h5>
             <p>Отметьте пункты, которые вы проверили самостоятельно. Это только локальные отметки для удобства.</p>
@@ -222,6 +233,8 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
               )}
             </section>
           )}
+          </>}</LessonFrame>
+          </div>
           <div className="bc-learning__navigation">
             <button type="button" disabled={current === 0} onClick={() => { selectUnit(current - 1); }}>Предыдущий урок</button>
             <span>{String(current + 1)} / {String(program.units.length)}</span>
