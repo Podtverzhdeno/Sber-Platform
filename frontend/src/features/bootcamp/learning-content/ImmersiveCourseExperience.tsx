@@ -362,7 +362,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
                   placeholder="Опишите решение, тестирование и выявленные ограничения (не менее 50 символов)"/>
               </label>
               <label>Ссылка на результат (HTTPS, необязательно)
-                <input type="url" value={practiceUrl} pattern="https://.*" placeholder="https://..."
+                <input type="url" value={practiceUrl} pattern="https://.*" placeholder="Ссылка на результат по HTTPS"
                   onChange={event => { setPracticeUrl(event.target.value); }}/>
               </label>
               <button className="imp-study__primary" type="submit"
