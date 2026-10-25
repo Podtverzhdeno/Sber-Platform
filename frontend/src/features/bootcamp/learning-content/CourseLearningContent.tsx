@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { learningProgramFor } from "./programs";
 import { blueprintFor } from "./course-blueprints";
@@ -20,6 +20,7 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
   const [opened, setOpened] = useState<ReadonlySet<string>>(() => new Set());
   const [checks, setChecks] = useState<ReadonlySet<string>>(() => new Set());
   const [showExpected, setShowExpected] = useState(false);
+  const lessonRef = useRef<HTMLElement>(null);
   const [knowledgeAnswers, setKnowledgeAnswers] = useState<Record<string, number>>({});
 
   useEffect(() => {
@@ -30,6 +31,16 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
     setShowExpected(false);
     setKnowledgeAnswers({});
   }, [courseKey]);
+
+  // After switching lessons, make the updated material visible under the sticky reader header.
+  useEffect(() => {
+    if (current === 0) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    lessonRef.current?.scrollIntoView({
+      block: "start",
+      behavior: reducedMotion ? "instant" : "smooth",
+    });
+  }, [current]);
 
   const unit = program?.units[current];
   const knowledgeCheck = unit ? knowledgeCheckFor(courseKey, unit.id) : null;
@@ -151,7 +162,7 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
             ))}
           </ol>
         </nav>
-        <article className="bc-learning__lesson" aria-labelledby="bc-learning-title">
+        <article ref={lessonRef} className="bc-learning__lesson" aria-labelledby="bc-learning-title">
           <p className="bc-learning__eyebrow">{current < 4 ? "Основы" : "Прикладная практика"} · Урок {String(current + 1)} из {String(program.units.length)}</p>
           <h4 id="bc-learning-title">{unit.title}</h4>
           <p className="bc-learning__purpose"><strong>Цель:</strong> {unit.purpose}</p>
