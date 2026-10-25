@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import {
-  ArrowRight, Award, BadgeCheck, BriefcaseBusiness, Check, ChevronRight,
-  Code2, Crown, FileBadge2, Gift, GraduationCap, HelpCircle, Info,
-  Layers3, LockKeyhole, Medal, MessageSquare, Rocket, ShieldCheck,
+  ArrowRight, BadgeCheck, BriefcaseBusiness, Check, ChevronRight,
+  Code2, Crown, Gift, GraduationCap, Info,
+  Layers3, LockKeyhole, Medal, Rocket, ShieldCheck,
   Sparkles, Star, TrendingUp, Trophy, Users, X,
 } from "lucide-react";
 import "./rewards-journey.scss";
