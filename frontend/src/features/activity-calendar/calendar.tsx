@@ -19,11 +19,14 @@ const MONTH = new Intl.DateTimeFormat("ru-RU", { month: "short", timeZone: "UTC"
 const FULL_DATE = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 
 function categoryOf(event: ActivityEvent): ActivityCategory {
-  const label = (event.kind + " " + event.source_kind + " " + event.title).toLowerCase();
-  if (/certificat|сертифик|badge|диплом/.test(label)) return "certification";
-  if (/project|проект|portfolio|портфоли|contribution|вклад/.test(label)) return "projects";
-  if (/practice|практик|task|задач|submission|review|провер/.test(label)) return "practice";
-  if (/event|событ|community|вебинар|сообществ/.test(label)) return "community";
+  const kind=event.kind.toLowerCase();
+  const source=event.source_kind.toLowerCase();
+  // Routing must be based on audited source identity, not arbitrary task titles.
+  if (/work_contribution|work_assignment|project|portfolio/.test(source) || /project_submission|revision_accepted|project_review|project_update/.test(kind)) return "projects";
+  if (/certificat|badge|credential/.test(source+" "+kind)) return "certification";
+  if (/impulse_self_study|bootcamp|course|learning/.test(source) || /lesson|course|checkpoint/.test(kind)) return "learning";
+  if (/event|community|webinar/.test(source+" "+kind)) return "community";
+  if (/practice|task|submission|review/.test(source+" "+kind)) return "practice";
   return "learning";
 }
 
@@ -77,6 +80,19 @@ export function ActivityCalendar({ snapshot, weeks, onOpenCourses, onOpenProject
     if (!container) return;
     container.scrollLeft = Math.max(0, container.scrollWidth - container.clientWidth);
   }, [weeks]);
+
+  // Dismiss keyboard/mouse-triggered tooltips without opening a day dialog.
+  useEffect(() => {
+    if (!hover) return;
+    const dismissOnEscape=(event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        setHover(null);
+      }
+    };
+    document.addEventListener("keydown", dismissOnEscape);
+    return () => { document.removeEventListener("keydown", dismissOnEscape); };
+  }, [hover]);
 
   useEffect(() => {
     if (!selectedKey) return;
