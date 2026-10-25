@@ -75,6 +75,23 @@ test("My Projects: introductory copy is gone and content starts directly with th
   await page.screenshot({path:"test-results/projects-compact-header.png",fullPage:true,animations:"disabled"});
 });
 
+test("My Projects: mobile help opens inside viewport after compact header", async ({page}) => {
+  await page.setViewportSize({width:390,height:844});
+  await fixture(page);
+  const root=page.locator(".mpv2");
+  const help=root.getByRole("button",{name:"Как это работает?"});
+  await help.click();
+  const panel=root.getByRole("region",{name:"Как работают мои проекты"});
+  await expect(panel).toBeVisible();
+  await expect(panel).toBeFocused();
+  await expect.poll(async () => panel.evaluate(el => {
+    const box=el.getBoundingClientRect();
+    return box.top >= -2 && box.bottom <= window.innerHeight + 2;
+  })).toBe(true);
+  await help.click();
+  await expect(panel).toHaveCount(0);
+});
+
 test("My Projects: default layout is list and manual cards choice remains available",async({page})=>{
   await page.setViewportSize({width:1672,height:941});
   await fixture(page, "list");
