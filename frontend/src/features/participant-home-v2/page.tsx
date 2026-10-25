@@ -161,7 +161,7 @@ export function ParticipantHomeV2Body(props: {
               {recommendedTask && <span><Clock3 size={16} />{TASK_NEXT_ACTION_LABELS[recommendedTask.next_action] ?? recommendedTask.status}</span>}
             </div>
             <div className="home-v2-hero-actions">
-              <button type="button" className="home-v2-primary" onClick={openHero}>{heroKind === "task" ? "Продолжить задачу" : heroKind === "course" ? "Продолжить обучение" : "Выбрать траекторию"}<ArrowRight size={18} /></button>
+              <button type="button" className={`home-v2-primary${heroKind === "course" ? " home-v2-primary--learning" : ""}`} onClick={openHero}>{heroKind === "task" ? "Продолжить задачу" : heroKind === "course" ? "Продолжить обучение" : "Выбрать траекторию"}<ArrowRight size={18} aria-hidden="true" /></button>
               {overview.next_outcome && <button type="button" className="home-v2-text-action" onClick={openNext}>Следующий шаг</button>}
             </div>
           </div>
