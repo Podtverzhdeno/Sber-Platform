@@ -152,7 +152,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   ];
   const isLearning = ["overview", "theory", "example", "practice", "check"].includes(view);
 
-  return <div className="imp-study" data-view={view} data-testid="impulse-immersive-reader">
+  return <div className="imp-study" data-course={courseKey} data-view={view} data-testid="impulse-immersive-reader">
     <div className="imp-study__hero">
       <div className="imp-study__intro">
         <span className="imp-study__chips"><span>Нужно для роли</span>{accessible ? <span className="ok"><Check size={13}/> Доступен</span> : <span className="locked"><LockKeyhole size={13}/> Доступ ограничен</span>}</span>
