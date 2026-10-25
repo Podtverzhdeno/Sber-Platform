@@ -1427,9 +1427,12 @@ function ImpulseApp() {
     .filter((channel) => channel.unread > 0 && !channel.muted)
     .sort((a,b) => (b.last_message?.created_at ?? "").localeCompare(a.last_message?.created_at ?? ""));
   const chatNotificationTitle = (channel: ChatNotification): string => {
-    if (channel.title.trim()) return channel.title;
-    const others = channel.participants.filter((person) => person.id !== actor?.person_id);
-    return others.map((person)=>person.display_name).filter(Boolean).join(", ") || "Личный чат";
+    const others = channel.participants
+      .filter((person) => person.id !== actor?.person_id)
+      .map((person) => person.display_name)
+      .filter(Boolean);
+    if (channel.kind === "personal" && others.length > 0) return others.join(", ");
+    return channel.title.trim() || others.join(", ") || "Личный чат";
   };
   const notificationItems = notificationsQuery.data?.items ?? [];
   const unreadCount = (notificationsQuery.data?.unread ?? 0)
