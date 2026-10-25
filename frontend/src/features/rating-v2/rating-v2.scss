@@ -256,26 +256,24 @@
 .ir-page {
   .ir-benefit > .ir-art,
   .ir-top-card > .ir-art {
-    background-image: url("/rating-reference/rewards.svg");
     background-repeat: no-repeat;
-    background-size: 300% 100%;
+    background-size: 100% 100%;
+    background-position: center center;
     isolation: isolate;
   }
   .ir-benefit > .ir-art > *,
-  .ir-top-card > .ir-art > * {
-    display: none;
-  }
+  .ir-top-card > .ir-art > * { display: none; }
   .ir-benefit--top30 > .ir-art,
   .ir-top-card--silver > .ir-art,
   .ir-top-card--teal > .ir-art {
-    background-position: left center;
+    background-image: url("/rating-reference/top30.svg");
   }
   .ir-benefit--top1 > .ir-art,
   .ir-top-card--gold > .ir-art {
-    background-position: center center;
+    background-image: url("/rating-reference/top1.svg");
   }
   .ir-benefit--top50 > .ir-art {
-    background-position: right center;
+    background-image: url("/rating-reference/top50.svg");
   }
   .ir-benefit--top1 > .ir-art,
   .ir-benefit--top50 > .ir-art,
