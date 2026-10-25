@@ -524,6 +524,18 @@ def test_community_invites_are_persisted_and_scoped_to_members_and_program() -> 
     assert again.status_code == 200
     member_ids = [person["id"] for person in again.json()["participants"]]
     assert member_ids.count(str(ROMAN)) == 1
+    roman_csrf = login(api, "customer-roman")
+    now_visible = api.get("/api/v1/me/messaging/channels")
+    assert now_visible.status_code == 200
+    assert channel_id in {item["id"] for item in now_visible.json()}
+    posted = api.post(
+        f"/api/v1/me/messaging/channels/{channel_id}/messages",
+        json={"body": "Подключился к обсуждению."},
+        headers={"X-CSRF-Token": roman_csrf},
+    )
+    assert posted.status_code == 200
+    assert posted.json()["author_id"] == str(ROMAN)
+    alex_csrf = login(api, "participant-alex")
     no_csrf = api.post(path, json={"person_ids": [str(ROMAN)]})
     assert no_csrf.status_code in (401, 403)
     hr_csrf = login(api, "hr-nina")
