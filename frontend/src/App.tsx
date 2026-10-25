@@ -7,6 +7,7 @@ import { BootcampV2Route } from "./features/bootcamp/route-v2";
 import { TrajectoryV2 } from "./features/trajectory-v2/page";
 import { SourceTrajectoryPage } from "./features/trajectory-v2/source-reference/source-route";
 import { TaskCatalogV2 } from "./features/task-catalog-v2/page";
+import { ParticipantProjectsV2 } from "./features/my-projects/page";
 import { ParticipantMetricSpark } from "./features/participant-home-spark";
 import { BuddySuggestionCard } from "./features/buddy-suggestion";
 import { ActivityPanel } from "./features/activity-panel";
@@ -568,7 +569,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Мои проекты" ? (
-          <ParticipantTasks view="projects" />
+          <ParticipantProjectsV2 />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Портфолио" ? (
