@@ -8,7 +8,7 @@ from enum import StrEnum
 from typing import Protocol
 from uuid import UUID, uuid4
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.domain.identity import ActorContext, Role
 
 

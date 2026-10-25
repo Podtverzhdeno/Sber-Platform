@@ -14,7 +14,7 @@ from enum import StrEnum
 from typing import Protocol
 from uuid import UUID
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.domain.events import EventValue, safe_event_payload
 from impulse.domain.identity import ActorContext, Role
 
