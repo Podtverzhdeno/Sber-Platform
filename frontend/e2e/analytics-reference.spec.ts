@@ -53,11 +53,12 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
       await expect(page.locator(".sidebar")).toHaveCSS("width", "244px");
       await expect(page.locator(".topbar")).toHaveCSS("left", "244px");
     }
-    for (const [view, title] of [
+    for (const [view] of [
       ["passport", "Ваш Skill Passport"], ["path", "Маршрут к вашей следующей цели"], ["evidence", "Результаты, которым можно доверять"]
     ] as const) {
       if (view !== "passport") await page.goto("/workspace/9?analyticsTab=passport&view=" + view);
-      await expect(page.getByRole("heading", { name: title })).toBeVisible();
+      await expect(root).toHaveClass(new RegExp("ref-layout-" + view));
+      await expect(root.locator(view === "path" ? ".ref-path-hero" : view === "evidence" ? ".ref-v3-main" : ".ref-v1-middle")).toBeVisible();
       await expect(root.locator(".ref-radar svg")).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow).toBeLessThanOrEqual(2);
