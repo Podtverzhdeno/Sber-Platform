@@ -562,6 +562,11 @@ export function RoleCardOverview(props: {
       data-role-state={role.state}
       data-primary={props.primary}
       data-tone={roleVisualTone(role, props.primary)}
+      title={roleVisualTone(role, props.primary) === "primary"
+        ? "Основная траектория"
+        : roleVisualTone(role, props.primary) === "learning"
+          ? "Дополнительная траектория для изучения"
+          : "Направление ещё не выбрано"}
       aria-pressed={props.selected}
       onClick={() => {
         props.onSelect();
