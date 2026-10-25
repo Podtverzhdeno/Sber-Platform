@@ -93,6 +93,10 @@ class MuteRequest(BaseModel):
     muted: bool
 
 
+class AddCommunityMembersRequest(BaseModel):
+    person_ids: list[UUID] = Field(min_length=1, max_length=24)
+
+
 def _service(request: Request) -> MessagingService:
     return request.app.state.messaging_service
 
@@ -239,6 +243,37 @@ async def open_personal(
     if summary is None:
         raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
     peers = await service.channel_participants(authenticated.actor, channel.id)
+    names = await _persona_names(request, [peer.person_id for peer in peers])
+    return _channel_view(summary, names, peers)
+
+
+@router.post("/me/messaging/channels/{channel_id}/members", response_model=ChannelView)
+async def add_community_members(
+    channel_id: UUID,
+    command: AddCommunityMembersRequest,
+    request: Request,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[MessagingService, Depends(_service)],
+) -> ChannelView:
+    # Only members of the same program can be invited, regardless of arbitrary
+    # identifiers supplied by the client. Membership authorization is checked
+    # inside MessagingService before modifying the channel.
+    store = request.app.state.auth_service.store
+    viewer = await store.get_persona_by_id(authenticated.actor.person_id)
+    if viewer is None:
+        raise ApiError("RESOURCE_NOT_FOUND", "Пользователь не найден.", 404)
+    ids = tuple(dict.fromkeys(command.person_ids))
+    if authenticated.actor.person_id in ids:
+        raise ApiError("MESSAGE_INVITE_INVALID", "Нельзя пригласить себя.", 422)
+    for person_id in ids:
+        candidate = await store.get_persona_by_id(person_id)
+        if candidate is None or candidate.program_key != viewer.program_key:
+            raise ApiError("MESSAGE_INVITE_INVALID", "Контакт недоступен в вашей программе.", 403)
+    await service.add_community_members(authenticated.actor, channel_id, ids)
+    summary = await service.channel_view(authenticated.actor, channel_id)
+    if summary is None:
+        raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
+    peers = await service.channel_participants(authenticated.actor, channel_id)
     names = await _persona_names(request, [peer.person_id for peer in peers])
     return _channel_view(summary, names, peers)
 
