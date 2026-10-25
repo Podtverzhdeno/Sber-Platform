@@ -240,6 +240,15 @@ test("composer toolbar icons open genuine attachment, emoji and mention controls
   await page.getByRole("button",{name:/Открыть последний чат/}).click();
   await page.locator(".msg-composer").getByRole("button",{name:"Вложения"}).click();
   await expect(page.getByTestId("composer-attachments")).toBeVisible();
+  const panel=await page.getByTestId("composer-attachments").boundingBox();
+  const input=await page.getByTestId("composer-ref-input").boundingBox();
+  const add=await page.getByTestId("composer-attachments").getByRole("button",{name:"Добавить"}).boundingBox();
+  expect(panel && input && add).toBeTruthy();
+  if(panel && input && add) {
+    expect(input.x).toBeGreaterThanOrEqual(panel.x);
+    expect(input.x+input.width).toBeLessThanOrEqual(add.x+2);
+    expect(add.x+add.width).toBeLessThanOrEqual(panel.x+panel.width+2);
+  }
   await page.getByRole("button",{name:"Эмодзи"}).click();
   await expect(page.getByRole("dialog",{name:"Эмодзи"})).toBeVisible();
   await page.getByRole("button",{name:"Вставить 🙏"}).click();
