@@ -35,7 +35,7 @@ function Title({children,icon:Icon}:{children:React.ReactNode;icon:typeof Target
 }
 type TasksProps={
   checkpoints:ReferenceCheckpoint[];decisions:ReferenceDecision[];
-  assignmentStatus:string;projectDescription:string;deliverable:string;
+  projectDescription:string;deliverable:string;
   acceptanceCriteria:string[];onWorkspace:()=>void;
 };
 export function ProjectReferenceTasks({checkpoints,decisions,projectDescription,deliverable,acceptanceCriteria,onWorkspace}:TasksProps){
@@ -95,8 +95,8 @@ export function ProjectReferenceTasks({checkpoints,decisions,projectDescription,
     </div>
   </div>;
 }
-type ProgressProps={checkpoints:ReferenceCheckpoint[];progress:number|null;deadline:string;decisions:ReferenceDecision[];onWorkspace:()=>void;};
-export function ProjectReferenceProgress({checkpoints,progress,deadline,decisions,onWorkspace}:ProgressProps){
+type ProgressProps={checkpoints:ReferenceCheckpoint[];progress:number|null;deadline:string;decisions:ReferenceDecision[];skills:string[];onWorkspace:()=>void;};
+export function ProjectReferenceProgress({checkpoints,progress,deadline,decisions,skills,onWorkspace}:ProgressProps){
   const done=checkpoints.filter(c=>doneStates.has(c.status)).length;
   return <div className="mp-ref-columns mp-ref-columns--progress" role="tabpanel" aria-label="Прогресс">
     <div className="mp-ref-stack">
@@ -108,8 +108,8 @@ export function ProjectReferenceProgress({checkpoints,progress,deadline,decision
         </div></div>
       </Card>
       <Card><header className="mp-ref-card-head"><h2>Компетенции проекта</h2><small>Подтверждаются отдельно</small></header>
-        <div className="mp-ref-skill-grid">{["Python","Computer Vision","Обработка изображений","Анализ данных"].map((skill,i)=>
-          <div className="mp-ref-skill" key={skill}><span className="mp-ref-blue-square">{[<Code2 size={19}/>,<Target size={19}/>,<LayersFallback/>,<Award size={19}/>][i]}</span><strong>{skill}</strong><small>После оценки результата</small></div>)}</div>
+        <div className="mp-ref-skill-grid">{skills.length?skills.map((skill,i)=>
+          <div className="mp-ref-skill" key={skill}><span className="mp-ref-blue-square">{[<Code2 size={19}/>,<Target size={19}/>,<LayersFallback/>,<Award size={19}/>][i]}</span><strong>{skill}</strong><small>После оценки результата</small></div>):<p className="mp-ref-muted">Навыки проекта ещё не опубликованы</p>}</div>
       </Card>
       <Card><Title icon={FileText}>Этапы выполнения</Title>
         <div className="mp-ref-timeline">{checkpoints.length?checkpoints.map((cp,index)=><div className="mp-ref-stage" key={cp.key}><span className={doneStates.has(cp.status)?"is-done":""}>{doneStates.has(cp.status)?<Check size={15}/>:index+1}</span><div><strong>{cp.title}</strong><small>{statusLabel(cp.status)}</small></div><em>{doneStates.has(cp.status)?"100%":"—"}</em></div>):<p className="mp-ref-muted">Нет опубликованных этапов</p>}</div>
@@ -127,9 +127,9 @@ type TeamProps={team:ReferencePerson[];customer:string;mentor:string|null;onMess
 export function ProjectReferenceTeam({team,customer,mentor,onMessage,onContribution}:TeamProps){
  return <div className="mp-ref-columns" role="tabpanel" aria-label="Команда">
    <div className="mp-ref-stack"><Card><header className="mp-ref-card-head"><h2>Команда проекта</h2><span className="mp-ref-pill">{team.length} участников</span></header>
-     <div className="mp-ref-team-list">{team.map((person,index)=><div className="mp-ref-person" key={person.person_id}>
+     <div className="mp-ref-team-list">{team.map(person=><div className="mp-ref-person" key={person.person_id}>
        <span className="mp-ref-avatar">{person.display_name.trim().charAt(0).toUpperCase()}</span><div><strong>{person.display_name}</strong><small>{statusLabel(person.status)}</small></div>
-       <span className="mp-ref-pill">{index===0?"Участник":"Команда"}</span>
+       <span className="mp-ref-pill">Участник</span>
        <button type="button" aria-label={`Написать ${person.display_name}`} onClick={()=>onMessage(person.person_id)}><MessageCircle size={17}/></button>
      </div>)}
      {!team.length&&<p className="mp-ref-empty">Состав команды ещё не опубликован</p>}
