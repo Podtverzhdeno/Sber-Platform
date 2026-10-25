@@ -448,3 +448,9 @@
   padding:0;border-radius:10px;
 }
 .pg-topic-shortcut--icon svg {width:19px;height:19px;}
+
+/* Unsolicited suggestions must never block underlying navigation or editor
+   actions. Only their actual help buttons remain clickable. Manual tours keep
+   their regular interactive popover. */
+.participant-guide .pg-coachmark--passive { pointer-events: none; }
+.participant-guide .pg-coachmark--passive button { pointer-events: auto; }
