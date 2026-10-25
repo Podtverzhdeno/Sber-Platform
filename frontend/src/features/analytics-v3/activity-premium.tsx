@@ -1,5 +1,5 @@
 import { useMemo, type ReactNode } from "react";
-import { Activity, ArrowRight, BarChart3, BookOpen, CalendarDays, CheckCircle2, Clock3, Code2, Flame, GraduationCap, Layers3, Sparkles, Target } from "lucide-react";
+import { ArrowRight, BarChart3, BookOpen, CalendarDays, CheckCircle2, Clock3, Code2, Flame, Layers3, Sparkles, Target } from "lucide-react";
 import type { LearningSummary } from "../learning-progress";
 import type { EngagementOverview } from "../engagement-client";
 import "./activity-premium.scss";
@@ -17,6 +17,10 @@ type Props = {
 };
 const dayMs = 86400000;
 const dateValue = (value:string):number|null => { const parsed=Date.parse(value);return Number.isFinite(parsed)?parsed:null; };
+const daysLabel=(value:number):string=>{
+  const lastTwo=value%100, last=value%10;
+  return String(value)+" "+(lastTwo>=11&&lastTwo<=14?"дней":last===1?"день":last>=2&&last<=4?"дня":"дней");
+};
 const kindOf = (e:ActivitySourceEvent):"learning"|"practice"|"projects"|"community"|"certification" => {
   const text=(e.kind+" "+e.source_kind+" "+e.title).toLowerCase();
   if(/сертифик|certificat|badge/.test(text))return "certification";
@@ -92,7 +96,7 @@ export function PremiumActivity({summary,snapshot,streak,weeks,onTraining,onHist
     const hasData=Boolean(snapshot?.freshness.known);
     const current=new Date();
     const todayUTC=Date.UTC(current.getUTCFullYear(),current.getUTCMonth(),current.getUTCDate());
-    const first=todayUTC-(weeks*7-1)*dayMs;
+    const first=todayUTC-((current.getUTCDay()+6)%7)*dayMs-(weeks-1)*7*dayMs;
     const all=(snapshot?.events??[]).filter(e=>e.source_ref&&e.source_kind&&dateValue(e.occurred_at)!==null);
     const valid=all.filter(e=>{const t=dateValue(e.occurred_at)??0;return t>=first&&t<todayUTC+dayMs;});
     const dateCounts=Array.from({length:weeks*7},(_,i)=>valid.filter(e=>{const ts=dateValue(e.occurred_at)??0;return ts>=first+i*dayMs&&ts<first+(i+1)*dayMs;}).length);
@@ -113,7 +117,7 @@ export function PremiumActivity({summary,snapshot,streak,weeks,onTraining,onHist
         {label:"Активные дни",value:observed?String(activeDays):"—",hint:observed?"из "+String(weeks*7)+" дней":"Нет истории",Icon:CalendarDays,tone:"cyan"},
         {label:"Часы на платформе",value:"—",hint:"Длительность сессий не измеряется",Icon:Clock3,tone:"cyan"},
         {label:"Выполненные действия",value:observed?String(total):"—",hint:observed?"Сохранённые события":"Нет истории",Icon:CheckCircle2,tone:"purple"},
-        {label:"Текущий стрик",value:streak?String(streak.current_days)+" "+(streak.current_days===1?"день":streak.current_days%10>=2&&streak.current_days%10<=4&&!(streak.current_days%100>=12&&streak.current_days%100<=14)?"дня":"дней"):"—",hint:streak?"Квалифицированные дни":"Показатель временно недоступен",Icon:Flame,tone:"amber"},
+        {label:"Текущий стрик",value:streak?daysLabel(streak.current_days):"—",hint:streak?"Квалифицированные дни":"Показатель временно недоступен",Icon:Flame,tone:"amber"},
       ].map((m,i)=><article key={m.label} className={"avp-activity-number avp-activity-number--"+m.tone+" av3-metric"}>
         <IconPanel tone={m.tone}><m.Icon size={24}/></IconPanel><div><small>{m.label}</small><strong>{m.value}</strong><span>{m.hint}</span></div>
         {i!==1&&<MiniBars tone={m.tone} values={i===0?byWeek:i===2?byWeek:streak?[streak.current_days]:[]}/>}
