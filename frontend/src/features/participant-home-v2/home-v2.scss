@@ -60,6 +60,52 @@
   /* Keep the gradient stable: gradient-to-solid "background" transitions blink. */
   &:hover:not(:disabled) {filter:brightness(1.13);box-shadow:0 0 18px #0ef5f45f;transform:translateY(-1px);}
 }
+/* Only the main-course CTA receives an inviting, low-distraction animation. */
+.home-v2 .home-v2-hero-actions .home-v2-primary--learning {
+  position:relative;isolation:isolate;overflow:hidden;
+  border-color:#9bfff4;
+  background:linear-gradient(112deg,#03dce8 0%,#1ff5ec 52%,#64ffe3 100%);
+  box-shadow:0 0 0 1px #69fff840,0 3px 16px #04e9dd42;
+  animation:home-v2-learning-glow 4.8s ease-in-out infinite;
+}
+.home-v2 .home-v2-hero-actions .home-v2-primary--learning::before {
+  content:"";position:absolute;inset:-30% auto -30% 0;width:55%;pointer-events:none;
+  background:linear-gradient(90deg,transparent 0%,#ffffff00 15%,#ffffffa8 50%,#ffffff00 85%,transparent);
+  transform:translate3d(-220%,0,0) skewX(-20deg);
+  animation:home-v2-learning-shine 5.7s ease-in-out infinite;
+}
+.home-v2 .home-v2-hero-actions .home-v2-primary--learning > svg {
+  position:relative;flex:none;transition:transform .25s ease;
+  animation:home-v2-learning-arrow 5.7s ease-in-out infinite;
+}
+.home-v2 .home-v2-hero-actions .home-v2-primary--learning:hover:not(:disabled),
+.home-v2 .home-v2-hero-actions .home-v2-primary--learning:focus-visible {
+  animation:none;filter:brightness(1.07);
+  box-shadow:0 0 0 2px #8affee99,0 0 26px #00e5d68c,0 8px 24px #00e5d650;
+  transform:translateY(-2px);
+}
+.home-v2 .home-v2-hero-actions .home-v2-primary--learning:hover > svg,
+.home-v2 .home-v2-hero-actions .home-v2-primary--learning:focus-visible > svg {
+  animation:none;transform:translateX(4px);
+}
+.home-v2 .home-v2-hero-actions .home-v2-primary--learning:active:not(:disabled) {
+  animation:none;transform:translateY(0) scale(.985);
+}
+@keyframes home-v2-learning-glow {
+  0%,100% {box-shadow:0 0 0 1px #69fff840,0 3px 16px #04e9dd42}
+  50% {box-shadow:0 0 0 2px #75fff870,0 0 20px #11fff075,0 6px 20px #00bcb633}
+}
+@keyframes home-v2-learning-shine {
+  0%,54% {transform:translate3d(-220%,0,0) skewX(-20deg);opacity:0}
+  59% {opacity:.65}
+  78% {transform:translate3d(410%,0,0) skewX(-20deg);opacity:.55}
+  86%,100% {transform:translate3d(410%,0,0) skewX(-20deg);opacity:0}
+}
+@keyframes home-v2-learning-arrow {
+  0%,70%,100% {transform:translateX(0)}
+  78% {transform:translateX(3px)}
+  86% {transform:translateX(0)}
+}
 .home-v2-secondary {
   display:inline-flex;justify-content:center;align-items:center;min-height:38px;
   padding:8px 10px;border:1px solid #24445e;border-radius:8px;
