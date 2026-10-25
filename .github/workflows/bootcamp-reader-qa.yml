@@ -37,11 +37,9 @@ jobs:
           package-manager-cache: false
       - name: Install locked dependencies
         run: npm ci
-      - name: Lint Bootcamp components and browser tests
-        run: npx eslint src/features/bootcamp e2e/bootcamp-approved.spec.ts e2e/bootcamp-forensic-audit.spec.ts --max-warnings 0
-      - name: Check TypeScript contracts
-        run: npm run typecheck
-      - name: Build frontend
+      # Collect browser evidence even if another parallel workstream temporarily
+      # introduces static-analysis failures in the shared Bootcamp catalog.
+      - name: Build Vite frontend for browser acceptance
         run: npx vite build
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
@@ -50,6 +48,12 @@ jobs:
           CI: "true"
           TZ: Europe/Moscow
         run: npx playwright test bootcamp-approved.spec.ts bootcamp-forensic-audit.spec.ts --project=chromium --reporter=line
+      - name: Lint Bootcamp components and browser tests
+        if: always()
+        run: npx eslint src/features/bootcamp e2e/bootcamp-approved.spec.ts e2e/bootcamp-forensic-audit.spec.ts --max-warnings 0
+      - name: Check TypeScript contracts
+        if: always()
+        run: npm run typecheck
       - name: Upload five screenshots and browser traces
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
