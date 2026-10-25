@@ -95,6 +95,11 @@ function installFetch(options: { claims?: unknown[]; claimed?: boolean; claimsEr
   const probes = { posts: 0, url: null as string | null, method: null as string | null, body: null as string | null };
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+    if (url.includes("/ecosystem/events/")) {
+      if (url.endsWith("/registration")) return Promise.resolve(jsonResponse(aggregate("ok")));
+      const isCompleted = url.includes("/event-completed");
+      return Promise.resolve(jsonResponse({ ...detail, ... (isCompleted ? completedItem : listItem) }));
+    }
     if (url.includes("/ecosystem/events")) {
       return Promise.resolve(jsonResponse({ items: options.onlyOpenEvents ? [listItem] : [listItem, completedItem], next_cursor: null, has_more: false }));
     }
@@ -134,43 +139,53 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("participant event catalog claim lifecycle (7.2/7.4)", () => {
-  it("freezes +5 points on registration and keeps the source link safe", async () => {
+describe("participant event catalog: verified source and claim lifecycle", () => {
+  it("renders only API events and does not invent frozen points or completed events", async () => {
     const probes = installFetch();
     renderCatalog();
-    const source = await screen.findByRole("link", { name: /Перейти к событию/ });
-    expect(source).toHaveAttribute("href", "https://example.test/event");
-    expect(source).toHaveAttribute("rel", "noopener noreferrer");
-    expect(screen.getAllByRole("button", { name: "Подтвердить результат" })).toHaveLength(1);
-    fireEvent.click(screen.getByRole("button", { name: "Зарегистрироваться · +5" }));
-    expect(await screen.findByText("+5 frozen")).toBeInTheDocument();
-    expect(screen.getByText("5 баллов заморожены до окончания события и проверки результата.")).toBeInTheDocument();
+    const cards = await screen.findAllByTestId("event-reference-card");
+    expect(cards).toHaveLength(2);
+    expect(screen.queryByText("Маяки 2025")).toBeInTheDocument();
+    expect(screen.queryByText("Маяки 2026")).not.toBeInTheDocument();
+    expect(screen.queryByText("+5 frozen")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Зарегистрироваться · +5" })).not.toBeInTheDocument();
     expect(probes.posts).toBe(0);
-    expect(screen.queryAllByRole("button", { name: "Зарегистрироваться · +5" })).toHaveLength(0);
+    const first = cards[0];
+    if (!first) throw new Error("The first API event is missing");
+    fireEvent.click(within(first).getByRole("button", { name: "Подробнее" }));
+    expect(await screen.findByRole("dialog", { name: "AI Journey 2026" })).toBeInTheDocument();
+    const official = within(screen.getByRole("dialog", { name: "AI Journey 2026" })).getByRole("link", { name: /Сайт события/ });
+    expect(official).toHaveAttribute("href", "https://example.test/event");
+    expect(official).toHaveAttribute("rel", "noopener noreferrer");
   });
 
-  it("reports a completed-event result and shows the provisional claim state", async () => {
+  it("reports result for a real completed event, then displays its provisional status without a trophy", async () => {
     const probes = installFetch();
     renderCatalog();
     const proof = await screen.findByRole("button", { name: "Подтвердить результат" });
     fireEvent.click(proof);
-    const claimDialog = await screen.findByRole("dialog", { name: /Подтвердить результат/ });
-    fireEvent.change(within(claimDialog).getByLabelText("Результат"), { target: { value: "winner" } });
-    fireEvent.click(screen.getByRole("button", { name: "Отправить на проверку" }));
+    const dialog = await screen.findByRole("dialog", { name: /Подтвердить результат/ });
+    fireEvent.change(within(dialog).getByLabelText("Результат"), { target: { value: "winner" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Отправить на проверку" }));
     await waitFor(() => { expect(probes.posts).toBe(1); });
     expect(probes.url).toContain("/me/events/event-completed/claims");
     expect(probes.method).toBe("POST");
-    expect(JSON.parse(String(probes.body))).toEqual({ claim_type: "winner", result: "Участвовал в команде и подготовил рабочий прототип.", evidence_url: "https://example.org/demo-evidence" });
-    expect(await screen.findByText("Участие заявлено вами; трофей и баллы не созданы.")).toBeInTheDocument();
-    expect(screen.getByText("Предварительно")).toBeInTheDocument();
-    expect(screen.queryAllByRole("button", { name: "Подтвердить результат" })).toHaveLength(0);
+    expect(JSON.parse(String(probes.body))).toEqual({
+      claim_type: "winner",
+      result: "Участвовал в команде и подготовил рабочий прототип.",
+      evidence_url: "https://example.org/demo-evidence",
+    });
+    expect(await screen.findByText("На проверке")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Подтвердить результат" })).not.toBeInTheDocument();
+    expect(screen.queryByText("+5 frozen")).not.toBeInTheDocument();
   });
 
-  it("keeps exactly one card when the claims read fails", async () => {
+  it("keeps the real event count when claims cannot be fetched", async () => {
     installFetch({ claimsError: true, onlyOpenEvents: true });
     renderCatalog();
-    await screen.findByRole("button", { name: "Зарегистрироваться · +5" });
+    expect(await screen.findAllByTestId("event-reference-card")).toHaveLength(1);
     expect(screen.getAllByRole("button", { name: "Подробнее" })).toHaveLength(1);
-    expect(screen.queryAllByRole("button", { name: "Подтвердить результат" })).toHaveLength(0);
+    expect(screen.queryByRole("button", { name: "Подтвердить результат" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Маяки 2025")).not.toBeInTheDocument();
   });
 });
