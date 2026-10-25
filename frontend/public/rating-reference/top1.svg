@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="360" viewBox="400 0 400 360" fill="none" role="img" aria-label="Награды рейтинга Impulse">
+<defs>
+  <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c4ffff"/><stop offset=".2" stop-color="#41f3ff"/><stop offset=".57" stop-color="#068cdb"/><stop offset=".84" stop-color="#083467"/><stop offset="1" stop-color="#021a39"/></linearGradient>
+  <linearGradient id="crownSide" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5cffff"/><stop offset=".34" stop-color="#0388d1"/><stop offset=".68" stop-color="#071f6b"/><stop offset="1" stop-color="#010c2b"/></linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2=".75" y2="1"><stop stop-color="#fffce2"/><stop offset=".15" stop-color="#ffda79"/><stop offset=".36" stop-color="#c88420"/><stop offset=".55" stop-color="#ffe39c"/><stop offset=".75" stop-color="#915018"/><stop offset="1" stop-color="#462507"/></linearGradient>
+  <linearGradient id="goldDark" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ad7420"/><stop offset=".45" stop-color="#4c2709"/><stop offset=".8" stop-color="#efac41"/><stop offset="1" stop-color="#391d08"/></linearGradient>
+  <linearGradient id="rock" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#704e22"/><stop offset=".33" stop-color="#30291d"/><stop offset=".75" stop-color="#0c1a21"/><stop offset="1" stop-color="#071020"/></linearGradient>
+  <radialGradient id="cGlow"><stop stop-color="#14eeff" stop-opacity=".7"/><stop offset=".45" stop-color="#05cfff" stop-opacity=".26"/><stop offset="1" stop-color="#05cfff" stop-opacity="0"/></radialGradient>
+  <radialGradient id="gGlow"><stop stop-color="#ffc750" stop-opacity=".88"/><stop offset=".5" stop-color="#f8a01e" stop-opacity=".23"/><stop offset="1" stop-color="#f8a01e" stop-opacity="0"/></radialGradient>
+  <filter id="bloom" x="-90%" y="-90%" width="280%" height="280%"><feGaussianBlur stdDeviation="9"/></filter>
+  <filter id="shine" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="3" stdDeviation="8" flood-color="#ffca50" flood-opacity=".75"/></filter>
+  <filter id="ice" x="-45%" y="-45%" width="190%" height="190%"><feDropShadow dx="0" dy="0" stdDeviation="9" flood-color="#00f5ff" flood-opacity=".85"/></filter>
+</defs>
+<!-- TOP 30 / cyan premium workstation -->
+<g transform="translate(0 0)">
+  <ellipse cx="258" cy="186" rx="180" ry="158" fill="url(#cGlow)"/>
+  <path d="M0 359L52 251L92 294L156 202L213 281L280 224L340 360Z" fill="#08253b" opacity=".91"/>
+  <path d="M94 360L172 235L210 282L272 231L357 360Z" fill="#041428" opacity=".96"/>
+  <g filter="url(#ice)">
+    <path d="M139 136L156 53L194 105L215 25L251 106L283 53L299 141Z" fill="url(#crownSide)" stroke="#5ffbff" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M156 53L194 105L215 25L230 130L139 136Z" fill="#81fbff" opacity=".28"/>
+    <path d="M215 25L251 106L283 53L299 141L229 135Z" fill="#1cdeff" opacity=".25"/>
+    <path d="M141 137Q221 160 300 137L294 155Q218 170 145 156Z" fill="url(#cyan)" stroke="#98ffff" stroke-width="3"/>
+    <circle cx="156" cy="53" r="7" fill="#fff"/><circle cx="215" cy="24" r="7" fill="#f3ffff"/><circle cx="283" cy="53" r="7" fill="#fff"/>
+    <rect x="149" y="150" width="144" height="117" rx="18" fill="url(#crownSide)" stroke="#2ae4ff" stroke-width="3"/>
+    <path d="M157 158L218 151L222 263L166 256Z" fill="#6afaff" opacity=".23"/>
+    <g transform="translate(169 184)">
+      <rect x="0" y="0" width="113" height="90" rx="13" fill="#061c40" stroke="#45f9ff" stroke-width="4" transform="rotate(-7 56 45)"/>
+      <text x="53" y="45" font-size="61" text-anchor="middle" font-family="Arial,sans-serif" fill="#2effee" transform="rotate(-7 53 45)">∞</text>
+      <text x="56" y="69" font-size="16" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" fill="#b7fffc" transform="rotate(-7 56 69)">GigaCode</text>
+    </g>
+  </g>
+  <path d="M107 296L175 267L284 279L336 321L311 360H93L69 327Z" fill="#081d2c"/>
+  <path d="M112 296L191 280L161 345L97 360L69 327Z" fill="#13435b" opacity=".7"/>
+  <path d="M194 279L284 279L336 321L276 352Z" fill="#03283f" opacity=".9"/>
+  <g fill="#b4ffff"><circle cx="118" cy="59" r="2"/><circle cx="318" cy="91" r="3"/><circle cx="95" cy="170" r="2"/><circle cx="306" cy="26" r="2"/></g>
+</g>
+<!-- TOP 1 / gold winner's trophy -->
+<g transform="translate(400 0)">
+  <ellipse cx="236" cy="180" rx="170" ry="175" fill="url(#gGlow)"/>
+  <path d="M0 360L68 247L128 305L169 224L242 296L294 231L400 360Z" fill="#292018"/>
+  <path d="M53 360L131 278L186 326L247 261L349 360Z" fill="#382a1b"/>
+  <path d="M171 350L129 279L197 251L273 298L346 336L313 360Z" fill="url(#rock)"/>
+  <g filter="url(#shine)">
+    <path d="M148 103L138 48L182 70L205 18L237 67L280 45L268 110Z" fill="url(#gold)" stroke="#ffe59b" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="139" cy="48" r="6" fill="#fff3ae"/><circle cx="205" cy="18" r="7" fill="#fffad3"/><circle cx="280" cy="45" r="6" fill="#fff3ae"/>
+    <path d="M155 98Q204 85 264 98L258 129Q201 139 159 125Z" fill="url(#goldDark)" stroke="#ffe6a4" stroke-width="3"/>
+    <path d="M151 118L255 115L252 245L199 277L152 243Z" fill="url(#gold)" stroke="#ffe7aa" stroke-width="4"/>
+    <path d="M200 124L200 271L153 243L151 118Z" fill="#ffbe44" opacity=".36"/>
+    <path d="M213 133L191 182H212L190 236L240 168H214L233 132Z" fill="#4c2309" stroke="#ffe99f" stroke-width="2"/>
+    <path d="M174 263L229 263L253 291L161 290Z" fill="url(#goldDark)" stroke="#ebba50" stroke-width="3"/>
+    <rect x="137" y="287" width="143" height="27" rx="8" fill="url(#gold)" stroke="#ffe9b2" stroke-width="3"/>
+    <path d="M144 314L271 314L285 335L135 335Z" fill="#623710" stroke="#ffc05a" stroke-width="2"/>
+  </g>
+  <path d="M115 324L145 304L176 349L115 358Z" fill="#70451b"/><path d="M274 312L319 343L291 359L243 339Z" fill="#99541b"/>
+  <g fill="#ffefaa"><circle cx="112" cy="63" r="2"/><circle cx="317" cy="95" r="3"/><circle cx="85" cy="185" r="2"/><circle cx="302" cy="22" r="2"/></g>
+</g>
+<!-- TOP 50 / community trophy -->
+<g transform="translate(800 0)">
+  <ellipse cx="255" cy="180" rx="170" ry="162" fill="url(#gGlow)"/>
+  <path d="M0 360L78 240L142 288L202 240L276 298L334 226L400 359Z" fill="#27231d"/>
+  <path d="M47 358L105 270L152 310L228 256L327 358Z" fill="#433324"/>
+  <path d="M95 358L140 285L192 311L248 270L316 350Z" fill="url(#rock)"/>
+  <g filter="url(#shine)">
+    <path d="M160 101C131 86 113 96 118 136C122 174 148 195 172 199" stroke="#d28a2c" stroke-width="14" stroke-linecap="round"/>
+    <path d="M250 101C279 86 297 96 292 136C288 174 262 195 238 199" stroke="#eeb54e" stroke-width="14" stroke-linecap="round"/>
+    <path d="M160 101C131 86 113 96 118 136C122 174 148 195 172 199" stroke="#ffeaa6" stroke-width="4"/>
+    <path d="M250 101C279 86 297 96 292 136C288 174 262 195 238 199" stroke="#ffeaa6" stroke-width="4"/>
+    <path d="M147 88L264 88L252 186Q243 217 208 233Q172 219 160 184Z" fill="url(#gold)" stroke="#fff0ba" stroke-width="5"/>
+    <path d="M150 97L205 98L207 221Q171 202 161 181Z" fill="#fff2ba" opacity=".18"/>
+    <path d="M206 115L220 147L254 151L229 176L235 209L205 193L176 207L181 175L156 152L190 147Z" fill="#fff5c4" stroke="#fff9d9" stroke-width="2"/>
+    <path d="M199 227L218 229L221 260L196 260Z" fill="url(#goldDark)"/>
+    <path d="M181 260L240 260L253 279L169 279Z" fill="url(#gold)" stroke="#ffe9aa" stroke-width="3"/>
+    <path d="M150 283L266 283L279 308L138 308Z" fill="url(#goldDark)" stroke="#f0bb5b" stroke-width="3"/>
+  </g>
+  <g fill="#fff3be"><circle cx="129" cy="39" r="2"/><circle cx="302" cy="81" r="3"/><circle cx="109" cy="220" r="2"/></g>
+</g>
+</svg>
