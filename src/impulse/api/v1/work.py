@@ -1759,7 +1759,7 @@ async def upload_checkpoint_file(
             code="INVALID_EVIDENCE_FILENAME", message="Недопустимое имя.", status_code=422
         )
     file_id = uuid4()
-    async with request.app.state.database.sessions() as session:
+    async with request.app.state.database.session() as session:
         await session.execute(
             text(
                 "INSERT INTO checkpoint_evidence_files "
@@ -1947,7 +1947,7 @@ async def submit_checkpoint_solution(
         f"Чекпоинт «{checkpoint.title}»: {command.summary}",
         (TeamArtifactRecord(command.artifact_key, primary_url),),
     )
-    async with request.app.state.database.sessions() as session:
+    async with request.app.state.database.session() as session:
         await session.execute(
             text(
                 "INSERT INTO checkpoint_submissions "
