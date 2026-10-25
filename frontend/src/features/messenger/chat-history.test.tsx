@@ -122,6 +122,19 @@ afterEach(() => {
 });
 
 describe("ChatHistory", () => {
+  it("names a direct chat after the other participant, not both people in the backend title", () => {
+    const direct: ApiChannelView = {
+      ...channelView(),
+      kind: "personal",
+      title: "Алексей Смирнов, Елена Васильева",
+      task_id: null,
+    };
+    const { container } = renderChat(new MemoryStorage(), { channel: direct });
+    expect(screen.getByRole("heading", { name: "Елена Васильева" })).toBeInTheDocument();
+    expect(container.querySelector(".msg-chat__avatar")?.textContent).toBe("Е");
+    expect(container.querySelector(".msg-chat__header-title")?.textContent).not.toContain("Алексей Смирнов");
+  });
+
   it("отображает состояния: загрузка, пусто, read-only и offline баннер", () => {
     const storage = new MemoryStorage();
     const initial = renderChat(storage, { isLoadingInitial: true, messages: [] });
