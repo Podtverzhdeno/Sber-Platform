@@ -68,7 +68,7 @@ test("premium analytics fits mobile and period and tabs remain interactive",asyn
  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
  if(overflow>2){
   const offenders=await page.evaluate(()=>Array.from(document.querySelectorAll<HTMLElement>("body *")).map(el=>{
-    const rect=el.getBoundingClientRect();return {tag:el.tagName,className:String(el.className).slice(0,60),left:Math.round(rect.left),right:Math.round(rect.right),width:Math.round(rect.width)};
+    const rect=el.getBoundingClientRect();return {tag:el.tagName,className:el.className.slice(0,60),left:Math.round(rect.left),right:Math.round(rect.right),width:Math.round(rect.width)};
   }).filter(x=>x.right>window.innerWidth+2||x.left< -2).slice(0,20));
   throw new Error("Horizontal overflow "+String(overflow)+": "+JSON.stringify(offenders));
  }
