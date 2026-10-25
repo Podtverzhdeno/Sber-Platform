@@ -44,7 +44,7 @@ async function openPortfolio(page: import("@playwright/test").Page, skills: {key
 }
 
 for (const viewport of [{width:1440,height:900},{width:390,height:844}]) {
-  test(`qualitative passport renders two actual skills without imaginary radar levels (${viewport.width}px)`, async ({page}) => {
+  test(`qualitative passport renders two actual skills without imaginary radar levels (${String(viewport.width)}px)`, async ({page}) => {
     await page.setViewportSize(viewport);
     await openPortfolio(page, [
       {key:"python",practical_level:"подтверждено",confirmed_case_count:2},
