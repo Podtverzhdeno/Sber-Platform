@@ -437,3 +437,50 @@ def test_group_creation_rejects_unknown_people_and_foreign_channels() -> None:
     assert post([str(ALEX)]).status_code == 422
     assert post([str(UUID(int=999))]).status_code == 422
     assert post([]).status_code == 422
+
+
+def test_contact_directory_and_group_creation_work_with_demo_flag_disabled() -> None:
+    """Program members can message each other after demo mode is switched off.
+
+    Keep demo-login isolated to the test setup; exercise the same session after
+    flipping settings. The group is stored in the MessagingService, not only UI.
+    """
+    api, _store = build()
+    csrf = login(api, "participant-alex")
+    api.app.state.settings.demo_mode = False
+
+    contacts = api.get("/api/v1/me/messaging/contacts")
+    assert contacts.status_code == 200
+    ids = {entry["id"] for entry in contacts.json()}
+    assert str(ELENA) in ids and str(ROMAN) in ids
+    assert str(ALEX) not in ids
+
+    created = api.post(
+        "/api/v1/me/messaging/channels/group",
+        json={"title": "AI-проект: участники", "peer_ids": [str(ELENA), str(ROMAN)]},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert created.status_code == 201
+    channel_id = created.json()["id"]
+    assert created.json()["kind"] == "community"
+    assert {part["id"] for part in created.json()["participants"]} == {
+        str(ALEX), str(ELENA), str(ROMAN),
+    }
+
+    message = api.post(
+        f"/api/v1/me/messaging/channels/{channel_id}/messages",
+        json={"body": "Новый чат работает, сообщение сохранено."},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert message.status_code == 200
+    assert api.get(f"/api/v1/me/messaging/channels/{channel_id}/messages").json()[-1]["body"] == (
+        "Новый чат работает, сообщение сохранено."
+    )
+
+    invalid = api.post(
+        "/api/v1/me/messaging/channels/personal",
+        json={"peer_id": str(UUID(int=999))},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert invalid.status_code == 403
+    assert invalid.json()["code"] == "MESSAGE_PEER_INVALID"
