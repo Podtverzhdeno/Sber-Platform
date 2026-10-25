@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bell, BellOff, Check, ChevronRight, Copy, ExternalLink, FileText, Image as ImageIcon, Link2, MoreHorizontal, Plus, Search, UsersRound, X, Bot, MessageSquareText } from "lucide-react";
+import { Bell, BellOff, ChevronRight, Copy, ExternalLink, FileText, Image as ImageIcon, Link2, MoreHorizontal, Plus, Search, UsersRound, X, Bot, MessageSquareText } from "lucide-react";
 import type { ApiChannelView, ApiMessageView, ApiParticipantView } from "./contracts";
 import { participantRoleLabel } from "./view-model";
 import type { DirectoryContact } from "./group-creator";
@@ -35,11 +35,12 @@ function collectShared(messages: readonly ApiMessageView[]) {
 }
 
 export function CommunityDetails({
-  channel, viewerId, messages, contacts, onClose, onToggleMute, onOpenMember, onInvite,
+  channel, viewerId, messages, attachmentRefs = [], contacts, onClose, onToggleMute, onOpenMember, onInvite,
 }: {
   channel: ApiChannelView;
   viewerId: string | null;
   messages: readonly ApiMessageView[];
+  attachmentRefs?: readonly string[];
   contacts: readonly DirectoryContact[];
   onClose?: () => void;
   onToggleMute?: () => void;
@@ -63,6 +64,10 @@ export function CommunityDetails({
   });
   const visible = participants.filter(person => person.display_name.toLocaleLowerCase("ru").includes(filter.toLocaleLowerCase("ru")));
   const shared = collectShared(messages);
+  for (const ref of attachmentRefs) {
+    if (imagePattern.test(ref)) { if (!shared.media.includes(ref)) shared.media.push(ref); }
+    else if (!shared.files.includes(ref)) shared.files.push(ref);
+  }
   const bots = participants.filter(person => person.role === "bot");
   const canInvite = Boolean(onInvite && channel.status === "active" && channel.sender_enabled);
   const eligible = contacts.filter(person =>
