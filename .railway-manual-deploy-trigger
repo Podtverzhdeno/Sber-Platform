@@ -2,3 +2,6 @@
 
 # Bootcamp unified practical reader; twelve applied labs; 96 lessons; QA verified
 release_request=2026-10-25-course-learning-c59dc098d684
+
+# Bootcamp final capstones and four-block applied course reader; browser and curriculum QA passed
+release_request=2026-10-25-bootcamp-final-capstones-47b3bfee55b2
