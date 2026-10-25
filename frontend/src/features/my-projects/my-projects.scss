@@ -316,3 +316,7 @@
 .mpv2 .mp-page-title__row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .mpv2 .mp-page-title__row>div{min-width:0}
 @media(max-width:540px){.mpv2 .mp-page-title__row{flex-wrap:wrap}.mpv2 .mp-help{align-self:flex-start}.mpv2 .mp-help-banner{display:grid}}
+
+.mpv2 .mp-page-title__row>div>p:last-child{font-size:15px;line-height:1.45;color:#a8c8e4;margin:0;max-width:1080px}
+@media(max-width:760px){.mpv2 .mp-page-title__row>div>p:last-child{font-size:13px}}
+[data-theme="light"] .mpv2 .mp-page-title__row>div>p:last-child{color:#52718a}
