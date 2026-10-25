@@ -22,6 +22,7 @@ const work = projects.map(item=>({
   decisions: [], allowed_artifacts: [],
 }));
 async function fixture(page: Page) {
+  await page.clock.setFixedTime(new Date("2026-10-25T12:00:00Z"));
   let authenticated=false;
   await page.route("**/api/v1/config", route=>route.fulfill({json:{demo_mode:true,honor_board_enabled:false}}));
   await page.route("**/api/v1/auth/personas", route=>route.fulfill({json:[{key:"participant-alex",display_name:actor.display_name,roles:["participant"]}]}));
@@ -184,4 +185,38 @@ test("My Projects: writing to a teammate targets the selected participant",async
   await page.locator(".mp-team-member").nth(1).getByRole("button",{name:"Написать"}).click();
   await expect(page).toHaveURL(/participant=mentor-1/);
   await expect(page).toHaveURL(/task=task-assignment-1/);
+});
+
+test("My Projects: compact reference cards show real team and no duplicated benefit strip",async({page})=>{
+  await page.setViewportSize({width:1672,height:941});
+  await fixture(page);
+  const cards=page.locator(".mp-project-grid .mp-project-tile");
+  await expect(cards).toHaveCount(3);
+  await expect(cards.first().locator(".mp-team-avatars i")).toHaveCount(2);
+  await expect(cards.first().locator(".mp-project-card-rewards")).toHaveCount(0);
+  await expect(cards.first()).toHaveClass(/is-selected/);
+  const box=await cards.first().boundingBox();
+  expect(box).not.toBeNull();
+  expect(box!.height).toBeLessThanOrEqual(265);
+  await page.getByRole("button",{name:"Быстрый просмотр"}).first().click();
+  await expect(page.locator(".mp-preview")).toBeVisible();
+  await page.getByRole("button",{name:"Скрыть предпросмотр"}).first().click();
+  await expect(page.locator(".mp-preview")).toHaveCount(0);
+});
+
+test("My Projects: deadline selection filters cards and list consistently",async({page})=>{
+  await page.setViewportSize({width:1672,height:941});
+  await fixture(page);
+  const projects=page.locator(".mpv2");
+  const deadline=projects.getByRole("combobox",{name:"Сроки"});
+  await deadline.selectOption("month");
+  await expect(projects.locator(".mp-project-tile")).toHaveCount(0);
+  await deadline.selectOption("all");
+  await expect(projects.locator(".mp-project-tile")).toHaveCount(3);
+  await deadline.selectOption("overdue");
+  await expect(projects.locator(".mp-project-tile")).toHaveCount(0);
+  await projects.getByRole("group",{name:"Режим проектов"}).getByRole("button",{name:"Список"}).click();
+  await expect(projects.locator(".mp-table tbody tr")).toHaveCount(0);
+  await deadline.selectOption("all");
+  await expect(projects.locator(".mp-table tbody tr")).toHaveCount(3);
 });
