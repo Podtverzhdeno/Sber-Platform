@@ -37,7 +37,7 @@ jobs:
         env:
           CI: "true"
           TZ: Europe/Moscow
-        run: npx playwright test my-projects-v2.spec.ts --project=chromium --grep "introductory copy" --reporter=line
+        run: npx playwright test my-projects-v2.spec.ts --project=chromium --grep "introductory copy|mobile help" --reporter=line
       - name: TypeScript whole-project gate
         run: npm run typecheck
       - name: Save browser evidence
