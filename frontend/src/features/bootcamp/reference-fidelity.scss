@@ -287,3 +287,59 @@
 .bc-reference .bc-ref-course-card[data-access="prerequisite_not_met"]{
   opacity:1;align-self:start;
 }
+
+/* BC-R03..BC-R05 measured panel anatomy: 520px desktop drawer, 65px header,
+   259px course hero, 204px required hero; never invent completion percentages. */
+.bc-reference .overlay-panel--drawer{width:min(520px,100vw);max-width:520px}
+.bc-reference .overlay-panel--drawer>header{min-height:65px}
+@media(min-width:621px){
+  .bc-reference .bc-ref-detail-hero{min-height:259px;align-content:center}
+}
+.bc-reference .bc-panel-content[data-reference="BC-R05"]{
+  padding:0!important;display:block;gap:0;
+}
+.bc-ref-required-hero{
+  min-height:204px;
+  padding:23px;
+  background:linear-gradient(125deg,#101638,#0d1f48 65%,#061c36);
+  border-bottom:1px solid #22516c;
+  display:flex;flex-direction:column;align-items:start;justify-content:center;gap:11px;
+}
+.bc-reference .bc-ref-required-hero h2{
+  color:#f5faff;font-size:23px!important;font-weight:800;
+  line-height:1.25;margin:0;
+}
+.bc-reference .bc-ref-required-hero p{
+  color:#b5cde7;font-size:12px;line-height:1.6;margin:0;
+}
+.bc-ref-required-body{display:grid;gap:10px;padding:16px 23px 25px}
+.bc-reference .bc-ref-required-body>h3{font-size:15px!important;font-weight:800;color:#f4f9ff;margin:0}
+.bc-ref-required-list{display:grid;gap:10px;list-style:none;margin:0;padding:0}
+.bc-ref-required-list>li{
+  min-height:74px;display:grid;grid-template-columns:46px minmax(0,1fr) auto;
+  align-items:center;gap:12px;padding:12px;
+  background:#09243e;border:1px solid #245775;border-radius:10px;
+}
+.bc-ref-required-list .bc-ref-art{width:46px;height:46px}
+.bc-ref-required-list .bc-ref-art svg{width:27px;height:27px}
+.bc-ref-required-course-info{min-width:0}
+.bc-ref-required-course-info h4{margin:0 0 5px;font-size:13px;color:#f3faff;font-weight:800;line-height:1.3}
+.bc-ref-required-course-info small{font-size:10px;color:#9fc1db}
+.bc-reference .bc-ref-required-list button{
+  min-height:35px;padding:8px 12px;border:0;border-radius:8px;
+  background:#08e8ec;color:#021729;display:flex;align-items:center;gap:9px;
+  font-size:12px;font-weight:800;white-space:nowrap;
+}
+.bc-ref-required-list button svg{width:16px;height:16px}
+.bc-ref-required-about{margin:0;padding:13px;background:#0c2843;border:1px solid #255575;border-radius:10px}
+.bc-reference .bc-ref-required-about h3{font-size:13px!important;margin:0 0 9px;color:#f3faff}
+.bc-reference .bc-ref-required-about p{font-size:12px;line-height:1.55;color:#aecaec}
+.bc-reference .bc-ref-required-close{width:max-content;max-width:100%;margin:0;padding:9px 15px;font-size:12px}
+@media(max-width:620px){
+  .bc-reference .overlay-panel--drawer{width:100vw;max-width:none}
+  .bc-ref-required-hero{min-height:221px;padding:17px}
+  .bc-ref-required-body{padding:14px 17px}
+  .bc-ref-required-list>li{grid-template-columns:44px minmax(0,1fr);gap:9px}
+  .bc-reference .bc-ref-required-list button{grid-column:2;justify-self:end}
+  .bc-reference .bc-ref-detail-hero{min-height:245px}
+}
