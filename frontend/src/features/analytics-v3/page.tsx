@@ -6,7 +6,7 @@ import { apiRequest } from "../../api/client";
 import { AnalyticsReference } from "../analytics-reference";
 import { ParticipantHelpTrigger } from "../participant-help-trigger";
 import { LearningProgressPanel } from "../learning-progress-panel";
-import { learningSummaryQueryKey, loadLearningSummary } from "../learning-progress";
+import { learningSummaryQueryKey, loadLearningSummary, type LearningSummary } from "../learning-progress";
 import "./analytics-v3.scss";
 
 type Tab = "activity" | "passport" | "certification";
@@ -51,6 +51,28 @@ function CertificationTab({certificates,openDetail,openSection}:{certificates:Ce
  <div className="av3-cert-pair"><Panel title="Доступные награды" action={<button type="button" className="av3-small-btn" onClick={()=>{openDetail("Все награды");}}>Все награды ↗</button>}><div className="av3-awards">{steps.map(s=><button key={s.title} type="button" onClick={()=>{openDetail(s.title);}}><s.Icon size={32}/><strong>{s.title}</strong><small>Agentic Coding</small><em><LockKeyhole size={12}/>Не выдан</em></button>)}</div></Panel><Panel title="История попыток / экзаменов" action={<button className="av3-small-btn" type="button" onClick={()=>{openDetail("История попыток");}}>Все попытки ↗</button>}><p className="av3-empty">Данных об экзаменационных попытках пока нет. Это не означает провал экзамена.</p></Panel></div>
  </div><div className="av3-cert-sidebar"><Panel title="Текущая сертификация" cls="av3-credential"><div className="av3-credential-main"><span className="av3-badge"><Code2 size={42}/></span><div><strong>{latest?.course_title||"Agentic Coding · Practitioner"}</strong><p>{latest?"Сертификат курса из реестра":"Пример возможного уровня"}</p></div></div><div className="av3-cert-progress"><span>Статус документа</span><strong>{latest?"Выдан":"Не выдан"}</strong></div><div className="av3-progress"><i style={{width:latest?"100%":"0%"}}/></div><dl><div><dt>Статус проверки</dt><dd>{latest?"Доступна публичная проверка":"Нет подтверждения"}</dd></div><div><dt>ID сертификата</dt><dd>{latest?.certificate_id||"Не присвоен"}</dd></div><div><dt>Дата выдачи</dt><dd>{latest?dateText(latest.issued_at):"—"}</dd></div></dl>{latest?.verification_id?<Link className="av3-primary" to={"/verify/"+encodeURIComponent(latest.verification_id)}>Открыть сертификат <ArrowRight size={16}/></Link>:<button type="button" className="av3-primary" onClick={()=>{openDetail("Условия получения сертификата");}}>Условия получения <ArrowRight size={16}/></button>}</Panel><Panel title="Следующий шаг" cls="av3-next av3-cert-next"><div className="av3-next-body"><Target size={37}/><b>Подготовить практический проект</b><p>Изучить критерии, выполнить задачу и представить проверяемый результат</p><button type="button" className="av3-primary" onClick={()=>{openSection("Задачи");}}>Перейти к заданию <ArrowRight size={16}/></button></div><div className="av3-todo">{["Изучи критерии оценки","Подготовь решение","Передай на проверку"].map(x=><label key={x}><input type="checkbox"/>{x}</label>)}</div></Panel></div></div></>;
 }
+/** Impulse self-study evidence is intentionally separate from provider-verified credentials. */
+function StudyResults({summary,view}:{summary:LearningSummary|undefined;view:"activity"|"certification"}) {
+  if (!summary) return null;
+  const courses = summary.courses;
+  const finished = courses.filter(course=>course.finished && course.certificate_id!==null);
+  const totalUnits = courses.reduce((sum,c)=>sum+c.total_units,0);
+  const completeUnits = courses.reduce((sum,c)=>sum+c.completed_units,0);
+  return <section className="av3-study-results" data-testid="analytics-study-results" aria-label="Сохранённый прогресс Bootcamp">
+    <header><div><span>BOOTCAMP · СИНХРОНИЗИРОВАНО</span><h2>{view==="activity"?"Учебный прогресс":"Сертификаты обучения Impulse"}</h2></div><small>Отдельно от подтверждения профессиональных компетенций</small></header>
+    <div className="av3-study-metrics">
+      <div><b>{summary.completed_lessons}</b><span>уроков завершено</span></div>
+      <div><b>{summary.finished_courses}</b><span>курсов пройдено</span></div>
+      <div><b>{summary.approved_practices}</b><span>практик одобрено</span></div>
+      <div><b>{totalUnits ? String(Math.round(100*completeUnits/totalUnits))+"%" : "—"}</b><span>прогресс начатых курсов</span></div>
+    </div>
+    {courses.length>0 && <div className="av3-study-list">{courses.slice(0,view==="activity"?3:20).map(course=><div key={course.course_key} className="av3-study-course">
+      <span><strong>{course.title}</strong><small>{course.finished?"Завершён":"В изучении"} · {course.completed_units} из {course.total_units} уроков{view==="certification"&&course.certificate_id?" · Учебный сертификат № "+course.certificate_id:""}</small></span>
+      <progress max={course.total_units} value={course.completed_units} aria-label={"Учебный прогресс "+course.title}/>
+    </div>)}</div>}
+    {view==="certification" && <p className="av3-study-note">{finished.length} учебных сертификатов Impulse. Для подтверждения практической компетенции нужна отдельная проверка работы.</p>}
+  </section>;
+}
 export function AnalyticsDashboardV3({navigation=[]}:{navigation?:string[]}) {
  const [params,setParams]=useSearchParams();const requested=params.get("analyticsTab");const tab:Tab=requested==="passport"||requested==="certification"?requested:"activity";
  const [weeks,setWeeks]=useState(8);const [detail,setDetail]=useState<string|null>(null);
@@ -77,9 +99,9 @@ export function AnalyticsDashboardV3({navigation=[]}:{navigation?:string[]}) {
  const desc=tab==="activity"?"Здесь собрана статистика вовлечённости, выполненных действий и ритма развития.":tab==="passport"?"Подтверждённые навыки, реальные доказательства и путь к следующему уровню роли.":"Статус сертификации, прогресс к новым бейджам и подтверждённые достижения.";
  const fresh=tab==="activity"?activitySnapshot?.freshness.latest_observed_at:certificates.data?.[0]?.issued_at;
  return <main className="analytics-v3" data-testid="analytics-v3" data-tab={tab}><header className="av3-top"><div className="av3-headline"><span>АНАЛИТИКА / {tabNames[tab].toUpperCase()}</span><h1 id="workspace-title">{title}</h1><p>{desc}</p></div><nav className="av3-tabs" aria-label="Подразделы аналитики">{(Object.keys(tabNames) as Tab[]).map(k=><button key={k} className={k===tab?"selected":""} aria-current={k===tab?"page":undefined} type="button" onClick={()=>{choose(k);}}>{tabNames[k]}</button>)}</nav><div className="av3-help-inline"><ParticipantHelpTrigger topicId={tab==="activity"?"analytics-activity":tab==="passport"?"passport":"certification"} label="Как это читать" /></div><div className="av3-global-filters"><label>Период<select aria-label="Период аналитики" value={weeks} onChange={e=>{setWeeks(Number(e.target.value));}}><option value={4}>4 недели</option><option value={8}>8 недель</option><option value={12}>12 недель</option></select></label><span className="av3-fresh">● {fresh?"Данные "+dateText(fresh):"Источник недоступен"}</span></div></header>
- {tab==="activity"&&<>{snapshot.isError&&<div className="av3-alert" role="alert">История активности недоступна <button type="button" onClick={()=>{void snapshot.refetch();}}>Повторить</button></div>}<ActivityTab snapshot={activitySnapshot} weeks={weeks} openSection={openSection}/></>}
+ {tab==="activity"&&<>{learning.isError&&<div className="av3-alert" role="alert">Учебный прогресс недоступен <button type="button" onClick={()=>{void learning.refetch();}}>Повторить</button></div>}<StudyResults summary={learning.data} view="activity"/>{snapshot.isError&&<div className="av3-alert" role="alert">История активности недоступна <button type="button" onClick={()=>{void snapshot.refetch();}}>Повторить</button></div>}<ActivityTab snapshot={activitySnapshot} weeks={weeks} openSection={openSection}/></>}
  {tab==="passport"&&<div className="av3-embedded-passport"><AnalyticsReference navigation={navigation}/></div>}
- {tab==="certification"&&<>{certificates.isError&&<div className="av3-alert" role="alert">Реестр сертификатов недоступен <button type="button" onClick={()=>{void certificates.refetch();}}>Повторить</button></div>}<CertificationTab certificates={certificates.data} openDetail={setDetail} openSection={openSection}/></>}
+ {tab==="certification"&&<>{certificates.isError&&<div className="av3-alert" role="alert">Реестр сертификатов недоступен <button type="button" onClick={()=>{void certificates.refetch();}}>Повторить</button></div>}<CertificationTab certificates={certificates.data} openDetail={setDetail} openSection={openSection}/><StudyResults summary={learning.data} view="certification"/></>}
  {tab!=="passport"&&<LearningProgressPanel bootcampIndex={Math.max(0,navigation.indexOf("Bootcamp"))}/>}
  <p className="av3-data-foot">Аналитика опирается на текущие источники Impulse. Отсутствующие данные не заменяются нулём; статус корпоративного L1 не присваивается автоматически.</p>
  {detail&&<div className="av3-overlay" role="presentation" onClick={()=>{setDetail(null);}}><section className="av3-dialog" role="dialog" aria-modal="true" aria-label={detail} onClick={e=>{e.stopPropagation();}}><button type="button" aria-label="Закрыть" onClick={()=>{setDetail(null);}}><X size={22}/></button><Sparkles size={36}/><h2>{detail}</h2><p>Для присвоения уровня необходимы утверждённые требования, проверяемые цифровые следы и решение уполномоченной стороны. Пока данные об этом шаге не поступили, статус не считается выполненным.</p><button className="av3-primary" type="button" onClick={()=>{setDetail(null);}}>Понятно <ArrowRight size={16}/></button></section></div>}
