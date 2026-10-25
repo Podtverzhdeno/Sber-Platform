@@ -120,7 +120,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   };
   // All cards come from the authorized server catalog; never invent
   // frontend-only roles or progress for unselected tracks.
-  const catalogueRoles = useMemo(() => canonicalAiRoles(overview.roles), [overview.roles]);
+  const catalogueRoles = useMemo(() => canonicalAiRoles(overview.roles), [overview]);
   const roleParam = searchParams.get("role");
   const selectedKey = useMemo(() => {
     const paramRole = catalogueRoles.find((role) => role.track_key === roleParam);
@@ -261,7 +261,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 <RoleCardOverview
                   role={role}
                   courseProgress={role.track_key===selectedKey && roleLevel?.curriculum_state==="published" ? `${String(roleLevel.completed_courses)} из ${String(roleLevel.required_courses)} курсов` : null}
-                  nextCycle={role.track_key===selectedKey && nextCycleUnpublished && roleLevel ? `L${String(roleLevel.level)} · цикл ${String(roleLevel.cycle_number)}` : null}
+                  nextCycle={role.track_key===selectedKey && roleLevel?.curriculum_state==="unpublished" && roleLevel.level>0 ? `L${String(roleLevel.level)} · цикл ${String(roleLevel.cycle_number)}` : null}
                   primary={role.track_key === primaryKey}
                   selected={role.track_key === selectedKey}
                   pinned={role.track_key === pinnedTrack}
