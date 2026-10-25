@@ -1,0 +1,60 @@
+name: My Projects Rewards Visual QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/my-projects/rewards-journey.tsx"
+      - "frontend/src/features/my-projects/rewards-journey.scss"
+      - "frontend/src/features/my-projects/page.tsx"
+      - "frontend/public/projects-rewards/**"
+      - "frontend/e2e/my-projects-v2.spec.ts"
+      - ".github/workflows/my-projects-rewards-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: my-projects-rewards-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  rewards-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout exact code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install frontend
+        run: npm ci
+      - name: Lint rewards feature and browser assertions
+        run: npx eslint src/features/my-projects/rewards-journey.tsx src/features/my-projects/page.tsx e2e/my-projects-v2.spec.ts --max-warnings 0
+      - name: Bundle working React UI
+        run: npx vite build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Verify reward panels and modal desktop/mobile
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+          LANG: ru_RU.UTF-8
+        run: npx playwright test my-projects-v2.spec.ts --project=chromium --grep "golden Skill Passport|reward area and modal fit|cards, selection, filtering" --reporter=line
+      - name: Retain pixel screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: my-projects-reward-evidence
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore
