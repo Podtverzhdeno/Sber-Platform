@@ -23,3 +23,12 @@
 .starter-case__source a {display:inline-flex;gap:4px;align-items:center;color:#6ce6d8;text-decoration:underline;text-underline-offset:3px;}
 .starter-case__note {display:block;margin-top:12px;font-size:10px;line-height:1.5;color:#839daf;}
 @media(max-width:600px){.starter-case > summary{padding:11px}.starter-case__badge{display:none}.starter-case__body{padding:12px}.starter-case pre{font-size:11px}.starter-case__head{font-size:10px}}
+
+.starter-case__copy {
+ display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:4px 8px;
+ border:1px solid #367f94;border-radius:7px;background:#163a55;color:#8feee8;
+ font:inherit;font-size:10px;cursor:pointer;
+}
+.starter-case__copy:hover {border-color:#61f6e5;background:#215370;}
+.starter-case__copy:focus-visible {outline:3px solid #63f7e4;outline-offset:2px;}
+@media(max-width:420px){.starter-case__head{flex-wrap:wrap}.starter-case__copy{margin-left:auto}}
