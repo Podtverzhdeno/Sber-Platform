@@ -36,10 +36,13 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
   useEffect(() => {
     if (current === 0) return;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    lessonRef.current?.scrollIntoView?.({
-      block: "start",
-      behavior: reducedMotion ? "instant" : "smooth",
-    });
+    const lesson = lessonRef.current;
+    if (lesson && typeof lesson.scrollIntoView === "function") {
+      lesson.scrollIntoView({
+        block: "start",
+        behavior: reducedMotion ? "instant" : "smooth",
+      });
+    }
   }, [current]);
 
   const unit = program?.units[current];
