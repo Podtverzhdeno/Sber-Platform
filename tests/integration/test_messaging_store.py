@@ -148,7 +148,6 @@ async def test_messaging_messages_persist_to_postgresql_and_reset_clears() -> No
             .mappings()
             .all()
         )
-    channel_rows = [row for row in rows if row["payload"].get("channel_id") == str(created_id)]
     message_events = [
         row
         for row in rows
