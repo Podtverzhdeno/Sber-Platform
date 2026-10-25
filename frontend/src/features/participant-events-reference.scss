@@ -80,9 +80,9 @@
   .ev-benefits-bottom strong{font-size:13px}.ev-benefits-bottom span{display:inline-flex;align-items:center;gap:5px;color:#b9d3e0;font-size:11px}.ev-benefits-bottom svg{color:#1df3d6;width:16px;height:16px}
   .ev-empty{border:1px dashed #186263;background:#082334;border-radius:12px;padding:35px;text-align:center;color:#c8e5ed}
   .ev-detail-modal .overlay{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:17px;background:#00101bd9;backdrop-filter:blur(5px)}
-  .ev-detail-modal .overlay-panel--dialog{width:min(1210px,calc(100vw - 42px));height:min(860px,calc(100dvh - 40px));min-height:0;max-width:none;margin:0;padding:0;background:#031626;border:1px solid #15998e;border-radius:17px;box-shadow:0 30px 90px #000c,0 0 35px #00dbb61d;overflow:hidden;animation:evModalIn .22s ease-out;display:flex;flex-direction:column}
+  .ev-detail-modal .overlay-panel--dialog{position:relative;width:min(1210px,calc(100vw - 42px));height:min(860px,calc(100dvh - 40px));min-height:0;max-width:none;margin:0;padding:0;background:#031626;border:1px solid #15998e;border-radius:17px;box-shadow:0 30px 90px #000c,0 0 35px #00dbb61d;overflow:hidden;animation:evModalIn .22s ease-out;display:flex;flex-direction:column}
   .ev-detail-modal .overlay-panel--dialog>header{position:absolute;top:5px;right:20px;z-index:10;padding:0!important;height:40px;border:none!important}.ev-detail-modal .overlay-panel--dialog>header h2{position:absolute;left:-10000px}.ev-detail-modal .overlay-panel--dialog>header button{display:grid;place-items:center;width:38px;height:38px;min-height:38px;border:1px solid #285166;border-radius:8px;background:#0f2a3e;color:#dcf6ff;font-size:23px}
-  .ev-detail-top button:last-child{visibility:hidden;pointer-events:none}
+  .ev-detail-top button:last-child{display:none}
   .ev-detail-v2{height:100%;overflow:hidden;display:flex;flex-direction:column}
   .ev-detail-top{flex:none;display:flex;justify-content:space-between;align-items:center;min-height:49px;padding:0 19px}
   .ev-detail-top button{background:transparent;border:0;color:#b7d4e2;font-size:12px;display:flex;align-items:center;gap:8px;padding:8px}
