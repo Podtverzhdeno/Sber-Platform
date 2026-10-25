@@ -97,6 +97,7 @@ test("real project lifecycle propagates accepted evidence to all participant scr
   expect(projectsIndex).toBeGreaterThanOrEqual(0);
   expect(portfolioIndex).toBeGreaterThanOrEqual(0);
   expect(buddyIndex).toBeGreaterThanOrEqual(0);
+  const baselineJourney = await api<Journey>(page, "/api/v1/me/journey/snapshot");
   const portfolioBefore = await api<Portfolio>(page, "/api/v1/me/portfolio");
   const passportBefore = await api<Passport>(page, "/api/v1/me/talent-passport");
   const ratingBefore = await api<unknown[]>(page, "/api/v1/me/rating/standings");
@@ -109,8 +110,8 @@ test("real project lifecycle propagates accepted evidence to all participant scr
   );
 
   const pending = await api<Journey>(page, "/api/v1/me/journey/snapshot");
-  expect(pending.accepted_case_count).toBe(0);
-  expect(pending.projects).toHaveLength(0);
+  expect(pending.accepted_case_count).toBe(baselineJourney.accepted_case_count);
+  expect(pending.projects).toEqual(baselineJourney.projects);
   expect((await api<Passport>(page, "/api/v1/me/talent-passport")).cases).toEqual(passportBefore.cases);
 
   const customerAgain = await signIn(page, "customer-roman");
@@ -138,7 +139,7 @@ test("real project lifecycle propagates accepted evidence to all participant scr
   );
   const contributionId = submitted.id;
   const unaccepted = await api<Journey>(page, "/api/v1/me/journey/snapshot");
-  expect(unaccepted.accepted_case_count).toBe(0);
+  expect(unaccepted.accepted_case_count).toBe(baselineJourney.accepted_case_count);
   expect((await api<Portfolio>(page, "/api/v1/me/portfolio")).contributions).toEqual(
     portfolioBefore.contributions,
   );
@@ -167,7 +168,7 @@ test("real project lifecycle propagates accepted evidence to all participant scr
   )).toBe(true);
   const journey = await api<Journey>(page, "/api/v1/me/journey/snapshot");
   expect(journey.person_id).toBe(actor.person_id);
-  expect(journey.accepted_case_count).toBe(1);
+  expect(journey.accepted_case_count).toBe(baselineJourney.accepted_case_count + 1);
   expect(journey.projects.some(item =>
     item.assignment_id === assignmentId &&
     item.accepted_contribution_ids.includes(contributionId)
@@ -189,7 +190,9 @@ test("real project lifecycle propagates accepted evidence to all participant scr
   await page.goto(`/workspace/${String(buddyIndex)}`);
   const buddy = page.getByTestId("buddy-live-context");
   await expect(buddy).toBeVisible();
-  await expect(buddy.getByTestId("buddy-accepted-count")).toHaveText("1");
+  await expect(buddy.getByTestId("buddy-accepted-count")).toHaveText(
+    String(baselineJourney.accepted_case_count + 1),
+  );
 
   // Other participants must not inherit Alex's accepted personal evidence.
   await signIn(page, "participant-maria");
