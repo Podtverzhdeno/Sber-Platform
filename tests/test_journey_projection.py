@@ -140,6 +140,7 @@ def test_snapshot_is_self_scoped_and_denies_other_roles() -> None:
     settings = Settings(
         app_env=AppEnvironment.TEST,
         demo_mode=True,
+        database_url=None,  # Pure in-memory route test, independent of CI PostgreSQL env.
         session_secret=SecretStr("journey-test-secret-long-enough"),
     )
     with TestClient(create_app(settings)) as api:
