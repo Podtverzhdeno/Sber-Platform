@@ -11,6 +11,7 @@ import { apiRequest } from "../../api/client";
 import { StatePanel } from "../../components/ui";
 import { ParticipantHelpTrigger } from "../participant-help-trigger";
 import { ProjectDashboard } from "./project-dashboard";
+import { RewardsJourney } from "./rewards-journey";
 import { ProjectReferenceTasks, ProjectReferenceProgress, ProjectReferenceTeam, ProjectReferenceRewards } from "./project-detail-reference";
 import "./my-projects.scss";
 
@@ -58,11 +59,11 @@ const benefits = [
   { id: "gitverse", title: "Токены GitVerse", unlock: "Старт программы", icon: Layers3, color: "teal" },
   { id: "gigacode", title: "Токены GigaCode", unlock: "После 1 проекта", icon: Code2, color: "blue" },
   { id: "gigaagent", title: "Премиум GigaAgent", unlock: "После 2 проектов", icon: Crown, color: "gold" },
-  { id: "internship", title: "Стажировка в Сбере", unlock: "После 5 проектов", icon: BriefcaseBusiness, color: "blue" },
+  { id: "internship", title: "Возможность стажировки в Сбере", unlock: "После 5 проектов", icon: BriefcaseBusiness, color: "blue" },
   { id: "community", title: "Закрытое сообщество лучших", unlock: "После 10 проектов", icon: Users, color: "purple" },
   { id: "assessment", title: "Оценка личного вклада", unlock: "При сдаче результатов", icon: Award, color: "purple" },
   { id: "portfolio", title: "Пополнение портфолио", unlock: "После подтверждения", icon: Star, color: "teal" },
-  { id: "mentor", title: "Возможность стать ментором", unlock: "После 20 проектов", icon: Award, color: "gold" },
+  { id: "mentor", title: "Возможность стать ментором", unlock: "После 20 проектов", icon: Award, color: "teal" },
 ] as const;
 const filterChoices: { key: Filter; title: string }[] = [
   { key: "all", title: "Все проекты" }, { key: "active", title: "В работе" },
@@ -115,27 +116,6 @@ function ProgressBar({ value, compact = false }: { value: number | null; compact
 function Status({ status }: { status: string }) {
   const tone = finishedStatuses.has(status) ? "complete" : reviewStatuses.has(status) ? "review" : status === "revision_requested" ? "review" : "active";
   return <span className={`mp-status mp-status--${tone}`}><i />{statusText[status] || status}</span>;
-}
-function RewardsPath({ completedCount, onSelect }: { completedCount: number; onSelect: (id: string) => void }) {
-  const milestones = benefits.filter(item=>item.id!=="assessment"&&item.id!=="portfolio");
-  const always = benefits.filter(item=>item.id==="assessment"||item.id==="portfolio");
-  const unlocked = (id: string) => id === "gitverse" || id === "gigacode" && completedCount>=1 ||
-    id === "gigaagent" && completedCount>=2 || id === "internship" && completedCount>=5 ||
-    id === "community" && completedCount>=10 || id === "mentor" && completedCount>=20;
-  return <section className="mp-benefit-journey" aria-label="Возможности и результаты участия">
-    <div className="mp-benefit-heading"><h2>Возможности за выполненные проекты</h2><span><Info size={14}/> Пороги участия, выдача по условиям программы</span></div>
-    <div className="mp-benefit-steps">
-      {milestones.map((reward,index)=>{
-        const Icon=reward.icon;
-        return <button type="button" onClick={()=>{onSelect(reward.id);}} className={"mp-benefit-step mp-benefit-step--"+reward.color} key={reward.id} aria-label={reward.title+", "+reward.unlock}>
-          <span className="mp-benefit-step__index">{index+1}</span><span className="mp-benefit-step__icon"><Icon size={25}/></span>
-          <span className="mp-benefit-step__text"><strong>{reward.title}</strong><small>{unlocked(reward.id)?"Порог достигнут · выдача по условиям":reward.unlock}</small></span>
-          {index<milestones.length-1&&<ArrowRight className="mp-benefit-arrow" size={15}/>}
-        </button>;
-      })}
-    </div>
-    <div className="mp-benefit-always"><span>На каждом проекте</span>{always.map(reward=>{const Icon=reward.icon;return <button type="button" key={reward.id} onClick={()=>{onSelect(reward.id);}}><Icon size={15}/><strong>{reward.title}</strong><small>{reward.unlock}</small></button>})}</div>
-  </section>;
 }
 function ProjectSidebarRow({ project, selected, onSelect, onOpen, onBookmark, saved }: {
   project: Project; selected: boolean; onSelect: () => void; onOpen: () => void; onBookmark: () => void; saved: boolean;
@@ -349,7 +329,6 @@ export function ParticipantProjectsV2() {
     } catch { return []; }
   });
   useEffect(()=>{localStorage.setItem("impulse_favorite_projects",JSON.stringify(saved));},[saved]);
-  const [rewardFocus,setRewardFocus] = useState<string|null>(null);
   const layout:View=params.get("layout")==="cards"?"cards":"list";
   const filter:Filter=filterChoices.some(c=>c.key===params.get("filter"))?params.get("filter") as Filter:"all";
   const selectedId=params.get("project");
@@ -427,8 +406,7 @@ export function ParticipantProjectsV2() {
   return <div className="mpv2" data-project-screen={layout}>
     <header className="mp-page-title"><div className="mp-page-title__row"><div><p className="mp-eyebrow">ПРАКТИКА И ЛИЧНЫЙ ВКЛАД</p><h1 id="workspace-title">Мои проекты</h1><p>Активно работай над проектами, развивай навыки в команде, отслеживай свой вклад и получай реальные выгоды.</p></div><button type="button" className="mp-help" onClick={()=>{setShowHelp(value=>!value);}} aria-expanded={showHelp} aria-controls="mp-help-panel"><Info size={15}/> Как это работает?</button></div></header>
     {showHelp&&<div id="mp-help-panel" className="mp-help-banner" role="region" aria-label="Как работают мои проекты"><span><strong>1.</strong> Проекты появляются после принятия назначения</span><span><strong>2.</strong> Работайте с командой и отправляйте личный вклад</span><span><strong>3.</strong> Заказчик проверяет результат, а возможности и награды зависят от условий программы</span></div>}
-    <RewardsPath completedCount={finished} onSelect={setRewardFocus}/>
-    {rewardFocus&&<div className="mp-reward-popup" role="status"><div><Gift size={17}/><span><strong>{benefits.find(x=>x.id===rewardFocus)?.title}</strong> — {benefits.find(x=>x.id===rewardFocus)?.unlock}. Условия участия и выдачи подтверждаются организатором.</span></div><button type="button" onClick={()=>{ setRewardFocus(null); }} aria-label="Закрыть информацию о бонусе">×</button></div>}
+    <RewardsJourney completedCount={finished}/>
     <section className="mp-toolbar" aria-label="Управление проектами">
       <div className="mp-filters" role="group" aria-label="Статус проектов">{filterChoices.map(item=><button type="button" aria-pressed={filter===item.key} className={filter===item.key?"is-active":""} onClick={()=>{ setFilter(item.key); }} key={item.key}>{item.title} ({item.key==="all"?projects.length:item.key==="active"?projects.filter(p=>activeStatuses.has(p.work.assignment.status)).length:item.key==="review"?projects.filter(p=>reviewStatuses.has(p.work.assignment.status)).length:finished})</button>)}</div>
       <label className="mp-select"><span className="mp-visually-hidden">Компания</span><select aria-label="Компания" value={company} onChange={e=>{ setCompany(e.target.value); }}><option value="all">Все компании</option>{companies.map(name=><option value={name} key={name}>{name}</option>)}</select><ChevronDown size={14}/></label>
