@@ -21,7 +21,7 @@ export function StreakCelebration({ from, to, onClose, mode = "streak-increase" 
   const dismissRef = useRef<HTMLButtonElement>(null);
   useEffect(() => { closeRef.current = onClose; }, [onClose]);
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    const prefersReducedMotion = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const timeout = window.setTimeout(() => { closeRef.current(); }, prefersReducedMotion ? 3500 : 6400);
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
