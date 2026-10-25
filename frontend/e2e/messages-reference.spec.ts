@@ -172,7 +172,7 @@ test("quick actions, search, tabs, context, mute, chat input operate end to end"
   await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toHaveCount(0);
   await page.getByRole("button",{name:"Открыть контекст"}).click();
   await expect(page.getByRole("complementary",{name:"Контекст диалога"})).toBeVisible();
-  await page.getByRole("button",{name:"Отключить уведомления"}).click();
+  await page.getByRole("complementary",{name:"Контекст диалога"}).getByRole("button",{name:"Отключить уведомления"}).click();
   await page.getByRole("searchbox",{name:"Поиск диалогов"}).fill("Елена");
   await expect(page.getByRole("button",{name:/Елена Наставник/}).first()).toBeVisible();
   await page.getByRole("button",{name:/Елена Наставник/}).first().click();
