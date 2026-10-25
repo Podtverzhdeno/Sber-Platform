@@ -7,15 +7,20 @@
   color:#eef7ff; min-width:0; gap:0; margin-top:-27px;
   .ev-hero {
     min-height:216px;height:216px;padding:18px 8px;border-radius:0;border:0;
-    background:linear-gradient(90deg,#031421 0%,#041e2e 41%,#07243224 72%),url("/events/reference-hero-banner.svg") right center/auto 100% no-repeat,#031421;
+    background-color:#031421;
+    background-image:
+      linear-gradient(90deg,#031421 0%,#041e2ef2 34%,#041e2e9c 55%,#03142112 79%),
+      url("/events/cyberpunk-hero.png");
+    background-repeat:no-repeat,no-repeat;
+    background-position:center,right center;
+    background-size:100% 100%,auto 100%;
     isolation:isolate;overflow:hidden;
   }
   .ev-hero::before {content:none}
   .ev-hero-copy {position:relative;z-index:3;width:70%;min-width:0;}
-  .ev-kicker {display:inline-flex;align-items:center;gap:17px;min-height:42px;margin:0 0 7px;
+  .ev-kicker {display:inline-flex;align-items:center;gap:0;min-height:38px;margin:0 0 9px;
     border:1px solid #076e70;border-radius:14px;background:#073039be;
-    font-size:13px;font-weight:700;letter-spacing:0;color:#29ead4;padding:0 14px;}
-  .ev-sber-emblem {font-size:14px;color:#bafc41;font-weight:900;letter-spacing:1px;}
+    font-size:12px;font-weight:700;letter-spacing:0;color:#29ead4;padding:0 14px;}
   .ev-hero h1 {font-size:clamp(28px,2.75vw,42px);line-height:1.05;letter-spacing:-.7px;max-width:820px;margin:0 0 11px;font-weight:900}
   .ev-hero h1 em {display:inline;color:#19dcc8}
   .ev-hero p {max-width:650px;color:#bed0e1;font-size:15px;line-height:1.4;margin:0}

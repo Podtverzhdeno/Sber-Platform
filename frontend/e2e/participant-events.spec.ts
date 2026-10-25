@@ -71,6 +71,13 @@ test("events reference: all six detail states, registration flow and keyboard na
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "События" }).click();
   await expect(page.getByTestId("events-v2")).toBeVisible();
+  const hero = page.locator(".participant-events .ev-hero");
+  await expect(hero.locator(".ev-kicker")).toHaveText("События от Сбера и партнёров");
+  const heroBackground = await hero.evaluate((element) => getComputedStyle(element).backgroundImage);
+  expect(heroBackground).toContain("/events/cyberpunk-hero.png");
+  const heroImage = await page.request.get("/events/cyberpunk-hero.png");
+  expect(heroImage.ok()).toBeTruthy();
+  expect(heroImage.headers()["content-type"]).toContain("image/png");
   await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
   const referenceCards = page.getByTestId("event-reference-card");
   await expect(referenceCards.locator(".ev-card-radar")).toHaveCount(0);
@@ -155,6 +162,22 @@ test("events reference: filters, favorite, motion and empty state", async ({ pag
   await page.getByRole("link", { name: "События" }).click();
   const eventCard = page.getByTestId("event-reference-card");
   await expect(eventCard).toHaveCount(1);
+  const categoryTabs = page.locator(".ev-result-tabs");
+  await expect(categoryTabs.getByRole("button", { name: /Для вас/ })).toHaveAttribute("aria-pressed", "true");
+  await categoryTabs.getByRole("button", { name: "От Сбера" }).click();
+  await expect(categoryTabs.getByRole("button", { name: "От Сбера" })).toHaveAttribute("aria-pressed", "true");
+  await categoryTabs.getByRole("button", { name: /Для вас/ }).click();
+  await expect(page.getByRole("button", { name: "Рекомендации для вас" })).toHaveAttribute("aria-pressed", "true");
+  const detailsControl = eventCard.getByRole("button", { name: "Подробнее" });
+  const detailStyle = await detailsControl.evaluate((el) => {
+    const rect = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
+    return { height: rect.height, width: rect.width, radius: style.borderRadius, fontSize: style.fontSize };
+  });
+  expect(detailStyle.height).toBeGreaterThanOrEqual(34);
+  expect(detailStyle.height).toBeLessThanOrEqual(40);
+  expect(detailStyle.width).toBeLessThanOrEqual(144);
+  expect(parseFloat(detailStyle.fontSize)).toBeLessThanOrEqual(12);
   await eventCard.getByRole("button", { name: "В избранное" }).click();
   await expect(eventCard.getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
   const duration = await eventCard.evaluate(el => getComputedStyle(el).transitionDuration);

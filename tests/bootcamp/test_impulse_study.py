@@ -90,6 +90,11 @@ def test_study_progress_requires_order_and_practice_requires_review(
     install_error_handlers(app)
     app.include_router(editorial_learning.router, prefix="/api/v1")
     app.state.database = database
+
+    async def course_catalog() -> tuple[SimpleNamespace, ...]:
+        return (SimpleNamespace(key="demo-course-1", title="Практикум Impulse"),)
+
+    app.state.development_service = SimpleNamespace(store=SimpleNamespace(courses=course_catalog))
     active_role = [Role.PARTICIPANT]
 
     def credentials() -> AuthenticatedSession:
@@ -102,6 +107,9 @@ def test_study_progress_requires_order_and_practice_requires_review(
 
     with TestClient(app) as client:
         assert client.get(API).json()["completed_units"] == 0
+        initial = client.get("/api/v1/me/bootcamp/impulse-study/summary")
+        assert initial.status_code == 200
+        assert initial.json()["started_courses"] == 0
         out_of_order = client.post(API + "/lessons/3/complete")
         assert out_of_order.status_code == 409
         assert client.post(API + "/finish").status_code == 409
@@ -112,12 +120,21 @@ def test_study_progress_requires_order_and_practice_requires_review(
             assert response.status_code == 200, response.text
             assert response.json()["completed_units"] == lesson + 1
         assert client.post(API + "/lessons/0/complete").json()["completed_units"] == 8
+        lessons_summary = client.get("/api/v1/me/bootcamp/impulse-study/summary").json()
+        assert lessons_summary["started_courses"] == 1
+        assert lessons_summary["completed_lessons"] == 8
+        assert lessons_summary["finished_courses"] == 0
+        assert lessons_summary["courses"][0]["title"] == "Практикум Impulse"
         completed = client.post(API + "/finish")
         assert completed.status_code == 200, completed.text
         first = completed.json()["certificate_id"]
         assert first is not None
         assert client.post(API + "/finish").json()["certificate_id"] == first
         assert client.get(API).json()["finished"] is True
+        finished_summary = client.get("/api/v1/me/bootcamp/impulse-study/summary").json()
+        assert finished_summary["finished_courses"] == 1
+        assert finished_summary["approved_practices"] == 0
+        assert finished_summary["courses"][0]["finished"] is True
 
         invalid = client.post(API + "/practice", json={"description": "small"})
         assert invalid.status_code == 422
@@ -137,6 +154,7 @@ def test_study_progress_requires_order_and_practice_requires_review(
         assert approved.json()["practice_status"] == "approved"
         practical = approved.json()["practical_certificate_id"]
         assert practical is not None and practical != first
+        assert client.get("/api/v1/me/bootcamp/impulse-study/summary").status_code == 403
         assert (
             client.post(path, json={"decision": "approved"}).json()["practical_certificate_id"]
             == practical
@@ -147,6 +165,12 @@ def test_study_progress_requires_order_and_practice_requires_review(
         assert read.status_code == 200
         assert read.json()["certificate_id"] == first
         assert read.json()["practical_certificate_id"] == practical
+        final_summary = client.get("/api/v1/me/bootcamp/impulse-study/summary").json()
+        assert final_summary["started_courses"] == 1
+        assert final_summary["finished_courses"] == 1
+        assert final_summary["completed_lessons"] == 8
+        assert final_summary["approved_practices"] == 1
+        assert final_summary["courses"][0]["practical_certificate_id"] == str(practical)
 
 
 @pytest.mark.spec("bootcamp/impulse-access-check")

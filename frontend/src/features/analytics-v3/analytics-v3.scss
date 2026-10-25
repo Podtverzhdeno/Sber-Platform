@@ -9,17 +9,17 @@
 .analytics-v3 button:hover{filter:brightness(1.12)}
 .analytics-v3 button:active{transform:scale(.985)}
 .analytics-v3 button:focus-visible,.analytics-v3 select:focus-visible,.analytics-v3 input:focus-visible{outline:2px solid #55fff3;outline-offset:2px}
-.av3-top{display:grid;grid-template-columns:minmax(0,1fr) 400px 288px;gap:12px;align-items:start;min-height:85px}
+.av3-top{display:grid;grid-template-columns:minmax(0,1fr) 344px 258px;gap:12px;align-items:start;min-height:85px}
 .av3-headline{min-width:0;display:grid;gap:5px}
 .av3-headline>span{font-size:11px;letter-spacing:.08em;color:#17e7e4;font-weight:900}
 .av3-headline>p{font-size:12px;line-height:1.4;color:#9fbad1;max-width:700px}
-.av3-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:400px;min-width:0;padding:3px;border:1px solid #124765;border-radius:11px;background:#061829;align-items:center;min-height:43px;white-space:nowrap}
-.av3-tabs button{min-width:0;border:0;background:transparent;padding:10px 8px;border-radius:8px;font-size:11px;color:#bad1e7;font-weight:800;text-align:center}
+.av3-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:344px;min-width:0;padding:3px;border:1px solid #124765;border-radius:11px;background:#061829;align-items:center;min-height:43px;white-space:nowrap}
+.av3-tabs button{border:0;background:transparent;padding:10px 15px;border-radius:8px;font-size:11px;color:#bad1e7;font-weight:800;text-align:center;min-width:0;white-space:nowrap}
 .av3-tabs button.selected{color:#052735;background:linear-gradient(115deg,#0be9d5,#12bafa);box-shadow:0 0 15px #1aebdb33}
-.av3-global-filters{display:flex;align-items:flex-end;gap:8px;justify-content:flex-end;width:288px;min-width:0}
+.av3-global-filters{display:flex;align-items:flex-end;gap:8px;justify-content:flex-end;min-width:0}
 .av3-global-filters label{font-size:10px;color:#97b8d0;display:grid;gap:4px}
 .av3-global-filters select{min-width:107px;max-width:140px;height:35px;border:1px solid #23506c;border-radius:8px;background:#071e30;padding:6px 12px;color:#e7f4fc;font-size:11px}
-.av3-fresh{display:inline-flex;align-items:center;justify-content:center;width:160px;min-width:0;min-height:35px;padding:7px 9px;border:1px solid #21506b;border-radius:8px;color:#c4def2;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.av3-fresh{display:inline-flex;align-items:center;justify-content:center;min-height:35px;padding:7px 9px;border:1px solid #21506b;border-radius:8px;color:#c4def2;font-size:10px;white-space:nowrap}
 .av3-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .av3-metric{display:grid;grid-template-columns:1fr auto;align-content:space-between;min-width:0;min-height:104px;position:relative;padding:15px 17px;border:1px solid #0d536c;border-radius:14px;background:linear-gradient(135deg,#062b3a,#071a2d 72%);box-shadow:inset 0 1px #ffffff0e}
 .av3-metric>span{grid-column:1/2;font-size:11px;font-weight:750;color:#d4e7f3}
@@ -110,16 +110,19 @@
 .av3-overlay{position:fixed;inset:0;z-index:10000;background:#000b;backdrop-filter:blur(6px);display:grid;place-items:center;padding:20px}
 .av3-dialog{width:min(490px,100%);padding:27px;display:grid;gap:16px;position:relative;border:1px solid #188b91;border-radius:17px;background:linear-gradient(#0b3042,#051627);box-shadow:0 20px 70px #000b}
 .av3-dialog>button:first-child{position:absolute;right:8px;top:9px;border:0;background:none;color:#b7e4e7}.av3-dialog>svg{color:#16f1e4}.av3-dialog h2{font-size:21px}.av3-dialog p{font-size:12px;color:#aed1de;line-height:1.7}
-@media(max-width:1420px){.av3-top{grid-template-columns:minmax(0,1fr) 400px;gap:10px}.av3-global-filters{grid-column:1/-1;justify-content:flex-end;width:100%}.av3-headline>p{max-width:650px}.av3-profile-distribution{gap:10px}.av3-donut{width:132px;height:132px;flex-basis:132px}.av3-donut>div{width:94px;height:94px}.av3-day-names,.av3-week-columns>div{gap:3px}}
+@media(max-width:1420px){.av3-top{grid-template-columns:minmax(0,1fr) 344px;gap:10px}.av3-global-filters{grid-column:1/-1;justify-content:flex-end}.av3-headline>p{max-width:650px}.av3-profile-distribution{gap:10px}.av3-donut{width:132px;height:132px;flex-basis:132px}.av3-donut>div{width:94px;height:94px}.av3-day-names,.av3-week-columns>div{gap:3px}}
 @media(max-width:1100px){.av3-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.av3-activity-main,.av3-cert-layout{grid-template-columns:1fr}.av3-activity-profile{min-height:auto}.av3-lower{grid-template-columns:repeat(2,minmax(0,1fr))}.av3-lower>:last-child{grid-column:1/-1}.av3-activity-left{grid-template-rows:auto}.av3-heat-cell{height:17px}}
-@media(max-width:700px){.analytics-v3{gap:10px;padding-bottom:28px}.av3-top{grid-template-columns:minmax(0,1fr)}.av3-top h1{font-size:27px}.av3-headline{min-height:118px;align-content:start}.av3-tabs{width:100%;overflow-x:auto;max-width:100%}.av3-tabs button{padding:10px 6px}.av3-global-filters{grid-column:auto;justify-content:flex-start;flex-wrap:wrap;width:100%}.av3-fresh{width:auto;max-width:100%}.av3-metrics{gap:8px}.av3-metric{min-height:100px;padding:12px}.av3-metric strong{font-size:22px}.av3-heat-panel{overflow-x:auto}.av3-heat{min-width:400px}.av3-heat-foot{min-width:365px}.av3-heat-cell{height:15px}.av3-lower,.av3-cert-pair{grid-template-columns:1fr}.av3-lower>:last-child{grid-column:auto}.av3-milestones i{width:48px;height:48px}.av3-milestones strong{font-size:10px}.av3-milestones small{font-size:9px}.av3-milestones em{font-size:8px}.av3-milestones::before{top:31px}.av3-credential-main{flex-wrap:wrap}.av3-embedded-passport .ref-v1-middle,.av3-embedded-passport .ref-v1-bottom{grid-template-columns:1fr}}
+@media(max-width:700px){.analytics-v3{gap:10px;padding-bottom:28px}.av3-top{grid-template-columns:1fr}.av3-top h1{font-size:27px}.av3-tabs{overflow-x:auto;max-width:100%;width:100%}.av3-tabs button{padding:10px 8px}.av3-global-filters{grid-column:auto;justify-content:flex-start;flex-wrap:wrap}.av3-metrics{gap:8px}.av3-metric{min-height:100px;padding:12px}.av3-metric strong{font-size:22px}.av3-heat-panel{overflow-x:auto}.av3-heat{min-width:400px}.av3-heat-foot{min-width:365px}.av3-heat-cell{height:15px}.av3-lower,.av3-cert-pair{grid-template-columns:1fr}.av3-lower>:last-child{grid-column:auto}.av3-milestones i{width:48px;height:48px}.av3-milestones strong{font-size:10px}.av3-milestones small{font-size:9px}.av3-milestones em{font-size:8px}.av3-milestones::before{top:31px}.av3-credential-main{flex-wrap:wrap}.av3-embedded-passport .ref-v1-middle,.av3-embedded-passport .ref-v1-bottom{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.analytics-v3 *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
 
-/* The legacy Skill Passport removes workspace padding when used standalone.
-   In analytics-v3 it is embedded, so preserve the shared shell in all tabs. */
-@media (min-width: 1024px) {
-  body:has(.analytics-v3 .analytics-reference) .workspace-content {
-    padding: 24px 28px 56px;
+/* The legacy standalone Skill Passport deliberately removes shell padding.
+   Its nested appearance inside Analytics V3 must not change the entire page. */
+@media(min-width:1024px){
+  body:has(.analytics-v3 .analytics-reference) .workspace-content{
+    padding:24px 28px 56px;
   }
+}
+@media(max-width:700px){
+  .analytics-v3 .av3-headline{min-height:118px;align-content:start}
 }

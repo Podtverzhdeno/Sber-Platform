@@ -70,7 +70,6 @@ test("missing-source values never masquerade as issued certification or verified
  await expect(page.getByText("Реестр сертификатов недоступен")).toBeVisible();
 });
 
-
 for (const viewport of [
  { name: "desktop-1586", width: 1586, height: 992 },
  { name: "compact-desktop-1366", width: 1366, height: 900 },

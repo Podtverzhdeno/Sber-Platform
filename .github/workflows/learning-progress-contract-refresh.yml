@@ -1,0 +1,51 @@
+name: Refresh learning progress contracts
+
+on:
+  push:
+    branches: [feat/cross-section-learning-progress-20261025]
+    paths:
+      - ".github/workflows/learning-progress-contract-refresh.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout learning feature branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: true
+      - name: Install Python and uv
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          python-version: "3.13"
+      - name: Install Python dependencies
+        run: uv sync --frozen
+      - name: Render OpenAPI contract
+        run: uv run python -m impulse.quality.openapi_contract
+      - name: Install Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Generate frontend client schema
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run api:generate
+          npm run api:check
+      - name: Publish generated contracts on feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add openapi.json frontend/src/api/schema.ts
+          if git diff --cached --quiet; then
+            echo "Contracts already up to date"
+            exit 0
+          fi
+          git commit -m "chore(learning): synchronize OpenAPI and TypeScript contracts"
+          git pull --rebase origin feat/cross-section-learning-progress-20261025
+          git push origin HEAD:feat/cross-section-learning-progress-20261025

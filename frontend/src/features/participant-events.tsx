@@ -9,6 +9,7 @@ import { EventsHero, EventsCard, EventExperienceDetail, EventRegistrationForm, t
 import "./participant-events-reference.scss";
 import "./participant-events.scss";
 import "./participant-events-fidelity.scss";
+import "./participant-events-controls.scss";
 
 type EventItem = {
   key: string; title: string; event_type: string; organizer: string; conditions: string;
@@ -152,7 +153,7 @@ export function ParticipantEventCatalog() {
     <div className="ev-catalog" id="ev-results">
       <aside className="ev-filters" aria-label="Фильтры событий">
         <header><h2>Подбор событий</h2><button type="button" onClick={resetFilters}>Сбросить всё</button></header>
-        <div className="ev-filter-modes"><button type="button" className={activeCategory==="for-you"?"active":""} onClick={()=> { setActiveCategory("for-you"); }}>Рекомендации для вас</button><button type="button" className={activeCategory==="all"?"active":""} onClick={()=> { setActiveCategory("all"); }}>Все события</button></div>
+        <div className="ev-filter-modes"><button type="button" aria-pressed={activeCategory==="for-you"} className={activeCategory==="for-you"?"active":""} onClick={()=> { setActiveCategory("for-you"); }}>Рекомендации для вас</button><button type="button" aria-pressed={activeCategory==="all"} className={activeCategory==="all"?"active":""} onClick={()=> { setActiveCategory("all"); }}>Все события</button></div>
         <label className="catalog-filter">Направление<select value={track} onChange={event=> { setParam("track",event.target.value); }}><option value="all">Все направления</option>{tracks.map(t=><option key={t} value={t}>{t}</option>)}</select></label>
         <section className="ev-filter-group"><h3>Ваши направления</h3>{tracks.map(key=><label key={key}><input type="checkbox" checked={selectedFocus.includes(key)} onChange={()=> { toggleFocus(key); }}/>{key}</label>)}</section>
         <label className="catalog-filter">Формат<select value={eventType} onChange={event=> { setParam("type",event.target.value); }}><option value="all">Все форматы</option>{types.map(t=><option key={t} value={t}>{t}</option>)}</select></label>
@@ -163,7 +164,7 @@ export function ParticipantEventCatalog() {
       <div className="ev-catalog-results">
         <div className="ev-result-header">
           <div className="ev-result-tabs">
-            {([["for-you","Для вас"],["sber","От Сбера"],["popular","Популярные"],["deadline","Скоро дедлайн"]] as const).map(([key,label])=><button type="button" key={key} className={activeCategory===key?"active":""} onClick={()=> { setActiveCategory(key); }}>{label}{key==="for-you"?` (${String(visible.length)})`:""}</button>)}
+            {([["for-you","Для вас"],["sber","От Сбера"],["popular","Популярные"],["deadline","Скоро дедлайн"]] as const).map(([key,label])=><button type="button" key={key} aria-pressed={activeCategory===key} className={activeCategory===key?"active":""} onClick={()=> { setActiveCategory(key); }}>{label}{key==="for-you"?` (${String(visible.length)})`:""}</button>)}
           </div>
           <div className="ev-result-order"><label>Сортировка: <select value={sortBy} aria-label="Сортировка событий" onChange={e=> { setSortBy(e.target.value); }}><option value="relevance">По соответствию</option><option value="deadline">По дедлайну</option></select></label></div>
         </div>

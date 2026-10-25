@@ -799,3 +799,64 @@ body:has(.home-v2-drawer-layer) {overflow:hidden;}
   .home-v2-drawer-body {padding:7px 11px 28px;}
   .home-v2-grade-timeline button strong {font-size:14px;}
 }
+
+
+/* Overview: anchor the lower dashboard area to the same visual surface as
+   the hero row, rather than leaving two independent floating card stacks. */
+.home-v2-bottom-grid {
+  position: relative;
+  align-items: stretch;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #143651;
+  border-radius: 15px;
+  background: linear-gradient(180deg, #071c2f 0%, #061827 100%);
+}
+.home-v2-bottom-grid > .home-v2-work-column,
+.home-v2-bottom-grid > .home-v2-insights-column {
+  min-width: 0;
+}
+.home-v2-bottom-grid .home-v2-block {
+  box-shadow: none;
+}
+@media (max-width: 630px) {
+  .home-v2-bottom-grid {
+    gap: 12px;
+    padding: 10px;
+    border-radius: 12px;
+  }
+}
+
+
+/* Overview overflow safety: real API titles and translations may be longer
+   than the short snapshot labels used in the reference screenshots. */
+.home-v2-hero,
+.home-v2-grade,
+.home-v2-weekly,
+.home-v2-next-outcome {
+  height: auto;
+}
+.home-v2-hero-inner { min-height: 310px; height: auto; }
+.home-v2-hero h2,
+.home-v2-outcome-content,
+.home-v2-task-copy,
+.home-v2-task-copy strong,
+.home-v2-buddy-content,
+.home-v2-passport,
+.home-v2-grade-readiness {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.home-v2-next-outcome { min-height: 172px; }
+.home-v2-outcome-main { min-height: 0; }
+.home-v2-bottom-grid { min-width: 0; }
+@media (max-width: 790px) {
+  .home-v2-hero-inner { min-height: 295px; }
+}
+@media (max-width: 630px) {
+  .home-v2-hero-inner { min-height: 285px; }
+  .home-v2-next-outcome { min-height: 208px; }
+  .home-v2-hero-actions { flex-wrap: wrap; }
+  .home-v2-outcome-stats { flex-wrap: wrap; white-space: normal; overflow: visible; }
+  .home-v2-outcome-stats > span { white-space: normal; }
+}

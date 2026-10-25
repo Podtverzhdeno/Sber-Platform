@@ -1,0 +1,314 @@
+/* Impulse Events — final control system
+   Applied last so filter buttons have one visual language rather than the
+   layered experimental styling in previous reference files. */
+.participant-events {
+  --ev-control-border: #24485a;
+  --ev-control-bg: #092235;
+  --ev-control-bg-hover: #103345;
+  --ev-control-text: #bed5e2;
+  --ev-control-active-bg: #0a4a4b;
+  --ev-control-active-border: #20d6ca;
+  --ev-control-accent: #27ebd3;
+  --ev-control-focus: #cffcf3;
+
+  button, select { -webkit-tap-highlight-color: transparent; }
+  button:focus-visible,
+  select:focus-visible,
+  .ev-search:focus-visible {
+    outline: 2px solid var(--ev-control-focus);
+    outline-offset: 2px;
+  }
+
+  /* Compact, aligned group. Each filter tab behaves as an actual toggle. */
+  .ev-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-bottom: 12px;
+    min-height: 44px;
+  }
+  .ev-result-tabs {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid #173b4d;
+    border-radius: 12px;
+    background: #061b2b;
+  }
+  .ev-result-tabs button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 35px;
+    height: 35px;
+    padding: 0 12px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--ev-control-text);
+    font-size: 12px;
+    font-weight: 650;
+    line-height: 1.1;
+    white-space: nowrap;
+    box-shadow: none;
+    transition: background-color .16s ease, border-color .16s ease, color .16s ease;
+  }
+  .ev-result-tabs button:hover:not(.active) {
+    transform: none;
+    color: #f2ffff;
+    border-color: #274f5c;
+    background: var(--ev-control-bg-hover);
+  }
+  .ev-result-tabs button.active,
+  .ev-result-tabs button[aria-pressed="true"] {
+    background: #0a4247;
+    color: #49ffe5;
+    border-color: #1aa59e;
+    box-shadow: inset 0 -2px 0 #23e4cf;
+  }
+  .ev-result-tabs button.active:hover {
+    transform: none;
+    background: #0e5557;
+    border-color: #2cebd7;
+  }
+
+  /* Equal-height segmented navigation inside the left filter panel. */
+  .ev-filter-modes {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid #1b3f52;
+    border-radius: 12px;
+    background: #061a29;
+  }
+  .ev-filter-modes button {
+    width: 100%;
+    min-width: 0;
+    min-height: 49px;
+    height: 100%;
+    margin: 0;
+    padding: 9px 7px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: #9ebcce;
+    font-size: 11px;
+    font-weight: 650;
+    line-height: 1.3;
+    text-align: center;
+    overflow-wrap: normal;
+    box-shadow: none;
+    transition: background-color .16s ease, color .16s ease, border-color .16s ease;
+  }
+  .ev-filter-modes button:hover:not(.active) {
+    background: #103247;
+    border-color: #315466;
+    color: #e0f7ff;
+  }
+  .ev-filter-modes button.active,
+  .ev-filter-modes button[aria-pressed="true"] {
+    background: #0a4144;
+    border-color: #188d88;
+    color: #46f7df;
+    box-shadow: inset 0 -2px 0 #23e8d4;
+  }
+  .ev-filter-modes button.active:hover { background: #0d4f50; }
+
+  .ev-filters header { gap: 10px; }
+  .ev-filters header button {
+    flex: none;
+    border: 0;
+    border-radius: 6px;
+    padding: 6px 2px;
+    background: transparent;
+    color: #50d9ce;
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color .16s ease;
+  }
+  .ev-filters header button:hover {
+    color: #9af9ea;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .ev-result-order { display: flex; align-items: center; margin-left: auto; }
+  .ev-result-order label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #8eafc2;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .ev-result-order select,
+  .ev-filters .catalog-filter select {
+    height: 39px;
+    min-height: 39px;
+    padding: 8px 12px;
+    background: #0b273a;
+    border: 1px solid var(--ev-control-border);
+    border-radius: 9px;
+    color: #d5ecf6;
+    font-size: 12px;
+    font-weight: 550;
+    box-shadow: none;
+    transition: border-color .16s ease, background-color .16s ease;
+  }
+  .ev-result-order select:hover,
+  .ev-filters .catalog-filter select:hover {
+    border-color: #39918c;
+    background: #113044;
+  }
+
+  /* Primary card action is not a full-width neon slab anymore. */
+  .ev-event-card--compact > .ev-card-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+  }
+  .ev-event-card--compact > .ev-card-actions button.ev-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: static;
+    width: 100%;
+    max-width: 136px;
+    height: 38px;
+    min-height: 38px;
+    padding: 8px 12px;
+    gap: 9px;
+    border: 1px solid #42e4d1;
+    border-radius: 9px;
+    background: linear-gradient(110deg, #22dace 0%, #39e7c5 100%);
+    color: #052d35;
+    font-size: 12px;
+    font-weight: 760;
+    letter-spacing: 0;
+    line-height: 1.15;
+    box-shadow: 0 3px 10px #00d7b91a;
+    transition: background .16s ease, transform .16s ease, box-shadow .16s ease;
+  }
+  .ev-event-card--compact > .ev-card-actions button.ev-primary svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+    transition: transform .16s ease;
+  }
+  .ev-event-card--compact > .ev-card-actions button.ev-primary:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(110deg, #36efe0 0%, #58efce 100%);
+    box-shadow: 0 6px 17px #03cbba30;
+  }
+  .ev-event-card--compact > .ev-card-actions button.ev-primary:hover svg {
+    transform: translateX(2px);
+  }
+  .ev-event-card--compact > .ev-card-actions button.ev-primary:active {
+    transform: translateY(0);
+    box-shadow: inset 0 1px 4px #00817b4d;
+  }
+  .ev-event-card--compact > .ev-card-actions button.ev-report-action {
+    position: static;
+    min-height: 24px;
+    padding: 3px 6px;
+    border: 0;
+    border-radius: 5px;
+    color: #a8d2d4;
+    background: transparent;
+    font-size: 11px;
+    text-decoration: none;
+  }
+  .ev-event-card--compact > .ev-card-actions button.ev-report-action:hover {
+    color: #6bffeb;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .ev-event-card--compact > .ev-save {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    top: 5px;
+    right: 7px;
+    padding: 7px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    color: #e3c35e;
+    background: transparent;
+    transition: border-color .16s ease, background-color .16s ease, transform .16s ease;
+  }
+  .ev-event-card--compact > .ev-save:hover,
+  .ev-event-card--compact > .ev-save.is-saved {
+    background: #23403b;
+    border-color: #5f8a63;
+    color: #ffdd70;
+    transform: none;
+  }
+
+  /* Detail actions follow the same sizing and motion rules. */
+  .ev-detail-modal .ev-tabs > .ev-primary,
+  .ev-registration-card .ev-reg-actions > .ev-primary {
+    min-height: 38px;
+    height: 38px;
+    padding: 8px 15px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 730;
+    box-shadow: 0 3px 10px #00d7b91c;
+  }
+  .ev-detail-modal .ev-tabs > button:not(.ev-primary):not(.ev-save) {
+    transition: color .15s ease, border-color .15s ease;
+  }
+  .ev-detail-modal .ev-tabs > button:not(.ev-primary):not(.ev-save):hover {
+    color: #e5fff9;
+    border-color: #46777a;
+  }
+
+  @media (max-width: 1460px) {
+    .ev-result-tabs button { padding: 0 10px; font-size: 11px; }
+    .ev-event-card--compact > .ev-card-actions button.ev-primary {
+      max-width: 118px;
+      height: 36px;
+      min-height: 36px;
+      padding: 7px 8px;
+      font-size: 11px;
+    }
+  }
+  @media (max-width: 1100px) {
+    .ev-event-card--compact > .ev-card-actions {
+      align-items: flex-end;
+    }
+    .ev-event-card--compact > .ev-card-actions button.ev-primary {
+      max-width: 134px;
+    }
+    .ev-result-order { margin-left: 0; }
+  }
+  @media (max-width: 720px) {
+    .ev-result-header { align-items: flex-start; }
+    .ev-result-tabs { width: 100%; }
+    .ev-result-tabs button { flex: 1 1 calc(50% - 4px); min-width: 0; }
+    .ev-result-order { width: 100%; justify-content: flex-end; }
+    .ev-filter-modes button { min-height: 43px; }
+    .ev-event-card--compact > .ev-card-actions button.ev-primary { max-width: 152px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ev-result-tabs button, .ev-filter-modes button,
+    .ev-event-card--compact > .ev-card-actions button.ev-primary,
+    .ev-event-card--compact > .ev-card-actions button.ev-primary svg,
+    .ev-event-card--compact > .ev-save {
+      transition: none;
+    }
+  }
+}
