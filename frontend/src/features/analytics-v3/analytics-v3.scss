@@ -162,3 +162,18 @@
  .analytics-v3 .av3-tabs{grid-column:1;width:100%}
  .analytics-v3 .av3-help-inline{justify-self:start}
 }
+
+
+/* Stable header columns regardless of the help text or active tab. */
+.analytics-v3 .av3-top {grid-template-columns:minmax(0,1fr) 390px 172px}
+.analytics-v3[data-tab="activity"] .av3-top {grid-template-columns:minmax(0,1fr) 390px 172px}
+@media(max-width:1100px) {
+ .analytics-v3 .av3-top,
+ .analytics-v3[data-tab="activity"] .av3-top {grid-template-columns:minmax(0,1fr) 172px}
+}
+@media(max-width:700px) {
+ .analytics-v3 .av3-top,
+ .analytics-v3[data-tab="activity"] .av3-top {grid-template-columns:minmax(0,1fr)}
+ .analytics-v3 .av3-headline {height:123px;min-height:123px;max-height:123px;overflow:hidden;align-content:start}
+ .analytics-v3[data-tab="activity"] .av3-headline {height:123px;min-height:123px;max-height:123px}
+}
