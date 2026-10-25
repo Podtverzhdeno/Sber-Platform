@@ -130,11 +130,28 @@ describe("App", () => {
     expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("not_evaluable");
     expect(screen.getByRole("navigation")).toBeInTheDocument();
 
+    // The participant home uses the same brand, icons and bottom card as other routes.
+    const sidebar = screen.getByRole("complementary", { name: "Боковая панель" });
+    expect(sidebar.querySelector(".sidebar-nudge")).not.toBeInTheDocument();
+    expect(sidebar.querySelector(".sidebar-art")).toBeInTheDocument();
+    expect(sidebar.querySelector(".nav-icon")?.textContent).toBe("⌂");
+    const homeSidebarMarkup = sidebar.innerHTML;
+
     window.history.pushState({}, "", "/workspace/0?v2=0");
     fireEvent.popState(window);
     await waitFor(() => {
       expect(screen.queryByTestId("grade-summary")).not.toBeInTheDocument();
       expect(screen.getByRole("region", { name: "Ключевые показатели" })).toBeInTheDocument();
     });
+    expect(sidebar.innerHTML).toBe(homeSidebarMarkup);
+
+    // Another participant section does not swap the brand or menu iconography.
+    fireEvent.click(screen.getByRole("link", { name: "Мой путь" }));
+    await waitFor(() => {
+      expect(screen.getByRole("link", { name: "Мой путь" })).toHaveAttribute("aria-current", "page");
+    });
+    expect(sidebar.querySelector(".sidebar-brand")?.innerHTML).toContain("Impulse");
+    expect(sidebar.querySelector(".nav-icon")?.textContent).toBe("⌂");
+    expect(sidebar.querySelector(".sidebar-art")).toBeInTheDocument();
   });
 });
