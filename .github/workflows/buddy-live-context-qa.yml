@@ -1,0 +1,51 @@
+name: AI Buddy Live Context QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/buddy-chat-v2.tsx"
+      - "frontend/src/features/buddy-chat-v2.scss"
+      - "frontend/src/features/buddy-chat-v2.test.tsx"
+      - "frontend/src/features/buddy-live-data.ts"
+      - "frontend/src/features/buddy-live-data.test.ts"
+      - ".github/workflows/buddy-live-context-qa.yml"
+  pull_request:
+    paths:
+      - "frontend/src/features/buddy-chat-v2.tsx"
+      - "frontend/src/features/buddy-chat-v2.scss"
+      - "frontend/src/features/buddy-chat-v2.test.tsx"
+      - "frontend/src/features/buddy-live-data.ts"
+      - "frontend/src/features/buddy-live-data.test.ts"
+      - ".github/workflows/buddy-live-context-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: buddy-live-context-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  buddy-context:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Scoped lint for AI Buddy data consumers
+        run: npx eslint src/features/buddy-live-data.ts src/features/buddy-live-data.test.ts src/features/buddy-chat-v2.tsx src/features/buddy-chat-v2.test.tsx --max-warnings 0
+      - name: Verify evidence cards and privacy
+        run: npm run test -- src/features/buddy-live-data.test.ts src/features/buddy-chat-v2.test.tsx
+      - name: Typecheck frontend
+        run: npm run typecheck
