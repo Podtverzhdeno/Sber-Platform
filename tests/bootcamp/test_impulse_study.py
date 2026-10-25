@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import asyncio
 import os
+from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from uuid import UUID, uuid4
@@ -71,13 +73,18 @@ def test_study_progress_requires_order_and_practice_requires_review(
                     {"id": person, "name": label, "key": str(person)},
                 )
 
-    asyncio.run(create_people())
+    @asynccontextmanager
+    async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+        # Keep all asyncpg connections in TestClient's single event loop.
+        await create_people()
+        yield
+        await database.close()
 
     async def accessible(*_args: object) -> None:
         return None
 
     monkeypatch.setattr(editorial_learning, "_assert_course_access", accessible)
-    app = FastAPI()
+    app = FastAPI(lifespan=lifespan)
     install_error_handlers(app)
     app.include_router(editorial_learning.router, prefix="/api/v1")
     app.state.database = database
@@ -139,7 +146,6 @@ def test_study_progress_requires_order_and_practice_requires_review(
         assert read.json()["certificate_id"] == first
         assert read.json()["practical_certificate_id"] == practical
 
-    asyncio.run(database.close())
 
 
 @pytest.mark.spec("bootcamp/impulse-access-check")
