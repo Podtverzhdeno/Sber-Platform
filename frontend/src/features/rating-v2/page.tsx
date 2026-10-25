@@ -127,7 +127,7 @@ function RatingHero({ title, eyebrow, description, seasonTitle, compact = false 
     {!compact && <aside className="ir-season" aria-label="Текущий сезон">
       <CalendarDays size={26} />
       <div><strong>{seasonTitle}</strong><b>Опубликованный рейтинг</b><span>По подтверждённым результатам</span></div>
-      <span className="ir-season-status">Текущий сезон</span>
+      <span className="ir-season-status">Опубликованный сезон</span>
     </aside>}
   </header>;
 }
