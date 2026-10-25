@@ -109,7 +109,7 @@ type NotificationItem = {
   entity_id: string | null;
 };
 type NotificationList = { items: NotificationItem[]; unread: number };
-type ChatNotification = { id: string; title: string; unread: number; muted: boolean; last_message: {id:string;body:string;created_at:string;author_name:string|null} | null };
+type ChatNotification = { id: string; title: string; kind: string; participants: Array<{id:string;display_name:string}>; unread: number; muted: boolean; last_message: {id:string;body:string;created_at:string;author_name:string|null} | null };
 const customerSections = ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения", "Настройки"];
 
 const searchKindLabels: Record<string, string> = {
@@ -1426,6 +1426,11 @@ function ImpulseApp() {
   const unreadChats = (chatNotificationsQuery.data ?? [])
     .filter((channel) => channel.unread > 0 && !channel.muted)
     .sort((a,b) => (b.last_message?.created_at ?? "").localeCompare(a.last_message?.created_at ?? ""));
+  const chatNotificationTitle = (channel: ChatNotification): string => {
+    if (channel.title.trim()) return channel.title;
+    const others = channel.participants.filter((person) => person.id !== actor?.person_id);
+    return others.map((person)=>person.display_name).filter(Boolean).join(", ") || "Личный чат";
+  };
   const notificationItems = notificationsQuery.data?.items ?? [];
   const unreadCount = (notificationsQuery.data?.unread ?? 0)
     + unreadChats.reduce((sum, channel) => sum + channel.unread, 0);
@@ -1661,7 +1666,7 @@ function ImpulseApp() {
                           onClick={() => {openChatNotification(channel.id);}}>
                           <span className="notification-symbol notification-symbol--mentor">✉</span>
                           <div>
-                            <strong>{channel.title || "Личный чат"}</strong>
+                            <strong>{chatNotificationTitle(channel)}</strong>
                             <p>{channel.last_message?.author_name ? `${channel.last_message.author_name}: ` : ""}{channel.last_message?.body ?? "Новые сообщения"}</p>
                             <small>{channel.unread} непрочитанных · {channel.last_message ? formatRelativeTime(channel.last_message.created_at) : ""}</small>
                           </div><i>›</i>
