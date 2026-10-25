@@ -24,3 +24,8 @@ export function createQueryClient(): QueryClient {
   });
   return client;
 }
+
+export const appQueryClient = createQueryClient();
+export function resetAppQueryCacheForTests(): void {
+  appQueryClient.clear();
+}
