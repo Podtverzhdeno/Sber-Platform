@@ -71,4 +71,46 @@ describe("Interactive activity calendar", () => {
     fireEvent.click(screen.getByRole("button", { name: "Закрыть подробности дня" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
+  it("closes hover tooltip on Escape while leaving the calendar focused", () => {
+    const now=new Date();
+    const snapshot: ActivityFeed={
+      generated_at:now.toISOString(),actor_timezone:"UTC",
+      freshness:{known:true,latest_observed_at:now.toISOString()},
+      events:[exampleEvent(now.toISOString())],
+    };
+    const {container}=render(<ActivityCalendar snapshot={snapshot} weeks={12}
+      onOpenCourses={vi.fn()} onOpenProjects={vi.fn()} onOpenEvents={vi.fn()}/>);
+    const cell=container.querySelector<HTMLButtonElement>(".ac-day.ac-level-1");
+    if(!cell)throw new Error("Missing test activity");
+    cell.focus();
+    expect(screen.getByRole("tooltip")).toBeVisible();
+    fireEvent.keyDown(document,{key:"Escape"});
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(cell).toHaveFocus();
+  });
+
+  it("routes project contributions by source even when task titles mention certificates", () => {
+    const now=new Date();
+    const snapshot: ActivityFeed={
+      generated_at:now.toISOString(),actor_timezone:"UTC",
+      freshness:{known:true,latest_observed_at:now.toISOString()},
+      events:[{
+        occurred_at:now.toISOString(),kind:"revision_accepted",
+        source_kind:"work_contribution",source_ref:"contribution-123",
+        title:"Сервис проверки сертификатов",
+      }],
+    };
+    const openProjects=vi.fn(),openCourses=vi.fn();
+    const {container}=render(<ActivityCalendar snapshot={snapshot} weeks={12}
+      onOpenCourses={openCourses} onOpenProjects={openProjects} onOpenEvents={vi.fn()}/>);
+    const cell=container.querySelector<HTMLButtonElement>(".ac-day.ac-level-1");
+    if(!cell)throw new Error("Missing project contribution activity");
+    fireEvent.click(cell);
+    expect(screen.getByText("Сервис проверки сертификатов")).toBeVisible();
+    fireEvent.click(screen.getByRole("button",{name:"Перейти в раздел"}));
+    expect(openProjects).toHaveBeenCalledTimes(1);
+    expect(openCourses).not.toHaveBeenCalled();
+  });
+
 });
