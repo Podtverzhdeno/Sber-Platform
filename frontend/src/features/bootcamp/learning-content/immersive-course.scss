@@ -300,3 +300,26 @@
 @media (max-width: 780px) {
   .imp-study:not([data-view="overview"]) .imp-study__right { display: none; }
 }
+
+
+/* Practical submission is an independently reviewed artefact, never a free
+   checkmark that automatically verifies knowledge. */
+.imp-study__submission {
+  display: grid; gap: 12px; margin-top: 18px;
+  padding: 17px; border: 1px solid #146b7c; border-radius: 12px;
+  background: #0a3046;
+}
+.imp-study__submission h4 { margin: 0; font-size: 18px; }
+.imp-study__submission label { display: grid; gap: 7px; font-size: 13px; color: #bde4ed; }
+.imp-study__submission textarea,
+.imp-study__submission input {
+  width: 100%; min-width: 0; padding: 11px 12px; border: 1px solid #2a7088;
+  border-radius: 8px; background: #051d33; color: #f3ffff; font: inherit;
+}
+.imp-study__submission textarea { min-height: 120px; resize: vertical; }
+.imp-study__submission textarea:focus,
+.imp-study__submission input:focus { outline: 2px solid #05e7e8; outline-offset: 1px; }
+.imp-study__submission > button { justify-self: stretch; }
+.imp-study__submission small { color: #a6bed2; }
+.imp-study__submission [role="status"] { color: #1ef9dc; }
+.imp-study__submission [role="alert"] { color: #ffb6c5; }
