@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - "frontend/e2e/production-trajectory-audit.spec.ts"
+      - "frontend/e2e/bootcamp-reference-fixtures.ts"
       - "frontend/production-playwright.config.ts"
       - ".github/workflows/production-trajectory-audit.yml"
   workflow_dispatch:
