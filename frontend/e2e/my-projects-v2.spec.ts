@@ -224,7 +224,7 @@ test("My Projects: contribution upload uses allowed artifact key and real API pa
     posted=route.request().postDataJSON() as {personal_summary:string;artifacts:{key:string;uri:string}[]};
     await route.fulfill({status:201,json:{id:"contribution-new",assignment_id:"assignment-1",version:2,personal_summary:posted.personal_summary,artifact_keys:["report"],status:"reported"}});
   });
-  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить работу/}).click();
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
   await page.getByRole("tab",{name:"Мой вклад"}).click();
   const form=page.locator(".mp-contribute-form");
   await expect(form.getByRole("combobox",{name:"Тип доказательства"})).toBeVisible();
