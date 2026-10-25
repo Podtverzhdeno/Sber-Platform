@@ -259,6 +259,7 @@ def analyze(root: Path) -> dict[str, Any]:
     forbidden: list[dict[str, Any]] = []
     cross_features: list[dict[str, Any]] = []
     failures: list[str] = []
+    css_risks: list[dict[str, Any]] = []
     biggest = []
     mig = {}
     counts: Counter[str] = Counter()
@@ -301,6 +302,15 @@ def analyze(root: Path) -> dict[str, Any]:
             mig[path] = source
         if kind == "generated":
             continue
+        if path.startswith("frontend/src/") and path.endswith((".scss", ".css")):
+            css_risks.append(
+                {
+                    "path": path,
+                    "bytes": len(source.encode("utf-8")),
+                    "important_count": source.count("!important"),
+                    "legacy_imports": len(re.findall(r"@import\\s", source)),
+                }
+            )
         if path.endswith(".json"):
             try:
                 json.loads(source)
@@ -379,6 +389,7 @@ def analyze(root: Path) -> dict[str, Any]:
         "type_only_edges_skipped": type_edges_skipped,
         "forbidden_imports": sorted(forbidden, key=lambda x: (x["path"], x["line"])),
         "cross_feature_imports": cross_features,
+        "css_risks": sorted(css_risks, key=lambda x: x["bytes"], reverse=True),
         "cycles": strongly_connected(graph),
         "migration_graph": migrations(mig),
         "unreadable_or_invalid": sorted(failures),
@@ -403,6 +414,19 @@ def as_markdown(r: dict[str, Any]) -> str:
     lines += [f"- {x['path']}:{x['line']} imports {x['module']}" for x in r["forbidden_imports"]]
     lines += ["", "## Import cycles", ""]
     lines += ["- " + " -> ".join(c) for c in r["cycles"][:30]]
+    lines += ["", "## Frontend runtime cross-feature imports", ""]
+    lines += [f"- {x['path']}:{x['line']} -> {x['target']}" for x in r["cross_feature_imports"][:40]]
+    lines += [
+        "",
+        "## CSS review signals (size and overrides do not alone prove defects)",
+        "",
+        "| Stylesheet | Bytes | !important | legacy @import |",
+        "|---|---:|---:|---:|",
+    ]
+    lines += [
+        f"| {x['path']} | {x['bytes']} | {x['important_count']} | {x['legacy_imports']} |"
+        for x in r["css_risks"][:20]
+    ]
     lines += ["", "## Largest handwritten files", "", "| File | Lines | Bytes |", "|---|---:|---:|"]
     lines += [f"| {x['path']} | {x['lines']} | {x['bytes']} |" for x in r["largest"][:30]]
     lines += [
