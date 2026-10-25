@@ -1,0 +1,33 @@
+name: AI Buddy UX QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/buddy-chat-v2.*"
+      - "frontend/src/features/participant.tsx"
+      - "frontend/src/features/participant.test.tsx"
+      - "frontend/src/App.tsx"
+      - ".github/workflows/buddy-ui-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  buddy-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - name: Lint Buddy UI and integration
+        run: npx eslint src/features/buddy-chat-v2.tsx src/features/buddy-chat-v2.test.tsx src/features/participant.tsx src/features/participant.test.tsx --max-warnings 0
+      - name: Verify conversation, files, links and opt-out
+        run: npx vitest run src/features/buddy-chat-v2.test.tsx src/features/participant.test.tsx
