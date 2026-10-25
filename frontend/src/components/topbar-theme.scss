@@ -25,6 +25,7 @@
 /* Compact, quieter streak chip: the button still opens the full rhythm dialog. */
 .topbar .streak-utility .streak-button {
   height: 36px;
+  min-height: 36px;
   min-width: 67px;
   gap: 5px;
   padding: 0 9px;
@@ -54,6 +55,7 @@
   width: auto;
   min-width: 111px;
   height: 36px;
+  min-height: 36px;
   gap: 7px;
   padding: 4px 9px;
   border-color: #135256;
@@ -104,7 +106,7 @@
 }
 
 /* Bell is visually smaller, while the clickable target remains usable. */
-.topbar .notification-button { width: 36px; height: 36px; }
+.topbar .notification-button { width: 36px; height: 36px; min-height: 36px; }
 .topbar .notification-button > svg { width: 16px; height: 16px; }
 
 @media(max-width:850px) {
