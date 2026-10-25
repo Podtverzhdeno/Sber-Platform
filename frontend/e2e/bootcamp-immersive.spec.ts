@@ -15,6 +15,7 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
     const reader = dialog.getByTestId("impulse-immersive-reader");
     await expect(reader).toBeVisible();
+    await expect(reader).toHaveAttribute("data-view", "overview");
     await expect(reader.getByText("Программа курса", { exact: true }).first()).toBeVisible();
     await page.screenshot({ path: "test-results/imp-01-program-" + String(viewport.width) + ".png", animations: "disabled" });
 
@@ -30,6 +31,8 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
       .getByRole("button", { name: /Открыть курс|Вернуться/ }).click();
     await expect(reader).toBeVisible();
 
+    await reader.getByRole("button", { name: /Перейти к программе/ }).click();
+    await expect(reader).toHaveAttribute("data-view", "program");
     await reader.locator(".imp-study__program-list button").first().click();
     for (const state of ["theory","example","practice","check"]) {
       const tab = reader.locator(".imp-study__tabs button").filter({ has: page.locator("svg") }).nth(
