@@ -287,7 +287,4 @@ STAGE_READINGS: dict[str, list[list[str]]] = json.loads(r"""{
 def reading_for_stage(track_key: str, stage_position: int) -> list[dict[str, str]]:
     """Return two official resources aligned with the practical module."""
     codes = STAGE_READINGS[track_key][stage_position - 1]
-    return [
-        {"title": READING_LIBRARY[key][0], "url": READING_LIBRARY[key][1]}
-        for key in codes
-    ]
+    return [{"title": READING_LIBRARY[key][0], "url": READING_LIBRARY[key][1]} for key in codes]
