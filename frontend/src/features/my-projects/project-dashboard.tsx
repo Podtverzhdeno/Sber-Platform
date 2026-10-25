@@ -143,8 +143,8 @@ export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMemb
   const latestContribution = project.contributions.at(-1);
   const openInfo = () => { setShowInfo(true); };
   const current = (id:Section) => () => {setActiveTab(id);};
-  const SummaryCard = ({icon:Icon,value,title,caption}: {icon:typeof Target;value:string;title:string;caption:string}) =>
-    <section className="mpd-metric"><div className="mpd-metric-icon"><Icon size={27}/></div><div><strong>{value}</strong><b>{title}</b><small>{caption}</small></div></section>;
+  const SummaryCard = ({icon:Icon,value,title,caption,progressValue}: {icon:typeof Target;value:string;title:string;caption:string;progressValue?:number|null}) =>
+    <section className="mpd-metric"><div className={progressValue===undefined?"mpd-metric-icon":"mpd-metric-progress"}>{progressValue===undefined?<Icon size={27}/>:<div className="mpd-progress-ring" role="img" aria-label={`Выполнено ${value}`} style={{background:`conic-gradient(#04e8cf ${String(progressValue??0)}%, #153c55 0)`}}><span>{value}</span></div>}</div><div>{progressValue===undefined&&<strong>{value}</strong>}<b>{title}</b><small>{caption}</small></div></section>;
   const StagePanel = () => <section className="mpd-panel mpd-stages">
     <div className="mpd-panel-head"><h2><CircleDot/> Этапы проекта</h2><span>{checkpoints.length? `Завершено ${String(done)} из ${String(checkpoints.length)}`:"План ожидается"} {percent!==null&&<strong>{String(percent)}%</strong>}</span></div>
     {checkpoints.length?<div className="mpd-stage-line">{checkpoints.map((stage,i)=>{
@@ -170,6 +170,7 @@ export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMemb
       <button type="button" className="mpd-back" onClick={onBack}><ArrowLeft size={16}/> К странице проекта</button>
       <div className="mpd-heading">
         <div className="mpd-head-copy"><div className="mpd-state"><i/>{readableStatus[project.status]??project.status}</div>
+          <span className="mpd-edition">Условия проекта · версия {String(project.version)}</span>
           <h1 id="workspace-title">{project.title}</h1>
           <p>{project.deliverable}</p>
           <div className="mpd-head-meta"><span><CalendarDays size={15}/> Срок: {dateRU(project.deadline)}</span><span><Users size={15}/> Команда: {String(project.team.length)}</span></div>
@@ -184,7 +185,7 @@ export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMemb
     {activeTab==="overview"?<div className="mpd-content">
       <main className="mpd-main">
         <div className="mpd-metrics">
-          <SummaryCard icon={Target} value={percent===null?"—":`${String(percent)}%`} title="Прогресс проекта" caption={checkpoints.length?`${String(done)} из ${String(checkpoints.length)} этапов завершено`:"Этапы пока не опубликованы"}/>
+          <SummaryCard icon={Target} progressValue={percent} value={percent===null?"—":`${String(percent)}%`} title="Прогресс проекта" caption={checkpoints.length?`${String(done)} из ${String(checkpoints.length)} этапов завершено`:"Этапы пока не опубликованы"}/>
           <SummaryCard icon={FileText} value={String(artifacts.length)} title="Артефактов" caption={project.contributions.length?`Версий вклада: ${String(project.contributions.length)}`:"Результаты ещё не отправлены"}/>
           <SummaryCard icon={Users} value={String(project.team.length)} title="Участников" caption="Команда проекта"/>
         </div>
