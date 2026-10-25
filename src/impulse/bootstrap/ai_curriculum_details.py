@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 
+from impulse.bootstrap.ai_reading_resources import reading_for_stage
 from impulse.bootstrap.ai_stage_guides import stage_guide
 
 # ruff: noqa: E501 -- curated human-readable Russian lesson descriptions.
@@ -671,6 +672,7 @@ def learning_details(track_key: str, stage_position: int) -> dict[str, object]:
     """Read a curriculum module without mutating the canonical milestone."""
     details = dict(AI_CURRICULUM_DETAILS[track_key][stage_position - 1])
     guide = stage_guide(track_key, stage_position)
+    details["resources"] = reading_for_stage(track_key, stage_position)
     details["lab"] = "\n\n".join(
         (
             str(details["lab"]),
