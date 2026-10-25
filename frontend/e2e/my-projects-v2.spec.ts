@@ -135,6 +135,9 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
   await page.getByRole("button",{name:/Продолжить работу/}).click();
   await expect(page.locator(".mpv2--workspace")).toBeVisible();
+  await page.getByRole("button",{name:"Загрузить новую версию"}).click();
+  await expect(page.locator(".mpv2--workspace .ctw-upload")).toBeVisible();
+  await expect(page.locator(".mpv2--workspace .ctw-upload .ctw-section-toggle")).toHaveAttribute("aria-expanded","true");
   await page.getByRole("button",{name:"К странице проекта"}).click();
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
 });
