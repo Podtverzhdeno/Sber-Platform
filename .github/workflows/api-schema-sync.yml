@@ -1,0 +1,59 @@
+name: Keep generated API types current
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "openapi.json"
+      - ".github/workflows/api-schema-sync.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: api-schema-sync-main
+  cancel-in-progress: false
+
+jobs:
+  api-schema-sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: true
+      - name: Install Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install generator
+        working-directory: frontend
+        run: npm ci
+      - name: Reconcile latest OpenAPI and commit generated types
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch --quiet origin main
+            git checkout -B api-schema-sync origin/main
+            (cd frontend && npm run api:generate && npm run api:check)
+            if git diff --quiet -- frontend/src/api/schema.ts; then
+              echo "Generated types already current on main"
+              exit 0
+            fi
+            git add frontend/src/api/schema.ts
+            git commit -m "chore(api): sync generated schema to current OpenAPI"
+            if git push origin HEAD:main; then
+              echo "Generated schema committed to main"
+              exit 0
+            fi
+            echo "main advanced during schema generation; retry ${attempt}"
+            sleep 3
+          done
+          echo "::error::Could not update generated API schema after five attempts"
+          exit 1
