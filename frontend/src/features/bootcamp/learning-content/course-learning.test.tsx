@@ -116,6 +116,7 @@ describe("Bootcamp editorial course curriculum", () => {
     render(<CourseLearningContent courseKey="demo-course-1" />);
     const nav = screen.getByRole("navigation", { name: "Шаги обучения" });
     fireEvent.click(within(nav).getByRole("button", { name: /Проверка и управление изменением/ }));
+    fireEvent.click(screen.getByRole("button", { name: /04 Самопроверка/ }));
     const group = screen.getByRole("group", { name: "Варианты ответа" });
     expect(within(group).getAllByRole("button")).toHaveLength(3);
     fireEvent.click(within(group).getByRole("button", { name: /Проверить только HTTP 200/ }));
@@ -133,11 +134,27 @@ describe("Bootcamp editorial course curriculum", () => {
     expect(screen.getByRole("button", { name: "Предыдущий урок" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "Следующий урок" }));
     expect(screen.getByRole("heading", { name: "Условия и циклы" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Показать ожидаемый результат" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /04 Самопроверка/ }));
     fireEvent.click(screen.getByRole("button", { name: "Показать ожидаемый результат" }));
     expect(screen.getByRole("status")).toHaveTextContent(/Два списка/);
     fireEvent.click(screen.getByRole("button", { name: "Скрыть ожидаемый результат" }));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
     expect(screen.getByText(/не начисляют XP/)).toBeInTheDocument();
+  });
+
+  it("combines all four parts in one lesson and hides self-check until intentional reveal", () => {
+    render(<CourseLearningContent courseKey="demo-course-3" />);
+    const lesson = screen.getByTestId("unified-course-lesson");
+    const frames = within(lesson).getAllByRole("button", { name: /0[1-4] (Теория|Разобранный пример|Практическое задание|Самопроверка)/ });
+    expect(frames).toHaveLength(4);
+    expect(frames.map(button => button.getAttribute("aria-expanded"))).toEqual(["true", "true", "true", "false"]);
+    expect(within(lesson).queryByRole("checkbox")).not.toBeInTheDocument();
+    fireEvent.click(frames[3]!);
+    expect(frames[3]).toHaveAttribute("aria-expanded", "true");
+    expect(within(lesson).getAllByRole("checkbox").length).toBeGreaterThan(0);
+    fireEvent.click(frames[3]!);
+    expect(within(lesson).queryByRole("checkbox")).not.toBeInTheDocument();
   });
 
   it("shows honest fallback rather than a fabricated lesson for unknown server catalog keys", () => {
@@ -151,6 +168,8 @@ describe("Bootcamp editorial course curriculum", () => {
     const nav = screen.getByRole("navigation", { name: "Шаги обучения" });
     fireEvent.click(within(nav).getByRole("button", { name: /Архитектура и ADR/ }));
     expect(screen.getByRole("heading", { name: "Архитектура и ADR" })).toBeInTheDocument();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /04 Самопроверка/ }));
     const checks = screen.getAllByRole("checkbox");
     expect(checks).toHaveLength(3);
     const firstCheck = checks[0];
