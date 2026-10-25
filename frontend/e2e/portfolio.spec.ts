@@ -79,9 +79,16 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
     const trustPanel = panel(".p2-trust-panel");
     const visibilityPanel = panel(".p2-visibility-panel");
     expect(Math.abs(projectsPanel.bottom-lastRight.bottom), "Projects and certification should end on same line").toBeLessThanOrEqual(3);
-    expect(Math.abs(aboutPanel.top-visibilityPanel.top), "Lower cards top should align").toBeLessThanOrEqual(3);
-    expect(Math.abs(aboutPanel.bottom-visibilityPanel.bottom), "About should extend to the longest lower card").toBeLessThanOrEqual(3);
-    expect(Math.abs(trustPanel.bottom-visibilityPanel.bottom), "Trust should extend to the longest lower card").toBeLessThanOrEqual(3);
+    const desktopThreeColumns = (page.viewportSize()?.width ?? 0) > 1200;
+    expect(Math.abs(aboutPanel.top-trustPanel.top), "About and Trust must start together").toBeLessThanOrEqual(3);
+    expect(Math.abs(aboutPanel.bottom-trustPanel.bottom), "About and Trust must end together").toBeLessThanOrEqual(3);
+    if (desktopThreeColumns) {
+      expect(Math.abs(aboutPanel.top-visibilityPanel.top), "Three desktop lower cards must start together").toBeLessThanOrEqual(3);
+      expect(Math.abs(aboutPanel.bottom-visibilityPanel.bottom), "Three desktop lower cards must end together").toBeLessThanOrEqual(3);
+    } else {
+      // At <=1200 px the visibility card deliberately wraps to a full-width next row.
+      expect(visibilityPanel.top, "Tablet full-width visibility should follow about/trust").toBeGreaterThanOrEqual(aboutPanel.bottom+8);
+    }
     const projectList = panel(".p2-project-list");
     expect(projectList.bottom, "Project cards must occupy the project panel instead of leaving unused bottom space")
       .toBeGreaterThan(projectsPanel.bottom-20);
