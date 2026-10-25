@@ -14,7 +14,7 @@ const completeBrief = () => {
   fireEvent.click(screen.getByRole("button", { name: /Критерии и сроки/ }));
   fireEvent.change(screen.getByPlaceholderText(/Каждый критерий с новой строки/), { target: { value: "Запуск по инструкции; отчёт по точности" } });
 };
-beforeEach(() => localStorage.clear());
+beforeEach(() => { localStorage.clear(); });
 
 describe("customer task creation wizard", () => {
   it("keeps draft fields and step after reopening", () => {
