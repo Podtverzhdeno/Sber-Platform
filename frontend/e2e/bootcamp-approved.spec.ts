@@ -134,6 +134,9 @@ test("course reader fills viewport and lesson navigation never clips", async ({ 
   await page.getByTestId("course-agent-development").getByRole("button", { name: "Подробнее →" }).click();
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(dialog).toBeVisible();
+  await dialog.getByRole("tab", { name: "Программа" }).click();
+  await expect(dialog.getByRole("tabpanel")).toBeVisible();
+  await expect(dialog.locator(".bc-learning__body")).toBeVisible();
   const geometry = await dialog.evaluate(node => {
     const rect = node.getBoundingClientRect();
     return { x: rect.x, y: rect.y, width: rect.width, height: rect.height,
