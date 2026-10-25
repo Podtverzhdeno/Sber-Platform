@@ -8,7 +8,7 @@ from decimal import Decimal
 from typing import Any, cast
 from uuid import UUID, uuid4
 
-from sqlalchemy import delete, func, select, update
+from sqlalchemy import delete, func, select, text, update
 from sqlalchemy.dialects.postgresql import insert
 
 from impulse.api.errors import ApiError
@@ -1426,6 +1426,58 @@ class SqlWorkStore(WorkStore):
                 .where(contributions.c.id == contribution_id)
                 .values(status=contribution_status.value, version=contributions.c.version + 1)
             )
+            # Checkpoint evidence is a stage-level review. Accepting one
+            # checkpoint must not close the entire assignment while other
+            # published checkpoints remain incomplete.
+            if decision is AcceptanceDecision.ACCEPTED:
+                checkpoint_key = await session.scalar(
+                    text(
+                        "SELECT checkpoint_key FROM checkpoint_submissions "
+                        "WHERE contribution_id = :contribution_id"
+                    ),
+                    {"contribution_id": contribution_id},
+                )
+                if checkpoint_key is not None:
+                    task_id = await session.scalar(
+                        select(assignments.c.task_id).where(
+                            assignments.c.id == row.assignment_id
+                        )
+                    )
+                    task_row = (
+                        await session.execute(
+                            select(tasks.c.payload)
+                            .where(tasks.c.id == task_id)
+                            .with_for_update()
+                        )
+                    ).one_or_none()
+                    if task_row is not None:
+                        payload = dict(task_row.payload or {})
+                        checkpoints = [
+                            dict(stage) for stage in payload.get("checkpoints", [])
+                        ]
+                        found = False
+                        for stage in checkpoints:
+                            if stage.get("key") == checkpoint_key:
+                                stage["status"] = "accepted"
+                                found = True
+                        if found:
+                            payload["checkpoints"] = checkpoints
+                            await session.execute(
+                                update(tasks)
+                                .where(tasks.c.id == task_id)
+                                .values(
+                                    payload=payload,
+                                    version=tasks.c.version + 1,
+                                )
+                            )
+                            complete_states = {
+                                "accepted", "completed", "verified", "done", "closed"
+                            }
+                            if any(
+                                stage.get("status") not in complete_states
+                                for stage in checkpoints
+                            ):
+                                assignment_status = AssignmentStatus.IN_PROGRESS
             await session.execute(
                 update(assignments)
                 .where(assignments.c.id == row.assignment_id)
