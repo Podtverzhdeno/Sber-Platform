@@ -2,7 +2,7 @@
 
 - task_id: ARCH-ARCHITECTURE-AUDIT-20261026
 - session_id: gpt6-20261026-architecture-audit-01
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 35ab781abeeb16a67e84c51e8f8893b4050da2c0
@@ -28,3 +28,6 @@
   - OpenSpec CLI validation and executable CI: NOT_RUN (remote connector only)
 - independent_review: CI rejection: first requirement description exceeds OpenSpec strict length; rework authorized, then return to REVIEW. Do not mark DONE.
 - blockers: Local Git checkout and OpenSpec CLI unavailable; static analysis conducted through connected GitHub, executable test results unavailable
+
+- review_handoff_2026_10_26: OpenSpec proposal, design, spec and 26-task checklist committed. Initial overly long requirement corrected. Dedicated strict OpenSpec gate confirmed successful in architecture CI #40242117126.
+- acceptance_limit: 26 OpenSpec work items remain unchecked; no claim that full architecture refactor is done.
