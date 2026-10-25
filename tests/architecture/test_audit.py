@@ -1,14 +1,16 @@
 """Focused tests for the read-only dependency and migration inventory."""
+
 from __future__ import annotations
 
 import importlib.util
-from pathlib import Path
 import tempfile
 import unittest
-
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-spec = importlib.util.spec_from_file_location("architecture_audit", ROOT / "scripts/architecture/audit.py")
+spec = importlib.util.spec_from_file_location(
+    "architecture_audit", ROOT / "scripts/architecture/audit.py"
+)
 assert spec and spec.loader
 audit_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(audit_module)
@@ -29,7 +31,9 @@ class ArchitectureAuditTests(unittest.TestCase):
     def test_relative_typescript_import(self) -> None:
         known = {"frontend/src/features/bootcamp/card.tsx", "frontend/src/features/rating/page.tsx"}
         self.assertEqual(
-            audit_module.ts_file("frontend/src/features/rating/page.tsx", "../bootcamp/card", known),
+            audit_module.ts_file(
+                "frontend/src/features/rating/page.tsx", "../bootcamp/card", known
+            ),
             "frontend/src/features/bootcamp/card.tsx",
         )
 
@@ -65,34 +69,45 @@ class ArchitectureAuditTests(unittest.TestCase):
             self.assertEqual(len(report["cycles"]), 1)
             self.assertEqual(len(report["cross_feature_imports"]), 2)
 
-
     def test_ratchet_blocks_new_debt_and_expired_allowlist(self) -> None:
-        report = {"forbidden_imports": [
-            {"path": "src/impulse/application/work.py", "module": "impulse.api.errors"}],
-            "cycles": [["a.py", "b.py"]]}
+        report = {
+            "forbidden_imports": [
+                {"path": "src/impulse/application/work.py", "module": "impulse.api.errors"}
+            ],
+            "cycles": [["a.py", "b.py"]],
+        }
         baseline = {"exceptions": [], "allowed_cycles": []}
         self.assertEqual(len(audit_module.baseline_regressions(report, baseline)), 2)
-        baseline["exceptions"] = [{
-            "path": "src/impulse/application/work.py", "module": "impulse.api.errors",
-            "owner": "team", "expires": "2099-01-01"
-        }]
+        baseline["exceptions"] = [
+            {
+                "path": "src/impulse/application/work.py",
+                "module": "impulse.api.errors",
+                "owner": "team",
+                "expires": "2099-01-01",
+            }
+        ]
         baseline["allowed_cycles"] = [["b.py", "a.py"]]
         self.assertEqual(audit_module.baseline_regressions(report, baseline), [])
         baseline["exceptions"][0]["expires"] = "2020-01-01"
         self.assertEqual(len(audit_module.baseline_regressions(report, baseline)), 1)
 
-
     def test_type_only_edges_do_not_create_runtime_cycles(self) -> None:
-        self.assertTrue(audit_module.type_only_ts_import(
-            'import type { Foo } from "./bar";', len('import type { Foo } ')
-        ))
-        self.assertFalse(audit_module.type_only_ts_import(
-            'import { Foo } from "./bar";', len('import { Foo } ')
-        ))
+        self.assertTrue(
+            audit_module.type_only_ts_import(
+                'import type { Foo } from "./bar";', len("import type { Foo } ")
+            )
+        )
+        self.assertFalse(
+            audit_module.type_only_ts_import('import { Foo } from "./bar";', len("import { Foo } "))
+        )
         import ast
-        tree = ast.parse("from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    from app.a import A\nfrom app.b import B\n")
-        modules = [n.module for n in audit_module.runtime_ast_nodes(tree)
-                   if isinstance(n, ast.ImportFrom)]
+
+        tree = ast.parse(
+            "from typing import TYPE_CHECKING\nif TYPE_CHECKING:\n    from app.a import A\nfrom app.b import B\n"
+        )
+        modules = [
+            n.module for n in audit_module.runtime_ast_nodes(tree) if isinstance(n, ast.ImportFrom)
+        ]
         self.assertEqual(modules, ["typing", "app.b"])
 
 

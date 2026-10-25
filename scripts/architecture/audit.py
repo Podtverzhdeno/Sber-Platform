@@ -1,29 +1,53 @@
 #!/usr/bin/env python3
 """Read-only Python/TS dependency, source and migration audit. stdlib only."""
+
 from __future__ import annotations
+
 import argparse
 import ast
-from collections import Counter, defaultdict
-from datetime import date
 import json
-from pathlib import Path, PurePosixPath
 import re
 import subprocess
 import tomllib
+from collections import Counter, defaultdict
+from datetime import date
+from pathlib import Path, PurePosixPath
 from typing import Any
 
-EXT = {".py", ".ts", ".tsx", ".js", ".jsx", ".mjs", ".css", ".scss", ".sql", ".yaml", ".yml", ".json", ".toml", ".ini", ".html"}
+EXT = {
+    ".py",
+    ".ts",
+    ".tsx",
+    ".js",
+    ".jsx",
+    ".mjs",
+    ".css",
+    ".scss",
+    ".sql",
+    ".yaml",
+    ".yml",
+    ".json",
+    ".toml",
+    ".ini",
+    ".html",
+}
 GENERATED = {"frontend/src/api/schema.ts", "openapi.json"}
-TS_IMPORT = re.compile(r'(?:\bfrom\s*|\bimport\s*\(|\brequire\s*\()\s*["\x27]([^"\x27]+)["\x27]|^\s*import\s*["\x27]([^"\x27]+)["\x27]', re.M)
-MIGRATION = re.compile(r'(?m)^\s*(revision|down_revision)\s*(?::[^=\n]+)?=\s*(.+?)\s*$')
+TS_IMPORT = re.compile(
+    r'(?:\bfrom\s*|\bimport\s*\(|\brequire\s*\()\s*["\x27]([^"\x27]+)["\x27]|^\s*import\s*["\x27]([^"\x27]+)["\x27]',
+    re.M,
+)
+MIGRATION = re.compile(r"(?m)^\s*(revision|down_revision)\s*(?::[^=\n]+)?=\s*(.+?)\s*$")
 
 
 def filenames(root: Path) -> list[str]:
     p = subprocess.run(["git", "-C", str(root), "ls-files", "-z"], capture_output=True, check=False)
     if p.returncode == 0:
         return sorted(x.decode() for x in p.stdout.split(b"\0") if x)
-    return sorted(p.relative_to(root).as_posix() for p in root.rglob("*")
-                  if p.is_file() and not {".git", "node_modules", ".venv", "dist"}.intersection(p.parts))
+    return sorted(
+        p.relative_to(root).as_posix()
+        for p in root.rglob("*")
+        if p.is_file() and not {".git", "node_modules", ".venv", "dist"}.intersection(p.parts)
+    )
 
 
 def category(path: str) -> str:
@@ -57,9 +81,23 @@ def ts_file(origin: str, imported: str, known: set[str]) -> str | None:
         elif x != ".":
             parts.append(x)
     base = "/".join(parts)
-    return next((x for x in (base, base + ".ts", base + ".tsx", base + ".js",
-                              base + ".scss", base + ".css", base + "/index.ts",
-                              base + "/index.tsx") if x in known), None)
+    return next(
+        (
+            x
+            for x in (
+                base,
+                base + ".ts",
+                base + ".tsx",
+                base + ".js",
+                base + ".scss",
+                base + ".css",
+                base + "/index.ts",
+                base + "/index.tsx",
+            )
+            if x in known
+        ),
+        None,
+    )
 
 
 def prohibited(source: str, module: str) -> bool:
@@ -128,17 +166,20 @@ def migrations(files: dict[str, str]) -> dict[str, Any]:
             parents.add(prev)
         elif isinstance(prev, (tuple, list)):
             parents.update(y for y in prev if isinstance(y, str))
-    return {"count": len(details), "heads": sorted(ids - parents),
-            "orphan_parents": sorted(parents - ids),
-            "missing_revision": sorted(p for p, x in details.items() if not x.get("revision"))}
+    return {
+        "count": len(details),
+        "heads": sorted(ids - parents),
+        "orphan_parents": sorted(parents - ids),
+        "missing_revision": sorted(p for p, x in details.items() if not x.get("revision")),
+    }
 
 
 def runtime_ast_nodes(tree: ast.AST):
     """Exclude import edges that exist only under typing.TYPE_CHECKING."""
     for child in ast.iter_child_nodes(tree):
         if isinstance(child, ast.If) and (
-            isinstance(child.test, ast.Name) and child.test.id == "TYPE_CHECKING"
-            or isinstance(child.test, ast.Attribute) and child.test.attr == "TYPE_CHECKING"
+            (isinstance(child.test, ast.Name) and child.test.id == "TYPE_CHECKING")
+            or (isinstance(child.test, ast.Attribute) and child.test.attr == "TYPE_CHECKING")
         ):
             for node in child.orelse:
                 yield node
@@ -149,7 +190,7 @@ def runtime_ast_nodes(tree: ast.AST):
 
 
 def type_only_ts_import(source: str, offset: int) -> bool:
-    prefix = source[max(0, offset - 500):offset]
+    prefix = source[max(0, offset - 500) : offset]
     # Find the active import statement, ignoring previous completed statements.
     current = prefix.rsplit(";", 1)[-1]
     return bool(re.search(r"\bimport\s+type\b", current))
@@ -169,8 +210,19 @@ def analyze(root: Path) -> dict[str, Any]:
     type_edges_skipped = 0
     manifest: list[dict[str, Any]] = []
     for path in all_files:
-        manifest.append({"path": path, "bytes": (root / path).stat().st_size, "kind": (
-            "generated" if path in GENERATED else category(path) if Path(path).suffix in EXT else "asset_or_document")})
+        manifest.append(
+            {
+                "path": path,
+                "bytes": (root / path).stat().st_size,
+                "kind": (
+                    "generated"
+                    if path in GENERATED
+                    else category(path)
+                    if Path(path).suffix in EXT
+                    else "asset_or_document"
+                ),
+            }
+        )
         if Path(path).suffix not in EXT:
             counts["non_source"] += 1
             continue
@@ -181,7 +233,14 @@ def analyze(root: Path) -> dict[str, Any]:
         except (UnicodeDecodeError, OSError):
             failures.append(path)
             continue
-        biggest.append({"path": path, "lines": source.count("\n") + 1, "bytes": len(source.encode()), "kind": kind})
+        biggest.append(
+            {
+                "path": path,
+                "lines": source.count("\n") + 1,
+                "bytes": len(source.encode()),
+                "kind": kind,
+            }
+        )
         if kind == "migration":
             mig[path] = source
         if kind == "generated":
@@ -208,8 +267,10 @@ def analyze(root: Path) -> dict[str, Any]:
                 elif isinstance(node, ast.ImportFrom):
                     if node.level:
                         package = PurePosixPath(path).parts[1:-1]
-                        ancestor = package[:len(package) - (node.level - 1)]
-                        base = ".".join((*ancestor, *(node.module.split(".") if node.module else [])))
+                        ancestor = package[: len(package) - (node.level - 1)]
+                        base = ".".join(
+                            (*ancestor, *(node.module.split(".") if node.module else []))
+                        )
                     else:
                         base = node.module or ""
                     modules = [base] if base else []
@@ -237,47 +298,74 @@ def analyze(root: Path) -> dict[str, Any]:
                 if dest and dest != path:
                     graph[path].add(dest)
                     a, b = PurePosixPath(path).parts, PurePosixPath(dest).parts
-                    if kind == category(dest) == "frontend/feature" and len(a) > 3 and len(b) > 3 and a[3] != b[3]:
-                        cross_features.append({"path": path, "line": source.count("\n", 0, match.start()) + 1, "target": dest})
+                    if (
+                        kind == category(dest) == "frontend/feature"
+                        and len(a) > 3
+                        and len(b) > 3
+                        and a[3] != b[3]
+                    ):
+                        cross_features.append(
+                            {
+                                "path": path,
+                                "line": source.count("\n", 0, match.start()) + 1,
+                                "target": dest,
+                            }
+                        )
         graph.setdefault(path, set())
     biggest.sort(key=lambda x: x["bytes"], reverse=True)
-    return {"tracked": len(all_files), "manifest": manifest,
-            "sources": sum(v for k, v in counts.items() if k != "non_source"),
-            "categories": dict(counts), "imports_scanned": edges_scanned,
-            "edges": sum(len(x) for x in graph.values()), "type_only_edges_skipped": type_edges_skipped,
-            "forbidden_imports": sorted(forbidden, key=lambda x: (x["path"], x["line"])),
-            "cross_feature_imports": cross_features, "cycles": strongly_connected(graph),
-            "migration_graph": migrations(mig), "unreadable_or_invalid": sorted(failures),
-            "largest": [x for x in biggest if x["kind"] != "generated"][:40]}
+    return {
+        "tracked": len(all_files),
+        "manifest": manifest,
+        "sources": sum(v for k, v in counts.items() if k != "non_source"),
+        "categories": dict(counts),
+        "imports_scanned": edges_scanned,
+        "edges": sum(len(x) for x in graph.values()),
+        "type_only_edges_skipped": type_edges_skipped,
+        "forbidden_imports": sorted(forbidden, key=lambda x: (x["path"], x["line"])),
+        "cross_feature_imports": cross_features,
+        "cycles": strongly_connected(graph),
+        "migration_graph": migrations(mig),
+        "unreadable_or_invalid": sorted(failures),
+        "largest": [x for x in biggest if x["kind"] != "generated"][:40],
+    }
 
 
 def as_markdown(r: dict[str, Any]) -> str:
-    lines = ["# Architecture audit", "",
-             f"Tracked: {r['tracked']}, sources: {r['sources']}, dependency edges: {r['edges']}",
-             f"Forbidden imports: {len(r['forbidden_imports'])}, cycles: {len(r['cycles'])}, migration heads: {len(r['migration_graph']['heads'])}",
-             "", "## Forbidden imports", ""]
+    lines = [
+        "# Architecture audit",
+        "",
+        f"Tracked: {r['tracked']}, sources: {r['sources']}, dependency edges: {r['edges']}",
+        f"Forbidden imports: {len(r['forbidden_imports'])}, cycles: {len(r['cycles'])}, migration heads: {len(r['migration_graph']['heads'])}",
+        "",
+        "## Forbidden imports",
+        "",
+    ]
     lines += [f"- {x['path']}:{x['line']} imports {x['module']}" for x in r["forbidden_imports"]]
     lines += ["", "## Import cycles", ""]
     lines += ["- " + " -> ".join(c) for c in r["cycles"][:30]]
     lines += ["", "## Largest handwritten files", "", "| File | Lines | Bytes |", "|---|---:|---:|"]
     lines += [f"| {x['path']} | {x['lines']} | {x['bytes']} |" for x in r["largest"][:30]]
-    lines += ["", "## Migration graph", "", json.dumps(r["migration_graph"], indent=2), "",
-              "Static scan: runtime, dynamic imports, performance and RBAC still need executable tests."]
+    lines += [
+        "",
+        "## Migration graph",
+        "",
+        json.dumps(r["migration_graph"], indent=2),
+        "",
+        "Static scan: runtime, dynamic imports, performance and RBAC still need executable tests.",
+    ]
     return "\n".join(lines) + "\n"
 
 
-
 def baseline_regressions(report: dict[str, Any], baseline: dict[str, Any]) -> list[str]:
-    allowed = {
-        (x["path"], x["module"]): x
-        for x in baseline.get("exceptions", [])
-    }
+    allowed = {(x["path"], x["module"]): x for x in baseline.get("exceptions", [])}
     errors = []
     for violation in report["forbidden_imports"]:
         key = (violation["path"], violation["module"])
         existing = allowed.get(key)
         if existing is None:
-            errors.append("New forbidden import: " + violation["path"] + " -> " + violation["module"])
+            errors.append(
+                "New forbidden import: " + violation["path"] + " -> " + violation["module"]
+            )
         elif not existing.get("owner") or not existing.get("expires"):
             errors.append("Unowned legacy exception: " + violation["path"])
         elif date.fromisoformat(existing["expires"]) < date.today():
@@ -299,7 +387,9 @@ def main() -> int:
     args = parser.parse_args()
     report = analyze(args.root.resolve())
     args.output_dir.mkdir(parents=True, exist_ok=True)
-    (args.output_dir / "architecture.json").write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    (args.output_dir / "architecture.json").write_text(
+        json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
     (args.output_dir / "architecture.md").write_text(as_markdown(report), encoding="utf-8")
     print(as_markdown(report).split("## Forbidden imports")[0])
     if args.fail_on_new:
@@ -307,9 +397,16 @@ def main() -> int:
         baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
         problems = baseline_regressions(report, baseline)
         if report["unreadable_or_invalid"]:
-            problems.append("Invalid or unreadable tracked sources: " + ", ".join(report["unreadable_or_invalid"]))
+            problems.append(
+                "Invalid or unreadable tracked sources: "
+                + ", ".join(report["unreadable_or_invalid"])
+            )
         migration = report["migration_graph"]
-        if len(migration["heads"]) != 1 or migration["orphan_parents"] or migration["missing_revision"]:
+        if (
+            len(migration["heads"]) != 1
+            or migration["orphan_parents"]
+            or migration["missing_revision"]
+        ):
             problems.append("Migration graph invalid: " + json.dumps(migration))
         for problem in problems:
             print("ARCHITECTURE REGRESSION: " + problem)
