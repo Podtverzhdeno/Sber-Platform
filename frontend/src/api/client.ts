@@ -129,6 +129,26 @@ export function clearApiReadCache(): void {
   pendingReads.clear();
 }
 
+/** Refresh only a server-rejected CSRF token, using the same authenticated
+ * HttpOnly-cookie session. Never retry a general 403 or disable validation. */
+let csrfRefreshInFlight: Promise<string | null> | null = null;
+async function refreshSessionCsrf(): Promise<string | null> {
+  if (!csrfRefreshInFlight) {
+    csrfRefreshInFlight = (async () => {
+      const response = await fetch("/api/v1/me", {
+        credentials: "include", cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
+      if (!response.ok) return null;
+      const actor = (await response.json()) as { csrf_token?: unknown };
+      if (typeof actor.csrf_token !== "string" || !actor.csrf_token) return null;
+      sessionStorage.setItem("impulse_csrf", actor.csrf_token);
+      return actor.csrf_token;
+    })().finally(() => { csrfRefreshInFlight = null; });
+  }
+  return csrfRefreshInFlight;
+}
+
 async function decodeError(response: Response): Promise<ApiClientError> {
   const fallback = { code: "HTTP_ERROR", message: `HTTP ${String(response.status)}`, retryable: false };
   try {
@@ -161,7 +181,15 @@ export async function apiRequest<T>(path: RuntimeApiPath, options?: RequestInit)
 
   if (!canReuseRead) {
     if (method !== "GET" && method !== "HEAD") clearApiReadCache();
-    const response = await fetch(path, { credentials: "include", ...options, headers });
+    let response = await fetch(path, { credentials: "include", ...options, headers });
+    if (!response.ok && method !== "GET" && method !== "HEAD" && path !== "/api/v1/auth/demo-login") {
+      const failure = await decodeError(response);
+      if (failure.status !== 403 || failure.code !== "CSRF_INVALID") throw failure;
+      const refreshed = await refreshSessionCsrf().catch(() => null);
+      if (!refreshed) throw failure;
+      headers.set("X-CSRF-Token", refreshed);
+      response = await fetch(path, { credentials: "include", ...options, headers });
+    }
     if (!response.ok) throw await decodeError(response);
     if (AUTH_SCOPE_MUTATIONS.has(path) && method !== "GET" && method !== "HEAD") publishAuthScopeChange();
     if (response.status === 204) return undefined as T;
