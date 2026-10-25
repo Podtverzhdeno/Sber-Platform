@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "../../api/client";
+import { CheckpointWorkspace, type SubmittedCheckpoint } from "./checkpoint-workspace";
 import {
   Activity, ArrowLeft, ArrowRight, CalendarDays, Check,
   ChevronRight, CircleDot, ClipboardCheck, Code2, Database,
@@ -125,8 +128,11 @@ function DocumentIllustration() {
     <span className="mpd-paper mpd-paper--foot"><i/><i/></span>
   </div>;
 }
-export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMember }: {
+export function ProjectDashboard({ project, assignmentId, initialCheckpointKey, onBack, onChat, onUpload, onOpenMember, onStartWork }: {
   project: DashboardProject;
+  assignmentId: string;
+  initialCheckpointKey?: string | null;
+  onStartWork?: () => Promise<void>;
   onBack: () => void;
   onChat: () => void;
   onUpload: () => void;
@@ -134,13 +140,21 @@ export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMemb
 }) {
   const [activeTab,setActiveTab] = useState<Section>("overview");
   const [showInfo,setShowInfo] = useState(false);
-  const [selectedStage,setSelectedStage] = useState<string|null>(null);
+  const [openedCheckpoint,setOpenedCheckpoint] = useState<string|null>(initialCheckpointKey??null);
+  const submissions=useQuery({
+    queryKey:["checkpoint-submissions",assignmentId],
+    queryFn:()=>apiRequest<SubmittedCheckpoint[]>(`/api/v1/me/assignments/${encodeURIComponent(assignmentId)}/checkpoint-submissions`),
+    retry:false,
+  });
   const checkpoints = project.checkpoints;
   const done = checkpoints.filter(item=>passed.has(item.status)).length;
   const percent = checkpoints.length?Math.round(done/checkpoints.length*100):null;
   const artifacts = project.contributions.flatMap(entry=>entry.artifact_keys.map(key=>({key,version:entry.version,id:entry.id,status:entry.status})));
   const nextStage = checkpoints.find(item=>!passed.has(item.status));
   const latestContribution = project.contributions.at(-1);
+  const selectedStage=checkpoints.find(item=>item.key===openedCheckpoint);
+  const openedSubmission=submissions.data?.find(item=>item.checkpoint_key===openedCheckpoint);
+  const activeSubmission=(key:string)=>submissions.data?.find(item=>item.checkpoint_key===key);
   const openInfo = () => { setShowInfo(true); };
   const current = (id:Section) => () => {setActiveTab(id);};
   const SummaryCard = ({icon:Icon,value,title,caption,progressValue}: {icon:typeof Target;value:string;title:string;caption:string;progressValue?:number|null}) =>
@@ -150,12 +164,12 @@ export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMemb
     {checkpoints.length?<div className="mpd-stage-line">{checkpoints.map((stage,i)=>{
       const doneStage=passed.has(stage.status);
       const isCurrent=!doneStage&&nextStage?.key===stage.key;
-      return <button key={stage.key} type="button" className={`mpd-stage ${doneStage?"is-done":isCurrent?"is-current":""}`} aria-pressed={selectedStage===stage.key} onClick={()=>{setSelectedStage(selectedStage===stage.key?null:stage.key);}}>
+      return <button key={stage.key} type="button" className={`mpd-stage ${doneStage?"is-done":isCurrent?"is-current":""}`} aria-label={`Подробнее об этапе ${stage.title}`} onClick={()=>{setOpenedCheckpoint(stage.key);}}>
         <span className="mpd-stage-node">{doneStage?<Check size={17}/>:String(i+1)}</span>
         <b>{stage.title}</b><small>{doneStage?"Завершён":isCurrent?"Текущий этап":stage.status}</small>
       </button>;
     })}</div>:<p className="mpd-empty">Этапы появятся после публикации плана заказчиком.</p>}
-    {selectedStage&&<p role="status" className="mpd-stage-note">{checkpoints.find(item=>item.key===selectedStage)?.title}: {checkpoints.find(item=>item.key===selectedStage)?.status}. Подтверждение этапов выполняется по данным заказчика.</p>}
+    <p className="mpd-stage-guidance"><Info size={15}/> Нажми на любой этап, чтобы прочитать постановку и отправить доказательства выполнения</p>
   </section>;
   const ContributionPanel = () => <section className="mpd-panel mpd-artifacts">
     <div className="mpd-panel-head"><h2><Layers3/> {activeTab==="artifacts"?"Все артефакты":"Последние артефакты"}</h2>{activeTab!=="artifacts"&&<button type="button" onClick={current("artifacts")}>Все артефакты <ChevronRight size={15}/></button>}</div>
@@ -176,7 +190,7 @@ export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMemb
           <div className="mpd-head-meta"><span><CalendarDays size={15}/> Срок: {dateRU(project.deadline)}</span><span><Users size={15}/> Команда: {String(project.team.length)}</span></div>
         </div>
         <DocumentIllustration/>
-        <div className="mpd-hero-side"><div><button type="button" className="mpd-secondary" onClick={onChat}><MessageCircle size={16}/> Открыть командный чат</button><button type="button" className="mpd-primary" onClick={onUpload}><UploadCloud size={18}/> Загрузить новую версию</button></div>
+        <div className="mpd-hero-side"><div><button type="button" className="mpd-secondary" onClick={onChat}><MessageCircle size={16}/> Открыть командный чат</button><button type="button" className="mpd-primary" onClick={()=>{if(nextStage)setOpenedCheckpoint(nextStage.key);else onUpload();}}><UploadCloud size={18}/> Сдать решение по этапу</button></div>
           <div className="mpd-hero-tags"><small>Навыки:</small>{project.competencyTags.length?project.competencyTags.slice(0,5).map(tag=><span key={tag}>{tag}</span>):<span>Уточняются</span>}</div>
         </div>
       </div>
@@ -192,7 +206,7 @@ export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMemb
         <StagePanel/>
         <section className="mpd-panel mpd-tasks">
           <div className="mpd-panel-head"><h2><ClipboardCheck/> Текущие задачи</h2><button type="button" onClick={current("stages")}>Все этапы <ChevronRight size={15}/></button></div>
-          <div className="mpd-task-list">{checkpoints.filter(item=>!passed.has(item.status)).length?checkpoints.filter(item=>!passed.has(item.status)).slice(0,3).map((item,i)=><button type="button" key={item.key} onClick={()=>{setActiveTab("stages");setSelectedStage(item.key);}}><span className="mpd-task-ring"/><b>{item.title}</b><small>{i===0?"Текущий этап":"По плану"}</small><ChevronRight size={16}/></button>):<p className="mpd-empty">Нет незавершённых этапов.</p>}</div>
+          <div className="mpd-task-list">{checkpoints.filter(item=>!passed.has(item.status)).length?checkpoints.filter(item=>!passed.has(item.status)).slice(0,3).map((item,i)=><button type="button" key={item.key} onClick={()=>{setOpenedCheckpoint(item.key);}}><span className="mpd-task-ring"/><b>{item.title}</b><small>{activeSubmission(item.key)?.status==="submitted"?"Передано на проверку":i===0?"Открыть и выполнить":"По плану · открыть постановку"}</small><ChevronRight size={16}/></button>):<p className="mpd-empty">Нет незавершённых этапов.</p>}</div>
         </section>
         <ContributionPanel/>
         <section className="mpd-panel mpd-activity">
@@ -216,11 +230,17 @@ export function ProjectDashboard({ project, onBack, onChat, onUpload, onOpenMemb
     </div>:<div className="mpd-section">
       <button type="button" className="mpd-section-back" onClick={current("overview")}><ArrowLeft size={16}/> Назад к обзору</button>
       {activeTab==="stages"&&<StagePanel/>}
-      {activeTab==="artifacts"&&<><ContributionPanel/><button className="mpd-primary mpd-section-cta" type="button" onClick={onUpload}><Plus size={16}/> Отправить новую версию</button></>}
+      {activeTab==="artifacts"&&<><ContributionPanel/><button className="mpd-primary mpd-section-cta" type="button" onClick={()=>{if(nextStage)setOpenedCheckpoint(nextStage.key);else onUpload();}}><Plus size={16}/> Сдать решение по этапу</button></>}
       {activeTab==="team"&&<TeamPanel/>}
       {activeTab==="integrations"&&<section className="mpd-panel"><div className="mpd-panel-head"><h2><GitBranch/> Интеграции проекта</h2></div><p className="mpd-empty">Подключения проекта отображаются после настройки организатором. Для подключения доступны сервисы, указанные в условиях программы; реквизиты доступа здесь не публикуются.</p></section>}
       {activeTab==="activity"&&<section className="mpd-panel"><div className="mpd-panel-head"><h2><Activity/> История результатов</h2></div>{project.contributions.length?project.contributions.map(item=><article key={item.id} className="mpd-history"><b>Версия {String(item.version)} · {item.status}</b><p>{item.personal_summary}</p><span>{item.artifact_keys.join(", ")}</span></article>):<p className="mpd-empty">История пока пуста.</p>}{project.feedback.map(item=><article key={item.contribution_id} className="mpd-history"><b>Ревью · {item.status}</b><p>{item.explanation}</p></article>)}</section>}
     </div>}
     {showInfo&&<ProjectInfoModal project={project} close={()=>{setShowInfo(false);}}/>}
+    {selectedStage&&<CheckpointWorkspace key={selectedStage.key} assignmentId={assignmentId}
+      checkpoint={selectedStage} stageIndex={checkpoints.findIndex(item=>item.key===selectedStage.key)+1}
+      stageCount={checkpoints.length} criteria={project.criteria} deliverable={project.deliverable}
+      deadline={project.deadline} allowedArtifacts={project.allowedArtifacts}
+      assignmentStatus={project.status} previous={openedSubmission} onStartWork={onStartWork}
+      onClose={()=>{setOpenedCheckpoint(null);}}/>}
   </div>;
 }
