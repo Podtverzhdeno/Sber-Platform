@@ -155,7 +155,7 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   await expect(page.getByRole("heading",{name:"Этапы проекта"})).toBeVisible();
   await expect(page.getByRole("img",{name:"Выполнено 60%"})).toBeVisible();
   await expect(page.getByText("Условия проекта · версия 1")).toBeVisible();
-  await page.getByRole("button",{name:"Подробнее"}).click();
+  await page.getByRole("button",{name:"Подробнее",exact:true}).click();
   const info=page.getByRole("dialog",{name:"Подробнее о проекте"});
   await expect(info).toBeVisible();
   await expect(info.getByText("Какую проблему решаем")).toBeVisible();
@@ -278,7 +278,7 @@ test("Project information popup is read-only, detailed, responsive and dismissib
   await page.locator(".mp-detail-footer").getByRole("button",{name:"Перейти к задачам"}).click();
   const dashboard=page.locator('[data-project-screen="dashboard"]');
   await expect(dashboard).toBeVisible();
-  await dashboard.getByRole("button",{name:"Подробнее"}).click();
+  await dashboard.getByRole("button",{name:"Подробнее",exact:true}).click();
   const dialog=page.getByRole("dialog",{name:"Подробнее о проекте"});
   await expect(dialog).toBeVisible();
   await page.screenshot({path:"test-results/my-projects-v2/05_popup_1672.png",fullPage:false,animations:"disabled"});
@@ -306,7 +306,7 @@ test("Project dashboard and detailed popup remain usable on a narrow phone",asyn
   await page.locator(".mp-detail-footer").getByRole("button",{name:"Перейти к задачам"}).click();
   const dashboard=page.locator('[data-project-screen="dashboard"]');
   await expect(dashboard).toBeVisible();
-  await dashboard.getByRole("button",{name:"Подробнее"}).click();
+  await dashboard.getByRole("button",{name:"Подробнее",exact:true}).click();
   const dialog=page.getByRole("dialog",{name:"Подробнее о проекте"});
   await expect(dialog).toBeVisible();
   const box=await dialog.boundingBox();
