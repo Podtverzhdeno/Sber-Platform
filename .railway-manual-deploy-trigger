@@ -16,3 +16,6 @@ release_request=2026-10-25-participant-help-center-build-110f10b485ea
 
 # Guided participant help center QA green (19 tests; mobile and desktop browser)
 release_request=2026-10-25-context-help-83c4eed56697
+
+# QA-approved participant guidance release; visible anchors, help library, mobile/browser tests
+release_request=2026-10-25-participant-final-5cfc42d217f0
