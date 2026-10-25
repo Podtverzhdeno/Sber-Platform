@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { ParticipantHelpTrigger } from "../../participant-help-trigger";
 
 import { learningProgramFor } from "./programs";
 import { blueprintFor } from "./course-blueprints";
@@ -93,6 +94,7 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
           <span>≈ {String(totalMinutes)} мин</span>
         </div>
       </header>
+      <ParticipantHelpTrigger topicId="course-content" label="Как проходить обучение" />
       <p className="bc-learning__boundary">
         Это учебные материалы платформы, а не опубликованная программа провайдера.
         Открытие урока и самопроверка не начисляют XP, не выдают сертификат и не изменяют серверный статус курса.
@@ -122,7 +124,7 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
         <article className="bc-learning__capstone" aria-label="Итоговый проект">
           <div className="bc-learning__capstone-heading">
             <span className="bc-learning__eyebrow">Практический проект · самостоятельная работа</span>
-            <h4>{blueprint.capstone.title}</h4>
+            <h4>{blueprint.capstone.title}</h4><ParticipantHelpTrigger topicId="course-practice" label="Как выполнить проект" />
             <p>{blueprint.capstone.scenario}</p>
           </div>
           <section>
