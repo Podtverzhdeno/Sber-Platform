@@ -85,7 +85,7 @@ export function ParticipantEventCatalog() {
   const [savedEvents, setSavedEvents] = useState<Set<string>>(new Set());
   const [detailTab, setDetailTab] = useState<EventTab>("about");
   const [registrationOpen, setRegistrationOpen] = useState(false);
-  const [frozenEvents, setFrozenEvents] = useState<Set<string>>(new Set());
+
   const [claimType, setClaimType] = useState("participation");
   const [result, setResult] = useState("Участвовал в команде и подготовил рабочий прототип.");
   const [evidence, setEvidence] = useState("https://example.org/demo-evidence");
@@ -141,8 +141,10 @@ export function ParticipantEventCatalog() {
     if(next.has(key))next.delete(key);else next.add(key);
     setParam("focus", [...next].join(","), "");
   };
-  const register = (item: EventItem) => {
-    setFrozenEvents(old => new Set(old).add(item.key));
+  const openRegistration = (item: EventItem) => {
+    setDetailTab("about");
+    setRegistrationOpen(true);
+    setParam("event", item.key, "");
   };
   const resetFilters = () => {
     setParam("focus","","");
@@ -174,7 +176,7 @@ export function ParticipantEventCatalog() {
         {visible.length===0?<div className="ev-empty"><h3>События не найдены</h3><p>Измените фильтры или направление развития</p><button className="ev-primary" type="button" onClick={resetFilters}>Сбросить фильтры</button></div>:
          <div className={`ev-event-list ev-event-list--${view}`}>{visible.map((item,index)=>{
            const claim=claimByEvent.get(item.key);
-           return <div key={item.key}><EventsCard item={item} index={index} focus={focus} frozen={frozenEvents.has(item.key)} saved={savedEvents.has(item.key)} onSave={()=> { toggleSaved(item.key); }} onDetails={()=> { openEvent(item.key); }} onRegister={()=> { register(item); }}/>
+           return <div key={item.key}><EventsCard item={item} index={index} focus={focus} frozen={claimByEvent.get(item.key)?.evidence_state === "provisional"} saved={savedEvents.has(item.key)} onSave={()=> { toggleSaved(item.key); }} onDetails={()=> { openEvent(item.key); }} onRegister={()=> { openRegistration(item); }}/>
              {claim&&<div className="claim-state" aria-live="polite"><Badge tone={claim.evidence_state==="verified"?"success":"warning"}>{claim.evidence_state==="verified"?"Подтверждено":"Предварительно"}</Badge><p>{claim.verification_explanation}</p></div>}
              {item.status!=="open"&&!claim&&<button className="ev-quick-register" type="button" onClick={()=> { setSelectedEvent(item); }}>Подтвердить результат</button>}
            </div>;
@@ -182,7 +184,7 @@ export function ParticipantEventCatalog() {
         <div className="ev-benefits-bottom"><strong>После участия вы получите</strong><span><BriefcaseBusiness/> Практический опыт</span><span><Award/> Подтверждённые достижения</span><span><GraduationCap/> Развитие навыков</span><span><Users/> Новые контакты</span></div>
       </div>
     </div>
-    <div className="ev-detail-modal"><Modal title={detail.data?.title ?? "Подробности события"} open={eventKey !== null} onClose={close}>{detail.isLoading || aggregate.isLoading ? <StatePanel kind="loading" /> : detail.isError || aggregate.isError || !detail.data || !aggregate.data ? <StatePanel kind="error" action="Закрыть" onAction={close} /> : <><EventExperienceDetail detail={detail.data} aggregate={aggregate.data} tab={detailTab} onTabChange={setDetailTab} onClose={close} onRegister={()=> { setRegistrationOpen(true); }} isSaved={savedEvents.has(detail.data.key)} onSave={()=> { toggleSaved(detail.data.key); }}/>{registrationOpen&&<EventRegistrationForm event={detail.data} onClose={closeRegistration} onInterest={()=> { register(detail.data); }}/>}</>}</Modal></div>
+    <div className="ev-detail-modal"><Modal title={detail.data?.title ?? "Подробности события"} open={eventKey !== null} onClose={close}>{detail.isLoading || aggregate.isLoading ? <StatePanel kind="loading" /> : detail.isError || aggregate.isError || !detail.data || !aggregate.data ? <StatePanel kind="error" action="Закрыть" onAction={close} /> : <><EventExperienceDetail detail={detail.data} aggregate={aggregate.data} tab={detailTab} onTabChange={setDetailTab} onClose={close} onRegister={()=> { setRegistrationOpen(true); }} isSaved={savedEvents.has(detail.data.key)} onSave={()=> { toggleSaved(detail.data.key); }}/>{registrationOpen&&<EventRegistrationForm event={detail.data} onClose={closeRegistration}/>}</>}</Modal></div>
     <Modal title={`Подтвердить результат · ${selectedEvent?.title ?? ""}`} open={selectedEvent !== null} onClose={() => { setSelectedEvent(null); }}>
       <form className="event-claim-form" onSubmit={(event) => { event.preventDefault(); if (selectedEvent) report.mutate(selectedEvent.key); }}><p>Событие завершено. После проверки сертификата баллы станут постоянными.</p><label>Результат<select value={claimType} onChange={(event) => { setClaimType(event.target.value); }}><option value="participation">Участие</option><option value="completion">Завершение</option><option value="finalist">Финалист</option><option value="winner">Победа</option></select></label><label>Что вы сделали<textarea required minLength={20} value={result} onChange={(event) => { setResult(event.target.value); }} /></label><label>Ссылка на сертификат или доказательство<input required type="url" value={evidence} onChange={(event) => { setEvidence(event.target.value); }} /></label><div className="modal-actions"><button type="submit" disabled={report.isPending}>{report.isPending ? "Отправляем…" : "Отправить на проверку"}</button><button className="secondary-button" type="button" onClick={() => { setSelectedEvent(null); }}>Отмена</button></div></form>
     </Modal>
