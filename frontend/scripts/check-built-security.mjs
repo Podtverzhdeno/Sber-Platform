@@ -55,8 +55,29 @@ const urlAllowlist = [
   "https://github.com/impulse/project",
   "https://developers.sber.ru/",
 ];
-for (const match of bundle.matchAll(/https?:\/\/[A-Za-z0-9._~:/?#@!$&()+,;=%-]{3,}/gu)) {
-  if (!urlAllowlist.some((prefix) => match[0].startsWith(prefix))) {
+// Exact, reviewed documentation links used by the editorial Bootcamp curriculum.
+// Do not use a hostname wildcard: an unrelated URL must still fail the bundle scan.
+const approvedLearningUrls = new Set([
+  "https://github.com/Fission-AI/OpenSpec/blob/main/docs/getting-started.md",
+  "https://reference.langchain.com/python/langgraph/overview",
+  "https://docs.python.org/3/tutorial/",
+  "https://fastapi.tiangolo.com/tutorial/",
+  "https://www.postgresql.org/docs/18/tutorial.html",
+  "https://developers.google.com/analytics/devguides/collection/ga4/events",
+  "https://developers.google.com/machine-learning/crash-course",
+  "https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell",
+  "https://docs.pytest.org/en/stable/getting-started.html",
+  "https://owasp.org/projects/web-security-testing-guide",
+  "https://developers.google.com/tech-writing",
+  "https://handbook.gitlab.com/handbook/engineering/workflow/code-review/",
+  "https://python.reference.langfuse.com/langfuse",
+  "https://git-scm.com/book/en/v2",
+  "https://playwright.dev/docs/intro",
+  "https://genai.owasp.org/glossary/prompt-injection/",
+  "https://airc.nist.gov/airmf-resources/playbook/",
+]);
+for (const match of bundle.matchAll(/https?:\/\/[A-Za-z0-9._~:/?#@!for (const match of bundle.matchAll(/https?:\/\/[A-Za-z0-9._~:/?#@!$&()+,;=%-]{3,}/gu)) {()+,;=%-]{3,}/gu)) {
+  if (!approvedLearningUrls.has(match[0]) && !urlAllowlist.some((prefix) => match[0].startsWith(prefix))) {
     failures.push(`URL outside the allowlist leaked into the bundle: ${match[0]}`);
   }
 }
