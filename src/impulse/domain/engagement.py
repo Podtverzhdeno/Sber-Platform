@@ -354,7 +354,8 @@ def weekly_rhythm_projection(
     # Count only achieved *planned* days. Completing a course on an unscheduled
     # day still qualifies for the continuous streak, but not for the rhythm goal.
     effective_days = {
-        day for day in week_days
+        day
+        for day in week_days
         if day >= rhythm.effective_from and day.isoweekday() in rhythm.active_days
     }
     active_in_week = achieved_dates & effective_days
