@@ -136,6 +136,35 @@ describe("trajectory v2 task/evidence drawer", () => {
   });
 
 
+  it("presents five separate sections of an enriched AI training lab without changing milestone evidence", async () => {
+    const stage = roadmapWithNext.milestones[1];
+    if (stage === undefined) throw new Error("missing fixture milestone");
+    const enriched = {
+      ...stage,
+      lab: [
+        "Реализовать прототип с проверяемыми тестами.",
+        "Учебный кейс: помощник обрабатывает синтетические заявки.",
+        "Пример решения: сервер валидирует JSON перед записью.",
+        "Типичная ошибка: считать текст модели разрешением на запись.",
+        "Самостоятельная проверка: отправить запрос с чужим tenant_id.",
+      ].join("\n\n"),
+    };
+    shell("/workspace/1", [{
+      ...roadmapWithNext,
+      milestones: [roadmapWithNext.milestones[0]!, enriched, roadmapWithNext.milestones[2]!],
+      next_step: enriched,
+    }]);
+    fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
+    const drawer = screen.getByRole("dialog", { name: /Детали этапа|Этап пройден/ });
+    const lab = drawer.querySelector(".trajectory-v2-learning-content");
+    expect(lab).not.toBeNull();
+    const paragraphs = lab?.querySelectorAll("p");
+    expect(paragraphs).toHaveLength(5);
+    expect(paragraphs?.[1]?.textContent).toContain("Учебный кейс:");
+    expect(paragraphs?.[4]?.textContent).toContain("Самостоятельная проверка:");
+    expect(drawer.textContent).toContain("Этап ещё не завершён");
+  });
+
   it("uses the authenticated role navigation rather than hard-coded workspace indexes", async () => {
     shell("/workspace/1", [roadmapWithNext], ["Главная", "Задачи", "Мой путь", "Bootcamp"]);
     fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
