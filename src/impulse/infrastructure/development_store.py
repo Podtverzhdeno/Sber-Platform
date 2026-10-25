@@ -184,6 +184,14 @@ class SqlDevelopmentStore(DevelopmentStore):
                         if isinstance(row["payload"].get("estimated_hours"), int)
                         else None
                     ),
+                    resources=tuple(
+                        {"title": item["title"], "url": item["url"]}
+                        for item in row["payload"].get("resources", [])
+                        if isinstance(item, dict)
+                        and isinstance(item.get("title"), str)
+                        and isinstance(item.get("url"), str)
+                        and item["url"].startswith("https://")
+                    ),
                 )
                 for row in rows
             )
