@@ -38,7 +38,7 @@ type TasksProps={
   assignmentStatus:string;projectDescription:string;deliverable:string;
   acceptanceCriteria:string[];onWorkspace:()=>void;
 };
-export function ProjectReferenceTasks({checkpoints,decisions,assignmentStatus,projectDescription,deliverable,acceptanceCriteria,onWorkspace}:TasksProps){
+export function ProjectReferenceTasks({checkpoints,decisions,projectDescription,deliverable,acceptanceCriteria,onWorkspace}:TasksProps){
   const [filter,setFilter]=useState<"all"|"active"|"review"|"done">("all");
   const [selected,setSelected]=useState<string|null>(null);
   const finished=checkpoints.filter(c=>doneStates.has(c.status)).length;
@@ -59,7 +59,7 @@ export function ProjectReferenceTasks({checkpoints,decisions,assignmentStatus,pr
             <button type="button" key={item.id} className={filter===item.id?"is-active":""} aria-pressed={filter===item.id}
               onClick={()=>setFilter(item.id)}>{item.title} · {item.count}</button>)}
         </div>
-        {shown.length?shown.map((c,index)=>{
+        {shown.length?shown.map((c)=>{
           const passed=doneStates.has(c.status),isSelected=current?.key===c.key;
           return <button type="button" className={`mp-ref-task-row ${isSelected?"is-selected":""}`} key={c.key}
             aria-pressed={isSelected} onClick={()=>setSelected(c.key)}>
