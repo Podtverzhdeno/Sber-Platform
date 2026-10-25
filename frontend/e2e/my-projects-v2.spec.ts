@@ -433,3 +433,73 @@ test("My Projects: reward area and modal fit on 390px mobile",async({page})=>{
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
 });
+
+
+test("reference project controls have distinct effects and accessible keyboard navigation",async({page})=>{
+  test.setTimeout(90_000);
+  await page.setViewportSize({width:1548,height:1016});
+  await fixture(page);
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
+  const detail=page.getByRole("dialog",{name:"Прототип рекомендательной системы для научных статей"});
+  await expect(detail).toBeVisible();
+  await expect(detail.getByRole("button",{name:"Закрыть подробности проекта"})).toBeFocused();
+  await expect(detail.locator(".mp-ref-hero-art--research")).toBeVisible();
+  await expect(detail.locator(".mp-ref-hero-art--satellite")).toHaveCount(0);
+  const logo=detail.locator(".mp-ref-hero .mp-company-mark img");
+  await expect(logo).toBeVisible();
+  expect(await logo.evaluate((img:HTMLImageElement)=>img.complete && img.naturalWidth>=64)).toBe(true);
+  await page.keyboard.press("Shift+Tab");
+  await expect(detail.locator(".mp-detail-footer button").last()).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(detail.getByRole("button",{name:"Закрыть подробности проекта"})).toBeFocused();
+
+  await detail.getByRole("tab",{name:"Задачи"}).click();
+  await expect(page).toHaveURL(/tab=tasks/);
+  await detail.getByRole("button",{name:/В работе ·/}).click();
+  await expect(detail.getByRole("button",{name:/В работе ·/})).toHaveAttribute("aria-pressed","true");
+  await detail.getByRole("button",{name:/Все задачи ·/}).click();
+  await detail.locator(".mp-ref-task-row").nth(4).click();
+  await expect(detail.locator(".mp-ref-current")).toContainText("Финальный отчёт");
+
+  await detail.getByRole("tab",{name:"Команда"}).click();
+  await expect(page).toHaveURL(/tab=team/);
+  await expect(detail.locator(".mp-ref-team-list")).toContainText("Ментор");
+  await expect(detail.locator(".mp-ref-team-count")).toContainText("1 участников");
+  await detail.getByRole("tab",{name:"Бонусы и выгоды"}).click();
+  await expect(page).toHaveURL(/tab=rewards/);
+  const expected=[
+    ["Результат в портфолио","Только принятый результат"],
+    ["Развитие компетенций","Уровень компетенций"],
+    ["Менторская поддержка","Ментор назначен"],
+    ["Реальный кейс","исходную задачу"],
+    ["Командная практика","фактическим участием"],
+    ["Рекомендации и возможности","не означает автоматической"],
+  ] as const;
+  for(const [title,description] of expected){
+    await detail.locator(".mp-ref-rewards").getByRole("button",{name:new RegExp(title)}).click();
+    const explanation=detail.locator(".mp-ref-reward-note");
+    await expect(explanation).toContainText(title);
+    await expect(explanation).toContainText(description);
+  }
+  await detail.getByRole("tab",{name:"Мой вклад"}).click();
+  await expect(page).toHaveURL(/tab=contribution/);
+  await expect(detail.locator(".mp-contribute-form")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(detail).toHaveCount(0);
+  await expect(page).not.toHaveURL(/project=assignment-1/);
+});
+
+test("all five project detail tabs fit small screens without horizontal overflow",async({page})=>{
+  test.setTimeout(90_000);
+  await page.setViewportSize({width:390,height:844});
+  await fixture(page);
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
+  const detail=page.locator('[data-project-screen="detail"]');
+  for(const title of ["Задачи","Прогресс","Мой вклад","Команда","Бонусы и выгоды"]){
+    await detail.getByRole("tab",{name:title}).click();
+    const diff=await detail.evaluate(node=>node.scrollWidth-node.clientWidth);
+    expect(diff).toBeLessThanOrEqual(2);
+    const docOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+    expect(docOverflow).toBeLessThanOrEqual(2);
+  }
+});
