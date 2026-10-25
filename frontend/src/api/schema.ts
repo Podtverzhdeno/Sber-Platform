@@ -364,7 +364,7 @@ export interface paths {
         };
         /**
          * Customer Analytics Activity
-         * @description Real project activity; data is restricted to the authenticated customer\'s tasks.
+         * @description Real project activity; data is restricted to the authenticated customer's tasks.
          */
         get: operations["customer_analytics_activity_api_v1_customer_analytics_activity_get"];
         put?: never;
@@ -4824,7 +4824,7 @@ export interface components {
              * Window Days
              * @default 84
              */
-            window_days?: number;
+            window_days: number;
         };
         /** CustomerTaskDetailView */
         CustomerTaskDetailView: {
@@ -8798,6 +8798,26 @@ export interface operations {
             };
         };
     };
+    customer_analytics_activity_api_v1_customer_analytics_activity_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CustomerActivityView"];
+                };
+            };
+        };
+    };
     customer_cases_api_v1_customer_cases_get: {
         parameters: {
             query?: never;
@@ -8998,26 +9018,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SupportCatalogView"];
-                };
-            };
-        };
-    };
-    customer_analytics_activity_api_v1_customer_analytics_activity_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomerActivityView"];
                 };
             };
         };
