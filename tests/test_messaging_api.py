@@ -342,3 +342,89 @@ def test_read_cursor_persists_across_sessions_and_devices() -> None:
     )
     assert again.status_code == 200
     assert again.json()["unread"] == 0
+
+
+def test_restored_session_csrf_unblocks_message_send_without_disabling_protection() -> None:
+    api, _store = build()
+    original = login(api, "participant-alex")
+    # Refresh/back-navigation in the SPA has no in-memory copy of the login token.
+    fresh_actor = api.get("/api/v1/me")
+    assert fresh_actor.status_code == 200
+    recovered = fresh_actor.json()["csrf_token"]
+    assert isinstance(recovered, str) and len(recovered) >= 32
+    assert fresh_actor.headers.get("cache-control") == "no-store, private"
+    assert recovered != original
+
+    blocked = api.post(
+        "/api/v1/me/messaging/channels/personal",
+        json={"peer_id": str(ELENA)},
+    )
+    assert blocked.status_code == 403
+    assert blocked.json()["code"] == "CSRF_INVALID"
+
+    opened = api.post(
+        "/api/v1/me/messaging/channels/personal",
+        json={"peer_id": str(ELENA)}, headers={"X-CSRF-Token": recovered},
+    )
+    assert opened.status_code == 200
+    cid = opened.json()["id"]
+    delivered = api.post(
+        f"/api/v1/me/messaging/channels/{cid}/messages",
+        json={"body": "Сообщение доставлено после перезагрузки."},
+        headers={"X-CSRF-Token": recovered},
+    )
+    assert delivered.status_code == 200
+    assert delivered.json()["body"] == "Сообщение доставлено после перезагрузки."
+    assert api.post(
+        f"/api/v1/me/messaging/channels/{cid}/mute",
+        json={"muted": True}, headers={"X-CSRF-Token": recovered},
+    ).status_code == 200
+
+
+def test_demo_contact_directory_and_group_creation_round_trip() -> None:
+    api, _store = build()
+    csrf = login(api, "participant-alex")
+    contacts_response = api.get("/api/v1/me/messaging/contacts")
+    assert contacts_response.status_code == 200
+    contacts = contacts_response.json()
+    assert len(contacts) >= 14
+    assert str(ALEX) not in {person["id"] for person in contacts}
+    assert {str(ELENA), str(ROMAN)}.issubset({person["id"] for person in contacts})
+
+    endpoint = "/api/v1/me/messaging/channels/group"
+    payload = {"title": "Команда AI-проекта", "peer_ids": [str(ELENA), str(ROMAN)]}
+    assert api.post(endpoint, json=payload).status_code == 403
+    created = api.post(endpoint, json=payload, headers={"X-CSRF-Token": csrf})
+    assert created.status_code == 201
+    chat = created.json()
+    assert chat["kind"] == "community" and chat["title"] == "Команда AI-проекта"
+    assert {str(ALEX), str(ELENA), str(ROMAN)} == {user["id"] for user in chat["participants"]}
+
+    sent = api.post(
+        f"/api/v1/me/messaging/channels/{chat['id']}/messages",
+        json={"body": "Проверка коллективной переписки."},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert sent.status_code == 200
+    login(api, "mentor-elena")
+    unread = api.get("/api/v1/me/messaging/channels").json()
+    assert next(c for c in unread if c["id"] == chat["id"])["unread"] == 1
+    elena_csrf = api.get("/api/v1/me").json()["csrf_token"]
+    marked = api.post(
+        f"/api/v1/me/messaging/channels/{chat['id']}/read",
+        json={"message_id": sent.json()["id"]}, headers={"X-CSRF-Token": elena_csrf},
+    )
+    assert marked.status_code == 200 and marked.json()["unread"] == 0
+
+
+def test_group_creation_rejects_unknown_people_and_foreign_channels() -> None:
+    api, _store = build()
+    csrf = login(api, "participant-alex")
+    post = lambda ids: api.post(
+        "/api/v1/me/messaging/channels/group",
+        json={"title": "Проверка доступа", "peer_ids": ids},
+        headers={"X-CSRF-Token": csrf},
+    )
+    assert post([str(ALEX)]).status_code == 422
+    assert post([str(UUID(int=999))]).status_code == 422
+    assert post([]).status_code == 422
