@@ -8,7 +8,8 @@ from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
 
 def load_role_migration():
     # Alembic versions are scripts, not an importable Python package.
-    path = Path(__file__).resolve().parents[1] / "migrations/versions/20261025_0028_ai_demo_roles.py"
+    migration_dir = Path(__file__).resolve().parents[1] / "migrations" / "versions"
+    path = migration_dir / "20261025_0028_ai_demo_roles.py"
     spec = spec_from_file_location("ai_demo_role_title_migration", path)
     assert spec is not None and spec.loader is not None
     module = module_from_spec(spec)
