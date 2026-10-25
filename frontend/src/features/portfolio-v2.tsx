@@ -10,6 +10,7 @@ import {
   Users, X, type LucideIcon,
 } from "lucide-react";
 import { apiRequest } from "../api/client";
+import { countCurrentDocuments, credentialStatusLabel, isCurrentCredential, isRevokedCredential } from "./portfolio-v2-data";
 import { learningSummaryQueryKey, loadLearningSummary } from "./learning-progress";
 import { confirmedPassportSkills, numericPassportLevel, passportEvidenceMax } from "./portfolio-skill-model";
 import "./portfolio-v2.scss";
@@ -49,25 +50,6 @@ const sections: { id: Tab; name: string; Icon: LucideIcon }[] = [
   { id: "achievements", name: "Достижения", Icon: Trophy },
   { id: "about", name: "О себе", Icon: Users },
 ];
-const demoPortfolio: Portfolio = {
-  person_id: "demo-participant", display_name: "Алекс Речной", demo_data: true,
-  about: "Разрабатываю цифровые продукты и исследую применение AI в реальных задачах. Интересуюсь инженерией, аналитикой и продуктовыми решениями.",
-  visibility: { hr_profile: true, public_profile: true, public_trophies: true },
-  contributions: [
-    { contribution_id: "demo-1", project_title: "Рекомендательная система для научных статей",
-      personal_summary: "Разработал ранжирование, воспроизводимый benchmark и API демонстрационного MVP.",
-      artifact_keys: ["Репозиторий", "Отчёт об оценке", "Демонстрация"], grade: "A",
-      review_reason: "Качество выше критериев, результат воспроизводится, личный вклад подтверждён историей артефактов.", verification_status: "verified" },
-    { contribution_id: "demo-2", project_title: "Прогнозирование нагрузки контактного центра",
-      personal_summary: "Подготовил признаки, baseline-модель и анализ ограничений внедрения.",
-      artifact_keys: ["Notebook", "Model card"], grade: "B",
-      review_reason: "Целевые метрики достигнуты, документация и вклад подтверждены.", verification_status: "verified" },
-  ],
-  courses: [{ key: "openspec", title: "OpenSpec и SDD", status: "verified" }, { key: "agents", title: "Агентная разработка", status: "verified" }],
-  credentials: [{ verification_id: "DEMO-COURSE-1", title: "OpenSpec и SDD", status: "Проверяемый", credential_type: "course", issuer: "Impulse · демонстрация" }],
-  trophies: [{ title: "Победитель МАЯКИ", organizer: "Сбер", source_url: "https://developers.sber.ru/", trophy_type: "Победа" }],
-  offers: [],
-};
 const numberForGrade = (grade: string | null): number | null => {
   if (!grade) return null;
   const value = { A: 5, B: 4, C: 3, D: 2, E: 1 }[grade.toUpperCase() as "A" | "B" | "C" | "D" | "E"];
@@ -148,9 +130,10 @@ function Metric({ Icon, count, label }: { Icon: LucideIcon; count: string | numb
   return <div className="p2-metric"><span className="p2-metric-icon"><Icon size={21}/></span><div><strong>{count}</strong><small>{label}</small></div></div>;
 }
 function CredentialCard({ item, onSelect }: { item: Credential; onSelect: (item: Credential) => void }) {
-  return <button className="p2-certificate" type="button" onClick={() => { onSelect(item); }}>
-    <span className="p2-certificate-symbol"><GraduationCap size={23}/></span><span className="p2-certificate-description"><strong>{item.title}</strong><small>{item.issuer || "Impulse · документ"}</small><em>{item.verification_id}</em></span>
-    <span className="p2-verified"><CheckCircle2 size={13}/> {item.status}</span>
+  const withdrawn = isRevokedCredential(item);
+  return <button className={"p2-certificate" + (withdrawn ? " is-revoked" : "")} type="button" onClick={() => { onSelect(item); }}>
+    <span className="p2-certificate-symbol"><GraduationCap size={23}/></span><span className="p2-certificate-description"><strong>{item.title}</strong><small>{item.issuer || "Документ из реестра признания"}</small><em>{item.verification_id}</em></span>
+    <span className={"p2-verified" + (withdrawn ? " is-revoked" : "")}>{isCurrentCredential(item) ? <CheckCircle2 size={13}/> : <ShieldCheck size={13}/>} {credentialStatusLabel(item)}</span>
   </button>;
 }
 function ProjectCard({ item, index, demo, onSelect }: { item: Contribution; index: number; demo: boolean; onSelect: (item: Contribution) => void }) {
@@ -190,17 +173,19 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
   }, [openCase, openCredential]);
 
   if (profileQuery.isPending) return <div className="p2-loading" role="status">Загружаем подтверждённое портфолио…</div>;
-  const portfolio = profileQuery.data ?? demoPortfolio;
+  if (!profileQuery.data) return <div className="p2-loading" role="alert">Не удалось получить портфолио из реестра. Демонстрационные результаты не подставляются. <button type="button" onClick={() => { void profileQuery.refetch(); }}>Повторить загрузку</button></div>;
+  const portfolio = profileQuery.data;
   const contributions = portfolio.contributions;
   const verifiedProjects = contributions.filter(isAccepted);
   const skills = confirmedPassportSkills(passportQuery.data?.skills ?? []);
   const credentials = portfolio.credentials;
-  const certificates = credentials.filter(i => i.credential_type === "course");
+  const certificates = credentials; // Реестр включает выданные дипломы сезона, а не только курсы.
+  const currentCertificates = credentials.filter(isCurrentCredential);
   const studyCertificates = (learningQuery.data?.courses ?? []).filter(course => course.finished && course.certificate_id !== null);
   const trophies = portfolio.trophies;
   const allGrades = verifiedProjects.map(x => numberForGrade(x.grade)).filter((n): n is number => n !== null);
   const grade = allGrades.length ? (allGrades.reduce((a,b)=>a+b,0) / allGrades.length).toFixed(1) : "—";
-  const bio = portfolio.about || portfolio.bio || (portfolio.demo_data ? demoPortfolio.about : null);
+  const bio = portfolio.about || portfolio.bio || null;
   const verified = verifiedProjects.length > 0 || skills.some(s => s.confirmed_case_count > 0);
   const showProjects = tab === "overview" || tab === "projects";
   const showPassport = tab === "overview" || tab === "passport";
@@ -229,7 +214,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
     } catch { setNotice("Не удалось скопировать ссылку. Проверьте разрешения браузера."); }
   };
   return <main className="p2-root" data-testid="portfolio-v2" data-current-tab={tab}>
-    {profileQuery.isError && <div className="p2-warning" role="alert">API портфолио недоступен — показаны демонстрационные данные. <button onClick={() => void profileQuery.refetch()} type="button">Повторить</button></div>}
+    {profileQuery.isError && <div className="p2-warning" role="alert">Не удалось обновить портфолио — отображается последний полученный серверный снимок. <button onClick={() => void profileQuery.refetch()} type="button">Повторить</button></div>}
     {passportQuery.isError && <div className="p2-warning" role="status">Skill Passport временно недоступен. <button onClick={() => void passportQuery.refetch()} type="button">Повторить</button></div>}
     {notice && <div className="p2-notice" role="status">{notice}</div>}
     <section className="p2-hero" aria-labelledby="workspace-title">
@@ -241,7 +226,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
       <div className="p2-metrics">
         <Metric Icon={FolderKanban} count={verifiedProjects.length} label="Принятых проектов"/>
         <Metric Icon={Users} count={passportQuery.isPending || passportQuery.isError ? "—" : skills.length} label="Подтверждённых навыков"/>
-        <Metric Icon={FileBadge2} count={certificates.length + studyCertificates.length} label="Сертификатов обучения"/>
+        <Metric Icon={FileBadge2} count={countCurrentDocuments(credentials, studyCertificates.length)} label="Действующих документов и учебных сертификатов"/>
         <Metric Icon={Trophy} count={trophies.length} label="Достижений"/>
         <Metric Icon={Star} count={grade} label="Средняя оценка"/>
       </div>
@@ -326,8 +311,8 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
         {(tab==="overview" || tab==="about" || tab==="projects") && <section className="p2-panel p2-trust-panel" aria-label="Доказательства и доверие">
           <PanelHeading icon={ShieldCheck} title="ДОКАЗАТЕЛЬСТВА И ДОВЕРИЕ" action="Все подтверждения" onAction={()=>{ openTab("projects"); }}/>
           <div className="p2-trust-list">{verifiedProjects.slice(0,2).map(x=><button key={x.contribution_id} type="button" onClick={()=>{ setOpenCase(x); }}><span className="p2-trust-icon"><ClipboardCheck size={18}/></span><span><strong>Проект принят заказчиком</strong><small>{x.project_title}</small></span><CheckCircle2 size={17}/></button>)}
-            {certificates.slice(0,2).map(c=><button key={c.verification_id} type="button" onClick={()=>{ setOpenCredential(c); }}><span className="p2-trust-icon"><GraduationCap size={18}/></span><span><strong>Сертификат курса</strong><small>{c.title}</small></span><CheckCircle2 size={17}/></button>)}
-            {verifiedProjects.length===0&&certificates.length===0&&<div className="p2-inline-empty">Здесь появятся подтверждения проектов и обучения.</div>}
+            {currentCertificates.slice(0,2).map(c=><button key={c.verification_id} type="button" onClick={()=>{ setOpenCredential(c); }}><span className="p2-trust-icon"><GraduationCap size={18}/></span><span><strong>Действующий документ</strong><small>{c.title}</small></span><CheckCircle2 size={17}/></button>)}
+            {verifiedProjects.length===0&&currentCertificates.length===0&&<div className="p2-inline-empty">Здесь появятся подтверждения проектов и обучения.</div>}
           </div>
         </section>}
         </div>
@@ -365,7 +350,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
     {(openCase || openCredential) && <div className="p2-modal-scrim" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget){setOpenCase(null);setOpenCredential(null);}}}>
       <section className="p2-modal" role="dialog" aria-modal="true" aria-label={openCase?"Подтверждённый проект":"Сертификат"}><button type="button" className="p2-modal-close" aria-label="Закрыть" onClick={()=>{setOpenCase(null);setOpenCredential(null);}}><X size={22}/></button>
         {openCase ? <><div className="p2-overline">КЕЙС И ДОКАЗАТЕЛЬСТВА</div><h2>{openCase.project_title}</h2><span className="p2-identity-badge"><BadgeCheck size={16}/>{isAccepted(openCase)?"Принят заказчиком":"Статус: "+openCase.verification_status}</span><h3>Личный вклад</h3><p>{openCase.personal_summary}</p><h3>Оценка и комментарий</h3><p>{openCase.grade??"Без оценки"} · {openCase.review_reason||"Комментарий ещё не предоставлен"}</p><h3>Связанные артефакты</h3><ul>{openCase.artifact_keys.map((key,i)=><li key={key+"-"+String(i)}><FileCheck2 size={17}/>{key}</li>)}</ul><p className="p2-modal-note">Для доступа к исходным файлам требуется разрешённая ссылка на артефакт. Названия файлов не являются прямыми ссылками.</p></> :
-        openCredential && <><div className="p2-overline">СЕРТИФИКАЦИЯ</div><h2>{openCredential.title}</h2><p>{openCredential.issuer || "Impulse"}</p><h3>Идентификатор документа</h3><p>{openCredential.verification_id}</p><h3>Статус</h3><p>{openCredential.status}</p><p className="p2-modal-note">Информация получена из реестра портфолио.</p></>}
+        openCredential && <><div className="p2-overline">СЕРТИФИКАЦИЯ</div><h2>{openCredential.title}</h2><p>{openCredential.issuer || "Impulse"}</p><h3>Идентификатор документа</h3><p>{openCredential.verification_id}</p><h3>Статус</h3><p>{credentialStatusLabel(openCredential)}</p><p className="p2-modal-note">Информация получена из реестра портфолио.</p></>}
       </section>
     </div>}
   </main>;
