@@ -1,0 +1,17 @@
+# Claim ANALYTICS-THREE-SECTIONS-20261025
+- task_id: ANALYTICS-THREE-SECTIONS-20261025
+- session_id: gpt6-20261025-analytics-three-reference-port
+- status: IN_PROGRESS
+- base_revision: 05f3b0e72c24c265b360ffc7ad5113ca82519be9
+- started_at: 2026-10-25
+- depends_on: []
+- write_scope:
+  - frontend/src/features/analytics-v3/**
+  - frontend/src/App.tsx (participant analytics import and single route switch only)
+  - frontend/e2e/analytics-three-sections.spec.ts
+  - .github/workflows/analytics-three-sections-qa.yml
+  - .agents/coordination/claims/ANALYTICS-THREE-SECTIONS-20261025.lock/status.md
+- shared_files: frontend/src/App.tsx (minimal two anchors, preserve concurrent changes)
+- verification: isolated lint/typecheck/build, three-screen Playwright, keyboard, mobile, visible charts, production deployment
+- progress: User-approved three images at 1586x992: Activity, Skill Passport, Certification. Existing AnalyticsReference remains intact while AN-08 claim is IN_PROGRESS. Add new module and route only.
+- data_integrity: show unknown real measurements as unavailable, not generated performance or issued certifications.
