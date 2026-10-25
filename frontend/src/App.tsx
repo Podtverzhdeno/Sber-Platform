@@ -1398,7 +1398,7 @@ function ImpulseApp() {
     refetchInterval: 12_000,
     refetchIntervalInBackground: false,
   });
-  const unreadChats = (chatNotificationsQuery.data ?? [])
+  const unreadChats = (Array.isArray(chatNotificationsQuery.data) ? chatNotificationsQuery.data : [])
     .filter((channel) => channel.unread > 0 && !channel.muted)
     .sort((a,b) => (b.last_message?.created_at ?? "").localeCompare(a.last_message?.created_at ?? ""));
   const chatNotificationTitle = (channel: ChatNotification): string => {
