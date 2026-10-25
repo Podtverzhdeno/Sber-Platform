@@ -1,6 +1,6 @@
 # Claim XS-304-REAL-BROWSER-JOURNEY-20261026
 - session_id: gpt6-20261026-xs-real-browser
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 90be60dcb2171dc135aa144e69f012c9c99da334
@@ -13,5 +13,12 @@
 - verification:
   - Ruff/Python backend startup with migrated PostgreSQL and demo seed
   - scoped ESLint and real Playwright chromium
-- progress: Real HTTP/browser auth and persisted course finish → Analytics, Trajectory, AI Buddy; privacy and no false grades.
+- progress: Real PostgreSQL / Chromium journey passed: authenticated course lessons/finish, idempotency and reload, Analytics → Trajectory → Buddy cross-screen consistency, no fake skill/grade/rank, other-role private API denied. Initial failure discovered 429 due read-bucket exhaustion, fixed separately in XS-104.
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40242705592
+- changed_files:
+  - frontend/e2e/cross-section-real-api.spec.ts
+  - .github/workflows/cross-section-real-browser-qa.yml
+- verification: migrated PostgreSQL + demo seed + real backend health 200 + frontend typecheck/lint + Playwright chromium success.
+- unverified: all six role end-to-end flows, independent review, production deployment
 - blockers: Full six-role domain lifecycle acceptance remains separate.
