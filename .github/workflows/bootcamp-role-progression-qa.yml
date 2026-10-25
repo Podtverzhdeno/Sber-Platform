@@ -5,6 +5,9 @@ on:
     branches: [main]
     paths:
       - "frontend/src/features/bootcamp/catalog.tsx"
+      - "frontend/src/features/bootcamp/grade-milestone-celebration.tsx"
+      - "frontend/src/features/bootcamp/grade-milestone-celebration.scss"
+      - "frontend/src/features/bootcamp/learning-content/ImmersiveCourseExperience.tsx"
       - "frontend/src/features/bootcamp/role-study-progression*"
       - "frontend/e2e/bootcamp-role-progression.spec.ts"
       - "frontend/e2e/bootcamp-reference-fixtures.ts"
