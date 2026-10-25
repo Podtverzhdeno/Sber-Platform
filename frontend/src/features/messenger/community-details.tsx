@@ -35,7 +35,7 @@ function collectShared(messages: readonly ApiMessageView[]) {
 }
 
 export function CommunityDetails({
-  channel, viewerId, messages, attachmentRefs = [], contacts, onClose, onToggleMute, onOpenMember, onInvite,
+  channel, viewerId, messages, attachmentRefs = [], contacts, onClose, onToggleMute, onOpenMember, onInvite, onLoadOlder, hasMoreOlder = false, isPaginating = false,
 }: {
   channel: ApiChannelView;
   viewerId: string | null;
@@ -46,6 +46,9 @@ export function CommunityDetails({
   onToggleMute?: () => void;
   onOpenMember?: (personId: string) => Promise<void>;
   onInvite?: (ids: string[]) => Promise<void>;
+  onLoadOlder?: () => void;
+  hasMoreOlder?: boolean;
+  isPaginating?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>("members");
   const [filter, setFilter] = useState("");
@@ -148,14 +151,17 @@ export function CommunityDetails({
           </ul>
           {visible.length === 0 && <p className="msg-community__empty">По вашему запросу участников не найдено</p>}
         </>}
-        {tab === "media" && <SharedList refs={shared.media} empty="В переписке пока нет изображений" kind="media" onCopy={copyText}/>}
-        {tab === "files" && <SharedList refs={shared.files} empty="В переписке пока нет прикреплённых файлов" kind="files" onCopy={copyText}/>}
-        {tab === "links" && <SharedList refs={shared.links} empty="В сообщениях пока нет ссылок" kind="links" onCopy={copyText}/>}
+        {tab === "media" && <SharedList refs={shared.media} empty="В загруженной истории пока нет изображений" kind="media" onCopy={copyText}/>}
+        {tab === "files" && <SharedList refs={shared.files} empty="В загруженной истории пока нет прикреплённых файлов" kind="files" onCopy={copyText}/>}
+        {tab === "links" && <SharedList refs={shared.links} empty="В загруженной истории пока нет ссылок" kind="links" onCopy={copyText}/>}
         {tab === "bots" && <>
           <h3 className="msg-community__section-title">Боты сообщества</h3>
           {bots.length ? bots.map(bot => <button type="button" className="msg-community__resource" key={bot.id} onClick={()=>{openPerson(bot);}}><Bot size={19}/><span>{bot.display_name}</span><ChevronRight size={16}/></button>)
             : <p className="msg-community__empty">Боты не подключены. Здесь появятся только участники с ролью бота.</p>}
         </>}
+        {tab !== "members" && tab !== "bots" && hasMoreOlder && onLoadOlder && <button
+          type="button" className="msg-community__load-more" disabled={isPaginating}
+          onClick={onLoadOlder}>{isPaginating ? "Загружаем…" : "Показать материалы из более ранних сообщений"}</button>}
       </div>
       {feedback && <p className="msg-community__feedback" role="status">{feedback}</p>}
       {profile && <div className="msg-community__profile" role="dialog" aria-label={`Профиль участника: ${profile.display_name}`}>
