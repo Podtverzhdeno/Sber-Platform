@@ -43,6 +43,15 @@ const statusText: Record<string, string> = {
   revision_requested: "Нужна доработка", submitted: "На ревью",
   disputed: "Оспаривается", accepted: "Принято", closed: "Завершено",
 };
+const memberStatusText: Record<string, string> = {
+  accepted: "Участие подтверждено",
+  invited: "Приглашён",
+  pending: "Ожидает подтверждения",
+  active: "В команде",
+  left: "Вышел из команды",
+  declined: "Приглашение отклонено",
+};
+const readableMemberStatus = (status: string) => memberStatusText[status] || status;
 const benefits = [
   { id: "gitverse", title: "Токены GitVerse", unlock: "Старт программы", icon: Layers3, color: "teal" },
   { id: "gigacode", title: "Токены GigaCode", unlock: "После 1 проекта", icon: Code2, color: "blue" },
@@ -281,7 +290,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
         </section>
         <section className="mp-surface mp-detail-panel">
           <header><h2><Users/> Команда</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab($1);}}>Все участники <ArrowRight size={15}/></button></header>
-          {(project.detail?.team ?? []).slice(0,3).map(person=><div className="mp-team-member" key={person.person_id}><span>{person.display_name.slice(0,1)}</span><div><strong>{person.display_name}</strong><small>{person.status}</small></div><button type="button" className="mp-secondary" onClick={()=>{onMessage(person.person_id);}} aria-label={"Написать "+person.display_name}><MessageCircle size={15}/></button></div>)}
+          {(project.detail?.team ?? []).slice(0,3).map(person=><div className="mp-team-member" key={person.person_id}><span>{person.display_name.slice(0,1)}</span><div><strong>{person.display_name}</strong><small>{readableMemberStatus(person.status)}</small></div><button type="button" className="mp-secondary" onClick={()=>{onMessage(person.person_id);}} aria-label={"Написать "+person.display_name}><MessageCircle size={15}/></button></div>)}
           {(project.detail?.team?.length ?? 0)===0&&<p className="mp-muted">Состав команды пока не опубликован</p>}
         </section>
         <section className="mp-surface mp-detail-panel mp-summary-contribution">
@@ -365,7 +374,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
       <div className="mp-detail-stack">
         <section className="mp-surface mp-detail-panel">
           <header><h2><Users/> Участники проекта</h2><span className="mp-muted">{project.detail?.team?.length ?? 0} участников</span></header>
-          {(project.detail?.team?.length ?? 0)>0?(project.detail?.team ?? []).map(person=><div className="mp-team-member mp-team-member--full" key={person.person_id}><span>{person.display_name.slice(0,1).toUpperCase()}</span><div><strong>{person.display_name}</strong><small>{person.status}</small></div><button className="mp-secondary" type="button" onClick={()=>{onMessage(person.person_id);}}><MessageCircle size={16}/> Написать</button></div>):<p className="mp-muted">Состав участников ещё не опубликован</p>}
+          {(project.detail?.team?.length ?? 0)>0?(project.detail?.team ?? []).map(person=><div className="mp-team-member mp-team-member--full" key={person.person_id}><span>{person.display_name.slice(0,1).toUpperCase()}</span><div><strong>{person.display_name}</strong><small>{readableMemberStatus(person.status)}</small></div><button className="mp-secondary" type="button" onClick={()=>{onMessage(person.person_id);}}><MessageCircle size={16}/> Написать</button></div>):<p className="mp-muted">Состав участников ещё не опубликован</p>}
         </section>
       </div>
       <div className="mp-detail-stack">
