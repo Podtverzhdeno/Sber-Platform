@@ -64,6 +64,22 @@ describe("Impulse help center content", () => {
     expect(navigate).toHaveBeenCalledWith("Мои проекты");
     expect(close).toHaveBeenCalledTimes(1);
   });
+  it("does not offer navigation to sections unavailable in the active role", () => {
+    render(<ParticipantHelpCenter section="Главная" initialTopicId="task-submit"
+      onClose={close} onOpenTour={tour} onNavigateSection={navigate}
+      availableSections={["Главная", "Задачи"]} />);
+    expect(screen.getByRole("heading", { name: "Как передать решение на проверку?" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /К разделу «Мои проекты»/ })).not.toBeInTheDocument();
+  });
+
+  it("traps keyboard focus within the dialog", () => {
+    setup();
+    const closeButton = screen.getByRole("button", { name: "Закрыть центр помощи" });
+    closeButton.focus();
+    fireEvent.keyDown(closeButton, { key: "Tab", shiftKey: true });
+    expect(document.activeElement).toBeInTheDocument();
+  });
+
   it("opens precisely the requested topic from inline buttons", () => {
     const received: string[] = [];
     const listener = (event: Event) => { received.push((event as CustomEvent<{ topicId: string }>).detail.topicId); };
