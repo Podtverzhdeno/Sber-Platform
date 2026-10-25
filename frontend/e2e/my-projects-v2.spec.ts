@@ -173,3 +173,14 @@ test("My Projects: quick preview tabs open correct deep-linked details",async({p
   await expect(page.getByRole("tab",{name:"Бонусы и выгоды"})).toHaveAttribute("aria-selected","true");
   await expect(page.locator(".mp-rewards-full button")).toHaveCount(7);
 });
+
+test("My Projects: writing to a teammate targets the selected participant",async({page})=>{
+  await page.setViewportSize({width:1672,height:941});
+  await fixture(page);
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить работу|Открыть проект/}).click();
+  await page.getByRole("tab",{name:"Команда"}).click();
+  await expect(page.locator(".mp-team-member")).toHaveCount(2);
+  await page.locator(".mp-team-member").nth(1).getByRole("button",{name:"Написать"}).click();
+  await expect(page).toHaveURL(/participant=mentor-1/);
+  await expect(page).toHaveURL(/task=task-assignment-1/);
+});
