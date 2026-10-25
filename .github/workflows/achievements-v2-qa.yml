@@ -46,7 +46,7 @@ jobs:
         run: npx playwright test achievements-v2.spec.ts --project=chromium --reporter=line
       - name: Verify lint
         if: always()
-        run: npx eslint src/features/achievements-v2/page.tsx src/features/achievements-v2/model.ts e2e/achievements-v2.spec.ts --max-warnings 0
+        run: npx eslint src/features/achievements-v2/gallery-page.tsx src/features/achievements-v2/model.ts e2e/achievements-v2.spec.ts --max-warnings 0
       - name: Upload screenshots and traces
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
