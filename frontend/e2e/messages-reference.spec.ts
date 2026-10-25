@@ -288,6 +288,46 @@ test("composer toolbar icons open genuine attachment, emoji and mention controls
   await expect(page.getByTestId("composer-send")).toBeEnabled();
 });
 
+test("creates a real persisted group from selected contacts, not a UI-only card", async ({page})=>{
+  await page.setViewportSize({width:1448,height:1086});
+  const {channels}=await openMessages(page);
+  let submitted: {title:string;peer_ids:string[]} | null=null;
+  await page.route("**/api/v1/me/messaging/channels/group", async route => {
+    submitted=route.request().postDataJSON() as {title:string;peer_ids:string[]};
+    const group={
+      ...channels[0],id:"00000000-0000-4000-8000-000000009999",
+      kind:"community",title:submitted.title,unread:0,last_message:null,
+      participants:[
+        {id:actor.person_id,display_name:actor.display_name,role:"member"},
+        ...submitted.peer_ids.map(id=>({
+          id,display_name:id.endsWith("005")?"Елена Наставник":"Роман Заказчик",role:"member",
+        })),
+      ],
+    };
+    channels.push(group);
+    await route.fulfill({status:201,json:group});
+  });
+  await page.getByRole("button",{name:"Создать чат",exact:true}).click();
+  await page.getByRole("menuitem",{name:/Новый групповой чат/}).click();
+  const dialog=page.getByRole("dialog",{name:"Создать групповой чат"});
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("textbox",{name:"Название группы"}).fill("Обсуждение проекта");
+  await dialog.getByRole("checkbox",{name:/Елена Наставник/}).check();
+  await dialog.getByRole("checkbox",{name:/Роман Заказчик/}).check();
+  await dialog.getByRole("button",{name:"Создать чат"}).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator(".msg-chat__header-title")).toContainText("Обсуждение проекта");
+  await expect(page.getByRole("button",{name:/Обсуждение проекта/}).first()).toBeVisible();
+  expect(submitted).toEqual({
+    title:"Обсуждение проекта",
+    peer_ids:[
+      "00000000-0000-4000-8000-000000000005",
+      "00000000-0000-4000-8000-000000000006",
+    ],
+  });
+  expect(channels.some(channel=>channel.title==="Обсуждение проекта")).toBe(true);
+});
+
 test("create chat opens real contacts rather than an empty decorative modal",async ({page})=>{
   await page.setViewportSize({width:1448,height:1086});
   await openMessages(page);
