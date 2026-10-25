@@ -260,13 +260,13 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
         </div>
         <footer className="pg-welcome-footer">
           <button type="button" className="pg-quiet-button" onClick={close}>Пропустить</button>
-          <div className="pg-dots" aria-label="Шаг 1 из 4"><i className="is-active"/><i/><i/><i/></div>
+          <button type="button" className="pg-welcome-library" onClick={() => { openLibrary(); }}>Все инструкции</button>
           <button type="button" className="pg-primary-button" onClick={next}>Далее <ArrowRight size={16}/></button>
         </footer>
       </section>
     </div>}
     {showTip && <>
-      {place && <div className="pg-highlight" aria-hidden="true" style={{
+      {place && <div className={`pg-highlight${view === "hint" ? " pg-highlight--soft" : ""}`} aria-hidden="true" style={{
         left: place.rect.left - 4, top: place.rect.top - 4,
         width: place.rect.width + 8, height: place.rect.height + 8,
       }} />}
@@ -309,6 +309,7 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate }: 
         <h2 id="pg-complete-title">Ты готов к старту!</h2>
         <p>Теперь ты знаешь, как устроен этот раздел. Выбирай следующий шаг — вернуться к подсказкам можно в любой момент.</p>
         <button type="button" className="pg-primary-button" onClick={() => { close(); if (isHome && destinationIndex >= 0) onNavigate(destinationIndex); }}>{isHome ? "К интересным задачам" : "Вернуться к работе"} <ArrowRight size={15}/></button>
+        <button type="button" className="pg-quiet-button" onClick={() => { openLibrary(); }}>Открыть инструкции</button>
         <button type="button" className="pg-quiet-button" onClick={() => { setStepIndex(0); setView("walkthrough"); }}>Показать подсказки ещё раз</button>
       </section>
     </div>}
