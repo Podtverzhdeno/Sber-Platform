@@ -59,6 +59,9 @@ class SecurityMiddleware:
             {
                 "auth": RateRule(20),
                 "search": RateRule(60),
+                # Ordinary authenticated read models share a separate budget.
+                # A complex page may fetch 30+ authorized projections at once.
+                "read": RateRule(240),
                 "write": RateRule(120),
                 "agents": RateRule(30),
             }
@@ -152,7 +155,7 @@ class SecurityMiddleware:
             return "search"
         if "/agents/" in path:
             return "agents"
-        return "write" if method not in {"GET", "HEAD", "OPTIONS"} else "search"
+        return "write" if method not in {"GET", "HEAD", "OPTIONS"} else "read"
 
     @staticmethod
     async def _reject(
