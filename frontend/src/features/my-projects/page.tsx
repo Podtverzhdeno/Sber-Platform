@@ -293,7 +293,17 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
       acceptanceCriteria={project.work.terms.acceptance_criteria} onWorkspace={onWorkspace}/>}
     {tab==="progress" && <ProjectReferenceProgress checkpoints={checkpoints} progress={progress}
       deadline={project.work.terms.deadline_at} decisions={project.work.decisions} onWorkspace={onWorkspace}/>}
-    {tab==="contribution" && <div className="mp-detail-tab-layout" role="tabpanel" aria-label="Мой вклад">
+    {tab==="contribution" && <>
+      <div className="mp-ref-contrib-head">
+        <h2>Мой вклад в проект <span>Подтверждённые действия и материалы</span></h2>
+        <div className="mp-ref-contrib-metrics">
+          <div><span className="mp-ref-title-icon"><FileText size={18}/></span><strong>{project.work.contributions.length}</strong><small>Отправлено версий</small></div>
+          <div><span className="mp-ref-title-icon"><CheckCircle2 size={18}/></span><strong>{project.detail?.feedback?.filter(v=>v.status==="accepted"||v.status==="verified"||v.status==="approved").length ?? 0}</strong><small>Принятых результатов</small></div>
+          <div><span className="mp-ref-title-icon"><Award size={18}/></span><strong>{project.detail?.feedback?.length ?? 0}</strong><small>Проверок</small></div>
+          <div><span className="mp-ref-title-icon"><Layers3 size={18}/></span><strong>{project.work.contributions.reduce((count,item)=>count+item.artifact_keys.length,0)}</strong><small>Типов материалов</small></div>
+        </div>
+      </div>
+      <div className="mp-detail-tab-layout mp-ref-contribution-layout" role="tabpanel" aria-label="Мой вклад">
       <div className="mp-detail-stack">
         <section className="mp-surface mp-detail-panel">
           <h2><FileText/> Мой личный вклад</h2><ParticipantHelpTrigger topicId="project-contribution" label="Как подтвердить вклад" />
@@ -310,9 +320,15 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
           <header><h2><Award/> Обратная связь</h2><span className="mp-muted">{project.detail?.feedback?.length ?? 0}</span></header>
           {(project.detail?.feedback?.length ?? 0)>0?(project.detail?.feedback ?? []).map(item=><article className="mp-history-item" key={item.contribution_id+"-"+String(item.review_version)}><strong>Версия {item.contribution_version} · {item.grade}</strong><small>{item.status}</small><p>{item.explanation || "Комментарий отсутствует"}</p></article>):<p className="mp-muted">Оценка появится здесь после проверки отправленного результата</p>}
         </section>
+        <section className="mp-surface mp-detail-panel mp-ref-evidence-list">
+          <header><h2><FileText/> Материалы по версиям</h2><span className="mp-muted">Указанные типы доказательств</span></header>
+          {project.work.contributions.flatMap(item=>item.artifact_keys.map(key=>({key,version:item.version,id:item.id}))).length?
+            project.work.contributions.flatMap(item=>item.artifact_keys.map(key=>({key,version:item.version,id:item.id}))).map((file,index)=><div key={file.id+"-"+file.key+"-"+String(index)}><span className="mp-ref-blue-square"><FileText size={17}/></span><strong>{file.key}</strong><small>Версия {file.version}</small></div>):
+            <p className="mp-muted">Файлы и другие подтверждения появятся после отправки версии</p>}
+        </section>
         <section className="mp-surface mp-detail-panel"><h2><Info/> Как подтвердить вклад</h2><ParticipantHelpTrigger topicId="task-submit" label="Как сдать работу" /><ol className="mp-explain-steps"><li><strong>Опиши результат</strong><p>Что сделал именно ты и почему это важно для задачи</p></li><li><strong>Приложи доказательство</strong><p>Ссылку на артефакт, по которому можно проверить работу</p></li><li><strong>Дождись проверки</strong><p>Решение и комментарии сохранятся в истории</p></li></ol></section>
       </div>
-    </div>}
+    </div></>}
     {startError&&<p className="mp-action-error" role="alert">Не удалось начать работу. Обнови проект и повтори попытку.</p>}
     {tab==="team" && <ProjectReferenceTeam team={project.detail?.team??[]} customer={projectCompany(project)}
       mentor={project.detail?.mentor?.display_name??null} onMessage={onMessage} onContribution={()=>{setTab("contribution");}}/>}
