@@ -19,7 +19,7 @@ const work = projects.map(item=>({
   task: { id:`task-${item.id}`, title:item.title, status:item.status },
   terms: { version:1, deadline_at:item.deadline, deliverable:`Реализовать: ${item.title}`, acceptance_criteria:["Исследование требований","Прототип","Тестирование","Документация","Финальный отчёт"] },
   contributions: item.status==="in_progress" ? [{ id:"contribution-1", version:1, personal_summary:"Подготовлен воспроизводимый модуль рекомендаций", artifact_keys:[], status:"reported" }] : [],
-  decisions: [], allowed_artifacts: [],
+  decisions: [], allowed_artifacts: ["git-commit", "report"],
 }));
 async function fixture(page: Page) {
   await page.clock.setFixedTime(new Date("2026-10-25T12:00:00Z"));
@@ -219,4 +219,26 @@ test("My Projects: deadline selection filters cards and list consistently",async
   await expect(projects.locator(".mp-table tbody tr")).toHaveCount(0);
   await deadline.selectOption("all");
   await expect(projects.locator(".mp-table tbody tr")).toHaveCount(3);
+});
+
+test("My Projects: contribution upload uses allowed artifact key and real API payload",async({page})=>{
+  await page.setViewportSize({width:1672,height:941});
+  let posted: { personal_summary?: string; artifacts?: {key:string;uri:string}[] } | null = null;
+  await fixture(page);
+  await page.route("**/api/v1/me/assignments/assignment-1/contributions",async route=>{
+    posted=route.request().postDataJSON() as {personal_summary:string;artifacts:{key:string;uri:string}[]};
+    await route.fulfill({status:201,json:{id:"contribution-new",assignment_id:"assignment-1",version:2,personal_summary:posted.personal_summary,artifact_keys:["report"],status:"reported"}});
+  });
+  await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить работу/}).click();
+  await page.getByRole("tab",{name:"Мой вклад"}).click();
+  const form=page.locator(".mp-contribute-form");
+  await expect(form.getByRole("combobox",{name:"Тип доказательства"})).toBeVisible();
+  await form.getByRole("combobox",{name:"Тип доказательства"}).selectOption("report");
+  await form.locator("textarea").fill("Подготовил воспроизводимую проверку результатов и оформил отчёт по эксперименту");
+  await form.getByRole("textbox",{name:"Ссылка на доказательство"}).fill("https://example.org/reports/final");
+  await form.getByRole("button",{name:"Отправить вклад"}).click();
+  await expect.poll(()=>posted).not.toBeNull();
+  expect(posted).toMatchObject({
+    artifacts:[{key:"report",uri:"https://example.org/reports/final"}],
+  });
 });
