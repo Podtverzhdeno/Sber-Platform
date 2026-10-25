@@ -560,7 +560,7 @@ function Workspace({
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Портфолио" ? (
-          <ParticipantPortfolioV2 />
+          <ParticipantPortfolioV2 navigation={navigation} />
         ) : allowed &&
           actor.active_role === "participant" &&
           currentSection === "Рейтинг" ? (
