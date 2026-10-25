@@ -160,6 +160,16 @@ export function MessagingWorkspace({
       : undefined) ??
     undefined;
 
+  // React Router reuses the workspace component between two ?channel= links.
+  // Re-select on query changes so notification clicks open the correct chat.
+  useEffect(() => {
+    if (requestedChannel && UUID_PATTERN.test(requestedChannel)) {
+      setSelectedId(requestedChannel);
+      setContextOpen(true);
+      if (isNarrow) setMobilePane("chat");
+    }
+  }, [requestedChannel, isNarrow]);
+
   // Глубокая ссылка ?task=<task_id>: открываем чат команды этой задачи,
   // когда он появится в списке каналов; явный ?channel= приоритетнее.
   useEffect(() => {
