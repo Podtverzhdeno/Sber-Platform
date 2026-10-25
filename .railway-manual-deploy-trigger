@@ -30,3 +30,6 @@ release_request=2026-10-25-projects-10of10-split-preview-103a2c7
 
 # Bootcamp: verified course tabs, security hero, downloadable JWT starter, dual certificates
 release_request=2026-10-25-bootcamp-polish-9b3c5317e09b
+
+# Events: final compact role-score cards, neon checkboxes and 4/4 Playwright QA
+release_request=2026-10-25-events-minimal-verified-ca8071842
