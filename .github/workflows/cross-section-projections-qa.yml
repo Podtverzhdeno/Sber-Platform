@@ -1,0 +1,44 @@
+name: Cross-section projection contract QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/api/cross-section-mutations.ts"
+      - "frontend/src/api/cross-section-mutations.test.ts"
+      - ".github/workflows/cross-section-projections-qa.yml"
+  pull_request:
+    paths:
+      - "frontend/src/api/cross-section-mutations.ts"
+      - "frontend/src/api/cross-section-mutations.test.ts"
+      - ".github/workflows/cross-section-projections-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cross-section-projections-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  frontend-contract:
+    name: Typed mutation / projection contract
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Lint integration policy and its tests
+        run: npx eslint src/api/cross-section-mutations.ts src/api/cross-section-mutations.test.ts --max-warnings 0
+      - name: Verify success, failure, query and boundary scenarios
+        run: npm run test -- src/api/cross-section-mutations.test.ts
