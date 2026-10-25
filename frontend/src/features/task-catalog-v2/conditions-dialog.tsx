@@ -10,6 +10,7 @@ import {
   loadCatalogTerms,
 } from "./client";
 import type { CatalogApplicationResult } from "./analytics";
+import { displayCatalogTopic } from "./topic-labels";
 import type { CatalogItem } from "./types";
 import { CustomerMark } from "./customer-mark";
 
@@ -159,7 +160,7 @@ export function ConditionsDialog(props: {
             {!termsAccessDenied ? (
               <>
                 <p>{task.customer.display_name} · версия условий {termsData?.terms_version ?? "…"}</p>
-                <ul className="catalog-v2-tags" aria-label="Компетенции задачи">{task.competency_tags.slice(0, 5).map((tag) => <li key={tag}>{tag}</li>)}</ul>
+                <ul className="catalog-v2-tags" aria-label="Компетенции задачи">{task.competency_tags.slice(0, 5).map((tag) => <li key={tag}>{displayCatalogTopic(tag)}</li>)}</ul>
               </>
             ) : null}
           </div>
