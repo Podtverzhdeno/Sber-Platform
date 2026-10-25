@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, CircleAlert, ClipboardCheck, Eye, FileText, Lightbulb, Save, ShieldCheck, Sparkles, UsersRound, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, Check, CheckCircle2, ChevronRight, CircleAlert, ClipboardCheck, Eye, FileText, Lightbulb, List, ListOrdered, Plus, Save, Search, ShieldCheck, Sparkles, UsersRound, X } from "lucide-react";
 import "./customer-create-task.scss";
 
 export type CreateTaskBrief = {
   title: string;
+  shortSummary: string;
+  skills: string[];
   department: string;
   direction: string;
   taskType: string;
@@ -33,8 +35,9 @@ const stages = [
 ] as const;
 const departments = ["Розничный бизнес", "Клиентский сервис", "R&D"];
 const directions = ["Аналитика данных", "AI / ML", "NLP", "Computer Vision"];
+const suggestedSkills = ["Python", "LLM", "AI-агенты", "Аналитика", "Базы данных", "API", "Тестирование", "Архитектура", "RAG", "SQL", "UX/UI"];
 const emptyBrief = (): CreateTaskBrief => ({
-  title: "", department: "Розничный бизнес", direction: "Аналитика данных", taskType: "MVP",
+  title: "", shortSummary: "", skills: [], department: "Розничный бизнес", direction: "Аналитика данных", taskType: "MVP",
   problem: "", deliverable: "", criteria: "",
   deadline: new Date(Date.now() + 28 * 86_400_000).toISOString().slice(0, 10),
   places: 2, mode: "open", reward: "80000",
@@ -49,7 +52,7 @@ function restore(): WizardData {
     if (!saved || !saved.brief || typeof saved.brief !== "object") return fallback;
     return {
       step: typeof saved.step === "number" && saved.step >= 0 && saved.step < stages.length ? saved.step : 0,
-      brief: { ...fallback.brief, ...saved.brief },
+      brief: { ...fallback.brief, ...saved.brief, skills: Array.isArray(saved.brief.skills) ? saved.brief.skills.filter((x): x is string => typeof x === "string").slice(0, 12) : [] },
       invited: Array.isArray(saved.invited) ? saved.invited.filter((id): id is string => typeof id === "string") : [],
       applied: Array.isArray(saved.applied) ? saved.applied.filter((id): id is string => typeof id === "string") : [],
     };
@@ -58,8 +61,9 @@ function restore(): WizardData {
 function incomplete(brief: CreateTaskBrief, invited: string[]) {
   const result: { title: string; step: number }[] = [];
   if (!brief.title.trim()) result.push({ title: "Название", step: 0 });
+  if (!brief.shortSummary.trim()) result.push({ title: "Краткое описание", step: 0 });
   if (!brief.problem.trim()) result.push({ title: "Проблема и цель", step: 0 });
-  if (!brief.deliverable.trim()) result.push({ title: "Ожидаемый результат", step: 0 });
+  if (!brief.deliverable.trim()) result.push({ title: "Ожидаемый результат", step: 1 });
   if (!brief.criteria.trim()) result.push({ title: "Критерии приёмки", step: 1 });
   if (!brief.deadline || Number.isNaN(Date.parse(brief.deadline)) || brief.deadline < new Date().toISOString().slice(0, 10)) result.push({ title: "Будущий дедлайн", step: 1 });
   if (!Number.isInteger(brief.places) || brief.places < 1) result.push({ title: "Количество мест", step: 1 });
@@ -91,12 +95,26 @@ export function CustomerCreateTask({ candidates, onPublish }: Props) {
   const [data, setData] = useState<WizardData>(restore);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [skillSearch, setSkillSearch] = useState("");
   const { step, brief, invited, applied } = data;
   const missing = incomplete(brief, invited);
-  const requiredCount = brief.mode === "invitation_only" ? 10 : 9;
+  const requiredCount = brief.mode === "invitation_only" ? 11 : 10;
   const readiness = Math.round((requiredCount - missing.length) / requiredCount * 100);
   const updateBrief = (patch: Partial<CreateTaskBrief>) => { setData((previous) => ({ ...previous, brief: { ...previous.brief, ...patch } })); setFeedback(""); };
   const goStep = (next: number) => { setData((previous) => ({ ...previous, step: Math.max(0, Math.min(4, next)) })); setFeedback(""); };
+  const toggleSkill = (value: string) => {
+    const skill = value.trim().slice(0, 36);
+    if (!skill) return;
+    const exists = brief.skills.some((entry) => entry.toLocaleLowerCase("ru") === skill.toLocaleLowerCase("ru"));
+    if (!exists && brief.skills.length >= 12) { setFeedback("Можно выбрать до 12 ключевых навыков."); return; }
+    updateBrief({ skills: exists ? brief.skills.filter((entry) => entry.toLocaleLowerCase("ru") !== skill.toLocaleLowerCase("ru")) : [...brief.skills, skill] });
+    setSkillSearch("");
+  };
+  const filteredSkills = suggestedSkills.filter((skill) => skill.toLowerCase().includes(skillSearch.toLowerCase()) && !brief.skills.includes(skill));
+  const addSuggestedSkill = () => toggleSkill(skillSearch);
+  const addFormatting = (format: "bullet" | "number") => {
+    updateBrief({ problem: brief.problem.trim() + (brief.problem.trim() ? "\n" : "") + (format === "bullet" ? "• " : "1. ") });
+  };
   const toggleInvite = (id: string) => setData((previous) => ({ ...previous, invited: previous.invited.includes(id) ? previous.invited.filter((value) => value !== id) : [...previous.invited, id] }));
   const applyTip = (tip: Tip) => {
     setData((previous) => ({ ...previous, brief: tip.patch(previous.brief), applied: [...new Set([...previous.applied, tip.id])] }));
@@ -122,32 +140,63 @@ export function CustomerCreateTask({ candidates, onPublish }: Props) {
   };
   const formatMode = brief.mode === "open" ? "Открытый набор" : "По приглашению";
   return <section className="create-task-workspace customer-create-v2" aria-label="Создание задачи заказчиком" data-reference="R-CUS-03">
-    <header className="create-v2-hero">
-      <div className="create-v2-hero-top"><span className="create-v2-kicker"><Sparkles size={15} /> Конструктор задач</span><span className="create-v2-autosave"><CheckCircle2 size={15} /> Автосохранение в браузере</span></div>
-      <div className="create-v2-hero-main"><div><h2>От идеи до понятной задачи</h2><p>Соберите бриф, который поможет участнику оценить сложность, подготовить решение и понять критерии приёмки.</p></div><div className="create-v2-hero-count"><strong>0{step + 1}<small>/ 05</small></strong><span>Текущий этап</span></div></div>
-      <div className="create-v2-progress" role="progressbar" aria-label="Этап заполнения" aria-valuenow={step + 1} aria-valuemin={1} aria-valuemax={5}><span style={{ width: String((step + 1) * 20) + "%" }} /></div>
-    </header>
+    <div className="create-v3-intro">
+      <span className="create-v3-back"><ArrowLeft size={14} aria-hidden="true" /> Рабочее пространство заказчика</span>
+      <div><span className="create-v3-intro-flag"><Sparkles size={14} /> Новый проект</span><span className="create-v3-autosave"><CheckCircle2 size={14} /> Черновик сохраняется в браузере</span></div>
+    </div>
     <nav className="create-stepper" aria-label="Этапы создания задачи">
       {stages.map((stage, index) => <button type="button" key={stage.title} aria-current={step === index ? "step" : undefined} className={step === index ? "active" : index < step ? "done" : ""} onClick={() => goStep(index)}>
-        <span className="create-v2-step-number">{index < step ? <Check size={15} /> : String(index + 1).padStart(2, "0")}</span>
-        <span className="create-v2-step-name"><b>{stage.title}</b><small>{stage.short}</small></span>
+        <span className="create-v2-step-number">{index < step ? <Check size={15} /> : index + 1}</span>
+        <span className="create-v2-step-name"><b>{["Бриф", "Критерии", "Формат", "Поддержка", "Публикация"][index]}</b></span>
       </button>)}
     </nav>
     <div className="create-task-grid">
       <section className="create-form-card" aria-labelledby="create-v2-step-title">
-        <div className="create-v2-section-top"><span className="create-v2-section-icon"><ClipboardCheck size={22} /></span><span className="create-v2-label">ЭТАП {step + 1} ИЗ 5</span></div>
-        <div className="create-v2-section-heading"><h2 id="create-v2-step-title">{["Расскажите о задаче", "Как понять, что задача решена", "Условия работы", "Поддержка и участники", "Всё готово к публикации?"][step]}</h2><p>{stages[step]?.description}</p></div>
-        {step === 0 && <div className="create-fields">
-          <label className="wide">Название задачи <span className="required">*</span><input value={brief.title} maxLength={140} onChange={(event) => updateBrief({ title: event.target.value })} placeholder="Например, AI-агент для анализа обращений" /><small className="create-v2-field-help">Конкретное название лучше привлекает релевантных участников · {brief.title.length}/140</small></label>
-          <fieldset className="create-v2-choice-group wide"><legend>Тип задачи</legend><div className="task-type-picker">{[["R&D", "Проверить гипотезу", "01"], ["MVP", "Создать прототип", "02"], ["Исследование", "Разобраться в подходах", "03"]].map(([kind, description, number]) => <button key={kind} type="button" aria-pressed={brief.taskType === kind} className={brief.taskType === kind ? "active" : ""} onClick={() => updateBrief({ taskType: kind })}><span>{number}</span><b>{kind}</b><small>{description}</small></button>)}</div></fieldset>
-          <label>Подразделение<select value={brief.department} onChange={(event) => updateBrief({ department: event.target.value })}>{departments.map((entry) => <option key={entry} value={entry}>{entry}</option>)}</select></label>
-          <label>Направление<select value={brief.direction} onChange={(event) => updateBrief({ direction: event.target.value })}>{directions.map((entry) => <option key={entry} value={entry}>{entry}</option>)}</select></label>
-          <label className="wide">Проблема и цель <span className="required">*</span><textarea rows={4} value={brief.problem} onChange={(event) => updateBrief({ problem: event.target.value })} placeholder="Что сейчас не работает, почему это важно и какое изменение нужно получить?" /><small className="create-v2-field-help">Сформулируйте проблему, а не только перечень технологий</small></label>
-          <label className="wide">Ожидаемый результат <span className="required">*</span><textarea rows={4} value={brief.deliverable} onChange={(event) => updateBrief({ deliverable: event.target.value })} placeholder="Что нужно передать: код, API, демо, отчёт, инструкции, метрики?" /><small className="create-v2-field-help">Участник должен понимать, что именно нужно сдать</small></label>
+        <div className="create-v2-section-top">
+          <span className="create-v2-section-icon"><ClipboardCheck size={19} /></span>
+          <span className="create-v2-label">ЭТАП {step + 1} ИЗ 5</span>
+          <span className="create-v3-step-pill">Шаг {step + 1} из 5</span>
+        </div>
+        <div className="create-v2-section-heading">
+          <h2 id="create-v2-step-title">{["Основная информация", "Критерии и сроки", "Формат и данные", "Поддержка и коммуникации", "Проверка и публикация"][step]}</h2>
+          <p>{["Кратко опишите задачу, чтобы участники понимали контекст и цель", "Объясните, что нужно сдать и как будет проверяться результат", "Какие материалы доступны участникам и каковы ограничения", "Кто поможет участникам во время выполнения", "Проверьте задачу глазами участника перед публикацией"][step]}</p>
+        </div>
+        {step === 0 && <div className="create-fields create-v3-brief-fields">
+          <label className="wide">Название задачи <span className="required">*</span>
+            <input value={brief.title} maxLength={120} onChange={(event) => updateBrief({ title: event.target.value })} placeholder="Например, AI-агент для анализа обращений" />
+            <small className="create-v3-counter">{brief.title.length}/120</small>
+          </label>
+          <label className="wide">Краткое описание <span className="required">*</span>
+            <textarea rows={2} maxLength={300} value={brief.shortSummary} onChange={(event) => updateBrief({ shortSummary: event.target.value })} placeholder="Опишите задачу в 2–3 предложениях" />
+            <small className="create-v3-counter">{brief.shortSummary.length}/300</small>
+          </label>
+          <div className="wide create-v3-description">
+            <label htmlFor="create-v3-description">Подробное описание <span className="required">*</span></label>
+            <div className="create-v3-editor">
+              <div className="create-v3-toolbar" role="group" aria-label="Форматирование описания">
+                <button type="button" onClick={() => addFormatting("bullet")} title="Добавить маркированный список" aria-label="Добавить маркированный список"><List size={16} /></button>
+                <button type="button" onClick={() => addFormatting("number")} title="Добавить нумерованный список" aria-label="Добавить нумерованный список"><ListOrdered size={16} /></button>
+                <span>Поддерживаются списки и переносы строк</span>
+              </div>
+              <textarea id="create-v3-description" rows={5} maxLength={2000} value={brief.problem} onChange={(event) => updateBrief({ problem: event.target.value })} placeholder="Добавьте детали, контекст, текущие ограничения и ожидаемый эффект" />
+            </div>
+            <small className="create-v3-counter">{brief.problem.length}/2000</small>
+          </div>
+          <label>Категория <span className="required">*</span><select value={brief.taskType} onChange={(event) => updateBrief({ taskType: event.target.value })}>{["MVP", "R&D", "Исследование"].map((entry) => <option key={entry} value={entry}>{entry}</option>)}</select></label>
+          <label>Направление <span className="required">*</span><select value={brief.direction} onChange={(event) => updateBrief({ direction: event.target.value })}>{directions.map((entry) => <option key={entry} value={entry}>{entry}</option>)}</select></label>
+          <label className="wide">Подразделение <select value={brief.department} onChange={(event) => updateBrief({ department: event.target.value })}>{departments.map((entry) => <option key={entry} value={entry}>{entry}</option>)}</select></label>
+          <div className="wide create-v3-skills">
+            <label htmlFor="create-v3-skill-input">Ключевые навыки</label>
+            <div className="create-v3-skill-search"><Search size={16} /><input id="create-v3-skill-input" value={skillSearch} maxLength={36} onChange={(event) => setSkillSearch(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addSuggestedSkill(); } }} placeholder="Поиск или добавление навыка…" />{skillSearch.trim() && <button type="button" onClick={addSuggestedSkill} aria-label="Добавить навык"><Plus size={17} /></button>}</div>
+            <p>Рекомендуемые навыки</p>
+            <div className="create-v3-skill-chips" aria-label="Выберите навыки">{filteredSkills.slice(0, 9).map((skill) => <button type="button" key={skill} onClick={() => toggleSkill(skill)}><Plus size={13} /> {skill}</button>)}</div>
+            {brief.skills.length > 0 && <div className="create-v3-selected-skills" aria-label="Выбранные навыки">{brief.skills.map((skill) => <button type="button" key={skill} onClick={() => toggleSkill(skill)} aria-label={`Удалить навык ${skill}`}>{skill} <X size={13} /></button>)}</div>}
+          </div>
         </div>}
         {step === 1 && <div className="create-fields">
           <div className="create-v2-inline-note wide"><FileText size={18} /><span>Критерии должны позволять объективно проверить результат, а не оценивать только впечатление от презентации.</span></div>
-          <label className="wide">Критерии приёмки <span className="required">*</span><textarea rows={7} value={brief.criteria} onChange={(event) => updateBrief({ criteria: event.target.value })} placeholder={"Каждый критерий с новой строки. Например:\n• Рабочий прототип запускается по инструкции\n• Точность не ниже согласованного порога\n• Приложен отчёт об ошибках"} /><small className="create-v2-field-help">Один критерий — одна проверяемая характеристика. Укажите метрику и условия проверки, если они известны</small></label>
+          <label className="wide">Ожидаемый результат <span className="required">*</span><textarea rows={4} value={brief.deliverable} onChange={(event) => updateBrief({ deliverable: event.target.value })} placeholder="Что нужно передать: код, API, демо, отчёт, инструкции, метрики?" /><small className="create-v2-field-help">Укажите конечные артефакты, которые проверит заказчик</small></label>
+          <label className="wide">Критерии приёмки <span className="required">*</span><textarea rows={7} value={brief.criteria} onChange={(event) => updateBrief({ criteria: event.target.value })} placeholder={"Каждый критерий с новой строки. Например:\n• Рабочий прототип запускается по инструкции\n• Точность не ниже согласованного порога\n• Приложен отчёт об ошибках"} /><small className="create-v2-field-help">Один критерий — одна проверяемая характеристика</small></label>
           <label>Дедлайн <span className="required">*</span><input type="date" min={new Date().toISOString().slice(0, 10)} value={brief.deadline} onChange={(event) => updateBrief({ deadline: event.target.value })} /></label>
           <label>Количество мест <span className="required">*</span><input type="number" min="1" step="1" value={brief.places} onChange={(event) => updateBrief({ places: Number(event.target.value) })} /><small className="create-v2-field-help">Сколько участников может выполнять задачу</small></label>
         </div>}
