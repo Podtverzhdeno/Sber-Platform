@@ -142,7 +142,10 @@ describe("task catalog v2", () => {
     expect(document.querySelector(".catalog-v2-match-ring-value")).not.toBeNull();
     expect(screen.getAllByText(catalogItem.title).length).toBeGreaterThan(1);
     expect(screen.getAllByText(/R&D лаборатория · Демо-заказчик/).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Запланировано · Длительность не указана/)).toBeInTheDocument();
+    const stageState = document.querySelector(".catalog-v2-stage-state");
+    expect(stageState).not.toBeNull();
+    expect(stageState).toHaveTextContent(/Запланировано/);
+    expect(stageState).toHaveTextContent(/Длительность не указана/);
     expect(screen.getByText(catalogItem.match.source_snapshot_version)).toBeInTheDocument();
     expect(screen.getByText(/Алгоритм: task-match-v1 · расчёт:/)).toBeInTheDocument();
   });
@@ -381,7 +384,7 @@ describe("task catalog v2", () => {
     expect(workspace).toHaveAttribute("data-layout", "cards");
     expect(screen.getByRole("complementary", { name: "Предпросмотр рекомендованной задачи" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Этапы задачи" })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: "Выберите задачу" })).not.toBeInTheDocument();
+    expect(document.querySelector(".catalog-v2-stage-track")).not.toBeNull();
     const detailButton = screen.getAllByRole("button", { name: "Подробнее" })[0];
     if (detailButton === undefined) throw new Error("Detail button is missing");
     fireEvent.click(detailButton);
