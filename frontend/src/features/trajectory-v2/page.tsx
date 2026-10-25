@@ -125,10 +125,10 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const selectedKey = useMemo(() => {
     const paramRole = catalogueRoles.find((role) => role.track_key === roleParam);
     if (paramRole) return paramRole.track_key;
-    const outcomeKey = overview.next_outcome?.trajectory_key;
-    return outcomeKey !== undefined && catalogueRoles.some((role) => role.track_key === outcomeKey)
-      ? outcomeKey
-      : (catalogueRoles[0]?.track_key ?? null);
+    // Prefer the enrolled primary role. Catalogue order and stale next-outcome
+    // hints must not select an unrelated role whose level API is unavailable.
+    return primaryTrajectoryKey(overview)
+      ?? (catalogueRoles[0]?.track_key ?? null);
   }, [catalogueRoles, overview.next_outcome, roleParam]);
   const selected = catalogueRoles.find((role) => role.track_key === selectedKey) ?? null;
   const learningLevel = useQuery({
@@ -341,7 +341,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           <header><h3>Уровень Impulse</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => { gradeTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setGradesOpen(true); }}>Все уровни →</button></header>
           <div className="trajectory-v2-grade-body">
             <div className="trajectory-v2-grade-ring" style={{background:`conic-gradient(#0de5d6 0 ${String(roleLevel ? levelCoursesProgress(roleLevel) : 0)}%, #204a68 ${String(roleLevel ? levelCoursesProgress(roleLevel) : 0)}% 100%)`}}>
-              <strong data-testid="trajectory-impulse-level">{roleLevel ? `L${String(roleLevel.level)}` : "—"}</strong>
+              <strong data-testid="trajectory-impulse-level">{roleLevel ? `L${String(roleLevel.level)}` : learningLevel.isPending ? "…" : "—"}</strong>
               <small>{roleLevel ? `Цикл ${String(roleLevel.cycle_number)}` : "Загрузка"}</small>
             </div>
             <div className="trajectory-v2-grade-progress">
@@ -355,6 +355,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 : roleLevel ? "Требования следующего цикла ещё не опубликованы" : "Проверяем сохранённый уровень"}</small>
             </div>
           </div>
+          {learningLevel.isError && selected?.attempt_number !== null && <p role="alert" className="trajectory-v2-level-error">Не удалось загрузить уровень Impulse. <button type="button" onClick={() => { void learningLevel.refetch(); }}>Повторить</button></p>}
           <div className="trajectory-v2-grade-callout"><span aria-hidden="true" className="trajectory-v2-grade-callout-icon">⌁</span>
             <span>{roleLevel?.advance_ready
               ? "Учебные курсы и практика подтверждены. Перейди в Bootcamp и нажми «Следующий этап» для сохранения L1."
