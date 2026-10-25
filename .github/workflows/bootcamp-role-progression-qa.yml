@@ -37,8 +37,6 @@ jobs:
         run: npm ci
       - name: Lint role projection
         run: npx eslint src/features/bootcamp/catalog.tsx src/features/bootcamp/role-study-progression.ts src/features/bootcamp/role-study-progression.test.ts e2e/bootcamp-role-progression.spec.ts --max-warnings 0
-      - name: Typecheck frontend
-        run: npm run typecheck
       - name: Unit checks for study evidence
         run: npx vitest run src/features/bootcamp/role-study-progression.test.ts
       - name: Install Chromium
@@ -48,6 +46,8 @@ jobs:
           CI: "true"
           TZ: Europe/Moscow
         run: npx playwright test bootcamp-role-progression.spec.ts --project=chromium --reporter=line
+      - name: Typecheck frontend
+        run: npm run typecheck
       - name: Save browser screenshots and error traces
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
