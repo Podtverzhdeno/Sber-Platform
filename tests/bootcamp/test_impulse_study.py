@@ -95,15 +95,19 @@ def test_study_progress_requires_order_and_practice_requires_review(
     async def qualification_evidence() -> list[dict[str, str]]:
         async with database.sessions() as db:
             rows = (
-                await db.execute(
-                    text(
-                        "SELECT source_ref, local_date FROM qualification_events "
-                        "WHERE person_id = :person AND source = 'course_learning' "
-                        "ORDER BY source_ref"
-                    ),
-                    {"person": learner},
+                (
+                    await db.execute(
+                        text(
+                            "SELECT source_ref, local_date FROM qualification_events "
+                            "WHERE person_id = :person AND source = 'course_learning' "
+                            "ORDER BY source_ref"
+                        ),
+                        {"person": learner},
+                    )
                 )
-            ).mappings().all()
+                .mappings()
+                .all()
+            )
         return [
             {"source_ref": str(row["source_ref"]), "local_date": row["local_date"].isoformat()}
             for row in rows
