@@ -68,6 +68,9 @@ for (const viewport of [{ width: 1448, height: 1086 }, { width: 390, height: 844
     await launch.click();
     const lesson = dialog.locator(".bc-learning__body");
     await expect(lesson).toBeVisible();
+    // The CTA must actually reveal learning material, not leave it below the fold.
+    await expect.poll(() => lesson.evaluate(element => element.getBoundingClientRect().top))
+      .toBeLessThan(180);
     await expect(dialog.getByRole("navigation", { name: "Шаги обучения" }).getByRole("button")).toHaveCount(8);
     const dimensions = await dialog.evaluate(element => {
       const box = element.getBoundingClientRect();
