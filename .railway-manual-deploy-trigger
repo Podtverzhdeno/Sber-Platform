@@ -6,3 +6,6 @@ release_request=2026-10-25-sidebar-unification-87ede9f
 
 # Projects: ensure quick preview is genuinely collapsible while first card remains highlighted
 release_request=2026-10-25-projects-quickview-65e985a
+
+# My Projects final acceptance after events type cleanup
+release_request=2026-10-25-projects-qa-fix-921a938
