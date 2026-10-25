@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "../api/client";
 import { learningSummaryQueryKey, loadLearningSummary } from "./learning-progress";
+import { confirmedPassportSkills, numericPassportLevel, passportEvidenceMax } from "./portfolio-skill-model";
 import "./portfolio-v2.scss";
 
 type Contribution = {
@@ -89,25 +90,45 @@ function MiniArt({ index, demo }: { index: number; demo: boolean }) {
   </div>;
 }
 function Radar({ skills }: { skills: Passport["skills"] }) {
-  const values = Array.from({ length: 5 }, (_, i) => {
-    const item = skills[i];
-    const raw = item?.practical_level.match(/[1-5]/)?.[0];
-    return raw ? Math.min(5, Math.max(1, Number(raw))) : 0;
-  });
-  const pt = (index: number, scale: number) => {
-    const theta = -Math.PI / 2 + index * Math.PI * 2 / 5;
-    return [120 + Math.cos(theta) * 77 * scale, 100 + Math.sin(theta) * 77 * scale].join(",");
+  const confirmed = confirmedPassportSkills(skills);
+  const measured = confirmed.filter(skill => numericPassportLevel(skill.practical_level) !== null).slice(0, 6);
+
+  // A radial polygon needs 3 or more separately assessed dimensions.
+  // Do not draw imaginary zero-valued axes for an unassessed qualitative level.
+  if (measured.length < 3) {
+    const maxCases = passportEvidenceMax(confirmed);
+    return <div className="p2-evidence-chart" data-testid="passport-evidence-chart" role="img"
+      aria-label={"Проверенные практические кейсы: " + (confirmed.length ? confirmed.map(skill => skill.key + " — " + String(skill.confirmed_case_count)).join("; ") : "нет подтверждений")}>
+      <strong>Проверено на практике</strong>
+      {confirmed.slice(0, 4).map((skill, index) => <div className="p2-evidence-bar" key={skill.key}>
+        <span>{String(index + 1).padStart(2, "0")}</span>
+        <i><b style={{ width: String(skill.confirmed_case_count / maxCases * 100) + "%" }}/></i>
+        <em>{skill.confirmed_case_count}</em>
+      </div>)}
+      <small>{confirmed.length ? "Принятые кейсы · не оценка уровня" : "Данные появятся после проверки кейсов"}</small>
+    </div>;
+  }
+
+  const count = measured.length;
+  const point = (index: number, scale: number) => {
+    const angle = -Math.PI / 2 + index * Math.PI * 2 / count;
+    return [120 + Math.cos(angle) * 75 * scale, 100 + Math.sin(angle) * 75 * scale].join(",");
   };
-  const labels = skills.slice(0, 5).map(s => s.key);
-  return <svg className="p2-radar" viewBox="0 0 240 204" role="img" aria-label="Радар подтверждённых навыков">
-    {[.25,.5,.75,1].map(s => <polygon key={s} points={Array.from({length:5},(_,i)=>pt(i,s)).join(" ")} fill="none" stroke="#204d66" strokeWidth="1.2"/>)}
-    {Array.from({length:5},(_,i)=><line key={i} x1="120" y1="100" x2={pt(i,1).split(",")[0]} y2={pt(i,1).split(",")[1]} stroke="#204d66"/>)}
-    <polygon points={values.map((v,i)=>pt(i,v / 5)).join(" ")} fill="#09dec0" fillOpacity=".26" stroke="#22f3dc" strokeWidth="2"/>
-    {values.map((v,i)=><circle key={i} cx={Number(pt(i,v/5).split(",")[0])} cy={Number(pt(i,v/5).split(",")[1])} r="3.4" fill="#1df0e5"/>)}
-    {Array.from({length:5},(_,i)=> {
-      const x=120+Math.cos(-Math.PI/2+i*Math.PI*2/5)*103;
-      const y=100+Math.sin(-Math.PI/2+i*Math.PI*2/5)*95;
-      return <text key={i} x={x} y={y} textAnchor="middle" dominantBaseline="middle" fill="#9cbcd3" fontSize="10">{labels[i] ? labels[i].slice(0,15) : "—"}</text>;
+  const points = (levels: number[]) => levels.map((level, index) => point(index, level / 5)).join(" ");
+  const values = measured.map(skill => numericPassportLevel(skill.practical_level) ?? 0);
+  return <svg className="p2-radar" viewBox="0 0 240 204" role="img"
+    data-testid="passport-skill-radar"
+    aria-label={"Радар измеренных уровней по шкале 1–5: " + measured.map((skill, index) => skill.key + " — " + String(values[index])).join("; ")}>
+    {[1, 2, 3, 4, 5].map(level => <polygon key={level} points={points(measured.map(() => level))}
+      fill="none" stroke="#204d66" strokeWidth="1.1" />)}
+    {measured.map((skill, i) => {
+      const [x, y] = point(i, 1).split(",").map(Number);
+      return <line key={skill.key} x1="120" y1="100" x2={x} y2={y} stroke="#204d66"/>;
+    })}
+    <polygon points={points(values)} fill="#09dec0" fillOpacity=".26" stroke="#22f3dc" strokeWidth="2.2"/>
+    {values.map((value, i) => {
+      const [x, y] = point(i, value / 5).split(",").map(Number);
+      return <circle key={measured[i]?.key ?? i} cx={x} cy={y} r="4" fill="#1df0e5"/>;
     })}
   </svg>;
 }
@@ -160,7 +181,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
   const portfolio = profileQuery.data ?? demoPortfolio;
   const contributions = portfolio.contributions;
   const verifiedProjects = contributions.filter(isAccepted);
-  const skills = passportQuery.data?.skills ?? [];
+  const skills = confirmedPassportSkills(passportQuery.data?.skills ?? []);
   const credentials = portfolio.credentials;
   const certificates = credentials.filter(i => i.credential_type === "course");
   const studyCertificates = (learningQuery.data?.courses ?? []).filter(course => course.finished && course.certificate_id !== null);
@@ -207,7 +228,7 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
       </div>
       <div className="p2-metrics">
         <Metric Icon={FolderKanban} count={verifiedProjects.length} label="Принятых проектов"/>
-        <Metric Icon={Users} count={passportQuery.isError ? "—" : skills.filter(s => s.confirmed_case_count > 0).length} label="Подтверждённых навыков"/>
+        <Metric Icon={Users} count={passportQuery.isPending || passportQuery.isError ? "—" : skills.length} label="Подтверждённых навыков"/>
         <Metric Icon={FileBadge2} count={certificates.length + studyCertificates.length} label="Сертификатов обучения"/>
         <Metric Icon={Trophy} count={trophies.length} label="Достижений"/>
         <Metric Icon={Star} count={grade} label="Средняя оценка"/>
@@ -226,12 +247,33 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
         </section>}
         {showPassport && <section className="p2-panel p2-passport-panel" aria-label="Skill Passport">
           <PanelHeading icon={BarChart3} title="SKILL PASSPORT" action={tab==="overview"?"Открыть":"Подробнее в аналитике"} onAction={()=>{ if(tab==="overview") openTab("passport"); else navigateTo(["Аналитика"], "?analyticsTab=passport"); }}/>
-          <div className="p2-passport-body"><div className="p2-radar-wrap"><Radar skills={skills}/></div><div className="p2-skill-levels"><h3>Уровень компетенций</h3>{skills.slice(0,5).map((s)=>{
-            const m=s.practical_level.match(/[1-5]/);
-            const level=m ? Math.min(5,Number(m[0])) : null;
-            return <div className="p2-skill-level" key={s.key}><span>{s.key}</span><i><b style={{width:level?String(level*20)+"%":"0%"}}/></i><em>{level?String(level)+"/5":"—"}</em></div>;
-          })}{skills.length===0 && <p className="p2-inline-empty">Подтверждённые компетенции появятся после оценки кейсов.</p>}</div></div>
-          <div className="p2-passport-footer"><div className="p2-passport-count"><Award size={19}/><strong>{skills.filter(s=>s.confirmed_case_count>0).length}</strong><small>практически подтверждённых навыков</small></div><button className="p2-primary" type="button" onClick={()=>{ navigateTo(["Аналитика"], "?analyticsTab=passport"); }}>Открыть Skill Passport <ArrowRight size={15}/></button></div>
+          {passportQuery.isPending ? <div className="p2-passport-state" role="status">Загружаем подтверждённые навыки и проверенные кейсы…</div>
+          : passportQuery.isError ? <div className="p2-passport-state" role="alert">Данные Skill Passport не получены. <button type="button" onClick={() => { void passportQuery.refetch(); }}>Повторить</button></div>
+          : <>
+            <div className="p2-passport-body">
+              <div className="p2-radar-wrap"><Radar skills={skills}/></div>
+              <div className="p2-skill-levels">
+                <h3>{skills.filter(s => numericPassportLevel(s.practical_level) !== null).length >= 3 ? "Измеренные уровни" : "Подтверждённая практика"}</h3>
+                {skills.slice(0, 5).map(skill => {
+                  const level = numericPassportLevel(skill.practical_level);
+                  const ratio = level === null ? skill.confirmed_case_count / passportEvidenceMax(skills) : level / 5;
+                  return <div className="p2-skill-level" key={skill.key}
+                    title={skill.key + ": " + (level === null ? String(skill.confirmed_case_count) + " подтверждённых кейсов" : "уровень " + String(level) + "/5")}>
+                    <span>{skill.key}</span>
+                    <i><b style={{width:String(ratio * 100) + "%"}}/></i>
+                    <em>{level === null ? String(skill.confirmed_case_count) : String(level) + "/5"}</em>
+                  </div>;
+                })}
+                {skills.length > 5 && <small className="p2-skill-extra">Ещё {skills.length - 5} навыков в полном паспорте</small>}
+                {skills.length === 0 && <p className="p2-inline-empty">Практические навыки появятся после проверки кейсов.</p>}
+                {skills.length > 0 && <small className="p2-skill-extra">Число кейсов не означает уровень компетенции</small>}
+              </div>
+            </div>
+            <div className="p2-passport-footer">
+              <div className="p2-passport-count"><Award size={19}/><strong>{skills.length}</strong><small>практически подтверждённых навыков</small></div>
+              <button className="p2-primary" type="button" onClick={()=>{ navigateTo(["Аналитика"], "?analyticsTab=passport"); }}>Открыть Skill Passport <ArrowRight size={15}/></button>
+            </div>
+          </>}
         </section>}
         {showCerts && <section className="p2-panel p2-certs-panel" aria-label="Сертификация">
           <PanelHeading icon={FileBadge2} title="СЕРТИФИКАЦИЯ" action={tab==="overview"?"Все сертификаты":"Перейти в аналитику"} onAction={()=>{ if(tab==="overview") openTab("certification"); else navigateTo(["Аналитика"], "?analyticsTab=certification"); }}/>
