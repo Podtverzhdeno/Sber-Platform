@@ -31,12 +31,12 @@ test("Bootcamp navigation, overview panels and catalog never overlap", async ({ 
 
     const firstPanelTop = Math.min(geometry.continue.top, geometry.right.top);
     const panelsBottom = Math.max(geometry.continue.bottom, geometry.right.bottom);
-    expect(geometry.tabs.bottom, `role tabs overlap overview at ${width}px`).toBeLessThanOrEqual(firstPanelTop + 2);
-    expect(geometry.category.top, `catalog overlaps overview at ${width}px`).toBeGreaterThanOrEqual(panelsBottom + 8);
+    expect(geometry.tabs.bottom, `role tabs overlap overview at ${String(width)}px`).toBeLessThanOrEqual(firstPanelTop + 2);
+    expect(geometry.category.top, `catalog overlaps overview at ${String(width)}px`).toBeGreaterThanOrEqual(panelsBottom + 8);
     if (width >= 1121) {
-      expect(Math.abs(geometry.right.top - geometry.continue.top), `columns misaligned at ${width}px`).toBeLessThanOrEqual(2);
+      expect(Math.abs(geometry.right.top - geometry.continue.top), `columns misaligned at ${String(width)}px`).toBeLessThanOrEqual(2);
     } else {
-      expect(geometry.right.top, `stacked panels overlap at ${width}px`).toBeGreaterThanOrEqual(geometry.continue.bottom + 2);
+      expect(geometry.right.top, `stacked panels overlap at ${String(width)}px`).toBeGreaterThanOrEqual(geometry.continue.bottom + 2);
     }
   }
 });
