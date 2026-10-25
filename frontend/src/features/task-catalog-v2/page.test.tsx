@@ -49,7 +49,7 @@ function defaultFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Res
   return Promise.resolve(json({ code: "NOT_FOUND", message: "Not found" }, 404));
 }
 
-function renderCatalog(initialEntry = "/workspace/2") {
+function renderCatalog(initialEntry = "/workspace/2?catalog_view=cards") {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
@@ -78,6 +78,16 @@ afterAll(() => {
 });
 
 describe("task catalog v2", () => {
+  it("defaults to a list and still supports explicit card layout", async () => {
+    renderCatalog("/workspace/2");
+    expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
+    expect(document.querySelector(".catalog-v2-results--list")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Список" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Карточки" }));
+    expect(screen.getByRole("button", { name: "Карточки" })).toHaveAttribute("aria-pressed", "true");
+    expect(document.querySelector(".catalog-v2-results--cards")).not.toBeNull();
+  });
+
   it("renders authoritative match and insufficient-data states without a fake zero", async () => {
     renderCatalog();
     expect((await screen.findAllByText(catalogItem.title)).length).toBeGreaterThan(0);
