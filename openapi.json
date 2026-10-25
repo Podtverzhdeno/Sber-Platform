@@ -4,7 +4,7 @@
       "AcceptApplicationRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           }
@@ -18,7 +18,7 @@
       "AcceptTermsRequest": {
         "properties": {
           "terms_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Terms Version",
             "type": "integer"
           }
@@ -365,25 +365,6 @@
         "title": "ActorView",
         "type": "object"
       },
-      "AddCommunityMembersRequest": {
-        "properties": {
-          "person_ids": {
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "maxItems": 24,
-            "minItems": 1,
-            "title": "Person Ids",
-            "type": "array"
-          }
-        },
-        "required": [
-          "person_ids"
-        ],
-        "title": "AddCommunityMembersRequest",
-        "type": "object"
-      },
       "AppealStatus": {
         "enum": [
           "open",
@@ -408,7 +389,7 @@
           "points": {
             "anyOf": [
               {
-                "exclusiveMinimum": 0,
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               },
               {
@@ -783,7 +764,7 @@
           },
           "draft_version": {
             "default": 1,
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Draft Version",
             "type": "integer"
           },
@@ -1584,7 +1565,7 @@
           },
           "version": {
             "default": 1,
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Version",
             "type": "integer"
           }
@@ -1758,7 +1739,7 @@
           "terms_version": {
             "anyOf": [
               {
-                "minimum": 1,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -2494,8 +2475,8 @@
           "estimated_minutes": {
             "anyOf": [
               {
-                "maximum": 100000,
-                "minimum": 1,
+                "maximum": 100000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -2958,7 +2939,7 @@
             "type": "string"
           },
           "minimum_size": {
-            "minimum": 2,
+            "minimum": 2.0,
             "title": "Minimum Size",
             "type": "integer"
           },
@@ -3046,7 +3027,7 @@
             "type": "string"
           },
           "policy_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Policy Version",
             "type": "integer"
           },
@@ -4670,8 +4651,8 @@
           },
           "places": {
             "default": 1,
-            "maximum": 100,
-            "minimum": 1,
+            "maximum": 100.0,
+            "minimum": 1.0,
             "title": "Places",
             "type": "integer"
           },
@@ -5192,7 +5173,7 @@
       "DeadlineChangeProposal": {
         "properties": {
           "base_terms_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Base Terms Version",
             "type": "integer"
           },
@@ -5334,7 +5315,7 @@
       "DecisionCommand": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           },
@@ -5449,7 +5430,7 @@
       "DemoReversalRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           },
@@ -5470,7 +5451,7 @@
       "DemoSettlementRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           },
@@ -5686,12 +5667,12 @@
             "type": "string"
           },
           "place_from": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Place From",
             "type": "integer"
           },
           "place_to": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Place To",
             "type": "integer"
           },
@@ -6339,8 +6320,8 @@
       "FeedbackRequest": {
         "properties": {
           "rating": {
-            "maximum": 1,
-            "minimum": -1,
+            "maximum": 1.0,
+            "minimum": -1.0,
             "title": "Rating",
             "type": "integer"
           }
@@ -6766,7 +6747,7 @@
         "description": "Participation is distinct from provider-verified competency evidence.",
         "properties": {
           "completed_units": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Completed Units",
             "type": "integer"
           },
@@ -6818,7 +6799,7 @@
             "type": "string"
           },
           "total_units": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Total Units",
             "type": "integer"
           },
@@ -6845,12 +6826,12 @@
       "ImpulseStudySummary": {
         "properties": {
           "approved_practices": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Approved Practices",
             "type": "integer"
           },
           "completed_lessons": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Completed Lessons",
             "type": "integer"
           },
@@ -6862,12 +6843,12 @@
             "type": "array"
           },
           "finished_courses": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Finished Courses",
             "type": "integer"
           },
           "started_courses": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Started Courses",
             "type": "integer"
           }
@@ -6897,8 +6878,8 @@
             "title": "Certificate Id"
           },
           "completed_units": {
-            "maximum": 8,
-            "minimum": 0,
+            "maximum": 8.0,
+            "minimum": 0.0,
             "title": "Completed Units",
             "type": "integer"
           },
@@ -8456,7 +8437,7 @@
       "OpenReviewAppealRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           },
@@ -8477,7 +8458,7 @@
       "OpenSeasonRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           }
@@ -9927,8 +9908,8 @@
       "PublishPolicyRequest": {
         "properties": {
           "appeal_period_days": {
-            "maximum": 365,
-            "minimum": 1,
+            "maximum": 365.0,
+            "minimum": 1.0,
             "title": "Appeal Period Days",
             "type": "integer"
           },
@@ -9945,7 +9926,7 @@
             "type": "array"
           },
           "expected_season_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Season Version",
             "type": "integer"
           },
@@ -10390,12 +10371,12 @@
             "title": "Assessments"
           },
           "expected_appeal_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Appeal Version",
             "type": "integer"
           },
           "expected_review_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Review Version",
             "type": "integer"
           },
@@ -10681,7 +10662,7 @@
       "ReviewTransitionRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           }
@@ -11305,7 +11286,7 @@
           "cap": {
             "anyOf": [
               {
-                "exclusiveMinimum": 0,
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               },
               {
@@ -11330,7 +11311,7 @@
           "weight": {
             "anyOf": [
               {
-                "exclusiveMinimum": 0,
+                "exclusiveMinimum": 0.0,
                 "type": "number"
               },
               {
@@ -11517,7 +11498,7 @@
       "SeasonTransitionRequest": {
         "properties": {
           "expected_version": {
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Expected Version",
             "type": "integer"
           }
@@ -12531,8 +12512,8 @@
           "duration_minutes": {
             "anyOf": [
               {
-                "maximum": 100000,
-                "minimum": 1,
+                "maximum": 100000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -12579,8 +12560,8 @@
           "weekly_workload_minutes": {
             "anyOf": [
               {
-                "maximum": 10000,
-                "minimum": 1,
+                "maximum": 10000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -13066,6 +13047,48 @@
           "theme"
         ],
         "title": "ThemeUpdateRequest",
+        "type": "object"
+      },
+      "ThreadSummaryView": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "message_count": {
+            "title": "Message Count",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "title",
+          "updated_at",
+          "message_count"
+        ],
+        "title": "ThreadSummaryView",
         "type": "object"
       },
       "ThreadView": {
@@ -13761,14 +13784,14 @@
             "type": "string"
           },
           "reminder_hour": {
-            "maximum": 23,
-            "minimum": 0,
+            "maximum": 23.0,
+            "minimum": 0.0,
             "title": "Reminder Hour",
             "type": "integer"
           },
           "reminder_window_hours": {
-            "maximum": 6,
-            "minimum": 1,
+            "maximum": 6.0,
+            "minimum": 1.0,
             "title": "Reminder Window Hours",
             "type": "integer"
           }
@@ -14080,8 +14103,8 @@
           "estimated_hours": {
             "anyOf": [
               {
-                "maximum": 80,
-                "minimum": 1,
+                "maximum": 80.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -14505,6 +14528,25 @@
       }
     },
     "/api/v1/agents/buddy/threads": {
+      "get": {
+        "operationId": "list_threads_api_v1_agents_buddy_threads_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThreadSummaryView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Threads",
+        "tags": [
+          "buddy"
+        ]
+      },
       "post": {
         "operationId": "create_thread_api_v1_agents_buddy_threads_post",
         "parameters": [
@@ -14824,6 +14866,75 @@
           }
         },
         "summary": "Add Message",
+        "tags": [
+          "buddy"
+        ]
+      }
+    },
+    "/api/v1/agents/buddy/threads/{thread_id}/reply": {
+      "post": {
+        "operationId": "reply_to_thread_api_v1_agents_buddy_threads__thread_id__reply_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "thread_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Thread Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ThreadView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reply To Thread",
         "tags": [
           "buddy"
         ]
@@ -15162,25 +15273,6 @@
         "summary": "Verify Credential"
       }
     },
-    "/api/v1/customer/analytics/activity": {
-      "get": {
-        "description": "Real project activity; data is restricted to the authenticated customer's tasks.",
-        "operationId": "customer_analytics_activity_api_v1_customer_analytics_activity_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomerActivityView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Customer Analytics Activity"
-      }
-    },
     "/api/v1/customer/applications/{application_id}/accept": {
       "post": {
         "operationId": "accept_candidate_api_v1_customer_applications__application_id__accept_post",
@@ -15245,6 +15337,25 @@
           }
         },
         "summary": "Accept Candidate"
+      }
+    },
+    "/api/v1/customer/analytics/activity": {
+      "get": {
+        "description": "Real project activity; data is restricted to the authenticated customer's tasks.",
+        "operationId": "customer_analytics_activity_api_v1_customer_analytics_activity_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerActivityView"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Customer Analytics Activity"
       }
     },
     "/api/v1/customer/cases": {
@@ -19186,72 +19297,6 @@
           }
         },
         "summary": "Channel Context"
-      }
-    },
-    "/api/v1/me/messaging/channels/{channel_id}/members": {
-      "post": {
-        "operationId": "add_community_members_api_v1_me_messaging_channels__channel_id__members_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "channel_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Channel Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-CSRF-Token",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "X-Csrf-Token"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddCommunityMembersRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChannelView"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Add Community Members"
       }
     },
     "/api/v1/me/messaging/channels/{channel_id}/messages": {

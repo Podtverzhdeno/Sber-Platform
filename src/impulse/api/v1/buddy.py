@@ -3,15 +3,25 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime
 from collections.abc import AsyncIterator
 from typing import Annotated, Literal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from pydantic import AwareDatetime, BaseModel, Field
 
 from impulse.api.v1.identity import csrf_session, current_session
+from impulse.api.errors import ApiError
+from impulse.ai.buddy.tools import BuddyToolbox
+from impulse.ai.gateway import (
+    ModelMessage,
+    ModelPurpose,
+    ModelOutputKind,
+    OpenRouterGateway,
+    ModelGatewayError,
+)
 from impulse.application.buddy import (
     BuddyConversationService,
     BuddyMessage,
@@ -75,6 +85,145 @@ def _message_view(message: BuddyMessage) -> MessageView:
         role=message.role,
         content=message.content,
     )
+
+
+class ThreadSummaryView(BaseModel):
+    id: UUID
+    status: str
+    title: str
+    updated_at: AwareDatetime | None
+    message_count: int
+
+
+@router.get("/threads", response_model=list[ThreadSummaryView])
+async def list_threads(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[BuddyConversationService, Depends(_service)],
+) -> list[ThreadSummaryView]:
+    threads = await service.list_threads(authenticated.actor)
+    results = [
+        ThreadSummaryView(
+            id=thread.id,
+            status=thread.status,
+            title=next(
+                (msg.content[:52] for msg in thread.messages if msg.role == "user"),
+                "Новый диалог",
+            ),
+            updated_at=thread.messages[-1].created_at if thread.messages else None,
+            message_count=len(thread.messages),
+        )
+        for thread in threads
+        if thread.status == "active"
+    ]
+    return sorted(
+        results,
+        key=lambda item: item.updated_at.isoformat() if item.updated_at else "",
+        reverse=True,
+    )
+
+
+@router.post("/threads/{thread_id}/reply", response_model=ThreadView)
+async def reply_to_thread(
+    thread_id: UUID,
+    body: MessageRequest,
+    request: Request,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[BuddyConversationService, Depends(_service)],
+) -> ThreadView:
+    """One bounded request to a server-side, free-only OpenRouter model."""
+    settings = request.app.state.settings
+    profile = await request.app.state.auth_service.participant_profile(authenticated)
+    if not profile.buddy_enabled:
+        raise ApiError("AI_BUDDY_DISABLED", "AI-Buddy выключен в настройках профиля.", 403)
+    if not settings.ai_buddy_enabled or settings.openrouter_api_key is None:
+        raise ApiError(
+            "MODEL_UNAVAILABLE", "AI-Buddy не подключён. Настройте OpenRouter на сервере.", 503
+        )
+    thread = await service.thread(authenticated.actor, thread_id)
+    if thread.status != "active":
+        raise ApiError("THREAD_NOT_ACTIVE", "Диалог закрыт.", 409)
+    existing_reply = next(
+        (
+            message
+            for message in thread.messages
+            if message.client_message_id == "reply:" + body.client_message_id
+        ),
+        None,
+    )
+    if existing_reply is not None:
+        return _thread_view(thread)
+    recent_messages = [
+        message
+        for saved in await service.list_threads(authenticated.actor)
+        for message in saved.messages
+        if message.role == "assistant"
+        and message.created_at.astimezone(UTC).date() == datetime.now(UTC).date()
+    ]
+    if len(recent_messages) >= settings.ai_max_requests_per_user_day:
+        raise ApiError("AGENT_BUDGET_EXCEEDED", "Лимит ответов AI-Buddy на сегодня достигнут.", 429)
+    if len(thread.messages) > 100:
+        raise ApiError("AGENT_BUDGET_EXCEEDED", "Лимит сообщений в диалоге достигнут.", 429)
+    user_message = await service.add_message(
+        authenticated.actor,
+        thread_id,
+        client_message_id=body.client_message_id,
+        content=body.content,
+    )
+    toolbox = BuddyToolbox(
+        request.app.state.development_service,
+        request.app.state.work_service,
+        max_items=6,
+    )
+    roadmap = await toolbox.roadmap(authenticated.actor)
+    tasks = await toolbox.own_work(authenticated.actor)
+    evidence = [*roadmap, *tasks]
+    facts = "\n".join(
+        f"[{item.source_ref}] " + "; ".join(item.facts[:7]) for item in evidence[:12]
+    )[:6000]
+    history = [
+        ModelMessage("assistant" if msg.role == "assistant" else "user", msg.content[:1800])
+        for msg in thread.messages[-10:]
+    ]
+    if not any(msg.client_message_id == user_message.client_message_id for msg in thread.messages):
+        history.append(ModelMessage("user", body.content))
+    system_prompt = (
+        "Ты AI-Buddy платформы Impulse, полезный русскоязычный наставник по "
+        "программированию и проектам. Давай содержательные, конкретные советы; "
+        "объясняй пошагово. Используй только проверяемые факты о пользователе из "
+        "КОНТЕКСТА; если их нет — прямо скажи. Никогда не выдумывай завершение "
+        "курса, статус задачи, ссылки, документы, оценки или гарантированные награды. "
+        "Не принимай решений за ментора. Не раскрывай персональные данные. "
+        "Безопасные разделы платформы: /workspace/2 (Bootcamp), /workspace/3 "
+        "(задачи), /workspace/8 (аналитика), /workspace/7 (портфолио). "
+        "Для переходов называй название раздела, интерфейс отобразит реальные кнопки. "
+        "КОНТЕКСТ (только чтение):\n" + (facts or "Данные пока недоступны.")
+    )
+    gateway = OpenRouterGateway(
+        api_key=settings.openrouter_api_key,
+        model_id=settings.openrouter_model_buddy,
+        policy_version="buddy-chat-v1",
+        timeout_seconds=int(settings.ai_timeout_seconds),
+        max_tokens=1200,
+    )
+    try:
+        result = await gateway.invoke(
+            ModelPurpose.BUDDY,
+            (ModelMessage("system", system_prompt), *history),
+            correlation_id=str(uuid4()),
+        )
+    except ModelGatewayError as error:
+        raise ApiError(
+            "MODEL_UNAVAILABLE", "Модель временно недоступна. Повторите запрос.", 503
+        ) from error
+    if result.kind is not ModelOutputKind.TEXT or not result.text or not result.text.strip():
+        raise ApiError("MODEL_OUTPUT_MALFORMED", "Модель не вернула текстовый ответ.", 502)
+    await service.add_assistant_message(
+        authenticated.actor,
+        thread_id,
+        client_message_id="reply:" + body.client_message_id,
+        content=result.text[:8000],
+    )
+    return _thread_view(await service.thread(authenticated.actor, thread_id))
 
 
 @router.post("/threads", response_model=ThreadView, status_code=201)

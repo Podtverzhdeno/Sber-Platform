@@ -74,6 +74,25 @@ class SqlBuddyStorage(BuddyStorage):
             content_deleted=thread_row.content_deleted,
         )
 
+    async def list_threads(self, owner_id: UUID) -> tuple[BuddyThread, ...]:
+        async with self._database.session() as session:
+            ids = (
+                (
+                    await session.execute(
+                        select(buddy_threads.c.id)
+                        .where(
+                            buddy_threads.c.owner_id == owner_id,
+                            buddy_threads.c.content_deleted.is_(False),
+                        )
+                        .order_by(buddy_threads.c.id.desc())
+                        .limit(40)
+                    )
+                )
+                .scalars()
+                .all()
+            )
+        return tuple([await self.load_thread(owner_id, thread_id) for thread_id in ids])
+
     async def append_message(
         self,
         thread_id: UUID,
