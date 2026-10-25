@@ -160,3 +160,38 @@ test("course reader fills viewport and lesson navigation never clips", async ({ 
   await dialog.getByRole("button", { name: "Закрыть" }).click();
   await expect(dialog).toHaveCount(0);
 });
+
+
+test("mobile fullscreen reader keeps lesson controls usable", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("button", { name: "Меню", exact: true }).click();
+  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await page.getByTestId("course-agent-development").getByRole("button", { name: "Подробнее →" }).click();
+  const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("tab", { name: "Программа" }).click();
+  await expect(dialog.locator(".bc-learning__body")).toBeVisible();
+  const dimensions = await dialog.evaluate(node => {
+    const rect = node.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  });
+  expect(dimensions.x).toBe(0);
+  expect(dimensions.y).toBe(0);
+  expect(dimensions.width).toBe(390);
+  expect(dimensions.height).toBe(844);
+  const next = dialog.getByRole("button", { name: "Следующий урок" });
+  await next.scrollIntoViewIfNeeded();
+  await expect(next).toBeEnabled();
+  const bounds = await next.boundingBox();
+  expect(bounds).not.toBeNull();
+  if (bounds) {
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(391);
+  }
+  await next.click();
+  await expect(dialog.locator(".bc-learning__eyebrow").filter({ hasText: "Урок 2 из" })).toBeVisible();
+  await dialog.getByRole("button", { name: "Закрыть" }).click();
+  await expect(dialog).toHaveCount(0);
+});
