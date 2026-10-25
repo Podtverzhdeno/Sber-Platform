@@ -254,4 +254,6 @@
 .mpd-metric:has(.mpd-progress-ring)>div:last-child{gap:4px}
 .mpd-metric:has(.mpd-progress-ring)>div:last-child b{font-size:14px;line-height:1.25}
 @media(max-width:1350px){.mpd-metric-progress{width:57px;height:57px}.mpd-progress-ring{width:56px;height:56px}.mpd-progress-ring::before{inset:8px}.mpd-progress-ring>span{font-size:13px}}
-\n/* Stage strip in the approved desktop screenshot occupies a full visual row. */\n@media(min-width:1500px){.mpd-page .mpd-stages{min-height:193px}}\n
+
+/* Stage strip in the approved desktop screenshot occupies a full visual row. */
+@media(min-width:1500px){.mpd-page .mpd-stages{min-height:193px}}
