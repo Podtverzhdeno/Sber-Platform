@@ -7,6 +7,7 @@ import type { components } from "../../api/schema";
 import { Modal, StatePanel } from "../../components/ui";
 import { BootcampPage, type BootcampOverview, type CatalogToolbarState } from "./page";
 import { CourseLearningContent } from "./learning-content/CourseLearningContent";
+import { LearningProgressPanel } from "../learning-progress-panel";
 import { parseBootcampUrl } from "./urlState";
 import "./bootcamp-approved.scss";
 
@@ -94,6 +95,7 @@ export function BootcampV2Route() {
   return (
     <section className="bootcamp-v2-boundary">
       <div aria-label="Версии Bootcamp"><button type="button" onClick={classic}>Действующий каталог</button></div>
+      <LearningProgressPanel bootcampIndex={2} compact />
       <BootcampPage
         overview={query.data}
         visibleCourses={visibleCourses}
