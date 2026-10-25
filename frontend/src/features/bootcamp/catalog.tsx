@@ -295,10 +295,10 @@ export function CatalogFilters({
 type CatalogPanel = "detail" | "reason" | "requirements";
 
 function CourseDetails({
-  card, onReason, detail, loading, detailError, certificate, certificatesLoading,
+  card, onReason, initialLearningView, detail, loading, detailError, certificate, certificatesLoading,
   certificateError, issuing, issueError, onIssue,
 }: {
-  card: CourseCardState; onReason: () => void; detail: CourseDetail | null;
+  card: CourseCardState; onReason: () => void; initialLearningView?: "overview" | "program"; detail: CourseDetail | null;
   loading: boolean; detailError: boolean; certificate: CourseCertificate | null;
   certificatesLoading: boolean; certificateError: boolean; issuing: boolean;
   issueError: boolean; onIssue: (key: string) => void;
@@ -326,6 +326,7 @@ function CourseDetails({
     return <ImmersiveCourseExperience
       courseKey={card.key} courseTitle={card.title}
       recommendation={card.recommendation_reason}
+      initialView={initialLearningView}
       accessible={card.access_state === "available"}
       onReason={onReason} />;
   }
@@ -415,13 +416,14 @@ function CourseDetails({
   </div>;
 }
 
-function RecommendationDetails({ card, track, onOpenCourse }: { card: CourseCardState; track: string; onOpenCourse: () => void }) {
+function RecommendationDetails({ card, track, onOpenCourse, onOpenProgram }: { card: CourseCardState; track: string; onOpenCourse: () => void; onOpenProgram: () => void }) {
   return <div className="bc-panel-content bc-ref-why-panel" data-reference="BC-R04">
     <div className="bc-ref-why-hero">
       <span className="bc-ref-chip bc-ref-chip--recommended"><Sparkles/> {card.relevant ? "Рекомендован" : "Обоснование курса"}</span>
-      <h2>Почему рекомендован курс «{card.title}»?</h2>
-      <p>Рекомендация связана с выбранной ролью и доступными данными о навыках. Она не гарантирует повышение грейда.</p>
+      <h2>Почему вам рекомендован этот курс</h2>
+      <p>Рекомендация связана с выбранной профессиональной ролью и этапами вашей траектории — не со случайной подборкой материалов.</p>
     </div>
+    <div className="bc-ref-why-role-banner"><div><strong>{track}</strong><span>Направление профессионального развития</span></div><span>{card.relevant ? "Рекомендован для роли" : "Релевантность уточняется"}</span></div>
     <section className="bc-ref-why-item">
       <span className="bc-ref-why-symbol bc-ref-why-symbol--role"><GraduationCap /></span>
       <div><h3>Связь с ролью</h3>
@@ -439,13 +441,14 @@ function RecommendationDetails({ card, track, onOpenCourse }: { card: CourseCard
       <div><h3>Практический результат</h3>
         <p>{card.recommendation_reason || "Обоснование практической применимости не опубликовано."}</p></div>
     </section>
+    <section className="bc-ref-why-item"><span className="bc-ref-why-symbol bc-ref-why-symbol--next"><ArrowRight /></span><div><h3>Следующий шаг траектории</h3><p>После прохождения курса закрепите материал на практическом задании и получите отдельную проверку навыков.</p></div></section>
     <div className="bc-ref-why-forecast">
       <strong>Прогноз влияния на навыки</strong>
       <p>{card.must_take?.projected_impact ?? "Достоверного прогноза уровня навыков пока нет."}</p>
       {card.must_take && <small>{card.must_take.skill}: {card.must_take.current_level ?? "уровень неизвестен"} → {card.must_take.target_level ?? "цель уточняется"}</small>}
     </div>
     <p className="bc-ref-why-warning">Прогноз не равен подтверждённому уровню. Реальный прогресс определяется только по проверенным учебным и проектным результатам.</p>
-    <button className="bc-ref-why-cta" type="button" onClick={onOpenCourse}>Открыть курс <ArrowRight /></button>
+    <div className="bc-ref-why-actions"><button className="bc-ref-why-back" type="button" onClick={onOpenCourse}>Вернуться к курсу</button><button className="bc-ref-why-cta" type="button" onClick={onOpenProgram}>Перейти к программе <ArrowRight /></button></div>
   </div>;
 }
 
@@ -615,6 +618,7 @@ export function BootcampCatalog({
     if (courseKey) next.set("course", courseKey);
     else next.delete("course");
     next.set("panel", panel);
+    next.delete("study");
     setSearchParams(next);
   }
 
@@ -622,6 +626,7 @@ export function BootcampCatalog({
     const next = new URLSearchParams(searchParams);
     next.delete("course");
     next.delete("panel");
+    next.delete("study");
     setSearchParams(next);
   }
 
@@ -803,8 +808,8 @@ export function BootcampCatalog({
         {visible.length === 0 && <div className="bc-ref-empty" role="status">Курсов по условиям не найдено. <button type="button" onClick={resetFilters}>Сбросить фильтры</button></div>}
       </section>
       <Drawer key={`${panel}:${deepLinked?.key ?? ""}`} title={panel === "reason" ? "Почему рекомендован" : "Информация о курсе"} open={deepLinked !== null && panel !== "requirements"} onClose={closePanel}>
-        {deepLinked && (panel === "reason" ? <RecommendationDetails card={deepLinked} track={selectedRoleTitle} onOpenCourse={() => { openPanel("detail", deepLinked.key); }} /> :
-          <CourseDetails key={deepLinked.key} card={deepLinked}
+        {deepLinked && (panel === "reason" ? <RecommendationDetails card={deepLinked} track={selectedRoleTitle} onOpenCourse={() => { openPanel("detail", deepLinked.key); }} onOpenProgram={() => { const next = new URLSearchParams(searchParams); next.set("course", deepLinked.key); next.set("panel", "detail"); next.set("study", "program"); setSearchParams(next); }} /> :
+          <CourseDetails key={deepLinked.key} card={deepLinked} initialLearningView={searchParams.get("study") === "program" ? "program" : "overview"}
             detail={detailQuery.data ?? null} loading={detailQuery.isPending} detailError={detailQuery.isError}
             certificate={certificatesQuery.data?.find((item) => item.course_title === deepLinked.title) ?? null}
             certificatesLoading={certificatesQuery.isPending} certificateError={certificatesQuery.isError}
