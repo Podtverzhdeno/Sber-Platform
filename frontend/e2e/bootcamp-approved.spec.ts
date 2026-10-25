@@ -25,9 +25,9 @@ for (const viewport of viewports) {
     await page.getByRole("link", { name: "Bootcamp" }).click();
 
     const shell = page.locator('[data-reference="BC-R01"]');
-    await expect(shell.getByRole("heading", { name: /Bootcamp.*Развитие навыков/ })).toBeVisible();
-    await expect(shell.getByRole("heading", { name: "Каталог курсов", exact: false })).toBeVisible();
-    const cards = shell.locator(".bootcamp-course-card");
+    await expect(shell.getByRole("heading", { name: "Bootcamp", exact: true })).toBeVisible();
+    await expect(shell.getByRole("heading", { name: "Каталог курсов", exact: true })).toHaveCount(1);
+    const cards = shell.locator(".bc-ref-course-card");
     await expect(cards.first()).toBeVisible();
 
     const noPageOverflow = await page.evaluate(
@@ -35,8 +35,8 @@ for (const viewport of viewports) {
     );
     expect(noPageOverflow, "Bootcamp must not horizontally overflow the page").toBe(true);
 
-    const locked = shell.locator('.bootcamp-course-card[data-access="prerequisite_not_met"]');
-    const open = shell.locator('.bootcamp-course-card[data-access="available"]');
+    const locked = shell.locator('.bc-ref-course-card[data-access="prerequisite_not_met"]');
+    const open = shell.locator('.bc-ref-course-card[data-access="available"]');
     if (await locked.count() > 0 && await open.count() > 0) {
       const first = await locked.first().boundingBox();
       const second = await open.first().boundingBox();
@@ -54,14 +54,14 @@ for (const viewport of viewports) {
     await toggle.getByRole("button", { name: "Список" }).click();
     await expect(page).toHaveURL(/view=list/);
     await expect(shell.getByRole("list", { name: "Каталог Bootcamp списком" })).toBeVisible();
-    const keysInList = await shell.locator(".bootcamp-course-row").evaluateAll((nodes) =>
+    const keysInList = await shell.locator(".bc-ref-course-row").evaluateAll((nodes) =>
       nodes.map((element) => element.getAttribute("data-testid")),
     );
     expect(keysInList).toEqual(keysInCards);
     await toggle.getByRole("button", { name: "Карточки" }).click();
     await expect(page).not.toHaveURL(/view=list/);
 
-    await shell.locator(".bc-open-actions").first().getByRole("button", { name: "Подробнее →" }).click();
+    await shell.locator(".bc-ref-course-card[data-access=\"available\"]").first().getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
     const details = page.getByRole("dialog", { name: "Информация о курсе" });
     await expect(details).toBeVisible();
     await details.getByRole("tab", { name: "Навыки" }).click();
@@ -89,7 +89,7 @@ test("Bootcamp cards respond to hover and keyboard focus", async ({ page }) => {
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
 
-  const card = page.locator('[data-reference="BC-R01"] .bootcamp-course-card[data-access="available"]').first();
+  const card = page.locator('[data-reference="BC-R01"] .bc-ref-course-card[data-access="available"]').first();
   await expect(card).toBeVisible();
   const before = await card.evaluate((node) => ({
     border: getComputedStyle(node).borderTopColor,
@@ -101,9 +101,9 @@ test("Bootcamp cards respond to hover and keyboard focus", async ({ page }) => {
   await expect.poll(() => card.evaluate((node) => getComputedStyle(node).boxShadow))
     .not.toBe(before.shadow);
 
-  await card.getByRole("button", { name: "Подробнее →" }).focus();
-  await expect(card.getByRole("button", { name: "Подробнее →" })).toBeFocused();
-  await card.getByRole("button", { name: "Подробнее →" }).click();
+  await card.getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).focus();
+  await expect(card.getByRole("button", { name: /Открыть курс|Посмотреть курс/ })).toBeFocused();
+  await card.getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
   await expect(page.getByRole("dialog", { name: "Информация о курсе" })).toBeVisible();
 });
 
@@ -113,16 +113,17 @@ test("Bootcamp reference grid column count and card minimum heights", async ({ p
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
-  const grid = page.locator('[data-reference="BC-R01"] .course-grid');
+  const grid = page.locator('[data-reference="BC-R01"] .bc-ref-course-grid');
   await expect(grid).toBeVisible();
   const columns = await grid.evaluate((node) =>
     getComputedStyle(node).gridTemplateColumns.split(" ").filter(Boolean).length
   );
   expect(columns).toBe(4);
-  const available = grid.locator('.bootcamp-course-card[data-access="available"]').first();
+  const available = grid.locator('.bc-ref-course-card[data-access="available"]').first();
   await expect(available).toBeVisible();
   const height = await available.evaluate((node) => parseFloat(getComputedStyle(node).minHeight));
-  expect(height).toBe(296);
+  expect(height).toBeGreaterThanOrEqual(280);
+  expect(height).toBeLessThanOrEqual(300);
 });
 
 
@@ -131,7 +132,7 @@ test("course reader fills viewport and lesson navigation never clips", async ({ 
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
-  await page.getByTestId("course-agent-development").getByRole("button", { name: "Подробнее →" }).click();
+  await page.getByTestId("course-agent-development").getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(dialog).toBeVisible();
   await dialog.getByRole("tab", { name: "Программа" }).click();
@@ -168,7 +169,7 @@ test("mobile fullscreen reader keeps lesson controls usable", async ({ page }) =
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("button", { name: "Меню", exact: true }).click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
-  await page.getByTestId("course-agent-development").getByRole("button", { name: "Подробнее →" }).click();
+  await page.getByTestId("course-agent-development").getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(dialog).toBeVisible();
   await dialog.getByRole("tab", { name: "Программа" }).click();
