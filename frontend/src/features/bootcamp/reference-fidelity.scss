@@ -536,3 +536,14 @@
     overflow: hidden;
   }
 }
+
+/* Real study counters from the Impulse course-progress DB, not the provider rating projection. */
+.bc-reference .bc-study-progress { display:flex; flex-direction:column;gap:5px;margin:8px 0 11px;min-width:0; }
+.bc-reference .bc-study-progress>span {color:#69ead6;font-size:12px;font-weight:750;}
+.bc-reference .bc-study-progress>small {color:#a8c4d5;font-size:10px;line-height:1.35;}
+.bc-reference .bc-study-progress>progress {appearance:none;width:100%;height:6px;overflow:hidden;border:0;border-radius:9px;background:#183e50;}
+.bc-reference .bc-study-progress>progress::-webkit-progress-bar {background:#183e50;border-radius:9px;}
+.bc-reference .bc-study-progress>progress::-webkit-progress-value {background:linear-gradient(90deg,#008cba,#06ddc6);border-radius:9px;}
+.bc-reference .bc-study-progress>progress::-moz-progress-bar {background:#06ddc6;border-radius:9px;}
+.bc-reference .bc-study-progress--compact {margin:0;width:100%;}
+.bc-reference .bc-ref-row-progress .bc-study-progress>small {font-size:10px;}
