@@ -187,12 +187,13 @@ function PanelPreview({ project, onOpen, onRewards }: { project: Project; onOpen
     <div className="mp-preview__actions"><button className="mp-primary" type="button" onClick={()=>{onOpen("overview");}}>Открыть проект <ArrowRight size={17}/></button><span>{dateLabel(project.work.terms.deadline_at)} · {daysLabel(project.work.terms.deadline_at)}</span></div>
   </aside>;
 }
-function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, onSubmitContribution, saving, saveError, onStart, starting, startError }: {
-  project: Project; initialTab: Tab; onBack: () => void; onWorkspace: () => void; onMessage: (personId?: string) => void;
+function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, onMessage, onSubmitContribution, saving, saveError, onStart, starting, startError }: {
+  project: Project; initialTab: Tab; onBack: () => void; onTabChange:(tab:Tab)=>void; onWorkspace: () => void; onMessage: (personId?: string) => void;
   onSubmitContribution: (summary: string, url: string, artifactKey: string) => void; saving: boolean; saveError: boolean; onStart: () => void; starting: boolean; startError: boolean;
 }) {
   const [tab,setTab] = useState<Tab>(initialTab);
   useEffect(()=>{setTab(initialTab);},[initialTab]);
+  const selectTab=(next:Tab)=>{setTab(next);onTabChange(next);};
   const dialogRef=useRef<HTMLDivElement>(null);
   const onBackRef=useRef(onBack);
   useEffect(()=>{onBackRef.current=onBack;},[onBack]);
@@ -234,6 +235,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
   const [artifactKey,setArtifactKey] = useState(project.work.allowed_artifacts?.[0] || "personal-proof");
   const [rewardFocus,setRewardFocus] = useState<string | null>(null);
   const [copied,setCopied] = useState(false);
+  const [copyFailed,setCopyFailed] = useState(false);
   const checkpoints = project.detail?.checkpoints ?? [];
   const progress = completion(project);
   const projectTopic=[project.work.task.title,project.detail?.problem??"",...(project.work.task.competency_tags??[])].join(" ").toLowerCase();
@@ -256,7 +258,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
     </div>
     <div className="mp-detail-tabs mp-ref-tabs" role="tablist" aria-label="Разделы проекта">{tabs.map((item,index)=>{
       const Icon=[FileText,CheckCircle2,Layers3,Award,Users,Gift][index]??FileText;
-      return <button key={item.id} type="button" role="tab" aria-selected={tab===item.id} className={tab===item.id?"is-active":""} onClick={()=>{setTab(item.id);}}><Icon size={16}/>{item.title}</button>;
+      return <button key={item.id} type="button" role="tab" aria-selected={tab===item.id} className={tab===item.id?"is-active":""} onClick={()=>{selectTab(item.id);}}><Icon size={16}/>{item.title}</button>;
     })}</div>
 
     {tab==="overview" && <div className="mp-overview-layout" role="tabpanel" aria-label="Обзор проекта">
@@ -268,14 +270,14 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
           {(project.work.task.competency_tags?.length ?? 0)>0 && <div className="mp-skill-tags"><span>Навыки проекта</span>{(project.work.task.competency_tags ?? []).map(tag=><em key={tag}>{tag}</em>)}</div>}
         </section>
         <section className="mp-surface mp-detail-panel">
-          <header><h2><CheckCircle2/> Критерии приёмки</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab("tasks");}}>Все требования <ArrowRight size={15}/></button></header>
+          <header><h2><CheckCircle2/> Критерии приёмки</h2><button className="mp-inline-action" type="button" onClick={()=>{selectTab("tasks");}}>Все требования <ArrowRight size={15}/></button></header>
           <p className="mp-panel-caption">Именно по этим пунктам заказчик проверяет результат. Галочки здесь не означают автоматического зачёта.</p>
           <ul className="mp-criteria-list">{project.work.terms.acceptance_criteria.slice(0,5).map((criterion,index)=><li key={index}><span>{index+1}</span><p>{criterion}</p></li>)}</ul>
           {project.work.terms.acceptance_criteria.length===0 && <p className="mp-muted">Критерии приёмки пока не опубликованы</p>}
-          {project.work.terms.acceptance_criteria.length>5&&<button className="mp-inline-action" type="button" onClick={()=>{setTab("tasks");}}>Ещё критерии: {project.work.terms.acceptance_criteria.length-5} <ArrowRight size={15}/></button>}
+          {project.work.terms.acceptance_criteria.length>5&&<button className="mp-inline-action" type="button" onClick={()=>{selectTab("tasks");}}>Ещё критерии: {project.work.terms.acceptance_criteria.length-5} <ArrowRight size={15}/></button>}
         </section>
         <section className="mp-surface mp-detail-panel">
-          <header><h2><Layers3/> Ближайшие этапы</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab("progress");}}>Весь прогресс <ArrowRight size={15}/></button></header>
+          <header><h2><Layers3/> Ближайшие этапы</h2><button className="mp-inline-action" type="button" onClick={()=>{selectTab("progress");}}>Весь прогресс <ArrowRight size={15}/></button></header>
           {checkpoints.length>0?<div className="mp-overview-checkpoints">{checkpoints.slice(0,4).map((cp,index)=><div className="mp-overview-checkpoint" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"is-done":""}>{finishedCheckpoint.has(cp.status)?<Check size={14}/>:index+1}</span><div><strong>{cp.title}</strong><small>{finishedCheckpoint.has(cp.status)?"Подтверждено":statusText[cp.status] || cp.status}</small></div></div>)}</div>:<p className="mp-muted">План этапов пока не опубликован заказчиком</p>}
         </section>
       </div>
@@ -293,15 +295,15 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
           <header><h2>Прогресс проекта</h2><strong>{progress===null?"—":String(progress)+"%"}</strong></header>
           <ProgressBar value={progress}/>
           <p>{checkpoints.length>0?String(checkpoints.filter(cp=>finishedCheckpoint.has(cp.status)).length)+" из "+String(checkpoints.length)+" этапов подтверждено":"Прогресс появится после подтверждения этапов"}</p>
-          <button className="mp-inline-action" type="button" onClick={()=>{setTab("progress");}}>Подробнее о ходе работы <ArrowRight size={15}/></button>
+          <button className="mp-inline-action" type="button" onClick={()=>{selectTab("progress");}}>Подробнее о ходе работы <ArrowRight size={15}/></button>
         </section>
         <section className="mp-surface mp-detail-panel">
-          <header><h2><Users/> Команда</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab("team");}}>Все участники <ArrowRight size={15}/></button></header>
+          <header><h2><Users/> Команда</h2><button className="mp-inline-action" type="button" onClick={()=>{selectTab("team");}}>Все участники <ArrowRight size={15}/></button></header>
           {(project.detail?.team ?? []).slice(0,3).map(person=><div className="mp-team-member" key={person.person_id}><span>{person.display_name.slice(0,1)}</span><div><strong>{person.display_name}</strong><small>{readableMemberStatus(person.status)}</small></div><button type="button" className="mp-secondary" onClick={()=>{onMessage(person.person_id);}} aria-label={"Написать "+person.display_name}><MessageCircle size={15}/></button></div>)}
           {(project.detail?.team?.length ?? 0)===0&&<p className="mp-muted">Состав команды пока не опубликован</p>}
         </section>
         <section className="mp-surface mp-detail-panel mp-summary-contribution">
-          <header><h2><FileText/> Мой вклад</h2><button className="mp-inline-action" type="button" onClick={()=>{setTab("contribution");}}>Открыть <ArrowRight size={15}/></button></header>
+          <header><h2><FileText/> Мой вклад</h2><button className="mp-inline-action" type="button" onClick={()=>{selectTab("contribution");}}>Открыть <ArrowRight size={15}/></button></header>
           <div className="mp-mini-stat"><strong>{project.work.contributions.length}</strong><span>отправленных версий</span></div>
           {project.work.contributions.length>0?<p>{project.work.contributions[project.work.contributions.length-1]?.personal_summary}</p>:<p>Опиши сделанную работу и приложи доказательство, чтобы заказчик мог оценить твой результат.</p>}
         </section>
@@ -351,13 +353,13 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
     </div></>}
     {startError&&<p className="mp-action-error" role="alert">Не удалось начать работу. Обнови проект и повтори попытку.</p>}
     {tab==="team" && <ProjectReferenceTeam team={project.detail?.team??[]} customer={projectCompany(project)}
-      mentor={project.detail?.mentor?.display_name??null} onMessage={onMessage} onContribution={()=>{setTab("contribution");}}/>}
+      mentor={project.detail?.mentor?.display_name??null} onMessage={onMessage} onContribution={()=>{selectTab("contribution");}}/>}
     {tab==="rewards" && <ProjectReferenceRewards selected={rewardFocus} onSelected={(id)=>{setRewardFocus(id);}}
       acceptedContributions={project.work.contributions.filter(item=>["accepted","verified","approved"].includes(item.status)).length}
       mentorAssigned={Boolean(project.detail?.mentor)}
       activeMembers={(project.detail?.team??[]).filter(person=>["active","accepted","joined","confirmed","in_progress","staffed"].includes(person.status)).length}
-      onContribution={()=>{setTab("contribution");}} onWorkspace={onWorkspace}/>}
-    <footer className="mp-detail-footer"><button type="button" className="mp-secondary" onClick={onBack}><ArrowLeft size={15}/> Все проекты</button><button type="button" className="mp-secondary" onClick={()=>{onMessage();}}><MessageCircle size={15}/> Обсуждение</button><button className="mp-secondary" type="button" onClick={()=>{void navigator.clipboard.writeText(window.location.href).then(()=>{setCopied(true);}).catch(()=>{setCopied(false);});}}><Share2 size={15}/>{copied?"Ссылка скопирована":"Поделиться"}</button><button className="mp-primary" type="button" onClick={onWorkspace}>Перейти к задачам <ArrowRight size={16}/></button></footer>
+      onContribution={()=>{selectTab("contribution");}} onWorkspace={onWorkspace}/>}
+    <footer className="mp-detail-footer"><button type="button" className="mp-secondary" onClick={onBack}><ArrowLeft size={15}/> Все проекты</button><button type="button" className="mp-secondary" onClick={()=>{onMessage();}}><MessageCircle size={15}/> Обсуждение</button><button className="mp-secondary" type="button" onClick={()=>{if(!navigator.clipboard?.writeText){setCopyFailed(true);setCopied(false);return;}void navigator.clipboard.writeText(window.location.href).then(()=>{setCopied(true);setCopyFailed(false);}).catch(()=>{setCopied(false);setCopyFailed(true);});}}><Share2 size={15}/>{copyFailed?"Не удалось скопировать":copied?"Ссылка скопирована":"Поделиться"}</button><button className="mp-primary" type="button" onClick={onWorkspace}>Перейти к задачам <ArrowRight size={16}/></button></footer>
   </div>;
 }
 export function ParticipantProjectsV2() {
@@ -445,7 +447,7 @@ export function ParticipantProjectsV2() {
       }}
     />
   </div>;
-  if(selected)return <div className="mpv2"><ProjectDetail key={selected.work.assignment.id} initialTab={(["overview","tasks","progress","contribution","team","rewards"] as const).find(tab=>tab===params.get("tab"))??"overview"} project={selected} onBack={back} onWorkspace={()=>{ setWorkspaceTab(true); }} onMessage={(personId)=>{ void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}${personId?`&participant=${encodeURIComponent(personId)}`:""}`); }} onSubmitContribution={(summary,url,artifactKey)=>{contribute.mutate({id:selected.work.assignment.id,summary,url,artifactKey});}} saving={contribute.isPending} saveError={contribute.isError} onStart={()=>{ start.mutate(selected.work.assignment.id); }} starting={start.isPending} startError={start.isError}/></div>;
+  if(selected)return <div className="mpv2"><ProjectDetail key={selected.work.assignment.id} onTabChange={(tab)=>{setParams(previous=>{const next=new URLSearchParams(previous);next.set("tab",tab);return next;},{replace:true});}} initialTab={(["overview","tasks","progress","contribution","team","rewards"] as const).find(tab=>tab===params.get("tab"))??"overview"} project={selected} onBack={back} onWorkspace={()=>{ setWorkspaceTab(true); }} onMessage={(personId)=>{ void navigate(`/workspace/10?task=${encodeURIComponent(selected.work.task.id)}${personId?`&participant=${encodeURIComponent(personId)}`:""}`); }} onSubmitContribution={(summary,url,artifactKey)=>{contribute.mutate({id:selected.work.assignment.id,summary,url,artifactKey});}} saving={contribute.isPending} saveError={contribute.isError} onStart={()=>{ start.mutate(selected.work.assignment.id); }} starting={start.isPending} startError={start.isError}/></div>;
   return <div className="mpv2" data-project-screen={layout}>
     <header className="mp-page-title"><div className="mp-page-title__row"><div><p className="mp-eyebrow">ПРАКТИКА И ЛИЧНЫЙ ВКЛАД</p><h1 id="workspace-title">Мои проекты</h1><p>Активно работай над проектами, развивай навыки в команде, отслеживай свой вклад и получай реальные выгоды.</p></div><button type="button" className="mp-help" onClick={()=>{setShowHelp(value=>!value);}} aria-expanded={showHelp} aria-controls="mp-help-panel"><Info size={15}/> Как это работает?</button></div></header>
     {showHelp&&<div id="mp-help-panel" className="mp-help-banner" role="region" aria-label="Как работают мои проекты"><span><strong>1.</strong> Проекты появляются после принятия назначения</span><span><strong>2.</strong> Работайте с командой и отправляйте личный вклад</span><span><strong>3.</strong> Заказчик проверяет результат, а возможности и награды зависят от условий программы</span></div>}
