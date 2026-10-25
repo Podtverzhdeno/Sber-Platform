@@ -32,3 +32,6 @@ release_request=2026-10-25-projects-reader-ts-retry-7950006
 
 # My Projects 3-reference fidelity followup: grid cards, top reward detail, corrected UI assertions
 release_request=2026-10-25-projects-grid-d62913b
+
+# Final My Projects triple state: 3-column overview, 3-card grid, list, interaction and responsive tests
+release_request=2026-10-25-my-projects-final-detail-b2a0208
