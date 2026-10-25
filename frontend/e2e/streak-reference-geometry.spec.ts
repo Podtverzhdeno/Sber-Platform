@@ -17,10 +17,10 @@ function installRoutes(page: Page): void {
   void page.route("**/api/v1/auth/demo-login", route => route.fulfill({ json: ACTOR }));
   void page.route("**/api/v1/me/engagement/overview", route => route.fulfill({ json: {
     current_days: 11, best_days: 24, qualified_dates: [
-      "2026-10-15","2026-10-16","2026-10-17","2026-10-18","2026-10-19","2026-10-20",
-      "2026-10-21","2026-10-22","2026-10-23","2026-10-24","2026-10-25"
+      "2026-10-14","2026-10-15","2026-10-16","2026-10-17","2026-10-18","2026-10-19",
+      "2026-10-20","2026-10-21","2026-10-22","2026-10-23","2026-10-24"
     ],
-    today_saved: true, reason: "", grace_available: false, frozen_dates: [], freeze_state: "idle",
+    today_saved: false, reason: "Отличный результат! Продолжай развиваться, и серия будет расти.", grace_available: false, frozen_dates: [], freeze_state: "idle",
   } }));
   void page.route("**/api/v1/me/engagement/freeze", route => route.fulfill({ json: {
     policy_version: 1, granted_total: 1, available: 1, consumed_total: 0,
@@ -82,7 +82,7 @@ test("streak mobile 390px: no clipping and all actions reachable", async ({ page
   await dialog.getByRole("button", { name: "Что такое недельный ритм?" }).click();
   await expect(dialog.getByRole("tooltip")).toBeVisible();
   await dialog.getByRole("button", { name: "Открыть полный календарь серии" }).click();
-  await expect(dialog.getByText("2026-10-25")).toBeVisible();
+  await expect(dialog.getByText("2026-10-24")).toBeVisible();
   await page.screenshot({ path: "test-results/streak-reference-mobile.png" });
   await dialog.getByRole("button", { name: /Вернуться к серии/ }).click();
   await dialog.getByRole("button", { name: "Закрыть" }).click();
