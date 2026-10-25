@@ -27,6 +27,16 @@ jobs:
         run: uv sync --frozen
       - name: Validate source import and error boundaries
         run: uv run python scripts/architecture/audit.py --root . --output-dir /tmp/error-inversion-audit --fail-on-new --fail-on-domain-violations
+      - name: Require zero remaining forbidden backend imports
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path("/tmp/error-inversion-audit/architecture.json").read_text())
+          violations = result["forbidden_imports"]
+          assert not violations, f"Backend layering regressions: {violations}"
+          assert not result["cycles"], f"Runtime import cycles: {result['cycles']}"
+          PY
       - name: Characterization tests
         run: uv run pytest -q tests/test_architecture_error_boundary.py tests/test_architecture_curriculum_boundary.py
       - name: Ruff for migrated boundary, compatibility facades, and tests
@@ -35,3 +45,46 @@ jobs:
           uv run ruff format --check src/impulse/application/errors.py src/impulse/bootstrap/ai_curriculum_details.py src/impulse/bootstrap/ai_reading_resources.py src/impulse/bootstrap/ai_stage_guides.py tests/test_architecture_error_boundary.py tests/test_architecture_curriculum_boundary.py
       - name: Focused Pyright
         run: uv run pyright src/impulse/application/errors.py src/impulse/api/errors.py tests/test_architecture_error_boundary.py tests/test_architecture_curriculum_boundary.py
+
+  persistence-compatibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      TEST_DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      APP_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Migrate clean PostgreSQL database
+        run: uv run alembic upgrade head
+      - name: Verify domain and SQL adapters after import inversion
+        run: |
+          uv run pytest -q \
+            tests/integration/test_agent_checkpoint_store.py \
+            tests/integration/test_buddy_store.py \
+            tests/integration/test_deadline_store.py \
+            tests/integration/test_development_store.py \
+            tests/integration/test_ecosystem_store.py \
+            tests/integration/test_identity_store.py \
+            tests/integration/test_messaging_store.py \
+            tests/integration/test_reward_store.py \
+            tests/integration/test_work_store.py
