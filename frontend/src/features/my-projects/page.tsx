@@ -330,7 +330,7 @@ function ProjectDetail({ project, initialTab, onBack, onTabChange, onWorkspace, 
       projectDescription={project.detail?.problem || project.work.terms.deliverable}
       deliverable={project.detail?.deliverable || project.work.terms.deliverable}
       acceptanceCriteria={project.work.terms.acceptance_criteria} onWorkspace={onWorkspace}
-      onCheckpoint={(key)=>{onWorkspace(key);}}/>}
+      onCheckpoint={onWorkspace}/>}
     {tab==="progress" && <ProjectReferenceProgress checkpoints={checkpoints} progress={progress}
       deadline={project.work.terms.deadline_at} decisions={project.work.decisions} skills={project.work.task.competency_tags??[]} onWorkspace={onWorkspace}/>}
     {tab==="contribution" && <>
