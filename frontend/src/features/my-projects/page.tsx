@@ -288,11 +288,11 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
       </div>
     </div>}
     {tab==="tasks" && <ProjectReferenceTasks checkpoints={checkpoints} decisions={project.work.decisions}
-      assignmentStatus={project.work.assignment.status} projectDescription={project.detail?.problem || project.work.terms.deliverable}
+      projectDescription={project.detail?.problem || project.work.terms.deliverable}
       deliverable={project.detail?.deliverable || project.work.terms.deliverable}
       acceptanceCriteria={project.work.terms.acceptance_criteria} onWorkspace={onWorkspace}/>}
     {tab==="progress" && <ProjectReferenceProgress checkpoints={checkpoints} progress={progress}
-      deadline={project.work.terms.deadline_at} decisions={project.work.decisions} onWorkspace={onWorkspace}/>}
+      deadline={project.work.terms.deadline_at} decisions={project.work.decisions} skills={project.work.task.competency_tags??[]} onWorkspace={onWorkspace}/>}
     {tab==="contribution" && <>
       <div className="mp-ref-contrib-head">
         <h2>Мой вклад в проект <span>Подтверждённые действия и материалы</span></h2>
