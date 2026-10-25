@@ -22,9 +22,9 @@ const dateLabel = (s:string) => {
 };
 function StageRing({ value, size = "large" }:{value:number|null;size?:"large"|"small"}) {
   return <div className={`mp-ref-ring mp-ref-ring--${size}`} role="img"
-    aria-label={value===null?"Прогресс ещё не рассчитан":`Завершено ${value}%`}
-    style={{background:`conic-gradient(#36f5cd 0 ${value??0}%, #183b57 ${value??0}% 100%)`}}>
-    <strong>{value===null?"—":`${value}%`}</strong>
+    aria-label={value===null?"Прогресс ещё не рассчитан":`Завершено ${String(value)}%`}
+    style={{background:`conic-gradient(#36f5cd 0 ${String(value??0)}%, #183b57 ${String(value??0)}% 100%)`}}>
+    <strong>{value===null?"—":`${String(value)}%`}</strong>
   </div>;
 }
 function Card({children, className=""}:{children:ReactNode;className?:string}) {
