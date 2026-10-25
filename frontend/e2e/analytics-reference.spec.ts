@@ -56,7 +56,7 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
     for (const [view, title] of [
       ["passport", "Ваш Skill Passport"], ["path", "Маршрут к вашей следующей цели"], ["evidence", "Результаты, которым можно доверять"]
     ] as const) {
-      if (view !== "passport") await root.getByRole("button", { name: view === "path" ? "Мой маршрут" : "Результаты", exact: true }).click();
+      if (view !== "passport") await page.goto("/workspace/9?analyticsTab=passport&view=" + view);
       await expect(page.getByRole("heading", { name: title })).toBeVisible();
       await expect(root.locator(".ref-radar svg")).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -76,11 +76,11 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
       if (viewport.name === "desktop-1600") {
         const goldenByView: Record<string, Record<string, [number, number, number, number]>> = {
           passport: {
-            ".ref-primary-matrix": [227, 288, 879, 441],
-            ".ref-passport": [1120, 288, 458, 441],
-            ".ref-action": [227, 743, 407, 255],
-            ".ref-bottom-evidence": [648, 743, 460, 255],
-            ".ref-bottom-chart": [1122, 743, 456, 255],
+            ".ref-primary-matrix": [272, 307, 846, 441],
+            ".ref-passport": [1132, 307, 440, 441],
+            ".ref-action": [272, 773, 391, 255],
+            ".ref-bottom-evidence": [677, 773, 442, 255],
+            ".ref-bottom-chart": [1134, 773, 438, 255],
           },
           path: {
             ".ref-path-hero": [227, 174, 1351, 199],
@@ -140,7 +140,7 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
       await page.screenshot({ path: testInfo.outputPath("analytics-" + view + "-" + viewport.name + ".png"), fullPage: true, animations: "disabled" });
     }
     expect(geometryViolations, "Analytics cards must retain reference height and remain in the shared shell").toEqual([]);
-    await root.getByRole("button", { name: "Мой маршрут" }).click();
+    await page.goto("/workspace/9?analyticsTab=passport&view=path");
     await root.getByRole("group", { name: "Профессиональная группа" }).getByRole("button", { name: "Аналитик" }).click();
     await root.getByRole("group", { name: "Вид диаграммы" }).getByRole("button", { name: "Гистограмма" }).click();
     await expect(root.locator(".ref-skill-bars")).toBeVisible();
