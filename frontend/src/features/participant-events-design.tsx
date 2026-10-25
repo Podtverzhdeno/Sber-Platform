@@ -60,9 +60,15 @@ function skillName(track: string): string {
   };
   return names[track.toLowerCase()] ?? track;
 }
-export function EventsCard({ item, focus, index, saved, onDetails, onSave }: {
-  item: EventViewItem; focus: string[]; index: number; frozen: boolean; saved: boolean;
-  onDetails: () => void; onSave: () => void;
+export function EventsCard({
+  item, focus, index, saved, evidenceState, verificationExplanation, canReportResult,
+  onDetails, onSave, onReportResult,
+}: {
+  item: EventViewItem; focus: string[]; index: number; saved: boolean;
+  evidenceState?: "provisional" | "verified" | "invalid";
+  verificationExplanation?: string;
+  canReportResult: boolean;
+  onDetails: () => void; onSave: () => void; onReportResult: () => void;
 }) {
   const match = matchPercent(item, focus);
   const tracks = item.track_keys.slice(0, 2);
@@ -76,6 +82,8 @@ export function EventsCard({ item, focus, index, saved, onDetails, onSave }: {
       <div className="ev-event-meta">
         <span><Landmark size={15}/>{item.organizer}</span>
         <span><CalendarDays size={15}/>{formatDate(item.deadline_at)}</span>
+        {evidenceState === "verified" && <span className="ev-inline-verification" title={verificationExplanation ?? "Результат подтверждён"}><CheckCircle2 size={14}/> Подтверждено</span>}
+        {evidenceState === "provisional" && <span className="ev-inline-verification ev-inline-verification--pending" title={verificationExplanation ?? "Результат проверяется"}>На проверке</span>}
       </div>
       <div className="ev-event-tags" aria-label="Направления события">
         {tracks.map(track => <span key={track}>{skillName(track)}</span>)}
@@ -96,7 +104,8 @@ export function EventsCard({ item, focus, index, saved, onDetails, onSave }: {
       <Star size={23} fill={saved ? "currentColor" : "none"}/>
     </button>
     <div className="ev-card-actions">
-      <button type="button" className="ev-primary" onClick={onDetails}>Подробнее <ArrowRight size={19}/></button>
+      <button type="button" className="ev-primary" onClick={onDetails}>Подробнее <ArrowRight size={16}/></button>
+      {canReportResult && <button type="button" className="ev-report-action" onClick={onReportResult}>Подтвердить результат</button>}
     </div>
   </article>;
 }
