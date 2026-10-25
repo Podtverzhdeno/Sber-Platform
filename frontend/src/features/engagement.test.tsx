@@ -120,6 +120,7 @@ describe("TopbarEngagementIndicator", () => {
     renderIndicator();
     await screen.findByText("0");
     openPopover();
+    fireEvent.click(screen.getByRole("button", { name: "Открыть полный календарь серии" }));
     await screen.findByText("Пока нет квалифицируемых действий");
     expect(screen.getAllByText(/Пока ноль/).length).toBeGreaterThan(0);
   });
@@ -148,7 +149,8 @@ describe("TopbarEngagementIndicator", () => {
     renderIndicator();
     await screen.findByText("3");
     openPopover();
-    await screen.findByText("2 в запасе · использовано 1");
+    await screen.findByText("2 в запасе");
+    fireEvent.click(screen.getByRole("button", { name: "Открыть полный календарь серии" }));
     await screen.findByText(/заморозка не считается активностью/);
     const tiles = screen.getAllByText("2026-10-21");
     const frozenTile = tiles.find((tile) => tile.closest(".engagement-day--frozen"));
@@ -229,7 +231,7 @@ describe("TopbarEngagementIndicator", () => {
     renderIndicator();
     await screen.findByText("0");
     openPopover();
-    await screen.findByText("0 в запасе · использовано 1");
+    await screen.findByText("0 в запасе");
     expect(screen.queryByRole("button", { name: /Использовать заморозку/ })).toBeNull();
   });
 
@@ -265,12 +267,12 @@ describe("TopbarEngagementIndicator", () => {
     renderIndicator();
     await screen.findByText("4");
     openPopover();
-    await screen.findByText("2 из 5 в этой неделе");
+    await screen.findByText("2 из 5 за неделю");
     expect(screen.queryByText(/Запланировано новое соглашение/)).toBeNull();
     expect(screen.getByText(/не тождественен серии/)).toBeTruthy();
     expect(screen.getByText(/Соглашение v1/)).toBeTruthy();
     expect(screen.getByRole("button", { name: "Сохранить ритм" })).toBeTruthy();
-    expect(screen.getByText("4 дней подряд")).toBeTruthy();
+    expect(document.querySelector(".streak-headline")?.textContent).toContain("4 дней подряд");
   });
 
   it("keeps the active contract visible when a future version is scheduled", async () => {
@@ -292,8 +294,8 @@ describe("TopbarEngagementIndicator", () => {
     renderIndicator();
     await screen.findByText("4");
     openPopover();
-    await screen.findByText("2 из 5 в этой неделе");
-    await screen.findByText(/Запланировано новое соглашение: Выходные, с 2026-10-25/);
+    await screen.findByText("2 из 5 за неделю");
+    await screen.findByText(/Новое расписание: Выходные, с 2026-10-25/);
     expect(screen.getByText(/Соглашение v1/)).toBeTruthy();
   });
 
@@ -455,8 +457,56 @@ describe("TopbarEngagementIndicator", () => {
     renderIndicator();
     await screen.findByText("4");
     openPopover();
-    await screen.findByText(/Будущее соглашение ещё не действует; запланировано на 2026-10-25/);
+    await screen.findByText(/Будущее расписание: Выходные, с 2026-10-25/);
     expect(screen.queryByText("из 0 в этой неделе")).toBeNull();
     expect(screen.getByRole("button", { name: "Сохранить ритм" })).toBeTruthy();
   });
+
+  it("shows only the compact week until full history is explicitly opened", async () => {
+    installOverview(OVERVIEW);
+    renderIndicator();
+    await screen.findByText("4");
+    openPopover();
+    expect(screen.getByRole("dialog", { name: "Учебный стрик" })).toBeInTheDocument();
+    expect(screen.queryByText("2026-10-17")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Открыть полный календарь серии" }));
+    expect(screen.getByText("2026-10-17")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Вернуться к серии/ }));
+    expect(screen.queryByText("2026-10-17")).toBeNull();
+  });
+
+  it("closes with Escape and restores focus on the streak trigger", async () => {
+    installOverview(OVERVIEW);
+    renderIndicator();
+    await screen.findByText("4");
+    const trigger = screen.getByRole("button", { name: /Учебный стрик:/ });
+    trigger.focus();
+    fireEvent.click(trigger);
+    const dialog = screen.getByRole("dialog", { name: "Учебный стрик" });
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Учебный стрик" })).toBeNull());
+    expect(trigger).toHaveFocus();
+  });
+
+  it("explains weekly rhythm from the question-mark control", async () => {
+    const fetchMock = installOverview(OVERVIEW);
+    fetchMock.mockImplementation((input: RequestInfo | URL) => {
+      const key = routeKey(input);
+      return new Response(JSON.stringify(key === "/api/v1/me/engagement/rhythm" ? {
+        versioned: true, history_count: 1, version: 1, preset: "workdays",
+        active_days: [1,2,3,4,5], reminder_hour: 18, reminder_window_hours: 3,
+        effective_from: "2026-10-19", week_start: "2026-10-19",
+        week_end: "2026-10-25", target_days: 5, done_days: 2,
+        hint: null, scheduled_from: null, scheduled_preset: null,
+      } : OVERVIEW), { status: 200, headers: { "Content-Type": "application/json" } });
+    });
+    renderIndicator();
+    await screen.findByText("4");
+    openPopover();
+    const help = await screen.findByRole("button", { name: "Что такое недельный ритм?" });
+    fireEvent.click(help);
+    expect(help).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("tooltip")).toHaveTextContent("Сам по себе ритм не засчитывает дни");
+  });
+
 });
