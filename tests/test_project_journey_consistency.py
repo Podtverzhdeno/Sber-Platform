@@ -69,6 +69,14 @@ def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -
                 "nominated_mentor_id": None,
                 "allowed_artifacts": ["repo"],
                 "competency_tags": ["python", "architecture"],
+                "case_rubric": {
+                    "version": 1,
+                    "result": "Воспроизводимый результат",
+                    "reasoning": "Техническое обоснование",
+                    "uncertainty": "Риски и допущения",
+                    "ai_use": "Ответственное использование ИИ",
+                    "defense": "Защита решения",
+                },
                 "compensation": {
                     "paid": True,
                     "base_amount_per_assignee": "10000.00",
