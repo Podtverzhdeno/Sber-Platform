@@ -65,12 +65,12 @@ describe("Impulse help center content", () => {
     expect(close).toHaveBeenCalledTimes(1);
   });
   it("opens precisely the requested topic from inline buttons", () => {
-    const event = vi.fn();
-    window.addEventListener("impulse:guide:topic", event);
+    const received: string[] = [];
+    const listener = (event: Event) => { received.push((event as CustomEvent<{ topicId: string }>).detail.topicId); };
+    window.addEventListener("impulse:guide:topic", listener);
     const { unmount } = render(<ParticipantHelpTrigger topicId="task-criteria" label="Пояснения к критериям" />);
     fireEvent.click(screen.getByRole("button", { name: "Пояснения к критериям" }));
-    expect(event).toHaveBeenCalledTimes(1);
-    expect((event.mock.calls[0]?.[0] as CustomEvent<{ topicId: string }>).detail.topicId).toBe("task-criteria");
-    unmount(); window.removeEventListener("impulse:guide:topic", event);
+    expect(received).toEqual(["task-criteria"]);
+    unmount(); window.removeEventListener("impulse:guide:topic", listener);
   });
 });
