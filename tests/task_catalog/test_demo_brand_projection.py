@@ -1,4 +1,5 @@
 """Exact original logo names must never leak into real or unverified tasks."""
+
 from impulse.application.task_catalog_demo_brands import catalog_demo_company_name
 
 
