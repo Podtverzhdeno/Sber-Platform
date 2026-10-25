@@ -17,6 +17,7 @@ type Progress = {
   certificate_id: string | null;
   finished: boolean;
   practice_status?: "pending" | "approved" | "needs_revision" | null;
+  practical_certificate_id?: string | null;
 };
 type View = "overview" | "program" | "theory" | "example" | "practice" | "check" | "finish" | "success" | "certificates";
 type Props = {
@@ -40,6 +41,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const [error, setError] = useState("");
   const [practiceDescription, setPracticeDescription] = useState("");
   const [practiceUrl, setPracticeUrl] = useState("");
+  const [printKind, setPrintKind] = useState<"study" | "practice">("study");
   const path = studyPath(courseKey);
   const progress = useQuery({
     queryKey: ["impulse-study", courseKey],
@@ -76,6 +78,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const percent = Math.round(100 * completed / total);
   const certificateId = progress.data?.certificate_id;
   const practiceState = progress.data?.practice_status;
+  const practicalCertificateId = progress.data?.practical_certificate_id;
   const unit = program.units[current] ?? program.units[0];
   if (!unit) return null;
   const currentUnitId = unit.id;
@@ -133,8 +136,9 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   }
   const checkedCount = unit.checklist.filter((_, i) => checks.has(unit.id + ":" + String(i))).length;
 
-  function printCertificate() {
-    window.print();
+  function printCertificate(kind: "study" | "practice") {
+    setPrintKind(kind);
+    window.requestAnimationFrame(() => { window.print(); });
   }
   const sectionTabs: Array<{ id: View; name: string; Icon: typeof BookOpen }> = [
     { id: "theory", name: "Теория", Icon: BookOpen },
@@ -209,16 +213,20 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
             <section className="imp-study__cert-card is-ready"><GraduationCap size={29}/><h3>Сертификат прохождения курса</h3>
               <p>Подтверждает завершение всех учебных материалов курса «{courseTitle}»</p>
               <span className="imp-study__cert-status">{certificateId ? "Выдан автоматически" : "После завершения всех уроков"}</span>
-              {certificateId && <><small>Идентификатор: {certificateId}</small><button type="button" className="imp-study__primary" onClick={printCertificate}><Download size={17}/> Распечатать сертификат</button></>}
+              {certificateId && <><small>Идентификатор: {certificateId}</small><button type="button" className="imp-study__primary" onClick={() => { printCertificate("study"); }}><Download size={17}/> Сохранить сертификат PDF</button></>}
             </section>
             <section className="imp-study__cert-card"><Medal size={29}/><h3>Сертификат подтверждения знаний</h3>
               <p>Требует практического задания и проверки результата наставником. Не выдаётся автоматически за просмотр уроков.</p><span className="imp-study__cert-status">{practiceState === "approved" ? "Практика подтверждена" : practiceState === "pending" ? "Работа отправлена на проверку" : "Требуется проверка практики"}</span>
-              <button type="button" className="imp-study__secondary" onClick={() => { setView("practice"); setCurrent(total-1); }}>Перейти к практике <ArrowRight size={16}/></button>
+              {practicalCertificateId && <><small>Идентификатор: {practicalCertificateId}</small>
+                <button type="button" className="imp-study__primary" onClick={() => { printCertificate("practice"); }}>
+                  <Download size={17}/> Сохранить сертификат PDF
+                </button></>}
+              {!practicalCertificateId && <button type="button" className="imp-study__secondary" onClick={() => { setView("practice"); setCurrent(total-1); }}>Перейти к практике <ArrowRight size={16}/></button>}
             </section>
           </div>
           {view === "finish" && <button type="button" className="imp-study__primary imp-study__finish" disabled={busy || !ready} onClick={() => { void completeCourse(); }}><CheckCircle2/> {busy ? "Проверяем и выдаём…" : "Завершить обучение"}</button>}
           {view === "success" && <button type="button" className="imp-study__secondary imp-study__finish" onClick={() => { openView("certificates"); }}>Посмотреть два сертификата <ArrowRight size={18}/></button>}
-          <div className="imp-study__print-certificate" aria-hidden="true"><h2>IMPULSE · Сертификат прохождения</h2><p>Подтверждается прохождение курса «{courseTitle}»</p><p>Номер {certificateId}</p></div>
+          <div className="imp-study__print-certificate" aria-hidden="true"><h2>IMPULSE · {printKind === "study" ? "Сертификат прохождения" : "Сертификат подтверждения знаний"}</h2><p>{printKind === "study" ? "Подтверждается прохождение курса" : "Подтверждается проверка практической работы по курсу"} «{courseTitle}»</p><p>Номер {printKind === "study" ? certificateId : practicalCertificateId}</p></div>
         </> : <>
           <div className="imp-study__lesson-heading"><div><span className="imp-study__eyebrow">Урок {current+1} из {total}</span><h2>{unit.title}</h2><p>{unit.purpose}</p></div><div className="imp-study__progress-top"><strong>{percent}% прохождения</strong><div className="imp-study__bar"><span style={{width:String(percent)+"%"}}/></div></div></div>
           <nav className="imp-study__tabs" aria-label="Разделы урока">{sectionTabs.map(({id,name,Icon})=><button type="button" key={id} aria-current={(view===id || (view==="overview" && id==="check")) ? "page" : undefined} className={(view===id || (view==="overview" && id==="check"))?"active":""} onClick={() => { openView(id); }}><Icon size={18}/>{name}</button>)}</nav>
