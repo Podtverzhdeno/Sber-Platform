@@ -134,6 +134,20 @@ export function StageTaskDrawer(props: {
                 <ul>{milestone.acceptance.map((criterion) => <li key={criterion}>{criterion}</li>)}</ul>
               </div>
             )}
+            {milestone.resources && milestone.resources.length > 0 && (
+              <div className="trajectory-v2-reading-resources">
+                <h4>Официальные руководства</h4>
+                <ul>{milestone.resources
+                  .filter((resource) => resource.url?.startsWith("https://"))
+                  .map((resource) => (
+                    <li key={resource.url}>
+                      <a href={resource.url} target="_blank" rel="noopener noreferrer">
+                        {resource.title || "Открыть руководство"} ↗
+                      </a>
+                    </li>
+                  ))}</ul>
+              </div>
+            )}
             <small>Это требования учебного задания, а не подтверждение пройденного этапа.</small>
           </section>
         )}
