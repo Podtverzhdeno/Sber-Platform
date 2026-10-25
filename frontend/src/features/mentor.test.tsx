@@ -201,7 +201,7 @@ describe("mentor workspace", () => {
       expect(
         screen.queryByRole("button", { name: /Рекомендательная система/ }),
       ).not.toBeInTheDocument();
-      fireEvent.click(screen.getByRole("tab", { name: "Все" }));
+      fireEvent.click(screen.getByRole("tab", { name: /^Все/ }));
       await waitFor(() => {
         expect(
           screen
