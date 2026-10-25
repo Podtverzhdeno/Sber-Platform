@@ -37,7 +37,7 @@ export function EventsHero({ events, onChoose }: { events: EventViewItem[]; onCh
   return <>
     <section className="ev-hero">
       <div className="ev-hero-copy">
-        <div className="ev-kicker"><span className="ev-sber-emblem">✓ СБЕР</span> События от Сбера и партнёров</div>
+        <div className="ev-kicker">События от Сбера и партнёров</div>
         <h1 id="workspace-title">События, которые дают <em>практику, баллы и карьерные возможности</em></h1>
         <p>Участвуйте в хакатонах, конкурсах и образовательных программах, чтобы развиваться, получать опыт и попадать в проекты Сбера.</p>
         <button className="ev-primary ev-hero-action" type="button" onClick={onChoose}>Посмотреть подборку <ArrowRight size={16}/></button>
