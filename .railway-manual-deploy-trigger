@@ -44,3 +44,6 @@ release_request=2026-10-25-events-team-optional-ts-18181082
 
 # My Projects: resolve optional team typing in card, preview and detail
 release_request=2026-10-25-my-projects-team-safe-34cc487
+
+# Events seven-state browser acceptance: 4/4, focus restored, release validated interaction changes
+release_request=2026-10-25-events-qa-passed-focus-546aa70
