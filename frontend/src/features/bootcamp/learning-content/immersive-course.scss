@@ -549,3 +549,50 @@
   .imp-study__cert-preview { display: none; }
   .imp-study__cert-card { min-height: 0; }
 }
+
+
+/* Course-info tabs within the reader: each target has its own real content. */
+@media (min-width:781px) {
+  .imp-study[data-view="skills"] .imp-study__grid,
+  .imp-study[data-view="reviews"] .imp-study__grid {
+    grid-template-columns: minmax(290px,360px) minmax(0,1fr);
+    gap: 22px;
+  }
+}
+.imp-study[data-view="skills"] .imp-study__right,
+.imp-study[data-view="reviews"] .imp-study__right,
+.imp-study[data-view="skills"] .imp-study__hero,
+.imp-study[data-view="reviews"] .imp-study__hero { display:none; }
+.imp-study__course-tabs { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin:14px 0 2px; }
+.imp-study__course-tabs button {
+  display:flex; align-items:center; justify-content:center; min-height:43px;
+  border:1px solid #1d5b79; border-radius:9px; background:#092942; color:#b4d5e6;
+  font-weight:750; font-size:13px; transition:transform .18s,background .18s, border-color .18s, box-shadow .18s;
+}
+.imp-study__course-tabs button:hover { background:#0c4056; color:#08e9e4; border-color:#00d9de; transform:translateY(-2px); }
+.imp-study__course-tabs button.active { border-color:#04e3e0; background:linear-gradient(110deg,#00d9e9,#04d5d5); color:#062334; box-shadow:0 0 12px #00e2e537; }
+.imp-study__skills-panel,.imp-study__reviews-panel { margin:13px 0; padding:19px; border:1px solid #1c5b7b; background:#09283d; border-radius:11px; }
+.imp-study__skills-panel > h3,.imp-study__reviews-panel > h3 { margin:0 0 7px; }
+.imp-study__skills-panel > p,.imp-study__reviews-panel > p { font-size:14px; }
+.imp-study__skills-panel > div { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; margin-bottom:17px; }
+.imp-study__skills-panel article {
+  min-width:0; display:flex; align-items:start; gap:11px; padding:12px;
+  border:1px solid #205a7a; border-radius:9px; background:#08233a;
+}
+.imp-study__skills-panel article > span {
+  flex:0 0 31px; height:31px; display:grid; place-items:center;
+  border-radius:50%; color:#06f5eb; background:#0a4e68; font-weight:800;
+}
+.imp-study__skills-panel article > div { min-width:0; flex:1; }
+.imp-study__skills-panel article strong { font-size:14px; }
+.imp-study__skills-panel article p { margin:5px 0 0; color:#a6c7dc; font-size:12px; }
+.imp-study__skills-panel article svg { flex:0 0 20px; color:#08ebdc; }
+.imp-study__skills-panel > button { min-width:220px; }
+.imp-study__reviews-panel { display:flex; flex-direction:column; align-items:center; text-align:center; justify-content:center; min-height:310px; }
+.imp-study__reviews-panel > svg { margin-bottom:10px; color:#27d4e2; }
+.imp-study__reviews-panel > p { max-width:560px; }
+@media (max-width:780px) {
+  .imp-study__course-tabs { display:flex; overflow-x:auto; padding-bottom:7px; scrollbar-width:thin; }
+  .imp-study__course-tabs button { flex:0 0 auto; min-width:112px; padding:0 14px; }
+  .imp-study__skills-panel > div { grid-template-columns:minmax(0,1fr); }
+}
