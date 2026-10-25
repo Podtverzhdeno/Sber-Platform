@@ -26,6 +26,10 @@ POLICY_VERSION = 1
 PRACTICE_MINIMUM = 1
 
 
+def _empty_history() -> list[dict[str, object]]:
+    return []
+
+
 class ImpulseLevelView(BaseModel):
     track_key: str
     level: int = Field(ge=0)
@@ -36,7 +40,7 @@ class ImpulseLevelView(BaseModel):
     approved_practices: int = Field(ge=0)
     required_practices: int = Field(ge=1)
     advance_ready: bool
-    history: list[dict[str, object]] = Field(default_factory=list)
+    history: list[dict[str, object]] = Field(default_factory=_empty_history)
     policy_version: int = POLICY_VERSION
 
 
