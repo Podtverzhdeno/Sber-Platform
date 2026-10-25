@@ -484,7 +484,7 @@ describe("TopbarEngagementIndicator", () => {
     fireEvent.click(trigger);
     const dialog = screen.getByRole("dialog", { name: "Учебный стрик" });
     fireEvent.keyDown(dialog, { key: "Escape" });
-    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Учебный стрик" })).toBeNull());
+    await waitFor(() => { expect(screen.queryByRole("dialog", { name: "Учебный стрик" })).toBeNull(); });
     expect(trigger).toHaveFocus();
   });
 
