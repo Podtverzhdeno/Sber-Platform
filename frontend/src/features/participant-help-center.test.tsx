@@ -76,8 +76,9 @@ describe("Impulse help center content", () => {
     setup();
     const closeButton = screen.getByRole("button", { name: "Закрыть центр помощи" });
     closeButton.focus();
+    const focusables = Array.from(screen.getByRole("dialog").querySelectorAll<HTMLElement>("button, input"));
     fireEvent.keyDown(closeButton, { key: "Tab", shiftKey: true });
-    expect(document.activeElement).toBeInTheDocument();
+    expect(document.activeElement).toBe(focusables[focusables.length - 1]);
   });
 
   it("opens precisely the requested topic from inline buttons", () => {
