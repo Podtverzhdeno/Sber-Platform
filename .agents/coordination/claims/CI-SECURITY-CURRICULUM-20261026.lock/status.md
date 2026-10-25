@@ -1,6 +1,6 @@
 # Claim CI-SECURITY-CURRICULUM-20261026
 - session_id: gpt6-20261026-curriculum-security-lint
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 27afaa3a4b9786d1fcc91f1bb34fc8116f08e863
@@ -14,5 +14,17 @@
 - verification:
   - Build production bundle and run unmodified strict scanner other than explicit URL approvals
   - Ensure ESLint parser treats production Playwright config as first-class TS source
-- progress: General CI rejects nine specific course source references and a config outside the TS eslint project; retain strict exact URL allowlist, no wildcard or skipping.
+- progress: Added exact allowlist entries for nine official curriculum references (no wildcard), registered production Playwright config in type-aware TS, and shipped independent CI with negative blocked-URL regression. Green CI; independent review outstanding.
+- changed_files:
+  - frontend/scripts/check-built-security.mjs
+  - frontend/tsconfig.node.json
+  - .github/workflows/frontend-security-references-qa.yml
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40244548925
+- verification:
+  - type-aware ESLint of production config and node TS: PASS
+  - actual Vite bundle + strict security scanner: PASS
+  - injected unknown URL in production assets rejected as expected: PASS
+- unverified:
+  - General CI and full release gate on exact integration SHA; other teams' UI and Python lint debt remains.
 - blockers: Other actively edited files with baseline Ruff and ESLint errors remain outside this claim.
