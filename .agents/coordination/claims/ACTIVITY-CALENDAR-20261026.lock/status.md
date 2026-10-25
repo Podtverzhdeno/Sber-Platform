@@ -9,6 +9,9 @@
 - write_scope:
   - frontend/src/features/activity-calendar/**
   - frontend/src/features/analytics-v3/page.tsx (activity import/render/period only)
+  - frontend/e2e/analytics-three-sections.spec.ts (legacy activity assertions only)
+  - frontend/e2e/analytics-premium.spec.ts (replace superseded legacy activity acceptance)
+  - .github/workflows/activity-calendar-qa.yml
   - .agents/coordination/claims/ACTIVITY-CALENDAR-20261026.lock/status.md
 - shared_files:
   - frontend/src/features/analytics-v3/page.tsx (minimal integration, keep passport/certification intact)
