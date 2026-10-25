@@ -98,9 +98,7 @@ def _merge_courses(
     """Canonical course_key joins; unknown self-study stays unknown, not 0."""
     names = {item.key: item.title for item in catalog}
     providers = {item.course_key: item.status for item in enrollments}
-    study_by_key = (
-        {item.course_key: item for item in study.courses} if study is not None else {}
-    )
+    study_by_key = {item.course_key: item for item in study.courses} if study is not None else {}
     links: dict[str, list[RoadmapEvidenceLink]] = {}
     for roadmap in roadmaps:
         for milestone in roadmap.milestones:
@@ -183,7 +181,8 @@ async def my_journey_snapshot(
             title=item.task.title,
             assignment_status=item.assignment.status.value,
             submitted_contribution_ids=[
-                contribution.id for contribution in item.contributions
+                contribution.id
+                for contribution in item.contributions
                 if contribution.status is not ContributionStatus.ACCEPTED
             ],
             accepted_contribution_ids=[
