@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type DragEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ArrowRight, CalendarDays, Check, CheckCircle2, ClipboardCheck, CloudUpload,
-  ExternalLink, FileArchive, FileCheck2, FileText, Info, Link2, LockKeyhole,
+  ExternalLink, FileArchive, FileCheck2, Info, Link2, LockKeyhole,
   Paperclip, ShieldCheck, Trash2, X,
 } from "lucide-react";
 import { apiRequest } from "../../api/client";
