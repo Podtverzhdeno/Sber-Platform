@@ -11,6 +11,7 @@ import { apiRequest } from "../../api/client";
 import { StatePanel } from "../../components/ui";
 import { ParticipantHelpTrigger } from "../participant-help-trigger";
 import { ProjectDashboard } from "./project-dashboard";
+import { ProjectReferenceTasks, ProjectReferenceProgress, ProjectReferenceTeam, ProjectReferenceRewards } from "./project-detail-reference";
 import "./my-projects.scss";
 
 type WorkItem = {
@@ -222,36 +223,21 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
   const tabs: {id:Tab;title:string}[]=[{id:"overview",title:"Обзор"},{id:"tasks",title:"Задачи"},{id:"progress",title:"Прогресс"},{id:"contribution",title:"Мой вклад"},{id:"team",title:"Команда"},{id:"rewards",title:"Бонусы и выгоды"}];
   return <div className="mp-detail" data-project-screen="detail">
     <nav className="mp-breadcrumb" aria-label="Путь"><button type="button" onClick={onBack}><ArrowLeft size={16}/> Мои проекты</button><span>/</span><span>{project.work.task.title}</span></nav>
-    <div className="mp-detail-top">
-      <header className="mp-detail-hero mp-surface">
-        <div className="mp-detail-hero__upper">
-          <CompanyIcon name={projectCompany(project)}/>
-          <div className="mp-detail-hero__name"><small>{projectCompany(project)} · Заказчик</small><h1 id="workspace-title">{project.work.task.title}</h1><div className="mp-chip-row"><em>Практика</em><em>Реальный проект</em><em>Командная работа</em></div></div>
-          <Status status={project.work.assignment.status}/>
-        </div>
-        <div className="mp-detail-hero__lower">
-          <div className="mp-detail-hero__progress"><span>Твой прогресс</span><ProgressBar value={progress}/><small>Срок · {dateLabel(project.work.terms.deadline_at)}</small></div>
-          <button type="button" className="mp-primary" onClick={onWorkspace}>Продолжить работу <ArrowRight size={18}/></button>
-        </div>
-      </header>
-      <section className="mp-detail-earnings mp-surface" aria-label="Возможные награды за проект">
-        <h2>Твои выгоды за этот проект</h2>
-        <div className="mp-detail-earnings__grid">
-          {benefits.slice(0,3).map(reward=>{
-            const Icon=reward.icon;
-            return <button key={reward.id} type="button" onClick={()=>{setTab("rewards");setRewardFocus(reward.id);}}>
-              <Icon size={23}/><span><strong>{reward.title}</strong><small>{reward.unlock}</small></span>
-            </button>;
-          })}
-        </div>
-        <p>Начисления и условия подтверждаются организаторами</p>
-      </section>
+    <div className="mp-ref-hero" role="banner">
+      <div className="mp-ref-hero-art" aria-hidden="true"/>
+      <CompanyIcon name={projectCompany(project)}/>
+      <div className="mp-ref-hero-text">
+        <div className="mp-ref-kicker"><strong>{projectCompany(project)}</strong><span>Заказчик</span></div>
+        <h1 id="workspace-title">{project.work.task.title}</h1>
+        <p>{project.detail?.problem || project.work.terms.deliverable}</p>
+        <div className="mp-chip-row">{(project.work.task.competency_tags ?? []).map(tag=><em key={tag}>{tag}</em>)}{!(project.work.task.competency_tags?.length)&&<em>Проектная работа</em>}</div>
+      </div>
+      <button type="button" className="mp-ref-close" aria-label="Закрыть подробности проекта" onClick={onBack}>×</button>
     </div>
-    <div className="mp-detail-opportunities">
-      <button type="button" onClick={()=>{setTab("rewards");setRewardFocus("internship");}}><BriefcaseBusiness size={19}/><span><strong>Возможность стажировки</strong><small>После выполнения условий программы</small></span><ArrowRight size={15}/></button>
-      <button type="button" onClick={()=>{setTab("rewards");setRewardFocus("community");}}><Users size={19}/><span><strong>Закрытое комьюнити лучших</strong><small>После 10 подтверждённых проектов</small></span><ArrowRight size={15}/></button>
-    </div>
-    <div className="mp-detail-tabs" role="tablist" aria-label="Разделы проекта">{tabs.map(item=><button key={item.id} type="button" role="tab" aria-selected={tab===item.id} className={tab===item.id?"is-active":""} onClick={()=>{ setTab(item.id); }}>{item.title}</button>)}</div>
+    <div className="mp-detail-tabs mp-ref-tabs" role="tablist" aria-label="Разделы проекта">{tabs.map((item,index)=>{
+      const Icon=[FileText,CheckCircle2,Layers3,Award,Users,Gift][index]??FileText;
+      return <button key={item.id} type="button" role="tab" aria-selected={tab===item.id} className={tab===item.id?"is-active":""} onClick={()=>{setTab(item.id);}}><Icon size={16}/>{item.title}</button>;
+    })}</div>
 
     {tab==="overview" && <div className="mp-overview-layout" role="tabpanel" aria-label="Обзор проекта">
       <div className="mp-detail-stack mp-detail-stack--main">
@@ -301,55 +287,12 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
         </section>
       </div>
     </div>}
-    {tab==="tasks" && <div className="mp-detail-tab-layout" role="tabpanel" aria-label="Задачи">
-      <div className="mp-detail-stack">
-        <section className="mp-surface mp-detail-panel mp-task-intro">
-          <header><h2><FileText/> Что нужно сделать</h2><Status status={project.work.assignment.status}/></header>
-          <p>{project.detail?.problem || project.work.terms.deliverable}</p>
-          <div className="mp-outcome-band"><span>Результат для заказчика</span><strong>{project.detail?.deliverable || project.work.terms.deliverable}</strong></div>
-        </section>
-        <section className="mp-surface mp-detail-panel">
-          <header><h2><CheckCircle2/> Требования к результату</h2><span className="mp-muted">{project.work.terms.acceptance_criteria.length} критериев</span></header>
-          <p className="mp-panel-caption">Требования версии {project.work.terms.version}. Только проверка заказчика подтверждает выполнение.</p>
-          <ul className="mp-criteria-list mp-criteria-list--large">{project.work.terms.acceptance_criteria.map((criterion,index)=><li key={index}><span>{index+1}</span><p>{criterion}</p></li>)}</ul>
-          {project.work.terms.acceptance_criteria.length===0&&<p className="mp-muted">Критерии пока не опубликованы</p>}
-        </section>
-      </div>
-      <div className="mp-detail-stack">
-        <section className="mp-surface mp-detail-panel">
-          <h2><Layers3/> Как проходит работа</h2>
-          <ol className="mp-explain-steps"><li><strong>Изучи условия</strong><p>Проверь ожидаемый результат и критерии приёмки</p></li><li><strong>Подготовь решение</strong><p>Работай над артефактами в рабочей области проекта</p></li><li><strong>Передай результат</strong><p>Опиши личный вклад и приложи проверяемое доказательство</p></li><li><strong>Получай обратную связь</strong><p>Заказчик оценит результат или запросит доработку</p></li></ol>
-        </section>
-        <section className="mp-surface mp-detail-panel mp-action-panel">
-          <h2><CalendarDays/> Сроки и условия</h2>
-          <div className="mp-key-facts"><span><CalendarDays size={16}/> Дедлайн <strong>{dateLabel(project.work.terms.deadline_at)}</strong></span><span><FileText size={16}/> Условия <strong>Версия {project.work.terms.version}</strong></span></div>
-          <button className="mp-primary" type="button" onClick={onWorkspace}>Открыть рабочую область <ArrowRight size={16}/></button>
-          <button className="mp-secondary" type="button" onClick={()=>{setTab("contribution");}}>Мой вклад и сдача результата</button>
-        </section>
-      </div>
-    </div>}
-    {tab==="progress" && <div className="mp-detail-tab-layout" role="tabpanel" aria-label="Прогресс">
-      <div className="mp-detail-stack">
-        <section className="mp-surface mp-detail-panel">
-          <header><h2><Layers3/> Этапы проекта</h2><strong className="mp-accent-number">{progress===null?"Нет оценки":String(progress)+"%"}</strong></header>
-          <p className="mp-panel-caption">Прогресс рассчитывается по подтверждённым этапам, а не по просмотрам страницы или отметкам пользователя.</p>
-          {checkpoints.length>0?checkpoints.map((cp,index)=><div className="mp-progress-stage" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"is-done":""}>{finishedCheckpoint.has(cp.status)?<Check size={16}/>:index+1}</span><div><strong>{cp.title}</strong><small>{finishedCheckpoint.has(cp.status)?"Подтверждён":statusText[cp.status] || cp.status}</small><ProgressBar compact value={finishedCheckpoint.has(cp.status)?100:null}/></div></div>):<p className="mp-muted">Заказчик пока не опубликовал этапы. Когда они появятся, здесь будет виден ход подтверждения.</p>}
-        </section>
-        <section className="mp-surface mp-detail-panel">
-          <header><h2><MessageCircle/> Решения по проверкам</h2><ParticipantHelpTrigger topicId="task-review" label="Как читать замечания" /><span className="mp-muted">{project.work.decisions.length}</span></header>
-          {project.work.decisions.length>0?project.work.decisions.map(decision=><article className="mp-history-item" key={decision.id}><strong>{decision.decision}</strong><p>{decision.reason || "Комментарий не добавлен"}</p>{decision.deadline_at&&<small>Срок доработки: {dateLabel(decision.deadline_at)}</small>}</article>):<p className="mp-muted">Решений по проверкам пока нет</p>}
-        </section>
-      </div>
-      <div className="mp-detail-stack">
-        <section className="mp-surface mp-detail-panel mp-progress-aside">
-          <h2><Info/> Сводка</h2>
-          <div className="mp-mini-stat"><strong>{checkpoints.filter(cp=>finishedCheckpoint.has(cp.status)).length} / {checkpoints.length}</strong><span>подтверждённых этапов</span></div>
-          <div className="mp-key-facts"><span><CalendarDays size={16}/> Дедлайн <strong>{dateLabel(project.work.terms.deadline_at)}</strong></span><span><FileText size={16}/> Версии вклада <strong>{project.work.contributions.length}</strong></span></div>
-          <button className="mp-secondary" type="button" onClick={onWorkspace}>Продолжить работу <ArrowRight size={16}/></button>
-        </section>
-        <section className="mp-surface mp-detail-panel"><h2><CheckCircle2/> Что считается завершением</h2><p>Подтверждение контрольных этапов и приёмка результата заказчиком. При запросе доработки замечания остаются в истории проверок.</p><Status status={project.work.assignment.status}/></section>
-      </div>
-    </div>}
+    {tab==="tasks" && <ProjectReferenceTasks checkpoints={checkpoints} decisions={project.work.decisions}
+      assignmentStatus={project.work.assignment.status} projectDescription={project.detail?.problem || project.work.terms.deliverable}
+      deliverable={project.detail?.deliverable || project.work.terms.deliverable}
+      acceptanceCriteria={project.work.terms.acceptance_criteria} onWorkspace={onWorkspace}/>}
+    {tab==="progress" && <ProjectReferenceProgress checkpoints={checkpoints} progress={progress}
+      deadline={project.work.terms.deadline_at} decisions={project.work.decisions} onWorkspace={onWorkspace}/>}
     {tab==="contribution" && <div className="mp-detail-tab-layout" role="tabpanel" aria-label="Мой вклад">
       <div className="mp-detail-stack">
         <section className="mp-surface mp-detail-panel">
@@ -371,39 +314,10 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
       </div>
     </div>}
     {startError&&<p className="mp-action-error" role="alert">Не удалось начать работу. Обнови проект и повтори попытку.</p>}
-    {tab==="team" && <div className="mp-detail-tab-layout" role="tabpanel" aria-label="Команда">
-      <div className="mp-detail-stack">
-        <section className="mp-surface mp-detail-panel">
-          <header><h2><Users/> Участники проекта</h2><span className="mp-muted">{project.detail?.team?.length ?? 0} участников</span></header>
-          {(project.detail?.team?.length ?? 0)>0?(project.detail?.team ?? []).map(person=><div className="mp-team-member mp-team-member--full" key={person.person_id}><span>{person.display_name.slice(0,1).toUpperCase()}</span><div><strong>{person.display_name}</strong><small>{readableMemberStatus(person.status)}</small></div><button className="mp-secondary" type="button" onClick={()=>{onMessage(person.person_id);}}><MessageCircle size={16}/> Написать</button></div>):<p className="mp-muted">Состав участников ещё не опубликован</p>}
-        </section>
-      </div>
-      <div className="mp-detail-stack">
-        <section className="mp-surface mp-detail-panel">
-          <h2><BriefcaseBusiness/> Контакты по проекту</h2>
-          <div className="mp-contact-card"><small>Заказчик</small><strong>{project.detail?.customer?.display_name || projectCompany(project)}</strong></div>
-          <div className="mp-contact-card"><small>Ментор</small><strong>{project.detail?.mentor?.display_name || "Пока не назначен"}</strong></div>
-          <button className="mp-secondary" type="button" onClick={()=>{onMessage();}}>Обсуждение проекта <MessageCircle size={16}/></button>
-        </section>
-        <section className="mp-surface mp-detail-panel"><h2><Info/> Совместная работа</h2><p>Обсуждайте решения в сообщениях, а персональные результаты фиксируйте во вкладке «Мой вклад». Так оценка не теряется внутри общей работы команды.</p><button className="mp-inline-action" type="button" onClick={()=>{setTab("contribution");}}>Посмотреть мой вклад <ArrowRight size={15}/></button></section>
-      </div>
-    </div>}
-    {tab==="rewards" && <div className="mp-rewards-layout" role="tabpanel" aria-label="Бонусы и выгоды">
-      <section className="mp-surface mp-detail-panel">
-        <header><h2><Gift/> Возможности по мере выполнения проектов</h2><span className="mp-muted">Условия программы</span></header>
-        <p className="mp-panel-caption">Указаны пороги участия в программе. Достижение порога открывает возможность, но не гарантирует выдачу бонуса или трудоустройство.</p>
-        <div className="mp-rewards-full">{benefits.filter(item=>item.id!=="assessment"&&item.id!=="portfolio").map(item=>{const Icon=item.icon;return <button type="button" key={item.id} className={rewardFocus===item.id?"is-active":""} aria-pressed={rewardFocus===item.id} onClick={()=>{setRewardFocus(item.id);}}><Icon size={24}/><strong>{item.title}</strong><span>{item.unlock}</span><ArrowRight size={16}/></button>})}</div>
-        {rewardFocus&&<div className="mp-reward-notice" role="status"><strong>{benefits.find(item=>item.id===rewardFocus)?.title}</strong><p>Возможность рассматривается по правилам программы. Подтверждение права на получение и условия выдачи зависят от организаторов.</p></div>}
-      </section>
-      <div className="mp-detail-stack">
-        <section className="mp-surface mp-detail-panel">
-          <h2><Star/> Результаты каждого проекта</h2>
-          <div className="mp-permanent-benefit"><FileText size={20}/><div><strong>Пополнение портфолио</strong><p>После подтверждения результата данные о проекте и личном вкладе становятся частью портфолио.</p></div></div>
-          <div className="mp-permanent-benefit"><Award size={20}/><div><strong>Оценка личного вклада</strong><p>При сдаче результата заказчик может проверить работу и предоставить обратную связь.</p></div></div>
-        </section>
-        <section className="mp-surface mp-detail-panel"><h2><Info/> Что важно знать</h2><p>Бонусы программы и подтверждение компетенций — разные вещи. Версии решений, оценки и результаты проверок хранятся в разделе «Мой вклад».</p><button className="mp-secondary" type="button" onClick={()=>{setTab("contribution");}}>Перейти к моему вкладу <ArrowRight size={16}/></button></section>
-      </div>
-    </div>}
+    {tab==="team" && <ProjectReferenceTeam team={project.detail?.team??[]} customer={projectCompany(project)}
+      mentor={project.detail?.mentor?.display_name??null} onMessage={onMessage} onContribution={()=>setTab("contribution")}/>}
+    {tab==="rewards" && <ProjectReferenceRewards selected={rewardFocus} onSelected={setRewardFocus}
+      onContribution={()=>setTab("contribution")} onWorkspace={onWorkspace}/>}
     <footer className="mp-detail-footer"><button type="button" className="mp-secondary" onClick={onBack}><ArrowLeft size={15}/> Все проекты</button><button type="button" className="mp-secondary" onClick={()=>{onMessage();}}><MessageCircle size={15}/> Обсуждение</button><button className="mp-secondary" type="button" onClick={()=>{void navigator.clipboard.writeText(window.location.href).then(()=>{setCopied(true);}).catch(()=>{setCopied(false);});}}><Share2 size={15}/>{copied?"Ссылка скопирована":"Поделиться"}</button><button className="mp-primary" type="button" onClick={onWorkspace}>Перейти к задачам <ArrowRight size={16}/></button></footer>
   </div>;
 }
