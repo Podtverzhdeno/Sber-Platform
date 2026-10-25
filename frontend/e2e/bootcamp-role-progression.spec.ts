@@ -22,7 +22,7 @@ test("finishing a saved required Impulse course refreshes the role's learning st
   await expect(bootcamp).toBeVisible();
   await expect(bootcamp.getByRole("heading",{name:/Остался.*1.*обязательный.*курс/})).toBeVisible();
   await expect(bootcamp.getByTestId("bootcamp-study-level")).toContainText("0 из 4");
-  await expect(bootcamp.getByTestId("bootcamp-official-grade")).toContainText("не присвоен");
+  await expect(bootcamp.getByTestId("bootcamp-official-grade")).toContainText("данные недоступны");
 
   // Complete all eight units through the same authenticated API as the course
   // player. Fixture persistence is authoritative; UI can't set a completion.
@@ -43,7 +43,7 @@ test("finishing a saved required Impulse course refreshes the role's learning st
   await expect(refreshed.getByRole("heading",{name:"Учебная часть завершена"})).toBeVisible();
   await expect(refreshed.getByTestId("bootcamp-next-stage")).toContainText("практика");
   await expect(refreshed.getByTestId("bootcamp-study-level")).toContainText("1 из 4");
-  await expect(refreshed.getByTestId("bootcamp-official-grade")).toContainText("не присвоен");
+  await expect(refreshed.getByTestId("bootcamp-official-grade")).toContainText("данные недоступны");
   const nextStageButton=refreshed.getByRole("button",{name:/Следующий этап/});
   await expect(nextStageButton).toHaveClass(/bc-ref-grade-button--unlock/);
   await nextStageButton.click();
@@ -100,7 +100,7 @@ test("finishing from the real course player updates the requirement banner witho
   await expect(page.locator("#bc-grade-title")).toContainText("Учебная часть завершена");
   await expect(page.getByTestId("bootcamp-study-level")).toContainText("1 из 4");
   await expect(page.getByTestId("bootcamp-next-stage")).toContainText("практика");
-  await expect(page.getByTestId("bootcamp-official-grade")).toContainText("не присвоен");
+  await expect(page.getByTestId("bootcamp-official-grade")).toContainText("данные недоступны");
 });
 
 test("official grade promotion animation requires an actual change in the server projection",async({page})=>{
