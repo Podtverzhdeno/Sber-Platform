@@ -522,7 +522,8 @@ def test_community_invites_are_persisted_and_scoped_to_members_and_program() -> 
         headers={"X-CSRF-Token": alex_csrf},
     )
     assert again.status_code == 200
-    assert len([person for person in again.json()["participants"] if person["id"] == str(ROMAN)]) == 1
+    member_ids = [person["id"] for person in again.json()["participants"]]
+    assert member_ids.count(str(ROMAN)) == 1
     no_csrf = api.post(path, json={"person_ids": [str(ROMAN)]})
     assert no_csrf.status_code in (401, 403)
     hr_csrf = login(api, "hr-nina")
