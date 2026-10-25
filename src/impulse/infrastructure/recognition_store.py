@@ -58,6 +58,19 @@ class SqlRecognitionStore(RecognitionStore):
     def __init__(self, database: Database) -> None:
         self.database = database
 
+    async def public_seasons(self) -> tuple[RatingSeason, ...]:
+        async with self.database.sessions() as session:
+            rows = (
+                (await session.execute(
+                    select(seasons)
+                    .where(seasons.c.status != SeasonStatus.SCHEDULED.value)
+                    .order_by(seasons.c.season_key.desc(), seasons.c.id.desc())
+                ))
+                .mappings()
+                .all()
+            )
+        return tuple(self._season(row) for row in rows)
+
     async def season(self, season_id: UUID) -> RatingSeason | None:
         async with self.database.sessions() as session:
             row = (
