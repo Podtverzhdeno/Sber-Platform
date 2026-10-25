@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "../../api/client";
 import { StatePanel } from "../../components/ui";
+import { ParticipantHelpTrigger } from "../participant-help-trigger";
 import { ProjectDashboard } from "./project-dashboard";
 import "./my-projects.scss";
 
@@ -255,7 +256,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
     {tab==="overview" && <div className="mp-overview-layout" role="tabpanel" aria-label="Обзор проекта">
       <div className="mp-detail-stack mp-detail-stack--main">
         <section className="mp-surface mp-detail-panel mp-summary-panel">
-          <h2><FileText/> О проекте</h2>
+          <h2><FileText/> О проекте</h2><ParticipantHelpTrigger topicId="project-overview" label="Как устроен проект" />
           <p className="mp-summary-lead">{project.detail?.problem || project.work.terms.deliverable}</p>
           <div className="mp-outcome-band"><span>Что нужно получить в результате</span><strong>{project.detail?.deliverable || project.work.terms.deliverable}</strong></div>
           {(project.work.task.competency_tags?.length ?? 0)>0 && <div className="mp-skill-tags"><span>Навыки проекта</span>{(project.work.task.competency_tags ?? []).map(tag=><em key={tag}>{tag}</em>)}</div>}
@@ -335,7 +336,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
           {checkpoints.length>0?checkpoints.map((cp,index)=><div className="mp-progress-stage" key={cp.key}><span className={finishedCheckpoint.has(cp.status)?"is-done":""}>{finishedCheckpoint.has(cp.status)?<Check size={16}/>:index+1}</span><div><strong>{cp.title}</strong><small>{finishedCheckpoint.has(cp.status)?"Подтверждён":statusText[cp.status] || cp.status}</small><ProgressBar compact value={finishedCheckpoint.has(cp.status)?100:null}/></div></div>):<p className="mp-muted">Заказчик пока не опубликовал этапы. Когда они появятся, здесь будет виден ход подтверждения.</p>}
         </section>
         <section className="mp-surface mp-detail-panel">
-          <header><h2><MessageCircle/> Решения по проверкам</h2><span className="mp-muted">{project.work.decisions.length}</span></header>
+          <header><h2><MessageCircle/> Решения по проверкам</h2><ParticipantHelpTrigger topicId="task-review" label="Как читать замечания" /><span className="mp-muted">{project.work.decisions.length}</span></header>
           {project.work.decisions.length>0?project.work.decisions.map(decision=><article className="mp-history-item" key={decision.id}><strong>{decision.decision}</strong><p>{decision.reason || "Комментарий не добавлен"}</p>{decision.deadline_at&&<small>Срок доработки: {dateLabel(decision.deadline_at)}</small>}</article>):<p className="mp-muted">Решений по проверкам пока нет</p>}
         </section>
       </div>
@@ -352,7 +353,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
     {tab==="contribution" && <div className="mp-detail-tab-layout" role="tabpanel" aria-label="Мой вклад">
       <div className="mp-detail-stack">
         <section className="mp-surface mp-detail-panel">
-          <h2><FileText/> Мой личный вклад</h2>
+          <h2><FileText/> Мой личный вклад</h2><ParticipantHelpTrigger topicId="project-contribution" label="Как подтвердить вклад" />
           <p className="mp-panel-caption">Вклад — это конкретная выполненная работа, которую можно проверить по материалам. Отправка версии не означает её принятие.</p>
           {(project.work.assignment.status==="staffed"||project.work.assignment.status==="revision_requested")?<div className="mp-action-panel"><p>{project.work.assignment.status==="revision_requested"?"Заказчик запросил доработку. Начни новую итерацию и подготовь исправления.":"Начни работу над проектом, затем появится возможность отправить результат."}</p><button className="mp-primary" type="button" disabled={starting} onClick={onStart}>{starting?"Сохраняем…":project.work.assignment.status==="revision_requested"?"Начать доработку":"Начать работу"} <ArrowRight size={16}/></button></div>:project.work.assignment.status==="in_progress"?<form className="mp-contribute-form" onSubmit={e=>{e.preventDefault();onSubmitContribution(summary,artifact,artifactKey);}}><label>Что сделано лично<textarea required minLength={20} value={summary} onChange={e=>{setSummary(e.target.value);}} placeholder="Опиши выполненную работу, свою роль и полученный результат…"/></label><label>Ссылка на доказательство<input type="url" value={artifact} onChange={e=>{setArtifact(e.target.value);}} placeholder="https://…"/></label>{(project.work.allowed_artifacts?.length ?? 0)>0&&<label>Тип доказательства<select aria-label="Тип доказательства" value={artifactKey} onChange={e=>{setArtifactKey(e.target.value);}}>{(project.work.allowed_artifacts ?? []).map(key=><option key={key} value={key}>{key}</option>)}</select></label>}<button type="submit" disabled={saving} className="mp-primary">{saving?"Отправляем…":"Отправить вклад"} <ArrowRight size={16}/></button>{saveError&&<p role="alert">Не удалось отправить вклад. Проверь поля и соединение.</p>}</form>:<div className="mp-action-panel"><Status status={project.work.assignment.status}/><p>Сейчас история доступна для просмотра. Отправка новой версии зависит от состояния проекта.</p></div>}
         </section>
@@ -366,7 +367,7 @@ function ProjectDetail({ project, initialTab, onBack, onWorkspace, onMessage, on
           <header><h2><Award/> Обратная связь</h2><span className="mp-muted">{project.detail?.feedback?.length ?? 0}</span></header>
           {(project.detail?.feedback?.length ?? 0)>0?(project.detail?.feedback ?? []).map(item=><article className="mp-history-item" key={item.contribution_id+"-"+String(item.review_version)}><strong>Версия {item.contribution_version} · {item.grade}</strong><small>{item.status}</small><p>{item.explanation || "Комментарий отсутствует"}</p></article>):<p className="mp-muted">Оценка появится здесь после проверки отправленного результата</p>}
         </section>
-        <section className="mp-surface mp-detail-panel"><h2><Info/> Как подтвердить вклад</h2><ol className="mp-explain-steps"><li><strong>Опиши результат</strong><p>Что сделал именно ты и почему это важно для задачи</p></li><li><strong>Приложи доказательство</strong><p>Ссылку на артефакт, по которому можно проверить работу</p></li><li><strong>Дождись проверки</strong><p>Решение и комментарии сохранятся в истории</p></li></ol></section>
+        <section className="mp-surface mp-detail-panel"><h2><Info/> Как подтвердить вклад</h2><ParticipantHelpTrigger topicId="task-submit" label="Как сдать работу" /><ol className="mp-explain-steps"><li><strong>Опиши результат</strong><p>Что сделал именно ты и почему это важно для задачи</p></li><li><strong>Приложи доказательство</strong><p>Ссылку на артефакт, по которому можно проверить работу</p></li><li><strong>Дождись проверки</strong><p>Решение и комментарии сохранятся в истории</p></li></ol></section>
       </div>
     </div>}
     {startError&&<p className="mp-action-error" role="alert">Не удалось начать работу. Обнови проект и повтори попытку.</p>}
