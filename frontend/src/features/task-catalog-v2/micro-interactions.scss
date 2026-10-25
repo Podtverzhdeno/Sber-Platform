@@ -327,3 +327,57 @@
     border-radius: 12px;
   }
 }
+
+/* reference-progress-ring-v2: arc encodes the same API percentage as the
+   label; an unknown result must not look like 100% progress. */
+.catalog-v2 .catalog-v2-kpi-ring {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.catalog-v2 .catalog-v2-kpi-ring svg,
+.catalog-v2 .catalog-v2-kpi-ring > span {
+  grid-area: 1 / 1;
+}
+.catalog-v2 .catalog-v2-kpi-ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  transform: rotate(-90deg);
+}
+.catalog-v2 .catalog-v2-kpi-ring circle {
+  fill: none;
+  stroke-width: 6;
+}
+.catalog-v2 .catalog-v2-kpi-ring-track {
+  stroke: var(--catalog-border);
+}
+.catalog-v2 .catalog-v2-kpi-ring-value {
+  stroke: var(--catalog-highlight);
+  stroke-linecap: round;
+  transition: stroke-dasharray 250ms ease;
+}
+.catalog-v2 .catalog-v2-kpi-ring > span {
+  position: relative;
+  font-size: clamp(0.48rem, 0.8vw, 0.7rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.catalog-v2 .catalog-v2-filter-rail .catalog-v2-all-tasks[aria-pressed="false"] {
+  color: var(--catalog-ink);
+  border-color: var(--catalog-border);
+  background: var(--catalog-surface);
+}
+.catalog-v2 .catalog-v2-filter-rail .catalog-v2-all-tasks[aria-pressed="true"] {
+  border-color: var(--catalog-highlight);
+  box-shadow: inset 0 -2px var(--catalog-highlight);
+}
+@media (prefers-reduced-motion: reduce) {
+  .catalog-v2 .catalog-v2-kpi-ring-value { transition: none; }
+}
