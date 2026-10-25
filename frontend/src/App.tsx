@@ -1725,7 +1725,7 @@ function ImpulseApp() {
                             </button>
                           );
                         })
-                      ) : (
+                      ) : unreadChats.length === 0 ? (
                         <div className="notification-empty">
                           <strong>Пока нет уведомлений</strong>
                           <span>Здесь появятся события ваших проектов</span>
