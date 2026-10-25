@@ -136,16 +136,18 @@ def test_public_seasons_exclude_drafts_and_discover_open_leaderboard() -> None:
         assert scheduled.status_code == 200
         season_id = scheduled.json()["id"]
         assert api.get("/api/v1/rating-seasons").json() == []
-        assert api.post(
+        policy_result = api.post(
             f"/api/v1/operations/rating-seasons/{season_id}/policies",
             json=policy_payload(),
             headers=headers,
-        ).status_code == 200
-        assert api.post(
+        )
+        assert policy_result.status_code == 200
+        opened_result = api.post(
             f"/api/v1/operations/rating-seasons/{season_id}/open",
             json={"expected_version": 1},
             headers=headers,
-        ).status_code == 200
+        )
+        assert opened_result.status_code == 200
         public = api.get("/api/v1/rating-seasons")
         assert public.status_code == 200
         assert [(row["id"], row["title"], row["status"]) for row in public.json()] == [
