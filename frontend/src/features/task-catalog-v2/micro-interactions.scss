@@ -528,21 +528,10 @@
     max-width: 235px;
     min-width: 170px;
   }
-  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(7)::before {
-    content: "Сортировка:";
-    display: block;
-    position: absolute;
-    z-index: 1;
-    left: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.71rem;
-    line-height: 1;
-    color: var(--catalog-muted);
-    pointer-events: none;
-  }
+  /* The select options already contain "Сортировка: ..."; a second
+     ::before label would print the same prefix twice. */
   .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(7) select {
-    padding-left: 89px;
+    padding-left: 10px;
     font-size: 0.71rem;
     text-overflow: ellipsis;
   }
@@ -582,9 +571,6 @@
     min-width: 0;
     max-width: none;
     font-size: 0.74rem;
-  }
-  .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(7)::before {
-    display: none;
   }
   .catalog-v2 .catalog-v2-filter-rail .catalog-v2-advanced-filters label:nth-child(7) select {
     padding-left: 9px;
