@@ -31,6 +31,24 @@ async function openMessages(page: Page) {
     loggedIn = true;
     return route.fulfill({json:actor});
   });
+  await page.route("**/api/v1/me/messaging/contacts", route => route.fulfill({json:[
+    {id:"00000000-0000-4000-8000-000000000005",display_name:"Елена Наставник",role:"mentor"},
+    {id:"00000000-0000-4000-8000-000000000006",display_name:"Роман Заказчик",role:"customer"},
+    {id:"00000000-0000-4000-8000-000000000007",display_name:"Мария Северова",role:"participant"},
+  ]}));
+  await page.route("**/api/v1/me/messaging/channels/group", route => {
+    const posted=route.request().postDataJSON() as {title:string;peer_ids:string[]};
+    const group={
+      ...channels[0],id:"00000000-0000-4000-8000-000000009999",kind:"community",
+      title:posted.title,unread:0,last_message:null,
+      participants:[
+        {id:actor.person_id,display_name:actor.display_name,role:"member"},
+        ...posted.peer_ids.map(id=>({id,display_name:id.endsWith("005")?"Елена Наставник":"Роман Заказчик",role:"member"})),
+      ],
+    };
+    channels.push(group);
+    return route.fulfill({status:201,json:group});
+  });
   await page.route("**/api/v1/me/messaging/channels", route => route.fulfill({json:channels}));
   await page.route("**/api/v1/me/messaging/channels/personal", route => {
     const existing = channels[0];
@@ -163,6 +181,22 @@ test("Messages sidebar collapse actually changes layout and restores it without 
   expect(normal?.width).toBeGreaterThan(150);
   await page.getByRole("button",{name:/Перейти в Маяки/}).click();
   await expect(page.locator(".msg-chat__header-title")).toContainText("Маяки");
+});
+
+test("group creation selects real contacts and persists a chat in API list",async ({page})=>{
+  await page.setViewportSize({width:1448,height:1086});
+  await openMessages(page);
+  await page.getByRole("button",{name:"Создать чат"}).click();
+  await page.getByRole("menuitem",{name:/Новый групповой чат/}).click();
+  const dialog=page.getByRole("dialog",{name:"Создать групповой чат"});
+  await expect(dialog).toBeVisible();
+  await dialog.getByPlaceholder("Например, Команда AI-проекта").fill("AI исследование");
+  await dialog.getByRole("checkbox").nth(0).check();
+  await dialog.getByRole("checkbox").nth(1).check();
+  await dialog.getByRole("button",{name:"Создать чат"}).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator(".msg-chat__header-title")).toContainText("AI исследование");
+  await expect(page.getByRole("button",{name:/AI исследование/}).first()).toBeVisible();
 });
 
 test("mobile messages open real dialog and return to list",async ({page})=>{
