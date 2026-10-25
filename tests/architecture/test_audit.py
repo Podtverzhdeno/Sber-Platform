@@ -37,6 +37,24 @@ class ArchitectureAuditTests(unittest.TestCase):
             "frontend/src/features/bootcamp/card.tsx",
         )
 
+    def test_frontend_feature_owner_groups_sibling_tests_and_styles(self) -> None:
+        self.assertEqual(
+            audit_module.frontend_feature_owner("frontend/src/features/activity-panel.test.tsx"),
+            "activity-panel",
+        )
+        self.assertEqual(
+            audit_module.frontend_feature_owner("frontend/src/features/activity-panel.scss"),
+            "activity-panel",
+        )
+        self.assertEqual(
+            audit_module.frontend_feature_owner("frontend/src/features/bootcamp/card.tsx"),
+            "bootcamp",
+        )
+        self.assertNotEqual(
+            audit_module.frontend_feature_owner("frontend/src/features/analytics.tsx"),
+            audit_module.frontend_feature_owner("frontend/src/features/bootcamp/catalog.tsx"),
+        )
+
     def test_migration_head_and_missing_parent(self) -> None:
         data = {
             "migrations/versions/001_a.py": 'revision = "a"\ndown_revision = None',
