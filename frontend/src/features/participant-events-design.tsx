@@ -2,7 +2,7 @@ import { useState, type SyntheticEvent, type ReactNode } from "react";
 import {
   ArrowLeft, ArrowRight, Award, Bookmark, BookOpen, CalendarDays,
   CheckCircle2, ChevronDown, Code2, ExternalLink, GraduationCap,
-  Landmark, Lightbulb, MapPin, Medal, ShieldCheck, Sparkles, BriefcaseBusiness,
+  Landmark, MapPin, Medal, ShieldCheck, Sparkles, BriefcaseBusiness,
 Star, Target, Trophy, Users, X,
 } from "lucide-react";
 import { SafeExternalLink } from "../components/ui";
@@ -31,11 +31,6 @@ function matchPercent(item: EventViewItem, focus: string[]): number | null {
   if (item.track_keys.length === 0 || focus.length === 0) return null;
   const matches = item.track_keys.filter((key) => focus.some((f) => f.toLowerCase() === key.toLowerCase())).length;
   return Math.round(matches / item.track_keys.length * 100);
-}
-function currentStatus(item: EventViewItem): string {
-  if (item.status !== "open") return "Завершено";
-  if (item.deadline_at && new Date(item.deadline_at).getTime() < Date.now()) return "Дедлайн прошёл";
-  return "Актуальное";
 }
 export function EventsHero({ events, onChoose }: { events: EventViewItem[]; onChoose: () => void }) {
   const sberEvents = events.filter(item => isSber(item.organizer));
