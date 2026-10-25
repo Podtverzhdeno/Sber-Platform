@@ -55,6 +55,7 @@ import { ParticipantEventCatalog } from "./features/participant-events";
 import { CustomerWorkspace } from "./features/customer";
 import { CustomerScenario } from "./features/customer-scenario";
 import { CustomerPremium } from "./features/customer-premium";
+import { CustomerAnalytics } from "./features/customer-analytics";
 import { CustomerCandidates } from "./features/customer-candidates";
 import { ManagerWorkspace } from "./features/manager";
 import { HrWorkspace } from "./features/hr";
@@ -500,7 +501,7 @@ function Workspace({
           <span aria-hidden="true">☰</span> Меню
         </button>
         {allowed && actor.active_role === "customer" && mockCustomer ? (
-          currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" personId={actor.person_id} quickTargets={{ task: navigation.findIndex((section) => section === "Задачи" || section === "Мои задачи") }} /> : currentSection === "Настройки" ? <ParticipantSettings actorName="Роман Воронов" consentScopes={actor.consent_scopes} role="customer" /> : <CustomerPremium section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
+          currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" personId={actor.person_id} quickTargets={{ task: navigation.findIndex((section) => section === "Задачи" || section === "Мои задачи") }} /> : currentSection === "Настройки" ? <ParticipantSettings actorName="Роман Воронов" consentScopes={actor.consent_scopes} role="customer" /> : <CustomerPremium navigation={actor.navigation} section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
         ) : allowed && currentSection === "Главная" ? (
           actor.active_role === "participant" ? (
             <ParticipantDashboard actor={actor} />
@@ -643,6 +644,10 @@ function Workspace({
           <RoleAnalytics role="operator" />
         ) : allowed && actor.active_role === "operator" ? (
           <OperatorVisualPage section={currentSection ?? "Главная"} />
+        ) : allowed &&
+          actor.active_role === "customer" &&
+          currentSection === "Аналитика" ? (
+          <CustomerAnalytics navigation={actor.navigation} />
         ) : allowed &&
           actor.active_role !== "participant" &&
           currentSection === "Аналитика" ? (
