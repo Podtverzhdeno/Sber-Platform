@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
 import { learningSummaryQueryKey, loadLearningSummary } from "./learning-progress";
+import { journeyEvidenceQueryKey, linkedCourseLabel, linkedCourseStatus, loadJourneyEvidence } from "./journey-evidence";
 import "./learning-progress-panel.scss";
 
 type Props = { bootcampIndex: number; compact?: boolean };
@@ -13,6 +14,12 @@ export function LearningProgressPanel({ bootcampIndex, compact = false }: Props)
     queryFn: loadLearningSummary,
   });
   const summary = learning.data;
+  const journey = useQuery({
+    queryKey: journeyEvidenceQueryKey,
+    queryFn: loadJourneyEvidence,
+    enabled: Boolean(summary?.courses.length),
+    retry: false,
+  });
   const courses = summary?.courses ?? [];
   const recent = courses.slice(0, compact ? 2 : 3);
   return (
@@ -29,10 +36,16 @@ export function LearningProgressPanel({ bootcampIndex, compact = false }: Props)
           <div><strong data-testid="learn-lessons">{summary.completed_lessons}</strong><span>уроков завершено</span></div>
           <div><strong data-testid="learn-reviewed">{summary.approved_practices}</strong><span>практик принято</span></div>
         </div>
-        {recent.length > 0 ? <ul className="learning-progress-bridge__courses">{recent.map(course => <li key={course.course_key}>
-          <div><strong>{course.title}</strong><span>{course.finished ? "Курс пройден" : `Изучено ${String(course.completed_units)} из ${String(course.total_units)} уроков`}{course.practice_status === "pending" ? " · Работа на проверке" : course.practice_status === "approved" ? " · Практика принята" : ""}</span></div>
-          <progress max={course.total_units} value={course.completed_units} aria-label={`Учебный прогресс курса «${course.title}»`} />
-        </li>)}</ul> : <p className="learning-progress-bridge__empty">Результаты появятся после первого сохранённого урока в Bootcamp.</p>}
+        {recent.length > 0 ? <ul className="learning-progress-bridge__courses">{recent.map(course => {
+          const linkState = linkedCourseStatus(journey.data, course.course_key);
+          return <li key={course.course_key}>
+            <div><strong>{course.title}</strong><span>{course.finished ? "Курс пройден" : `Изучено ${String(course.completed_units)} из ${String(course.total_units)} уроков`}{course.practice_status === "pending" ? " · Работа на проверке" : course.practice_status === "approved" ? " · Практика принята" : ""}</span>
+              {linkState && <small data-testid={`learn-linked-${course.course_key}`}>{linkedCourseLabel(linkState)}</small>}
+            </div>
+            <progress max={course.total_units} value={course.completed_units} aria-label={`Учебный прогресс курса «${course.title}»`} />
+          </li>;
+        })}</ul> : <p className="learning-progress-bridge__empty">Результаты появятся после первого сохранённого урока в Bootcamp.</p>}
+        {journey.isError && <small role="status">Связь обучения с траекторией временно недоступна. Учебные результаты показаны из отдельного сохранённого реестра.</small>}
       </>}
       <small>Самостоятельное обучение учитывается в учебной статистике. Рейтинг, карьерный грейд и подтверждённый уровень навыков меняются только по отдельным правилам проверки.</small>
     </section>
