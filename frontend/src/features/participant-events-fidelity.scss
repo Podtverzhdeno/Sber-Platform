@@ -62,7 +62,7 @@
   .ev-result-tabs {gap:7px}
   .ev-result-tabs button {min-height:34px;padding:9px 12px;font-size:11px}
   .ev-result-order select {min-height:34px;padding:7px;font-size:11px}
-  .ev-layout-select {display:none}
+  .ev-layout-select {display:flex;gap:3px;align-items:center}.ev-layout-select button {padding:8px 9px;font-size:10px;min-height:33px}
   .ev-event-list {gap:9px}
   .ev-event-card {grid-template-columns:136px minmax(0,1fr) minmax(210px,300px);gap:14px;
     border-radius:13px;padding:10px 11px 37px 10px;min-height:179px;border-color:#185167;background:linear-gradient(120deg,#061b2c,#021523);
@@ -93,7 +93,7 @@
   .ev-match-bars>div {grid-template-columns:56px minmax(0,1fr)}
   .ev-card-actions {margin:0;justify-content:flex-end;align-self:flex-end}
   .ev-card-actions button {position:absolute;right:10px;bottom:8px;width:112px;min-height:31px;font-size:11px;border-radius:8px}
-  .ev-card-footer {left:auto;right:10px;top:7px;bottom:auto;border:0;background:none;width:max-content;padding:0;
+  .ev-card-footer {left:auto;right:138px;top:auto;bottom:9px;border:0;background:none;width:max-content;padding:0;
     flex-direction:row-reverse;align-items:flex-start;min-height:auto}
   .ev-status {display:none}
   .ev-source-link {font-size:10px}
