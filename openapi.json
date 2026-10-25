@@ -13747,6 +13747,16 @@
             "title": "Purpose",
             "type": "string"
           },
+          "resources": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Resources",
+            "type": "array"
+          },
           "skill": {
             "title": "Skill",
             "type": "string"
