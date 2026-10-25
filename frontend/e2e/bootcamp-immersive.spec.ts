@@ -69,6 +69,14 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
     const hoverStyle = await pdfButton.evaluate(el => getComputedStyle(el).transitionProperty);
     expect(hoverStyle).not.toBe("none");
     await page.screenshot({ path: "test-results/imp-07-certificates-" + String(viewport.width) + ".png", animations: "disabled" });
+    const infoTabs = reader.getByRole("navigation", { name: "Разделы информации о курсе" });
+    await expect(infoTabs.getByRole("button")).toHaveCount(5);
+    await infoTabs.getByRole("button", { name: "Навыки" }).click();
+    await expect(reader.getByRole("region", { name: "Навыки курса" }).locator("article")).toHaveCount(8);
+    await infoTabs.getByRole("button", { name: "Отзывы" }).click();
+    await expect(reader.getByText("Проверенных отзывов пока нет")).toBeVisible();
+    await infoTabs.getByRole("button", { name: "Сертификаты" }).click();
+    await expect(reader.locator(".imp-study__cert-grid .imp-study__cert-card")).toHaveCount(2);
     await reader.getByRole("button", { name: /Перейти к практике/ }).click();
     await reader.getByLabel("Опишите, что сделали и как проверили результат").fill(
       "Выполнил практическое задание: создал тестовый сценарий и проверил основное поведение, " +
