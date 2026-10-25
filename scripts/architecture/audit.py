@@ -132,6 +132,28 @@ def migrations(files: dict[str, str]) -> dict[str, Any]:
             "missing_revision": sorted(p for p, x in details.items() if not x.get("revision"))}
 
 
+def runtime_ast_nodes(tree: ast.AST):
+    """Exclude import edges that exist only under typing.TYPE_CHECKING."""
+    for child in ast.iter_child_nodes(tree):
+        if isinstance(child, ast.If) and (
+            isinstance(child.test, ast.Name) and child.test.id == "TYPE_CHECKING"
+            or isinstance(child.test, ast.Attribute) and child.test.attr == "TYPE_CHECKING"
+        ):
+            for node in child.orelse:
+                yield node
+                yield from runtime_ast_nodes(node)
+            continue
+        yield child
+        yield from runtime_ast_nodes(child)
+
+
+def type_only_ts_import(source: str, offset: int) -> bool:
+    prefix = source[max(0, offset - 500):offset]
+    # Find the active import statement, ignoring previous completed statements.
+    current = prefix.rsplit(";", 1)[-1]
+    return bool(re.search(r"\bimport\s+type\b", current))
+
+
 def analyze(root: Path) -> dict[str, Any]:
     all_files = filenames(root)
     known = set(all_files)
@@ -143,6 +165,7 @@ def analyze(root: Path) -> dict[str, Any]:
     mig = {}
     counts: Counter[str] = Counter()
     edges_scanned = 0
+    type_edges_skipped = 0
     for path in all_files:
         if Path(path).suffix not in EXT:
             counts["non_source"] += 1
@@ -165,7 +188,7 @@ def analyze(root: Path) -> dict[str, Any]:
             except SyntaxError:
                 failures.append(path)
                 continue
-            for node in ast.walk(tree):
+            for node in runtime_ast_nodes(tree):
                 if isinstance(node, ast.Import):
                     modules = [alias.name for alias in node.names]
                 elif isinstance(node, ast.ImportFrom):
@@ -192,6 +215,9 @@ def analyze(root: Path) -> dict[str, Any]:
         elif Path(path).suffix in {".ts", ".tsx", ".js", ".jsx", ".mjs"}:
             for match in TS_IMPORT.finditer(source):
                 spec = match.group(1) or match.group(2)
+                if type_only_ts_import(source, match.start()):
+                    type_edges_skipped += 1
+                    continue
                 edges_scanned += 1
                 dest = ts_file(path, spec, known)
                 if dest and dest != path:
@@ -203,7 +229,7 @@ def analyze(root: Path) -> dict[str, Any]:
     biggest.sort(key=lambda x: x["bytes"], reverse=True)
     return {"tracked": len(all_files), "sources": sum(v for k, v in counts.items() if k != "non_source"),
             "categories": dict(counts), "imports_scanned": edges_scanned,
-            "edges": sum(len(x) for x in graph.values()),
+            "edges": sum(len(x) for x in graph.values()), "type_only_edges_skipped": type_edges_skipped,
             "forbidden_imports": sorted(forbidden, key=lambda x: (x["path"], x["line"])),
             "cross_feature_imports": cross_features, "cycles": strongly_connected(graph),
             "migration_graph": migrations(mig), "unreadable_or_invalid": sorted(failures),
