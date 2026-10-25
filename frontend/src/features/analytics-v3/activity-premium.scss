@@ -131,8 +131,6 @@
 .avp-profile__legend small{text-align:right;color:#9bb7c9}
 .avp-profile button{display:flex;align-items:center;gap:5px;background:none;border:0;color:#13eeef;font-size:10px}
 @media(max-width:1380px){
- .analytics-v3[data-tab="activity"] .av3-top{grid-template-columns:minmax(0,1fr) 342px auto}
- .analytics-v3[data-tab="activity"] .av3-tabs{width:342px}
  .avp-study-number{gap:9px;padding:10px}
  .avp-study-number .avp-icon{width:43px;height:43px}
  .avp-courses{gap:7px}
@@ -177,3 +175,5 @@
  .avp-learning-empty{flex-wrap:wrap}
 }
 @media(prefers-reduced-motion:reduce){.avp-activity *, .avp-activity *::before,.avp-activity *::after{animation:none!important;transition:none!important}}
+
+@media(max-width:700px){.analytics-v3[data-tab="activity"]{overflow-x:clip}}
