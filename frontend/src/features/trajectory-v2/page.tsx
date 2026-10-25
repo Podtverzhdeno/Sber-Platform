@@ -129,7 +129,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     // hints must not select an unrelated role whose level API is unavailable.
     return primaryTrajectoryKey(overview)
       ?? (catalogueRoles[0]?.track_key ?? null);
-  }, [catalogueRoles, overview.next_outcome, roleParam]);
+  }, [catalogueRoles, overview, roleParam]);
   const selected = catalogueRoles.find((role) => role.track_key === selectedKey) ?? null;
   const learningLevel = useQuery({
     queryKey:roleLevelQueryKey(selectedKey),
