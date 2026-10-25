@@ -72,6 +72,7 @@ test("My Projects: introductory copy is gone and content starts directly with th
     firstVisible: el.querySelector(".mpr-main, .mp-toolbar")?.getBoundingClientRect().top ?? Infinity,
   }));
   expect(screen.firstVisible - screen.top).toBeLessThan(90);
+  await page.screenshot({path:"test-results/projects-compact-header.png",fullPage:true,animations:"disabled"});
 });
 
 test("My Projects: default layout is list and manual cards choice remains available",async({page})=>{
