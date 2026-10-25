@@ -148,6 +148,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const displayReadiness=Number.isFinite(readyPercent) ? readyPercent : null;
   const currentGrade=officialRoleGrade?.current_grade_title ?? overview.concepts.career_grade.current_grade;
   const gradeCatalogKnown=officialRoleGrade!==null || overview.concepts.career_grade.catalog_version!==null;
+  const roleGradeUnavailable=roleGrade.isError;
 
   const passportSkills = Array.isArray(passport.data?.skills) ? passport.data.skills : [];
   const completedMilestones = overview.roles.reduce((sum, role) => sum + role.completed_milestones, 0);
@@ -355,9 +356,9 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
             <div className="trajectory-v2-grade-ring" style={{ background: `conic-gradient(#0de5d6 0 ${String(displayReadiness ?? 0)}%, #204a68 ${String(displayReadiness ?? 0)}% 100%)` }}><strong data-testid="trajectory-official-grade">{currentGrade ?? "—"}</strong><small>{selected?.title ?? "Моя роль"}</small></div>
             <div className="trajectory-v2-grade-progress">
               <small>До следующего грейда</small>
-              <strong>{displayReadiness === null ? (gradeCatalogKnown?"Нет оценки":"Не опубликовано") : `${String(100 - displayReadiness)}%`}</strong>
+              <strong>{displayReadiness === null ? (roleGradeUnavailable ? "Недоступно" : gradeCatalogKnown?"Нет оценки":"Не опубликовано") : `${String(100 - displayReadiness)}%`}</strong>
               <progress max={100} value={displayReadiness ?? 0} aria-label="Готовность к следующему грейду" />
-              <small>{officialRoleGrade ? (roleGrade.data?.curriculum.state==="known" ? "Требования опубликованной программы подтверждаются сервером" : "Требования грейда пока не опубликованы") : (overview.concepts.career_grade.hint ?? "Карьерный грейд появится после публикации утверждённых правил")}</small>
+              <small>{roleGradeUnavailable ? "Сервис официального грейда временно недоступен. Пройденные курсы учитываются отдельно." : officialRoleGrade ? (roleGrade.data?.curriculum.state==="known" ? "Требования опубликованной программы подтверждаются сервером" : "Требования грейда пока не опубликованы") : (overview.concepts.career_grade.hint ?? "Карьерный грейд появится после публикации утверждённых правил")}</small>
             </div>
           </div>
           <div className="trajectory-v2-grade-callout">
