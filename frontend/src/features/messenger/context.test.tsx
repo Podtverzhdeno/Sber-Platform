@@ -119,7 +119,7 @@ describe("ContextPanel", () => {
     expect(screen.getByRole("tabpanel",{name:"Ссылки"})).toHaveTextContent("https://example.org/guide");
     fireEvent.click(screen.getByRole("tab",{name:"Боты"}));
     expect(screen.getByRole("tabpanel",{name:"Боты"})).toHaveTextContent("Боты не подключены");
-    fireEvent.click(screen.getByRole("button",{name:"Без звука"}));
+    fireEvent.click(screen.getByRole("button",{name:"Отключить уведомления"}));
     expect(onToggleMute).toHaveBeenCalledTimes(1);
   });
 
