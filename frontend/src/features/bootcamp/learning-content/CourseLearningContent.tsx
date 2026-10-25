@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { learningProgramFor } from "./programs";
 import { blueprintFor } from "./course-blueprints";
 import { knowledgeCheckFor } from "./knowledge-checks";
+import { ManualCompanionCard } from "./ManualCompanionCard";
 import "./learning-content.scss";
 
 type Props = {
@@ -154,6 +155,7 @@ export function CourseLearningContent({ courseKey, courseTitle, sourceUrl }: Pro
           <p className="bc-learning__eyebrow">{current < 4 ? "Основы" : "Прикладная практика"} · Урок {String(current + 1)} из {String(program.units.length)}</p>
           <h4 id="bc-learning-title">{unit.title}</h4>
           <p className="bc-learning__purpose"><strong>Цель:</strong> {unit.purpose}</p>
+          <ManualCompanionCard courseKey={courseKey} lessonIndex={current} />
           <h5>Разберёмся</h5>
           {unit.theory.map((paragraph, index) => <p key={String(index)}>{paragraph}</p>)}
           <h5>Пример</h5>
