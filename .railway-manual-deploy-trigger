@@ -36,3 +36,6 @@ release_request=2026-10-25-events-minimal-verified-ca8071842
 
 # Browser-tested rating trophy illustrations release; PR #67.
 release_request=2026-10-25-rating-art-13abc967e818
+
+# Events: compact actions, no list view, no standalone confirmation rows; 4/4 Chromium tests green
+release_request=2026-10-25-events-cards-only-compact-79e5ff51
