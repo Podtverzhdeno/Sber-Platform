@@ -1,12 +1,23 @@
 """Regression coverage for demo-only role title synchronization."""
 
-from importlib import import_module
+from importlib.util import module_from_spec, spec_from_file_location
+from pathlib import Path
 
 from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
 
 
+def load_role_migration():
+    # Alembic versions are scripts, not an importable Python package.
+    path = Path(__file__).resolve().parents[1] / "migrations/versions/20261025_0028_ai_demo_roles.py"
+    spec = spec_from_file_location("ai_demo_role_title_migration", path)
+    assert spec is not None and spec.loader is not None
+    module = module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def test_ai_role_migration_changes_only_seed_owned_track_titles(monkeypatch) -> None:
-    migration = import_module("migrations.versions.20261025_0028_ai_demo_roles")
+    migration = load_role_migration()
     executed = []
     monkeypatch.setattr(migration.op, "execute", executed.append)
 
@@ -30,7 +41,7 @@ def test_ai_role_migration_changes_only_seed_owned_track_titles(monkeypatch) -> 
 
 
 def test_migration_downgrade_does_not_restore_obsolete_career_labels(monkeypatch) -> None:
-    migration = import_module("migrations.versions.20261025_0028_ai_demo_roles")
+    migration = load_role_migration()
     executed = []
     monkeypatch.setattr(migration.op, "execute", executed.append)
 
