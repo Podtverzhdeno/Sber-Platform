@@ -464,7 +464,39 @@ function RecommendationDetails({ card, track, onOpenCourse, onOpenProgram }: { c
   </div>;
 }
 
-function RequirementsDetails({ cards, studyRecords, onSelect, onClose, onStartPractice }: { cards: CourseCardState[]; studyRecords: readonly StudyRecord[]; onSelect: (key: string) => void; onClose: () => void; onStartPractice:()=>void }) {
+function RequirementsDetails({ cards, studyRecords, onSelect, onClose, onStartPractice, policyCurriculum }: { cards: CourseCardState[]; studyRecords: readonly StudyRecord[]; onSelect: (key: string) => void; onClose: () => void; onStartPractice:()=>void; policyCurriculum?: BootcampOverview["curriculum"] | null }) {
+  // Published career-grade requirements supersede educational demo suggestions.
+  // Verified study alone never fulfills independently reviewed project evidence.
+  if (policyCurriculum?.state==="known") {
+    const outstanding=policyCurriculum.requirements.filter(req=>req.state!=="verified");
+    const courses=outstanding.filter(req=>req.kind==="course");
+    return <div className="bc-panel-content bc-ref-required-panel" data-reference="BC-R05" data-policy-version={policyCurriculum.policy_version??""}>
+      <div className="bc-ref-required-hero">
+        <span className="bc-ref-required-kicker">♛ Опубликованная программа грейда</span>
+        <h2>{outstanding.length===0?"Все условия подтверждены":
+          courses.length>0?`Осталось учебных требований: ${String(courses.length)}`:"Учебная часть завершена"}</h2>
+        <p>{outstanding.length===0
+          ?"Все требования подтверждены. Система оформляет разрешённый переход на следующий грейд по опубликованным правилам."
+          :"Для перехода на новый грейд необходимо выполнить и подтвердить все требования программы. Закрытие одного курса не заменяет практику и проверку."}</p>
+      </div>
+      <div className="bc-ref-required-body">
+        <h3>{outstanding.length>0?"Следующие требования":"Проверка завершена"}</h3>
+        {outstanding.length>0?<ol className="bc-ref-required-list">
+          {outstanding.map(req=>{
+            const linked=cards.find(card=>card.key===req.source_key);
+            return <li key={req.key} data-requirement-kind={req.kind}>
+              <span className="bc-ref-policy-icon" aria-hidden="true">{req.kind==="course"?"◈":"◆"}</span>
+              <div className="bc-ref-required-course-info"><h4>{req.title}</h4>
+                <small>{req.kind==="course"?"Обучение":req.kind==="project"?"Практический проект":"Подтверждение"} · {req.state==="reported"?"На проверке":"Ожидает выполнения"}</small></div>
+              {linked&&<button type="button" onClick={()=>{onSelect(linked.key);}}>Открыть <ArrowRight/></button>}
+            </li>;
+          })}
+        </ol>:<p className="bc-ref-required-empty">Ожидайте официального обновления грейда. Дублировать выполнение или отправлять доказательства повторно не требуется.</p>}
+        {outstanding.some(req=>req.kind!=="course")&&<button type="button" className="bc-ref-required-start-practice" onClick={onStartPractice}>Перейти к практике <ArrowRight/></button>}
+        <button type="button" className="bc-ref-required-close" onClick={onClose}>Вернуться в Bootcamp <ArrowRight/></button>
+      </div>
+    </div>;
+  }
   // A verified course has must_take=null in the authoritative projection.
   // Never derive a misleading completion percentage from the pending-only list.
   const pending = projectRoleStudy(cards, studyRecords).pending;
@@ -782,11 +814,17 @@ export function BootcampCatalog({
   const roleCourses = catalog.data.filter(forRole);
   const roleStudy = projectRoleStudy(roleCourses,study.data?.courses ?? []);
   const pendingRequired = roleStudy.pending;
+  const gradeCurriculum=gradeOverview.data?.selected_track_key===selectedRole
+    && gradeOverview.data.curriculum?.state==="known" ? gradeOverview.data.curriculum : null;
+  const policyRemaining=gradeCurriculum?.requirements.filter(req=>req.state!=="verified")??[];
+  const policyCourses=policyRemaining.filter(req=>req.kind==="course");
+  const remainingStudyCount=gradeCurriculum?policyCourses.length:pendingRequired.length;
+  const studyNeedsAction=gradeCurriculum?policyRemaining.length>0:pendingRequired.length>0;
   const officialGrade = gradeOverview.data?.role_summary.track_key===selectedRole && gradeOverview.data.role_summary.grade_state==="known"
     ? gradeOverview.data.role_summary.current_grade_title : null;
-  const progressionComplete = roleStudy.required.length>0 && pendingRequired.length===0;
-  const requiredWord = new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "one" ? "курс" :
-    new Intl.PluralRules("ru-RU").select(pendingRequired.length) === "few" ? "курса" : "курсов";
+  const progressionComplete = gradeCurriculum?policyRemaining.length===0:roleStudy.required.length>0 && pendingRequired.length===0;
+  const requiredWord = new Intl.PluralRules("ru-RU").select(remainingStudyCount) === "one" ? "курс" :
+    new Intl.PluralRules("ru-RU").select(remainingStudyCount) === "few" ? "курса" : "курсов";
   const suggestedCourses = orderRoleCourses(catalog.data.filter(forRole), selectedRole).filter((card) => card.access_state === "available" && card.completion_state === "not_started" && !studyFinished(card.key) && (selectedRole !== "all" || card.relevant));
   const nextCourse = suggestedCourses.find(card => studyStarted(card.key)) ?? suggestedCourses[0] ?? null;
   const selectedRoleTitle = selectedRole === "all" ? "Все активные направления" : aiRoleTitle(selectedRole);
@@ -845,9 +883,9 @@ export function BootcampCatalog({
             <img className="bc-ref-trophy" alt="" src="/bootcamp/trophy.svg" />
             <div className="bc-ref-grade-body">
               <div className="bc-ref-grade-kicker">♛ &nbsp; Учебные требования роли</div>
-              <h2 id="bc-grade-title" aria-live="polite">{pendingRequired.length > 0 ? <>{pendingRequired.length === 1 ? "Остался" : "Осталось"} <em>{pendingRequired.length}</em> {pendingRequired.length === 1 ? "обязательный" : "обязательных"} {requiredWord}</> : progressionComplete ? "Учебная часть завершена" : "Обязательные курсы"}</h2>
-              <p>{pendingRequired.length > 0 ? "Оставшиеся учебные требования обновляются после завершения курса. Практика и подтверждение проверяются отдельно." : progressionComplete ? "Следующий этап — практические задачи и подтверждение компетенций. Профессиональный грейд обновится после проверки требований опубликованной программы." : "Обязательные курсы пока не указаны. Дальнейшие требования смотри в траектории."}</p>
-              <div className="bc-ref-grade-list">{progressionComplete ? <span className="bc-ref-grade-next" data-testid="bootcamp-next-stage">◆ Следующий этап: практика и проверка результатов</span> : pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => { openPanel("detail",card.key); }}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
+              <h2 id="bc-grade-title" aria-live="polite">{remainingStudyCount > 0 ? <>{remainingStudyCount === 1 ? "Остался" : "Осталось"} <em>{remainingStudyCount}</em> {remainingStudyCount === 1 ? "обязательный" : "обязательных"} {requiredWord}</> : progressionComplete ? "Учебная часть завершена" : "Обязательные курсы"}</h2>
+              <p>{studyNeedsAction ? gradeCurriculum ? "Следующие требования опубликованной программы. Для повышения нужно подтвердить каждый пункт." : "Оставшиеся учебные требования обновляются после завершения курса. Практика и подтверждение проверяются отдельно." : progressionComplete ? "Все необходимые требования завершены. Профессиональный грейд обновится после серверного подтверждения перехода." : "Обязательные курсы пока не указаны. Дальнейшие требования смотри в траектории."}</p>
+              <div className="bc-ref-grade-list">{progressionComplete ? <span className="bc-ref-grade-next" data-testid="bootcamp-next-stage">◆ Следующий этап: практика и проверка результатов</span> : gradeCurriculum ? policyRemaining.slice(0,2).map(req=><button key={req.key} type="button" onClick={()=>{const card=catalog.data.find(item=>item.key===req.source_key);if(card){openPanel("detail",card.key);}else{openPanel("requirements");}}}><span>◆</span>{req.title}<span aria-hidden="true">›</span></button>) : pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => { openPanel("detail",card.key); }}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
             </div>
             <button className={"bc-ref-grade-button"+(progressionComplete?" bc-ref-grade-button--unlock":"")} type="button" onClick={() => { if(progressionComplete){setMilestoneCelebration({mode:"stage-unlocked",roleTitle:selectedRoleTitle});}else{openPanel("requirements");} }} aria-label={progressionComplete?"Следующий этап — открыть новую ступень развития":"Посмотреть курсы"}>{progressionComplete ? <><Sparkles size={17} aria-hidden="true"/>Следующий этап</> : "Посмотреть курсы"} <ArrowRight /></button>
           </section>
@@ -908,7 +946,7 @@ export function BootcampCatalog({
             onReason={() => { openPanel("reason", deepLinked.key); }} />)}
       </Drawer>
       <Drawer title="Требования к обучению" open={panel === "requirements"} onClose={closePanel}>
-        <RequirementsDetails cards={roleCourses} studyRecords={study.data?.courses ?? []} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} onStartPractice={() => { void navigate("/workspace/1"); }} />
+        <RequirementsDetails cards={roleCourses} studyRecords={study.data?.courses ?? []} policyCurriculum={gradeCurriculum} onSelect={(key) => { openPanel("detail", key); }} onClose={closePanel} onStartPractice={() => { void navigate("/workspace/1"); }} />
       </Drawer>
       {milestoneCelebration && <GradeMilestoneCelebration mode={milestoneCelebration.mode}
         roleTitle={milestoneCelebration.roleTitle} fromGrade={milestoneCelebration.fromGrade} toGrade={milestoneCelebration.toGrade}
