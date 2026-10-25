@@ -23,6 +23,7 @@ import { learningSummaryQueryKey, loadLearningSummary, type LearningCourse } fro
 import { RoleInfoDialog, StageTaskDrawer } from "./details";
 import { canonicalAiRoles } from "./source-reference/source-catalog";
 import { primaryTrajectoryKey, roleVisualTone } from "./role-state";
+import { levelCoursesProgress, loadRoleLevel, roleLevelQueryKey } from "../impulse-role-level";
 import type {
   DevelopmentOverviewView,
   MilestoneView,
@@ -139,6 +140,13 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     enabled:selectedKey!==null,
     retry:false,
   });
+  const learningLevel = useQuery({
+    queryKey:roleLevelQueryKey(selectedKey),
+    queryFn:()=>loadRoleLevel(selectedKey ?? ""),
+    enabled:selectedKey!==null,retry:false,
+  });
+  const roleLevel=learningLevel.data?.track_key===selectedKey ? learningLevel.data : null;
+  const nextCycleUnpublished=roleLevel!==null && roleLevel.level>0 && roleLevel.curriculum_state==="unpublished";
   const officialRoleGrade=roleGrade.data?.selected_track_key===selectedKey
     && roleGrade.data.role_summary.grade_state==="known"
     ? roleGrade.data.role_summary : null;
@@ -296,6 +304,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               primary={selected.track_key === primaryKey}
               roadmap={selectedRoadmap}
               learningCourses={learning.data?.courses}
+              nextCycleUnpublished={nextCycleUnpublished}
               roadmapPending={roadmapCatalog.isPending && roadmaps.isPending}
               roadmapError={roadmapCatalog.isError && roadmaps.isError}
               roadmapRetry={() => {
@@ -353,19 +362,27 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         <section className="trajectory-v2-grade-panel">
           <header><h3>Твой грейд</h3><button type="button" className="trajectory-v2-all-grades-link" onClick={() => { gradeTriggerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; setGradesOpen(true); }}>Все уровни →</button></header>
           <div className="trajectory-v2-grade-body">
-            <div className="trajectory-v2-grade-ring" style={{ background: `conic-gradient(#0de5d6 0 ${String(displayReadiness ?? 0)}%, #204a68 ${String(displayReadiness ?? 0)}% 100%)` }}><strong data-testid="trajectory-official-grade">{currentGrade ?? "—"}</strong><small>{selected?.title ?? "Моя роль"}</small></div>
+            <div className="trajectory-v2-grade-ring" style={{background:`conic-gradient(#0de5d6 0 ${String(roleLevel ? levelCoursesProgress(roleLevel) : 0)}%, #204a68 ${String(roleLevel ? levelCoursesProgress(roleLevel) : 0)}% 100%)`}}>
+              <strong data-testid="trajectory-impulse-level">{roleLevel ? `L${String(roleLevel.level)}` : "—"}</strong>
+              <small>{roleLevel ? `Цикл ${String(roleLevel.cycle_number)}` : "Загрузка"}</small>
+            </div>
             <div className="trajectory-v2-grade-progress">
-              <small>До следующего грейда</small>
-              <strong>{displayReadiness === null ? (roleGradeUnavailable ? "Недоступно" : gradeCatalogKnown?"Нет оценки":"Не опубликовано") : `${String(100 - displayReadiness)}%`}</strong>
-              <progress max={100} value={displayReadiness ?? 0} aria-label="Готовность к следующему грейду" />
-              <small>{roleGradeUnavailable ? "Сервис официального грейда временно недоступен. Пройденные курсы учитываются отдельно." : officialRoleGrade ? (roleGrade.data?.curriculum.state==="known" ? "Требования опубликованной программы подтверждаются сервером" : "Требования грейда пока не опубликованы") : (overview.concepts.career_grade.hint ?? "Карьерный грейд появится после публикации утверждённых правил")}</small>
+              <small>{roleLevel ? `До уровня L${String(roleLevel.level+1)}` : "Учебные уровни Impulse"}</small>
+              <strong>{roleLevel?.curriculum_state==="published"
+                ? `${String(roleLevel.completed_courses)} из ${String(roleLevel.required_courses)} курсов`
+                : roleLevel ? "Новый цикл" : "Данных нет"}</strong>
+              <progress max={100} value={roleLevel ? levelCoursesProgress(roleLevel) : 0} aria-label="Освоение курсов текущего цикла"/>
+              <small>{roleLevel?.curriculum_state==="published"
+                ? `Практика одобрена: ${String(roleLevel.approved_practices)} из ${String(roleLevel.required_practices)}`
+                : roleLevel ? "Требования следующего цикла ещё не опубликованы" : "Проверяем сохранённый уровень"}</small>
             </div>
           </div>
-          <div className="trajectory-v2-grade-callout">
-            <span aria-hidden="true" className="trajectory-v2-grade-callout-icon">⌁</span>
-            <span>{overview.concepts.career_grade.state === "ready"
-              ? (overview.next_outcome !== null ? `Заверши текущий шаг «${overview.next_outcome.target_title}», чтобы приблизиться к следующему грейду. После проверки прогресс обновится.` : "Прогресс рассчитывается по проверенным результатам")
-              : gradeCatalogKnown ? "Грейд рассчитывается по серверной политике и проверенным результатам" : "Учебные курсы уже учитываются отдельно. Присвоение грейда станет доступно после публикации официальной программы."}</span>
+          <div className="trajectory-v2-grade-callout"><span aria-hidden="true" className="trajectory-v2-grade-callout-icon">⌁</span>
+            <span>{roleLevel?.advance_ready
+              ? "Учебные курсы и практика подтверждены. Перейди в Bootcamp и нажми «Следующий этап» для сохранения L1."
+              : nextCycleUnpublished
+                ? "Текущий L1 сохранён. Предыдущие сертификаты не становятся выполненными заданиями нового цикла."
+                : "Завершай курсы и передавай практические работы на проверку. Это уровень Impulse, не карьерный грейд Сбера."}</span>
           </div>
         </section>
         <section className="trajectory-v2-next-panel">
@@ -640,6 +657,7 @@ export function RoleDetailPanel(props: {
   primary: boolean;
   roadmap: RoadmapView | null;
   learningCourses?: LearningCourse[];
+  nextCycleUnpublished?: boolean;
   roadmapPending: boolean;
   roadmapError: boolean;
   roadmapRetry: () => void;
