@@ -1,7 +1,7 @@
 # Claim XS-201-JOURNEY-20261026
 
 - session_id: gpt6-20261026-journey01
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26T00:55:00+03:00
 - heartbeat_at: 2026-10-26T00:55:00+03:00
 - base_revision: d6dde0b7271884a4bf582827ca88d373ba30fce3
@@ -18,5 +18,15 @@
   - uv run ruff check and format --check on owned Python files
   - uv run pytest tests/test_journey_projection.py
   - independent review before DONE
-- progress: Claims inspected; no current claim holds the declared backend API module/registry scope. Read-only inspection confirmed separate enrollment, study, work, and leaderboard read models; implementing authorized joined read projection.
+- progress: Joined participant API shipped to main; actual PostgreSQL test covers 8 lessons, persisted finish, idempotent certificate and non-award semantics. Focused CI green; independent review still required.
+- changed_files:
+  - src/impulse/api/v1/journey.py
+  - src/impulse/api/v1/__init__.py
+  - tests/test_journey_projection.py
+  - .github/workflows/journey-projection-qa.yml
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40238835389 (format/lint/migrations/pytest success)
+- unverified:
+  - Whole frontend E2E across every role and actual UI consumers
+- next_step: independent review, typed API contract generation and UI wiring by integration owner
 - blockers: Local Git checkout unavailable (GitHub DNS blocked); server-based CI evidence required
