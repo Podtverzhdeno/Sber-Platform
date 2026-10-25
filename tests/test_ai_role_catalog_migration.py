@@ -2,11 +2,25 @@
 
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+from types import ModuleType
+from typing import Protocol, cast
+
+import pytest
+from sqlalchemy.sql.elements import TextClause
 
 from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
 
 
-def load_role_migration():
+class RoleMigration(Protocol):
+    AI_ROLE_TITLES: dict[str, str]
+    op: ModuleType
+
+    def upgrade(self) -> None: ...
+
+    def downgrade(self) -> None: ...
+
+
+def load_role_migration() -> RoleMigration:
     # Alembic versions are scripts, not an importable Python package.
     migration_dir = Path(__file__).resolve().parents[1] / "migrations" / "versions"
     path = migration_dir / "20261025_0028_ai_demo_roles.py"
@@ -14,12 +28,14 @@ def load_role_migration():
     assert spec is not None and spec.loader is not None
     module = module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module
+    return cast(RoleMigration, module)
 
 
-def test_ai_role_migration_changes_only_seed_owned_track_titles(monkeypatch) -> None:
+def test_ai_role_migration_changes_only_seed_owned_track_titles(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     migration = load_role_migration()
-    executed = []
+    executed: list[TextClause] = []
     monkeypatch.setattr(migration.op, "execute", executed.append)
 
     migration.upgrade()
@@ -41,9 +57,11 @@ def test_ai_role_migration_changes_only_seed_owned_track_titles(monkeypatch) -> 
         assert "roadmap" not in sql
 
 
-def test_migration_downgrade_does_not_restore_obsolete_career_labels(monkeypatch) -> None:
+def test_migration_downgrade_does_not_restore_obsolete_career_labels(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     migration = load_role_migration()
-    executed = []
+    executed: list[TextClause] = []
     monkeypatch.setattr(migration.op, "execute", executed.append)
 
     migration.downgrade()
