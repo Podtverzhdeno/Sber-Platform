@@ -61,11 +61,13 @@ class SqlRecognitionStore(RecognitionStore):
     async def public_seasons(self) -> tuple[RatingSeason, ...]:
         async with self.database.sessions() as session:
             rows = (
-                (await session.execute(
-                    select(seasons)
-                    .where(seasons.c.status != SeasonStatus.SCHEDULED.value)
-                    .order_by(seasons.c.season_key.desc(), seasons.c.id.desc())
-                ))
+                (
+                    await session.execute(
+                        select(seasons)
+                        .where(seasons.c.status != SeasonStatus.SCHEDULED.value)
+                        .order_by(seasons.c.season_key.desc(), seasons.c.id.desc())
+                    )
+                )
                 .mappings()
                 .all()
             )
