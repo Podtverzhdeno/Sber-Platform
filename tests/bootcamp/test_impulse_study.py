@@ -26,7 +26,9 @@ API = "/api/v1/me/bootcamp/impulse-study/demo-course-1"
 
 
 def actor(person_id: UUID, role: Role) -> ActorContext:
-    scopes: frozenset[str] = frozenset({"verification:write"}) if role is Role.OPERATOR else frozenset()
+    scopes: frozenset[str] = (
+        frozenset({"verification:write"}) if role is Role.OPERATOR else frozenset()
+    )
     return ActorContext(
         person_id=person_id,
         display_name="Test learner",
@@ -83,7 +85,7 @@ def test_study_progress_requires_order_and_practice_requires_review(
     async def accessible(*_args: object) -> None:
         return None
 
-    monkeypatch.setattr(editorial_learning, "_assert_course_access", accessible)
+    monkeypatch.setattr(editorial_learning, "assert_course_access", accessible)
     app = FastAPI(lifespan=lifespan)
     install_error_handlers(app)
     app.include_router(editorial_learning.router, prefix="/api/v1")
