@@ -604,8 +604,13 @@
 
 /* Canvas variations adjust the chat columns, never the application shell. */
 @media (min-width: 1400px) {
+  /* The empty state keeps the 44px breathing gutter from the supplied design.
+     The fixed host selector owns width:auto, so override its right inset. */
+  .page-shell:has(.sberchat-reference[data-message-state="empty"]) .workspace-content > .sberchat-reference[data-message-state="empty"] {
+    right:44px;
+  }
   .messenger-page.sberchat-reference[data-message-state="empty"] {
-    height:calc(100dvh - 64px);width:calc(100% - 44px);
+    height:calc(100dvh - 64px);
     overflow:hidden;border-radius:0 14px 14px 0;
     border:1px solid #123251;border-left:0;
   }
