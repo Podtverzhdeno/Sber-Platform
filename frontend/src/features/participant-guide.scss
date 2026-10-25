@@ -441,3 +441,10 @@
 .pg-welcome-library:hover { color:white; }
 .pg-welcome-library:focus-visible { outline:3px solid #3ee9dd; outline-offset:3px; }
 @media (max-width:400px) { .pg-welcome-footer {flex-wrap:wrap;justify-content:center;} }
+
+/* Help lives alongside the existing portfolio actions, without adding a new layout row. */
+.pg-topic-shortcut--icon {
+  display:inline-grid;place-items:center;width:35px;min-width:35px;height:42px;
+  padding:0;border-radius:10px;
+}
+.pg-topic-shortcut--icon svg {width:19px;height:19px;}
