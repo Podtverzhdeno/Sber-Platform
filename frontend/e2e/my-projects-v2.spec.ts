@@ -560,20 +560,21 @@ test("sharing the active tab creates a useful deep link and handles clipboard fa
 test("checkpoint popup stores binary file and submits stage-specific contribution",async({page})=>{
   test.setTimeout(95_000);
   await page.setViewportSize({width:1548,height:1016});
-  let uploaded:{filename:string;content_type:string;base64_data:string}|null=null;
-  let submission:{summary:string;artifact_key:string;file_ids:string[];external_url:string|null}|null=null;
+  const uploaded:{filename:string;content_type:string;base64_data:string}[]=[];
+  const submissions:{summary:string;artifact_key:string;file_ids:string[];external_url:string|null}[]=[];
   let stageHistory:{checkpoint_key:string;contribution_id:string;version:number;status:string}[]=[];
   await fixture(page);
   await page.route("**/api/v1/me/assignments/assignment-1/checkpoint-submissions",route=>
     route.fulfill({json:stageHistory}));
   await page.route("**/api/v1/me/assignments/assignment-1/checkpoints/cp-3/files",route=>{
-    uploaded=route.request().postDataJSON() as typeof uploaded;
+    uploaded.push(route.request().postDataJSON() as (typeof uploaded)[number]);
     return route.fulfill({status:200,json:{id:"00000000-0000-0000-0000-000000000221",filename:"prototype.txt",size_bytes:34}});
   });
   await page.route("**/api/v1/me/assignments/assignment-1/checkpoints/cp-3/submit",route=>{
-    submission=route.request().postDataJSON() as typeof submission;
+    const payload=route.request().postDataJSON() as (typeof submissions)[number];
+    submissions.push(payload);
     stageHistory=[{checkpoint_key:"cp-3",contribution_id:"00000000-0000-0000-0000-000000000222",version:2,status:"submitted"}];
-    return route.fulfill({status:200,json:{id:"00000000-0000-0000-0000-000000000222",assignment_id:"assignment-1",version:2,personal_summary:submission?.summary??"",artifact_keys:["report"],status:"submitted"}});
+    return route.fulfill({status:200,json:{id:"00000000-0000-0000-0000-000000000222",assignment_id:"assignment-1",version:2,personal_summary:payload.summary,artifact_keys:["report"],status:"submitted"}});
   });
   await page.locator(".mp-project-tile").first().getByRole("button",{name:/Продолжить|Открыть/}).click();
   const first=page.getByTestId("project-next-action");
@@ -596,12 +597,12 @@ test("checkpoint popup stores binary file and submits stage-specific contributio
   await expect(send).toBeEnabled();
   await send.click();
   await expect(popup).toContainText("Решение отправлено");
-  await expect.poll(()=>uploaded).not.toBeNull();
-  await expect.poll(()=>submission).not.toBeNull();
-  expect(uploaded?.filename).toBe("prototype.txt");
-  expect(uploaded?.content_type).toBe("text/plain");
-  expect(submission?.file_ids).toEqual(["00000000-0000-0000-0000-000000000221"]);
-  expect(submission?.summary).toContain("Подготовил документацию");
+  await expect.poll(()=>uploaded.length).toBe(1);
+  await expect.poll(()=>submissions.length).toBe(1);
+  expect(uploaded[0]?.filename).toBe("prototype.txt");
+  expect(uploaded[0]?.content_type).toBe("text/plain");
+  expect(submissions[0]?.file_ids).toEqual(["00000000-0000-0000-0000-000000000221"]);
+  expect(submissions[0]?.summary).toContain("Подготовил документацию");
   await popup.getByRole("button",{name:/Вернуться к проекту/}).first().click();
   await expect(popup).toHaveCount(0);
 });
