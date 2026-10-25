@@ -1,0 +1,16 @@
+# Claim TRJ-AI-CANONICAL-ROLES-20261025
+- task_id: TRJ-AI-CANONICAL-ROLES-20261025
+- session_id: gpt6-20261025-role-catalog
+- status: IN_PROGRESS
+- base_revision: 7decd998fb5718e61ffa57759294ce5e9817194c
+- lane: trajectory-role-catalog
+- write_scope:
+  - frontend/src/features/trajectory-v2/source-reference/source-catalog.ts
+  - frontend/src/features/trajectory-v2/source-reference/source-catalog.test.ts
+  - frontend/src/features/trajectory-v2/page.tsx
+  - frontend/src/features/trajectory-v2/page.test.tsx
+  - migrations/versions/20261025_0028_ai_demo_roles.py
+  - tests/test_ai_role_catalog_migration.py
+  - .agents/coordination/claims/TRJ-AI-CANONICAL-ROLES-20261025.lock/status.md
+- verification: all seven canonical AI names; preserve server track keys and progress; no legacy phantom cards; DB demo-only rename by slug; no runtime enrollment mutations
+- blockers: deployment watchPatterns prevent automatic Railway publication
