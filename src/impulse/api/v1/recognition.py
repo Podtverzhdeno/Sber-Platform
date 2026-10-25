@@ -5,12 +5,14 @@ from decimal import Decimal
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel, Field
 
-from impulse.api.v1.identity import csrf_session
+from impulse.api.errors import ApiError
+from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.application.recognition import RecognitionService
+from impulse.domain.identity import Role
 from impulse.domain.recognition import (
     CohortRule,
     Credential,
@@ -175,6 +177,20 @@ class LeaderboardEntryView(BaseModel):
     trophies: list[TrophyProofView]
     offers: list[OfferProofView]
     anonymized: bool
+
+
+class OwnStandingView(BaseModel):
+    """Owner-only published-season standing; never copied into public leaderboard."""
+
+    season_id: UUID
+    season_key: str
+    season_title: str
+    season_status: SeasonStatus
+    season_version: int
+    policy_version: int | None
+    place: int | None
+    score: Decimal | None
+    successful_projects: int | None
 
 
 class PublicCredentialView(BaseModel):
@@ -457,6 +473,40 @@ async def published_rating_seasons(
 ) -> list[SeasonView]:
     """Publicly discover published seasons; scheduled drafts are not exposed."""
     return [_season_view(item) for item in await service.public_seasons()]
+
+
+@router.get("/me/rating/standings", response_model=list[OwnStandingView])
+async def my_rating_standings(
+    authenticated: Annotated[AuthenticatedSession, Depends(current_session)],
+    service: Annotated[RecognitionService, Depends(_service)],
+    response: Response,
+) -> list[OwnStandingView]:
+    """Show one's own place without requiring public-rating publication consent.
+
+    Never enumerate other people. Only discoverable seasons are considered,
+    and missing standings are explicitly unknown (None), not an invented zero.
+    """
+    response.headers["Cache-Control"] = "private, no-store"
+    if authenticated.actor.active_role is not Role.PARTICIPANT:
+        raise ApiError("RESOURCE_NOT_FOUND", "Resource not found.", 404)
+    seasons = await service.public_seasons()
+    result: list[OwnStandingView] = []
+    for season in seasons:
+        standing = await service.store.standing(season.season_id, authenticated.actor.person_id)
+        result.append(
+            OwnStandingView(
+                season_id=season.season_id,
+                season_key=season.key,
+                season_title=season.title,
+                season_status=season.status,
+                season_version=season.version,
+                policy_version=season.policy_version,
+                place=standing.place if standing else None,
+                score=standing.score if standing else None,
+                successful_projects=standing.successful_projects if standing else None,
+            )
+        )
+    return result
 
 
 @router.get(
