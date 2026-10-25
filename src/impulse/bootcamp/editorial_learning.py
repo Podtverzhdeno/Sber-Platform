@@ -152,19 +152,23 @@ async def impulse_study_summary(
     person = authenticated.actor.person_id
     async with request.app.state.database.sessions() as session:
         rows = (
-            await session.execute(
-                text(
-                    "SELECT p.course_key, p.completed_units, p.total_units, "
-                    "p.finished_at, p.certificate_id, p.updated_at, "
-                    "s.status AS practice_status, s.practical_certificate_id "
-                    "FROM impulse_course_progress AS p "
-                    "LEFT JOIN impulse_practical_submissions AS s "
-                    "ON s.person_id = p.person_id AND s.course_key = p.course_key "
-                    "WHERE p.person_id = :person ORDER BY p.updated_at DESC, p.course_key"
-                ),
-                {"person": person},
+            (
+                await session.execute(
+                    text(
+                        "SELECT p.course_key, p.completed_units, p.total_units, "
+                        "p.finished_at, p.certificate_id, p.updated_at, "
+                        "s.status AS practice_status, s.practical_certificate_id "
+                        "FROM impulse_course_progress AS p "
+                        "LEFT JOIN impulse_practical_submissions AS s "
+                        "ON s.person_id = p.person_id AND s.course_key = p.course_key "
+                        "WHERE p.person_id = :person ORDER BY p.updated_at DESC, p.course_key"
+                    ),
+                    {"person": person},
+                )
             )
-        ).mappings().all()
+            .mappings()
+            .all()
+        )
     development = request.app.state.development_service
     titles = {course.key: course.title for course in await development.store.courses()}
     courses = [
@@ -185,9 +189,7 @@ async def impulse_study_summary(
         started_courses=len(courses),
         finished_courses=sum(course.finished for course in courses),
         completed_lessons=sum(course.completed_units for course in courses),
-        approved_practices=sum(
-            course.practical_certificate_id is not None for course in courses
-        ),
+        approved_practices=sum(course.practical_certificate_id is not None for course in courses),
         courses=courses,
     )
 
