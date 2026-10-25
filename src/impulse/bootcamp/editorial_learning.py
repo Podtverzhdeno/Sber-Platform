@@ -46,6 +46,7 @@ class ImpulseCourseSummary(BaseModel):
     total_units: int = Field(ge=1)
     finished: bool
     finished_at: datetime | None
+    certificate_id: UUID | None
     updated_at: datetime
     practice_status: str | None
     practical_certificate_id: UUID | None
@@ -180,6 +181,7 @@ async def impulse_study_summary(
             total_units=int(row["total_units"]),
             finished=row["certificate_id"] is not None,
             finished_at=row["finished_at"],
+            certificate_id=row["certificate_id"],
             updated_at=row["updated_at"],
             practice_status=row["practice_status"],
             practical_certificate_id=row["practical_certificate_id"],
