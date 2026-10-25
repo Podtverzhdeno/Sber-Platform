@@ -141,3 +141,35 @@ test("My Projects: hover animations and workspace transition are real",async({pa
   await page.getByRole("button",{name:"К странице проекта"}).click();
   await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
 });
+
+test("My Projects: reference desktop grid and contextual help",async({page})=>{
+  await page.setViewportSize({width:1672,height:941});
+  await fixture(page);
+  const root=page.locator(".mpv2");
+  const grid=root.locator(".mp-project-grid");
+  await expect(grid.locator(".mp-project-tile")).toHaveCount(3);
+  const columns=await grid.evaluate(element=>getComputedStyle(element).gridTemplateColumns.split(/\\s+/).filter(Boolean).length);
+  expect(columns).toBe(4);
+  const help=root.getByRole("button",{name:"Как это работает?"});
+  await help.click();
+  await expect(help).toHaveAttribute("aria-expanded","true");
+  await expect(root.getByRole("region",{name:"Как работают мои проекты"})).toBeVisible();
+  await help.click();
+  await expect(help).toHaveAttribute("aria-expanded","false");
+});
+
+test("My Projects: quick preview tabs open correct deep-linked details",async({page})=>{
+  await page.setViewportSize({width:1672,height:941});
+  await fixture(page);
+  const root=page.locator(".mpv2");
+  await root.getByRole("button",{name:"Быстрый просмотр"}).first().click();
+  await root.locator(".mp-preview__tabs").getByRole("button",{name:"Прогресс"}).click();
+  await expect(page.locator('[data-project-screen="detail"]')).toBeVisible();
+  await expect(page.getByRole("tab",{name:"Прогресс"})).toHaveAttribute("aria-selected","true");
+  await expect(page.getByRole("heading",{name:"Прогресс по этапам"})).toBeVisible();
+  await page.getByRole("button",{name:/Мои проекты/}).first().click();
+  await root.getByRole("button",{name:"Быстрый просмотр"}).first().click();
+  await root.locator(".mp-preview__tabs").getByRole("button",{name:"Бонусы и выгоды"}).click();
+  await expect(page.getByRole("tab",{name:"Бонусы и выгоды"})).toHaveAttribute("aria-selected","true");
+  await expect(page.locator(".mp-rewards-full button")).toHaveCount(7);
+});
