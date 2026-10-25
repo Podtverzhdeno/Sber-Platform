@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { overviewFixture } from "../participant-home-v2/fixture";
 import type { DevelopmentOverviewView } from "../participant-home-v2/client";
-import { StageDetail, TrajectoryV2Body } from "./page";
+import { StageDetail, StagePathSection, TrajectoryV2Body } from "./page";
 import { primaryTrajectoryKey, roleVisualTone } from "./role-state";
 import { milestoneState } from "./client";
 import type { RoadmapView } from "./client";
@@ -274,5 +274,64 @@ describe("trajectory v2 stage path", () => {
     expect(screen.getByTestId("trajectory-stage-detail").textContent).toContain(
       "Задача · demo-task-1",
     );
+  });
+});
+
+describe("Persisted course learning versus verified milestone state", () => {
+  it("shows an 8/8 lesson course as studied but does not falsely complete its roadmap checkpoint", () => {
+    const role = rolesFixture[0];
+    if (!role) throw new Error("Role fixture missing");
+    render(<StagePathSection
+      role={role}
+      roadmap={roadmapWithNext}
+      pending={false}
+      error={false}
+      retry={vi.fn()}
+      stageKey="api"
+      onStageSelect={vi.fn()}
+      onOpenDetails={vi.fn()}
+      learningCourses={[{
+        course_key:"python-api",
+        title:"API и сервисы",
+        completed_units:8,
+        total_units:8,
+        finished:true,
+        certificate_id:"study-cert",
+        finished_at:"2026-10-25T19:00:00Z",
+        updated_at:"2026-10-25T19:00:00Z",
+        practice_status:null,
+        practical_certificate_id:null,
+      }]}
+    />);
+    const api = screen.getByRole("button", {name:/API и сервисы/});
+    expect(api).toHaveAttribute("data-stage-state","current");
+    expect(api).toHaveAttribute("data-study-state","studied");
+    expect(api).toHaveTextContent("Учебный курс ✓");
+    expect(screen.getByTestId("trajectory-study-progress")).toHaveTextContent("8 из 8 уроков");
+    const progress=screen.getByRole("progressbar",{name:"Учебный прогресс выбранной траектории"});
+    expect(progress).toHaveAttribute("value","8");
+    expect(progress).toHaveAttribute("max","8");
+    expect(screen.getByText(/1 завершено · 3 этапов/)).toBeInTheDocument();
+  });
+
+  it("does not attribute any self-study progress to a role the participant has not chosen", () => {
+    const role = rolesFixture[2];
+    if (!role) throw new Error("Role fixture missing");
+    render(<StagePathSection
+      role={role}
+      roadmap={{...roadmapFixture,track_key:"product",next_step:null}}
+      pending={false}
+      error={false}
+      retry={vi.fn()}
+      stageKey={null}
+      onStageSelect={vi.fn()}
+      onOpenDetails={vi.fn()}
+      learningCourses={[{
+        course_key:"python-api",title:"API",completed_units:8,total_units:8,finished:true,certificate_id:"demo",
+        finished_at:null,updated_at:"2026-10-25T19:00:00Z",practice_status:null,practical_certificate_id:null,
+      }]}
+    />);
+    expect(screen.queryByTestId("trajectory-study-progress")).not.toBeInTheDocument();
+    expect(screen.getByRole("button",{name:/API и сервисы/})).toHaveAttribute("data-study-state","none");
   });
 });
