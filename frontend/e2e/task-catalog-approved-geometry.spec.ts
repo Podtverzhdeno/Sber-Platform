@@ -46,6 +46,19 @@ async function openReferenceVolumeCatalog(page: Page) {
 test("approved cards composition: four KPI cards, detail at right, five planned stages and four conditional benefits", async ({ page }) => {
   await openReferenceVolumeCatalog(page);
   await expect(page.locator(".catalog-v2-kpi")).toHaveCount(4);
+  // The source has a partially filled average-match donut. The stroke must
+  // represent the real API average, never an unconditionally complete ring.
+  const averageKpi = page.locator(".catalog-v2-kpi").nth(1);
+  const averageText = await averageKpi.locator("strong").innerText();
+  const displayedAverage = Number.parseFloat(averageText.replace("%", "").replace(",", "."));
+  expect(Number.isFinite(displayedAverage)).toBe(true);
+  const kpiArc = averageKpi.locator(".catalog-v2-kpi-ring-value");
+  await expect(kpiArc).toHaveCount(1);
+  const arc = await kpiArc.getAttribute("stroke-dasharray");
+  expect(arc).toBe(`${String(Math.min(100, Math.max(0, displayedAverage)))} 100`);
+  const ringBox = await averageKpi.locator(".catalog-v2-kpi-ring svg").boundingBox();
+  expect(ringBox?.width).toBeGreaterThan(20);
+
   await expect(page.locator(".catalog-v2-stage-track li")).toHaveCount(5);
   await expect(page.locator(".catalog-v2-benefits-section li")).toHaveCount(4);
   // Every branded source mark in approved 01/03 must be the original SVG
