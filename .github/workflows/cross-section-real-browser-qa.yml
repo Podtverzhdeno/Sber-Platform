@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "frontend/e2e/cross-section-real-api.spec.ts"
+      - "src/impulse/api/security.py"
       - ".github/workflows/cross-section-real-browser-qa.yml"
   pull_request:
     paths:
