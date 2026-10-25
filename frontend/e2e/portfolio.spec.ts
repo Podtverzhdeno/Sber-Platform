@@ -57,50 +57,53 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
   expect(Math.abs((tabs.y - hero.y - hero.height) - 12)).toBeLessThanOrEqual(3);
   expect(projects.x).toBeLessThan(passport.x);
   expect(Math.abs(projects.y - passport.y)).toBeLessThanOrEqual(2);
-  // The overview has two stacked right-hand cards and three lower cards.
-  // All their baselines must align; no empty strip is allowed below projects.
-  const checkAlignedRows = async () => {
-    const boxes = await Promise.all(
-      [".p2-projects-panel", ".p2-passport-panel", ".p2-certs-panel", ".p2-about-panel", ".p2-trust-panel", ".p2-visibility-panel", ".p2-project-list"]
-        .map(async selector => {
-          const box = await page.locator(selector).boundingBox();
-          if (!box) throw new Error("Missing overview panel: " + selector);
-          return { selector, top:box.y, bottom:box.y+box.height, height:box.height };
-        })
-    );
-    const panel = (selector: string) => {
-      const value = boxes.find(item => item.selector === selector);
-      if (!value) throw new Error("Overview panel lost: " + selector);
-      return value;
-    };
-    const projectsPanel = panel(".p2-projects-panel");
-    const lastRight = panel(".p2-certs-panel");
-    const aboutPanel = panel(".p2-about-panel");
-    const trustPanel = panel(".p2-trust-panel");
-    const visibilityPanel = panel(".p2-visibility-panel");
-    expect(Math.abs(projectsPanel.bottom-lastRight.bottom), "Projects and certification should end on same line").toBeLessThanOrEqual(3);
-    const desktopThreeColumns = (page.viewportSize()?.width ?? 0) > 1200;
-    expect(Math.abs(aboutPanel.top-trustPanel.top), "About and Trust must start together").toBeLessThanOrEqual(3);
-    expect(Math.abs(aboutPanel.bottom-trustPanel.bottom), "About and Trust must end together").toBeLessThanOrEqual(3);
-    if (desktopThreeColumns) {
-      expect(Math.abs(aboutPanel.top-visibilityPanel.top), "Three desktop lower cards must start together").toBeLessThanOrEqual(3);
-      expect(Math.abs(aboutPanel.bottom-visibilityPanel.bottom), "Three desktop lower cards must end together").toBeLessThanOrEqual(3);
-    } else {
-      // At <=1200 px the visibility card deliberately wraps to a full-width next row.
-      expect(visibilityPanel.top, "Tablet full-width visibility should follow about/trust").toBeGreaterThanOrEqual(aboutPanel.bottom+8);
+  // Independent masonry columns should follow content, not stretch project tiles.
+  const checkCompactLayout = async (width: number) => {
+    await page.setViewportSize({width,height:900});
+    const geometry = await page.evaluate(() => {
+      const rect = (el:Element) => {
+        const r=el.getBoundingClientRect();
+        return {top:r.top,bottom:r.bottom,height:r.height,left:r.left,right:r.right};
+      };
+      const groups=[".p2-overview-column--left",".p2-overview-column--right"];
+      return {
+        groups:groups.map(selector=>{
+          const group=document.querySelector(selector);
+          if(!group) throw new Error("Missing overview group "+selector);
+          return [...group.querySelectorAll(":scope > .p2-panel")].map(rect);
+        }),
+        projects:rect(document.querySelector(".p2-projects-panel")!),
+        projectTiles:[...document.querySelectorAll(".p2-project")].map(rect),
+        picture:[...document.querySelectorAll(".p2-project-art")].map(rect),
+        passport:rect(document.querySelector(".p2-passport-panel")!),
+      };
+    });
+    expect(geometry.projectTiles.length).toBe(2);
+    // Original cards never grow to the height of the two right-hand cards.
+    for(const tile of geometry.projectTiles) {
+      expect(tile.height,`project card is stretched at ${width}px`).toBeLessThan(280);
     }
-    const projectList = panel(".p2-project-list");
-    expect(projectList.bottom, "Project cards must occupy the project panel instead of leaving unused bottom space")
-      .toBeGreaterThan(projectsPanel.bottom-20);
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth+2)).toBe(true);
+    for(const picture of geometry.picture) {
+      expect(picture.height,`project illustration is stretched at ${width}px`).toBeLessThan(250);
+    }
+    const [left,right] = geometry.groups;
+    if(!left||!right) throw new Error("Missing overview columns");
+    expect(left.length).toBe(3);
+    expect(right.length).toBe(3);
+    expect(Math.abs(left[0]!.top-right[0]!.top)).toBeLessThan(3);
+    for(const group of [left,right]) {
+      for(let i=1;i<group.length;i++) {
+        const gap=group[i]!.top-group[i-1]!.bottom;
+        expect(gap,`unwanted vertical gap at ${width}px`).toBeGreaterThanOrEqual(8);
+        expect(gap,`unwanted vertical gap at ${width}px`).toBeLessThanOrEqual(20);
+      }
+    }
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2)).toBe(true);
   };
-  await checkAlignedRows();
-  await page.setViewportSize({width:1440,height:900});
-  await checkAlignedRows();
-  await page.setViewportSize({width:1100,height:900});
-  await checkAlignedRows();
+  await checkCompactLayout(1672);
+  await checkCompactLayout(1440);
+  await checkCompactLayout(1100);
   await page.setViewportSize({width:1672,height:941});
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 2)).toBe(true);
 
   await page.getByRole("button", { name: /Открыть кейс/ }).first().click();
   await expect(page.getByRole("dialog", { name: "Подтверждённый проект" })).toBeVisible();
