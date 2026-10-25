@@ -13,6 +13,7 @@ import { learningSummaryQueryKey, loadLearningSummary, type LearningCourse } fro
 import { aiRoleTitle, bootcampRoleKeys, courseRoleTitles, isCourseInAiRole, orderRoleCourses } from "./trajectory-content";
 import { projectRoleStudy, satisfiesStudyRequirement, type StudyRecord } from "./role-study-progression";
 import { GradeMilestoneCelebration } from "./grade-milestone-celebration";
+import { advanceRoleLevel, loadRoleLevel, roleLevelQueryKey } from "../impulse-role-level";
 import type { BootcampOverview } from "./page";
 import "./bootcamp-ux.scss";
 import "./bootcamp-approved.scss";
@@ -659,7 +660,7 @@ export function StudyCourseProgress({course,compact=false}:{course?:LearningCour
   </div>;
 }
 
-type MilestoneCelebration = { mode: "stage-unlocked" | "official-grade-up"; roleTitle: string; fromGrade?:string; toGrade?:string };
+type MilestoneCelebration = { mode: "stage-unlocked" | "official-grade-up" | "impulse-level-up"; roleTitle: string; fromGrade?:string; toGrade?:string };
 
 export function BootcampCatalog({
   honorBoardEnabled,
@@ -694,6 +695,27 @@ export function BootcampCatalog({
     enabled:gradeRole!==null,
     retry:false,
     refetchInterval:(query)=>query.state.data?.role_summary.grade_state==="known"?20000:false,
+  });
+  const impulseLevel = useQuery({
+    queryKey:roleLevelQueryKey(gradeRole),
+    queryFn:()=>loadRoleLevel(gradeRole ?? ""),
+    enabled:gradeRole!==null,
+    retry:false,
+  });
+  const advanceLevel = useMutation({
+    mutationFn:(trackKey:string)=>advanceRoleLevel(trackKey),
+    onSuccess:async (result)=>{
+      await Promise.all([
+        client.invalidateQueries({queryKey:roleLevelQueryKey(result.track_key)}),
+        client.invalidateQueries({queryKey:["development-overview"]}),
+        client.invalidateQueries({queryKey:["trajectory-roadmaps"]}),
+        client.invalidateQueries({queryKey:["trajectory-roadmap-catalog"]}),
+      ]);
+      setMilestoneCelebration({
+        mode:"impulse-level-up",roleTitle:aiRoleTitle(result.track_key),
+        fromGrade:`L${String(result.level-1)}`,toGrade:`L${String(result.level)}`,
+      });
+    },
   });
   const serverGradeState = gradeOverview.data?.role_summary;
   useEffect(() => {
@@ -833,6 +855,9 @@ export function BootcampCatalog({
           ? "Грейд: правила не опубликованы"
           : "Грейд: не присвоен";
   const progressionComplete = gradeCurriculum?policyRemaining.length===0:roleStudy.required.length>0 && pendingRequired.length===0;
+  const levelForRole = impulseLevel.data?.track_key === selectedRole ? impulseLevel.data : null;
+  const canAdvanceLearningLevel = levelForRole?.advance_ready === true;
+  const pendingLevelCurriculum = levelForRole?.curriculum_state === "unpublished" && levelForRole.level > 0;
   const requiredWord = new Intl.PluralRules("ru-RU").select(remainingStudyCount) === "one" ? "курс" :
     new Intl.PluralRules("ru-RU").select(remainingStudyCount) === "few" ? "курса" : "курсов";
   const suggestedCourses = orderRoleCourses(catalog.data.filter(forRole), selectedRole).filter((card) => card.access_state === "available" && card.completion_state === "not_started" && !studyFinished(card.key) && (selectedRole !== "all" || card.relevant));
@@ -885,7 +910,7 @@ export function BootcampCatalog({
         <div className="bc-ref-right-panels">
           <section className="bc-ref-role-summary" aria-labelledby="bc-role-title">
             <div><h2 id="bc-role-title">Моя роль: {selectedRoleTitle}</h2>
-              <div className="bc-ref-summary-tags"><span data-testid="bootcamp-official-grade">♜ {gradeStatusLabel}</span><span>▦ Курсов: {roleStudy.totalRoleCourses}</span><span data-testid="bootcamp-study-level">Учебный этап: {roleStudy.studied.length} из {roleStudy.totalRoleCourses}</span></div>
+              <div className="bc-ref-summary-tags"><span data-testid="bootcamp-official-grade">♜ {gradeStatusLabel}</span><span>▦ Курсов: {roleStudy.totalRoleCourses}</span><span data-testid="bootcamp-study-level">Уровень Impulse: {levelForRole ? `L${String(levelForRole.level)} · цикл ${String(levelForRole.cycle_number)}` : "загружается"}</span></div>
             </div>
             <div className="bc-ref-ring" aria-label="Завершённые учебные курсы роли, не профессиональный грейд"><strong data-testid="bootcamp-study-count">{roleStudy.studied.length}</strong><small>курсов<br/>пройдено</small></div>
           </section>
@@ -893,11 +918,22 @@ export function BootcampCatalog({
             <img className="bc-ref-trophy" alt="" src="/bootcamp/trophy.svg" />
             <div className="bc-ref-grade-body">
               <div className="bc-ref-grade-kicker">♛ &nbsp; Учебные требования роли</div>
-              <h2 id="bc-grade-title" aria-live="polite">{remainingStudyCount > 0 ? <>{remainingStudyCount === 1 ? "Остался" : "Осталось"} <em>{remainingStudyCount}</em> {remainingStudyCount === 1 ? "обязательный" : "обязательных"} {requiredWord}</> : progressionComplete ? "Учебная часть завершена" : "Обязательные курсы"}</h2>
-              <p>{studyNeedsAction ? gradeCurriculum ? "Следующие требования опубликованной программы. Для повышения нужно подтвердить каждый пункт." : "Оставшиеся учебные требования обновляются после завершения курса. Практика и подтверждение проверяются отдельно." : progressionComplete ? "Все необходимые требования завершены. Профессиональный грейд обновится после серверного подтверждения перехода." : "Обязательные курсы пока не указаны. Дальнейшие требования смотри в траектории."}</p>
-              <div className="bc-ref-grade-list">{progressionComplete ? <span className="bc-ref-grade-next" data-testid="bootcamp-next-stage">◆ Следующий этап: практика и проверка результатов</span> : gradeCurriculum ? policyRemaining.slice(0,2).map(req=><button key={req.key} type="button" onClick={()=>{const card=catalog.data.find(item=>item.key===req.source_key);if(card){openPanel("detail",card.key);}else{openPanel("requirements");}}}><span>◆</span>{req.title}<span aria-hidden="true">›</span></button>) : pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => { openPanel("detail",card.key); }}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
+              <h2 id="bc-grade-title" aria-live="polite">{pendingLevelCurriculum ? "Следующий цикл готовится" : remainingStudyCount > 0 ? <>{remainingStudyCount === 1 ? "Остался" : "Осталось"} <em>{remainingStudyCount}</em> {remainingStudyCount === 1 ? "обязательный" : "обязательных"} {requiredWord}</> : progressionComplete ? "Учебная часть завершена" : "Обязательные курсы"}</h2>
+              <p>{pendingLevelCurriculum ? "L1 сохранён на сервере. Новые курсы и практические задания будут доступны после публикации программы следующего уровня." : studyNeedsAction ? gradeCurriculum ? "Следующие требования опубликованной программы. Для повышения нужно подтвердить каждый пункт." : "Оставшиеся учебные требования обновляются после завершения курса. Практика и подтверждение проверяются отдельно." : progressionComplete ? "Все необходимые требования завершены. Профессиональный грейд обновится после серверного подтверждения перехода." : "Обязательные курсы пока не указаны. Дальнейшие требования смотри в траектории."}</p>
+              <div className="bc-ref-grade-list">{pendingLevelCurriculum ? <span className="bc-ref-grade-next">◆ Новая программа пока не опубликована</span> : progressionComplete ? <span className="bc-ref-grade-next" data-testid="bootcamp-next-stage">◆ Следующий этап: практика и проверка результатов</span> : gradeCurriculum ? policyRemaining.slice(0,2).map(req=><button key={req.key} type="button" onClick={()=>{const card=catalog.data.find(item=>item.key===req.source_key);if(card){openPanel("detail",card.key);}else{openPanel("requirements");}}}><span>◆</span>{req.title}<span aria-hidden="true">›</span></button>) : pendingRequired.slice(0,2).map(card => <button key={card.key} type="button" onClick={() => { openPanel("detail",card.key); }}><span>◆</span>{card.title}<span aria-hidden="true">›</span></button>)}</div>
             </div>
-            <button className={"bc-ref-grade-button"+(progressionComplete?" bc-ref-grade-button--unlock":"")} type="button" onClick={() => { if(progressionComplete){setMilestoneCelebration({mode:"stage-unlocked",roleTitle:selectedRoleTitle});}else{openPanel("requirements");} }} aria-label={progressionComplete?"Следующий этап — открыть новую ступень развития":"Посмотреть курсы"}>{progressionComplete ? <><Sparkles size={17} aria-hidden="true"/>Следующий этап</> : "Посмотреть курсы"} <ArrowRight /></button>
+            <button className={"bc-ref-grade-button"+(canAdvanceLearningLevel?" bc-ref-grade-button--unlock":"")}
+              type="button" disabled={advanceLevel.isPending}
+              onClick={() => {
+                if(canAdvanceLearningLevel){advanceLevel.mutate(selectedRole);}
+                else if(pendingLevelCurriculum){void navigate(`/workspace/1?role=${encodeURIComponent(selectedRole)}`);}
+                else{openPanel("requirements");}
+              }}
+              aria-label={canAdvanceLearningLevel?"Подтвердить повышение уровня Impulse":pendingLevelCurriculum?"Открыть новый цикл траектории":"Посмотреть учебные и практические требования"}>
+              {canAdvanceLearningLevel ? <><Sparkles size={17} aria-hidden="true"/>Следующий этап</>
+                : pendingLevelCurriculum ? "Новый цикл"
+                : progressionComplete ? "К практике" : "Посмотреть курсы"} <ArrowRight />
+            </button>
           </section>
         </div>
       </div>
