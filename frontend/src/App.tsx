@@ -1397,7 +1397,15 @@ function ImpulseApp() {
     return channel.title.trim() || others.join(", ") || "Личный чат";
   };
   const notificationItems = notificationsQuery.data?.items ?? [];
-  const unreadCount = (notificationsQuery.data?.unread ?? 0)
+  // A new chat message can exist in both the generic feed and the channel
+  // unread list. Show that event once and count the unread messages once.
+  const unreadChannelIds = new Set(unreadChats.map((channel) => channel.id));
+  const duplicateChatNotification = (item: NotificationItem) =>
+    item.kind === "message" && item.entity_type === "messaging_channel"
+    && item.entity_id !== null && unreadChannelIds.has(item.entity_id);
+  const visibleNotificationItems = notificationItems.filter((item) => !duplicateChatNotification(item));
+  const deduplicatedUnread = notificationItems.filter((item) => !item.read && duplicateChatNotification(item)).length;
+  const unreadCount = Math.max(0, (notificationsQuery.data?.unread ?? 0) - deduplicatedUnread)
     + unreadChats.reduce((sum, channel) => sum + channel.unread, 0);
   const invalidateNotifications = () => {
     void queryClient.invalidateQueries({ queryKey: ["notifications"] });
@@ -1648,8 +1656,8 @@ function ImpulseApp() {
                           </div><i>›</i>
                         </button>
                       ))}
-                      {notificationItems.length ? (
-                        notificationItems.map((item) => {
+                      {visibleNotificationItems.length ? (
+                        visibleNotificationItems.map((item) => {
                           const style =
                             notificationStyles[item.kind] ?? {
                               symbol: "◎",
