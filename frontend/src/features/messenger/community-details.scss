@@ -2,7 +2,7 @@
    messenger reference while using Impulse dark tokens. Scoped to community only. */
 .sberchat-reference .msg-context.msg-community {
   position:relative;display:flex;flex-direction:column;gap:0;
-  height:100%;padding:0;overflow:hidden;border-left:1px solid #1b3e57;
+  width:100%;min-width:0;max-width:100%;height:100%;padding:0;overflow:hidden;border-left:1px solid #1b3e57;
   background:linear-gradient(180deg,#061b2b 0%,#031523 100%);color:#eaf6ff;
 }
 .sberchat-reference .msg-community__top {
