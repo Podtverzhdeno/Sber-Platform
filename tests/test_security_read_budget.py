@@ -5,8 +5,8 @@ traffic. These tests ensure read-model fans-out cannot masquerade as search.
 """
 
 from fastapi.testclient import TestClient
-from starlette.types import Receive, Scope, Send
 from pydantic import SecretStr
+from starlette.types import Receive, Scope, Send
 
 from impulse.api.security import RequestRateLimiter, SecurityMiddleware
 from impulse.bootstrap.app import create_app
