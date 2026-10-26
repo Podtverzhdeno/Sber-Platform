@@ -224,7 +224,7 @@ def test_postgres_course_finish_reflects_in_joined_snapshot_without_fake_awards(
     async def enrollments(_person: object) -> tuple[EnrollmentRecord, ...]:
         return (EnrollmentRecord("demo-course-1", CompletionStatus.REPORTED),)
 
-    async def roadmaps(_actor: object) -> tuple[SimpleNamespace, ...]:
+    async def roadmaps(_actor: object) -> tuple[RoadmapProjection, ...]:
         return (_role_roadmap(completed=False),)
 
     async def empty(_actor: object) -> tuple[object, ...]:
