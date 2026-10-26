@@ -107,7 +107,11 @@ export function buildKpiValues(sources: {
   const { growth, work, anchors, certificates, streak } = sources;
   const values: KpiValues = {};
   if (growth.isSuccess) {
-    const trajectory = growth.data.trajectories[0];
+    // Malformed or stale API responses must not crash the participant dashboard.
+    // An absent trajectory is unknown progress, never a fabricated 0%.
+    const trajectories = Array.isArray(growth.data.trajectories)
+      ? growth.data.trajectories : [];
+    const trajectory = trajectories[0];
     const percent = trajectory?.completion.percent ?? null;
     values.progress = {
       value: percent === null ? "—" : `${String(Math.round(percent))}%`,

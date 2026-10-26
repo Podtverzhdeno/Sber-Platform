@@ -114,7 +114,12 @@ export function MessagingWorkspace({
     refetchInterval: 12_000,
     refetchIntervalInBackground: false,
   });
-  const channels = useMemo(() => channelsQuery.data ?? [], [channelsQuery.data]);
+  // Defensively handle malformed/transient API responses (including stale test mocks)
+  // without crashing the entire messaging screen; never treat an object as a list.
+  const channels = useMemo(
+    () => Array.isArray(channelsQuery.data) ? channelsQuery.data : [],
+    [channelsQuery.data],
+  );
   const contactsQuery = useQuery({
     queryKey: ["messaging-contacts"],
     queryFn: () => apiRequest<Array<{id:string;display_name:string;role:string}>>("/api/v1/me/messaging/contacts"),
