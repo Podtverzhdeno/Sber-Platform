@@ -178,6 +178,7 @@ export function StageTaskDrawer(props: {
             milestone={milestone}
             state={props.state}
             canContinue={props.role.attempt_number !== null}
+            trackKey={props.role.track_key}
           />
         </footer>
       </div>
@@ -189,6 +190,7 @@ function StageDrawerContinuation(props: {
   milestone: MilestoneView;
   state: string;
   canContinue: boolean;
+  trackKey: string;
 }) {
   const { milestone } = props;
   const navigate = useNavigate();
@@ -226,7 +228,11 @@ function StageDrawerContinuation(props: {
   if (sectionIndex < 0) {
     return <p role="status">Раздел «{section}» недоступен для текущей роли.</p>;
   }
-  const route = `/workspace/${String(sectionIndex)}?${milestone.target_kind === "task" ? "task" : "course"}=${encodeURIComponent(milestone.target_key)}`;
+  const params = new URLSearchParams({
+    [milestone.target_kind === "task" ? "task" : "course"]: milestone.target_key,
+  });
+  if (milestone.target_kind === "course") params.set("role", props.trackKey);
+  const route = `/workspace/${String(sectionIndex)}?${params.toString()}`;
   return (
     <button
       type="button"
