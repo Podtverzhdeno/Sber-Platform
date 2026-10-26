@@ -123,7 +123,6 @@ test.describe("task catalog interactive controls and motion", () => {
 
   test("task detail displays real accepted skill evidence and truthful unknown levels", async ({ page }) => {
     const baseImpact = catalogItem.skill_impact[0];
-    if (!baseImpact) throw new Error("Fixture must have a primary skill impact");
     const item: CatalogItem = {
       ...catalogItem,
       competency_tags: ["python", "recommender-systems"],
