@@ -250,14 +250,15 @@ test("finished course appears in Analytics and Trajectory from one persisted lea
   // living only in a React component or a temporary notification.
   await page.goto("/workspace/5");
   await expect(page.getByTestId("analytics-v3")).toBeVisible();
-  // Activity now uses PremiumActivity, not the legacy learning-progress-bridge.
-  // Assert the same persisted data through the current four metric cards.
+  // The Activity tab contains the calendar. Persisted study metrics belong
+  // to Certification, so changing sections must not lose the result.
+  await page.getByRole("button",{name:"Сертификация"}).click();
   const analytics = page.getByTestId("analytics-study-results");
   await expect(analytics).toBeVisible();
-  await expect(analytics.locator(".avp-study-number").filter({hasText:"уроков завершено"}).locator("strong")).toHaveText("8");
-  await expect(analytics.locator(".avp-study-number").filter({hasText:"курсов пройдено"}).locator("strong")).toHaveText("1");
-  await expect(analytics.locator(".avp-study-number").filter({hasText:"практик одобрено"}).locator("strong")).toHaveText("0");
-  await expect(analytics.locator(".avp-course")).toContainText(["OpenSpec и SDD"]);
+  await expect(analytics.locator(".av3-study-metrics div").filter({hasText:"уроков завершено"}).locator("b")).toHaveText("8");
+  await expect(analytics.locator(".av3-study-metrics div").filter({hasText:"курсов пройдено"}).locator("b")).toHaveText("1");
+  await expect(analytics.locator(".av3-study-metrics div").filter({hasText:"практик одобрено"}).locator("b")).toHaveText("0");
+  await expect(analytics.locator(".av3-study-course")).toContainText(["OpenSpec и SDD"]);
 
   await page.goto("/workspace/1");
   const trajectory = page.getByTestId("learning-progress-bridge");
