@@ -129,7 +129,8 @@ describe("App", () => {
     window.history.pushState({}, "", "/workspace/0");
     render(<App />);
     expect(await screen.findByTestId("grade-summary")).toBeInTheDocument();
-    expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("not_evaluable");
+    // An unavailable Impulse level is not an invented career grade or L0 result.
+    expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("unavailable");
     expect(screen.getByRole("navigation")).toBeInTheDocument();
 
     const sidebar = screen.getByRole("complementary", { name: "Боковая панель" });
