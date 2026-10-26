@@ -733,8 +733,8 @@ function CycleLearningPath(props: { level: ImpulseRoleLevel; learningCourses: Le
   };
   const keys = level.required_course_keys ?? [];
   return <section className="trajectory-v2-cycle-path" data-testid="trajectory-cycle-path" aria-label="Текущий учебный цикл">
-    <header><div><small>Цикл {level.cycle_number}</small><h3>{finished ? "L3 · Программа завершена" : `Развитие L${level.level} → L${level.level + 1}`}</h3></div>
-      <span>{finished ? "Все уровни пройдены" : `${level.completed_courses} из ${level.required_courses} курсов`}</span></header>
+    <header><div><small>Цикл {level.cycle_number}</small><h3>{finished ? "L3 · Программа завершена" : `Развитие L${String(level.level)} → L${String(level.level + 1)}`}</h3></div>
+      <span>{finished ? "Все уровни пройдены" : `${String(level.completed_courses)} из ${String(level.required_courses)} курсов`}</span></header>
     {finished ? <p>Три учебных цикла завершены. Полученные сертификаты и проверенные практические результаты сохранены в истории Impulse.</p> : <>
       <p>Новый виток: изучи отдельные курсы, отправь практическую работу на независимую проверку и подтверди повышение уровня в Bootcamp.</p>
       <div className="trajectory-v2-cycle-courses">{keys.map((key,index)=>{
@@ -742,8 +742,8 @@ function CycleLearningPath(props: { level: ImpulseRoleLevel; learningCourses: Le
         const number=Number(/^demo-course-(\d+)/.exec(key)?.[1] ?? "0");
         const isDone=course?.finished === true;
         return <Link key={key} to={`/workspace/2?role=${encodeURIComponent(roleKey)}&course=${encodeURIComponent(key)}&panel=detail`} className="trajectory-v2-cycle-course">
-          <span className="trajectory-v2-cycle-num">{isDone ? "✓" : index+1}</span>
-          <div><strong>{subjectNames[number] ?? course?.title ?? key}</strong><small>{isDone ? "Учебный сертификат сохранён" : course?.completed_units ? `${course.completed_units} из 8 уроков` : "Курс не начат"}</small></div>
+          <span className="trajectory-v2-cycle-num">{isDone ? "✓" : String(index+1)}</span>
+          <div><strong>{subjectNames[number] ?? course?.title ?? key}</strong><small>{isDone ? "Учебный сертификат сохранён" : course?.completed_units ? `${String(course.completed_units)} из 8 уроков` : "Курс не начат"}</small></div>
           <span>{isDone ? "Пройден" : "Открыть"} →</span>
         </Link>;
       })}</div>
