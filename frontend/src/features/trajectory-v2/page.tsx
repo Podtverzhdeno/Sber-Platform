@@ -162,8 +162,8 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [compareTarget, setCompareTarget] = useState<string | null>(null);
   const [, refreshVisited] = useState(0);
-  const openedScope = selected && selectedRoadmap
-    ? visitScope(navigation.data?.person_id, selected.track_key, selected.attempt_number, selectedRoadmap.policy_version) : null;
+  const openedScope = navigation.data?.person_id && selected && selectedRoadmap
+    ? visitScope(navigation.data.person_id, selected.track_key, selected.attempt_number, selectedRoadmap.policy_version) : null;
   const markVisited = (key: string) => {
     if (openedScope === null) return;
     markStageOpened(openedScope,key);
@@ -270,6 +270,8 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               <li key={role.track_key}>
                 <RoleCardOverview
                   role={role}
+                  studiedSteps={role.track_key===selectedKey && selectedRoadmap && role.attempt_number!==null
+                    ? projectLearningStages(selectedRoadmap,learning.data?.courses,true).completed.size : null}
                   courseProgress={role.track_key===selectedKey && roleLevel?.curriculum_state==="published" ? `${String(roleLevel.completed_courses)} из ${String(roleLevel.required_courses)} курсов` : null}
                   nextCycle={role.track_key===selectedKey && roleLevel?.curriculum_state==="unpublished" && roleLevel.level>0 ? `L${String(roleLevel.level)} · цикл ${String(roleLevel.cycle_number)}` : null}
                   primary={role.track_key === primaryKey}
@@ -575,6 +577,7 @@ function formatAsOf(asOf: string): string {
 export function RoleCardOverview(props: {
   role: RoleCardView;
   courseProgress?: string | null;
+  studiedSteps?: number | null;
   nextCycle?: string | null;
   primary: boolean;
   selected: boolean;
@@ -629,8 +632,11 @@ export function RoleCardOverview(props: {
       <strong>{role.title}</strong>
       {props.nextCycle ? <small>{props.nextCycle} · ожидает новые этапы</small> : role.attempt_number !== null ? (
         <>
-          <progress max={Math.max(1,role.total_milestones)} value={Math.min(role.total_milestones,role.completed_milestones)} aria-label="Прогресс этапов роли" />
-          <small>{role.completed_milestones} из {role.total_milestones} этапов подтверждено{role.state === "paused" ? " · пауза" : ""}{props.courseProgress ? ` · ${props.courseProgress}` : ""}</small>
+          <progress max={Math.max(1,role.total_milestones)} value={Math.min(role.total_milestones,props.studiedSteps ?? role.completed_milestones)} aria-label="Прогресс учебных шагов роли" />
+          <small>{props.studiedSteps !== null && props.studiedSteps !== undefined
+            ? `${String(props.studiedSteps)} из ${String(role.total_milestones)} шагов освоено · ${String(role.completed_milestones)} подтверждено`
+            : `${String(role.completed_milestones)} из ${String(role.total_milestones)} этапов подтверждено`}
+            {role.state === "paused" ? " · пауза" : ""}{props.courseProgress ? ` · ${props.courseProgress}` : ""}</small>
         </>
       ) : (
         <small className="trajectory-v2-role-unselected">Не выбрана</small>
