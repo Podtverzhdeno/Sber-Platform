@@ -305,7 +305,7 @@ export function ParticipantHomeV2Body(props: {
                             {done ? <span className="home-v2-grade-course-done"><CheckCircle2 size={16}/> Пройден</span> :
                               <button type="button" className="home-v2-grade-course-action"
                                 aria-label={`${started ? "Продолжить" : "Пройти"} курс «${title}»`}
-                                onClick={() => { closePanel(); props.onOpenTarget("course", key); }}>
+                                onClick={() => { closePanel(); props.onOpenTarget("course", key, levelRoleKey ?? undefined); }}>
                                 {started ? "Продолжить" : "Пройти"} <ArrowRight size={15}/>
                               </button>}
                           </li>;
