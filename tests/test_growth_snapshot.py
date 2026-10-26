@@ -17,12 +17,12 @@ from impulse.application.development import (
     RoadmapRecord,
 )
 from impulse.application.growth import GrowthService
-from impulse.application.work import WorkItem
 from impulse.application.identity import (
     DemoAuthService,
     MemoryIdentityStore,
     demo_personas,
 )
+from impulse.application.work import WorkItem
 from impulse.bootstrap.app import create_app
 from impulse.bootstrap.demo_seed import demo_id
 from impulse.bootstrap.settings import AppEnvironment, Settings
