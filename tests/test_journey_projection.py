@@ -19,13 +19,13 @@ from impulse.api.errors import install_error_handlers
 from impulse.api.v1 import journey
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.api.v1.journey import merge_courses
-from impulse.application.development import EnrollmentRecord
+from impulse.application.development import CourseRecord, EnrollmentRecord
 from impulse.application.identity import AuthenticatedSession, SessionRecord, demo_personas
 from impulse.bootcamp import editorial_learning
 from impulse.bootcamp.editorial_learning import ImpulseCourseSummary, ImpulseStudySummary
 from impulse.bootstrap.app import create_app
 from impulse.bootstrap.settings import AppEnvironment, Settings
-from impulse.domain.development import CompletionStatus
+from impulse.domain.development import CompletionStatus, RoadmapMilestone, RoadmapProjection
 from impulse.domain.identity import ActorContext, Role
 from impulse.infrastructure.database import Database
 
@@ -56,18 +56,37 @@ def _study(*, finished: bool) -> ImpulseStudySummary:
     )
 
 
-def _role_roadmap(*, completed: bool) -> SimpleNamespace:
-    return SimpleNamespace(
+def _catalog_course(key: str, title: str) -> CourseRecord:
+    return CourseRecord(
+        key=key,
+        title=title,
+        track_keys=("python",),
+        source_url="https://example.test/learning",
+        availability="available",
+        access_note="",
+    )
+
+
+def _role_roadmap(*, completed: bool) -> RoadmapProjection:
+    return RoadmapProjection(
         track_key="python",
         policy_version=7,
         milestones=(
-            SimpleNamespace(
+            RoadmapMilestone(
                 key="foundation",
+                position=1,
+                title="Foundation",
+                purpose="Learn",
+                skill="python",
                 target_kind="course",
                 target_key="demo-course-1",
             ),
-            SimpleNamespace(
+            RoadmapMilestone(
                 key="hands-on",
+                position=2,
+                title="Hands-on",
+                purpose="Practice",
+                skill="python",
                 target_kind="task",
                 target_key="test-task",
             ),
@@ -78,7 +97,7 @@ def _role_roadmap(*, completed: bool) -> SimpleNamespace:
 
 def test_self_study_finish_does_not_claim_verified_course_or_milestone() -> None:
     courses = merge_courses(
-        catalog=(SimpleNamespace(key="demo-course-1", title="Учебный курс"),),
+        catalog=(_catalog_course("demo-course-1", "Учебный курс"),),
         enrollments=(EnrollmentRecord("demo-course-1", CompletionStatus.REPORTED),),
         roadmaps=(_role_roadmap(completed=False),),
         study=_study(finished=True),
@@ -96,7 +115,7 @@ def test_self_study_finish_does_not_claim_verified_course_or_milestone() -> None
 
 def test_verified_provider_and_roadmap_are_separate_authoritative_evidence() -> None:
     courses = merge_courses(
-        catalog=(SimpleNamespace(key="demo-course-1", title="Учебный курс"),),
+        catalog=(_catalog_course("demo-course-1", "Учебный курс"),),
         enrollments=(EnrollmentRecord("demo-course-1", CompletionStatus.VERIFIED),),
         roadmaps=(_role_roadmap(completed=True),),
         study=_study(finished=False),
@@ -109,7 +128,7 @@ def test_verified_provider_and_roadmap_are_separate_authoritative_evidence() -> 
 
 def test_missing_self_study_database_does_not_fake_zero_lessons() -> None:
     courses = merge_courses(
-        catalog=(SimpleNamespace(key="demo-course-1", title="Учебный курс"),),
+        catalog=(_catalog_course("demo-course-1", "Учебный курс"),),
         enrollments=(),
         roadmaps=(_role_roadmap(completed=False),),
         study=None,
@@ -120,8 +139,8 @@ def test_missing_self_study_database_does_not_fake_zero_lessons() -> None:
 def test_course_join_is_by_exact_canonical_key_not_similar_title() -> None:
     courses = merge_courses(
         catalog=(
-            SimpleNamespace(key="demo-course-1", title="Повторяющееся название"),
-            SimpleNamespace(key="demo-course-2", title="Повторяющееся название"),
+            _catalog_course("demo-course-1", "Повторяющееся название"),
+            _catalog_course("demo-course-2", "Повторяющееся название"),
         ),
         enrollments=(EnrollmentRecord("demo-course-2", CompletionStatus.VERIFIED),),
         roadmaps=(_role_roadmap(completed=True),),
