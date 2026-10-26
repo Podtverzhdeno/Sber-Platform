@@ -134,11 +134,15 @@
   .ach-gallery-chips {display:flex;gap:5px;flex-wrap:wrap;margin-top:auto;padding-top:4px;}
   .ach-gallery-chips span {border:1px solid #235071;border-radius:6px;padding:4px 7px;background:#122b46;color:#add2eb;font-size:10px;white-space:nowrap;}
   .ach-gallery-star {
-    z-index:5;position:absolute;top:13px;right:13px;width:26px;height:26px;display:grid;place-items:center;padding:2px;
-    color:#ffe071;background:#071829eb;border:1px solid #294258;border-radius:6px;transition:transform .14s,background .14s;
+    z-index:5;position:absolute;top:13px;right:13px;width:26px;height:26px;
+    display:grid;place-items:center;padding:2px;cursor:pointer;
+    color:#ffe071;background:transparent;border:0;border-radius:6px;
+    filter:drop-shadow(0 1px 3px #001b2b);
+    transition:transform .14s,color .14s,filter .14s;
   }
-  .ach-gallery-star:hover {transform:scale(1.09);background:#103f4b;}
-  .ach-gallery-star.is-starred {color:#ffd740;background:#3f3213;border-color:#876830;}
+  .ach-gallery-star:hover {transform:scale(1.15);background:transparent;filter:drop-shadow(0 0 5px #ffe0718c);}
+  .ach-gallery-star.is-starred {color:#ffd740;background:transparent;border:0;}
+  .ach-gallery-star:focus-visible {outline:2px solid #ffe071;outline-offset:2px;}
 
   .ach-gallery-empty {
     display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;min-height:385px;
