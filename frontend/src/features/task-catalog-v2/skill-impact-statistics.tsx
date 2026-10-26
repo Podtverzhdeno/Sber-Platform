@@ -27,9 +27,9 @@ export function SkillImpactStatistics({ impacts, onGrowthExpand }: {
       }}>{expanded ? "Скрыть подробности" : "Показать подробности"} <ChevronDown size={13} aria-hidden="true"/></button>
     </div>
     <div className="catalog-skill-stats__overview" aria-label="Подтверждения по требованиям задачи">
-      <div><strong>{hasEvidenceData ? `${acceptedSkillCount} из ${impacts.length}` : "—"}</strong><span>навыков с принятыми работами</span></div>
+      <div><strong>{hasEvidenceData ? String(acceptedSkillCount) + " из " + String(impacts.length) : "—"}</strong><span>навыков с принятыми работами</span></div>
       <div><strong>{hasEvidenceData ? evidenceCount : "—"}</strong><span>подтверждений по навыкам</span></div>
-      <div><strong>{hasEvidenceData ? `${coverage}%` : "—"}</strong><span>покрытие навыков принятыми работами</span></div>
+      <div><strong>{hasEvidenceData ? String(coverage) + "%" : "—"}</strong><span>покрытие навыков принятыми работами</span></div>
     </div>
     <div className="catalog-skill-stats__coverage" role="img" aria-label={hasEvidenceData ? String(coverage) + "% навыков подкреплено принятыми работами" : "Подтверждения пока не загружены"}>
       <span style={{width: String(hasEvidenceData ? coverage : 0) + "%"}}/>
