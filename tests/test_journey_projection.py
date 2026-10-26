@@ -18,7 +18,7 @@ from sqlalchemy import text
 from impulse.api.errors import install_error_handlers
 from impulse.api.v1 import journey
 from impulse.api.v1.identity import csrf_session, current_session
-from impulse.api.v1.journey import _merge_courses
+from impulse.api.v1.journey import merge_courses
 from impulse.application.development import EnrollmentRecord
 from impulse.application.identity import AuthenticatedSession, SessionRecord, demo_personas
 from impulse.bootcamp import editorial_learning
@@ -77,7 +77,7 @@ def _role_roadmap(*, completed: bool) -> SimpleNamespace:
 
 
 def test_self_study_finish_does_not_claim_verified_course_or_milestone() -> None:
-    courses = _merge_courses(
+    courses = merge_courses(
         catalog=(SimpleNamespace(key="demo-course-1", title="Учебный курс"),),
         enrollments=(EnrollmentRecord("demo-course-1", CompletionStatus.REPORTED),),
         roadmaps=(_role_roadmap(completed=False),),
@@ -95,7 +95,7 @@ def test_self_study_finish_does_not_claim_verified_course_or_milestone() -> None
 
 
 def test_verified_provider_and_roadmap_are_separate_authoritative_evidence() -> None:
-    courses = _merge_courses(
+    courses = merge_courses(
         catalog=(SimpleNamespace(key="demo-course-1", title="Учебный курс"),),
         enrollments=(EnrollmentRecord("demo-course-1", CompletionStatus.VERIFIED),),
         roadmaps=(_role_roadmap(completed=True),),
@@ -108,7 +108,7 @@ def test_verified_provider_and_roadmap_are_separate_authoritative_evidence() -> 
 
 
 def test_missing_self_study_database_does_not_fake_zero_lessons() -> None:
-    courses = _merge_courses(
+    courses = merge_courses(
         catalog=(SimpleNamespace(key="demo-course-1", title="Учебный курс"),),
         enrollments=(),
         roadmaps=(_role_roadmap(completed=False),),
@@ -118,7 +118,7 @@ def test_missing_self_study_database_does_not_fake_zero_lessons() -> None:
 
 
 def test_course_join_is_by_exact_canonical_key_not_similar_title() -> None:
-    courses = _merge_courses(
+    courses = merge_courses(
         catalog=(
             SimpleNamespace(key="demo-course-1", title="Повторяющееся название"),
             SimpleNamespace(key="demo-course-2", title="Повторяющееся название"),
