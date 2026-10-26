@@ -198,9 +198,12 @@ describe("mentor workspace", () => {
 
       expect(screen.getByText("Все")).toBeVisible();
       fireEvent.click(screen.getByRole("tab", { name: "Архив" }));
+      // The currently opened conversation remains visible in the detail header.
+      // Archive filtering applies to the dialogue list, not the open header.
       expect(
-        screen.queryByRole("button", { name: /Рекомендательная система/ }),
-      ).not.toBeInTheDocument();
+        screen.queryAllByRole("button", { name: /Рекомендательная система/ })
+          .some((button) => button.classList.contains("msg-dialog-list__row")),
+      ).toBe(false);
       fireEvent.click(screen.getByRole("tab", { name: /^Все/ }));
       await waitFor(() => {
         expect(
