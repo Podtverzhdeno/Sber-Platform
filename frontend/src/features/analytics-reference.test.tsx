@@ -8,7 +8,7 @@ import { AnalyticsReference } from "./analytics-reference";
 vi.mock("../api/client", () => ({ apiRequest: vi.fn() }));
 
 type ReferenceSkillFixture = {
-  key: string; title: string; target_level: number | undefined; current_level: number | null;
+  key: string; title: string; target_level: number | null; current_level: number | null;
   evidence_count: number; data_state: string; unresolved_methodology: boolean;
 };
 const roleSkills: ReferenceSkillFixture[] = ["prompting", "prompt_engineering", "context_management", "tools_mcp", "creating_skills", "agents_team"].map((key, i) => ({
