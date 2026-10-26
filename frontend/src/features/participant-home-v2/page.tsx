@@ -326,8 +326,8 @@ export function ParticipantHomeV2Body(props: {
                       <p className="home-v2-grade-course-message" role="status">Статусы обучения временно недоступны. Для подтверждённого прогресса открой Bootcamp.</p>}
                   </section>
                   <div className="home-v2-grade-requirement"><ClipboardCheck size={21}/><div>
-                    <strong>Проверенная практика: {impulseLevel.data.approved_practices}/{impulseLevel.data.required_practices}</strong>
-                    <small>Результат подтверждает проверяющий, не сам участник</small>
+                    <strong>Практика для уровня: {impulseLevel.data.credited_practices}/{impulseLevel.data.required_practices}</strong>
+                    <small>Отправленная работа учитывается для уровня Impulse. Независимая проверка компетенции проводится отдельно.</small>
                   </div></div>
                   {impulseLevel.data.level < (impulseLevel.data.max_level ?? 3) && impulseLevel.data.curriculum_state==="unpublished" && <section className="home-v2-grade-unavailable" role="status">
                     <LockKeyhole size={23}/><strong>Новая программа ещё не опубликована</strong>
