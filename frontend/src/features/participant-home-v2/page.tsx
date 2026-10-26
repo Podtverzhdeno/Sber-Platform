@@ -321,7 +321,8 @@ export function GradeSummaryPanel(props: {
 }) {
 
   const {levelData:level,levelPending} = props;
-  const pct = level ? levelCoursesProgress(level) : 0;
+  const complete = level !== null && level.level >= (level.max_level ?? 3);
+  const pct = complete ? 100 : level ? levelCoursesProgress(level) : 0;
   return (
     <section className="home-v2-block home-v2-grade" data-testid="grade-summary"
       data-grade-state={level ? "impulse-known" : levelPending ? "loading" : "unavailable"}>
@@ -335,17 +336,17 @@ export function GradeSummaryPanel(props: {
           <div><strong>{level ? `L${String(level.level)}` : "—"}</strong><span>{level ? `Цикл ${String(level.cycle_number)}` : "Загрузка"}</span></div>
         </div>
         <div className="home-v2-grade-readiness">
-          <small>{level ? `До L${String(level.level+1)}` : "До следующего уровня"}</small>
-          <strong>{level?.curriculum_state === "published" ? `${String(level.completed_courses)}/${String(level.required_courses)}` : "—"}</strong>
+          <small>{complete ? "Учебная программа завершена" : level ? `До L${String(level.level+1)}` : "До следующего уровня"}</small>
+          <strong>{complete ? "L3 достигнут" : level?.curriculum_state === "published" ? `${String(level.completed_courses)}/${String(level.required_courses)}` : "—"}</strong>
           <div className="home-v2-progress"><span style={{width:`${String(pct)}%`}}/></div>
-          <small>{level?.curriculum_state === "published"
+          <small>{complete ? "Три цикла с практикой и проверкой пройдены" : level?.curriculum_state === "published"
             ? `Практика: ${String(level.approved_practices)} из ${String(level.required_practices)}`
-            : level ? "Следующий цикл ожидает новой программы" : "Уровень пока недоступен"}</small>
+            : level ? "Данные программы недоступны" : "Уровень пока недоступен"}</small>
         </div>
       </div>
       <button type="button" className="home-v2-next-grade" onClick={props.onOpenDetails} disabled={!props.onOpenDetails}>
-        <div className="home-v2-next-grade-name"><span>{level ? `L${String(level.level+1)}` : "—"}</span>
-          <strong>{level?.advance_ready ? "Готов к повышению" : "Следующий уровень"}</strong>
+        <div className="home-v2-next-grade-name"><span>{complete ? "L3" : level ? `L${String(level.level+1)}` : "—"}</span>
+          <strong>{complete ? "Программа освоена" : level?.advance_ready ? "Готов к повышению" : "Следующий уровень"}</strong>
           <ChevronRight size={17}/></div>
         <p>{props.roleTitle ?? "Выберите профессиональную роль"}</p>
       </button>
