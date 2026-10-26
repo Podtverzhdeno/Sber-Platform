@@ -42,7 +42,7 @@ class ImpulseLevelView(BaseModel):
     completed_courses: int = Field(ge=0)
     required_courses: int = Field(ge=0)
     approved_practices: int = Field(ge=0)
-    required_practices: int = Field(ge=1)
+    required_practices: int = Field(ge=0)
     advance_ready: bool
     history: list[dict[str, object]] = Field(default_factory=_empty_history)
     policy_version: int = POLICY_VERSION
@@ -130,7 +130,7 @@ async def _project(
             completed_courses=0,
             required_courses=0,
             approved_practices=0,
-            required_practices=PRACTICE_MINIMUM,
+            required_practices=0,  # L3 is terminal: no phantom L4 practice.
             advance_ready=False,
             history=history,
         )
