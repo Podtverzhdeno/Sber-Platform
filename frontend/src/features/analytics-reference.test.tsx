@@ -136,7 +136,7 @@ describe("three canonical analytics reference layouts", () => {
     expect(within(summary).getByText("0")).toBeInTheDocument();
     expect(container.querySelectorAll(".ref-radar circle[fill='#31eaba']")).toHaveLength(0);
     expect(screen.getByText(/реальные действия ниже не являются уровнем Agentic Coding/)).toBeInTheDocument();
-    await waitFor(() => expect(container.querySelector(".ref-skill-activity")?.textContent).toContain("1"));
+    await waitFor(() => { expect(container.querySelector(".ref-skill-activity")?.textContent).toContain("1"); });
     const axis = container.querySelector(".ref-radar-skill");
     expect(axis).toHaveAttribute("aria-label", expect.stringContaining("Зарегистрированных действий по этому навыку: 1"));
     if (axis === null) throw new Error("Accessible skill axis not found");
@@ -148,7 +148,7 @@ describe("three canonical analytics reference layouts", () => {
   it("keeps unknown methodology targets unknown when server explicitly provides null", async () => {
     const custom = roleSkills.map(skill => skill.key === "prompt_engineering" ? { ...skill, target_level: null } : skill);
     const { container } = open("/workspace/9", custom);
-    await waitFor(() => expect(container.querySelector(".ref-radar-skill")?.getAttribute("aria-label")).toContain("Зарегистрированных"));
+    await waitFor(() => { expect(container.querySelector(".ref-radar-skill")?.getAttribute("aria-label")).toContain("Зарегистрированных"); });
     const list = container.querySelector(".ref-skill-list");
     if (!list) throw new Error("Skill list missing");
     const row = within(list as HTMLElement).getByRole("button", { name: /Правила работы агента/ });
