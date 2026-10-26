@@ -358,40 +358,28 @@ test("real seeded API separates match snapshots after a trajectory change", asyn
   expect(target).toBeTruthy();
   if (target === undefined) return;
 
-  await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
-  const targetCard = page.locator(".track-card").filter({ hasText: target.title });
-  await expect(targetCard).toBeVisible();
-  if (overview.active_count >= overview.max_active) {
-    await targetCard.click();
-    const dialog = page.getByRole("dialog", { name: /Освободить место/ });
-    await expect(dialog).toBeVisible();
-    const frozen = overview.tracks.find((track) => track.status === "active");
-    expect(frozen).toBeTruthy();
-    if (frozen === undefined) return;
-    const changeResponsePromise = page.waitForResponse(
-      (response) =>
-        response.request().method() === "POST" &&
-        new URL(response.url()).pathname === "/api/v1/me/tracks",
-    );
-    await dialog
-      .getByRole("button", { name: `Заморозить «${frozen.title}»` })
-      .click();
-    expect((await changeResponsePromise).status()).toBe(200);
-  } else {
-    const changeResponsePromise = page.waitForResponse(
-      (response) =>
-        response.request().method() === "POST" &&
-        new URL(response.url()).pathname === "/api/v1/me/tracks",
-    );
-    await targetCard.click();
-    expect((await changeResponsePromise).status()).toBe(200);
-  }
-  await expect(targetCard).toContainText("Активно");
-
-  await page.getByRole("link", { name: "Задачи", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "Задачи для твоего развития" }),
-  ).toBeVisible();
+  // The active AI-role trajectory uses new role cards, whereas this API
+  // contract deliberately changes the persisted development track. Mutate the
+  // authoritative endpoint, then validate its effect on live catalog matching.
+  const session = await page.context().request.get("/api/v1/me");
+  expect(session.status()).toBe(200);
+  const { csrf_token: currentCsrf } = (await session.json()) as Login;
+  const activeToFreeze = overview.active_count >= overview.max_active
+    ? overview.tracks.find(track => track.status === "active")
+    : undefined;
+  if (overview.active_count >= overview.max_active) expect(activeToFreeze).toBeTruthy();
+  const changed = await page.context().request.post("/api/v1/me/tracks", {
+    headers: { "X-CSRF-Token": currentCsrf },
+    data: {
+      track_key: target.key,
+      ...(activeToFreeze ? { freeze_track_key: activeToFreeze.key } : {}),
+    },
+  });
+  expect(changed.status(), await changed.text()).toBe(200);
+  const afterTracks = (await changed.json()) as TrackOverview;
+  expect(afterTracks.tracks.find(track => track.key === target.key)?.status).toBe("active");
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
   const refreshedSnapshot = await openCandidateDetail();
   await expect(refreshedSnapshot).not.toHaveText(candidate.match.source_snapshot_version);
 
