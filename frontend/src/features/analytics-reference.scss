@@ -339,3 +339,25 @@ body:has(.analytics-reference) .overlay {z-index:10050;}
 @media (min-width: 1520px) {
   .analytics-reference .ref-page-header { margin-bottom:-8px; }
 }
+
+/* Measured account events, visually separate from the 1–4 qualification scale. */
+.analytics-reference .ref-radar-skill {cursor:pointer;outline:none}
+.analytics-reference .ref-radar-skill:focus-visible text {fill:#4df5e0;text-decoration:underline}
+.analytics-reference .ref-radar-center rect {fill:#092536;stroke:#22667d;stroke-width:1}
+.analytics-reference .ref-radar-center text:first-of-type {fill:#2be5cd;font-size:17px;font-weight:800}
+.analytics-reference .ref-radar-center text:last-of-type {fill:#9bbace;font-size:9px}
+.analytics-reference .ref-personal-facts {width:100%;border:1px solid #205269;border-radius:12px;background:#092535;padding:9px 11px;margin-top:7px}
+.analytics-reference .ref-personal-facts>strong {display:block;font-size:11px;color:#36e5d5;margin-bottom:8px}
+.analytics-reference .ref-personal-facts>strong span {font-weight:400;color:#93b4c8;font-size:9px}
+.analytics-reference .ref-personal-facts>div {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.analytics-reference .ref-personal-facts>div>span {display:flex;flex-direction:column;gap:3px;min-width:0}
+.analytics-reference .ref-personal-facts b {color:#f1fdff;font-size:18px;font-variant-numeric:tabular-nums}
+.analytics-reference .ref-personal-facts small {color:#93b4c8;font-size:9px;line-height:1.35}
+.analytics-reference .ref-skill-activity {grid-column:2/4;grid-row:2;color:#84cfc9;font-size:9px;line-height:1.1}
+.analytics-reference .ref-skill-row>small {grid-column:5;grid-row:1}
+.analytics-reference .ref-personal-sources {padding-left:20px;overflow-wrap:anywhere}
+@media(max-width:600px) {
+  .analytics-reference .ref-personal-facts>div {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .analytics-reference .ref-skill-activity {grid-column:2/4;grid-row:3}
+  .analytics-reference .ref-skill-row>small {grid-column:2/-1;grid-row:2}
+}
