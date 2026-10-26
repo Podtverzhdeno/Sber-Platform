@@ -154,6 +154,18 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         ?? roadmaps.data?.find((item) => item.track_key === selected.track_key)
         ?? null)
       : null;
+  // Keep the next-step card aligned with the course-certificate-driven learning path.
+  // This changes navigation only, not independently verified professional milestones.
+  const currentLearningPath = selected && selectedRoadmap && selected.attempt_number !== null
+    ? projectLearningStages(selectedRoadmap, learning.data?.courses, true) : null;
+  const hasCertifiedCourse = (currentLearningPath?.studied.studiedKeys.size ?? 0) > 0;
+  const nextOutcomeForPanel = hasCertifiedCourse
+    ? currentLearningPath?.next && selected
+      ? { trajectory_key:selected.track_key, trajectory_title:selected.title,
+          milestone_key:currentLearningPath.next.key, target_title:currentLearningPath.next.title,
+          target_kind:currentLearningPath.next.target_kind, stale_reason:null }
+      : null
+    : overview.next_outcome;
   const lastOverlayTriggerRef = useRef<HTMLElement | null>(null);
   const [roleInfoOpen, setRoleInfoOpen] = useState(false);
   const [drawerKey, setDrawerKey] = useState<string | null>(null);
@@ -391,19 +403,19 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
           </div> : <>
           <header>
             <h3>Следующий шаг</h3>
-            <span>{overview.next_outcome?.trajectory_title ?? "Маршрут"}</span>
+            <span>{nextOutcomeForPanel?.trajectory_title ?? "Маршрут"}</span>
           </header>
           <div className="trajectory-v2-next-task">
             <span className="trajectory-v2-next-task-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M5 2h10l4 4v16H5zM15 2v5h4M9 11h6M9 15h6M9 19h4"/></svg>
             </span>
             <div className="trajectory-v2-next-task-description">
-              <strong>{overview.next_outcome?.target_title ?? "Следующий шаг пока не назначен"}</strong>
-              <small>{overview.next_outcome?.target_kind === "task" ? "Практическая задача" : overview.next_outcome?.target_kind === "course" ? "Обучение" : "Маршрут"}
-                {overview.next_outcome?.stale_reason ? ` · ${overview.next_outcome.stale_reason}` : ""}</small>
+              <strong>{nextOutcomeForPanel?.target_title ?? "Следующий шаг пока не назначен"}</strong>
+              <small>{nextOutcomeForPanel?.target_kind === "task" ? "Практическая задача" : nextOutcomeForPanel?.target_kind === "course" ? "Обучение" : "Маршрут"}
+                {nextOutcomeForPanel?.stale_reason ? ` · ${nextOutcomeForPanel.stale_reason}` : ""}</small>
             </div>
-            {overview.next_outcome !== null && <button type="button" aria-label="Посмотреть следующий шаг" onClick={() => {
-              const outcome = overview.next_outcome;
+            {nextOutcomeForPanel !== null && <button type="button" aria-label="Посмотреть следующий шаг" onClick={() => {
+              const outcome = nextOutcomeForPanel;
               if (outcome === null) return;
               snapshotTrigger();
               if (outcome.trajectory_key !== selectedKey) {
