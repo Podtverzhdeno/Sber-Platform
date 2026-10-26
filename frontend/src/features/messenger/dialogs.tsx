@@ -382,7 +382,7 @@ export function DialogList({
                       onSelect(row.channel.id);
                     }}
                   >
-                    <DialogAvatar title={row.title} initials={row.initial} kind={row.channel.kind} />
+                    <DialogAvatar title={row.title} kind={row.channel.kind} />
                     <span className="msg-dialog-list__row-text">
                       <span className="msg-dialog-list__row-title">
                         <strong>{row.title}</strong>
