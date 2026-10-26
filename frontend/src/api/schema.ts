@@ -5722,10 +5722,17 @@ export interface components {
             /** Level */
             level: number;
             /**
+             * Max Level
+             * @default 3
+             */
+            max_level: number;
+            /**
              * Policy Version
-             * @default 1
+             * @default 2
              */
             policy_version: number;
+            /** Required Course Keys */
+            required_course_keys?: string[];
             /** Required Courses */
             required_courses: number;
             /** Required Practices */
