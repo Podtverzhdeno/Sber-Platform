@@ -46,7 +46,7 @@ export const advancedCyclePrograms: LearningProgram[] = [
 /** Role-specific database keys reuse level subject matter, never another role's credit. */
 export function advancedCycleProgramFor(key: string): LearningProgram | null {
   const match = /^demo-course-(13|14|15|16)-([a-z][a-z0-9-]*)$/.exec(key);
-  if (!match) return null;
+  if (!match?.[1]) return null;
   const base = advancedCyclePrograms.find(item => item.courseKey === "demo-course-" + match[1]);
   return base ? {...base, courseKey:key} : null;
 }
