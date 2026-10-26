@@ -6,6 +6,7 @@ on:
       - "src/impulse/bootstrap/demo_seed.py"
       - "tests/test_demo_seed_graph.py"
       - "tests/integration/test_demo_rating_visibility.py"
+      - "tests/integration/test_recognition_store.py"
       - "frontend/src/features/rating-v2/page.tsx"
       - "frontend/src/features/rating-v2/page.test.tsx"
       - "frontend/e2e/participant-interactions.spec.ts"
@@ -50,10 +51,12 @@ jobs:
         run: uv run alembic upgrade head
       - name: Ruff source and test quality
         run: |
-          uv run ruff format --check src/impulse/bootstrap/demo_seed.py tests/test_demo_seed_graph.py tests/integration/test_demo_rating_visibility.py
-          uv run ruff check src/impulse/bootstrap/demo_seed.py tests/test_demo_seed_graph.py tests/integration/test_demo_rating_visibility.py
+          uv run ruff format --check src/impulse/bootstrap/demo_seed.py tests/test_demo_seed_graph.py tests/integration/test_demo_rating_visibility.py tests/integration/test_recognition_store.py
+          uv run ruff check src/impulse/bootstrap/demo_seed.py tests/test_demo_seed_graph.py tests/integration/test_demo_rating_visibility.py tests/integration/test_recognition_store.py
       - name: Seed privacy, rating and opt-out regression
-        run: uv run pytest -q tests/test_demo_seed_graph.py tests/test_recognition_domain.py tests/integration/test_demo_rating_visibility.py
+        run: |
+          uv run pytest -q tests/test_demo_seed_graph.py tests/test_recognition_domain.py tests/integration/test_demo_rating_visibility.py tests/integration/test_recognition_store.py
+          uv run pytest -q tests/integration/test_demo_rating_visibility.py
 
   rating-browser:
     runs-on: ubuntu-24.04
