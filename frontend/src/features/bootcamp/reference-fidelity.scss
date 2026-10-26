@@ -136,6 +136,11 @@
 [data-theme="light"] .bc-reference .bc-ref-category-tabs button{background:#fff;color:#365c73}
 [data-theme="light"] .bc-reference .bc-ref-category-tabs button[aria-pressed=true]{background:#00dfe5;color:#09243b}
 [data-theme="light"] .bc-reference .bc-ref-summary-tags span{background:#eef6fb;color:#345a73;border-color:#bdd8e8}
+/* Accessible contrast on light panels: axe WCAG AA checks at 390/1280. */
+[data-theme="light"] .bc-reference .bc-ref-continue-status p,
+[data-theme="light"] .bc-reference .bc-ref-ring small{color:#36556c}
+[data-theme="light"] .bc-reference .bc-ref-empty button{color:#07566e}
+
 
 /* Reference side panels: 1448_course / why / required */
 .bc-reference .overlay { position:fixed;inset:0;display:flex;justify-content:flex-end;align-items:stretch;padding:0;background:#020a17b8;backdrop-filter:blur(4px);z-index:100; }
