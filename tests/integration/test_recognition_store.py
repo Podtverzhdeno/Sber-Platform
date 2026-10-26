@@ -125,14 +125,27 @@ async def test_policy_round_trip_and_season_binding() -> None:
     assert ledger_count == 2
     assert first_projection == second_projection
     assert first_projection[0].score == Decimal("105.0")
+    # Demo participants can now already have a public-rating row.
+    # Keep this fixture idempotent without changing any other public identity.
+    async with database.sessions() as session:
+        original_rating_visible = await session.scalar(
+            select(visibility_settings.c.visible).where(
+                visibility_settings.c.person_id == members[0].person_id,
+                visibility_settings.c.scope == "public_rating",
+            )
+        )
     async with database.session() as session:
         for scope in ("public_rating", "public_trophies", "public_profile"):
+            statement = insert(visibility_settings).values(
+                person_id=members[0].person_id,
+                scope=scope,
+                visible=True,
+                data_origin="demo_runtime",
+            )
             await session.execute(
-                insert(visibility_settings).values(
-                    person_id=members[0].person_id,
-                    scope=scope,
-                    visible=True,
-                    data_origin="demo_runtime",
+                statement.on_conflict_do_update(
+                    constraint="uq_visibility_settings_person_id_scope",
+                    set_={"visible": True},
                 )
             )
         await session.execute(
@@ -244,5 +257,17 @@ async def test_policy_round_trip_and_season_binding() -> None:
                 update(score_ledger)
                 .where(score_ledger.c.id == original.entry_id)
                 .values(points=Decimal("999"))
+            )
+    # Restore the participant's public visibility after the temporary
+    # consent-negative projection assertion to avoid polluting later tests.
+    if original_rating_visible is not None:
+        async with database.session() as session:
+            await session.execute(
+                update(visibility_settings)
+                .where(
+                    visibility_settings.c.person_id == members[0].person_id,
+                    visibility_settings.c.scope == "public_rating",
+                )
+                .values(visible=original_rating_visible)
             )
     await database.close()
