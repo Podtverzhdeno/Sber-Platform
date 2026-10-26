@@ -39,7 +39,9 @@ revocations take precedence, and anonymous public rows never expose a
 `person_id` or any name coming from the API. The UI uses a place-based
 anonymous label (e.g. `Участник №4`) and disables private profile actions.
 
-After deploying the migration-free seed change to an existing demo database,
-execute the project's supported **demo-only** `seed_demo` workflow in the
-approved environment. Merely updating the frontend does not alter previously
-stored `public_rating` visibility. Do not run demo seeding on real user data.
+Railway's configured pre-deploy step (`python -m impulse.bootstrap.predeploy`)
+already re-seeds the existing database **only when `DEMO_MODE=true`**. Thus an
+approved Railway deployment of this revision applies the new fictional
+`public_rating` defaults without a manual database change. A frontend-only
+deployment or `DEMO_MODE=false` cannot change persisted visibility. Do not
+run demo seeding on real user data or bypass the repository's deploy gate.
