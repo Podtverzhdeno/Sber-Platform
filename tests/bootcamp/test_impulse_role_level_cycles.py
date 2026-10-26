@@ -118,6 +118,7 @@ async def test_real_database_three_cycles_never_replay_certificates(
         assert state.level == 3 and state.cycle_number == 4
         assert len(state.history) == 3
         assert not state.advance_ready and not state.required_course_keys
+        assert state.required_practices == 0  # terminal L3 has no phantom L4 assignment
         repeat = await impulse_levels.advance_impulse_level("python", auth, request)
         assert repeat.level == 3 and len(repeat.history) == 3
         async with database.sessions() as session:
