@@ -217,7 +217,7 @@ export async function apiRequest<T>(path: RuntimeApiPath, options?: RequestInit)
     }
     const data = (await response.json()) as T;
     const scope = progressMutationScope(path, method);
-      if (scope !== null) publishProgressMutation(scope);
+    if (scope !== null) publishProgressMutation(scope);
     return data;
   }
 
