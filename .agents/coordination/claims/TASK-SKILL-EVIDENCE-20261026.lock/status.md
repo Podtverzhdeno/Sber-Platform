@@ -10,6 +10,12 @@
   - src/impulse/application/task_catalog_matching.py (per-skill accepted-evidence projection only)
   - src/impulse/api/v1/task_catalog.py (serialize evidence statistics only)
   - frontend/src/features/task-catalog-v2/types.ts (read-model extension only)
+  - frontend/src/features/task-catalog-v2/page.test.tsx (update task detail assertion only)
+  - frontend/e2e/task-catalog-v2-interactions.spec.ts (details checks and evidence browser scenario only)
+  - frontend/src/api/schema.ts (generated OpenAPI interface)
+  - openapi.json (CatalogSkillImpactView only)
+  - tests/test_task_catalog_matching.py (dedupe/freshness assertion)
+
   - frontend/src/features/task-catalog-v2/skill-impact-statistics.tsx
   - frontend/src/features/task-catalog-v2/skill-impact-statistics.scss
   - frontend/src/features/task-catalog-v2/skill-impact-statistics.test.tsx
@@ -23,5 +29,5 @@
   - strict Python Ruff/Pyright and focused pytest
   - frontend typecheck + ESLint + Vitest
   - browser or layout regression
-- progress: Replace three non-informative blank skill values with accepted-contribution evidence statistics, accurate coverage, and verification steps; never invent proficiency percentage or forecast.
+- progress: Server API includes accepted contribution count per skill; frontend replaces empty three-column forecast with evidence summary and breakdown. OpenAPI/typegen, Ruff, strict frontend TypeScript/lint and backend task-catalog test suite passed on b6a8dce. React and Playwright acceptance updated; PR #105 open.
 - blockers: Main integration only after independent review of frontend file overlap; scope remains isolated in separate PR.
