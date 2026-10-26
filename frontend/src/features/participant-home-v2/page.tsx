@@ -27,8 +27,7 @@ import {
 } from "lucide-react";
 
 import { StatePanel } from "../../components/ui";
-import { apiRequest, type RuntimeApiPath } from "../../api/client";
-import type { components } from "../../api/schema";
+import { apiRequest } from "../../api/client";
 import { learningSummaryQueryKey, loadLearningSummary } from "../learning-progress";
 import {
   TASK_NEXT_ACTION_LABELS,
@@ -45,7 +44,7 @@ import "./home-v2.scss";
 type HomeGrade = DevelopmentOverviewView["concepts"]["career_grade"];
 type HomePanel = "levels" | "grade-details" | null;
 type HomePassport = { skills: {key: string; practical_level: string; confirmed_case_count: number}[] };
-type GradeCourseCatalog = components["schemas"]["BootcampOverviewV2"];
+type GradeCourseCatalog = { key: string; title: string; completion_state: "not_started" | "reported" | "verified" | "rejected" }[];
 
 /** Same approved SVG artwork as the standalone 22.10.2026 ZIP. */
 const HERO_ART = "/home-reference/mountain-path.svg";
@@ -121,11 +120,9 @@ export function ParticipantHomeV2Body(props: {
     retry: false,
   });
   const gradeCourseCatalog = useQuery({
-    queryKey: ["bootcamp-v2-overview", levelRoleKey],
-    queryFn: () => apiRequest<GradeCourseCatalog>(
-      `/api/v1/me/bootcamp/overview?track=${encodeURIComponent(levelRoleKey ?? "")}` as RuntimeApiPath,
-    ),
-    enabled: showRequiredCourses && levelRoleKey !== null,
+    queryKey: ["bootcamp-catalog"],
+    queryFn: () => apiRequest<GradeCourseCatalog>("/api/v1/me/bootcamp/catalog"),
+    enabled: showRequiredCourses,
     retry: false,
   });
   const recommendedTask = overview.active_tasks.find((task) => task.next_action !== "await_review") ?? null;
@@ -289,21 +286,19 @@ export function ParticipantHomeV2Body(props: {
                       <ol className="home-v2-grade-course-list">
                         {impulseLevel.data.required_course_keys?.map((key, index) => {
                           const course = studyCourses.data?.courses.find((item) => item.course_key === key);
-                          const catalogCourse = gradeCourseCatalog.data?.courses.find((item) => item.card.key === key);
-                          const title = catalogCourse?.card.title ?? course?.title ??
+                          const catalogCourse = gradeCourseCatalog.data?.find((item) => item.key === key);
+                          const title = catalogCourse?.title ?? course?.title ??
                             (studyCourses.isPending || gradeCourseCatalog.isPending ? "Загружаем название курса…" : `Курс · ${key}`);
-                          const done = (course?.finished === true && course.certificate_id !== null) ||
-                            catalogCourse?.card.completion_state === "verified";
+                          const done = course?.finished === true || catalogCourse?.completion_state === "verified";
                           const started = (course?.completed_units ?? 0) > 0 ||
-                            catalogCourse?.card.completion_state === "in_progress" ||
-                            catalogCourse?.card.completion_state === "reported";
+                            catalogCourse?.completion_state === "reported";
                           return <li key={key} className="home-v2-grade-course" data-course-key={key}>
                             <span className={done ? "home-v2-grade-course-index is-done" : "home-v2-grade-course-index"} aria-hidden="true">
                               {done ? <Check size={16}/> : index + 1}
                             </span>
                             <div className="home-v2-grade-course-info">
                               <strong>{title}</strong>
-                              <small>{done ? "Завершён · сертификат получен" :
+                              <small>{done ? course?.certificate_id || catalogCourse?.completion_state === "verified" ? "Завершён · сертификат получен" : "Учебный курс завершён" :
                                 started ? `В процессе${course?.total_units ? ` · ${String(course.completed_units)} из ${String(course.total_units)} уроков` : ""}` :
                                   "Ещё не начат"}</small>
                             </div>
