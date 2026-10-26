@@ -866,7 +866,6 @@ class SqlWorkStore(WorkStore):
                     constraint="uq_applications_task_id_person_id",
                     set_={
                         "accepted_terms_version": version,
-                        "status": "terms_accepted",
                         "version": applications.c.version + 1,
                     },
                 )
@@ -910,7 +909,8 @@ class SqlWorkStore(WorkStore):
                 )
             record = self._application(row)
             if (
-                idempotency_key is not None
+                record.status not in {ApplicationStatus.WITHDRAWN, ApplicationStatus.REJECTED}
+                and idempotency_key is not None
                 and record.idempotency_key is not None
                 and record.idempotency_key != idempotency_key
             ):

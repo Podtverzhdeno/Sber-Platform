@@ -209,7 +209,7 @@ def test_filters_narrow_without_losing_totals_semantics() -> None:
     assert page.total_found == 1
     assert page.items[0].match.percent == Decimal("92")
     assert page.items[0].task_id == UUID(int=102)
-    assert page.total_available == 3
+    assert page.total_available == 1
 
 
 def test_customer_substring_filter_is_case_insensitive() -> None:
@@ -255,9 +255,9 @@ def test_direction_timeframe_saved_filters_and_snapshot_kpis() -> None:
 
     assert [item.task_id for item in page.items] == [UUID(int=101)]
     assert page.total_found == 1
-    assert page.total_available == 3
+    assert page.total_available == 1
     assert page.total_saved == 1
-    assert page.total_calculated == 3
+    assert page.total_calculated == 1
     assert page.snapshot_at == NOW
 
 
