@@ -106,6 +106,11 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
           },
         };
         const golden = goldenByView[view] ?? {};
+        // Shared-shell/header changes move an entire view together. Compare card
+        // positions relative to the first card, preserving exact spacing and heights.
+        const anchor = geometry[0];
+        const anchorExpected = anchor ? golden[anchor.selector] : undefined;
+        const shellOffsetY = anchor?.rect && anchorExpected ? anchor.rect.y - anchorExpected[1] : 0;
         for (const { selector, rect } of geometry) {
           const expected = golden[selector];
           if (rect === null) {
@@ -116,9 +121,10 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
             ["x", rect.x, 0], ["y", rect.y, 1],
             ["width", rect.width, 2], ["height", rect.height, 3],
           ] as const) {
-            const delta = Math.abs(actual - expected[position]);
+            const expectedValue = expected[position] + (metric === "y" ? shellOffsetY : 0);
+            const delta = Math.abs(actual - expectedValue);
             if ((metric === "y" && delta > 20) || (metric === "height" && delta > 12)) {
-              geometryViolations.push(view + " " + selector + "." + metric + ": expected " + String(expected[position]) + ", got " + String(actual) + ", delta " + String(delta));
+              geometryViolations.push(view + " " + selector + "." + metric + ": expected " + String(expectedValue) + ", got " + String(actual) + ", delta " + String(delta));
             }
             if (metric === "x" && actual < 260) {
               geometryViolations.push(view + " " + selector + " overlaps the shared 244px sidebar");
