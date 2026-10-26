@@ -2163,3 +2163,31 @@
   .workspace-content .trajectory-v2 .trajectory-v2-study-summary{grid-template-columns:1fr;gap:9px}
   .workspace-content .trajectory-v2 .trajectory-v2-stage-header > .trajectory-v2-stage-state{justify-self:start}
 }
+
+/* Subsequent Impulse level cycles: new courses, independently verified practice. */
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-path {
+  display:grid;gap:13px;padding:19px;border-radius:14px;border:1px solid #136276;
+  background:linear-gradient(140deg,#082639,#071b30);
+}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-path>header {display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-path>header h3{margin:3px 0 0;font-size:19px;color:#f0feff}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-path>header small{font-size:11px;color:#41dfe0}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-path>header>span{font-size:12px;color:#9dfaf0}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-path>p{margin:0;color:#a4c3d4;font-size:12px;line-height:1.55}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-courses{display:grid;gap:9px}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-course{display:flex;align-items:center;gap:11px;min-width:0;border:1px solid #1b5270;border-radius:10px;background:#0a3047;padding:12px;color:#e4f9ff;text-decoration:none;transition:border-color .18s,background .18s}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-course:hover,.workspace-content .trajectory-v2 .trajectory-v2-cycle-course:focus-visible{background:#0c3b52;border-color:#0de5d6}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-course>div{flex:1;min-width:0;display:grid;gap:4px}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-course strong{font-size:12px;line-height:1.4}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-course small{font-size:10px;color:#9bc5d4}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-course>span:last-child{font-size:11px;color:#12dfd2;white-space:nowrap}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-num{width:29px;height:29px;display:grid;place-items:center;flex:none;border-radius:8px;background:#065369;color:#30f8e7;font-weight:800}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-practice{display:grid;gap:5px;border:1px solid #245569;border-radius:10px;padding:12px;background:#072c39}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-practice strong{font-size:12px;color:#e0fff9}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-practice span{font-size:11px;color:#13e5d1}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-practice p{margin:0;font-size:11px;color:#9ebecf;line-height:1.5}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-link{display:inline-flex;align-items:center;justify-content:center;border-radius:9px;padding:11px 13px;background:#06d7d2;color:#001c2a;font-size:12px;font-weight:850;text-decoration:none}
+.workspace-content .trajectory-v2 .trajectory-v2-cycle-ready{color:#32f4cc!important;font-weight:750}
+.workspace-content .trajectory-v2 .trajectory-v2-level-error{font-size:11px;color:#ffbd88}
+.workspace-content .trajectory-v2 .trajectory-v2-level-error button{background:transparent;border:1px solid #fdab76;border-radius:5px;color:#ffc39c;padding:3px 7px}
+@media(max-width:560px){.workspace-content .trajectory-v2 .trajectory-v2-cycle-path{padding:12px}.workspace-content .trajectory-v2 .trajectory-v2-cycle-course{flex-wrap:wrap}.workspace-content .trajectory-v2 .trajectory-v2-cycle-course>span:last-child{margin-left:auto}}
