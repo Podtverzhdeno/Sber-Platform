@@ -117,9 +117,7 @@ def test_study_progress_requires_order_and_practice_requires_review(
 
     async def course_catalog() -> tuple[SimpleNamespace, ...]:
         return (
-            SimpleNamespace(
-                key="demo-course-1", title="Практикум Impulse", track_keys=("python",)
-            ),
+            SimpleNamespace(key="demo-course-1", title="Практикум Impulse", track_keys=("python",)),
         )
 
     async def attempts(_person: UUID) -> tuple[TrackAttempt, ...]:
