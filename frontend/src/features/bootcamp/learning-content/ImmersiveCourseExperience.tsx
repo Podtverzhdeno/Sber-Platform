@@ -350,7 +350,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
             <section className="imp-study__cert-card imp-study__cert-card--practice">
               <div className="imp-study__cert-card-top"><Medal size={29}/>
                 <span className="imp-study__cert-status imp-study__cert-status--practice">
-                  {practiceState === "approved" ? "Знания подтверждены" : practiceState === "pending" ? "На проверке" : "Нужна практика"}
+                  {practiceState === "approved" ? "Знания подтверждены" : practiceState === "pending" ? "Практика зачтена · сертификат проверяется" : "Нужна практика"}
                 </span>
               </div>
               <div className="imp-study__cert-body"><div className="imp-study__cert-details">
@@ -358,7 +358,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
                 <p>Подтверждает практические навыки после выполнения задания и независимой проверки результата.</p>
                 <ul>
                   <li><CheckCircle2 size={16}/> Теоретическая программа завершена</li>
-                  <li className={practiceState ? "complete" : "pending"}><Clock3 size={16}/> {practiceState === "pending" ? "Работа ожидает проверки" : practiceState === "approved" ? "Практика принята" : "Выполните практическое задание"}</li>
+                  <li className={practiceState ? "complete" : "pending"}><Clock3 size={16}/> {practiceState === "pending" ? "Практика зачтена для уровня Impulse" : practiceState === "approved" ? "Практика принята" : "Выполните практическое задание"}</li>
                   <li className={practicalCertificateId ? "complete" : "pending"}><Medal size={16}/> {practicalCertificateId ? "Компетенции подтверждены" : "Требуется решение проверяющего"}</li>
                 </ul>
               </div><div className="imp-study__cert-preview imp-study__cert-preview--practice" aria-hidden="true">
@@ -376,7 +376,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           {view === "certificates" && <section className="imp-study__cert-timeline" aria-label="Как получить сертификаты">
             <h3>Как получить каждый сертификат</h3><div>
               <div><BookOpen size={22}/><span><strong>1. Пройти все уроки</strong><small>Завершить {total} из {total} уроков</small></span><ChevronRight size={18}/><CheckCircle2 size={25}/><span><strong>Сертификат прохождения</strong><small>Выдаётся автоматически</small></span></div>
-              <div><Code2 size={22}/><span><strong>2. Выполнить практику</strong><small>Отправить решение на проверку</small></span><ChevronRight size={18}/><Medal size={25}/><span><strong>Подтверждение знаний</strong><small>Только после успешной проверки</small></span></div>
+              <div><Code2 size={22}/><span><strong>2. Выполнить практику</strong><small>Практика засчитывается при отправке</small></span><ChevronRight size={18}/><Medal size={25}/><span><strong>Подтверждение знаний</strong><small>Отдельно после проверки</small></span></div>
             </div>
           </section>}
           {view === "finish" && <button type="button" className="imp-study__primary imp-study__finish" disabled={busy || !ready} onClick={() => { void completeCourse(); }}><CheckCircle2/> {busy ? "Проверяем и выдаём…" : "Завершить обучение"} <ArrowRight size={17}/></button>}
@@ -426,9 +426,9 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
                 <Download size={17}/> Скачать шаблон
               </a>
             </div>}
-            <p className="imp-study__disclaimer">Практическая работа требует отдельной проверки для сертификата подтверждения знаний.</p>
+            <p className="imp-study__disclaimer">Отправленная практика сразу засчитывается для учебной траектории и уровня Impulse. Независимый сертификат знаний выдаётся только после проверки.</p>
             <form className="imp-study__submission" onSubmit={event => { event.preventDefault(); void submitPractice.mutateAsync(); }}>
-              <h4>Отправить практическую работу на проверку</h4>
+              <h4>Отправить практику и зачесть учебное требование</h4>
               <label>Опишите, что сделали и как проверили результат
                 <textarea value={practiceDescription} minLength={50} required
                   onChange={event => { setPracticeDescription(event.target.value); }}
@@ -440,10 +440,11 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
               </label>
               <button className="imp-study__primary" type="submit"
                 disabled={!certificateId || submitPractice.isPending || practiceDescription.trim().length < 50}>
-                {submitPractice.isPending ? "Отправляем…" : practiceState === "pending" ? "Обновить работу на проверке" : "Отправить на проверку"} <ArrowRight size={17}/>
+                {submitPractice.isPending ? "Отправляем…" : practiceState === "pending" ? "Обновить зачтённую практику" : "Отправить и зачесть практику"} <ArrowRight size={17}/>
               </button>
               {!certificateId && <small>Отправка откроется после завершения всех уроков.</small>}
-              {practiceState === "pending" && <p role="status">Практическая работа получена. Сертификат знаний будет доступен только после проверки.</p>}
+              {practiceState === "pending" && <p role="status">Практика уже учтена для траектории и повышения уровня Impulse. Независимый сертификат знаний появится после проверки.</p>}
+              {practiceState === "approved" && <p role="status">Практика зачтена, сертификат подтверждения знаний выдан.</p>}
               {submitPractice.isError && <p role="alert">Не удалось отправить работу. Проверьте соединение и повторите попытку.</p>}
             </form>
           </section>}</LessonFrame>

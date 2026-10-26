@@ -1,10 +1,11 @@
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
-  Activity, ArrowRight, CalendarDays, Check, CheckCircle2, Clock3,
-  Flame, FolderOpen, Info, RefreshCw, Target, Users, Zap,
+  Activity, ArrowRight, CalendarDays, CheckCircle2, Clock3,
+  Flame, FolderOpen, Info, RefreshCw, Target, Users, X, Zap,
 } from "lucide-react";
 
 import { apiRequest } from "../api/client";
@@ -119,6 +120,16 @@ export function CustomerAnalytics({navigation=[]}:{navigation?:string[]}) {
   const [category,setCategory]=useState<Category>("all");
   const [projectId,setProjectId]=useState("all");
   const [selectedDay,setSelectedDay]=useState<string|null>(null);
+  const [hovered,setHovered]=useState<{key:string;x:number;y:number}|null>(null);
+  const closeRef=useRef<HTMLButtonElement|null>(null);
+  const sourceRef=useRef<HTMLButtonElement|null>(null);
+  useEffect(()=>{
+    if(!selectedDay)return;
+    const onEscape=(event:KeyboardEvent)=>{if(event.key==="Escape")setSelectedDay(null);};
+    document.addEventListener("keydown",onEscape);
+    closeRef.current?.focus();
+    return ()=>{document.removeEventListener("keydown",onEscape);sourceRef.current?.focus();};
+  },[selectedDay]);
   const activity=useQuery({queryKey:["customer-activity-events"],queryFn:()=>apiRequest<ActivityResponse>("/api/v1/customer/analytics/activity"),refetchOnMount:"always"});
   const tasks=useQuery({queryKey:["customer-tasks"],queryFn:()=>apiRequest<Task[]>("/api/v1/customer/tasks"),refetchOnMount:"always"});
   const events=activity.data?.events??[];
@@ -153,7 +164,9 @@ export function CustomerAnalytics({navigation=[]}:{navigation?:string[]}) {
     else perProject.set(event.task_id,{id:event.task_id,title:event.task_title,count:1});
   }
   const ranked=[...perProject.values()].sort((a,b)=>b.count-a.count||a.title.localeCompare(b.title,"ru")).slice(0,5);
-  const list=selectedDay?visible.filter(event=>eventDay(event)===selectedDay):visible;
+  const selectedEvents=selectedDay?visible.filter(event=>eventDay(event)===selectedDay):[];
+  const hoverEvents=hovered?visible.filter(event=>eventDay(event)===hovered.key):[];
+  const list=selectedDay?selectedEvents:visible;
   const lastEvents=[...list].sort((a,b)=>Date.parse(b.occurred_at)-Date.parse(a.occurred_at)).slice(0,5);
   const peak=Math.max(0,...weekly);
   const busiest=weekly.indexOf(peak);
@@ -201,19 +214,29 @@ export function CustomerAnalytics({navigation=[]}:{navigation?:string[]}) {
           </select>
           <div className="ca3-heat-legend">Меньше{[0,1,2,3,4].map(x=><i className={`ca3-heat-${String(x)}`} key={x}/>)}Больше</div>
         </div>}>
-        <div className="ca3-heatmap-inner">
-          <div className="ca3-weekdays">{["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map(x=><span key={x}>{x}</span>)}</div>
-          <div className="ca3-heatmap-grid">{calendar.map((days,idx)=><div key={idx} className="ca3-heat-column">{days.map(day=>{
-            const count=counts.get(day.key)??0;
-            const level=count===0?0:maxCount===0?0:Math.max(1,Math.ceil(count/maxCount*4));
-            const future=day.date>now;
-            return <button type="button" key={day.key} disabled={future||!activity.isSuccess} aria-label={`${todayLabel(day.date.toISOString())}: ${String(count)} событий`}
-              title={`${todayLabel(day.date.toISOString())} · ${String(count)} событий`}
-              className={`ca3-heat-cell ca3-heat-${String(level)} ${selectedDay===day.key?"is-selected":""}`}
-              onClick={()=>{setSelectedDay(selectedDay===day.key?null:day.key);}}/>;})}</div>)}</div>
+        <div className="ca3-heatmap-scroll" role="region" tabIndex={0} aria-label="Дни активности заказчика, горизонтальная прокрутка">
+          <div className="ca3-heatmap-inner">
+            <div className="ca3-weekdays" aria-hidden="true"><span/>{["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map((x,index)=><span key={x}>{index%2===0?x:""}</span>)}</div>
+            <div className="ca3-heatmap-grid">{calendar.map((days,idx)=><div key={idx} className="ca3-heat-column">
+              <span className="ca3-week-label">{idx%3===0?`Нед. ${String(idx+1)}`:""}</span>
+              {days.map(day=>{
+                const count=counts.get(day.key)??0;
+                const level=count===0?0:maxCount===0?0:Math.max(1,Math.ceil(count/maxCount*4));
+                const future=day.date>now;
+                const name=todayLabel(day.date.toISOString());
+                return <button type="button" key={day.key} disabled={future} aria-label={`${name}: ${activity.isSuccess?String(count)+" событий":"данные недоступны"}`}
+                  title={`${name} · ${activity.isSuccess?String(count)+" событий":"история недоступна"}`}
+                  className={`ca3-heat-cell ca3-heat-${String(level)} ${activity.isSuccess?"":"is-unknown"} ${selectedDay===day.key?"is-selected":""}`}
+                  onMouseEnter={e=>{const r=e.currentTarget.getBoundingClientRect();setHovered({key:day.key,x:r.left,y:r.top});}}
+                  onMouseLeave={()=>{setHovered(null);}}
+                  onFocus={e=>{const r=e.currentTarget.getBoundingClientRect();setHovered({key:day.key,x:r.left,y:r.top});}}
+                  onBlur={()=>{setHovered(null);}}
+                  onClick={e=>{sourceRef.current=e.currentTarget;setHovered(null);setSelectedDay(day.key);}}/>;
+              })}
+            </div>)}</div>
+          </div>
         </div>
-        <div className="ca3-heatmap-labels" style={{gridTemplateColumns:`24px repeat(${String(weeks)},minmax(0,1fr))`}}><span/>{calendar.map((_,idx)=><span key={idx}>Нед. {idx+1}</span>)}</div>
-        {selectedDay&&<div className="ca3-day-selection"><span><Check size={14}/> {todayLabel(dayFromKey(selectedDay).toISOString())} · {String(counts.get(selectedDay)??0)} событий</span><button type="button" onClick={()=>{setSelectedDay(null);}}>Сбросить день</button></div>}
+        <p className="ca3-heatmap-hint"><Info size={13}/> Один квадрат — один день. Наведите, чтобы увидеть события; нажмите для подробностей.</p>
         {activity.isSuccess&&windowEvents.length===0&&<p className="ca3-empty-inline">В выбранном периоде пока нет зарегистрированных событий</p>}
       </Card>
       <Card title="Структура активности" description="Распределение событий по вашим проектам" className="ca3-structure">
@@ -260,6 +283,32 @@ export function CustomerAnalytics({navigation=[]}:{navigation?:string[]}) {
         })}</div>:<div className="ca3-placeholder">Пока нет событий за выбранный период</div>}
       </Card>
     </section>
+    {hovered && !selectedDay && createPortal(<div className="ca3-heat-tooltip" role="tooltip" style={{left:Math.max(8,Math.min(hovered.x,window.innerWidth-244)),top:Math.max(8,hovered.y-102)}}>
+      <strong>{todayLabel(dayFromKey(hovered.key).toISOString())}</strong>
+      <span>{activity.isSuccess?`${counts.get(hovered.key)??0} событий`:"История недоступна"}</span>
+      {hoverEvents.slice(0,2).map(event=><small key={event.id}>{labels[event.kind]} · {event.task_title}</small>)}
+      <em>Нажмите для подробностей</em>
+    </div>,document.body)}
+    {selectedDay && createPortal(<div className="ca3-activity-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setSelectedDay(null);}}>
+      <section className="ca3-day-dialog" role="dialog" aria-modal="true" aria-label={`Активность ${todayLabel(dayFromKey(selectedDay).toISOString())}`}>
+        <header><div><small>АКТИВНОСТЬ ЗАКАЗЧИКА ЗА ДЕНЬ</small><h2>{todayLabel(dayFromKey(selectedDay).toISOString())}</h2></div>
+          <button ref={closeRef} type="button" aria-label="Закрыть подробности дня" onClick={()=>{setSelectedDay(null);}}><X size={18}/></button>
+        </header>
+        <div className="ca3-day-total"><strong>{activity.isSuccess?String(selectedEvents.length):"—"}</strong><span>зарегистрированных действий</span></div>
+        <h3>Что происходило</h3>
+        <div className="ca3-day-events">
+          {selectedEvents.length ? [...selectedEvents].sort((a,b)=>Date.parse(a.occurred_at)-Date.parse(b.occurred_at)).map(event=>{
+            const Icon=eventIcon(event.kind);
+            return <article key={event.id}>
+              <div><span><Icon size={16}/>{labels[event.kind]}</span><time dateTime={event.occurred_at}>{timeLabel(event.occurred_at)}</time></div>
+              <strong>{event.task_title}</strong>
+              {projectNavigation&&<button type="button" onClick={()=>{setSelectedDay(null);navigateTask(event.task_id);}}>Открыть проект <ArrowRight size={14}/></button>}
+            </article>;
+          }):<p>{activity.isSuccess?"Нет зарегистрированных событий в этот день":"История активности недоступна"}</p>}
+        </div>
+        <p className="ca3-day-disclaimer">Часы работы не вычисляются по событиям без достоверного учёта времени.</p>
+      </section>
+    </div>,document.body)}
     <footer className="ca3-data-note"><Info size={15}/> История ограничена последними 84 днями · учитываются только события с подтверждённой датой · данные видны только по вашим проектам</footer>
   </main>;
 }

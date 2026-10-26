@@ -5690,6 +5690,8 @@ export interface components {
             practical_certificate_id: string | null;
             /** Practice Status */
             practice_status: string | null;
+            /** Practice Submitted At */
+            practice_submitted_at?: string | null;
             /** Title */
             title: string;
             /** Total Units */
@@ -5708,6 +5710,8 @@ export interface components {
             approved_practices: number;
             /** Completed Courses */
             completed_courses: number;
+            /** Credited Practices */
+            credited_practices: number;
             /**
              * Curriculum State
              * @enum {string}
@@ -5748,6 +5752,8 @@ export interface components {
             completed_lessons: number;
             /** Courses */
             courses: components["schemas"]["ImpulseCourseSummary"][];
+            /** Credited Practices */
+            credited_practices: number;
             /** Finished Courses */
             finished_courses: number;
             /** Started Courses */

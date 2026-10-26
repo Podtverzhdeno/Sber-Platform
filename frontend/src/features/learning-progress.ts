@@ -12,6 +12,7 @@ export type LearningCourse = {
   certificate_id: string | null;
   updated_at: string;
   practice_status: string | null;
+  practice_submitted_at?: string | null;
   practical_certificate_id: string | null;
 };
 
@@ -20,6 +21,7 @@ export type LearningSummary = {
   finished_courses: number;
   completed_lessons: number;
   approved_practices: number;
+  credited_practices: number;
   courses: LearningCourse[];
 };
 

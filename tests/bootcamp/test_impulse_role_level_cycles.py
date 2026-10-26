@@ -56,7 +56,8 @@ async def test_real_database_three_cycles_never_replay_certificates(
                 (
                     await session.execute(
                         text(
-                            "SELECT p.course_key, p.certificate_id, s.practical_certificate_id "
+                            "SELECT p.course_key, p.certificate_id, s.practical_certificate_id, "
+                            "s.status AS practice_status "
                             "FROM impulse_course_progress p "
                             "LEFT JOIN impulse_practical_submissions s "
                             "ON s.person_id=p.person_id AND s.course_key=p.course_key "
@@ -74,6 +75,7 @@ async def test_real_database_three_cycles_never_replay_certificates(
                     course_key=row["course_key"],
                     finished=row["certificate_id"] is not None,
                     practical_certificate_id=row["practical_certificate_id"],
+                    practice_status=row["practice_status"],
                 )
                 for row in rows
             ]
@@ -143,7 +145,9 @@ async def test_real_database_three_cycles_never_replay_certificates(
 
         await grant(("demo-course-13-python", "demo-course-14-python"), "demo-course-13-python")
         state = await impulse_levels.impulse_level("python", auth, request)
-        assert state.advance_ready and state.approved_practices == 1
+        assert (
+            state.advance_ready and state.approved_practices == 1 and state.credited_practices == 1
+        )
         state = await impulse_levels.advance_impulse_level("python", auth, request)
         assert (state.level, state.completed_courses) == (2, 0)
         assert not state.advance_ready
