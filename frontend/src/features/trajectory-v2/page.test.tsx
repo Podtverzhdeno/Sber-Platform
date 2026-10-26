@@ -187,6 +187,8 @@ describe("trajectory role palette and single primary", () => {
       roles: [unselected],
     })).toBeNull();
     expect(roleVisualTone(unselected, true)).toBe("unselected");
+    expect(primaryTrajectoryKey({ ...overview, next_outcome: null, roles: [{...unselected, state:"learning", attempt_number:1}] })).toBeNull();
+    expect(roleVisualTone({...unselected, state:"learning", attempt_number:1}, false)).toBe("learning");
   });
 });
 
@@ -270,7 +272,7 @@ describe("trajectory v2 stage path", () => {
     renderShell("/workspace/1?role=product");
     await waitFor(() => expect(screen.getByTestId("trajectory-stages")).toBeInTheDocument());
     expect(screen.getByTestId("trajectory-role-detail").textContent).toContain(
-      "Персональный прогресс отсутствует",
+      "Нажмите «Изучать дополнительно»",
     );
   });
 
@@ -346,5 +348,42 @@ describe("Persisted course learning versus verified milestone state", () => {
     />);
     expect(screen.queryByTestId("trajectory-study-progress")).not.toBeInTheDocument();
     expect(screen.getByRole("button",{name:/API и сервисы/})).toHaveAttribute("data-study-state","none");
+  });
+});
+
+
+describe("optional role activation and reversible grey state", () => {
+  it("lets a participant activate a grey role without selecting it as primary", async () => {
+    const spy = mockRoadmapsFetch();
+    renderShell("/workspace/1?role=product");
+    expect(screen.getByTestId("trajectory-role-detail")).toHaveAttribute("data-tone", "unselected");
+    fireEvent.click(screen.getByRole("button", { name: "Изучать дополнительно →" }));
+    await waitFor(() => {
+      expect(spy.mock.calls.some(([input, options]) =>
+        String(input).includes("/me/tracks/optional")
+        && (options as RequestInit | undefined)?.method === "POST"
+        && String((options as RequestInit | undefined)?.body).includes('"enabled":true')
+      )).toBe(true);
+    });
+    expect(screen.getAllByTestId("trajectory-role-card").filter(role =>
+      role.getAttribute("data-primary") === "true")).toHaveLength(1);
+  });
+
+  it("shows archive button for optional studies without erasing historical progress", async () => {
+    const spy = mockRoadmapsFetch();
+    const overview: DevelopmentOverviewView = {
+      ...overviewFixture,
+      roles: rolesFixture.map(role => role.track_key === "product"
+        ? { ...role, state: "learning", attempt_number: 1, completed_milestones: 2 }
+        : role),
+    };
+    renderShell("/workspace/1?role=product", { overview });
+    expect(screen.getByTestId("trajectory-role-detail")).toHaveAttribute("data-tone", "learning");
+    fireEvent.click(screen.getByRole("button", { name: "Сделать карточку серой" }));
+    await waitFor(() => expect(spy.mock.calls.some(([input, options]) =>
+      String(input).includes("/me/tracks/optional")
+      && String((options as RequestInit | undefined)?.body).includes('"enabled":false')
+    )).toBe(true));
+    expect(screen.getByTestId("trajectory-role-detail")).toHaveTextContent("Обучение и практические шаги");
   });
 });
