@@ -122,13 +122,15 @@ test.describe("task catalog interactive controls and motion", () => {
   });
 
   test("task detail displays real accepted skill evidence and truthful unknown levels", async ({ page }) => {
+    const baseImpact = catalogItem.skill_impact[0];
+    if (!baseImpact) throw new Error("Fixture must have a primary skill impact");
     const item: CatalogItem = {
       ...catalogItem,
       competency_tags: ["python", "recommender-systems"],
       skill_impact: [
-        { ...catalogItem.skill_impact[0]!, accepted_evidence_count: 2, last_evidence_submitted_at: "2026-10-20T12:00:00Z" },
+        { ...baseImpact, accepted_evidence_count: 2, last_evidence_submitted_at: "2026-10-20T12:00:00Z" },
         {
-          ...catalogItem.skill_impact[0]!,
+          ...baseImpact,
           skill_id: "recommender-systems", title: "Рекомендательные системы",
           accepted_evidence_count: 0, last_evidence_submitted_at: null,
         },
