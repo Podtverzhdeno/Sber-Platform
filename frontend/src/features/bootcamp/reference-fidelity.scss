@@ -623,3 +623,43 @@
   .bc-reference .bc-ref-grade-button--unlock::after,
   .bc-reference .bc-ref-grade--ready::after{animation:none!important}
 }
+
+/* Main career direction is distinct from the currently viewed Bootcamp tab:
+   primary = server enrollment (gold); selected secondary = existing cyan. */
+.bc-reference .bc-ref-role-tabs > button[data-primary="true"] {
+  color: #ffe6a4;
+  border-color: #d7a344;
+  background: linear-gradient(135deg, #322818, #162033 86%);
+  box-shadow: inset 0 1px 0 #ffe49c20, 0 0 0 1px #c58a3420;
+}
+.bc-reference .bc-ref-role-tabs > button[data-primary="true"]:hover {
+  color: #fff1c5;
+  border-color: #f4c567;
+  background: linear-gradient(135deg, #453016, #1b2638);
+}
+.bc-reference .bc-ref-role-tabs > button[data-primary="true"][aria-pressed="true"] {
+  color: #251607;
+  border-color: #ffd06f;
+  background: linear-gradient(180deg, #ffe7a3 0%, #f6c15c 53%, #e6a33d 100%);
+  box-shadow: inset 0 1px 0 #fff7d5a6, 0 0 17px #ecb85350;
+}
+.bc-reference .bc-ref-role-tabs > button[data-primary="true"][aria-pressed="true"]:hover {
+  color: #251607;
+  background: linear-gradient(180deg, #fff0bf 0%, #facd74 56%, #eeb04f 100%);
+}
+.bc-reference .bc-ref-role-tabs > button[data-primary="true"]:focus-visible {
+  outline: 2px solid #ffd875;
+  outline-offset: 3px;
+}
+.bc-reference .bc-ref-role-tabs > button .bc-ref-role-primary-star {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  margin-left: -7px;
+  fill: currentColor;
+}
+[data-theme="light"] .bc-reference .bc-ref-role-tabs > button[data-primary="true"]:not([aria-pressed="true"]) {
+  color: #78500c;
+  border-color: #cb963f;
+  background: linear-gradient(135deg, #fff4d7, #fffaf0);
+}

@@ -1,0 +1,27 @@
+# Claim BC-PRIMARY-ROLE-GOLD-20261026
+- task_id: BC-PRIMARY-ROLE-GOLD-20261026
+- session_id: gpt6-20261026-primary-role
+- status: REVIEW
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: be63d6d3b53fb2dd0983e11adbeab47a4574db22
+- lane: bootcamp-role-visual-indicator
+- depends_on: []
+- write_scope:
+  - frontend/src/features/bootcamp/catalog.tsx (AiRoleTabs component and primary-overview read only; do not change course contents)
+  - frontend/src/features/bootcamp/reference-fidelity.scss (golden role-tab styles only)
+  - frontend/src/features/bootcamp/trajectory-catalog-ui.test.tsx (primary-role indication tests)
+  - frontend/e2e/bootcamp-primary-role-gold.spec.ts
+  - .github/workflows/bootcamp-primary-role-gold-qa.yml
+  - .agents/coordination/claims/BC-PRIMARY-ROLE-GOLD-20261026.lock/status.md
+- shared_files:
+  - frontend/src/features/bootcamp/catalog.tsx (BC2-COURSE-CONTENT-INTEGRATION-20261025 owns other hunks; explicitly limited to role-tab rendering/data)
+- verification: eslint targeted, typecheck, Vitest role UI, browser or screenshot, actual primary trajectory data
+- progress: Cross-check main role via existing primaryTrajectoryKey; keep cyan selected secondary and gold source-authoritative primary.
+- blockers: BC2-COURSE-CONTENT-INTEGRATION-20261025 retains an active file-level claim; project owner has explicitly directed serialized integration of this reviewed PR into main on 2026-10-26. Integration decision applies only to PR #95; ownership of remaining BC2 work is unchanged. Independent review for this PR covered the overlap and focused checks passed.
+
+- integration_handoff: PR #95 contains isolated golden primary-role indicator and tests. Integration expressly authorized by project owner on 2026-10-26; merge into current main as reviewed, without modifying the existing BC2 claim.
+- code_review: P1 overlap PRRT_kwDOUtZ8mM6wGnkU mitigated by explicit owner-directed serial integration; BC2 claim not transferred or overwritten.
+- focused_checks: lint, TypeScript, Vitest and build passed on 88553b98639f9ddc437187fd3145c12916f886bd; browser QA SUCCESS at run 40249628326
+- verification_evidence: https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40249628326 (SUCCESS on 88553b98639f9ddc437187fd3145c12916f886bd: ESLint, TypeScript, 15 Vitest tests, production build and Chromium browser role-switch tests)
+- visual_proof: artifact bootcamp-primary-role-gold-evidence, bootcamp-main-direction-gold.png
