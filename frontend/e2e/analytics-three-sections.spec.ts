@@ -115,3 +115,20 @@ for (const viewport of [
   }
  });
 }
+
+test("certification reflects stored course and practice evidence, without inert checkboxes",async({page})=>{
+ await page.route("**/api/v1/me/bootcamp/impulse-study/summary",r=>r.fulfill({json:{
+  started_courses:1,finished_courses:1,completed_lessons:8,approved_practices:0,
+  credited_practices:1,courses:[],
+ }}));
+ await page.goto("/workspace/9?analyticsTab=certification");
+ const root=page.getByTestId("analytics-v3");
+ await expect(root).toHaveAttribute("data-tab","certification");
+ await expect(root.locator(".av3-requirements").getByText("1 завершено")).toBeVisible();
+ await expect(root.locator(".av3-requirements").getByText("1 учтено")).toBeVisible();
+ await expect(root.locator(".av3-todo input[type=checkbox]")).toHaveCount(0);
+ await expect(root.getByRole("button",{name:"Условия сертификации"})).toBeVisible();
+ await expect(root.getByRole("combobox",{name:"Период аналитики"})).toHaveCount(0);
+ await root.getByRole("button",{name:"Условия сертификации"}).click();
+ await expect(page.getByRole("dialog",{name:"Независимая сертификация"})).toBeVisible();
+});
