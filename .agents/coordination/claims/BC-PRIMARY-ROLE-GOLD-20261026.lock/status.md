@@ -11,6 +11,8 @@
   - frontend/src/features/bootcamp/catalog.tsx (AiRoleTabs component and primary-overview read only; do not change course contents)
   - frontend/src/features/bootcamp/reference-fidelity.scss (golden role-tab styles only)
   - frontend/src/features/bootcamp/trajectory-catalog-ui.test.tsx (primary-role indication tests)
+  - frontend/e2e/bootcamp-primary-role-gold.spec.ts
+  - .github/workflows/bootcamp-primary-role-gold-qa.yml
   - .agents/coordination/claims/BC-PRIMARY-ROLE-GOLD-20261026.lock/status.md
 - shared_files:
   - frontend/src/features/bootcamp/catalog.tsx (BC2-COURSE-CONTENT-INTEGRATION-20261025 owns other hunks; explicitly limited to role-tab rendering/data)
