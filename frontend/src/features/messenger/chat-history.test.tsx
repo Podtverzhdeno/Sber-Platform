@@ -131,7 +131,7 @@ describe("ChatHistory", () => {
     };
     const { container } = renderChat(new MemoryStorage(), { channel: direct });
     expect(container.querySelector(".msg-chat__header-title strong")?.textContent).toBe("Елена Васильева");
-    expect(container.querySelector(".msg-chat__avatar")?.textContent).toBe("Е");
+    expect(container.querySelector(".msg-chat__avatar")?.textContent).toBe("ЕВ");
     expect(container.querySelector(".msg-chat__header-title")?.textContent).not.toContain("Алексей Смирнов");
   });
 
