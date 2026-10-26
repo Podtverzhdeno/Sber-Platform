@@ -6,7 +6,8 @@ import { expect, test } from "@playwright/test";
  * Never point this test at production: it intentionally writes learner progress.
  */
 test("course selection → eight lessons → certificate → practice → persisted analytics", async ({ page }) => {
-  test.setTimeout(150_000);
+  test.setTimeout(100_000);
+  page.setDefaultTimeout(10_000);
   const browserErrors: string[] = [];
   const serverErrors: string[] = [];
   page.on("pageerror", error => { browserErrors.push(error.message); });
@@ -35,7 +36,8 @@ test("course selection → eight lessons → certificate → practice → persis
     .getByRole("button", { name: /Все курсы/ }).click();
   const card = page.getByTestId("course-demo-course-1");
   await expect(card).toBeVisible();
-  await card.getByRole("button", { name: "Открыть курс" }).click();
+  await expect(card).toHaveAttribute("data-access", "available");
+  await card.locator(".bc-ref-primary").click();
   await expect(page).toHaveURL(/course=demo-course-1/);
   let reader = page.getByTestId("impulse-immersive-reader");
   await expect(reader).toBeVisible();
