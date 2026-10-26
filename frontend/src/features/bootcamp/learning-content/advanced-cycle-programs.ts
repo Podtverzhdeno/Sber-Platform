@@ -50,5 +50,20 @@ export function advancedCycleProgramFor(key: string): LearningProgram | null {
   const number = match?.[1];
   if (!number || !AI_ROLE_CATALOG.some(role => role.key === match[2])) return null;
   const base = advancedCyclePrograms.find(item => item.courseKey === "demo-course-" + number);
-  return base ? {...base, courseKey:key} : null;
+  if (!base) return null;
+  const role = AI_ROLE_CATALOG.find(item => item.key === match[2]);
+  if (!role) return null;
+  return {
+    ...base,
+    courseKey: key,
+    units: base.units.map(item => ({
+      ...item,
+      theory: [
+        item.theory[0] + " Для направления " + role.title + " укажи ответственность компонента, входы и наблюдаемый критерий успеха.",
+        item.theory[1] + " Зафиксируй отказную ветку, ограничение доступа и что меняется после повторного запуска.",
+      ],
+      practice: item.practice + ". Выполни в контексте роли " + role.title + ": сохрани входные данные, положительный и отрицательный сценарии и объясни выбранный компромисс.",
+      expected: item.expected + ". Представь версионированный артефакт, критерии приёмки и шаги для независимого воспроизведения результата.",
+    })),
+  };
 }
