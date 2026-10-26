@@ -162,7 +162,7 @@ export function BuddyWorkspace() {
     try{
       let threadId=selected;
       if(!threadId){
-        const created=await apiRequest<Thread>("/api/v1/agents/buddy/threads" as RuntimeApiPath,{method:"POST",headers:csrf()});
+        const created=await apiRequest<Thread>("/api/v1/agents/buddy/threads",{method:"POST",headers:csrf()});
         threadId=created.id;setSelected(threadId);
       }
       const id=retryId.current??crypto.randomUUID();
