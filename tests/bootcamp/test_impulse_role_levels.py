@@ -148,10 +148,6 @@ async def test_each_cycle_requires_disjoint_role_specific_evidence(
         "demo-course-16-ai-security": SimpleNamespace(finished=False, practical_certificate_id=None),
         "demo-course-13-ai-data": SimpleNamespace(finished=True, practical_certificate_id="other-role"),
     }
-    monkeypatch.setattr(
-        impulse_levels, "impulse_study_summary",
-        lambda *_: None,  # replaced below with awaitable to preserve API behavior
-    )
     async def summary(*_args: object) -> SimpleNamespace:
         return SimpleNamespace(
             courses=[SimpleNamespace(course_key=key, **vars(record)) for key, record in saved.items()]
