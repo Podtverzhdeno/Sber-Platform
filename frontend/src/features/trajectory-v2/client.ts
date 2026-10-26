@@ -51,6 +51,7 @@ export const ROLE_STATE_LABELS: Record<string, string | undefined> = {
   active: "Активная",
   paused: "На паузе",
   unselected: "Не выбрана",
+  learning: "Изучаю дополнительно",
 };
 
 export const PRIMARY_LABEL = "Основная";
