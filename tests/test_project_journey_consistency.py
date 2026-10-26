@@ -6,6 +6,8 @@ same authorization, domain rules and projection contracts as the application.
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
@@ -38,16 +40,24 @@ def _login(api: TestClient, persona: str) -> str:
     return response.json()["csrf_token"]
 
 
-def _post(api: TestClient, path: str, csrf: str, body: dict[str, object] | None = None) -> dict:
+def _post(
+    api: TestClient, path: str, csrf: str, body: dict[str, object] | None = None
+) -> dict[str, Any]:
     response = api.post(path, headers={"X-CSRF-Token": csrf}, json=body)
     assert response.status_code == 200, f"{path}: {response.status_code} {response.text}"
-    return response.json()
+    return cast(dict[str, Any], response.json())
 
 
-def _get(api: TestClient, path: str) -> dict | list:
+def _get(api: TestClient, path: str) -> dict[str, Any]:
     response = api.get(path)
     assert response.status_code == 200, f"{path}: {response.status_code} {response.text}"
-    return response.json()
+    return cast(dict[str, Any], response.json())
+
+
+def _get_list(api: TestClient, path: str) -> list[dict[str, Any]]:
+    response = api.get(path)
+    assert response.status_code == 200, f"{path}: {response.status_code} {response.text}"
+    return cast(list[dict[str, Any]], response.json())
 
 
 def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -> None:
@@ -129,7 +139,7 @@ def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -
         assert any(item["id"] == assignment_id for item in customer_view["assignments"])
 
         participant = _login(api, "participant-alex")
-        participant_work = _get(api, "/api/v1/me/work")
+        participant_work = _get_list(api, "/api/v1/me/work")
         assert any(item["assignment"]["id"] == assignment_id for item in participant_work)
         _post(api, f"/api/v1/me/assignments/{assignment_id}/start", participant)
 
@@ -166,7 +176,7 @@ def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -
         )
 
         participant = _login(api, "participant-alex")
-        work_after = _get(api, "/api/v1/me/work")
+        work_after = _get_list(api, "/api/v1/me/work")
         assert any(
             contribution["id"] == contribution_id and contribution["status"] == "accepted"
             for item in work_after

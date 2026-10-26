@@ -202,7 +202,7 @@ class GrowthService:
         )
         accepted_task_keys = frozenset(item.task.task_key for item in accepted_items)
         events = self._activity_events(accepted_items)
-        intervals = self._trusted_intervals(accepted_items)
+        intervals = self.trusted_intervals(accepted_items)
         boundaries = period_boundaries(now=now, timezone=actor.timezone)
         activity = activity_bucket_counts(
             tuple((event.occurred_at, event.kind) for event in events),
@@ -407,7 +407,7 @@ class GrowthService:
         return tuple(events)
 
     @staticmethod
-    def _trusted_intervals(
+    def trusted_intervals(
         _items: tuple[WorkItem, ...],
     ) -> tuple[tuple[datetime, datetime, str, str], ...]:
         """Only time-attested work sessions may populate the hours projection.

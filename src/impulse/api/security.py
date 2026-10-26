@@ -148,6 +148,11 @@ class SecurityMiddleware:
         return True
 
     @staticmethod
+    def category(path: str, method: str) -> str:
+        """Stable public rate-limit classification for request diagnostics."""
+        return SecurityMiddleware._category(path, method)
+
+    @staticmethod
     def _category(path: str, method: str) -> str:
         if "/auth/" in path:
             return "auth"
