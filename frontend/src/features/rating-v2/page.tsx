@@ -41,7 +41,9 @@ function toPerson(entry: PublishedEntry): Person {
   return {
     personId: entry.anonymized ? null : entry.person_id,
     place: entry.place,
-    name: entry.display_name,
+    // Never trust a display_name from an anonymized public record.
+    // A stable place-based alias makes anonymous rows distinguishable.
+    name: entry.anonymized ? "Участник №" + String(entry.place) : entry.display_name,
     projects: entry.successful_projects,
     points: Number(entry.score),
     achievements: entry.trophies.map(trophy => trophy.title),
@@ -217,16 +219,16 @@ export function ParticipantRatingV2({ onOpenMessages, currentPersonId }: { onOpe
         {visible.length === 0 && <div className="ir-empty"><Search size={30}/><strong>Участники не найдены</strong><p>{people.length === 0 ? "Подтверждённых записей пока нет." : "Измените поиск или фильтр рейтинга."}</p><button type="button" onClick={() => {updateParams({q:null,rank:null});}}>Сбросить фильтры</button></div>}
         {visible.map(item => <article key={item.place} className={["ir-leader-row", item.place <= 3 ? "ir-leader-row--"+String(item.place) : "", item.personId !== null && item.personId === current?.personId ? "ir-leader-row--me" : ""].join(" ")}>
           <span className="ir-rank">{item.place <= 3 ? <Crown size={22} /> : null}{item.place}</span>
-          <div className="ir-person"><PersonAvatar person={item}/><div><button type="button" disabled={item.personId === null} onClick={() => {openProfile(item);}}>{item.name}</button><small>{item.projects} успешно выполненных проектов</small></div></div>
+          <div className="ir-person"><PersonAvatar person={item}/><div><button type="button" disabled={item.personId === null} title={item.personId === null ? "Личный профиль скрыт по настройкам приватности" : undefined} onClick={() => {openProfile(item);}}>{item.name}</button><small>{item.personId === null ? "Имя и профиль скрыты · " : ""}{item.projects} успешно выполненных проектов</small></div></div>
           <span className={"ir-status ir-status--" + (item.place <= 3 ? String(item.place) : "normal")}>{item.place === 1 ? "Лидер сезона" : item.personId !== null && item.personId === current?.personId ? "Ваш результат" : item.place <= 30 ? "Топ-участник" : "Участник"}</span>
           <strong className="ir-points">{item.points}<small> баллов</small></strong>
           <span className="ir-count"><BriefcaseBusiness size={16}/>{item.projects}</span>
           <div className="ir-achievements" aria-label={"Достижения " + item.name}>{item.achievements.length > 0 ? item.achievements.map(title => <Medal key={title} size={16} aria-label={title}/>) : "—"}</div>
           <span className="ir-activity">{item.activity}</span>
-          <button type="button" className="ir-outline-button" disabled={item.personId === null} onClick={() => {openProfile(item);}}>Профиль <ArrowRight size={16} /></button>
+          <button type="button" className="ir-outline-button" disabled={item.personId === null} title={item.personId === null ? "Профиль скрыт по настройкам приватности" : undefined} onClick={() => {openProfile(item);}}>{item.personId === null ? "Профиль закрыт" : "Профиль"} <ArrowRight size={16} /></button>
         </article>)}
       </section>
-      <div className="ir-disclaimer">Позиции и баллы берутся из опубликованного рейтинга. Анонимизированные профили защищены. Привилегии и сертификаты не выдаются автоматически.</div>
+      <div className="ir-disclaimer">Позиции и баллы берутся из опубликованного рейтинга. Имена отображаются только с разрешения участников.{season?.key.startsWith("demo-") ? " Демо-персоны вымышлены." : ""} Привилегии и сертификаты не выдаются автоматически.</div>
     </>}
     {screen === "benefits" && <>
       <div className="ir-breadcrumb"><button type="button" onClick={backToList}>Рейтинг</button><span className="ir-divider-chevron">›</span><strong>Награды и возможности</strong></div>
