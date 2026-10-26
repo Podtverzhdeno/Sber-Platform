@@ -24,7 +24,7 @@ import {
 import { ConditionsDialog } from "./conditions-dialog";
 import { CustomerMark } from "./customer-mark";
 import { BenefitMark } from "./benefit-mark";
-import { SkillMark } from "./skill-mark";
+import { SkillImpactStatistics } from "./skill-impact-statistics";
 import { TaskCatalogList } from "./list";
 import { displayCatalogTopic } from "./topic-labels";
 import type {
@@ -217,12 +217,6 @@ function TaskSummary(props: {
   );
 }
 
-function skillPercent(level: string | null): number | null {
-  if (level === null || !/^\d+(?:[.,]\d+)?%$/.test(level.trim())) return null;
-  const value = Number(level.replace("%", "").replace(",", "."));
-  return Number.isFinite(value) && value >= 0 && value <= 100 ? value : null;
-}
-
 function TaskDetail(props: {
   item: CatalogItem;
   withdrawPending: boolean;
@@ -234,7 +228,6 @@ function TaskDetail(props: {
 }) {
   const { item } = props;
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
-  const [growthExpanded, setGrowthExpanded] = useState(true);
   const [detailTab, setDetailTab] = useState<"overview" | "criteria" | "solution" | "review">("overview");
   const canApply = item.allowed_actions.includes("apply") && item.eligibility.status === "eligible" && item.application_state === "none";
   const canSeeConditions = item.allowed_actions.includes("open_conditions") || canApply;
@@ -267,49 +260,7 @@ function TaskDetail(props: {
       </dl>
 
       <div className="catalog-v2-detail-grid">
-        <section className="catalog-v2-growth-section">
-          <div className="catalog-v2-section-heading">
-            <h3>Развитие твоих навыков</h3>
-            <button type="button" aria-expanded={growthExpanded} onClick={() => {
-              if (!growthExpanded) props.onGrowthExpand();
-              setGrowthExpanded((value) => !value);
-            }}>{growthExpanded ? "Скрыть сравнение уровней" : "Показать сравнение уровней"}</button>
-          </div>
-          {growthExpanded ? item.skill_impact.length > 0 ? (
-            <div className="catalog-v2-growth-table">
-              <div className="catalog-v2-growth-head"><span>Навык</span><span>Сейчас</span><span>Прогноз после проверки</span><span>Прирост</span></div>
-              <ul className="catalog-v2-growth-list" aria-label="Сравнение текущего и потенциального уровня">
-                {item.skill_impact.map((impact) => {
-                  const current = skillPercent(impact.current_level);
-                  const projected = impact.status === "calculated" ? skillPercent(impact.projected_level) : null;
-                  const delta = current !== null && projected !== null ? projected - current : null;
-                  return (
-                    <li key={impact.skill_id}>
-                      <strong className="catalog-v2-skill-name"><SkillMark title={impact.title} /> {displayCatalogTopic(impact.title)}</strong>
-                      <div className="catalog-v2-skill-transition">
-                        <span><small>Текущий уровень</small><b>{impact.current_level ?? "Нет подтверждённого уровня"}</b>{current !== null ? <span className="catalog-v2-skill-bar"><i style={{ width: String(current) + "%" }} /></span> : null}</span>
-                        <span className="catalog-v2-skill-arrow" aria-hidden="true">→</span>
-                        <span><small>После задачи · прогноз</small><b>{impact.projected_level ?? "Без числового прогноза"}</b>{projected !== null ? <span className="catalog-v2-skill-bar catalog-v2-skill-bar--forecast"><i style={{ width: String(projected) + "%" }} /></span> : null}</span>
-                      </div>
-                      <span className="catalog-v2-growth-delta">{delta === null ? "Не рассчитан" : (delta > 0 ? "+" : "") + String(delta) + "%"}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-              <p className="catalog-v2-growth-caveat">Прогноз не подтверждает навык автоматически. Итоговый результат проверяется после выполнения задачи.</p>
-              <details className="catalog-v2-growth-explanations">
-                <summary>Пояснения к прогнозу навыков</summary>
-                <ul>{item.skill_impact.map((impact) => (
-                  <li key={impact.skill_id}>
-                    <strong>{displayCatalogTopic(impact.title)}</strong>
-                    <p>{impact.explanation}</p>
-                    <small>{impact.status === "calculated" ? "Потенциальный рост рассчитан; необходима верификация." : "Потенциальный рост пока не рассчитан."} {impact.verification_required ? "Навык не подтверждается автоматически." : "Статус проверки не указан."}</small>
-                  </li>
-                ))}</ul>
-              </details>
-            </div>
-          ) : <p>Компетенции для прогноза не опубликованы; числовой рост не рассчитывается.</p> : null}
-        </section>
+        <SkillImpactStatistics impacts={item.skill_impact} onGrowthExpand={props.onGrowthExpand}/>
 
         <section className="catalog-v2-benefits-section">
           <h3>Что ты получишь</h3>
