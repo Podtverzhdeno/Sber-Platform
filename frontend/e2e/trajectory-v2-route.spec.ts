@@ -148,6 +148,12 @@ test("approved trajectory layout has seven role cards, side-by-side rail and sep
   await expect(mainRole).toHaveAttribute("data-tone", "primary");
   await page.locator('.trajectory-v2-role-card[data-role-key="python"]').click();
   await expect(page.locator(".trajectory-v2-stage-path button")).toHaveCount(7);
+  const nodes = page.locator(".trajectory-v2-stage-path button .trajectory-v2-milestone-node");
+  const labels = page.locator(".trajectory-v2-stage-path button .trajectory-v2-milestone-position");
+  await expect(labels).toHaveCount(7);
+  expect(await nodes.allTextContents()).toEqual(expect.arrayContaining(["✓", "♙"]));
+  for (const marker of await nodes.allTextContents()) expect(marker).not.toMatch(/^[1-7]$/);
+  expect(await labels.allTextContents()).toEqual(["1","2","3","4","5","6","7"]);
   await expect(page.getByRole("heading", { name: "AI Security Engineer" })).toBeVisible();
   await page.locator('.trajectory-v2-role-card[data-role-key="product"]').click();
 
