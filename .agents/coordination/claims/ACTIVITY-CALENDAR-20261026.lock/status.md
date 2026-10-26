@@ -1,0 +1,29 @@
+# Claim ACTIVITY-CALENDAR-20261026
+
+- task_id: ACTIVITY-CALENDAR-20261026
+- session_id: gpt6-20261026-activity-calendar
+- status: REVIEW
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- depends_on: []
+- write_scope:
+  - frontend/src/features/activity-calendar/**
+  - frontend/src/features/analytics-v3/page.tsx (activity import/render/period only)
+  - frontend/e2e/analytics-three-sections.spec.ts (legacy activity assertions only)
+  - frontend/e2e/analytics-premium.spec.ts (replace superseded legacy activity acceptance)
+  - .github/workflows/activity-calendar-qa.yml
+  - .agents/coordination/claims/ACTIVITY-CALENDAR-20261026.lock/status.md
+- shared_files:
+  - frontend/src/features/analytics-v3/page.tsx (minimal integration, keep passport/certification intact)
+- verification:
+  - focused Vitest activity calendar tests
+  - frontend TypeScript/ESLint
+  - browser desktop/mobile calendar hover/click/modal
+- progress: GitHub activity heatmap implemented with hover/focus tooltip, accessible day modal, 3/6/12-month periods, evidence data projection and read-only hourly measurement gap. Legacy component retained for rollback. PR #87 is open.
+- blockers: Independent product acceptance and full integration CI remain open; no main merge until policy checks satisfied.
+- changed_files: frontend/src/features/activity-calendar/**; frontend/src/features/analytics-v3/page.tsx; frontend/e2e/analytics-three-sections.spec.ts; frontend/e2e/analytics-premium.spec.ts; .github/workflows/activity-calendar-qa.yml
+- verification_evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40243531859 — Activity Calendar QA success on f99dde025f676aafd8a2bc5d8dcc00734635ea36
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40243531852 — Analytics Three Sections QA success
+  - Browser artifacts: calendar desktop/mobile, three analytics screens, modal visual
+- independent_review: required before DONE
