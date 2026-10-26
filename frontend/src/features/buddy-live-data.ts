@@ -4,7 +4,7 @@
  * ranking have different authorities and must never be inferred from each other.
  * Missing API data must stay unknown rather than becoming a fabricated zero.
  */
-import { apiRequest, type RuntimeApiPath } from "../api/client";
+import { apiRequest } from "../api/client";
 
 export type BuddyStudyCourse = {
   course_key: string;
@@ -42,7 +42,7 @@ export type BuddyAnalytics = {
 };
 
 export function loadBuddyJourney(): Promise<BuddyJourney> {
-  return apiRequest<BuddyJourney>("/api/v1/me/journey/snapshot" as RuntimeApiPath, {
+  return apiRequest<BuddyJourney>("/api/v1/me/journey/snapshot", {
     cache: "no-store",
   });
 }

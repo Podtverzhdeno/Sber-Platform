@@ -4,7 +4,7 @@
  * successful course, task or recognition mutation revalidates this projection.
  * Course keys are matched exactly: never infer a relation from the title.
  */
-import { apiRequest, type RuntimeApiPath } from "../api/client";
+import { apiRequest } from "../api/client";
 
 export const journeyEvidenceQueryKey = ["development-overview", "journey-evidence"] as const;
 
@@ -31,7 +31,7 @@ export type JourneyEvidenceSnapshot = {
 
 export function loadJourneyEvidence(): Promise<JourneyEvidenceSnapshot> {
   return apiRequest<JourneyEvidenceSnapshot>(
-    "/api/v1/me/journey/snapshot" as RuntimeApiPath,
+    "/api/v1/me/journey/snapshot",
     { cache: "no-store" },
   );
 }

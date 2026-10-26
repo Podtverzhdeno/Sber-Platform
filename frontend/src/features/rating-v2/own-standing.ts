@@ -4,7 +4,7 @@
  * owner from that list or infer a place from streak, XP, or course progress.
  */
 import { useQuery } from "@tanstack/react-query";
-import { apiRequest, type RuntimeApiPath } from "../../api/client";
+import { apiRequest } from "../../api/client";
 
 export type PublishedSeasonRef = {
   id: string;
@@ -31,7 +31,7 @@ export function useOwnPublishedStandings(personId: string | null | undefined) {
   return useQuery({
     queryKey: ownStandingQueryKey(personId ?? ""),
     queryFn: () => apiRequest<OwnPublishedStanding[]>(
-      "/api/v1/me/rating/standings" as RuntimeApiPath,
+      "/api/v1/me/rating/standings",
       { cache: "no-store" },
     ),
     enabled: Boolean(personId),
