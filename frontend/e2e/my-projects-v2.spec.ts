@@ -53,6 +53,45 @@ async function fixture(page: Page, requestedView: "cards" | "list" = "cards") {
   }
 }
 
+test("My Projects: introductory copy is gone and content starts directly with the project journey", async ({page}) => {
+  await page.setViewportSize({width:1672,height:941});
+  await fixture(page);
+  const root = page.locator(".mpv2");
+  await expect(root.locator(".mp-page-title")).toHaveCount(0);
+  await expect(root.getByText("ПРАКТИКА И ЛИЧНЫЙ ВКЛАД")).toHaveCount(0);
+  await expect(root.getByText(/Активно работай над проектами, развивай навыки/)).toHaveCount(0);
+  await expect(root.locator("#workspace-title.mp-visually-hidden")).toHaveCount(1);
+  await expect(root.getByRole("button", {name:"Как это работает?"})).toBeVisible();
+  const help = root.getByRole("button", {name:"Как это работает?"});
+  await help.click();
+  await expect(root.getByRole("region", {name:"Как работают мои проекты"})).toBeVisible();
+  await help.click();
+  await expect(root.getByRole("region", {name:"Как работают мои проекты"})).toHaveCount(0);
+  const screen = await root.evaluate(el => ({
+    top: el.getBoundingClientRect().top,
+    firstVisible: el.querySelector(".mpr-main, .mp-toolbar")?.getBoundingClientRect().top ?? Infinity,
+  }));
+  expect(screen.firstVisible - screen.top).toBeLessThan(90);
+  await page.screenshot({path:"test-results/projects-compact-header.png",fullPage:true,animations:"disabled"});
+});
+
+test("My Projects: mobile help opens inside viewport after compact header", async ({page}) => {
+  await page.setViewportSize({width:390,height:844});
+  await fixture(page);
+  const root=page.locator(".mpv2");
+  const help=root.getByRole("button",{name:"Как это работает?"});
+  await help.click();
+  const panel=root.getByRole("region",{name:"Как работают мои проекты"});
+  await expect(panel).toBeVisible();
+  await expect(panel).toBeFocused();
+  await expect.poll(async () => panel.evaluate(el => {
+    const box=el.getBoundingClientRect();
+    return box.top >= -2 && box.bottom <= window.innerHeight + 2;
+  })).toBe(true);
+  await help.click();
+  await expect(panel).toHaveCount(0);
+});
+
 test("My Projects: default layout is list and manual cards choice remains available",async({page})=>{
   await page.setViewportSize({width:1672,height:941});
   await fixture(page, "list");
