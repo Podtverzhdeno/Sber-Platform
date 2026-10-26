@@ -274,7 +274,7 @@ async def test_each_cycle_requires_disjoint_role_specific_evidence(
         (2, (1, 2, 0)),
         (3, (0, 0, 0)),
     ]:
-        finished, total, approved, credited, keys = await impulse_levels._evidence(
+        finished, total, approved, credited, keys = await impulse_levels.role_level_evidence(
             cast(Request, request), cast(AuthenticatedSession, auth), "ai-security", level
         )
         assert (finished, total, approved) == expected
