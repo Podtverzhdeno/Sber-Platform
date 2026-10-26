@@ -174,6 +174,9 @@ describe("App", () => {
       if (url.endsWith("/me")) {
         return Promise.resolve(new Response(JSON.stringify(actor), { status: 200 }));
       }
+      if (url.endsWith("/development-overview")) {
+        return Promise.resolve(new Response(JSON.stringify(overviewFixture), { status: 200 }));
+      }
       return Promise.resolve(new Response("{}", { status: 200 }));
     });
     window.history.pushState({}, "", "/workspace/0");
