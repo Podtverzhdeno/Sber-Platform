@@ -173,7 +173,7 @@ describe("trajectory v2 task/evidence drawer", () => {
     fireEvent.click(await waitFor(() => getByRole(screen.getByTestId("trajectory-stage-detail"), "button", { name: /Продолжить|Посмотреть/ })));
     const drawer = screen.getByRole("dialog", { name: /Детали этапа|Этап пройден/ });
     fireEvent.click(await waitFor(() => getByRole(drawer, "button", { name: "Открыть курс" })));
-    expect(screen.getByTestId("route-probe")).toHaveTextContent("/workspace/3?course=python-api");
+    expect(screen.getByTestId("route-probe")).toHaveTextContent("/workspace/3?course=python-api&role=python");
   });
 
   it("does not offer navigation to a section absent from the authorized role", async () => {

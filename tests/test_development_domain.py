@@ -458,3 +458,16 @@ def test_primary_cannot_be_archived_as_an_optional_path() -> None:
         set_optional_track(state, "python", enabled=False)
     assert error.value.code == "PRIMARY_TRACK_PROTECTED"
     assert set_optional_track(state, "python", enabled=True) == state
+
+
+@pytest.mark.spec("career-roadmap/optional-path-protect-frozen")
+def test_former_primary_cannot_silently_convert_to_optional_or_grey() -> None:
+    state = (
+        attempt("python", TrackStatus.ACTIVE, "foundation"),
+        attempt("data", TrackStatus.FROZEN, "data-intro"),
+    )
+    for enabled in (True, False):
+        with pytest.raises(TrackPolicyError) as error:
+            set_optional_track(state, "data", enabled=enabled)
+        assert error.value.code == "FROZEN_TRACK_PROTECTED"
+    assert state[1].completed_milestones == frozenset({"data-intro"})

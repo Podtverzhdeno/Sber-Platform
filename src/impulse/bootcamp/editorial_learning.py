@@ -21,7 +21,7 @@ from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.bootcamp.service import BootcampCatalogService
 from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
-from impulse.domain.development import local_learning_days
+from impulse.domain.development import TrackStatus, local_learning_days
 from impulse.domain.identity import Role
 
 router = APIRouter(tags=["bootcamp"])
@@ -123,6 +123,7 @@ async def assert_course_access(
         track = match.group(2)
         if not any(
             attempt.track_key == track
+            and attempt.status in (TrackStatus.ACTIVE, TrackStatus.EXPLORING)
             for attempt in await development.store.attempts(authenticated.actor.person_id)
         ):
             raise ApiError(

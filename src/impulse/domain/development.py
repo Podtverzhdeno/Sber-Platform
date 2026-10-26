@@ -127,6 +127,11 @@ def set_optional_track(
                 "Основную активную траекторию нельзя сделать серой через дополнительные роли.",
             )
         return attempts
+    if existing is not None and existing.status is TrackStatus.FROZEN:
+        raise TrackPolicyError(
+            "FROZEN_TRACK_PROTECTED",
+            "Ранее выбранную карьерную траекторию нельзя преобразовать в дополнительную.",
+        )
     if existing is None:
         if not enabled:
             return attempts

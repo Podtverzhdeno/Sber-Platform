@@ -143,7 +143,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
 
   const passportSkills = Array.isArray(passport.data?.skills) ? passport.data.skills : [];
   const completedMilestones = overview.roles.reduce((sum, role) => sum + role.completed_milestones, 0);
-  const activeTrajectories = overview.roles.filter((role) => role.state === "active").length;
+  const activeTrajectories = overview.roles.filter((role) => role.state === "active" || role.state === "learning").length;
   const verifiedCourses = Array.isArray(portfolio.data?.courses) ? portfolio.data.courses : [];
   const acceptedContributions = Array.isArray(portfolio.data?.contributions)
     ? portfolio.data.contributions.filter((item) => item.verification_status === "verified")
@@ -160,14 +160,15 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   // This changes navigation only, not independently verified professional milestones.
   const currentLearningPath = selected && selectedRoadmap && selected.attempt_number !== null
     ? projectLearningStages(selectedRoadmap, learning.data?.courses, true) : null;
-  const hasCertifiedCourse = (currentLearningPath?.studied.studiedKeys.size ?? 0) > 0;
-  const nextOutcomeForPanel = hasCertifiedCourse
-    ? currentLearningPath?.next && selected
-      ? { trajectory_key:selected.track_key, trajectory_title:selected.title,
-          milestone_key:currentLearningPath.next.key, target_title:currentLearningPath.next.title,
-          target_kind:currentLearningPath.next.target_kind, stale_reason:null }
-      : null
-    : overview.next_outcome;
+  // The right-hand next action belongs to the viewed enrolled role, never
+  // to the primary path while the participant is browsing an optional role.
+  const nextOutcomeForPanel = selected !== null && selected.attempt_number !== null
+    ? currentLearningPath?.next
+      ? { trajectory_key: selected.track_key, trajectory_title: selected.title,
+          milestone_key: currentLearningPath.next.key, target_title: currentLearningPath.next.title,
+          target_kind: currentLearningPath.next.target_kind, stale_reason: null }
+      : overview.next_outcome?.trajectory_key === selected.track_key ? overview.next_outcome : null
+    : null;
   const lastOverlayTriggerRef = useRef<HTMLElement | null>(null);
   const [roleInfoOpen, setRoleInfoOpen] = useState(false);
   const [drawerKey, setDrawerKey] = useState<string | null>(null);
@@ -677,7 +678,7 @@ export function RoleCardOverview(props: {
             {role.state === "paused" ? " · пауза" : ""}{props.courseProgress ? ` · ${props.courseProgress}` : ""}</small>
         </>
       ) : (
-        <small className="trajectory-v2-role-unselected">Не выбрана</small>
+        <small className="trajectory-v2-role-unselected">Не выбрана · посмотреть →</small>
       )}
       {props.pinned && <span className="trajectory-v2-role-pinned" aria-label="Закреплена">◆</span>}
     </button>
@@ -755,7 +756,7 @@ export function RoleDetailPanel(props: {
           />
         </div>
       </header>
-      {!props.primary && (role.state === "unselected" || role.state === "learning" || role.state === "paused") && (
+      {!props.primary && (role.state === "unselected" || role.state === "learning") && (
         <div className="trajectory-v2-optional-actions" data-testid="trajectory-optional-actions">
           <button type="button"
             className={role.state === "unselected" ? "trajectory-v2-optional-enable" : "trajectory-v2-optional-archive"}
@@ -764,8 +765,8 @@ export function RoleDetailPanel(props: {
             {props.optionalBusy ? "Сохраняем…" : role.state === "unselected" ? "Изучать дополнительно →" : "Сделать карточку серой"}
           </button>
           <small>{role.state === "unselected"
-            ? "Включить курсы и задачи без смены основной роли"
-            : "Прогресс и сертификаты сохранятся. Основная роль не изменится"}</small>
+            ? "Откроет курсы и практику без смены основной роли. Можно отключить в любой момент."
+            : "Скрывает дополнительную траекторию, но сохраняет курсы, сертификаты и историю."}</small>
           {props.optionalError && <p role="alert">{props.optionalError}</p>}
         </div>
       )}
