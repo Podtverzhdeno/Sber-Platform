@@ -12,7 +12,7 @@ type ReferenceSkillFixture = {
   evidence_count: number; data_state: string; unresolved_methodology: boolean;
 };
 const roleSkills: ReferenceSkillFixture[] = ["prompting", "prompt_engineering", "context_management", "tools_mcp", "creating_skills", "agents_team"].map((key, i) => ({
-  key, title: key, target_level: [3, 4, 3, 2, 3, 2][i], current_level: null,
+  key, title: key, target_level: [3, 4, 3, 2, 3, 2][i] ?? null, current_level: null,
   evidence_count: 0, data_state: "unknown", unresolved_methodology: false,
 }));
 const profile = {
