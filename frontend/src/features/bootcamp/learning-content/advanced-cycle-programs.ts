@@ -1,3 +1,4 @@
+import { AI_ROLE_CATALOG } from "../../trajectory-v2/source-reference/source-catalog";
 import { program, unit, type LearningProgram } from "./types";
 
 /** Published higher-cycle programs. Each course has eight independent lessons. */
@@ -47,7 +48,7 @@ export const advancedCyclePrograms: LearningProgram[] = [
 export function advancedCycleProgramFor(key: string): LearningProgram | null {
   const match = /^demo-course-(13|14|15|16)-([a-z][a-z0-9-]*)$/.exec(key);
   const number = match?.[1];
-  if (!number) return null;
+  if (!number || !AI_ROLE_CATALOG.some(role => role.key === match?.[2])) return null;
   const base = advancedCyclePrograms.find(item => item.courseKey === "demo-course-" + number);
   return base ? {...base, courseKey:key} : null;
 }
