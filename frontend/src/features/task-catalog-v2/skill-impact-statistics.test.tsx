@@ -2,7 +2,8 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { catalogItem } from "./fixture";
-import { SkillImpactStatistics, parseSkillPercent } from "./skill-impact-statistics";
+import { parseSkillPercent } from "./skill-impact-model";
+import { SkillImpactStatistics } from "./skill-impact-statistics";
 
 describe("Skill impact evidence statistics", () => {
   it("shows actual accepted counts instead of empty progress forecast or fabricated level", () => {
