@@ -453,6 +453,15 @@ class TaskCatalogProjectionService:
         assignment_by_task = {item.task_id: item for item in assignments}
         now = self._now().astimezone(UTC)
         context = matching_context(roadmaps, evidence, now)
+        # Only accepted personal contributions are returned by participant_case_evidence.
+        # Apply the same recency policy as VERIFIED_COMPETENCIES match factor.
+        recent_evidence = tuple(
+            row for row in evidence if row.submitted_at >= now - timedelta(days=EVIDENCE_FRESHNESS_DAYS)
+        )
+        evidence_by_skill: dict[str, dict[str, CaseEvidence]] = {}
+        for row in recent_evidence:
+            for tag in _normalized(row.competency_tags):
+                evidence_by_skill.setdefault(tag, {})[str(row.contribution_id)] = row
         result: list[tuple[TaskRecommendationProjection, TaskTermsSnapshot]] = []
         for marketplace_item in marketplace:
             task = marketplace_item.task
@@ -535,6 +544,11 @@ class TaskCatalogProjectionService:
                     ),
                     verification_required=True,
                     sources=(brief_source,),
+                    accepted_evidence_count=len(evidence_by_skill.get(tag.strip().casefold(), {})),
+                    last_evidence_submitted_at=max(
+                        (row.submitted_at for row in evidence_by_skill.get(tag.strip().casefold(), {}).values()),
+                        default=None,
+                    ),
                 )
                 for tag in task.competency_tags
             )
