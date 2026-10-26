@@ -32,6 +32,26 @@ describe("Bootcamp role-study remainder from persistent study certificates",()=>
     expect(satisfiesStudyRequirement(provider,[finished("openspec-sdd","any")])).toBe(false);
     expect(satisfiesStudyRequirement(card("openspec-sdd","verified"),[])).toBe(true);
   });
+  it("counts only the fresh, role-specific course certificates after L1 promotion",()=>{
+    const level1 = [
+      card("demo-course-13-ai-security"),
+      card("demo-course-14-ai-security"),
+    ];
+    const oldAndWrongRole = [
+      finished("demo-course-1","l0-certificate"),
+      finished("demo-course-2","l0-certificate-2"),
+      finished("demo-course-13-ai-data","another-role-certificate"),
+    ];
+    expect(projectRoleStudy(level1,oldAndWrongRole).completedRequired).toBe(0);
+    expect(projectRoleStudy(level1,[...oldAndWrongRole,finished("demo-course-13-ai-security","new-l1-cert")]).completedRequired).toBe(1);
+    const full=projectRoleStudy(level1,[
+      ...oldAndWrongRole,
+      finished("demo-course-13-ai-security","new-l1-cert"),
+      finished("demo-course-14-ai-security","new-l1-cert-2"),
+    ]);
+    expect(full.pending).toHaveLength(0);
+    expect(full.studied).toHaveLength(2);
+  });
   it("never counts a course twice when both completion sources agree",()=>{
     const x=projectRoleStudy([card("demo-course-10","verified")],[finished("demo-course-10","study-id")]);
     expect(x.studied).toHaveLength(1);
