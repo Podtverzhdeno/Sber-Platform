@@ -42,9 +42,10 @@ test("saved Bootcamp certificate appears in selected trajectory without inventin
  const detail=page.getByTestId("trajectory-role-detail");
  await expect(detail).toHaveAttribute("data-role-key","product");
  await expect(page.getByTestId("trajectory-study-evidence")).toContainText("1 из 2 учебных курсов завершено");
- await expect(page.getByTestId("trajectory-study-evidence")).toContainText("0 из 2 этапов подтверждено");
+ await expect(page.getByTestId("trajectory-study-evidence")).toContainText("0 этапов подтверждено отдельно");
  await expect(page.locator(".trajectory-v2-stage[data-study-state='studied']")).toHaveCount(1);
- await expect(page.locator(".trajectory-v2-stage[data-stage-state='completed']")).toHaveCount(0);
+ await expect(page.locator(".trajectory-v2-stage[data-stage-state='completed']")).toHaveCount(1);
+ await expect(page.locator(".trajectory-v2-stage[data-stage-state='current']")).toHaveCount(1);
  // The overview keeps one compact study summary; no repeated full-size progress boxes.
  const summary=page.getByTestId("trajectory-study-evidence");
  await expect(summary.getByTestId("trajectory-study-progress").locator("progress")).toHaveAttribute("max","2");

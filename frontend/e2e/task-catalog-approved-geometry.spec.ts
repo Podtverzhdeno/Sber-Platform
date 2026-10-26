@@ -89,7 +89,18 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
   const ringBox = await averageKpi.locator(".catalog-v2-kpi-ring svg").boundingBox();
   expect(ringBox?.width).toBeGreaterThan(20);
 
-  await expect(page.locator(".catalog-v2-stage-track li")).toHaveCount(5);
+  // The approved task detail now uses actionable workflow tabs. Planned stages
+  // remain available via explicit disclosure; they are not fake "completed" UI.
+  const workflow=page.locator(".catalog-v2-workflow-section");
+  await expect(workflow.getByRole("tab")).toHaveCount(4);
+  await expect(workflow.getByRole("tab",{name:"О задаче"})).toHaveAttribute("aria-selected","true");
+  const stagesDisclosure=workflow.locator(".catalog-v2-workflow-extra");
+  await expect(stagesDisclosure).toContainText("План выполнения (5)");
+  await stagesDisclosure.locator("summary").click();
+  await expect(stagesDisclosure.locator("li")).toHaveCount(5);
+  await workflow.getByRole("tab",{name:"Критерии"}).click();
+  await expect(workflow.getByRole("tabpanel")).toContainText("Что требуется для успешной сдачи");
+  await workflow.getByRole("tab",{name:"О задаче"}).click();
   await expect(page.locator(".catalog-v2-benefits-section li")).toHaveCount(4);
   // Exact source benefit pictograms: learning passport / portfolio case /
   // supported teamwork / mentor review. The categories are canonical API
