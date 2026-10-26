@@ -38,7 +38,16 @@ export function loadLearningSummary(): Promise<LearningSummary> {
  * Self-study and provider-verified completions remain separate, but every
  * screen reading the self-study projection must refresh on mutation.
  */
-export function invalidateLearningProjections(client: QueryClient): void {
+export function invalidateLearningProjections(
+  client: QueryClient,
+  scope: "lesson" | "all" = "all",
+): void {
+  // Per-lesson updates already commit the local course state and only need
+  // the shared aggregate. Full completion/practice still refresh all reads.
+  if (scope === "lesson") {
+    void client.invalidateQueries({ queryKey: learningSummaryQueryKey });
+    return;
+  }
   const prefixes = [
     learningSummaryQueryKey,
     ["bootcamp-catalog"],
