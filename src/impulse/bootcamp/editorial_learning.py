@@ -7,8 +7,8 @@ remain exclusively on the verified provider/reviewer track.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
 import re
+from datetime import UTC, datetime
 from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
@@ -20,13 +20,13 @@ from impulse.api.errors import ApiError
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.bootcamp.service import BootcampCatalogService
+from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
 from impulse.domain.development import local_learning_days
 from impulse.domain.identity import Role
 
 router = APIRouter(tags=["bootcamp"])
 UNIT_COUNT = 8
 BASE_KEYS = frozenset(f"demo-course-{number}" for number in range(1, 13))
-from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
 ADVANCED_KEY_PATTERN = re.compile(r"^demo-course-(13|14|15|16)-([a-z][a-z0-9-]*)$")
 ADVANCED_KEYS = frozenset(
     f"demo-course-{number}-{track}"
