@@ -377,6 +377,7 @@ def test_optional_tracks_can_be_added_and_archived_without_changing_primary() ->
     client, store = _client()
     with client:
         csrf = _login(client)
+
         def update(track: str, enabled: bool) -> object:
             return client.post(
                 "/api/v1/me/tracks/optional",
@@ -405,8 +406,10 @@ def test_optional_tracks_can_be_added_and_archived_without_changing_primary() ->
         assert statuses["python"] == "active"
 
         # Archive is a display state, never deletion of the user's attempts.
-        from impulse.application.identity import demo_personas
         import asyncio
+
+        from impulse.application.identity import demo_personas
+
         attempts = asyncio.run(store.attempts(demo_personas()[0].person_id))
         assert next(item for item in attempts if item.track_key == "data").attempt_number == 1
 
