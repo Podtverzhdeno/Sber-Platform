@@ -17,7 +17,7 @@ export function LearningProgressPanel({ bootcampIndex, compact = false }: Props)
   const journey = useQuery({
     queryKey: journeyEvidenceQueryKey,
     queryFn: loadJourneyEvidence,
-    enabled: Boolean(summary?.courses?.length),
+    enabled: Boolean((summary?.courses ?? []).length),
     retry: false,
   });
   const courses = summary?.courses ?? [];
