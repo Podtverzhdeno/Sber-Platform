@@ -122,7 +122,7 @@ async def test_two_checkpoint_reviews_close_project_only_after_final_review() ->
             expected_status = "in_progress" if index == 1 else "accepted"
             assert status == expected_status
             assert isinstance(payload, dict)
-            raw_stages: object = payload["checkpoints"]
+            raw_stages = cast(object, payload["checkpoints"])
             assert isinstance(raw_stages, list)
             stage_rows = cast(list[dict[str, str]], raw_stages)
             assert [stage["status"] for stage in stage_rows] == (
