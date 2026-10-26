@@ -18,8 +18,10 @@ from pydantic import BaseModel, Field
 
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import current_session
-from impulse.application.development import CourseRecord, EnrollmentRecord
+from impulse.application.development import CourseRecord, DevelopmentService, EnrollmentRecord
 from impulse.application.identity import AuthenticatedSession
+from impulse.application.recognition import RecognitionService
+from impulse.application.work import WorkService
 from impulse.bootcamp.editorial_learning import ImpulseStudySummary, impulse_study_summary
 from impulse.domain.development import CompletionStatus, RoadmapProjection
 from impulse.domain.identity import Role
@@ -154,9 +156,9 @@ async def my_journey_snapshot(
             status_code=404,
         )
 
-    development = request.app.state.development_service
-    work = request.app.state.work_service
-    recognition = request.app.state.recognition_service
+    development: DevelopmentService = request.app.state.development_service
+    work: WorkService = request.app.state.work_service
+    recognition: RecognitionService = request.app.state.recognition_service
 
     catalog, enrollments, roadmaps, work_items, cases, seasons = await asyncio.gather(
         development.store.courses(),
