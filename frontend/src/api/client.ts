@@ -14,6 +14,7 @@ export type RuntimeApiPath =
   | "/api/v1/me/work"
   | "/api/v1/me/profile"
   | "/api/v1/me/talent-passport"
+  | "/api/v1/me/tracks/optional"
   | "/api/v1/me/reward-evidence"
   | "/api/v1/mentor/review-workspace"
   | "/api/v1/mentor/review-queue"

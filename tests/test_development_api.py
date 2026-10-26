@@ -370,3 +370,70 @@ def test_roadmap_catalog_is_participant_scoped() -> None:
         response = client.get("/api/v1/me/roadmap-catalog")
     assert response.status_code == 403
     assert response.json()["code"] == "FORBIDDEN"
+
+
+@pytest.mark.spec("career-roadmap/optional-trajectory-api")
+def test_optional_tracks_can_be_added_and_archived_without_changing_primary() -> None:
+    client, store = _client()
+    with client:
+        csrf = _login(client)
+
+        def update(track: str, enabled: bool) -> object:
+            return client.post(
+                "/api/v1/me/tracks/optional",
+                json={"track_key": track, "enabled": enabled},
+                headers={"X-CSRF-Token": csrf},
+            )
+
+        for track in ("data", "product", "ml"):
+            response = update(track, True)
+            assert response.status_code == 200, response.text
+            assert response.json()["active_count"] == 1
+        statuses = {row["key"]: row["status"] for row in response.json()["tracks"]}
+        assert statuses["python"] == "active"
+        assert all(statuses[track] == "exploring" for track in ("data", "product", "ml"))
+
+        denied = update("python", False)
+        assert denied.status_code == 409
+        assert denied.json()["code"] == "PRIMARY_TRACK_PROTECTED"
+        invalid = update("nonexistent-role", True)
+        assert invalid.status_code == 404
+
+        archived = update("data", False)
+        assert archived.status_code == 200
+        statuses = {row["key"]: row["status"] for row in archived.json()["tracks"]}
+        assert statuses["data"] == "archived"
+        assert statuses["python"] == "active"
+
+        # Archive is a display state, never deletion of the user's attempts.
+        import asyncio
+
+        from impulse.application.identity import demo_personas
+
+        attempts = asyncio.run(store.attempts(demo_personas()[0].person_id))
+        assert next(item for item in attempts if item.track_key == "data").attempt_number == 1
+
+        restored = update("data", True)
+        assert restored.status_code == 200
+        statuses = {row["key"]: row["status"] for row in restored.json()["tracks"]}
+        assert statuses["data"] == "exploring"
+        assert statuses["python"] == "active"
+
+
+def test_optional_trajectory_endpoint_requires_csrf_and_participant() -> None:
+    client, _store = _client()
+    with client:
+        csrf = _login(client)
+        no_csrf = client.post(
+            "/api/v1/me/tracks/optional",
+            json={"track_key": "data", "enabled": True},
+        )
+        assert no_csrf.status_code in (401, 403)
+        assert csrf
+        _login(client, "mentor-elena")
+        forbidden = client.post(
+            "/api/v1/me/tracks/optional",
+            json={"track_key": "data", "enabled": True},
+            headers={"X-CSRF-Token": csrf},
+        )
+        assert forbidden.status_code in (403, 401)

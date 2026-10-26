@@ -11,6 +11,8 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 class TrackStatus(StrEnum):
     ACTIVE = "active"
     FROZEN = "frozen"
+    EXPLORING = "exploring"
+    ARCHIVED = "archived"
 
 
 class CompletionStatus(StrEnum):
@@ -101,6 +103,40 @@ def select_track(
         attempts=tuple(updated),
         activated=track_key,
         frozen=freeze_track_key,
+    )
+
+
+def set_optional_track(
+    attempts: tuple[TrackAttempt, ...],
+    track_key: str,
+    *,
+    enabled: bool,
+) -> tuple[TrackAttempt, ...]:
+    """Toggle an optional learning path without affecting primary enrollments.
+
+    Archiving hides it from active study; retained milestones remain durable.
+    Optional paths do not consume either of the two primary track slots.
+    """
+    if not track_key:
+        raise TrackPolicyError("TRACK_REQUIRED", "Направление не указано.")
+    existing = next((item for item in attempts if item.track_key == track_key), None)
+    if existing is not None and existing.status is TrackStatus.ACTIVE:
+        if not enabled:
+            raise TrackPolicyError(
+                "PRIMARY_TRACK_PROTECTED",
+                "Основную активную траекторию нельзя сделать серой через дополнительные роли.",
+            )
+        return attempts
+    if existing is None:
+        if not enabled:
+            return attempts
+        return (
+            *attempts,
+            TrackAttempt(track_key=track_key, attempt_number=1, status=TrackStatus.EXPLORING),
+        )
+    target = TrackStatus.EXPLORING if enabled else TrackStatus.ARCHIVED
+    return tuple(
+        replace(item, status=target) if item.track_key == track_key else item for item in attempts
     )
 
 

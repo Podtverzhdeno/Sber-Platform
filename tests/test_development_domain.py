@@ -16,6 +16,7 @@ from impulse.domain.development import (
     rating_eligible,
     recalculate_roadmap,
     select_track,
+    set_optional_track,
 )
 from impulse.domain.engagement import (
     FREEZE_INVENTORY_CAP,
@@ -413,3 +414,47 @@ def test_out_of_stock_state_for_yesterday_miss() -> None:
     )
     assert frozen.freeze_state == "out_of_stock" or frozen.freeze_state == "break"
     assert frozen.qualified_dates == frozenset({date(2026, 10, 18)})
+
+
+@pytest.mark.spec("career-roadmap/optional-path-without-primary-switch")
+def test_multiple_optional_paths_do_not_consume_primary_slots() -> None:
+    primary = attempt("python", TrackStatus.ACTIVE, "foundation")
+    secondary = attempt("data", TrackStatus.ACTIVE)
+    state = (primary, secondary)
+    for name in ("product", "ml", "design"):
+        state = set_optional_track(state, name, enabled=True)
+    assert sum(item.status is TrackStatus.ACTIVE for item in state) == 2
+    assert [item.track_key for item in state if item.status is TrackStatus.EXPLORING] == [
+        "product",
+        "ml",
+        "design",
+    ]
+    assert state[0] == primary
+    assert state[1] == secondary
+
+
+@pytest.mark.spec("career-roadmap/optional-path-archive-restore")
+def test_optional_path_archives_to_grey_and_recovers_saved_study_progress() -> None:
+    initial = (
+        attempt("python", TrackStatus.ACTIVE, "foundation"),
+        attempt("product", TrackStatus.EXPLORING, "product-intro", "product-lab"),
+    )
+    grey = set_optional_track(initial, "product", enabled=False)
+    archived = grey[1]
+    assert archived.status is TrackStatus.ARCHIVED
+    assert archived.attempt_number == 1
+    assert archived.completed_milestones == frozenset({"product-intro", "product-lab"})
+    assert set_optional_track(grey, "product", enabled=False) == grey
+    resumed = set_optional_track(grey, "product", enabled=True)
+    assert resumed[1].status is TrackStatus.EXPLORING
+    assert resumed[1].completed_milestones == archived.completed_milestones
+    assert resumed[0] == initial[0]
+
+
+@pytest.mark.spec("career-roadmap/optional-path-protect-primary")
+def test_primary_cannot_be_archived_as_an_optional_path() -> None:
+    state = (attempt("python", TrackStatus.ACTIVE),)
+    with pytest.raises(TrackPolicyError) as error:
+        set_optional_track(state, "python", enabled=False)
+    assert error.value.code == "PRIMARY_TRACK_PROTECTED"
+    assert set_optional_track(state, "python", enabled=True) == state

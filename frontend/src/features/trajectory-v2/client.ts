@@ -38,10 +38,20 @@ export function roadmapQueryKeyFor(trackKey: string): readonly [string, string] 
  */
 export const OVERVIEW_QUERY_KEY = overviewQueryKey;
 
+/** Persistent study-only role. Does not change the primary career track. */
+export function setOptionalTrajectory(trackKey: string, enabled: boolean): Promise<unknown> {
+  return apiRequest("/api/v1/me/tracks/optional", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ track_key: trackKey, enabled }),
+  });
+}
+
 export const ROLE_STATE_LABELS: Record<string, string | undefined> = {
   active: "Активная",
   paused: "На паузе",
   unselected: "Не выбрана",
+  learning: "Изучаю дополнительно",
 };
 
 export const PRIMARY_LABEL = "Основная";

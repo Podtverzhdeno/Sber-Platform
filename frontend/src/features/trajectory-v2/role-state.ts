@@ -5,15 +5,13 @@ import type { DevelopmentOverviewView, RoleCardView } from "./client";
  * the currently viewed detail must never become primary. */
 export function primaryTrajectoryKey(overview: DevelopmentOverviewView): string | null {
   const enrolled = overview.roles.filter(
-    (role) => role.attempt_number !== null && role.state !== "unselected",
+    (role) => role.attempt_number !== null && role.state === "active",
   );
   const serverFocus = overview.next_outcome?.trajectory_key;
   if (serverFocus && enrolled.some((role) => role.track_key === serverFocus)) {
     return serverFocus;
   }
-  return enrolled.find((role) => role.state === "active")?.track_key
-    ?? enrolled[0]?.track_key
-    ?? null;
+  return enrolled[0]?.track_key ?? null;
 }
 
 export type RoleVisualTone = "primary" | "learning" | "unselected";

@@ -24,6 +24,7 @@ from impulse.domain.development import (
     rating_eligible,
     recalculate_roadmap,
     select_track,
+    set_optional_track,
 )
 from impulse.domain.engagement import (
     FREEZE_GRANT_MILESTONE_DAYS,
@@ -611,6 +612,24 @@ class DevelopmentService:
             raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
         await self.store.replace_attempts(actor.person_id, selection.attempts)
         return selection.attempts
+
+    async def set_optional_track(
+        self, actor: ActorContext, track_key: str, *, enabled: bool
+    ) -> tuple[TrackAttempt, ...]:
+        self._participant(actor)
+        catalog = await self.store.tracks()
+        if track_key not in {item.key for item in catalog}:
+            raise ApiError(
+                code="RESOURCE_NOT_FOUND", message="Resource not found.", status_code=404
+            )
+        try:
+            updated = set_optional_track(
+                await self.store.attempts(actor.person_id), track_key, enabled=enabled
+            )
+        except TrackPolicyError as exc:
+            raise ApiError(code=exc.code, message=str(exc), status_code=409) from exc
+        await self.store.replace_attempts(actor.person_id, updated)
+        return updated
 
     async def roadmaps(self, actor: ActorContext) -> tuple[RoadmapProjection, ...]:
         self._participant(actor)

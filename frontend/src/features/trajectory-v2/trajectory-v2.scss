@@ -2222,3 +2222,37 @@
   border-radius:8px; text-decoration:none; border:1px solid #22727b; background:#073348; }
 .trajectory-v2-cycle-practice-link:hover, .trajectory-v2-cycle-practice-link:focus-visible {
   background:#0d4654; border-color:#12d9cf; outline-offset:2px; }
+
+
+/* Optional path enrollment is separate from the primary (gold) career track.
+   The participant can put an optional card back to grey without deleting data. */
+.workspace-content .trajectory-v2-role-card[data-role-state="learning"]{
+  border-color:#167fb5;
+  background:linear-gradient(145deg,#082942,#071b31);
+  opacity:1;
+}
+.workspace-content .trajectory-v2-role-card[data-role-state="learning"] .trajectory-v2-role-icon{
+  background:#12477b;color:#5dc6ff;
+}
+.workspace-content .trajectory-v2-optional-actions{
+  display:flex;flex-wrap:wrap;align-items:center;gap:9px 13px;
+  border:1px solid #1b4c63;border-radius:10px;
+  background:linear-gradient(110deg,#0a2538,#061d2b);
+  padding:10px 12px;min-width:0;
+}
+.workspace-content .trajectory-v2-optional-actions button{
+  padding:9px 13px;border-radius:8px;border:1px solid #1396b9;
+  color:#072735;background:linear-gradient(100deg,#0de6db,#14aeeb);
+  font-size:12px;font-weight:800;cursor:pointer;
+}
+.workspace-content .trajectory-v2-optional-actions button.trajectory-v2-optional-archive{
+  background:#0a2537;color:#aec7d9;border-color:#32556c;
+}
+.workspace-content .trajectory-v2-optional-actions button:hover:not(:disabled){filter:brightness(1.11)}
+.workspace-content .trajectory-v2-optional-actions button:disabled{opacity:.65;cursor:progress}
+.workspace-content .trajectory-v2-optional-actions small{color:#9dbbd0;font-size:11px;line-height:1.45}
+.workspace-content .trajectory-v2-optional-actions p[role="alert"]{width:100%;color:#ffb8b8;font-size:12px;margin:0}
+@media(max-width:700px){
+ .workspace-content .trajectory-v2-optional-actions{align-items:stretch;flex-direction:column}
+ .workspace-content .trajectory-v2-optional-actions button{width:100%}
+}
