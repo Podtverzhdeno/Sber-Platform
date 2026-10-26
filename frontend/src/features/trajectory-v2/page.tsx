@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import { StatePanel } from "../../components/ui";
 import { apiRequest } from "../../api/client";
@@ -22,7 +22,7 @@ import { learningSummaryQueryKey, loadLearningSummary, type LearningCourse } fro
 import { RoleInfoDialog, StageTaskDrawer } from "./details";
 import { canonicalAiRoles } from "./source-reference/source-catalog";
 import { primaryTrajectoryKey, roleVisualTone } from "./role-state";
-import { levelCoursesProgress, loadRoleLevel, roleLevelQueryKey } from "../impulse-role-level";
+import { levelCoursesProgress, loadRoleLevel, roleLevelQueryKey, type ImpulseRoleLevel } from "../impulse-role-level";
 import type {
   DevelopmentOverviewView,
   MilestoneView,
@@ -137,7 +137,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     enabled:selectedKey!==null,retry:false,
   });
   const roleLevel=learningLevel.data?.track_key===selectedKey ? learningLevel.data : null;
-  const nextCycleUnpublished=roleLevel!==null && roleLevel.level>0 && roleLevel.curriculum_state==="unpublished";
+  const nextCycleUnpublished=roleLevel!==null && roleLevel.level>0 && roleLevel.level<3 && roleLevel.curriculum_state==="unpublished";
 
   const passportSkills = Array.isArray(passport.data?.skills) ? passport.data.skills : [];
   const completedMilestones = overview.roles.reduce((sum, role) => sum + role.completed_milestones, 0);
@@ -284,6 +284,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               roadmap={selectedRoadmap}
               learningCourses={learning.data?.courses}
               nextCycleUnpublished={nextCycleUnpublished}
+              levelData={roleLevel}
               roadmapPending={roadmapCatalog.isPending && roadmaps.isPending}
               roadmapError={roadmapCatalog.isError && roadmaps.isError}
               roadmapRetry={() => {
@@ -634,6 +635,7 @@ export function RoleDetailPanel(props: {
   roadmap: RoadmapView | null;
   learningCourses?: LearningCourse[];
   nextCycleUnpublished?: boolean;
+  levelData?: ImpulseRoleLevel | null;
   roadmapPending: boolean;
   roadmapError: boolean;
   roadmapRetry: () => void;
@@ -698,7 +700,8 @@ export function RoleDetailPanel(props: {
           Это направление пока не выбрано. Персональный прогресс отсутствует; этапы появятся после подключения роли.
         </p>
       )}
-      {props.nextCycleUnpublished ? <div className="trajectory-v2-next-cycle" role="status" data-testid="trajectory-next-cycle">
+      {props.levelData && props.levelData.level >= 1 ? <CycleLearningPath level={props.levelData} learningCourses={props.learningCourses ?? []} roleKey={role.track_key} /> :
+      props.nextCycleUnpublished ? <div className="trajectory-v2-next-cycle" role="status" data-testid="trajectory-next-cycle">
         <h4>Новый виток развития</h4>
         <p>Уровень Impulse повышен и сохранён. Новая программа курсов и практических задач для следующего цикла пока не опубликована.
           После публикации здесь появится новая последовательность этапов; старые сертификаты не засчитываются повторно.</p>
@@ -715,9 +718,47 @@ export function RoleDetailPanel(props: {
         showDetails={false}
       />}
     </article>
-    {!props.nextCycleUnpublished && <SelectedStageCard role={role} roadmap={props.roadmap} learningCourses={props.learningCourses} stageKey={props.stageKey} onOpenDetails={props.onOpenStageDetails}/>}
+    {!props.nextCycleUnpublished && !(props.levelData && props.levelData.level >= 1) && <SelectedStageCard role={role} roadmap={props.roadmap} learningCourses={props.learningCourses} stageKey={props.stageKey} onOpenDetails={props.onOpenStageDetails}/>}
     </div>
   );
+}
+
+/** One fresh course+review cycle per saved Impulse level. This is not a
+ * fabricated professional-grade trajectory checkpoint. */
+function CycleLearningPath(props: { level: ImpulseRoleLevel; learningCourses: LearningCourse[]; roleKey: string }) {
+  const {level, roleKey} = props;
+  const finished = level.level >= (level.max_level ?? 3);
+  const subjectNames: Record<number, string> = {
+    13: "Архитектура AI-сервисов и контракты",
+    14: "Оценка и качество AI-агентов",
+    15: "Безопасность и эксплуатация AI-систем",
+    16: "Мультиагентная оркестрация и надёжность",
+  };
+  const keys = level.required_course_keys ?? [];
+  return <section className="trajectory-v2-cycle-path" data-testid="trajectory-cycle-path" aria-label="Текущий учебный цикл">
+    <header><div><small>Цикл {level.cycle_number}</small><h3>{finished ? "L3 · Программа завершена" : `Развитие L${level.level} → L${level.level + 1}`}</h3></div>
+      <span>{finished ? "Все уровни пройдены" : `${level.completed_courses} из ${level.required_courses} курсов`}</span></header>
+    {finished ? <p>Три учебных цикла завершены. Полученные сертификаты и проверенные практические результаты сохранены в истории Impulse.</p> : <>
+      <p>Новый виток: изучи отдельные курсы, отправь практическую работу на независимую проверку и подтверди повышение уровня в Bootcamp.</p>
+      <div className="trajectory-v2-cycle-courses">{keys.map((key,index)=>{
+        const course=props.learningCourses.find(item=>item.course_key===key);
+        const number=Number(/^demo-course-(\\d+)/.exec(key)?.[1] ?? "0");
+        const isDone=course?.finished === true;
+        return <Link key={key} to={`/workspace/2?role=${encodeURIComponent(roleKey)}&course=${encodeURIComponent(key)}&panel=detail`} className="trajectory-v2-cycle-course">
+          <span className="trajectory-v2-cycle-num">{isDone ? "✓" : index+1}</span>
+          <div><strong>{subjectNames[number] ?? course?.title ?? key}</strong><small>{isDone ? "Учебный сертификат сохранён" : course?.completed_units ? `${course.completed_units} из 8 уроков` : "Курс не начат"}</small></div>
+          <span>{isDone ? "Пройден" : "Открыть"} →</span>
+        </Link>;
+      })}</div>
+      <div className="trajectory-v2-cycle-practice">
+        <strong>Практика и независимая проверка</strong>
+        <span>{level.approved_practices} из {level.required_practices} принятых результатов</span>
+        <p>Отправь артефакт в практическом разделе курса. Подтверждение выдаётся проверяющим, а не автоматически после уроков.</p>
+      </div>
+      {level.advance_ready && <p role="status" className="trajectory-v2-cycle-ready">Все условия выполнены. Перейди в Bootcamp и нажми «Следующий этап».</p>}
+    </>}
+    <Link to={`/workspace/2?role=${encodeURIComponent(roleKey)}`} className="trajectory-v2-cycle-link">{finished ? "Посмотреть сертификаты" : "Открыть текущий цикл в Bootcamp"} →</Link>
+  </section>;
 }
 
 function SelectedStageCard(props: { role: RoleCardView; roadmap: RoadmapView | null; learningCourses?: LearningCourse[]; stageKey: string | null; onOpenDetails: (stageKey: string) => void }) {
