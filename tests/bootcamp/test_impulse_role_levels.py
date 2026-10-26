@@ -40,7 +40,7 @@ async def test_l0_starts_without_fabricated_grade_and_needs_practical_review(
         return 0, 1, []
 
     async def evidence(
-        _request: object, _auth: object, _track: str
+        _request: object, _auth: object, _track: str, _level: int = 0
     ) -> tuple[int, int, int, tuple[str, ...]]:
         return 4, 4, 0, ("demo-course-1", "demo-course-2", "demo-course-3", "demo-course-4")
 
@@ -64,7 +64,7 @@ async def test_l0_starts_without_fabricated_grade_and_needs_practical_review(
     assert not level.advance_ready
 
     async def approved(
-        _request: object, _auth: object, _track: str
+        _request: object, _auth: object, _track: str, _level: int = 0
     ) -> tuple[int, int, int, tuple[str, ...]]:
         return 4, 4, 1, ("demo-course-1", "demo-course-2", "demo-course-3", "demo-course-4")
 
@@ -99,6 +99,10 @@ async def test_l1_requires_new_curriculum_and_never_replays_older_courses(
     ) -> tuple[int, int, list[dict[str, object]]]:
         return 1, 2, [{"from": 0, "to": 1}]
 
+    async def advanced_evidence(_request: object, _auth: object, _track: str, level: int = 0) -> tuple[int, int, int, tuple[str, ...]]:
+        assert level == 1
+        return 0, 2, 0, ("demo-course-13-ai-security", "demo-course-14-ai-security")
+    monkeypatch.setattr(impulse_levels, "_evidence", advanced_evidence)
     monkeypatch.setattr(impulse_levels, "_saved", stored)
     request = SimpleNamespace(
         app=SimpleNamespace(
@@ -112,7 +116,8 @@ async def test_l1_requires_new_curriculum_and_never_replays_older_courses(
         "ai-security", cast(AuthenticatedSession, auth), cast(Request, request)
     )
     assert state.level == 1 and state.cycle_number == 2
-    assert state.curriculum_state == "unpublished"
+    assert state.curriculum_state == "published"
+    assert state.required_courses == 2
     assert not state.advance_ready
     assert state.completed_courses == 0
     with pytest.raises(ApiError):
