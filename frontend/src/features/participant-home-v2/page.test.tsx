@@ -301,7 +301,7 @@ describe("participant home v2", () => {
     expect(courseList).toHaveTextContent("Пройден");
     expect(within(courseList).queryByRole("button", { name: /Пройти курс «Python: основы»/ })).toBeNull();
     fireEvent.click(within(courseList).getByRole("button", { name: "Продолжить курс «Разработка AI-агентов»" }));
-    expect(onOpenTarget).toHaveBeenCalledWith("course", "python-agents");
+    expect(onOpenTarget).toHaveBeenCalledWith("course", "python-agents", "python");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
