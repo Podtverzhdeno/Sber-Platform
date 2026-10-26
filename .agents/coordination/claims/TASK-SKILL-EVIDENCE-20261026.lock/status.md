@@ -1,0 +1,27 @@
+# Claim TASK-SKILL-EVIDENCE-20261026
+- task_id: TASK-SKILL-EVIDENCE-20261026
+- session_id: gpt6-20261026-task-skill-evidence
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- depends_on: []
+- write_scope:
+  - src/impulse/application/task_catalog.py (SkillImpactProjection extension only)
+  - src/impulse/application/task_catalog_matching.py (per-skill accepted-evidence projection only)
+  - src/impulse/api/v1/task_catalog.py (serialize evidence statistics only)
+  - frontend/src/features/task-catalog-v2/types.ts (read-model extension only)
+  - frontend/src/features/task-catalog-v2/skill-impact-statistics.tsx
+  - frontend/src/features/task-catalog-v2/skill-impact-statistics.scss
+  - frontend/src/features/task-catalog-v2/skill-impact-statistics.test.tsx
+  - frontend/src/features/task-catalog-v2/page.tsx (replace skill comparison JSX only)
+  - tests/task_catalog/test_projection_service.py (regression)
+  - .github/workflows/task-skill-statistics-qa.yml
+  - .agents/coordination/claims/TASK-SKILL-EVIDENCE-20261026.lock/status.md
+- shared_files:
+  - frontend/src/features/task-catalog-v2/page.tsx (parallel desktop-firstfold task owns other hunks; task-detail growth only)
+- verification:
+  - strict Python Ruff/Pyright and focused pytest
+  - frontend typecheck + ESLint + Vitest
+  - browser or layout regression
+- progress: Replace three non-informative blank skill values with accepted-contribution evidence statistics, accurate coverage, and verification steps; never invent proficiency percentage or forecast.
+- blockers: Main integration only after independent review of frontend file overlap; scope remains isolated in separate PR.
