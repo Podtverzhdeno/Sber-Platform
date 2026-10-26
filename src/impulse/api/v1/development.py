@@ -179,6 +179,24 @@ async def select_track(
     return await _overview(service, authenticated)
 
 
+class OptionalTrackRequest(BaseModel):
+    track_key: str = Field(min_length=1, max_length=96)
+    enabled: bool
+
+
+@router.post("/me/tracks/optional", response_model=TrackOverview)
+async def optional_track(
+    command: OptionalTrackRequest,
+    authenticated: Annotated[AuthenticatedSession, Depends(csrf_session)],
+    service: Annotated[DevelopmentService, Depends(_service)],
+) -> TrackOverview:
+    """Enable optional studies or archive the card; neither operation changes the primary."""
+    await service.set_optional_track(
+        authenticated.actor, command.track_key, enabled=command.enabled
+    )
+    return await _overview(service, authenticated)
+
+
 def _milestone_view(item: object, completed_keys: frozenset[str]) -> MilestoneView:
     from impulse.domain.development import RoadmapMilestone
 
