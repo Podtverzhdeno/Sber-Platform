@@ -424,6 +424,44 @@ test("participant home actions open project, buddy and linked routes", async ({ 
   await expect(page).toHaveURL(/\/workspace\/3$/);
 });
 
+test("rating shows ten distinct consented fictional demo participants, avatars and profiles", async ({ page }) => {
+  await page.setViewportSize({ width: 1672, height: 941 });
+  const fictionalNames = [
+    "Алекс Речной", "Мария Северова", "Игорь Лесной", "Анна Смирнова",
+    "Илья Кузнецов", "Артём Соколов", "Дарья Орлова", "Кирилл Меньшев",
+    "София Белова", "Тимур Валеев",
+  ];
+  await page.route("**/api/v1/rating-seasons", (route) => route.fulfill({ json: [
+    { id: "season-e2e", key: "demo-autumn-2026", title: "Демо-сезон: осень 2026",
+      status: "open", version: 2, policy_version: 1 },
+  ] }));
+  await page.route("**/api/v1/rating-seasons/season-e2e/leaderboard", (route) => route.fulfill({
+    json: fictionalNames.map((display_name, index) => ({
+      place: index + 1,
+      person_id: "fictional-demo-id-" + String(index),
+      display_name,
+      score: String(550 - index * 50),
+      successful_projects: 0,
+      trophies: [],
+      offers: [],
+      anonymized: false,
+    })),
+  }));
+  await page.goto("/");
+  await page.locator('[data-persona="participant-alex"]').click();
+  await page.getByRole("link", { name: "Рейтинг" }).click();
+  const board = page.getByRole("region", { name: "Все участники рейтинга" });
+  await expect(board.locator(".ir-leader-row")).toHaveCount(10);
+  for (const name of fictionalNames) {
+    await expect(board.getByRole("button", { name, exact: true })).toBeEnabled();
+    await expect(board.getByRole("img", { name })).toBeVisible();
+  }
+  await expect(page.getByText(/Демо-персоны вымышлены/)).toBeVisible();
+  await page.screenshot({ path: "test-results/rating-ten-visible-demo-people.png", fullPage: true, animations: "disabled" });
+  await board.getByRole("button", { name: "Мария Северова" }).click();
+  await expect(page.getByRole("heading", { name: "Мария Северова" })).toBeVisible();
+});
+
 test("rating list opens participant profile and returns to the same ranking", async ({ page }) => {
   await page.setViewportSize({ width: 1672, height: 941 });
   await page.goto("/");
