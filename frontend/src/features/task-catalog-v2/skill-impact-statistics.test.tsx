@@ -47,6 +47,15 @@ describe("Skill impact evidence statistics", () => {
     expect(screen.queryByText(/\+\d+%/)).not.toBeInTheDocument();
   });
 
+  it("does not turn missing server evidence into a false zero", () => {
+    render(<SkillImpactStatistics impacts={[baseImpact]} onGrowthExpand={vi.fn()}/>);
+    const area = screen.getByRole("region", { name: "Статистика навыков задачи" });
+    expect(within(area).getByText("Данные не загружены")).toBeInTheDocument();
+    expect(within(area).getByText(/Это не означает, что подтверждений нет/)).toBeInTheDocument();
+    expect(within(area).queryByText("Работ пока нет")).not.toBeInTheDocument();
+    expect(within(area).getByRole("img", { name: "Подтверждения пока не загружены" })).toBeInTheDocument();
+  });
+
   it("accepts percentages only when a model provided them", () => {
     expect(parseSkillPercent(null)).toBeNull();
     expect(parseSkillPercent("40%")).toBe(40);
