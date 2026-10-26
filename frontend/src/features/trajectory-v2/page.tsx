@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 
@@ -11,6 +11,7 @@ import {
   loadRoadmaps,
   overviewQueryKey,
   roadmapsQueryKey,
+  setOptionalTrajectory,
   PRIMARY_LABEL,
   MILESTONE_STATE_LABELS,
   readPinnedTrack,
@@ -86,6 +87,7 @@ export function TrajectoryV2() {
 
 export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const { overview } = props;
+  const queryClient = useQueryClient();
   const learning = useQuery({ queryKey: learningSummaryQueryKey, queryFn: loadLearningSummary });
   const [searchParams, setSearchParams] = useSearchParams();
   const roadmaps = useQuery({
@@ -171,6 +173,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const [drawerKey, setDrawerKey] = useState<string | null>(null);
   const [pinnedTrack, setPinnedTrack] = useState<string | null>(() => readPinnedTrack());
   const [hiddenUnselected, setHiddenUnselected] = useState(false);
+  const [optionalError, setOptionalError] = useState<string | null>(null);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [compareTarget, setCompareTarget] = useState<string | null>(null);
   const [, refreshVisited] = useState(0);
@@ -259,6 +262,27 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
     );
   };
 
+  const optionalTrack = useMutation({
+    mutationFn: ({ trackKey, enabled }: { trackKey: string; enabled: boolean }) =>
+      setOptionalTrajectory(trackKey, enabled),
+    onSuccess: async (_, variables) => {
+      setOptionalError(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: overviewQueryKey }),
+        queryClient.invalidateQueries({ queryKey: roadmapsQueryKey }),
+        queryClient.invalidateQueries({ queryKey: ["trajectory-roadmap-catalog"] }),
+        queryClient.invalidateQueries({ queryKey: roleLevelQueryKey(variables.trackKey) }),
+        queryClient.invalidateQueries({ queryKey: ["participant-growth-analytics"] }),
+        queryClient.invalidateQueries({ queryKey: ["impulse-role-level"] }),
+      ]);
+      setActionFeedback(variables.enabled
+        ? "Дополнительная траектория открыта. Основная роль не изменена."
+        : "Карточка снова серая. Пройденные курсы и практика сохранены.");
+    },
+    onError: (error: Error) => {
+      setOptionalError(error.message || "Не удалось изменить дополнительную траекторию.");
+    },
+  });
   const roleSelected = (trackKey: string) => {
     const next = new URLSearchParams(searchParams);
     next.set("role", trackKey);
@@ -306,6 +330,9 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 role={selected}
               primary={selected.track_key === primaryKey}
               roadmap={selectedRoadmap}
+              optionalBusy={optionalTrack.isPending}
+              optionalError={optionalError}
+              onToggleOptional={(enabled) => { setOptionalError(null); optionalTrack.mutate({ trackKey: selected.track_key, enabled }); }}
               learningCourses={learning.data?.courses}
               nextCycleUnpublished={nextCycleUnpublished}
               levelData={roleLevel}
@@ -661,6 +688,9 @@ export function RoleDetailPanel(props: {
   role: RoleCardView;
   primary: boolean;
   roadmap: RoadmapView | null;
+  optionalBusy?: boolean;
+  optionalError?: string | null;
+  onToggleOptional?: (enabled: boolean) => void;
   learningCourses?: LearningCourse[];
   nextCycleUnpublished?: boolean;
   levelData?: ImpulseRoleLevel | null;
@@ -725,9 +755,23 @@ export function RoleDetailPanel(props: {
           />
         </div>
       </header>
+      {!props.primary && (role.state === "unselected" || role.state === "learning" || role.state === "paused") && (
+        <div className="trajectory-v2-optional-actions" data-testid="trajectory-optional-actions">
+          <button type="button"
+            className={role.state === "unselected" ? "trajectory-v2-optional-enable" : "trajectory-v2-optional-archive"}
+            disabled={props.optionalBusy}
+            onClick={() => { props.onToggleOptional?.(role.state === "unselected"); }}>
+            {props.optionalBusy ? "Сохраняем…" : role.state === "unselected" ? "Изучать дополнительно →" : "Сделать карточку серой"}
+          </button>
+          <small>{role.state === "unselected"
+            ? "Включить курсы и задачи без смены основной роли"
+            : "Прогресс и сертификаты сохранятся. Основная роль не изменится"}</small>
+          {props.optionalError && <p role="alert">{props.optionalError}</p>}
+        </div>
+      )}
       {role.attempt_number === null && (
         <p className="trajectory-v2-unselected-note" role="status">
-          Это направление пока не выбрано. Персональный прогресс отсутствует; этапы появятся после подключения роли.
+          Программа доступна для просмотра. Нажмите «Изучать дополнительно», чтобы начать курсы и практику. Основная роль не изменится.
         </p>
       )}
       {props.levelData && props.levelData.level >= 1 ? <CycleLearningPath level={props.levelData} learningCourses={props.learningCourses ?? []} roleKey={role.track_key} isUnopened={props.isUnopened} markVisited={props.markVisited} /> :
