@@ -19,9 +19,9 @@ from pydantic import BaseModel, Field
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import current_session
 from impulse.application.development import CourseRecord, DevelopmentService, EnrollmentRecord
+from impulse.application.identity import AuthenticatedSession
 from impulse.application.recognition import RecognitionService
 from impulse.application.work import WorkService
-from impulse.application.identity import AuthenticatedSession
 from impulse.bootcamp.editorial_learning import ImpulseStudySummary, impulse_study_summary
 from impulse.domain.development import CompletionStatus, RoadmapProjection
 from impulse.domain.identity import Role
