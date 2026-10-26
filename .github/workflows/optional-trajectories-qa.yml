@@ -12,6 +12,7 @@ on:
       - "tests/test_development_api.py"
       - "tests/bootcamp/test_impulse_study.py"
       - "frontend/e2e/trajectory-optional-lifecycle.spec.ts"
+      - "frontend/e2e/trajectory-optional-persisted.spec.ts"
       - "src/impulse/bootcamp/editorial_learning.py"
       - "src/impulse/bootcamp/service.py"
       - "tests/bootcamp/test_optional_trajectory_catalog.py"
@@ -65,3 +66,62 @@ jobs:
           CI: "true"
           TZ: Europe/Moscow
         run: npx playwright test trajectory-optional-lifecycle.spec.ts --project=chromium --reporter=line
+  optional-journey-postgres:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      APP_ENV: test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@887a942a15af3a7626099df99e897a18d9e5ab3a
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install backend and seed isolated PostgreSQL
+        run: |
+          uv sync --frozen
+          uv run alembic upgrade head
+          uv run impulse-demo-seed
+          nohup uv run uvicorn impulse.main:app --host 127.0.0.1 --port 8000 --app-dir . > /tmp/optional-backend.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl --silent --fail http://127.0.0.1:8000/health/ready >/dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/optional-backend.log
+          exit 1
+      - name: Install frontend and browser
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Real database optional trajectory and completed course
+        working-directory: frontend
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test trajectory-optional-persisted.spec.ts --project=chromium --reporter=line
+      - name: Upload evidence on failure
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: optional-journey-real-db-trace
+          path: frontend/test-results/
+          if-no-files-found: ignore
