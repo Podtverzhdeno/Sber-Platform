@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import os
 from types import SimpleNamespace
 from typing import cast
@@ -58,7 +57,8 @@ async def test_real_database_three_cycles_never_replay_certificates(
                     await session.execute(
                         text(
                             "SELECT p.course_key, p.certificate_id, s.practical_certificate_id "
-                            "FROM impulse_course_progress p LEFT JOIN impulse_practical_submissions s "
+                            "FROM impulse_course_progress p "
+                            "LEFT JOIN impulse_practical_submissions s "
                             "ON s.person_id=p.person_id AND s.course_key=p.course_key "
                             "WHERE p.person_id=:person"
                         ),
@@ -97,7 +97,8 @@ async def test_real_database_three_cycles_never_replay_certificates(
     async with database.session() as session:
         await session.execute(
             text(
-                "INSERT INTO persons(id,display_name,external_key) VALUES (:id,'Cycle learner',:key)"
+                "INSERT INTO persons(id,display_name,external_key) "
+                "VALUES (:id,'Cycle learner',:key)"
             ),
             {"id": person, "key": str(person)},
         )
@@ -108,7 +109,8 @@ async def test_real_database_three_cycles_never_replay_certificates(
                 await session.execute(
                     text(
                         "INSERT INTO impulse_course_progress "
-                        "(person_id,course_key,completed_units,total_units,certificate_id,finished_at) "
+                        "(person_id,course_key,completed_units,total_units, "
+                        "certificate_id,finished_at) "
                         "VALUES (:person,:key,8,8,:certificate,now())"
                     ),
                     {"person": person, "key": key, "certificate": uuid4()},
