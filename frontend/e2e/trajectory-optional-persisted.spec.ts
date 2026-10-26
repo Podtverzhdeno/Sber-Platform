@@ -11,7 +11,14 @@ test("real DB: grey AI role → optional trajectory → complete course → grey
 
   await page.setViewportSize({ width: 1500, height: 900 });
   await page.goto("/");
+  const loggedIn = page.waitForResponse(response =>
+    response.request().method() === "POST" && response.url().endsWith("/api/v1/auth/demo-login"),
+  );
   await page.locator('[data-persona="participant-alex"]').click();
+  expect((await loggedIn).ok()).toBe(true);
+  await expect.poll(async () =>
+    (await page.request.get("/api/v1/me")).status(),
+  ).toBe(200);
 
   type Role = { track_key: string; state: string; attempt_number: number | null };
   const getOverview = async (): Promise<{ roles: Role[] }> => {
