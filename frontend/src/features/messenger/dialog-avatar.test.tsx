@@ -1,7 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import { avatarInitials, DialogAvatar } from "./dialog-avatar";
+import { avatarInitials } from "./avatar-model";
+import { DialogAvatar } from "./dialog-avatar";
 
 describe("Messenger identity avatars", () => {
   it("renders the same community identity regardless of placement", () => {
