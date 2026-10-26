@@ -1,9 +1,9 @@
-import { Box, Radio, UsersRound } from "lucide-react";
+import { Box, Cat, Radio, Sparkles, Trophy, UsersRound } from "lucide-react";
+import { avatarInitials } from "./avatar-model";
 
-type ReferenceKind = "trophy" | "school" | "team" | "ai" | "cat" | "technology" | "pulse" | "community" | null;
+type ReferenceKind = "trophy" | "school" | "team" | "ai" | "cat" | "technology" | "pulse" | "lighthouse" | null;
 
-/** Named badges originate in the approved reference's dialog list.
- * Ordinary, unrelated channels continue to use their real initials. */
+/** Recognised community identities. Unknown groups use a styled monogram. */
 const pictureByTitle: Record<string, ReferenceKind> = {
   "Грантовый конкурс": "trophy",
   "Школа 21": "school",
@@ -17,27 +17,43 @@ const pictureByTitle: Record<string, ReferenceKind> = {
   "Команда задачи": "team",
 };
 
-export function DialogAvatar({ title, initials, className = "" }: {
+/** Portraits already identified by the existing Mayaki reference. Never assign
+ * them to another person merely because they share a given name. */
+const verifiedPortraits: Record<string, string> = {
+  "Анна Ковалёва": "/messages-reference/anna-avatar.svg",
+  "Анна Ковалева": "/messages-reference/anna-avatar.svg",
+  "Дмитрий Соколов": "/messages-reference/dmitry-avatar.svg",
+  "Мария Лебедева": "/messages-reference/maria-avatar.svg",
+};
+
+export function DialogAvatar({ title, initials, kind, className = "msg-dialog-list__avatar" }: {
   title: string;
-  initials: string;
+  initials?: string;
+  kind?: string;
   className?: string;
 }) {
   const name = title.trim();
-  const picture = Object.prototype.hasOwnProperty.call(pictureByTitle, name)
-    ? pictureByTitle[name]
+  const isGroup = kind !== "personal";
+  const icon = isGroup
+    ? (name.toLocaleLowerCase("ru-RU") === "маяки" ? "lighthouse" : pictureByTitle[name] ?? null)
     : null;
-  const mode = name.toLowerCase() === "маяки" ? "lighthouse" : picture;
+  const portrait = !isGroup ? verifiedPortraits[name] : undefined;
+  let sum = 0;
+  for (let index = 0; index < name.length; index++) sum += name.charCodeAt(index);
+  const tone = sum % 5;
+  const modeClass = icon ? `msg-reference-avatar--${icon}` : `msg-avatar--contact msg-avatar--tone-${String(tone)}`;
   return (
-    <span className={`msg-dialog-list__avatar msg-reference-avatar ${mode ? "msg-reference-avatar--" + mode : ""} ${className}`} aria-hidden="true">
-      {mode === "lighthouse" && <img src="/messages-reference/mayaki-avatar.svg" alt="" />}
-      {mode === "trophy" && <span className="msg-reference-avatar-symbol">🏆</span>}
-      {mode === "school" && <span className="msg-reference-avatar-symbol school">21</span>}
-      {mode === "team" && <UsersRound size={24} strokeWidth={1.7} />}
-      {mode === "ai" && <span className="msg-reference-avatar-symbol ai">◕<small>GOOD</small></span>}
-      {mode === "cat" && <span className="msg-reference-avatar-symbol">🐱</span>}
-      {mode === "technology" && <Box size={26} strokeWidth={1.7} />}
-      {mode === "pulse" && <Radio size={23} strokeWidth={1.7} />}
-      {mode === null && initials}
+    <span className={`msg-avatar msg-reference-avatar ${modeClass} ${className}`.trim()} aria-hidden="true">
+      {portrait ? <img src={portrait} alt="" loading="lazy" />
+        : icon === "lighthouse" ? <img src="/messages-reference/mayaki-avatar.svg" alt="" loading="lazy" />
+        : icon === "trophy" ? <Trophy aria-hidden="true" strokeWidth={2.1} />
+        : icon === "school" ? <span className="msg-reference-avatar-symbol school">21</span>
+        : icon === "team" ? <UsersRound aria-hidden="true" strokeWidth={1.8} />
+        : icon === "ai" ? <Sparkles aria-hidden="true" strokeWidth={1.9} />
+        : icon === "cat" ? <Cat aria-hidden="true" strokeWidth={1.9} />
+        : icon === "technology" ? <Box aria-hidden="true" strokeWidth={1.8} />
+        : icon === "pulse" ? <Radio aria-hidden="true" strokeWidth={1.8} />
+        : <span className="msg-avatar__initials">{initials ?? avatarInitials(name)}</span>}
     </span>
   );
 }

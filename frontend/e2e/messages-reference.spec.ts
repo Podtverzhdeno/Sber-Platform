@@ -511,3 +511,36 @@ test("community tabs list actual attachments, links and can add directory contac
   await detail.getByRole("searchbox",{name:"Найти участника"}).fill("Роман Заказчик");
   await expect(detail.getByRole("button",{name:"Открыть профиль: Роман Заказчик"})).toBeVisible();
 });
+
+
+test("switching between direct and group chats keeps both column dividers fixed", async ({page}) => {
+  await page.setViewportSize({width:1672,height:941});
+  await openMessages(page);
+  const columnBounds = async () => page.evaluate(() => {
+    const boxes = [".msg-dialog-list", ".chat-thread", ".msg-context"].map(selector => {
+      const element = document.querySelector(selector);
+      if (!element) throw new Error("Missing messenger column: " + selector);
+      const rectangle = element.getBoundingClientRect();
+      return {left: rectangle.left, right:rectangle.right, width:rectangle.width};
+    });
+    return boxes;
+  });
+  await page.locator(".msg-dialog-list__row").filter({has:page.locator(".msg-dialog-list__row-title strong").filter({hasText:/^Елена Наставник$/})}).click();
+  await expect(page.locator(".messenger-page")).toHaveAttribute("data-message-state","direct");
+  const direct = await columnBounds();
+  await page.locator(".msg-dialog-list__row").filter({hasText:"Грантовый конкурс"}).click();
+  await expect(page.locator(".messenger-page")).toHaveAttribute("data-message-state","community");
+  await expect(page.locator(".msg-chat__avatar.msg-reference-avatar--trophy svg")).toBeVisible();
+  await expect(page.locator(".msg-community__hero-avatar.msg-reference-avatar--trophy svg")).toBeVisible();
+  const group = await columnBounds();
+  for (let i=0;i<direct.length;i++) {
+    for(const dimension of ["left","right","width"] as const) {
+      expect(Math.abs((direct[i]?.[dimension] ?? 0)-(group[i]?.[dimension] ?? 0)),
+        `Column ${String(i)} ${dimension} shifted after selecting community`).toBeLessThan(1.5);
+    }
+  }
+  await page.locator(".msg-dialog-list__row").filter({has:page.locator(".msg-dialog-list__row-title strong").filter({hasText:/^Елена Наставник$/})}).click();
+  await expect(page.locator(".messenger-page")).toHaveAttribute("data-message-state","direct");
+  const again = await columnBounds();
+  expect(Math.abs((again[1]?.left ?? 0) - (direct[1]?.left ?? 0))).toBeLessThan(1.5);
+});

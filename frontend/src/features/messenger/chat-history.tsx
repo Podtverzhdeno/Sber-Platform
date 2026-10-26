@@ -23,6 +23,7 @@ import {
 } from "react";
 
 import { AttachmentCard } from "./attachment-card";
+import { DialogAvatar } from "./dialog-avatar";
 import { MayakiEventPreview } from "./mayaki-event-preview";
 import type { ApiChannelView, ApiMessageView } from "./contracts";
 import {
@@ -87,11 +88,6 @@ const PENDING_STATE_LABELS: Record<PendingMessageOverlay["state"], string> = {
   read: "Прочитано",
   failed: "Не отправлено",
 };
-
-function channelInitial(channel: ApiChannelView | null, viewerId: string | null): string {
-  if (channel === null) return "ч";
-  return (dialogTitle(channel, viewerId).trim()[0] ?? "ч").toUpperCase();
-}
 
 export function ChatHistory({
   channel,
@@ -244,9 +240,7 @@ export function ChatHistory({
       aria-label={ariaLabel ?? `Чат «${channelTitle}»`}
     >
       <header className="msg-chat__header" aria-label="Заголовок чата">
-        <span className="msg-chat__avatar" aria-hidden="true">
-          {channel?.title.trim().toLowerCase() === "маяки" ? <img src="/messages-reference/mayaki-avatar.svg" alt="" /> : channelInitial(channel, viewerId)}
-        </span>
+        <DialogAvatar title={channelTitle} kind={channel?.kind} className="msg-chat__avatar" />
         <button
           type="button"
           className="msg-chat__header-title msg-chat__header-title-button"
@@ -451,15 +445,7 @@ export function ChatHistory({
                 >
                   <span className="msg-chat__group-author">
                     {row.authorId !== viewerId && (
-                      <span className="msg-chat__group-avatar" aria-hidden="true">
-                        {channel?.kind === "community" && channel.title.trim().toLowerCase() === "маяки" && /^анна ковал[её]ва$/iu.test(row.authorName ?? "")
-                          ? <img src="/messages-reference/anna-avatar.svg" alt="" />
-                          : channel?.kind === "community" && channel.title.trim().toLowerCase() === "маяки" && row.authorName === "Дмитрий Соколов"
-                            ? <img src="/messages-reference/dmitry-avatar.svg" alt="" />
-                            : channel?.kind === "community" && channel.title.trim().toLowerCase() === "маяки" && row.authorName === "Мария Лебедева"
-                              ? <img src="/messages-reference/maria-avatar.svg" alt="" />
-                              : (row.authorName ?? "У").trim().slice(0,1).toUpperCase()}
-                      </span>
+                      <DialogAvatar title={row.authorName ?? "Участник"} kind="personal" className="msg-chat__group-avatar" />
                     )}
                     <span>{row.authorId === viewerId ? "Вы" : row.authorName}</span>
                     {row.authorId !== viewerId && channel?.participants.find((person) => person.id === row.authorId) !== undefined && (
