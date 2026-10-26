@@ -34,6 +34,7 @@ function mockApi(skills: ReferenceSkillFixture[] = roleSkills) {
     if (path.includes("/growth/snapshot")) return snapshot;
     if (path.includes("/analytics/journey")) return journey;
     if (path.includes("/impulse-study/summary")) return { started_courses: 6, finished_courses: 6, completed_lessons: 56, approved_practices: 1, credited_practices: 2, courses: [] };
+    if (path.includes("/me/competency-evidence")) return [{ competency_key: "prompting", source_kind: "project", source_ref: "agent-task-01", level: "базовый", observed_at: "2026-10-24T09:00:00Z", counted: true }];
     throw new Error("unexpected endpoint " + path);
   });
 }
@@ -127,4 +128,30 @@ describe("three canonical analytics reference layouts", () => {
     expect(screen.getByRole("dialog", { name: "Условия Agentic Coding L1" })).toBeInTheDocument();
     expect(screen.getByText(/не официальный сертификат/i)).toBeInTheDocument();
   });
+  it("renders actual user learning and accepted work inside the radar without inventing a certified level", async () => {
+    const { container } = open();
+    const summary = await screen.findByTestId("reference-personal-facts");
+    expect(within(summary).getByText("56")).toBeInTheDocument();
+    expect(within(summary).getByText("6")).toBeInTheDocument();
+    expect(within(summary).getByText("2")).toBeInTheDocument();
+    expect(within(summary).getByText("0")).toBeInTheDocument();
+    expect(container.querySelectorAll(".ref-radar circle[fill='#31eaba']")).toHaveLength(0);
+    expect(screen.getByText(/реальные действия ниже не являются уровнем Agentic Coding/)).toBeInTheDocument();
+    await waitFor(() => expect(container.querySelector(".ref-skill-activity")?.textContent).toContain("1"));
+    const axis = container.querySelector(".ref-radar-skill");
+    expect(axis).toHaveAttribute("aria-label", expect.stringContaining("Зарегистрированных действий по этому навыку: 1"));
+    if (axis === null) throw new Error("Accessible skill axis not found");
+    fireEvent.click(axis);
+    expect(screen.getByText(/agent-task-01/)).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: /Подтверждение навыка/ })).toBeInTheDocument();
+  });
+
+  it("keeps unknown methodology targets unknown when server explicitly provides null", async () => {
+    const custom = roleSkills.map(skill => skill.key === "prompt_engineering" ? { ...skill, target_level: null } : skill);
+    const { container } = open("/workspace/9", custom);
+    await waitFor(() => expect(container.querySelector(".ref-radar-skill")?.getAttribute("aria-label")).toContain("Зарегистрированных"));
+    const row = screen.getByRole("button", { name: /Правила работы агента/ });
+    expect(row).toHaveTextContent("—");
+  });
+
 });
