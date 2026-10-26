@@ -130,9 +130,9 @@ export type ProgressMutationScope = "lesson" | "all";
 
 export function progressMutationScope(path: string, method: string): ProgressMutationScope | null {
   if (!isCrossSectionMutation(path, method)) return null;
-  const pathname = (path.split(/[?#]/, 1)[0] ?? path).replace(/\\/$/, "");
+  const pathname = (path.split(/[?#]/, 1)[0] ?? path).replace(/\/$/, "");
   if (method.toUpperCase() === "POST" &&
-    /^\\/api\\/v1\\/me\\/bootcamp\\/impulse-study\\/[^/]+\\/lessons\\/\\d+\\/complete$/.test(pathname)) {
+    /^\/api\/v1\/me\/bootcamp\/impulse-study\/[^/]+\/lessons\/\d+\/complete$/.test(pathname)) {
     return "lesson";
   }
   return "all";
