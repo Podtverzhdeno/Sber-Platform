@@ -157,19 +157,9 @@ def test_demo_alex_learning_and_competencies_use_stable_evidence() -> None:
 
 def test_demo_rating_public_opt_in_is_explicit_and_only_for_fictional_participants() -> None:
     rows = _rows()
-    participants = {
-        row["person_id"]
-        for row in rows["actor_roles"]
-        if row["role"] == "participant"
-    }
-    published = [
-        row for row in rows["visibility_settings"]
-        if row["scope"] == "public_rating"
-    ]
-    consented = [
-        row for row in rows["consents"]
-        if row["scope"] == "public_rating"
-    ]
+    participants = {row["person_id"] for row in rows["actor_roles"] if row["role"] == "participant"}
+    published = [row for row in rows["visibility_settings"] if row["scope"] == "public_rating"]
+    consented = [row for row in rows["consents"] if row["scope"] == "public_rating"]
 
     assert len(participants) == len(published) == len(consented) == 10
     assert {row["person_id"] for row in published} == participants
@@ -178,7 +168,4 @@ def test_demo_rating_public_opt_in_is_explicit_and_only_for_fictional_participan
     assert all(row["granted"] is True for row in consented)
     assert all(row["data_origin"] == "demo_seed" for row in published + consented)
     assert all(row["provenance"]["synthetic"] is True for row in published + consented)
-    assert not any(
-        row["scope"] == "public_profile"
-        for row in rows["visibility_settings"]
-    )
+    assert not any(row["scope"] == "public_profile" for row in rows["visibility_settings"])
