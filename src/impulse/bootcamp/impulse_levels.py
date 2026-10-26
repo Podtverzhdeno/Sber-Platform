@@ -1,13 +1,15 @@
 """Authoritative Impulse *learning* levels, independent of career grades.
 
-L0 is the initial level of an enrolled role. L0 -> L1 requires every
-published role course and at least one independently approved practical
-certificate. Later cycles need separately published curriculum; old
-certificates MUST NOT be replayed as evidence for a new level.
+Each enrolled role starts at L0. Three published cycles lead to L3:
+L0 → L1 (foundation), L1 → L2 (architecture / evaluation),
+L2 → L3 (operations / orchestration). All require separate course certificates
+and independently reviewed practical evidence. Old cycle or other role credits
+never substitute for the current requirements.
 """
 
 from __future__ import annotations
 
+import json
 from typing import Annotated, Literal
 from uuid import UUID
 
@@ -22,8 +24,10 @@ from impulse.bootcamp.editorial_learning import ELIGIBLE_KEYS, impulse_study_sum
 from impulse.domain.identity import Role
 
 router = APIRouter(tags=["bootcamp"])
-POLICY_VERSION = 1
+POLICY_VERSION = 2
 PRACTICE_MINIMUM = 1
+MAX_LEVEL = 3
+ADVANCED_CYCLES = {1: (13, 14), 2: (15, 16)}
 
 
 def _empty_history() -> list[dict[str, object]]:
@@ -42,6 +46,8 @@ class ImpulseLevelView(BaseModel):
     advance_ready: bool
     history: list[dict[str, object]] = Field(default_factory=_empty_history)
     policy_version: int = POLICY_VERSION
+    max_level: int = MAX_LEVEL
+    required_course_keys: list[str] = Field(default_factory=list)
 
 
 async def _actor_track(
@@ -59,16 +65,23 @@ async def _actor_track(
 
 
 async def _evidence(
-    request: Request, authenticated: AuthenticatedSession, track_key: str
+    request: Request, authenticated: AuthenticatedSession, track_key: str, level: int = 0
 ) -> tuple[int, int, int, tuple[str, ...]]:
     courses = await request.app.state.development_service.store.courses()
-    keys = tuple(
-        sorted(
-            course.key
-            for course in courses
+    # Every cycle uses disjoint DB course keys. This prevents replay of an old
+    # certificate (including one awarded for the same role at L0).
+    if level == 0:
+        keys = tuple(sorted(
+            course.key for course in courses
             if track_key in course.track_keys and course.key in ELIGIBLE_KEYS
-        )
-    )
+            and course.key.count("-") == 2  # demo-course-1 through demo-course-12
+        ))
+    else:
+        required = {f"demo-course-{index}-{track_key}" for index in ADVANCED_CYCLES.get(level, ())}
+        keys = tuple(sorted(
+            course.key for course in courses if course.key in required
+            and track_key in course.track_keys
+        ))
     summary = await impulse_study_summary(authenticated, request)
     verified_by_key = {course.course_key: course for course in summary.courses}
     finished = sum(verified_by_key[key].finished for key in keys if key in verified_by_key)
@@ -107,9 +120,8 @@ async def _project(
 ) -> ImpulseLevelView:
     await _actor_track(request, authenticated, track_key)
     level, cycle, history = await _saved(request, authenticated.actor.person_id, track_key)
-    # Only the first-cycle curriculum has been published. Past certificates
-    # cannot automatically count in a future cycle.
-    if level > 0:
+    # L3 is the attained program ceiling, not a fabricated L4 curriculum.
+    if level >= MAX_LEVEL:
         return ImpulseLevelView(
             track_key=track_key,
             level=level,
@@ -122,7 +134,7 @@ async def _project(
             advance_ready=False,
             history=history,
         )
-    finished, required, approved, _keys = await _evidence(request, authenticated, track_key)
+    finished, required, approved, keys = await _evidence(request, authenticated, track_key, level)
     return ImpulseLevelView(
         track_key=track_key,
         level=level,
@@ -134,6 +146,7 @@ async def _project(
         required_practices=PRACTICE_MINIMUM,
         advance_ready=required > 0 and finished == required and approved >= PRACTICE_MINIMUM,
         history=history,
+        required_course_keys=list(keys),
     )
 
 
@@ -154,9 +167,8 @@ async def advance_impulse_level(
 ) -> ImpulseLevelView:
     await _actor_track(request, authenticated, track)
     current = await _project(request, authenticated, track)
-    # A repeated POST after a successful award is a read-only replay.
-    # Higher-level curricula are not published; never advance beyond L1.
-    if current.level >= 1:
+    # L3 is the maximum published level. Reads never advance progress.
+    if current.level >= MAX_LEVEL:
         return current
     if current.curriculum_state != "published":
         raise ApiError(
@@ -193,24 +205,31 @@ async def advance_impulse_level(
             .mappings()
             .one()
         )
-        if int(row["level"]) == 0:
+        # Stale or overlapping requests cannot award a second level from the
+        # same evidence snapshot. A client must re-read the new curriculum first.
+        if int(row["level"]) == current.level and current.advance_ready:
             await session.execute(
                 text(
                     "UPDATE impulse_role_levels "
-                    "SET level=1, cycle_number=2, advanced_at=now(), "
+                    "SET level=:next, cycle_number=:cycle, advanced_at=now(), "
+                    "policy_version=:version, "
                     "history=history || jsonb_build_array(jsonb_build_object("
-                    "'from',0,'to',1,'policy_version',:version,"
+                    "'from',:old,'to',:next,'policy_version',:version,"
                     "'completed_courses',:courses,'approved_practices',:practices,"
-                    "'awarded_at',now())) "
-                    "WHERE person_id=:person AND track_key=:track AND level=0"
+                    "'course_keys',CAST(:course_keys AS jsonb),'awarded_at',now())) "
+                    "WHERE person_id=:person AND track_key=:track AND level=:old"
                 ),
                 {
                     "person": person,
                     "track": track,
+                    "old": current.level,
+                    "next": current.level + 1,
+                    "cycle": current.level + 2,
                     "version": POLICY_VERSION,
                     "courses": current.completed_courses,
                     "practices": current.approved_practices,
+                    "course_keys": json.dumps(current.required_course_keys),
                 },
             )
-        # An overlapping request cannot award a second level or repeat proofs.
+        # A repeated POST is idempotent for the already awarded level.
     return await _project(request, authenticated, track)
