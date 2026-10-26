@@ -53,8 +53,7 @@ describe("three canonical analytics reference layouts", () => {
     expect(container.querySelectorAll(".ref-kpi")).toHaveLength(4);
     expect(screen.getByRole("heading", { name: "Матрица навыков Agentic Coding" })).toBeInTheDocument();
     expect(container.querySelector(".ref-passport")).toBeInTheDocument();
-    expect(screen.getByTestId("participant-live-evidence")).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByTestId("evidence-lessons")).toHaveTextContent("56"));
+    await waitFor(() => expect(within(screen.getByTestId("reference-personal-facts")).getByText("56")).toBeInTheDocument());
     expect(screen.getByRole("heading", { name: "Последние подтверждения" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Развитие за 8 месяцев" })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/Подтверждённых уровней пока нет/)).toBeInTheDocument());
