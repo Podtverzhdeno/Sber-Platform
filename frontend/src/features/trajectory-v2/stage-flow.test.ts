@@ -11,6 +11,9 @@ const stages: RoadmapView = {
   ],
   next_step:{key:"course",position:1,title:"Security",purpose:"Learn",skill:"security",target_kind:"course",target_key:"demo-course-10",completed:false,deliverable:null,lab:null,estimated_hours:null},
 };
+const first = stages.milestones[0];
+const second = stages.milestones[1];
+if (!first || !second) throw new Error("Roadmap fixture is missing published stages");
 const study: LearningCourse = {
   course_key:"demo-course-10",title:"Security",completed_units:8,total_units:8,
   finished:true,finished_at:null,certificate_id:"study-cert",
@@ -19,21 +22,21 @@ const study: LearningCourse = {
 describe("course completion automatically advances the learning path",()=>{
   it("completes the certified course step and highlights the first published next step",()=>{
     const before=projectLearningStages(stages, [{...study,finished:false,certificate_id:null}], true);
-    expect(before.stateOf(stages.milestones[0]!)).toBe("current");
+    expect(before.stateOf(first)).toBe("current");
     const after=projectLearningStages(stages, [study], true);
-    expect(after.stateOf(stages.milestones[0]!)).toBe("completed");
+    expect(after.stateOf(first)).toBe("completed");
     expect(after.next?.key).toBe("task");
-    expect(after.stateOf(stages.milestones[1]!)).toBe("current");
-    expect(stages.milestones[0]!.completed).toBe(false);
+    expect(after.stateOf(second)).toBe("current");
+    expect(first.completed).toBe(false);
   });
   it("ignores partial, uncertified and unrelated courses or unselected roles",()=>{
     for(const courses of [[{...study,finished:false}], [{...study,certificate_id:null}], [{...study,course_key:"demo-course-9"}]]) {
       expect(projectLearningStages(stages,courses,true).next?.key).toBe("course");
     }
-    expect(projectLearningStages(stages,[study],false).stateOf(stages.milestones[0]!)).toBe("preview");
+    expect(projectLearningStages(stages,[study],false).stateOf(first)).toBe("preview");
   });
   it("does not invent unpublished stages",()=>{
-    expect(projectLearningStages({...stages,milestones:[stages.milestones[0]!]},[study],true).next).toBeNull();
+    expect(projectLearningStages({...stages,milestones:[first]},[study],true).next).toBeNull();
   });
 });
 describe("first-opening acknowledgement",()=>{
