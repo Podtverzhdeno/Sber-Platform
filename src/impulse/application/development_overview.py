@@ -267,11 +267,13 @@ class DevelopmentOverviewService:
                     title=track.title,
                     state=TRACK_STATE_LABELS[None if attempt is None else attempt.status],
                     attempt_number=(
-                        None if attempt is None or attempt.status is TrackStatus.ARCHIVED
+                        None
+                        if attempt is None or attempt.status is TrackStatus.ARCHIVED
                         else attempt.attempt_number
                     ),
                     completed_milestones=(
-                        0 if attempt is None or attempt.status is TrackStatus.ARCHIVED
+                        0
+                        if attempt is None or attempt.status is TrackStatus.ARCHIVED
                         else len(attempt.completed_milestones)
                     ),
                     total_milestones=0 if roadmap is None else len(roadmap.milestones),
