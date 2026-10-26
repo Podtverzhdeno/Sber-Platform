@@ -841,7 +841,7 @@ export function StagePathSection(props: {
                   props.onStageSelect(milestone.key);
                 }}
               >
-                <span className="trajectory-v2-milestone-node" aria-hidden="true">{state === "completed" ? "✓" : state === "current" ? "◉" : state === "locked" ? "♙" : String(milestone.position)}</span>
+                <span className="trajectory-v2-milestone-node" aria-hidden="true">{state === "completed" ? "✓" : state === "current" ? "◉" : state === "locked" ? "♙" : "♙"}</span>
                 <strong className="trajectory-v2-milestone-position">{milestone.position}</strong>
                 <span className="trajectory-v2-milestone-title">{milestone.title}</span>
                 {studied && studied.completed_units > 0 && <small className="trajectory-v2-stage-study-tag">{studyProgress.studiedKeys.has(milestone.key) ? "✓ Курс пройден" : `${String(Math.round(100*studied.completed_units/Math.max(1,studied.total_units)))}% обучения`}</small>}
