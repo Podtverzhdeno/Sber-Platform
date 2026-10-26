@@ -3,6 +3,10 @@ on:
   pull_request:
     paths:
       - "frontend/e2e/course-practice-real-db.spec.ts"
+      - "frontend/src/api/cross-section-mutations.ts"
+      - "frontend/src/api/cross-section-mutations.test.ts"
+      - "frontend/src/api/client.ts"
+      - "frontend/src/App.tsx"
       - ".github/workflows/real-db-course-practice-e2e.yml"
       - "src/impulse/bootcamp/**"
       - "frontend/src/features/bootcamp/**"
@@ -65,9 +69,12 @@ jobs:
       - name: Strict typecheck
         working-directory: frontend
         run: npm run typecheck
-      - name: Lint real E2E
+      - name: Lint real E2E and notification policy
         working-directory: frontend
-        run: npx eslint e2e/course-practice-real-db.spec.ts --max-warnings 0
+        run: npx eslint e2e/course-practice-real-db.spec.ts src/api/cross-section-mutations.ts src/api/cross-section-mutations.test.ts src/api/client.ts src/App.tsx --max-warnings 0
+      - name: Scope contract unit tests
+        working-directory: frontend
+        run: npx vitest run src/api/cross-section-mutations.test.ts
       - name: Install Chromium
         working-directory: frontend
         run: npx playwright install --with-deps chromium
