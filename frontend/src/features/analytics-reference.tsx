@@ -22,7 +22,7 @@ type Stage = { key: string; title: string; count: number; status: string };
 type Journey = { stages: Stage[]; generated_at: string; successful: boolean; next_action: string };
 type Skill = { key: string; title: string; target_level: number | null; current_level: number | null; evidence_count: number; data_state: string; unresolved_methodology: boolean };
 type RegisteredEvidence = { competency_key: string; source_kind: string; source_ref: string; level: string; observed_at: string; counted: boolean };
-type ParticipantSkillFacts = { learning: LearningSummary | undefined; accepted: number | null; registered: readonly RegisteredEvidence[] | undefined };
+type ParticipantSkillFacts = { learning: LearningSummary | undefined; accepted: number | null; registered: readonly RegisteredEvidence[] | undefined; sourcesUnavailable: boolean };
 /** Registered actions are not qualified Agentic Coding levels. */
 function registeredForSkill(facts: ParticipantSkillFacts, key: string): RegisteredEvidence[] {
   const sources = new Map<string, RegisteredEvidence>();
@@ -41,7 +41,7 @@ function PersonalFactsStrip({ facts }: { facts: ParticipantSkillFacts }) {
     ["Принятых работ", facts.accepted === null ? "—" : String(facts.accepted)],
   ];
   return <div className="ref-personal-facts" data-testid="reference-personal-facts" aria-label="Мои реальные результаты Impulse">
-    <strong>Мои результаты <span>· аккаунт, все направления</span></strong>
+    <strong>Мои результаты <span>{facts.sourcesUnavailable ? "· часть источников недоступна" : "· аккаунт, все направления"}</span></strong>
     <div>{values.map(([label,value]) => <span key={label}><b>{value}</b><small>{label}</small></span>)}</div>
   </div>;
 }
@@ -292,7 +292,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
   const ready = verified && known.length === required.length && required.length > 0
     ? Math.round(required.reduce((sum, skill) => sum + Math.min((skill.current_level ?? 0) / (skill.target_level ?? 1), 1), 0) / required.length * 100) : null;
   const accepted = journeyQuery.data?.stages.find((stage) => stage.key === "verified_experience")?.count ?? null;
-  const facts: ParticipantSkillFacts = { learning: learningQuery.data, accepted, registered: registeredQuery.data };
+  const facts: ParticipantSkillFacts = { learning: learningQuery.data, accepted, registered: registeredQuery.data, sourcesUnavailable: learningQuery.isError || registeredQuery.isError };
   const qualifiedSourceCount = trustedProfile(profileQuery.data, role) ? profileQuery.data?.known_evidence_count ?? null : null;
   const events = growthQuery.data?.freshness.known ? (growthQuery.data.events ?? []).filter((event) => Boolean(event.source_kind && event.source_ref)) : [];
   const series = monthSeries(growthQuery.data, period);
@@ -320,8 +320,6 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
     {growthQuery.isError && <div className="ref-alert" role="alert">Историю цифровых следов загрузить не удалось. Это не означает отсутствие подтверждений. <button type="button" onClick={() => { void growthQuery.refetch(); }}>Повторить</button></div>}
     {journeyQuery.isPending && <p className="ref-loading" role="status">Загружаются принятые результаты и путь участника…</p>}
     {journeyQuery.isError && <div className="ref-alert" role="alert">Источник принятых результатов недоступен. Отсутствующее значение не является нулём. <button type="button" onClick={() => { void journeyQuery.refetch(); }}>Повторить</button></div>}
-    {learningQuery.isError && <div className="ref-alert" role="alert">Учебные результаты недоступны. <button type="button" onClick={() => { void learningQuery.refetch(); }}>Повторить</button></div>}
-    {registeredQuery.isError && <div className="ref-alert" role="alert">Источники действий по навыкам недоступны. <button type="button" onClick={() => { void registeredQuery.refetch(); }}>Повторить</button></div>}
     {layout !== "path" && <Kpis skills={skills} ready={ready} sourceCount={qualifiedSourceCount} accepted={accepted} variant={layout} />}
     {layout === "passport" && <>
       <div className="ref-v1-middle">
