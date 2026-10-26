@@ -150,7 +150,9 @@ describe("three canonical analytics reference layouts", () => {
     const custom = roleSkills.map(skill => skill.key === "prompt_engineering" ? { ...skill, target_level: null } : skill);
     const { container } = open("/workspace/9", custom);
     await waitFor(() => expect(container.querySelector(".ref-radar-skill")?.getAttribute("aria-label")).toContain("Зарегистрированных"));
-    const row = screen.getByRole("button", { name: /Правила работы агента/ });
+    const list = container.querySelector(".ref-skill-list");
+    if (!list) throw new Error("Skill list missing");
+    const row = within(list as HTMLElement).getByRole("button", { name: /Правила работы агента/ });
     expect(row).toHaveTextContent("—");
   });
 
