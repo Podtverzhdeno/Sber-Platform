@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import json
-from datetime import UTC, datetime
 from collections.abc import AsyncIterator
+from datetime import UTC, datetime
 from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
@@ -12,16 +12,16 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from pydantic import AwareDatetime, BaseModel, Field
 
-from impulse.api.v1.identity import csrf_session, current_session
-from impulse.api.errors import ApiError
 from impulse.ai.buddy.tools import BuddyToolbox
 from impulse.ai.gateway import (
-    ModelMessage,
-    ModelPurpose,
-    ModelOutputKind,
-    OpenRouterGateway,
     ModelGatewayError,
+    ModelMessage,
+    ModelOutputKind,
+    ModelPurpose,
+    OpenRouterGateway,
 )
+from impulse.api.errors import ApiError
+from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.buddy import (
     BuddyConversationService,
     BuddyMessage,
