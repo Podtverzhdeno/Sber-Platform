@@ -185,6 +185,7 @@ def test_factor_values_outside_unit_interval_are_rejected(value: Decimal) -> Non
 
 def test_skill_evidence_counts_only_fresh_unique_approved_contributions() -> None:
     contribution = uuid4()
+
     def row(contribution_id, tag, when):
         return CaseEvidence(
             task_id=uuid4(),
