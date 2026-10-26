@@ -2,6 +2,7 @@
 
 Requires TEST_DATABASE_URL to reference a dedicated migrated test database.
 """
+
 from __future__ import annotations
 
 import os
