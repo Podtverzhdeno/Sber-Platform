@@ -2,3 +2,7 @@
 # Release: event detail popup shows the same thematic banner as its catalog card
 # Local AVIF image with a readable left-side gradient overlay
 release_request=2026-10-26-event-detail-banner-534db0e241
+
+# Release: single checkpoint numbers, frameless favorites and compact customer activity squares
+# Customer Activity Squares, Achievements V2 and Trajectory reference browser QA passed
+release_request=2026-10-26-compact-activity-and-favorites-f1532a5e53f2
