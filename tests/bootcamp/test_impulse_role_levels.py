@@ -139,7 +139,7 @@ async def test_each_cycle_requires_disjoint_role_specific_evidence(
         return tuple(
             [
                 SimpleNamespace(key="demo-course-1", track_keys=("ai-security",)),
-                SimpleNamespace(key="demo-course-2", track_keys=("ai-security",)),
+                SimpleNamespace(key="demo-course-2", track_keys=("ai-security",), availability="unavailable"),
             ]
             + [
                 SimpleNamespace(key=f"demo-course-{number}-{track}", track_keys=(track,))
@@ -181,7 +181,7 @@ async def test_each_cycle_requires_disjoint_role_specific_evidence(
     )
     auth = SimpleNamespace(actor=SimpleNamespace(person_id=uuid4()))
     for level, expected in [
-        (0, (2, 2, 1)),
+        (0, (1, 1, 1)),
         (1, (2, 2, 1)),
         (2, (1, 2, 0)),
         (3, (0, 0, 0)),
