@@ -29,9 +29,7 @@ UNIT_COUNT = 8
 BASE_KEYS = frozenset(f"demo-course-{number}" for number in range(1, 13))
 ADVANCED_KEY_PATTERN = re.compile(r"^demo-course-(13|14|15|16)-([a-z][a-z0-9-]*)$")
 ADVANCED_KEYS = frozenset(
-    f"demo-course-{number}-{track}"
-    for track in AI_ROLE_PROFILES
-    for number in (13, 14, 15, 16)
+    f"demo-course-{number}-{track}" for track in AI_ROLE_PROFILES for number in (13, 14, 15, 16)
 )
 ELIGIBLE_KEYS = BASE_KEYS | ADVANCED_KEYS
 

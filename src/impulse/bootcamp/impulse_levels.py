@@ -71,17 +71,24 @@ async def _evidence(
     # Every cycle uses disjoint DB course keys. This prevents replay of an old
     # certificate (including one awarded for the same role at L0).
     if level == 0:
-        keys = tuple(sorted(
-            course.key for course in courses
-            if track_key in course.track_keys and course.key in ELIGIBLE_KEYS
-            and course.key.count("-") == 2  # demo-course-1 through demo-course-12
-        ))
+        keys = tuple(
+            sorted(
+                course.key
+                for course in courses
+                if track_key in course.track_keys
+                and course.key in ELIGIBLE_KEYS
+                and course.key.count("-") == 2  # demo-course-1 through demo-course-12
+            )
+        )
     else:
         required = {f"demo-course-{index}-{track_key}" for index in ADVANCED_CYCLES.get(level, ())}
-        keys = tuple(sorted(
-            course.key for course in courses if course.key in required
-            and track_key in course.track_keys
-        ))
+        keys = tuple(
+            sorted(
+                course.key
+                for course in courses
+                if course.key in required and track_key in course.track_keys
+            )
+        )
     summary = await impulse_study_summary(authenticated, request)
     verified_by_key = {course.course_key: course for course in summary.courses}
     finished = sum(verified_by_key[key].finished for key in keys if key in verified_by_key)
