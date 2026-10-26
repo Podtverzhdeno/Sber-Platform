@@ -44,6 +44,8 @@ describe("customer activity dashboard", () => {
     expect(screen.queryByText("1 840")).not.toBeInTheDocument();
     const heatmap = document.querySelectorAll(".ca3-heat-cell");
     expect(heatmap.length).toBe(56);
+    expect(screen.getByRole("region",{name:"Дни активности заказчика, горизонтальная прокрутка"})).toBeVisible();
+    expect(screen.getByText(/Один квадрат — один день/)).toBeVisible();
     expect((await screen.findAllByText("Поиск научных статей")).length).toBeGreaterThan(0);
   });
 
@@ -63,9 +65,16 @@ describe("customer activity dashboard", () => {
     const populated = Array.from(cells).find(cell=>cell.getAttribute("aria-label")?.includes("1 событий"));
     expect(populated).toBeDefined();
     if (!populated) throw new Error("Missing recorded activity cell");
+    fireEvent.mouseEnter(populated);
+    expect(await screen.findByRole("tooltip")).toContainText("1 событий");
     fireEvent.click(populated);
-    expect(screen.getByRole("button",{name:"Сбросить день"})).toBeVisible();
-    expect(screen.getByText("Результат принят")).toBeVisible();
+    const dialog=screen.getByRole("dialog",{name:/Активность/});
+    expect(dialog).toBeVisible();
+    expect(dialog).toHaveTextContent("Результат принят");
+    expect(dialog).toHaveTextContent(ownedTask.title);
+    expect(dialog).toHaveTextContent("Часы работы не вычисляются");
+    fireEvent.keyDown(document,{key:"Escape"});
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("does not render invented counts when history cannot load", async () => {
