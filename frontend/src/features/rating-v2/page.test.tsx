@@ -82,6 +82,9 @@ describe("published rating integration", () => {
     });
     show();
     const board = await screen.findByRole("region", { name: "Все участники рейтинга" });
+    await waitFor(() => {
+      expect(within(board).getAllByRole("article")).toHaveLength(2);
+    });
     expect(within(board).getByRole("button", { name: "Алекс Речной" })).toBeEnabled();
     expect(within(board).getByRole("button", { name: "Мария Северова" })).toBeEnabled();
     expect(within(board).getByRole("img", { name: "Алекс Речной" })).toHaveTextContent("АР");
