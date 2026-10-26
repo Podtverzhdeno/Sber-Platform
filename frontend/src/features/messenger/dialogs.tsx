@@ -336,9 +336,7 @@ export function DialogList({
                     void Promise.resolve(onCreateDialog?.(contact.id)).catch(() => undefined);
                   }}
                 >
-                  <span className="msg-dialog-list__avatar" aria-hidden="true">
-                    {contact.display_name.trim()[0]?.toUpperCase() ?? "?"}
-                  </span>
+                  <DialogAvatar title={contact.display_name} kind="personal" />
                   <span className="msg-dialog-list__contact-text">
                     <strong>{contact.display_name}</strong>
                     <small>{contact.roleLabel}</small>
@@ -384,7 +382,7 @@ export function DialogList({
                       onSelect(row.channel.id);
                     }}
                   >
-                    <DialogAvatar title={row.title} initials={row.initial} />
+                    <DialogAvatar title={row.title} initials={row.initial} kind={row.channel.kind} />
                     <span className="msg-dialog-list__row-text">
                       <span className="msg-dialog-list__row-title">
                         <strong>{row.title}</strong>
