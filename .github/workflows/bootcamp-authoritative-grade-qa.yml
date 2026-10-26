@@ -1,0 +1,36 @@
+name: Bootcamp Authoritative Grade QA
+
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/bootcamp/catalog.tsx"
+      - "frontend/src/features/bootcamp/career-grade-status.ts"
+      - "frontend/src/features/bootcamp/career-grade-status.test.ts"
+      - ".github/workflows/bootcamp-authoritative-grade-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  grade-integration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - name: Strict lint changed files
+        run: npx eslint src/features/bootcamp/catalog.tsx src/features/bootcamp/career-grade-status.ts src/features/bootcamp/career-grade-status.test.ts --max-warnings 0
+      - name: Grade provenance tests
+        run: npx vitest run src/features/bootcamp/career-grade-status.test.ts
+      - name: Whole frontend typecheck
+        run: npm run typecheck
+      - name: Production build
+        run: npm run build
