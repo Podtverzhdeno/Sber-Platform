@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { ApiChannelView, ApiMessageView } from "./contracts";
 import type { DirectoryContact } from "./group-creator";
 import { CommunityDetails } from "./community-details";
+import { DialogAvatar } from "./dialog-avatar";
 import {
   type ChannelWorkContextView,
   contextDateLabel,
@@ -80,11 +81,7 @@ export function ContextPanel({
       )}
       <p className="msg-context__eyebrow">Контекст</p>
       <div className="msg-context__profile">
-        <span className="msg-context__avatar" aria-hidden="true">
-          {channel.title.trim().toLowerCase() === "маяки"
-            ? <img src="/messages-reference/mayaki-avatar.svg" alt="" />
-            : (dialogTitle(channel, viewerId).trim()[0] ?? "Ч").toUpperCase()}
-        </span>
+        <DialogAvatar title={dialogTitle(channel, viewerId)} kind={channel.kind} className="msg-context__avatar" />
         <div className="msg-context__identity">
           <h2 className="msg-context__title">{dialogTitle(channel, viewerId)}</h2>
           <span className={`msg-context__badge${channel.muted ? " msg-context__badge--muted" : ""}`}>
