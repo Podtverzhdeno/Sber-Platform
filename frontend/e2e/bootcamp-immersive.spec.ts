@@ -133,8 +133,8 @@ for (const viewport of [{ width: 1672, height: 941 }, { width: 390, height: 844 
       "Выполнил практическое задание: создал тестовый сценарий и проверил основное поведение, " +
       "обработку ошибок и негативные случаи. Добавил результаты проверки."
     );
-    await reader.getByRole("button", { name: /Отправить на проверку/ }).click();
-    await expect(reader.getByText(/Практическая работа получена/)).toBeVisible();
+    await reader.getByRole("button", { name: /Отправить и зачесть практику/ }).click();
+    await expect(reader.getByText(/Практика уже учтена для траектории/)).toBeVisible();
     await page.screenshot({ path: `test-results/imp-08-practice-pending-${String(viewport.width)}.png`, animations: "disabled" });
     const overflow = await dialog.evaluate(el => el.scrollWidth > el.clientWidth + 1);
     expect(overflow).toBe(false);
@@ -246,6 +246,27 @@ test("finished course appears in Analytics and Trajectory from one persisted lea
   await reader.locator(".imp-study__finish").click();
   await expect(reader.getByRole("heading", { name: "Обучение завершено!" })).toBeVisible();
 
+  // A persisted practical submission is counted for the Impulse learning
+  // trajectory immediately, before independent competency certification.
+  await page.getByTestId("grade-milestone-celebration").getByRole("button", { name: "Посмотреть сертификаты" }).click();
+  await reader.getByRole("button", { name: /Перейти к практике/ }).click();
+  await reader.locator(".imp-study__submission textarea").fill(
+    "Разработал прикладное решение, выполнил позитивные и негативные сценарии, проверил итоговую работу."
+  );
+  const submissionResponse = page.waitForResponse(response =>
+    response.request().method() === "POST" &&
+    response.url().endsWith("/api/v1/me/bootcamp/impulse-study/demo-course-1/practice")
+  );
+  await reader.getByRole("button", { name: /Отправить и зачесть практику/ }).click();
+  const receipt = await submissionResponse;
+  // The server records learning credit but does not mint a review certificate.
+  expect(await receipt.json()).toMatchObject({
+    practice_status: "pending",
+    practical_certificate_id: null,
+  });
+  await expect(reader.locator(".imp-study__submission [role='status']"))
+    .toContainText("Практика уже учтена для траектории");
+
   // The browser is reloaded: the counter must survive navigation rather than
   // living only in a React component or a temporary notification.
   await page.goto("/workspace/5");
@@ -257,7 +278,7 @@ test("finished course appears in Analytics and Trajectory from one persisted lea
   await expect(analytics).toBeVisible();
   await expect(analytics.locator(".av3-study-metrics div").filter({hasText:"уроков завершено"}).locator("b")).toHaveText("8");
   await expect(analytics.locator(".av3-study-metrics div").filter({hasText:"курсов пройдено"}).locator("b")).toHaveText("1");
-  await expect(analytics.locator(".av3-study-metrics div").filter({hasText:"практик одобрено"}).locator("b")).toHaveText("0");
+  await expect(analytics.locator(".av3-study-metrics div").filter({hasText:"практик учтено"}).locator("b")).toHaveText("1");
   await expect(analytics.locator(".av3-study-course")).toContainText(["OpenSpec и SDD"]);
 
   await page.goto("/workspace/1");

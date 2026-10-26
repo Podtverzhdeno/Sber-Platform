@@ -67,13 +67,13 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
     json: { demo_data: true, courses: [], contributions: [] },
   }));
 
-  const study = new Map<string, { completed_units: number; certificate_id: string | null; practice_status: string | null }>();
+  const study = new Map<string, { completed_units: number; certificate_id: string | null; practice_status: string | null; practice_submitted_at: string | null }>();
   await page.route("**/api/v1/me/bootcamp/impulse-study/**", async route => {
     const path = new URL(route.request().url()).pathname;
     const match = path.match(/\/impulse-study\/(demo-course-\d+)(?:\/lessons\/(\d+)\/complete|\/(finish)|\/(practice))?$/);
     if (!match) { await route.fulfill({ status: 404, json: { code: "NOT_FOUND" } }); return; }
     const course = match[1];
-    const previous = study.get(course) ?? { completed_units: 0, certificate_id: null, practice_status: null };
+    const previous = study.get(course) ?? { completed_units: 0, certificate_id: null, practice_status: null, practice_submitted_at: null };
     const record = { ...previous };
     if (route.request().method() === "POST" && match[2]) {
       const index = Number(match[2]);
@@ -87,12 +87,15 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
     if (route.request().method() === "POST" && match[4]) {
       if (!record.certificate_id) { await route.fulfill({ status: 409, json: { code: "COURSE_INCOMPLETE" } }); return; }
       record.practice_status = "pending";
+      record.practice_submitted_at = "2026-10-25T13:00:00Z";
     }
     study.set(course, record);
     await route.fulfill({ json: {
       course_key: course, completed_units: record.completed_units, total_units: 8,
       certificate_id: record.certificate_id, finished: Boolean(record.certificate_id),
       practice_status: record.practice_status,
+      practice_submitted_at: record.practice_submitted_at,
+      practical_certificate_id: null,
     } });
   });
 
@@ -109,6 +112,7 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
       finished_at: state.certificate_id ? "2026-10-25T12:00:00Z" : null,
       updated_at: "2026-10-25T12:00:00Z",
       practice_status: state.practice_status,
+      practice_submitted_at: state.practice_submitted_at,
       practical_certificate_id: null,
     }));
     return route.fulfill({ json: {
@@ -116,6 +120,7 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
       finished_courses: courses.filter(course => course.finished).length,
       completed_lessons: courses.reduce((sum, course) => sum + course.completed_units, 0),
       approved_practices: 0,
+      credited_practices: courses.filter(course => course.finished && course.practice_status === "pending").length,
       courses,
     } });
   });

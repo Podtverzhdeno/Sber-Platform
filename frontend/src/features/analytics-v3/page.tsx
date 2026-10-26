@@ -40,7 +40,7 @@ function StudyResults({summary,view}:{summary:LearningSummary|undefined;view:"ac
     <div className="av3-study-metrics">
       <div><b>{summary.completed_lessons}</b><span>уроков завершено</span></div>
       <div><b>{summary.finished_courses}</b><span>курсов пройдено</span></div>
-      <div><b>{summary.approved_practices}</b><span>практик одобрено</span></div>
+      <div><b>{summary.credited_practices}</b><span>практик учтено</span></div>
       <div><b>{totalUnits ? String(Math.round(100*completeUnits/totalUnits))+"%" : "—"}</b><span>прогресс начатых курсов</span></div>
     </div>
     {courses.length>0 && <div className="av3-study-list">{courses.slice(0,view==="activity"?3:20).map(course=><div key={course.course_key} className="av3-study-course">
@@ -60,13 +60,21 @@ export function AnalyticsDashboardV3({navigation=[]}:{navigation?:string[]}) {
   occurred_at:course.finished_at as string,kind:"impulse_course_finished",
   title:"Пройден курс Impulse: "+course.title,source_kind:"impulse_self_study",source_ref:course.course_key,
  }));
- const allEvents=[...(snapshot.data?.events??[]),...learningEvents];
+ const practiceEvents:SourceEvent[]=(learning.data?.courses??[])
+   .filter(course=>course.finished && course.practice_submitted_at && ["pending","approved"].includes(course.practice_status ?? ""))
+   .map(course=>({
+    occurred_at:course.practice_submitted_at as string,
+    kind:"impulse_practice_submitted",
+    title:"Практика Impulse учтена: "+course.title,
+    source_kind:"impulse_self_study",source_ref:course.course_key+":practice",
+   }));
+ const allEvents=[...(snapshot.data?.events??[]),...learningEvents,...practiceEvents];
  const latestDates=allEvents.map(e=>dateNum(e.occurred_at)).filter((v):v is number=>v!==null);
  const activitySnapshot:Snapshot|undefined=snapshot.data||learning.data?{
   generated_at:snapshot.data?.generated_at??new Date().toISOString(),
   actor_timezone:snapshot.data?.actor_timezone,
   freshness:{
-   known:Boolean(snapshot.data?.freshness.known||learningEvents.length),
+   known:Boolean(snapshot.data?.freshness.known||learningEvents.length||practiceEvents.length),
    latest_observed_at:latestDates.length?new Date(Math.max(...latestDates)).toISOString():snapshot.data?.freshness.latest_observed_at??null,
   },
   events:allEvents,

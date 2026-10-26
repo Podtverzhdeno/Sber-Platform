@@ -182,6 +182,18 @@ def test_study_progress_requires_order_and_practice_requires_review(
         assert submitted.status_code == 200
         assert submitted.json()["practice_status"] == "pending"
         assert submitted.json()["practical_certificate_id"] is None
+        credited = client.get("/api/v1/me/bootcamp/impulse-study/summary").json()
+        assert credited["credited_practices"] == 1
+        assert credited["approved_practices"] == 0
+        assert credited["courses"][0]["practice_submitted_at"] is not None
+        # A repeated submission is still one credited practice, with no fake certificate.
+        duplicate = client.post(API + "/practice", json={"description": "T" * 80})
+        assert duplicate.status_code == 200
+        assert duplicate.json()["practical_certificate_id"] is None
+        assert (
+            client.get("/api/v1/me/bootcamp/impulse-study/summary").json()["credited_practices"]
+            == 1
+        )
         path = f"/api/v1/bootcamp/impulse-study/demo-course-1/practice/{learner}/review"
         assert client.post(path, json={"decision": "approved"}).status_code == 403
 
@@ -207,6 +219,7 @@ def test_study_progress_requires_order_and_practice_requires_review(
         assert final_summary["finished_courses"] == 1
         assert final_summary["completed_lessons"] == 8
         assert final_summary["approved_practices"] == 1
+        assert final_summary["credited_practices"] == 1
         assert final_summary["courses"][0]["practical_certificate_id"] == str(practical)
 
 

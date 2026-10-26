@@ -11,6 +11,7 @@ export type ImpulseRoleLevel = {
   completed_courses: number;
   required_courses: number;
   approved_practices: number;
+  credited_practices: number;
   required_practices: number;
   advance_ready: boolean;
   history: {from: number; to: number; awarded_at: string; policy_version: number}[];
