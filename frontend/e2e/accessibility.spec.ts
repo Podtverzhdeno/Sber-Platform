@@ -51,6 +51,10 @@ for (const viewport of [{ width: 1280, height: 800 }, { width: 390, height: 844 
     await page.getByRole("link", { name: "Bootcamp" }).click();
     await expect(page).toHaveURL(/\/workspace\/1$/);
     await expect(page.getByRole("heading", { name: "Bootcamp", exact: true })).toBeVisible();
+    const courseProgress = page.locator(".bc-ref-track").first();
+    await expect(courseProgress).toHaveAttribute("role", "progressbar");
+    await expect(courseProgress).toHaveAttribute("aria-valuemin", "0");
+    await expect(courseProgress).toHaveAttribute("aria-valuemax", "100");
     const results = await new AxeBuilder({ page }).analyze();
     expect(results.violations.filter((item) => ["critical", "serious"].includes(item.impact ?? ""))).toEqual([]);
   });
