@@ -15,6 +15,8 @@ export type ImpulseRoleLevel = {
   advance_ready: boolean;
   history: {from: number; to: number; awarded_at: string; policy_version: number}[];
   policy_version: number;
+  max_level?: number;
+  required_course_keys?: string[];
 };
 
 export const roleLevelQueryKey = (trackKey: string | null) =>
