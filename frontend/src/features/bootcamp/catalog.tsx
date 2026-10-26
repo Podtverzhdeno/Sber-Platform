@@ -740,7 +740,7 @@ export function BootcampCatalog({
       setMilestoneCelebration({ mode:"official-grade-up",roleTitle:aiRoleTitle(gradeRole),fromGrade:before.title,toGrade:current.title });
     }
   },[gradeRole,serverGradeState?.grade_state,serverGradeState?.current_grade_key,serverGradeState?.current_grade_title]);
-  const studyFor = (key: string): LearningCourse | undefined => study.data?.courses?.find(item => item.course_key === key);
+  const studyFor = (key: string): LearningCourse | undefined => (Array.isArray(study.data?.courses) ? study.data.courses : []).find(item => item.course_key === key);
   const studyStarted = (key: string) => (studyFor(key)?.completed_units ?? 0) > 0;
   const studyFinished = (key: string) => studyFor(key)?.finished === true;
   const [searchParams, setSearchParams] = useSearchParams();
