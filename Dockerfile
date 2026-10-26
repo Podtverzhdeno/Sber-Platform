@@ -41,4 +41,7 @@ RUN rm -rf \
 USER impulse
 
 EXPOSE 8000
-# Run the same migration and demo-only seed used by Railway preDeploy here too:\n# not every Railway deployment configuration executes a repository preDeploy hook.\n# A failed verification aborts startup instead of serving stale anonymous demo data.\nCMD ["sh", "-c", "python -m impulse.bootstrap.predeploy && exec uvicorn impulse.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Run the same migration and demo-only seed used by Railway preDeploy here too:
+# not every Railway deployment configuration executes a repository preDeploy hook.
+# A failed verification aborts startup instead of serving stale anonymous demo data.
+CMD ["sh", "-c", "python -m impulse.bootstrap.predeploy && exec uvicorn impulse.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
