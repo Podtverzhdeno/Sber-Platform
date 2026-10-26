@@ -287,12 +287,10 @@ describe("participant home v2", () => {
             updated_at: "2026-10-21", practice_status: null, practical_certificate_id: null },
         ],
       });
-      client.setQueryData(["bootcamp-v2-overview", "python"], {
-        courses: [
-          { card: { key: "python-base", title: "Python: основы", completion_state: "verified" } },
-          { card: { key: "python-agents", title: "Разработка AI-агентов", completion_state: "in_progress" } },
-        ],
-      });
+      client.setQueryData(["bootcamp-catalog"], [
+        { key: "python-base", title: "Python: основы", completion_state: "verified" },
+        { key: "python-agents", title: "Разработка AI-агентов", completion_state: "reported" },
+      ]);
     });
     fireEvent.click(screen.getByRole("button", { name: /Следующий уровень/ }));
     const dialog = screen.getByRole("dialog", { name: "Требования следующего грейда" });
