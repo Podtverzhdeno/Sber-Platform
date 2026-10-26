@@ -264,7 +264,7 @@ function Matrix({ title, subtitle, skills, role, setRole, chart, setChart, serie
   return <section className={"ref-panel ref-matrix " + className}>
     <div className="ref-card-title"><div><span className="ref-cap">ГЛАВНЫЙ РЕЗУЛЬТАТ</span><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{onCriteria && <button className="ref-small-link" type="button" onClick={() => { onCriteria(); }}>Как считается ↗</button>}</div>
     <Controls role={role} setRole={setRole} chart={chart} setChart={setChart} />
-    <div className="ref-matrix-grid"><div><SkillsVisual skills={skills} chart={chart} series={series} facts={facts} openSkill={openSkill} /><ParticipantEvidence compact /></div><div className="ref-matrix-list"><h3>Квалифицированные уровни Agentic Coding</h3><p>Текущий / целевой уровень · учебная активность ниже отдельно</p><SkillRows skills={skills} openSkill={openSkill} facts={facts} /></div></div>
+    <div className="ref-matrix-grid"><div><SkillsVisual skills={skills} chart={chart} series={series} facts={facts} openSkill={openSkill} />{chart !== "radar" && <ParticipantEvidence compact />}</div><div className="ref-matrix-list"><h3>Квалифицированные уровни Agentic Coding</h3><p>Текущий / целевой уровень · учебная активность ниже отдельно</p><SkillRows skills={skills} openSkill={openSkill} facts={facts} /></div></div>
   </section>;
 }
 export function AnalyticsReference({ navigation = [] }: { navigation?: string[] }) {
