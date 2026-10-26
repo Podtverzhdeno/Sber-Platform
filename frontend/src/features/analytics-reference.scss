@@ -366,3 +366,28 @@ body:has(.analytics-reference) .overlay {z-index:10050;}
   .analytics-reference .ref-skill-activity {grid-column:2/4;grid-row:3}
   .analytics-reference .ref-skill-row>small {grid-column:2/-1;grid-row:2}
 }
+
+/* Source loading and outage notices must not reflow the pixel-aligned Skill Passport. */
+.analytics-reference .ref-source-notices {
+  position:fixed;
+  bottom:18px;
+  right:18px;
+  z-index:110;
+  max-width:min(390px,calc(100vw - 36px));
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  pointer-events:none;
+}
+.analytics-reference .ref-source-notices > * {
+  margin:0;
+  box-shadow:0 8px 22px #0008;
+  pointer-events:auto;
+}
+@media(max-width:600px) {
+  .analytics-reference .ref-source-notices {
+    bottom:12px;
+    right:12px;
+    max-width:calc(100vw - 24px);
+  }
+}
