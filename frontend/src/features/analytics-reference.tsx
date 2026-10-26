@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { apiRequest } from "../api/client";
 import { Modal } from "../components/ui";
 import { LearningProgressPanel } from "./learning-progress-panel";
+import { ParticipantEvidence } from "./participant-evidence";
 import type { AgenticServerProfile } from "./agentic-coding-profile";
 import "./analytics-reference.scss";
 
@@ -214,7 +215,7 @@ function Matrix({ title, subtitle, skills, role, setRole, chart, setChart, serie
   return <section className={"ref-panel ref-matrix " + className}>
     <div className="ref-card-title"><div><span className="ref-cap">ГЛАВНЫЙ РЕЗУЛЬТАТ</span><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{onCriteria && <button className="ref-small-link" type="button" onClick={() => { onCriteria(); }}>Как считается ↗</button>}</div>
     <Controls role={role} setRole={setRole} chart={chart} setChart={setChart} />
-    <div className="ref-matrix-grid"><SkillsVisual skills={skills} chart={chart} series={series} /><div className="ref-matrix-list"><h3>Что уже подтверждено</h3><p>Текущий / целевой уровень</p><SkillRows skills={skills} openSkill={openSkill} /></div></div>
+    <div className="ref-matrix-grid"><div><SkillsVisual skills={skills} chart={chart} series={series} /><ParticipantEvidence compact /></div><div className="ref-matrix-list"><h3>Квалифицированные уровни Agentic Coding</h3><p>Текущий / целевой уровень · учебная активность ниже отдельно</p><SkillRows skills={skills} openSkill={openSkill} /></div></div>
   </section>;
 }
 export function AnalyticsReference({ navigation = [] }: { navigation?: string[] }) {

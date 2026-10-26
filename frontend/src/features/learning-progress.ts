@@ -45,6 +45,7 @@ export function invalidateLearningProjections(client: QueryClient): void {
     ["bootcamp-v2-overview"],
     ["impulse-role-level"],
     ["participant-growth-analytics"],
+    ["participant-analytics"],
     ["bootcamp-certificates"],
     ["certificates"],
     ["trajectory-roadmaps"],

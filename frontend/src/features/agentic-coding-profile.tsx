@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
 import { apiRequest } from "../api/client";
+import { ParticipantEvidence } from "./participant-evidence";
 import "./agentic-coding-profile.scss";
 
 /**
@@ -316,11 +317,12 @@ function CertificationPanel({ role, targets, current, conflicts, serverStatus, s
   </aside>;
 }
 
-export function AgenticCodingProfile({ activeRole, onRoleChange, serverProfile, serverStatus = "preview" }: {
+export function AgenticCodingProfile({ activeRole, onRoleChange, serverProfile, serverStatus = "preview", showParticipantEvidence = false }: {
   activeRole?: Role;
   onRoleChange?: (role: Role) => void;
   serverProfile?: AgenticServerProfile;
   serverStatus?: ServerStatus;
+  showParticipantEvidence?: boolean;
 } = {}) {
   const [localRole, setLocalRole] = useState<Role>("developer");
   const role = activeRole ?? localRole;
@@ -393,6 +395,7 @@ export function AgenticCodingProfile({ activeRole, onRoleChange, serverProfile, 
           </div>
           {view === "radar" && <div className="agentic-visual-layout">
             <TargetRadar targets={targets} current={current} onSelect={setActiveSkill} />
+             {showParticipantEvidence && <ParticipantEvidence compact />}
             <div className="agentic-axis-list" aria-label="Значения целевого профиля">
               {SKILLS.map((item, index) => <button type="button" key={item.key} onClick={() => { setActiveSkill(item.key); }}
                 className="agentic-skill-row" data-testid={"agentic-skill-" + item.key}>
@@ -443,5 +446,5 @@ export function ConnectedAgenticCodingProfile() {
     queryFn: () => apiRequest<AgenticServerProfile>(AGENTIC_PROFILE_PATHS[role]),
   });
   return <AgenticCodingProfile activeRole={role} onRoleChange={setRole} serverProfile={profile.data}
-    serverStatus={profile.isPending ? "loading" : profile.isError ? "unavailable" : "ready"} />;
+    serverStatus={profile.isPending ? "loading" : profile.isError ? "unavailable" : "ready"} showParticipantEvidence />;
 }
