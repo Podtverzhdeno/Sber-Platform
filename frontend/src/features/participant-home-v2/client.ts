@@ -47,7 +47,7 @@ export function formatWeekdayShort(value: string): string {
  * (Bootcamp + course key, task section). The mapping lives with the page
  * caller so the feature stays decoupled from the routing layout.
  */
-export type OpenTarget = (kind: string, key: string) => void;
+export type OpenTarget = (kind: string, key: string, roleKey?: string) => void;
 
 export const TASK_NEXT_ACTION_LABELS: Record<string, string | undefined> = {
   start: "Начать работу",
