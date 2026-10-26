@@ -407,6 +407,13 @@ class GrowthService:
         return tuple(events)
 
     @staticmethod
+    def trusted_intervals(
+        items: tuple[WorkItem, ...],
+    ) -> tuple[tuple[datetime, datetime, str, str], ...]:
+        """Read-only public contract: attested sessions, never calendar lead time."""
+        return GrowthService._trusted_intervals(items)
+
+    @staticmethod
     def _trusted_intervals(
         _items: tuple[WorkItem, ...],
     ) -> tuple[tuple[datetime, datetime, str, str], ...]:

@@ -81,7 +81,7 @@ def test_customer_routes_and_body_models_remain_registered() -> None:
         (route.path, method)
         for route in work.router.routes
         if isinstance(route, APIRoute)
-        for method in route.methods
+        for method in (route.methods or ())
     }
     assert ("/customer/projects/{project_key}/tasks", "POST") in routes
     assert ("/customer/team-requests", "POST") in routes

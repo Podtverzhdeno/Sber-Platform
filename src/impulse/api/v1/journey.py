@@ -146,6 +146,10 @@ def _merge_courses(
     ]
 
 
+# Supported pure join for integration tests; no change to authoritative sources.
+merge_courses = _merge_courses
+
+
 @router.get("/me/journey/snapshot", response_model=JourneySnapshotView)
 async def my_journey_snapshot(
     request: Request,

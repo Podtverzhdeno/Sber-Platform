@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import importlib.util
 import tempfile
 import unittest
@@ -25,7 +27,7 @@ class ArchitectureAuditTests(unittest.TestCase):
         self.assertFalse(audit_module.prohibited("bootstrap", "impulse.infrastructure.database"))
 
     def test_cycle_detection(self) -> None:
-        graph = {"a.py": {"b.py"}, "b.py": {"a.py"}, "c.py": set()}
+        graph: dict[str, set[str]] = {"a.py": {"b.py"}, "b.py": {"a.py"}, "c.py": set()}
         self.assertEqual(audit_module.strongly_connected(graph), [["a.py", "b.py"]])
 
     def test_relative_typescript_import(self) -> None:
@@ -110,7 +112,7 @@ class ArchitectureAuditTests(unittest.TestCase):
             ],
             "cycles": [["a.py", "b.py"]],
         }
-        baseline = {"exceptions": [], "allowed_cycles": []}
+        baseline: dict[str, Any] = {"exceptions": [], "allowed_cycles": []}
         self.assertEqual(len(audit_module.baseline_regressions(report, baseline)), 2)
         baseline["exceptions"] = [
             {
