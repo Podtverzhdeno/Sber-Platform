@@ -357,6 +357,7 @@ describe("optional role activation and reversible grey state", () => {
     const spy = mockRoadmapsFetch();
     renderShell("/workspace/1?role=product");
     expect(screen.getByTestId("trajectory-role-detail")).toHaveAttribute("data-tone", "unselected");
+    expect(screen.getByTestId("trajectory-role-detail")).toHaveTextContent("Включить курсы и практику");
     fireEvent.click(screen.getByRole("button", { name: "Изучать дополнительно →" }));
     await waitFor(() => {
       expect(spy.mock.calls.some(([input, options]) => {
