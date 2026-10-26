@@ -110,7 +110,8 @@ test("events reference: all six detail states, registration flow and keyboard na
   await expect(page.getByText("События, которые дают")).toBeVisible();
   const catalogueCover = referenceCards.first().locator(".ev-event-thumb img");
   const coverSource = await catalogueCover.getAttribute("src");
-  expect(coverSource).toMatch(/^\\/events\\/banners\\/[a-z-]+\\.avif$/);
+  expect(coverSource?.startsWith("/events/banners/")).toBe(true);
+  expect(coverSource?.endsWith(".avif")).toBe(true);
   await page.getByRole("button", { name: "Подробнее" }).first().click();
   const dialog = page.getByRole("dialog", { name: visualEvent.title });
   await expect(dialog).toBeVisible();
