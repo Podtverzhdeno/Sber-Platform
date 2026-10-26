@@ -89,7 +89,7 @@ class JourneySnapshotView(BaseModel):
     verified_provider_course_count: int
 
 
-def _merge_courses(
+def merge_courses(
     *,
     catalog: tuple[CourseRecord, ...],
     enrollments: tuple[EnrollmentRecord, ...],
@@ -220,7 +220,7 @@ async def my_journey_snapshot(
         person_id=actor.person_id,
         observed_at=datetime.now(UTC),
         self_study_available=study is not None,
-        courses=_merge_courses(
+        courses=merge_courses(
             catalog=catalog, enrollments=enrollments, roadmaps=roadmaps, study=study
         ),
         projects=projects,
