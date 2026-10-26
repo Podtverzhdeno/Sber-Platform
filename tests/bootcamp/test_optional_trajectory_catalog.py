@@ -60,7 +60,8 @@ def test_optional_course_recommendations_hide_and_restore_without_progress_loss(
         # Completed milestones must survive as the card is greyed and reopened.
         completed = tuple(
             replace(item, completed_milestones=frozenset({"foundation"}))
-            if item.track_key == "product" else item
+            if item.track_key == "product"
+            else item
             for item in reopened
         )
         grey_again = set_optional_track(completed, "product", enabled=False)
