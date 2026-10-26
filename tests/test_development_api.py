@@ -2,17 +2,10 @@
 
 from __future__ import annotations
 
-import pytest
-from fastapi.testclient import TestClient
 from typing import Any, Protocol
 
-class ApiResponse(Protocol):
-    @property
-    def status_code(self) -> int: ...
-    @property
-    def text(self) -> str: ...
-    def json(self) -> Any: ...
-
+import pytest
+from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
 from impulse.application.development import (
@@ -32,6 +25,16 @@ from impulse.domain.development import (
     TrackAttempt,
     TrackStatus,
 )
+
+
+class ApiResponse(Protocol):
+    @property
+    def status_code(self) -> int: ...
+
+    @property
+    def text(self) -> str: ...
+
+    def json(self) -> Any: ...
 
 
 def _client() -> tuple[TestClient, MemoryDevelopmentStore]:
