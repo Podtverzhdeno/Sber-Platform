@@ -272,6 +272,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         queryClient.invalidateQueries({ queryKey: overviewQueryKey }),
         queryClient.invalidateQueries({ queryKey: roadmapsQueryKey }),
         queryClient.invalidateQueries({ queryKey: ["trajectory-roadmap-catalog"] }),
+        queryClient.invalidateQueries({ queryKey: ["bootcamp-catalog"] }),
         queryClient.invalidateQueries({ queryKey: roleLevelQueryKey(variables.trackKey) }),
         queryClient.invalidateQueries({ queryKey: ["participant-growth-analytics"] }),
         queryClient.invalidateQueries({ queryKey: ["impulse-role-level"] }),
