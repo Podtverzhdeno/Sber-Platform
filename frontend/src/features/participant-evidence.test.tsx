@@ -15,6 +15,7 @@ function mount() {
 describe("participant evidence vs professional Agentic level", () => {
   it("shows recorded study and practical results without manufacturing a level", async () => {
     vi.mocked(apiRequest).mockImplementation(async (path: string) => {
+      await Promise.resolve();
       if (path.includes("impulse-study/summary")) return {
         started_courses: 7, finished_courses: 6, completed_lessons: 56,
         approved_practices: 1, credited_practices: 2,
@@ -36,6 +37,7 @@ describe("participant evidence vs professional Agentic level", () => {
 
   it("distinguishes real zero counts from unavailable accepted results", async () => {
     vi.mocked(apiRequest).mockImplementation(async (path: string) => {
+      await Promise.resolve();
       if (path.includes("impulse-study/summary")) return {
         started_courses: 0, finished_courses: 0, completed_lessons: 0,
         approved_practices: 0, credited_practices: 0, courses: [],
