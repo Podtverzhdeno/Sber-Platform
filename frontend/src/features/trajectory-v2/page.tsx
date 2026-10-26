@@ -5,6 +5,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { StatePanel } from "../../components/ui";
 import { apiRequest } from "../../api/client";
 import { trajectoryStudyProgress } from "./study-progress";
+import { projectLearningStages, visitScope, stageWasOpened, markStageOpened } from "./stage-flow";
 import {
   loadDevelopmentOverview,
   loadRoadmaps,
@@ -112,7 +113,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   });
   const navigation = useQuery({
     queryKey: ["me"],
-    queryFn: () => apiRequest<{ navigation: string[] }>("/api/v1/me"),
+    queryFn: () => apiRequest<{ navigation: string[]; person_id?: string }>("/api/v1/me"),
   });
   const goToPortfolio = () => {
     const idx = (navigation.data?.navigation ?? []).indexOf("Портфолио");
@@ -161,6 +162,15 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const [hiddenUnselected, setHiddenUnselected] = useState(false);
   const [actionFeedback, setActionFeedback] = useState<string | null>(null);
   const [compareTarget, setCompareTarget] = useState<string | null>(null);
+  const [, refreshVisited] = useState(0);
+  const openedScope = selected && selectedRoadmap
+    ? visitScope(navigation.data?.person_id, selected.track_key, selected.attempt_number, selectedRoadmap.policy_version) : null;
+  const markVisited = (key: string) => {
+    if (openedScope === null) return;
+    markStageOpened(openedScope,key);
+    refreshVisited((value) => value+1);
+  };
+  const isUnopened = (key: string): boolean => openedScope !== null && !stageWasOpened(openedScope,key);
   const [gradesOpen, setGradesOpen] = useState(false);
   const gradeDialogRef = useRef<HTMLElement | null>(null);
   const gradeTriggerRef = useRef<HTMLElement | null>(null);
@@ -181,6 +191,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const openStageDetails = (stageKey: string) => {
     snapshotTrigger();
     setRoleInfoOpen(false);
+    markVisited(stageKey);
     setDrawerKey(stageKey);
   };
   const closeOverlays = () => {
@@ -292,7 +303,10 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 void roadmapCatalog.refetch();
               }}
               stageKey={searchParams.get("stage")}
+              isUnopened={isUnopened}
+              markVisited={markVisited}
               onStageSelect={(stageKey) => {
+                markVisited(stageKey);
                 const next = new URLSearchParams(searchParams);
                 next.set("stage", stageKey);
                 setSearchParams(next);
@@ -398,6 +412,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 setSearchParams(nextParams);
               }
               setRoleInfoOpen(false);
+              markVisited(outcome.milestone_key);
               setDrawerKey(outcome.milestone_key);
             }}>→</button>}
           </div>
@@ -541,7 +556,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
         <StageTaskDrawer
           key={drawerMilestone.key}
           milestone={drawerMilestone}
-          state={selected.attempt_number === null ? "preview" : milestoneState(drawerMilestone, selectedRoadmap.next_step)}
+          state={projectLearningStages(selectedRoadmap, learning.data?.courses, selected.attempt_number !== null).stateOf(drawerMilestone)}
           role={selected}
           policyVersion={selectedRoadmap.policy_version}
           onClose={closeOverlays}
@@ -638,6 +653,8 @@ export function RoleDetailPanel(props: {
   roadmapRetry: () => void;
   stageKey: string | null;
   onStageSelect: (stageKey: string) => void;
+  isUnopened?: (key: string) => boolean;
+  markVisited?: (key: string) => void;
   onOpenRoleInfo: () => void;
   onOpenStageDetails: (stageKey: string) => void;
   pinned: boolean;
@@ -697,7 +714,7 @@ export function RoleDetailPanel(props: {
           Это направление пока не выбрано. Персональный прогресс отсутствует; этапы появятся после подключения роли.
         </p>
       )}
-      {props.levelData && props.levelData.level >= 1 ? <CycleLearningPath level={props.levelData} learningCourses={props.learningCourses ?? []} roleKey={role.track_key} /> :
+      {props.levelData && props.levelData.level >= 1 ? <CycleLearningPath level={props.levelData} learningCourses={props.learningCourses ?? []} roleKey={role.track_key} isUnopened={props.isUnopened} markVisited={props.markVisited} /> :
       props.nextCycleUnpublished ? <div className="trajectory-v2-next-cycle" role="status" data-testid="trajectory-next-cycle">
         <h4>Новый виток развития</h4>
         <p>Уровень Impulse повышен и сохранён. Новая программа курсов и практических задач для следующего цикла пока не опубликована.
@@ -712,6 +729,7 @@ export function RoleDetailPanel(props: {
         stageKey={props.stageKey}
         onStageSelect={props.onStageSelect}
         onOpenDetails={props.onOpenStageDetails}
+        isUnopened={props.isUnopened}
         showDetails={false}
       />}
     </article>
@@ -722,7 +740,7 @@ export function RoleDetailPanel(props: {
 
 /** One fresh course+review cycle per saved Impulse level. This is not a
  * fabricated professional-grade trajectory checkpoint. */
-function CycleLearningPath(props: { level: ImpulseRoleLevel; learningCourses: LearningCourse[]; roleKey: string }) {
+function CycleLearningPath(props: { level: ImpulseRoleLevel; learningCourses: LearningCourse[]; roleKey: string; isUnopened?: (key:string)=>boolean; markVisited?: (key:string)=>void }) {
   const {level, roleKey} = props;
   const finished = level.level >= (level.max_level ?? 3);
   const subjectNames: Record<number, string> = {
@@ -741,7 +759,10 @@ function CycleLearningPath(props: { level: ImpulseRoleLevel; learningCourses: Le
         const course=props.learningCourses.find(item=>item.course_key===key);
         const number=Number(/^demo-course-(\d+)/.exec(key)?.[1] ?? "0");
         const isDone=course?.finished === true;
-        return <Link key={key} to={`/workspace/2?role=${encodeURIComponent(roleKey)}&course=${encodeURIComponent(key)}&panel=detail`} className="trajectory-v2-cycle-course">
+        const nextCourse = keys.find(k=>!props.learningCourses.some(c=>c.course_key===k && c.finished && c.certificate_id));
+        const visitKey = `cycle:${String(level.cycle_number)}:${key}`;
+        const attention = !isDone && nextCourse===key && props.isUnopened?.(visitKey)===true;
+        return <Link key={key} to={`/workspace/2?role=${encodeURIComponent(roleKey)}&course=${encodeURIComponent(key)}&panel=detail`} className="trajectory-v2-cycle-course" data-attention={attention ? "new" : undefined} onClick={()=>{props.markVisited?.(visitKey);}}> 
           <span className="trajectory-v2-cycle-num">{isDone ? "✓" : String(index+1)}</span>
           <div><strong>{subjectNames[number] ?? course?.title ?? key}</strong><small>{isDone ? "Учебный сертификат сохранён" : course?.completed_units ? `${String(course.completed_units)} из 8 уроков` : "Курс не начат"}</small></div>
           <span>{isDone ? "Пройден" : "Открыть"} →</span>
@@ -761,11 +782,12 @@ function CycleLearningPath(props: { level: ImpulseRoleLevel; learningCourses: Le
 function SelectedStageCard(props: { role: RoleCardView; roadmap: RoadmapView | null; learningCourses?: LearningCourse[]; stageKey: string | null; onOpenDetails: (stageKey: string) => void }) {
   const { roadmap, role } = props;
   if (roadmap === null || roadmap.track_key !== role.track_key) return null;
-  const currentKey = roadmap.next_step?.key ?? roadmap.milestones[0]?.key ?? "";
+  const projection = projectLearningStages(roadmap,props.learningCourses,role.attempt_number !== null);
+  const currentKey = projection.next?.key ?? roadmap.milestones[0]?.key ?? "";
   const activeKey = isSelectedStage(props.stageKey, roadmap.milestones, currentKey);
   const active = roadmap.milestones.find((milestone) => milestone.key === activeKey);
   if (active === undefined) return null;
-  return <StageDetail milestone={active} state={role.attempt_number === null ? "preview" : milestoneState(active, roadmap.next_step)} nextStep={roadmap.next_step} role={role} learningCourses={props.learningCourses} onOpenDetails={props.onOpenDetails}/>;
+  return <StageDetail milestone={active} state={projection.stateOf(active)} nextStep={projection.next} role={role} learningCourses={props.learningCourses} onOpenDetails={props.onOpenDetails}/>;
 }
 
 export function StagePathSection(props: {
@@ -778,6 +800,7 @@ export function StagePathSection(props: {
   stageKey: string | null;
   onStageSelect: (stageKey: string) => void;
   onOpenDetails: (stageKey: string) => void;
+  isUnopened?: (key: string) => boolean;
   showDetails?: boolean;
 }) {
   const { role, roadmap } = props;
@@ -814,7 +837,8 @@ export function StagePathSection(props: {
       </div>
     );
   }
-  const nextStep = roadmap.next_step;
+  const projection = projectLearningStages(roadmap,props.learningCourses,role.attempt_number !== null);
+  const nextStep = projection.next;
   const currentKey = nextStep?.key ?? roadmapsDefaultKey(roadmap);
   const visibleStageKey = isSelectedStage(props.stageKey, roadmap.milestones, currentKey);
   const visibleMilestone = roadmap.milestones.find((m) => m.key === visibleStageKey);
@@ -826,7 +850,7 @@ export function StagePathSection(props: {
       </header>
       <ol className="trajectory-v2-stage-path">
         {roadmap.milestones.map((milestone) => {
-          const state = role.attempt_number === null ? "preview" : milestoneState(milestone, nextStep);
+          const state = projection.stateOf(milestone);
           const studied = role.attempt_number === null || milestone.target_kind !== "course" ? undefined : props.learningCourses?.find(course => course.course_key === milestone.target_key);
           return (
             <li key={milestone.key}>
@@ -835,6 +859,7 @@ export function StagePathSection(props: {
                 className="trajectory-v2-stage"
                 aria-pressed={milestone.key === visibleStageKey}
                 data-stage-state={state}
+                data-attention={state==="current" && props.isUnopened?.(milestone.key)===true ? "new" : undefined}
                 data-study-state={studyProgress.studiedKeys.has(milestone.key) ? "studied" : studied?.completed_units ? "learning" : "none"}
                 title={studied ? `Обучение: ${String(studied.completed_units)} из ${String(studied.total_units)} уроков. ${studied.finished ? "Курс изучен, подтверждение этапа отдельно" : "Обучение в процессе"}` : milestone.title}
                 onClick={() => {
@@ -865,7 +890,7 @@ export function StagePathSection(props: {
       {studyProgress.matchedCourses > 0 && <div className="trajectory-v2-study-summary" data-testid="trajectory-study-evidence" role="status">
         <div className="trajectory-v2-study-summary__text">
           <strong>{studyProgress.finishedCourses} из {studyProgress.matchedCourses} учебных курсов завершено</strong>
-          <small>{role.completed_milestones} из {roadmap.milestones.length} этапов подтверждено</small>
+          <small>{projection.completed.size} из {roadmap.milestones.length} учебных шагов выполнено · {role.completed_milestones} этапов подтверждено отдельно</small>
         </div>
         <div className="trajectory-v2-studying" data-testid="trajectory-study-progress">
           <progress max={studyProgress.matchedCourses} value={studyProgress.finishedCourses} aria-label="Завершённые курсы выбранной траектории"/>
@@ -874,7 +899,7 @@ export function StagePathSection(props: {
       {visibleMilestone === undefined || props.showDetails === false ? null : (
         <StageDetail
           milestone={visibleMilestone}
-          state={role.attempt_number === null ? "preview" : milestoneState(visibleMilestone, nextStep)}
+          state={projection.stateOf(visibleMilestone)}
           nextStep={nextStep}
           role={role}
           learningCourses={props.learningCourses}
@@ -910,7 +935,7 @@ export function StageDetail(props: {
           <p>{milestone.purpose}</p>
         </div>
         <span className="trajectory-v2-stage-state" data-state={props.state}>
-          {props.state === "preview" ? "План обучения" : (MILESTONE_STATE_LABELS[props.state] ?? props.state)}
+          {props.state === "preview" ? "План обучения" : props.state === "completed" && studied?.finished && !milestone.completed ? "Курс завершён" : (MILESTONE_STATE_LABELS[props.state] ?? props.state)}
         </span>
       </div>
       <div className="trajectory-v2-task-row" data-state={props.state}>
@@ -921,7 +946,7 @@ export function StageDetail(props: {
           <strong>{milestone.target_kind === "course" ? "Курс в Bootcamp" : milestone.title}</strong>
           <small>{milestone.skill} · {milestone.target_kind === "task" ? "Практическая задача" : milestone.target_kind === "course" ? "Обучение" : milestone.target_kind}</small>
         </div>
-        <span className="trajectory-v2-task-status">{props.state === "preview" ? "Для ознакомления" : props.state === "completed" ? "Подтверждено" : props.state === "locked" ? "Недоступно" : studied?.finished ? "Курс пройден" : studied?.completed_units ? "В процессе" : "К выполнению"}</span>
+        <span className="trajectory-v2-task-status">{props.state === "preview" ? "Для ознакомления" : props.state === "completed" && studied?.finished && !milestone.completed ? "Курс пройден" : props.state === "completed" ? "Подтверждено" : props.state === "locked" ? "Недоступно" : studied?.finished ? "Курс пройден" : studied?.completed_units ? "В процессе" : "К выполнению"}</span>
         {canOpen ? (
           <button type="button" className={props.state === "completed" || role.attempt_number === null ? "trajectory-v2-task-action" : "trajectory-v2-task-action is-primary"} onClick={() => props.onOpenDetails?.(milestone.key)}>
             {role.attempt_number === null || props.state === "completed" || studied?.finished ? "Посмотреть" : "Продолжить"} →
@@ -930,7 +955,7 @@ export function StageDetail(props: {
       </div>
       {studied && <p className="trajectory-v2-study-caption" data-testid="trajectory-course-learning" data-course-key={studied.course_key}>
         {studied.completed_units} из {studied.total_units} уроков{studied.finished ? " · учебный сертификат выдан" : " · прогресс сохранён"}
-        <span> · этап подтверждается отдельно</span>
+        <span> · учебный шаг учтён; практика подтверждается отдельно</span>
       </p>}
       {milestone.activities && milestone.activities.length > 0 && (
         <div className="trajectory-v2-activities" data-testid="trajectory-stage-activities">
