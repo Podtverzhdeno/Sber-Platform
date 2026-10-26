@@ -14,6 +14,13 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: "Алекс Речной", roles: ["participant"] }] }));
   await page.route("**/api/v1/me", (route) => route.fulfill({ json: actor }));
   await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: actor }));
+  // Personal-data sources are independently authorized; fixture their empty states
+  // so reference geometry is not influenced by failed API proxy retries.
+  await page.route("**/api/v1/me/bootcamp/impulse-study/summary", (route) => route.fulfill({ json: {
+    started_courses: 0, finished_courses: 0, completed_lessons: 0,
+    approved_practices: 0, credited_practices: 0, courses: [],
+  }}));
+  await page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/me/agentic-coding/profile**", async (route) => {
     const role = new URL(route.request().url()).searchParams.get("role_key") ?? "developer";
     const target = role === "analyst" ? [3, null, 3, 2, 2, 2] : role === "qa" ? [3, 2, 2, 2, 2, 2] : [3, 4, 3, 2, 3, 2];
