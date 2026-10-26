@@ -145,7 +145,7 @@ describe("BootcampPage composition (BC2-301)", () => {
     expect(continuation).toHaveTextContent("Прогресс пока не рассчитан.");
     expect(continuation).toHaveTextContent("Checkpoint: functions");
     expect(continuation.querySelector("time")).toHaveAttribute("datetime", "2026-11-01T00:00:00Z");
-    expect(continuation.querySelectorAll("button")).toHaveLength(1);
+    expect(continuation.querySelectorAll("button:not(.pg-topic-shortcut)")).toHaveLength(1);
     fireEvent.click(screen.getByRole("button", { name: "Продолжить курс" }));
     expect(onContinue).toHaveBeenCalledOnce();
   });
@@ -154,7 +154,7 @@ describe("BootcampPage composition (BC2-301)", () => {
     render(<BootcampPage overview={{ ...overview, continue_learning: null }} view="card" onViewChange={vi.fn()} onRoleChange={vi.fn()} onContinue={vi.fn()} onOpenCourse={vi.fn()} onOpenRequirements={vi.fn()} />);
     const continuation = screen.getByRole("region", { name: "Продолжить обучение" });
     expect(continuation).toHaveTextContent("Активного шага пока нет");
-    expect(continuation.querySelector("button")).toBeNull();
+    expect(continuation.querySelector("button:not(.pg-topic-shortcut)")).toBeNull();
   });
 
   it("does not turn unknown role metrics into zero progress", () => {
