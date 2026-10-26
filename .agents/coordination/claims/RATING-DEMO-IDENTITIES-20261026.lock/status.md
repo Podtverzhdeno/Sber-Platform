@@ -1,7 +1,7 @@
 # Claim RATING-DEMO-IDENTITIES-20261026
 - task_id: RATING-DEMO-IDENTITIES-20261026
 - session_id: gpt6-rating-participants-20261026
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 1191f3969f63497d5086f5d0cc53b14c0faa847b
@@ -21,5 +21,13 @@
 - shared_files:
   - frontend/src/features/rating-v2/page.tsx (previous rating art and private consumer claims are REVIEW; anonymous alias only)
 - verification: seeded fake personas not real people; existing privacy opt-outs preserved on reseed; backend and frontend regression plus targeted browser.
-- progress: All ten fake personas in the demo season have no public_rating visibility, yielding ten indistinguishable anonymous rows; restore **synthetic** demo participant visibility only, never relax privacy for real users.
+- progress: Demo-only public_rating explicitly seeded for 10 fictional participants. Re-seeding never overwrites consent/visibility. Anonymous alias always rank-based, no public name or profile without opt-in. Initials split fixed.
 - integration: isolated PR, no direct main edits or deployment without QA
+
+- verification_evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40257590295 — PostgreSQL migrations, Ruff, privacy opt-out, repeat reseed, recognition fixtures, frontend lint/typecheck, Vitest, build, Chromium: SUCCESS
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40257590274 — Rating reference QA: SUCCESS
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40257590159 — Owner rating consumers QA: SUCCESS
+- independent_review: Codex review no new findings on 5cbf9b57e5ac8bd89d038a123a348dee7b320d76; initial three P2 comments fixed and regression-tested
+- overall_ci: unrelated failures in journey, Bootcamp, mentor and project schema tests remain (no waivers)
+- integration: User requested main as default for platform changes in preceding turns. Merge with standard GitHub PR; do not explicitly initiate production deploy.
