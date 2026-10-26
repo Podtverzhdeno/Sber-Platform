@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from typing import cast
 from types import SimpleNamespace
 from uuid import UUID, uuid4
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
@@ -115,7 +117,7 @@ def test_owner_portfolio_shows_issued_valid_revoked_and_public_evidence() -> Non
     with _client() as api:
         _login(api, "participant-alex")
         person = UUID(api.get("/api/v1/me/portfolio").json()["person_id"])
-        api.app.state.recognition_service = StubRecognition(person)
+        cast(FastAPI, api.app).state.recognition_service = StubRecognition(person)
         response = api.get("/api/v1/me/portfolio")
         assert response.status_code == 200, response.text
         result = response.json()
@@ -137,7 +139,7 @@ def test_anonymized_rating_cannot_be_reidentified_from_portfolio() -> None:
     with _client() as api:
         _login(api, "participant-alex")
         person = UUID(api.get("/api/v1/me/portfolio").json()["person_id"])
-        api.app.state.recognition_service = StubRecognition(person, public=False)
+        cast(FastAPI, api.app).state.recognition_service = StubRecognition(person, public=False)
         result = api.get("/api/v1/me/portfolio").json()
         assert result["trophies"] == []
         assert result["offers"] == []
@@ -148,7 +150,7 @@ def test_hr_without_achievements_consent_cannot_read_credentials_or_trophies() -
     with _client() as api:
         participant_csrf = _login(api, "participant-alex")
         person = UUID(api.get("/api/v1/me/portfolio").json()["person_id"])
-        api.app.state.recognition_service = StubRecognition(person)
+        cast(FastAPI, api.app).state.recognition_service = StubRecognition(person)
         _login(api, "hr-nina")
         assert api.get(f"/api/v1/hr/candidates/{person}").status_code == 404
 
