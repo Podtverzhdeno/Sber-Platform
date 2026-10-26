@@ -177,6 +177,7 @@ function Radar({ skills, facts, openSkill }: { skills: Skill[]; facts: Participa
             <circle cx={activityMark.x} cy={activityMark.y} r="10"/>
             <text x={activityMark.x} y={activityMark.y + 3.5} textAnchor="middle">{Math.min(sources.length,99)}</text>
           </g>}
+          <circle className="ref-radar-skill-hit" cx={t.x} cy={t.y} r="15" />
         </g>;
       })}
       <g className="ref-radar-center" aria-label={String(knownCount) + " из 6 навыков с квалифицированным уровнем"}>
