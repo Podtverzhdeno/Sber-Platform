@@ -21,9 +21,6 @@ const safeUrl = (raw: string): string | null => {
     return url.protocol === "https:" && url.hostname ? url.href : null;
   } catch { return null; }
 };
-function initials(name: string) {
-  return name.trim().split(/\s+/u).slice(0, 2).map(word => word[0] ?? "").join("").toUpperCase() || "У";
-}
 function refLabel(ref: string) {
   return ref.split(/[?#]/u)[0]?.split("/").pop() || ref;
 }
