@@ -29,6 +29,9 @@ jobs:
         run: |
           uv run ruff format --check src/impulse/application/task_catalog.py src/impulse/application/task_catalog_matching.py src/impulse/api/v1/task_catalog.py tests/test_task_catalog_matching.py
           uv run ruff check src/impulse/application/task_catalog.py src/impulse/application/task_catalog_matching.py src/impulse/api/v1/task_catalog.py tests/test_task_catalog_matching.py
+      - name: Show Ruff formatter diff on failure
+        if: failure()
+        run: uv run ruff format --diff src/impulse/application/task_catalog.py src/impulse/application/task_catalog_matching.py src/impulse/api/v1/task_catalog.py tests/test_task_catalog_matching.py
       - name: Backend task catalog contract and evidence regression
         run: uv run pytest -q tests/test_task_catalog_matching.py tests/task_catalog/test_projection_service.py tests/test_task_catalog_api.py
   frontend:
@@ -46,6 +49,11 @@ jobs:
       - run: npm ci
       - name: OpenAPI client codegen contract
         run: npm run api:check
+      - name: Show generated API type differences on failure
+        if: failure()
+        run: |
+          npm run api:generate
+          git diff -- src/api/schema.ts | head -c 12000
       - name: Strict frontend lint
         run: npx eslint src/features/task-catalog-v2/page.tsx src/features/task-catalog-v2/skill-impact-statistics.tsx src/features/task-catalog-v2/skill-impact-statistics.test.tsx --max-warnings 0
       - name: Typecheck
