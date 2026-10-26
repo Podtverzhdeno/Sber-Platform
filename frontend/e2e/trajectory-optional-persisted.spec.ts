@@ -16,7 +16,7 @@ test("real DB: grey AI role → optional trajectory → complete course → grey
   type Role = { track_key: string; state: string; attempt_number: number | null };
   const getOverview = async (): Promise<{ roles: Role[] }> => {
     const response = await page.request.get("/api/v1/participant/me/development-overview");
-    expect(response.ok()).toBe(true);
+    expect(response.ok(), `Overview status ${String(response.status())}: ${(await response.text()).slice(0, 1500)}`).toBe(true);
     return await response.json() as { roles: Role[] };
   };
   const getStudy = async (): Promise<{
