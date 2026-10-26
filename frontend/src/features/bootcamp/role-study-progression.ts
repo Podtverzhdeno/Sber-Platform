@@ -16,7 +16,7 @@ export function satisfiesStudyRequirement(
   if (card.completion_state === "verified") return true;
   // Only Impulse's demo course keys can be satisfied by Impulse's own
   // server-issued study certificate; external LMS courses remain independent.
-  if (!/^demo-course-(?:[1-9]|1[0-2])$/.test(card.key)) return false;
+  if (!/^demo-course-(?:[1-9]|1[0-2]|1[3-6]-[a-z][a-z0-9-]*)$/.test(card.key)) return false;
   return records.some(record =>
     record.course_key === card.key && record.finished && record.certificate_id !== null
   );
