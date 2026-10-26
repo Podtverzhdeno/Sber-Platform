@@ -1,0 +1,38 @@
+# Claim TASK-SKILL-EVIDENCE-20261026
+- task_id: TASK-SKILL-EVIDENCE-20261026
+- session_id: gpt6-20261026-task-skill-evidence
+- status: BLOCKED
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- depends_on: []
+- write_scope:
+  - src/impulse/application/task_catalog.py (SkillImpactProjection extension only)
+  - src/impulse/application/task_catalog_matching.py (per-skill accepted-evidence projection only)
+  - src/impulse/api/v1/task_catalog.py (serialize evidence statistics only)
+  - frontend/src/features/task-catalog-v2/types.ts (read-model extension only)
+  - frontend/src/features/task-catalog-v2/page.test.tsx (update task detail assertion only)
+  - frontend/e2e/task-catalog-v2-interactions.spec.ts (details checks and evidence browser scenario only)
+  - frontend/src/api/schema.ts (generated OpenAPI interface)
+  - openapi.json (CatalogSkillImpactView only)
+  - tests/test_task_catalog_matching.py (dedupe/freshness assertion)
+
+  - frontend/src/features/task-catalog-v2/skill-impact-statistics.tsx
+  - frontend/src/features/task-catalog-v2/skill-impact-statistics.scss
+  - frontend/src/features/task-catalog-v2/skill-impact-statistics.test.tsx
+  - frontend/src/features/task-catalog-v2/page.tsx (replace skill comparison JSX only)
+  - tests/task_catalog/test_projection_service.py (regression)
+  - .github/workflows/task-skill-statistics-qa.yml
+  - .agents/coordination/claims/TASK-SKILL-EVIDENCE-20261026.lock/status.md
+- shared_files:
+  - frontend/src/features/task-catalog-v2/page.tsx (parallel desktop-firstfold task owns other hunks; task-detail growth only)
+- verification:
+  - strict Python Ruff/Pyright and focused pytest
+  - frontend typecheck + ESLint + Vitest
+  - browser or layout regression
+- progress: Server API includes accepted contribution count per skill; frontend replaces empty three-column forecast with evidence summary and breakdown. OpenAPI/typegen, Ruff, strict frontend TypeScript/lint and backend task-catalog test suite passed on b6a8dce. React and Playwright acceptance updated; PR #105 open.
+- blockers: P1 owner-overlap remains active: task-catalog-desktop-firstfold-20261024 owns frontend/src/features/task-catalog-v2/page.tsx with no shared_files allowance. No main merge until the integration owner/coordinator explicitly releases or takes over JSX wiring. Do not edit existing claim.
+
+- handoff_pr: https://github.com/Podtverzhdeno/Sber-Platform/pull/105
+- last_target_qa_success: https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40254010963 (backend+frontend+Playwright, pre-final fallback/light contrast changes)
+- code_review: P2 light-theme contrast fixed, P1 ownership thread intentionally left open
+- integration_decision: BLOCKED, no unilateral main merge

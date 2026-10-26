@@ -2358,6 +2358,10 @@
       },
       "CatalogSkillImpactView": {
         "properties": {
+          "accepted_evidence_count": {
+            "title": "Accepted Evidence Count",
+            "type": "integer"
+          },
           "current_level": {
             "anyOf": [
               {
@@ -2372,6 +2376,18 @@
           "explanation": {
             "title": "Explanation",
             "type": "string"
+          },
+          "last_evidence_submitted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Evidence Submitted At"
           },
           "model_version": {
             "anyOf": [
@@ -2419,7 +2435,9 @@
           "projected_level",
           "model_version",
           "explanation",
-          "verification_required"
+          "verification_required",
+          "accepted_evidence_count",
+          "last_evidence_submitted_at"
         ],
         "title": "CatalogSkillImpactView",
         "type": "object"

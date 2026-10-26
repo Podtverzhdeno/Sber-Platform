@@ -68,6 +68,10 @@ export type CatalogItem = {
     model_version: string | null;
     explanation: string;
     verification_required: boolean;
+    /** Unique accepted personal contributions, fresh within catalog matching policy. */
+    accepted_evidence_count?: number;
+    /** Original submission time, not necessarily review/acceptance time. */
+    last_evidence_submitted_at?: string | null;
   }[];
   stage_plan: {
     version: number;

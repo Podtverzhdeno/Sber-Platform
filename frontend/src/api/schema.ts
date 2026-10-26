@@ -4183,10 +4183,14 @@ export interface components {
         };
         /** CatalogSkillImpactView */
         CatalogSkillImpactView: {
+            /** Accepted Evidence Count */
+            accepted_evidence_count: number;
             /** Current Level */
             current_level: string | null;
             /** Explanation */
             explanation: string;
+            /** Last Evidence Submitted At */
+            last_evidence_submitted_at: string | null;
             /** Model Version */
             model_version: string | null;
             /** Projected Level */

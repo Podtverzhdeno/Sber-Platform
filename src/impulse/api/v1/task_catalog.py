@@ -89,6 +89,8 @@ class CatalogSkillImpactView(BaseModel):
     model_version: str | None
     explanation: str
     verification_required: bool
+    accepted_evidence_count: int
+    last_evidence_submitted_at: AwareDatetime | None
 
 
 class CatalogStagePlanItemView(BaseModel):
@@ -226,6 +228,8 @@ def _recommendation_item(item: TaskRecommendationProjection) -> CatalogRecommend
                 model_version=impact.model_version,
                 explanation=impact.explanation,
                 verification_required=impact.verification_required,
+                accepted_evidence_count=impact.accepted_evidence_count,
+                last_evidence_submitted_at=impact.last_evidence_submitted_at,
             )
             for impact in item.skill_impact
         ],

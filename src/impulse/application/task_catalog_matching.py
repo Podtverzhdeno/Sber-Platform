@@ -233,6 +233,24 @@ def calculate_task_match(
     )
 
 
+def accepted_skill_evidence(
+    evidence: tuple[CaseEvidence, ...], now: datetime
+) -> dict[str, dict[str, CaseEvidence]]:
+    """Unique accepted contributions per skill within the matching freshness window.
+
+    Caller must pass participant_case_evidence, which contains only approved
+    personal work with artifacts and permitted task ownership.
+    """
+    recent = (
+        row for row in evidence if row.submitted_at >= now - timedelta(days=EVIDENCE_FRESHNESS_DAYS)
+    )
+    result: dict[str, dict[str, CaseEvidence]] = {}
+    for row in recent:
+        for tag in _normalized(row.competency_tags):
+            result.setdefault(tag, {})[str(row.contribution_id)] = row
+    return result
+
+
 def fresh_verified_tags(evidence: tuple[CaseEvidence, ...], now: datetime) -> frozenset[str]:
     threshold = now - timedelta(days=EVIDENCE_FRESHNESS_DAYS)
     return _normalized(
@@ -453,6 +471,7 @@ class TaskCatalogProjectionService:
         assignment_by_task = {item.task_id: item for item in assignments}
         now = self._now().astimezone(UTC)
         context = matching_context(roadmaps, evidence, now)
+        evidence_by_skill = accepted_skill_evidence(evidence, now)
         result: list[tuple[TaskRecommendationProjection, TaskTermsSnapshot]] = []
         for marketplace_item in marketplace:
             task = marketplace_item.task
@@ -535,6 +554,14 @@ class TaskCatalogProjectionService:
                     ),
                     verification_required=True,
                     sources=(brief_source,),
+                    accepted_evidence_count=len(evidence_by_skill.get(tag.strip().casefold(), {})),
+                    last_evidence_submitted_at=max(
+                        (
+                            row.submitted_at
+                            for row in evidence_by_skill.get(tag.strip().casefold(), {}).values()
+                        ),
+                        default=None,
+                    ),
                 )
                 for tag in task.competency_tags
             )

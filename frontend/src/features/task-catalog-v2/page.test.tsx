@@ -401,8 +401,9 @@ describe("task catalog v2", () => {
     expect(plannedStages.length).toBe(catalogItem.stage_plan.stages.length);
     expect(screen.getByText(/Это план, а не прогресс/)).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Итог" })).not.toBeInTheDocument();
-    expect(document.querySelector(".catalog-v2-skill-transition")).not.toBeNull();
-    expect(screen.getByText("Прогноз после проверки")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Статистика навыков задачи" })).toBeInTheDocument();
+    expect(document.querySelector(".catalog-skill-stats__overview")).not.toBeNull();
+    expect(screen.getByText("Оценка после проверки")).toBeInTheDocument();
   });
 
   it("provides readable mobile list labels without changing task ordering", async () => {

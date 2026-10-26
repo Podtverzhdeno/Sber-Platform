@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from hypothesis import given
@@ -18,6 +18,7 @@ from impulse.application.task_catalog_matching import (
     VERIFIED_COMPETENCIES,
     FactorValue,
     MatchingContext,
+    accepted_skill_evidence,
     calculate_task_match,
     fresh_verified_tags,
     score_factors,
@@ -180,3 +181,31 @@ def test_score_properties_hold_for_arbitrary_factor_coverage(
 def test_factor_values_outside_unit_interval_are_rejected(value: Decimal) -> None:
     with pytest.raises(ValueError, match=r"0\.\.1"):
         FactorValue(ROLE_REQUIREMENTS, value)
+
+
+def test_skill_evidence_counts_only_fresh_unique_approved_contributions() -> None:
+    contribution = uuid4()
+
+    def row(contribution_id: UUID, tag: str, when: datetime) -> CaseEvidence:
+        return CaseEvidence(
+            task_id=uuid4(),
+            contribution_id=contribution_id,
+            personal_summary="accepted personal result",
+            competency_tags=(tag,),
+            artifact_keys=("report",),
+            submitted_at=when,
+            reviewer_id=uuid4(),
+        )
+
+    fresh = row(contribution, " Python ", NOW - timedelta(days=2))
+    duplicate = row(contribution, "python", NOW - timedelta(days=2))
+    expired = row(uuid4(), "python", NOW - timedelta(days=366))
+    other = row(uuid4(), "recommender-systems", NOW - timedelta(days=1))
+
+    indexed = accepted_skill_evidence((fresh, duplicate, expired, other), NOW)
+
+    assert len(indexed["python"]) == 1
+    assert indexed["python"][str(contribution)].submitted_at == fresh.submitted_at
+    assert len(indexed["recommender-systems"]) == 1
+    assert "unrelated" not in indexed
+    assert accepted_skill_evidence((), NOW) == {}

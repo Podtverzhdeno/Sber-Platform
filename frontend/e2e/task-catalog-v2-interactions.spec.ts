@@ -106,10 +106,10 @@ test.describe("task catalog interactive controls and motion", () => {
     await first.getByRole("button", { name: /Подробнее/ }).click();
     await expect(page).toHaveURL(new RegExp(`task=${catalogItem.task_id}`));
     await expect(page.getByRole("heading", { name: "Развитие твоих навыков" })).toBeVisible();
-    await page.getByRole("button", { name: "Скрыть сравнение уровней" }).click();
-    await expect(page.getByRole("button", { name: "Показать сравнение уровней" })).toHaveAttribute("aria-expanded", "false");
-    await page.getByRole("button", { name: "Показать сравнение уровней" }).click();
-    await expect(page.getByRole("button", { name: "Скрыть сравнение уровней" })).toHaveAttribute("aria-expanded", "true");
+    await page.getByRole("button", { name: "Скрыть подробности" }).click();
+    await expect(page.getByRole("button", { name: "Показать подробности" })).toHaveAttribute("aria-expanded", "false");
+    await page.getByRole("button", { name: "Показать подробности" }).click();
+    await expect(page.getByRole("button", { name: "Скрыть подробности" })).toHaveAttribute("aria-expanded", "true");
 
     await page.getByRole("button", { name: "Посмотреть условия", exact: true }).click();
     const modal = page.getByRole("dialog");
@@ -119,6 +119,37 @@ test.describe("task catalog interactive controls and motion", () => {
     await expect(modal).toHaveCount(0);
     await page.getByRole("button", { name: "Закрыть детали" }).click();
     await expect(page).not.toHaveURL(/task=/);
+  });
+
+  test("task detail displays real accepted skill evidence and truthful unknown levels", async ({ page }) => {
+    const baseImpact = catalogItem.skill_impact[0];
+    const item: CatalogItem = {
+      ...catalogItem,
+      competency_tags: ["python", "recommender-systems"],
+      skill_impact: [
+        { ...baseImpact, accepted_evidence_count: 2, last_evidence_submitted_at: "2026-10-20T12:00:00Z" },
+        {
+          ...baseImpact,
+          skill_id: "recommender-systems", title: "Рекомендательные системы",
+          accepted_evidence_count: 0, last_evidence_submitted_at: null,
+        },
+      ],
+    };
+    await openCatalog(page, [item]);
+    const first = page.locator(".catalog-v2-card").first();
+    await first.hover();
+    await first.getByRole("button", { name: /Подробнее/ }).click();
+    const stats = page.getByRole("region", { name: "Статистика навыков задачи" });
+    await expect(stats).toBeVisible();
+    await expect(stats.locator(".catalog-skill-stats__overview")).toContainText("1 из 2");
+    await expect(stats.locator(".catalog-skill-stats__overview")).toContainText("50%");
+    await expect(stats.getByText("Принято личных работ")).toHaveCount(2);
+    await expect(stats.getByText("Не оценивался")).toHaveCount(2);
+    await expect(stats.getByText("Пока неизвестно")).toHaveCount(2);
+    await expect(stats.getByText("Есть принятые работы")).toBeVisible();
+    await expect(stats.getByText("Работ пока нет")).toBeVisible();
+    await expect(stats.getByText("Без числового прогноза")).toHaveCount(0);
+    await page.screenshot({path: "test-results/task-skill-evidence-statistics.png", animations: "disabled", fullPage: true});
   });
 
   test("list view row, keyboard and controls preserve filters and selected task", async ({ page }) => {
