@@ -33,6 +33,7 @@ function mockApi(skills: ReferenceSkillFixture[] = roleSkills) {
     if (path.includes("/agentic-coding/profile")) return { ...profile, skills };
     if (path.includes("/growth/snapshot")) return snapshot;
     if (path.includes("/analytics/journey")) return journey;
+    if (path.includes("/impulse-study/summary")) return { started_courses: 6, finished_courses: 6, completed_lessons: 56, approved_practices: 1, credited_practices: 2, courses: [] };
     throw new Error("unexpected endpoint " + path);
   });
 }
@@ -51,6 +52,8 @@ describe("three canonical analytics reference layouts", () => {
     expect(container.querySelectorAll(".ref-kpi")).toHaveLength(4);
     expect(screen.getByRole("heading", { name: "Матрица навыков Agentic Coding" })).toBeInTheDocument();
     expect(container.querySelector(".ref-passport")).toBeInTheDocument();
+    expect(screen.getByTestId("participant-live-evidence")).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByTestId("evidence-lessons")).toHaveTextContent("56"));
     expect(screen.getByRole("heading", { name: "Последние подтверждения" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Развитие за 8 месяцев" })).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText(/Подтверждённых уровней пока нет/)).toBeInTheDocument());
