@@ -136,7 +136,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
   const learningLevel = useQuery({
     queryKey:roleLevelQueryKey(selectedKey),
     queryFn:()=>loadRoleLevel(selectedKey ?? ""),
-    enabled:selectedKey!==null,retry:false,
+    enabled:selectedKey!==null && selected?.attempt_number!==null,retry:false,
   });
   const roleLevel=learningLevel.data?.track_key===selectedKey ? learningLevel.data : null;
   const nextCycleUnpublished=roleLevel!==null && roleLevel.level>0 && roleLevel.level<3 && roleLevel.curriculum_state==="unpublished";
