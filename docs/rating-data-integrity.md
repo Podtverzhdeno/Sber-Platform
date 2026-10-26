@@ -39,9 +39,21 @@ revocations take precedence, and anonymous public rows never expose a
 `person_id` or any name coming from the API. The UI uses a place-based
 anonymous label (e.g. `Участник №4`) and disables private profile actions.
 
-Railway's configured pre-deploy step (`python -m impulse.bootstrap.predeploy`)
-already re-seeds the existing database **only when `DEMO_MODE=true`**. Thus an
-approved Railway deployment of this revision applies the new fictional
-`public_rating` defaults without a manual database change. A frontend-only
-deployment or `DEMO_MODE=false` cannot change persisted visibility. Do not
-run demo seeding on real user data or bypass the repository's deploy gate.
+The production validation of 26 October 2026 exposed a deployment gap:
+the `main` commit with demo public-rating defaults deployed successfully, yet
+the live API still returned ten anonymous people. The runtime Dockerfile had
+been running **Alembic only**, while the intended optional Railway
+`preDeployCommand` was not observable as an applied seed operation.
+
+The Docker container now invokes `python -m impulse.bootstrap.predeploy`
+**before Uvicorn**. This module upgrades Alembic, checks `DEMO_MODE`, and
+when enabled performs the existing idempotent demo seed and catalog checks.
+If seeding fails, the container does not serve a stale application.
+`DEMO_MODE=false` still skips all synthetic data changes. Already recorded
+privacy opt-outs remain authoritative on reseed. Never force visibility on
+real users or bypass the deployment gate.
+
+For release acceptance, check
+`GET /api/v1/rating-seasons/{demo-season-id}/leaderboard` on the *actual live
+domain*, not just mocked Chromium tests. Verify ten distinct synthetic names
+where publication is allowed and that anonymous records remain closed.

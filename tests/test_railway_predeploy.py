@@ -1,5 +1,6 @@
 """Railway migration/seed pre-deploy must be safe, ordered and explicit."""
 
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -95,3 +96,12 @@ async def test_demo_seed_verifies_twelve_tasks(
     monkeypatch.setattr(predeploy, "seed_demo", seed)
     await predeploy.seed_and_verify("postgresql+asyncpg://test:test@localhost/test")
     assert closed == [True]
+
+
+def test_docker_runtime_runs_demo_only_predeploy_before_uvicorn() -> None:
+    """Railway may omit its optional pre-deploy hook; the container must not."""
+    dockerfile = (Path(__file__).resolve().parents[1] / "Dockerfile").read_text()
+    start = next(line for line in dockerfile.splitlines() if line.startswith("CMD "))
+    assert "python -m impulse.bootstrap.predeploy && exec uvicorn" in start
+    assert start.index("impulse.bootstrap.predeploy") < start.index("uvicorn")
+    assert "alembic upgrade head && exec uvicorn" not in start

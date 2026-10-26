@@ -1,0 +1,80 @@
+name: Railway Demo Startup Seed QA
+
+on:
+  pull_request:
+    paths:
+      - "Dockerfile"
+      - "src/impulse/bootstrap/predeploy.py"
+      - "tests/test_railway_predeploy.py"
+      - ".github/workflows/railway-startup-seed-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seed-and-public-rating:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      APP_ENV: test
+      DEMO_MODE: "true"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Ruff formatting and lint
+        run: |
+          uv run ruff format --check src/impulse/bootstrap/predeploy.py tests/test_railway_predeploy.py
+          uv run ruff check src/impulse/bootstrap/predeploy.py tests/test_railway_predeploy.py
+      - name: Static startup command and module regression
+        run: uv run pytest -q tests/test_railway_predeploy.py
+      - name: Execute actual container startup predeploy module
+        run: uv run python -m impulse.bootstrap.predeploy
+      - name: Verify public domain projection from seeded PostgreSQL
+        run: |
+          uv run python - <<'PY'
+          import asyncio
+          from impulse.bootstrap.demo_seed import demo_id, PERSONAS
+          from impulse.domain.recognition import public_leaderboard
+          from impulse.infrastructure.database import Database
+          from impulse.infrastructure.recognition_store import SqlRecognitionStore
+          import os
+
+          async def verify():
+              db = Database(os.environ["DATABASE_URL"])
+              try:
+                  candidates = await SqlRecognitionStore(db).leaderboard_candidates(demo_id("season:autumn-2026"))
+                  visible = public_leaderboard(candidates)
+                  expected = {name for _key, name, role in PERSONAS if role == "participant"}
+                  assert len(visible) == 10
+                  assert {person.display_name for person in visible} == expected
+                  assert all(not person.anonymized and person.person_id is not None for person in visible)
+                  print("Rating projection: 10 named synthetic demo participants verified")
+              finally:
+                  await db.close()
+
+          asyncio.run(verify())
+          PY
+      - name: Second startup remains idempotent
+        run: |
+          uv run python -m impulse.bootstrap.predeploy
+          uv run pytest -q tests/test_railway_predeploy.py
