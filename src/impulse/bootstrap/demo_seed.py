@@ -304,6 +304,37 @@ def build_seed_batches() -> list[SeedBatch]:
         )
         for index in range(1, len(COURSES) + 1)
     ]
+    # Published advanced Impulse study cycles. Unique course keys per role and
+    # level prevent old certificates or another role's progress being replayed.
+    # L1 -> L2: architecture and evaluation. L2 -> L3: operations and orchestration.
+    advanced_titles = (
+        (13, "Архитектура AI-сервисов и контракты", "https://learn.microsoft.com/en-us/azure/architecture/"),
+        (14, "Оценка и качество AI-агентов", "https://www.langchain.com/langsmith"),
+        (15, "Безопасность и эксплуатация AI-систем", "https://owasp.org/www-project-top-10-for-large-language-model-applications/"),
+        (16, "Мультиагентная оркестрация и надёжность", "https://a2a-protocol.org/latest/"),
+    )
+    for index, title, source_url in advanced_titles:
+        for slug, role_title in TRACKS:
+            course_rows.append(
+                demo_row(
+                    f"course:{index}:{slug}",
+                    slug=f"demo-course-{index}-{slug}",
+                    title=f"{title} · {role_title}",
+                    payload={
+                        "source_url": source_url,
+                        "availability": "available",
+                        "access_note": "Программа следующего учебного цикла Impulse; требует предыдущий уровень.",
+                        "impulse_level": 1 if index < 15 else 2,
+                    },
+                )
+            )
+            course_link_rows.append(
+                demo_row(
+                    f"course-link:{index}:{slug}",
+                    course_id=demo_id(f"course:{index}:{slug}"),
+                    track_id=demo_id(f"track:{slug}"),
+                )
+            )
     enrollment_rows = [
         demo_row(
             f"enrollment:alex:{index}",
