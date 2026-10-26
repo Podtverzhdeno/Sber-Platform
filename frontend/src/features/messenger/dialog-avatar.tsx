@@ -1,4 +1,5 @@
 import { Box, Cat, Radio, Sparkles, Trophy, UsersRound } from "lucide-react";
+import { avatarInitials } from "./avatar-model";
 
 type ReferenceKind = "trophy" | "school" | "team" | "ai" | "cat" | "technology" | "pulse" | "lighthouse" | null;
 
@@ -25,12 +26,6 @@ const verifiedPortraits: Record<string, string> = {
   "Мария Лебедева": "/messages-reference/maria-avatar.svg",
 };
 
-export function avatarInitials(name: string): string {
-  const words = name.trim().split(/\s+/u).filter(Boolean);
-  if (words.length === 0) return "?";
-  return words.slice(0, 2).map(word => (word[0] ?? "").toLocaleUpperCase("ru-RU")).join("");
-}
-
 export function DialogAvatar({ title, initials, kind, className = "msg-dialog-list__avatar" }: {
   title: string;
   initials?: string;
@@ -43,7 +38,9 @@ export function DialogAvatar({ title, initials, kind, className = "msg-dialog-li
     ? (name.toLocaleLowerCase("ru-RU") === "маяки" ? "lighthouse" : pictureByTitle[name] ?? null)
     : null;
   const portrait = !isGroup ? verifiedPortraits[name] : undefined;
-  const tone = [...name].reduce((value, char) => value + (char.codePointAt(0) ?? 0), 0) % 5;
+  let sum = 0;
+  for (let index = 0; index < name.length; index++) sum += name.charCodeAt(index);
+  const tone = sum % 5;
   const modeClass = icon ? `msg-reference-avatar--${icon}` : `msg-avatar--contact msg-avatar--tone-${String(tone)}`;
   return (
     <span className={`msg-avatar msg-reference-avatar ${modeClass} ${className}`.trim()} aria-hidden="true">
