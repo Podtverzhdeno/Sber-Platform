@@ -643,7 +643,7 @@ function CourseContinueStatus({ card, onOpen, onCatalog }: {
   return <div className="bc-ref-continue-status">
     <div className="bc-ref-stat-top"><span>{card ? "Обучение" : "Следующий курс"}</span>
       <strong>{loaded ? `${String(percent)}% пройдено` : card ? "Доступен" : "Не выбран"}</strong></div>
-    <div className="bc-ref-track" aria-label={loaded ? `Прогресс обучения: ${String(percent)}%` : "Прогресс ещё не определён"}>
+    <div className="bc-ref-track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={loaded ? percent : undefined} aria-label={loaded ? `Прогресс обучения: ${String(percent)}%` : "Прогресс ещё не определён"}>
       <i style={{ width: loaded ? String(percent) + "%" : "0%" }}/></div>
     <p><Clock3/>{loaded ? `${String(completed)} из ${String(total)} уроков завершено`
       : !card ? "Нет активных учебных шагов"
