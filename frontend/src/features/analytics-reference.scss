@@ -342,6 +342,8 @@ body:has(.analytics-reference) .overlay {z-index:10050;}
 
 /* Measured account events, visually separate from the 1–4 qualification scale. */
 .analytics-reference .ref-radar-skill {cursor:pointer;outline:none}
+.analytics-reference .ref-radar-skill-hit {fill:transparent;stroke:none;pointer-events:all;cursor:pointer}
+.analytics-reference .ref-radar-skill:focus-visible .ref-radar-skill-hit {stroke:#2debd4;stroke-width:2}
 .analytics-reference .ref-radar-skill:focus-visible text {fill:#4df5e0;text-decoration:underline}
 .analytics-reference .ref-radar-center rect {fill:#092536;stroke:#22667d;stroke-width:1}
 .analytics-reference .ref-radar-center text:first-of-type {fill:#2be5cd;font-size:17px;font-weight:800}
