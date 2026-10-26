@@ -416,7 +416,6 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
             </div>
             {nextOutcomeForPanel !== null && <button type="button" aria-label="Посмотреть следующий шаг" onClick={() => {
               const outcome = nextOutcomeForPanel;
-              if (outcome === null) return;
               snapshotTrigger();
               if (outcome.trajectory_key !== selectedKey) {
                 const nextParams = new URLSearchParams(searchParams);
