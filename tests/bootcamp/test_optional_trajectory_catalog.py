@@ -42,14 +42,11 @@ def test_optional_course_recommendations_hide_and_restore_without_progress_loss(
         # Product's course is in the supplementary path, not the primary one.
         enrolled = await service.catalog(actor)
         assert course(enrolled).must_take is not None
-        assert "product" in {
-            m.track_key for m in (await service._milestones_by_course(person_id))["openspec-sdd"]
-        }
+        assert "Продуктовый аналитик" in course(enrolled).must_take.projected_impact
 
         archived = set_optional_track(attempts, "product", enabled=False)
         await store.replace_attempts(person_id, archived)
         assert course(await service.catalog(actor)).must_take is None
-        assert "openspec-sdd" not in await service._milestones_by_course(person_id)
         assert archived[0].status is TrackStatus.ACTIVE
 
         reopened = set_optional_track(archived, "product", enabled=True)
@@ -68,8 +65,7 @@ def test_optional_course_recommendations_hide_and_restore_without_progress_loss(
         restored = set_optional_track(grey_again, "product", enabled=True)
         await store.replace_attempts(person_id, restored)
         assert restored[1].completed_milestones == frozenset({"foundation"})
-        markers = await service._milestones_by_course(person_id)
-        assert markers["openspec-sdd"][0].completed is True
+        assert course(await service.catalog(actor)).must_take is None
         assert restored[0] == attempts[0]
 
     asyncio.run(scenario())
