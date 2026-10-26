@@ -29,6 +29,7 @@ describe("Bootcamp AI trajectory content in reference UI", () => {
     vi.stubGlobal("fetch", vi.fn((request: RequestInfo | URL) => {
       const url = typeof request === "string" ? request : request instanceof URL ? request.href : request.url;
       const data = url.includes("/me/bootcamp/catalog") ? courses :
+        url.includes("/me/bootcamp/impulse-study/summary") ? { started_courses: 0, finished_courses: 0, completed_lessons: 0, approved_practices: 0, courses: [] } :
         url.includes("/participant/me/development-overview") ? {
           roles: [
             { track_key: "product", state: "active", attempt_number: 1 },
