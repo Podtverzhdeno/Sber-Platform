@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 from datetime import UTC, datetime
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Request
@@ -18,9 +18,10 @@ from pydantic import BaseModel, Field
 
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import current_session
+from impulse.application.development import CourseRecord, EnrollmentRecord
 from impulse.application.identity import AuthenticatedSession
 from impulse.bootcamp.editorial_learning import ImpulseStudySummary, impulse_study_summary
-from impulse.domain.development import CompletionStatus
+from impulse.domain.development import CompletionStatus, RoadmapProjection
 from impulse.domain.identity import Role
 from impulse.domain.work import ContributionStatus
 
@@ -96,11 +97,17 @@ def _merge_courses(
     study: ImpulseStudySummary | None,
 ) -> list[JourneyCourseView]:
     """Canonical course_key joins; unknown self-study stays unknown, not 0."""
-    names = {item.key: item.title for item in catalog}
-    providers = {item.course_key: item.status for item in enrollments}
+    # Production stores return these exact domain records. Keep the public
+    # helper accepting object-shaped test doubles, and cast only at this
+    # typed boundary rather than propagating Unknown through the read model.
+    courses = cast(tuple[CourseRecord, ...], catalog)
+    provider_enrollments = cast(tuple[EnrollmentRecord, ...], enrollments)
+    role_roadmaps = cast(tuple[RoadmapProjection, ...], roadmaps)
+    names = {item.key: item.title for item in courses}
+    providers = {item.course_key: item.status for item in provider_enrollments}
     study_by_key = {item.course_key: item for item in study.courses} if study is not None else {}
     links: dict[str, list[RoadmapEvidenceLink]] = {}
-    for roadmap in roadmaps:
+    for roadmap in role_roadmaps:
         for milestone in roadmap.milestones:
             if milestone.target_kind != "course":
                 continue

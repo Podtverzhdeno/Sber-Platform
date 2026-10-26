@@ -6,6 +6,8 @@ same authorization, domain rules and projection contracts as the application.
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 
@@ -38,16 +40,20 @@ def _login(api: TestClient, persona: str) -> str:
     return response.json()["csrf_token"]
 
 
-def _post(api: TestClient, path: str, csrf: str, body: dict[str, object] | None = None) -> dict:
+def _post(api: TestClient, path: str, csrf: str, body: dict[str, object] | None = None) -> dict[str, Any]:
     response = api.post(path, headers={"X-CSRF-Token": csrf}, json=body)
     assert response.status_code == 200, f"{path}: {response.status_code} {response.text}"
-    return response.json()
+    payload: object = response.json()
+    assert isinstance(payload, dict), f"{path} must return a JSON object"
+    return cast(dict[str, Any], payload)
 
 
-def _get(api: TestClient, path: str) -> dict | list:
+def _get(api: TestClient, path: str) -> dict[str, Any]:
     response = api.get(path)
     assert response.status_code == 200, f"{path}: {response.status_code} {response.text}"
-    return response.json()
+    payload: object = response.json()
+    assert isinstance(payload, dict), f"{path} must return a JSON object"
+    return cast(dict[str, Any], payload)
 
 
 def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -> None:
