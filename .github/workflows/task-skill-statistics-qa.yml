@@ -55,10 +55,27 @@ jobs:
           npm run api:generate
           git diff -- src/api/schema.ts | head -c 12000
       - name: Strict frontend lint
-        run: npx eslint src/features/task-catalog-v2/page.tsx src/features/task-catalog-v2/skill-impact-statistics.tsx src/features/task-catalog-v2/skill-impact-statistics.test.tsx --max-warnings 0
+        run: npx eslint src/features/task-catalog-v2/page.tsx src/features/task-catalog-v2/skill-impact-statistics.tsx src/features/task-catalog-v2/skill-impact-statistics.test.tsx e2e/task-catalog-v2-interactions.spec.ts --max-warnings 0
       - name: Typecheck
         run: npm run typecheck
       - name: Evidence statistics and existing task-detail tests
         run: npx vitest run src/features/task-catalog-v2/skill-impact-statistics.test.tsx src/features/task-catalog-v2/page.test.tsx
       - name: Production bundle
         run: npx vite build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Task detail evidence browser acceptance
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test task-catalog-v2-interactions.spec.ts --project=chromium --grep "real accepted skill evidence" --reporter=line
+      - name: Upload detail screenshot and failure traces
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: task-skill-statistics-evidence
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
