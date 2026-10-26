@@ -113,6 +113,13 @@ async def _evidence(
     return finished, len(keys), approved, credited, keys
 
 
+async def role_learning_evidence(
+    request: Request, authenticated: AuthenticatedSession, track_key: str, level: int = 0
+) -> tuple[int, int, int, int, tuple[str, ...]]:
+    """Read the persisted Impulse learning-cycle facts without promoting a grade."""
+    return await _evidence(request, authenticated, track_key, level)
+
+
 async def _saved(
     request: Request, person_id: UUID, track_key: str
 ) -> tuple[int, int, list[dict[str, object]]]:
