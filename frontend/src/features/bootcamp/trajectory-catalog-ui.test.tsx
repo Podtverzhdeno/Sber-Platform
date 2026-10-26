@@ -30,6 +30,14 @@ describe("Bootcamp AI trajectory content in reference UI", () => {
       const url = typeof request === "string" ? request : request instanceof URL ? request.href : request.url;
       const data = url.includes("/me/bootcamp/catalog") ? courses :
         url.includes("/me/bootcamp/impulse-study/summary") ? { started_courses: 0, finished_courses: 0, completed_lessons: 0, approved_practices: 0, courses: [] } :
+        url.includes("/me/bootcamp/overview") ? {
+          selected_track_key: new URL(url, "https://impulse.test").searchParams.get("track") ?? "product",
+          role_summary: {
+            track_key: new URL(url, "https://impulse.test").searchParams.get("track") ?? "product",
+            grade_state: "not_evaluable", current_grade_title: null,
+          },
+          curriculum: { state: "not_evaluable", requirements: [] },
+        } :
         url.includes("/participant/me/development-overview") ? {
           roles: [
             { track_key: "product", state: "active", attempt_number: 1 },
