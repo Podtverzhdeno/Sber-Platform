@@ -160,6 +160,7 @@ function Radar({ skills, facts, openSkill }: { skills: Skill[]; facts: Participa
         const sources = registeredForSkill(facts, skill.key);
         const t = xy(i, aim ?? 0), c = xy(i, current ?? 0);
         const label = xy(i, 4.8);
+        const activityMark = xy(i, 5.32);
         const description = skill.title + ". Подтверждённый Agentic: "
           + (current === null ? "нет данных" : String(current) + " из 4")
           + ". Цель: " + (aim === null ? "уточняется" : String(aim) + " из 4")
@@ -172,6 +173,10 @@ function Radar({ skills, facts, openSkill }: { skills: Skill[]; facts: Participa
           {aim !== null && <circle cx={t.x} cy={t.y} r="3" fill="#ffb844" />}
           {current !== null && <circle cx={c.x} cy={c.y} r="4.3" fill="#31eaba" stroke="#092e2d" strokeWidth="1.5" />}
           <text x={label.x} y={label.y} fill="#bfd8e7" fontSize="11" fontWeight="600" textAnchor={i === 0 || i === 3 ? "middle" : i < 3 ? "start" : "end"}>{SHORT_LABELS[i]}</text>
+          {sources.length > 0 && <g className="ref-radar-activity-mark" aria-label={String(sources.length) + " зарегистрированных действий"}>
+            <circle cx={activityMark.x} cy={activityMark.y} r="10"/>
+            <text x={activityMark.x} y={activityMark.y + 3.5} textAnchor="middle">{Math.min(sources.length,99)}</text>
+          </g>}
         </g>;
       })}
       <g className="ref-radar-center" aria-label={String(knownCount) + " из 6 навыков с квалифицированным уровнем"}>
@@ -180,7 +185,7 @@ function Radar({ skills, facts, openSkill }: { skills: Skill[]; facts: Participa
         <text x="260" y="185" textAnchor="middle">с оценкой</text>
       </g>
     </svg>
-    <div className="ref-legend"><span><i className="ref-dot" />Текущий уровень</span><span><i className="ref-dot amber" />Цель по методологии L1</span></div>
+    <div className="ref-legend"><span><i className="ref-dot" />Текущий уровень</span><span><i className="ref-dot amber" />Цель по методологии L1</span><span><i className="ref-dot activity" />Действия (число, не уровень)</span></div>
     {known.every((level) => level === null) && <p className="ref-chart-note">Подтверждённых уровней пока нет: реальные действия ниже не являются уровнем Agentic Coding 1–4.</p>}
     <PersonalFactsStrip facts={facts} />
   </div>;
