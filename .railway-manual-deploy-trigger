@@ -13,3 +13,6 @@ release_request=2026-10-26-trajectory-next-step-7e6c66183096
 
 # Release: final course-to-next-stage projection aligned in main trajectory and sidebar
 release_request=2026-10-26-trajectory-next-panel-8f20281da120
+
+# Release: verified automated study navigation and consistent next-step card; lint fix included
+release_request=2026-10-26-course-trajectory-final-b7c1d3c40dad
