@@ -1,6 +1,6 @@
 import { useState, type SyntheticEvent, type ReactNode } from "react";
 import {
-  ArrowLeft, ArrowRight, Award, Bookmark, BookOpen, CalendarDays,
+  ArrowLeft, ArrowRight, Award, Bookmark, CalendarDays,
   CheckCircle2, ChevronDown, Code2, ExternalLink, GraduationCap,
   Landmark, MapPin, Medal, ShieldCheck, Sparkles, BriefcaseBusiness,
 Star, Target, Trophy, Users, X,
@@ -21,6 +21,44 @@ const tabs: { key: EventTab; label: string }[] = [
   { key: "faq", label: "FAQ" },
 ];
 const interests = ["python", "product", "ai", "ml", "data"];
+// Event covers are tied to event identity, never to the displayed list index.
+// This keeps thumbnails unchanged when the user sorts or filters the catalogue.
+const EVENT_COVER_ROOT = "/events/banners/";
+const DEMO_EVENT_COVERS: Record<string, string> = {
+  "demo-event-1": "education",        // МАЯКИ
+  "demo-event-2": "analytics",        // Хакатон данных
+  "demo-event-3": "startup",          // Грантовый конкурс
+  "demo-event-4": "robotics",         // Университетская лаборатория
+  "demo-event-5": "networking",       // Карьерный день
+  "demo-event-6": "cybersecurity",    // Инженерный интенсив
+  "demo-event-7": "product",          // Продуктовый кейс-чемпионат
+  "demo-event-8": "ai-conference",    // Школа исследователей
+  "mayaki-2026": "education",
+  "green-hack": "ai-hackathon",
+  "research-grant": "ai-conference",
+};
+
+export function getEventCover(item: Pick<EventViewItem, "key" | "title" | "event_type" | "track_keys">): string {
+  const id = item.key.toLowerCase();
+  let cover = DEMO_EVENT_COVERS[id];
+  if (!cover) {
+    const text = [item.title, item.event_type, ...item.track_keys].join(" ").toLowerCase();
+    if (/кибер|безопасн|security|cyber/.test(text)) cover = "cybersecurity";
+    else if (/финтех|финанс|банк|плат[её]ж|fintech|payment/.test(text)) cover = "fintech";
+    else if (/данн|аналит|data|analytics/.test(text)) cover = "analytics";
+    else if (/робот|инжен|лаборат|robot|engineering|laboratory/.test(text)) cover = "robotics";
+    else if (/карьер|нетворк|career|network/.test(text)) cover = "networking";
+    else if (/продукт|кейс|product/.test(text)) cover = "product";
+    else if (/грант|стартап|startup|accelerat/.test(text)) cover = "startup";
+    else if (/хакатон|hackathon/.test(text)) cover = "ai-hackathon";
+    else if (/исслед|нейросет|research|conference|scientific/.test(text)) cover = "ai-conference";
+    else if (/маяк|школ|курс|обуч|образователь|bootcamp|educat/.test(text)) cover = "education";
+    else if (/ai|ml|нейросеть|искусственный интеллект/.test(text)) cover = "ai-conference";
+    else cover = "ai-hackathon";
+  }
+  return `${EVENT_COVER_ROOT}${cover}.avif`;
+}
+
 function formatDate(value: string | null | undefined): string {
   if (!value) return "Уточняется";
   const date = new Date(value);
@@ -75,7 +113,7 @@ export function EventsCard({
   const roleScore = match ?? 0;
   return <article className="ev-event-card ev-event-card--compact" data-testid="event-reference-card" data-event-key={item.key}>
     <div className={`ev-event-thumb ev-event-thumb-${String(index % 3)}`} aria-hidden="true">
-      {index % 3 === 0 ? <Code2 size={56}/> : index % 3 === 1 ? <BookOpen size={56}/> : <Trophy size={56}/>}
+      <img src={getEventCover(item)} alt="" loading="lazy" decoding="async" />
     </div>
     <div className="ev-event-main">
       <h3>{item.title}</h3>

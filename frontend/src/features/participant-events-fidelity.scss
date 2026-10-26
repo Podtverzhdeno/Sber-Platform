@@ -629,3 +629,20 @@
     .ev-result-order {margin-left:0}
   }
 }
+
+/* Event-specific artwork: actual generated covers replace the index-based SVG icons. */
+.participant-events .ev-event-card--compact .ev-event-thumb {
+  background: #041b26;
+  border-color: #17756e;
+}
+.participant-events .ev-event-card--compact .ev-event-thumb::before {
+  content: none;
+}
+.participant-events .ev-event-card--compact .ev-event-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border-radius: inherit;
+}
