@@ -18,9 +18,10 @@ from pydantic import BaseModel, Field
 
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import current_session
+from impulse.application.development import CourseRecord, EnrollmentRecord
 from impulse.application.identity import AuthenticatedSession
 from impulse.bootcamp.editorial_learning import ImpulseStudySummary, impulse_study_summary
-from impulse.domain.development import CompletionStatus
+from impulse.domain.development import CompletionStatus, RoadmapProjection
 from impulse.domain.identity import Role
 from impulse.domain.work import ContributionStatus
 
@@ -90,9 +91,9 @@ class JourneySnapshotView(BaseModel):
 
 def _merge_courses(
     *,
-    catalog: tuple[object, ...],
-    enrollments: tuple[object, ...],
-    roadmaps: tuple[object, ...],
+    catalog: tuple[CourseRecord, ...],
+    enrollments: tuple[EnrollmentRecord, ...],
+    roadmaps: tuple[RoadmapProjection, ...],
     study: ImpulseStudySummary | None,
 ) -> list[JourneyCourseView]:
     """Canonical course_key joins; unknown self-study stays unknown, not 0."""
