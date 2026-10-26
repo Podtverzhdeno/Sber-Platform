@@ -128,8 +128,8 @@ export const lessonProgressProjectionKeys = [
 ] as const;
 
 export function projectionKeysForProgressMutation(path: string): readonly string[] {
-  const pathname = (path.split(/[?#]/, 1)[0] ?? path).replace(/\\/$/, "");
-  if (/^\\/api\\/v1\\/me\\/bootcamp\\/impulse-study\\/[^/]+\\/lessons\\/\\d+\\/complete$/.test(pathname)) {
+  const pathname = (path.split(/[?#]/, 1)[0] ?? path).replace(/\/$/, "");
+  if (/^\/api\/v1\/me\/bootcamp\/impulse-study\/[^/]+\/lessons\/\d+\/complete$/.test(pathname)) {
     return lessonProgressProjectionKeys;
   }
   return participantProjectionKeys;
