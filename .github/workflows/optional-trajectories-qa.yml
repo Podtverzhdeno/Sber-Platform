@@ -10,6 +10,8 @@ on:
       - "frontend/src/api/client.ts"
       - "tests/test_development_domain.py"
       - "tests/test_development_api.py"
+      - "frontend/e2e/trajectory-optional-lifecycle.spec.ts"
+      - "src/impulse/bootcamp/editorial_learning.py"
       - ".github/workflows/optional-trajectories-qa.yml"
   workflow_dispatch:
 permissions:
@@ -40,3 +42,23 @@ jobs:
           npm run typecheck
           npx vitest run src/features/trajectory-v2/page.test.tsx src/features/trajectory-v2/actions.test.tsx
           npm run build
+  optional-journey-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - run: npx eslint e2e/trajectory-optional-lifecycle.spec.ts --max-warnings 0
+      - run: npx playwright install --with-deps chromium
+      - name: Grey to optional, course, grey and restore
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test trajectory-optional-lifecycle.spec.ts --project=chromium --reporter=line
