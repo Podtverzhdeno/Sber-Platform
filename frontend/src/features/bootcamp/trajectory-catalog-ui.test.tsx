@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -29,6 +29,13 @@ describe("Bootcamp AI trajectory content in reference UI", () => {
     vi.stubGlobal("fetch", vi.fn((request: RequestInfo | URL) => {
       const url = typeof request === "string" ? request : request instanceof URL ? request.href : request.url;
       const data = url.includes("/me/bootcamp/catalog") ? courses :
+        url.includes("/participant/me/development-overview") ? {
+          roles: [
+            { track_key: "product", state: "active", attempt_number: 1 },
+            { track_key: "ml", state: "active", attempt_number: 2 },
+          ],
+          next_outcome: { trajectory_key: "ml" },
+        } :
         url.includes("/me/learning/streak") ? { current_days: 2 } : [];
       return Promise.resolve(new Response(JSON.stringify(data), {
         status: 200, headers: { "Content-Type": "application/json" },
@@ -45,6 +52,13 @@ describe("Bootcamp AI trajectory content in reference UI", () => {
     for (const role of AI_ROLE_CATALOG) {
       expect(within(roleTabs).getByRole("button", { name: role.title })).toBeInTheDocument();
     }
+    const mainRole = within(roleTabs).getByRole("button", { name: "AI Engineer" });
+    const architectRole = within(roleTabs).getByRole("button", { name: "AI Architect" });
+    await waitFor(() => { expect(mainRole).toHaveAttribute("data-primary", "true"); });
+    expect(mainRole).toHaveAttribute("aria-description", "Основное направление");
+    expect(mainRole).toHaveAttribute("aria-pressed", "false");
+    expect(architectRole).toHaveAttribute("aria-pressed", "true");
+    expect(architectRole).toHaveAttribute("data-primary", "false");
     expect(screen.getByRole("heading", { name: "Моя роль: AI Architect" })).toBeInTheDocument();
     expect(screen.getByTestId("course-demo-course-1")).toBeInTheDocument();
     expect(screen.getByTestId("course-demo-course-6")).toBeInTheDocument();
@@ -52,6 +66,8 @@ describe("Bootcamp AI trajectory content in reference UI", () => {
 
     fireEvent.click(within(roleTabs).getByRole("button", { name: "AI Engineer" }));
     expect(screen.getByRole("heading", { name: "Моя роль: AI Engineer" })).toBeInTheDocument();
+    expect(mainRole).toHaveAttribute("data-primary", "true");
+    expect(mainRole).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("course-demo-course-2")).toBeInTheDocument();
     expect(screen.getByTestId("course-demo-course-3")).toBeInTheDocument();
     expect(screen.queryByTestId("course-demo-course-1")).not.toBeInTheDocument();
@@ -62,6 +78,9 @@ describe("Bootcamp AI trajectory content in reference UI", () => {
 
     fireEvent.click(within(roleTabs).getByRole("button", { name: "AI Security Engineer" }));
     expect(screen.getByRole("heading", { name: "Моя роль: AI Security Engineer" })).toBeInTheDocument();
+    expect(mainRole).toHaveAttribute("data-primary", "true");
+    expect(mainRole).toHaveAttribute("aria-pressed", "false");
+    expect(within(roleTabs).getByRole("button", { name: "AI Security Engineer" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByTestId("course-demo-course-10")).toBeInTheDocument();
   });
 });
