@@ -1,18 +1,13 @@
 import { useState } from "react";
 import { BadgeCheck, BarChart3, ChevronDown, CircleHelp, ClipboardCheck } from "lucide-react";
 
+import { parseSkillPercent } from "./skill-impact-model";
 import { SkillMark } from "./skill-mark";
 import { displayCatalogTopic } from "./topic-labels";
 import type { CatalogItem } from "./types";
 import "./skill-impact-statistics.scss";
 
 type Impact = CatalogItem["skill_impact"][number];
-
-export function parseSkillPercent(level: string | null): number | null {
-  if (level === null || !/^\d+(?:[.,]\d+)?%$/.test(level.trim())) return null;
-  const value = Number(level.replace("%", "").replace(",", "."));
-  return Number.isFinite(value) && value >= 0 && value <= 100 ? value : null;
-}
 
 export function SkillImpactStatistics({ impacts, onGrowthExpand }: {
   impacts: readonly Impact[];
@@ -60,7 +55,7 @@ export function SkillImpactStatistics({ impacts, onGrowthExpand }: {
               <div><small>После этой задачи</small><b>{impact.status === "calculated" && impact.projected_level ? impact.projected_level : "Оценка после проверки"}</b></div>
               <div><small>Изменение уровня</small><b>{delta === null ? "Пока неизвестно" : (delta > 0 ? "+" : "") + String(delta) + "%"}</b></div>
             </div>
-            {current !== null && <div className="catalog-skill-stats__measured" aria-label={"Текущий уровень " + impact.current_level}><i style={{width:String(current)+"%"}}/></div>}
+            {current !== null && <div className="catalog-skill-stats__measured" aria-label={"Текущий уровень " + (impact.current_level ?? "не оценивался")}><i style={{width:String(current)+"%"}}/></div>}
             <p>{count > 0 ? "Принятый опыт учтён в статистике задачи. Уровень отдельно определяется системой компетенций." : "Этот навык указан в требованиях задачи. Принятого личного результата по нему пока нет."}</p>
             {impact.last_evidence_submitted_at && count > 0 && <small className="catalog-skill-stats__date">Последняя принятая работа отправлена {new Date(impact.last_evidence_submitted_at).toLocaleDateString("ru-RU")}</small>}
           </li>;
