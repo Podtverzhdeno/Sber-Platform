@@ -124,8 +124,8 @@ test("certification reflects stored course and practice evidence, without inert 
  await page.goto("/workspace/9?analyticsTab=certification");
  const root=page.getByTestId("analytics-v3");
  await expect(root).toHaveAttribute("data-tab","certification");
- await expect(root.getByText("1 завершено")).toBeVisible();
- await expect(root.getByText("1 учтено")).toBeVisible();
+ await expect(root.locator(".av3-requirements").getByText("1 завершено")).toBeVisible();
+ await expect(root.locator(".av3-requirements").getByText("1 учтено")).toBeVisible();
  await expect(root.locator(".av3-todo input[type=checkbox]")).toHaveCount(0);
  await expect(root.getByRole("button",{name:"Условия сертификации"})).toBeVisible();
  await expect(root.getByRole("combobox",{name:"Период аналитики"})).toHaveCount(0);
