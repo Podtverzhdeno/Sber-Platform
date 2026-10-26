@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "../api/client";
 import { learningSummaryQueryKey, loadLearningSummary } from "./learning-progress";
 import "./participant-evidence.scss";
 
@@ -12,15 +13,14 @@ export function ParticipantEvidence({ compact = false }: { compact?: boolean }) 
   });
   const work = useQuery({
     queryKey: ["participant-analytics"],
-    queryFn: async () => {
-      const { apiRequest } = await import("../api/client");
-      return apiRequest<Journey>("/api/v1/me/analytics/journey");
-    },
+    queryFn: () => apiRequest<Journey>("/api/v1/me/analytics/journey"),
     refetchOnMount: "always",
   });
   const summary = learning.data;
   const accepted = work.data?.stages.find(stage => stage.key === "verified_experience")?.count;
-  const recent = summary?.courses.filter(course => course.finished).slice(0, compact ? 1 : 2) ?? [];
+  const recent = summary?.courses.filter(course => course.finished).sort((a, b) =>
+    (b.finished_at ?? "").localeCompare(a.finished_at ?? "")
+  ).slice(0, compact ? 1 : 2) ?? [];
   return <section className={"participant-evidence" + (compact ? " participant-evidence--compact" : "")}
     data-testid="participant-live-evidence" aria-label="Мой подтверждённый учебный прогресс Impulse">
     <div className="participant-evidence__heading">
