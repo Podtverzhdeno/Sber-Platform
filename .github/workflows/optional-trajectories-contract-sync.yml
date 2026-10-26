@@ -1,0 +1,44 @@
+name: Optional Trajectories Contract Sync
+
+on:
+  push:
+    branches:
+      - feat/optional-trajectories-with-archive-20261026
+    paths:
+      - .github/workflows/optional-trajectories-contract-sync.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: true
+      - uses: astral-sh/setup-uv@887a942a15af3a7626099df99e897a18d9e5ab3a
+        with:
+          python-version: "3.13"
+      - run: uv sync --frozen
+      - name: Generate exact OpenAPI from application
+        run: uv run python -m impulse.quality.openapi_contract
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci --prefix frontend
+      - name: Generate typed API client
+        run: npm run api:generate --prefix frontend
+      - name: Commit only generated contract files to this feature branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add openapi.json frontend/src/api/schema.ts
+          if git diff --cached --quiet; then
+            echo "Contracts already match"
+          else
+            git commit -m "contract(trajectory): synchronize optional study API OpenAPI and TypeScript"
+            git push origin HEAD:feat/optional-trajectories-with-archive-20261026
+          fi
