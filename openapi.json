@@ -7031,10 +7031,22 @@
             "title": "Level",
             "type": "integer"
           },
+          "max_level": {
+            "default": 3,
+            "title": "Max Level",
+            "type": "integer"
+          },
           "policy_version": {
-            "default": 1,
+            "default": 2,
             "title": "Policy Version",
             "type": "integer"
+          },
+          "required_course_keys": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Course Keys",
+            "type": "array"
           },
           "required_courses": {
             "minimum": 0.0,
@@ -7042,7 +7054,7 @@
             "type": "integer"
           },
           "required_practices": {
-            "minimum": 1.0,
+            "minimum": 0.0,
             "title": "Required Practices",
             "type": "integer"
           },
