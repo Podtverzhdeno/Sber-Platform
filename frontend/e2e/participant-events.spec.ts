@@ -110,13 +110,14 @@ test("events reference: all six detail states, registration flow and keyboard na
   await expect(page.getByText("События, которые дают")).toBeVisible();
   const catalogueCover = referenceCards.first().locator(".ev-event-thumb img");
   const coverSource = await catalogueCover.getAttribute("src");
-  expect(coverSource?.startsWith("/events/banners/")).toBe(true);
-  expect(coverSource?.endsWith(".avif")).toBe(true);
+  if (!coverSource) throw new Error("Event card cover must be present");
+  expect(coverSource.startsWith("/events/banners/")).toBe(true);
+  expect(coverSource.endsWith(".avif")).toBe(true);
   await page.getByRole("button", { name: "Подробнее" }).first().click();
   const dialog = page.getByRole("dialog", { name: visualEvent.title });
   await expect(dialog).toBeVisible();
   const detailCover = dialog.locator(".ev-detail-banner");
-  await expect(detailCover).toHaveAttribute("src", coverSource!);
+  await expect(detailCover).toHaveAttribute("src", coverSource);
   await expect(detailCover).toBeVisible();
   await expect.poll(() => detailCover.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
   await page.screenshot({ path: "test-results/event-reference/about.png", animations: "disabled" });
@@ -128,7 +129,7 @@ test("events reference: all six detail states, registration flow and keyboard na
   await page.setViewportSize({ width: 1667, height: 939 });
   const nav = dialog.getByRole("navigation", { name: "Разделы события" });
   await nav.getByRole("button", { name: "Программа" }).click();
-  await expect(detailCover).toHaveAttribute("src", coverSource!);
+  await expect(detailCover).toHaveAttribute("src", coverSource);
   await expect(dialog.getByText("Программа мероприятия")).toBeVisible();
   await expect(dialog.getByText("Открытие и знакомство")).toBeVisible();
   await expect(dialog.locator(".ev-program-timeline li")).toHaveCount(6);
