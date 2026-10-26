@@ -10,36 +10,6 @@ const exampleEvent = (occurred_at: string) => ({
   title: "Пройден курс Impulse: Python",
   source_kind: "impulse_self_study",
   source_ref: "python",
-  it("opens certification tab for certificate evidence instead of Bootcamp", () => {
-    const now = new Date();
-    const snapshot: ActivityFeed = {
-      generated_at: now.toISOString(), actor_timezone: "UTC",
-      freshness: { known: true, latest_observed_at: now.toISOString() },
-      events: [{ occurred_at: now.toISOString(), kind: "certificate_issued", title: "Сертификат", source_kind: "certificate", source_ref: "cert-1" }],
-    };
-    const openCertification = vi.fn(), openCourses = vi.fn();
-    const { container } = render(<ActivityCalendar snapshot={snapshot} weeks={12} onOpenCourses={openCourses} onOpenProjects={vi.fn()} onOpenEvents={vi.fn()} onOpenCertification={openCertification}/>);
-    const cell = container.querySelector<HTMLButtonElement>(".ac-day.ac-level-1");
-    if (!cell) throw new Error("Missing certificate day");
-    fireEvent.click(cell);
-    fireEvent.click(screen.getByRole("button", { name: "Перейти в раздел" }));
-    expect(openCertification).toHaveBeenCalledOnce();
-    expect(openCourses).not.toHaveBeenCalled();
-  });
-
-  it("renders event time safely for invalid server timezone", () => {
-    const now = new Date();
-    const snapshot: ActivityFeed = {
-      generated_at: now.toISOString(), actor_timezone: "Invalid/Timezone",
-      freshness: { known: true, latest_observed_at: now.toISOString() },
-      events: [exampleEvent(now.toISOString())],
-    };
-    const { container } = render(<ActivityCalendar snapshot={snapshot} weeks={12} onOpenCourses={vi.fn()} onOpenProjects={vi.fn()} onOpenEvents={vi.fn()} onOpenCertification={vi.fn()}/>);
-    const cell = container.querySelector<HTMLButtonElement>(".ac-day.ac-level-1");
-    if (!cell) throw new Error("Missing activity day");
-    expect(() => fireEvent.click(cell)).not.toThrow();
-    expect(screen.getByRole("dialog")).toHaveTextContent("Пройден курс Impulse: Python");
-  });
 });
 
 describe("Activity calendar data integrity", () => {
@@ -142,6 +112,37 @@ describe("Interactive activity calendar", () => {
     fireEvent.click(screen.getByRole("button",{name:"Перейти в раздел"}));
     expect(openProjects).toHaveBeenCalledTimes(1);
     expect(openCourses).not.toHaveBeenCalled();
+  });
+
+  it("opens certification tab for certificate evidence instead of Bootcamp", () => {
+    const now = new Date();
+    const snapshot: ActivityFeed = {
+      generated_at: now.toISOString(), actor_timezone: "UTC",
+      freshness: { known: true, latest_observed_at: now.toISOString() },
+      events: [{ occurred_at: now.toISOString(), kind: "certificate_issued", title: "Сертификат", source_kind: "certificate", source_ref: "cert-1" }],
+    };
+    const openCertification = vi.fn(), openCourses = vi.fn();
+    const { container } = render(<ActivityCalendar snapshot={snapshot} weeks={12} onOpenCourses={openCourses} onOpenProjects={vi.fn()} onOpenEvents={vi.fn()} onOpenCertification={openCertification}/>);
+    const cell = container.querySelector<HTMLButtonElement>(".ac-day.ac-level-1");
+    if (!cell) throw new Error("Missing certificate day");
+    fireEvent.click(cell);
+    fireEvent.click(screen.getByRole("button", { name: "Перейти в раздел" }));
+    expect(openCertification).toHaveBeenCalledOnce();
+    expect(openCourses).not.toHaveBeenCalled();
+  });
+
+  it("renders event time safely for invalid server timezone", () => {
+    const now = new Date();
+    const snapshot: ActivityFeed = {
+      generated_at: now.toISOString(), actor_timezone: "Invalid/Timezone",
+      freshness: { known: true, latest_observed_at: now.toISOString() },
+      events: [exampleEvent(now.toISOString())],
+    };
+    const { container } = render(<ActivityCalendar snapshot={snapshot} weeks={12} onOpenCourses={vi.fn()} onOpenProjects={vi.fn()} onOpenEvents={vi.fn()} onOpenCertification={vi.fn()}/>);
+    const cell = container.querySelector<HTMLButtonElement>(".ac-day.ac-level-1");
+    if (!cell) throw new Error("Missing activity day");
+    expect(() => fireEvent.click(cell)).not.toThrow();
+    expect(screen.getByRole("dialog")).toHaveTextContent("Пройден курс Impulse: Python");
   });
 
 });
