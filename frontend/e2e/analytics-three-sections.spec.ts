@@ -132,3 +132,31 @@ test("certification reflects stored course and practice evidence, without inert 
  await root.getByRole("button",{name:"Условия сертификации"}).click();
  await expect(page.getByRole("dialog",{name:"Независимая сертификация"})).toBeVisible();
 });
+
+
+test("participant's real account data appears on the Agentic cyclogram and axes without a fabricated grade",async({page})=>{
+ await page.route("**/api/v1/me/bootcamp/impulse-study/summary",route=>route.fulfill({json:{
+  started_courses:2,finished_courses:1,completed_lessons:8,approved_practices:0,credited_practices:1,courses:[],
+ }}));
+ await page.route("**/api/v1/me/competency-evidence",route=>route.fulfill({json:[
+  {competency_key:"prompting",source_kind:"project",source_ref:"accepted-agent-case",level:"базовый",observed_at:"2026-10-25T14:00:00Z",reason:"Зарегистрированный источник",counted:true},
+ ]}));
+ await page.setViewportSize({width:1448,height:900});
+ await page.goto("/workspace/9?analyticsTab=passport");
+ const root=page.getByTestId("analytics-v3");
+ await expect(root).toHaveAttribute("data-tab","passport");
+ const stats=page.getByTestId("reference-personal-facts");
+ await expect(stats).toContainText("Курсов пройдено");
+ await expect(stats).toContainText("Уроков завершено");
+ await expect(stats).toContainText("Практик учтено");
+ await expect(stats).toContainText("Принятых работ");
+ await expect(stats.locator("b")).toHaveText(["1","8","1","4"]);
+ const chart=page.getByTestId("reference-radar");
+ await expect(chart.locator(".ref-radar-activity-mark")).toHaveCount(1);
+ await expect(chart.locator(".ref-radar-activity-mark text")).toHaveText("1");
+ await expect(chart.locator(".ref-radar-center")).toContainText("6 / 6");
+ await chart.locator(".ref-radar-skill").first().click();
+ await expect(page.getByRole("dialog",{name:/Подтверждение навыка/})).toBeVisible();
+ await expect(page.getByText(/accepted-agent-case/)).toBeVisible();
+ await page.screenshot({path:"test-results/analytics-real-personal-skill-evidence.png",fullPage:true,animations:"disabled"});
+});
