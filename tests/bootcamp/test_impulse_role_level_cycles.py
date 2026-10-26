@@ -38,14 +38,14 @@ async def test_real_database_three_cycles_never_replay_certificates(
         consent_scopes=frozenset(),
     )
     async def attempts(_person: object) -> tuple[TrackAttempt, ...]:
-        return (TrackAttempt("ai-security", 1, TrackStatus.ACTIVE),)
+        return (TrackAttempt("python", 1, TrackStatus.ACTIVE),)
     async def courses() -> tuple[SimpleNamespace, ...]:
         return tuple(
-            [SimpleNamespace(key=f"demo-course-{i}", track_keys=("ai-security",))
+            [SimpleNamespace(key=f"demo-course-{i}", track_keys=("python",))
              for i in (1, 2)]
-            + [SimpleNamespace(key=f"demo-course-{i}-ai-security", track_keys=("ai-security",))
+            + [SimpleNamespace(key=f"demo-course-{i}-python", track_keys=("python",))
                for i in (13, 14, 15, 16)]
-            + [SimpleNamespace(key="demo-course-13-ai-data", track_keys=("ai-data",))]
+            + [SimpleNamespace(key="demo-course-13-data", track_keys=("data",))]
         )
     async def summary(_auth: object, _request: object) -> SimpleNamespace:
         async with database.sessions() as session:
@@ -93,37 +93,37 @@ async def test_real_database_three_cycles_never_replay_certificates(
                 "certificate": uuid4(),
             })
     try:
-        state = await impulse_levels.impulse_level("ai-security", auth, request)
+        state = await impulse_levels.impulse_level("python", auth, request)
         assert (state.level, state.cycle_number) == (0, 1)
         assert not state.advance_ready
         await grant(("demo-course-1", "demo-course-2"), "demo-course-1")
-        state = await impulse_levels.impulse_level("ai-security", auth, request)
+        state = await impulse_levels.impulse_level("python", auth, request)
         assert state.advance_ready
-        state = await impulse_levels.advance_impulse_level("ai-security", auth, request)
+        state = await impulse_levels.advance_impulse_level("python", auth, request)
         assert (state.level, state.cycle_number, state.completed_courses) == (1, 2, 0)
         assert not state.advance_ready
         assert len(state.required_course_keys) == 2
 
-        await grant(("demo-course-13-ai-security", "demo-course-14-ai-security"),
-                    "demo-course-13-ai-security")
-        state = await impulse_levels.impulse_level("ai-security", auth, request)
+        await grant(("demo-course-13-python", "demo-course-14-python"),
+                    "demo-course-13-python")
+        state = await impulse_levels.impulse_level("python", auth, request)
         assert state.advance_ready and state.approved_practices == 1
-        state = await impulse_levels.advance_impulse_level("ai-security", auth, request)
+        state = await impulse_levels.advance_impulse_level("python", auth, request)
         assert (state.level, state.completed_courses) == (2, 0)
         assert not state.advance_ready
 
-        await grant(("demo-course-15-ai-security", "demo-course-16-ai-security"),
-                    "demo-course-15-ai-security")
-        state = await impulse_levels.advance_impulse_level("ai-security", auth, request)
+        await grant(("demo-course-15-python", "demo-course-16-python"),
+                    "demo-course-15-python")
+        state = await impulse_levels.advance_impulse_level("python", auth, request)
         assert state.level == 3 and state.cycle_number == 4
         assert len(state.history) == 3
         assert not state.advance_ready and not state.required_course_keys
-        repeat = await impulse_levels.advance_impulse_level("ai-security", auth, request)
+        repeat = await impulse_levels.advance_impulse_level("python", auth, request)
         assert repeat.level == 3 and len(repeat.history) == 3
         async with database.sessions() as session:
             row = (await session.execute(text(
                 "SELECT level,cycle_number FROM impulse_role_levels "
-                "WHERE person_id=:person AND track_key='ai-security'"
+                "WHERE person_id=:person AND track_key='python'"
             ), {"person": person})).one()
         assert tuple(row) == (3, 4)
     finally:
