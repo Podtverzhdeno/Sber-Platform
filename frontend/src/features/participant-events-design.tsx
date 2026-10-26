@@ -38,7 +38,7 @@ const DEMO_EVENT_COVERS: Record<string, string> = {
   "research-grant": "ai-conference",
 };
 
-export function getEventCover(item: Pick<EventViewItem, "key" | "title" | "event_type" | "track_keys">): string {
+function getEventCover(item: Pick<EventViewItem, "key" | "title" | "event_type" | "track_keys">): string {
   const id = item.key.toLowerCase();
   let cover = DEMO_EVENT_COVERS[id];
   if (!cover) {
