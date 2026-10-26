@@ -33,7 +33,8 @@ function localDateKey(timestamp: number, timeZone: string): string | null {
     const dateKey = part("year") + "-" + part("month") + "-" + part("day");
     return /^\d{4}-\d{2}-\d{2}$/.test(dateKey) ? dateKey : null;
   } catch {
-    return null;
+    // Invalid server timezone must not silently discard recorded activity.
+    return utcKey(timestamp);
   }
 }
 
