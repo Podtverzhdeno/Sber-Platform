@@ -728,7 +728,7 @@ export function BootcampCatalog({
       });
     },
   });
-  const studyFor = (key: string): LearningCourse | undefined => study.data?.courses?.find(item => item.course_key === key);
+  const studyFor = (key: string): LearningCourse | undefined => study.data?.courses.find(item => item.course_key === key);
   const studyStarted = (key: string) => (studyFor(key)?.completed_units ?? 0) > 0;
   const studyFinished = (key: string) => studyFor(key)?.finished === true;
   const [searchParams, setSearchParams] = useSearchParams();
