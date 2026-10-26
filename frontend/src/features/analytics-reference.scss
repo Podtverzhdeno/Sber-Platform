@@ -355,6 +355,9 @@ body:has(.analytics-reference) .overlay {z-index:10050;}
 .analytics-reference .ref-personal-facts small {color:#93b4c8;font-size:9px;line-height:1.35}
 .analytics-reference .ref-skill-activity {grid-column:2/4;grid-row:2;color:#84cfc9;font-size:9px;line-height:1.1}
 .analytics-reference .ref-skill-row>small {grid-column:5;grid-row:1}
+.analytics-reference .ref-radar-activity-mark circle {fill:#0e8da2;stroke:#041f32;stroke-width:2}
+.analytics-reference .ref-radar-activity-mark text {fill:#f2ffff;font-size:10px;font-weight:800;pointer-events:none}
+.analytics-reference .ref-dot.activity {background:#0e8da2}
 .analytics-reference .ref-personal-sources {padding-left:20px;overflow-wrap:anywhere}
 @media(max-width:600px) {
   .analytics-reference .ref-personal-facts>div {grid-template-columns:repeat(2,minmax(0,1fr))}
