@@ -250,6 +250,32 @@ def build_seed_batches() -> list[SeedBatch]:
         for key, _name, role in PERSONAS
         if role == "participant"
     ]
+    # DEMO ONLY: all participant names below are fictional and intentionally
+    # visible in the fictional published season. Real users still opt in through
+    # the consent API. Do not expand this scope to non-demo account records.
+    consent_rows.extend(
+        demo_row(
+            f"consent:{key}:public-rating",
+            person_id=demo_id(key),
+            scope="public_rating",
+            granted=True,
+            status="active",
+        )
+        for key, _name, role in PERSONAS
+        if role == "participant"
+    )
+    visibility_rows.extend(
+        demo_row(
+            f"visibility:{key}:public-rating",
+            person_id=demo_id(key),
+            scope="public_rating",
+            visible=True,
+            status="active",
+        )
+        for key, _name, role in PERSONAS
+        if role == "participant"
+    )
+
     track_rows = [demo_row(f"track:{slug}", slug=slug, title=title) for slug, title in TRACKS]
     roadmap_rows = [
         demo_row(
@@ -1569,6 +1595,12 @@ async def _insert_batches(session: AsyncSession, batches: list[SeedBatch]) -> No
             # The enrollment can carry a runtime completion/verification even
             # if data_origin still says demo_seed (runtime updates preserve it).
             # Never overwrite that status. New enrollments are seeded normally.
+            statement = statement.on_conflict_do_nothing()
+        elif batch.table in (visibility_settings, consents):
+            # Seed is a default ONLY. A participant may have revoked a demo
+            # public-rating or HR grant since seeding. Never overwrite their
+            # preference on a later startup/reseed, including when the runtime
+            # row uses a different UUID but the same natural person/scope key.
             statement = statement.on_conflict_do_nothing()
         else:
             update_values = {

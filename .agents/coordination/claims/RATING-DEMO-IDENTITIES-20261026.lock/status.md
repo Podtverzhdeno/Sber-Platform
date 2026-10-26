@@ -1,0 +1,33 @@
+# Claim RATING-DEMO-IDENTITIES-20261026
+- task_id: RATING-DEMO-IDENTITIES-20261026
+- session_id: gpt6-rating-participants-20261026
+- status: REVIEW
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 1191f3969f63497d5086f5d0cc53b14c0faa847b
+- depends_on: []
+- write_scope:
+  - src/impulse/bootstrap/demo_seed.py (synthetic participant demo-only public_rating, idempotent consent preservation)
+  - tests/test_demo_seed_graph.py (synthetic opt-in invariants)
+  - tests/test_recognition_domain.py (public consent privacy regression)
+  - tests/integration/test_demo_rating_visibility.py (PostgreSQL opt-out survives reseed)
+  - tests/integration/test_recognition_store.py (upsert existing rating visibility in integration fixtures)
+  - frontend/src/features/rating-v2/page.tsx (anonymous row alias/closed profile UX only)
+  - frontend/src/features/rating-v2/page.test.tsx (anonymous UI regression)
+  - frontend/e2e/participant-interactions.spec.ts (synthetic ten-person rating scenario only)
+  - docs/rating-data-integrity.md (demo and production boundary)
+  - .github/workflows/rating-demo-identities-qa.yml
+  - .agents/coordination/claims/RATING-DEMO-IDENTITIES-20261026.lock/status.md
+- shared_files:
+  - frontend/src/features/rating-v2/page.tsx (previous rating art and private consumer claims are REVIEW; anonymous alias only)
+- verification: seeded fake personas not real people; existing privacy opt-outs preserved on reseed; backend and frontend regression plus targeted browser.
+- progress: Demo-only public_rating explicitly seeded for 10 fictional participants. Re-seeding never overwrites consent/visibility. Anonymous alias always rank-based, no public name or profile without opt-in. Initials split fixed.
+- integration: isolated PR, no direct main edits or deployment without QA
+
+- verification_evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40257590295 — PostgreSQL migrations, Ruff, privacy opt-out, repeat reseed, recognition fixtures, frontend lint/typecheck, Vitest, build, Chromium: SUCCESS
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40257590274 — Rating reference QA: SUCCESS
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40257590159 — Owner rating consumers QA: SUCCESS
+- independent_review: Codex review no new findings on 5cbf9b57e5ac8bd89d038a123a348dee7b320d76; initial three P2 comments fixed and regression-tested
+- overall_ci: unrelated failures in journey, Bootcamp, mentor and project schema tests remain (no waivers)
+- integration: User requested main as default for platform changes in preceding turns. Merge with standard GitHub PR; do not explicitly initiate production deploy.
