@@ -21,3 +21,25 @@ The participant ranking is a read-only projection of the published recognition s
 **Note:** Program privileges are informational until an independently published award policy grants them.
 
 Task stage plans and provisional event claims must not count toward score-ledger entries until the required reviewer or operator decision is committed.
+
+## Synthetic demo participants
+
+The sample `demo-autumn-2026` season contains **ten fictional personas** with a
+`demo_seed` origin and `provenance.synthetic=true`. The demo seed explicitly
+grants `public_rating` consent and visibility to those ten sample participants
+so the ranking UI can display distinct names and initials instead of ten
+identical anonymous rows. This is not a global opt-in or a changed default for
+real accounts. The public leaderboard still relies solely on `public_rating`
+visibility in the SQL store.
+
+Seed is **default data, not an override of a user's choice**: conflict handling
+for `visibility_settings` and `consents` ignores existing rows rather than
+restoring public visibility after a participant changes consent. Runtime
+revocations take precedence, and anonymous public rows never expose a
+`person_id` or any name coming from the API. The UI uses a place-based
+anonymous label (e.g. `Участник №4`) and disables private profile actions.
+
+After deploying the migration-free seed change to an existing demo database,
+execute the project's supported **demo-only** `seed_demo` workflow in the
+approved environment. Merely updating the frontend does not alter previously
+stored `public_rating` visibility. Do not run demo seeding on real user data.
