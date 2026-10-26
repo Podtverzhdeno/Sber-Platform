@@ -13,7 +13,6 @@ import {
   roadmapsQueryKey,
   PRIMARY_LABEL,
   MILESTONE_STATE_LABELS,
-  milestoneState,
   readPinnedTrack,
   writePinnedTrack,
 } from "./client";
