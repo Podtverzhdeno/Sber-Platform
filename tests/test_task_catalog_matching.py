@@ -18,8 +18,8 @@ from impulse.application.task_catalog_matching import (
     VERIFIED_COMPETENCIES,
     FactorValue,
     MatchingContext,
-    calculate_task_match,
     accepted_skill_evidence,
+    calculate_task_match,
     fresh_verified_tags,
     score_factors,
 )
