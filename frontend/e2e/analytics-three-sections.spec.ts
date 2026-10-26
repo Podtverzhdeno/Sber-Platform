@@ -29,7 +29,7 @@ test("all three analytics screens, live charts, evidence and certification inter
  await expect(root).toHaveAttribute("data-tab","activity");
  await expect(page.getByRole("heading",{name:"Твоя активность"})).toBeVisible();
  await expect(root.locator(".av3-heat-column")).toHaveCount(0);
- await expect(root.locator(".av3-week-columns > div")).toHaveCount(8);
+ await expect(root.locator(".ac-week")).toHaveCount(52);
  await expect(root.getByText("14",{exact:true}).first()).toBeVisible();
  await page.screenshot({path:"test-results/analytics-v3-activity-1586x992.png",fullPage:true,animations:"disabled"});
  await root.getByRole("button",{name:"Skill Passport",exact:true}).click();
@@ -51,8 +51,8 @@ test("responsive analytics navigation, range selectors and stable button animati
  await page.goto("/workspace/9");
  const root=page.getByTestId("analytics-v3");
  await expect(root.getByRole("heading",{name:"Твоя активность"})).toBeVisible();
- await root.getByRole("combobox",{name:"Период аналитики"}).selectOption("4");
- await expect(root.locator(".av3-week-columns > div")).toHaveCount(4);
+ await root.getByRole("combobox",{name:"Период аналитики"}).selectOption("12");
+ await expect(root.locator(".ac-week")).toHaveCount(12);
  await root.getByRole("button",{name:"Сертификация",exact:true}).click();
  await expect(root.getByRole("heading",{name:"Твоя сертификация"})).toBeVisible();
  const w=await root.evaluate(el=>({viewport:window.innerWidth,width:document.documentElement.scrollWidth,transition:getComputedStyle(el.querySelector("button")??el).transitionProperty}));
@@ -87,9 +87,9 @@ for (const viewport of [
     const r=el.getBoundingClientRect();
     const buttons=Array.from(el.querySelectorAll<HTMLButtonElement>("button"), x=>{
      const rect=x.getBoundingClientRect();
-     return {x:rect.x,y:rect.y,width:rect.width,height:rect.height};
+     return {x:rect.x+window.scrollX,y:rect.y+window.scrollY,width:rect.width,height:rect.height};
     });
-    return {x:r.x,y:r.y,width:r.width,height:r.height,buttons};
+    return {x:r.x+window.scrollX,y:r.y+window.scrollY,width:r.width,height:r.height,buttons};
    });
   };
   const initial=await sample();
