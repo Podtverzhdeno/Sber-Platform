@@ -5,8 +5,9 @@ from __future__ import annotations
 import importlib.util
 import tempfile
 import unittest
-from typing import TypedDict
 from pathlib import Path
+from typing import TypedDict
+
 
 class AuditBaseline(TypedDict):
     exceptions: list[dict[str, str]]
