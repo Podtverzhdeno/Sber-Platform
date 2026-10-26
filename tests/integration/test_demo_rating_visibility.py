@@ -38,25 +38,41 @@ async def test_seeded_fictional_rating_is_named_and_optout_survives_reseed() -> 
                 )
             ).all()
         names = {row.person_id: row.visible for row in rows}
-        assert all(names[demo_id(key)] is True for key in participant_keys)
+        # Previously granted demo records may have been opted out by earlier
+        # test runs. Do not turn them back on just to assert the default.
+        assert all(demo_id(key) in names for key in participant_keys)
+        assert all(isinstance(names[demo_id(key)], bool) for key in participant_keys)
 
         alex_id = demo_id("participant-alex")
+        original_visible = names[alex_id]
         store = SqlIdentityStore(db)
-        await store.set_consent(alex_id, ConsentScope.PUBLIC_RATING, False)
-
-        await seed_demo(db)
-        await seed_demo(db)
-        async with db.sessions() as session:
-            row = (
-                await session.execute(
-                    select(visibility_settings.c.visible).where(
-                        visibility_settings.c.person_id == alex_id,
-                        visibility_settings.c.scope == "public_rating",
+        try:
+            await store.set_consent(alex_id, ConsentScope.PUBLIC_RATING, False)
+            await seed_demo(db)
+            await seed_demo(db)
+            async with db.sessions() as session:
+                row = (
+                    await session.execute(
+                        select(visibility_settings.c.visible).where(
+                            visibility_settings.c.person_id == alex_id,
+                            visibility_settings.c.scope == "public_rating",
+                        )
                     )
-                )
-            ).scalar_one()
-        assert row is False
-        assert ConsentScope.PUBLIC_RATING not in await store.granted_consents(alex_id)
-        assert names[demo_id("participant-maria")] is True
+                ).scalar_one()
+                maria_visible = (
+                    await session.execute(
+                        select(visibility_settings.c.visible).where(
+                            visibility_settings.c.person_id == demo_id("participant-maria"),
+                            visibility_settings.c.scope == "public_rating",
+                        )
+                    )
+                ).scalar_one()
+            assert row is False
+            assert ConsentScope.PUBLIC_RATING not in await store.granted_consents(alex_id)
+            assert maria_visible is names[demo_id("participant-maria")]
+        finally:
+            # Logical visibility and consent must be restored, so re-running
+            # this test on the same dedicated DB remains deterministic.
+            await store.set_consent(alex_id, ConsentScope.PUBLIC_RATING, original_visible)
     finally:
         await db.close()
