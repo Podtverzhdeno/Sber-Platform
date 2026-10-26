@@ -48,6 +48,7 @@ function view() {
 beforeEach(() => {
   vi.resetAllMocks();
   localStorage.clear();
+  sessionStorage.clear();
   thread.messages = [];
   journeyResult = { person_id: profile.person_id, self_study_available: true, courses: [], projects: [], accepted_case_count: 0, verified_provider_course_count: 0 };
   passportResult = { person_id: profile.person_id, skills: [] };
@@ -142,5 +143,72 @@ describe("AI-Buddy single-pane conversation", () => {
     fireEvent.click(screen.getByRole("button", {name:"Отправить сообщение"}));
     expect(await screen.findByText(/Сообщение не отправлено/)).toBeVisible();
     expect(screen.getByRole("textbox", {name:"Сообщение AI-Buddy"})).toHaveValue("Помоги");
+  });
+
+  it("closes the greeting banner for the session without hiding new-chat navigation", async () => {
+    const first = view();
+    const close = await screen.findByRole("button", { name: "Закрыть баннер AI-Buddy" });
+    fireEvent.click(close);
+    expect(screen.queryByText("Привет, я AI-Buddy!")).not.toBeInTheDocument();
+    expect(sessionStorage.getItem("impulse-buddy-hero-dismissed:" + profile.person_id)).toBe("1");
+    expect(screen.getByRole("heading", {name:"AI-Buddy",level:1})).toBeInTheDocument();
+    first.unmount();
+    view();
+    expect(screen.queryByRole("button", { name: "Закрыть баннер AI-Buddy" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Новый диалог" })).toBeVisible();
+  });
+
+  it("creates a persisted server thread before typing the first message", async () => {
+    const created = {
+      id: "33333333-3333-4333-8333-333333333333", status: "active",
+      content_deleted: false, messages: [] as {id:string;client_message_id:string;role:string;content:string}[],
+    };
+    localStorage.setItem("impulse-buddy-dialogues:" + profile.person_id, JSON.stringify([
+      { id: thread.id, title: "Старый чат", updated: "2026-10-25T08:00:00Z" },
+    ]));
+    thread.messages = [{
+      id: "44444444-4444-4444-8444-444444444444", client_message_id:"old-message",
+      role:"user", content:"Старый разговор",
+    }];
+    const initial = vi.mocked(apiRequest).getMockImplementation();
+    vi.mocked(apiRequest).mockImplementation(async (path, options) => {
+      if (path === "/api/v1/agents/buddy/threads" && options?.method === "POST") return created;
+      if (path === "/api/v1/agents/buddy/threads/" + created.id) return created;
+      if (!initial) throw new Error("Missing default mocked API");
+      return initial(path, options);
+    });
+    const {container} = view();
+    expect(await screen.findByText("Старый разговор")).toBeVisible();
+    fireEvent.change(screen.getByRole("textbox", {name:"Сообщение AI-Buddy"}), {
+      target: {value:"Черновик"},
+    });
+    fireEvent.click(screen.getByRole("button", {name:"Новый диалог"}));
+    await waitFor(() => {
+      expect(apiRequest).toHaveBeenCalledWith(
+        "/api/v1/agents/buddy/threads", expect.objectContaining({method:"POST"}),
+      );
+      expect(container.querySelector(".buddy2-dialog.active")).toHaveTextContent("Новый диалог");
+    });
+    expect(screen.getByRole("textbox", {name:"Сообщение AI-Buddy"})).toHaveValue("");
+    expect(screen.queryByText("Старый разговор")).not.toBeInTheDocument();
+    expect(screen.getByText(/Начните разговор: напишите вопрос/)).toBeVisible();
+    expect(localStorage.getItem("impulse-buddy-dialogues:" + profile.person_id)).toContain(created.id);
+  });
+
+  it("keeps the previous thread and unsent draft if server thread creation fails", async () => {
+    const initial = vi.mocked(apiRequest).getMockImplementation();
+    vi.mocked(apiRequest).mockImplementation(async (path, options) => {
+      if (path === "/api/v1/agents/buddy/threads" && options?.method === "POST") throw new Error("Offline");
+      if (!initial) throw new Error("Missing default mocked API");
+      return initial(path, options);
+    });
+    view();
+    fireEvent.change(screen.getByRole("textbox", {name:"Сообщение AI-Buddy"}), {
+      target:{value:"Важный черновик"},
+    });
+    fireEvent.click(screen.getByRole("button", {name:"Новый диалог"}));
+    expect(await screen.findByText(/Не удалось создать новый диалог/)).toBeVisible();
+    expect(screen.getByRole("textbox", {name:"Сообщение AI-Buddy"})).toHaveValue("Важный черновик");
+    expect(localStorage.getItem("impulse-buddy-dialogues:" + profile.person_id)).toBeNull();
   });
 });
