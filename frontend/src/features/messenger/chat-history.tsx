@@ -89,11 +89,6 @@ const PENDING_STATE_LABELS: Record<PendingMessageOverlay["state"], string> = {
   failed: "Не отправлено",
 };
 
-function channelInitial(channel: ApiChannelView | null, viewerId: string | null): string {
-  if (channel === null) return "ч";
-  return (dialogTitle(channel, viewerId).trim()[0] ?? "ч").toUpperCase();
-}
-
 export function ChatHistory({
   channel,
   viewerId,
@@ -245,7 +240,7 @@ export function ChatHistory({
       aria-label={ariaLabel ?? `Чат «${channelTitle}»`}
     >
       <header className="msg-chat__header" aria-label="Заголовок чата">
-        <DialogAvatar title={channelTitle} initials={channelInitial(channel, viewerId)} kind={channel?.kind} className="msg-chat__avatar" />
+        <DialogAvatar title={channelTitle} kind={channel?.kind} className="msg-chat__avatar" />
         <button
           type="button"
           className="msg-chat__header-title msg-chat__header-title-button"
