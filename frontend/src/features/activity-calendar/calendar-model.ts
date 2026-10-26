@@ -40,7 +40,12 @@ function localDateKey(timestamp: number, timeZone: string): string | null {
 
 export function buildActivityDays(snapshot: ActivityFeed | undefined, weeks: number, now = new Date()): Day[] {
   const length = Math.max(1, Math.min(52, Math.trunc(weeks) || 12)) * 7;
-  const timeZone = snapshot?.actor_timezone || "UTC";
+  // Invalid server timezones must not silently discard real activity events.
+  // Use the same UTC fallback as the event-time renderer.
+  const requestedTimeZone = snapshot?.actor_timezone || "UTC";
+  let timeZone = requestedTimeZone;
+  try { new Intl.DateTimeFormat("en-US", { timeZone }); }
+  catch { timeZone = "UTC"; }
   const todayKey = localDateKey(now.getTime(), timeZone) ?? utcKey(now.getTime());
   const todayTimestamp = Date.parse(todayKey + "T00:00:00Z");
   const dayOfWeek = new Date(todayTimestamp).getUTCDay();
