@@ -197,7 +197,7 @@ async def test_demo_seed_is_linked_and_idempotent() -> None:
 
     assert first == second
     assert second["persons"] == 15
-    assert second["courses"] == 12
+    assert second["courses"] == 40  # 12 foundation + 4 advanced courses for each of seven roles
     assert second["events"] == 8
     assert second["tasks"] == 12
     assert second["appeals"] == 1
