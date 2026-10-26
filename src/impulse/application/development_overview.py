@@ -58,6 +58,8 @@ ASSIGNMENT_NEXT_ACTIONS: dict[AssignmentStatus, str] = {
 TRACK_STATE_LABELS: dict[TrackStatus | None, str] = {
     TrackStatus.ACTIVE: "active",
     TrackStatus.FROZEN: "paused",
+    TrackStatus.EXPLORING: "learning",
+    TrackStatus.ARCHIVED: "unselected",
     None: "unselected",
 }
 
@@ -264,9 +266,13 @@ class DevelopmentOverviewService:
                     track_key=track.key,
                     title=track.title,
                     state=TRACK_STATE_LABELS[None if attempt is None else attempt.status],
-                    attempt_number=None if attempt is None else attempt.attempt_number,
+                    attempt_number=(
+                        None if attempt is None or attempt.status is TrackStatus.ARCHIVED
+                        else attempt.attempt_number
+                    ),
                     completed_milestones=(
-                        0 if attempt is None else len(attempt.completed_milestones)
+                        0 if attempt is None or attempt.status is TrackStatus.ARCHIVED
+                        else len(attempt.completed_milestones)
                     ),
                     total_milestones=0 if roadmap is None else len(roadmap.milestones),
                 )
