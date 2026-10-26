@@ -55,6 +55,8 @@ describe("published rating integration", () => {
     expect(within(board).getByText("100")).toBeInTheDocument();
     expect(within(board).getByText("75")).toBeInTheDocument();
     expect(within(board).getByText("Тестовый участник")).toBeInTheDocument();
+    expect(within(board).getAllByText("Нет опубликованных данных").length).toBeGreaterThan(0);
+    expect(screen.getByText(/только подтверждённые проектные начисления сезона/)).toBeInTheDocument();
     expect(within(board).getByText("Участник №1")).toBeInTheDocument();
     expect(within(board).queryByText("Нельзя раскрывать")).not.toBeInTheDocument();
     expect(within(board).getByText(/Имя и профиль скрыты/)).toBeInTheDocument();
