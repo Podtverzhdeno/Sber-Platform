@@ -10,6 +10,7 @@ on:
       - "frontend/src/api/client.ts"
       - "tests/test_development_domain.py"
       - "tests/test_development_api.py"
+      - "tests/bootcamp/test_impulse_study.py"
       - "frontend/e2e/trajectory-optional-lifecycle.spec.ts"
       - "src/impulse/bootcamp/editorial_learning.py"
       - ".github/workflows/optional-trajectories-qa.yml"
@@ -27,7 +28,7 @@ jobs:
         run: |
           uv sync --frozen
           uv run ruff check src/impulse/domain/development.py src/impulse/application/development.py src/impulse/application/development_overview.py src/impulse/api/v1/development.py tests/test_development_domain.py tests/test_development_api.py
-          uv run pytest -q tests/test_development_domain.py tests/test_development_api.py
+          uv run pytest -q tests/test_development_domain.py tests/test_development_api.py tests/bootcamp/test_impulse_study.py
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: "24"
