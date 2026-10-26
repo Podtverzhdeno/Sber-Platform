@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
+
 import pytest
+from fastapi.routing import APIRoute
 from pydantic import ValidationError
 
 from impulse.api.v1 import work, work_requests
@@ -67,7 +70,7 @@ def test_existing_validation_bounds_are_preserved() -> None:
         work_requests.CompensationRequest(
             paid=True,
             currency="rub",
-            a_multiplier="1",
+            a_multiplier=Decimal("1"),
             policy_version=1,
             payout_condition="Результат",
         )
@@ -75,10 +78,10 @@ def test_existing_validation_bounds_are_preserved() -> None:
 
 def test_customer_routes_and_body_models_remain_registered() -> None:
     routes = {
-        (path, method)
+        (route.path, method)
         for route in work.router.routes
-        for path in (getattr(route, "path", None),)
-        for method in (getattr(route, "methods", None) or set())
+        if isinstance(route, APIRoute)
+        for method in route.methods
     }
     assert ("/customer/projects/{project_key}/tasks", "POST") in routes
     assert ("/customer/team-requests", "POST") in routes
