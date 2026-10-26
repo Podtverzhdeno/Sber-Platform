@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Bell, BellOff, ChevronRight, Copy, ExternalLink, FileText, Image as ImageIcon, Link2, MoreHorizontal, Plus, Search, UsersRound, X, Bot, MessageSquareText } from "lucide-react";
 import type { ApiChannelView, ApiMessageView, ApiParticipantView } from "./contracts";
 import { participantRoleLabel } from "./view-model";
+import { DialogAvatar } from "./dialog-avatar";
 import type { DirectoryContact } from "./group-creator";
 import "./community-details.scss";
 
@@ -102,9 +103,7 @@ export function CommunityDetails({
         {onClose && <button type="button" aria-label="К чату" title="Закрыть информацию" onClick={onClose}><X size={20}/></button>}
       </header>
       <section className="msg-community__hero" aria-label="Профиль сообщества">
-        <div className="msg-community__hero-avatar" aria-hidden="true">
-          {channel.title.trim().toLocaleLowerCase("ru") === "маяки" ? <img src="/messages-reference/mayaki-avatar.svg" alt="" /> : initials(channel.title)}
-        </div>
+        <DialogAvatar title={channel.title} kind="community" className="msg-community__hero-avatar" />
         <h2>{channel.title}</h2>
         <p>{channel.participants.length} {channel.participants.length % 10 === 1 && channel.participants.length % 100 !== 11 ? "участник" : [2,3,4].includes(channel.participants.length % 10) && ![12,13,14].includes(channel.participants.length % 100) ? "участника" : "участников"}</p>
         {channel.title.trim().toLocaleLowerCase("ru") === "маяки" && <small>Сообщество для развития, проектов и новых возможностей</small>}
@@ -142,7 +141,7 @@ export function CommunityDetails({
           <ul className="msg-community__members">
             {visible.map((person,index) => <li key={person.id} data-testid="context-participant">
               <button type="button" onClick={() => {openPerson(person);}} aria-label={`Открыть профиль: ${person.display_name}`}>
-                <span className={`msg-community__person-avatar tone-${String(index%5)}`} aria-hidden="true">{initials(person.display_name)}</span>
+                <DialogAvatar title={person.display_name} kind="personal" className={`msg-community__person-avatar tone-${String(index%5)}`} />
                 <span className="msg-community__person-name"><strong>{person.display_name || "Без имени"}</strong>
                   <small>{person.id === viewerId ? "Вы · " : ""}{participantRoleLabel(person.role)}</small>
                 </span>
@@ -167,7 +166,7 @@ export function CommunityDetails({
       {feedback && <p className="msg-community__feedback" role="status">{feedback}</p>}
       {profile && <div className="msg-community__profile" role="dialog" aria-label={`Профиль участника: ${profile.display_name}`}>
         <button type="button" className="msg-community__profile-close" aria-label="Закрыть профиль" onClick={() => {setProfile(null);}}><X size={18}/></button>
-        <span className="msg-community__profile-avatar">{initials(profile.display_name)}</span>
+        <DialogAvatar title={profile.display_name} kind="personal" className="msg-community__profile-avatar" />
         <h3>{profile.display_name || "Без имени"}</h3>
         <p>{participantRoleLabel(profile.role)}{profile.id === viewerId ? " · это вы" : ""}</p>
         <small>Данные о присутствии в сети недоступны</small>
@@ -196,7 +195,7 @@ export function CommunityDetails({
           <p>Выберите коллег из вашей программы, которые ещё не состоят в сообществе.</p>
           <label className="msg-community__search"><Search size={16}/><input type="search" placeholder="Поиск контактов" aria-label="Поиск контактов" value={filter} onChange={event=>{setFilter(event.target.value);}}/></label>
           <div className="msg-community__invites">
-            {eligible.map(person=><label key={person.id}><input type="checkbox" checked={chosen.includes(person.id)} onChange={event=>{setChosen(current=>event.target.checked?[...current,person.id]:current.filter(id=>id!==person.id));}}/><span className="msg-community__person-avatar">{initials(person.display_name)}</span><span>{person.display_name}<small>{person.role}</small></span></label>)}
+            {eligible.map(person=><label key={person.id}><input type="checkbox" checked={chosen.includes(person.id)} onChange={event=>{setChosen(current=>event.target.checked?[...current,person.id]:current.filter(id=>id!==person.id));}}/><DialogAvatar title={person.display_name} kind="personal" className="msg-community__person-avatar" /><span>{person.display_name}<small>{person.role}</small></span></label>)}
             {!eligible.length && <p className="msg-community__empty">Нет подходящих контактов для добавления</p>}
           </div>
           {inviteError && <p role="alert">{inviteError}</p>}
