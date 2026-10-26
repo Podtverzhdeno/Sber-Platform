@@ -23,6 +23,7 @@ from impulse.bootcamp.service import BootcampCatalogService
 from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
 from impulse.domain.development import local_learning_days
 from impulse.domain.identity import Role
+from impulse.domain.development import TrackStatus
 
 router = APIRouter(tags=["bootcamp"])
 UNIT_COUNT = 8
@@ -123,6 +124,7 @@ async def assert_course_access(
         track = match.group(2)
         if not any(
             attempt.track_key == track
+            and attempt.status in (TrackStatus.ACTIVE, TrackStatus.EXPLORING)
             for attempt in await development.store.attempts(authenticated.actor.person_id)
         ):
             raise ApiError(
