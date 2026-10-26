@@ -107,6 +107,34 @@ export const participantProjectionKeys = [
   "me",
 ] as const;
 
+/**
+ * A single saved lesson only changes self-study counters and qualified
+ * engagement. Do not refetch the entire participant workspace (projects,
+ * rating, documents, profile, messaging) eight times in an eight-lesson
+ * course: that exhausts the per-session read rate limit during normal study.
+ *
+ * Course finish, practice submissions, awards and other writes retain the
+ * existing full cross-section invalidation contract.
+ */
+export const lessonProgressProjectionKeys = [
+  "impulse-study",
+  "impulse-learning-summary",
+  "engagement-overview",
+  "engagement-rhythm",
+  "streak",
+  "participant-growth-analytics",
+  "participant-analytics",
+  "growth-snapshot",
+] as const;
+
+export function projectionKeysForProgressMutation(path: string): readonly string[] {
+  const pathname = (path.split(/[?#]/, 1)[0] ?? path).replace(/\\/$/, "");
+  if (/^\\/api\\/v1\\/me\\/bootcamp\\/impulse-study\\/[^/]+\\/lessons\\/\\d+\\/complete$/.test(pathname)) {
+    return lessonProgressProjectionKeys;
+  }
+  return participantProjectionKeys;
+}
+
 /** Normalize only the pathname; retain path segment boundaries. */
 function isEndpointOrChild(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
