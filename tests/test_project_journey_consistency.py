@@ -40,7 +40,9 @@ def _login(api: TestClient, persona: str) -> str:
     return response.json()["csrf_token"]
 
 
-def _post(api: TestClient, path: str, csrf: str, body: dict[str, object] | None = None) -> dict[str, Any]:
+def _post(
+    api: TestClient, path: str, csrf: str, body: dict[str, object] | None = None
+) -> dict[str, Any]:
     response = api.post(path, headers={"X-CSRF-Token": csrf}, json=body)
     assert response.status_code == 200, f"{path}: {response.status_code} {response.text}"
     payload: object = response.json()
