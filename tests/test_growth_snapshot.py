@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
 from typing import cast
 
 import pytest
@@ -15,6 +16,8 @@ from impulse.application.development import (
     MemoryDevelopmentStore,
     RoadmapRecord,
 )
+from impulse.application.growth import GrowthService
+from impulse.application.work import WorkItem
 from impulse.application.identity import (
     DemoAuthService,
     MemoryIdentityStore,
@@ -25,6 +28,7 @@ from impulse.bootstrap.demo_seed import demo_id
 from impulse.bootstrap.settings import AppEnvironment, Settings
 from impulse.domain.development import CompletionStatus, RoadmapMilestone
 from impulse.domain.growth import merge_intervals, merged_minutes
+from impulse.domain.work import ContributionStatus
 
 
 def _test_settings() -> Settings:
@@ -185,9 +189,27 @@ def test_growth_snapshot_activity_buckets_and_hours_shape() -> None:
         }
     assert "day" in payload["activity"]
     hours = payload["hours"]
-    assert hours["self_reported_minutes"] == 0
-    if not hours["known"]:
-        assert hours["trusted_minutes"] is None
+    assert hours["self_reported_minutes"] is None
+    assert hours["known"] is False
+    assert hours["trusted_minutes"] is None
+    assert hours["intervals"] == []
+
+
+@pytest.mark.spec("participant-experience/hours-must-be-attested")
+def test_assignment_to_acceptance_is_not_a_trusted_work_session() -> None:
+    """Workflow lead time cannot be reported as hours spent working."""
+    start = datetime(2026, 10, 1, 9, tzinfo=UTC)
+    accepted_at = start + timedelta(days=5)
+    item = cast(
+        WorkItem,
+        SimpleNamespace(
+            assignment=SimpleNamespace(created_at=start, id="task-1"),
+            decisions=(
+                SimpleNamespace(decision=ContributionStatus.ACCEPTED, decided_at=accepted_at),
+            ),
+        ),
+    )
+    assert GrowthService._trusted_intervals((item,)) == ()
 
 
 @pytest.mark.spec("participant-experience/versioned-growth-snapshot")
