@@ -11,6 +11,7 @@
   - tests/test_demo_seed_graph.py (synthetic opt-in invariants)
   - tests/test_recognition_domain.py (public consent privacy regression)
   - tests/integration/test_demo_rating_visibility.py (PostgreSQL opt-out survives reseed)
+  - tests/integration/test_recognition_store.py (upsert existing rating visibility in integration fixtures)
   - frontend/src/features/rating-v2/page.tsx (anonymous row alias/closed profile UX only)
   - frontend/src/features/rating-v2/page.test.tsx (anonymous UI regression)
   - frontend/e2e/participant-interactions.spec.ts (synthetic ten-person rating scenario only)
