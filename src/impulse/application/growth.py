@@ -365,7 +365,7 @@ class GrowthService:
         return HoursBlock(
             known=bool(intervals),
             trusted_minutes=minutes if intervals else None,
-            self_reported_minutes=0,
+            self_reported_minutes=None,
             intervals=tuple(
                 TrustedIntervalSnapshot(
                     start=item[0], end=item[1], source_kind=item[2], source_ref=item[3]
@@ -406,31 +406,18 @@ class GrowthService:
                 )
         return tuple(events)
 
+    @staticmethod
     def _trusted_intervals(
-        self, items: tuple[WorkItem, ...]
+        _items: tuple[WorkItem, ...],
     ) -> tuple[tuple[datetime, datetime, str, str], ...]:
-        intervals: list[tuple[datetime, datetime, str, str]] = []
-        for item in items:
-            assignment = item.assignment
-            decision = next(
-                (row for row in item.decisions if row.decision is ContributionStatus.ACCEPTED),
-                None,
-            )
-            if (
-                assignment.created_at is not None
-                and decision is not None
-                and decision.decided_at is not None
-                and decision.decided_at > assignment.created_at
-            ):
-                intervals.append(
-                    (
-                        assignment.created_at,
-                        decision.decided_at,
-                        "work_assignment",
-                        str(assignment.id),
-                    )
-                )
-        return tuple(intervals)
+        """Only time-attested work sessions may populate the hours projection.
+
+        Assignment creation to acceptance is elapsed calendar time, not hours
+        spent working. No duration-attested session store is integrated yet;
+        keep hours unknown instead of manufacturing work effort from workflow
+        timestamps. Real acceptance/submission events remain in the timeline.
+        """
+        return ()
 
     def _milestone_views(
         self,
