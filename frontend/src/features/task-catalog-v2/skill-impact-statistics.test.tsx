@@ -25,7 +25,7 @@ describe("Skill impact evidence statistics", () => {
     const area = screen.getByRole("region", { name: "Статистика навыков задачи" });
     expect(within(area).getByText("1 из 2")).toBeInTheDocument();
     expect(within(area).getByText("50%")).toBeInTheDocument();
-    expect(within(area).getByText("2")).toBeInTheDocument();
+    expect(within(area).getAllByText("2")).toHaveLength(2);
     expect(within(area).getAllByText("Не оценивался")).toHaveLength(2);
     expect(within(area).getAllByText("Пока неизвестно")).toHaveLength(2);
     expect(within(area).getAllByText("Оценка после проверки")).toHaveLength(2);
