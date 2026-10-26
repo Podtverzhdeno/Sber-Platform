@@ -9161,6 +9161,26 @@
         "title": "OperationalCredentialView",
         "type": "object"
       },
+      "OptionalTrackRequest": {
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "track_key": {
+            "maxLength": 96,
+            "minLength": 1,
+            "title": "Track Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "track_key",
+          "enabled"
+        ],
+        "title": "OptionalTrackRequest",
+        "type": "object"
+      },
       "OverviewConceptView": {
         "properties": {
           "canonical_surface": {
@@ -13912,7 +13932,9 @@
       "TrackStatus": {
         "enum": [
           "active",
-          "frozen"
+          "frozen",
+          "exploring",
+          "archived"
         ],
         "title": "TrackStatus",
         "type": "string"
@@ -21998,6 +22020,63 @@
           }
         },
         "summary": "Select Track"
+      }
+    },
+    "/api/v1/me/tracks/optional": {
+      "post": {
+        "description": "Enable optional studies or archive the card; neither operation changes the primary.",
+        "operationId": "optional_track_api_v1_me_tracks_optional_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Csrf-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OptionalTrackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackOverview"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Optional Track"
       }
     },
     "/api/v1/me/trajectory-map": {

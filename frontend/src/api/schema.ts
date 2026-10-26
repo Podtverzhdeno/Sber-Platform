@@ -2408,6 +2408,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/tracks/optional": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Optional Track
+         * @description Enable optional studies or archive the card; neither operation changes the primary.
+         */
+        post: operations["optional_track_api_v1_me_tracks_optional_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/trajectory-map": {
         parameters: {
             query?: never;
@@ -6534,6 +6554,13 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** OptionalTrackRequest */
+        OptionalTrackRequest: {
+            /** Enabled */
+            enabled: boolean;
+            /** Track Key */
+            track_key: string;
+        };
         /** OverviewConceptView */
         OverviewConceptView: {
             /** Canonical Surface */
@@ -8189,7 +8216,7 @@ export interface components {
          * TrackStatus
          * @enum {string}
          */
-        TrackStatus: "active" | "frozen";
+        TrackStatus: "active" | "frozen" | "exploring" | "archived";
         /** TrackView */
         TrackView: {
             /** Completed Milestones */
@@ -12966,6 +12993,41 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": components["schemas"]["SelectTrackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrackOverview"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    optional_track_api_v1_me_tracks_optional_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-CSRF-Token"?: string | null;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OptionalTrackRequest"];
             };
         };
         responses: {
