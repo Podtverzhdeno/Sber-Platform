@@ -285,7 +285,7 @@ export function CustomerAnalytics({navigation=[]}:{navigation?:string[]}) {
     </section>
     {hovered && !selectedDay && createPortal(<div className="ca3-heat-tooltip" role="tooltip" style={{left:Math.max(8,Math.min(hovered.x,window.innerWidth-244)),top:Math.max(8,hovered.y-102)}}>
       <strong>{todayLabel(dayFromKey(hovered.key).toISOString())}</strong>
-      <span>{activity.isSuccess?`${counts.get(hovered.key)??0} событий`:"История недоступна"}</span>
+      <span>{activity.isSuccess?`${String(counts.get(hovered.key)??0)} событий`:"История недоступна"}</span>
       {hoverEvents.slice(0,2).map(event=><small key={event.id}>{labels[event.kind]} · {event.task_title}</small>)}
       <em>Нажмите для подробностей</em>
     </div>,document.body)}
