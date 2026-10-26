@@ -1074,3 +1074,95 @@
     box-shadow: -12px 0 35px rgba(0, 8, 20, .45);
   }
 }
+
+
+/* Consistent identity rendering on every messaging surface.
+   Monograms are used when the API doesn't provide a verified portrait. */
+.sberchat-reference .msg-avatar {
+  position:relative;display:inline-grid;place-items:center;isolation:isolate;
+  flex-shrink:0;overflow:hidden;border-radius:50%;line-height:1;aspect-ratio:1;
+}
+.sberchat-reference .msg-avatar img {
+  display:block;width:100%;height:100%;object-fit:cover;object-position:center;
+}
+.sberchat-reference .msg-avatar svg {
+  display:block;width:var(--msg-avatar-icon-size,48%);height:var(--msg-avatar-icon-size,48%);
+  max-width:70%;max-height:70%;stroke-linecap:round;stroke-linejoin:round;
+}
+.sberchat-reference .msg-avatar__initials {
+  position:relative;z-index:1;display:block;max-width:100%;
+  font-size:var(--msg-avatar-initials-size,0.7em);
+  line-height:1;font-weight:750;letter-spacing:-.035em;text-align:center;
+  white-space:nowrap;
+}
+.sberchat-reference .msg-avatar--contact {
+  background:linear-gradient(145deg,#1f5074,#0b2c4e);
+  border-color:#34718b;
+}
+.sberchat-reference .msg-avatar--contact::before {
+  content:"";position:absolute;width:85%;height:85%;top:-37%;right:-29%;
+  border-radius:50%;background:radial-gradient(circle,#9ae9ef45,transparent 72%);
+  pointer-events:none;
+}
+.sberchat-reference .msg-avatar--tone-1 {background:linear-gradient(145deg,#326c83,#113557);border-color:#397e96;}
+.sberchat-reference .msg-avatar--tone-2 {background:linear-gradient(145deg,#59518d,#27325c);border-color:#6863a1;}
+.sberchat-reference .msg-avatar--tone-3 {background:linear-gradient(145deg,#18746f,#0b384c);border-color:#338a88;}
+.sberchat-reference .msg-avatar--tone-4 {background:linear-gradient(145deg,#74508a,#3e316e);border-color:#856399;}
+.sberchat-reference .msg-dialog-list__row {
+  grid-template-columns:48px minmax(0,1fr) minmax(34px,auto);
+  align-items:center;
+}
+.sberchat-reference .msg-dialog-list__avatar {
+  box-sizing:border-box;width:48px;height:48px;flex-basis:48px;
+  --msg-avatar-icon-size:23px;--msg-avatar-initials-size:21px;
+}
+.sberchat-reference .msg-chat__avatar {
+  box-sizing:border-box;width:47px;height:47px;flex-basis:47px;
+  --msg-avatar-icon-size:23px;--msg-avatar-initials-size:21px;
+}
+.sberchat-reference .msg-context__avatar {
+  box-sizing:border-box;width:59px;height:59px;
+  --msg-avatar-icon-size:29px;--msg-avatar-initials-size:24px;
+}
+.sberchat-reference .msg-community__hero-avatar {
+  box-sizing:border-box;width:76px;height:76px;
+  --msg-avatar-icon-size:38px;--msg-avatar-initials-size:29px;
+}
+.sberchat-reference .msg-community__person-avatar {
+  box-sizing:border-box;width:38px;height:38px;flex-basis:38px;
+  --msg-avatar-icon-size:20px;--msg-avatar-initials-size:15px;
+}
+.sberchat-reference .msg-community__profile-avatar {
+  box-sizing:border-box;width:80px;height:80px;flex-basis:80px;
+  --msg-avatar-icon-size:37px;--msg-avatar-initials-size:29px;
+}
+.sberchat-reference .msg-chat__group-avatar {
+  box-sizing:border-box;width:40px;height:40px;flex-basis:40px;
+  --msg-avatar-icon-size:20px;--msg-avatar-initials-size:16px;
+}
+.sberchat-reference .msg-dialog-list__scroll,
+.sberchat-reference .msg-chat__scroll {
+  scrollbar-gutter:stable;
+}
+
+/* The original reference had different left/right column widths for direct
+   vs community conversations. Switching chats must NOT move either divider. */
+@media (min-width:1120px) {
+  .messenger-page.sberchat-reference[data-message-state="direct"] > .messenger-shell:not(.messenger-shell--no-context),
+  .messenger-page.sberchat-reference[data-message-state="community"] > .messenger-shell:not(.messenger-shell--no-context),
+  .messenger-page.sberchat-reference[data-message-state="task_team"] > .messenger-shell:not(.messenger-shell--no-context) {
+    grid-template-columns:clamp(320px,calc(26.3vw - 47px),393px) minmax(0,1fr) clamp(318px,calc(4vw + 292px),360px);
+  }
+  .messenger-page.sberchat-reference[data-message-state="direct"] > .messenger-shell.messenger-shell--no-context,
+  .messenger-page.sberchat-reference[data-message-state="community"] > .messenger-shell.messenger-shell--no-context,
+  .messenger-page.sberchat-reference[data-message-state="task_team"] > .messenger-shell.messenger-shell--no-context {
+    grid-template-columns:clamp(320px,calc(26.3vw - 47px),393px) minmax(0,1fr);
+  }
+}
+@media (min-width:960px) and (max-width:1119px) {
+  .messenger-page.sberchat-reference[data-message-state="direct"] > .messenger-shell,
+  .messenger-page.sberchat-reference[data-message-state="community"] > .messenger-shell,
+  .messenger-page.sberchat-reference[data-message-state="task_team"] > .messenger-shell {
+    grid-template-columns:295px minmax(0,1fr);
+  }
+}
