@@ -9,7 +9,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as postgres_insert
 
-from impulse.api.errors import ApiError
+from impulse.application.ai_curriculum_details import AI_CURRICULUM_DETAILS, learning_details
 from impulse.application.development import (
     CourseRecord,
     DevelopmentStore,
@@ -17,7 +17,7 @@ from impulse.application.development import (
     RoadmapRecord,
     TrackRecord,
 )
-from impulse.bootstrap.ai_curriculum_details import AI_CURRICULUM_DETAILS, learning_details
+from impulse.application.errors import ApiError
 from impulse.domain.development import (
     CompletionStatus,
     RoadmapMilestone,

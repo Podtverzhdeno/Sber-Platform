@@ -11,7 +11,7 @@ from decimal import Decimal
 from typing import Protocol, TypeVar
 from uuid import UUID, uuid4
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.domain.identity import ActorContext, Role
 from impulse.domain.recognition import (
     CohortMember,

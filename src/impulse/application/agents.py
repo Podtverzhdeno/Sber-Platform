@@ -9,7 +9,7 @@ from typing import Protocol
 from uuid import UUID, uuid4
 
 from impulse.ai.gateway import JsonValue
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 
 
 class RunStatus(StrEnum):

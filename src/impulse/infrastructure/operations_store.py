@@ -7,7 +7,7 @@ from uuid import UUID
 
 from sqlalchemy import insert, select
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.operations import CaseDecision, CaseStatus, OperationsCase, OperationsStore
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.operations import case_decisions, operations_cases

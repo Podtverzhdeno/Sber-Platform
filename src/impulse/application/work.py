@@ -10,7 +10,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Protocol
 from uuid import UUID, uuid4
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.identity import IdentityStore
 from impulse.domain.identity import ActorContext, ConsentScope, Role
 from impulse.domain.reward import CompensationTerms

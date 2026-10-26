@@ -8,7 +8,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Protocol, runtime_checkable
 from uuid import UUID, uuid4
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.identity import ActorContext, demo_personas
 from impulse.domain.notifications import Notification, NotificationKind
 

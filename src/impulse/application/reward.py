@@ -8,8 +8,8 @@ from datetime import UTC, datetime, timedelta
 from typing import Protocol, TypeVar
 from uuid import UUID, uuid4
 
-from impulse.api.errors import ApiError
 from impulse.application.concurrency import compose_reads
+from impulse.application.errors import ApiError
 from impulse.application.identity import PersonaRecord
 from impulse.application.work import AssignmentRecord, ContributionRecord, WorkStore
 from impulse.domain.identity import ActorContext, Role

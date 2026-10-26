@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.domain.identity import (
     HR_VISIBILITY_DEFAULTS,
     HR_VISIBILITY_SCOPES,

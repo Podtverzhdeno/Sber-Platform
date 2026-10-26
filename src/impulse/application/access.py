@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.domain.identity import ActorContext, ProtectedObject
 
 

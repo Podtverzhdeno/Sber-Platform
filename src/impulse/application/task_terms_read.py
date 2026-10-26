@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from uuid import UUID
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.task_catalog import CatalogContractError, TaskRecommendationProjection
 from impulse.application.task_catalog_page import TaskCatalogPageService
 from impulse.application.task_catalog_visibility import TaskVisibilityError

@@ -8,7 +8,6 @@ from uuid import UUID, uuid4
 from sqlalchemy import delete, select, update
 from sqlalchemy.dialects.postgresql import insert
 
-from impulse.api.errors import ApiError
 from impulse.application.buddy import (
     BuddyDeletionAudit,
     BuddyFeedback,
@@ -17,6 +16,7 @@ from impulse.application.buddy import (
     BuddySuggestionStates,
     BuddyThread,
 )
+from impulse.application.errors import ApiError
 from impulse.infrastructure.database import Database
 from impulse.infrastructure.models.buddy import (
     buddy_deletion_audits,
