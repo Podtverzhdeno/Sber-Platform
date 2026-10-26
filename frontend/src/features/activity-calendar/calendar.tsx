@@ -12,6 +12,7 @@ type Props = {
   onOpenCourses: () => void;
   onOpenProjects: () => void;
   onOpenEvents: () => void;
+  onOpenCertification: () => void;
 };
 
 const weekdayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
@@ -47,13 +48,23 @@ function readableDate(day: Day): string {
   return FULL_DATE.format(new Date(day.timestamp));
 }
 
+function safeTimeZone(candidate: string | undefined): string {
+  if (!candidate) return "UTC";
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: candidate });
+    return candidate;
+  } catch {
+    return "UTC";
+  }
+}
+
 function hoursNote(): string {
   // There are no per-session duration records in the growth activity snapshot.
   // Do not infer hours from the gap between events or from course completion.
   return "Длительность не измеряется";
 }
 
-export function ActivityCalendar({ snapshot, weeks, onOpenCourses, onOpenProjects, onOpenEvents }: Props) {
+export function ActivityCalendar({ snapshot, weeks, onOpenCourses, onOpenProjects, onOpenEvents, onOpenCertification }: Props) {
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [hover, setHover] = useState<{ key: string; x: number; y: number } | null>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
@@ -138,6 +149,7 @@ export function ActivityCalendar({ snapshot, weeks, onOpenCourses, onOpenProject
     setSelectedKey(null);
     if (category === "projects" || category === "practice") onOpenProjects();
     else if (category === "community") onOpenEvents();
+    else if (category === "certification") onOpenCertification();
     else onOpenCourses();
   };
 
@@ -199,7 +211,7 @@ export function ActivityCalendar({ snapshot, weeks, onOpenCourses, onOpenProject
           {selected.events.length > 0 ? selected.events.map((item, index) => {
             const category = categoryOf(item);
             const hour = new Date(item.occurred_at).toLocaleTimeString("ru-RU", {
-              hour: "2-digit", minute: "2-digit", timeZone: snapshot?.actor_timezone || "UTC",
+              hour: "2-digit", minute: "2-digit", timeZone: safeTimeZone(snapshot?.actor_timezone),
             });
             return <article key={item.source_kind + item.source_ref + item.occurred_at + String(index)}>
               <div><span className={"ac-event-kind ac-kind-" + category}>{categoryLabels[category]}</span><time>{hour}</time></div>
