@@ -1,0 +1,30 @@
+# Claim BUDDY-HERO-NEW-CHAT-20261026
+
+- task_id: BUDDY-HERO-NEW-CHAT-20261026
+- session_id: gpt6-20261026-buddy-banner-chat
+- status: REVIEW
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 2c0ab21e42a5933921b104889fa08a92ab3b06a2
+- depends_on: []
+- write_scope:
+  - frontend/src/features/buddy-chat-v2.tsx
+  - frontend/src/features/buddy-chat-v2.scss
+  - frontend/src/features/buddy-chat-v2.test.tsx
+  - .agents/coordination/claims/BUDDY-HERO-NEW-CHAT-20261026.lock/status.md
+- shared_files: []
+- verification:
+  - cd frontend && npm test -- buddy-chat-v2.test.tsx
+  - cd frontend && npm run typecheck
+  - cd frontend && npm run lint
+- progress: Banner dismiss, persisted session preference, eager server thread creation, empty state and error-safe drafts implemented; PR #84 open. Independent review required.
+- blockers: Full CI has unrelated red jobs; deployment and independent review outstanding.
+- changed_files:
+  - frontend/src/features/buddy-chat-v2.tsx
+  - frontend/src/features/buddy-chat-v2.scss
+  - frontend/src/features/buddy-chat-v2.test.tsx
+- verification_evidence:
+  - AI Buddy UX QA run 40240848813: SUCCESS on 172cbe76fa48114634ba5581d529dcdd14a8d8b2
+  - ESLint strict: success
+  - Vitest: 12/12 success (6 Buddy, 6 participant)
+- independent_review: required before DONE

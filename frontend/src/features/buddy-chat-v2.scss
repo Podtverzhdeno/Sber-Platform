@@ -38,6 +38,15 @@ color:var(--b2-fg);font:inherit;isolation:isolate;box-shadow:0 18px 45px #000000
 .buddy2-main{display:flex;flex-direction:column;min-width:0;min-height:0;background:radial-gradient(ellipse 75% 25% at 65% 8%,#07547421,transparent),#061729}
 .buddy2-hero{display:grid;grid-template-columns:160px minmax(0,1fr);gap:6px;min-height:164px;background:linear-gradient(115deg,#074578 0%,#142349 40%,#0c2863 76%,#082b59);border-bottom:1px solid #16577c;position:relative;overflow:hidden;margin:10px 11px 0;border-radius:12px;padding:16px}
 .buddy2-hero:after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 10% 75%,#00aeef3e,transparent 28%),radial-gradient(circle at 90% 0%,#105bda60,transparent 44%)}
+.buddy2-hero-close{position:absolute;top:10px;right:10px;z-index:3;width:30px;height:30px;display:grid;place-items:center;padding:0;border:1px solid #78b9d052;border-radius:8px;background:#082944af;color:#d9f8ff;backdrop-filter:blur(6px)}
+.buddy2-hero-close:hover:not(:disabled){background:#144966;border-color:#3ce0eb}
+.buddy2-hero-close:focus-visible{outline:2px solid #56fcf2;outline-offset:2px}
+.buddy2-hero-content{padding-right:26px}
+.buddy2-empty-chat{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;min-height:165px;padding:22px;text-align:center;border:1px dashed #22536b;border-radius:12px;background:linear-gradient(145deg,#08283b,#091c30)}
+.buddy2-empty-chat-icon{display:grid;place-items:center;width:43px;height:43px;border-radius:12px;color:#31e4e0;background:#0a4657}
+.buddy2-empty-chat strong{color:#e9faff;font-size:15px}
+.buddy2-empty-chat p{max-width:420px;font-size:11px;line-height:1.55;color:#9ebfd1}
+
 .buddy2-robot{display:flex;flex-direction:column;align-items:center;align-self:center;justify-self:center;width:132px;height:132px;z-index:1;filter:drop-shadow(0 5px 14px #1feaff59);position:relative}
 .buddy2-robot-face{position:relative;width:106px;height:85px;border:7px solid #44d5fa;border-radius:30px;background:linear-gradient(150deg,#042b4c,#011126);box-shadow:inset 0 2px 20px #00c9f16b,0 0 0 5px #94dfff33;display:flex;align-items:center;justify-content:center;gap:18px;transform:rotate(-6deg)}
 .buddy2-robot-face i{width:17px;height:23px;border-radius:60%;background:#00faff;box-shadow:0 0 13px 5px #00eafb94}
