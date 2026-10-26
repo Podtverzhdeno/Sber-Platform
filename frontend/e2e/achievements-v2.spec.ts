@@ -69,7 +69,10 @@ test("achievements v2: live stats, filtering, evidence detail, keyboard and add 
   await expect(screen.locator(".ach-gallery-stat").nth(1).locator("strong")).toHaveText("1");
   await expect(screen.locator(".ach-gallery-stat").nth(2).locator("strong")).toHaveText("1");
   const firstStar = screen.getByTestId("achievement-card").first().getByRole("button", { name: "В избранное" });
+  await expect(firstStar).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(firstStar).toHaveCSS("border-top-width", "0px");
   await firstStar.click();
+  await expect(screen.getByTestId("achievement-card").first().locator(".ach-gallery-star")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(screen.getByTestId("achievement-card").first().getByRole("button", { name: "Убрать из избранного" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("link", { name: "Главная" }).click();
   await page.getByRole("link", { name: "Достижения" }).click();
