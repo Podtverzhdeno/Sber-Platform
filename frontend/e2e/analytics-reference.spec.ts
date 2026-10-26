@@ -109,8 +109,8 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
         // Shared-shell/header changes move an entire view together. Compare card
         // positions relative to the first card, preserving exact spacing and heights.
         const anchor = geometry[0];
-        const anchorExpected = anchor ? golden[anchor.selector] : undefined;
-        const shellOffsetY = anchor?.rect && anchorExpected ? anchor.rect.y - anchorExpected[1] : 0;
+        const anchorExpected = golden[anchor.selector];
+        const shellOffsetY = anchor.rect && anchorExpected ? anchor.rect.y - anchorExpected[1] : 0;
         for (const { selector, rect } of geometry) {
           const expected = golden[selector];
           if (rect === null) {
