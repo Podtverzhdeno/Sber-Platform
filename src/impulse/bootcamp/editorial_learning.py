@@ -21,9 +21,8 @@ from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession
 from impulse.bootcamp.service import BootcampCatalogService
 from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
-from impulse.domain.development import local_learning_days
+from impulse.domain.development import TrackStatus, local_learning_days
 from impulse.domain.identity import Role
-from impulse.domain.development import TrackStatus
 
 router = APIRouter(tags=["bootcamp"])
 UNIT_COUNT = 8
