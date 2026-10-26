@@ -107,6 +107,37 @@ export const participantProjectionKeys = [
   "me",
 ] as const;
 
+/**
+ * A saved lesson advances self-study, but is not a new verified work item.
+ * Invalidating every portfolio, rating, task and messaging projection after
+ * each of 8 lessons creates a read storm, exhausting the 240/min safety budget.
+ * Keep full fanout for course finish and practical submission.
+ */
+export const lessonProjectionKeys = [
+  "impulse-learning-summary",
+  "impulse-role-level",
+  "engagement-overview",
+  "engagement-rhythm",
+  "streak",
+  "participant-growth-analytics",
+  "participant-analytics",
+  "development-overview",
+  "trajectory-roadmaps",
+  "bootcamp-v2-overview",
+] as const;
+
+export type ProgressMutationScope = "lesson" | "all";
+
+export function progressMutationScope(path: string, method: string): ProgressMutationScope | null {
+  if (!isCrossSectionMutation(path, method)) return null;
+  const pathname = (path.split(/[?#]/, 1)[0] ?? path).replace(/\/$/, "");
+  if (method.toUpperCase() === "POST" &&
+    /^\/api\/v1\/me\/bootcamp\/impulse-study\/[^/]+\/lessons\/\d+\/complete$/.test(pathname)) {
+    return "lesson";
+  }
+  return "all";
+}
+
 /** Normalize only the pathname; retain path segment boundaries. */
 function isEndpointOrChild(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(`${prefix}/`);

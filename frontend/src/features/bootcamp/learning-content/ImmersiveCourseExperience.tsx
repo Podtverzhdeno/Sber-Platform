@@ -105,8 +105,10 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
       { method: "POST", headers: csrfHeaders() },
     ),
     onSuccess: (state) => {
+      // apiRequest broadcasts a narrowly scoped lesson update to mounted
+      // projections; the current course is updated optimistically here.
+      // The full global read refresh remains reserved for finish/practice.
       client.setQueryData(["impulse-study", courseKey], state);
-      invalidateLearningProjections(client);
     },
   });
   const submitPractice = useMutation({
