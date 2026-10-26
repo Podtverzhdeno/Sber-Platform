@@ -218,11 +218,14 @@ async def advance_impulse_level(
             await session.execute(
                 text(
                     "UPDATE impulse_role_levels "
-                    "SET level=CAST(:next AS integer), cycle_number=CAST(:cycle AS integer), advanced_at=now(), "
+                    "SET level=CAST(:next AS integer), "
+                    "cycle_number=CAST(:cycle AS integer), advanced_at=now(), "
                     "policy_version=CAST(:version AS integer), "
                     "history=history || jsonb_build_array(jsonb_build_object("
-                    "'from',CAST(:old AS integer),'to',CAST(:next AS integer),'policy_version',CAST(:version AS integer),"
-                    "'completed_courses',CAST(:courses AS integer),'approved_practices',CAST(:practices AS integer),"
+                    "'from',CAST(:old AS integer),'to',CAST(:next AS integer),"
+                    "'policy_version',CAST(:version AS integer),"
+                    "'completed_courses',CAST(:courses AS integer),"
+                    "'approved_practices',CAST(:practices AS integer),"
                     "'course_keys',CAST(:course_keys AS jsonb),'awarded_at',now())) "
                     "WHERE person_id=:person AND track_key=:track AND level=:old"
                 ),
