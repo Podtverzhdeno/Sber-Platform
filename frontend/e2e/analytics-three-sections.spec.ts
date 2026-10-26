@@ -155,7 +155,7 @@ test("participant's real account data appears on the Agentic cyclogram and axes 
  await expect(chart.locator(".ref-radar-activity-mark")).toHaveCount(1);
  await expect(chart.locator(".ref-radar-activity-mark text")).toHaveText("1");
  await expect(chart.locator(".ref-radar-center")).toContainText("6 / 6");
- await chart.locator(".ref-radar-skill").first().click();
+ await chart.locator(".ref-radar-skill-hit").first().click();
  await expect(page.getByRole("dialog",{name:/Подтверждение навыка/})).toBeVisible();
  await expect(page.getByText(/accepted-agent-case/)).toBeVisible();
  await page.screenshot({path:"test-results/analytics-real-personal-skill-evidence.png",fullPage:true,animations:"disabled"});
