@@ -1,0 +1,22 @@
+# Claim RATING-DEMO-IDENTITIES-20261026
+- task_id: RATING-DEMO-IDENTITIES-20261026
+- session_id: gpt6-rating-participants-20261026
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- heartbeat_at: 2026-10-26
+- base_revision: 1191f3969f63497d5086f5d0cc53b14c0faa847b
+- depends_on: []
+- write_scope:
+  - src/impulse/bootstrap/demo_seed.py (synthetic participant demo-only public_rating, idempotent consent preservation)
+  - tests/test_demo_seed_graph.py (synthetic opt-in invariants)
+  - tests/test_recognition_domain.py (public consent privacy regression)
+  - frontend/src/features/rating-v2/page.tsx (anonymous row alias/closed profile UX only)
+  - frontend/src/features/rating-v2/page.test.tsx (anonymous UI regression)
+  - docs/rating-data-integrity.md (demo and production boundary)
+  - .github/workflows/rating-demo-identities-qa.yml
+  - .agents/coordination/claims/RATING-DEMO-IDENTITIES-20261026.lock/status.md
+- shared_files:
+  - frontend/src/features/rating-v2/page.tsx (previous rating art and private consumer claims are REVIEW; anonymous alias only)
+- verification: seeded fake personas not real people; existing privacy opt-outs preserved on reseed; backend and frontend regression plus targeted browser.
+- progress: All ten fake personas in the demo season have no public_rating visibility, yielding ten indistinguishable anonymous rows; restore **synthetic** demo participant visibility only, never relax privacy for real users.
+- integration: isolated PR, no direct main edits or deployment without QA
