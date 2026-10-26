@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { createPortal } from "react-dom";
 import { apiRequest } from "../api/client";
+import { ParticipantEvidence } from "./participant-evidence";
 import "./agentic-coding-profile.scss";
 
 /**
@@ -393,6 +394,7 @@ export function AgenticCodingProfile({ activeRole, onRoleChange, serverProfile, 
           </div>
           {view === "radar" && <div className="agentic-visual-layout">
             <TargetRadar targets={targets} current={current} onSelect={setActiveSkill} />
+             <ParticipantEvidence compact />
             <div className="agentic-axis-list" aria-label="Значения целевого профиля">
               {SKILLS.map((item, index) => <button type="button" key={item.key} onClick={() => { setActiveSkill(item.key); }}
                 className="agentic-skill-row" data-testid={"agentic-skill-" + item.key}>
