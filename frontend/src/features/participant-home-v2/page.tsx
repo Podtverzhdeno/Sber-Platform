@@ -233,17 +233,12 @@ export function ParticipantHomeV2Body(props: {
                 <p className="home-v2-drawer-eyebrow">Путь развития Impulse</p><h2>Карта уровней</h2>
                 <p>Начни с L0. Заверши учебную программу и получи независимое подтверждение практики, чтобы перейти на следующий уровень.</p>
                 <div className="home-v2-grade-timeline">
-                  {impulseLevel.data && <button type="button" onClick={() => { setPanel("grade-details"); }}>
-                    <span className="home-v2-grade-dot current"/>
-                    <strong>L{impulseLevel.data.level} · текущий уровень</strong>
-                    <small>Цикл {impulseLevel.data.cycle_number}</small><ChevronRight size={18}/>
-                  </button>}
-                  <button type="button" onClick={() => { setPanel("grade-details"); }}>
-                    <span className="home-v2-grade-dot target"/>
-                    <strong>L{(impulseLevel.data?.level ?? 0)+1} · следующая цель</strong>
-                    <small>{impulseLevel.data?.curriculum_state==="published" ? "Курсы + проверенная практика" : "Программа ожидает публикации"}</small>
+                  {(["Стартовый цикл", "Архитектура и оценка", "Эксплуатация и A2A", "Итог программы"] as const).map((label,index)=><button key={label} type="button" onClick={() => { setPanel("grade-details"); }}>
+                    <span className={`home-v2-grade-dot ${impulseLevel.data?.level===index?"current":impulseLevel.data && impulseLevel.data.level>index?"current":"target"}`}/>
+                    <strong>L{index} · {label}</strong>
+                    <small>{impulseLevel.data?.level === index ? "Текущий уровень" : impulseLevel.data && impulseLevel.data.level > index ? "Получен" : "Впереди"}</small>
                     <ChevronRight size={18}/>
-                  </button>
+                  </button>)}
                 </div>
                 {activeRole && <div className="home-v2-drawer-note">Роль: {activeRole.title}</div>}
                 <div className="home-v2-drawer-note">Это учебные уровни Impulse. Официальный карьерный грейд рассчитывается отдельно.</div>
@@ -253,7 +248,7 @@ export function ParticipantHomeV2Body(props: {
                 <button className="home-v2-drawer-back" type="button" onClick={() => { setPanel("levels"); }}>← Все уровни</button>
                 <div className="home-v2-grade-detail-hero">
                   <span className="home-v2-drawer-eyebrow">Учебный уровень Impulse</span>
-                  <h2>{impulseLevel.data ? `L${String(impulseLevel.data.level)} → L${String(impulseLevel.data.level+1)}` : "Данные ещё загружаются"}</h2>
+                  <h2>{impulseLevel.data ? impulseLevel.data.level >= (impulseLevel.data.max_level ?? 3) ? "L3 · Программа освоена" : `L${String(impulseLevel.data.level)} → L${String(impulseLevel.data.level+1)}` : "Данные ещё загружаются"}</h2>
                   <p>{activeRole?.title ?? "Траектория развития"}</p>
                 </div>
                 {impulseLevel.data ? <>
@@ -271,7 +266,7 @@ export function ParticipantHomeV2Body(props: {
                     <strong>Проверенная практика: {impulseLevel.data.approved_practices}/{impulseLevel.data.required_practices}</strong>
                     <small>Результат подтверждает проверяющий, не сам участник</small>
                   </div></div>
-                  {impulseLevel.data.curriculum_state==="unpublished" && <section className="home-v2-grade-unavailable" role="status">
+                  {impulseLevel.data.level < (impulseLevel.data.max_level ?? 3) && impulseLevel.data.curriculum_state==="unpublished" && <section className="home-v2-grade-unavailable" role="status">
                     <LockKeyhole size={23}/><strong>Новая программа ещё не опубликована</strong>
                     <span>Старые сертификаты не повышают уровень повторно.</span>
                   </section>}
