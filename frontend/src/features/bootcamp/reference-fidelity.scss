@@ -254,6 +254,13 @@
   .bc-reference .bc-ref-course-card{min-height:296px}
   .bc-reference .bc-ref-course-card[data-access="prerequisite_not_met"]{min-height:184px}
 }
+/* Keep the left learning card flush with the bottom of the two stacked
+   right cards. Let content determine row height; no fixed pixel sizing. */
+@media(min-width:1121px){
+  .bc-reference .bc-ref-hero-grid{align-items:stretch}
+  .bc-reference .bc-ref-continue{display:flex;flex-direction:column}
+  .bc-reference .bc-ref-continue-columns{flex:1}
+}
 @media(min-width:821px) and (max-width:1120px){
   .bc-reference .bc-ref-hero-grid{grid-template-columns:1fr;gap:12px;margin-bottom:18px}
   .bc-reference .bc-ref-continue{min-height:239px}
