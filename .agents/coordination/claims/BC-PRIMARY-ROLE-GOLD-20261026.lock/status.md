@@ -1,7 +1,7 @@
 # Claim BC-PRIMARY-ROLE-GOLD-20261026
 - task_id: BC-PRIMARY-ROLE-GOLD-20261026
 - session_id: gpt6-20261026-primary-role
-- status: IN_PROGRESS
+- status: BLOCKED
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: be63d6d3b53fb2dd0983e11adbeab47a4574db22
@@ -18,4 +18,8 @@
   - frontend/src/features/bootcamp/catalog.tsx (BC2-COURSE-CONTENT-INTEGRATION-20261025 owns other hunks; explicitly limited to role-tab rendering/data)
 - verification: eslint targeted, typecheck, Vitest role UI, browser or screenshot, actual primary trajectory data
 - progress: Cross-check main role via existing primaryTrajectoryKey; keep cyan selected secondary and gold source-authoritative primary.
-- blockers: Existing BC2 integration claim covers same file; avoid changing unrelated hunks, perform independent review before merge.
+- blockers: P1 independent review identified file-level conflict: BC2-COURSE-CONTENT-INTEGRATION-20261025 remains IN_PROGRESS and owns frontend/src/features/bootcamp/catalog.tsx. No merge or further product changes until owner/coordinator explicitly RELEASES that scope or integrates this PR. This claim is BLOCKED, not DONE.
+
+- integration_handoff: PR #95 contains isolated golden primary-role indicator and tests; requires coordinator ownership recovery / integration approval
+- code_review: P1 conflict finding PRRT_kwDOUtZ8mM6wGnkU, acknowledged; do not resolve before file ownership is valid
+- focused_checks: lint, TypeScript, Vitest and build passed on 88553b98639f9ddc437187fd3145c12916f886bd; browser QA in progress at handoff
