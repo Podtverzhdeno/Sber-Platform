@@ -9,6 +9,7 @@ from uuid import uuid4
 import pytest
 
 from impulse.application.development import MemoryDevelopmentStore
+from impulse.bootcamp.catalog import CourseCard
 from impulse.bootcamp.service import BootcampCatalogService
 from impulse.domain.development import TrackAttempt, TrackStatus, set_optional_track
 from impulse.domain.identity import ActorContext, Role
@@ -35,7 +36,7 @@ def test_optional_course_recommendations_hide_and_restore_without_progress_loss(
         )
         await store.replace_attempts(person_id, attempts)
 
-        def course(cards: object) -> object:
+        def course(cards: tuple[CourseCard, ...]) -> CourseCard:
             return next(card for card in cards if card.key == "openspec-sdd")
 
         # Product's course is in the supplementary path, not the primary one.
