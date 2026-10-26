@@ -296,6 +296,7 @@ describe("participant home v2", () => {
     const dialog = screen.getByRole("dialog", { name: "Требования следующего грейда" });
     const courseList = within(dialog).getByTestId("home-grade-required-courses");
     expect(courseList).toHaveTextContent("Обязательные курсы · 1/2");
+    expect(dialog).toHaveTextContent("Практика для уровня: 0/1");
     expect(courseList).toHaveTextContent("Python: основы");
     expect(courseList).toHaveTextContent("Разработка AI-агентов");
     expect(courseList).toHaveTextContent("Пройден");
@@ -303,6 +304,28 @@ describe("participant home v2", () => {
     fireEvent.click(within(courseList).getByRole("button", { name: "Продолжить курс «Разработка AI-агентов»" }));
     expect(onOpenTarget).toHaveBeenCalledWith("course", "python-agents", "python");
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("offers a direct Start action for an unstarted required course", () => {
+    renderHome({}, (client) => {
+      client.setQueryData(roleLevelQueryKey("python"), {
+        track_key: "python", level: 0, cycle_number: 1, curriculum_state: "published",
+        completed_courses: 0, required_courses: 1, approved_practices: 0, credited_practices: 0,
+        required_practices: 1, advance_ready: false, policy_version: 1, history: [],
+        required_course_keys: ["python-base"],
+      } satisfies ImpulseRoleLevel);
+      client.setQueryData(learningSummaryQueryKey, {
+        started_courses: 0, finished_courses: 0, completed_lessons: 0,
+        approved_practices: 0, credited_practices: 0, courses: [],
+      });
+      client.setQueryData(["bootcamp-catalog"], [
+        { key: "python-base", title: "Python: основы", completion_state: "not_started" },
+      ]);
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Следующий уровень/ }));
+    const courseList = screen.getByTestId("home-grade-required-courses");
+    expect(courseList).toHaveTextContent("Python: основы");
+    expect(within(courseList).getByRole("button", { name: "Пройти курс «Python: основы»" })).toBeEnabled();
   });
 
   it("does not fabricate course names when the level has no published course keys", () => {
