@@ -1,18 +1,1 @@
-534db0e241edae4ee22cee02faf13d8c574effdb
-# Release: event detail popup shows the same thematic banner as its catalog card
-# Local AVIF image with a readable left-side gradient overlay
-release_request=2026-10-26-event-detail-banner-534db0e241
-
-# Release: single checkpoint numbers, frameless favorites and compact customer activity squares
-# Customer Activity Squares, Achievements V2 and Trajectory reference browser QA passed
-release_request=2026-10-26-compact-activity-and-favorites-f1532a5e53f2
-
-# Release: automatic certified course-to-trajectory progression and first-open next step spotlight
-# Keeps practical review and professional grade evaluation independent
-release_request=2026-10-26-trajectory-next-step-7e6c66183096
-
-# Release: final course-to-next-stage projection aligned in main trajectory and sidebar
-release_request=2026-10-26-trajectory-next-panel-8f20281da120
-
-# Release: verified automated study navigation and consistent next-step card; lint fix included
-release_request=2026-10-26-course-trajectory-final-b7c1d3c40dad
+2920afc4ef70344440200b857ef729e12122294d
