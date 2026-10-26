@@ -1,0 +1,32 @@
+name: Work API schema architecture QA
+on:
+  pull_request:
+    paths:
+      - 'src/impulse/api/v1/work.py'
+      - 'src/impulse/api/v1/work_requests.py'
+      - 'tests/test_work_request_schema_boundary.py'
+      - '.github/workflows/work-request-boundary-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  request-model-compatibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: '3.13'
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Ruff lint and format on extracted request models
+        run: |
+          uv run ruff check src/impulse/api/v1/work.py src/impulse/api/v1/work_requests.py tests/test_work_request_schema_boundary.py
+          uv run ruff format --check src/impulse/api/v1/work.py src/impulse/api/v1/work_requests.py tests/test_work_request_schema_boundary.py
+      - name: Type-check affected API modules
+        run: uv run pyright src/impulse/api/v1/work.py src/impulse/api/v1/work_requests.py
+      - name: Verify validation, route and work API contracts
+        run: uv run pytest -q tests/test_work_request_schema_boundary.py tests/test_work_api.py tests/test_openapi_contract.py
