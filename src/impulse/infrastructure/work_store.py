@@ -11,7 +11,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import delete, func, select, text, update
 from sqlalchemy.dialects.postgresql import insert
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.work import (
     AcceptanceRecord,
     ApplicationRecord,

@@ -22,7 +22,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, cast
 from uuid import UUID
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.task_catalog import (
     ApplicationState,
     BenefitState,

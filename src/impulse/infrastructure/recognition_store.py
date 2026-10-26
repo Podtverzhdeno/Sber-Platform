@@ -12,7 +12,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import RowMapping
 from sqlalchemy.exc import IntegrityError
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.recognition import RecognitionStore
 from impulse.domain.recognition import (
     CohortMember,

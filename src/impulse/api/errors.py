@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from typing import Any, cast
 
 import structlog
@@ -13,6 +12,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import ExceptionHandler
 
 from impulse.api.request_context import get_request_id
+from impulse.application.errors import ApiError
 
 logger = structlog.get_logger(__name__)
 
@@ -35,21 +35,6 @@ class ErrorEnvelope(BaseModel):
     field_errors: dict[str, list[str]] | None = None
     request_id: str
     retryable: bool = False
-
-
-@dataclass(slots=True)
-class ApiError(Exception):
-    code: str
-    message: str
-    status_code: int
-    retryable: bool = False
-    field_errors: dict[str, list[str]] | None = field(default=None)
-
-    def __post_init__(self) -> None:
-        # Zero-argument super() is unreliable in slotted dataclasses on Python 3.13:
-        # dataclass may replace the class object while the generated closure still
-        # points at the original one. Call the stable base explicitly.
-        Exception.__init__(self, self.message)
 
 
 def _response(error: ErrorEnvelope, status_code: int) -> JSONResponse:

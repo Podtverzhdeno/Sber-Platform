@@ -11,7 +11,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import RowMapping
 from sqlalchemy.exc import IntegrityError
 
-from impulse.api.errors import ApiError
+from impulse.application.errors import ApiError
 from impulse.application.reward import ReviewStore
 from impulse.domain.reward import (
     AppealStatus,
