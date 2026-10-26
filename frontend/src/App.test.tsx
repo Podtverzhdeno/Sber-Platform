@@ -177,7 +177,8 @@ describe("App", () => {
       if (url.endsWith("/development-overview")) {
         return Promise.resolve(new Response(JSON.stringify(overviewFixture), { status: 200 }));
       }
-      return Promise.resolve(new Response("{}", { status: 200 }));
+      // An unimplemented endpoint is an HTTP error, not a successful `{}` schema violation.
+      return Promise.resolve(new Response(JSON.stringify({ code: "NOT_FOUND" }), { status: 404 }));
     });
     window.history.pushState({}, "", "/workspace/0");
     render(<App />);
