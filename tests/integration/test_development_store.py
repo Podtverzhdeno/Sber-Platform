@@ -13,7 +13,7 @@ from sqlalchemy import func, select
 from impulse.application.development import DevelopmentService
 from impulse.application.identity import DemoAuthService
 from impulse.bootstrap.app import create_app
-from impulse.bootstrap.demo_seed import demo_id, seed_demo
+from impulse.bootstrap.demo_seed import demo_id, reset_demo_data, seed_demo
 from impulse.bootstrap.settings import AppEnvironment, Settings
 from impulse.infrastructure.database import Database, async_database_url
 from impulse.infrastructure.development_store import SqlDevelopmentStore
@@ -39,6 +39,7 @@ def integration_url() -> str:
 @pytest.mark.asyncio
 async def test_track_swap_reported_completion_and_one_learning_day() -> None:
     database = Database(integration_url())
+    await reset_demo_data(database, demo_mode=True)
     await seed_demo(database)
     settings = Settings(
         app_env=AppEnvironment.TEST,
