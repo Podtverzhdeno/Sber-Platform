@@ -60,16 +60,17 @@ async def test_track_swap_reported_completion_and_one_learning_day() -> None:
             "/api/v1/auth/demo-login", json={"persona_key": "participant-alex"}
         )
         csrf = login.json()["csrf_token"]
+        # Seeded participant already has product + ml active; freeze ml to make room.
         assert (
             await client.post(
                 "/api/v1/me/tracks",
-                json={"track_key": "data"},
+                json={"track_key": "data", "freeze_track_key": "ml"},
                 headers={"X-CSRF-Token": csrf},
             )
         ).status_code == 200
         switched = await client.post(
             "/api/v1/me/tracks",
-            json={"track_key": "product", "freeze_track_key": "python"},
+            json={"track_key": "product"},
             headers={"X-CSRF-Token": csrf},
         )
         assert switched.status_code == 200
@@ -132,6 +133,7 @@ async def test_track_swap_reported_completion_and_one_learning_day() -> None:
         "python": "frozen",
         "data": "active",
         "product": "active",
+        "ml": "frozen",
     }
     assert learning_count == 1
     assert completion is not None
