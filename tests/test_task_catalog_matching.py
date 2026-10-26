@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import pytest
 from hypothesis import given
@@ -186,7 +186,7 @@ def test_factor_values_outside_unit_interval_are_rejected(value: Decimal) -> Non
 def test_skill_evidence_counts_only_fresh_unique_approved_contributions() -> None:
     contribution = uuid4()
 
-    def row(contribution_id, tag, when):
+    def row(contribution_id: UUID, tag: str, when: datetime) -> CaseEvidence:
         return CaseEvidence(
             task_id=uuid4(),
             contribution_id=contribution_id,
