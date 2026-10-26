@@ -106,7 +106,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     ),
     onSuccess: (state) => {
       client.setQueryData(["impulse-study", courseKey], state);
-      invalidateLearningProjections(client);
+      invalidateLearningProjections(client, "lesson");
     },
   });
   const submitPractice = useMutation({
