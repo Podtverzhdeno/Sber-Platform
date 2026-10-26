@@ -308,9 +308,17 @@ def build_seed_batches() -> list[SeedBatch]:
     # level prevent old certificates or another role's progress being replayed.
     # L1 -> L2: architecture and evaluation. L2 -> L3: operations and orchestration.
     advanced_titles = (
-        (13, "Архитектура AI-сервисов и контракты", "https://learn.microsoft.com/en-us/azure/architecture/"),
+        (
+            13,
+            "Архитектура AI-сервисов и контракты",
+            "https://learn.microsoft.com/en-us/azure/architecture/",
+        ),
         (14, "Оценка и качество AI-агентов", "https://www.langchain.com/langsmith"),
-        (15, "Безопасность и эксплуатация AI-систем", "https://owasp.org/www-project-top-10-for-large-language-model-applications/"),
+        (
+            15,
+            "Безопасность и эксплуатация AI-систем",
+            "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+        ),
         (16, "Мультиагентная оркестрация и надёжность", "https://a2a-protocol.org/latest/"),
     )
     for index, title, source_url in advanced_titles:
