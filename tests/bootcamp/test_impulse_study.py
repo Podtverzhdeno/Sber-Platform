@@ -193,7 +193,10 @@ def test_study_progress_requires_order_and_practice_requires_review(
         assert finished_summary["approved_practices"] == 0
         assert finished_summary["courses"][0]["finished"] is True
         courses_only = client.get(level_url).json()
-        assert (courses_only["completed_courses"], courses_only["credited_practices"]) == (1, 0)
+        assert (
+            courses_only["completed_courses"],
+            courses_only["credited_practices"],
+        ) == (1, 0)
         assert not courses_only["advance_ready"]
         assert client.post(advance_url).status_code == 409
 
