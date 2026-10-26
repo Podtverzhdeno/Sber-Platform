@@ -2191,3 +2191,27 @@
 .workspace-content .trajectory-v2 .trajectory-v2-level-error{font-size:11px;color:#ffbd88}
 .workspace-content .trajectory-v2 .trajectory-v2-level-error button{background:transparent;border:1px solid #fdab76;border-radius:5px;color:#ffc39c;padding:3px 7px}
 @media(max-width:560px){.workspace-content .trajectory-v2 .trajectory-v2-cycle-path{padding:12px}.workspace-content .trajectory-v2 .trajectory-v2-cycle-course{flex-wrap:wrap}.workspace-content .trajectory-v2 .trajectory-v2-cycle-course>span:last-child{margin-left:auto}}
+
+/* The next published step invites an initial visit, without a perpetual nudge
+ * after the participant intentionally opens it. */
+@keyframes trajectory-next-spotlight {
+  0%,100% { box-shadow:0 0 0 3px #08eed52b,0 0 14px #0cdbc14d; }
+  50% { box-shadow:0 0 0 7px #0df0d018,0 0 26px #09f9db9c; }
+}
+.workspace-content .trajectory-v2-stage-path .trajectory-v2-stage[data-attention="new"] .trajectory-v2-milestone-node {
+  background:#075965;border-color:#18ffea;color:#eafffd;
+  animation:trajectory-next-spotlight 2.35s ease-in-out infinite;
+}
+.workspace-content .trajectory-v2-stage-path .trajectory-v2-stage[data-attention="new"] .trajectory-v2-milestone-title {
+  color:#69ffe8;font-weight:800;
+}
+.workspace-content .trajectory-v2-cycle-course[data-attention="new"] {
+  border-color:#19e6da;
+  animation:trajectory-next-spotlight 2.35s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .workspace-content .trajectory-v2-stage-path .trajectory-v2-stage[data-attention="new"] .trajectory-v2-milestone-node,
+  .workspace-content .trajectory-v2-cycle-course[data-attention="new"] {
+    animation:none;box-shadow:0 0 0 3px #0deac15e;
+  }
+}

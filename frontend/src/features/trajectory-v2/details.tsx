@@ -86,12 +86,13 @@ export function StageTaskDrawer(props: {
   }, [props.triggerRef]);
 
   const completed = props.state === "completed";
+  const completedStudy = completed && milestone.target_kind === "course" && !milestone.completed;
   return (
     <div className="trajectory-v2-overlay" data-testid="trajectory-drawer-overlay" onClick={props.onClose}>
       <div ref={dialogRef} className="trajectory-v2-drawer" role="dialog" aria-modal="true" aria-labelledby="trajectory-drawer-title" tabIndex={-1} onKeyDown={onKeyDown} onClick={(event) => { event.stopPropagation(); }}>
         <header className="trajectory-v2-drawer-heading">
           <div>
-            <small id="trajectory-drawer-title">{props.state === "preview" ? "Программа для ознакомления" : completed ? "✓ Этап пройден" : "Детали этапа"}</small>
+            <small id="trajectory-drawer-title">{props.state === "preview" ? "Программа для ознакомления" : completedStudy ? "✓ Курс завершён" : completed ? "✓ Этап пройден" : "Детали этапа"}</small>
             <h2>{milestone.title}</h2>
             <span className="trajectory-v2-drawer-tag">{milestone.target_kind === "task" ? "Практическая задача" : milestone.target_kind === "course" ? "Обучение" : milestone.target_kind}</span>
             <span className="trajectory-v2-drawer-tag">{milestone.skill}</span>
@@ -154,17 +155,17 @@ export function StageTaskDrawer(props: {
         <section className="trajectory-v2-drawer-section">
           <h3>Что было сделано</h3>
           <p>{completed
-            ? "Этап отмечен завершённым в подтверждённом снимке дорожной карты. Подробности личного вклада и отзыв ментора в этом API не публикуются."
+            ? completedStudy ? "Учебный шаг автоматически засчитан на основании сертификата курса. Независимая проверка практических навыков остаётся отдельным процессом." : "Этап отмечен завершённым в подтверждённом снимке дорожной карты. Подробности личного вклада и отзыв ментора в этом API не публикуются."
             : props.state === "preview" ? "Профессия пока не выбрана. Это план обучения, а не запись о проделанной работе." : "Этап ещё не завершён. После выполнения и проверки результат отразится в дорожной карте."}</p>
         </section>
         <div className="trajectory-v2-drawer-metrics">
-          <div><small>Состояние</small><strong>{props.state === "preview" ? "Для ознакомления" : (MILESTONE_STATE_LABELS[props.state] ?? props.state)}</strong></div>
+          <div><small>Состояние</small><strong>{props.state === "preview" ? "Для ознакомления" : (completedStudy ? "Курс завершён" : (MILESTONE_STATE_LABELS[props.state] ?? props.state))}</strong></div>
           <div><small>Навык</small><strong>{milestone.skill}</strong></div>
         </div>
         <section className="trajectory-v2-drawer-section">
           <h3>Цель этапа</h3>
           <p>{stageTargetLabel(milestone)}</p>
-          <small>{completed ? "Факт завершения отражён в дорожной карте" : "Факт выполнения ожидает подтверждения"}</small>
+          <small>{completedStudy ? "Учебная часть засчитана; практика подтверждается отдельно" : completed ? "Факт завершения отражён в дорожной карте" : "Факт выполнения ожидает подтверждения"}</small>
         </section>
         <section className="trajectory-v2-drawer-section">
           <h3>Проверка результата</h3>

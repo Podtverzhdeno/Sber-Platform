@@ -11,8 +11,8 @@ export type TrajectoryStudyProgress = {
 };
 
 /** Match by exact, server-owned course key and only in the selected roadmap.
- * A finished study course is not an officially completed milestone; practice,
- * project acceptance and career-grade policies have separate verification. */
+ * Finishing a course completes its learning checkpoint in the user journey,
+ * but reviewer evidence, professional competency and grade are independent. */
 export function trajectoryStudyProgress(
   milestones: readonly MilestoneView[],
   courses: readonly LearningCourse[] | null | undefined,

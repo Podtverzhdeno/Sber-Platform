@@ -290,7 +290,7 @@ describe("trajectory v2 stage path", () => {
 });
 
 describe("Persisted course learning versus verified milestone state", () => {
-  it("shows an 8/8 lesson course as studied but does not falsely complete its roadmap checkpoint", () => {
+  it("completes an enrolled self-study step without forging official evidence", () => {
     const role = rolesFixture[0];
     if (!role) throw new Error("Role fixture missing");
     render(<StagePathSection
@@ -316,7 +316,9 @@ describe("Persisted course learning versus verified milestone state", () => {
       }]}
     />);
     const api = screen.getByRole("button", {name:/API и сервисы/});
-    expect(api).toHaveAttribute("data-stage-state","current");
+    expect(api).toHaveAttribute("data-stage-state","completed");
+    expect(screen.getByRole("button",{name:/Итоговый проект/})).toHaveAttribute("data-stage-state","current");
+    expect(screen.getByTestId("trajectory-study-evidence")).toHaveTextContent("2 из 3 учебных шагов выполнено · 1 этапов подтверждено отдельно");
     expect(api).toHaveAttribute("data-study-state","studied");
     expect(api).toHaveTextContent("✓ Курс пройден");
     expect(screen.getByTestId("trajectory-study-evidence")).toHaveTextContent("1 из 2 учебных курсов завершено");
