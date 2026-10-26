@@ -425,7 +425,9 @@ def test_multiple_optional_paths_do_not_consume_primary_slots() -> None:
         state = set_optional_track(state, name, enabled=True)
     assert sum(item.status is TrackStatus.ACTIVE for item in state) == 2
     assert [item.track_key for item in state if item.status is TrackStatus.EXPLORING] == [
-        "product", "ml", "design",
+        "product",
+        "ml",
+        "design",
     ]
     assert state[0] == primary
     assert state[1] == secondary
