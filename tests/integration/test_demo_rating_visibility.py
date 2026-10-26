@@ -10,10 +10,10 @@ import os
 import pytest
 from sqlalchemy import select
 
-from impulse.infrastructure.identity_store import SqlIdentityStore
 from impulse.bootstrap.demo_seed import PERSONAS, demo_id, seed_demo
 from impulse.domain.identity import ConsentScope
 from impulse.infrastructure.database import Database, async_database_url
+from impulse.infrastructure.identity_store import SqlIdentityStore
 from impulse.infrastructure.models.identity import visibility_settings
 
 pytestmark = pytest.mark.integration
