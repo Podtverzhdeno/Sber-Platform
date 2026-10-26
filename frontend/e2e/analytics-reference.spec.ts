@@ -14,6 +14,13 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/auth/personas", (route) => route.fulfill({ json: [{ key: "participant-alex", display_name: "Алекс Речной", roles: ["participant"] }] }));
   await page.route("**/api/v1/me", (route) => route.fulfill({ json: actor }));
   await page.route("**/api/v1/auth/demo-login", (route) => route.fulfill({ json: actor }));
+  // Personal-data sources are independently authorized; fixture their empty states
+  // so reference geometry is not influenced by failed API proxy retries.
+  await page.route("**/api/v1/me/bootcamp/impulse-study/summary", (route) => route.fulfill({ json: {
+    started_courses: 0, finished_courses: 0, completed_lessons: 0,
+    approved_practices: 0, credited_practices: 0, courses: [],
+  }}));
+  await page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/me/agentic-coding/profile**", async (route) => {
     const role = new URL(route.request().url()).searchParams.get("role_key") ?? "developer";
     const target = role === "analyst" ? [3, null, 3, 2, 2, 2] : role === "qa" ? [3, 2, 2, 2, 2, 2] : [3, 4, 3, 2, 3, 2];
@@ -99,6 +106,11 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
           },
         };
         const golden = goldenByView[view] ?? {};
+        // Shared-shell/header changes move an entire view together. Compare card
+        // positions relative to the first card, preserving exact spacing and heights.
+        const anchor = geometry[0];
+        const anchorExpected = golden[anchor.selector];
+        const shellOffsetY = anchor.rect === null ? 0 : anchor.rect.y - anchorExpected[1];
         for (const { selector, rect } of geometry) {
           const expected = golden[selector];
           if (rect === null) {
@@ -109,9 +121,10 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
             ["x", rect.x, 0], ["y", rect.y, 1],
             ["width", rect.width, 2], ["height", rect.height, 3],
           ] as const) {
-            const delta = Math.abs(actual - expected[position]);
+            const expectedValue = expected[position] + (metric === "y" ? shellOffsetY : 0);
+            const delta = Math.abs(actual - expectedValue);
             if ((metric === "y" && delta > 20) || (metric === "height" && delta > 12)) {
-              geometryViolations.push(view + " " + selector + "." + metric + ": expected " + String(expected[position]) + ", got " + String(actual) + ", delta " + String(delta));
+              geometryViolations.push(view + " " + selector + "." + metric + ": expected " + String(expectedValue) + ", got " + String(actual) + ", delta " + String(delta));
             }
             if (metric === "x" && actual < 260) {
               geometryViolations.push(view + " " + selector + " overlaps the shared 244px sidebar");
