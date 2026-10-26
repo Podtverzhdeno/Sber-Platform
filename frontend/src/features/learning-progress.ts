@@ -41,6 +41,7 @@ export function invalidateLearningProjections(client: QueryClient): void {
     learningSummaryQueryKey,
     ["bootcamp-catalog"],
     ["bootcamp-v2-overview"],
+    ["impulse-role-level"],
     ["participant-growth-analytics"],
     ["bootcamp-certificates"],
     ["certificates"],
