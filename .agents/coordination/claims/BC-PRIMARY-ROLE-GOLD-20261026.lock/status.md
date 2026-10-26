@@ -22,4 +22,6 @@
 
 - integration_handoff: PR #95 contains isolated golden primary-role indicator and tests; requires coordinator ownership recovery / integration approval
 - code_review: P1 conflict finding PRRT_kwDOUtZ8mM6wGnkU, acknowledged; do not resolve before file ownership is valid
-- focused_checks: lint, TypeScript, Vitest and build passed on 88553b98639f9ddc437187fd3145c12916f886bd; browser QA in progress at handoff
+- focused_checks: lint, TypeScript, Vitest and build passed on 88553b98639f9ddc437187fd3145c12916f886bd; browser QA SUCCESS at run 40249628326
+- verification_evidence: https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40249628326 (SUCCESS on 88553b98639f9ddc437187fd3145c12916f886bd: ESLint, TypeScript, 15 Vitest tests, production build and Chromium browser role-switch tests)
+- visual_proof: artifact bootcamp-primary-role-gold-evidence, bootcamp-main-direction-gold.png
