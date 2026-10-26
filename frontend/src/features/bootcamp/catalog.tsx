@@ -853,11 +853,17 @@ export function BootcampCatalog({
     return activeLevel === (Number(advanced[1]) < 15 ? 1 : 2);
   };
   const forRole = (card: CourseCardState) => isCourseInAiRole(card, selectedRole) && isCurrentCycleCourse(card.key);
+  const cycleVisible = (card: CourseCardState): boolean => {
+    const advanced = /^demo-course-(13|14|15|16)-([a-z][a-z0-9-]*)$/.exec(card.key);
+    return !advanced || (advanced[2] === selectedRole &&
+      (Number(advanced[1]) < 15 ? 1 : 2) <= activeLevel);
+  };
+  const availableCatalog = catalog.data.filter(cycleVisible);
   const categoryCounts = [
-    { key: "role", label: "Для моей роли", count: catalog.data.filter((card) => forTrack(card) && forRole(card)).length },
-    { key: "all", label: "Все курсы", count: catalog.data.filter(forTrack).length },
-    { key: "progress", label: "В процессе", count: catalog.data.filter((card) => forTrack(card) && (card.completion_state === "reported" || (studyStarted(card.key) && !studyFinished(card.key)))).length },
-    { key: "completed", label: "Завершённые", count: catalog.data.filter((card) => forTrack(card) && (card.completion_state === "verified" || studyFinished(card.key))).length },
+    { key: "role", label: "Для моей роли", count: availableCatalog.filter((card) => forTrack(card) && forRole(card)).length },
+    { key: "all", label: "Все курсы", count: availableCatalog.filter(forTrack).length },
+    { key: "progress", label: "В процессе", count: availableCatalog.filter((card) => forTrack(card) && (card.completion_state === "reported" || (studyStarted(card.key) && !studyFinished(card.key)))).length },
+    { key: "completed", label: "Завершённые", count: availableCatalog.filter((card) => forTrack(card) && (card.completion_state === "verified" || studyFinished(card.key))).length },
   ];
   const levelForRole = impulseLevel.data?.track_key === selectedRole ? impulseLevel.data : null;
   const roleCourses = catalog.data.filter(forRole);
@@ -894,13 +900,7 @@ export function BootcampCatalog({
   const suggestedCourses = orderRoleCourses(catalog.data.filter(forRole), selectedRole).filter((card) => card.access_state === "available" && card.completion_state === "not_started" && !studyFinished(card.key) && (selectedRole !== "all" || card.relevant));
   const nextCourse = suggestedCourses.find(card => studyStarted(card.key)) ?? suggestedCourses[0] ?? null;
   const selectedRoleTitle = selectedRole === "all" ? "Все активные направления" : aiRoleTitle(selectedRole);
-  const visible = catalog.data
-    // Future-cycle offerings are not actionable before promotion; retain
-    // completed earlier cycles under "Завершённые".
-    .filter(card => {
-      const advanced = /^demo-course-(13|14|15|16)-([a-z][a-z0-9-]*)$/.exec(card.key);
-      return !advanced || (advanced[2] === selectedRole && (Number(advanced[1]) < 15 ? 1 : 2) <= activeLevel);
-    })
+  const visible = availableCatalog
     .filter((card) => relevanceFilter !== "relevant" || card.relevant)
     .filter(forTrack)
     .filter((card) => category === "all" || (category === "role" && forRole(card)) || (category === "required" && forRole(card) && card.must_take !== null && !satisfiesStudyRequirement(card,study.data?.courses ?? [])) || (category === "progress" && (card.completion_state === "reported" || (studyStarted(card.key) && !studyFinished(card.key)))) || (category === "completed" && (card.completion_state === "verified" || studyFinished(card.key))))
