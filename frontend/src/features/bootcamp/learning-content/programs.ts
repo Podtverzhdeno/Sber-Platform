@@ -1,3 +1,4 @@
+import { advancedCycleProgramFor } from "./advanced-cycle-programs";
 import { engineeringPrograms } from "./programs-engineering";
 import { dataPrograms } from "./programs-data";
 import { practicePrograms } from "./programs-practice";
@@ -17,7 +18,7 @@ export const learningPrograms: readonly LearningProgram[] = [
 const byKey = new Map(learningPrograms.map(item => [item.courseKey, item]));
 
 export function learningProgramFor(courseKey: string | null | undefined): LearningProgram | null {
-  return courseKey ? (byKey.get(courseKey) ?? null) : null;
+  return courseKey ? (byKey.get(courseKey) ?? advancedCycleProgramFor(courseKey)) : null;
 }
 export function allLearningUnits(): readonly LearningUnit[] {
   return learningPrograms.flatMap(item => item.units);
