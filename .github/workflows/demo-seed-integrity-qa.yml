@@ -1,0 +1,47 @@
+name: Demo Seed Integrity QA
+on:
+  pull_request:
+    paths:
+      - "tests/integration/test_migration_constraints.py"
+      - "tests/integration/test_search_store.py"
+      - ".github/workflows/demo-seed-integrity-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seed-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      TEST_DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      APP_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: Migrate clean PostgreSQL
+        run: uv run alembic upgrade head
+      - name: Ruff format and lint
+        run: uv run ruff check tests/integration/test_migration_constraints.py tests/integration/test_search_store.py
+      - name: Seed idempotence and search
+        run: uv run pytest -q tests/integration/test_migration_constraints.py::test_demo_seed_is_linked_and_idempotent tests/integration/test_search_store.py::test_search_finds_published_task_dictionary_catalog
