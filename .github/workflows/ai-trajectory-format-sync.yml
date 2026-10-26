@@ -1,4 +1,5 @@
 name: AI trajectory format and schema sync
+# Refresh course catalog formatting and public L0-L3 level schema in one revision.
 
 on:
   push:
