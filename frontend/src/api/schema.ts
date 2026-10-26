@@ -4189,10 +4189,7 @@ export interface components {
             current_level: string | null;
             /** Explanation */
             explanation: string;
-            /**
-             * Last Evidence Submitted At
-             * Format: date-time
-             */
+            /** Last Evidence Submitted At */
             last_evidence_submitted_at: string | null;
             /** Model Version */
             model_version: string | null;
