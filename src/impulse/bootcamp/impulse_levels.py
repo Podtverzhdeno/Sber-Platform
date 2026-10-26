@@ -76,6 +76,7 @@ async def _evidence(
                 course.key
                 for course in courses
                 if track_key in course.track_keys
+                and getattr(course, "availability", "available") == "available"
                 and course.key in ELIGIBLE_KEYS
                 and course.key.count("-") == 2  # demo-course-1 through demo-course-12
             )
@@ -86,7 +87,9 @@ async def _evidence(
             sorted(
                 course.key
                 for course in courses
-                if course.key in required and track_key in course.track_keys
+                if course.key in required
+                and track_key in course.track_keys
+                and getattr(course, "availability", "available") == "available"
             )
         )
     summary = await impulse_study_summary(authenticated, request)
