@@ -6,8 +6,8 @@ import { expect, test } from "@playwright/test";
  */
 test("real DB: grey AI role → optional trajectory → complete course → grey → restore", async ({ page }) => {
   test.setTimeout(120_000);
-  const trackKey = "product"; // AI Architect in the seeded role catalog
-  const courseKey = "demo-course-1"; // First published AI Architect course
+  const trackKey = "backend"; // MLOps Engineer: an initially grey, unenrolled role in the seeded catalog
+  const courseKey = "demo-course-1"; // First published MLOps Engineer course
 
   await page.setViewportSize({ width: 1500, height: 900 });
   await page.goto("/");
@@ -40,6 +40,7 @@ test("real DB: grey AI role → optional trajectory → complete course → grey
   const before = await getOverview();
   const primaryBefore = before.roles.filter(role => role.state === "active").map(role => role.track_key);
   expect(primaryBefore.length).toBeGreaterThan(0);
+  expect(before.roles.find(role => role.track_key === trackKey)?.state).toBe("unselected");
 
   await page.goto(`/workspace/1?role=${trackKey}`);
   const selected = page.getByTestId("trajectory-role-detail");
