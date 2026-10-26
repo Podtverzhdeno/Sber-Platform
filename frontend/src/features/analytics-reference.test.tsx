@@ -119,8 +119,10 @@ describe("three canonical analytics reference layouts", () => {
   });
 
   it("opens per-skill details and certification terms without issuing a badge", () => {
-    open();
-    fireEvent.click(screen.getByRole("button", { name: /Постановка задач агенту/ }));
+    const { container } = open();
+    const list = container.querySelector(".ref-skill-list");
+    if (list === null) throw new Error("Missing skill list");
+    fireEvent.click(within(list as HTMLElement).getByRole("button", { name: /Постановка задач агенту/ }));
     expect(screen.getByRole("dialog", { name: /Подтверждение навыка/ })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Закрыть" }));
     fireEvent.click(screen.getByRole("button", { name: "Открыть Skill Passport ↗" }));
@@ -130,10 +132,12 @@ describe("three canonical analytics reference layouts", () => {
   it("renders actual user learning and accepted work inside the radar without inventing a certified level", async () => {
     const { container } = open();
     const summary = await screen.findByTestId("reference-personal-facts");
-    expect(within(summary).getByText("56")).toBeInTheDocument();
-    expect(within(summary).getByText("6")).toBeInTheDocument();
-    expect(within(summary).getByText("2")).toBeInTheDocument();
-    expect(within(summary).getByText("0")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(within(summary).getByText("56")).toBeInTheDocument();
+      expect(within(summary).getByText("6")).toBeInTheDocument();
+      expect(within(summary).getByText("2")).toBeInTheDocument();
+      expect(within(summary).getByText("0")).toBeInTheDocument();
+    });
     expect(container.querySelectorAll(".ref-radar circle[fill='#31eaba']")).toHaveLength(0);
     expect(screen.getByText(/реальные действия ниже не являются уровнем Agentic Coding/)).toBeInTheDocument();
     await waitFor(() => { expect(container.querySelector(".ref-skill-activity")?.textContent).toContain("1"); });
