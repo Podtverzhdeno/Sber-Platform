@@ -5,6 +5,7 @@ import { apiRequest } from "../api/client";
 import { Modal } from "../components/ui";
 import { LearningProgressPanel } from "./learning-progress-panel";
 import { ParticipantEvidence } from "./participant-evidence";
+import { learningSummaryQueryKey, loadLearningSummary, type LearningSummary } from "./learning-progress";
 import type { AgenticServerProfile } from "./agentic-coding-profile";
 import "./analytics-reference.scss";
 
@@ -20,6 +21,31 @@ type Snapshot = {
 type Stage = { key: string; title: string; count: number; status: string };
 type Journey = { stages: Stage[]; generated_at: string; successful: boolean; next_action: string };
 type Skill = { key: string; title: string; target_level: number | null; current_level: number | null; evidence_count: number; data_state: string; unresolved_methodology: boolean };
+type RegisteredEvidence = { competency_key: string; source_kind: string; source_ref: string; level: string; observed_at: string; counted: boolean };
+type ParticipantSkillFacts = { learning: LearningSummary | undefined; accepted: number | null; registered: readonly RegisteredEvidence[] | undefined };
+/** Registered actions are not qualified Agentic Coding levels. */
+function registeredForSkill(facts: ParticipantSkillFacts, key: string): RegisteredEvidence[] {
+  const sources = new Map<string, RegisteredEvidence>();
+  for (const row of facts.registered ?? []) {
+    if (row.competency_key !== key || !row.counted || !row.source_kind || !row.source_ref) continue;
+    const fingerprint = row.source_kind + ":" + row.source_ref;
+    if (!sources.has(fingerprint)) sources.set(fingerprint, row);
+  }
+  return [...sources.values()];
+}
+function PersonalFactsStrip({ facts }: { facts: ParticipantSkillFacts }) {
+  const values = [
+    ["Курсов пройдено", facts.learning ? String(facts.learning.finished_courses) : "—"],
+    ["Уроков завершено", facts.learning ? String(facts.learning.completed_lessons) : "—"],
+    ["Практик учтено", facts.learning ? String(facts.learning.credited_practices) : "—"],
+    ["Принятых работ", facts.accepted === null ? "—" : String(facts.accepted)],
+  ];
+  return <div className="ref-personal-facts" data-testid="reference-personal-facts" aria-label="Мои реальные результаты Impulse">
+    <strong>Мои результаты <span>· аккаунт, все направления</span></strong>
+    <div>{values.map(([label,value]) => <span key={label}><b>{value}</b><small>{label}</small></span>)}</div>
+  </div>;
+}
+
 
 const ROLES: Record<RoleKey, string> = { developer: "Разработчик", analyst: "Аналитик", qa: "Тестировщик" };
 const LAYOUTS: { key: LayoutKey; name: string; heading: string; description: string; eyebrow: string }[] = [
@@ -51,7 +77,7 @@ function skillSource(profile: AgenticServerProfile | undefined, role: RoleKey): 
     const record = trusted ? profile.skills.find((item) => item.key === key) : undefined;
     return {
       key, title: LABELS[index] ?? key,
-      target_level: record?.target_level ?? TARGETS[role][index] ?? null,
+      target_level: record !== undefined ? record.target_level : TARGETS[role][index] ?? null,
       current_level: record?.data_state === "verified" && typeof record.current_level === "number" ? record.current_level : null,
       evidence_count: record?.data_state === "verified" ? record.evidence_count : 0,
       data_state: record?.data_state ?? "unknown",
@@ -98,7 +124,7 @@ function monthSeries(snapshot: Snapshot | undefined, period: number): { name: st
   }
   return result.map(({ name, total, verified }) => ({ name, total, verified }));
 }
-function Radar({ skills }: { skills: Skill[] }) {
+function Radar({ skills, facts, openSkill }: { skills: Skill[]; facts: ParticipantSkillFacts; openSkill: (key: string) => void }) {
   const center = 260, radius = 118;
   const xy = (index: number, level: number) => {
     const a = (-Math.PI / 2) + index * (2 * Math.PI / skills.length);
@@ -109,6 +135,7 @@ function Radar({ skills }: { skills: Skill[] }) {
     return String(pos.x) + "," + String(pos.y);
   }).join(" ");
   const known = skills.map((skill) => skill.current_level);
+  const knownCount = known.filter((value) => value !== null).length;
   return <div className="ref-radar" data-testid="reference-radar">
     <svg viewBox="0 0 520 350" role="img" aria-label="Циклограмма: бирюзовая линия — подтверждённый уровень, оранжевая пунктирная — целевой">
       {[1, 2, 3, 4].map((level) => <polygon key={level} points={points(skills.map(() => level))} stroke="#244760" strokeWidth="1" fill="none" />)}
@@ -130,17 +157,32 @@ function Radar({ skills }: { skills: Skill[] }) {
       })}
       {skills.map((skill, i) => {
         const aim = skill.target_level, current = skill.current_level;
+        const sources = registeredForSkill(facts, skill.key);
         const t = xy(i, aim ?? 0), c = xy(i, current ?? 0);
         const label = xy(i, 4.8);
-        return <g key={skill.key}>
+        const description = skill.title + ". Подтверждённый Agentic: "
+          + (current === null ? "нет данных" : String(current) + " из 4")
+          + ". Цель: " + (aim === null ? "уточняется" : String(aim) + " из 4")
+          + ". Зарегистрированных действий по этому навыку: "
+          + (facts.registered === undefined ? "нет ответа источника" : String(sources.length)) + ".";
+        return <g key={skill.key} role="button" tabIndex={0} className="ref-radar-skill"
+          aria-label={description + " Открыть сведения о навыке"} onClick={() => { openSkill(skill.key); }}
+          onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openSkill(skill.key); } }}>
+          <title>{description}</title>
           {aim !== null && <circle cx={t.x} cy={t.y} r="3" fill="#ffb844" />}
           {current !== null && <circle cx={c.x} cy={c.y} r="4.3" fill="#31eaba" stroke="#092e2d" strokeWidth="1.5" />}
           <text x={label.x} y={label.y} fill="#bfd8e7" fontSize="11" fontWeight="600" textAnchor={i === 0 || i === 3 ? "middle" : i < 3 ? "start" : "end"}>{SHORT_LABELS[i]}</text>
         </g>;
       })}
+      <g className="ref-radar-center" aria-label={String(knownCount) + " из 6 навыков с квалифицированным уровнем"}>
+        <rect x="220" y="151" width="80" height="45" rx="9"/>
+        <text x="260" y="169" textAnchor="middle">{String(knownCount)} / 6</text>
+        <text x="260" y="185" textAnchor="middle">с оценкой</text>
+      </g>
     </svg>
     <div className="ref-legend"><span><i className="ref-dot" />Текущий уровень</span><span><i className="ref-dot amber" />Цель по методологии L1</span></div>
-    {known.every((level) => level === null) && <p className="ref-chart-note">Подтверждённых уровней пока нет — бирюзовый контур появится после проверки цифровых следов.</p>}
+    {known.every((level) => level === null) && <p className="ref-chart-note">Подтверждённых уровней пока нет: реальные действия ниже не являются уровнем Agentic Coding 1–4.</p>}
+    <PersonalFactsStrip facts={facts} />
   </div>;
 }
 function HistoryChart({ series, mode = "bars" }: { series: ReturnType<typeof monthSeries>; mode?: "bars" | "line" }) {
@@ -163,18 +205,19 @@ function Controls({ role, setRole, chart, setChart }: { role: RoleKey; setRole: 
     <div className="ref-switch" role="group" aria-label="Вид диаграммы">{([["radar", "Циклограмма"], ["histogram", "Гистограмма"], ["trend", "Тренд"]] as [ChartKey, string][]).map(([key, label]) => <button type="button" className={chart === key ? "active" : ""} aria-pressed={chart === key} key={key} onClick={() => { setChart(key); }}>{label}</button>)}</div>
   </div>;
 }
-function SkillsVisual({ skills, chart, series }: { skills: Skill[]; chart: ChartKey; series: ReturnType<typeof monthSeries> }) {
-  if (chart === "radar") return <Radar skills={skills} />;
+function SkillsVisual({ skills, chart, series, facts, openSkill }: { skills: Skill[]; chart: ChartKey; series: ReturnType<typeof monthSeries>; facts: ParticipantSkillFacts; openSkill: (key: string) => void }) {
+  if (chart === "radar") return <Radar skills={skills} facts={facts} openSkill={openSkill} />;
   if (chart === "trend") return <HistoryChart series={series} mode="line" />;
   return <div className="ref-skill-bars" aria-label="Уровни навыков по шкале 1–4">{skills.map((skill) =>
     <div className="ref-skill-bar" key={skill.key}><span>{skill.title}</span><div className="ref-meter"><div style={{ width: String((skill.current_level ?? 0) * 25) + "%" }} /><i style={{ left: String((skill.target_level ?? 0) * 25) + "%" }} /></div><strong>{pString(skill.current_level)} / {pString(skill.target_level)}</strong></div>)}</div>;
 }
-function SkillRows({ skills, openSkill }: { skills: Skill[]; openSkill: (key: string) => void }) {
+function SkillRows({ skills, openSkill, facts }: { skills: Skill[]; openSkill: (key: string) => void; facts: ParticipantSkillFacts }) {
   return <div className="ref-skill-list">{skills.map((skill, index) =>
     <button type="button" className="ref-skill-row" key={skill.key} onClick={() => { openSkill(skill.key); }}>
       <span className="ref-skill-no">{index + 1}</span><span className="ref-skill-title">{skill.title}</span>
       <span className="ref-meter"><span style={{ width: String((skill.current_level ?? 0) * 25) + "%" }} /><i style={{ left: String((skill.target_level ?? 0) * 25) + "%" }} /></span>
       <strong>{pString(skill.current_level)} / {pString(skill.target_level)}</strong>
+      <span className="ref-skill-activity" title="Это зарегистрированные действия, не подтверждённый уровень">{facts.registered === undefined ? "Действия: —" : "Действия: " + String(registeredForSkill(facts,skill.key).length)}</span>
       <small className={skill.current_level !== null && skill.target_level !== null && skill.current_level >= skill.target_level ? "done" : "pending"}>
         {skill.target_level === null ? "Цель уточняется" : skill.current_level === null ? "Нет данных" : skill.current_level >= skill.target_level ? "Цель достигнута" : "Требует проверки"}
       </small>
@@ -207,15 +250,16 @@ function Kpis({ skills, ready, sourceCount, accepted, variant }: { skills: Skill
        ["Принятые результаты", accepted === null ? "—" : String(accepted), "С проверенным вкладом", "✓"]];
   return <div className="ref-kpis">{cards.map(([label, value, detail, icon], i) => <article className={"ref-kpi ref-kpi-" + String(i)} key={label}><span>{label}</span><b>{value}</b><small>{detail}</small><i aria-hidden="true">{icon}</i></article>)}</div>;
 }
-function Matrix({ title, subtitle, skills, role, setRole, chart, setChart, series, openSkill, className = "", onCriteria }: {
+function Matrix({ title, subtitle, skills, role, setRole, chart, setChart, series, facts, openSkill, className = "", onCriteria }: {
   title: string; subtitle?: string; skills: Skill[]; role: RoleKey; setRole: (role: RoleKey) => void;
   chart: ChartKey; setChart: (chart: ChartKey) => void; series: ReturnType<typeof monthSeries>;
+  facts: ParticipantSkillFacts;
   openSkill: (key: string) => void; className?: string; onCriteria?: () => void;
 }) {
   return <section className={"ref-panel ref-matrix " + className}>
     <div className="ref-card-title"><div><span className="ref-cap">ГЛАВНЫЙ РЕЗУЛЬТАТ</span><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{onCriteria && <button className="ref-small-link" type="button" onClick={() => { onCriteria(); }}>Как считается ↗</button>}</div>
     <Controls role={role} setRole={setRole} chart={chart} setChart={setChart} />
-    <div className="ref-matrix-grid"><div><SkillsVisual skills={skills} chart={chart} series={series} /><ParticipantEvidence compact /></div><div className="ref-matrix-list"><h3>Квалифицированные уровни Agentic Coding</h3><p>Текущий / целевой уровень · учебная активность ниже отдельно</p><SkillRows skills={skills} openSkill={openSkill} /></div></div>
+    <div className="ref-matrix-grid"><div><SkillsVisual skills={skills} chart={chart} series={series} facts={facts} openSkill={openSkill} /><ParticipantEvidence compact /></div><div className="ref-matrix-list"><h3>Квалифицированные уровни Agentic Coding</h3><p>Текущий / целевой уровень · учебная активность ниже отдельно</p><SkillRows skills={skills} openSkill={openSkill} facts={facts} /></div></div>
   </section>;
 }
 export function AnalyticsReference({ navigation = [] }: { navigation?: string[] }) {
@@ -232,6 +276,8 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
   const profileQuery = useQuery({ queryKey: ["agentic-coding-profile", role], queryFn: () => apiRequest<AgenticServerProfile>(("/api/v1/me/agentic-coding/profile?role_key=" + role) as `/api/v1/me/agentic-coding/profile?${string}`) });
   const growthQuery = useQuery({ queryKey: ["participant-growth-analytics"], queryFn: () => apiRequest<Snapshot>("/api/v1/me/growth/snapshot") });
   const journeyQuery = useQuery({ queryKey: ["participant-analytics"], queryFn: () => apiRequest<Journey>("/api/v1/me/analytics/journey") });
+  const learningQuery = useQuery({ queryKey: learningSummaryQueryKey, queryFn: loadLearningSummary, refetchOnMount: "always" });
+  const registeredQuery = useQuery({ queryKey: ["participant-competency-evidence"], queryFn: () => apiRequest<RegisteredEvidence[]>("/api/v1/me/competency-evidence"), refetchOnMount: "always" });
   const skills = useMemo(() => skillSource(profileQuery.data, role), [profileQuery.data, role]);
   const verified = trustedProfile(profileQuery.data, role);
   const required = skills.filter((skill) => skill.target_level !== null);
@@ -240,6 +286,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
   const ready = verified && known.length === required.length && required.length > 0
     ? Math.round(required.reduce((sum, skill) => sum + Math.min((skill.current_level ?? 0) / (skill.target_level ?? 1), 1), 0) / required.length * 100) : null;
   const accepted = journeyQuery.data?.stages.find((stage) => stage.key === "verified_experience")?.count ?? null;
+  const facts: ParticipantSkillFacts = { learning: learningQuery.data, accepted, registered: registeredQuery.data };
   const qualifiedSourceCount = trustedProfile(profileQuery.data, role) ? profileQuery.data?.known_evidence_count ?? null : null;
   const events = growthQuery.data?.freshness.known ? (growthQuery.data.events ?? []).filter((event) => Boolean(event.source_kind && event.source_ref)) : [];
   const series = monthSeries(growthQuery.data, period);
@@ -267,10 +314,12 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
     {growthQuery.isError && <div className="ref-alert" role="alert">Историю цифровых следов загрузить не удалось. Это не означает отсутствие подтверждений. <button type="button" onClick={() => { void growthQuery.refetch(); }}>Повторить</button></div>}
     {journeyQuery.isPending && <p className="ref-loading" role="status">Загружаются принятые результаты и путь участника…</p>}
     {journeyQuery.isError && <div className="ref-alert" role="alert">Источник принятых результатов недоступен. Отсутствующее значение не является нулём. <button type="button" onClick={() => { void journeyQuery.refetch(); }}>Повторить</button></div>}
+    {learningQuery.isError && <div className="ref-alert" role="alert">Учебные результаты недоступны. <button type="button" onClick={() => { void learningQuery.refetch(); }}>Повторить</button></div>}
+    {registeredQuery.isError && <div className="ref-alert" role="alert">Источники действий по навыкам недоступны. <button type="button" onClick={() => { void registeredQuery.refetch(); }}>Повторить</button></div>}
     {layout !== "path" && <Kpis skills={skills} ready={ready} sourceCount={qualifiedSourceCount} accepted={accepted} variant={layout} />}
     {layout === "passport" && <>
       <div className="ref-v1-middle">
-        <Matrix className="ref-primary-matrix" title="Матрица навыков Agentic Coding" subtitle="Сравнение вашего профиля с требованиями L1 · 6 компетенций" skills={skills} role={role} setRole={setRole} chart={chart} setChart={setChart} series={series} openSkill={setOpenDetail} onCriteria={() => { setShowCriteria(true); }} />
+        <Matrix className="ref-primary-matrix" title="Матрица навыков Agentic Coding" subtitle="Сравнение вашего профиля с требованиями L1 · 6 компетенций" skills={skills} role={role} setRole={setRole} chart={chart} setChart={setChart} series={series} facts={facts} openSkill={setOpenDetail} onCriteria={() => { setShowCriteria(true); }} />
         <aside className="ref-panel ref-passport"><span className="ref-cap">ВАШ ЦИФРОВОЙ ПРОФИЛЬ</span><div className="ref-passport-top"><span className="ref-passport-crest">◇</span><div><h2>Skill Passport</h2><p>{ROLES[role]} · Agentic Coding</p></div></div>
           <div className="ref-big-value">{ready === null ? "—" : String(ready) + "%"} <span>готовность к целевому профилю</span></div>
           <div className="ref-progress"><i style={{ width: String(ready ?? 0) + "%" }} /></div>
@@ -295,7 +344,7 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
         <section className="ref-panel ref-gaps"><div className="ref-card-title"><div><span className="ref-cap">ТОЧЕЧНЫЕ ДЕЙСТВИЯ</span><h2>{gap.length ? String(gap.length) + " навыка до целевого профиля" : "Открытые требования"}</h2><p>Каждое действие связано с правилами методологии</p></div></div>
           <div className="ref-gaps-list">{gap.length ? gap.slice(0, 3).map((skill, i) => <button className="ref-gap-row" key={skill.key} type="button" onClick={() => { setOpenDetail(skill.key); }}><span className="ref-gap-num">{i + 1}</span><div><h3>{skill.title}</h3><div className="ref-meter"><span style={{ width: String((skill.current_level ?? 0) * 25) + "%" }} /><i style={{ left: String((skill.target_level ?? 0) * 25) + "%" }} /></div><p>{PRACTICES[skill.key]}</p></div><strong>{pString(skill.current_level)} / {pString(skill.target_level)}</strong></button>) : <p className="ref-quiet">Пока нет новых пробелов для отображения.</p>}</div>
         </section>
-        <Matrix className="ref-path-matrix" title={"Ваш профиль — " + ROLES[role]} skills={skills} role={role} setRole={setRole} chart={chart} setChart={setChart} series={series} openSkill={setOpenDetail} />
+        <Matrix className="ref-path-matrix" title={"Ваш профиль — " + ROLES[role]} skills={skills} role={role} setRole={setRole} chart={chart} setChart={setChart} series={series} facts={facts} openSkill={setOpenDetail} />
       </div>
       <div className="ref-v2-bottom">
         <section className="ref-panel ref-history"><div className="ref-card-title"><div><span className="ref-cap">ПРОВЕРЯЕМЫЙ РЕЗУЛЬТАТ</span><h2>История подтверждения</h2></div></div><QualifiedEvidenceList skills={skills} /></section>
@@ -324,6 +373,12 @@ export function AnalyticsReference({ navigation = [] }: { navigation?: string[] 
         <p>Подтверждённый уровень: <strong>{pString(detailed.current_level)}</strong> · Цель: <strong>{pString(detailed.target_level)}</strong></p>
         <p>{PRACTICES[detailed.key]}</p>
         <p>Событий из разрешённого источника: {detailed.evidence_count}. {detailed.unresolved_methodology ? "Есть нерешённое расхождение методологии." : "Неподтверждённый уровень не является нулём."}</p>
+        <h4>Мои действия по этой компетенции</h4>
+        {facts.registered === undefined ? <p>Источник зарегистрированных действий недоступен.</p>
+          : registeredForSkill(facts,detailed.key).length === 0 ? <p>Действий с точной привязкой к этому навыку нет. Учебный прогресс по курсам показан отдельно.</p>
+          : <ul className="ref-personal-sources">{registeredForSkill(facts,detailed.key).slice(0,10).map(item=><li key={item.source_kind+":"+item.source_ref}>
+             {item.source_kind} · {item.source_ref} · {new Date(item.observed_at).toLocaleDateString("ru-RU")}
+            </li>)}</ul>}
         <a className="ref-primary-cta" href={tasksUrl}>Перейти к задачам →</a>
       </div>}
     </Modal>
