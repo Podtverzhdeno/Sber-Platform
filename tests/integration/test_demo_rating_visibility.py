@@ -29,10 +29,13 @@ async def test_seeded_fictional_rating_is_named_and_optout_survives_reseed() -> 
         await seed_demo(db)
         participant_keys = [key for key, _name, role in PERSONAS if role == "participant"]
         async with db.sessions() as session:
-            rows = (await session.execute(
-                select(visibility_settings.c.person_id, visibility_settings.c.visible)
-                .where(visibility_settings.c.scope == "public_rating")
-            )).all()
+            rows = (
+                await session.execute(
+                    select(visibility_settings.c.person_id, visibility_settings.c.visible).where(
+                        visibility_settings.c.scope == "public_rating"
+                    )
+                )
+            ).all()
         names = {row.person_id: row.visible for row in rows}
         assert all(names[demo_id(key)] is True for key in participant_keys)
 
@@ -43,13 +46,14 @@ async def test_seeded_fictional_rating_is_named_and_optout_survives_reseed() -> 
         await seed_demo(db)
         await seed_demo(db)
         async with db.sessions() as session:
-            row = (await session.execute(
-                select(visibility_settings.c.visible)
-                .where(
-                    visibility_settings.c.person_id == alex_id,
-                    visibility_settings.c.scope == "public_rating",
+            row = (
+                await session.execute(
+                    select(visibility_settings.c.visible).where(
+                        visibility_settings.c.person_id == alex_id,
+                        visibility_settings.c.scope == "public_rating",
+                    )
                 )
-            )).scalar_one()
+            ).scalar_one()
         assert row is False
         assert ConsentScope.PUBLIC_RATING not in await store.granted_consents(alex_id)
         assert names[demo_id("participant-maria")] is True
