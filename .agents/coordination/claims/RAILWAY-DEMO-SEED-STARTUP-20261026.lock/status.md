@@ -1,0 +1,19 @@
+# Claim RAILWAY-DEMO-SEED-STARTUP-20261026
+- task_id: RAILWAY-DEMO-SEED-STARTUP-20261026
+- session_id: gpt6-railway-demo-ranking-runtime-20261026
+- status: IN_PROGRESS
+- started_at: 2026-10-26
+- base_revision: 9e681d0ec9aaecc87ab3590bc9626c471f0fb6a4
+- depends_on:
+  - RATING-DEMO-IDENTITIES-20261026 (merged in main as 6597dc8)
+- write_scope:
+  - Dockerfile (startup command only)
+  - tests/test_railway_predeploy.py (startup command regression)
+  - .github/workflows/railway-startup-seed-qa.yml
+  - docs/rating-data-integrity.md (correct previous deployment assumption)
+  - .agents/coordination/claims/RAILWAY-DEMO-SEED-STARTUP-20261026.lock/status.md
+- shared_files: none
+- problem: Production /api/v1/rating-seasons/{id}/leaderboard returns 10 anonymized entries after #110 deployed SUCCESS at 6597dc8. Public health/ready OK and Railway deploy logs show Alembic startup only; configured Railway service has no visible preDeploy command. Therefore synthetic demo public_rating consent data wasn't applied.
+- mitigation: Dockerfile runtime runs the already-tested python -m impulse.bootstrap.predeploy (Alembic + demo-mode only seed) before uvicorn. Demo privacy opt-out preserved by seed ON CONFLICT DO NOTHING.
+- verification: targeted tests/format, Docker build, check source review, exact main and Railway commit, production read-only API after deployment.
+- scope_limit: no direct database modification and no direct production variable changes. Use repo PR -> main.
