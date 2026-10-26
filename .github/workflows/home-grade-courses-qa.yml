@@ -8,6 +8,7 @@ on:
       - "frontend/src/features/participant-home-v2/home-v2.scss"
       - "frontend/src/App.tsx"
       - ".github/workflows/home-grade-courses-qa.yml"
+      - "frontend/e2e/home-grade-courses.spec.ts"
   workflow_dispatch:
 
 permissions:
@@ -33,3 +34,9 @@ jobs:
         run: npx eslint src/App.tsx src/features/participant-home-v2/client.ts src/features/participant-home-v2/page.tsx src/features/participant-home-v2/page.test.tsx --max-warnings 0
       - name: Required course and navigation regressions
         run: npx vitest run src/features/participant-home-v2/page.test.tsx
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Browser path desktop and mobile
+        env:
+          CI: "true"
+        run: npx playwright test home-grade-courses.spec.ts --project=chromium --reporter=line
