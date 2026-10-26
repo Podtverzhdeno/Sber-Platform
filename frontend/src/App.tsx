@@ -42,7 +42,7 @@ import {
 } from "react-router-dom";
 
 import { apiRequest, subscribeProgressMutation } from "./api/client";
-import { participantProjectionKeys } from "./api/cross-section-mutations";
+import { projectionKeysForProgressMutation } from "./api/cross-section-mutations";
 import {
   applyTheme,
   storedThemeChoice,
@@ -1843,8 +1843,8 @@ function ImpulseApp() {
 }
 
 export function App() {
-  useEffect(() => subscribeProgressMutation(() => {
-    for (const key of participantProjectionKeys) {
+  useEffect(() => subscribeProgressMutation((path) => {
+    for (const key of projectionKeysForProgressMutation(path)) {
       void queryClient.invalidateQueries({ queryKey: [key] });
     }
   }), []);
