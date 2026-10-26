@@ -1,7 +1,7 @@
 # Claim TASK-SKILL-EVIDENCE-20261026
 - task_id: TASK-SKILL-EVIDENCE-20261026
 - session_id: gpt6-20261026-task-skill-evidence
-- status: IN_PROGRESS
+- status: BLOCKED
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - depends_on: []
@@ -30,4 +30,9 @@
   - frontend typecheck + ESLint + Vitest
   - browser or layout regression
 - progress: Server API includes accepted contribution count per skill; frontend replaces empty three-column forecast with evidence summary and breakdown. OpenAPI/typegen, Ruff, strict frontend TypeScript/lint and backend task-catalog test suite passed on b6a8dce. React and Playwright acceptance updated; PR #105 open.
-- blockers: Main integration only after independent review of frontend file overlap; scope remains isolated in separate PR.
+- blockers: P1 owner-overlap remains active: task-catalog-desktop-firstfold-20261024 owns frontend/src/features/task-catalog-v2/page.tsx with no shared_files allowance. No main merge until the integration owner/coordinator explicitly releases or takes over JSX wiring. Do not edit existing claim.
+
+- handoff_pr: https://github.com/Podtverzhdeno/Sber-Platform/pull/105
+- last_target_qa_success: https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40254010963 (backend+frontend+Playwright, pre-final fallback/light contrast changes)
+- code_review: P2 light-theme contrast fixed, P1 ownership thread intentionally left open
+- integration_decision: BLOCKED, no unilateral main merge
