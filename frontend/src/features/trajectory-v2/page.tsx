@@ -742,7 +742,7 @@ function CycleLearningPath(props: { level: ImpulseRoleLevel; learningCourses: Le
       <p>Новый виток: изучи отдельные курсы, отправь практическую работу на независимую проверку и подтверди повышение уровня в Bootcamp.</p>
       <div className="trajectory-v2-cycle-courses">{keys.map((key,index)=>{
         const course=props.learningCourses.find(item=>item.course_key===key);
-        const number=Number(/^demo-course-(\\d+)/.exec(key)?.[1] ?? "0");
+        const number=Number(/^demo-course-(\d+)/.exec(key)?.[1] ?? "0");
         const isDone=course?.finished === true;
         return <Link key={key} to={`/workspace/2?role=${encodeURIComponent(roleKey)}&course=${encodeURIComponent(key)}&panel=detail`} className="trajectory-v2-cycle-course">
           <span className="trajectory-v2-cycle-num">{isDone ? "✓" : index+1}</span>
