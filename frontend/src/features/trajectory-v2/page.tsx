@@ -347,22 +347,23 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
               <small>{roleLevel ? `Цикл ${String(roleLevel.cycle_number)}` : "Загрузка"}</small>
             </div>
             <div className="trajectory-v2-grade-progress">
-              <small>{roleLevel ? `До уровня L${String(roleLevel.level+1)}` : "Учебные уровни Impulse"}</small>
+              <small>{roleLevel?.level === 3 ? "Программа L3 освоена" : roleLevel ? `До уровня L${String(roleLevel.level+1)}` : "Учебные уровни Impulse"}</small>
               <strong>{roleLevel?.curriculum_state==="published"
                 ? `${String(roleLevel.completed_courses)} из ${String(roleLevel.required_courses)} курсов`
-                : roleLevel ? "Новый цикл" : "Данных нет"}</strong>
-              <progress max={100} value={roleLevel ? levelCoursesProgress(roleLevel) : 0} aria-label="Освоение курсов текущего цикла"/>
+                : roleLevel?.level === 3 ? "L3 достигнут" : roleLevel ? "Новый цикл" : "Данных нет"}</strong>
+              <progress max={100} value={roleLevel?.level === 3 ? 100 : roleLevel ? levelCoursesProgress(roleLevel) : 0} aria-label="Освоение курсов текущего цикла"/>
               <small>{roleLevel?.curriculum_state==="published"
                 ? `Практика одобрена: ${String(roleLevel.approved_practices)} из ${String(roleLevel.required_practices)}`
-                : roleLevel ? "Требования следующего цикла ещё не опубликованы" : "Проверяем сохранённый уровень"}</small>
+                : roleLevel?.level === 3 ? "Три учебных цикла сохранены" : roleLevel ? "Программа цикла недоступна" : "Проверяем сохранённый уровень"}</small>
             </div>
           </div>
           {learningLevel.isError && selected?.attempt_number !== null && <p role="alert" className="trajectory-v2-level-error">Не удалось загрузить уровень Impulse. <button type="button" onClick={() => { void learningLevel.refetch(); }}>Повторить</button></p>}
           <div className="trajectory-v2-grade-callout"><span aria-hidden="true" className="trajectory-v2-grade-callout-icon">⌁</span>
             <span>{roleLevel?.advance_ready
-              ? "Учебные курсы и практика подтверждены. Перейди в Bootcamp и нажми «Следующий этап» для сохранения L1."
-              : nextCycleUnpublished
-                ? "Текущий L1 сохранён. Предыдущие сертификаты не становятся выполненными заданиями нового цикла."
+              ? "Учебные курсы и практика подтверждены. Перейди в Bootcamp и нажми «Следующий этап» для сохранения нового уровня."
+              : roleLevel?.level === 3 ? "Максимальный учебный уровень L3 достигнут. Проверенные результаты сохранены."
+                : nextCycleUnpublished
+                ? "Уровень сохранён. Новая программа временно недоступна."
                 : "Завершай курсы и передавай практические работы на проверку. Это уровень Impulse, не карьерный грейд Сбера."}</span>
           </div>
         </section>
@@ -500,14 +501,10 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
             </header>
             <div className="trajectory-v2-grades-layout">
               <nav className="trajectory-v2-grades-list" aria-label="Учебные циклы">
-                <div className="trajectory-v2-grade-option">
-                  <span className="trajectory-v2-grade-dot">L0</span>
-                  <span><strong>Стартовый уровень</strong><small>Курсы и первая практика</small></span>
-                </div>
-                <div className="trajectory-v2-grade-option">
-                  <span className="trajectory-v2-grade-dot">L1</span>
-                  <span><strong>Следующий уровень</strong><small>Новый цикл и более сложные результаты</small></span>
-                </div>
+                {(["Фундамент и практика", "Архитектура и оценка агентов", "Эксплуатация и оркестрация", "Программа освоена"] as const).map((label,index)=><div className="trajectory-v2-grade-option" key={label} data-attained={roleLevel !== null && roleLevel.level >= index}>
+                  <span className="trajectory-v2-grade-dot">L{index}</span>
+                  <span><strong>{label}</strong><small>{roleLevel === null ? "Загрузка" : roleLevel.level === index ? "Текущий уровень" : roleLevel.level > index ? "Получен" : "Впереди"}</small></span>
+                </div>)}
               </nav>
               <div className="trajectory-v2-grade-explanation">
                 <div className="trajectory-v2-grade-explanation-head">
@@ -520,7 +517,7 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                   <h4>Прогресс текущего цикла</h4>
                   <p>Курсы: {roleLevel.completed_courses} из {roleLevel.required_courses}</p>
                   <p>Принятая практика: {roleLevel.approved_practices} из {roleLevel.required_practices}</p>
-                  {roleLevel.curriculum_state==="unpublished" && <p>Программа следующего цикла ещё не опубликована. Старые сертификаты не засчитываются повторно.</p>}
+                  {roleLevel.level === 3 && <p>L3 — максимальный уровень опубликованной программы.</p>}
                 </div>}
                 <div className="trajectory-v2-grade-next-note">Переход подтверждает сервер. Просмотр этой страницы не повышает уровень.</div>
               </div>
