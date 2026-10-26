@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { advancedCycleProgramFor } from "./advanced-cycle-programs";
 import { learningProgramFor } from "./programs";
 
-const roles = ["ai-architect", "ai-engineer", "ai-security", "ai-data", "ai-mlops", "ai-agent", "ai-product"];
+const roles = ["product", "ml", "python", "data", "backend", "design", "manager"];
 
 describe("Impulse L1-L3 advanced course content", () => {
   it("publishes 28 role-scoped course programs with eight substantive lessons each", () => {
@@ -31,8 +31,8 @@ describe("Impulse L1-L3 advanced course content", () => {
   });
   it("never aliases new course keys to a former L0 certificate or another role", () => {
     expect(advancedCycleProgramFor("demo-course-3")).toBeNull();
-    expect(advancedCycleProgramFor("demo-course-13-ai-does-not-exist")).not.toBeNull();
+    expect(advancedCycleProgramFor("demo-course-13-ai-does-not-exist")).toBeNull();
     expect(advancedCycleProgramFor("demo-course-17-ai-security")).toBeNull();
-    expect(advancedCycleProgramFor("demo-course-13-ai-security%2F../")).toBeNull();
+    expect(advancedCycleProgramFor("demo-course-13-python%2F../")).toBeNull();
   });
 });
