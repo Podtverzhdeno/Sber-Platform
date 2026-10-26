@@ -167,12 +167,18 @@ class SkillImpactProjection:
     explanation: str
     verification_required: bool = True
     sources: tuple[ProjectionSource, ...] = ()
+    accepted_evidence_count: int = 0
+    last_accepted_at: datetime | None = None
 
     def __post_init__(self) -> None:
         if not self.skill_id.strip() or not self.title.strip() or not self.explanation.strip():
             raise CatalogContractError("Skill impact requires identity, title and explanation.")
         if not self.verification_required:
             raise CatalogContractError("Catalog skill impact must remain verification-required.")
+        if self.accepted_evidence_count < 0:
+            raise CatalogContractError("Accepted evidence count cannot be negative.")
+        if self.accepted_evidence_count == 0 and self.last_accepted_at is not None:
+            raise CatalogContractError("Evidence date without accepted evidence is misleading.")
         if self.status is ForecastStatus.CALCULATED:
             if not self.current_level or not self.projected_level or not self.model_version:
                 raise CatalogContractError(
