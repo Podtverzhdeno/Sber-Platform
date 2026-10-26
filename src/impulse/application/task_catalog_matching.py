@@ -241,7 +241,9 @@ def accepted_skill_evidence(
     Caller must pass participant_case_evidence, which contains only approved
     personal work with artifacts and permitted task ownership.
     """
-    recent = (row for row in evidence if row.submitted_at >= now - timedelta(days=EVIDENCE_FRESHNESS_DAYS))
+    recent = (
+        row for row in evidence if row.submitted_at >= now - timedelta(days=EVIDENCE_FRESHNESS_DAYS)
+    )
     result: dict[str, dict[str, CaseEvidence]] = {}
     for row in recent:
         for tag in _normalized(row.competency_tags):
@@ -554,7 +556,10 @@ class TaskCatalogProjectionService:
                     sources=(brief_source,),
                     accepted_evidence_count=len(evidence_by_skill.get(tag.strip().casefold(), {})),
                     last_evidence_submitted_at=max(
-                        (row.submitted_at for row in evidence_by_skill.get(tag.strip().casefold(), {}).values()),
+                        (
+                            row.submitted_at
+                            for row in evidence_by_skill.get(tag.strip().casefold(), {}).values()
+                        ),
                         default=None,
                     ),
                 )
