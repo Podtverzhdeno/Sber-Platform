@@ -10,8 +10,10 @@
   - src/impulse/bootstrap/demo_seed.py (synthetic participant demo-only public_rating, idempotent consent preservation)
   - tests/test_demo_seed_graph.py (synthetic opt-in invariants)
   - tests/test_recognition_domain.py (public consent privacy regression)
+  - tests/integration/test_demo_rating_visibility.py (PostgreSQL opt-out survives reseed)
   - frontend/src/features/rating-v2/page.tsx (anonymous row alias/closed profile UX only)
   - frontend/src/features/rating-v2/page.test.tsx (anonymous UI regression)
+  - frontend/e2e/participant-interactions.spec.ts (synthetic ten-person rating scenario only)
   - docs/rating-data-integrity.md (demo and production boundary)
   - .github/workflows/rating-demo-identities-qa.yml
   - .agents/coordination/claims/RATING-DEMO-IDENTITIES-20261026.lock/status.md
