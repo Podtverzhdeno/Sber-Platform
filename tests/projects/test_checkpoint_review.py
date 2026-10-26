@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from typing import cast
-
 import os
+from typing import cast
 from uuid import uuid4
 
 import pytest
