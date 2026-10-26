@@ -57,7 +57,9 @@ test("saved Bootcamp certificate appears in selected trajectory without inventin
  await page.locator(".trajectory-v2-stage[data-stage-state='completed']").click();
  await expect(page.getByTestId("trajectory-course-learning")).toContainText("учебный сертификат выдан");
  await expect(page.locator(".trajectory-v2-stage-more")).toHaveCount(0);
- await expect(page.getByTestId("trajectory-official-grade")).toHaveText("—");
- await expect(page.getByText("Не опубликовано")).toBeVisible();
+ // A learning certificate does not mint a corporate career grade.
+ // The trajectory deliberately exposes the separate Impulse level instead.
+ await expect(page.getByTestId("trajectory-impulse-level")).toHaveText("L0");
+ await expect(page.getByText(/это уровень Impulse, не карьерный грейд Сбера/i)).toBeVisible();
  await page.screenshot({path:"test-results/trajectory-learning-sync-desktop.png",fullPage:true,animations:"disabled"});
 });
