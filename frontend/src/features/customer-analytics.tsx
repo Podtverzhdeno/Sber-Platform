@@ -218,7 +218,7 @@ export function CustomerAnalytics({navigation=[]}:{navigation?:string[]}) {
           <div className="ca3-heatmap-inner">
             <div className="ca3-weekdays" aria-hidden="true"><span/>{["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].map((x,index)=><span key={x}>{index%2===0?x:""}</span>)}</div>
             <div className="ca3-heatmap-grid">{calendar.map((days,idx)=><div key={idx} className="ca3-heat-column">
-              <span className="ca3-week-label">Нед. {idx+1}</span>
+              <span className="ca3-week-label">{idx%3===0?`Нед. ${String(idx+1)}`:""}</span>
               {days.map(day=>{
                 const count=counts.get(day.key)??0;
                 const level=count===0?0:maxCount===0?0:Math.max(1,Math.ceil(count/maxCount*4));
