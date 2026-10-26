@@ -403,7 +403,7 @@ describe("task catalog v2", () => {
     expect(screen.queryByRole("heading", { name: "Итог" })).not.toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Статистика навыков задачи" })).toBeInTheDocument();
     expect(document.querySelector(".catalog-skill-stats__overview")).not.toBeNull();
-    expect(screen.getByText("Прогноз после проверки")).toBeInTheDocument();
+    expect(screen.getByText("Оценка после проверки")).toBeInTheDocument();
   });
 
   it("provides readable mobile list labels without changing task ordering", async () => {
