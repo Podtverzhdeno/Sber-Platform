@@ -47,7 +47,7 @@ async def test_search_finds_published_task_dictionary_catalog() -> None:
     await reset_demo_data(database, demo_mode=True)
     report = await seed_demo(database)
     assert report["tasks"] == 12
-    assert report["courses"] == 40  # 12 foundation + 4 advanced courses for each of seven roles
+    assert report["courses"] == 40
     assert report["events"] == 8
 
     settings = _settings()
