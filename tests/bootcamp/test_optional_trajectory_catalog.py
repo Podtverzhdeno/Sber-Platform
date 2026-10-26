@@ -41,8 +41,9 @@ def test_optional_course_recommendations_hide_and_restore_without_progress_loss(
 
         # Product's course is in the supplementary path, not the primary one.
         enrolled = await service.catalog(actor)
-        assert course(enrolled).must_take is not None
-        assert "Продуктовый аналитик" in course(enrolled).must_take.projected_impact
+        recommendation = course(enrolled).must_take
+        assert recommendation is not None
+        assert "Продуктовый аналитик" in recommendation.projected_impact
 
         archived = set_optional_track(attempts, "product", enabled=False)
         await store.replace_attempts(person_id, archived)
