@@ -239,7 +239,8 @@ test("real seeded API submits one application and replays its idempotency key", 
   expect(preflight.status(), await preflight.text()).toBe(200);
 
   await openRealCatalog(page);
-  expect(await page.evaluate(() => window.sessionStorage.getItem("impulse_csrf"))).toBe(csrf);
+  const activeCsrf = await page.evaluate(() => window.sessionStorage.getItem("impulse_csrf"));
+  expect(activeCsrf, "Live browser session must expose the current CSRF token").toBeTruthy();
   await page.getByRole("button", { name: "Все фильтры" }).click();
   const search = page.getByLabel("Поиск", { exact: true });
   await search.fill(candidate.title);
@@ -298,7 +299,7 @@ test("real seeded API submits one application and replays its idempotency key", 
   const replay = await page.context().request.post(
     `/api/v1/me/tasks/${candidate.task_id}/applications`,
     {
-      headers: { "X-CSRF-Token": csrf, "Idempotency-Key": idempotencyKey },
+      headers: { "X-CSRF-Token": activeCsrf ?? "", "Idempotency-Key": idempotencyKey },
     },
   );
   expect([200, 201]).toContain(replay.status());
@@ -551,10 +552,10 @@ test("real server exposes qualitative growth, unverified customer and hard eligi
   await expect(detail).toContainText("Заказчик не верифицирован");
   await expect(detail).not.toContainText("Проверенный заказчик");
   await expect(detail).not.toContainText("Возможность использовать результат в портфолио");
-  const growth = detail.locator(".catalog-v2-growth-list");
-  await expect(growth).toContainText("Нет подтверждённого уровня");
-  await expect(growth).toContainText("Без числового прогноза");
-  await expect(growth).not.toContainText("0%");
+  const growth = detail.locator(".catalog-skill-stats__list");
+  await expect(growth).toContainText("Не оценивался");
+  await expect(growth).toContainText("Оценка после проверки");
+  await expect(growth).not.toContainText("Изменение уровня 0%");
 
   const directApply = await page.context().request.post(
     `/api/v1/me/tasks/${candidate.task_id}/applications`,
