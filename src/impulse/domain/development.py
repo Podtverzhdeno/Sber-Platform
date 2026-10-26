@@ -130,11 +130,13 @@ def set_optional_track(
     if existing is None:
         if not enabled:
             return attempts
-        return (*attempts, TrackAttempt(track_key=track_key, attempt_number=1, status=TrackStatus.EXPLORING))
+        return (
+            *attempts,
+            TrackAttempt(track_key=track_key, attempt_number=1, status=TrackStatus.EXPLORING),
+        )
     target = TrackStatus.EXPLORING if enabled else TrackStatus.ARCHIVED
     return tuple(
-        replace(item, status=target) if item.track_key == track_key else item
-        for item in attempts
+        replace(item, status=target) if item.track_key == track_key else item for item in attempts
     )
 
 
