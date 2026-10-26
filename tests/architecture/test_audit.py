@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 import importlib.util
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
