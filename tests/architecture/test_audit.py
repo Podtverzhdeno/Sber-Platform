@@ -5,7 +5,13 @@ from __future__ import annotations
 import importlib.util
 import tempfile
 import unittest
+from typing import TypedDict
 from pathlib import Path
+
+class AuditBaseline(TypedDict):
+    exceptions: list[dict[str, str]]
+    allowed_cycles: list[list[str]]
+
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
@@ -25,7 +31,7 @@ class ArchitectureAuditTests(unittest.TestCase):
         self.assertFalse(audit_module.prohibited("bootstrap", "impulse.infrastructure.database"))
 
     def test_cycle_detection(self) -> None:
-        graph = {"a.py": {"b.py"}, "b.py": {"a.py"}, "c.py": set()}
+        graph: dict[str, set[str]] = {"a.py": {"b.py"}, "b.py": {"a.py"}, "c.py": set()}
         self.assertEqual(audit_module.strongly_connected(graph), [["a.py", "b.py"]])
 
     def test_relative_typescript_import(self) -> None:
@@ -110,7 +116,7 @@ class ArchitectureAuditTests(unittest.TestCase):
             ],
             "cycles": [["a.py", "b.py"]],
         }
-        baseline = {"exceptions": [], "allowed_cycles": []}
+        baseline: AuditBaseline = {"exceptions": [], "allowed_cycles": []}
         self.assertEqual(len(audit_module.baseline_regressions(report, baseline)), 2)
         baseline["exceptions"] = [
             {
