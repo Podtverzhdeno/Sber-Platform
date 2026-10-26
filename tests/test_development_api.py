@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import pytest
 from fastapi.testclient import TestClient
+from httpx import Response
 from pydantic import SecretStr
 
 from impulse.application.development import (
@@ -378,11 +381,14 @@ def test_optional_tracks_can_be_added_and_archived_without_changing_primary() ->
     with client:
         csrf = _login(client)
 
-        def update(track: str, enabled: bool) -> object:
-            return client.post(
-                "/api/v1/me/tracks/optional",
-                json={"track_key": track, "enabled": enabled},
-                headers={"X-CSRF-Token": csrf},
+        def update(track: str, enabled: bool) -> Response:
+            return cast(
+                Response,
+                client.post(
+                    "/api/v1/me/tracks/optional",
+                    json={"track_key": track, "enabled": enabled},
+                    headers={"X-CSRF-Token": csrf},
+                ),
             )
 
         for track in ("data", "product", "ml"):
