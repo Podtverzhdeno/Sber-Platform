@@ -1,0 +1,42 @@
+name: Home Grade Courses QA
+on:
+  pull_request:
+    paths:
+      - "frontend/src/features/participant-home-v2/page.tsx"
+      - "frontend/src/features/participant-home-v2/page.test.tsx"
+      - "frontend/src/features/participant-home-v2/client.ts"
+      - "frontend/src/features/participant-home-v2/home-v2.scss"
+      - "frontend/src/App.tsx"
+      - ".github/workflows/home-grade-courses-qa.yml"
+      - "frontend/e2e/home-grade-courses.spec.ts"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  grade-courses:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Strict targeted lint
+        run: npx eslint src/App.tsx src/features/participant-home-v2/client.ts src/features/participant-home-v2/page.tsx src/features/participant-home-v2/page.test.tsx --max-warnings 0
+      - name: Required course and navigation regressions
+        run: npx vitest run src/features/participant-home-v2/page.test.tsx
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Browser path desktop and mobile
+        env:
+          CI: "true"
+        run: npx playwright test home-grade-courses.spec.ts --project=chromium --reporter=line

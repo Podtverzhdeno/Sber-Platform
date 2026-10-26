@@ -906,3 +906,95 @@ body:has(.home-v2-drawer-layer) {overflow:hidden;}
   .home-v2-outcome-stats { flex-wrap: wrap; white-space: normal; overflow: visible; }
   .home-v2-outcome-stats > span { white-space: normal; }
 }
+
+/* Required curriculum courses in the home grade drawer (same source as Bootcamp). */
+.home-v2-grade-courses {
+  margin: 10px 0 12px;
+  border: 1px solid #1e4058;
+  border-radius: 11px;
+  background: #0a2338;
+  overflow: hidden;
+}
+.home-v2-grade-courses-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 14px;
+}
+.home-v2-grade-courses-header > svg { flex: none; color: #02dbea; }
+.home-v2-grade-courses-header strong { display: block; font-size: 13px; }
+.home-v2-grade-courses-header small {
+  display: block;
+  margin-top: 6px;
+  color: #aac0d8;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.home-v2-grade-course-list {
+  display: grid;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0 12px 12px;
+}
+.home-v2-grade-course {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  padding: 13px 8px;
+  border-top: 1px solid #24465b;
+}
+.home-v2-grade-course-index {
+  display: grid;
+  flex: 0 0 27px;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border: 1px solid #235c77;
+  border-radius: 8px;
+  color: #a5ccdd;
+  background: #11344a;
+  font-size: 12px;
+  font-weight: 700;
+}
+.home-v2-grade-course-index.is-done { border-color: #139780; color: #56e8c8; background: #0c463f; }
+.home-v2-grade-course-info { display: grid; flex: 1; min-width: 0; gap: 5px; }
+.home-v2-grade-course-info strong { overflow-wrap: anywhere; color: #effaff; font-size: 12.5px; line-height: 1.4; }
+.home-v2-grade-course-info small { color: #a2bed2; font-size: 11px; line-height: 1.35; }
+.home-v2-grade-course-action {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #08c8d1;
+  border-radius: 8px;
+  background: #04d9e4;
+  color: #052739;
+  padding: 10px 11px;
+  font-size: 11.5px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: background .16s ease, box-shadow .16s ease;
+}
+.home-v2-grade-course-action:hover { background: #65f5f4; box-shadow: 0 0 18px #00e5f32e; }
+.home-v2-grade-course-action:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.home-v2-grade-course-done {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #71dfc1;
+}
+.home-v2-grade-course-message { margin: 0; padding: 0 14px 15px; color: #adc6d9; font-size: 12px; line-height: 1.55; }
+@media (max-width: 420px) {
+  .home-v2-grade-course { flex-wrap: wrap; }
+  .home-v2-grade-course-info { flex-basis: calc(100% - 43px); }
+  .home-v2-grade-course-action, .home-v2-grade-course-done { margin-left: 38px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-v2-grade-course-action { transition: none; }
+}

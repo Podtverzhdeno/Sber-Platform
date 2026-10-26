@@ -7,6 +7,8 @@ import {
   type DevelopmentOverviewView,
 } from "./client";
 import { ParticipantHomeV2Body } from "./page";
+import { learningSummaryQueryKey } from "../learning-progress";
+import { roleLevelQueryKey, type ImpulseRoleLevel } from "../impulse-role-level";
 
 const overview: DevelopmentOverviewView = {
   overview_version: 1,
@@ -112,10 +114,15 @@ const overview: DevelopmentOverviewView = {
   monthly_plan: null,
 };
 
-function renderHome(override: Partial<DevelopmentOverviewView> = {}) {
+function renderHome(
+  override: Partial<DevelopmentOverviewView> = {},
+  seed?: (client: QueryClient) => void,
+) {
   const onOpenTarget = vi.fn();
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
+  seed?.(client);
   const view = render(
-    <QueryClientProvider client={new QueryClient()}>
+    <QueryClientProvider client={client}>
       <ParticipantHomeV2Body
         overview={{ ...overview, ...override }}
         onOpenTarget={onOpenTarget}
@@ -245,6 +252,95 @@ describe("participant home v2", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+
+  it("shows the role's exact required courses and opens the unfinished course in Bootcamp", () => {
+    const level: ImpulseRoleLevel = {
+      track_key: "python",
+      level: 0,
+      cycle_number: 1,
+      curriculum_state: "published",
+      completed_courses: 1,
+      required_courses: 2,
+      approved_practices: 0,
+      credited_practices: 0,
+      required_practices: 1,
+      advance_ready: false,
+      policy_version: 1,
+      max_level: 3,
+      history: [],
+      required_course_keys: ["python-base", "python-agents"],
+    };
+    const { onOpenTarget } = renderHome({}, (client) => {
+      client.setQueryData(roleLevelQueryKey("python"), level);
+      client.setQueryData(learningSummaryQueryKey, {
+        started_courses: 2,
+        finished_courses: 1,
+        completed_lessons: 9,
+        approved_practices: 0,
+        credited_practices: 0,
+        courses: [
+          { course_key: "python-base", title: "Python: основы", completed_units: 8, total_units: 8,
+            finished: true, certificate_id: "cert-python-base", finished_at: "2026-10-20",
+            updated_at: "2026-10-20", practice_status: null, practical_certificate_id: null },
+          { course_key: "python-agents", title: "Разработка AI-агентов", completed_units: 1, total_units: 8,
+            finished: false, certificate_id: null, finished_at: null,
+            updated_at: "2026-10-21", practice_status: null, practical_certificate_id: null },
+        ],
+      });
+      client.setQueryData(["bootcamp-catalog"], [
+        { key: "python-base", title: "Python: основы", completion_state: "verified" },
+        { key: "python-agents", title: "Разработка AI-агентов", completion_state: "reported" },
+      ]);
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Следующий уровень/ }));
+    const dialog = screen.getByRole("dialog", { name: "Требования следующего грейда" });
+    const courseList = within(dialog).getByTestId("home-grade-required-courses");
+    expect(courseList).toHaveTextContent("Обязательные курсы · 1/2");
+    expect(dialog).toHaveTextContent("Практика для уровня: 0/1");
+    expect(courseList).toHaveTextContent("Python: основы");
+    expect(courseList).toHaveTextContent("Разработка AI-агентов");
+    expect(courseList).toHaveTextContent("Пройден");
+    expect(within(courseList).queryByRole("button", { name: /Пройти курс «Python: основы»/ })).toBeNull();
+    fireEvent.click(within(courseList).getByRole("button", { name: "Продолжить курс «Разработка AI-агентов»" }));
+    expect(onOpenTarget).toHaveBeenCalledWith("course", "python-agents", "python");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("offers a direct Start action for an unstarted required course", () => {
+    renderHome({}, (client) => {
+      client.setQueryData(roleLevelQueryKey("python"), {
+        track_key: "python", level: 0, cycle_number: 1, curriculum_state: "published",
+        completed_courses: 0, required_courses: 1, approved_practices: 0, credited_practices: 0,
+        required_practices: 1, advance_ready: false, policy_version: 1, history: [],
+        required_course_keys: ["python-base"],
+      } satisfies ImpulseRoleLevel);
+      client.setQueryData(learningSummaryQueryKey, {
+        started_courses: 0, finished_courses: 0, completed_lessons: 0,
+        approved_practices: 0, credited_practices: 0, courses: [],
+      });
+      client.setQueryData(["bootcamp-catalog"], [
+        { key: "python-base", title: "Python: основы", completion_state: "not_started" },
+      ]);
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Следующий уровень/ }));
+    const courseList = screen.getByTestId("home-grade-required-courses");
+    expect(courseList).toHaveTextContent("Python: основы");
+    expect(within(courseList).getByRole("button", { name: "Пройти курс «Python: основы»" })).toBeEnabled();
+  });
+
+  it("does not fabricate course names when the level has no published course keys", () => {
+    renderHome({}, (client) => {
+      client.setQueryData(roleLevelQueryKey("python"), {
+        track_key: "python", level: 0, cycle_number: 1, curriculum_state: "published",
+        completed_courses: 0, required_courses: 2, approved_practices: 0, credited_practices: 0,
+        required_practices: 1, advance_ready: false, policy_version: 1, history: [],
+      } satisfies ImpulseRoleLevel);
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Следующий уровень/ }));
+    const list = screen.getByTestId("home-grade-required-courses");
+    expect(list).toHaveTextContent("Перечень обязательных курсов пока не получен");
+    expect(within(list).queryByRole("button")).toBeNull();
+  });
 
   it("renders grade ring from API readiness rather than a fixed decoration", () => {
     const custom = {

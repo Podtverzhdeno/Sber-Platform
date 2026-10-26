@@ -770,9 +770,9 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
       ) : null}
       {searchParams.get("v2") !== "0" ? (
         <ParticipantHomeV2
-          onOpenTarget={(kind, key) => {
+          onOpenTarget={(kind, key, roleKey) => {
             if (kind === "course") {
-              goTo("Bootcamp", `?course=${encodeURIComponent(key)}`);
+              goTo("Bootcamp", `?course=${encodeURIComponent(key)}${roleKey ? `&role=${encodeURIComponent(roleKey)}` : ""}`);
             } else if (kind === "task" && key) {
               goTo("Задачи", `?task=${encodeURIComponent(key)}`);
             } else {

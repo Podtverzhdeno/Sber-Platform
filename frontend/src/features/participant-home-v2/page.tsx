@@ -28,6 +28,7 @@ import {
 
 import { StatePanel } from "../../components/ui";
 import { apiRequest } from "../../api/client";
+import { learningSummaryQueryKey, loadLearningSummary } from "../learning-progress";
 import {
   TASK_NEXT_ACTION_LABELS,
   formatDayLabel,
@@ -43,6 +44,7 @@ import "./home-v2.scss";
 type HomeGrade = DevelopmentOverviewView["concepts"]["career_grade"];
 type HomePanel = "levels" | "grade-details" | null;
 type HomePassport = { skills: {key: string; practical_level: string; confirmed_case_count: number}[] };
+type GradeCourseCatalog = { key: string; title: string; completion_state: "not_started" | "reported" | "verified" | "rejected" }[];
 
 /** Same approved SVG artwork as the standalone 22.10.2026 ZIP. */
 const HERO_ART = "/home-reference/mountain-path.svg";
@@ -107,6 +109,21 @@ export function ParticipantHomeV2Body(props: {
     queryFn:()=>loadRoleLevel(levelRoleKey ?? ""),
     enabled:levelRoleKey!==null,
     retry:false,
+  });
+  const showRequiredCourses = panel === "grade-details" &&
+    impulseLevel.data?.curriculum_state === "published" &&
+    (impulseLevel.data.required_course_keys?.length ?? 0) > 0;
+  const studyCourses = useQuery({
+    queryKey: learningSummaryQueryKey,
+    queryFn: loadLearningSummary,
+    enabled: showRequiredCourses,
+    retry: false,
+  });
+  const gradeCourseCatalog = useQuery({
+    queryKey: ["bootcamp-catalog"],
+    queryFn: () => apiRequest<GradeCourseCatalog>("/api/v1/me/bootcamp/catalog"),
+    enabled: showRequiredCourses,
+    retry: false,
   });
   const recommendedTask = overview.active_tasks.find((task) => task.next_action !== "await_review") ?? null;
   const heroKind = recommendedTask ? "task" : overview.next_outcome?.target_kind ?? null;
@@ -258,13 +275,59 @@ export function ParticipantHomeV2Body(props: {
                     <div className="home-v2-grade-track"><span style={{width:`${String(levelCoursesProgress(impulseLevel.data))}%`}}/></div>
                   </div></section>
                   <h3>Что нужно для перехода</h3>
-                  <div className="home-v2-grade-requirement"><FileCheck2 size={21}/><div>
-                    <strong>Курсы: {impulseLevel.data.completed_courses}/{impulseLevel.data.required_courses}</strong>
-                    <small>Учебные сертификаты учитываются один раз в своём цикле</small>
-                  </div></div>
+                  <section className="home-v2-grade-courses" aria-label="Обязательные курсы для нового уровня" data-testid="home-grade-required-courses">
+                    <div className="home-v2-grade-courses-header">
+                      <FileCheck2 size={21} aria-hidden="true"/>
+                      <div><strong>Обязательные курсы · {impulseLevel.data.completed_courses}/{impulseLevel.data.required_courses}</strong>
+                        <small>Проходи курсы своей роли. Сертификаты учитываются один раз за цикл.</small>
+                      </div>
+                    </div>
+                    {impulseLevel.data.curriculum_state === "published" && (impulseLevel.data.required_course_keys?.length ?? 0) > 0 ? (
+                      <ol className="home-v2-grade-course-list">
+                        {impulseLevel.data.required_course_keys?.map((key, index) => {
+                          const course = studyCourses.data?.courses.find((item) => item.course_key === key);
+                          const catalogCourse = gradeCourseCatalog.data?.find((item) => item.key === key);
+                          const title = catalogCourse?.title ?? course?.title ??
+                            (studyCourses.isPending || gradeCourseCatalog.isPending ? "Загружаем название курса…" : `Курс · ${key}`);
+                          const done = course?.finished === true || catalogCourse?.completion_state === "verified";
+                          const started = (course?.completed_units ?? 0) > 0 ||
+                            catalogCourse?.completion_state === "reported";
+                          return <li key={key} className="home-v2-grade-course" data-course-key={key}>
+                            <span className={done ? "home-v2-grade-course-index is-done" : "home-v2-grade-course-index"} aria-hidden="true">
+                              {done ? <Check size={16}/> : index + 1}
+                            </span>
+                            <div className="home-v2-grade-course-info">
+                              <strong>{title}</strong>
+                              <small>{done ? course?.certificate_id || catalogCourse?.completion_state === "verified" ? "Завершён · сертификат получен" : "Учебный курс завершён" :
+                                started ? `В процессе${course?.total_units ? ` · ${String(course.completed_units)} из ${String(course.total_units)} уроков` : ""}` :
+                                  "Ещё не начат"}</small>
+                            </div>
+                            {done ? <span className="home-v2-grade-course-done"><CheckCircle2 size={16}/> Пройден</span> :
+                              <button type="button" className="home-v2-grade-course-action"
+                                aria-label={`${started ? "Продолжить" : "Пройти"} курс «${title}»`}
+                                onClick={() => { closePanel(); props.onOpenTarget("course", key, levelRoleKey ?? undefined); }}>
+                                {started ? "Продолжить" : "Пройти"} <ArrowRight size={15}/>
+                              </button>}
+                          </li>;
+                        })}
+                      </ol>
+                    ) : impulseLevel.data.curriculum_state === "published" && impulseLevel.data.required_courses > 0 ? (
+                      <p className="home-v2-grade-course-message" role="status">
+                        Перечень обязательных курсов пока не получен. Открой траекторию, чтобы посмотреть опубликованную программу.
+                      </p>
+                    ) : (
+                      <p className="home-v2-grade-course-message" role="status">
+                        {impulseLevel.data.level >= (impulseLevel.data.max_level ?? 3)
+                          ? "Все учебные циклы завершены."
+                          : "Курсы следующего цикла ещё не опубликованы."}
+                      </p>
+                    )}
+                    {studyCourses.isError && showRequiredCourses &&
+                      <p className="home-v2-grade-course-message" role="status">Статусы обучения временно недоступны. Для подтверждённого прогресса открой Bootcamp.</p>}
+                  </section>
                   <div className="home-v2-grade-requirement"><ClipboardCheck size={21}/><div>
-                    <strong>Проверенная практика: {impulseLevel.data.approved_practices}/{impulseLevel.data.required_practices}</strong>
-                    <small>Результат подтверждает проверяющий, не сам участник</small>
+                    <strong>Практика для уровня: {impulseLevel.data.credited_practices}/{impulseLevel.data.required_practices}</strong>
+                    <small>Отправленная работа учитывается для уровня Impulse. Независимая проверка компетенции проводится отдельно.</small>
                   </div></div>
                   {impulseLevel.data.level < (impulseLevel.data.max_level ?? 3) && impulseLevel.data.curriculum_state==="unpublished" && <section className="home-v2-grade-unavailable" role="status">
                     <LockKeyhole size={23}/><strong>Новая программа ещё не опубликована</strong>
