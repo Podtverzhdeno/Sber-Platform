@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ParticipantHelpTrigger } from "../participant-help-trigger";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowRight, Bot, Check, Clock3, FileText, GitBranch, GraduationCap, List, LockKeyhole, Search, Sparkles, ChartNoAxesCombined, LayoutGrid, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Bot, Check, Clock3, FileText, GitBranch, GraduationCap, List, LockKeyhole, Search, Sparkles, ChartNoAxesCombined, LayoutGrid, ChevronLeft, ChevronRight, Star } from "lucide-react";
 
 import { apiRequest, retrySafeRead, RuntimeApiPath } from "../../api/client";
 import { Badge, Card, Drawer, SafeExternalLink, StatePanel } from "../../components/ui";
@@ -14,6 +14,8 @@ import { aiRoleTitle, bootcampRoleKeys, courseRoleTitles, isCourseInAiRole, orde
 import { projectRoleStudy, satisfiesStudyRequirement, type StudyRecord } from "./role-study-progression";
 import { GradeMilestoneCelebration } from "./grade-milestone-celebration";
 import { advanceRoleLevel, loadRoleLevel, roleLevelQueryKey } from "../impulse-role-level";
+import { loadDevelopmentOverview, overviewQueryKey } from "../participant-home-v2/client";
+import { primaryTrajectoryKey } from "../trajectory-v2/role-state";
 import type { BootcampOverview } from "./page";
 import "./bootcamp-ux.scss";
 import "./bootcamp-approved.scss";
@@ -567,8 +569,8 @@ function CoursePrimaryAction({ card, onOpen }: { card: CourseCardState; onOpen: 
 /** Keep all seven trajectory roles reachable without wrapping and moving the
  * approved hero/catalog geometry. Controls appear only when tabs overflow. */
 function AiRoleTabs({
-  roles, selected, onSelect,
-}: { roles: readonly string[]; selected: string; onSelect: (role: string) => void }) {
+  roles, selected, primary, onSelect,
+}: { roles: readonly string[]; selected: string; primary: string | null; onSelect: (role: string) => void }) {
   const scroller = useRef<HTMLDivElement>(null);
   const [canScroll, setCanScroll] = useState({ back: false, next: false });
 
@@ -600,8 +602,12 @@ function AiRoleTabs({
         aria-label="Направление обучения" onScroll={updateScrollButtons}>
         {roles.map((role, index) =>
           <button type="button" key={role} aria-pressed={selected === role}
+            data-primary={role === primary}
+            aria-description={role === primary ? "Основное направление" : undefined}
+            title={role === primary ? "Основное направление развития" : undefined}
             onClick={() => { onSelect(role); }}>
             {index === 0 ? <Bot /> : <ChartNoAxesCombined />}{aiRoleTitle(role)}
+            {role === primary && <Star className="bc-ref-role-primary-star" aria-hidden="true" />}
           </button>)}
       </div>
       {canScroll.back && <button className="bc-ref-role-scroll bc-ref-role-scroll--back"
@@ -680,6 +686,13 @@ export function BootcampCatalog({
     retry: retrySafeRead,
   });
   const study = useQuery({ queryKey: learningSummaryQueryKey, queryFn: loadLearningSummary, retry: retrySafeRead });
+  // Reuse Trajectory's server-owned primary enrollment rather than treating
+  // whichever Bootcamp tab is selected as the user's main career direction.
+  const development = useQuery({
+    queryKey: overviewQueryKey,
+    queryFn: loadDevelopmentOverview,
+    retry: false,
+  });
   // The versioned role-grade projection is the only allowed source for a
   // professional grade. Never infer a corporate grade from finished lessons.
   const [gradeRequestParams] = useSearchParams();
@@ -807,6 +820,8 @@ export function BootcampCatalog({
 
   const relevanceFilter = searchParams.get("relevance") ?? "all";
   const trackOptions = bootcampRoleKeys(catalog.data);
+  const primaryRoleKey = development.data ? primaryTrajectoryKey(development.data) : null;
+  const primaryRole = primaryRoleKey !== null && trackOptions.includes(primaryRoleKey) ? primaryRoleKey : null;
   // Role selection and catalog direction are independent state dimensions.
   // Otherwise 'Все курсы' silently only showed the first role's courses.
   const requestedRole = searchParams.get("role");
@@ -907,7 +922,7 @@ export function BootcampCatalog({
         <div><h1 id="workspace-title">Bootcamp</h1><p>Обучение для твоей роли и реальных проектов</p></div>
       </header>
       {catalog.isError && <p className="notice" role="status">Обновление каталога недоступно. <button type="button" onClick={() => { void catalog.refetch(); }}>Повторить</button></p>}
-      <AiRoleTabs roles={trackOptions} selected={selectedRole} onSelect={setRole} />
+      <AiRoleTabs roles={trackOptions} selected={selectedRole} primary={primaryRole} onSelect={setRole} />
       <div className="bc-ref-hero-grid">
         <section className="bc-ref-continue" aria-labelledby="bc-continue-title">
           <h2 id="bc-continue-title">{nextCourse ? "Начать обучение" : "Выбрать обучение"} <span aria-hidden="true">›</span></h2>
