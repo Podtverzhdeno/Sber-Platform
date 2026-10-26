@@ -10,3 +10,6 @@ release_request=2026-10-26-compact-activity-and-favorites-f1532a5e53f2
 # Release: automatic certified course-to-trajectory progression and first-open next step spotlight
 # Keeps practical review and professional grade evaluation independent
 release_request=2026-10-26-trajectory-next-step-7e6c66183096
+
+# Release: final course-to-next-stage projection aligned in main trajectory and sidebar
+release_request=2026-10-26-trajectory-next-panel-8f20281da120
