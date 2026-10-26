@@ -848,7 +848,7 @@ export function BootcampCatalog({
   const roleStudy = projectRoleStudy(roleCourses,study.data?.courses ?? []);
   const pendingRequired = roleStudy.pending;
   const gradeCurriculum=gradeOverview.data?.selected_track_key===selectedRole
-    && gradeOverview.data?.curriculum?.state==="known" ? gradeOverview.data.curriculum : null;
+    && gradeOverview.data.curriculum.state==="known" ? gradeOverview.data.curriculum : null;
   const policyRemaining=gradeCurriculum?.requirements.filter(req=>req.state!=="verified")??[];
   const policyCourses=policyRemaining.filter(req=>req.kind==="course");
   const remainingStudyCount=gradeCurriculum?policyCourses.length:pendingRequired.length;
@@ -860,7 +860,7 @@ export function BootcampCatalog({
     : gradeOverview.isPending
       ? "Грейд: загружается"
       : officialGrade ? "Грейд: "+officialGrade
-        : gradeOverview.data?.role_summary?.grade_state === "not_evaluable"
+        : gradeOverview.data.role_summary.grade_state === "not_evaluable"
           ? "Грейд: правила не опубликованы"
           : "Грейд: не присвоен";
   const levelForRole = impulseLevel.data?.track_key === selectedRole ? impulseLevel.data : null;
