@@ -16,6 +16,7 @@ from impulse.domain.development import (
     rating_eligible,
     recalculate_roadmap,
     select_track,
+    set_optional_track,
 )
 from impulse.domain.engagement import (
     FREEZE_INVENTORY_CAP,
