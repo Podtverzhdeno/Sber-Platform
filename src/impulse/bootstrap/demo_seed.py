@@ -331,7 +331,10 @@ def build_seed_batches() -> list[SeedBatch]:
                     payload={
                         "source_url": source_url,
                         "availability": "available",
-                        "access_note": "Программа следующего учебного цикла Impulse; требует предыдущий уровень.",
+                        "access_note": (
+                            "Программа следующего учебного цикла Impulse; "
+                            "требует предыдущий уровень."
+                        ),
                         "impulse_level": 1 if index < 15 else 2,
                     },
                 )
