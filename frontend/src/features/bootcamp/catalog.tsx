@@ -330,7 +330,7 @@ function CourseDetails({
   ] as const;
   // Impulse's self-paced demo content uses the new ten-state immersive reader.
   // External provider courses keep their original verified-program and certificate flow.
-  if (/^demo-course-(?:[1-9]|1[0-2])$/.test(card.key)) {
+  if (/^demo-course-(?:[1-9]|1[0-2]|1[3-6]-[a-z][a-z0-9-]*)$/.test(card.key)) {
     return <ImmersiveCourseExperience
       courseKey={card.key} courseTitle={card.title}
       recommendation={card.recommendation_reason}
@@ -620,7 +620,7 @@ function CourseContinueStatus({ card, onOpen, onCatalog }: {
   onOpen: (key: string) => void;
   onCatalog: () => void;
 }) {
-  const impulse = card !== null && /^demo-course-(?:[1-9]|1[0-2])$/.test(card.key);
+  const impulse = card !== null && /^demo-course-(?:[1-9]|1[0-2]|1[3-6]-[a-z][a-z0-9-]*)$/.test(card.key);
   const progress = useQuery({
     queryKey: ["impulse-study", card?.key ?? ""],
     queryFn: () => apiRequest<MiniStudyProgress>(
