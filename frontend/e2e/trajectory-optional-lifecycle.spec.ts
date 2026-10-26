@@ -12,7 +12,7 @@ test("grey role: preview → optional study → role-scoped course → grey → 
   };
   let loggedIn = false;
   let optionalState: "unselected" | "learning" = "unselected";
-  let completedMilestones = 2;
+  const completedMilestones = 2;
   const tracked: Array<{ track_key: string; enabled: boolean }> = [];
   const roles = () => [
     { track_key: "python", title: "AI Security Engineer", state: "active", attempt_number: 1, completed_milestones: 1, total_milestones: 2 },
@@ -73,7 +73,7 @@ test("grey role: preview → optional study → role-scoped course → grey → 
   await expect(page.locator(".trajectory-v2-next-panel")).not.toContainText("Только основной путь");
 
   await page.locator(".trajectory-v2-stage-path button").first().click();
-  const drawer = page.getByRole("dialog", { name: /Введение в AI Architect/ });
+  const drawer = page.locator(".trajectory-v2-drawer");
   await expect(drawer.getByRole("button", { name: "Открыть курс" })).toBeVisible();
   await drawer.getByRole("button", { name: "Открыть курс" }).click();
   await expect(page).toHaveURL(/\/workspace\/2\?course=demo-course-1&role=product/);
