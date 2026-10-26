@@ -1,0 +1,39 @@
+/* Event-specific cover in the details dialog. The same local artwork is used by catalogue cards. */
+.participant-events .ev-detail-modal {
+  .ev-detail-hero {
+    background: #031723;
+    isolation: isolate;
+  }
+  .ev-detail-hero .ev-detail-banner {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 48%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 0 11px 11px 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .ev-detail-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(90deg, #031723 0%, #031723f8 36%, #031723d9 51%, #03172366 72%, #0317230c 100%);
+  }
+  .ev-detail-hero-top, .ev-detail-hero h2, .ev-detail-hero p, .ev-detail-hero-meta {
+    z-index: 2;
+  }
+  @media (max-width: 740px) {
+    .ev-detail-hero .ev-detail-banner {
+      width: 100%;
+      opacity: .55;
+    }
+    .ev-detail-hero::before {
+      background: linear-gradient(90deg, #031723f5 0%, #031723e8 58%, #0317239a 100%);
+    }
+  }
+}

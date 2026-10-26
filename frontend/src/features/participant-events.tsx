@@ -10,6 +10,7 @@ import "./participant-events-reference.scss";
 import "./participant-events.scss";
 import "./participant-events-fidelity.scss";
 import "./participant-events-compact.scss";
+import "./participant-events-detail-banner.scss";
 
 type EventItem = {
   key: string; title: string; event_type: string; organizer: string; conditions: string;

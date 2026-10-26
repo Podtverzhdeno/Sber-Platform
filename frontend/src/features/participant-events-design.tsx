@@ -214,6 +214,7 @@ export function EventExperienceDetail({detail,aggregate,tab,onTabChange,onClose,
   return <div className={`ev-detail-v2 ev-detail--${tab}`} data-testid="event-detail">
     <div className="ev-detail-top"><button type="button" onClick={onClose}><ArrowLeft size={16}/> К списку событий</button><button type="button" onClick={onClose} aria-label="Закрыть подробности"><X size={21}/></button></div>
     <section className="ev-detail-hero">
+      <img className="ev-detail-banner" src={getEventCover(detail)} alt="" aria-hidden="true" decoding="async" />
       <div className="ev-detail-hero-top"><span>{detail.event_type}</span><span className="ev-hero-tag"><CheckCircle2 size={14}/> Совпадает с вашей траекторией</span><span className="ev-demo-stamp">{detail.organizer}</span></div>
       <h2>{detail.title}</h2>
       <p>{detail.description || detail.recommendation_reason || "Информация о событии уточняется организатором"}</p>
