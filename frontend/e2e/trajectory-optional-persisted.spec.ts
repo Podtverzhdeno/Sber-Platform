@@ -76,7 +76,15 @@ test("real DB: grey AI role → optional trajectory → complete course → grey
 
   // UI state and server state must both return to grey without deleting study.
   await page.goto(`/workspace/1?role=${trackKey}`);
+  const archiveResponseReady = page.waitForResponse(response =>
+    response.request().method() === "POST" && response.url().endsWith("/api/v1/me/tracks/optional"),
+  );
   await selected.getByRole("button", { name: "Сделать карточку серой" }).click();
+  const archiveResponse = await archiveResponseReady;
+  expect(archiveResponse.ok(), `Archive status ${String(archiveResponse.status())}: ${(await archiveResponse.text()).slice(0, 1500)}`).toBe(true);
+  await expect.poll(async () =>
+    (await getOverview()).roles.find(role => role.track_key === trackKey)?.state,
+  ).toBe("unselected");
   await expect(optional).toHaveAttribute("data-tone", "unselected");
   await page.reload();
   await expect(optional).toHaveAttribute("data-tone", "unselected");
