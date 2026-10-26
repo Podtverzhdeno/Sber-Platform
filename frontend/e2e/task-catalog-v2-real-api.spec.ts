@@ -103,6 +103,20 @@ async function openRealCatalog(page: Page): Promise<void> {
   await page.getByRole("button", { name: "Карточки", exact: true }).click();
 }
 
+/** The UI deliberately paginates at 12, while this contract reads all items at 50. */
+async function loadEveryCatalogPage(page: Page, expectedCount: number): Promise<void> {
+  const items = page.locator('[role="listitem"]');
+  await expect.poll(() => items.count()).toBeGreaterThan(0);
+  while (await items.count() < expectedCount) {
+    const previous = await items.count();
+    const loadMore = page.getByRole("button", { name: "Показать ещё", exact: true });
+    await expect(loadMore, "The catalog must expose its remaining server pages").toBeVisible();
+    await loadMore.click();
+    await expect.poll(() => items.count()).toBeGreaterThan(previous);
+  }
+  await expect(items).toHaveCount(expectedCount);
+}
+
 test("real seeded API preserves card/list order and opens the canonical assigned workspace", async ({ page }) => {
   test.setTimeout(90_000);
   await login(page);
@@ -130,7 +144,7 @@ test("real seeded API preserves card/list order and opens the canonical assigned
   await openRealCatalog(page);
   const taskPath = new URL(page.url()).pathname;
   const expectedTitles = catalog.items.map((item) => item.title);
-  await expect(page.locator('[role="listitem"]')).toHaveCount(expectedTitles.length);
+  await loadEveryCatalogPage(page, expectedTitles.length);
   await expect(page.locator('[role="listitem"] h2')).toHaveText(expectedTitles);
 
   await page.getByRole("button", { name: "Список", exact: true }).click();
@@ -146,7 +160,7 @@ test("real seeded API preserves card/list order and opens the canonical assigned
   await search.press("Enter");
   await expect(page.getByRole("heading", { name: "Подходящих задач не найдено" })).toBeVisible();
   await page.locator(".catalog-v2-empty").getByRole("button", { name: "Сбросить фильтры" }).click();
-  await expect(page.locator('[role="listitem"]')).toHaveCount(expectedTitles.length);
+  await loadEveryCatalogPage(page, expectedTitles.length);
 
   const planned = catalog.items.find((item) => item.stage_plan.stages.length > 0);
   expect(planned).toBeTruthy();
