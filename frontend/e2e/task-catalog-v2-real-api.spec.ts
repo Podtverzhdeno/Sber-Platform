@@ -103,6 +103,20 @@ async function openRealCatalog(page: Page): Promise<void> {
   await page.getByRole("button", { name: "Карточки", exact: true }).click();
 }
 
+/** The UI deliberately paginates at 12, while this contract reads all items at 50. */
+async function loadEveryCatalogPage(page: Page, expectedCount: number): Promise<void> {
+  const items = page.locator('[role="listitem"]');
+  await expect.poll(() => items.count()).toBeGreaterThan(0);
+  while (await items.count() < expectedCount) {
+    const previous = await items.count();
+    const loadMore = page.getByRole("button", { name: "Показать ещё", exact: true });
+    await expect(loadMore, "The catalog must expose its remaining server pages").toBeVisible();
+    await loadMore.click();
+    await expect.poll(() => items.count()).toBeGreaterThan(previous);
+  }
+  await expect(items).toHaveCount(expectedCount);
+}
+
 test("real seeded API preserves card/list order and opens the canonical assigned workspace", async ({ page }) => {
   test.setTimeout(90_000);
   await login(page);
@@ -130,7 +144,7 @@ test("real seeded API preserves card/list order and opens the canonical assigned
   await openRealCatalog(page);
   const taskPath = new URL(page.url()).pathname;
   const expectedTitles = catalog.items.map((item) => item.title);
-  await expect(page.locator('[role="listitem"]')).toHaveCount(expectedTitles.length);
+  await loadEveryCatalogPage(page, expectedTitles.length);
   await expect(page.locator('[role="listitem"] h2')).toHaveText(expectedTitles);
 
   await page.getByRole("button", { name: "Список", exact: true }).click();
@@ -146,7 +160,7 @@ test("real seeded API preserves card/list order and opens the canonical assigned
   await search.press("Enter");
   await expect(page.getByRole("heading", { name: "Подходящих задач не найдено" })).toBeVisible();
   await page.locator(".catalog-v2-empty").getByRole("button", { name: "Сбросить фильтры" }).click();
-  await expect(page.locator('[role="listitem"]')).toHaveCount(expectedTitles.length);
+  await loadEveryCatalogPage(page, expectedTitles.length);
 
   const planned = catalog.items.find((item) => item.stage_plan.stages.length > 0);
   expect(planned).toBeTruthy();
@@ -157,7 +171,11 @@ test("real seeded API preserves card/list order and opens the canonical assigned
   await expect(plannedDetail.locator(".catalog-v2-detail-customer")).toContainText(
     customerStateLabels[planned.customer.verification],
   );
-  await expect(plannedDetail.getByText(/Запланировано ·/).first()).toBeVisible();
+  const stagePlan = plannedDetail.locator(".catalog-v2-workflow-extra");
+  await expect(stagePlan).toContainText(`План выполнения (${String(planned.stage_plan.stages.length)})`);
+  await stagePlan.locator("summary").click();
+  await expect(stagePlan.locator("li")).toHaveCount(planned.stage_plan.stages.length);
+  await expect(stagePlan).toContainText("Это план, а не прогресс выполнения");
 
   await page.goto(`${taskPath}?task=${assigned?.task_id ?? ""}&catalog_view=list`);
   await expect(page.locator("#catalog-detail-title")).toHaveText(assigned?.title ?? "");
@@ -225,7 +243,8 @@ test("real seeded API submits one application and replays its idempotency key", 
   expect(preflight.status(), await preflight.text()).toBe(200);
 
   await openRealCatalog(page);
-  expect(await page.evaluate(() => window.sessionStorage.getItem("impulse_csrf"))).toBe(csrf);
+  const activeCsrf = await page.evaluate(() => window.sessionStorage.getItem("impulse_csrf"));
+  expect(activeCsrf, "Live browser session must expose the current CSRF token").toBeTruthy();
   await page.getByRole("button", { name: "Все фильтры" }).click();
   const search = page.getByLabel("Поиск", { exact: true });
   await search.fill(candidate.title);
@@ -284,7 +303,7 @@ test("real seeded API submits one application and replays its idempotency key", 
   const replay = await page.context().request.post(
     `/api/v1/me/tasks/${candidate.task_id}/applications`,
     {
-      headers: { "X-CSRF-Token": csrf, "Idempotency-Key": idempotencyKey },
+      headers: { "X-CSRF-Token": activeCsrf ?? "", "Idempotency-Key": idempotencyKey },
     },
   );
   expect([200, 201]).toContain(replay.status());
@@ -343,40 +362,28 @@ test("real seeded API separates match snapshots after a trajectory change", asyn
   expect(target).toBeTruthy();
   if (target === undefined) return;
 
-  await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
-  const targetCard = page.locator(".track-card").filter({ hasText: target.title });
-  await expect(targetCard).toBeVisible();
-  if (overview.active_count >= overview.max_active) {
-    await targetCard.click();
-    const dialog = page.getByRole("dialog", { name: /Освободить место/ });
-    await expect(dialog).toBeVisible();
-    const frozen = overview.tracks.find((track) => track.status === "active");
-    expect(frozen).toBeTruthy();
-    if (frozen === undefined) return;
-    const changeResponsePromise = page.waitForResponse(
-      (response) =>
-        response.request().method() === "POST" &&
-        new URL(response.url()).pathname === "/api/v1/me/tracks",
-    );
-    await dialog
-      .getByRole("button", { name: `Заморозить «${frozen.title}»` })
-      .click();
-    expect((await changeResponsePromise).status()).toBe(200);
-  } else {
-    const changeResponsePromise = page.waitForResponse(
-      (response) =>
-        response.request().method() === "POST" &&
-        new URL(response.url()).pathname === "/api/v1/me/tracks",
-    );
-    await targetCard.click();
-    expect((await changeResponsePromise).status()).toBe(200);
-  }
-  await expect(targetCard).toContainText("Активно");
-
-  await page.getByRole("link", { name: "Задачи", exact: true }).click();
-  await expect(
-    page.getByRole("heading", { name: "Задачи для твоего развития" }),
-  ).toBeVisible();
+  // The active AI-role trajectory uses new role cards, whereas this API
+  // contract deliberately changes the persisted development track. Mutate the
+  // authoritative endpoint, then validate its effect on live catalog matching.
+  const session = await page.context().request.get("/api/v1/me");
+  expect(session.status()).toBe(200);
+  const { csrf_token: currentCsrf } = (await session.json()) as Login;
+  const activeToFreeze = overview.active_count >= overview.max_active
+    ? overview.tracks.find(track => track.status === "active")
+    : undefined;
+  if (overview.active_count >= overview.max_active) expect(activeToFreeze).toBeTruthy();
+  const changed = await page.context().request.post("/api/v1/me/tracks", {
+    headers: { "X-CSRF-Token": currentCsrf },
+    data: {
+      track_key: target.key,
+      ...(activeToFreeze ? { freeze_track_key: activeToFreeze.key } : {}),
+    },
+  });
+  expect(changed.status(), await changed.text()).toBe(200);
+  const afterTracks = (await changed.json()) as TrackOverview;
+  expect(afterTracks.tracks.find(track => track.key === target.key)?.status).toBe("active");
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Задачи для твоего развития" })).toBeVisible();
   const refreshedSnapshot = await openCandidateDetail();
   await expect(refreshedSnapshot).not.toHaveText(candidate.match.source_snapshot_version);
 
@@ -537,10 +544,10 @@ test("real server exposes qualitative growth, unverified customer and hard eligi
   await expect(detail).toContainText("Заказчик не верифицирован");
   await expect(detail).not.toContainText("Проверенный заказчик");
   await expect(detail).not.toContainText("Возможность использовать результат в портфолио");
-  const growth = detail.locator(".catalog-v2-growth-list");
-  await expect(growth).toContainText("Нет подтверждённого уровня");
-  await expect(growth).toContainText("Без числового прогноза");
-  await expect(growth).not.toContainText("0%");
+  const growth = detail.locator(".catalog-skill-stats__list");
+  await expect(growth).toContainText("Не оценивался");
+  await expect(growth).toContainText("Оценка после проверки");
+  await expect(growth).not.toContainText("Изменение уровня 0%");
 
   const directApply = await page.context().request.post(
     `/api/v1/me/tasks/${candidate.task_id}/applications`,

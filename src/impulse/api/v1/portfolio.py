@@ -15,6 +15,7 @@ from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.concurrency import compose_reads
 from impulse.application.development import DevelopmentService
 from impulse.application.identity import AuthenticatedSession, DemoAuthService, PersonaRecord
+from impulse.application.recognition import RecognitionService
 from impulse.application.reward import RewardService
 from impulse.application.talent import PipelineEvent, PipelineStage, TalentService
 from impulse.application.work import WorkService
@@ -140,7 +141,7 @@ async def _recognition_evidence(
         authorized_hr = (
             settings.get("hr_achievements", False) and ConsentScope.PUBLIC_TROPHIES in consents
         )
-    recognition = request.app.state.recognition_service
+    recognition: RecognitionService = request.app.state.recognition_service
     if not (own or authorized_hr):
         return [], [], []
 

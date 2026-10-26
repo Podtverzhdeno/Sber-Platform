@@ -68,6 +68,23 @@ export async function installBootcampReferenceApi(page: Page): Promise<void> {
   }));
 
   const study = new Map<string, { completed_units: number; certificate_id: string | null; practice_status: string | null; practice_submitted_at: string | null; practice_task_key: string | null; practice_description: string | null; practice_artifact_url: string | null }>();
+  // Real Bootcamp uses /impulse-level, not the retired /bootcamp/overview
+  // provider. Keep the role projection derived from the same persisted fixture
+  // that serves the lesson API. Do not treat a certificate as a career grade.
+  await page.route("**/api/v1/me/bootcamp/impulse-level?track=*", route => {
+    const track = new URL(route.request().url()).searchParams.get("track") ?? "product";
+    const requiredKey = track === "product" ? "demo-course-1" : bootcampCatalogFixture.find(item => item.track_keys.includes(track))?.key ?? "demo-course-1";
+    const state = study.get(requiredKey);
+    const completed = Boolean(state?.certificate_id);
+    const credited = Number(completed && (state?.practice_status === "pending" || state?.practice_status === "approved"));
+    return route.fulfill({ json: {
+      track_key:track,level:0,cycle_number:1,curriculum_state:"published",
+      completed_courses:Number(completed),required_courses:1,approved_practices:0,
+      credited_practices:credited,required_practices:1,
+      advance_ready:completed && credited===1,
+      history:[],policy_version:1,max_level:3,required_course_keys:[requiredKey],
+    } });
+  });
   await page.route("**/api/v1/me/bootcamp/impulse-study/**", async route => {
     const path = new URL(route.request().url()).pathname;
     const match = path.match(/\/impulse-study\/(demo-course-\d+)(?:\/lessons\/(\d+)\/complete|\/(finish)|\/(practice))?$/);

@@ -42,18 +42,24 @@ test("saved Bootcamp certificate appears in selected trajectory without inventin
  const detail=page.getByTestId("trajectory-role-detail");
  await expect(detail).toHaveAttribute("data-role-key","product");
  await expect(page.getByTestId("trajectory-study-evidence")).toContainText("1 из 2 учебных курсов завершено");
- await expect(page.getByTestId("trajectory-study-evidence")).toContainText("0 из 2 этапов подтверждено");
+ await expect(page.getByTestId("trajectory-study-evidence")).toContainText("0 этапов подтверждено отдельно");
  await expect(page.locator(".trajectory-v2-stage[data-study-state='studied']")).toHaveCount(1);
- await expect(page.locator(".trajectory-v2-stage[data-stage-state='completed']")).toHaveCount(0);
+ await expect(page.locator(".trajectory-v2-stage[data-stage-state='completed']")).toHaveCount(1);
+ await expect(page.locator(".trajectory-v2-stage[data-stage-state='current']")).toHaveCount(1);
  // The overview keeps one compact study summary; no repeated full-size progress boxes.
  const summary=page.getByTestId("trajectory-study-evidence");
  await expect(summary.getByTestId("trajectory-study-progress").locator("progress")).toHaveAttribute("max","2");
  await expect(summary.getByTestId("trajectory-study-progress").locator("progress")).toHaveAttribute("value","1");
  await expect(page.locator(".trajectory-v2-stage-detail .trajectory-v2-stage-progress")).toHaveCount(0);
  await expect(page.locator(".trajectory-v2-stage-detail .trajectory-v2-studied-course")).toHaveCount(0);
+ // The active panel advances to the next uncompleted stage automatically.
+ // Inspect the finished course only after explicitly selecting its historic node.
+ await page.locator(".trajectory-v2-stage[data-stage-state='completed']").click();
  await expect(page.getByTestId("trajectory-course-learning")).toContainText("учебный сертификат выдан");
  await expect(page.locator(".trajectory-v2-stage-more")).toHaveCount(0);
- await expect(page.getByTestId("trajectory-official-grade")).toHaveText("—");
- await expect(page.getByText("Не опубликовано")).toBeVisible();
+ // A learning certificate does not mint a corporate career grade.
+ // The trajectory deliberately exposes the separate Impulse level instead.
+ await expect(page.getByTestId("trajectory-impulse-level")).toHaveText("L0");
+ await expect(page.getByText(/это уровень Impulse, не карьерный грейд Сбера/i)).toBeVisible();
  await page.screenshot({path:"test-results/trajectory-learning-sync-desktop.png",fullPage:true,animations:"disabled"});
 });

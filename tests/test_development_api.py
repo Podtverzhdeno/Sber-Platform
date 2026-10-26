@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any, Protocol
+
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
@@ -23,6 +25,16 @@ from impulse.domain.development import (
     TrackAttempt,
     TrackStatus,
 )
+
+
+class ApiResponse(Protocol):
+    @property
+    def status_code(self) -> int: ...
+
+    @property
+    def text(self) -> str: ...
+
+    def json(self) -> Any: ...
 
 
 def _client() -> tuple[TestClient, MemoryDevelopmentStore]:
@@ -378,7 +390,7 @@ def test_optional_tracks_can_be_added_and_archived_without_changing_primary() ->
     with client:
         csrf = _login(client)
 
-        def update(track: str, enabled: bool) -> object:
+        def update(track: str, enabled: bool) -> ApiResponse:
             return client.post(
                 "/api/v1/me/tracks/optional",
                 json={"track_key": track, "enabled": enabled},

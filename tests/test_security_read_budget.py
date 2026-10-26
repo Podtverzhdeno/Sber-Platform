@@ -6,6 +6,7 @@ traffic. These tests ensure read-model fans-out cannot masquerade as search.
 
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
+from starlette.types import Receive, Scope, Send
 
 from impulse.api.security import RequestRateLimiter, SecurityMiddleware
 from impulse.bootstrap.app import create_app
@@ -13,7 +14,7 @@ from impulse.bootstrap.settings import AppEnvironment, Settings
 
 
 def test_classifies_read_models_separately_from_search_and_agent_calls() -> None:
-    classify = SecurityMiddleware._category
+    classify = SecurityMiddleware.category
     assert classify("/api/v1/me/journey/snapshot", "GET") == "read"
     assert classify("/api/v1/me/rating/standings", "GET") == "read"
     assert classify("/api/v1/me/talent-passport", "GET") == "read"
@@ -26,7 +27,10 @@ def test_classifies_read_models_separately_from_search_and_agent_calls() -> None
 
 
 def test_search_and_agent_limits_remain_strict_and_isolated() -> None:
-    middleware = SecurityMiddleware(lambda *_args: None)
+    async def app(_scope: Scope, _receive: Receive, _send: Send) -> None:
+        return
+
+    middleware = SecurityMiddleware(app)
     limits = middleware.limiter.rules
     assert limits["search"].limit == 60
     assert limits["auth"].limit == 20

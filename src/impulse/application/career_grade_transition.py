@@ -47,6 +47,7 @@ class CareerGradeAwardStore(Protocol):
         awarded_at: datetime,
     ) -> bool:
         """Durable atomic CAS, with unique award key. Return False if already advanced."""
+        ...
 
 
 @dataclass(frozen=True, slots=True)
