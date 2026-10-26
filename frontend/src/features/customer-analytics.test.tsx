@@ -66,7 +66,7 @@ describe("customer activity dashboard", () => {
     expect(populated).toBeDefined();
     if (!populated) throw new Error("Missing recorded activity cell");
     fireEvent.mouseEnter(populated);
-    expect(await screen.findByRole("tooltip")).toContainText("1 событий");
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("1 событий");
     fireEvent.click(populated);
     const dialog=screen.getByRole("dialog",{name:/Активность/});
     expect(dialog).toBeVisible();
