@@ -68,9 +68,10 @@ test("catalog filters, view parity and one idempotent apply", async ({ page }) =
   const advanced = page.locator(".catalog-v2-filter-expander");
   await expect(advanced).toHaveAccessibleName("Все фильтры");
   await expect(advanced).toHaveAttribute("aria-expanded", "false");
-  await expect(page.getByLabel("Навык", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Навык", { exact: true })).toBeHidden();
   await advanced.click();
   await expect(advanced).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByLabel("Навык", { exact: true })).toBeVisible();
   await page.getByLabel("Навык", { exact: true }).fill("python");
   await expect(page.getByRole("button", { name: /Сбросить фильтр Навык/ })).toBeVisible();
   await page.getByRole("button", { name: "Список" }).click();
