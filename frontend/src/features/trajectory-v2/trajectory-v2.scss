@@ -2215,3 +2215,10 @@
     animation:none;box-shadow:0 0 0 3px #0deac15e;
   }
 }
+
+.trajectory-v2-cycle-course-entry { display:flex; flex-direction:column; min-width:0; }
+.trajectory-v2-cycle-practice-link { align-self:flex-start; display:inline-flex; padding:7px 11px;
+  margin:3px 0 10px 8px; font-size:12px; line-height:1.4; font-weight:650; color:#12d9cf;
+  border-radius:8px; text-decoration:none; border:1px solid #22727b; background:#073348; }
+.trajectory-v2-cycle-practice-link:hover, .trajectory-v2-cycle-practice-link:focus-visible {
+  background:#0d4654; border-color:#12d9cf; outline-offset:2px; }

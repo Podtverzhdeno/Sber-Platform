@@ -308,7 +308,7 @@ function CourseDetails({
   card, onReason, initialLearningView, detail, loading, detailError, certificate, certificatesLoading,
   certificateError, issuing, issueError, onIssue, onCelebrationChange,
 }: {
-  card: CourseCardState; onReason: () => void; initialLearningView?: "overview" | "program"; detail: CourseDetail | null;
+  card: CourseCardState; onReason: () => void; initialLearningView?: "overview" | "program" | "practice"; detail: CourseDetail | null;
   loading: boolean; detailError: boolean; certificate: CourseCertificate | null;
   certificatesLoading: boolean; certificateError: boolean; issuing: boolean;
   issueError: boolean; onIssue: (key: string) => void;
@@ -768,6 +768,14 @@ export function BootcampCatalog({
     setSearchParams(next);
   }
 
+  function openPractice(courseKey: string) {
+    const next = new URLSearchParams(searchParams);
+    next.set("course", courseKey);
+    next.set("panel", "detail");
+    next.set("study", "practice");
+    setSearchParams(next);
+  }
+
   function closePanel() {
     const next = new URLSearchParams(searchParams);
     next.delete("course");
@@ -869,6 +877,11 @@ export function BootcampCatalog({
   const progressionComplete=levelForRole?.curriculum_state==="published"
     ? levelForRole.required_courses>0 && remainingStudyCount===0
     : roleStudy.required.length>0 && pendingRequired.length===0;
+  const nextPracticeCourse = (study.data?.courses ?? []).find(course =>
+    course.finished && (levelForRole?.required_course_keys ?? roleStudy.required.map(item => item.key))
+      .includes(course.course_key) &&
+    course.practice_status !== "pending" && course.practice_status !== "approved"
+  );
   const canAdvanceLearningLevel = levelForRole?.advance_ready === true;
   const pendingLevelCurriculum = levelForRole?.curriculum_state === "unpublished" && levelForRole.level < 3 && levelForRole.level > 0;
   const programCompleted = (levelForRole?.level ?? 0) >= 3;
@@ -941,9 +954,10 @@ export function BootcampCatalog({
               onClick={() => {
                 if(canAdvanceLearningLevel){advanceLevel.mutate(selectedRole);}
                 else if(pendingLevelCurriculum){void navigate(`/workspace/1?role=${encodeURIComponent(selectedRole)}`);}
+                else if(progressionComplete && nextPracticeCourse){openPractice(nextPracticeCourse.course_key);}
                 else{openPanel("requirements");}
               }}
-              aria-label={canAdvanceLearningLevel?"Подтвердить повышение уровня Impulse":pendingLevelCurriculum?"Открыть новый цикл траектории":"Посмотреть учебные и практические требования"}>
+              aria-label={canAdvanceLearningLevel?"Подтвердить повышение уровня Impulse":pendingLevelCurriculum?"Открыть новый цикл траектории":progressionComplete&&nextPracticeCourse?"Выбрать практическую задачу":"Посмотреть учебные и практические требования"}>
               {canAdvanceLearningLevel ? <><Sparkles size={17} aria-hidden="true"/>Следующий этап</>
                 : programCompleted ? "L3 достигнут" : pendingLevelCurriculum ? "Новый цикл"
                 : progressionComplete ? "К практике" : "Посмотреть курсы"} <ArrowRight />
@@ -997,7 +1011,7 @@ export function BootcampCatalog({
       <LearningProgressPanel bootcampIndex={2} compact />
       <Drawer key={`${panel}:${deepLinked?.key ?? ""}`} title={panel === "reason" ? "Почему рекомендован" : "Информация о курсе"} preciseCloseIcon={panel === "reason"} open={deepLinked !== null && panel !== "requirements"} onClose={closePanel}>
         {deepLinked && (panel === "reason" ? <RecommendationDetails card={deepLinked} track={selectedRoleTitle} onOpenCourse={() => { openPanel("detail", deepLinked.key); }} onOpenProgram={() => { const next = new URLSearchParams(searchParams); next.set("course", deepLinked.key); next.set("panel", "detail"); next.set("study", "program"); setSearchParams(next); }} /> :
-          <CourseDetails key={deepLinked.key} card={deepLinked} initialLearningView={searchParams.get("study") === "program" ? "program" : "overview"}
+          <CourseDetails key={deepLinked.key} card={deepLinked} initialLearningView={searchParams.get("study") === "practice" ? "practice" : searchParams.get("study") === "program" ? "program" : "overview"}
             detail={detailQuery.data ?? null} loading={detailQuery.isPending} detailError={detailQuery.isError}
             certificate={certificatesQuery.data?.find((item) => item.course_title === deepLinked.title) ?? null}
             certificatesLoading={certificatesQuery.isPending} certificateError={certificatesQuery.isError}

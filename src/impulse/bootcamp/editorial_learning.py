@@ -41,6 +41,9 @@ class ImpulseStudyView(BaseModel):
     certificate_id: UUID | None
     finished: bool
     practice_status: str | None = None
+    practice_task_key: str | None = None
+    practice_description: str | None = None
+    practice_artifact_url: str | None = None
     practical_certificate_id: UUID | None = None
 
 
@@ -56,6 +59,7 @@ class ImpulseCourseSummary(BaseModel):
     certificate_id: UUID | None
     updated_at: datetime
     practice_status: str | None
+    practice_task_key: str | None = None
     practical_certificate_id: UUID | None
     practice_submitted_at: datetime | None = None
 
@@ -75,6 +79,19 @@ class PracticeReviewBody(BaseModel):
 
 class PracticeSubmissionBody(BaseModel):
     description: str = Field(min_length=50, max_length=5000)
+    practice_task_key: (
+        Literal[
+            "lesson:0",
+            "lesson:1",
+            "lesson:2",
+            "lesson:3",
+            "lesson:4",
+            "lesson:5",
+            "lesson:6",
+            "lesson:7",
+        ]
+        | None
+    ) = None
     artifact_url: str | None = Field(default=None, max_length=2000)
 
 
@@ -156,8 +173,9 @@ async def _view(request: Request, person_id: UUID, course_key: str) -> ImpulseSt
             (
                 await session.execute(
                     text(
-                        "SELECT status, practical_certificate_id "
-                        "FROM impulse_practical_submissions WHERE person_id = :person "
+                        "SELECT status, practice_task_key, description, artifact_url, "
+                        "practical_certificate_id FROM impulse_practical_submissions "
+                        "WHERE person_id = :person "
                         "AND course_key = :course"
                     ),
                     {"person": person_id, "course": course_key},
@@ -172,6 +190,9 @@ async def _view(request: Request, person_id: UUID, course_key: str) -> ImpulseSt
         certificate_id=row["certificate_id"] if row else None,
         finished=bool(row and row["certificate_id"]),
         practice_status=practice["status"] if practice else None,
+        practice_task_key=practice["practice_task_key"] if practice else None,
+        practice_description=practice["description"] if practice else None,
+        practice_artifact_url=practice["artifact_url"] if practice else None,
         practical_certificate_id=practice["practical_certificate_id"] if practice else None,
     )
 
@@ -196,7 +217,8 @@ async def impulse_study_summary(
                     text(
                         "SELECT p.course_key, p.completed_units, p.total_units, "
                         "p.finished_at, p.certificate_id, p.updated_at, "
-                        "s.status AS practice_status, s.practical_certificate_id, "
+                        "s.status AS practice_status, s.practice_task_key, "
+                        "s.practical_certificate_id, "
                         "s.submitted_at AS practice_submitted_at "
                         "FROM impulse_course_progress AS p "
                         "LEFT JOIN impulse_practical_submissions AS s "
@@ -222,6 +244,7 @@ async def impulse_study_summary(
             certificate_id=row["certificate_id"],
             updated_at=row["updated_at"],
             practice_status=row["practice_status"],
+            practice_task_key=row["practice_task_key"],
             practical_certificate_id=row["practical_certificate_id"],
             practice_submitted_at=row["practice_submitted_at"],
         )
@@ -428,10 +451,11 @@ async def submit_impulse_practice(
         await session.execute(
             text(
                 "INSERT INTO impulse_practical_submissions "
-                "(person_id, course_key, description, artifact_url, status) "
-                "VALUES (:person, :course, :description, :artifact_url, 'pending') "
+                "(person_id, course_key, description, artifact_url, practice_task_key, status) "
+                "VALUES (:person, :course, :description, :artifact_url, :task, 'pending') "
                 "ON CONFLICT (person_id, course_key) DO UPDATE SET "
                 "description = EXCLUDED.description, artifact_url = EXCLUDED.artifact_url, "
+                "practice_task_key = EXCLUDED.practice_task_key, "
                 "status = 'pending', submitted_at = now() "
                 "WHERE impulse_practical_submissions.status <> 'approved'"
             ),
@@ -440,6 +464,7 @@ async def submit_impulse_practice(
                 "course": course_key,
                 "description": body.description,
                 "artifact_url": body.artifact_url,
+                "task": body.practice_task_key,
             },
         )
     return await _view(request, person, course_key)

@@ -778,11 +778,18 @@ function CycleLearningPath(props: { level: ImpulseRoleLevel; learningCourses: Le
         const nextCourse = keys.find(k=>!props.learningCourses.some(c=>c.course_key===k && c.finished && c.certificate_id));
         const visitKey = `cycle:${String(level.cycle_number)}:${key}`;
         const attention = !isDone && nextCourse===key && props.isUnopened?.(visitKey)===true;
-        return <Link key={key} to={`/workspace/2?role=${encodeURIComponent(roleKey)}&course=${encodeURIComponent(key)}&panel=detail`} className="trajectory-v2-cycle-course" data-attention={attention ? "new" : undefined} onClick={()=>{props.markVisited?.(visitKey);}}> 
+        return <div key={key} className="trajectory-v2-cycle-course-entry">
+        <Link to={`/workspace/2?role=${encodeURIComponent(roleKey)}&course=${encodeURIComponent(key)}&panel=detail`} className="trajectory-v2-cycle-course" data-attention={attention ? "new" : undefined} onClick={()=>{props.markVisited?.(visitKey);}}> 
           <span className="trajectory-v2-cycle-num">{isDone ? "✓" : String(index+1)}</span>
           <div><strong>{subjectNames[number] ?? course?.title ?? key}</strong><small>{isDone ? "Учебный сертификат сохранён" : course?.completed_units ? `${String(course.completed_units)} из 8 уроков` : "Курс не начат"}</small></div>
           <span>{isDone ? "Пройден" : "Открыть"} →</span>
-        </Link>;
+        </Link>
+          {isDone && <Link className="trajectory-v2-cycle-practice-link"
+            to={`/workspace/2?role=${encodeURIComponent(roleKey)}&course=${encodeURIComponent(key)}&panel=detail&study=practice`}>
+            {course.practice_status === "pending" || course.practice_status === "approved"
+              ? "Посмотреть зачтённую практику" : "Выбрать практическую задачу"} →
+          </Link>}
+        </div>;
       })}</div>
       <div className="trajectory-v2-cycle-practice">
         <strong>Практика текущего уровня</strong>

@@ -5696,6 +5696,8 @@ export interface components {
             practice_status: string | null;
             /** Practice Submitted At */
             practice_submitted_at?: string | null;
+            /** Practice Task Key */
+            practice_task_key?: string | null;
             /** Title */
             title: string;
             /** Total Units */
@@ -5775,8 +5777,14 @@ export interface components {
             finished: boolean;
             /** Practical Certificate Id */
             practical_certificate_id?: string | null;
+            /** Practice Artifact Url */
+            practice_artifact_url?: string | null;
+            /** Practice Description */
+            practice_description?: string | null;
             /** Practice Status */
             practice_status?: string | null;
+            /** Practice Task Key */
+            practice_task_key?: string | null;
             /**
              * Total Units
              * @default 8
@@ -6905,6 +6913,8 @@ export interface components {
             artifact_url?: string | null;
             /** Description */
             description: string;
+            /** Practice Task Key */
+            practice_task_key?: ("lesson:0" | "lesson:1" | "lesson:2" | "lesson:3" | "lesson:4" | "lesson:5" | "lesson:6" | "lesson:7") | null;
         };
         /** PrerequisiteFactView */
         PrerequisiteFactView: {
