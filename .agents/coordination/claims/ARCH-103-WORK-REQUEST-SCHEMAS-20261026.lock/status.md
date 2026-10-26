@@ -1,7 +1,7 @@
 # Claim ARCH-103-WORK-REQUEST-SCHEMAS-20261026
 - task_id: ARCH-103-WORK-REQUEST-SCHEMAS-20261026
 - session_id: gpt6-20261026-work-requests-01
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-10-26
 - heartbeat_at: 2026-10-26
 - base_revision: 59459dfbaefeb8afa2366837efa71826468465a8
@@ -19,3 +19,15 @@
   - independent reviewer for schema/type backward compatibility
 - progress: Extract request-only schemas from oversized work API without changing routes, payload schema, or handlers.
 - blockers: Full CI has concurrently edited unrelated backend/frontend, shared OpenAPI generated snapshot belongs to integration lane and is not in scope.
+
+- review_handoff_2026_10_26: Draft PR #89, branch refactor/work-request-schemas-20261026; extracted 18 Pydantic request models from oversized work API into work_requests.py, preserving old imports via explicit reexports; adjusted typed empty UUID default in checkpoint payload without runtime semantics change.
+- changed_files:
+  - src/impulse/api/v1/work.py
+  - src/impulse/api/v1/work_requests.py
+  - tests/test_work_request_schema_boundary.py
+  - .github/workflows/work-request-boundary-qa.yml
+- evidence:
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40247106559
+  - https://github.com/Podtverzhdeno/Sber-Platform/actions/runs/40247106598
+- verification_result: Focused Ruff, Ruff format, Pyright on changed route/request modules, request validation/route compatibility tests, work API tests and OpenAPI snapshot PASS; architecture import/cycle gate PASS.
+- acceptance_limit: Whole monorepo CI remains red due to unrelated concurrent Pyright debt; require independent review and pinned integration SHA. Do not mark ARCH-103 DONE or merge until accepted.
