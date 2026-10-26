@@ -542,5 +542,5 @@ test("switching between direct and group chats keeps both column dividers fixed"
   await page.locator(".msg-dialog-list__row").filter({hasText:"Елена Наставник"}).click();
   await expect(page.locator(".messenger-page")).toHaveAttribute("data-message-state","direct");
   const again = await columnBounds();
-  expect(Math.abs(again[1]!.left-direct[1]!.left)).toBeLessThan(1.5);
+  expect(Math.abs((again[1]?.left ?? 0) - (direct[1]?.left ?? 0))).toBeLessThan(1.5);
 });
