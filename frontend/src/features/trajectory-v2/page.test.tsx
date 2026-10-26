@@ -359,11 +359,13 @@ describe("optional role activation and reversible grey state", () => {
     expect(screen.getByTestId("trajectory-role-detail")).toHaveAttribute("data-tone", "unselected");
     fireEvent.click(screen.getByRole("button", { name: "Изучать дополнительно →" }));
     await waitFor(() => {
-      expect(spy.mock.calls.some(([input, options]) =>
-        String(input).includes("/me/tracks/optional")
-        && (options as RequestInit | undefined)?.method === "POST"
-        && String((options as RequestInit | undefined)?.body).includes('"enabled":true')
-      )).toBe(true);
+      expect(spy.mock.calls.some(([input, options]) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+        return url.includes("/me/tracks/optional")
+          && options?.method === "POST"
+          && typeof options.body === "string"
+          && options.body.includes('"enabled":true');
+      })).toBe(true);
     });
     expect(screen.getAllByTestId("trajectory-role-card").filter(role =>
       role.getAttribute("data-primary") === "true")).toHaveLength(1);
@@ -380,10 +382,14 @@ describe("optional role activation and reversible grey state", () => {
     renderShell("/workspace/1?role=product", { overview });
     expect(screen.getByTestId("trajectory-role-detail")).toHaveAttribute("data-tone", "learning");
     fireEvent.click(screen.getByRole("button", { name: "Сделать карточку серой" }));
-    await waitFor(() => expect(spy.mock.calls.some(([input, options]) =>
-      String(input).includes("/me/tracks/optional")
-      && String((options as RequestInit | undefined)?.body).includes('"enabled":false')
-    )).toBe(true));
+    await waitFor(() => {
+      expect(spy.mock.calls.some(([input, options]) => {
+        const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+        return url.includes("/me/tracks/optional")
+          && typeof options?.body === "string"
+          && options.body.includes('"enabled":false');
+      })).toBe(true);
+    });
     expect(screen.getByTestId("trajectory-role-detail")).toHaveTextContent("Обучение и практические шаги");
   });
 });
