@@ -291,6 +291,7 @@ export function BuddyChatV2({ profile, navigation = [] }: Props) {
       </div>
     </aside>
     <div className="buddy2-main">
+      {heroDismissed && <h1 id="workspace-title" className="buddy2-visually-hidden">AI-Buddy</h1>}
       {!heroDismissed && <header className="buddy2-hero">
         <button type="button" className="buddy2-hero-close" aria-label="Закрыть баннер AI-Buddy" title="Закрыть баннер" onClick={dismissHero}><X size={16}/></button>
         <div className="buddy2-robot" aria-hidden="true"><div className="buddy2-antenna"/><div className="buddy2-robot-face"><i/><i/></div><div className="buddy2-robot-body"><Sparkles size={24}/></div></div>
