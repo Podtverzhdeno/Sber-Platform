@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import pytest
-from httpx import Response
 from fastapi.testclient import TestClient
+from httpx import Response
 from pydantic import SecretStr
 
 from impulse.application.development import (
