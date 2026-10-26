@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { apiRequest, clearApiReadCache, subscribeProgressMutation, type RuntimeApiPath } from "./client";
-import { isCrossSectionMutation, participantProjectionKeys } from "./cross-section-mutations";
+import { isCrossSectionMutation, progressMutationScope, lessonProjectionKeys, participantProjectionKeys } from "./cross-section-mutations";
 
 afterEach(() => {
   clearApiReadCache();
@@ -66,6 +66,40 @@ describe("cross-section progress mutation policy", () => {
     expect(isCrossSectionMutation("/api/v1/me/workforce?task=/api/v1/me/work", "POST")).toBe(false);
   });
 
+  it("scopes rapid lesson progress without disabling global finish and practice updates", () => {
+    const lesson = "/api/v1/me/bootcamp/impulse-study/demo-course-1/lessons/7/complete";
+    expect(isCrossSectionMutation(lesson, "POST")).toBe(true);
+    expect(progressMutationScope(lesson, "POST")).toBe("lesson");
+    expect(progressMutationScope(lesson + "?retry=1", "POST")).toBe("lesson");
+    expect(progressMutationScope("/api/v1/me/bootcamp/impulse-study/demo-course-1/finish", "POST")).toBe("all");
+    expect(progressMutationScope("/api/v1/me/bootcamp/impulse-study/demo-course-1/practice", "POST")).toBe("all");
+    expect(progressMutationScope("/api/v1/me/bootcamp/impulse-study/summary", "GET")).toBeNull();
+    expect(lessonProjectionKeys).toEqual(expect.arrayContaining([
+      "impulse-learning-summary", "impulse-role-level", "engagement-overview",
+      "development-overview", "trajectory-roadmaps",
+    ]));
+    expect(lessonProjectionKeys.length).toBeLessThan(participantProjectionKeys.length);
+    expect(lessonProjectionKeys).not.toContain("rating");
+    expect(lessonProjectionKeys).not.toContain("portfolio");
+    expect(lessonProjectionKeys).not.toContain("me");
+  });
+
+  it("notifies the lesson scope exactly once after one successful lesson write", async () => {
+    const onChange = vi.fn();
+    const unsubscribe = subscribeProgressMutation(onChange);
+    try {
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+        new Response(JSON.stringify({ completed_units: 1 }), { status: 200 }),
+      );
+      await apiRequest("/api/v1/me/bootcamp/impulse-study/demo-course-1/lessons/0/complete" as RuntimeApiPath, {
+        method: "POST",
+      });
+      expect(onChange).toHaveBeenCalledExactlyOnceWith("lesson");
+    } finally {
+      unsubscribe();
+    }
+  });
+
   it("includes every observed cross-section UI query prefix", () => {
     expect(participantProjectionKeys).toEqual(expect.arrayContaining([
       "development-overview",
@@ -112,7 +146,7 @@ describe("cross-section progress mutation policy", () => {
         "/api/v1/me/bootcamp/impulse-study/a/finish" as RuntimeApiPath,
         { method: "POST", body: "{}" },
       );
-      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledExactlyOnceWith("all");
     } finally {
       unsubscribe();
     }
