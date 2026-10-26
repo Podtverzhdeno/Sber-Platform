@@ -58,6 +58,15 @@ def _get(api: TestClient, path: str) -> dict[str, Any]:
     return cast(dict[str, Any], payload)
 
 
+def _get_list(api: TestClient, path: str) -> list[dict[str, Any]]:
+    response = api.get(path)
+    assert response.status_code == 200, f"{path}: {response.status_code} {response.text}"
+    payload: object = response.json()
+    assert isinstance(payload, list), f"{path} must return a JSON array"
+    assert all(isinstance(item, dict) for item in payload), f"{path} array entries must be objects"
+    return cast(list[dict[str, Any]], payload)
+
+
 def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -> None:
     with _app() as api:
         customer = _login(api, "customer-roman")
@@ -137,7 +146,7 @@ def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -
         assert any(item["id"] == assignment_id for item in customer_view["assignments"])
 
         participant = _login(api, "participant-alex")
-        participant_work = _get(api, "/api/v1/me/work")
+        participant_work = _get_list(api, "/api/v1/me/work")
         assert any(item["assignment"]["id"] == assignment_id for item in participant_work)
         _post(api, f"/api/v1/me/assignments/{assignment_id}/start", participant)
 
@@ -174,7 +183,7 @@ def test_project_acceptance_updates_workspace_portfolio_passport_and_journey() -
         )
 
         participant = _login(api, "participant-alex")
-        work_after = _get(api, "/api/v1/me/work")
+        work_after = _get_list(api, "/api/v1/me/work")
         assert any(
             contribution["id"] == contribution_id and contribution["status"] == "accepted"
             for item in work_after
