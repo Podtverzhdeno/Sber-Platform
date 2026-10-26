@@ -233,6 +233,22 @@ def calculate_task_match(
     )
 
 
+def accepted_skill_evidence(
+    evidence: tuple[CaseEvidence, ...], now: datetime
+) -> dict[str, dict[str, CaseEvidence]]:
+    """Unique accepted contributions per skill within the matching freshness window.
+
+    Caller must pass participant_case_evidence, which contains only approved
+    personal work with artifacts and permitted task ownership.
+    """
+    recent = (row for row in evidence if row.submitted_at >= now - timedelta(days=EVIDENCE_FRESHNESS_DAYS))
+    result: dict[str, dict[str, CaseEvidence]] = {}
+    for row in recent:
+        for tag in _normalized(row.competency_tags):
+            result.setdefault(tag, {})[str(row.contribution_id)] = row
+    return result
+
+
 def fresh_verified_tags(evidence: tuple[CaseEvidence, ...], now: datetime) -> frozenset[str]:
     threshold = now - timedelta(days=EVIDENCE_FRESHNESS_DAYS)
     return _normalized(
@@ -453,15 +469,7 @@ class TaskCatalogProjectionService:
         assignment_by_task = {item.task_id: item for item in assignments}
         now = self._now().astimezone(UTC)
         context = matching_context(roadmaps, evidence, now)
-        # Only accepted personal contributions are returned by participant_case_evidence.
-        # Apply the same recency policy as VERIFIED_COMPETENCIES match factor.
-        recent_evidence = tuple(
-            row for row in evidence if row.submitted_at >= now - timedelta(days=EVIDENCE_FRESHNESS_DAYS)
-        )
-        evidence_by_skill: dict[str, dict[str, CaseEvidence]] = {}
-        for row in recent_evidence:
-            for tag in _normalized(row.competency_tags):
-                evidence_by_skill.setdefault(tag, {})[str(row.contribution_id)] = row
+        evidence_by_skill = accepted_skill_evidence(evidence, now)
         result: list[tuple[TaskRecommendationProjection, TaskTermsSnapshot]] = []
         for marketplace_item in marketplace:
             task = marketplace_item.task
