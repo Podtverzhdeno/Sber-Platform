@@ -1,5 +1,5 @@
 import type { paths } from "./schema";
-import { isCrossSectionMutation } from "./cross-section-mutations";
+import { progressMutationScope, type ProgressMutationScope } from "./cross-section-mutations";
 
 export type ApiPaths = paths;
 export type RuntimeApiPath =
@@ -112,16 +112,16 @@ let cacheGeneration = 0;
 let activeFetch = globalThis.fetch;
 /** Role and identity changes must invalidate every actor-scoped TanStack query too. */
 const authScopeListeners = new Set<() => void>();
-const progressMutationListeners = new Set<() => void>();
+const progressMutationListeners = new Set<(scope: ProgressMutationScope) => void>();
 
 /** Subscribers refetch all visible authoritative projections after a commit. */
-export function subscribeProgressMutation(listener: () => void): () => void {
+export function subscribeProgressMutation(listener: (scope: ProgressMutationScope) => void): () => void {
   progressMutationListeners.add(listener);
   return () => { progressMutationListeners.delete(listener); };
 }
 
-function publishProgressMutation(): void {
-  for (const listener of progressMutationListeners) listener();
+function publishProgressMutation(scope: ProgressMutationScope): void {
+  for (const listener of progressMutationListeners) listener(scope);
 }
 
 
@@ -211,11 +211,13 @@ export async function apiRequest<T>(path: RuntimeApiPath, options?: RequestInit)
     if (!response.ok) throw await decodeError(response);
     if (AUTH_SCOPE_MUTATIONS.has(path) && method !== "GET" && method !== "HEAD") publishAuthScopeChange();
     if (response.status === 204) {
-      if (isCrossSectionMutation(path, method)) publishProgressMutation();
+      const scope = progressMutationScope(path, method);
+      if (scope !== null) publishProgressMutation(scope);
       return undefined as T;
     }
     const data = (await response.json()) as T;
-    if (isCrossSectionMutation(path, method)) publishProgressMutation();
+    const scope = progressMutationScope(path, method);
+      if (scope !== null) publishProgressMutation(scope);
     return data;
   }
 
