@@ -1,4 +1,4 @@
-be37bcaab64824ce98741a103ff8bf50e5bbf04b
-# Release: optimized thematic images for Impulse events
-# Static AVIF covers tied to stable event identity; no other feature changes in this release
-release_request=2026-10-26-event-card-banners-be37bca
+534db0e241edae4ee22cee02faf13d8c574effdb
+# Release: event detail popup shows the same thematic banner as its catalog card
+# Local AVIF image with a readable left-side gradient overlay
+release_request=2026-10-26-event-detail-banner-534db0e241
