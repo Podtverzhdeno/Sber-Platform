@@ -19,8 +19,12 @@ test("course selection → eight lessons → certificate → practice → persis
   await page.goto("/");
   await expect(page.locator('[data-persona="participant-alex"]')).toBeVisible();
   await page.locator('[data-persona="participant-alex"]').click();
+  await expect(page.getByRole("link", { name: "Bootcamp" })).toBeVisible();
+  await expect.poll(async () => (await page.request.get("/api/v1/me")).status(), {
+    message: "demo login must establish the HttpOnly session before API assertions",
+    timeout: 15_000,
+  }).toBe(200);
   const meResponse = await page.request.get("/api/v1/me");
-  expect(meResponse.status()).toBe(200);
   const actor = await meResponse.json() as { navigation: string[] };
   const bootcampIndex = actor.navigation.indexOf("Bootcamp");
   expect(bootcampIndex, "demo participant must be able to open Bootcamp").toBeGreaterThanOrEqual(0);
