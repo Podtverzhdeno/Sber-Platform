@@ -36,6 +36,7 @@ import {
   Route,
   Routes,
   useNavigate,
+  useLocation,
   useParams,
   useSearchParams,
 } from "react-router-dom";
@@ -1259,6 +1260,7 @@ function RoleDashboard({
 
 function ImpulseApp() {
   const navigate = useNavigate();
+  const location = useLocation();
   const configQuery = useQuery({
     queryKey: ["public-config"],
     queryFn: () => apiRequest<PublicConfig>("/api/v1/config"),
@@ -1528,6 +1530,7 @@ function ImpulseApp() {
       <a className="skip-link" href="#workspace-main">
         Перейти к содержимому
       </a>
+      {(actor !== null || location.pathname.startsWith("/verify/")) && (
       <header className="topbar">
         {actor ? (
           <>
@@ -1750,6 +1753,7 @@ function ImpulseApp() {
           </a>
         )}
       </header>
+      )}
       <div id="workspace-main">
         <Routes>
           <Route
