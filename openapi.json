@@ -6989,6 +6989,17 @@
             ],
             "title": "Practice Submitted At"
           },
+          "practice_task_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Task Key"
+          },
           "title": {
             "title": "Title",
             "type": "string"
@@ -7199,6 +7210,28 @@
             ],
             "title": "Practical Certificate Id"
           },
+          "practice_artifact_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Artifact Url"
+          },
+          "practice_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Description"
+          },
           "practice_status": {
             "anyOf": [
               {
@@ -7209,6 +7242,17 @@
               }
             ],
             "title": "Practice Status"
+          },
+          "practice_task_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Task Key"
           },
           "total_units": {
             "default": 8,
@@ -10164,6 +10208,27 @@
             "minLength": 50,
             "title": "Description",
             "type": "string"
+          },
+          "practice_task_key": {
+            "anyOf": [
+              {
+                "enum": [
+                  "lesson:0",
+                  "lesson:1",
+                  "lesson:2",
+                  "lesson:3",
+                  "lesson:4",
+                  "lesson:5",
+                  "lesson:6",
+                  "lesson:7"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Task Key"
           }
         },
         "required": [

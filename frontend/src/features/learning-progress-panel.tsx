@@ -34,13 +34,19 @@ export function LearningProgressPanel({ bootcampIndex, compact = false }: Props)
         <div className="learning-progress-bridge__metrics">
           <div><strong data-testid="learn-finished">{summary.finished_courses}</strong><span>курсов пройдено</span></div>
           <div><strong data-testid="learn-lessons">{summary.completed_lessons}</strong><span>уроков завершено</span></div>
-          <div><strong data-testid="learn-reviewed">{summary.approved_practices}</strong><span>практик принято</span></div>
+          <div><strong data-testid="learn-reviewed">{summary.approved_practices}</strong><span>практик проверено</span></div>
+          <div><strong data-testid="learn-practice-credited">{summary.credited_practices}</strong><span>практик зачтено для уровня Impulse</span></div>
         </div>
         {recent.length > 0 ? <ul className="learning-progress-bridge__courses">{recent.map(course => {
           const linkState = linkedCourseStatus(journey.data, course.course_key);
           return <li key={course.course_key}>
-            <div><strong>{course.title}</strong><span>{course.finished ? "Курс пройден" : `Изучено ${String(course.completed_units)} из ${String(course.total_units)} уроков`}{course.practice_status === "pending" ? " · Работа на проверке" : course.practice_status === "approved" ? " · Практика принята" : ""}</span>
+            <div><strong>{course.title}</strong><span>{course.finished ? "Курс пройден" : `Изучено ${String(course.completed_units)} из ${String(course.total_units)} уроков`}{course.practice_status === "pending" ? " · Учебная практика зачтена" : course.practice_status === "approved" ? " · Практика подтверждена" : ""}</span>
               {linkState && <small data-testid={`learn-linked-${course.course_key}`}>{linkedCourseLabel(linkState)}</small>}
+              {course.finished && <Link className="learning-progress-bridge__practice-link"
+                to={`/workspace/${String(bootcampIndex)}?course=${encodeURIComponent(course.course_key)}&panel=detail&study=practice`}>
+                {course.practice_status === "pending" || course.practice_status === "approved"
+                  ? "Посмотреть практику" : "Выбрать практическую задачу"} →
+              </Link>}
             </div>
             <progress max={course.total_units} value={course.completed_units} aria-label={`Учебный прогресс курса «${course.title}»`} />
           </li>;

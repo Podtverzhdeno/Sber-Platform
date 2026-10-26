@@ -25,6 +25,9 @@ type Progress = {
   certificate_id: string | null;
   finished: boolean;
   practice_status?: "pending" | "approved" | "needs_revision" | null;
+  practice_task_key?: string | null;
+  practice_description?: string | null;
+  practice_artifact_url?: string | null;
   practical_certificate_id?: string | null;
 };
 type View = "overview" | "program" | "skills" | "reviews" | "theory" | "example" | "practice" | "check" | "finish" | "success" | "certificates";
@@ -33,7 +36,7 @@ type Props = {
   courseTitle: string;
   recommendation: string;
   accessible: boolean;
-  initialView?: "overview" | "program";
+  initialView?: "overview" | "program" | "practice";
   onReason: () => void;
   onCelebrationChange?: (active: boolean) => void;
 };
@@ -90,7 +93,11 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
     if (!program || !progress.data || progress.data.course_key !== courseKey) return;
     if (resumedCourse.current === courseKey) return;
     resumedCourse.current = courseKey;
-    setCurrent(Math.min(progress.data.completed_units, Math.max(0, program.units.length - 1)));
+    if (progress.data.practice_description) setPracticeDescription(progress.data.practice_description);
+    if (progress.data.practice_artifact_url) setPracticeUrl(progress.data.practice_artifact_url);
+    const selectedTask = /^lesson:([0-7])$/.exec(progress.data.practice_task_key ?? "");
+    setCurrent(selectedTask ? Number(selectedTask[1]) :
+      Math.min(progress.data.completed_units, Math.max(0, program.units.length - 1)));
   }, [courseKey, program, progress.data]);
     const advance = useMutation({
     mutationFn: (lessonIndex: number) => apiRequest<Progress>(
@@ -105,7 +112,8 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const submitPractice = useMutation({
     mutationFn: () => apiRequest<Progress>((path + "/practice") as RuntimeApiPath, {
       method: "POST", headers: { ...csrfHeaders(), "Content-Type": "application/json" },
-      body: JSON.stringify({ description: practiceDescription, artifact_url: practiceUrl || null }),
+      body: JSON.stringify({ description: practiceDescription, artifact_url: practiceUrl || null,
+        practice_task_key: "lesson:" + String(current) }),
     }),
     onSuccess: (state) => {
       client.setQueryData(["impulse-study", courseKey], state);
@@ -143,7 +151,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
   const busy = advance.isPending || finish.isPending;
 
   function openView(next: View) {
-    if (next === "certificates" && !certificateId) return;
+    if ((next === "certificates" || next === "practice") && !certificateId) return;
     setView(next);
     setError("");
   }
@@ -382,7 +390,7 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
           {view === "finish" && <button type="button" className="imp-study__primary imp-study__finish" disabled={busy || !ready} onClick={() => { void completeCourse(); }}><CheckCircle2/> {busy ? "Проверяем и выдаём…" : "Завершить обучение"} <ArrowRight size={17}/></button>}
           {view === "success" && <div className="imp-study__success-actions">
             <button type="button" className="imp-study__secondary" onClick={() => { openView("certificates"); }}>Посмотреть два сертификата <ArrowRight size={18}/></button>
-            <button type="button" className="imp-study__primary" disabled={!certificateId} onClick={() => { printCertificate("study"); }}><Download size={17}/> Распечатать / сохранить PDF</button>
+            <button type="button" className="imp-study__primary" disabled={!certificateId} onClick={() => { openView("practice"); }}>Выбрать практическую задачу <ArrowRight size={17}/></button>
           </div>}
           <div className="imp-study__print-certificate" aria-hidden="true"><h2>IMPULSE · {printKind === "study" ? "Сертификат прохождения" : "Сертификат подтверждения знаний"}</h2><p>{printKind === "study" ? "Подтверждается прохождение курса" : "Подтверждается проверка практической работы по курсу"} «{courseTitle}»</p><p>Номер {printKind === "study" ? certificateId : practicalCertificateId}</p></div>
         </> : <>
@@ -426,9 +434,23 @@ export function ImmersiveCourseExperience({ courseKey, courseTitle, recommendati
                 <Download size={17}/> Скачать шаблон
               </a>
             </div>}
+            <div className="imp-study__practice-picker" data-testid="impulse-practice-picker">
+              <h4>Выберите практическую задачу</h4>
+              <p>Доступны задания из восьми пройденных уроков. Выберите одно и отправьте решение — организатор не нужен для учебного зачёта.</p>
+              <div className="imp-study__practice-choices">
+                {program.units.map((task,index) => <button key={task.id} type="button"
+                  aria-pressed={current === index}
+                  className={current === index ? "selected" : ""}
+                  onClick={() => { scrollOnLessonChange.current = true; setCurrent(index); }}>
+                  <span>{index+1}</span><strong>{task.title}</strong>
+                  <small>{task.practice}</small>
+                </button>)}
+              </div>
+              <strong className="imp-study__practice-selection">Задание {current+1}: {unit.title}</strong>
+            </div>
             <p className="imp-study__disclaimer">Отправленная практика сразу засчитывается для учебной траектории и уровня Impulse. Независимый сертификат знаний выдаётся только после проверки.</p>
             <form className="imp-study__submission" onSubmit={event => { event.preventDefault(); void submitPractice.mutateAsync(); }}>
-              <h4>Отправить практику и зачесть учебное требование</h4>
+              <h4>Сдать выбранную задачу и зачесть практику</h4>
               <label>Опишите, что сделали и как проверили результат
                 <textarea value={practiceDescription} minLength={50} required
                   onChange={event => { setPracticeDescription(event.target.value); }}

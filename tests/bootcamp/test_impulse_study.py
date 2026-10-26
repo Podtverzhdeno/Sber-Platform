@@ -177,23 +177,41 @@ def test_study_progress_requires_order_and_practice_requires_review(
         assert invalid.status_code == 422
         submitted = client.post(
             API + "/practice",
-            json={"description": "S" * 80, "artifact_url": "https://example.com/review"},
+            json={
+                "description": "S" * 80,
+                "artifact_url": "https://example.com/review",
+                "practice_task_key": "lesson:4",
+            },
         )
         assert submitted.status_code == 200
         assert submitted.json()["practice_status"] == "pending"
+        assert submitted.json()["practice_task_key"] == "lesson:4"
         assert submitted.json()["practical_certificate_id"] is None
         credited = client.get("/api/v1/me/bootcamp/impulse-study/summary").json()
         assert credited["credited_practices"] == 1
         assert credited["approved_practices"] == 0
         assert credited["courses"][0]["practice_submitted_at"] is not None
+        assert credited["courses"][0]["practice_task_key"] == "lesson:4"
         # A repeated submission is still one credited practice, with no fake certificate.
-        duplicate = client.post(API + "/practice", json={"description": "T" * 80})
+        duplicate = client.post(
+            API + "/practice", json={"description": "T" * 80, "practice_task_key": "lesson:2"}
+        )
         assert duplicate.status_code == 200
         assert duplicate.json()["practical_certificate_id"] is None
+        assert duplicate.json()["practice_task_key"] == "lesson:2"
         assert (
             client.get("/api/v1/me/bootcamp/impulse-study/summary").json()["credited_practices"]
             == 1
         )
+        invalid_task = client.post(
+            API + "/practice",
+            json={
+                "description": "Invalid practice task number" * 3,
+                "practice_task_key": "lesson:8",
+            },
+        )
+        assert invalid_task.status_code == 422
+        assert client.get(API).json()["practice_task_key"] == "lesson:2"
         path = f"/api/v1/bootcamp/impulse-study/demo-course-1/practice/{learner}/review"
         assert client.post(path, json={"decision": "approved"}).status_code == 403
 

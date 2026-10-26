@@ -250,6 +250,10 @@ test("finished course appears in Analytics and Trajectory from one persisted lea
   // trajectory immediately, before independent competency certification.
   await page.getByTestId("grade-milestone-celebration").getByRole("button", { name: "Посмотреть сертификаты" }).click();
   await reader.getByRole("button", { name: /Перейти к практике/ }).click();
+  const chooser = reader.getByTestId("impulse-practice-picker");
+  await expect(chooser.locator(".imp-study__practice-choices button")).toHaveCount(8);
+  await chooser.locator(".imp-study__practice-choices button").nth(2).click();
+  await expect(chooser.locator(".imp-study__practice-choices button").nth(2)).toHaveAttribute("aria-pressed", "true");
   await reader.locator(".imp-study__submission textarea").fill(
     "Разработал прикладное решение, выполнил позитивные и негативные сценарии, проверил итоговую работу."
   );
@@ -262,6 +266,7 @@ test("finished course appears in Analytics and Trajectory from one persisted lea
   // The server records learning credit but does not mint a review certificate.
   expect(await receipt.json()).toMatchObject({
     practice_status: "pending",
+    practice_task_key: "lesson:2",
     practical_certificate_id: null,
   });
   await expect(reader.locator(".imp-study__submission [role='status']"))
@@ -287,6 +292,20 @@ test("finished course appears in Analytics and Trajectory from one persisted lea
   await expect(trajectory.getByTestId("learn-lessons")).toHaveText("8");
   await expect(trajectory.getByTestId("learn-reviewed")).toHaveText("0");
   await expect(trajectory).toContainText("Самостоятельное обучение");
+
+  // Re-enter through the actual Trajectory action, not a manufactured URL.
+  // The server, not a browser-only draft, owns the chosen task and solution.
+  await page.getByTestId("learning-progress-bridge")
+    .getByRole("link", { name: /Посмотреть практику/ }).click();
+  await expect(page).toHaveURL(/course=demo-course-1.*study=practice/);
+  const returned = page.getByTestId("impulse-immersive-reader");
+  await expect(returned).toHaveAttribute("data-view", "practice");
+  const selected = returned.getByTestId("impulse-practice-picker")
+    .locator(".imp-study__practice-choices button").nth(2);
+  await expect(selected).toHaveAttribute("aria-pressed", "true");
+  await expect(returned.locator(".imp-study__submission textarea"))
+    .toHaveValue(/Разработал прикладное решение/);
+  await expect(returned.getByText(/Практика уже учтена для траектории/)).toBeVisible();
 });
 
 
