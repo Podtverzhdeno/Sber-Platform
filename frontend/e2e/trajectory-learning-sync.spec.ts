@@ -52,6 +52,9 @@ test("saved Bootcamp certificate appears in selected trajectory without inventin
  await expect(summary.getByTestId("trajectory-study-progress").locator("progress")).toHaveAttribute("value","1");
  await expect(page.locator(".trajectory-v2-stage-detail .trajectory-v2-stage-progress")).toHaveCount(0);
  await expect(page.locator(".trajectory-v2-stage-detail .trajectory-v2-studied-course")).toHaveCount(0);
+ // The active panel advances to the next uncompleted stage automatically.
+ // Inspect the finished course only after explicitly selecting its historic node.
+ await page.locator(".trajectory-v2-stage[data-stage-state='completed']").click();
  await expect(page.getByTestId("trajectory-course-learning")).toContainText("учебный сертификат выдан");
  await expect(page.locator(".trajectory-v2-stage-more")).toHaveCount(0);
  await expect(page.getByTestId("trajectory-official-grade")).toHaveText("—");
