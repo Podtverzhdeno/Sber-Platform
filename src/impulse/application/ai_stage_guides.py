@@ -310,6 +310,10 @@ _GUIDES: dict[str, RoleGuides] = cast(
 )
 
 
+# Stable public compatibility symbol for the bootstrap facade.
+GUIDES = _GUIDES
+
+
 def stage_guide(track_key: str, stage_position: int) -> StageGuide:
     """Return a distinct learning aid for one stable roadmap position."""
     role = _GUIDES[track_key]
