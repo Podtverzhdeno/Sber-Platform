@@ -41,8 +41,8 @@ async def test_l0_starts_without_fabricated_grade_and_needs_practical_review(
 
     async def evidence(
         _request: object, _auth: object, _track: str, _level: int = 0
-    ) -> tuple[int, int, int, tuple[str, ...]]:
-        return 4, 4, 0, ("demo-course-1", "demo-course-2", "demo-course-3", "demo-course-4")
+    ) -> tuple[int, int, int, int, tuple[str, ...]]:
+        return 4, 4, 0, 0, ("demo-course-1", "demo-course-2", "demo-course-3", "demo-course-4")
 
     monkeypatch.setattr(impulse_levels, "_saved", stored)
     monkeypatch.setattr(impulse_levels, "_evidence", evidence)
@@ -61,18 +61,20 @@ async def test_l0_starts_without_fabricated_grade_and_needs_practical_review(
     assert level.cycle_number == 1
     assert level.completed_courses == 4
     assert level.approved_practices == 0
+    assert level.credited_practices == 0
     assert not level.advance_ready
 
     async def approved(
         _request: object, _auth: object, _track: str, _level: int = 0
-    ) -> tuple[int, int, int, tuple[str, ...]]:
-        return 4, 4, 1, ("demo-course-1", "demo-course-2", "demo-course-3", "demo-course-4")
+    ) -> tuple[int, int, int, int, tuple[str, ...]]:
+        return 4, 4, 1, 1, ("demo-course-1", "demo-course-2", "demo-course-3", "demo-course-4")
 
     monkeypatch.setattr(impulse_levels, "_evidence", approved)
     ready = await impulse_levels.impulse_level(
         "ai-security", cast(AuthenticatedSession, auth), cast(Request, request)
     )
     assert ready.advance_ready
+    assert ready.credited_practices == 1
     assert ready.level == 0  # reading readiness never grants an award
 
 
@@ -101,9 +103,9 @@ async def test_l1_requires_new_curriculum_and_never_replays_older_courses(
 
     async def advanced_evidence(
         _request: object, _auth: object, _track: str, level: int = 0
-    ) -> tuple[int, int, int, tuple[str, ...]]:
+    ) -> tuple[int, int, int, int, tuple[str, ...]]:
         assert level == 1
-        return 0, 2, 0, ("demo-course-13-ai-security", "demo-course-14-ai-security")
+        return 0, 2, 0, 0, ("demo-course-13-ai-security", "demo-course-14-ai-security")
 
     monkeypatch.setattr(impulse_levels, "_evidence", advanced_evidence)
     monkeypatch.setattr(impulse_levels, "_saved", stored)
@@ -127,6 +129,86 @@ async def test_l1_requires_new_curriculum_and_never_replays_older_courses(
         await impulse_levels.impulse_level(
             "ai-data", cast(AuthenticatedSession, auth), cast(Request, request)
         )
+
+
+@pytest.mark.asyncio
+async def test_pending_submitted_practice_unlocks_current_level_but_never_claims_approval(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    person = uuid4()
+    actor = ActorContext(
+        person_id=person,
+        display_name="Learner",
+        active_role=Role.PARTICIPANT,
+        assigned_roles=(Role.PARTICIPANT,),
+        scopes=frozenset(),
+        program_key="test",
+        consent_scopes=frozenset(),
+    )
+
+    async def attempts(_person: object) -> tuple[TrackAttempt, ...]:
+        return (TrackAttempt("python", 1, TrackStatus.ACTIVE),)
+
+    async def courses() -> tuple[SimpleNamespace, ...]:
+        return (
+            SimpleNamespace(key="demo-course-1", track_keys=("python",)),
+            SimpleNamespace(key="demo-course-2", track_keys=("python",)),
+        )
+
+    status = {"practice": "pending"}
+
+    async def summary(*_args: object) -> SimpleNamespace:
+        return SimpleNamespace(
+            courses=[
+                SimpleNamespace(
+                    course_key="demo-course-1",
+                    finished=True,
+                    practical_certificate_id=None,
+                    practice_status=status["practice"],
+                ),
+                SimpleNamespace(
+                    course_key="demo-course-2",
+                    finished=True,
+                    practical_certificate_id=None,
+                    practice_status=None,
+                ),
+                # Another role cannot supply this role's practice.
+                SimpleNamespace(
+                    course_key="demo-course-13-ai-data",
+                    finished=True,
+                    practical_certificate_id=uuid4(),
+                    practice_status="approved",
+                ),
+            ]
+        )
+
+    async def saved(
+        _request: object, _person: object, _track: str
+    ) -> tuple[int, int, list[dict[str, object]]]:
+        return 0, 1, []
+
+    monkeypatch.setattr(impulse_levels, "impulse_study_summary", summary)
+    monkeypatch.setattr(impulse_levels, "_saved", saved)
+    store = SimpleNamespace(attempts=attempts, courses=courses)
+    request = cast(
+        Request,
+        SimpleNamespace(
+            app=SimpleNamespace(
+                state=SimpleNamespace(development_service=SimpleNamespace(store=store))
+            )
+        ),
+    )
+    auth = cast(AuthenticatedSession, SimpleNamespace(actor=actor))
+    before = await impulse_levels.impulse_level("python", auth, request)
+    assert before.completed_courses == before.required_courses == 2
+    assert before.approved_practices == 0
+    assert before.credited_practices == 1
+    assert before.advance_ready
+
+    status["practice"] = "needs_revision"
+    after = await impulse_levels.impulse_level("python", auth, request)
+    assert after.approved_practices == after.credited_practices == 0
+    assert not after.advance_ready
 
 
 @pytest.mark.asyncio
@@ -167,6 +249,10 @@ async def test_each_cycle_requires_disjoint_role_specific_evidence(
     }
 
     async def summary(*_args: object) -> SimpleNamespace:
+        for record in saved.values():
+            record.practice_status = "approved" if record.practical_certificate_id else None
+        saved["demo-course-14-ai-security"].practice_status = "pending"
+        saved["demo-course-15-ai-security"].practice_status = "needs_revision"
         return SimpleNamespace(
             courses=[
                 SimpleNamespace(course_key=key, **vars(record)) for key, record in saved.items()
@@ -188,10 +274,11 @@ async def test_each_cycle_requires_disjoint_role_specific_evidence(
         (2, (1, 2, 0)),
         (3, (0, 0, 0)),
     ]:
-        finished, total, approved, keys = await impulse_levels._evidence(
+        finished, total, approved, credited, keys = await impulse_levels._evidence(
             cast(Request, request), cast(AuthenticatedSession, auth), "ai-security", level
         )
         assert (finished, total, approved) == expected
+        assert credited == (2 if level == 1 else approved)
         assert all("ai-data" not in key for key in keys)
         if level > 0:
             assert all(key not in {"demo-course-1", "demo-course-2"} for key in keys)
@@ -225,10 +312,10 @@ async def test_l1_l2_l3_projection_requires_new_certs_and_stops_at_l3(
 
     async def evidence(
         _request: object, _auth: object, _track: str, level: int = 0
-    ) -> tuple[int, int, int, tuple[str, ...]]:
+    ) -> tuple[int, int, int, int, tuple[str, ...]]:
         assert level in (1, 2)
         keys = tuple(f"demo-course-{n}-ai-security" for n in ((13, 14) if level == 1 else (15, 16)))
-        return 2, 2, 1, keys
+        return 2, 2, 1, 1, keys
 
     monkeypatch.setattr(impulse_levels, "_saved", stored)
     monkeypatch.setattr(impulse_levels, "_evidence", evidence)
@@ -248,7 +335,11 @@ async def test_l1_l2_l3_projection_requires_new_certs_and_stops_at_l3(
         result = await impulse_levels.impulse_level("ai-security", auth, request)
         assert result.level == level and result.cycle_number == level + 1
         assert result.required_courses == 2 and result.completed_courses == 2
-        assert result.approved_practices == 1 and result.advance_ready
+        assert (
+            result.approved_practices == 1
+            and result.credited_practices == 1
+            and result.advance_ready
+        )
         assert len(result.required_course_keys) == 2
     state["level"] = 3
     result = await impulse_levels.impulse_level("ai-security", auth, request)

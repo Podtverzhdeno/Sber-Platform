@@ -57,6 +57,7 @@ class ImpulseCourseSummary(BaseModel):
     updated_at: datetime
     practice_status: str | None
     practical_certificate_id: UUID | None
+    practice_submitted_at: datetime | None = None
 
 
 class ImpulseStudySummary(BaseModel):
@@ -64,6 +65,7 @@ class ImpulseStudySummary(BaseModel):
     finished_courses: int = Field(ge=0)
     completed_lessons: int = Field(ge=0)
     approved_practices: int = Field(ge=0)
+    credited_practices: int = Field(ge=0)
     courses: list[ImpulseCourseSummary]
 
 
@@ -194,7 +196,8 @@ async def impulse_study_summary(
                     text(
                         "SELECT p.course_key, p.completed_units, p.total_units, "
                         "p.finished_at, p.certificate_id, p.updated_at, "
-                        "s.status AS practice_status, s.practical_certificate_id "
+                        "s.status AS practice_status, s.practical_certificate_id, "
+                        "s.submitted_at AS practice_submitted_at "
                         "FROM impulse_course_progress AS p "
                         "LEFT JOIN impulse_practical_submissions AS s "
                         "ON s.person_id = p.person_id AND s.course_key = p.course_key "
@@ -220,6 +223,7 @@ async def impulse_study_summary(
             updated_at=row["updated_at"],
             practice_status=row["practice_status"],
             practical_certificate_id=row["practical_certificate_id"],
+            practice_submitted_at=row["practice_submitted_at"],
         )
         for row in rows
     ]
@@ -228,6 +232,12 @@ async def impulse_study_summary(
         finished_courses=sum(course.finished for course in courses),
         completed_lessons=sum(course.completed_units for course in courses),
         approved_practices=sum(course.practical_certificate_id is not None for course in courses),
+        # Submitted work is immediately accepted as learning practice; a separate
+        # reviewer decision still controls the independently verified certificate.
+        credited_practices=sum(
+            course.finished and course.practice_status in ("pending", "approved")
+            for course in courses
+        ),
         courses=courses,
     )
 

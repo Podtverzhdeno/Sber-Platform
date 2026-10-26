@@ -42,6 +42,7 @@ class ImpulseLevelView(BaseModel):
     completed_courses: int = Field(ge=0)
     required_courses: int = Field(ge=0)
     approved_practices: int = Field(ge=0)
+    credited_practices: int = Field(ge=0)
     required_practices: int = Field(ge=0)
     advance_ready: bool
     history: list[dict[str, object]] = Field(default_factory=_empty_history)
@@ -66,7 +67,7 @@ async def _actor_track(
 
 async def _evidence(
     request: Request, authenticated: AuthenticatedSession, track_key: str, level: int = 0
-) -> tuple[int, int, int, tuple[str, ...]]:
+) -> tuple[int, int, int, int, tuple[str, ...]]:
     courses = await request.app.state.development_service.store.courses()
     # Every cycle uses disjoint DB course keys. This prevents replay of an old
     # certificate (including one awarded for the same role at L0).
@@ -100,7 +101,16 @@ async def _evidence(
         for key in keys
         if key in verified_by_key
     )
-    return finished, len(keys), approved, keys
+    # An actual, persisted submission satisfies the Impulse learning-cycle
+    # practice requirement immediately. A rejected submission is not credited.
+    # Independently reviewed certificates remain counted in "approved" only.
+    credited = sum(
+        verified_by_key[key].finished
+        and getattr(verified_by_key[key], "practice_status", None) in ("pending", "approved")
+        for key in keys
+        if key in verified_by_key
+    )
+    return finished, len(keys), approved, credited, keys
 
 
 async def _saved(
@@ -140,11 +150,14 @@ async def _project(
             completed_courses=0,
             required_courses=0,
             approved_practices=0,
+            credited_practices=0,
             required_practices=0,  # L3 is terminal: no phantom L4 practice.
             advance_ready=False,
             history=history,
         )
-    finished, required, approved, keys = await _evidence(request, authenticated, track_key, level)
+    finished, required, approved, credited, keys = await _evidence(
+        request, authenticated, track_key, level
+    )
     return ImpulseLevelView(
         track_key=track_key,
         level=level,
@@ -153,8 +166,9 @@ async def _project(
         completed_courses=finished,
         required_courses=required,
         approved_practices=approved,
+        credited_practices=credited,
         required_practices=PRACTICE_MINIMUM,
-        advance_ready=required > 0 and finished == required and approved >= PRACTICE_MINIMUM,
+        advance_ready=required > 0 and finished == required and credited >= PRACTICE_MINIMUM,
         history=history,
         required_course_keys=list(keys),
     )
@@ -189,7 +203,7 @@ async def advance_impulse_level(
     if not current.advance_ready:
         raise ApiError(
             code="IMPULSE_LEVEL_NOT_READY",
-            message="Завершите курсы и получите проверенное практическое подтверждение.",
+            message="Завершите обязательные курсы и отправьте практическую работу.",
             status_code=409,
         )
     person = authenticated.actor.person_id
@@ -229,6 +243,7 @@ async def advance_impulse_level(
                     "'policy_version',CAST(:version AS integer),"
                     "'completed_courses',CAST(:courses AS integer),"
                     "'approved_practices',CAST(:practices AS integer),"
+                    "'credited_practices',CAST(:credited AS integer),"
                     "'course_keys',CAST(:course_keys AS jsonb),'awarded_at',now())) "
                     "WHERE person_id=:person AND track_key=:track AND level=:old"
                 ),
@@ -241,6 +256,7 @@ async def advance_impulse_level(
                     "version": POLICY_VERSION,
                     "courses": current.completed_courses,
                     "practices": current.approved_practices,
+                    "credited": current.credited_practices,
                     "course_keys": json.dumps(current.required_course_keys),
                 },
             )

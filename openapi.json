@@ -6959,6 +6959,18 @@
             ],
             "title": "Practice Status"
           },
+          "practice_submitted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Submitted At"
+          },
           "title": {
             "title": "Title",
             "type": "string"
@@ -7003,6 +7015,11 @@
           "completed_courses": {
             "minimum": 0.0,
             "title": "Completed Courses",
+            "type": "integer"
+          },
+          "credited_practices": {
+            "minimum": 0.0,
+            "title": "Credited Practices",
             "type": "integer"
           },
           "curriculum_state": {
@@ -7071,6 +7088,7 @@
           "completed_courses",
           "required_courses",
           "approved_practices",
+          "credited_practices",
           "required_practices",
           "advance_ready"
         ],
@@ -7096,6 +7114,11 @@
             "title": "Courses",
             "type": "array"
           },
+          "credited_practices": {
+            "minimum": 0.0,
+            "title": "Credited Practices",
+            "type": "integer"
+          },
           "finished_courses": {
             "minimum": 0.0,
             "title": "Finished Courses",
@@ -7112,6 +7135,7 @@
           "finished_courses",
           "completed_lessons",
           "approved_practices",
+          "credited_practices",
           "courses"
         ],
         "title": "ImpulseStudySummary",

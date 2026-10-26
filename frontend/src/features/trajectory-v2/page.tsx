@@ -353,14 +353,14 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                 : roleLevel?.level === 3 ? "L3 достигнут" : roleLevel ? "Новый цикл" : "Данных нет"}</strong>
               <progress max={100} value={roleLevel?.level === 3 ? 100 : roleLevel ? levelCoursesProgress(roleLevel) : 0} aria-label="Освоение курсов текущего цикла"/>
               <small>{roleLevel?.curriculum_state==="published"
-                ? `Практика одобрена: ${String(roleLevel.approved_practices)} из ${String(roleLevel.required_practices)}`
+                ? `Практика учтена: ${String(roleLevel.credited_practices)} из ${String(roleLevel.required_practices)}`
                 : roleLevel?.level === 3 ? "Три учебных цикла сохранены" : roleLevel ? "Программа цикла недоступна" : "Проверяем сохранённый уровень"}</small>
             </div>
           </div>
           {learningLevel.isError && selected?.attempt_number !== null && <p role="alert" className="trajectory-v2-level-error">Не удалось загрузить уровень Impulse. <button type="button" onClick={() => { void learningLevel.refetch(); }}>Повторить</button></p>}
           <div className="trajectory-v2-grade-callout"><span aria-hidden="true" className="trajectory-v2-grade-callout-icon">⌁</span>
             <span>{roleLevel?.advance_ready
-              ? "Учебные курсы и практика подтверждены. Перейди в Bootcamp и нажми «Следующий этап» для сохранения нового уровня."
+              ? "Обязательные курсы завершены, практическая работа отправлена и учтена. Нажми «Следующий этап» в Bootcamp для сохранения нового уровня."
               : roleLevel?.level === 3 ? "Максимальный учебный уровень L3 достигнут. Проверенные результаты сохранены."
                 : nextCycleUnpublished
                 ? "Уровень сохранён. Новая программа временно недоступна."
@@ -512,11 +512,11 @@ export function TrajectoryV2Body(props: { overview: DevelopmentOverviewView }) {
                     <span>Текущий цикл: {roleLevel?.cycle_number ?? "—"}</span>
                   </div>
                 </div>
-                <p>Чтобы повысить уровень, завершите обязательные курсы выбранной роли и получите независимое подтверждение практики.</p>
+                <p>Для повышения уровня Impulse пройдите обязательные курсы и отправьте практику. Она учитывается сразу; независимый сертификат выдаётся отдельно после проверки.</p>
                 {roleLevel && <div className="trajectory-v2-grade-expectations">
                   <h4>Прогресс текущего цикла</h4>
                   <p>Курсы: {roleLevel.completed_courses} из {roleLevel.required_courses}</p>
-                  <p>Принятая практика: {roleLevel.approved_practices} из {roleLevel.required_practices}</p>
+                  <p>Зачтённая практика: {roleLevel.credited_practices} из {roleLevel.required_practices}</p>
                   {roleLevel.level === 3 && <p>L3 — максимальный уровень опубликованной программы.</p>}
                 </div>}
                 <div className="trajectory-v2-grade-next-note">Переход подтверждает сервер. Просмотр этой страницы не повышает уровень.</div>
@@ -736,7 +736,7 @@ function CycleLearningPath(props: { level: ImpulseRoleLevel; learningCourses: Le
     <header><div><small>Цикл {level.cycle_number}</small><h3>{finished ? "L3 · Программа завершена" : `Развитие L${String(level.level)} → L${String(level.level + 1)}`}</h3></div>
       <span>{finished ? "Все уровни пройдены" : `${String(level.completed_courses)} из ${String(level.required_courses)} курсов`}</span></header>
     {finished ? <p>Три учебных цикла завершены. Полученные сертификаты и проверенные практические результаты сохранены в истории Impulse.</p> : <>
-      <p>Новый виток: изучи отдельные курсы, отправь практическую работу на независимую проверку и подтверди повышение уровня в Bootcamp.</p>
+      <p>Новый виток: заверши курсы и отправь практическую работу. Она сразу засчитывается для уровня Impulse; затем нажми «Следующий этап» в Bootcamp.</p>
       <div className="trajectory-v2-cycle-courses">{keys.map((key,index)=>{
         const course=props.learningCourses.find(item=>item.course_key===key);
         const number=Number(/^demo-course-(\d+)/.exec(key)?.[1] ?? "0");
@@ -748,9 +748,9 @@ function CycleLearningPath(props: { level: ImpulseRoleLevel; learningCourses: Le
         </Link>;
       })}</div>
       <div className="trajectory-v2-cycle-practice">
-        <strong>Практика и независимая проверка</strong>
-        <span>{level.approved_practices} из {level.required_practices} принятых результатов</span>
-        <p>Отправь артефакт в практическом разделе курса. Подтверждение выдаётся проверяющим, а не автоматически после уроков.</p>
+        <strong>Практика текущего уровня</strong>
+        <span>{level.credited_practices} из {level.required_practices} зачтённых работ</span>
+        <p>После отправки работа сразу учитывается для учебного уровня. Отдельный сертификат подтверждения компетенций выдаётся после независимой проверки.</p>
       </div>
       {level.advance_ready && <p role="status" className="trajectory-v2-cycle-ready">Все условия выполнены. Перейди в Bootcamp и нажми «Следующий этап».</p>}
     </>}
