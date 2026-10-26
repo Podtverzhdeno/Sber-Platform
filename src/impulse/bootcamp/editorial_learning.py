@@ -8,6 +8,7 @@ remain exclusively on the verified provider/reviewer track.
 from __future__ import annotations
 
 from datetime import UTC, datetime
+import re
 from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
@@ -24,7 +25,15 @@ from impulse.domain.identity import Role
 
 router = APIRouter(tags=["bootcamp"])
 UNIT_COUNT = 8
-ELIGIBLE_KEYS = frozenset(f"demo-course-{number}" for number in range(1, 13))
+BASE_KEYS = frozenset(f"demo-course-{number}" for number in range(1, 13))
+from impulse.bootstrap.ai_role_catalog import AI_ROLE_PROFILES
+ADVANCED_KEY_PATTERN = re.compile(r"^demo-course-(13|14|15|16)-([a-z][a-z0-9-]*)$")
+ADVANCED_KEYS = frozenset(
+    f"demo-course-{number}-{track}"
+    for track in AI_ROLE_PROFILES
+    for number in (13, 14, 15, 16)
+)
+ELIGIBLE_KEYS = BASE_KEYS | ADVANCED_KEYS
 
 
 class ImpulseStudyView(BaseModel):
@@ -91,6 +100,29 @@ async def assert_course_access(
     card = next((item for item in catalog if item.key == course_key), None)
     if card is None:
         raise ApiError(code="NOT_FOUND", message="Курс не найден.", status_code=404)
+    match = ADVANCED_KEY_PATTERN.fullmatch(course_key)
+    if match:
+        required_level = 1 if int(match.group(1)) < 15 else 2
+        track = match.group(2)
+        if not any(
+            attempt.track_key == track
+            for attempt in await development.store.attempts(authenticated.actor.person_id)
+        ):
+            raise ApiError(code="ROLE_NOT_SELECTED", message="Направление не выбрано.", status_code=409)
+        # Never permit a direct URL to complete a course from a future level.
+        async with request.app.state.database.sessions() as session:
+            saved_level = (
+                await session.execute(
+                    text("SELECT level FROM impulse_role_levels WHERE person_id=:person AND track_key=:track"),
+                    {"person": authenticated.actor.person_id, "track": track},
+                )
+            ).scalar_one_or_none()
+        if (int(saved_level) if saved_level is not None else 0) < required_level:
+            raise ApiError(
+                code="IMPULSE_LEVEL_LOCKED",
+                message="Сначала завершите предыдущий цикл развития.",
+                status_code=409,
+            )
     if card.access_state != "available":
         raise ApiError(
             code="COURSE_UNAVAILABLE",
@@ -204,6 +236,8 @@ async def get_impulse_study(
     request: Request,
 ) -> ImpulseStudyView:
     _check_actor(authenticated, course_key)
+    if course_key in ADVANCED_KEYS:
+        await assert_course_access(request, authenticated, course_key)
     return await _view(request, authenticated.actor.person_id, course_key)
 
 
