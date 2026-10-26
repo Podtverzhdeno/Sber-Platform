@@ -5,12 +5,15 @@ import { catalogItem } from "./fixture";
 import { parseSkillPercent } from "./skill-impact-model";
 import { SkillImpactStatistics } from "./skill-impact-statistics";
 
+const baseImpact = catalogItem.skill_impact[0];
+if (!baseImpact) throw new Error("Fixture requires at least one skill");
+
 describe("Skill impact evidence statistics", () => {
   it("shows actual accepted counts instead of empty progress forecast or fabricated level", () => {
     const impacts = [
-      { ...catalogItem.skill_impact[0], accepted_evidence_count: 2, last_evidence_submitted_at: "2026-10-20T12:00:00Z" },
+      { ...baseImpact, accepted_evidence_count: 2, last_evidence_submitted_at: "2026-10-20T12:00:00Z" },
       {
-        ...catalogItem.skill_impact[0],
+        ...baseImpact,
         skill_id: "recommender-systems",
         title: "recommender-systems",
         accepted_evidence_count: 0,
@@ -37,7 +40,7 @@ describe("Skill impact evidence statistics", () => {
   });
 
   it("does not treat a non-calculated skill impact as a numeric prediction", () => {
-    render(<SkillImpactStatistics impacts={[{...catalogItem.skill_impact[0],accepted_evidence_count:0}]} onGrowthExpand={vi.fn()}/>);
+    render(<SkillImpactStatistics impacts={[{...baseImpact,accepted_evidence_count:0}]} onGrowthExpand={vi.fn()}/>);
     expect(screen.getByText("0 из 1")).toBeInTheDocument();
     expect(screen.getByText("0%")).toBeInTheDocument();
     expect(screen.getByText("Работ пока нет")).toBeInTheDocument();
