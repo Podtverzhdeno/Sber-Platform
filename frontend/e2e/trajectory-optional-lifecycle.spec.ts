@@ -73,6 +73,7 @@ test("grey role: preview → optional study → role-scoped course → grey → 
   await expect(page.locator(".trajectory-v2-next-panel")).not.toContainText("Только основной путь");
 
   await page.locator(".trajectory-v2-stage-path button").first().click();
+  await page.locator(".trajectory-v2-stage-detail .trajectory-v2-task-action").click();
   const drawer = page.locator(".trajectory-v2-drawer");
   await expect(drawer.getByRole("button", { name: "Открыть курс" })).toBeVisible();
   await drawer.getByRole("button", { name: "Открыть курс" }).click();
