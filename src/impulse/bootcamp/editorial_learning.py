@@ -108,12 +108,17 @@ async def assert_course_access(
             attempt.track_key == track
             for attempt in await development.store.attempts(authenticated.actor.person_id)
         ):
-            raise ApiError(code="ROLE_NOT_SELECTED", message="Направление не выбрано.", status_code=409)
+            raise ApiError(
+                code="ROLE_NOT_SELECTED", message="Направление не выбрано.", status_code=409
+            )
         # Never permit a direct URL to complete a course from a future level.
         async with request.app.state.database.sessions() as session:
             saved_level = (
                 await session.execute(
-                    text("SELECT level FROM impulse_role_levels WHERE person_id=:person AND track_key=:track"),
+                    text(
+                        "SELECT level FROM impulse_role_levels "
+                        "WHERE person_id=:person AND track_key=:track"
+                    ),
                     {"person": authenticated.actor.person_id, "track": track},
                 )
             ).scalar_one_or_none()
