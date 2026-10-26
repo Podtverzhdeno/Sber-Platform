@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import cast
 from types import SimpleNamespace
+from typing import cast
 from uuid import UUID, uuid4
 
 from fastapi import FastAPI
