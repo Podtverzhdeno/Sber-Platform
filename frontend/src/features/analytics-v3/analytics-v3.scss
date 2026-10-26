@@ -177,3 +177,9 @@
  .analytics-v3 .av3-headline {height:123px;min-height:123px;max-height:123px;overflow:hidden;align-content:start}
  .analytics-v3[data-tab="activity"] .av3-headline {height:123px;min-height:123px;max-height:123px}
 }
+
+/* Certification: read-only evidence instead of misleading unsaved checkboxes. */
+.av3-cert-next .av3-todo > div{display:flex;align-items:center;gap:8px;font-size:11px;color:#a8c4d6;line-height:1.55}
+.av3-cert-next .av3-todo > div > span{font-weight:800;color:#28e8d5;font-size:14px}
+.av3-requirements button em{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.av3-show-all{margin:12px 0;}
