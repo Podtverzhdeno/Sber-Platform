@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import cast
+
 import pytest
 from fastapi.testclient import TestClient
 from httpx import Response
@@ -380,10 +382,13 @@ def test_optional_tracks_can_be_added_and_archived_without_changing_primary() ->
         csrf = _login(client)
 
         def update(track: str, enabled: bool) -> Response:
-            return client.post(
-                "/api/v1/me/tracks/optional",
-                json={"track_key": track, "enabled": enabled},
-                headers={"X-CSRF-Token": csrf},
+            return cast(
+                Response,
+                client.post(
+                    "/api/v1/me/tracks/optional",
+                    json={"track_key": track, "enabled": enabled},
+                    headers={"X-CSRF-Token": csrf},
+                ),
             )
 
         for track in ("data", "product", "ml"):
