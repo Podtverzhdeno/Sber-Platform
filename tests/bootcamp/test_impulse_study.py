@@ -262,3 +262,32 @@ def test_study_cannot_advance_locked_course(monkeypatch: pytest.MonkeyPatch) -> 
             )
         )
     assert exception.value.status_code == 409
+
+
+@pytest.mark.spec("career-roadmap/optional-course-access-archive")
+def test_archived_optional_track_cannot_advance_by_direct_course_url(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from impulse.domain.development import TrackStatus
+
+    learner = uuid4()
+
+    async def catalog(*_args: object) -> list[object]:
+        return [SimpleNamespace(key="demo-course-13-product", access_state="available")]
+
+    async def attempts(_person: UUID) -> tuple[object, ...]:
+        return (SimpleNamespace(track_key="product", status=TrackStatus.ARCHIVED),)
+
+    monkeypatch.setattr(editorial_learning.BootcampCatalogService, "catalog", catalog)
+    app = FastAPI()
+    app.state.development_service = SimpleNamespace(store=SimpleNamespace(attempts=attempts))
+    app.state.competency_service = None
+    request = Request({"type": "http", "app": app})
+    with pytest.raises(ApiError) as error:
+        asyncio.run(
+            editorial_learning.assert_course_access(
+                request, session(learner, Role.PARTICIPANT), "demo-course-13-product"
+            )
+        )
+    assert error.value.code == "ROLE_NOT_SELECTED"
+    assert error.value.status_code == 409
