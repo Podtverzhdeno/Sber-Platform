@@ -158,7 +158,7 @@ function Radar({ skills, facts, openSkill }: { skills: Skill[]; facts: Participa
       {skills.map((skill, i) => {
         const aim = skill.target_level, current = skill.current_level;
         const sources = registeredForSkill(facts, skill.key);
-        const t = xy(i, aim ?? 0), c = xy(i, current ?? 0);
+        const t = xy(i, aim ?? 0), c = xy(i, current ?? 0), hit = xy(i, aim ?? 4);
         const label = xy(i, 4.8);
         const activityMark = xy(i, 5.32);
         const description = skill.title + ". Подтверждённый Agentic: "
@@ -177,7 +177,7 @@ function Radar({ skills, facts, openSkill }: { skills: Skill[]; facts: Participa
             <circle cx={activityMark.x} cy={activityMark.y} r="10"/>
             <text x={activityMark.x} y={activityMark.y + 3.5} textAnchor="middle">{Math.min(sources.length,99)}</text>
           </g>}
-          <circle className="ref-radar-skill-hit" cx={t.x} cy={t.y} r="15" />
+          <circle className="ref-radar-skill-hit" cx={hit.x} cy={hit.y} r="15" />
         </g>;
       })}
       <g className="ref-radar-center" aria-label={String(knownCount) + " из 6 навыков с квалифицированным уровнем"}>
