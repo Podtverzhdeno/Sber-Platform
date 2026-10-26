@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
-  Activity, ArrowRight, CalendarDays, Check, CheckCircle2, Clock3,
+  Activity, ArrowRight, CalendarDays, CheckCircle2, Clock3,
   Flame, FolderOpen, Info, RefreshCw, Target, Users, X, Zap,
 } from "lucide-react";
 
