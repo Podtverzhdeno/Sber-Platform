@@ -38,6 +38,7 @@ def _study(*, finished: bool) -> ImpulseStudySummary:
         finished_courses=int(finished),
         completed_lessons=8 if finished else 3,
         approved_practices=0,
+        credited_practices=int(finished),
         courses=[
             ImpulseCourseSummary(
                 course_key="demo-course-1",
