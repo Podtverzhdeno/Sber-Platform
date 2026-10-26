@@ -148,14 +148,14 @@ test("approved cards composition: four KPI cards, detail at right, five planned 
   if (process.env.CAPTURE_APPROVED_TASKS === "1") await page.screenshot({ path: "test-results/approved-geometry-cards.png", fullPage: true, animations: "disabled" });
   await expect(page.getByRole("heading", { name: "Развитие твоих навыков" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Что ты получишь" })).toBeVisible();
-  await expect(page.getByText(/Это план, а не прогресс/)).toBeVisible();
+  await expect(page.getByText(/Это план, а не прогресс/)).toBeHidden();
   await expect(page.getByRole("heading", { name: "Итог" })).toHaveCount(0);
 
   const geometry = await page.evaluate(() => {
     const rect = (selector: string) => document.querySelector(selector)?.getBoundingClientRect();
     const cards = rect(".catalog-v2-discovery");
     const details = rect(".catalog-v2-inspector");
-    const stage = rect(".catalog-v2-stage-track");
+    const stage = rect(".catalog-v2-workflow-section");
     const firstKpi = rect(".catalog-v2-kpi");
     const lastKpi = document.querySelectorAll(".catalog-v2-kpi").item(3).getBoundingClientRect();
     return {
