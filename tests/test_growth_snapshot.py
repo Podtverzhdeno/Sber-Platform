@@ -209,7 +209,7 @@ def test_assignment_to_acceptance_is_not_a_trusted_work_session() -> None:
             ),
         ),
     )
-    assert GrowthService._trusted_intervals((item,)) == ()
+    assert GrowthService.trusted_intervals((item,)) == ()
 
 
 @pytest.mark.spec("participant-experience/versioned-growth-snapshot")

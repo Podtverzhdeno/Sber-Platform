@@ -18,9 +18,12 @@ from pydantic import BaseModel, Field
 
 from impulse.api.errors import ApiError
 from impulse.api.v1.identity import current_session
+from impulse.application.development import CourseRecord, DevelopmentService, EnrollmentRecord
 from impulse.application.identity import AuthenticatedSession
+from impulse.application.recognition import RecognitionService
+from impulse.application.work import WorkService
 from impulse.bootcamp.editorial_learning import ImpulseStudySummary, impulse_study_summary
-from impulse.domain.development import CompletionStatus
+from impulse.domain.development import CompletionStatus, RoadmapProjection
 from impulse.domain.identity import Role
 from impulse.domain.work import ContributionStatus
 
@@ -88,11 +91,11 @@ class JourneySnapshotView(BaseModel):
     verified_provider_course_count: int
 
 
-def _merge_courses(
+def merge_courses(
     *,
-    catalog: tuple[object, ...],
-    enrollments: tuple[object, ...],
-    roadmaps: tuple[object, ...],
+    catalog: tuple[CourseRecord, ...],
+    enrollments: tuple[EnrollmentRecord, ...],
+    roadmaps: tuple[RoadmapProjection, ...],
     study: ImpulseStudySummary | None,
 ) -> list[JourneyCourseView]:
     """Canonical course_key joins; unknown self-study stays unknown, not 0."""
@@ -153,9 +156,9 @@ async def my_journey_snapshot(
             status_code=404,
         )
 
-    development = request.app.state.development_service
-    work = request.app.state.work_service
-    recognition = request.app.state.recognition_service
+    development: DevelopmentService = request.app.state.development_service
+    work: WorkService = request.app.state.work_service
+    recognition: RecognitionService = request.app.state.recognition_service
 
     catalog, enrollments, roadmaps, work_items, cases, seasons = await asyncio.gather(
         development.store.courses(),
@@ -219,7 +222,7 @@ async def my_journey_snapshot(
         person_id=actor.person_id,
         observed_at=datetime.now(UTC),
         self_study_available=study is not None,
-        courses=_merge_courses(
+        courses=merge_courses(
             catalog=catalog, enrollments=enrollments, roadmaps=roadmaps, study=study
         ),
         projects=projects,
