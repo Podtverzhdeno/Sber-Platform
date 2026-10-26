@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from typing import cast
 from uuid import uuid4
 
 import pytest
@@ -121,7 +122,10 @@ async def test_two_checkpoint_reviews_close_project_only_after_final_review() ->
             expected_status = "in_progress" if index == 1 else "accepted"
             assert status == expected_status
             assert isinstance(payload, dict)
-            assert [stage["status"] for stage in payload["checkpoints"]] == (
+            raw_stages: object = payload["checkpoints"]
+            assert isinstance(raw_stages, list)
+            stage_rows = cast(list[dict[str, str]], raw_stages)
+            assert [stage["status"] for stage in stage_rows] == (
                 ["accepted", "planned"] if index == 1 else ["accepted", "accepted"]
             )
     finally:

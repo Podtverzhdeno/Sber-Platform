@@ -63,7 +63,8 @@ def _get_list(api: TestClient, path: str) -> list[dict[str, Any]]:
     assert response.status_code == 200, f"{path}: {response.status_code} {response.text}"
     payload: object = response.json()
     assert isinstance(payload, list), f"{path} must return a JSON array"
-    assert all(isinstance(item, dict) for item in payload), f"{path} array entries must be objects"
+    entries = cast(list[object], payload)
+    assert all(isinstance(item, dict) for item in entries), f"{path} array entries must be objects"
     return cast(list[dict[str, Any]], payload)
 
 

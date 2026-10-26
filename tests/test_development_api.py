@@ -4,7 +4,15 @@ from __future__ import annotations
 
 import pytest
 from fastapi.testclient import TestClient
-from httpx import Response
+from typing import Any, Protocol
+
+class ApiResponse(Protocol):
+    @property
+    def status_code(self) -> int: ...
+    @property
+    def text(self) -> str: ...
+    def json(self) -> Any: ...
+
 from pydantic import SecretStr
 
 from impulse.application.development import (
@@ -379,7 +387,7 @@ def test_optional_tracks_can_be_added_and_archived_without_changing_primary() ->
     with client:
         csrf = _login(client)
 
-        def update(track: str, enabled: bool) -> Response:
+        def update(track: str, enabled: bool) -> ApiResponse:
             return client.post(
                 "/api/v1/me/tracks/optional",
                 json={"track_key": track, "enabled": enabled},
