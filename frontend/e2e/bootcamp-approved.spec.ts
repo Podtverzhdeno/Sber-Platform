@@ -377,36 +377,49 @@ test("Bootcamp primary actions share a baseline with or without recommendation l
   await page.getByRole("link", { name: "Bootcamp" }).click();
   // Non-recommended cards are deliberately hidden in the default personalized tab.
   // Select the full catalog to verify both CTA variants in the same row.
-  await page.getByRole("group", { name: "Категории курсов" }).getByRole("button", { name: /Все курсы/ }).click();
-  // The direction filter is independent of the catalog category. Without
-  // selecting "all", the non-recommended fixture card belongs to another
-  // direction and is never rendered, making the mixed-row assertion invalid.
-  await page.locator(".bc-ref-controls .bc-ref-select select").first().selectOption("all");
+  const fullCatalog = page.getByRole("group", { name: "Категории курсов" }).getByRole("button", { name: /Все курсы/ });
+  await fullCatalog.click();
+  // The default direction is already 'all'. Issuing an immediate second
+  // updateFilter call with stale searchParams can overwrite category=all,
+  // collapsing the list back to the role-only 4 cards after the first paint.
+  await expect(fullCatalog).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/category=all/);
+  await expect(page.locator(".bc-ref-controls .bc-ref-select select").first()).toHaveValue("all");
   await expect(page.locator(".bc-ref-course-card")).toHaveCount(bootcampCatalogFixture.length);
   await expect(page.locator('[data-testid="course-demo-course-8"] .bc-ref-reason')).toHaveCount(0);
   await expect(page.locator('.bc-ref-course-card .bc-ref-reason').first()).toBeVisible();
   for (const width of [1448, 1024, 768]) {
     await page.setViewportSize({ width, height: 900 });
+    await expect(page.locator(".bc-ref-course-card")).toHaveCount(bootcampCatalogFixture.length);
+    await page.evaluate(async () => { await document.fonts.ready; });
     const cards = await page.locator(".bc-ref-course-card").evaluateAll(elements =>
       elements.map(element => {
         const card = element.getBoundingClientRect();
         const cta = element.querySelector(".bc-ref-card-bottom .bc-ref-primary")?.getBoundingClientRect();
         return {
-          row: Math.round(card.top),
+          key: element.getAttribute("data-testid"),
+          row: card.top,
           top: cta?.top ?? -1,
           hasReason: Boolean(element.querySelector(".bc-ref-reason")),
         };
       }),
     );
-    const rows = new Map<number, typeof cards>();
-    for (const card of cards) rows.set(card.row, [...(rows.get(card.row) ?? []), card]);
+    // Subpixel CSS layout can give siblings in the same physical row slightly
+    // different top coordinates. Never use Math.round(top) as row identity.
+    const rows: typeof cards[] = [];
+    for (const card of cards) {
+      let row = rows.find(items => Math.abs((items[0]?.row ?? -9999) - card.row) <= 3);
+      if (!row) { row = []; rows.push(row); }
+      row.push(card);
+    }
     let mixedRowChecked = false;
-    for (const row of rows.values()) {
+    for (const row of rows) {
       if (row.length < 2) continue;
       const tops = row.map(card => card.top);
+      // Keep the original strict 2px CTA baseline tolerance unchanged.
       expect(Math.max(...tops) - Math.min(...tops), `misaligned CTAs at ${String(width)}px`).toBeLessThanOrEqual(2);
       if (row.some(card => card.hasReason) && row.some(card => !card.hasReason)) mixedRowChecked = true;
     }
-    expect(mixedRowChecked, `fixture needs recommended and ordinary courses at ${String(width)}px`).toBe(true);
+    expect(mixedRowChecked, `fixture needs a physically mixed row at ${String(width)}px: ${JSON.stringify(cards)}`).toBe(true);
   }
 });
