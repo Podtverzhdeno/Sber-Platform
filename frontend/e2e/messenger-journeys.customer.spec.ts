@@ -69,7 +69,7 @@ const contextPayload = {
 
 function mockBoot(page: Page, navigation: string[]): void {
   void page.route("**/api/v1/**", (route) => route.fulfill({ status: 404, json: {} }));
-  void page.route("**/api/v1/config", (route) => route.fulfill({ json: {} }));
+  void page.route("**/api/v1/config", (route) => route.fulfill({ json: { demo_mode: true } }));
   void page.route("**/api/v1/auth/personas", (route) =>
     route.fulfill({
       json: [
@@ -125,6 +125,8 @@ test("customer journeys: контекст задачи, доменные гра�
   await page.locator('[data-persona="customer-roman"]').click();
   await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
   await page.getByRole("link", { name: "Сообщения" }).click();
+  // SberChat waits for explicit channel selection; do not invent active history.
+  await page.locator(".msg-dialog-list__row").filter({ hasText: "Ревью отзывов" }).click();
 
   const context = page.getByRole("complementary", { name: "Контекст диалога" });
   await expect(context.getByRole("heading", { level: 2 })).toHaveText("Ревью отзывов");
@@ -141,6 +143,7 @@ test("customer journeys: контекст задачи, доменные гра�
   await expect(page).toHaveURL(/workspace\/1\?task=/);
 
   await page.getByRole("link", { name: "Сообщения" }).click();
+  await page.locator(".msg-dialog-list__row").filter({ hasText: "Ревью отзывов" }).click();
   const chatPane = page.locator(".msg-chat");
   await expect(chatPane).toBeVisible();
 
