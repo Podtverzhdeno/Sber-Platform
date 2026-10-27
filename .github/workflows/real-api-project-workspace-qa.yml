@@ -1,0 +1,91 @@
+name: Real API assigned project workspace QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "frontend/e2e/task-catalog-v2-real-api.spec.ts"
+      - "frontend/src/features/my-projects/**"
+      - "frontend/src/features/task-catalog-v2/**"
+      - ".github/workflows/real-api-project-workspace-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/e2e/task-catalog-v2-real-api.spec.ts"
+      - ".github/workflows/real-api-project-workspace-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: real-api-project-workspace-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  postgres-browser:
+    name: real-postgres-project-workspace
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-ci-only
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      APP_ENV: test
+      TZ: Europe/Moscow
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          python-version: "3.13"
+          enable-cache: true
+      - run: uv sync --frozen
+      - run: uv run alembic upgrade head
+      - run: uv run impulse-demo-seed
+      - name: Start production API in test mode
+        run: |
+          nohup uv run uvicorn impulse.main:app --host 127.0.0.1 --port 8000 --app-dir . > /tmp/impulse-test-api.log 2>&1 &
+      - name: Verify backend readiness
+        run: |
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent --max-time 5 http://127.0.0.1:8000/health/ready; then exit 0; fi
+            sleep 2
+          done
+          tail -n 120 /tmp/impulse-test-api.log
+          exit 1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run typecheck
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - name: Run complete real API task catalog browser contract
+        working-directory: frontend
+        env:
+          CI: "true"
+          LANG: ru_RU.UTF-8
+        run: npx playwright test task-catalog-v2-real-api.spec.ts --project=chromium --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: real-api-project-workspace-evidence
+          path: |
+            frontend/test-results/
+            /tmp/impulse-test-api.log
+          if-no-files-found: ignore
+          retention-days: 7
