@@ -18,6 +18,9 @@
 .catalog-skill-stats__facts { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px; }
 .catalog-skill-stats__facts > div { display:grid;align-content:start;gap:5px;min-width:0;padding:8px;background:#09263b;border:1px solid #23465d;border-radius:8px; }
 .catalog-skill-stats__facts small { font-size:9px;line-height:1.35;color:#95b6c9; }
+/* Light-theme generic small-text rule must not darken captions on the dark facts tiles. */
+html[data-theme="light"] .catalog-v2 .catalog-skill-stats__facts small { color:#b5d5e7; }
+
 .catalog-skill-stats__facts b { font-size:12px;line-height:1.35;color:#e1f6fa;overflow-wrap:anywhere; }
 .catalog-skill-stats__list > li p { color:#92b7ca;line-height:1.5;font-size:10px; }
 .catalog-skill-stats__date { color:#7ea6c4;font-size:9px; }
