@@ -122,6 +122,7 @@ test("customer can send messages and each dialog keeps its own history", async (
   await openCustomer(page);
   await installMessages(page);
   await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Сообщения",exact:true}).click();
+  await page.locator(".msg-dialog-list__row").filter({hasText:"Рекомендательная система"}).click();
   await expect(page.locator(".messenger-page")).toBeVisible();
   const composer=page.getByRole("textbox", { name: "Текст сообщения" });
   await expect(composer).toBeInViewport();
@@ -167,6 +168,7 @@ test("customer participant dialogs keep separate histories", async ({ page }) =>
   await openCustomer(page);
   await installMessages(page);
   await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Сообщения", exact: true }).click();
+  await page.locator(".msg-dialog-list__row").filter({hasText:"Рекомендательная система"}).click();
   const dialogs=page.getByRole("list", { name: "Диалоги" });
   const history=page.getByRole("list", { name: "История чата" });
   await expect(history.getByText("Результат доступен на приёмке; посмотрите evidence.")).toBeVisible();
@@ -179,6 +181,7 @@ test("customer messages expose the linked work context", async ({ page }) => {
   await openCustomer(page);
   await installMessages(page);
   await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Сообщения", exact: true }).click();
+  await page.locator(".msg-dialog-list__row").filter({hasText:"Рекомендательная система"}).click();
   await expect(page.locator(".chat-context h2")).toContainText("Рекомендательная система");
   await expect(page.locator(".chat-context")).toContainText("impulse-demo");
   await expect(page.locator(".chat-context")).toContainText("версия 2");
