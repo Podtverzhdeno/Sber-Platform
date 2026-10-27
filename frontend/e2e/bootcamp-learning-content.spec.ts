@@ -3,23 +3,23 @@ import { installBootcampReferenceApi } from "./bootcamp-reference-fixtures";
 
 test.beforeEach(async ({ page }) => { await installBootcampReferenceApi(page); });
 
-test("all twelve Bootcamp AI courses provide eight integrated lessons and concealed self-check", async ({ page }) => {
+for (let index = 1; index <= 12; index++) {
+  test(`Bootcamp AI course ${String(index)} provides eight lessons and concealed self-check`, async ({ page }) => {
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
   const bootcampPath = new URL(page.url()).pathname;
 
-  for (let index = 1; index <= 12; index++) {
     const key = "demo-course-" + String(index);
     await page.goto(bootcampPath + "?course=" + key);
     const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
     const reader = dialog.getByTestId("impulse-immersive-reader");
-    await expect(reader).toBeVisible();
+    await expect(reader, `Reader for ${key} must open`).toBeVisible();
     await reader.getByRole("button", { name: /Перейти к программе/ }).click();
     const outline = reader.locator(".imp-study__program-list button");
     await expect(outline).toHaveCount(8);
-    if (index === 5) continue; // Temporarily unavailable external course: no unauthorized lesson entry.
+    if (index === 5) return; // Temporarily unavailable external course: no unauthorized lesson entry.
     await outline.first().click();
     const lesson = reader.getByTestId("unified-course-lesson");
     await expect(lesson.locator("[data-learning-block]")).toHaveCount(4);
@@ -32,8 +32,8 @@ test("all twelve Bootcamp AI courses provide eight integrated lessons and concea
     await expect(reader.getByRole("button", { name: "Скрыть ожидаемый результат" })).toBeVisible();
     await reader.getByRole("button", { name: "Следующий урок" }).click();
     await expect(reader.locator(".imp-study__lesson-heading .imp-study__eyebrow")).toContainText("Урок 2 из 8");
-  }
-});
+  });
+}
 
 test("mobile interactive reader has no horizontal overflow and reaches its lesson content", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
