@@ -142,7 +142,7 @@ test("participant journeys: диалог, отправка, вложение, з
   ).toHaveValue("");
 
   await page
-    .getByRole("button", { name: "Отключить уведомления" })
+    .locator(".msg-chat__header-action--mute")
     .click();
   await expect.poll(() => muteBodies.length, { timeout: 5_000 }).toBe(1);
   expect(muteBodies[0]).toMatchObject({ muted: true });
