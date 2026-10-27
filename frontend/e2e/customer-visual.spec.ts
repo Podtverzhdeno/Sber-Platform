@@ -120,26 +120,28 @@ test("customer returns a result for revision with a detailed reason", async ({ p
 
 test("customer five-step brief applies guidance and submits one task for moderation", async ({ page }) => {
   const taskId = "00000000-0000-0000-0000-000000000987";
-  let task: {id:string;project_key:string;task_key:string;title:string;status:"draft"|"submitted";places:number;mode:string;competency_tags:string[]} | null = null;
+  const server = {
+    task: null as {id:string;project_key:string;task_key:string;title:string;status:"draft"|"submitted";places:number;mode:string;competency_tags:string[]} | null,
+    payload: null as {task_key:string;title:string;problem:string;deliverable:string;acceptance_criteria:string[];data_constraints:string;mode:string} | null,
+  };
   let createdCount = 0;
   let submittedCount = 0;
-  let payload: {task_key:string;title:string;problem:string;deliverable:string;acceptance_criteria:string[];data_constraints:string;mode:string} | null = null;
-  await page.route("**/api/v1/customer/tasks", route => route.fulfill({json:task ? [task] : []}));
+  await page.route("**/api/v1/customer/tasks", route => route.fulfill({json:server.task ? [server.task] : []}));
   await page.route("**/api/v1/customer/projects/demo-rd-lab/tasks", route => {
     createdCount += 1;
-    payload = route.request().postDataJSON() as typeof payload;
-    if (!payload) throw new Error("Missing task payload");
-    task = {
-      id:taskId,project_key:"demo-rd-lab",task_key:payload.task_key,
-      title:payload.title,status:"draft",places:2,mode:payload.mode,competency_tags:[],
+    server.payload = route.request().postDataJSON() as typeof server.payload;
+    if (!server.payload) throw new Error("Missing task payload");
+    server.task = {
+      id:taskId,project_key:"demo-rd-lab",task_key:server.payload.task_key,
+      title:server.payload.title,status:"draft",places:2,mode:server.payload.mode,competency_tags:[],
     };
-    return route.fulfill({json:task});
+    return route.fulfill({json:server.task});
   });
   await page.route("**/api/v1/customer/tasks/*/submit", route => {
     submittedCount += 1;
-    if (!task) throw new Error("Submit without server draft");
-    task = {...task,status:"submitted"};
-    return route.fulfill({json:task});
+    if (!server.task) throw new Error("Submit without server draft");
+    server.server.task = {...server.task,status:"submitted"};
+    return route.fulfill({json:server.task});
   });
   await openCustomer(page);
   await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Создать задачу",exact:true}).click();
@@ -164,11 +166,11 @@ test("customer five-step brief applies guidance and submits one task for moderat
   await expect(page).toHaveURL(new RegExp(`/workspace/1\\?created=${taskId}$`));
   expect(createdCount).toBe(1);
   expect(submittedCount).toBe(1);
-  expect(payload?.title).toBe("AI-поиск внутренних регламентов");
-  expect(payload?.problem).toContain("Целевая аудитория");
-  expect(payload?.acceptance_criteria).toContain("Precision@10 не ниже 0.8");
-  expect(payload?.mode).toBe("open");
-  expect(task?.status).toBe("submitted");
+  expect(server.payload?.title).toBe("AI-поиск внутренних регламентов");
+  expect(server.payload?.problem).toContain("Целевая аудитория");
+  expect(server.payload?.acceptance_criteria).toContain("Precision@10 не ниже 0.8");
+  expect(server.payload?.mode).toBe("open");
+  expect(server.task?.status).toBe("submitted");
   await expect(page.getByText("AI-поиск внутренних регламентов",{exact:true}).first()).toBeVisible();
 });
 
