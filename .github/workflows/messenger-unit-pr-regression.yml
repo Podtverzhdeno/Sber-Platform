@@ -1,0 +1,33 @@
+name: Messenger Unit PR Regression
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "frontend/src/features/collaboration.test.tsx"
+      - "frontend/src/features/collaboration.tsx"
+      - "frontend/src/features/messenger/**"
+      - ".github/workflows/messenger-unit-pr-regression.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/src/features/collaboration.test.tsx"
+      - ".github/workflows/messenger-unit-pr-regression.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - run: npx vitest run src/features/collaboration.test.tsx src/features/messenger
+      - run: npm run typecheck
