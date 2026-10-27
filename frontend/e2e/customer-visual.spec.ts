@@ -140,7 +140,7 @@ test("customer five-step brief applies guidance and submits one task for moderat
   await page.route("**/api/v1/customer/tasks/*/submit", route => {
     submittedCount += 1;
     if (!server.task) throw new Error("Submit without server draft");
-    server.server.task = {...server.task,status:"submitted"};
+    server.task = {...server.task,status:"submitted"};
     return route.fulfill({json:server.task});
   });
   await openCustomer(page);
