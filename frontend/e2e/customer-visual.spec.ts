@@ -62,7 +62,7 @@ test("customer premium workspace renders every route without overflow", async ({
             .map((node) => ({node, rect:node.getBoundingClientRect()}))
             .filter(({rect}) => rect.width > 0 && rect.right > width + 1)
             .sort((a,b)=>b.rect.right-a.rect.right).slice(0,10)
-            .map(({node,rect}) => ({tag:node.tagName, className:typeof node.className==="string" ? node.className.slice(0,140):"", right:Math.round(rect.right),width:Math.round(rect.width),text:(node.textContent??"").slice(0,90)})),
+            .map(({node,rect}) => ({tag:node.tagName, className:typeof node.className==="string" ? node.className.slice(0,140):"", right:Math.round(rect.right),width:Math.round(rect.width),text:node.textContent.slice(0,90)})),
         };
       });
       expect(geometry.documentWidth, `${section} overflow diagnostics: ${JSON.stringify(geometry)}`).toBeLessThanOrEqual(geometry.viewportWidth+1);
