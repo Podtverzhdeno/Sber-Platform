@@ -118,24 +118,60 @@ test("customer returns a result for revision with a detailed reason", async ({ p
   await expect(page.getByRole("button",{name:"Запрос на доработку отправлен",exact:true})).toBeDisabled();
 });
 
-test("AI suggestions update the brief and a published task appears in My Tasks", async ({ page }) => {
+test("customer five-step brief applies guidance and submits one task for moderation", async ({ page }) => {
+  const taskId = "00000000-0000-0000-0000-000000000987";
+  const server = {
+    task: null as {id:string;project_key:string;task_key:string;title:string;status:"draft"|"submitted";places:number;mode:string;competency_tags:string[]} | null,
+    payload: null as {task_key:string;title:string;problem:string;deliverable:string;acceptance_criteria:string[];data_constraints:string;mode:string} | null,
+  };
+  let createdCount = 0;
+  let submittedCount = 0;
+  await page.route("**/api/v1/customer/tasks", route => route.fulfill({json:server.task ? [server.task] : []}));
+  await page.route("**/api/v1/customer/projects/demo-rd-lab/tasks", route => {
+    createdCount += 1;
+    server.payload = route.request().postDataJSON() as typeof server.payload;
+    if (!server.payload) throw new Error("Missing task payload");
+    server.task = {
+      id:taskId,project_key:"demo-rd-lab",task_key:server.payload.task_key,
+      title:server.payload.title,status:"draft",places:2,mode:server.payload.mode,competency_tags:[],
+    };
+    return route.fulfill({json:server.task});
+  });
+  await page.route("**/api/v1/customer/tasks/*/submit", route => {
+    submittedCount += 1;
+    if (!server.task) throw new Error("Submit without server draft");
+    server.task = {...server.task,status:"submitted"};
+    return route.fulfill({json:server.task});
+  });
   await openCustomer(page);
   await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Создать задачу",exact:true}).click();
-  await page.getByLabel("Название задачи").fill("AI-поиск внутренних регламентов");
-  await page.getByLabel("Проблема и цель").fill("Сотрудники долго ищут актуальные регламенты.");
-  await page.getByLabel("Ожидаемый результат").fill("Рабочий поисковый прототип.");
-  await page.locator(".create-ai-panel article",{hasText:"Добавьте целевую аудиторию решения"}).getByRole("button").click();
-  await expect(page.getByRole("status")).toContainText("Рекомендация применена");
-  await expect(page.getByLabel("Проблема и цель")).toHaveValue(/Целевая аудитория/);
-  await page.locator(".create-ai-panel article",{hasText:"Укажите формат и источник данных"}).getByRole("button").click();
-  await expect(page.getByLabel("Ожидаемый результат")).toHaveValue(/CSV\/JSON/);
-  await page.getByRole("button",{name:"Продолжить"}).click();
-  await page.getByLabel("Критерии успеха").fill("Precision@10 не ниже 0.8");
-  for(let step=0;step<3;step+=1) await page.getByRole("button",{name:"Продолжить"}).click();
-  await page.getByRole("button",{name:"Опубликовать"}).click();
-  await expect(page).toHaveURL(/\/workspace\/1\?created=IMP-/);
+  const wizard = page.locator(".create-task-workspace");
+  await expect(wizard).toBeVisible();
+  await wizard.getByLabel("Название задачи").fill("AI-поиск внутренних регламентов");
+  await wizard.getByLabel("Краткое описание").fill("Поиск регламентов с проверяемыми источниками");
+  await wizard.getByLabel("Подробное описание").fill("Сотрудники долго ищут актуальные регламенты");
+  await wizard.locator(".create-v3-advice-card").getByRole("button",{name:/Добавить рекомендацию/}).first().click();
+  await expect(wizard.getByLabel("Подробное описание")).toHaveValue(/Целевая аудитория/);
+  await expect(wizard.getByRole("status")).toContainText("Подсказка добавлена в бриф");
+  await wizard.getByRole("button",{name:/^Далее/}).click();
+  await wizard.getByLabel("Ожидаемый результат").fill("Рабочий прототип с API, README и воспроизводимыми тестами");
+  await wizard.getByLabel("Критерии приёмки").fill("Precision@10 не ниже 0.8\nСсылки на первоисточники");
+  await wizard.getByRole("button",{name:/^Далее/}).click();
+  await expect(wizard.getByLabel("Данные и ограничения")).toBeVisible();
+  await wizard.getByRole("button",{name:/^Далее/}).click();
+  await expect(wizard.getByLabel("Модель поддержки")).toBeVisible();
+  await wizard.getByRole("button",{name:/^Далее/}).click();
+  await expect(wizard.getByText("Бриф готов к отправке")).toBeVisible();
+  await wizard.getByRole("button",{name:"Отправить на модерацию"}).click();
+  await expect(page).toHaveURL(new RegExp(`/workspace/1\\?created=${taskId}$`));
+  expect(createdCount).toBe(1);
+  expect(submittedCount).toBe(1);
+  expect(server.payload?.title).toBe("AI-поиск внутренних регламентов");
+  expect(server.payload?.problem).toContain("Целевая аудитория");
+  expect(server.payload?.acceptance_criteria).toContain("Precision@10 не ниже 0.8");
+  expect(server.payload?.mode).toBe("open");
+  expect(server.task?.status).toBe("submitted");
   await expect(page.getByText("AI-поиск внутренних регламентов",{exact:true}).first()).toBeVisible();
-  await expect(page.getByText("Опубликована",{exact:true}).first()).toBeVisible();
 });
 
 test("customer can send messages and each dialog keeps its own history", async ({ page }) => {
