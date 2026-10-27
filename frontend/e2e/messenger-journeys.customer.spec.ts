@@ -125,8 +125,19 @@ test("customer journeys: контекст задачи, доменные гра�
   await page.locator('[data-persona="customer-roman"]').click();
   await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
   await page.getByRole("link", { name: "Сообщения" }).click();
-  // SberChat waits for explicit channel selection; do not invent active history.
-  await page.locator(".msg-dialog-list__row").filter({ hasText: "Ревью отзывов" }).click();
+  // SberChat waits for explicit selection, and task/personal channels must coexist.
+  const visible=page.locator(".msg-dialog-list__row").filter({ hasText: "Ревью отзывов" });
+  try {
+    await expect(visible).toBeVisible({timeout:5000});
+  } catch (error) {
+    console.log("MESSENGER_CUSTOMER_DEBUG "+JSON.stringify({
+      url:page.url(),
+      screen:(await page.locator("body").innerText()).slice(0,2200),
+      channelRows:await page.locator(".msg-dialog-list__row").count(),
+    }));
+    throw error;
+  }
+  await visible.click();
 
   const context = page.getByRole("complementary", { name: "Контекст диалога" });
   await expect(context.getByRole("heading", { level: 2 })).toHaveText("Ревью отзывов");
