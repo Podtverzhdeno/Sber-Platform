@@ -625,7 +625,7 @@ export function MessagingWorkspace({
               }}
               headerExtra={headerExtra}
             /> : (
-              <EmptyChatState recent={recentChannel} mayaki={mayakiChannel}
+              <EmptyChatState recent={recentChannel} viewerId={personId} mayaki={mayakiChannel}
                 onOpen={selectChannel} onCreate={openCreate} onFindCommunity={findMayaki}/>
             )}
             {selected && (
