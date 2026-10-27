@@ -5,7 +5,7 @@ type Stage = {key:string;target_kind:string;target_key:string;completed:boolean}
 type Role = {track_key:string;state:string;attempt_number:number|null;completed_milestones:number};
 type Overview = {roles:Role[];next_outcome:{trajectory_key:string}|null;concepts:{career_grade:{current_grade:string|null}}};
 type Roadmap = {track_key:string;milestones:Stage[]};
-type GradeSummary = {selected_track_key:string;role_summary:{grade_state:string;current_grade_title:string|null}};
+type ImpulseLevel = {track_key:string;level:number;cycle_number:number;curriculum_state:string};
 type Me = {navigation:string[]};
 
 test("production demo session: saved learning, selected trajectory, verified stages and grade stay consistent",async({page})=>{
@@ -67,15 +67,13 @@ test("production demo session: saved learning, selected trajectory, verified sta
   await expect(studySummary).toContainText(`${String(expectedLearningCompleted)} из ${String(roadmap.milestones.length)} учебных шагов выполнено`);
   await expect(studySummary).toContainText(`${String(focus.completed_milestones)} этапов подтверждено отдельно`);
  }
- const gradeResponse=await page.evaluate(async track=>{
-  const response=await fetch("/api/v1/me/bootcamp/overview?track="+encodeURIComponent(track),{credentials:"same-origin"});
-  return {ok:response.ok,status:response.status,body:response.ok?(await response.json() as unknown):null};
- },track);
- const shownGrade=(await page.getByTestId("trajectory-official-grade").innerText()).trim();
- const grade=gradeResponse.ok?(gradeResponse.body as GradeSummary):null;
- if(grade?.selected_track_key===track&&grade.role_summary.grade_state==="known"&&grade.role_summary.current_grade_title){
-  expect(shownGrade,"Displayed grade must equal backend issued grade").toBe(grade.role_summary.current_grade_title);
- }
+ // Impulse is a study level, not an independently awarded professional grade.
+ // Check the actual authoritative learning-level endpoint and the current view.
+ const level=await api<ImpulseLevel>("/api/v1/me/bootcamp/impulse-level?track="+encodeURIComponent(track));
+ expect(level.track_key,"Server Impulse level belongs to selected role").toBe(track);
+ const shownLevel=page.getByTestId("trajectory-impulse-level");
+ await expect(shownLevel,"Displayed Impulse level must be server-issued").toHaveText("L"+String(level.level));
+ await expect(page.locator(".trajectory-v2-grade-ring small"),"Displayed cycle must match server").toHaveText("Цикл "+String(level.cycle_number));
  if(expectedStudied>0)await expect(page.getByTestId("trajectory-study-evidence")).toContainText(`${String(expectedStudied)} из`);
  expect(browserErrors,"No uncaught JavaScript exceptions").toEqual([]);
  await page.screenshot({path:"test-results/production-trajectory-desktop.png",fullPage:true,animations:"disabled"});
@@ -85,7 +83,7 @@ test("production demo session: saved learning, selected trajectory, verified sta
  const horizontalOverflow=await page.evaluate(()=>Math.max(0,document.documentElement.scrollWidth-innerWidth));
  console.log("PRODUCTION_TRAJECTORY_AUDIT "+JSON.stringify({
   selectedTrack:track,courseRecords:learning.courses.length,studiedSteps:actualStudied,
-  acceptedSteps:actualAccepted,renderedGrade:shownGrade,officialGradeState:grade?.role_summary.grade_state??"unavailable",
+  acceptedSteps:actualAccepted,renderedImpulseLevel:"L"+String(level.level),impulseCycle:level.cycle_number,
   mobileHorizontalOverflowPx:horizontalOverflow,uncaughtErrors:browserErrors.length,
  }));
 });
