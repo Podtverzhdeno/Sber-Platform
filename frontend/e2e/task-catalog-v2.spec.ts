@@ -125,7 +125,7 @@ test("catalog and conditions pass automated accessibility checks", async ({ page
 });
 
 test("light theme keeps catalog contrast accessible", async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.setItem("impulse-theme", "light"));
+  await page.addInitScript(() => { window.localStorage.setItem("impulse-theme", "light"); });
   await openCatalog(page);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   const result = await new AxeBuilder({ page }).analyze();
