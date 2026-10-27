@@ -169,6 +169,19 @@ test("customer journeys: контекст задачи, доменные гра�
     .filter({ hasText: "Личное: документы выслал." })
     .first();
   await personalRow.click();
+  try {
+    await expect(personalRow).toHaveAttribute("aria-current", "true", {timeout:5000});
+    await expect(page.getByTestId("composer-readonly")).toBeVisible({timeout:5000});
+  } catch(error) {
+    console.log("PERSONAL_READONLY_DIAGNOSTIC "+JSON.stringify({
+      messageState:await page.locator(".messenger-page").getAttribute("data-message-state"),
+      selectedRows:await page.locator('.msg-dialog-list__row[aria-current="true"]').allTextContents(),
+      renderedComposer:await page.locator(".msg-composer").allTextContents(),
+      senderIsDisabled:await page.getByTestId("composer-textarea").count(),
+      panel: (await page.locator("body").innerText()).slice(-2400),
+    }));
+    throw error;
+  }
   await expect(page.getByTestId("composer-readonly")).toContainText(
     "отозвано право писать",
   );
