@@ -5,6 +5,7 @@ on:
     paths:
       - "frontend/e2e/messenger-journeys.customer.spec.ts"
       - "frontend/e2e/messenger-journeys.participant.spec.ts"
+      - "frontend/e2e/mentor.spec.ts"
       - "frontend/src/features/messenger/**"
       - "frontend/src/features/collaboration.tsx"
       - ".github/workflows/messenger-journey-pr-qa.yml"
@@ -37,7 +38,7 @@ jobs:
         env:
           CI: "true"
           TZ: Europe/Moscow
-        run: npx playwright test messenger-journeys.customer.spec.ts messenger-journeys.participant.spec.ts --project=chromium --reporter=line
+        run: npx playwright test messenger-journeys.customer.spec.ts messenger-journeys.participant.spec.ts mentor.spec.ts --project=chromium --reporter=line
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
