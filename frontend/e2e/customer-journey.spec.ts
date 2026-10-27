@@ -18,6 +18,9 @@ test("customer lifecycle: draft, publish, accept, revise, rework, accept, analyt
   let repeatCreated = false;
   let application: Record<string, unknown> = { id: applicationId, task_id: taskId, person_id: "00000000-0000-0000-0000-000000000001", accepted_terms_version: 1, status: "applied", version: 1, participant_name: "Игорь Лесной", verified_case_count: 0 };
   let decisions: Record<string, unknown>[] = [];
+  // Current customer Analytics V3 visualizes canonical activity events, not old aggregate metrics.
+  const activityEvents: Array<{id:string;kind:string;occurred_at:string;task_id:string;task_title:string}> = [];
+
   const actor = {
     person_id: "00000000-0000-0000-0000-000000000005",
     display_name: "Роман Заказчик",
@@ -67,6 +70,11 @@ test("customer lifecycle: draft, publish, accept, revise, rework, accept, analyt
   });
   await page.route("**/api/v1/customer/contributions/*/decision", (route) => {
     const body = route.request().postDataJSON() as { decision: string; reason: string; deadline_at: string | null };
+    activityEvents.push({
+      id: `decision-event-${String(activityEvents.length+1)}`,
+      kind: body.decision === "accepted" ? "result_accepted" : "revision_requested",
+      occurred_at: new Date().toISOString(), task_id: taskId, task_title: String(task.title),
+    });
     decisions = [
       ...decisions.filter((item) => item.contribution_id !== contributionId),
       { contribution_id: contributionId, contribution_version: 1, decision: body.decision, reason: body.reason, deadline_at: body.deadline_at, owner_id: actor.person_id },
@@ -84,6 +92,10 @@ test("customer lifecycle: draft, publish, accept, revise, rework, accept, analyt
     return route.fulfill({ json: repeatTask });
   });
   await page.route("**/api/v1/customer/tasks/*/participant-preview", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/customer/analytics/activity", (route) => route.fulfill({ json: {
+    generated_at: new Date().toISOString(), window_days: 84, events: activityEvents,
+  } }));
+  // Kept for old role-based consumers; CustomerAnalytics V3 uses /customer/analytics/activity.
   await page.route("**/api/v1/analytics/role", (route) => route.fulfill({ json: { role: "customer", metrics: [
     metric("customer_tasks", "Задачи заказчика", "count", "1", 1, 1),
     metric("customer_acceptance_rate", "Доля принятых результатов", "percent", "50.00", 1, 2),
@@ -133,12 +145,13 @@ test("customer lifecycle: draft, publish, accept, revise, rework, accept, analyt
   decisions = [];
 
   await page.getByRole("link", { name: "Открыть аналитику" }).click();
-  await expect(page.getByText("Запрошенные доработки")).toBeVisible();
-  await expect(page.getByText("Среднее время до результата")).toBeVisible();
-  await expect(page.getByText("Доля принятых результатов")).toBeVisible();
-  await expect(page.getByText("50.00%")).toBeVisible();
-  await page.getByText("Как рассчитано").first().click();
-  await expect(page.getByText("Числитель").first()).toBeVisible();
+  const analytics = page.getByTestId("customer-activity-v3");
+  await expect(analytics.getByRole("heading", { name: "Активность заказчика" })).toBeVisible();
+  await expect(analytics.getByRole("img", { name: "Всего 1 действий по проектам" })).toBeVisible();
+  await expect(analytics.getByText("Запрошена доработка", {exact:true})).toBeVisible();
+  await analytics.getByRole("combobox", {name:"Тип событий"}).selectOption("decisions");
+  await expect(analytics.getByRole("img", { name: "Всего 1 действий по проектам" })).toBeVisible();
+  await expect(analytics.getByText("Сценарий полного цикла", {exact:true}).first()).toBeVisible();
 
   await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Мои задачи" }).click();
   await page.reload();
