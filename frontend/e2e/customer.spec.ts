@@ -98,10 +98,12 @@ test("customer draft survives reload locally and moderation creates exactly one 
   await expect(page).toHaveURL(new RegExp("/workspace/1\\?created="+taskId+"$"));
   expect(created,"The task create request must not be duplicated").toBe(1);
   expect(submitted,"Moderation submission must occur exactly once").toBe(1);
-  expect(submittedBrief?.title).toBe("Платный R&D прототип");
-  expect(submittedBrief?.problem).toContain("Нужно проверить продуктовую гипотезу");
-  expect(submittedBrief?.acceptance_criteria).toContain("Метрика качества подтверждена отчётом");
-  expect(persistedTask?.status).toBe("submitted");
+  expect(submittedBrief).toMatchObject({
+    title:"Платный R&D прототип",
+    problem:"Нужно проверить продуктовую гипотезу на данных",
+    acceptance_criteria:["Метрика качества подтверждена отчётом"],
+  });
+  expect(persistedTask).toMatchObject({status:"submitted"});
   await expect.poll(async()=>page.evaluate(()=>localStorage.getItem("impulse-customer-task-wizard-v2"))).toBeNull();
 });
 
