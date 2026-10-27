@@ -387,26 +387,35 @@ test("Bootcamp primary actions share a baseline with or without recommendation l
   await expect(page.locator('.bc-ref-course-card .bc-ref-reason').first()).toBeVisible();
   for (const width of [1448, 1024, 768]) {
     await page.setViewportSize({ width, height: 900 });
+    await page.evaluate(async () => { await document.fonts.ready; });
     const cards = await page.locator(".bc-ref-course-card").evaluateAll(elements =>
       elements.map(element => {
         const card = element.getBoundingClientRect();
         const cta = element.querySelector(".bc-ref-card-bottom .bc-ref-primary")?.getBoundingClientRect();
         return {
-          row: Math.round(card.top),
+          key: element.getAttribute("data-testid"),
+          row: card.top,
           top: cta?.top ?? -1,
           hasReason: Boolean(element.querySelector(".bc-ref-reason")),
         };
       }),
     );
-    const rows = new Map<number, typeof cards>();
-    for (const card of cards) rows.set(card.row, [...(rows.get(card.row) ?? []), card]);
+    // Subpixel CSS layout can give siblings in the same physical row slightly
+    // different top coordinates. Never use Math.round(top) as row identity.
+    const rows: typeof cards[] = [];
+    for (const card of cards) {
+      let row = rows.find(items => Math.abs((items[0]?.row ?? -9999) - card.row) <= 3);
+      if (!row) { row = []; rows.push(row); }
+      row.push(card);
+    }
     let mixedRowChecked = false;
-    for (const row of rows.values()) {
+    for (const row of rows) {
       if (row.length < 2) continue;
       const tops = row.map(card => card.top);
+      // Keep the original strict 2px CTA baseline tolerance unchanged.
       expect(Math.max(...tops) - Math.min(...tops), `misaligned CTAs at ${String(width)}px`).toBeLessThanOrEqual(2);
       if (row.some(card => card.hasReason) && row.some(card => !card.hasReason)) mixedRowChecked = true;
     }
-    expect(mixedRowChecked, `fixture needs recommended and ordinary courses at ${String(width)}px`).toBe(true);
+    expect(mixedRowChecked, `fixture needs a physically mixed row at ${String(width)}px: ${JSON.stringify(cards)}`).toBe(true);
   }
 });
