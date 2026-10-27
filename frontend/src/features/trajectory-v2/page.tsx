@@ -927,7 +927,6 @@ export function StagePathSection(props: {
                 className="trajectory-v2-stage"
                 aria-pressed={milestone.key === visibleStageKey}
                 data-stage-state={state}
-                data-stage-verified={milestone.completed ? "true" : "false"}
                 data-attention={state==="current" && props.isUnopened?.(milestone.key)===true ? "new" : undefined}
                 data-study-state={studyProgress.studiedKeys.has(milestone.key) ? "studied" : studied?.completed_units ? "learning" : "none"}
                 title={studied ? `Обучение: ${String(studied.completed_units)} из ${String(studied.total_units)} уроков. ${studied.finished ? "Курс изучен, подтверждение этапа отдельно" : "Обучение в процессе"}` : milestone.title}
