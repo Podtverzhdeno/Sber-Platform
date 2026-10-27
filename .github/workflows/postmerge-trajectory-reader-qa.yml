@@ -1,0 +1,88 @@
+name: Postmerge trajectory and reader regression QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "frontend/e2e/production-trajectory-audit.spec.ts"
+      - "frontend/e2e/bootcamp-approved.spec.ts"
+      - "frontend/e2e/bootcamp-forensic-audit.spec.ts"
+      - "frontend/src/features/trajectory-v2/**"
+      - "frontend/src/features/bootcamp/**"
+      - ".github/workflows/postmerge-trajectory-reader-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/e2e/production-trajectory-audit.spec.ts"
+      - "frontend/e2e/bootcamp-approved.spec.ts"
+      - "frontend/e2e/bootcamp-forensic-audit.spec.ts"
+      - "frontend/src/features/trajectory-v2/**"
+      - ".github/workflows/postmerge-trajectory-reader-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: postmerge-trajectory-reader-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bootcamp_reader:
+    name: bootcamp-reader-regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx vite build
+      - run: npx playwright install --with-deps chromium
+      - name: Test full Bootcamp reader interactions and reference screens
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test bootcamp-approved.spec.ts bootcamp-forensic-audit.spec.ts bootcamp-immersive.spec.ts bootcamp-learning-content.spec.ts --project=chromium --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bootcamp-reader-regression-evidence
+          path: frontend/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  live_trajectory:
+    name: production-trajectory-read-only-regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx playwright install --with-deps chromium
+      - name: Check live trajectory against read-only server evidence
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test --config production-playwright.config.ts --project=chromium
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: production-trajectory-regression-evidence
+          path: frontend/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
