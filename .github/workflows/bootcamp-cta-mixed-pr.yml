@@ -34,7 +34,7 @@ jobs:
         env:
           CI: "true"
           TZ: Europe/Moscow
-        run: npx playwright test bootcamp-approved.spec.ts --project=chromium --reporter=line --grep "Bootcamp primary actions share a baseline"
+        run: npx playwright test bootcamp-approved.spec.ts --project=chromium --reporter=line --grep "Bootcamp primary actions share a baseline" --repeat-each=3
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
