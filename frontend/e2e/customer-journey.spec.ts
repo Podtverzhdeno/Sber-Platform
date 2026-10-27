@@ -151,7 +151,7 @@ test("customer lifecycle: draft, publish, accept, revise, rework, accept, analyt
   await expect(analytics.getByText("Запрошена доработка", {exact:true})).toBeVisible();
   await analytics.getByRole("combobox", {name:"Тип событий"}).selectOption("decisions");
   await expect(analytics.getByRole("img", { name: "Всего 1 действий по проектам" })).toBeVisible();
-  await expect(analytics.getByText("Сценарий полного цикла", {exact:true}).first()).toBeVisible();
+  await expect(analytics.locator(".ca3-activity-list button").filter({hasText:"Сценарий полного цикла"})).toBeVisible();
 
   await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Мои задачи" }).click();
   await page.reload();
