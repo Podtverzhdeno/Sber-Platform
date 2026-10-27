@@ -50,17 +50,25 @@ test("production demo session: saved learning, selected trajectory, verified sta
  await expect(detail).toHaveAttribute("data-role-key",track,{timeout:15000});
  const expectedStudied=roadmap.milestones.filter(m=>m.target_kind==="course"&&
   learning.courses.some(c=>c.course_key===m.target_key&&c.finished&&c.certificate_id!==null)).length;
- const expectedAccepted=roadmap.milestones.filter(m=>m.completed).length;
+ const verifiedKeys=new Set(roadmap.milestones.filter(m=>m.completed).map(m=>m.key));
+ const studiedKeys=new Set(roadmap.milestones.filter(m=>m.target_kind==="course" &&
+  learning.courses.some(c=>c.course_key===m.target_key&&c.finished&&c.certificate_id!==null)).map(m=>m.key));
+ // Learning closes navigation steps, but does NOT independently verify a professional milestone.
+ const expectedLearningCompleted=new Set([...verifiedKeys,...studiedKeys]).size;
  const studiedSteps=page.locator(".trajectory-v2-stage[data-study-state='studied']");
- const acceptedSteps=page.locator(".trajectory-v2-stage[data-stage-state='completed']");
- // The trajectory fetches study evidence separately from the role overview;
- // never assert against the first render before React Query settles.
- await expect(studiedSteps,"Course certificates must eventually appear in their trajectory").toHaveCount(expectedStudied,{timeout:20000});
- await expect(acceptedSteps,"Accepted steps mirror server roadmap").toHaveCount(expectedAccepted,{timeout:12000});
+ const completedLearningSteps=page.locator(".trajectory-v2-stage[data-stage-state='completed']");
+ const verifiedSteps=page.locator(".trajectory-v2-stage[data-stage-verified='true']");
+ // Read-only production audit: wait for React Query's asynchronous evidence projection.
+ await expect(studiedSteps,"Certified courses must appear in the learning path").toHaveCount(expectedStudied,{timeout:20000});
+ await expect(completedLearningSteps,"Learning path must combine independently verified and certified steps").toHaveCount(expectedLearningCompleted,{timeout:12000});
+ await expect(verifiedSteps,"Only server verified milestones may be marked as independently verified").toHaveCount(verifiedKeys.size,{timeout:12000});
  const actualStudied=await studiedSteps.count();
- const actualAccepted=await acceptedSteps.count();
- const stageTitle=page.locator(".trajectory-v2-stage-block header small").first();
- await expect(stageTitle).toContainText(`${String(expectedAccepted)} этапов подтверждено`);
+ const actualAccepted=await verifiedSteps.count();
+ const studySummary=page.getByTestId("trajectory-study-evidence");
+ if(expectedStudied>0){
+  await expect(studySummary).toContainText(`${String(expectedLearningCompleted)} из ${String(roadmap.milestones.length)} учебных шагов выполнено`);
+  await expect(studySummary).toContainText(`${String(focus.completed_milestones)} этапов подтверждено отдельно`);
+ }
  const gradeResponse=await page.evaluate(async track=>{
   const response=await fetch("/api/v1/me/bootcamp/overview?track="+encodeURIComponent(track),{credentials:"same-origin"});
   return {ok:response.ok,status:response.status,body:response.ok?(await response.json() as unknown):null};
