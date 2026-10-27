@@ -378,6 +378,13 @@ test("Bootcamp primary actions share a baseline with or without recommendation l
   // Non-recommended cards are deliberately hidden in the default personalized tab.
   // Select the full catalog to verify both CTA variants in the same row.
   await page.getByRole("group", { name: "Категории курсов" }).getByRole("button", { name: /Все курсы/ }).click();
+  // The direction filter is independent of the catalog category. Without
+  // selecting "all", the non-recommended fixture card belongs to another
+  // direction and is never rendered, making the mixed-row assertion invalid.
+  await page.locator(".bc-ref-controls .bc-ref-select select").first().selectOption("all");
+  await expect(page.locator(".bc-ref-course-card")).toHaveCount(bootcampCatalogFixture.length);
+  await expect(page.locator('[data-testid="course-demo-course-8"] .bc-ref-reason')).toHaveCount(0);
+  await expect(page.locator('.bc-ref-course-card .bc-ref-reason').first()).toBeVisible();
   for (const width of [1448, 1024, 768]) {
     await page.setViewportSize({ width, height: 900 });
     const cards = await page.locator(".bc-ref-course-card").evaluateAll(elements =>
