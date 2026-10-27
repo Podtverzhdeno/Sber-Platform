@@ -487,7 +487,7 @@ export function ChatHistory({
                             ),
                           )}
                         </div>
-                        {channel?.title.trim().toLowerCase() === "маяки" && item.body.includes("Карьера в IT: от обучения к возможностям") && <MayakiEventPreview />}
+                        {typeof channel?.title === "string" && channel.title.trim().toLowerCase() === "маяки" && item.body.includes("Карьера в IT: от обучения к возможностям") && <MayakiEventPreview />}
                         {item.artifact_refs.length > 0 && (
                           <ul className="msg-chat__artifact-refs">
                             {item.artifact_refs.map((ref) => <AttachmentCard key={ref} reference={ref} />)}
