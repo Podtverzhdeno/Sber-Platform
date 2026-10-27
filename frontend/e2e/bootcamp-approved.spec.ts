@@ -266,11 +266,11 @@ test("Bootcamp desktop reference hero has correct stagger, overlay, and grid den
   expect(summary).not.toBeNull();
   expect(categories).not.toBeNull();
   if (tabs && hero && summary && categories) {
-    // The role tabs use their own 15px bottom margin, without the global 34px grid gap.
+    // Current reference: the right role summary aligns with the left learning card;
+    // the catalog starts after the shared hero row, without overlapping it.
     expect(Math.abs(hero.y - (tabs.y + tabs.height + 15))).toBeLessThanOrEqual(3);
-    expect(Math.abs(summary.y - (hero.y - 24))).toBeLessThanOrEqual(3);
-    // The approved hero intentionally overlaps the catalog tabs by 51px.
-    expect(Math.abs(categories.y - (hero.y + hero.height - 51))).toBeLessThanOrEqual(4);
+    expect(Math.abs(summary.y - hero.y)).toBeLessThanOrEqual(3);
+    expect(Math.abs(categories.y - (hero.y + hero.height + 18))).toBeLessThanOrEqual(4);
   }
   const standard = cards.filter({ has: page.locator(".bc-ref-chip--available") }).first();
   await expect(standard).toBeVisible();
@@ -285,7 +285,7 @@ test("Bootcamp required-course popup follows reference and never invents progres
   await page.getByRole("link", { name: "Bootcamp" }).click();
   const shell = page.locator(".bc-reference");
 
-  await shell.getByRole("button", { name: /Посмотреть курсы/ }).click();
+  await shell.getByRole("button", { name: "Посмотреть учебные и практические требования" }).click();
   const dialog = page.getByRole("dialog", { name: "Требования к обучению" });
   await expect(dialog).toBeVisible();
   await expect(dialog.locator(".bc-ref-required-hero")).toBeVisible();
@@ -375,6 +375,9 @@ test("Bootcamp primary actions share a baseline with or without recommendation l
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("link", { name: "Bootcamp" }).click();
+  // Non-recommended cards are deliberately hidden in the default personalized tab.
+  // Select the full catalog to verify both CTA variants in the same row.
+  await page.getByRole("group", { name: "Категории курсов" }).getByRole("button", { name: /Все курсы/ }).click();
   for (const width of [1448, 1024, 768]) {
     await page.setViewportSize({ width, height: 900 });
     const cards = await page.locator(".bc-ref-course-card").evaluateAll(elements =>

@@ -38,7 +38,7 @@ test("forensic Bootcamp five screens at 1448x1086", async ({ page }) => {
   await page.screenshot({ path: "test-results/forensic-bc-r04-why.png", animations: "disabled" });
   await page.getByRole("dialog", { name: "Почему рекомендован" }).getByRole("button", { name: "Закрыть" }).click();
 
-  await page.getByRole("button", { name: /Посмотреть курсы/ }).click();
+  await page.getByRole("button", { name: "Посмотреть учебные и практические требования" }).click();
   await expect(page.getByRole("dialog", { name: "Требования к обучению" })).toBeVisible();
   await page.evaluate(() => { window.scrollTo(0, 0); });
   await page.screenshot({ path: "test-results/forensic-bc-r05-requirements.png", animations: "disabled" });
