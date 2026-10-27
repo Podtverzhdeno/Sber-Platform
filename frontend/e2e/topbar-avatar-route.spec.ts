@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { overviewFixture } from "../src/features/participant-home-v2/fixture";
 
 const actor = {
   person_id: "00000000-0000-0000-0000-000000000001",
@@ -26,6 +27,9 @@ async function openParticipantTrajectory(page: Page) {
     loggedIn = true;
     return route.fulfill({json:actor});
   });
+  await page.route("**/api/v1/participant/me/development-overview", route =>
+    route.fulfill({json:overviewFixture}));
+  await page.route("**/api/v1/me/roadmaps", route => route.fulfill({json:[]}));
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   await page.goto("/workspace/1?source=1");
