@@ -127,6 +127,9 @@ test("trajectory map remains usable in light theme and mobile viewport", async (
   await page.locator('[data-persona="participant-alex"]').click();
   await page.getByRole("button", { name: "Меню", exact: true }).click();
   await page.getByRole("link", { name: "Моя траектория" }).click();
+  // This spec exercises the opt-in checkpoint map, not the canonical V2 roadmap.
+  await page.goto("/workspace/1?legacy=1");
+  await expect(page.getByTestId("trajectory-map")).toBeVisible();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.getByRole("button", { name: "Освоить основу. Текущий шаг" }).click();
   await expect(page.getByRole("dialog", { name: "Веха траектории" })).toBeVisible();
