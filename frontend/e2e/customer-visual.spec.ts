@@ -50,6 +50,14 @@ test("customer premium workspace renders every route without overflow", async ({
         const width = document.documentElement.clientWidth;
         return {
           documentWidth: document.documentElement.scrollWidth, viewportWidth: width,
+          spills: Array.from(document.querySelectorAll<HTMLElement>("body *"))
+            .filter(node=>node.clientWidth>0&&node.scrollWidth>node.clientWidth+1)
+            .map(node=>({tag:node.tagName,cls:typeof node.className==="string"?node.className.slice(0,100):"",
+              scroll:node.scrollWidth,client:node.clientWidth,overflow:getComputedStyle(node).overflowX}))
+            .sort((a,b)=>(b.scroll-b.client)-(a.scroll-a.client)).slice(0,12),
+          leftSpills: Array.from(document.querySelectorAll<HTMLElement>("body *"))
+            .map(node=>({node,left:node.getBoundingClientRect().left}))
+            .filter(({left})=>left < -2).slice(0,8).map(({node,left})=>({className:typeof node.className==="string"?node.className.slice(0,100):"",left:Math.round(left)})),
           offenders: Array.from(document.querySelectorAll<HTMLElement>("body *"))
             .map((node) => ({node, rect:node.getBoundingClientRect()}))
             .filter(({rect}) => rect.width > 0 && rect.right > width + 1)
