@@ -1,0 +1,44 @@
+name: Customer Lifecycle Activity PR QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "frontend/e2e/customer-journey.spec.ts"
+      - "frontend/src/features/customer-analytics.tsx"
+      - ".github/workflows/customer-lifecycle-activity-pr.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/e2e/customer-journey.spec.ts"
+      - ".github/workflows/customer-lifecycle-activity-pr.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  customer-lifecycle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx playwright install --with-deps chromium
+      - name: Verify draft, publish, revision, event analytics, repeat lifecycle
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test customer-journey.spec.ts --project=chromium --reporter=line
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: customer-lifecycle-event-evidence
+          path: frontend/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
