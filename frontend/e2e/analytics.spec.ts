@@ -81,136 +81,65 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/me/project-credentials", (route) => route.fulfill({ json: [projectCredential] }));
   await page.route("**/api/v1/competency-evidence", (route) => route.fulfill({ json: [] }));
   await page.route("**/api/v1/me/competency-evidence", (route) => route.fulfill({ json: [] }));
+  await page.route("**/api/v1/me/bootcamp/impulse-study/summary", route => route.fulfill({json:{
+    started_courses:1,finished_courses:1,completed_lessons:8,approved_practices:0,credited_practices:0,
+    courses:[{course_key:"python-base",title:"Python: основа",completed_units:8,total_units:8,finished:true,
+      finished_at:"2026-10-15T10:00:00Z",certificate_id:"cert-1",updated_at:"2026-10-15T10:00:00Z",
+      practice_status:null,practical_certificate_id:null}],
+  }}));
 });
 
-test("documents panel reveals verification and lands exactly on certificate, project and task checkpoints", async ({ page }) => {
+
+/** The active participant Analytics route is V3, not the retired legacy document dashboard. */
+test("V3 certification displays server course certificate and public verification", async ({page})=>{
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.goto("/workspace/5?legacy=1");
-
-  const documents = page.getByTestId("document-item");
-  await expect(documents.filter({ hasText: "Python: основа" })).toBeVisible();
-  await expect(documents.filter({ hasText: "Проверка прототипа на данных" })).toBeVisible();
-
-  await documents.filter({ hasText: "Python: основа" }).getByRole("button", { name: "Проверить" }).click();
-  const certificateViewer = page.getByTestId("document-viewer").first();
-  await expect(certificateViewer).toContainText("ver-cert-1");
-  await certificateViewer.getByRole("link", { name: "Открыть публичную проверку сертификата" }).click();
+  await page.goto("/workspace/5?analyticsTab=certification");
+  const analytics=page.getByTestId("analytics-v3");
+  await expect(analytics).toHaveAttribute("data-tab","certification");
+  await expect(page.getByRole("heading",{name:"Твоя сертификация"})).toBeVisible();
+  await expect(analytics).toContainText("Python: основа");
+  await expect(analytics).toContainText("cert-1");
+  await expect(page.getByTestId("analytics-study-results")).toContainText("Python: основа");
+  await analytics.getByRole("link",{name:/Открыть сертификат/}).click();
   await expect(page).toHaveURL(/\/verify\/ver-cert-1$/);
-  await expect(page.getByRole("heading", { name: "Python: основа" })).toBeVisible();
-  await expect(page.getByText(/демо · не является официальным сертификатом/)).toBeVisible();
-
-  await page.goto("/");
-  await page.locator('[data-persona="participant-alex"]').click();
-  await page.goto("/workspace/5?legacy=1");
-  await documents.filter({ hasText: "Проверка прототипа на данных" }).getByRole("button", { name: "Проверить" }).click();
-  const projectViewer = page.getByTestId("document-viewer").first();
-  await projectViewer.getByRole("link", { name: "Открыть публичную проверку проектного credential" }).click();
-  await expect(page).toHaveURL(/\/verify\/projects\/ver-proj-1$/);
-
-  await page.goto("/");
-  await page.locator('[data-persona="participant-alex"]').click();
-  await page.goto("/workspace/5?legacy=1");
-  await page.getByRole("button", { name: /До следующего уровня/ }).click();
-  const firstPlanStep = page.getByTestId("plan-step-0");
-  await expect(firstPlanStep).toHaveAttribute("href", "/workspace/2");
-  await firstPlanStep.click();
-  await expect(page).toHaveURL(/\/workspace\/2$/);
+  await expect(page.getByRole("heading",{name:"Python: основа"})).toBeVisible();
 });
-
-test("mobile layout in light theme keeps verification and plan deep links exact", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.route("**/api/v1/me/theme", (route) => route.fulfill({ json: actor }));
+test("V3 mobile personal learning progress and tab links remain navigable",async({page})=>{
+  await page.setViewportSize({width:390,height:844});
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  const themeToggle = page.locator(".theme-toggle");
-  await themeToggle.click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
-  await expect(themeToggle).toHaveAttribute("aria-pressed", "false");
-
-  const openAnalytics = async (): Promise<void> => {
-    await page.getByRole("button", { name: "Меню", exact: true }).click();
-    await expect(page.getByRole("button", { name: "Меню", exact: true })).toHaveAttribute("aria-expanded", "true");
-    await page.goto("/workspace/5?legacy=1");
-  };
-
-  await openAnalytics();
-  const documents = page.getByTestId("document-item");
-  await expect(documents.filter({ hasText: "Проверка прототипа на данных" })).toBeVisible();
-  await documents.filter({ hasText: "Проверка прототипа на данных" }).getByRole("button", { name: "Проверить" }).click();
-  const projectViewer = page.getByTestId("document-viewer").first();
-  await projectViewer.getByRole("link", { name: "Открыть публичную проверку проектного credential" }).click();
-  await expect(page).toHaveURL(/\/verify\/projects\/ver-proj-1$/);
-  await expect(page.getByRole("heading", { name: "Проверка прототипа на данных" })).toBeVisible();
-
-  await page.goto("/");
-  await page.locator('[data-persona="participant-alex"]').click();
-  await openAnalytics();
-  await page.getByRole("button", { name: /До следующего уровня/ }).click();
-  const lastPlanStep = page.getByTestId("plan-step-2");
-  await expect(lastPlanStep).toHaveAttribute("href", "/workspace/2");
-  await lastPlanStep.click();
-  await expect(page).toHaveURL(/\/workspace\/2$/);
+  await page.goto("/workspace/5?analyticsTab=certification");
+  const panel=page.getByTestId("analytics-v3");
+  await expect(panel).toHaveAttribute("data-tab","certification");
+  await expect(page.getByTestId("analytics-study-results")).toContainText("Python: основа");
+  const tabs=panel.getByRole("navigation",{name:"Подразделы аналитики"});
+  await tabs.getByRole("button",{name:"Активность"}).click();
+  await expect(panel).toHaveAttribute("data-tab","activity");
+  await tabs.getByRole("button",{name:"Сертификация"}).click();
+  await expect(page).toHaveURL(/analyticsTab=certification/);
+  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(2);
 });
-
-
-
-
-/**
- * Candidate screenshot evidence only: the approved Analytics PNG/HTML are not
- * available in the repository. These captures never establish pixel parity.
- */
-for (const viewport of [
-  { name: "desktop-dark", width: 1440, height: 900 },
-  { name: "mobile-dark", width: 390, height: 844 },
-] as const) {
-  test(`analytics visual audit: ${viewport.name} layout, chart, long plan links and candidate screenshot`, async ({ page }, testInfo) => {
-    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+for(const viewport of [{name:"desktop-dark",width:1440,height:900},{name:"mobile-dark",width:390,height:844}] as const){
+  test(`V3 analytics ${viewport.name}: activity evidence, certification and visual capture`,async({page},testInfo)=>{
+    await page.setViewportSize({width:viewport.width,height:viewport.height});
+    await page.emulateMedia({colorScheme:"dark"});
     await page.goto("/");
     await page.locator('[data-persona="participant-alex"]').click();
-    if (viewport.width < 700) {
-      await page.getByRole("button", { name: "Меню", exact: true }).click();
-    }
-    await page.goto("/workspace/5?legacy=1");
-
-    await expect(page.getByRole("heading", { name: "Моя аналитика" })).toBeVisible();
-    const profile = page.getByTestId("agentic-profile");
-    const chart = page.locator(".agentic-profile-chart");
-    const certification = page.locator(".agentic-certification");
-    await expect(profile).toBeVisible();
-    await expect(chart).toBeVisible();
-    await expect(certification).toBeVisible();
-    await expect(page.locator(".activity-chart-panel svg")).toBeVisible();
-    await expect(page.getByText(/Нет проверяемой истории событий/)).toBeVisible();
-
-    const chartRect = await chart.boundingBox();
-    const certificationRect = await certification.boundingBox();
-    expect(chartRect).not.toBeNull();
-    expect(certificationRect).not.toBeNull();
-    if (chartRect && certificationRect) {
-      if (viewport.width >= 1080) {
-        expect(certificationRect.x).toBeGreaterThan(chartRect.x + chartRect.width - 5);
-        expect(Math.abs(chartRect.y - certificationRect.y)).toBeLessThan(8);
-      } else {
-        expect(certificationRect.y).toBeGreaterThan(chartRect.y + chartRect.height - 5);
-      }
-    }
-
-    await page.getByRole("button", { name: /До следующего уровня/ }).click();
-    const firstPlanLink = page.getByTestId("plan-step-0");
-    await expect(firstPlanLink).toBeVisible();
-    const planStyles = await firstPlanLink.evaluate((link) => {
-      const styles = window.getComputedStyle(link);
-      return { width: link.getBoundingClientRect().width, display: styles.display, fontSize: Number.parseFloat(styles.fontSize) };
-    });
-    expect(planStyles.width).toBeGreaterThan(100);
-    expect(planStyles.fontSize).toBeGreaterThanOrEqual(11);
-    expect(planStyles.display).not.toBe("inline");
-
-    const htmlOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-    expect(htmlOverflow).toBeLessThanOrEqual(2);
-    await page.evaluate(async () => { await document.fonts.ready; });
-    const screenshot = await page.screenshot({ path: testInfo.outputPath(`analytics-candidate-${viewport.name}.png`), animations: "disabled", fullPage: true });
-    await testInfo.attach(`analytics-candidate-${viewport.name}`, { body: screenshot, contentType: "image/png" });
+    await page.goto("/workspace/5");
+    const panel=page.getByTestId("analytics-v3");
+    await expect(panel).toHaveAttribute("data-tab","activity");
+    await expect(page.getByRole("heading",{name:"Твоя активность"})).toBeVisible();
+    const period=panel.getByRole("combobox",{name:"Период аналитики"});
+    await period.selectOption("12");
+    await expect(period).toHaveValue("12");
+    await panel.getByRole("navigation",{name:"Подразделы аналитики"}).getByRole("button",{name:"Сертификация"}).click();
+    await expect(panel).toHaveAttribute("data-tab","certification");
+    await expect(panel).toContainText("Отдельно от подтверждения профессиональных компетенций");
+    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
+    expect(overflow).toBeLessThanOrEqual(2);
+    const png=await page.screenshot({path:testInfo.outputPath(`analytics-v3-${viewport.name}.png`),fullPage:true,animations:"disabled"});
+    await testInfo.attach(`analytics-v3-${viewport.name}`,{body:png,contentType:"image/png"});
   });
 }
