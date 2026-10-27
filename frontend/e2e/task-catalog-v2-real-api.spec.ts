@@ -195,13 +195,17 @@ test("real seeded API preserves card/list order and opens the canonical assigned
   ).length;
   expect(workspace.checkpoints).toHaveLength(5);
   expect(completed).toBe(2);
-  const expectedProgress = workspace.checkpoints.length
-    ? `${String(Math.round((completed / workspace.checkpoints.length) * 100))}% выполнено`
-    : "Прогресс уточняется";
-  expect(expectedProgress).toBe("40% выполнено");
-  await expect(page.locator(".ctw-progress h2")).toHaveText(expectedProgress);
-  await expect(page.locator(".ctw-metrics")).toContainText(
-    `${String(completed)} / ${String(workspace.checkpoints.length)}`,
+  // Assigned work now opens the canonical My Projects V2 detail. The retired
+  // TaskWorkspacePage (.ctw-*) is not the participant's route anymore.
+  const expectedPercent = Math.round((completed / workspace.checkpoints.length) * 100);
+  expect(expectedPercent).toBe(40);
+  const project = page.locator('.mp-detail[data-project-screen="detail"]');
+  await expect(project).toBeVisible();
+  await expect(project.getByRole("heading", { name: assigned?.title ?? "" })).toBeVisible();
+  const progress = project.locator(".mp-compact-progress");
+  await expect(progress.locator("header strong")).toHaveText(`${String(expectedPercent)}%`);
+  await expect(progress).toContainText(
+    `${String(completed)} из ${String(workspace.checkpoints.length)} этапов подтверждено`,
   );
 
   const foreign = await page.context().request.get(
