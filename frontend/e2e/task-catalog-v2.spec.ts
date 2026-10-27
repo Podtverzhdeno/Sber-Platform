@@ -76,7 +76,8 @@ test("catalog filters, view parity and one idempotent apply", async ({ page }) =
   await expect(page.getByRole("button", { name: /Сбросить фильтр Навык/ })).toBeVisible();
   await page.getByRole("button", { name: "Список" }).click();
   await expect(page.getByRole("table", { name: "Список рекомендованных задач" })).toBeVisible();
-  await page.getByRole("button", { name: "Отклик" }).first().click();
+  await page.getByLabel(`Действия с задачей: ${catalogItem.title}`).click();
+  await page.getByRole("group", { name: `Действия: ${catalogItem.title}` }).getByRole("button", { name: "Условия и отклик" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("checkbox").check();
   const submit = dialog.getByRole("button", { name: "Подтвердить и отправить отклик" });
@@ -124,8 +125,9 @@ test("catalog and conditions pass automated accessibility checks", async ({ page
 });
 
 test("light theme keeps catalog contrast accessible", async ({ page }) => {
+  await page.addInitScript(() => window.localStorage.setItem("impulse-theme", "light"));
   await openCatalog(page);
-  await page.getByRole("button", { name: /Тёмная тема включена/ }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   const result = await new AxeBuilder({ page }).analyze();
   expect(result.violations).toEqual([]);
 });
@@ -210,8 +212,11 @@ test("mobile collapses secondary filters and reveals opened task detail", async 
   await expect(page.getByLabel("Навык", { exact: true })).toBeHidden();
 
   await page.getByRole("button", { name: "Подробнее" }).first().click();
-  await expect(page.getByRole("heading", { name: "Этапы задачи" })).toBeVisible();
-  await expect(page.getByText(/Это план, а не прогресс/)).toBeVisible();
+  const planned = page.locator(".catalog-v2-detail .catalog-v2-workflow-extra");
+  await expect(planned.locator("summary")).toContainText(`План выполнения (${String(catalogItem.stage_plan.stages.length)})`);
+  await planned.locator("summary").click();
+  await expect(planned.locator("li")).toHaveCount(catalogItem.stage_plan.stages.length);
+  await expect(planned).toContainText("Это план, а не прогресс выполнения");
   await expect.poll(() =>
     page.locator(".catalog-v2-inspector").evaluate((node) => node.getBoundingClientRect().top),
   ).toBeLessThan(844);

@@ -90,7 +90,10 @@ for (const viewport of [
       test(`selected cards and detail · ${theme}`, async ({ page }) => {
         await openCatalog(page, theme);
         await page.getByRole("button", { name: "Подробнее" }).first().click();
-        await expect(page.getByRole("heading", { name: "Этапы задачи" })).toBeVisible();
+        const plan=page.locator(".catalog-v2-detail .catalog-v2-workflow-extra");
+        await expect(plan.locator("summary")).toContainText("План выполнения");
+        await plan.locator("summary").click();
+        await expect(plan.locator("li")).toHaveCount(catalogItem.stage_plan.stages.length);
         await expect(page).toHaveScreenshot(
           `task-catalog-detail-${String(viewport.width)}x${String(viewport.height)}-${theme}.png`,
           { animations: "disabled", fullPage: true, maxDiffPixelRatio: 0.01 },
