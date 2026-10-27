@@ -1,0 +1,44 @@
+name: Bootcamp CTA Mixed Recommendation PR QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "frontend/e2e/bootcamp-approved.spec.ts"
+      - "frontend/src/features/bootcamp/**"
+      - ".github/workflows/bootcamp-cta-mixed-pr.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/e2e/bootcamp-approved.spec.ts"
+      - ".github/workflows/bootcamp-cta-mixed-pr.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bootcamp-cta:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx playwright install --with-deps chromium
+      - name: Compare real recommended and ordinary course card CTA geometry
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: npx playwright test bootcamp-approved.spec.ts --project=chromium --reporter=line --grep "Bootcamp primary actions share a baseline"
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: bootcamp-cta-mixed-evidence
+          path: frontend/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
