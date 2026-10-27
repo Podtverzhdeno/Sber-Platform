@@ -45,6 +45,7 @@ test("customer draft survives reload locally and moderation creates exactly one 
   let loggedIn = false;
   let created = 0;
   let submitted = 0;
+  let submittedProblem = "";
   let persistedTask: { id:string; project_key:string; task_key:string; title:string; status:"draft"|"submitted"; places:number; mode:string; competency_tags:string[] } | null = null;
   let submittedBrief: { task_key:string; title:string; problem:string; deliverable:string; acceptance_criteria:string[]; mode:string } | null = null;
 
@@ -58,6 +59,7 @@ test("customer draft survives reload locally and moderation creates exactly one 
     created += 1;
     submittedBrief = route.request().postDataJSON() as typeof submittedBrief;
     if (!submittedBrief) throw new Error("Missing submitted brief");
+    submittedProblem = submittedBrief.problem;
     persistedTask = {id:taskId,project_key:"demo-rd-lab",task_key:submittedBrief.task_key,
       title:submittedBrief.title,status:"draft",places:2,mode:submittedBrief.mode,competency_tags:[]};
     return route.fulfill({json:persistedTask});
@@ -100,9 +102,10 @@ test("customer draft survives reload locally and moderation creates exactly one 
   expect(submitted,"Moderation submission must occur exactly once").toBe(1);
   expect(submittedBrief).toMatchObject({
     title:"Платный R&D прототип",
-    problem:"Нужно проверить продуктовую гипотезу на данных",
     acceptance_criteria:["Метрика качества подтверждена отчётом"],
   });
+  expect(submittedProblem).toContain("Нужно проверить продуктовую гипотезу на данных");
+  expect(submittedProblem).toContain("Сопровождение: Ментор");
   expect(persistedTask).toMatchObject({status:"submitted"});
   await expect.poll(async()=>page.evaluate(()=>localStorage.getItem("impulse-customer-task-wizard-v2"))).toBeNull();
 });
