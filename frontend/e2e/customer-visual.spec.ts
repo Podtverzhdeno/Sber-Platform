@@ -43,11 +43,31 @@ test("customer premium workspace renders every route without overflow", async ({
   const sidebar = page.getByRole("navigation", { name: "Навигация роли" });
   await expect(sidebar.getByRole("link")).toHaveCount(9);
   for (const section of ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения", "Настройки"]) {
-    await sidebar.getByRole("link", { name: section, exact: true }).click();
-    await expect(page.locator(".premium-page, .messenger-page, .customer-talent-analytics, .buddy-page, .create-task-workspace, .participant-settings").first()).toBeVisible();
-    const overflow = await page.evaluate<boolean>("document.documentElement.scrollWidth > document.documentElement.clientWidth");
-    expect(overflow, `${section} has horizontal overflow`).toBe(false);
-    await page.screenshot({ path: `test-results/customer-${section.replace(/[^a-zа-я0-9]+/giu, "-")}.png`, fullPage: true });
+    await test.step(`Customer route: ${section}`, async () => {
+      await sidebar.getByRole("link", { name: section, exact: true }).click();
+      await expect(page.locator(".premium-page, .messenger-page, .customer-talent-analytics, .customer-activity-v3, .buddy-page, .customer-scenario, .create-task-workspace, .participant-settings").first()).toBeVisible();
+      const geometry = await page.evaluate(() => {
+        const width = document.documentElement.clientWidth;
+        return {
+          documentWidth: document.documentElement.scrollWidth, viewportWidth: width,
+          spills: Array.from(document.querySelectorAll<HTMLElement>("body *"))
+            .filter(node=>node.clientWidth>0&&node.scrollWidth>node.clientWidth+1)
+            .map(node=>({tag:node.tagName,cls:typeof node.className==="string"?node.className.slice(0,100):"",
+              scroll:node.scrollWidth,client:node.clientWidth,overflow:getComputedStyle(node).overflowX}))
+            .sort((a,b)=>(b.scroll-b.client)-(a.scroll-a.client)).slice(0,12),
+          leftSpills: Array.from(document.querySelectorAll<HTMLElement>("body *"))
+            .map(node=>({node,left:node.getBoundingClientRect().left}))
+            .filter(({left})=>left < -2).slice(0,8).map(({node,left})=>({className:typeof node.className==="string"?node.className.slice(0,100):"",left:Math.round(left)})),
+          offenders: Array.from(document.querySelectorAll<HTMLElement>("body *"))
+            .map((node) => ({node, rect:node.getBoundingClientRect()}))
+            .filter(({rect}) => rect.width > 0 && rect.right > width + 1)
+            .sort((a,b)=>b.rect.right-a.rect.right).slice(0,10)
+            .map(({node,rect}) => ({tag:node.tagName, className:typeof node.className==="string" ? node.className.slice(0,140):"", right:Math.round(rect.right),width:Math.round(rect.width),text:node.textContent.slice(0,90)})),
+        };
+      });
+      expect(geometry.documentWidth, `${section} overflow diagnostics: ${JSON.stringify(geometry)}`).toBeLessThanOrEqual(geometry.viewportWidth+1);
+      await page.screenshot({ path: `test-results/customer-${section.replace(/[^a-zа-я0-9]+/giu, "-")}.png`, fullPage: true });
+    });
   }
 });
 

@@ -1391,6 +1391,9 @@ tbody tr:hover, tbody tr:focus-within { background: var(--c-rgb2f95ff_a05);; }
 .buddy-chat form button { padding:0 16px; }
 .buddy-context { padding:17px; }
 .buddy-context h2 { margin:3px 0 13px; }
+/* The customer assistant sidebar title must wrap inside its grid column. */
+.buddy-page .buddy-context { min-width:0; }
+.buddy-page .buddy-context h2 { overflow-wrap:anywhere; }
 .buddy-context article { display:grid;gap:9px;padding:14px;border:1px solid var(--c-rgb22e6d0_a22);border-radius:11px;background:var(--c-rgb22e6d0_a05); }
 .buddy-context article small { color:var(--color-muted); }
 .buddy-context article button { padding:8px;border:0;border-radius:7px;color:var(--c-rgb03201c);background:var(--color-primary);font-weight:850;cursor:pointer; }
@@ -1884,6 +1887,11 @@ tbody tr:hover, tbody tr:focus-within { background: var(--c-rgb2f95ff_a05);; }
 .mini-metrics { display:grid;grid-template-columns:repeat(3,1fr);gap:8px; }
 .mini-metrics span { display:grid;gap:3px;padding:9px;border:1px solid var(--c-rgb1d3852);border-radius:8px;background:var(--c-rgb0d1e30); }
 .mini-metrics small { color:var(--c-rgb8ea2b7); }
+/* Constrain the customer home business-effect triplet to its grid: long captions may wrap,
+   but must not extend past the desktop viewport. Preserve the text and card widths. */
+.premium-home-lower .mini-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.premium-home-lower .mini-metrics > span { min-width:0; }
+.premium-home-lower .mini-metrics small { overflow-wrap:anywhere; }
 .premium-toolbar { display:flex;gap:10px;align-items:center; }
 .premium-toolbar input, .talent-toolbar input, .ws-card input { min-height:38px;padding:0 12px;border:1px solid var(--c-rgb24425f);border-radius:8px;color:var(--c-rgbeef6ff);background:var(--c-rgb0c1b2c); }
 .premium-toolbar input { margin-left:auto; }
