@@ -120,6 +120,8 @@ test("customer journeys: контекст задачи, доменные гра�
   page,
 }) => {
   mockBoot(page, ["Сообщения"]);
+  const pageErrors: string[] = [];
+  page.on("pageerror", error => pageErrors.push(error.message));
 
   await page.goto("/");
   await page.locator('[data-persona="customer-roman"]').click();
@@ -134,6 +136,7 @@ test("customer journeys: контекст задачи, доменные гра�
       url:page.url(),
       screen:(await page.locator("body").innerText()).slice(0,2200),
       channelRows:await page.locator(".msg-dialog-list__row").count(),
+      pageErrors,
     }));
     throw error;
   }
