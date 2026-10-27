@@ -1,0 +1,50 @@
+name: Published Impulse Grade Catalog QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "frontend/e2e/home-reference-geometry.spec.ts"
+      - "frontend/e2e/trajectory-reference-geometry.spec.ts"
+      - "frontend/src/features/participant-home-v2/**"
+      - "frontend/src/features/trajectory-v2/**"
+      - ".github/workflows/published-grade-catalog-pr.yml"
+  push:
+    branches: [main]
+    paths:
+      - "frontend/e2e/home-reference-geometry.spec.ts"
+      - "frontend/e2e/trajectory-reference-geometry.spec.ts"
+      - ".github/workflows/published-grade-catalog-pr.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  grade-catalog:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npx playwright install --with-deps chromium
+      - name: Verify published grades, drawer geometry, focus and trajectory cycles
+        env:
+          CI: "true"
+          TZ: Europe/Moscow
+        run: >-
+          npx playwright test home-reference-geometry.spec.ts trajectory-reference-geometry.spec.ts
+          --project=chromium --reporter=line
+          --grep "grade drawer matches the source|TRJ-SCREEN-02 and 05"
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: published-grade-catalog-evidence
+          path: frontend/test-results/
+          retention-days: 7
+          if-no-files-found: ignore

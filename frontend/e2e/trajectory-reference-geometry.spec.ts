@@ -159,5 +159,7 @@ test("TRJ-SCREEN-02 and 05: stage result drawer and grade catalog states are cap
   const grades = page.locator(".trajectory-v2-grades-dialog");
   await expect(grades).toBeVisible();
   await captureState(page, "TRJ-SCREEN-05-all-grades");
-  await expect(grades.getByText(/Полный перечень грейдов пока не опубликован/)).toBeVisible();
+  await expect(grades.locator(".trajectory-v2-grade-option")).toHaveCount(4);
+  await expect(grades.getByRole("heading", {name:/Уровни Impulse/})).toBeVisible();
+  await expect(grades).toContainText("Учебные уровни и карьерные грейды Сбера — разные системы.");
 });

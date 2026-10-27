@@ -292,7 +292,9 @@ test("grade drawer matches the source 456px geometry and restores focus at deskt
   expect(box).not.toBeNull();
   expect(box?.width).toBe(456);
   expect(box?.x).toBe(992);
-  await expect(drawer.getByText("Каталог грейдов пока не опубликован")).toBeVisible();
+  await expect(drawer.locator(".home-v2-grade-timeline > button")).toHaveCount(4);
+  await expect(drawer.getByText("L0 · Стартовый цикл")).toBeVisible();
+  await expect(drawer).toContainText("Официальный карьерный грейд рассчитывается отдельно.");
   await expect(page.locator("body")).toHaveCSS("overflow", "hidden");
   await page.keyboard.press("Escape");
   await expect(drawer).toHaveCount(0);
