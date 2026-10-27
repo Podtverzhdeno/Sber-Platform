@@ -166,7 +166,7 @@ describe("SberChat-style messenger shell", () => {
     expect(screen.getByText("Ничего не найдено по этому запросу.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Создать новый чат/ }));
     expect(screen.getByRole("tab", { name: "Контакты" })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByRole("button", { name: /Участник проекта/ })).toBeInTheDocument();
+    expect(within(screen.getByRole("list", { name: "Контакты" })).getByRole("button", { name: /Участник проекта/ })).toBeInTheDocument();
   });
 
   it("mobile single-pane: выбор диалога открывает чат, назад возвращается к списку", async () => {
