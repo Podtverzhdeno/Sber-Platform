@@ -118,6 +118,7 @@ test("mentor routes rubric queue into workspace and opens messenger context", as
   expect(workspaceScreenshot.byteLength).toBeGreaterThan(1_000);
 
   await page.getByRole("link", { name: "Сообщения" }).click();
+  await page.locator(".msg-dialog-list__row").filter({ hasText: "MVP для mentor journey" }).click();
   await expect(page.locator(".chat-context h2")).toHaveText("MVP для mentor journey");
   await expect(page.locator(".chat-context")).toContainText("Проект");
   await expect(page.locator(".chat-context")).toContainText("версия 2 · принят заказчиком");

@@ -1,20 +1,24 @@
 import { ArrowRight, Folder, MessageCircleMore, MessagesSquare, Plus, Search, Settings, Users } from "lucide-react";
 
 import type { ApiChannelView } from "./contracts";
+import { dialogTitle } from "./view-model";
 
 export function EmptyChatState({
   recent,
+  viewerId,
   mayaki,
   onOpen,
   onCreate,
   onFindCommunity,
 }: {
   recent: ApiChannelView | null;
+  viewerId: string | null;
   mayaki: ApiChannelView | null;
   onOpen: (id: string) => void;
   onCreate: () => void;
   onFindCommunity: () => void;
 }) {
+  const recentName = recent ? dialogTitle(recent, viewerId) : null;
   const openMayaki = () => {
     if (mayaki !== null) onOpen(mayaki.id);
     else onFindCommunity();
@@ -28,8 +32,8 @@ export function EmptyChatState({
       <p>Слева вы можете открыть личный чат,<br/> рабочую группу или сообщество</p>
       <div className="msg-reference-empty__actions">
         <button type="button" onClick={() => {if (recent !== null) onOpen(recent.id); else onCreate();}}>
-          <span className="msg-reference-empty__action-icon">{recent ? (recent.title[0] ?? "Ч") : <MessageCircleMore size={22}/>}</span>
-          <span><strong>{recent ? "Открыть последний чат" : "Начать общение"}</strong><small>{recent?.title ?? "Контакты и доступные диалоги"}</small></span>
+          <span className="msg-reference-empty__action-icon">{recentName ? (recentName[0] ?? "Ч") : <MessageCircleMore size={22}/>}</span>
+          <span><strong>{recent ? "Открыть последний чат" : "Начать общение"}</strong><small>{recentName ?? "Контакты и доступные диалоги"}</small></span>
           <ArrowRight size={19} />
         </button>
         <button type="button" className="community" onClick={openMayaki}>

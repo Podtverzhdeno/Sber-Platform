@@ -538,7 +538,7 @@ export function MessagingWorkspace({
     .sort((a, b) =>
       (b.last_message?.created_at ?? b.created_at).localeCompare(a.last_message?.created_at ?? a.created_at)
     )[0] ?? null;
-  const mayakiChannel = channels.find((channel) => channel.title.trim().toLowerCase() === "маяки") ?? null;
+  const mayakiChannel = channels.find((channel) => typeof channel.title === "string" && channel.title.trim().toLowerCase() === "маяки") ?? null;
   const openCreate = () => {
     setCreateSignal((current) => current + 1);
     if (isNarrow) setMobilePane("list");
@@ -625,7 +625,7 @@ export function MessagingWorkspace({
               }}
               headerExtra={headerExtra}
             /> : (
-              <EmptyChatState recent={recentChannel} mayaki={mayakiChannel}
+              <EmptyChatState recent={recentChannel} viewerId={personId} mayaki={mayakiChannel}
                 onOpen={selectChannel} onCreate={openCreate} onFindCommunity={findMayaki}/>
             )}
             {selected && (

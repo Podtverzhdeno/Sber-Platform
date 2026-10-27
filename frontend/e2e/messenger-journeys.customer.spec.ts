@@ -69,7 +69,7 @@ const contextPayload = {
 
 function mockBoot(page: Page, navigation: string[]): void {
   void page.route("**/api/v1/**", (route) => route.fulfill({ status: 404, json: {} }));
-  void page.route("**/api/v1/config", (route) => route.fulfill({ json: {} }));
+  void page.route("**/api/v1/config", (route) => route.fulfill({ json: { demo_mode: true } }));
   void page.route("**/api/v1/auth/personas", (route) =>
     route.fulfill({
       json: [
@@ -120,11 +120,27 @@ test("customer journeys: контекст задачи, доменные гра�
   page,
 }) => {
   mockBoot(page, ["Сообщения"]);
+  const pageErrors: string[] = [];
+  page.on("pageerror", error => pageErrors.push(error.message));
 
   await page.goto("/");
   await page.locator('[data-persona="customer-roman"]').click();
   await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
   await page.getByRole("link", { name: "Сообщения" }).click();
+  // SberChat waits for explicit selection, and task/personal channels must coexist.
+  const visible=page.locator(".msg-dialog-list__row").filter({ hasText: "Ревью отзывов" });
+  try {
+    await expect(visible).toBeVisible({timeout:5000});
+  } catch (error) {
+    console.log("MESSENGER_CUSTOMER_DEBUG "+JSON.stringify({
+      url:page.url(),
+      screen:(await page.locator("body").innerText()).slice(0,2200),
+      channelRows:await page.locator(".msg-dialog-list__row").count(),
+      pageErrors,
+    }));
+    throw error;
+  }
+  await visible.click();
 
   const context = page.getByRole("complementary", { name: "Контекст диалога" });
   await expect(context.getByRole("heading", { level: 2 })).toHaveText("Ревью отзывов");
@@ -141,6 +157,7 @@ test("customer journeys: контекст задачи, доменные гра�
   await expect(page).toHaveURL(/workspace\/1\?task=/);
 
   await page.getByRole("link", { name: "Сообщения" }).click();
+  await page.locator(".msg-dialog-list__row").filter({ hasText: "Ревью отзывов" }).click();
   const chatPane = page.locator(".msg-chat");
   await expect(chatPane).toBeVisible();
 
@@ -152,6 +169,19 @@ test("customer journeys: контекст задачи, доменные гра�
     .filter({ hasText: "Личное: документы выслал." })
     .first();
   await personalRow.click();
+  try {
+    await expect(personalRow).toHaveAttribute("aria-current", "true", {timeout:5000});
+    await expect(page.getByTestId("composer-readonly")).toBeVisible({timeout:5000});
+  } catch(error) {
+    console.log("PERSONAL_READONLY_DIAGNOSTIC "+JSON.stringify({
+      messageState:await page.locator(".messenger-page").getAttribute("data-message-state"),
+      selectedRows:await page.locator('.msg-dialog-list__row[aria-current="true"]').allTextContents(),
+      renderedComposer:await page.locator(".msg-composer").allTextContents(),
+      senderIsDisabled:await page.getByTestId("composer-textarea").count(),
+      panel: (await page.locator("body").innerText()).slice(-2400),
+    }));
+    throw error;
+  }
   await expect(page.getByTestId("composer-readonly")).toContainText(
     "отозвано право писать",
   );
