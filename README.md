@@ -166,6 +166,15 @@ npm run dev
 | <code>AI_BUDDY_ENABLED</code> | Включение AI Buddy |
 | <code>LANGFUSE_ENABLED</code> | Включение опциональной AI-трассировки |
 
+**Как подключить OpenRouter для AI Buddy:**
+
+~~~bash
+# Из корня репозитория
+cp .env.example .env
+~~~
+
+В Windows PowerShell: `Copy-Item .env.example .env`. В файле `.env` вставьте свой ключ в `OPENROUTER_API_KEY` и установите `AI_BUDDY_ENABLED=true`. По умолчанию используется `OPENROUTER_MODEL_BUDDY=openrouter/free`. Для локального запуска через Docker Compose перезапустите `docker compose up --build`: Compose прочитает корневой `.env` и передаст значения только backend-контейнеру. Для запуска backend без Docker настройки берутся из того же `.env`. Настоящий ключ в `.env.example` и Git добавлять нельзя.
+
 По умолчанию AI-флаги выключены. В AI-контуре допускается <code>openrouter/free</code> либо явно разрешённая модель с суффиксом <code>:free</code>; платного fallback нет. Не помещайте API-ключи, реальные пароли и токены в Git, frontend или логи.
 
 Команда <code>uv run impulse-demo-reset</code> удаляет только seed-owned записи и допустима исключительно при <code>DEMO_MODE=true</code>. Для обычного запуска она не требуется.
