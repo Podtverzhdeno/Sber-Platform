@@ -113,16 +113,16 @@ let cacheGeneration = 0;
 let activeFetch = globalThis.fetch;
 /** Role and identity changes must invalidate every actor-scoped TanStack query too. */
 const authScopeListeners = new Set<() => void>();
-const progressMutationListeners = new Set<() => void>();
+const progressMutationListeners = new Set<(path: string) => void>();
 
 /** Subscribers refetch all visible authoritative projections after a commit. */
-export function subscribeProgressMutation(listener: () => void): () => void {
+export function subscribeProgressMutation(listener: (path: string) => void): () => void {
   progressMutationListeners.add(listener);
   return () => { progressMutationListeners.delete(listener); };
 }
 
-function publishProgressMutation(): void {
-  for (const listener of progressMutationListeners) listener();
+function publishProgressMutation(path: string): void {
+  for (const listener of progressMutationListeners) listener(path);
 }
 
 
@@ -212,11 +212,11 @@ export async function apiRequest<T>(path: RuntimeApiPath, options?: RequestInit)
     if (!response.ok) throw await decodeError(response);
     if (AUTH_SCOPE_MUTATIONS.has(path) && method !== "GET" && method !== "HEAD") publishAuthScopeChange();
     if (response.status === 204) {
-      if (isCrossSectionMutation(path, method)) publishProgressMutation();
+      if (isCrossSectionMutation(path, method)) publishProgressMutation(path);
       return undefined as T;
     }
     const data = (await response.json()) as T;
-    if (isCrossSectionMutation(path, method)) publishProgressMutation();
+    if (isCrossSectionMutation(path, method)) publishProgressMutation(path);
     return data;
   }
 
