@@ -1,0 +1,454 @@
+---
+name: Temporary full CI verification of main
+
+on:
+  push:
+    branches:
+      - ops/verify-main-ci-20261031
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.13"
+  NODE_VERSION: "24"
+
+jobs:
+  openspec_strict_and_docs:
+    name: openspec-strict-and-docs
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: Install Python dependencies
+        run: uv sync --frozen
+      - name: Validate OpenSpec
+        run: npx -y @fission-ai/openspec@latest validate --all --strict --no-interactive
+      - name: Validate documentation contracts
+        run: uv run python scripts/check_docs.py
+
+  backend_format_lint_types:
+    name: backend-format-lint-types
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Check formatting
+        run: uv run ruff format --check .
+      - name: Run Ruff
+        run: uv run ruff check .
+      - name: Run Pyright
+        run: uv run pyright
+
+  backend_unit_api_integration:
+    name: backend-unit-api-integration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      TEST_DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      APP_ENV: test
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Apply migrations to clean PostgreSQL
+        run: uv run alembic upgrade head
+      - name: Run unit, API, and integration tests
+        run: |
+          mkdir -p test-results
+          set -o pipefail
+          uv run pytest \
+            --cov=impulse \
+            --cov-report=term-missing \
+            --cov-report=xml:test-results/coverage.xml \
+            --junitxml=test-results/pytest.xml 2>&1 | tee test-results/pytest.log
+      - name: Publish failed test names
+        if: ${{ failure() }}
+        run: |
+          python3 - <<'PY'
+          import pathlib, urllib.parse
+          log_path = pathlib.Path('test-results/pytest.log')
+          if not log_path.exists():
+              print('::error::pytest.log is missing')
+              raise SystemExit(0)
+          log = log_path.read_text(encoding='utf-8', errors='replace')
+          failed = [line for line in log.splitlines() if line.startswith('FAILED ')][:15]
+          print('::error::failed_tests=' + urllib.parse.quote(' | '.join(failed)[:800]))
+          for line in failed[:5]:
+              print('::error::' + urllib.parse.quote(line[:250]))
+          tail = [line for line in log.splitlines() if line.startswith('E ')][-15:]
+          print('::error::tail=' + urllib.parse.quote(' \n'.join(tail)[:1800]))
+          PY
+      - name: Upload backend test reports
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: backend-test-reports
+          path: test-results/
+          if-no-files-found: error
+          retention-days: 14
+
+  frontend_quality_and_contracts:
+    name: frontend-quality-and-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Run ESLint
+        run: npm run lint
+      - name: Run TypeScript checks
+        run: npm run typecheck
+      - name: Run unit tests
+        run: npm test
+      - name: Verify generated API schema
+        run: npm run api:check
+
+  frontend_build_and_e2e:
+    name: frontend-build-and-e2e (shard ${{ matrix.shard }}/6)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      APP_ENV: test
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Install backend dependencies
+        run: uv sync --frozen
+        working-directory: .
+      - name: Apply backend migrations
+        run: uv run alembic upgrade head
+        working-directory: .
+      - name: Seed demo data
+        run: uv run impulse-demo-seed
+        working-directory: .
+      - name: Start backend for browser tests
+        run: |
+          nohup uv run uvicorn impulse.main:app --host 127.0.0.1 --port 8000 --app-dir . > /tmp/backend.log 2>&1 &
+          echo $! > /tmp/backend.pid
+        working-directory: .
+      - name: Wait for backend readiness
+        run: |
+          set +e
+          ready=""
+          code=""
+          for attempt in $(seq 1 30); do
+            code=$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 5 http://127.0.0.1:8000/health/ready)
+            rc=$?
+            if [ "${code}" = "200" ]; then
+              ready=1
+              break
+            fi
+            if [ "$attempt" = "1" ] || [ "$attempt" = "15" ]; then
+              backend_probe=$(cat /tmp/backend.log 2>/dev/null | tr '\n' ' ' | tail -c 900)
+              echo "::notice::backend_probe_attempt_${attempt}=${backend_probe}"
+            fi
+            sleep 2
+          done
+          if [ -z "${ready}" ]; then
+            backend_logs=$(cat /tmp/backend.log 2>/dev/null | tr '\n' ' ' | tail -c 1800)
+            echo "::error::backend_not_ready last_code=${code} curl_rc=${rc} log=${backend_logs}"
+            exit 1
+          fi
+        working-directory: .
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Align Linux fonts with cross-platform expectations
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-core fonts-liberation fontconfig
+          fc-cache -f
+      - name: Build production bundle
+        run: npm run build
+      - name: Verify built security controls
+        run: npm run security:check
+      - name: Run browser tests
+        run: |
+          set -o pipefail
+          npm run test:e2e -- --shard=${{ matrix.shard }}/6 2>&1 | tee e2e.log
+        env:
+          TZ: Europe/Moscow
+          LANG: ru_RU.UTF-8
+      - name: Publish e2e failures
+        if: ${{ failure() }}
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, urllib.parse
+          log_path = pathlib.Path('e2e.log')
+          if not log_path.exists():
+              print('::error::e2e.log is missing')
+              raise SystemExit(0)
+          log = log_path.read_text(encoding='utf-8', errors='replace')
+          lines = log.splitlines()
+          failures = [line.strip() for line in lines if line.strip().startswith(tuple('%d) ' % n for n in range(1, 40)))]
+          print('::error::e2e_failure_headers=' + urllib.parse.quote(' | '.join(failures)[:1200]))
+          bodies = []
+          for index, line in enumerate(lines):
+              stripped = line.strip()
+              if re.match(r'^\d+\) ', stripped) and '[chromium]' in stripped:
+                  bodies.extend(lines[index:index+14])
+                  if len(bodies) > 96:
+                      break
+          print('::error::e2e_failure_bodies=' + urllib.parse.quote(' \n'.join(bodies)[:4200]))
+          tail = [line for line in lines][-25:]
+          print('::error::e2e_tail=' + urllib.parse.quote(' \n'.join(tail)[:1800]))
+          backend_text = pathlib.Path('/tmp/backend.log').read_text(encoding='utf-8', errors='replace')
+          post_lines = [line for line in backend_text.splitlines() if 'POST /api/v1/auth' in line or 'GET /health' in line][-14:]
+          print('::error::backend_auth_lines=' + urllib.parse.quote(' \n'.join(post_lines)[:1400]))
+          PY
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: playwright-report-shard-${{ matrix.shard }}
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  docker_smoke:
+    name: docker-smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - name: Build and start the stack
+        run: docker compose up --detach --build --wait
+      - name: Record image digest
+        run: docker compose images --format json
+      - name: Verify non-root process
+        run: test "$(docker compose exec -T app id -u)" != "0"
+      - name: Verify health and SPA fallback
+        run: |
+          live_ok=""
+          for attempt in $(seq 1 45); do
+            code=$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 5 http://127.0.0.1:8000/health/live)
+            if [ "${code}" = "200" ]; then
+              live_ok=1
+              break
+            fi
+            sleep 2
+          done
+          if [ -z "${live_ok}" ]; then
+            app_logs=$(docker compose logs --tail=200 app 2>&1 | tr '\n' ' ' | tail -c 2500)
+            echo "::error::uvicorn_did_not_become_live app_logs=${app_logs}"
+            pg_logs=$(docker compose logs --tail=40 postgres 2>&1 | tr '\n' ' ' | tail -c 1200)
+            echo "::error::postgres_logs=${pg_logs}"
+            echo "::error::last_live_code=${code}"
+            activity=$(docker compose exec -T postgres psql -U impulse -d impulse -c "SELECT pid, state, wait_event_type, wait_event, query FROM pg_stat_activity" 2>&1 | tr '\n' ' ' | tail -c 1500)
+            echo "::error::pg_activity=${activity}"
+            ports=$(docker compose exec -T app sh -c 'netstat -tlnp 2>/dev/null | grep -w 8000' 2>&1 | tr '\n' ' ')
+            echo "::error::app_8000_listener=${ports}"
+            exit 1
+          fi
+          curl --fail --silent --show-error http://127.0.0.1:8000/health/live
+          curl --fail --silent --show-error http://127.0.0.1:8000/health/ready
+          curl --fail --silent --show-error \
+            --header 'Accept: text/html' \
+            http://127.0.0.1:8000/participant | grep -q '<div id="root"></div>'
+      - name: Verify demo login
+        run: |
+          curl --fail --silent --show-error \
+            --header 'Content-Type: application/json' \
+            --data '{"persona_key":"participant-alex"}' \
+            http://127.0.0.1:8000/api/v1/auth/demo-login \
+            | python -c 'import json,sys; data=json.load(sys.stdin); assert data["active_role"] == "participant"'
+      - name: Verify readiness fails closed without PostgreSQL
+        run: |
+          docker compose stop postgres
+          if curl --fail --silent http://127.0.0.1:8000/health/ready; then
+            echo 'readiness unexpectedly remained healthy without PostgreSQL'
+            exit 1
+          fi
+      - name: Diagnose stack on failure
+        if: ${{ failure() }}
+        run: |
+          set +e
+          ps_output=$(docker compose ps --format json 2>&1 | head -c 800)
+          echo "::error::compose_ps=${ps_output}"
+          app_logs=$(docker compose logs --tail=60 app 2>&1 | tr '\n' ' ' | head -c 1800)
+          echo "::error::app_logs=${app_logs}"
+          for path in /health/live /health/ready /participant; do
+            code=$(curl --silent --output /dev/null --write-out '%{http_code}' --header 'Accept: text/html' --max-time 10 "http://127.0.0.1:8000$path")
+            rc=$?
+            echo "::error::probe ${path} -> ${code} (curl_rc=${rc})"
+          done
+          spa_head=$(curl --silent --header 'Accept: text/html' --show-error --max-time 15 http://127.0.0.1:8000/participant | head -c 300 | tr '\n' ' ')
+          echo "::error::spa_head=${spa_head}"
+          exit 0
+      - name: Stop the stack
+        if: ${{ always() }}
+        run: docker compose down --volumes
+
+  secret_and_dependency_scans:
+    name: secret-and-dependency-scans
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          enable-cache: true
+      - name: Install Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          package-manager-cache: false
+      - name: Install locked dependencies
+        run: uv sync --frozen
+      - name: Scan repository for secrets
+        run: uv run impulse-secret-scan
+      - name: Audit Python production dependencies
+        run: |
+          uv export --frozen --no-dev --no-hashes --format requirements-txt --output-file requirements-ci.txt
+          uvx pip-audit --requirement requirements-ci.txt
+      - name: Audit npm production dependencies
+        working-directory: frontend
+        run: |
+          npm ci
+          npm audit --omit=dev --audit-level=high
+      - name: Build final container image
+        run: docker build --tag impulse-ci:${{ github.sha }} .
+      - name: Scan final image for critical vulnerabilities
+        run: >-
+          docker run --rm
+          --volume /var/run/docker.sock:/var/run/docker.sock
+          aquasec/trivy:0.67.2 image
+          --exit-code 1
+          --severity CRITICAL
+          --ignore-unfixed
+          --scanners vuln
+          --timeout 15m
+          --skip-version-check
+          impulse-ci:${{ github.sha }}
+
+  required_gates:
+    name: required-gates
+    if: ${{ always() }}
+    needs:
+      - openspec_strict_and_docs
+      - backend_format_lint_types
+      - backend_unit_api_integration
+      - frontend_quality_and_contracts
+      - frontend_build_and_e2e
+      - docker_smoke
+      - secret_and_dependency_scans
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every mandatory gate to succeed
+        run: |
+          test '${{ needs.openspec_strict_and_docs.result }}' = 'success'
+          test '${{ needs.backend_format_lint_types.result }}' = 'success'
+          test '${{ needs.backend_unit_api_integration.result }}' = 'success'
+          test '${{ needs.frontend_quality_and_contracts.result }}' = 'success'
+          test '${{ needs.frontend_build_and_e2e.result }}' = 'success'
+          test '${{ needs.docker_smoke.result }}' = 'success'
+          test '${{ needs.secret_and_dependency_scans.result }}' = 'success'
