@@ -1,0 +1,52 @@
+name: Zero-year support probe (self-cleaning)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/zero-year-probe.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 3
+      - name: Try year-zero raw Git commit on isolated branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name Podtverzhdeno
+          git config user.email 187974942+Podtverzhdeno@users.noreply.github.com
+          TREE=$(git rev-parse HEAD^{tree})
+          PARENT=$(git rev-parse HEAD)
+          {
+            printf 'tree %s\n' "$TREE"
+            printf 'parent %s\n' "$PARENT"
+            printf 'author Podtverzhdeno <187974942+Podtverzhdeno@users.noreply.github.com> -62152876800 +0000\n'
+            printf 'committer Podtverzhdeno <187974942+Podtverzhdeno@users.noreply.github.com> -62152876800 +0000\n\n'
+            printf 'chore: historical year-zero compatibility probe\n'
+          } > /tmp/year-zero-commit.txt
+          SHA=$(git hash-object --literally -t commit -w --stdin < /tmp/year-zero-commit.txt)
+          echo "RAW_SHA=$SHA"
+          git cat-file -p "$SHA"
+          if git push origin "$SHA:refs/heads/probe/year-zero-0000"; then
+            echo 'YEAR_ZERO_PUSH=SUCCESS'
+          else
+            echo 'YEAR_ZERO_PUSH=REJECTED'
+          fi
+      - name: Remove temporary probe workflow from main
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name Podtverzhdeno
+          git config user.email 187974942+Podtverzhdeno@users.noreply.github.com
+          git fetch origin main
+          git checkout main
+          git merge --ff-only origin/main
+          git rm .github/workflows/zero-year-probe.yml
+          git commit -m "chore: clean year-zero compatibility probe"
+          git push origin HEAD:main
