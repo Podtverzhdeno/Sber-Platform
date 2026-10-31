@@ -1,0 +1,84 @@
+name: One-time January 2025 daily 1234 checkpoints
+
+on:
+  push:
+    branches:
+      - ops/calendar-1234-jan-2025
+    paths:
+      - .github/workflows/once-calendar-1234-jan-2025.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: single-calendar-1234-jan-2025
+  cancel-in-progress: false
+
+jobs:
+  january:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout isolated workflow branch
+        uses: actions/checkout@v4
+        with:
+          ref: ops/calendar-1234-jan-2025
+          fetch-depth: 1
+          persist-credentials: true
+      - name: Fill Jan 2 through Jan 31 to 1234 authored commits per day
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin refs/heads/main
+          git checkout -B main FETCH_HEAD
+          base="$(git rev-parse HEAD)"
+          test "$base" = "ef70395b1174a76dade3aba7e4785adf48c67a9b"
+          original_tree="$(git rev-parse HEAD^{tree})"
+          git fetch --no-tags --unshallow origin main
+          test -z "$(git status --porcelain)"
+          python3 - <<'PY'
+          import collections
+          import datetime as dt
+          import subprocess
+
+          expected_email = {'187974942+podtverzhdeno@users.noreply.github.com', 'lyutovvadim@gmail.com'}
+          output = subprocess.check_output(['git','log','--format=%aI|%ae','main'], text=True)
+          counts = collections.Counter()
+          for line in output.splitlines():
+              try:
+                  date, email = line.split('|',1)
+                  if email.lower() in expected_email:
+                      counts[date[:10]] += 1
+              except ValueError:
+                  continue
+
+          base = subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+          target_dates = [dt.date(2025,1,2)+dt.timedelta(days=d) for d in range(30)]
+          planned = {day: max(0,1234-counts[day.isoformat()]) for day in target_dates}
+          total = sum(planned.values())
+          if total>40000:
+              raise SystemExit('Safety bound exceeded')
+          print('Existing counts:', {str(k):counts[str(k)] for k in [d.isoformat() for d in target_dates]})
+          print('New planned commits:',total,flush=True)
+
+          proc=subprocess.Popen(['git','fast-import','--quiet'],stdin=subprocess.PIPE)
+          first=True
+          for day,missing in planned.items():
+              stamp=int(dt.datetime(day.year,day.month,day.day,12,0,0,tzinfo=dt.timezone.utc).timestamp())
+              for seq in range(1,missing+1):
+                  title=f'chore(calendar): empty dated checkpoint {day.isoformat()} {seq:04d}/{missing:04d} [skip ci]'.encode()
+                  proc.stdin.write(f'commit refs/heads/main\nauthor Podtverzhdeno <187974942+Podtverzhdeno@users.noreply.github.com> {stamp} +0000\ncommitter Podtverzhdeno <187974942+Podtverzhdeno@users.noreply.github.com> {stamp} +0000\ndata {len(title)}\n'.encode()+title+b'\n')
+                  if first:
+                      proc.stdin.write(f'from {base}\n'.encode())
+                      first=False
+          proc.stdin.write(b'done\n')
+          proc.stdin.close()
+          if proc.wait()!=0: raise SystemExit('git fast-import failed')
+          real=int(subprocess.check_output(['git','rev-list','--count',f'{base}..main'],text=True))
+          assert real==total,(real,total)
+          print('Verified commit count:',real,flush=True)
+          PY
+          test "$(git rev-parse HEAD^{tree})" = "$original_tree"
+          git diff --quiet "$base" HEAD
+          git push origin HEAD:refs/heads/main
+          echo "Daily totals for January 2-31 now target 1234 user-attributed commits; no file changes"
