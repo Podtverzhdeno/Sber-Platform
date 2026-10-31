@@ -1,0 +1,62 @@
+name: Fill calendar dates 2025 through 2026 with test markers
+
+on:
+  push:
+    branches:
+      - ops/calendar-fill-2025-2026-669
+    paths:
+      - .github/workflows/once-calendar-fill-669-2026.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: one-time-calendar-fill-669
+  cancel-in-progress: false
+
+jobs:
+  fill-calendar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout temporary workflow branch
+        uses: actions/checkout@v4
+        with:
+          ref: ops/calendar-fill-2025-2026-669
+          fetch-depth: 1
+          persist-credentials: true
+      - name: Add 669 dated empty calendar marker commits
+        shell: bash
+        env:
+          GIT_AUTHOR_NAME: Podtverzhdeno
+          GIT_AUTHOR_EMAIL: 187974942+Podtverzhdeno@users.noreply.github.com
+          GIT_COMMITTER_NAME: Podtverzhdeno
+          GIT_COMMITTER_EMAIL: 187974942+Podtverzhdeno@users.noreply.github.com
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin refs/heads/main
+          git checkout -B main FETCH_HEAD
+          base="$(git rev-parse HEAD)"
+          original_tree="$(git rev-parse HEAD^{tree})"
+          test "$base" = "0e75fd36ec93aa27869022a636b4b13bd38adf7b"
+          test -z "$(git status --porcelain)"
+          mapfile -t all_dates < <(python3 - <<'PY'
+          from datetime import date, timedelta
+          current = date(2025,1,1)
+          end = date(2026,10,31)
+          while current <= end:
+              print(current.isoformat())
+              current += timedelta(days=1)
+          PY
+          )
+          test "${#all_dates[@]}" -eq 669
+          for day in "${all_dates[@]}"; do
+            export GIT_AUTHOR_DATE="$day 12:00:00 +0000"
+            export GIT_COMMITTER_DATE="$day 12:00:00 +0000"
+            git -c commit.gpgsign=false commit --allow-empty --quiet -m "chore(calendar): dated empty activity marker $day [skip ci]"
+          done
+          test "$(git rev-list --count "$base"..HEAD)" -eq 669
+          test "$(git rev-parse HEAD^{tree})" = "$original_tree"
+          git diff --quiet "$base" HEAD
+          git push origin HEAD:refs/heads/main
+          echo "669 dated, empty, clearly labeled calendar marker commits added to main"
