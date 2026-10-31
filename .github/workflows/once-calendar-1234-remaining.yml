@@ -1,0 +1,99 @@
+name: One-time 1234-per-day calendar backfill 2025-2026
+
+on:
+  push:
+    branches:
+      - ops/calendar-1234-feb2025-oct2026
+    paths:
+      - .github/workflows/once-calendar-1234-remaining.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: calendar-1234-remaining-2025-2026
+  cancel-in-progress: false
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Checkout isolated workflow branch
+        uses: actions/checkout@v4
+        with:
+          ref: ops/calendar-1234-feb2025-oct2026
+          fetch-depth: 1
+          persist-credentials: true
+      - name: Fill dated empty checkpoints for February 2025 to October 30 2026
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin refs/heads/main
+          git checkout -B main FETCH_HEAD
+          original_tree="$(git rev-parse HEAD^{tree})"
+          git fetch --no-tags --unshallow origin main
+          test -z "$(git status --porcelain)"
+          python3 - <<'PY'
+          import collections
+          import datetime as dt
+          import subprocess
+          import time
+
+          def git(*args):
+              return subprocess.check_output(['git',*args],text=True).strip()
+
+          accounts={'187974942+podtverzhdeno@users.noreply.github.com','lyutovvadim@gmail.com'}
+          counts=collections.Counter()
+          for line in git('log','--format=%at|%ae','main').splitlines():
+              try:
+                  ts,email=line.split('|',1)
+                  sec=int(ts)
+                  if sec>=0 and email.lower() in accounts:
+                      counts[dt.datetime.fromtimestamp(sec,tz=dt.timezone.utc).date().isoformat()]+=1
+              except (ValueError,OverflowError):
+                  pass
+
+          start=dt.date(2025,2,1)
+          end=dt.date(2026,10,30)
+          days=[start+dt.timedelta(days=k) for k in range((end-start).days+1)]
+          assert len(days)==637
+          planned={day: max(0,1234-counts[day.isoformat()]) for day in days}
+          total=sum(planned.values())
+          assert total<=850000, f'Safety stop: unexpected number of commits: {total}'
+          exceptions=[(day.isoformat(),counts[day.isoformat()]) for day in days if counts[day.isoformat()]>2000]
+          print(f'Target 1234 user-attributed commits on {len(days)} dates; planned new commits {total}; existing days above 2000: {exceptions}',flush=True)
+          original_tree=git('rev-parse','HEAD^{tree}')
+          all_added=0
+          for offset in range(0,len(days),14):
+              batch=days[offset:offset+14]
+              amount=sum(planned[d] for d in batch)
+              if amount==0:
+                  print(f'No-op for {batch[0]}..{batch[-1]}',flush=True)
+                  continue
+              before=git('rev-parse','HEAD')
+              proc=subprocess.Popen(['git','fast-import','--quiet'],stdin=subprocess.PIPE)
+              first=True
+              for day in batch:
+                  missing=planned[day]
+                  stamp=int(dt.datetime(day.year,day.month,day.day,12,0,tzinfo=dt.timezone.utc).timestamp())
+                  for seq in range(1,missing+1):
+                      message=f'chore(calendar): empty dated checkpoint {day.isoformat()} {seq:04d}/{missing:04d} [skip ci]'.encode()
+                      proc.stdin.write(f'commit refs/heads/main\nauthor Podtverzhdeno <187974942+Podtverzhdeno@users.noreply.github.com> {stamp} +0000\ncommitter Podtverzhdeno <187974942+Podtverzhdeno@users.noreply.github.com> {stamp} +0000\ndata {len(message)}\n'.encode()+message+b'\n')
+                      if first:
+                          proc.stdin.write(f'from {before}\n'.encode())
+                          first=False
+              proc.stdin.write(b'done\n')
+              proc.stdin.close()
+              assert proc.wait()==0, 'Git fast-import failed'
+              actual=int(git('rev-list','--count',f'{before}..HEAD'))
+              assert actual==amount, (actual,amount)
+              assert git('rev-parse','HEAD^{tree}')==original_tree, 'File tree changed'
+              subprocess.run(['git','push','origin','HEAD:refs/heads/main'],check=True)
+              all_added+=amount
+              print(f'PUBLISHED {batch[0]}..{batch[-1]}: {amount} empty commits, total {all_added}/{total}; unchanged tree',flush=True)
+              time.sleep(1.5)
+          assert all_added==total,(all_added,total)
+          print(f'SUCCESS: {all_added} new commits across {len(days)} historical dates without file changes',flush=True)
+          PY
+          test "$(git rev-parse HEAD^{tree})" = "$original_tree"
