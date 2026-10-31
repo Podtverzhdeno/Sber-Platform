@@ -19,13 +19,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - name: Checkout current default branch
+      - name: Checkout workflow branch (not historical-dated main)
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ops/contributions-12331-20261031
           fetch-depth: 1
           persist-credentials: true
-      - name: Generate exactly 12331 empty commits dated October 31, 2026
+      - name: Fetch latest main and generate 12331 empty commits dated October 31
         shell: bash
         env:
           GIT_AUTHOR_NAME: Podtverzhdeno
@@ -34,19 +34,21 @@ jobs:
           GIT_COMMITTER_EMAIL: 187974942+Podtverzhdeno@users.noreply.github.com
         run: |
           set -euo pipefail
+          git fetch --no-tags --depth=1 origin refs/heads/main
+          git checkout -B main FETCH_HEAD
           base="$(git rev-parse HEAD)"
-          original_tree="$(git rev-parse HEAD^{tree})"
+          tree="$(git rev-parse 'HEAD^{tree}')"
           test -z "$(git status --porcelain)"
-          git_date="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00')"
-          test "${git_date%%T*}" = "2026-10-31"
-          export GIT_AUTHOR_DATE="$git_date"
-          export GIT_COMMITTER_DATE="$git_date"
+          today="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00')"
+          test "${today%%T*}" = "2026-10-31"
+          export GIT_AUTHOR_DATE="$today"
+          export GIT_COMMITTER_DATE="$today"
           for ((i=1; i<=12331; i++)); do
             printf -v seq '%05d' "$i"
             git -c commit.gpgsign=false commit --allow-empty -m "chore: empty contribution checkpoint $seq/12331 [skip ci]" >/dev/null
           done
           test "$(git rev-list --count "$base"..HEAD)" = "12331"
-          test "$(git rev-parse HEAD^{tree})" = "$original_tree"
+          test "$(git rev-parse 'HEAD^{tree}')" = "$tree"
           git diff --quiet "$base" HEAD
           git push origin HEAD:refs/heads/main
-          echo "SUCCESS: 12331 empty commits dated $git_date, unchanged tree, pushed to main"
+          echo "SUCCESS: 12331 user-attributed dated checkpoints, no file changes"
