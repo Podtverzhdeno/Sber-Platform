@@ -1,0 +1,42 @@
+name: One-time empty-commit batch
+
+on:
+  push:
+    branches:
+      - maintenance/empty-commits-20261031
+    paths:
+      - .github/workflows/commit-count-batch-20261031.yml
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    if: github.ref == 'refs/heads/maintenance/empty-commits-20261031'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: maintenance/empty-commits-20261031
+          fetch-depth: 2
+          persist-credentials: true
+      - name: Generate 9999 follow-up commits, no content changes in final tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          base="$(git rev-parse HEAD^)"
+          test "$base" = "d9eee076583b28e85a2529c0bee6ce06e304f576"
+          git rm -- .github/workflows/commit-count-batch-20261031.yml
+          git -c commit.gpgsign=false commit -m "chore: remove temporary batch workflow"
+          for ((i = 1; i <= 9998; i++)); do
+            printf -v n '%05d' "$i"
+            git -c commit.gpgsign=false commit --allow-empty -m "chore: empty repository checkpoint $n/09998" >/dev/null
+          done
+          count="$(git rev-list --count "$base"..HEAD)"
+          test "$count" = "10000"
+          git diff --quiet "$base" HEAD
+          git push origin HEAD:refs/heads/maintenance/empty-commits-20261031
+          echo "Created $count commits and verified unchanged final tree"
