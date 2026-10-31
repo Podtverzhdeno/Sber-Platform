@@ -42,14 +42,16 @@ jobs:
           import subprocess
 
           expected_email = {'187974942+podtverzhdeno@users.noreply.github.com', 'lyutovvadim@gmail.com'}
-          output = subprocess.check_output(['git','log','--format=%aI|%ae','main'], text=True)
+          output = subprocess.check_output(['git','log','--format=%at|%ae','main'], text=True)
           counts = collections.Counter()
           for line in output.splitlines():
               try:
-                  date, email = line.split('|',1)
-                  if email.lower() in expected_email:
-                      counts[date[:10]] += 1
-              except ValueError:
+                  epoch, email = line.split('|',1)
+                  ts = int(epoch)
+                  if ts >= 0 and email.lower() in expected_email:
+                      day = dt.datetime.fromtimestamp(ts,tz=dt.timezone.utc).date().isoformat()
+                      counts[day] += 1
+              except (ValueError, OverflowError):
                   continue
 
           base = subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
