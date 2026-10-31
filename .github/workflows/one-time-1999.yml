@@ -1,0 +1,40 @@
+name: One-time historical commit (1999)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/one-time-1999.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  commit-1999:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 5
+      - name: Create single 1999-dated commit and remove this temporary workflow
+        env:
+          GIT_AUTHOR_NAME: Podtverzhdeno
+          GIT_AUTHOR_EMAIL: 187974942+Podtverzhdeno@users.noreply.github.com
+          GIT_COMMITTER_NAME: Podtverzhdeno
+          GIT_COMMITTER_EMAIL: 187974942+Podtverzhdeno@users.noreply.github.com
+          GIT_AUTHOR_DATE: "1999-06-15T12:00:00 +0000"
+          GIT_COMMITTER_DATE: "1999-06-15T12:00:00 +0000"
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout main
+          git merge --ff-only origin/main
+          git rm -- .github/workflows/one-time-1999.yml
+          git commit -m "chore: historical repository checkpoint (1999)"
+          git show --no-patch --format=fuller HEAD
+          git push origin HEAD:refs/heads/main
