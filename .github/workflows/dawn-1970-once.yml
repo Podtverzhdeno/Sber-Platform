@@ -1,0 +1,86 @@
+name: DAWN OF AN ERA — historical contribution typography (1970)
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/dawn-1970-once.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dawn-1970-one-time
+  cancel-in-progress: false
+
+jobs:
+  paint:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Paint 1970 calendar with empty dated commits
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          git checkout main
+          git merge --ff-only origin/main
+          git config user.name "Podtverzhdeno"
+          git config user.email "187974942+Podtverzhdeno@users.noreply.github.com"
+
+          python3 - <<'PY'
+          import datetime
+          import os
+          import subprocess
+          font = {
+              'D': ['##.', '#.#', '#.#', '#.#', '##.'],
+              'A': ['.#.', '#.#', '###', '#.#', '#.#'],
+              'W': ['#...#', '#...#', '#.#.#', '##.##', '#...#'],
+              'N': ['#.#', '###', '###', '###', '#.#'],
+              'O': ['###', '#.#', '#.#', '#.#', '###'],
+              'F': ['###', '#..', '##.', '#..', '#..'],
+              'E': ['###', '#..', '##.', '#..', '###'],
+              'R': ['##.', '#.#', '##.', '#.#', '#.#'],
+              ' ': ['..', '..', '..', '..', '..'],
+          }
+          label = 'DAWN OF AN ERA'
+          columns = []
+          for i, letter in enumerate(label):
+              if i and label[i - 1] != ' ' and letter != ' ':
+                  columns.append('.....')
+              columns.extend(''.join(font[letter][row][x] for row in range(5)) for x in range(len(font[letter][0])))
+          assert len(columns) == 48
+          week_zero = datetime.datetime(1969, 12, 28)
+          start_col = (53 - len(columns)) // 2
+          dates = []
+          for i, column in enumerate(columns):
+              for row, cell in enumerate(column):
+                  if cell == '#':
+                      d = week_zero + datetime.timedelta(days=7 * (start_col + i) + (row + 1))
+                      assert d.year == 1970
+                      dates.append(d.strftime('%Y-%m-%dT12:00:00 +0000'))
+          dates.sort()
+          assert len(dates) == 119, len(dates)
+          print('Painting 119 days in year 1970, from', dates[0], 'through', dates[-1], flush=True)
+          for idx, date in enumerate(dates, 1):
+              env = os.environ.copy()
+              env['GIT_AUTHOR_NAME'] = 'Podtverzhdeno'
+              env['GIT_AUTHOR_EMAIL'] = '187974942+Podtverzhdeno@users.noreply.github.com'
+              env['GIT_COMMITTER_NAME'] = 'Podtverzhdeno'
+              env['GIT_COMMITTER_EMAIL'] = '187974942+Podtverzhdeno@users.noreply.github.com'
+              env['GIT_AUTHOR_DATE'] = date
+              env['GIT_COMMITTER_DATE'] = date
+              subprocess.run(['git','commit','--allow-empty', '-m', f'chore(contributions): DAWN OF AN ERA 1970 pixel {idx:03d}/119 [skip ci]'], env=env, check=True, stdout=subprocess.DEVNULL)
+          print('Historical commits completed:', len(dates), flush=True)
+          PY
+          
+          git rm -- .github/workflows/dawn-1970-once.yml
+          git commit -m "ci: remove one-time DAWN OF AN ERA 1970 painter [skip ci]"
+          git push origin HEAD:refs/heads/main
+          git log -1 --oneline
