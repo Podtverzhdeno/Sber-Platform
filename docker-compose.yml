@@ -20,7 +20,11 @@ services:
       DEMO_MODE: "true"
       DATABASE_URL: postgresql://impulse:impulse-local-only@postgres:5432/impulse
       SESSION_SECRET: local-docker-session-secret-change-before-production
-      AI_BUDDY_ENABLED: "false"
+      # Compose reads the root .env for interpolation; secrets stay server-side.
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL_BUDDY: ${OPENROUTER_MODEL_BUDDY:-openrouter/free}
+      OPENROUTER_MODEL_STRUCTURED: ${OPENROUTER_MODEL_STRUCTURED:-openrouter/free}
+      AI_BUDDY_ENABLED: "${AI_BUDDY_ENABLED:-false}"
       AI_MENTOR_DRAFT_ENABLED: "false"
       AI_OPERATOR_TRIAGE_ENABLED: "false"
       AI_CUSTOMER_BRIEF_ENABLED: "false"
