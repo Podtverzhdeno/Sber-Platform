@@ -1,6 +1,13 @@
 name: Trajectory reference QA
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "frontend/src/features/trajectory-v2/**"
+      - "frontend/e2e/trajectory-v2-route.spec.ts"
+      - "frontend/e2e/trajectory-reference-geometry.spec.ts"
+      - ".github/workflows/trajectory-reference-qa.yml"
   push:
     branches: [main]
     paths:
@@ -38,7 +45,7 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
       - name: Verify approved trajectory interactions and layout
-        run: npx playwright test trajectory-v2-route.spec.ts --project=chromium
+        run: npx playwright test trajectory-v2-route.spec.ts trajectory-reference-geometry.spec.ts --project=chromium
         env:
           CI: "true"
           TZ: Europe/Moscow
