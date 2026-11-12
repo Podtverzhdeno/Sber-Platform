@@ -290,16 +290,16 @@ def build_catalog_page(
         items=window,
         total_found=len(ordered),
         total_available=sum(
-            1 for item in items if item.eligibility.status is EligibilityStatus.ELIGIBLE
+            1 for item in visible if item.eligibility.status is EligibilityStatus.ELIGIBLE
         ),
         next_cursor=next_cursor,
-        total_saved=sum(1 for item in items if item.bookmarked),
+        total_saved=sum(1 for item in visible if item.bookmarked),
         total_calculated=sum(
             1
-            for item in items
+            for item in visible
             if item.match.status is MatchStatus.CALCULATED and item.match.percent is not None
         ),
-        snapshot_at=max((item.generated_at for item in items), default=None),
+        snapshot_at=max((item.generated_at for item in visible), default=None),
     )
 
 

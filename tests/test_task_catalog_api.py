@@ -165,14 +165,14 @@ def test_cursor_continuation_keeps_identical_totals() -> None:
     assert second["next_cursor"] is None
 
 
-def test_filters_change_found_total_but_not_available_total() -> None:
+def test_filters_scope_found_and_available_totals_to_the_same_snapshot() -> None:
     response = _client(Role.PARTICIPANT).get(
         "/api/v1/me/task-recommendations", params={"sort": "deadline", "q": "task-102"}
     )
     assert response.status_code == 200
     payload = response.json()
     assert payload["total_found"] == 1
-    assert payload["total_available"] == 3
+    assert payload["total_available"] == 1
 
 
 def test_unknown_sort_is_a_typed_contract_error() -> None:
