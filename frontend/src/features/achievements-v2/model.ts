@@ -7,6 +7,8 @@ export type AchievementRecord = {
   status: AchievementStatus;
   description: string;
   issuer: string;
+  /** Source-provided issuance date; absent until verifiable evidence supplies one. */
+  issuedAt?: string;
   source: "portfolio" | "event";
   verificationId?: string;
   evidence: string[];
