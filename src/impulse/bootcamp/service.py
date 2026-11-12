@@ -99,7 +99,9 @@ class BootcampCatalogService:
         }
         by_course: dict[str, list[MilestoneOnTrajectory]] = {}
         for attempt in attempts:
-            if attempt.status is not TrackStatus.ACTIVE:
+            # Supplementary study is an enrolled path as well.  Archived and
+            # frozen paths must not appear in the learner's current recommendations.
+            if attempt.status not in (TrackStatus.ACTIVE, TrackStatus.EXPLORING):
                 continue
             record = await self.development.roadmap(attempt.track_key)
             if record is None:

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { apiRequest, clearApiReadCache, subscribeProgressMutation, type RuntimeApiPath } from "./client";
-import { isCrossSectionMutation, participantProjectionKeys } from "./cross-section-mutations";
+import { isCrossSectionMutation, participantProjectionKeys, projectionKeysForProgressMutation } from "./cross-section-mutations";
 
 afterEach(() => {
   clearApiReadCache();
@@ -101,6 +101,23 @@ describe("cross-section progress mutation policy", () => {
     expect(new Set(participantProjectionKeys).size).toBe(participantProjectionKeys.length);
   });
 
+  it("only refetches learning and engagement for each persisted lesson", () => {
+    const lesson = "/api/v1/me/bootcamp/impulse-study/demo-course-1/lessons/3/complete";
+    const keys = projectionKeysForProgressMutation(lesson);
+    expect(keys).toContain("impulse-learning-summary");
+    expect(keys).toContain("engagement-overview");
+    expect(keys).toContain("participant-growth-analytics");
+    for (const unrelated of ["my-work", "portfolio", "rating", "me", "task-catalog-v2"]) {
+      expect(keys).not.toContain(unrelated);
+    }
+    expect(keys.length).toBeLessThan(12);
+    expect(projectionKeysForProgressMutation(lesson + "?track=backend")).toEqual(keys);
+    expect(projectionKeysForProgressMutation(lesson + "/extra")).toBe(participantProjectionKeys);
+    expect(projectionKeysForProgressMutation("/api/v1/me/bootcamp/impulse-study/demo-course-1/finish")).toBe(participantProjectionKeys);
+    expect(projectionKeysForProgressMutation("/api/v1/me/bootcamp/impulse-study/demo-course-1/practice")).toBe(participantProjectionKeys);
+    expect(projectionKeysForProgressMutation("/api/v1/me/tracks/optional")).toBe(participantProjectionKeys);
+  });
+
   it("notifies exactly once on successful persisted course completion", async () => {
     const onChange = vi.fn();
     const unsubscribe = subscribeProgressMutation(onChange);
@@ -113,6 +130,7 @@ describe("cross-section progress mutation policy", () => {
         { method: "POST", body: "{}" },
       );
       expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith("/api/v1/me/bootcamp/impulse-study/a/finish");
     } finally {
       unsubscribe();
     }
