@@ -1,0 +1,13 @@
+# Claim CI-TRAJECTORY-BOOTCAMP-SNAPSHOT-20261025
+- task_id: CI-TRAJECTORY-BOOTCAMP-SNAPSHOT-20261025
+- session_id: gpt6-20261025-qa-snapshot
+- status: IN_PROGRESS
+- base_revision: cfba6ef36d7bc997dfb4dcb72271d1165c1d2a2f
+- started_at: 2026-10-25T01:24:00+03:00
+- heartbeat_at: 2026-10-25T01:24:00+03:00
+- lane: combined-ci-snapshot
+- write_scope:
+  - .agents/coordination/claims/CI-TRAJECTORY-BOOTCAMP-SNAPSHOT-20261025.lock/status.md
+- verification: full GitHub Actions CI and Playwright for immutable source revision, identify bootcamp/trajectory failures separately from unrelated regressions
+- blockers: browser-use quota prevents manual production inspection, original image ZIP absent from mounted materials
+- progress: QA-only branch created from main for uncancelled CI
