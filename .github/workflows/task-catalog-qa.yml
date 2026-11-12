@@ -19,6 +19,12 @@ on:
       - "tests/task_catalog/test_demo_brand_projection.py"
       - "tests/task_catalog/test_catalog_page_contract.py"
       - "tests/test_task_catalog_api.py"
+  pull_request:
+    paths:
+      - "frontend/src/features/task-catalog-v2/**"
+      - "frontend/e2e/task-catalog-v2-interactions.spec.ts"
+      - "frontend/e2e/task-catalog-approved-geometry.spec.ts"
+      - ".github/workflows/task-catalog-qa.yml"
   workflow_dispatch:
 
 permissions:

@@ -10,6 +10,15 @@ on:
       - "frontend/e2e/trajectory-learning-sync.spec.ts"
       - "frontend/e2e/bootcamp-role-progression.spec.ts"
       - ".github/workflows/bootcamp-trajectory-learning-e2e.yml"
+  pull_request:
+    paths:
+      - "frontend/src/features/trajectory-v2/page.tsx"
+      - "frontend/src/features/trajectory-v2/study-progress*"
+      - "frontend/src/features/bootcamp/catalog.tsx"
+      - "frontend/e2e/bootcamp-reference-fixtures.ts"
+      - "frontend/e2e/trajectory-learning-sync.spec.ts"
+      - "frontend/e2e/bootcamp-role-progression.spec.ts"
+      - ".github/workflows/bootcamp-trajectory-learning-e2e.yml"
   workflow_dispatch:
 permissions:
   contents: read
