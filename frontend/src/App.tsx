@@ -42,7 +42,7 @@ import {
 } from "react-router-dom";
 
 import { apiRequest, subscribeProgressMutation } from "./api/client";
-import { participantProjectionKeys } from "./api/cross-section-mutations";
+import { lessonProjectionKeys, participantProjectionKeys } from "./api/cross-section-mutations";
 import {
   applyTheme,
   storedThemeChoice,
@@ -1843,8 +1843,11 @@ function ImpulseApp() {
 }
 
 export function App() {
-  useEffect(() => subscribeProgressMutation(() => {
-    for (const key of participantProjectionKeys) {
+  useEffect(() => subscribeProgressMutation((scope) => {
+    // A lesson only changes self-study/readiness. Do not reload every tasks,
+    // portfolio, rating and permissions query eight times in quick succession.
+    const keys = scope === "lesson" ? lessonProjectionKeys : participantProjectionKeys;
+    for (const key of keys) {
       void queryClient.invalidateQueries({ queryKey: [key] });
     }
   }), []);

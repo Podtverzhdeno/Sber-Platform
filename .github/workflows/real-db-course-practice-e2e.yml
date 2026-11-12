@@ -1,0 +1,96 @@
+name: Real DB Course Practice E2E
+on:
+  pull_request:
+    paths:
+      - "frontend/e2e/course-practice-real-db.spec.ts"
+      - "frontend/src/api/cross-section-mutations.ts"
+      - "frontend/src/api/cross-section-mutations.test.ts"
+      - "frontend/src/api/client.ts"
+      - "frontend/src/App.tsx"
+      - ".github/workflows/real-db-course-practice-e2e.yml"
+      - "src/impulse/bootcamp/**"
+      - "frontend/src/features/bootcamp/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-stack-journey:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: impulse
+          POSTGRES_USER: impulse
+          POSTGRES_PASSWORD: impulse-ci-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U impulse -d impulse"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      TEST_DATABASE_URL: postgresql+asyncpg://impulse:impulse-ci-only@127.0.0.1:5432/impulse
+      APP_ENV: test
+      CI: "true"
+      TZ: Europe/Moscow
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884
+        with:
+          python-version: "3.13"
+      - name: Install Python dependencies
+        run: uv sync --frozen
+      - name: Migrate and seed isolated PostgreSQL
+        run: |
+          uv run alembic upgrade head
+          uv run impulse-demo-seed
+      - name: Start real API
+        run: |
+          nohup uv run uvicorn impulse.main:app --host 127.0.0.1 --port 8000 > /tmp/impulse-qa-backend.log 2>&1 &
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:8000/health/ready >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/impulse-qa-backend.log
+          exit 1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Strict typecheck
+        working-directory: frontend
+        run: npm run typecheck
+      - name: Lint real E2E and notification policy
+        working-directory: frontend
+        run: npx eslint e2e/course-practice-real-db.spec.ts src/api/cross-section-mutations.ts src/api/cross-section-mutations.test.ts src/api/client.ts src/App.tsx --max-warnings 0
+      - name: Scope contract unit tests
+        working-directory: frontend
+        run: npx vitest run src/api/cross-section-mutations.test.ts
+      - name: Install Chromium
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+      - name: Run full browser against real PostgreSQL
+        working-directory: frontend
+        run: npx playwright test course-practice-real-db.spec.ts --project=chromium --reporter=line
+      - name: Inspect DB/API regression gates
+        run: uv run pytest tests/bootcamp/test_impulse_study.py -q
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: course-practice-real-db-e2e
+          path: |
+            frontend/test-results/
+            frontend/playwright-report/
+            /tmp/impulse-qa-backend.log
+          if-no-files-found: ignore
+          retention-days: 7
