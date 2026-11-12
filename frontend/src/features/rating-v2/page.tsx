@@ -47,7 +47,7 @@ function toPerson(entry: PublishedEntry): Person {
     projects: entry.successful_projects,
     points: Number(entry.score),
     achievements: entry.trophies.map(trophy => trophy.title),
-    activity: "Не опубликована",
+    activity: "Нет опубликованных данных",
     initials: entry.anonymized ? "•" : words.slice(0, 2).map(word => word.charAt(0)).join("").toLocaleUpperCase("ru-RU"),
     palette: entry.place === 1 ? "gold" : entry.place === 2 ? "silver" : entry.place === 3 ? "teal" : "blue",
   };
@@ -228,7 +228,7 @@ export function ParticipantRatingV2({ onOpenMessages, currentPersonId }: { onOpe
           <button type="button" className="ir-outline-button" disabled={item.personId === null} title={item.personId === null ? "Профиль скрыт по настройкам приватности" : undefined} onClick={() => {openProfile(item);}}>{item.personId === null ? "Профиль закрыт" : "Профиль"} <ArrowRight size={16} /></button>
         </article>)}
       </section>
-      <div className="ir-disclaimer">Позиции и баллы берутся из опубликованного рейтинга. Имена отображаются только с разрешения участников.{season?.key.startsWith("demo-") ? " Демо-персоны вымышлены." : ""} Привилегии и сертификаты не выдаются автоматически.</div>
+      <div className="ir-disclaimer">Позиции и баллы берутся из опубликованного рейтинга. Колонка «Проекты» учитывает только подтверждённые проектные начисления сезона, а не все проекты участника. Активность в публичный рейтинг пока не передаётся. Имена отображаются только с разрешения участников.{season?.key.startsWith("demo-") ? " Демо-персоны вымышлены. Их результаты не отражают реальную активность платформы." : ""} Привилегии и сертификаты не выдаются автоматически.</div>
     </>}
     {screen === "benefits" && <>
       <div className="ir-breadcrumb"><button type="button" onClick={backToList}>Рейтинг</button><span className="ir-divider-chevron">›</span><strong>Награды и возможности</strong></div>
