@@ -18,7 +18,8 @@ from sqlalchemy import text
 from impulse.api.errors import ApiError, install_error_handlers
 from impulse.api.v1.identity import csrf_session, current_session
 from impulse.application.identity import AuthenticatedSession, SessionRecord
-from impulse.bootcamp import editorial_learning
+from impulse.bootcamp import editorial_learning, impulse_levels
+from impulse.domain.development import TrackAttempt, TrackStatus
 from impulse.domain.identity import ActorContext, Role
 from impulse.infrastructure.database import Database
 
@@ -89,6 +90,7 @@ def test_study_progress_requires_order_and_practice_requires_review(
     app = FastAPI(lifespan=lifespan)
     install_error_handlers(app)
     app.include_router(editorial_learning.router, prefix="/api/v1")
+    app.include_router(impulse_levels.router, prefix="/api/v1")
     app.state.database = database
 
     @app.get("/test/qualified")
@@ -114,9 +116,16 @@ def test_study_progress_requires_order_and_practice_requires_review(
         ]
 
     async def course_catalog() -> tuple[SimpleNamespace, ...]:
-        return (SimpleNamespace(key="demo-course-1", title="Практикум Impulse"),)
+        return (
+            SimpleNamespace(key="demo-course-1", title="Практикум Impulse", track_keys=("python",)),
+        )
 
-    app.state.development_service = SimpleNamespace(store=SimpleNamespace(courses=course_catalog))
+    async def attempts(_person: UUID) -> tuple[TrackAttempt, ...]:
+        return (TrackAttempt("python", 1, TrackStatus.ACTIVE),)
+
+    app.state.development_service = SimpleNamespace(
+        store=SimpleNamespace(courses=course_catalog, attempts=attempts)
+    )
     active_role = [Role.PARTICIPANT]
 
     def credentials() -> AuthenticatedSession:
@@ -128,6 +137,15 @@ def test_study_progress_requires_order_and_practice_requires_review(
     app.dependency_overrides[csrf_session] = credentials
 
     with TestClient(app) as client:
+        level_url = "/api/v1/me/bootcamp/impulse-level?track=python"
+        advance_url = "/api/v1/me/bootcamp/impulse-level/advance?track=python"
+        initial_level = client.get(level_url)
+        assert initial_level.status_code == 200, initial_level.text
+        assert (
+            initial_level.json()["level"],
+            initial_level.json()["required_courses"],
+        ) == (0, 1)
+        assert not initial_level.json()["advance_ready"]
         assert client.get(API).json()["completed_units"] == 0
         assert client.get("/test/qualified").json() == []
         initial = client.get("/api/v1/me/bootcamp/impulse-study/summary")
@@ -172,6 +190,13 @@ def test_study_progress_requires_order_and_practice_requires_review(
         assert finished_summary["finished_courses"] == 1
         assert finished_summary["approved_practices"] == 0
         assert finished_summary["courses"][0]["finished"] is True
+        courses_only = client.get(level_url).json()
+        assert (
+            courses_only["completed_courses"],
+            courses_only["credited_practices"],
+        ) == (1, 0)
+        assert not courses_only["advance_ready"]
+        assert client.post(advance_url).status_code == 409
 
         invalid = client.post(API + "/practice", json={"description": "small"})
         assert invalid.status_code == 422
@@ -192,6 +217,22 @@ def test_study_progress_requires_order_and_practice_requires_review(
         assert credited["approved_practices"] == 0
         assert credited["courses"][0]["practice_submitted_at"] is not None
         assert credited["courses"][0]["practice_task_key"] == "lesson:4"
+        # No reviewer action: the submitted practice immediately unlocks L0 -> L1.
+        ready = client.get(level_url).json()
+        assert ready["completed_courses"] == ready["required_courses"] == 1
+        assert ready["approved_practices"] == 0
+        assert ready["credited_practices"] == 1
+        assert ready["advance_ready"] is True
+        advanced = client.post(advance_url)
+        assert advanced.status_code == 200, advanced.text
+        assert advanced.json()["level"] == 1
+        assert advanced.json()["completed_courses"] == 0
+        assert advanced.json()["advance_ready"] is False
+        assert len(advanced.json()["history"]) == 1
+        assert advanced.json()["history"][0]["credited_practices"] == 1
+        assert advanced.json()["history"][0]["approved_practices"] == 0
+        # Reads and re-submissions never double-award an Impulse level.
+        assert client.get(level_url).json()["level"] == 1
         # A repeated submission is still one credited practice, with no fake certificate.
         duplicate = client.post(
             API + "/practice", json={"description": "T" * 80, "practice_task_key": "lesson:2"}
