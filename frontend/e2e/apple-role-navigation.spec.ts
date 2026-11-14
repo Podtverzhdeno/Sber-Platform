@@ -44,6 +44,7 @@ for (const [role, sections] of Object.entries(roleSections) as [ImpulseRole, rea
     await trigger.click();
     const panel = page.getByRole("dialog", { name: "Главное меню" });
     await expect(panel).toBeVisible();
+    await expect(panel.locator("nav a[href^='/workspace/']")).toHaveCount(sections.length);
 
     // Even collapsed sections must stay in the DOM and retain exact server-approved indexes.
     const links = await panel.locator("nav a[href^='/workspace/']").evaluateAll(elements =>
@@ -90,6 +91,7 @@ test("demo customer retains all nine distinct destinations on mobile", async ({ 
   await page.getByRole("button", { name: "Меню", exact: true }).click();
   const panel = page.getByRole("dialog", { name: "Главное меню" });
   await expect(panel).toBeVisible();
+  await expect(panel.locator("nav a[href^='/workspace/']")).toHaveCount(demoCustomerSections.length);
   const links = await panel.locator("nav a[href^='/workspace/']").evaluateAll(elements =>
     elements.map(element => ({ text: element.textContent?.trim(), href: element.getAttribute("href") })),
   );
