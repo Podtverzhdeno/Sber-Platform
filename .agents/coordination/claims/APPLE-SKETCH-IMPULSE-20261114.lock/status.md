@@ -1,0 +1,30 @@
+# Claim APPLE-SKETCH-IMPULSE-20261114
+- task_id: APPLE-SKETCH-IMPULSE-20261114
+- session_id: gpt6-20261114-source-messages-shared-ui
+- status: IN_PROGRESS
+- started_at: 2026-11-14T21:35:00+03:00
+- heartbeat_at: 2026-11-14T21:35:00+03:00
+- base_revision: e897261936855269d191d88496ceb500113b042c
+- depends_on: []
+- write_scope:
+  - frontend/src/components/apple-sketch-core.scss
+  - frontend/src/components/ui.tsx (one stylesheet import only)
+  - frontend/src/features/messenger/apple-sketch-messages.scss
+  - frontend/src/features/collaboration.tsx (one stylesheet import; 3 additional CSS class markers only)
+  - frontend/src/features/messenger/apple-sketch-messages.test.tsx (new)
+  - docs/design/apple-sketch-impulse-implementation-20261114.md
+  - .agents/coordination/claims/APPLE-SKETCH-IMPULSE-20261114.lock/status.md
+- shared_files: []
+- excluded:
+  - frontend/src/app/** and frontend/src/main.tsx (active integration claims)
+  - frontend/src/features/bootcamp/**, frontend/src/features/trajectory-v2/** (active worker changes)
+  - backend, auth, routes, business logic, Railway
+- verification:
+  - frontend lint / TypeScript / Vitest / Vite build
+  - screenshot comparison of sourced Sketch dimensions and light/dark
+  - independent review before main
+- source:
+  - Original uploaded Messages(1).sketch and TipKit(1).sketch and existing Figma iOS16 node verified light Filled
+  - iOS Messages Sketch Chat List 402×79, bubble friend light #E9E9EA and dark #262629, chat input 402×70 collapsed and 402×60 expanded
+  - Figma iOS16 node 839:9700 #007AFF and node 839:9728 #0A84FF, 50px / 14px
+- progress: independent source-verified styling to be integrated in existing controls; business functions untouched.
