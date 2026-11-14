@@ -522,3 +522,175 @@ body, :root[data-theme="light"] body, :root[data-theme="dark"] body {
     animation-duration: .01ms !important;
   }
 }
+
+
+/* Content-first role home for screens where the backend has no reliable
+   aggregate yet. Never display fake KPI tiles, fictional activity or ROI. */
+.workspace--apple .apple-role-home {
+  display: grid;
+  width: 100%;
+  max-width: 1080px;
+  gap: 22px;
+  margin-inline: auto;
+  color: var(--color-text);
+}
+.workspace--apple .apple-role-home__header h1 {
+  margin: 0 0 6px;
+  font-size: clamp(29px, 3vw, 37px);
+  line-height: 1.14;
+  letter-spacing: -.035em;
+}
+.workspace--apple .apple-role-home__header p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+.workspace--apple .apple-role-home__focus {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: clamp(20px, 3vw, 34px);
+  border-radius: 17px;
+  background: var(--color-surface-2);
+}
+.workspace--apple .apple-role-home__focus > div { min-width: 0; }
+.workspace--apple .apple-role-home__eyebrow {
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 630;
+}
+.workspace--apple .apple-role-home__focus h2 {
+  margin: 9px 0;
+  color: var(--color-text);
+  font-size: clamp(21px, 2.5vw, 27px);
+  line-height: 1.2;
+  letter-spacing: -.03em;
+}
+.workspace--apple .apple-role-home__focus p {
+  max-width: 590px;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.workspace--apple .apple-role-home__focus button {
+  display: inline-flex;
+  min-height: 46px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border: 1px solid var(--color-primary);
+  border-radius: 11px;
+  color: var(--on-brand-ink);
+  background: var(--color-primary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 650;
+}
+.workspace--apple .apple-role-home__focus button:hover {
+  border-color: var(--color-primary-strong);
+  background: var(--color-primary-strong);
+}
+.workspace--apple .apple-role-home__details {
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.workspace--apple .apple-role-home__details summary {
+  display: flex;
+  min-height: 62px;
+  align-items: center;
+  padding: 15px 6px;
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 650;
+}
+.workspace--apple .apple-role-home__details summary::marker { color: var(--color-muted); }
+.workspace--apple .apple-role-home__details ul {
+  margin: 0;
+  padding: 0 0 16px;
+  list-style: none;
+}
+.workspace--apple .apple-role-home__details li + li { border-top: 1px solid var(--color-border); }
+.workspace--apple .apple-role-home__details li button {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--color-text);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+.workspace--apple .apple-role-home__details li button:hover { background: var(--color-surface-2); }
+.workspace--apple .apple-role-home__details li button span:last-child { color: var(--color-muted); }
+
+/* Login and role choice are also part of the app, so the theme selector works
+   before login. This does not unlock disabled demo personas. */
+.page-shell .login-layout {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+.page-shell .login-layout .login-copy h1 {
+  color: var(--color-text);
+  font-size: clamp(37px, 4vw, 58px);
+  line-height: 1.07;
+  letter-spacing: -.04em;
+}
+.page-shell .login-layout .login-copy :is(.lead,.eyebrow) {
+  color: var(--color-muted);
+  letter-spacing: normal;
+  text-transform: none;
+}
+.page-shell .login-theme {
+  margin-bottom: 32px;
+}
+.page-shell .persona-panel {
+  border: 1px solid var(--color-border);
+  border-radius: 21px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: 0 13px 34px rgb(20 25 35 / 6%);
+}
+:root[data-theme="dark"] .page-shell .persona-panel { box-shadow: none; }
+.page-shell .persona-panel h2 { color: var(--color-text); font-size: 19px; }
+.page-shell .persona-grid { gap: 10px; }
+.page-shell .persona-card,
+.page-shell .persona-card--active {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  box-shadow: none;
+}
+.page-shell .persona-card small { color: var(--color-muted); }
+.page-shell .persona-card:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+}
+.page-shell .persona-card--inactive,
+.page-shell .persona-card--inactive:hover {
+  color: var(--color-muted);
+  border-color: var(--color-border);
+  background: var(--color-surface-2);
+  opacity: .65;
+}
+.page-shell .persona-card--inactive small,
+.page-shell .persona-card--inactive em { color: var(--color-muted); }
+.page-shell .login-layout .error-message { color: var(--color-danger); }
+
+@media (max-width: 767px) {
+  .workspace--apple .apple-role-home__focus { align-items: stretch; flex-direction: column; }
+  .workspace--apple .apple-role-home__focus button { justify-content: center; width: 100%; }
+  .page-shell .login-layout { grid-template-columns: 1fr; gap: 24px; padding-inline: 17px; }
+  .page-shell .persona-panel { padding: 22px; }
+}
