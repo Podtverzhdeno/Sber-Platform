@@ -14,7 +14,7 @@ describe("Apple-like workspace primitives", () => {
         </AppleSection>
       </ApplePage>,
     );
-    expect(screen.getByRole("main")).toHaveClass("apple-surface");
+    expect(screen.getByTestId("apple-surface")).toHaveClass("apple-surface");
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Главная" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Следующий шаг" })).toBeInTheDocument();
