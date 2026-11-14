@@ -1,7 +1,22 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { bootcampCatalogFixture, installBootcampReferenceApi } from "./bootcamp-reference-fixtures";
 
 test.beforeEach(async ({ page }) => { await installBootcampReferenceApi(page); });
+/** Preserve the real server-authorized Bootcamp route behind the grouped sidebar. */
+async function navigateToBootcamp(page: Page): Promise<void> {
+  if ((page.viewportSize()?.width ?? 1024) <= 767) {
+    await page.getByRole("button", { name: "Меню", exact: true }).click();
+  }
+  const group = page.getByRole("button", { name: "Развитие", exact: true });
+  await expect(group).toBeVisible();
+  if (await group.getAttribute("aria-expanded") !== "true") {
+    await group.click();
+  }
+  await expect(group).toHaveAttribute("aria-expanded", "true");
+  await page.getByRole("link", { name: "Bootcamp", exact: true }).click();
+  await expect(page).toHaveURL(/\/workspace\/2(?:[?]|$)/);
+}
+
 
 /**
  * BC-R01..BC-R05 responsive, interaction and navigation invariants.
@@ -22,10 +37,7 @@ for (const viewport of viewports) {
     await page.setViewportSize(viewport);
     await page.goto("/");
     await page.locator('[data-persona="participant-alex"]').click();
-    if (viewport.width < 1024) {
-      await page.getByRole("button", { name: "Меню", exact: true }).click();
-    }
-    await page.getByRole("link", { name: "Bootcamp" }).click();
+    await navigateToBootcamp(page);
 
     const shell = page.locator(".bc-reference");
     await expect(shell.getByRole("heading", { name: "Bootcamp", exact: true })).toBeVisible();
@@ -91,7 +103,7 @@ test("Bootcamp cards respond to hover and keyboard focus", async ({ page }) => {
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await navigateToBootcamp(page);
 
   const card = page.locator('[data-reference="BC-R01"] .bc-ref-course-card[data-access="available"]').first();
   await expect(card).toBeVisible();
@@ -116,7 +128,7 @@ test("Bootcamp reference grid column count and card minimum heights", async ({ p
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await navigateToBootcamp(page);
   const grid = page.locator('[data-reference="BC-R01"] .bc-ref-course-grid');
   await expect(grid).toBeVisible();
   const columns = await grid.evaluate((node) =>
@@ -135,7 +147,7 @@ test("course reader fills viewport and lesson navigation never clips", async ({ 
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await navigateToBootcamp(page);
   await page.getByTestId("course-demo-course-2").getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(dialog).toBeVisible();
@@ -172,8 +184,7 @@ test("mobile fullscreen reader keeps lesson controls usable", async ({ page }) =
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("button", { name: "Меню", exact: true }).click();
-  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await navigateToBootcamp(page);
   await page.getByTestId("course-demo-course-2").getByRole("button", { name: /Открыть курс|Посмотреть курс/ }).click();
   const dialog = page.getByRole("dialog", { name: "Информация о курсе" });
   await expect(dialog).toBeVisible();
@@ -208,7 +219,7 @@ test("Bootcamp role choice and direction are independent; reset clears hidden co
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await navigateToBootcamp(page);
 
   const shell = page.locator(".bc-reference");
   const categories = shell.getByRole("group", { name: "Категории курсов" });
@@ -254,7 +265,7 @@ test("Bootcamp desktop reference hero has correct stagger, overlay, and grid den
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await navigateToBootcamp(page);
   const shell = page.locator(".bc-reference");
   const tabs = await shell.locator(".bc-ref-role-tabs").boundingBox();
   const hero = await shell.locator(".bc-ref-hero-grid").boundingBox();
@@ -282,7 +293,7 @@ test("Bootcamp required-course popup follows reference and never invents progres
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await navigateToBootcamp(page);
   const shell = page.locator(".bc-reference");
 
   await shell.getByRole("button", { name: "Посмотреть учебные и практические требования" }).click();
@@ -306,7 +317,7 @@ test("Bootcamp recommendation popup opens real course details", async ({ page })
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await navigateToBootcamp(page);
   const shell = page.locator(".bc-reference");
   const reason = shell.locator(".bc-ref-reason").first();
   await expect(reason).toBeVisible();
@@ -323,7 +334,7 @@ test("Bootcamp role catalog starts as 4+1 cards and expands without losing filte
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await navigateToBootcamp(page);
   const shell = page.locator(".bc-reference");
   const cards = shell.locator(".bc-ref-course-card");
   await expect(cards.first()).toBeVisible();
@@ -350,7 +361,7 @@ test("all seven AI trajectory roles remain reachable through horizontal controls
   await page.setViewportSize({ width: 1448, height: 1086 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await navigateToBootcamp(page);
   const tabs = page.getByRole("group", { name: "Направление обучения" });
   await expect(tabs.getByRole("button", { name: "AI Architect", exact: true })).toHaveAttribute("aria-pressed", "true");
   const next = page.getByRole("button", { name: "Следующие AI-роли" });
@@ -374,7 +385,7 @@ test("Bootcamp primary actions share a baseline with or without recommendation l
   }));
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Bootcamp" }).click();
+  await navigateToBootcamp(page);
   // Non-recommended cards are deliberately hidden in the default personalized tab.
   // Select the full catalog to verify both CTA variants in the same row.
   const fullCatalog = page.getByRole("group", { name: "Категории курсов" }).getByRole("button", { name: /Все курсы/ });
