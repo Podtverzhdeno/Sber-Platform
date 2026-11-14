@@ -2,7 +2,7 @@
 
 - task_id: FIGMA-IOS16-CONTROLS-20261114
 - session_id: gpt6-20261114-figma-verified-controls
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-14
 - heartbeat_at: 2026-11-14
 - base_revision: e897261936855269d191d88496ceb500113b042c
@@ -15,5 +15,12 @@
 - verification:
   - frontend lint, TypeScript, Vitest
   - independent screenshot comparison for Figma nodes 839:9700, 839:9707, 839:9728, 211:5737
-- progress: exact source via connected Figma MCP with session 0d5e6a90-42f6-4788-bbe1-2947499ce0b0; source component metadata collected; first wave isolated
+- progress: Five source-node controls implemented as isolated Button/TextField React components with source-linked SDD; draft PR #170 ready for independent component review.
+- evidence:
+  - Figma get_design_context with screenshots: 839:9700, 839:9707, 839:9728, 211:5737, 211:5752
+  - Four component unit tests PASS in Actions 43623574711
+  - ESLint standalone SUCCESS; OpenSpec strict SUCCESS; Docker smoke SUCCESS; architecture audit SUCCESS
+  - Overall frontend unit job FAIL: src/App.test.tsx pre-existing sidebar group aria-expanded false expectation; 638 PASS and 1 FAIL in 639 tests on source head
+  - New primitives NOT integrated into existing call sites; no visual screenshot acceptance or main merge
+- review: PENDING; do not describe as 1:1 product-wide UI
 - blockers: Figma Starter MCP rate limit reached for further nodes; no global UI migration permitted until distinct component variants and independent browser acceptance are verified.
