@@ -127,3 +127,39 @@ test("selected controls remain distinct and Buddy input stays legible on light s
   expect(colors.rowSelected).not.toBe(colors.rowIdle);
   expect(colors.inputInk).not.toBe(colors.composerBackground);
 });
+
+for (const theme of ["light", "dark"] as const) {
+  test(`messenger ${theme}: incoming and outgoing bubbles remain legible and distinct`, async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await mountRole(page, "participant", theme);
+    const result = await page.locator(".workspace--apple").evaluate((root) => {
+      const fixture = document.createElement("div");
+      fixture.innerHTML = [
+        '<div class="messenger-page sberchat-reference">',
+        '<div class="msg-dialog-list__row-item selected"><button class="msg-dialog-list__row" id="msg-selection">Диалог</button></div>',
+        '<div class="msg-chat__group incoming"><div class="msg-chat__bubble" id="msg-in"><span class="msg-chat__bubble-body">Входящее</span></div></div>',
+        '<div class="msg-chat__group outgoing"><div class="msg-chat__bubble" id="msg-out"><span class="msg-chat__bubble-body" id="msg-out-text">Исходящее</span></div></div>',
+        '<div class="msg-composer"><div class="msg-composer__input-shell"><textarea class="msg-composer__textarea" id="msg-input">Текст</textarea></div></div>',
+        '</div>',
+      ].join("");
+      root.appendChild(fixture);
+      const style = (id: string) => getComputedStyle(fixture.querySelector<HTMLElement>(id) as HTMLElement);
+      try {
+        return {
+          incoming: style("#msg-in").backgroundColor,
+          outgoing: style("#msg-out").backgroundColor,
+          outgoingInk: style("#msg-out-text").color,
+          composerInk: style("#msg-input").color,
+          selected: style("#msg-selection").backgroundColor,
+        };
+      } finally {
+        fixture.remove();
+      }
+    });
+    expect(result.incoming).toBe(theme === "light" ? "rgb(233, 233, 234)" : "rgb(38, 38, 41)");
+    expect(result.outgoing).not.toBe(result.incoming);
+    expect(result.outgoingInk).toBe("rgb(255, 255, 255)");
+    expect(result.composerInk).not.toBe("rgb(255, 255, 255)");
+    expect(result.selected).not.toBe("rgba(0, 0, 0, 0)");
+  });
+}
