@@ -282,7 +282,7 @@ export function ImpulsePixelReference({
         <section className="impulse-pixel__fold">
           <button type="button" aria-expanded={toolsOpen}
             onClick={() => { setToolsOpen((open) => !open); }}>
-            <span><strong>Инструменты</strong><small>Траектория, скилл-паспорт и AI Buddy</small></span>
+            <span><strong>Инструменты</strong><small>{home.toolsSummary ?? "Траектория и скилл-паспорт"}</small></span>
             <ChevronDown size={19} aria-hidden="true"/>
           </button>
           {toolsOpen && <div className="impulse-pixel__expanded"><p>{home.toolsSummary ?? "Доступные инструменты перечислены в соответствующих разделах."}</p><button type="button" onClick={onOpenTools}>Открыть инструменты <ChevronRight size={16} aria-hidden="true" /></button></div>}
