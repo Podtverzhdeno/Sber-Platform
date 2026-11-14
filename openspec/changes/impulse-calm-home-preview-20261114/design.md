@@ -6,7 +6,7 @@
 
 ## Decisions
 
-1. **One page, one main action.** Make a calmer working surface: page heading, hero containing the real highest-priority actionable item, a three-metric factual summary (only available data), active work list, weekly focus, current Impulse level and optional skill/AI utility row. No stock illustrations, duplicated large CTA, glow, or chart decoration.
+1. **One page, one main action.** Make a calmer working surface: page heading, hero containing the real highest-priority actionable item, a three-metric factual summary (only available data), with work list, weekly focus and optional shortcuts collapsed behind clear one-click disclosures. No stock illustrations, duplicated large CTA, glow, or chart decoration.
 2. **On-demand detail.** Full requirements of the next Impulse level, including the required course list and practice, expand only on request. The fetch for course names/lesson state is deferred until requirements are opened, but the core role level request remains independent.
 3. **Honest data.** Activity, courses, level, project work and verified skills use existing API results; unavailable data display a neutral unavailable state. No mixing career grade with Impulse level, no invented target or manual verifications.
 4. **Preview-only rollout.** `?home=calm` selects the new screen only for participant home. The default `ParticipantHomeV2Body` and all existing routes stay intact. This allows user comparison before further changes. Do not edit `App.tsx`, global CSS, sidebar, backend or Railway.
@@ -19,9 +19,9 @@
 - L0 header: «Главная», current role, one quiet subtitle.
 - L0 focus card: next actionable task/course/trajectory with ONE filled button; status and provenance.
 - L0 brief factual overview: Impulse level, active tasks, confirmed competencies (or unknown).
-- L0 working area: small current tasks list and weekly focus.
-- L1 «Мой уровень» details: requirements and exact courses, learning status and practice; no hidden blockers.
-- L1 contextual shortcuts: «Траектория», «Задачи», «Портфолио», optionally «AI Buddy».
+- L1 «Задачи и неделя»: compact one-click disclosure with current tasks list and weekly focus.
+- L0 quiet one-line «Ваш уровень и следующий этап», showing actual progress when available; L1 requirements and exact courses, learning status and practice on click; no hidden blockers.
+- L1 «Другие инструменты»: one-click disclosure containing «Траектория», «Скилл-паспорт», optionally «AI Buddy». No permanently visible secondary tool deck.
 - L2 detailed trajectories, projects, course content, skill passport in their real destination screens.
 
 ## Testing/risks
@@ -30,3 +30,7 @@
 - Unit tests for next CTA, empty, unknown level, on-demand course list and no fake grade.
 - Build/lint/TypeScript/format on exact branch SHA, independent review and browser screenshot once deployed to a review-only environment with owner authorization.
 - Rendering must not duplicate backend calls or silently make any mutating API request.
+
+## User refinement — 14 Nov 2026
+
+Visual direction clarified as white, futuristic, Apple-inspired minimalism. First fold deliberately retains only page context, one next action and three factual small metrics; large decorative orbit removed. Secondary work/weekly cards and utility shortcuts are native `details/summary` disclosures with visible accessible labels; the Impulse level stays as an unobtrusive short card, and full curriculum is accessed intentionally. Global navigation and other screens remain unchanged. Dark theme is supported as a user setting, but the default visual direction is bright and restrained.
