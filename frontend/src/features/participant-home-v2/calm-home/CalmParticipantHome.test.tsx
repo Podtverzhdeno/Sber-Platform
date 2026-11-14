@@ -93,7 +93,7 @@ describe("calm participant homepage", () => {
     expect(screen.queryByTestId("calm-home-requirements")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Требования уровня" }));
     expect(screen.getByTestId("calm-home-requirements")).toHaveTextContent("Засчитано: 1 из 2");
-    expect(screen.getByTestId("calm-home-requirements")).toHaveTextContent("Карьерный грейд");
+    expect(screen.getByTestId("calm-home-requirements")).toHaveTextContent(/карьерный грейд/i);
   });
 
   it("shows source-backed weekly activity without inferred completion", () => {
