@@ -1,0 +1,23 @@
+# Claim UI-CALM-HOME-20261114
+
+- task_id: UI-CALM-HOME-20261114
+- session_id: gpt6-impulse-calm-home-20261114-01
+- status: IN_PROGRESS
+- started_at: 2026-11-14T14:00:00+03:00
+- heartbeat_at: 2026-11-14T14:00:00+03:00
+- base_revision: ca741df7685e880a9f1597e0e39a1df88040566c
+- depends_on: []
+- write_scope:
+  - openspec/changes/impulse-calm-home-preview-20261114/**
+  - frontend/src/features/participant-home-v2/page.tsx (opt-in entrypoint conditional only)
+  - frontend/src/features/participant-home-v2/calm-home/**
+  - .agents/coordination/claims/UI-CALM-HOME-20261114.lock/status.md
+- excluded_shared_surfaces:
+  - frontend/src/App.tsx
+  - frontend/src/styles.scss
+  - frontend/src/features/participant-home-v2/home-v2.scss
+  - frontend/src/App.test.tsx
+  - Railway / production
+- verification: scoped frontend eslint, typecheck, Vitest + independent review and browser preview
+- progress: Source inspected; existing home drawer and legacy layout must remain available. Only new opt-in home to be added; other roles and navigation untouched.
+- blockers: HOME-BUTTON-SMOOTH and SIDEBAR-UNIFICATION old claims reserve existing home-v2.scss; do not edit.
