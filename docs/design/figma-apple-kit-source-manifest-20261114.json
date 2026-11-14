@@ -1,0 +1,547 @@
+{
+  "title": "Impulse Apple UI Kit reference and extraction matrix",
+  "date": "2026-11-14",
+  "claims": "This manifest is a source inventory, not complete extracted designs or screenshot parity",
+  "officialReference": "https://developer.apple.com/design/resources/",
+  "figmaLicense": "https://help.figma.com/hc/en-us/articles/24037833895831-Get-started-with-Apple-s-UI-kit",
+  "figmaSessionId": "0d5e6a90-42f6-4788-bbe1-2947499ce0b0",
+  "designFileKey": "51dkjSuhgFyyeGV2cWLxex",
+  "extractionState": {
+    "ios16": "5 high-fidelity nodes, 4 additional metadata-only examples",
+    "ios26": "library indexed, node details NOT extracted",
+    "macos26": "library indexed, node details NOT extracted",
+    "ios27": "library indexed, node details NOT extracted",
+    "macos27": "library indexed, node details NOT extracted",
+    "blocker": "Figma MCP Starter plan tool call quota reached"
+  },
+  "officialKits": [
+    {
+      "id": "apple-ios27",
+      "name": "iOS and iPadOS 27",
+      "platform": "mobile/tablet",
+      "status": "figma-library-indexed",
+      "url": "https://www.figma.com/community/file/1651309003795292092/ios-and-ipados-27",
+      "libraryKey": "lk-3167e7e1386e96621fc3b20782e2ec1b199754eeceff2ef04bf90d28a124be6414b67982dc8fb71ea1896b0310c316f54d7b9f0ac598cb3111748728c039a567"
+    },
+    {
+      "id": "apple-macos27",
+      "name": "macOS 27",
+      "platform": "desktop",
+      "status": "figma-library-indexed",
+      "url": "https://www.figma.com/community/file/1651309434229735362/macos-27",
+      "libraryKey": "lk-9b6046629e11db2bbe15e5a3fa0443ecd557a34812bc69997a2b8598852d86fb806d4036ca6c146521c7e1cf898a1e7f7aa80"
+    },
+    {
+      "id": "apple-ios26",
+      "name": "iOS and iPadOS 26",
+      "platform": "mobile/tablet",
+      "status": "figma-library-indexed",
+      "url": "https://www.figma.com/community/file/1527721578857867021/ios-and-ipados-26",
+      "libraryKey": "lk-a5b98decf0fb24381005421a2986b813149fcf20f37a1169316d44e2802c483494c6fc98ab8e083540a73bd5e45cf892a38123ee61981aee097d5f4eb8487a17"
+    },
+    {
+      "id": "apple-macos26",
+      "name": "macOS 26",
+      "platform": "desktop",
+      "status": "figma-library-indexed",
+      "url": "https://www.figma.com/community/file/1543337041090580818/apple-design-resources-macos-26",
+      "libraryKey": "lk-52492a50a550123b626cdfcd7639929209dc66307681f3f8cf9937770a714f2d76ade248aff2d8a0e42da17e343a440cebc0a04f1800ad34ae6d86e1a7f7aa9a"
+    },
+    {
+      "id": "apple-ios18",
+      "name": "iOS 18 and iPadOS 18",
+      "platform": "mobile/tablet",
+      "status": "public-confirmed-not-opened",
+      "url": "https://www.figma.com/community/file/1385659531316001292/ios-18-and-ipados-18",
+      "libraryKey": null
+    }
+  ],
+  "communityKits": [
+    {
+      "id": "ios16-community",
+      "name": "iOS 16 UI Kit for Figma",
+      "url": "https://www.figma.com/community/file/1121065701252736567/ios-16-ui-kit-for-figma",
+      "status": "specific-design-node-inspected",
+      "designFileKey": "51dkjSuhgFyyeGV2cWLxex",
+      "designUrl": "https://www.figma.com/design/51dkjSuhgFyyeGV2cWLxex/iOS-16-UI-Kit-for-Figma--Community-?node-id=1002-6668"
+    },
+    {
+      "id": "ios15-community",
+      "name": "iOS 15 UI Kit for Figma",
+      "url": "https://www.figma.com/community/file/984106517828363349/ios-15-ui-kit-for-figma",
+      "status": "link-only"
+    },
+    {
+      "id": "ios16-ittybitty",
+      "name": "iOS 16 UI Kit by Itty Bitty Apps",
+      "url": "https://www.figma.com/community/file/1172051389106515682/ios-16-ui-kit-by-itty-bitty-apps",
+      "status": "link-only"
+    },
+    {
+      "id": "liquid-glass26-community",
+      "name": "iOS 26 Liquid Glass",
+      "url": "https://www.figma.com/community/file/1514237154489556536/ios-26-liquid-glass",
+      "status": "link-only"
+    },
+    {
+      "id": "ios27-widgets-community",
+      "name": "iOS 27 Widgets",
+      "url": "https://www.figma.com/community/file/1253436284170910973/ios-27-widgets",
+      "status": "link-only"
+    },
+    {
+      "id": "mobile-keyboards",
+      "name": "Android & iOS Keyboards Kit",
+      "url": "https://www.figma.com/community/file/946157263507080040/android-ios-keyboards-kit",
+      "status": "link-only"
+    },
+    {
+      "id": "bootstrap5",
+      "name": "Bootstrap 5 Design System",
+      "url": "https://www.figma.com/community/file/1044316192441037087/bootstrap-5-design-system-ui-kit",
+      "status": "link-only"
+    },
+    {
+      "id": "dynamic-layer",
+      "name": "Dynamic Layer FREE",
+      "url": "https://www.figma.com/community/file/1226993304994576514/dynamic-layer-free-mobile-app-ui-kit-and-design-system-v5-1",
+      "status": "link-only"
+    }
+  ],
+  "verifiedNodes": [
+    {
+      "family": "button",
+      "variant": "light-filled",
+      "nodeId": "839:9700",
+      "kit": "ios16-community",
+      "size": {
+        "height": 50,
+        "radius": 14,
+        "paddingHorizontal": 20,
+        "paddingVertical": 14
+      },
+      "tokens": {
+        "bg": "#007AFF",
+        "text": "#FFFFFF",
+        "fontSize": 17,
+        "lineHeight": 22,
+        "weight": 600,
+        "tracking": -0.408
+      },
+      "source": "Figma get_design_context screenshot+code",
+      "implementation": "frontend/src/features/figma-ios16-kit/Ios16Controls.tsx (PR #170, unmerged)"
+    },
+    {
+      "family": "button",
+      "variant": "light-tinted",
+      "nodeId": "839:9707",
+      "kit": "ios16-community",
+      "size": {
+        "height": 50,
+        "radius": 14,
+        "paddingHorizontal": 20,
+        "paddingVertical": 14
+      },
+      "tokens": {
+        "bg": "rgba(0,122,255,0.15)",
+        "text": "#007AFF",
+        "fontSize": 17,
+        "lineHeight": 22,
+        "weight": 600,
+        "tracking": -0.408
+      },
+      "source": "Figma get_design_context screenshot+code"
+    },
+    {
+      "family": "button",
+      "variant": "dark-filled",
+      "nodeId": "839:9728",
+      "kit": "ios16-community",
+      "size": {
+        "height": 50,
+        "radius": 14
+      },
+      "tokens": {
+        "bg": "#0A84FF",
+        "text": "#FFFFFF"
+      },
+      "source": "Figma get_design_context screenshot+code"
+    },
+    {
+      "family": "text-field",
+      "variant": "light-default",
+      "nodeId": "211:5737",
+      "kit": "ios16-community",
+      "size": {
+        "width": 390,
+        "height": 44,
+        "leftInset": 16,
+        "separatorWidth": 0.5
+      },
+      "tokens": {
+        "bg": "#FFFFFF",
+        "fontSize": 17,
+        "lineHeight": 22,
+        "tracking": -0.408
+      },
+      "source": "Figma get_design_context screenshot+code"
+    },
+    {
+      "family": "text-field",
+      "variant": "light-active",
+      "nodeId": "211:5752",
+      "kit": "ios16-community",
+      "size": {
+        "width": 390,
+        "height": 46
+      },
+      "tokens": {
+        "fontSize": 17,
+        "lineHeight": 22
+      },
+      "source": "Figma get_design_context screenshot+code"
+    },
+    {
+      "family": "toggle",
+      "variant": "light-on",
+      "nodeId": "10:2583",
+      "kit": "ios16-community",
+      "size": {
+        "width": 51,
+        "height": 31
+      },
+      "tokens": null,
+      "source": "Figma get_metadata only, not design context"
+    },
+    {
+      "family": "segmented-control",
+      "variant": "light-two-options-right",
+      "nodeId": "6:823",
+      "kit": "ios16-community",
+      "size": {
+        "width": 343,
+        "height": 32
+      },
+      "tokens": null,
+      "source": "Figma get_metadata only, not design context"
+    },
+    {
+      "family": "table-view",
+      "variant": "light",
+      "nodeId": "151:5289",
+      "kit": "ios16-community",
+      "size": {
+        "width": 358,
+        "height": 224
+      },
+      "tokens": null,
+      "source": "Figma get_metadata only, not design context"
+    },
+    {
+      "family": "alert-modal",
+      "variant": "light",
+      "nodeId": "10:2291",
+      "kit": "ios16-community",
+      "size": {
+        "width": 337,
+        "height": 200
+      },
+      "tokens": null,
+      "source": "Figma get_metadata only, not design context"
+    }
+  ],
+  "requiredFamilies": [
+    {
+      "id": "shell",
+      "desktop": "macOS 27 window/sidebar/toolbar/titlebar",
+      "mobile": "iOS 27 navigation bars/sheets",
+      "roles": [
+        "all"
+      ],
+      "exactNodeStatus": "pending"
+    },
+    {
+      "id": "buttons",
+      "desktop": "macOS 27 push/toolbar buttons",
+      "mobile": "iOS 27 buttons",
+      "roles": [
+        "all"
+      ],
+      "exactNodeStatus": "ios16-only-5-node-proof"
+    },
+    {
+      "id": "fields-search",
+      "desktop": "macOS 27 fields/search/combo boxes",
+      "mobile": "iOS 27 text fields/search",
+      "roles": [
+        "all"
+      ],
+      "exactNodeStatus": "ios16-only-5-node-proof"
+    },
+    {
+      "id": "lists-tables",
+      "desktop": "macOS 27 list/table/detail rows",
+      "mobile": "iOS 27 lists",
+      "roles": [
+        "all"
+      ],
+      "exactNodeStatus": "pending"
+    },
+    {
+      "id": "filters",
+      "desktop": "macOS 27 segmented/checkbox/pop-up",
+      "mobile": "iOS 27 segmented/toggle",
+      "roles": [
+        "all"
+      ],
+      "exactNodeStatus": "ios16-geometry-only"
+    },
+    {
+      "id": "forms",
+      "desktop": "macOS 27 forms/menus/date controls",
+      "mobile": "iOS 27 date/time/pickers",
+      "roles": [
+        "customer",
+        "operator",
+        "mentor",
+        "participant"
+      ],
+      "exactNodeStatus": "pending"
+    },
+    {
+      "id": "dialogs",
+      "desktop": "macOS 27 dialogs/popovers",
+      "mobile": "iOS 27 alerts/sheets",
+      "roles": [
+        "all"
+      ],
+      "exactNodeStatus": "ios16-geometry-only"
+    },
+    {
+      "id": "progress",
+      "desktop": "macOS 27 progress controls",
+      "mobile": "iOS 27 progress indicators",
+      "roles": [
+        "participant",
+        "mentor",
+        "manager"
+      ],
+      "exactNodeStatus": "pending"
+    },
+    {
+      "id": "calendar",
+      "desktop": "macOS 27 date/calendar controls",
+      "mobile": "iOS 27 date/time pickers",
+      "roles": [
+        "participant",
+        "manager",
+        "customer"
+      ],
+      "exactNodeStatus": "pending"
+    },
+    {
+      "id": "messages",
+      "desktop": "macOS 27 split view + web composer",
+      "mobile": "Apple Messages design template / iOS 27 text input",
+      "roles": [
+        "participant",
+        "mentor",
+        "customer",
+        "hr"
+      ],
+      "exactNodeStatus": "pending"
+    },
+    {
+      "id": "charts",
+      "desktop": "custom data visualizations (not copied from UIKit)",
+      "mobile": "responsive chart/summary",
+      "roles": [
+        "participant",
+        "manager",
+        "customer",
+        "hr",
+        "operator",
+        "mentor"
+      ],
+      "exactNodeStatus": "not-in-ui-kit"
+    },
+    {
+      "id": "upload",
+      "desktop": "native accessible HTML file upload with matching UI shell",
+      "mobile": "browser file picker with matching UI shell",
+      "roles": [
+        "participant",
+        "customer",
+        "mentor"
+      ],
+      "exactNodeStatus": "browser-native-difference"
+    }
+  ],
+  "roleRouteGroups": [
+    {
+      "id": "participant",
+      "routes": [
+        "Главная",
+        "Мой путь / Моя траектория",
+        "Bootcamp",
+        "Задачи",
+        "Мои проекты",
+        "События",
+        "Рейтинг",
+        "Портфолио",
+        "Достижения",
+        "Аналитика",
+        "Сообщения",
+        "AI-Buddy",
+        "Настройки"
+      ],
+      "families": [
+        "shell",
+        "buttons",
+        "fields-search",
+        "lists-tables",
+        "filters",
+        "forms",
+        "dialogs",
+        "progress",
+        "calendar",
+        "messages",
+        "charts",
+        "upload"
+      ]
+    },
+    {
+      "id": "mentor",
+      "routes": [
+        "Главная",
+        "Очередь ревью / Проверка вкладов",
+        "Мои проекты",
+        "Участники",
+        "Сообщения",
+        "Аналитика",
+        "AI-помощник",
+        "План недели"
+      ],
+      "families": [
+        "shell",
+        "buttons",
+        "fields-search",
+        "lists-tables",
+        "filters",
+        "forms",
+        "dialogs",
+        "progress",
+        "calendar",
+        "messages",
+        "charts",
+        "upload"
+      ]
+    },
+    {
+      "id": "customer",
+      "routes": [
+        "Главная",
+        "Мои задачи",
+        "Создать задачу",
+        "Заявки / Кандидаты",
+        "Приёмка",
+        "Аналитика",
+        "Сообщения",
+        "AI-помощник",
+        "База участников",
+        "Настройки"
+      ],
+      "families": [
+        "shell",
+        "buttons",
+        "fields-search",
+        "lists-tables",
+        "filters",
+        "forms",
+        "dialogs",
+        "calendar",
+        "messages",
+        "charts",
+        "upload"
+      ]
+    },
+    {
+      "id": "manager",
+      "routes": [
+        "Главная",
+        "Инициативы",
+        "Команда",
+        "Аналитика",
+        "Результаты",
+        "Календарь команды",
+        "База участников",
+        "Настройки"
+      ],
+      "families": [
+        "shell",
+        "buttons",
+        "fields-search",
+        "lists-tables",
+        "filters",
+        "dialogs",
+        "progress",
+        "calendar",
+        "charts"
+      ]
+    },
+    {
+      "id": "hr",
+      "routes": [
+        "Главная",
+        "Кандидаты",
+        "Воронка",
+        "Аналитика",
+        "Сообщения"
+      ],
+      "families": [
+        "shell",
+        "buttons",
+        "fields-search",
+        "lists-tables",
+        "filters",
+        "dialogs",
+        "charts",
+        "messages"
+      ]
+    },
+    {
+      "id": "operator",
+      "routes": [
+        "Главная",
+        "Операционная очередь",
+        "Проверки",
+        "Задачи и проекты",
+        "Выплаты",
+        "Споры",
+        "Пользователи",
+        "События и трофеи",
+        "Аналитика"
+      ],
+      "families": [
+        "shell",
+        "buttons",
+        "fields-search",
+        "lists-tables",
+        "filters",
+        "forms",
+        "dialogs",
+        "charts"
+      ]
+    }
+  ],
+  "invariants": [
+    "The server's actor.navigation remains authoritative; route indexes not re-assigned",
+    "No business handlers, forms, permissions, or data replaced by static Figma frames",
+    "Keep all workflows reachable on mobile and desktop",
+    "Honor user light/dark/system choice",
+    "Assets need licensed local copies; no SF Pro font redistribution",
+    "Claim pixel 1:1 only after exact Figma node screenshot and browser render acceptance",
+    "No cross-generation visual variants without explicit mapping",
+    "Unknown source dimensions remain unknown"
+  ]
+}
