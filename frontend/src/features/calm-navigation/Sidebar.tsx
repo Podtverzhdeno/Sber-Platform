@@ -70,8 +70,23 @@ export function CalmSidebar({
 }: CalmSidebarProps) {
   const id = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const edgeTriggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
+  const hoverExitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suppressNextEdgeFocus = useRef(false);
+  const cancelHoverExit = () => {
+    if (hoverExitTimer.current !== null) {
+      clearTimeout(hoverExitTimer.current);
+      hoverExitTimer.current = null;
+    }
+  };
+  useEffect(() => () => {
+    if (hoverExitTimer.current !== null) clearTimeout(hoverExitTimer.current);
+  }, []);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Hover flyout is non-modal: do not trap focus, lock scrolling or dim the page.
+  const [hoverOpen, setHoverOpen] = useState(false);
+  const navOpen = drawerOpen || hoverOpen;
   const model = useMemo(() => buildCalmNavigation(role, navigation), [role, navigation]);
   const activeGroup = activeCalmGroup(model, activeIndex);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(activeGroup);
@@ -120,28 +135,92 @@ export function CalmSidebar({
     };
   }, [drawerOpen]);
 
+  useEffect(() => {
+    if (!hoverOpen || drawerOpen) return;
+    const dismissOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        cancelHoverExit();
+        setHoverOpen(false);
+        // Restore focus if a keyboard user is inside the about-to-hide panel.
+        if (panelRef.current?.contains(document.activeElement)) {
+          suppressNextEdgeFocus.current = true;
+          edgeTriggerRef.current?.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", dismissOnEscape);
+    return () => { document.removeEventListener("keydown", dismissOnEscape); };
+  }, [hoverOpen, drawerOpen]);
+
   const closeDrawer = () => {
+    cancelHoverExit();
     setDrawerOpen(false);
+    setHoverOpen(false);
     triggerRef.current?.focus();
   };
   const followLink = () => {
+    cancelHoverExit();
     if (drawerOpen) closeDrawer();
+    else if (hoverOpen) setHoverOpen(false);
     onNavigate?.();
   };
 
   return (
-    <div className="calm-navigation">
+    <div
+      className="calm-navigation"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setHoverOpen(false);
+      }}
+    >
       <button
         ref={triggerRef}
         type="button"
         className="calm-navigation__mobile-trigger"
         aria-controls={id}
         aria-expanded={drawerOpen}
-        onClick={() => { setDrawerOpen(true); }}
+        onClick={() => { cancelHoverExit(); setHoverOpen(false); setDrawerOpen(true); }}
       >
         <Menu size={20} aria-hidden="true" />
         <span>Меню</span>
       </button>
+
+      <button
+        ref={edgeTriggerRef}
+        type="button"
+        className="calm-navigation__edge-trigger"
+        aria-label="Показать навигацию"
+        title="Навигация"
+        aria-controls={id}
+        aria-expanded={navOpen}
+        onPointerEnter={(event) => {
+          if (event.pointerType === "mouse") {
+            cancelHoverExit();
+            setHoverOpen(true);
+          }
+        }}
+        onPointerLeave={(event) => {
+          if (event.pointerType !== "mouse" || drawerOpen) return;
+          cancelHoverExit();
+          // Give the cursor time to transfer to the sliding panel. A fly-by
+          // that never enters the panel must not leave it stuck open.
+          hoverExitTimer.current = setTimeout(() => {
+            hoverExitTimer.current = null;
+            if (!panelRef.current?.matches(":hover") && !panelRef.current?.contains(document.activeElement)) {
+              setHoverOpen(false);
+            }
+          }, 220);
+        }}
+        onFocus={() => {
+          if (suppressNextEdgeFocus.current) {
+            suppressNextEdgeFocus.current = false;
+            return;
+          }
+          cancelHoverExit();
+          setHoverOpen(true);
+        }}
+        onClick={() => { cancelHoverExit(); setHoverOpen(false); setDrawerOpen(true); }}
+      />
 
       {/*
         Keep the backdrop mounted so opening AND closing animate smoothly.
@@ -158,7 +237,16 @@ export function CalmSidebar({
       <aside
         id={id}
         ref={panelRef}
-        className={`calm-sidebar${drawerOpen ? " calm-sidebar--open" : ""}`}
+        className={`calm-sidebar${navOpen ? " calm-sidebar--open" : ""}${hoverOpen && !drawerOpen ? " calm-sidebar--hover" : ""}`}
+        onPointerEnter={(event) => {
+          if (event.pointerType === "mouse") cancelHoverExit();
+        }}
+        onPointerLeave={(event) => {
+          if (event.pointerType === "mouse" && !drawerOpen && !panelRef.current?.contains(document.activeElement)) {
+            cancelHoverExit();
+            setHoverOpen(false);
+          }
+        }}
         role={drawerOpen ? "dialog" : undefined}
         aria-label={drawerOpen ? "Главное меню" : "Боковая панель"}
         aria-modal={drawerOpen ? true : undefined}
