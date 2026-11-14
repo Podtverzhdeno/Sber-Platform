@@ -1,0 +1,25 @@
+# Claim UI-CALM-NAV-20261114
+
+- session_id: chatgpt-impulse-sdd-20261114-01
+- status: IN_PROGRESS
+- started_at: 2026-11-14T14:37:00+03:00
+- heartbeat_at: 2026-11-14T14:37:00+03:00
+- base_revision: ca741df7685e880a9f1597e0e39a1df88040566c
+- depends_on: []
+- write_scope:
+  - openspec/changes/impulse-calm-redesign-20261114/**
+  - frontend/src/features/calm-navigation/**
+  - .agents/coordination/claims/UI-CALM-NAV-20261114.lock/status.md
+- shared_files: []
+- excluded_shared_surfaces:
+  - frontend/src/App.tsx
+  - frontend/src/styles.scss
+  - frontend/src/App.test.tsx
+  - frontend/src/features/participant-home-v2/**
+  - frontend/src/components/topbar-theme.scss
+- verification:
+  - OpenSpec delta structure review
+  - file read-back on the committed feature branch
+  - independent later frontend lint/types/component and E2E after integration
+- progress: preflight completed on remote main, local Sber-platform dirty changes preserved; role and menu design pending; no product write yet
+- blockers: old SIDEBAR-UNIFICATION-20261025 and TRJ-SOURCE-ROUTE-INTEGRATION-20261025 claims remain REVIEW on shared App.tsx; wiring must be separate integration lane
