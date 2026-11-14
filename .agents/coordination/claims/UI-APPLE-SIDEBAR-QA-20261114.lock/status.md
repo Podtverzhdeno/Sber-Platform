@@ -1,0 +1,13 @@
+# Claim UI-APPLE-SIDEBAR-QA-20261114
+- session_id: gpt6-20261114-sidebar-selector-qa
+- status: IN_PROGRESS
+- started_at: 2026-11-14
+- base_revision: a35f17409db86ca45db30f6141a9f4827487e5cc
+- depends_on: [PR-167, PR-168]
+- write_scope:
+  - frontend/e2e/sidebar-consistency.spec.ts (test selectors only)
+  - .agents/coordination/claims/UI-APPLE-SIDEBAR-QA-20261114.lock/status.md
+- shared_files: []
+- verification:
+  - frontend lint, typecheck, focused Playwright CI
+- progress: identified ambiguous Playwright getByRole button "Меню" also matching "Закрыть меню"
