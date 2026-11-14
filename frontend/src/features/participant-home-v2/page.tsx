@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import {
   useEffect,
   useRef,
@@ -40,6 +41,7 @@ import {
 } from "./client";
 import { levelCoursesProgress, loadRoleLevel, roleLevelQueryKey, type ImpulseRoleLevel } from "../impulse-role-level";
 import "./home-v2.scss";
+import { CalmParticipantHome } from "./calm-home/CalmParticipantHome";
 
 type HomeGrade = DevelopmentOverviewView["concepts"]["career_grade"];
 type HomePanel = "levels" | "grade-details" | null;
@@ -55,6 +57,7 @@ export function ParticipantHomeV2(props: {
   onOpenWorkspace: (canonicalPath?: string) => void;
   buddyAvailable?: boolean;
 }) {
+  const [searchParams] = useSearchParams();
   const overview = useQuery({
     queryKey: overviewQueryKey,
     queryFn: loadDevelopmentOverview,
@@ -71,6 +74,18 @@ export function ParticipantHomeV2(props: {
           <button type="button" onClick={() => { void overview.refetch(); }}>Повторить</button>
         </section>
       </div>
+    );
+  }
+  // Calm is the participant home by default; explicit ?home=legacy keeps a reversible fallback.
+  // Other roles and workspace destinations continue using their existing renderers.
+  if (searchParams.get("home") !== "legacy") {
+    return (
+      <CalmParticipantHome
+        overview={overview.data}
+        onOpenTarget={props.onOpenTarget}
+        onOpenWorkspace={props.onOpenWorkspace}
+        buddyAvailable={props.buddyAvailable}
+      />
     );
   }
   return (

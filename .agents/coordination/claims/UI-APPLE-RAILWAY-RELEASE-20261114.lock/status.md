@@ -1,0 +1,38 @@
+# Claim UI-APPLE-RAILWAY-RELEASE-20261114
+
+- task_id: UI-APPLE-RAILWAY-RELEASE-20261114
+- session_id: gpt6-impulse-apple-all-pr-railway-20261114
+- status: IN_PROGRESS
+- base_revision: 5e411cca53e3351a9e529707c77fd70e33be1b7e
+- source_prs:
+  - PR #160 navigation research and isolated components
+  - PR #161 participant home implementation
+  - PR #162 full 49-route SDD
+  - PR #163 scoped apple-surface primitives
+- write_scope:
+  - openspec/changes/impulse-calm-redesign-20261114/**
+  - openspec/changes/impulse-apple-app-experience-20261114/**
+  - frontend/src/features/calm-navigation/**
+  - frontend/src/features/apple-surface/**
+  - .agents/coordination/claims/UI-APPLE-RAILWAY-RELEASE-20261114.lock/status.md
+- excluded_shared_surfaces:
+  - frontend/src/App.tsx
+  - frontend/src/styles.scss
+  - frontend/src/features/participant-home-v2/home-v2.scss
+  - src/** and database
+- target:
+  - Railway project determined-spirit: 75a881d2-6862-4fea-b16b-10dffe8bf2a3
+  - production: d85a3bb5-aeac-4998-8f98-1fc7b659fae3
+  - Sber-Platform: e767b854-b617-4abe-bfaf-e33f7753205a
+- prior_successful_release: 2bf0a5a5a41c51ae001fbfa84c643a9e5ba0915e
+- rollout_policy: exact-SHA deploy only after frontend build/type/lint/tests and Docker smoke PASS, maintain source-pinned rollback; never modify Postgres
+- caveat: old visual E2E + backend and security gates are not fully green; disclose outstanding failures
+- integrated_source_revision: b9b635f33962e3d72423f766ae5c529f8c23f465
+- integration_summary:
+  - 37 additional source/docs files copied by immutable Git blob SHA from PR #160, #162 and #163 onto current PR #161 head
+  - 15 PR #160 files (sidebar primitives + design spec), 19 PR #162 specification files, 3 PR #163 UI component files
+  - 53 total changed files compared with main, no backend or database schema changes
+  - PR #164 https://github.com/Podtverzhdeno/Sber-Platform/pull/164 open and mergeable
+  - SDD and unmounted UI components have no active runtime effect except current home implementation from PR #161
+- stage: CHECKING_INTEGRATED_SHA_BEFORE_RAILWAY_DEPLOY
+- independent_review: PENDING

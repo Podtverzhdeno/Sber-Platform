@@ -120,6 +120,10 @@ describe("App", () => {
       if (url.endsWith("/development-overview")) {
         return Promise.resolve(new Response(JSON.stringify(overviewFixture), { status: 200 }));
       }
+      // A missing role-level projection is an explicit API error, not malformed successful data.
+      if (url.includes("/bootcamp/impulse-level")) {
+        return Promise.resolve(new Response(JSON.stringify({ code: "NOT_FOUND" }), { status: 404 }));
+      }
       if (init?.method !== "GET") {
         return Promise.resolve(new Response(JSON.stringify({ code: "INTERNAL" }), { status: 500 }));
       }
@@ -128,9 +132,9 @@ describe("App", () => {
 
     window.history.pushState({}, "", "/workspace/0");
     render(<App />);
-    expect(await screen.findByTestId("grade-summary")).toBeInTheDocument();
-    // An unavailable Impulse level is not an invented career grade or L0 result.
-    expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("unavailable");
+    // The participant's default home is Calm; absent role level data never invents L0.
+    expect(await screen.findByTestId("calm-participant-home")).toBeInTheDocument();
+    expect(screen.getByTestId("calm-impulse-level")).toHaveTextContent("—");
     expect(screen.getByRole("navigation")).toBeInTheDocument();
 
     const sidebar = screen.getByRole("complementary", { name: "Боковая панель" });
@@ -139,6 +143,17 @@ describe("App", () => {
     expect(sidebar.querySelector(".nav-icon")?.textContent).toBe("⌂");
     const homeSidebarMarkup = sidebar.innerHTML;
 
+    // Explicit rollback keeps the previous detailed home intact without changing navigation.
+    window.history.pushState({}, "", "/workspace/0?home=legacy");
+    fireEvent.popState(window);
+    expect(await screen.findByTestId("grade-summary")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("unavailable");
+    });
+    expect(screen.queryByTestId("calm-participant-home")).not.toBeInTheDocument();
+    expect(sidebar.innerHTML).toBe(homeSidebarMarkup);
+
+    // The pre-existing v2=0 fallback still works.
     window.history.pushState({}, "", "/workspace/0?v2=0");
     fireEvent.popState(window);
     await waitFor(() => {
