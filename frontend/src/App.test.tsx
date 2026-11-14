@@ -147,7 +147,9 @@ describe("App", () => {
     window.history.pushState({}, "", "/workspace/0?home=legacy");
     fireEvent.popState(window);
     expect(await screen.findByTestId("grade-summary")).toBeInTheDocument();
-    expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("unavailable");
+    await waitFor(() => {
+      expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("unavailable");
+    });
     expect(screen.queryByTestId("calm-participant-home")).not.toBeInTheDocument();
     expect(sidebar.innerHTML).toBe(homeSidebarMarkup);
 
