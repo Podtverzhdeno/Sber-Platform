@@ -49,7 +49,7 @@ for (const [role, sections] of Object.entries(roleSections) as [ImpulseRole, rea
     // Even collapsed sections must stay in the DOM and retain exact server-approved indexes.
     const links = await panel.locator("nav a[href^='/workspace/']").evaluateAll(elements =>
       elements.map(element => ({
-        text: element.textContent?.trim() ?? "",
+        text: element.textContent.trim(),
         href: element.getAttribute("href"),
       })),
     );
@@ -93,7 +93,7 @@ test("demo customer retains all nine distinct destinations on mobile", async ({ 
   await expect(panel).toBeVisible();
   await expect(panel.locator("nav a[href^='/workspace/']")).toHaveCount(demoCustomerSections.length);
   const links = await panel.locator("nav a[href^='/workspace/']").evaluateAll(elements =>
-    elements.map(element => ({ text: element.textContent?.trim(), href: element.getAttribute("href") })),
+    elements.map(element => ({ text: element.textContent.trim(), href: element.getAttribute("href") })),
   );
   const byIndex = [...links].sort((a, b) =>
     Number(a.href?.split("/").at(-1)) - Number(b.href?.split("/").at(-1)),
