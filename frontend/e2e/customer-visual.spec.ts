@@ -16,6 +16,22 @@ async function navigateCustomer(page: import("@playwright/test").Page, section: 
   await trigger.click();
   const menu = page.getByRole("dialog", { name: "Главное меню" });
   await expect(menu).toBeVisible();
+  const byGroup: Record<string, string> = {
+    "Мои задачи": "Задачи",
+    "Создать задачу": "Задачи",
+    "Заявки": "Задачи",
+    "База участников": "Люди",
+    "Аналитика": "Работа",
+    "Сообщения": "Общение",
+    "AI-помощник": "Дополнительно",
+    "Настройки": "Дополнительно",
+  };
+  if (section !== "Главная") {
+    const group = menu.getByRole("button", { name: byGroup[section] ?? "Другие разделы", exact: true });
+    if (await group.getAttribute("aria-expanded") !== "true") {
+      await group.click();
+    }
+  }
   await menu.getByRole("navigation", { name: "Навигация роли" })
     .getByRole("link", { name: section, exact: true }).click();
 }
@@ -52,7 +68,7 @@ test("customer premium workspace renders every route without overflow", async ({
 
   await page.getByRole("button", { name: "Меню", exact: true }).click();
   const sidebar = page.getByRole("navigation", { name: "Навигация роли" });
-  await expect(sidebar.getByRole("link")).toHaveCount(9);
+  await expect(sidebar.locator('a[href^="/workspace/"]')).toHaveCount(9);
   await page.keyboard.press("Escape");
   for (const section of ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения", "Настройки"]) {
     await test.step(`Customer route: ${section}`, async () => {
