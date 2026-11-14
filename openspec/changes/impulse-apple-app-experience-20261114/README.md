@@ -16,6 +16,18 @@
 **Status:** DRAFT · SDD-first, **no application runtime changes**.  
 **Owner request:** make the entire Impulse app visually/behaviorally close to the clear, white, systematic organization of Apple apps; **preserve all existing functions**, move secondary controls under discoverable contextual navigation. Document every screen before modifying the implementation.
 
+## Content-first v3 (read **before** any design or code)
+
+- [Verified analysis of the user's **actual** four screenshots](docs/owner-true-originals-analysis-20261114.md): the controls kit, white mobile grouped lists, dark Figma UI kit and blue-toned iOS collage, with correct dimensions/SHA-256 and non-Apple provenance. Original archive stored separately in user's Library.
+- [Decision-first content operating model](docs/content-first-operating-model.md): six role homes, status/empty/error microcopy, P0–P3 information priorities and explicit human actions.
+- [13 participant routes in detail](docs/participant-content-blueprints-v2.md): every page's title, first fold, L1/L2, critical status, error, mobile and source limitations.
+- [Remaining 36 server role routes + conditional customer demo paths](docs/work-roles-content-blueprints-v2.md): customer, mentor, manager, HR, operator.
+- [Visual language v3](docs/visual-language-v3.md): semantic light/dark tokens, typography, soft control depth, interaction states, calculated contrast (including **white on #007AFF only ~4.02:1**, requiring adjustment).
+- [23 Apple-inspired opportunities, priorities and explicit rejections](docs/apple-native-pattern-opportunities.md): Smart Lists, inspector, search, drafts, accessible controls vs full-page glass/neumorphism.
+- [Formal content-fidelity capability](specs/apple-content-fidelity/spec.md): additional SHALL/WHEN/THEN requirements for actual content, source fidelity and 49/42 parity.
+
+**S0 research/SDD only:** these files do not deploy or turn on an unfinished global theme. `feat/impulse-global-futurist-ui-20261114` remains blocked per owner STOP; production unchanged.
+
 ## Read in this order
 
 1. [Proposal](proposal.md) — goals, boundaries, compatibility.
