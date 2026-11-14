@@ -1,0 +1,39 @@
+# Claim UI-CALM-NAV-20261114
+
+- session_id: chatgpt-impulse-sdd-20261114-01
+- status: REVIEW
+- started_at: 2026-11-14T14:37:00+03:00
+- heartbeat_at: 2026-11-14T14:37:00+03:00
+- base_revision: ca741df7685e880a9f1597e0e39a1df88040566c
+- depends_on: []
+- write_scope:
+  - openspec/changes/impulse-calm-redesign-20261114/**
+  - frontend/src/features/calm-navigation/**
+  - .agents/coordination/claims/UI-CALM-NAV-20261114.lock/status.md
+- shared_files: []
+- excluded_shared_surfaces:
+  - frontend/src/App.tsx
+  - frontend/src/styles.scss
+  - frontend/src/App.test.tsx
+  - frontend/src/features/participant-home-v2/**
+  - frontend/src/components/topbar-theme.scss
+- verification:
+  - OpenSpec delta structure review
+  - file read-back on the committed feature branch
+  - independent later frontend lint/types/component and E2E after integration
+- progress: Complete OpenSpec design for all six roles; isolated CalmSidebar and role-safe model with light/dark/mobile styles; 13 new tests passed (7 Sidebar, 6 model). Draft PR #160 opened, integration intentionally excluded.
+- verification_evidence:
+  - source revision: 262ee59a84b62668c03186d93f240ccce5986298
+  - GitHub Actions run: 43593594020 (subsequent revision from fixes, per-check status should be read by exact SHA)
+  - frontend-quality-and-contracts: PASS (79 files / 606 tests, TypeScript and ESLint)
+  - frontend standalone ESLint: PASS
+  - docker-smoke: PASS
+  - backend-format-lint-types: PASS
+  - openspec-strict-and-docs: PASS
+  - architecture-audit: PASS
+  - backend-unit-api-integration: FAIL (26 existing task-deadline-sensitive failures, out of redesign scope)
+  - secret-and-dependency-scans: FAIL (langgraph-sdk CVE-2026-118667 and opentelemetry-api CVE-2026-126360, existing lockfile)
+  - playwright E2E: in progress when recorded; integration-specific browser smoke NOT RUN
+  - independent reviewer: PENDING
+- changed_paths: only openspec/changes/impulse-calm-redesign-20261114/**, frontend/src/features/calm-navigation/** and own claim
+- blockers: old SIDEBAR-UNIFICATION-20261025 and TRJ-SOURCE-ROUTE-INTEGRATION-20261025 claims remain REVIEW on shared App.tsx; wiring must be separate integration lane
