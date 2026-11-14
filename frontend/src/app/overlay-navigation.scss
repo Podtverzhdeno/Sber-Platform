@@ -211,3 +211,47 @@
     pointer-events: none;
   }
 }
+
+/* UIKit / HIG resilience: transient glass must not compromise visibility. */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar {
+    background: var(--color-sidebar) !important;
+    box-shadow: 18px 0 48px rgb(10 14 22 / 22%);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar {
+    background: var(--color-sidebar) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-navigation__backdrop {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgb(12 16 24 / 55%);
+  }
+}
+@media (forced-colors: active) {
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar {
+    background: Canvas !important;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    border-left: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-navigation__backdrop--open {
+    background: CanvasText;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar__group[aria-expanded="true"],
+  .page-shell--apple-overlay .workspace--apple :is(.calm-sidebar__home,.calm-sidebar__link)[aria-current="page"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-navigation__mobile-trigger {
+    border-color: ButtonText;
+  }
+}
