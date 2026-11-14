@@ -125,6 +125,7 @@ test("customer journeys: контекст задачи, доменные гра�
 
   await page.goto("/");
   await page.locator('[data-persona="customer-roman"]').click();
+  await page.getByRole("button", { name: "Меню", exact: true }).click();
   await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
   await page.getByRole("link", { name: "Сообщения" }).click();
   // SberChat waits for explicit selection, and task/personal channels must coexist.
@@ -156,6 +157,7 @@ test("customer journeys: контекст задачи, доменные гра�
   await page.getByRole("button", { name: "Открыть вклад задачи" }).click();
   await expect(page).toHaveURL(/workspace\/1\?task=/);
 
+  await page.getByRole("button", { name: "Меню", exact: true }).click();
   await page.getByRole("link", { name: "Сообщения" }).click();
   await page.locator(".msg-dialog-list__row").filter({ hasText: "Ревью отзывов" }).click();
   const chatPane = page.locator(".msg-chat");
