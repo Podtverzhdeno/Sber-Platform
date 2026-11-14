@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { ImpulsePixelReference, nextImpulseVisualMode, type ImpulsePixelReferenceProps } from "./ImpulsePixelReference";
+import { ImpulsePixelReference, type ImpulsePixelReferenceProps } from "./ImpulsePixelReference";
+import { nextImpulseVisualMode } from "./visual-modes";
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
