@@ -16,7 +16,7 @@ const actor = {
 };
 
 async function installReferenceSession(page: Page): Promise<void> {
-  await page.addInitScript(() => localStorage.setItem("impulse-theme", "light"));
+  await page.addInitScript(() => { localStorage.setItem("impulse-theme", "light"); });
   await page.route("**/api/v1/config", route =>
     route.fulfill({ json: { demo_mode: true, honor_board_enabled: true } }));
   await page.route("**/api/v1/me", route => route.fulfill({ json: actor }));
@@ -33,11 +33,11 @@ async function sidebarSignature(page: Page) {
   return page.locator(".calm-sidebar").evaluate(sidebar => ({
     brand: sidebar.querySelector(".calm-sidebar__brand")?.textContent,
     sections: Array.from(sidebar.querySelectorAll(".calm-sidebar__home,.calm-sidebar__link"), link => ({
-      label: link.textContent?.trim(),
+      label: link.textContent.trim(),
       href: link.getAttribute("href"),
     })),
     groups: Array.from(sidebar.querySelectorAll(".calm-sidebar__group"), button =>
-      button.textContent?.trim()),
+      button.textContent.trim()),
     promotion: sidebar.querySelector(".sidebar-message"),
   }));
 }
