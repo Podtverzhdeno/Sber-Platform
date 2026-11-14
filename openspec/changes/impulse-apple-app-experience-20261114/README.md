@@ -1,5 +1,8 @@
 # Impulse Apple-like Experience · Specification index
 
+> **LATEST OWNER DECISION (2026-11-14):** navigation must be **closed by default on all screen sizes**, including desktop, and open as an elegant translucent animated overlay. This supersedes the older fixed-sidebar assumption. See [Navigation overlay v4](docs/navigation-overlay-v4.md) and [OpenSpec scenarios](specs/overlay-navigation/spec.md). The wider canvas is the default; no screen's authorized actions or URLs may be removed.
+
+
 > **IMPORTANT REFERENCE CORRECTION:** the old `impulse-reference-pack-20261114.zip` was assistant-generated Impulse concept PNGs, not the four real user uploads. The **true owner originals** are separately preserved in personal Library archive `impulse-USER-original-4-images.zip` and described in [owner-true-originals-analysis](docs/owner-true-originals-analysis-20261114.md). User originals take precedence; older mockup coordinates are illustrative only. This fixes the initial provenance misidentification.
 
 
