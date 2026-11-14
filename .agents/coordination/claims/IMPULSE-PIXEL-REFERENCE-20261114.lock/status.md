@@ -1,7 +1,7 @@
 # Claim IMPULSE-PIXEL-REFERENCE-20261114
 - task_id: IMPULSE-PIXEL-REFERENCE-20261114
 - session_id: gpt6-20261114-image3-pixel-wave-c718
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-14T23:26:00+03:00
 - heartbeat_at: 2026-11-14T23:26:00+03:00
 - base_revision: 423b1e24caa711537ac9a390691cff114d256109
@@ -24,4 +24,25 @@
 - integration_handoff: exact JSX/CSS preview and interaction API are ready for separately owned App/main integration after claims release; never silently overwrite the shared files.
 - verification: isolated component tests; screenshot baseline at 1422x803 and responsive 390px; 3-cycle theme/no hidden login routes; CI on exact PR SHA
 - source: user attached image(3).png, Apple HIG Materials, official macOS 27 UI Kit catalog, generated custom abstract wave
-- progress: scope claimed. No shared product files touched.
+- progress: Source-measured React pixel reference, 3 theme modes, real API adapter, generated WebP background, 12 isolated unit tests and independent HTML browser preview are complete; independent review and real App integration outstanding.
+- changed_files:
+  - frontend/src/features/pixel-reference/ImpulsePixelReference.tsx
+  - frontend/src/features/pixel-reference/ImpulsePixelReference.test.tsx
+  - frontend/src/features/pixel-reference/adapter.ts
+  - frontend/src/features/pixel-reference/adapter.test.ts
+  - frontend/src/features/pixel-reference/visual-modes.ts
+  - frontend/src/features/pixel-reference/impulse-pixel-reference.scss
+  - frontend/public/impulse-wave-reference.webp
+  - openspec/changes/impulse-pixel-reference-20261114/**
+  - docs/design/impulse-pixel-reference-20261114.md
+- verification:
+  - Standalone preview: Chromium 1422x803 and 390x844; all three theme cycle clicks, search, brand navigation and requirements disclosure PASS
+  - React unit tests for this branch: 7/7 `ImpulsePixelReference.test.tsx` PASS; adapter unit tests 5/5 PASS
+  - Frontend unit aggregate on pre-handoff SHA 0662b7e: 652 PASS / 1 FAIL, known pre-existing `calm-navigation/Sidebar.test.tsx` focus case
+  - Frontend lint standalone gate PASS on pre-handoff SHA 0662b7e
+  - OpenSpec and architecture audit PASS; TypeScript stage passed before unit stage; Docker smoke / Playwright results not fully confirmed yet
+  - Backend and Python dependency audit remain known baseline FAIL independent of scope
+- integration_blocker: App.tsx, theme-controls, calm-navigation and CalmParticipantHome owned by other IN_PROGRESS/REVIEW claims. The module is deliberately unmounted; independent integration owner must wire it and run visual E2E on exact integration SHA.
+- PR: https://github.com/Podtverzhdeno/Sber-Platform/pull/175
+- main_and_railway: untouched.
+
