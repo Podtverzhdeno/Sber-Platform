@@ -212,9 +212,21 @@ describe("App", () => {
     expect(initial.promo).toBeUndefined();
 
     for (const section of ["Аналитика", "Сообщения", "Главная"]) {
-      if (section === "Аналитика") fireEvent.click(screen.getByRole("button", { name: /Результаты/ }));
-      if (section === "Сообщения") fireEvent.click(screen.getByRole("button", { name: /Сообщество/ }));
-      fireEvent.click(screen.getByRole("link", { name: section }));
+      // The active section may have already expanded its group. Clicking it
+      // unconditionally would instead collapse the already-visible link.
+      const groupName = section === "Аналитика" ? /Результаты/ :
+        section === "Сообщения" ? /Сообщество/ : null;
+      if (groupName) {
+        const group = screen.getByRole("button", { name: groupName });
+        if (group.getAttribute("aria-expanded") !== "true") {
+          fireEvent.click(group);
+        }
+        await waitFor(() => {
+          expect(group).toHaveAttribute("aria-expanded", "true");
+        });
+      }
+      const routeLink = await screen.findByRole("link", { name: section });
+      fireEvent.click(routeLink);
       await waitFor(() => {
         expect(screen.getByRole("link", { name: section })).toHaveAttribute("aria-current", "page");
       });
