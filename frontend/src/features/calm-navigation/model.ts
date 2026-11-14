@@ -98,12 +98,14 @@ export function buildCalmNavigation(role: CalmRole, navigation: readonly string[
 
   const fallback = remaining.filter((item) => !claimed.has(item.index));
   if (fallback.length) {
-    const last = groups[groups.length - 1];
-    groups[groups.length - 1] = {
-      id: last.id,
-      title: "Другие разделы",
-      items: [...last.items, ...fallback].sort((a, b) => a.index - b.index),
-    };
+    const last = groups.at(-1);
+    if (last) {
+      groups[groups.length - 1] = {
+        id: last.id,
+        title: "Другие разделы",
+        items: [...last.items, ...fallback].sort((a, b) => a.index - b.index),
+      };
+    }
   }
   return {
     home,
