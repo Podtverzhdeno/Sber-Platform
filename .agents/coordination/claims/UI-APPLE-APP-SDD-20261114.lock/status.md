@@ -1,0 +1,59 @@
+# Claim UI-APPLE-APP-SDD-20261114
+
+- task_id: UI-APPLE-APP-SDD-20261114
+- session_id: gpt6-apple-ux-all-screens-20261114-1646
+- status: REVIEW
+- started_at: 2026-11-14T16:46:00+03:00
+- heartbeat_at: 2026-11-14T16:46:00+03:00
+- base_revision: ca741df7685e880a9f1597e0e39a1df88040566c
+- depends_on: []
+- write_scope:
+  - openspec/changes/impulse-apple-app-experience-20261114/**
+  - .agents/coordination/claims/UI-APPLE-APP-SDD-20261114.lock/status.md
+- shared_files: []
+- excluded_shared_surfaces:
+  - frontend/** (no code change during SDD-first phase)
+  - openspec/changes/impulse-calm-redesign-20261114/** (reserved PR #160)
+  - openspec/changes/impulse-calm-home-preview-20261114/** (reserved PR #161)
+  - src/**, tests/**, Railway and production
+- verification:
+  - source route vs capability crosswalk, HIG references, strict openspec CI and independent design review
+- progress: Spec-only work complete for author handoff. 49 backend-authorized role destinations documented, conditional customer demo navigation separated, all screen L0/L1/L2 contracts, 42 action families, six formal OpenSpec capabilities (20 requirements, 37 scenarios), 320/390/768/1024/1440/1920 responsive behavior and migration waves S0–S7.
+- changed_files:
+  - openspec/changes/impulse-apple-app-experience-20261114/** (19 authored spec/docs files)
+  - .agents/coordination/claims/UI-APPLE-APP-SDD-20261114.lock/status.md
+- verification_evidence:
+  - Static GitHub branch read-back: 6 capability specs, 20 requirements, 37 scenarios and no missing scenario count
+  - GitHub Actions job 132472692255 on tested commit 5244fbb44852ab2bc666093bca9cbebe3440c22d: Validate OpenSpec PASS; Validate documentation contracts PASS
+  - PR #162 draft: https://github.com/Podtverzhdeno/Sber-Platform/pull/162
+  - Source base main: ca741df7685e880a9f1597e0e39a1df88040566c
+- unresolved:
+  - Independent product and design review of each screen's L0/L1/L2, no user sign-off
+  - Cross-role live browser and production evidence not performed; design-only work
+  - Existing CI backend/security failures are unrelated and not suppressed
+  - PR #160 navigation and PR #161 participant home remain isolated proposals
+- tested_spec_revision: 5244fbb44852ab2bc666093bca9cbebe3440c22d
+- independent_review: PENDING
+- blockers: shared App.tsx and legacy CSS have active/review claims; future integrations require distinct accepted claims.
+
+## SDD v3 content-first research addition — 2026-11-14
+
+- status: REVIEW (author's spec committed, **independent reviewer has not accepted**)
+- owner_reference_correction:
+  - Earlier `impulse-reference-pack-20261114.zip` contained **assistant-generated Impulse mockups**, NOT the four user's originals; prior claim was inaccurate and is explicitly superseded in README.
+  - Original user images reopened and stored unchanged with hashes in personal Library archive `/Impulse-UI-References-2026-11-14/impulse-USER-original-4-images.zip`.
+  - Original screenshots dimensions: U01 1000x750 controls; U02 2048x1292 white mobile mockups; U03 2048x1147 Figma dark workspace/artboard; U04 1500x914 blue iOS kit.
+- new_docs:
+  - docs/owner-true-originals-analysis-20261114.md
+  - docs/content-first-operating-model.md
+  - docs/participant-content-blueprints-v2.md
+  - docs/work-roles-content-blueprints-v2.md
+  - docs/visual-language-v3.md
+  - docs/apple-native-pattern-opportunities.md
+  - specs/apple-content-fidelity/spec.md
+- new_coverage: all 49 real role destinations detailed, 9 conditional demo customer labels separated, six main next-action policies; 23 Apple-inspired feature opportunities evaluated (not implemented).
+- quality: calculated contrast white on inspirational #007AFF approx 4.02:1, proposed darker CTA #0066D6 contrast approx 5.42:1. No Apple proprietary assets redistributed.
+- source_research: current Apple HIG design principles/writing/layout/split views/materials/sidebar/lists and Reminders/Notes, plus Linear 2026.
+- current_revision_at_edit: 23202f93e147ee38f2536a7f1db0b0e294d948eb (the subsequent claim commit may advance HEAD)
+- open_checks: exact-SHA OpenSpec CI latest revision, independent content/design review, actual browser screenshots for all light/dark screen states and 49x42 functional parity.
+- deployment: NOT PERFORMED. Owner's most recent direction was to study and improve SDD, not resume paused global CSS rollout. Prior Railway pinned successful source remains 277a163f.
