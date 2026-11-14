@@ -14,7 +14,7 @@ type ApplePageProps = {
 /** Scoped workspace frame. Does not alter global theme, routes or business logic. */
 export function ApplePage({ title, context, action, children }: ApplePageProps) {
   return (
-    <main className="apple-surface" data-testid="apple-surface">
+    <div className="apple-surface" data-testid="apple-surface">
       <header className="apple-surface__page-header">
         <div className="apple-surface__title-group">
           <h1 className="apple-surface__page-title">{title}</h1>
@@ -23,7 +23,7 @@ export function ApplePage({ title, context, action, children }: ApplePageProps) 
         {action && <div className="apple-surface__page-actions">{action}</div>}
       </header>
       {children}
-    </main>
+    </div>
   );
 }
 
