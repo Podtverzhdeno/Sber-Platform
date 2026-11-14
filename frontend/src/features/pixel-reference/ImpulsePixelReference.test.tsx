@@ -5,7 +5,8 @@ import { ImpulsePixelReference, nextImpulseVisualMode, type ImpulsePixelReferenc
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
 const model: ImpulsePixelReferenceProps["home"] = {
-  roleTitle: "AI Agent Engineer",
+  roleTitle: "AI Security Engineer",
+  moduleTrackTitle: "AI Agent Engineer",
   nextTitle: "Создание AI-агентов",
   nextKind: "course",
   nextState: "Следующий курс",
@@ -62,6 +63,8 @@ describe("Impulse pixel reference", () => {
   it("renders real current module and both dynamic progress values", () => {
     render(<ImpulsePixelReference {...props()} />);
     expect(screen.getByRole("heading", {name:"Создание AI-агентов"})).toBeInTheDocument();
+    expect(screen.getByText("Текущий модуль · AI Agent Engineer")).toBeInTheDocument();
+    expect(screen.getByText("AI Security Engineer")).toBeInTheDocument();
     expect(screen.getByRole("progressbar", {name:"Прогресс текущего курса"})).toHaveAttribute("aria-valuenow","50");
     expect(screen.getByRole("progressbar", {name:"Прогресс обязательных курсов"})).toHaveAttribute("aria-valuenow","50");
     expect(screen.getByText("С подтверждёнными кейсами")).toBeInTheDocument();
