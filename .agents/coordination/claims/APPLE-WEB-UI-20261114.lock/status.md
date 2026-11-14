@@ -1,0 +1,43 @@
+# Claim APPLE-WEB-UI-20261114
+
+- task_id: APPLE-WEB-UI-20261114
+- session_id: gpt6-20261114-apple-web-design-system
+- status: REVIEW
+- started_at: 2026-11-14T19:55:00+03:00
+- heartbeat_at: 2026-11-14T20:12:00+03:00
+- base_revision: ca741df7685e880a9f1597e0e39a1df88040566c (main at PR creation)
+- depends_on: []
+- write_scope:
+  - frontend/src/app/apple-web-ui.scss
+  - frontend/src/main.tsx (stylesheet import only)
+  - openspec/changes/apple-web-design-system-20261114/
+  - .agents/coordination/claims/APPLE-WEB-UI-20261114.lock/status.md
+- shared_files:
+  - frontend/src/main.tsx (single trailing import)
+- changed_files:
+  - frontend/src/app/apple-web-ui.scss
+  - frontend/src/main.tsx
+  - openspec/changes/apple-web-design-system-20261114/proposal.md
+  - openspec/changes/apple-web-design-system-20261114/design.md
+  - openspec/changes/apple-web-design-system-20261114/specs/apple-web-ui/spec.md
+  - openspec/changes/apple-web-design-system-20261114/tasks.md
+  - .agents/coordination/claims/APPLE-WEB-UI-20261114.lock/status.md
+- code_pr: https://github.com/Podtverzhdeno/Sber-Platform/pull/166
+- evidence_at_css_revision: 0eba823f1642183bcc9c33cdb042bf544cdaa890
+- verification:
+  - OpenSpec strict & docs: SUCCESS, CI run 43619256668
+  - frontend quality (ESLint / TypeScript / Vitest): SUCCESS, CI run 43619256668
+  - Vite production build: SUCCESS on all completed frontend-build-e2e shards in CI run 43619256668
+  - standalone frontend lint: SUCCESS, Actions 43619256646
+  - architecture audit: SUCCESS, Actions 43619256623
+  - docker smoke: SUCCESS, CI run 43619256668
+  - full frontend E2E: outstanding at time of handoff, must be checked on exact branch head
+  - backend pytest: FAIL (26 failing, 813 passing; mostly expired demo task deadlines, outside UI diff)
+  - Python dependency audit: FAIL (langgraph-sdk 0.4.5, opentelemetry-api 1.45.1; outside UI diff)
+- progress: Apple-inspired shared web design layer implemented and imported; source-linked full-role design and acceptance plan authored. Scope is code foundation only, NOT all feature-specific pixel fidelity.
+- blockers:
+  - No direct access to specified Figma community node (external browser/web access unavailable); no pixel-parity claims.
+  - All six roles still need visual UX inspection, feature-specific styling and screenshot acceptance.
+  - Full mainline CI remains red due unrelated backend/date fixture and dependency issues.
+  - No independent design review, merge or Railway deploy.
+- next_safe_step: Independent reviewer reviews CSS diff, checks current E2E screenshot failures and interaction impacts. Then integrate screen-level changes under non-overlapping claims with the separate shared-shell integration lane.

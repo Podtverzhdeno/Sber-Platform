@@ -1,0 +1,449 @@
+/*
+ * Impulse / Apple-inspired Web UI
+ * Last-imported presentation layer. Does not change React state, routing or API.
+ * References: Apple HIG, UIKit and the user's Sketch design references.
+ * UIKit itself cannot run in a browser; use semantic web controls.
+ * Do not bundle Apple's reserved SF font binaries.
+ */
+:root,
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --apple-canvas: #0e0e10;
+  --apple-sidebar: #151517;
+  --apple-surface: #1c1c1e;
+  --apple-surface-secondary: #242426;
+  --apple-surface-raised: #2c2c2e;
+  --apple-label: #f5f5f7;
+  --apple-secondary-label: #a1a1a6;
+  --apple-tertiary-label: #8e8e93;
+  --apple-separator: #38383a;
+  --apple-control-border: #48484a;
+  --apple-accent: #0a84ff;
+  --apple-accent-hover: #409cff;
+  --apple-on-accent: #ffffff;
+  --apple-selection: rgb(10 132 255 / 18%);
+  --apple-hover: rgb(255 255 255 / 6%);
+  --apple-glass: rgb(28 28 30 / 90%);
+  --apple-shadow: 0 12px 32px rgb(0 0 0 / 16%);
+  --apple-danger: #ff453a;
+  --apple-success: #30d158;
+  --apple-warning: #ffd60a;
+  --apple-radius-control: 11px;
+  --apple-radius-card: 18px;
+  --apple-radius-dialog: 22px;
+  --apple-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-bg: var(--apple-canvas);
+  --color-sidebar: var(--apple-sidebar);
+  --color-surface: var(--apple-surface);
+  --color-surface-1: var(--apple-surface);
+  --color-surface-2: var(--apple-surface-secondary);
+  --color-surface-raised: var(--apple-surface-raised);
+  --color-border: var(--apple-separator);
+  --color-border-strong: var(--apple-control-border);
+  --color-text: var(--apple-label);
+  --color-muted: var(--apple-secondary-label);
+  --color-primary: var(--apple-accent);
+  --color-primary-strong: #0066d6;
+  --color-accent: var(--apple-accent);
+  --color-info: var(--apple-accent);
+  --color-warning: var(--apple-warning);
+  --color-danger: var(--apple-danger);
+  --on-brand-ink: var(--apple-on-accent);
+  --radius-sm: var(--apple-radius-control);
+  --radius-md: 14px;
+  --radius-lg: var(--apple-radius-card);
+  --shadow-raised: var(--apple-shadow);
+  font-family: var(--apple-font);
+  color: var(--apple-label);
+  background: var(--apple-canvas);
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --apple-canvas: #f5f5f7;
+  --apple-sidebar: #f9f9fb;
+  --apple-surface: #ffffff;
+  --apple-surface-secondary: #f2f2f7;
+  --apple-surface-raised: #ffffff;
+  --apple-label: #1d1d1f;
+  --apple-secondary-label: #636366;
+  --apple-tertiary-label: #737378;
+  --apple-separator: #dedee3;
+  --apple-control-border: #c7c7cc;
+  --apple-accent: #007aff;
+  --apple-accent-hover: #0067d8;
+  --apple-selection: rgb(0 122 255 / 10%);
+  --apple-hover: rgb(28 28 30 / 4%);
+  --apple-glass: rgb(255 255 255 / 89%);
+  --apple-shadow: 0 10px 34px rgb(37 43 57 / 6%);
+  --apple-danger: #d70015;
+  --apple-success: #248a3d;
+  --apple-warning: #9a6700;
+  --color-primary-strong: #0067d8;
+}
+
+/* Foundation. Leave high-density charts and status-specific colors untouched. */
+html { font-family: var(--apple-font); text-size-adjust: 100%; }
+:root body {
+  margin: 0;
+  background: var(--apple-canvas);
+  color: var(--apple-label);
+  font-family: var(--apple-font);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+:root :where(button, input, select, textarea, [role="button"]) {
+  font-family: inherit;
+  letter-spacing: normal;
+}
+:root :where(button, [role="button"], a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--apple-accent);
+  outline-offset: 3px;
+}
+:root :where(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+:root :where(a) { text-underline-offset: .16em; }
+:root :where(h1, h2, h3, h4) { color: var(--apple-label); text-wrap: pretty; }
+:root .page-shell h1 {
+  font-size: clamp(28px, 3vw, 40px);
+  font-weight: 720;
+  line-height: 1.14;
+  letter-spacing: -.035em;
+}
+:root .page-shell h2 { letter-spacing: -.022em; font-weight: 660; }
+:root .page-shell :where(small, .muted) { color: var(--apple-secondary-label); }
+:root :where(.eyebrow) {
+  color: var(--apple-secondary-label);
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .06em;
+}
+:root :where(.lead) { color: var(--apple-secondary-label); line-height: 1.5; }
+
+/* macOS/iPadOS-style sidebar and floating but restrained toolbar. */
+:root .workspace { padding-left: 252px; background: var(--apple-canvas); }
+:root .sidebar {
+  width: 252px;
+  padding: 0 14px 20px;
+  color: var(--apple-label);
+  border-right: 1px solid var(--apple-separator);
+  background: var(--apple-sidebar);
+  box-shadow: none;
+}
+:root .sidebar-brand {
+  min-height: 72px;
+  margin-bottom: 12px;
+  border-color: var(--apple-separator);
+}
+:root .sidebar-brand-home strong {
+  font-size: 21px;
+  font-weight: 720;
+  letter-spacing: -.05em;
+}
+:root .brand-mark {
+  border-radius: 12px;
+  color: #fff;
+  background: var(--apple-accent);
+  box-shadow: none;
+}
+:root .sidebar nav { gap: 3px; }
+:root .sidebar nav a {
+  min-height: 43px;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 10px;
+  color: var(--apple-secondary-label);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 570;
+}
+:root .sidebar nav a:hover {
+  color: var(--apple-label);
+  background: var(--apple-hover);
+}
+:root .sidebar nav a.active,
+:root .sidebar nav a[aria-current="page"] {
+  border: 0;
+  color: var(--apple-label);
+  background: var(--apple-selection);
+  font-weight: 680;
+}
+:root .sidebar nav a.active::before,
+:root .sidebar nav a[aria-current="page"]::before { display: none; }
+:root .sidebar .nav-icon {
+  width: 23px;
+  min-width: 23px;
+  color: var(--apple-accent);
+  font-size: 17px;
+  font-weight: 530;
+  text-align: center;
+}
+:root .sidebar-message {
+  margin-top: auto;
+  border-color: var(--apple-separator);
+  color: var(--apple-secondary-label);
+  background: transparent;
+  box-shadow: none;
+}
+:root .sidebar-message .sidebar-art { display: none; }
+:root .topbar {
+  left: 252px;
+  min-height: 64px;
+  border-bottom: 1px solid var(--apple-separator);
+  color: var(--apple-label);
+  background: var(--apple-glass);
+  box-shadow: none;
+  backdrop-filter: saturate(150%) blur(22px);
+  -webkit-backdrop-filter: saturate(150%) blur(22px);
+}
+:root .topbar :where(.top-persona strong, .top-persona small) { color: var(--apple-label); }
+:root .topbar .top-persona small { color: var(--apple-secondary-label); }
+:root .workspace-content {
+  min-width: 0;
+  max-width: 1740px;
+  margin-inline: auto;
+  padding: 32px clamp(20px, 3vw, 48px) 72px;
+}
+:root .global-search {
+  height: 39px;
+  border: 1px solid var(--apple-separator);
+  border-radius: 11px;
+  color: var(--apple-secondary-label);
+  background: var(--apple-surface-secondary);
+  box-shadow: none;
+}
+:root .global-search input {
+  color: var(--apple-label);
+  background: transparent;
+  border: 0;
+}
+:root .global-search input::placeholder { color: var(--apple-tertiary-label); }
+:root .role-switcher select { color: var(--apple-label); background: var(--apple-surface); }
+:root .topbar :where(.notification-button, .topbar-guide-btn, .theme-toggle, .ghost-button) {
+  color: var(--apple-label);
+  border-color: var(--apple-separator);
+  background: var(--apple-surface-secondary);
+  box-shadow: none;
+}
+:root .topbar :where(.notification-button, .topbar-guide-btn, .theme-toggle, .ghost-button):hover {
+  background: var(--apple-hover);
+}
+:root .mobile-menu { color: var(--apple-label); background: var(--apple-surface); }
+:root .demo-badge {
+  border-color: var(--apple-separator);
+  color: var(--apple-secondary-label);
+  background: var(--apple-surface-secondary);
+}
+
+/* Unified cards. Keep layout, data semantics, and chart shapes as-is. */
+:root .page-shell :where(
+  .ui-card, .state-panel, .next-action, .metric-card, .focus-panel,
+  .ai-panel, .activity-panel, .insight-panel, .compact-panel, .track-card,
+  .rating-table, .rating-participant-card, .rating-position, .persona-panel,
+  .persona-card, .course-roadmap-hero, .course-progress, .overlay-panel
+) {
+  border: 1px solid var(--apple-separator);
+  border-radius: var(--apple-radius-card);
+  color: var(--apple-label);
+  background: var(--apple-surface);
+  box-shadow: var(--apple-shadow);
+}
+:root .page-shell :where(.metric-card, .focus-panel, .ai-panel, .activity-panel, .insight-panel)::after {
+  filter: none;
+}
+:root .page-shell .metric-card::after { opacity: 0; }
+:root .page-shell .metric-card > span:not(.metric-icon) { color: var(--apple-secondary-label); }
+:root .page-shell .metric-card strong { color: var(--apple-label); font-weight: 700; }
+:root .page-shell .metric-icon {
+  color: var(--apple-accent);
+  border-color: var(--apple-separator);
+  background: var(--apple-selection);
+}
+:root .page-shell :where(.focus-panel, .next-action, .state-panel, .ai-panel) p {
+  color: var(--apple-secondary-label);
+}
+:root .page-shell :where(.ui-badge, .badge, [class$="-badge"]) {
+  border: 1px solid var(--apple-separator);
+  border-radius: 999px;
+  background: var(--apple-surface-secondary);
+  color: var(--apple-secondary-label);
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: none;
+}
+:root .page-shell :where(.ui-badge--success, .status-success) {
+  border-color: color-mix(in srgb, var(--apple-success) 25%, transparent);
+  background: color-mix(in srgb, var(--apple-success) 10%, var(--apple-surface));
+  color: var(--apple-success);
+}
+:root .page-shell :where(.ui-badge--warning, .status-warning) {
+  border-color: color-mix(in srgb, var(--apple-warning) 25%, transparent);
+  background: color-mix(in srgb, var(--apple-warning) 9%, var(--apple-surface));
+  color: var(--apple-warning);
+}
+
+/* Buttons: selected/primary remains distinct, while secondary chrome is quiet. */
+:root .page-shell :where(button, [role="button"]) {
+  border-radius: var(--apple-radius-control);
+  font-weight: 580;
+  box-shadow: none;
+  transition: background-color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+:root .page-shell :where(
+  .state-panel button, .modal-actions button:not(.secondary-button),
+  .course-actions button:not(.secondary-button), .event-actions button,
+  .focus-panel button, .ai-panel button, .work-grid .ui-card > button,
+  .review-actions button:not(.secondary-button), .contribution-form button,
+  .row-actions button:not(.secondary-button), .task-wizard button:not(.secondary-button)
+) {
+  min-height: 40px;
+  border: 1px solid transparent;
+  border-radius: var(--apple-radius-control);
+  color: var(--apple-on-accent);
+  background: var(--apple-accent);
+  box-shadow: none;
+  font-weight: 610;
+}
+:root .page-shell :where(
+  .state-panel button, .modal-actions button:not(.secondary-button),
+  .course-actions button:not(.secondary-button), .event-actions button,
+  .focus-panel button, .ai-panel button, .work-grid .ui-card > button,
+  .review-actions button:not(.secondary-button), .contribution-form button
+):hover:not(:disabled) { background: var(--apple-accent-hover); }
+:root .page-shell :where(.secondary-button, .ghost-button) {
+  color: var(--apple-label) !important;
+  border: 1px solid var(--apple-separator) !important;
+  background: var(--apple-surface-secondary) !important;
+  box-shadow: none;
+}
+:root .page-shell :where(.text-button) {
+  color: var(--apple-accent);
+  background: transparent;
+  text-decoration: none;
+}
+:root .page-shell :where(.text-button):hover { text-decoration: underline; }
+:root .page-shell :where(.track-card, .persona-card):hover:not(:disabled) {
+  border-color: var(--apple-control-border);
+  background: var(--apple-surface-secondary);
+  transform: none;
+}
+:root .page-shell :where(.track-card--active, .persona-card--active) {
+  border-color: color-mix(in srgb, var(--apple-accent) 40%, var(--apple-separator));
+  background: var(--apple-selection);
+}
+:root .page-shell :where(.track-card--active, .persona-card--active):hover {
+  background: var(--apple-selection);
+}
+
+/* Fields and segmented controls, without altering native checkbox/radio geometry. */
+:root .page-shell :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]),
+  textarea, select
+) {
+  min-height: 40px;
+  border: 1px solid var(--apple-separator);
+  border-radius: var(--apple-radius-control);
+  color: var(--apple-label);
+  background: var(--apple-surface-secondary);
+  box-shadow: none;
+}
+:root .page-shell :where(input, textarea)::placeholder { color: var(--apple-tertiary-label); }
+:root .page-shell :where(input[type="checkbox"], input[type="radio"], input[type="range"]) {
+  accent-color: var(--apple-accent);
+}
+:root .page-shell :where(.catalog-segments, .view-toggle, [role="tablist"]) {
+  padding: 4px;
+  border: 1px solid var(--apple-separator);
+  border-radius: 12px;
+  background: var(--apple-surface-secondary);
+  box-shadow: none;
+}
+:root .page-shell :where(.catalog-segments, .view-toggle, [role="tablist"]) button {
+  border: 0;
+  border-radius: 9px;
+  color: var(--apple-secondary-label);
+  background: transparent;
+  box-shadow: none;
+}
+:root .page-shell :where(.catalog-segments, .view-toggle, [role="tablist"]) :where(button[aria-selected="true"], button[aria-pressed="true"], button.active) {
+  color: var(--apple-label);
+  background: var(--apple-surface);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 10%);
+}
+:root .page-shell :where(.catalog-segments, .view-toggle, [role="tablist"]) :where(button[aria-selected="true"], button[aria-pressed="true"], button.active):hover {
+  color: var(--apple-label);
+  background: var(--apple-surface);
+}
+
+/* Tables, dialogs, popovers and state panels. */
+:root .page-shell :where(.table-scroll, .rating-table) {
+  border: 1px solid var(--apple-separator);
+  border-radius: var(--apple-radius-card);
+  background: var(--apple-surface);
+}
+:root .page-shell :where(table) { border-collapse: separate; border-spacing: 0; }
+:root .page-shell :where(th) {
+  position: sticky;
+  top: 0;
+  color: var(--apple-secondary-label);
+  background: var(--apple-surface-secondary);
+  font-size: 12px;
+  font-weight: 610;
+}
+:root .page-shell :where(td, th) { border-color: var(--apple-separator); }
+:root .page-shell :where(tbody tr):hover { background: var(--apple-hover); }
+:root .overlay { background: rgb(0 0 0 / 46%); backdrop-filter: blur(8px); }
+:root .page-shell .overlay-panel {
+  border-color: var(--apple-separator);
+  border-radius: var(--apple-radius-dialog);
+  background: var(--apple-surface-raised);
+  box-shadow: 0 24px 72px rgb(0 0 0 / 24%);
+}
+:root .page-shell :where(.notification-popover, .global-search-results, [role="menu"], .tooltip [role="tooltip"]) {
+  border: 1px solid var(--apple-separator);
+  border-radius: 14px;
+  color: var(--apple-label);
+  background: var(--apple-surface-raised);
+  box-shadow: 0 14px 38px rgb(0 0 0 / 14%);
+}
+:root .page-shell :where(.state-panel--error, .state-panel--offline) {
+  border-color: color-mix(in srgb, var(--apple-danger) 35%, var(--apple-separator));
+}
+:root .page-shell :where(.notification-list, .activity-row, .rating-row) {
+  border-color: var(--apple-separator);
+}
+:root .page-shell :where(.rating-row--current) {
+  background: var(--apple-selection);
+  box-shadow: inset 3px 0 var(--apple-accent);
+}
+:root .page-shell :where(.sidebar-message, .focus-visual)::after { pointer-events: none; }
+
+/* Responsive design retains existing menu mechanics and all actions. */
+@media (max-width: 1023px) {
+  :root .workspace { padding-left: 0; }
+  :root .topbar { left: 0; }
+  :root .sidebar { box-shadow: 14px 0 44px rgb(0 0 0 / 15%); }
+  :root .workspace-content { padding: 24px 20px 56px; }
+  :root .mobile-menu { min-height: 40px; border-radius: var(--apple-radius-control); }
+}
+@media (max-width: 767px) {
+  :root .workspace { padding-top: 58px; }
+  :root .topbar { min-height: 58px; padding-inline: 12px; }
+  :root .workspace-content { padding: 20px 14px 52px; }
+  :root .page-shell h1 { font-size: clamp(26px, 7vw, 34px); }
+  :root .global-search { width: min(48vw, 420px); }
+  :root .global-search input::placeholder { color: transparent; }
+  :root .page-shell :where(.ui-card, .state-panel, .next-action, .focus-panel, .ai-panel) {
+    border-radius: 16px;
+  }
+  :root .page-shell :where(.overlay-panel) { max-width: calc(100vw - 24px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root :where(button, [role="button"], .sidebar) { transition: none !important; }
+}
+@media (forced-colors: active) {
+  :root :where(button, [role="button"], a):focus-visible { outline: 2px solid Highlight !important; }
+  :root .sidebar nav a[aria-current="page"] { border: 1px solid Highlight; }
+}
