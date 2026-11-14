@@ -694,3 +694,286 @@ body, :root[data-theme="light"] body, :root[data-theme="dark"] body {
   .page-shell .login-layout { grid-template-columns: 1fr; gap: 24px; padding-inline: 17px; }
   .page-shell .persona-panel { padding: 22px; }
 }
+
+
+/* Dedicated bridges for long-lived feature CSS. Components keep all their
+   business controls; only legacy navy/teal presentation is normalized. */
+
+/* Bootcamp catalog, lessons and level requirements */
+.workspace--apple .bc-approved {
+  --bc2-line: var(--color-border);
+  --bc2-surface: var(--color-surface);
+  --bc2-raised: var(--color-surface-2);
+  --bc2-text: var(--color-text);
+  --bc2-muted: var(--color-muted);
+  --bc2-teal: var(--color-primary);
+}
+.workspace--apple .bc-approved :is(
+  .bootcamp-hero-pulse,.bc-grade-banner,.bootcamp-catalog-toolbar,
+  .bootcamp-course-card,.bc-role-card,.bc-role-metrics > div
+) {
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .bc-approved .bc-continue {
+  color: var(--color-text);
+  background: var(--color-surface-2) !important;
+  border-color: var(--color-border);
+}
+.workspace--apple .bc-approved .bc-continue::before { opacity: 0; }
+.workspace--apple .bc-approved .bc-grade-banner p:last-child,
+.workspace--apple .bc-approved .bc-course-summary,
+.workspace--apple .bc-approved .bc-role-metrics span { color: var(--color-muted); }
+.workspace--apple .bc-approved .bc-panel-kicker {
+  color: var(--color-muted);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.workspace--apple .bc-approved .bc-catalog-title { color: var(--color-text); }
+.workspace--apple .bc-approved :is(.bc-category-row,.catalog-segments) {
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+}
+.workspace--apple .bc-approved .bc-overview-grid { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+.workspace--apple .bc-approved .course-grid { grid-template-columns: repeat(auto-fit,minmax(min(100%,235px),1fr)); }
+
+/* My Projects: normalize all actionable project-list surfaces, not evidence
+   status semantics; sticky completion/benefit information remains visible. */
+.workspace--apple .mpv2 {
+  --mp-bg: var(--color-bg);
+  --mp-panel: var(--color-surface);
+  --mp-panel2: var(--color-surface-2);
+  --mp-border: var(--color-border);
+  --mp-text: var(--color-text);
+  --mp-muted: var(--color-muted);
+  --mp-cyan: var(--color-primary);
+  --mp-purple: var(--color-ai);
+  color: var(--color-text);
+}
+.workspace--apple .mpv2 :is(
+  .mp-benefit-journey,.mp-benefit-step,.mp-card-list__header,
+  .mp-project-tile,.mp-reward-popup,.mp-list-search,.mp-surface
+) {
+  color: var(--color-text) !important;
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: none !important;
+}
+.workspace--apple .mpv2 :is(
+  .mp-filters button,.mp-layout button,.mp-select,
+  .mp-secondary,.mp-table-open,.mp-open-tile,.mp-card-list__header label
+) {
+  color: var(--color-text) !important;
+  background: var(--color-surface-2) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: none !important;
+}
+.workspace--apple .mpv2 :is(.mp-project-tile.is-selected,.mp-filters button.is-active,.mp-layout button.is-active) {
+  border-color: var(--color-primary) !important;
+  background: color-mix(in srgb,var(--color-primary) 7%,var(--color-surface)) !important;
+}
+.workspace--apple .mpv2 :is(.mp-page-title>p:last-child,.mp-benefit-heading span,.mp-benefit-step__text small,.mp-project-tile__identity small) {
+  color: var(--color-muted);
+}
+.workspace--apple .mpv2 .mp-benefit-step__icon {
+  background: var(--color-surface-2);
+  color: var(--color-primary);
+}
+.workspace--apple .mpv2 .mp-primary {
+  color: var(--on-brand-ink) !important;
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: none !important;
+}
+.workspace--apple .mpv2 :is(.mp-list-search input,.mp-select select,.mp-card-list__header input) {
+  color: var(--color-text);
+  background: transparent;
+}
+
+/* Analytics: keep all heatmap cells and actual chart colors, remove decorative
+   cyan glows around fake-surface data containers. */
+.workspace--apple .analytics-v3 {
+  --av3-cyan: var(--color-primary);
+  --av3-blue: var(--color-info);
+  --av3-stroke: var(--color-border);
+  --av3-muted: var(--color-muted);
+  color: var(--color-text);
+}
+.workspace--apple .analytics-v3::before { opacity: 0 !important; }
+.workspace--apple .analytics-v3 :is(
+  .av3-tabs,.av3-metric,.av3-panel,.av3-heat-panel,
+  .av3-cert-main,.av3-cert-sidebar,.av3-next
+) {
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .analytics-v3 .av3-tabs {
+  background: var(--color-surface-2) !important;
+  border-radius: 12px;
+}
+.workspace--apple .analytics-v3 .av3-tabs button { color: var(--color-muted); }
+.workspace--apple .analytics-v3 .av3-tabs button.selected {
+  color: var(--color-text);
+  background: color-mix(in srgb,var(--color-primary) 10%,var(--color-surface)) !important;
+  box-shadow: none;
+}
+.workspace--apple .analytics-v3 :is(.av3-headline>span,.av3-headline>p,.av3-panel>header p,.av3-metric small,.av3-tiny-note) {
+  color: var(--color-muted);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.workspace--apple .analytics-v3 :is(.av3-panel>header h2,.av3-headline h1) { color: var(--color-text); }
+.workspace--apple .analytics-v3 :is(.av3-primary) {
+  color: var(--on-brand-ink);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+.workspace--apple .analytics-v3 .av3-donut>div { background: var(--color-surface); }
+.workspace--apple .analytics-v3 .av3-heat-cell.level-0 { background: var(--color-surface-2); }
+.workspace--apple .analytics-v3 :is(.av3-heat-cell.level-1,.av3-heat-cell.level-2,.av3-heat-cell.level-3,.av3-heat-cell.level-4) {
+  box-shadow: none;
+}
+
+/* Portfolio & Skill Passport: verification/consent remains visible in neutral
+   evidence cards; one actual action retains the strong blue fill. */
+.workspace--apple .p2-root {
+  --p2-teal: var(--color-primary);
+  --p2-line: var(--color-border);
+  --p2-card: var(--color-surface);
+  --p2-soft: var(--color-surface-2);
+  color: var(--color-text);
+}
+.workspace--apple .workspace-content:has(.p2-root) { padding: 96px clamp(22px,3.3vw,54px) 72px; }
+.workspace--apple .p2-root :is(.p2-hero,.p2-panel,.p2-tabs,.p2-metric,.p2-project) {
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .p2-root .p2-hero::before { opacity: 0; }
+.workspace--apple .p2-root :is(.p2-person>p,.p2-person-about,.p2-metric small,.p2-panel-heading>span,.p2-tabs button) {
+  color: var(--color-muted);
+}
+.workspace--apple .p2-root :is(.p2-avatar,.p2-metric-icon,.p2-skill-chips span) {
+  color: var(--color-primary);
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .p2-root .p2-primary {
+  color: var(--on-brand-ink) !important;
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+.workspace--apple .p2-root :is(.p2-outline,.p2-tabs button.is-active) {
+  color: var(--color-primary) !important;
+  background: color-mix(in srgb,var(--color-primary) 7%,var(--color-surface));
+  border-color: var(--color-border);
+}
+.workspace--apple .p2-root .p2-warning {
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+  background: color-mix(in srgb,var(--color-warning) 8%,var(--color-surface));
+}
+.workspace--apple .p2-root .p2-identity-badge {
+  color: var(--color-primary);
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+}
+
+/* Rating: replace trophy spotlight atmosphere with accessible standings and
+   source-backed profile detail, keeping every rank/benefit/detail action. */
+.workspace--apple .ir-page {
+  --ir-bg: var(--color-bg);
+  --ir-panel: var(--color-surface);
+  --ir-line: var(--color-border);
+  --ir-text: var(--color-text);
+  --ir-muted: var(--color-muted);
+  --ir-cyan: var(--color-primary);
+  color: var(--color-text);
+}
+.workspace--apple .ir-page::before,
+.workspace--apple .ir-hero::after { opacity: 0; }
+.workspace--apple .ir-page :is(.ir-hero,.ir-season,.ir-benefit) {
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.workspace--apple .ir-page :is(.ir-hero-copy>p:last-child,.ir-season strong,.ir-season span,.ir-benefit li) {
+  color: var(--color-muted);
+}
+.workspace--apple .ir-page .ir-benefit-title { color: var(--color-primary); }
+.workspace--apple .ir-page .ir-art { opacity: .17; filter: saturate(.35); }
+
+/* Achievements: compact and factual, no full-width neon galaxy background. */
+.workspace--apple .achv-page {
+  --achv-turquoise: var(--color-primary);
+  --achv-muted: var(--color-muted);
+  --achv-stroke: var(--color-border);
+  --achv-surface: var(--color-surface);
+  --achv-surface-2: var(--color-surface-2);
+  --achv-white: var(--color-text);
+  color: var(--color-text);
+}
+.workspace--apple .achv-page .achv-hero {
+  min-height: 0;
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .achv-page .achv-hero :is(h1,h1 span) { color: var(--color-text); }
+.workspace--apple .achv-page .achv-hero p { color: var(--color-muted); }
+.workspace--apple .achv-page .achv-button-primary {
+  color: var(--on-brand-ink);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+.workspace--apple .achv-page .achv-button-ghost {
+  color: var(--color-primary);
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+}
+.workspace--apple .achv-page .achv-hero-visual { opacity: .24; pointer-events: none; }
+
+/* Messages retain the full compose/thread/attachment UX; opaque list panes
+   replace translucent teal cards, with selected conversation distinct. */
+.workspace--apple .sberchat-shell {
+  color: var(--color-text);
+  background: transparent !important;
+}
+.workspace--apple .sberchat-shell :is(.msg-dialog-list,.chat-thread,.msg-context) {
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .sberchat-shell :is(.msg-dialog-list__row,.msg-chat__header,.msg-chat__bubble) {
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+.workspace--apple .sberchat-shell .msg-dialog-list__row-item.selected .msg-dialog-list__row {
+  background: color-mix(in srgb,var(--color-primary) 9%,var(--color-surface));
+}
+.workspace--apple .sberchat-shell :is(.msg-dialog-list__preview,.msg-chat__meta) { color: var(--color-muted); }
+.workspace--apple .sberchat-shell .msg-dialog-list__tabs button.active {
+  color: var(--color-primary);
+  background: var(--color-surface-2);
+}
+@media (max-width: 900px) {
+  .workspace--apple .bc-approved .bc-overview-grid { grid-template-columns: 1fr; }
+  .workspace--apple .mpv2 .mp-card-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 767px) {
+  .workspace--apple .workspace-content:has(.p2-root) { padding: 128px 17px 44px; }
+  .workspace--apple .bc-approved .course-grid { grid-template-columns: 1fr; }
+}
