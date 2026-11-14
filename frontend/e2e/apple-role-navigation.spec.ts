@@ -53,15 +53,24 @@ for (const [role, sections] of Object.entries(roleSections) as [ImpulseRole, rea
       })),
     );
     expect(links).toHaveLength(sections.length);
-    expect(links.map(link => link.href)).toEqual(sections.map((_, index) => `/workspace/${String(index)}`));
-    expect(links.map(link => link.text)).toEqual(sections);
+    // Visual groups may reorder the links; route indexes must remain immutable.
+    const byIndex = [...links].sort((a, b) =>
+      Number(a.href?.split("/").at(-1)) - Number(b.href?.split("/").at(-1)),
+    );
+    expect(byIndex.map(link => link.href)).toEqual(sections.map((_, index) => `/workspace/${String(index)}`));
+    expect(byIndex.map(link => link.text)).toEqual(sections);
 
-    // Use the real disclosure instead of clicking a hidden item. This verifies
-    // menu open → group expand → authorized route → menu close.
-    const firstGroup = panel.locator(".calm-sidebar__group").first();
-    if (await firstGroup.getAttribute("aria-expanded") !== "true") await firstGroup.click();
-    await expect(panel.locator('a[href="/workspace/1"]')).toBeVisible();
-    await panel.locator('a[href="/workspace/1"]').click();
+    // Open the group that actually contains route index 1. It differs by role.
+    const secondRoute = panel.locator('a[href="/workspace/1"]');
+    const panelId = await secondRoute.evaluate(element =>
+      element.closest("ul.calm-sidebar__items")?.id ?? "",
+    );
+    expect(panelId).not.toBe("");
+    // A group is itself the button with aria-controls; find it directly.
+    const groupButton = panel.locator(`button[aria-controls="${panelId}"]`);
+    if (await groupButton.getAttribute("aria-expanded") !== "true") await groupButton.click();
+    await expect(secondRoute).toBeVisible();
+    await secondRoute.click();
     await expect(page).toHaveURL(/\/workspace\/1(?:\?.*)?$/);
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
     await expect(page.locator(".calm-sidebar")).toBeHidden();
@@ -84,8 +93,11 @@ test("demo customer retains all nine distinct destinations on mobile", async ({ 
   const links = await panel.locator("nav a[href^='/workspace/']").evaluateAll(elements =>
     elements.map(element => ({ text: element.textContent?.trim(), href: element.getAttribute("href") })),
   );
-  expect(links.map(link => link.text)).toEqual(demoCustomerSections);
-  expect(links.map(link => link.href)).toEqual(demoCustomerSections.map((_, i) => `/workspace/${String(i)}`));
+  const byIndex = [...links].sort((a, b) =>
+    Number(a.href?.split("/").at(-1)) - Number(b.href?.split("/").at(-1)),
+  );
+  expect(byIndex.map(link => link.text)).toEqual(demoCustomerSections);
+  expect(byIndex.map(link => link.href)).toEqual(demoCustomerSections.map((_, i) => `/workspace/${String(i)}`));
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.keyboard.press("Escape");
   await expect(page.getByRole("button", { name: "Меню", exact: true })).toBeFocused();
