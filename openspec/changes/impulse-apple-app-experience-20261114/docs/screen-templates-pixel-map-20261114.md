@@ -1,4 +1,8 @@
-# Pixel-oriented templates for all 49 Impulse role routes
+# Layout templates for all 49 Impulse role routes — measured concept, user originals separately verified
+
+> **SOURCE CORRECTION:** The 1440×900 / 390×895 measurements below belong to **assistant-generated Impulse prototype images**, not the four screenshots uploaded by the user. Treat them as optional layout proposals, not mandatory exact copies. For user's *actual* four screenshots, source-based observations and SHA-256 see [owner-true-originals-analysis-20261114.md](owner-true-originals-analysis-20261114.md). Implementing shared shells must honor user U01–U04 + Apple HIG and independently review real browser designs; don't mistake generated design mocks for owner-provided pixel geometry.
+
+
 
 **Design authority:** four owner PNGs in `owner-screenshot-pixel-contract-20261114.md`; supplemental primary-source research in `web-app-interface-research-20261114.md`. **STOP:** not an implemented or approved cross-role redesign. This is the new screen specification from which implementation must be measured.
 
