@@ -1,0 +1,23 @@
+# Claim UI-APPLE-APP-SDD-20261114
+
+- task_id: UI-APPLE-APP-SDD-20261114
+- session_id: gpt6-apple-ux-all-screens-20261114-1646
+- status: IN_PROGRESS
+- started_at: 2026-11-14T16:46:00+03:00
+- heartbeat_at: 2026-11-14T16:46:00+03:00
+- base_revision: ca741df7685e880a9f1597e0e39a1df88040566c
+- depends_on: []
+- write_scope:
+  - openspec/changes/impulse-apple-app-experience-20261114/**
+  - .agents/coordination/claims/UI-APPLE-APP-SDD-20261114.lock/status.md
+- shared_files: []
+- excluded_shared_surfaces:
+  - frontend/** (no code change during SDD-first phase)
+  - openspec/changes/impulse-calm-redesign-20261114/** (reserved PR #160)
+  - openspec/changes/impulse-calm-home-preview-20261114/** (reserved PR #161)
+  - src/**, tests/**, Railway and production
+- verification:
+  - source route vs capability crosswalk, HIG references, strict openspec CI and independent design review
+- progress: Starting detailed whole-app Apple-like functional-preservation SDD for all six supported user roles. No application or production changes.
+- independent_review: PENDING
+- blockers: shared App.tsx and legacy CSS have active/review claims; future integrations require distinct accepted claims.
