@@ -124,14 +124,15 @@
 
 .calm-home__focus {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(145px, .32fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 24px;
   align-items: center;
-  min-height: 310px;
+  min-height: 270px;
   padding: clamp(25px, 3vw, 40px);
   border: 1px solid var(--calm-separator);
   border-radius: 24px;
   background: var(--calm-panel);
+  box-shadow: 0 20px 70px rgb(20 36 29 / 2.5%);
 }
 .calm-home__focus-kicker {
   display: inline-flex;
@@ -538,8 +539,57 @@
 }
 .calm-home__skills-preview svg { flex: none; color: var(--calm-accent); }
 
+
+/* Progressive disclosure: the first fold shows only the next action and verified facts.
+   Full work tools remain one click away, without a second global navigation. */
+.calm-home__disclosure {
+  margin: 0 0 14px;
+  overflow: hidden;
+  border: 1px solid var(--calm-separator);
+  border-radius: 16px;
+  background: var(--calm-panel);
+}
+.calm-home__disclosure-trigger {
+  display: flex;
+  min-height: 70px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 22px;
+  color: var(--calm-text);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.calm-home__disclosure-trigger::-webkit-details-marker { display: none; }
+.calm-home__disclosure-trigger::marker { content: ""; }
+.calm-home__disclosure-trigger:focus-visible {
+  outline: 3px solid var(--calm-focus);
+  outline-offset: -4px;
+}
+.calm-home__disclosure-trigger > span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+.calm-home__disclosure-trigger strong { font-size: 14px; font-weight: 650; }
+.calm-home__disclosure-trigger small { color: var(--calm-subtext); font-size: 12px; }
+.calm-home__disclosure-trigger > svg { flex: none; color: var(--calm-subtext); }
+.calm-home__disclosure[open] .calm-home__disclosure-trigger > svg { transform: rotate(180deg); }
+.calm-home__disclosure-trigger:hover { background: var(--calm-elevated); }
+.calm-home__disclosure .calm-home__work-grid { padding: 0 12px 12px; }
+.calm-home__disclosure .calm-home__work-grid > .calm-home__panel { border-radius: 13px; }
+.calm-home__disclosure--tools { margin-top: 14px; }
+.calm-home__disclosure .calm-home__footer {
+  margin-top: 0;
+  padding: 0 22px 22px;
+}
+
 @media (max-width: 1200px) {
-  .calm-home__focus { grid-template-columns: minmax(0, 1fr) 135px; }
+  .calm-home__disclosure-trigger { padding: 14px 16px; }
+  .calm-home__disclosure .calm-home__work-grid { padding: 0 8px 8px; }
+  .calm-home__disclosure .calm-home__footer { padding: 0 16px 16px; }
+  .calm-home__focus { grid-template-columns: minmax(0, 1fr); }
   .calm-home__metric { padding: 19px; }
   .calm-home__work-grid { grid-template-columns: 1fr; }
 }
@@ -558,7 +608,6 @@
   }
   .calm-home__focus-kicker { margin-bottom: 24px; }
   .calm-home__focus h2 { font-size: 27px; }
-  .calm-home__focus-aside { display: none; }
   .calm-home__metrics {
     grid-template-columns: 1fr 1fr;
     margin: 12px 0;
