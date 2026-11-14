@@ -1,7 +1,7 @@
 # Claim EDGE-HOVER-QUIET-UX-20261114
 - task_id: EDGE-HOVER-QUIET-UX-20261114
 - session_id: gpt6-20261114-owner-hover-quiet
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-14
 - heartbeat_at: 2026-11-14
 - base_revision: af4607141f243749edb90ae45a95260fda0e4004
@@ -13,4 +13,7 @@
   - openspec/changes/edge-hover-quiet-ux-20261114/**
   - .agents/coordination/claims/EDGE-HOVER-QUIET-UX-20261114.lock/status.md
 - integration_note: UI-APPLE-INTEGRATE-20261114 also declares these files IN_PROGRESS; this work is a separate owner-requested PR. Never overwrite its working tree; independent review/rebase required before merging.
-- no_main_merge: pending functional, mobile, keyboard, and reduced-motion review.
+- owner_merge_authorization: 2026-11-14 owner explicitly instructed "сразу в main переноси" after the isolated implementation; direct release instruction supersedes earlier author-imposed no-main-merge hold, subject to GitHub branch permissions.
+- ownership_note: other claim UI-APPLE-INTEGRATE-20261114 remains untouched; avoid overwriting that agent's working tree. Since main SHA is verified and PR is mergeable, owner directs commit-level integration into main; branch claim does not grant ownership over the other claim's future edits.
+- current_review: automated comments P2 keyboard focus and abandoned pointer flyby fixed, P1 checkboxes reset; verify exact current CI before release.
+- release_status: REVIEW — merge request owner-approved, production readiness separately verified.
