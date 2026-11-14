@@ -1,0 +1,16 @@
+# Claim EDGE-HOVER-QUIET-UX-20261114
+- task_id: EDGE-HOVER-QUIET-UX-20261114
+- session_id: gpt6-20261114-owner-hover-quiet
+- status: IN_PROGRESS
+- started_at: 2026-11-14
+- heartbeat_at: 2026-11-14
+- base_revision: af4607141f243749edb90ae45a95260fda0e4004
+- owner_instruction: desktop sidebar hidden by default; hover left viewport edge reveals navigation with smooth label motion, no content displacement; remove "С возвращением" / "Продолжите с того места" from design.
+- write_scope:
+  - frontend/src/features/calm-navigation/Sidebar.tsx (hover-only mode)
+  - frontend/src/app/overlay-navigation.scss (hot edge/flyout treatment)
+  - frontend/src/features/calm-navigation/Sidebar.test.tsx (behavior contract)
+  - openspec/changes/edge-hover-quiet-ux-20261114/**
+  - .agents/coordination/claims/EDGE-HOVER-QUIET-UX-20261114.lock/status.md
+- integration_note: UI-APPLE-INTEGRATE-20261114 also declares these files IN_PROGRESS; this work is a separate owner-requested PR. Never overwrite its working tree; independent review/rebase required before merging.
+- no_main_merge: pending functional, mobile, keyboard, and reduced-motion review.
