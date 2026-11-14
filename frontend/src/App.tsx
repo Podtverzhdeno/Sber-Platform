@@ -46,6 +46,7 @@ import {
   applyTheme,
   storedThemeChoice,
   subscribeSystemTheme,
+  type ThemeChoice,
 } from "./app/theme";
 import { appQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
@@ -314,11 +315,15 @@ function LoginScreen({
   loading,
   error,
   onLogin,
+  themeChoice,
+  onThemeChange,
 }: {
   personas: Persona[];
   loading: boolean;
   error: string;
   onLogin: (key: string) => void;
+  themeChoice: ThemeChoice;
+  onThemeChange: (next: ThemeChoice) => void;
 }) {
   const visiblePersonas = personas.filter((persona, index) => {
     const role = persona.roles[0];
@@ -328,6 +333,7 @@ function LoginScreen({
   return (
     <section className="login-layout" aria-labelledby="login-title">
       <div className="login-copy">
+        <div className="login-theme"><ThemeControl value={themeChoice} onChange={onThemeChange} /></div>
         <p className="eyebrow">Путь от интереса к подтверждённому опыту</p>
         <h1 id="login-title">Выберите роль, чтобы присоединиться</h1>
         <p className="lead">
@@ -1567,6 +1573,8 @@ function ImpulseApp() {
                       personas={personasQuery.data ?? []}
                       loading={personasQuery.isLoading}
                       error={error}
+                      themeChoice={themeChoice}
+                      onThemeChange={setThemeChoice}
                       onLogin={(key) => {
                         void login(key);
                       }}
