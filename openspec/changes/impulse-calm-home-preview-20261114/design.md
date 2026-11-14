@@ -9,7 +9,7 @@
 1. **One page, one main action.** Make a calmer working surface: page heading, hero containing the real highest-priority actionable item, a three-metric factual summary (only available data), with work list, weekly focus and optional shortcuts collapsed behind clear one-click disclosures. No stock illustrations, duplicated large CTA, glow, or chart decoration.
 2. **On-demand detail.** Full requirements of the next Impulse level, including the required course list and practice, expand only on request. The fetch for course names/lesson state is deferred until requirements are opened, but the core role level request remains independent.
 3. **Honest data.** Activity, courses, level, project work and verified skills use existing API results; unavailable data display a neutral unavailable state. No mixing career grade with Impulse level, no invented target or manual verifications.
-4. **Preview-only rollout.** `?home=calm` selects the new screen only for participant home. The default `ParticipantHomeV2Body` and all existing routes stay intact. This allows user comparison before further changes. Do not edit `App.tsx`, global CSS, sidebar, backend or Railway.
+4. **Preview-only rollout.** The participant home renders CalmParticipantHome by default on the requested `determined-spirit / production` deployment. `?home=legacy` explicitly selects the original ParticipantHomeV2Body as rollback. All other routes/roles remain unchanged. This follows the user's request to update that specific production service. Do not edit `App.tsx`, global CSS, sidebar, backend or Railway.
 5. **Accessible first.** 44px touch buttons, labelled shortcuts, keyboard-selectable weekly days, semantic headings and progress, reduced motion, clean 320px layout, real empty/loading/error states.
 6. **Technical boundary.** New `calm-home/CalmParticipantHome.tsx` + `calm-home/calm-home.scss` and a very small entrypoint conditional in `participant-home-v2/page.tsx`. Reuse existing `OpenTarget` and `onOpenWorkspace` contract.
 7. **Safe rollback.** Without `?home=calm` the existing page is unchanged; branch not deployed and stays draft pending user approval.
@@ -26,7 +26,7 @@
 
 ## Testing/risks
 
-- Old legacy snapshots must remain unchanged when `home=calm` absent.
+- Old legacy snapshots remain available under `?home=legacy` and their functional invariants remain tested. New default snapshot covers the calm first fold.
 - Unit tests for next CTA, empty, unknown level, on-demand course list and no fake grade.
 - Build/lint/TypeScript/format on exact branch SHA, independent review and browser screenshot once deployed to a review-only environment with owner authorization.
 - Rendering must not duplicate backend calls or silently make any mutating API request.
