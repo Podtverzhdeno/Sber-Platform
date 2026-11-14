@@ -1,5 +1,8 @@
 # Impulse Apple-like Experience · Specification index
 
+> **NEW SOURCES (14.11.2026):** official [Apple UIKit documentation](https://developer.apple.com/documentation/uikit) and owner's [iOS 16 Figma UI Kit reference](https://www.figma.com/design/51dkjSuhgFyyeGV2cWLxex/iOS-16-UI-Kit-for-Figma--Community-?node-id=1002-6668&p=f). [Technical source crosswalk](docs/uikit-ios16-figma-reference-contract.md) describes actual UIKit→React/CSS translation, accessibility/contrast/blur fallback, and the unverified exact Figma node. Third-party Figma Community kit must not be represented as official Apple kit.
+
+
 > **IMPORTANT REFERENCE CORRECTION:** the old `impulse-reference-pack-20261114.zip` was assistant-generated Impulse concept PNGs, not the four real user uploads. The **true owner originals** are separately preserved in personal Library archive `impulse-USER-original-4-images.zip` and described in [owner-true-originals-analysis](docs/owner-true-originals-analysis-20261114.md). User originals take precedence; older mockup coordinates are illustrative only. This fixes the initial provenance misidentification.
 
 
