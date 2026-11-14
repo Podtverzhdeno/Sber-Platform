@@ -1,0 +1,37 @@
+.future-theme-switch {
+  position: relative;
+  display: inline-flex;
+  min-width: 126px;
+  height: 40px;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px solid var(--color-border, #dedee3);
+  border-radius: 12px;
+  background: var(--color-surface, #fff);
+  color: var(--color-text, #1d1d1f);
+  cursor: pointer;
+}
+.future-theme-switch__icon { display: inline-flex; align-items: center; flex: none; pointer-events: none; }
+.future-theme-switch select {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  appearance: none;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: inherit;
+  font: 600 12px/1.3 -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  cursor: pointer;
+}
+.future-theme-switch select option { color: var(--color-text); background: var(--color-surface); }
+.future-theme-switch__chevron { flex: none; pointer-events: none; color: var(--color-muted); }
+.future-theme-switch:focus-within {
+  border-color: var(--color-primary, #006bd6);
+  outline: 2px solid var(--color-primary, #006bd6);
+  outline-offset: 2px;
+}
+@media (max-width: 700px) {
+  .future-theme-switch { min-width: 105px; padding: 0 7px; }
+}
