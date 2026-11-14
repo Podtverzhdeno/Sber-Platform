@@ -1,0 +1,31 @@
+# Claim UI-APPLE-INTEGRATE-20261114
+
+- task_id: UI-APPLE-INTEGRATE-20261114
+- session_id: gpt6-20261114-all-role-main-integration
+- status: IN_PROGRESS
+- started_at: 2026-11-14T20:24:00+03:00
+- heartbeat_at: 2026-11-14T20:24:00+03:00
+- base_revision: ca63d46b756d9ee5f1105a225640517a3fe0307a
+- depends_on: [PR-164, PR-166]
+- write_scope:
+  - frontend/src/App.tsx
+  - frontend/src/App.test.tsx
+  - frontend/src/main.tsx
+  - frontend/src/app/impulse-next.scss
+  - frontend/src/app/overlay-navigation.scss
+  - frontend/src/app/screen-layout*
+  - frontend/src/app/theme-controls/
+  - frontend/src/features/calm-navigation/
+  - frontend/e2e/sidebar-consistency.spec.ts
+  - frontend/e2e/bootcamp-approved.spec.ts
+  - openspec/changes/impulse-apple-app-experience-20261114/
+  - .agents/coordination/claims/UI-APPLE-INTEGRATE-20261114.lock/status.md
+- shared_files:
+  - frontend/src/App.tsx
+  - frontend/src/main.tsx
+- verification:
+  - OpenSpec strict
+  - TypeScript, lint, frontend Vitest, production build, browser E2E
+  - light/dark/system role routing, navigation and Railway smoke
+- progress: dedicated integration branch created from exact current main; source PR #165 audited for 32-file delta against PR #164; no bulk changes written yet
+- blockers: existing browser E2E geometry assumptions and backend dated tests are failing; report without hiding
