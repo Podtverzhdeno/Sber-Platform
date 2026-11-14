@@ -136,7 +136,7 @@ export function CalmSidebar({
       }
     };
     document.addEventListener("keydown", dismissOnEscape);
-    return () => document.removeEventListener("keydown", dismissOnEscape);
+    return () => { document.removeEventListener("keydown", dismissOnEscape); };
   }, [hoverOpen, drawerOpen]);
 
   const closeDrawer = () => {
@@ -180,7 +180,7 @@ export function CalmSidebar({
         onPointerEnter={(event) => {
           if (event.pointerType === "mouse") setHoverOpen(true);
         }}
-        onFocus={() => setHoverOpen(true)}
+        onFocus={() => { setHoverOpen(true); }}
         onClick={() => { setHoverOpen(false); setDrawerOpen(true); }}
       />
 
