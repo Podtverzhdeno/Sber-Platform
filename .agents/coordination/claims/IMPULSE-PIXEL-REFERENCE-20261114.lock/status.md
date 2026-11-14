@@ -1,0 +1,48 @@
+# Claim IMPULSE-PIXEL-REFERENCE-20261114
+- task_id: IMPULSE-PIXEL-REFERENCE-20261114
+- session_id: gpt6-20261114-image3-pixel-wave-c718
+- status: REVIEW
+- started_at: 2026-11-14T23:26:00+03:00
+- heartbeat_at: 2026-11-14T23:26:00+03:00
+- base_revision: 423b1e24caa711537ac9a390691cff114d256109
+- owner_instruction: match uploaded 1422x803 reference exactly; 3 click modes sun, blue moon and dark moon; generate background and reuse official Apple UI Kit design guidance
+- depends_on: []
+- write_scope:
+  - frontend/src/features/pixel-reference/**
+  - frontend/public/impulse-wave-reference.webp
+  - frontend/public/impulse-pixel-reference.html
+  - frontend/e2e/pixel-reference-screenshot.spec.ts
+  - docs/design/impulse-pixel-reference-20261114.md
+  - openspec/changes/impulse-pixel-reference-20261114/**
+  - .agents/coordination/claims/IMPULSE-PIXEL-REFERENCE-20261114.lock/status.md
+- excluded:
+  - frontend/src/App.tsx (UI-APPLE-INTEGRATE IN_PROGRESS)
+  - frontend/src/app/theme-controls/** (UI-APPLE-INTEGRATE IN_PROGRESS)
+  - frontend/src/features/calm-navigation/** (UI-APPLE-INTEGRATE and UI-ALL-APPLE IN_PROGRESS)
+  - frontend/src/features/participant-home-v2/calm-home/** (UI-CALM-HOME in REVIEW)
+  - backend and Railway, main
+- integration_handoff: exact JSX/CSS preview and interaction API are ready for separately owned App/main integration after claims release; never silently overwrite the shared files.
+- verification: isolated component tests; screenshot baseline at 1422x803 and responsive 390px; 3-cycle theme/no hidden login routes; CI on exact PR SHA
+- source: user attached image(3).png, Apple HIG Materials, official macOS 27 UI Kit catalog, generated custom abstract wave
+- progress: Source-measured React pixel reference, 3 theme modes, real API adapter, generated WebP background, 12 isolated unit tests and independent HTML browser preview are complete; independent review and real App integration outstanding.
+- changed_files:
+  - frontend/src/features/pixel-reference/ImpulsePixelReference.tsx
+  - frontend/src/features/pixel-reference/ImpulsePixelReference.test.tsx
+  - frontend/src/features/pixel-reference/adapter.ts
+  - frontend/src/features/pixel-reference/adapter.test.ts
+  - frontend/src/features/pixel-reference/visual-modes.ts
+  - frontend/src/features/pixel-reference/impulse-pixel-reference.scss
+  - frontend/public/impulse-wave-reference.webp
+  - openspec/changes/impulse-pixel-reference-20261114/**
+  - docs/design/impulse-pixel-reference-20261114.md
+- verification:
+  - Standalone preview: Chromium 1422x803 and 390x844; all three theme cycle clicks, search, brand navigation and requirements disclosure PASS
+  - React unit tests for this branch: 7/7 `ImpulsePixelReference.test.tsx` PASS; adapter unit tests 5/5 PASS
+  - Frontend unit aggregate on pre-handoff SHA 0662b7e: 652 PASS / 1 FAIL, known pre-existing `calm-navigation/Sidebar.test.tsx` focus case
+  - Frontend lint standalone gate PASS on pre-handoff SHA 0662b7e
+  - OpenSpec and architecture audit PASS; TypeScript stage passed before unit stage; Docker smoke / Playwright results not fully confirmed yet
+  - Backend and Python dependency audit remain known baseline FAIL independent of scope
+- integration_blocker: App.tsx, theme-controls, calm-navigation and CalmParticipantHome owned by other IN_PROGRESS/REVIEW claims. The module is deliberately unmounted; independent integration owner must wire it and run visual E2E on exact integration SHA.
+- PR: https://github.com/Podtverzhdeno/Sber-Platform/pull/175
+- main_and_railway: untouched.
+
