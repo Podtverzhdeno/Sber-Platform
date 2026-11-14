@@ -1,5 +1,8 @@
 # Impulse Apple-like Experience · Specification index
 
+> **NEW SOURCES (14.11.2026):** official [Apple UIKit documentation](https://developer.apple.com/documentation/uikit) and owner's [iOS 16 Figma UI Kit reference](https://www.figma.com/design/51dkjSuhgFyyeGV2cWLxex/iOS-16-UI-Kit-for-Figma--Community-?node-id=1002-6668&p=f). [Technical source crosswalk](docs/uikit-ios16-figma-reference-contract.md) describes actual UIKit→React/CSS translation, accessibility/contrast/blur fallback, and the unverified exact Figma node. Third-party Figma Community kit must not be represented as official Apple kit.
+
+
 > **LATEST OWNER DECISION (2026-11-14):** navigation must be **closed by default on all screen sizes**, including desktop, and open as an elegant translucent animated overlay. This supersedes the older fixed-sidebar assumption. See [Navigation overlay v4](docs/navigation-overlay-v4.md) and [OpenSpec scenarios](specs/overlay-navigation/spec.md). The wider canvas is the default; no screen's authorized actions or URLs may be removed.
 
 
