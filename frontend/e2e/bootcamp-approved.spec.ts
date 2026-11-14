@@ -4,10 +4,11 @@ import { bootcampCatalogFixture, installBootcampReferenceApi } from "./bootcamp-
 test.beforeEach(async ({ page }) => { await installBootcampReferenceApi(page); });
 /** Preserve the real server-authorized Bootcamp route behind the grouped sidebar. */
 async function navigateToBootcamp(page: Page): Promise<void> {
-  if ((page.viewportSize()?.width ?? 1024) <= 767) {
-    await page.getByRole("button", { name: "Меню", exact: true }).click();
-  }
-  const group = page.getByRole("button", { name: "Развитие", exact: true });
+  // A single floating menu works at every viewport, including large desktop.
+  await page.getByRole("button", { name: "Меню", exact: true }).click();
+  const menu = page.getByRole("dialog", { name: "Главное меню" });
+  await expect(menu).toBeVisible();
+  const group = menu.getByRole("button", { name: "Развитие", exact: true });
   await expect(group).toBeVisible();
   if (await group.getAttribute("aria-expanded") !== "true") {
     await group.click();
