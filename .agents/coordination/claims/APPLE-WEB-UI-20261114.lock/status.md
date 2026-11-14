@@ -1,0 +1,23 @@
+# Claim APPLE-WEB-UI-20261114
+- task_id: APPLE-WEB-UI-20261114
+- session_id: gpt6-20261114-apple-web-design-system
+- status: IN_PROGRESS
+- started_at: 2026-11-14T19:55:00+03:00
+- heartbeat_at: 2026-11-14T19:55:00+03:00
+- base_revision: main (branch created from main on 2026-11-14)
+- depends_on: []
+- write_scope:
+  - frontend/src/app/apple-web-ui.scss
+  - frontend/src/main.tsx (stylesheet import only, shared-shell integration lane)
+  - openspec/changes/apple-web-design-system-20261114/
+  - .agents/coordination/claims/APPLE-WEB-UI-20261114.lock/status.md
+- shared_files:
+  - frontend/src/main.tsx (single import only)
+- verification:
+  - npm run typecheck
+  - npm run lint
+  - npm run build
+  - npm test
+  - theme and responsive Playwright checks with baseline review
+- progress: claim acquired; analysis of Apple HIG, iOS-16 Figma link, attached Sketch metadata; no product changes yet
+- blockers: None for isolated styling; visual/browser acceptance remains a separate gate
