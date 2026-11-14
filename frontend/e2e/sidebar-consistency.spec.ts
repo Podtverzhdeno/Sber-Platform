@@ -53,72 +53,110 @@ const sectionGroups: Readonly<Record<string, string>> = {
   "Сообщения": "Сообщество",
 };
 
+// The user's SDD: navigation is overlay-only at EVERY screen width.
 for (const width of [960, 1024, 1448, 1672]) {
-  test(`all permitted sections remain stable at ${String(width)}px`, async ({ page }, testInfo) => {
+  test(`full-width work area and hidden drawer at ${String(width)}px`, async ({ page }, testInfo) => {
     await page.setViewportSize({ width, height: 941 });
     await installReferenceSession(page);
     await page.goto("/workspace/0");
-    const sidebar = page.getByRole("complementary", { name: "Боковая панель" });
-    await expect(sidebar).toBeVisible();
-    const expectedWidth = width <= 900 ? 210 : width <= 1200 ? 228 : 244;
-    await expect(sidebar).toHaveCSS("width", `${String(expectedWidth)}px`);
-    await expect(page.locator(".topbar")).toHaveCSS("left", `${String(expectedWidth)}px`);
+
+    const trigger = page.getByRole("button", { name: "Меню", exact: true });
+    const sidebar = page.locator(".calm-sidebar");
+    const content = page.locator(".workspace--apple .workspace-content");
+    await expect(trigger).toBeVisible();
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await expect(sidebar).toBeHidden();
+    await expect(page.locator(".topbar")).toHaveCSS("left", "0px");
+    await expect(page.locator(".workspace--apple")).toHaveCSS("display", "block");
+    const workRect = await content.boundingBox();
+    expect(workRect).not.toBeNull();
+    expect(workRect?.x).toBe(0);
+    expect(workRect?.width ?? 0).toBeGreaterThanOrEqual(width - 35);
+
+    await trigger.click();
+    const menu = page.getByRole("dialog", { name: "Главное меню" });
+    await expect(menu).toBeVisible();
+    await expect(menu).toHaveCSS("width", "320px");
+    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator(".calm-navigation__backdrop--open")).toHaveCSS("opacity", "1");
     const initial = await sidebarSignature(page);
     expect(initial.sections).toHaveLength(13);
-    expect(initial.sections.map(s => s.href)).toEqual(actor.navigation.map((_, i) => `/workspace/${String(i)}`));
-    expect(initial.brand).toContain("Impulse");
+    expect(initial.sections.map(item => item.href)).toEqual(
+      actor.navigation.map((_, index) => `/workspace/${String(index)}`),
+    );
     expect(initial.promotion).toBeNull();
 
     for (const [section, routeIndex] of [["Аналитика", 9], ["Сообщения", 10], ["Главная", 0]] as const) {
       if (sectionGroups[section]) await openNamedGroup(page, sectionGroups[section]);
-      await sidebar.getByRole("link", { name: section, exact: true }).click();
+      await menu.getByRole("link", { name: section, exact: true }).click();
       await expect(page).toHaveURL(new RegExp(`/workspace/${String(routeIndex)}(?:[?]|$)`));
-      await expect(sidebar.getByRole("link", { name: section, exact: true })).toHaveAttribute("aria-current", "page");
-      await expect(sidebar).toHaveCSS("width", `${String(expectedWidth)}px`);
-      await expect(page.locator(".topbar")).toHaveCSS("left", `${String(expectedWidth)}px`);
+      await expect(sidebar).toBeHidden();
+      await expect(trigger).toHaveAttribute("aria-expanded", "false");
       expect(await sidebarSignature(page)).toEqual(initial);
-      const position = await sidebar.boundingBox();
-      expect(position?.x).toBe(0);
-      expect(position?.y).toBe(0);
+      await trigger.click();
+      await expect(menu).toBeVisible();
+      await expect(menu.getByRole("link", { name: section, exact: true })).toHaveAttribute("aria-current", "page");
       await page.screenshot({
-        path: testInfo.outputPath(`sidebar-${section}-${String(width)}.png`),
+        path: testInfo.outputPath(`overlay-${section}-${String(width)}.png`),
         animations: "disabled",
       });
     }
-    await openNamedGroup(page, "Результаты");
-    const analytics = sidebar.getByRole("link", { name: "Аналитика", exact: true });
-    await analytics.hover();
-    await expect(sidebar).toHaveCSS("width", `${String(expectedWidth)}px`);
+    await page.keyboard.press("Escape");
+    await expect(menu).toHaveCount(0);
+    await expect(trigger).toBeFocused();
   });
 }
 
-test("390px drawer hides behind menu, traps Escape and preserves original routes", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+for (const width of [320, 390, 768]) {
+  test(`drawer is accessible on a ${String(width)}px viewport`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await installReferenceSession(page);
+    await page.goto("/workspace/0");
+    const trigger = page.getByRole("button", { name: "Меню", exact: true });
+    const sidebar = page.locator(".calm-sidebar");
+    await expect(trigger).toBeVisible();
+    await expect(sidebar).toBeHidden();
+    await trigger.click();
+    const dialog = page.getByRole("dialog", { name: "Главное меню" });
+    await expect(dialog).toBeVisible();
+    await expect(sidebar).toHaveCSS("width", width === 320 ? "292px" : "320px");
+    await expect(dialog.getByRole("button", { name: "Закрыть меню" })).toBeFocused();
+    await openNamedGroup(page, "Результаты");
+    await dialog.getByRole("link", { name: "Аналитика" }).click();
+    await expect(page).toHaveURL(/\/workspace\/9(?:[?]|$)/);
+    await expect(sidebar).toBeHidden();
+    await trigger.click();
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("link", { name: "Аналитика" })).toHaveAttribute("aria-current", "page");
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(trigger).toBeFocused();
+
+    await trigger.click();
+    const backdrop = page.locator(".calm-navigation__backdrop--open");
+    await expect(backdrop).toBeVisible();
+    await backdrop.click({ position: { x: width - 12, y: 320 } });
+    await expect(sidebar).toBeHidden();
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    const horizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 2,
+    );
+    expect(horizontalOverflow).toBe(false);
+  });
+}
+
+test("dark theme retains translucent menu without making the body unusable", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   await installReferenceSession(page);
   await page.goto("/workspace/0");
-  const menu = page.getByRole("button", { name: "Меню", exact: true });
-  await expect(menu).toBeVisible();
-  await expect(menu).toHaveAttribute("aria-expanded", "false");
-  const sidebar = page.locator(".calm-sidebar");
-  await expect(sidebar).not.toBeInViewport();
-  await menu.click();
-  await expect(menu).toHaveAttribute("aria-expanded", "true");
-  await expect(page.getByRole("dialog", { name: "Главное меню" })).toBeInViewport();
-  await expect(sidebar).toHaveCSS("width", "300px");
-  const initial = await sidebarSignature(page);
-  expect(initial.sections).toHaveLength(13);
-
-  for (const [section, routeIndex] of [["Аналитика", 9], ["Сообщения", 10], ["Главная", 0]] as const) {
-    if (sectionGroups[section]) await openNamedGroup(page, sectionGroups[section]);
-    await sidebar.getByRole("link", { name: section, exact: true }).click();
-    await expect(page).toHaveURL(new RegExp(`/workspace/${String(routeIndex)}(?:[?]|$)`));
-    await expect(menu).toHaveAttribute("aria-expanded", "false");
-    expect(await sidebarSignature(page)).toEqual(initial);
-    await menu.click();
-    await expect(page.getByRole("dialog", { name: "Главное меню" })).toBeInViewport();
-    await expect(sidebar.getByRole("link", { name: section, exact: true })).toHaveAttribute("aria-current", "page");
-  }
+  await page.getByRole("combobox", { name: "Тема оформления" }).selectOption("dark");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const trigger = page.getByRole("button", { name: "Меню" });
+  await trigger.click();
+  const panel = page.getByRole("dialog", { name: "Главное меню" });
+  await expect(panel).toBeVisible();
+  await expect(panel).toHaveCSS("backdrop-filter", /blur/);
+  await expect(page.locator(".workspace-content")).toHaveCSS("width", /[0-9]+px/);
   await page.keyboard.press("Escape");
-  await expect(menu).toHaveAttribute("aria-expanded", "false");
-  await expect(menu).toBeFocused();
+  await expect(trigger).toBeFocused();
 });
