@@ -1,0 +1,49 @@
+# Claim UI-CALM-HOME-20261114
+
+- task_id: UI-CALM-HOME-20261114
+- session_id: gpt6-impulse-calm-home-20261114-01
+- status: REVIEW
+- started_at: 2026-11-14T14:00:00+03:00
+- heartbeat_at: 2026-11-14T14:00:00+03:00
+- base_revision: ca741df7685e880a9f1597e0e39a1df88040566c
+- depends_on: []
+- write_scope:
+  - openspec/changes/impulse-calm-home-preview-20261114/**
+  - frontend/src/features/participant-home-v2/page.tsx (opt-in entrypoint conditional only)
+  - frontend/src/features/participant-home-v2/calm-home/**
+  - frontend/e2e/calm-home-preview.spec.ts (new isolated browser regression only)
+  - .agents/coordination/claims/UI-CALM-HOME-20261114.lock/status.md
+- excluded_shared_surfaces:
+  - frontend/src/App.tsx
+  - frontend/src/styles.scss
+  - frontend/src/features/participant-home-v2/home-v2.scss
+  - frontend/src/App.test.tsx
+  - Railway / production
+- verification: scoped frontend eslint, typecheck, Vitest + independent review and browser preview
+- progress: Apple-like first-fold implementation completed in isolated home scope: removed marketing overlines and large dashboard tile frames, made one real primary task CTA and compact factual progress, kept level/weekly/tasks/tools as accessible on-demand functions, retained legacy rollback. Dispute and pending-review items cannot be primary submit actions, stale recommended outcomes trigger honest trajectory fallback, unknown course titles disabled. Independent product/design review pending.
+- changed_files:
+  - frontend/src/features/participant-home-v2/page.tsx (tiny opt-in router switch)
+  - frontend/src/features/participant-home-v2/calm-home/CalmParticipantHome.tsx
+  - frontend/src/features/participant-home-v2/calm-home/calm-home.scss
+  - frontend/src/features/participant-home-v2/calm-home/CalmParticipantHome.test.tsx
+  - openspec/changes/impulse-calm-home-preview-20261114/**
+- tested_product_revision: 160c5fc3dcc71007fbf2a28416d6321942231653
+- verified:
+  - GitHub Actions frontend-quality-and-contracts: PASS, 78/78 test files, 607/607 unit tests, including updated home tests; strict TypeScript and ESLint PASS
+  - GitHub Actions openspec-strict-and-docs: PASS
+  - GitHub Actions docker-smoke: PASS
+  - GitHub Actions standalone eslint: PASS
+  - GitHub Actions backend-format-lint-types: PASS
+  - GitHub Actions architecture audit: PASS
+  - Static HTML visual composition preview: desktop 1440px and mobile 390px screenshots created locally, demo data only (not production screenshots)
+- unresolved:
+  - Existing backend-unit-api-integration FAIL on expiring task deadlines (outside scope)
+  - Existing secret-and-dependency-scans FAIL (vulnerable lockfile packages, outside scope)
+  - Full Playwright E2E has FAIL shards: some old reference geometry and participant-interaction tests assert legacy home as default; other baseline visual/messenger/customer failures remain. Isolated calm-home spec was added but real latest-SHA browser acceptance is not signed off.
+  - Railway determined-spirit production is running pinned revision 2bf0a5a5a41c51ae001fbfa84c643a9e5ba0915e SUCCESS (user explicitly requested); planned product changes will require another separately approved/deployed exact SHA once checks pass
+- independent_review: PENDING
+- blockers: HOME-BUTTON-SMOOTH and SIDEBAR-UNIFICATION old claims reserve existing home-v2.scss; do not edit.
+
+- design_reference: Apple's current HIG Layout, Materials, Sidebars, Lists and Tables; no Apple proprietary assets
+- static_ux_preview: /mnt/data/impulse-apple-home-preview.html and desktop/mobile PNG exist only in this chat container, not GitHub/production
+- rollout_blocker: Need independent reviewer + E2E migration lane with exact legacy-home route assertions before any new deploy or merge
