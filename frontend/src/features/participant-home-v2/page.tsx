@@ -76,8 +76,9 @@ export function ParticipantHomeV2(props: {
       </div>
     );
   }
-  // Design preview only. Without the opt-in query the legacy page remains unchanged.
-  if (searchParams.get("home") === "calm") {
+  // Calm is the participant home by default; explicit ?home=legacy keeps a reversible fallback.
+  // Other roles and workspace destinations continue using their existing renderers.
+  if (searchParams.get("home") !== "legacy") {
     return (
       <CalmParticipantHome
         overview={overview.data}
