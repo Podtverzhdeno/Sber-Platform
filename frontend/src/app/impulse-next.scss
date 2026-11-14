@@ -268,7 +268,9 @@ body, :root[data-theme="light"] body, :root[data-theme="dark"] body {
   background: transparent !important;
   box-shadow: none;
 }
-.workspace--apple .workspace-content :is(.analytics-v3::before,.achv-hero::before,.achv-hero::after) {
+.workspace--apple .workspace-content .analytics-v3::before,
+.workspace--apple .workspace-content .achv-hero::before,
+.workspace--apple .workspace-content .achv-hero::after {
   opacity: 0;
   pointer-events: none;
 }
@@ -339,9 +341,11 @@ body, :root[data-theme="light"] body, :root[data-theme="dark"] body {
   background-color: var(--color-surface);
   box-shadow: none;
 }
-.workspace--apple .workspace-content :is(
-  input::placeholder, textarea::placeholder
-) { color: var(--color-muted); opacity: 1; }
+.workspace--apple .workspace-content input::placeholder,
+.workspace--apple .workspace-content textarea::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
 .workspace--apple .workspace-content button:disabled { cursor: not-allowed; opacity: .65; }
 .workspace--apple .workspace-content :is(.ui-badge,.ui-badge--success,.ui-badge--warning) {
   border-radius: 8px;
@@ -398,16 +402,8 @@ body, :root[data-theme="light"] body, :root[data-theme="dark"] body {
 
 /* Existing custom modules may use local tokens. Bind their outer surfaces,
    without overriding internal status colors or document/message evidence. */
-.workspace--apple .analytics-v3,
-.workspace--apple .p2-root,
-.workspace--apple .mpv2,
-.workspace--apple .trajectory-v2,
-.workspace--apple .catalog-v2 {
-  --color-bg: var(--color-bg);
-  --color-text: var(--color-text);
-  --color-border: var(--color-border);
-  --color-primary: var(--color-primary);
-}
+/* Shared --color-* values are inherited from :root. Do not redeclare a
+   custom property in terms of itself: doing so makes it invalid at runtime. */
 .workspace--apple :is(.analytics-panel,.mp-surface,.catalog-v2-card,.p2-surface) :is(h1,h2,h3) {
   color: var(--color-text);
 }
