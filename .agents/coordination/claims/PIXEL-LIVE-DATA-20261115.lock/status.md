@@ -1,7 +1,7 @@
 # Claim PIXEL-LIVE-DATA-20261115
 - task_id: PIXEL-LIVE-DATA-20261115
 - session_id: gpt6-20261115-pixel-live-connector-92a
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-15
 - heartbeat_at: 2026-11-15
 - base_revision: 371f6cce1506138e0bf0948dc7306b024e89bdfb
@@ -21,4 +21,19 @@
   - frontend/src/features/pixel-reference/** (other lane in REVIEW)
   - backend, Railway
 - verification: TypeScript, ESLint, Vitest, OpenSpec, exact SHA CI; later live role E2E by integration owner
-- progress: isolated data-and-theme integration bridge; live application mounting still reserved by active UI-APPLE-INTEGRATE claim.
+- progress: real authenticated role-level, learning-summary and passport React Query bridge + 3-mode persistent state + integrated callback-only participant shell implemented; source integration runbook added.
+- exact_tested_code_sha: 058fb1d4edb374895d0e09869c5e9a3cece1a00c (code and documentation prior to status-only update)
+- verified:
+  - frontend ESLint standalone PASS
+  - frontend TypeScript PASS
+  - pixel-integration tests 12/12 PASS (4 shell, 3 live data, 5 themes)
+  - pixel-reference tests 12/12 PASS (prior merged PR)
+  - full Vitest 664 PASS / 1 FAIL of 665, unrelated pre-existing CalmSidebar Escape focus regression (claimed by other agent)
+  - strict OpenSpec PASS, static architecture audit PASS, Docker smoke PASS
+  - backend unit and Python dependency audit have existing independent failures
+- unresolved:
+  - Browser E2E all-route final state not green; no visual screenshot acceptance on mounted participant UI yet
+  - shared App/theme/sidebar/home source claims remain active; do not mount or modify reserved files
+- release_policy: REVIEW; isolated additions may be owner-directed merged into main but runtime integration and Railway deployment require separate acceptance.
+- PR: https://github.com/Podtverzhdeno/Sber-Platform/pull/176
+
