@@ -98,10 +98,22 @@ describe("calm participant homepage", () => {
 
   it("shows source-backed weekly activity without inferred completion", () => {
     renderCalmHome();
+    fireEvent.click(screen.getByText("Задачи и неделя"));
     fireEvent.click(screen.getByRole("button", { name: /19 октября.*запланировано/i }));
     expect(screen.getByText(/Запланирован, пока не выполнен/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: /20 октября.*выполнено/i }));
     expect(screen.getByText(/День подтверждён выполненным действием/)).toBeTruthy();
+  });
+
+  it("keeps secondary work and tools collapsed until explicitly requested", () => {
+    renderCalmHome();
+    const work = screen.getByTestId("calm-home-work-disclosure");
+    expect(work.hasAttribute("open")).toBe(false);
+    expect(screen.getByText("Другие инструменты").closest("details")?.hasAttribute("open")).toBe(false);
+    fireEvent.click(screen.getByText("Задачи и неделя"));
+    expect(work.hasAttribute("open")).toBe(true);
+    fireEvent.click(screen.getByText("Другие инструменты"));
+    expect(screen.getByText("Другие инструменты").closest("details")?.hasAttribute("open")).toBe(true);
   });
 
   it("keeps AI Buddy optional and does not show its shortcut without permission", () => {
