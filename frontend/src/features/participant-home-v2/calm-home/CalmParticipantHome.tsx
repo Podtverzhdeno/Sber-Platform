@@ -161,12 +161,6 @@ export function CalmParticipantHome({
             {primaryLabel} <ArrowRight size={18} aria-hidden="true" />
           </button>
         </div>
-        <div className="calm-home__focus-aside" aria-hidden="true">
-          <div className="calm-home__focus-orbit">
-            <span><Compass size={33} strokeWidth={1.5} /></span>
-          </div>
-          <span className="calm-home__focus-aside-caption">Всё начинается с одного шага</span>
-        </div>
       </section>
 
       <section className="calm-home__metrics" aria-label="Краткий обзор прогресса">
@@ -191,7 +185,12 @@ export function CalmParticipantHome({
         </div>
       </section>
 
-      <div className="calm-home__work-grid">
+      <details className="calm-home__disclosure" data-testid="calm-home-work-disclosure">
+        <summary className="calm-home__disclosure-trigger">
+          <span><strong>Задачи и неделя</strong><small>Работа в процессе и ритм развития</small></span>
+          <ChevronDown size={20} aria-hidden="true" />
+        </summary>
+        <div className="calm-home__work-grid">
         <section className="calm-home__panel calm-home__tasks" aria-labelledby="calm-home-tasks-title">
           <header className="calm-home__panel-heading">
             <div><span className="calm-home__overline">ВАША РАБОТА</span><h2 id="calm-home-tasks-title">Активные задачи</h2></div>
@@ -254,7 +253,8 @@ export function CalmParticipantHome({
             </p>
           )}
         </section>
-      </div>
+        </div>
+      </details>
 
       <section className="calm-home__path calm-home__panel" aria-labelledby="calm-home-path-title">
         <div className="calm-home__path-main">
@@ -338,7 +338,12 @@ export function CalmParticipantHome({
         )}
       </section>
 
-      <section className="calm-home__footer" aria-label="Другие инструменты">
+      <details className="calm-home__disclosure calm-home__disclosure--tools">
+        <summary className="calm-home__disclosure-trigger">
+          <span><strong>Другие инструменты</strong><small>Траектория, скилл-паспорт и AI Buddy</small></span>
+          <ChevronDown size={20} aria-hidden="true" />
+        </summary>
+        <section className="calm-home__footer" aria-label="Другие инструменты">
         <div className="calm-home__footer-heading">
           <h2>Всё остальное — под рукой</h2>
           <p>Откройте нужный раздел, когда он понадобится.</p>
@@ -351,7 +356,8 @@ export function CalmParticipantHome({
         </div>
         {passport.data && passport.data.skills.length > 0 &&
           <p className="calm-home__skills-preview"><ShieldCheck size={16} aria-hidden="true" /> Последний подтверждённый навык: {passport.data.skills[0]?.key}</p>}
-      </section>
+        </section>
+      </details>
     </div>
   );
 }
