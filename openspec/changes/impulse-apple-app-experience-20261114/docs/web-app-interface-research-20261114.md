@@ -1,5 +1,7 @@
 # Real web-app interface references — structure, minimalism and source-backed choices
 
+> **SOURCE CLARIFICATION:** Previous references to “the user's four screenshots from `owner-screenshot-pixel-contract-20261114.md`” were inaccurate: that document measured an assistant-generated Impulse preview. The user's **actual** four screenshots are U01–U04 in `owner-true-originals-analysis-20261114.md`. The old A1/A2 layout measurements are optional assistant proposals, not user-original pixel targets. This research remains about external official patterns, not the provenance of the original photos.
+
 **Research date:** 2026-11-14. **Purpose:** collect primary product references to supplement *user-supplied* four screenshots from `owner-screenshot-pixel-contract-20261114.md`. The user's screenshots remain the visual authority; these sites illustrate how mature web applications sustain information density and functional parity without clutter.
 
 ## 1. Source comparison
