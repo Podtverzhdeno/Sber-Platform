@@ -9,6 +9,14 @@ afterEach(() => {
   document.body.style.overflow = "";
 });
 
+// JSDOM does not implement PointerEvent in every runner; fire a real
+// bubbling pointerover/out with the browser's pointerType explicitly attached.
+function dispatchPointer(target: Element, eventName: "pointerover" | "pointerout", pointerType: "mouse" | "touch") {
+  const event = new Event(eventName, { bubbles: true });
+  Object.defineProperty(event, "pointerType", { value: pointerType });
+  fireEvent(target, event);
+}
+
 function renderParticipant(activeIndex = 3) {
   return render(
     <MemoryRouter initialEntries={[`/workspace/${String(activeIndex)}`]}>
@@ -124,14 +132,14 @@ describe("CalmSidebar", () => {
     const backdrop = view.container.querySelector<HTMLElement>(".calm-navigation__backdrop");
     expect(edge).toHaveAttribute("aria-expanded", "false");
     expect(aside).not.toHaveClass("calm-sidebar--open");
-    fireEvent.pointerEnter(edge, { pointerType: "mouse" });
+    dispatchPointer(edge, "pointerover", "mouse");
     expect(edge).toHaveAttribute("aria-expanded", "true");
     expect(aside).toHaveClass("calm-sidebar--open", "calm-sidebar--hover");
     expect(screen.queryByRole("dialog", { name: "Главное меню" })).toBeNull();
     expect(backdrop).not.toHaveClass("calm-navigation__backdrop--open");
     expect(document.body.style.overflow).toBe("");
     if (!aside) throw new Error("Sidebar is missing");
-    fireEvent.pointerLeave(aside, { pointerType: "mouse" });
+    dispatchPointer(aside, "pointerout", "mouse");
     expect(edge).toHaveAttribute("aria-expanded", "false");
     expect(aside).not.toHaveClass("calm-sidebar--open");
   });
@@ -139,7 +147,7 @@ describe("CalmSidebar", () => {
   it("never opens on touchscreen hover emulation; explicit Menu still works", () => {
     renderParticipant(0);
     const edge = screen.getByRole("button", { name: "Показать навигацию" });
-    fireEvent.pointerEnter(edge, { pointerType: "touch" });
+    dispatchPointer(edge, "pointerover", "touch");
     expect(edge).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(screen.getByRole("button", { name: "Меню" }));
     expect(screen.getByRole("dialog", { name: "Главное меню" })).toBeInTheDocument();
@@ -158,7 +166,7 @@ describe("CalmSidebar", () => {
   it("does not lose authorized deep links or active-group expansion on hover", () => {
     renderParticipant(3);
     const edge = screen.getByRole("button", { name: "Показать навигацию" });
-    fireEvent.pointerEnter(edge, { pointerType: "mouse" });
+    dispatchPointer(edge, "pointerover", "mouse");
     expect(screen.getByRole("link", { name: "Bootcamp" })).toHaveAttribute("href", "/workspace/3");
     expect(screen.getByRole("button", { name: /Развитие/ })).toHaveAttribute("aria-expanded", "true");
   });
