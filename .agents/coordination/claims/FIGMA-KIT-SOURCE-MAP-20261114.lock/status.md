@@ -2,7 +2,7 @@
 
 - task_id: FIGMA-KIT-SOURCE-MAP-20261114
 - session_id: gpt6-20261114-figma-source-map-unique
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-14
 - heartbeat_at: 2026-11-14
 - base_revision: e897261936855269d191d88496ceb500113b042c
@@ -16,5 +16,11 @@
   - JSON parsing and schema fields
   - exact links and measured-source provenance
   - independent review before task acceptance
-- progress: Primary and fallback Figma libraries identified; iOS16 exact node snapshots known; new 26/27 node extraction blocked by Figma Starter MCP quota
+- progress: Published Markdown reference matrix and machine-readable JSON; extracted/metadata-only/library-only evidence levels kept separate. Review requested before adoption.
+- evidence:
+  - docs/design/figma-apple-kit-reference-matrix-20261114.md (102 lines; 6 role mappings)
+  - docs/design/figma-apple-kit-source-manifest-20261114.json (JSON.parse PASS; 5 official and 8 community reference entries; 9 nodes of which 5 context+screenshots and 4 metadata only; 12 families)
+  - role-to-family references all valid and node IDs unique
+  - authoritative 27 links from Apple Design Resources and pre-existing Figma get_libraries index
+  - no source assets imported or unmeasured components marked 1:1
 - blockers: Figma Starter View seat MCP usage exhausted; Browser Use credits exhausted; TinyFish credits exhausted. Full source-frame export cannot be claimed.
