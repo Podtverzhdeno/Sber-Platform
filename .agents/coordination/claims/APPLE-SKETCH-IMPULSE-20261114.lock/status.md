@@ -1,7 +1,7 @@
 # Claim APPLE-SKETCH-IMPULSE-20261114
 - task_id: APPLE-SKETCH-IMPULSE-20261114
 - session_id: gpt6-20261114-source-messages-shared-ui
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-14T21:35:00+03:00
 - heartbeat_at: 2026-11-14T21:35:00+03:00
 - base_revision: e897261936855269d191d88496ceb500113b042c
@@ -27,4 +27,7 @@
   - Original uploaded Messages(1).sketch and TipKit(1).sketch and existing Figma iOS16 node verified light Filled
   - iOS Messages Sketch Chat List 402×79, bubble friend light #E9E9EA and dark #262629, chat input 402×70 collapsed and 402×60 expanded
   - Figma iOS16 node 839:9700 #007AFF and node 839:9728 #0A84FF, 50px / 14px
-- progress: independent source-verified styling to be integrated in existing controls; business functions untouched.
+- progress: Apple Sketch styles applied to shared UI and all live MessagingWorkspace states; business code unchanged.
+- verified: Messenger Unit PR Regression 43628252923 SUCCESS (68 tests, including five new Apple Sketch contracts), TypeScript SUCCESS; standalone ESLint 43628252928 SUCCESS; Architecture audit 43628252921 SUCCESS; Messenger Avatar Layout QA 43628252856 SUCCESS; OpenSpec strict and Docker smoke SUCCESS.
+- pending: full E2E & independent visual reviewer. Messenger Journey PR QA found pre-existing collapsed navigation selectors in three test files; QA claim below owns correction.
+- PR: https://github.com/Podtverzhdeno/Sber-Platform/pull/172
