@@ -33,6 +33,7 @@ describe("App", () => {
 
     expect(screen.queryByText("Демо-режим · синтетические данные")).not.toBeInTheDocument();
     expect(await screen.findByRole("button", { name: /Алекс Речной/ })).toBeEnabled();
+    expect(screen.getByRole("combobox", { name: "Тема оформления" })).toBeInTheDocument();
   });
 
   it("logs in and renders only navigation returned for the role", async () => {
@@ -251,6 +252,33 @@ describe("App", () => {
     expect(window.localStorage.getItem("impulse-theme")).toBeNull();
     expect(window.location.pathname).toBe("/workspace/0");
     expect(screen.getByRole("link", { name: "Главная" })).toBeInTheDocument();
+  });
+
+  it("uses truthful customer/HR fallback content instead of synthetic performance metrics", async () => {
+    const actor = {
+      person_id: "00000000-0000-0000-0000-000000000003",
+      display_name: "Вера Лебедева",
+      active_role: "hr",
+      assigned_roles: ["hr"],
+      scopes: [], consent_scopes: [],
+      navigation: ["Главная", "Кандидаты", "Воронка", "Аналитика", "Сообщения"],
+      csrf_token: "csrf",
+    };
+    vi.spyOn(globalThis, "fetch").mockImplementation((input) => {
+      const url = requestUrl(input);
+      if (url.endsWith("/me")) return Promise.resolve(new Response(JSON.stringify(actor), { status: 200 }));
+      return Promise.resolve(new Response(JSON.stringify({ code: "NOT_FOUND" }), { status: 404 }));
+    });
+    window.history.pushState({}, "", "/workspace/0");
+    render(<App />);
+    expect(await screen.findByTestId("apple-role-home")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Главная", level: 1 })).toBeInTheDocument();
+    expect(screen.queryByText("346")).not.toBeInTheDocument();
+    expect(screen.queryByText("39% приглашений")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Открыть кандидаты/ })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: /Открыть кандидаты/ }));
+    await waitFor(() => expect(window.location.pathname).toBe("/workspace/1"));
+    expect(screen.getByRole("navigation", { name: "Навигация роли" })).toBeInTheDocument();
   });
 
 });
