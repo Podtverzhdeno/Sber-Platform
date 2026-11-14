@@ -1,0 +1,25 @@
+# Claim UI-APPLE-SURFACE-20261114
+
+- task_id: UI-APPLE-SURFACE-20261114
+- session_id: chatgpt-gpt6-apple-foundation-20261114
+- status: IN_PROGRESS
+- started_at: 2026-11-14T17:00:00+03:00
+- heartbeat_at: 2026-11-14T17:00:00+03:00
+- base_revision: ca741df7685e880a9f1597e0e39a1df88040566c
+- depends_on:
+  - openspec/changes/impulse-apple-app-experience-20261114 (draft PR #162)
+- write_scope:
+  - frontend/src/features/apple-surface/**
+  - .agents/coordination/claims/UI-APPLE-SURFACE-20261114.lock/status.md
+- shared_files: []
+- excluded_shared_surfaces:
+  - frontend/src/App.tsx
+  - frontend/src/styles.scss
+  - frontend/src/components/ui.tsx
+  - frontend/src/features/calm-navigation/**
+  - frontend/src/features/participant-home-v2/**
+  - openspec/changes/impulse-apple-app-experience-20261114/**
+  - src/**, Railway and production
+- verification: isolated TS, lint, Vitest, full CI, independent review before integrating
+- progress: implement isolated scoped, reusable Apple-like visual primitives without replacing existing routes or semantics.
+- independent_review: PENDING
