@@ -243,10 +243,10 @@ describe("App", () => {
     render(<App />);
     const theme = await screen.findByRole("combobox", { name: "Тема оформления" });
     fireEvent.change(theme, { target: { value: "light" } });
-    await waitFor(() => expect(document.documentElement.dataset.theme).toBe("light"));
+    await waitFor(() => { expect(document.documentElement.dataset.theme).toBe("light"); });
     expect(window.localStorage.getItem("impulse-theme")).toBe("light");
     fireEvent.change(theme, { target: { value: "dark" } });
-    await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
+    await waitFor(() => { expect(document.documentElement.dataset.theme).toBe("dark"); });
     expect(window.localStorage.getItem("impulse-theme")).toBe("dark");
     fireEvent.change(theme, { target: { value: "system" } });
     expect(window.localStorage.getItem("impulse-theme")).toBeNull();
@@ -277,7 +277,7 @@ describe("App", () => {
     expect(screen.queryByText("39% приглашений")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Открыть кандидаты/ })).toBeEnabled();
     fireEvent.click(screen.getByRole("button", { name: /Открыть кандидаты/ }));
-    await waitFor(() => expect(window.location.pathname).toBe("/workspace/1"));
+    await waitFor(() => { expect(window.location.pathname).toBe("/workspace/1"); });
     expect(screen.getByRole("navigation", { name: "Навигация роли" })).toBeInTheDocument();
   });
 
