@@ -13,16 +13,8 @@ import {
   Sun,
   TrendingUp,
 } from "lucide-react";
+import { nextImpulseVisualMode, type ImpulseVisualMode } from "./visual-modes";
 import "./impulse-pixel-reference.scss";
-
-/** Three owner-selected looks, deliberately separate from the legacy "system" preference. */
-export type ImpulseVisualMode = "light" | "blue" | "midnight";
-
-const modes: readonly ImpulseVisualMode[] = ["light", "blue", "midnight"];
-
-export function nextImpulseVisualMode(current: ImpulseVisualMode): ImpulseVisualMode {
-  return modes[(modes.indexOf(current) + 1) % modes.length] ?? "light";
-}
 
 export interface PixelSearchResult {
   readonly id: string;
