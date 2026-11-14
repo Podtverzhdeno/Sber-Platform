@@ -43,6 +43,7 @@ Tokens are design decisions for the **web product**, not claimed one-to-one tran
 ## Source code
 - `liquid-shell.scss`: role-independent canvas/tokens/chrome, fully scoped under `page-shell--apple-overlay`.
 - `liquid-sections.scss`: selectors traced to existing React UI classes across role sections, cards, panels, control groups and breakpoints.
+- `liquid-messages.scss`: source-informed 79px chat rows, accessible light/dark message bubbles, readable real composer and selected-channel state; no changes to messaging logic or attachments.
 - `components/ui.tsx`: imports only; unchanged native buttons, React state, data table, overlays and event handlers.
 
 ## Verification
