@@ -1,0 +1,24 @@
+# Claim PIXEL-LIVE-DATA-20261115
+- task_id: PIXEL-LIVE-DATA-20261115
+- session_id: gpt6-20261115-pixel-live-connector-92a
+- status: IN_PROGRESS
+- started_at: 2026-11-15
+- heartbeat_at: 2026-11-15
+- base_revision: 371f6cce1506138e0bf0948dc7306b024e89bdfb
+- owner_instruction: "в main пуш и продолжай работать" on pixel-fidelity Impulse UI
+- depends_on: [PR-175 merged to main]
+- write_scope:
+  - frontend/src/features/pixel-integration/**
+  - openspec/changes/pixel-live-data-20261115/**
+  - .agents/coordination/claims/PIXEL-LIVE-DATA-20261115.lock/status.md
+- excluded_reserved_shared:
+  - frontend/src/App.tsx
+  - frontend/src/app/theme-controls/**
+  - frontend/src/app/theme.ts
+  - frontend/src/features/calm-navigation/**
+  - frontend/src/features/participant-home-v2/page.tsx
+  - frontend/src/features/participant-home-v2/calm-home/**
+  - frontend/src/features/pixel-reference/** (other lane in REVIEW)
+  - backend, Railway
+- verification: TypeScript, ESLint, Vitest, OpenSpec, exact SHA CI; later live role E2E by integration owner
+- progress: isolated data-and-theme integration bridge; live application mounting still reserved by active UI-APPLE-INTEGRATE claim.
