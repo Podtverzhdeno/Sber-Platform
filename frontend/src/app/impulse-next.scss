@@ -88,7 +88,9 @@
   --c-rgb667b96: #b5b6be;
   --c-rgb7589a3: #b5b6be;
 }
-html { scroll-behavior: auto; }
+/* Reserve vertical scrollbar width between analytics subviews so their
+   local navigation does not jump horizontally when content height changes. */
+html { scroll-behavior: auto; scrollbar-gutter: stable; }
 body, :root[data-theme="light"] body, :root[data-theme="dark"] body {
   color: var(--color-text);
   background: var(--color-bg);
