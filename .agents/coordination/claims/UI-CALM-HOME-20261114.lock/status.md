@@ -11,6 +11,7 @@
   - openspec/changes/impulse-calm-home-preview-20261114/**
   - frontend/src/features/participant-home-v2/page.tsx (opt-in entrypoint conditional only)
   - frontend/src/features/participant-home-v2/calm-home/**
+  - frontend/e2e/calm-home-preview.spec.ts (new isolated browser regression only)
   - .agents/coordination/claims/UI-CALM-HOME-20261114.lock/status.md
 - excluded_shared_surfaces:
   - frontend/src/App.tsx
@@ -19,7 +20,7 @@
   - frontend/src/App.test.tsx
   - Railway / production
 - verification: scoped frontend eslint, typecheck, Vitest + independent review and browser preview
-- progress: Resumed same author lane after user requested continued quality work. Calm homepage enabled by default with explicit ?home=legacy rollback; targeted review found course deep-link role context and confirmed-case count defects; fixing exclusively within claimed calm-home component and tests. Independent review still pending.
+- progress: Resumed same author lane after user requested continued quality work. Calm homepage enabled by default with explicit ?home=legacy rollback; course deep-link role context and confirmed-case count fixed inside claimed scope. Adding isolated Playwright acceptance spec; legacy geometry suite owned by other active claims is deliberately untouched. Independent review still pending.
 - changed_files:
   - frontend/src/features/participant-home-v2/page.tsx (tiny opt-in router switch)
   - frontend/src/features/participant-home-v2/calm-home/CalmParticipantHome.tsx
