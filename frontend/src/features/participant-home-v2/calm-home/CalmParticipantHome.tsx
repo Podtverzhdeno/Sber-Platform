@@ -11,7 +11,6 @@ import {
   Compass,
   GraduationCap,
   Layers3,
-  MessageCircle,
   ShieldCheck,
   Sparkles,
   Target,
