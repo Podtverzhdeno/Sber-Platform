@@ -110,15 +110,26 @@ export function CalmParticipantHome({
 
   const followPriority = () => {
     if (targetKind !== null && targetKey !== null) {
-      onOpenTarget(targetKind, targetKey);
+      if (targetKind === "course") {
+        // Preserve the source trajectory when navigating into Bootcamp.
+        onOpenTarget(targetKind, targetKey, nextOutcome?.trajectory_key ?? roleKey ?? undefined);
+      } else {
+        onOpenTarget(targetKind, targetKey);
+      }
     } else {
       onOpenWorkspace("trajectory");
     }
   };
 
   const focus = overview.weekly_focus;
-  const day = focus.days.find((item) => item.date === selectedDay) ?? null;
-  const completedSkills = passport.data?.skills.length ?? null;
+  // A refreshed overview may contain a different week; never leave the day picker empty.
+  const validSelectedDay = focus.days.some((item) => item.date === selectedDay)
+    ? selectedDay
+    : focus.days.find((item) => item.date === overview.local_today)?.date
+      ?? focus.days[0]?.date ?? "";
+  const day = focus.days.find((item) => item.date === validSelectedDay) ?? null;
+  const confirmedSkills = passport.data?.skills.filter((skill) => skill.confirmed_case_count > 0) ?? null;
+  const completedSkills = confirmedSkills?.length ?? null;
   const currentLevel = level.data;
   const levelComplete = currentLevel &&
     currentLevel.level >= (currentLevel.max_level ?? 3);
@@ -181,7 +192,7 @@ export function CalmParticipantHome({
           <strong data-testid="calm-verified-skills">{completedSkills === null ? "—" : String(completedSkills)}</strong>
           <small>{completedSkills === null
             ? passport.isPending ? "Загружаем данные" : "Данные недоступны"
-            : "Навыков в скилл-паспорте"}</small>
+            : "Навыков с подтверждёнными кейсами"}</small>
         </div>
       </section>
 
@@ -235,8 +246,8 @@ export function CalmParticipantHome({
               <button
                 key={entry.date}
                 type="button"
-                className={`calm-home__day${entry.done ? " calm-home__day--done" : ""}${entry.date === selectedDay ? " calm-home__day--current" : ""}`}
-                aria-pressed={entry.date === selectedDay}
+                className={`calm-home__day${entry.done ? " calm-home__day--done" : ""}${entry.date === validSelectedDay ? " calm-home__day--current" : ""}`}
+                aria-pressed={entry.date === validSelectedDay}
                 aria-label={`${formatDayLabel(entry.date)}: ${entry.done ? "выполнено" : entry.planned ? "запланировано" : "без плана"}`}
                 onClick={() => { setSelectedDay(entry.date); }}
               >
@@ -274,7 +285,7 @@ export function CalmParticipantHome({
           <div className="calm-home__path-actions">
             {currentLevel && <strong className="calm-home__path-level">L{currentLevel.level}{!levelComplete && ` → L${String(currentLevel.level + 1)}`}</strong>}
             <button type="button" className="calm-home__secondary" aria-expanded={requirementsOpen}
-              aria-controls="calm-home-requirements" onClick={() => { setRequirementsOpen((opened) => !opened); }}>
+              aria-controls={requirementsOpen ? "calm-home-requirements" : undefined} onClick={() => { setRequirementsOpen((opened) => !opened); }}>
               Требования уровня <ChevronDown size={16} aria-hidden="true" />
             </button>
           </div>
@@ -340,7 +351,7 @@ export function CalmParticipantHome({
 
       <details className="calm-home__disclosure calm-home__disclosure--tools">
         <summary className="calm-home__disclosure-trigger">
-          <span><strong>Другие инструменты</strong><small>Траектория, скилл-паспорт и AI Buddy</small></span>
+          <span><strong>Другие инструменты</strong><small>{buddyAvailable ? "Траектория, скилл-паспорт и AI Buddy" : "Траектория и скилл-паспорт"}</small></span>
           <ChevronDown size={20} aria-hidden="true" />
         </summary>
         <section className="calm-home__footer" aria-label="Другие инструменты">
@@ -354,8 +365,8 @@ export function CalmParticipantHome({
           {buddyAvailable &&
             <button type="button" onClick={() => { onOpenWorkspace("buddy"); }}><Sparkles size={20} /> AI Buddy <ChevronRight size={16} /></button>}
         </div>
-        {passport.data && passport.data.skills.length > 0 &&
-          <p className="calm-home__skills-preview"><ShieldCheck size={16} aria-hidden="true" /> Последний подтверждённый навык: {passport.data.skills[0]?.key}</p>}
+        {confirmedSkills && confirmedSkills.length > 0 &&
+          <p className="calm-home__skills-preview"><ShieldCheck size={16} aria-hidden="true" /> Подтверждённый навык: {confirmedSkills[0]?.key}</p>}
         </section>
       </details>
     </div>
