@@ -2,7 +2,7 @@
 
 - task_id: UI-APPLE-APP-SDD-20261114
 - session_id: gpt6-apple-ux-all-screens-20261114-1646
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-14T16:46:00+03:00
 - heartbeat_at: 2026-11-14T16:46:00+03:00
 - base_revision: ca741df7685e880a9f1597e0e39a1df88040566c
@@ -18,6 +18,20 @@
   - src/**, tests/**, Railway and production
 - verification:
   - source route vs capability crosswalk, HIG references, strict openspec CI and independent design review
-- progress: Starting detailed whole-app Apple-like functional-preservation SDD for all six supported user roles. No application or production changes.
+- progress: Spec-only work complete for author handoff. 49 backend-authorized role destinations documented, conditional customer demo navigation separated, all screen L0/L1/L2 contracts, 42 action families, six formal OpenSpec capabilities (20 requirements, 37 scenarios), 320/390/768/1024/1440/1920 responsive behavior and migration waves S0–S7.
+- changed_files:
+  - openspec/changes/impulse-apple-app-experience-20261114/** (19 authored spec/docs files)
+  - .agents/coordination/claims/UI-APPLE-APP-SDD-20261114.lock/status.md
+- verification_evidence:
+  - Static GitHub branch read-back: 6 capability specs, 20 requirements, 37 scenarios and no missing scenario count
+  - GitHub Actions job 132472692255 on tested commit 5244fbb44852ab2bc666093bca9cbebe3440c22d: Validate OpenSpec PASS; Validate documentation contracts PASS
+  - PR #162 draft: https://github.com/Podtverzhdeno/Sber-Platform/pull/162
+  - Source base main: ca741df7685e880a9f1597e0e39a1df88040566c
+- unresolved:
+  - Independent product and design review of each screen's L0/L1/L2, no user sign-off
+  - Cross-role live browser and production evidence not performed; design-only work
+  - Existing CI backend/security failures are unrelated and not suppressed
+  - PR #160 navigation and PR #161 participant home remain isolated proposals
+- tested_spec_revision: 5244fbb44852ab2bc666093bca9cbebe3440c22d
 - independent_review: PENDING
 - blockers: shared App.tsx and legacy CSS have active/review claims; future integrations require distinct accepted claims.
