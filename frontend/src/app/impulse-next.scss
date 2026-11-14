@@ -1,0 +1,981 @@
+/* Impulse Content-first v3 — shared, original web design. Based on owner U01–U04
+   and approved OpenSpec screen hierarchy. CSS-only adaptation: never changes
+   API/ACL, route indexes, form state or underlying business controls. */
+
+/* App-wide semantic colors. Historical alias tokens bridge legacy components
+   so white/dark modes keep coherent text/surface contrast. */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #ffffff;
+  --color-sidebar: #f7f7f9;
+  --color-surface: #ffffff;
+  --color-surface-1: #ffffff;
+  --color-surface-raised: #ffffff;
+  --color-surface-2: #f5f5f7;
+  --color-border: #e5e5ea;
+  --color-border-strong: #ccd0d7;
+  --color-text: #1d1d1f;
+  --color-muted: #5f6268;
+  --color-primary: #0066d6;
+  --color-primary-strong: #0053b1;
+  --color-accent: #0066d6;
+  --color-info: #086dcc;
+  --color-ai: #6655bd;
+  --color-warning: #865a00;
+  --color-danger: #aa263a;
+  --color-success: #16704a;
+  --on-brand-ink: #ffffff;
+  --shadow-raised: 0 10px 30px rgb(17 28 45 / 7%);
+  --c-rgb071321: #f7f7f9;
+  --c-rgb081725: #f5f5f7;
+  --c-rgb0b1726: #ffffff;
+  --c-rgb091522: #ffffff;
+  --c-rgb0b192a: #ffffff;
+  --c-rgb091625: #ffffff;
+  --c-rgb10263a: #f5f5f7;
+  --c-rgb0e1d2f: #f5f5f7;
+  --c-rgb45df91: #0066d6;
+  --c-rgb22e6d0: #0066d6;
+  --c-rgb22e6d0_a08: rgb(0 102 214 / 8%);
+  --c-rgb22e6d0_a10: rgb(0 102 214 / 10%);
+  --c-rgb22e6d0_a12: rgb(0 102 214 / 12%);
+  --c-rgb22e6d0_a25: rgb(0 102 214 / 25%);
+  --c-rgb22e6d0_a42: rgb(0 102 214 / 42%);
+  --c-rgbf2ac3d: #865a00;
+  --c-rgbb5c5d9: #5f6268;
+  --c-rgb667b96: #70747b;
+  --c-rgb7589a3: #697078;
+  --c-rgb91a2ba: #697078;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #111214;
+  --color-sidebar: #191a1e;
+  --color-surface: #1b1c20;
+  --color-surface-1: #1b1c20;
+  --color-surface-raised: #24262a;
+  --color-surface-2: #232428;
+  --color-border: #38393e;
+  --color-border-strong: #52535a;
+  --color-text: #f5f5f7;
+  --color-muted: #b5b6be;
+  --color-primary: #75b1ff;
+  --color-primary-strong: #a2cbff;
+  --color-accent: #75b1ff;
+  --color-info: #8cbaff;
+  --color-ai: #b2a8ff;
+  --color-warning: #f3c572;
+  --color-danger: #ff929b;
+  --color-success: #82dda8;
+  --on-brand-ink: #0b1524;
+  --shadow-raised: 0 12px 30px rgb(0 0 0 / 24%);
+  --c-rgb071321: #191a1e;
+  --c-rgb081725: #232428;
+  --c-rgb0b1726: #1b1c20;
+  --c-rgb091522: #1b1c20;
+  --c-rgb0b192a: #1b1c20;
+  --c-rgb091625: #1b1c20;
+  --c-rgb10263a: #232428;
+  --c-rgb45df91: #75b1ff;
+  --c-rgb22e6d0: #75b1ff;
+  --c-rgb22e6d0_a08: rgb(117 177 255 / 9%);
+  --c-rgb22e6d0_a10: rgb(117 177 255 / 12%);
+  --c-rgb22e6d0_a12: rgb(117 177 255 / 14%);
+  --c-rgb22e6d0_a25: rgb(117 177 255 / 25%);
+  --c-rgb22e6d0_a42: rgb(117 177 255 / 42%);
+  --c-rgbb5c5d9: #b5b6be;
+  --c-rgb667b96: #b5b6be;
+  --c-rgb7589a3: #b5b6be;
+}
+/* Reserve vertical scrollbar width between analytics subviews so their
+   local navigation does not jump horizontally when content height changes. */
+html { scroll-behavior: auto; scrollbar-gutter: stable; }
+body, :root[data-theme="light"] body, :root[data-theme="dark"] body {
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.page-shell { max-width: none; background: var(--color-bg); }
+.page-shell button, .page-shell a, .page-shell select { -webkit-tap-highlight-color: transparent; }
+.page-shell button:hover { transform: none; }
+.page-shell button:focus-visible,
+.page-shell a:focus-visible,
+.page-shell select:focus-visible,
+.page-shell input:focus-visible,
+.page-shell textarea:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+.page-shell .skip-link { color: #ffffff; background: #0066d6; }
+
+/* A shared, functional toolbar for every role. Icon utilities survive; their
+   appearance is quiet, not glowing. ThemeControl is a real 3-way selector. */
+.page-shell .topbar {
+  box-sizing: border-box;
+  left: 244px;
+  right: 0;
+  width: auto;
+  min-height: 66px;
+  padding: 0 clamp(12px, 2.5vw, 32px);
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.page-shell .topbar, .page-shell .topbar .top-persona strong { color: var(--color-text); }
+.page-shell .topbar .top-persona small { color: var(--color-muted); }
+.page-shell .topbar .global-search {
+  height: 40px;
+  min-width: 140px;
+  width: min(570px, 42vw);
+  border: 1px solid var(--color-border);
+  border-radius: 11px;
+  background: var(--color-surface-2);
+  color: var(--color-muted);
+  box-shadow: none;
+}
+.page-shell .topbar .global-search input { color: var(--color-text); background: transparent; }
+.page-shell .topbar .global-search input::placeholder { color: var(--color-muted); opacity: 1; }
+.page-shell .topbar .header-actions { gap: clamp(5px, 0.8vw, 12px); }
+.page-shell .topbar :is(.notification-button,.topbar-guide-btn,.ghost-button) {
+  min-height: 40px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  border-radius: 10px;
+  box-shadow: none;
+}
+.page-shell .topbar :is(.notification-button,.topbar-guide-btn,.ghost-button):hover {
+  color: var(--color-primary);
+  border-color: var(--color-border-strong);
+  background: var(--color-surface-2);
+}
+.page-shell .topbar .ghost-button { padding-inline: 11px; }
+.page-shell .topbar :is(.streak-utility .streak-button,.ranking-utility--personal) {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  box-shadow: none;
+}
+.page-shell .topbar .streak-utility .streak-button strong,
+.page-shell .topbar .ranking-utility--personal .ranking-utility-copy strong {
+  color: var(--color-text);
+}
+.page-shell .topbar .ranking-utility--personal > .ranking-utility-symbol { background: transparent; color: var(--color-primary); }
+.page-shell .topbar .notification-popover,
+.page-shell .topbar .global-search-results {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-raised);
+}
+.page-shell .topbar .notification-popover :is(p,small,span) { color: var(--color-muted); }
+
+/* Application frame: one quiet sidebar + roomy focused content. The original
+   component trees, all 49 routes, query parameters and actions remain intact. */
+.page-shell .workspace--apple {
+  display: grid;
+  grid-template-columns: 244px minmax(0, 1fr);
+  gap: 0;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+}
+.workspace--apple > .calm-navigation {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  background: var(--color-sidebar);
+}
+.workspace--apple .calm-navigation {
+  --calm-canvas: var(--color-sidebar);
+  --calm-surface: var(--color-sidebar);
+  --calm-subtle: var(--color-surface-2);
+  --calm-text: var(--color-text);
+  --calm-muted: var(--color-muted);
+  --calm-line: var(--color-border);
+  --calm-accent: var(--color-primary);
+  --calm-selected: color-mix(in srgb, var(--color-primary) 10%, var(--color-sidebar));
+  --calm-focus: var(--color-primary);
+}
+.workspace--apple .calm-sidebar {
+  box-sizing: border-box;
+  width: 244px;
+  max-width: 100%;
+  min-height: 100%;
+  border-color: var(--color-border);
+  background: var(--color-sidebar);
+  box-shadow: none;
+}
+.workspace--apple .calm-sidebar__brand-mark {
+  color: var(--on-brand-ink);
+  background: var(--color-primary);
+  box-shadow: none;
+}
+.workspace--apple .calm-sidebar :is(.calm-sidebar__home,.calm-sidebar__group,.calm-sidebar__link) {
+  min-height: 44px;
+  font-weight: 570;
+}
+.workspace--apple .calm-sidebar .calm-sidebar__link { font-size: 13px; }
+.workspace--apple .calm-sidebar .calm-sidebar__home[aria-current="page"],
+.workspace--apple .calm-sidebar .calm-sidebar__link[aria-current="page"] {
+  color: var(--color-text);
+  background: var(--calm-selected);
+  font-weight: 680;
+}
+.workspace--apple .calm-sidebar .calm-sidebar__group--active { color: var(--color-text); }
+.workspace--apple .workspace-content {
+  min-width: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 98px clamp(22px, 3.3vw, 54px) 72px;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+.workspace--apple .workspace-content > :is(.feature-stack,.trajectory-v2,.catalog-v2,.mpv2,.bc-approved,.analytics-v3,.p2-root,.achv-page,.ir-page,.calm-home) {
+  width: 100%;
+  max-width: 1220px;
+  margin-inline: auto;
+}
+.workspace--apple .workspace-content > .calm-home { max-width: 1100px; }
+.workspace--apple .workspace-content :is(.feature-stack h1,.trajectory-v2 h1,.catalog-v2 h1,.mpv2 h1,.analytics-v3 h1,.p2-root h1,.achv-page h1,.ir-page h1) {
+  color: var(--color-text);
+  letter-spacing: -.035em;
+  line-height: 1.14;
+  font-size: clamp(29px, 3vw, 37px);
+}
+.workspace--apple .workspace-content :is(h2,h3) { overflow-wrap: anywhere; }
+.workspace--apple .workspace-content :is(p,small) { overflow-wrap: anywhere; }
+.workspace--apple .feature-stack { gap: 24px; }
+
+/* Light surface grammar applied to all screen families, not a content rewrite.
+   Hardcoded decorated module shells are flattened by design; real data controls
+   (tables, inputs, badge text and evidence) remain visible and interactive. */
+.workspace--apple .workspace-content :is(
+  .trajectory-v2, .bc-approved, .catalog-v2, .mpv2, .analytics-v3, .p2-root,
+  .ir-page, .achv-page, .sberchat-shell, .customer-scenario, .customer-create-v2
+) {
+  color: var(--color-text);
+  background: transparent !important;
+  box-shadow: none;
+}
+.workspace--apple .workspace-content .analytics-v3::before,
+.workspace--apple .workspace-content .achv-hero::before,
+.workspace--apple .workspace-content .achv-hero::after {
+  opacity: 0;
+  pointer-events: none;
+}
+.workspace--apple .workspace-content :is(
+  .ui-card, .next-action, .state-panel, .analytics-panel, .rating-table,
+  .track-card, .roadmap-list li button, .checkpoint > div,
+  .trajectory-v2-role-card, .trajectory-v2-stage-block,
+  .catalog-v2-card, .mp-surface, .p2-surface,
+  .achv-hero, .ir-hero, .create-v2-hero
+) {
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none !important;
+  text-shadow: none;
+}
+.workspace--apple .workspace-content :is(.next-action,.achv-hero,.ir-hero,.create-v2-hero) {
+  border-radius: 16px;
+}
+.workspace--apple .workspace-content :is(
+  .ui-card, .track-card, .catalog-v2-card, .p2-surface, .mp-surface
+) { border-radius: 12px; }
+.workspace--apple .workspace-content :is(.catalog-v2-card,.ui-card,.track-card) {
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+.workspace--apple .workspace-content :is(.catalog-v2-card,.ui-card,.track-card):hover {
+  border-color: var(--color-border-strong);
+}
+.workspace--apple .workspace-content :is(.eyebrow,.mp-eyebrow,.p2-overline,.ir-eyebrow,.achv-kicker) {
+  color: var(--color-muted);
+  font-weight: 600;
+  letter-spacing: .02em;
+  text-transform: none;
+}
+.workspace--apple .workspace-content :is(
+  .trajectory-v2-heading, .catalog-v2-heading, .av3-top, .mp-page-title
+) { margin-bottom: clamp(16px, 2vw, 30px); }
+.workspace--apple .workspace-content :is(
+  .trajectory-v2-columns, .catalog-v2-layout, .messenger-shell
+) { min-width: 0; }
+.workspace--apple .workspace-content :is(
+  .trajectory-v2-role-card[aria-pressed="true"],.catalog-segments button[aria-pressed="true"],
+  .av3-tabs button.selected,.view-toggle button.active
+) {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 9%, var(--color-surface));
+  box-shadow: none;
+}
+.workspace--apple .workspace-content :is(
+  .catalog-v2-card, .rating-row, .analytics-results tr,
+  .roadmap-list li, .mpv2 tr
+) { border-color: var(--color-border); }
+
+/* Evidence is presented as rows and crisp tables, not permanently glowing cards. */
+.workspace--apple .workspace-content :is(table, .rating-table) { color: var(--color-text); }
+.workspace--apple .workspace-content :is(th,td) { border-bottom-color: var(--color-border); }
+.workspace--apple .workspace-content th { color: var(--color-muted); font-weight: 650; }
+.workspace--apple .workspace-content :is(tr:hover,.rating-row:hover) {
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+}
+.workspace--apple .workspace-content :is(
+  input:not([type="checkbox"]):not([type="radio"]), textarea, select
+) {
+  accent-color: var(--color-primary);
+  color: var(--color-text);
+  border-color: var(--color-border);
+  background-color: var(--color-surface);
+  box-shadow: none;
+}
+.workspace--apple .workspace-content input::placeholder,
+.workspace--apple .workspace-content textarea::placeholder {
+  color: var(--color-muted);
+  opacity: 1;
+}
+.workspace--apple .workspace-content button:disabled { cursor: not-allowed; opacity: .65; }
+.workspace--apple .workspace-content :is(.ui-badge,.ui-badge--success,.ui-badge--warning) {
+  border-radius: 8px;
+  text-transform: none;
+}
+.workspace--apple .workspace-content .ui-badge--success {
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 9%, var(--color-surface));
+}
+.workspace--apple .workspace-content .ui-badge--warning {
+  color: var(--color-warning);
+  background: color-mix(in srgb, var(--color-warning) 9%, var(--color-surface));
+}
+.workspace--apple .workspace-content :is(.ui-badge,.text-button,.muted) { color: var(--color-muted); }
+.workspace--apple .workspace-content :is(.text-button,.calm-home__text-action) { color: var(--color-primary); }
+.workspace--apple .workspace-content :is(.timeline, .roadmap-list, .rating-table, .msg-dialog-list) {
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+/* Dialogs and menus are opaque: no low-contrast "glass" behind evidence. */
+.page-shell .overlay-panel,
+.page-shell :is(.notification-popover,.global-search-results) {
+  background: var(--color-surface);
+  color: var(--color-text);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-raised);
+}
+.page-shell .overlay { background: rgb(0 0 0 / 48%); }
+.page-shell :is(.overlay-panel,.notification-popover,.global-search-results) :is(input,select,textarea) {
+  color: var(--color-text);
+  background: var(--color-surface-2);
+}
+.page-shell :is(.modal-actions button,.course-actions button) {
+  color: var(--on-brand-ink);
+  background: var(--color-primary);
+}
+
+/* The participant Calm home is aligned with the global palette without
+   removing any of its course, practice, week or disclosure interactions. */
+.workspace--apple .calm-home {
+  --calm-canvas: var(--color-bg);
+  --calm-panel: var(--color-bg);
+  --calm-elevated: var(--color-surface-2);
+  --calm-accent: var(--color-primary);
+  --calm-accent-strong: var(--color-primary-strong);
+  --calm-tint: color-mix(in srgb, var(--color-primary) 8%, var(--color-bg));
+  --calm-text: var(--color-text);
+  --calm-subtext: var(--color-muted);
+  --calm-separator: var(--color-border);
+  --calm-focus: var(--color-primary);
+  padding-inline: clamp(0px, 1vw, 20px);
+}
+.workspace--apple .calm-home__primary { color: var(--on-brand-ink) !important; }
+
+/* Existing custom modules may use local tokens. Bind their outer surfaces,
+   without overriding internal status colors or document/message evidence. */
+/* Shared --color-* values are inherited from :root. Do not redeclare a
+   custom property in terms of itself: doing so makes it invalid at runtime. */
+.workspace--apple :is(.analytics-panel,.mp-surface,.catalog-v2-card,.p2-surface) :is(h1,h2,h3) {
+  color: var(--color-text);
+}
+.workspace--apple :is(.analytics-panel,.catalog-v2-card,.mp-surface,.p2-surface) :is(p,small) {
+  color: var(--color-muted);
+}
+
+/* Dark mode is composed independently; no brightness/invert filters.
+   Public achievement photos, project proof and charts retain their real colors. */
+:root[data-theme="dark"] .workspace--apple .workspace-content :is(
+  .catalog-v2-card, .trajectory-v2-stage-block, .mp-surface,
+  .p2-surface, .analytics-panel
+) {
+  background: var(--color-surface) !important;
+  color: var(--color-text) !important;
+}
+:root[data-theme="dark"] .page-shell :is(.notification-popover,.global-search-results) { background: #232428; }
+:root[data-theme="dark"] .workspace--apple .workspace-content :is(.ui-card,.next-action,.track-card) {
+  background: var(--color-surface) !important;
+}
+@media (max-width: 1200px) {
+  .page-shell .topbar .global-search { width: min(380px, 33vw); }
+  .page-shell .workspace--apple { grid-template-columns: 228px minmax(0,1fr); }
+  .page-shell .topbar { left: 228px; }
+  .workspace--apple .calm-sidebar { width: 228px; }
+  .workspace--apple .workspace-content { padding-inline: 28px; }
+}
+@media (max-width: 900px) {
+  .page-shell .topbar .header-actions { gap: 5px; }
+  .page-shell .topbar .global-search { width: min(290px, 31vw); }
+  .page-shell .topbar .top-persona > span:last-child { display: none; }
+  .page-shell .workspace--apple { grid-template-columns: 210px minmax(0,1fr); }
+  .page-shell .topbar { left: 210px; }
+  .workspace--apple .calm-sidebar { width: 210px; }
+  .workspace--apple .workspace-content { padding-inline: 20px; }
+}
+@media (max-width: 767px) {
+  .page-shell .topbar {
+    left: 0;
+    width: 100%;
+    min-height: 62px;
+    padding: 0 12px 0 106px;
+    align-items: center;
+  }
+  .page-shell .topbar .global-search {
+    position: absolute;
+    top: 65px;
+    left: 15px;
+    right: 15px;
+    width: auto;
+    max-width: none;
+    height: 42px;
+  }
+  .page-shell .topbar .global-search-results {
+    max-width: calc(100vw - 30px);
+  }
+  .page-shell .topbar .header-actions {
+    margin-left: auto;
+    min-width: 0;
+    max-width: calc(100vw - 116px);
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .page-shell .topbar .header-actions > * { flex: 0 0 auto; }
+  .page-shell .topbar .top-persona { min-width: 40px; padding-inline: 3px; }
+  .page-shell .topbar .ghost-button { min-width: 54px; padding-inline: 6px; font-size: 12px; }
+  .page-shell .workspace--apple { display: block; min-height: 100vh; }
+  .workspace--apple > .calm-navigation {
+    position: static;
+    width: 0;
+    height: 0;
+    min-height: 0;
+    overflow: visible;
+  }
+  .workspace--apple .calm-navigation__mobile-trigger {
+    display: inline-flex;
+    position: fixed;
+    z-index: 90;
+    top: 10px;
+    left: 12px;
+    height: 44px;
+    padding-inline: 9px;
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 11px;
+  }
+  .workspace--apple .calm-navigation__backdrop { z-index: 110; }
+  .workspace--apple .calm-sidebar {
+    position: fixed;
+    z-index: 111;
+    width: min(300px, calc(100vw - 40px));
+    max-width: none;
+    height: auto;
+    background: var(--color-sidebar);
+  }
+  .workspace--apple .calm-sidebar--open { visibility: visible; pointer-events: auto; }
+  .workspace--apple .workspace-content {
+    max-width: none;
+    padding: 128px 17px 44px;
+  }
+  .workspace--apple .workspace-content > .calm-home { padding-inline: 0; }
+  .workspace--apple .workspace-content :is(.feature-stack h1,.trajectory-v2 h1,.catalog-v2 h1,.mpv2 h1,.analytics-v3 h1,.p2-root h1,.achv-page h1,.ir-page h1) {
+    font-size: clamp(26px, 7.6vw, 31px);
+  }
+}
+@media (max-width: 390px) {
+  .page-shell .topbar { padding-left: 94px; padding-right: 7px; }
+  .workspace--apple .calm-navigation__mobile-trigger { left: 8px; padding-inline: 6px; }
+  .page-shell .topbar .header-actions { max-width: calc(100vw - 104px); }
+  .workspace--apple .workspace-content { padding-inline: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-shell *, .page-shell *::before, .page-shell *::after {
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
+
+
+/* Content-first role home for screens where the backend has no reliable
+   aggregate yet. Never display fake KPI tiles, fictional activity or ROI. */
+.workspace--apple .apple-role-home {
+  display: grid;
+  width: 100%;
+  max-width: 1080px;
+  gap: 22px;
+  margin-inline: auto;
+  color: var(--color-text);
+}
+.workspace--apple .apple-role-home__header h1 {
+  margin: 0 0 6px;
+  font-size: clamp(29px, 3vw, 37px);
+  line-height: 1.14;
+  letter-spacing: -.035em;
+}
+.workspace--apple .apple-role-home__header p {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+.workspace--apple .apple-role-home__focus {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: clamp(20px, 3vw, 34px);
+  border-radius: 17px;
+  background: var(--color-surface-2);
+}
+.workspace--apple .apple-role-home__focus > div { min-width: 0; }
+.workspace--apple .apple-role-home__eyebrow {
+  color: var(--color-muted);
+  font-size: 13px;
+  font-weight: 630;
+}
+.workspace--apple .apple-role-home__focus h2 {
+  margin: 9px 0;
+  color: var(--color-text);
+  font-size: clamp(21px, 2.5vw, 27px);
+  line-height: 1.2;
+  letter-spacing: -.03em;
+}
+.workspace--apple .apple-role-home__focus p {
+  max-width: 590px;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.workspace--apple .apple-role-home__focus button {
+  display: inline-flex;
+  min-height: 46px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border: 1px solid var(--color-primary);
+  border-radius: 11px;
+  color: var(--on-brand-ink);
+  background: var(--color-primary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 650;
+}
+.workspace--apple .apple-role-home__focus button:hover {
+  border-color: var(--color-primary-strong);
+  background: var(--color-primary-strong);
+}
+.workspace--apple .apple-role-home__details {
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+.workspace--apple .apple-role-home__details summary {
+  display: flex;
+  min-height: 62px;
+  align-items: center;
+  padding: 15px 6px;
+  color: var(--color-text);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 650;
+}
+.workspace--apple .apple-role-home__details summary::marker { color: var(--color-muted); }
+.workspace--apple .apple-role-home__details ul {
+  margin: 0;
+  padding: 0 0 16px;
+  list-style: none;
+}
+.workspace--apple .apple-role-home__details li + li { border-top: 1px solid var(--color-border); }
+.workspace--apple .apple-role-home__details li button {
+  display: flex;
+  width: 100%;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--color-text);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+.workspace--apple .apple-role-home__details li button:hover { background: var(--color-surface-2); }
+.workspace--apple .apple-role-home__details li button span:last-child { color: var(--color-muted); }
+
+/* Login and role choice are also part of the app, so the theme selector works
+   before login. This does not unlock disabled demo personas. */
+.page-shell .login-layout {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+.page-shell .login-layout .login-copy h1 {
+  color: var(--color-text);
+  font-size: clamp(37px, 4vw, 58px);
+  line-height: 1.07;
+  letter-spacing: -.04em;
+}
+.page-shell .login-layout .login-copy :is(.lead,.eyebrow) {
+  color: var(--color-muted);
+  letter-spacing: normal;
+  text-transform: none;
+}
+.page-shell .login-theme {
+  margin-bottom: 32px;
+}
+.page-shell .persona-panel {
+  border: 1px solid var(--color-border);
+  border-radius: 21px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: 0 13px 34px rgb(20 25 35 / 6%);
+}
+:root[data-theme="dark"] .page-shell .persona-panel { box-shadow: none; }
+.page-shell .persona-panel h2 { color: var(--color-text); font-size: 19px; }
+.page-shell .persona-grid { gap: 10px; }
+.page-shell .persona-card,
+.page-shell .persona-card--active {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  box-shadow: none;
+}
+.page-shell .persona-card small { color: var(--color-muted); }
+.page-shell .persona-card:hover:not(:disabled) {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
+}
+.page-shell .persona-card--inactive,
+.page-shell .persona-card--inactive:hover {
+  color: var(--color-muted);
+  border-color: var(--color-border);
+  background: var(--color-surface-2);
+  opacity: .65;
+}
+.page-shell .persona-card--inactive small,
+.page-shell .persona-card--inactive em { color: var(--color-muted); }
+.page-shell .login-layout .error-message { color: var(--color-danger); }
+
+@media (max-width: 767px) {
+  .workspace--apple .apple-role-home__focus { align-items: stretch; flex-direction: column; }
+  .workspace--apple .apple-role-home__focus button { justify-content: center; width: 100%; }
+  .page-shell .login-layout { grid-template-columns: 1fr; gap: 24px; padding-inline: 17px; }
+  .page-shell .persona-panel { padding: 22px; }
+}
+
+
+/* Dedicated bridges for long-lived feature CSS. Components keep all their
+   business controls; only legacy navy/teal presentation is normalized. */
+
+/* Bootcamp catalog, lessons and level requirements */
+.workspace--apple .bc-approved {
+  --bc2-line: var(--color-border);
+  --bc2-surface: var(--color-surface);
+  --bc2-raised: var(--color-surface-2);
+  --bc2-text: var(--color-text);
+  --bc2-muted: var(--color-muted);
+  --bc2-teal: var(--color-primary);
+}
+.workspace--apple .bc-approved :is(
+  .bootcamp-hero-pulse,.bc-grade-banner,.bootcamp-catalog-toolbar,
+  .bootcamp-course-card,.bc-role-card,.bc-role-metrics > div
+) {
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .bc-approved .bc-continue {
+  color: var(--color-text);
+  background: var(--color-surface-2) !important;
+  border-color: var(--color-border);
+}
+.workspace--apple .bc-approved .bc-continue::before { opacity: 0; }
+.workspace--apple .bc-approved .bc-grade-banner p:last-child,
+.workspace--apple .bc-approved .bc-course-summary,
+.workspace--apple .bc-approved .bc-role-metrics span { color: var(--color-muted); }
+.workspace--apple .bc-approved .bc-panel-kicker {
+  color: var(--color-muted);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.workspace--apple .bc-approved .bc-catalog-title { color: var(--color-text); }
+.workspace--apple .bc-approved :is(.bc-category-row,.catalog-segments) {
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+}
+.workspace--apple .bc-approved .bc-overview-grid { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }
+.workspace--apple .bc-approved .course-grid { grid-template-columns: repeat(auto-fit,minmax(min(100%,235px),1fr)); }
+
+/* My Projects: normalize all actionable project-list surfaces, not evidence
+   status semantics; sticky completion/benefit information remains visible. */
+.workspace--apple .mpv2 {
+  --mp-bg: var(--color-bg);
+  --mp-panel: var(--color-surface);
+  --mp-panel2: var(--color-surface-2);
+  --mp-border: var(--color-border);
+  --mp-text: var(--color-text);
+  --mp-muted: var(--color-muted);
+  --mp-cyan: var(--color-primary);
+  --mp-purple: var(--color-ai);
+  color: var(--color-text);
+}
+.workspace--apple .mpv2 :is(
+  .mp-benefit-journey,.mp-benefit-step,.mp-card-list__header,
+  .mp-project-tile,.mp-reward-popup,.mp-list-search,.mp-surface
+) {
+  color: var(--color-text) !important;
+  background: var(--color-surface) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: none !important;
+}
+.workspace--apple .mpv2 :is(
+  .mp-filters button,.mp-layout button,.mp-select,
+  .mp-secondary,.mp-table-open,.mp-open-tile,.mp-card-list__header label
+) {
+  color: var(--color-text) !important;
+  background: var(--color-surface-2) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: none !important;
+}
+.workspace--apple .mpv2 :is(.mp-project-tile.is-selected,.mp-filters button.is-active,.mp-layout button.is-active) {
+  border-color: var(--color-primary) !important;
+  background: color-mix(in srgb,var(--color-primary) 7%,var(--color-surface)) !important;
+}
+.workspace--apple .mpv2 :is(.mp-page-title>p:last-child,.mp-benefit-heading span,.mp-benefit-step__text small,.mp-project-tile__identity small) {
+  color: var(--color-muted);
+}
+.workspace--apple .mpv2 .mp-benefit-step__icon {
+  background: var(--color-surface-2);
+  color: var(--color-primary);
+}
+.workspace--apple .mpv2 .mp-primary {
+  color: var(--on-brand-ink) !important;
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  box-shadow: none !important;
+}
+.workspace--apple .mpv2 :is(.mp-list-search input,.mp-select select,.mp-card-list__header input) {
+  color: var(--color-text);
+  background: transparent;
+}
+
+/* Analytics: keep all heatmap cells and actual chart colors, remove decorative
+   cyan glows around fake-surface data containers. */
+.workspace--apple .analytics-v3 {
+  --av3-cyan: var(--color-primary);
+  --av3-blue: var(--color-info);
+  --av3-stroke: var(--color-border);
+  --av3-muted: var(--color-muted);
+  color: var(--color-text);
+}
+.workspace--apple .analytics-v3::before { opacity: 0 !important; }
+.workspace--apple .analytics-v3 :is(
+  .av3-tabs,.av3-metric,.av3-panel,.av3-heat-panel,
+  .av3-cert-main,.av3-cert-sidebar,.av3-next
+) {
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .analytics-v3 .av3-tabs {
+  background: var(--color-surface-2) !important;
+  border-radius: 12px;
+}
+.workspace--apple .analytics-v3 .av3-tabs button { color: var(--color-muted); }
+.workspace--apple .analytics-v3 .av3-tabs button.selected {
+  color: var(--color-text);
+  background: color-mix(in srgb,var(--color-primary) 10%,var(--color-surface)) !important;
+  box-shadow: none;
+}
+.workspace--apple .analytics-v3 :is(.av3-headline>span,.av3-headline>p,.av3-panel>header p,.av3-metric small,.av3-tiny-note) {
+  color: var(--color-muted);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.workspace--apple .analytics-v3 :is(.av3-panel>header h2,.av3-headline h1) { color: var(--color-text); }
+.workspace--apple .analytics-v3 :is(.av3-primary) {
+  color: var(--on-brand-ink);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+.workspace--apple .analytics-v3 .av3-donut>div { background: var(--color-surface); }
+.workspace--apple .analytics-v3 .av3-heat-cell.level-0 { background: var(--color-surface-2); }
+.workspace--apple .analytics-v3 :is(.av3-heat-cell.level-1,.av3-heat-cell.level-2,.av3-heat-cell.level-3,.av3-heat-cell.level-4) {
+  box-shadow: none;
+}
+
+/* Portfolio & Skill Passport: verification/consent remains visible in neutral
+   evidence cards; one actual action retains the strong blue fill. */
+.workspace--apple .p2-root {
+  --p2-teal: var(--color-primary);
+  --p2-line: var(--color-border);
+  --p2-card: var(--color-surface);
+  --p2-soft: var(--color-surface-2);
+  color: var(--color-text);
+}
+.workspace--apple .workspace-content:has(.p2-root) { padding: 96px clamp(22px,3.3vw,54px) 72px; }
+.workspace--apple .p2-root :is(.p2-hero,.p2-panel,.p2-tabs,.p2-metric,.p2-project) {
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .p2-root .p2-hero::before { opacity: 0; }
+.workspace--apple .p2-root :is(.p2-person>p,.p2-person-about,.p2-metric small,.p2-panel-heading>span,.p2-tabs button) {
+  color: var(--color-muted);
+}
+.workspace--apple .p2-root :is(.p2-avatar,.p2-metric-icon,.p2-skill-chips span) {
+  color: var(--color-primary);
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .p2-root .p2-primary {
+  color: var(--on-brand-ink) !important;
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+.workspace--apple .p2-root :is(.p2-outline,.p2-tabs button.is-active) {
+  color: var(--color-primary) !important;
+  background: color-mix(in srgb,var(--color-primary) 7%,var(--color-surface));
+  border-color: var(--color-border);
+}
+.workspace--apple .p2-root .p2-warning {
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+  background: color-mix(in srgb,var(--color-warning) 8%,var(--color-surface));
+}
+.workspace--apple .p2-root .p2-identity-badge {
+  color: var(--color-primary);
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+}
+
+/* Rating: replace trophy spotlight atmosphere with accessible standings and
+   source-backed profile detail, keeping every rank/benefit/detail action. */
+.workspace--apple .ir-page {
+  --ir-bg: var(--color-bg);
+  --ir-panel: var(--color-surface);
+  --ir-line: var(--color-border);
+  --ir-text: var(--color-text);
+  --ir-muted: var(--color-muted);
+  --ir-cyan: var(--color-primary);
+  color: var(--color-text);
+}
+.workspace--apple .ir-page::before,
+.workspace--apple .ir-hero::after { opacity: 0; }
+.workspace--apple .ir-page :is(.ir-hero,.ir-season,.ir-benefit) {
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.workspace--apple .ir-page :is(.ir-hero-copy>p:last-child,.ir-season strong,.ir-season span,.ir-benefit li) {
+  color: var(--color-muted);
+}
+.workspace--apple .ir-page .ir-benefit-title { color: var(--color-primary); }
+.workspace--apple .ir-page .ir-art { opacity: .17; filter: saturate(.35); }
+
+/* Achievements: compact and factual, no full-width neon galaxy background. */
+.workspace--apple .achv-page {
+  --achv-turquoise: var(--color-primary);
+  --achv-muted: var(--color-muted);
+  --achv-stroke: var(--color-border);
+  --achv-surface: var(--color-surface);
+  --achv-surface-2: var(--color-surface-2);
+  --achv-white: var(--color-text);
+  color: var(--color-text);
+}
+.workspace--apple .achv-page .achv-hero {
+  min-height: 0;
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .achv-page .achv-hero :is(h1,h1 span) { color: var(--color-text); }
+.workspace--apple .achv-page .achv-hero p { color: var(--color-muted); }
+.workspace--apple .achv-page .achv-button-primary {
+  color: var(--on-brand-ink);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+.workspace--apple .achv-page .achv-button-ghost {
+  color: var(--color-primary);
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+}
+.workspace--apple .achv-page .achv-hero-visual { opacity: .24; pointer-events: none; }
+
+/* Messages retain the full compose/thread/attachment UX; opaque list panes
+   replace translucent teal cards, with selected conversation distinct. */
+.workspace--apple .sberchat-shell {
+  color: var(--color-text);
+  background: transparent !important;
+}
+.workspace--apple .sberchat-shell :is(.msg-dialog-list,.chat-thread,.msg-context) {
+  color: var(--color-text);
+  background: var(--color-surface) !important;
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+.workspace--apple .sberchat-shell :is(.msg-dialog-list__row,.msg-chat__header,.msg-chat__bubble) {
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+.workspace--apple .sberchat-shell .msg-dialog-list__row-item.selected .msg-dialog-list__row {
+  background: color-mix(in srgb,var(--color-primary) 9%,var(--color-surface));
+}
+.workspace--apple .sberchat-shell :is(.msg-dialog-list__preview,.msg-chat__meta) { color: var(--color-muted); }
+.workspace--apple .sberchat-shell .msg-dialog-list__tabs button.active {
+  color: var(--color-primary);
+  background: var(--color-surface-2);
+}
+@media (max-width: 900px) {
+  .workspace--apple .bc-approved .bc-overview-grid { grid-template-columns: 1fr; }
+  .workspace--apple .mpv2 .mp-card-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 767px) {
+  .workspace--apple .workspace-content:has(.p2-root) { padding: 128px 17px 44px; }
+  .workspace--apple .bc-approved .course-grid { grid-template-columns: 1fr; }
+}

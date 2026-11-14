@@ -2,6 +2,16 @@
 
 > Checkboxes remain `[ ]` until **independent acceptance**. An author's committed spec, a Docker build or a preview is not enough to mark any task complete. Only the independent reviewer may accept. Every implementer needs a non-overlapping atomic claim, baseline source revision and explicit allowed write-scope.
 
+## S0a — Owner-origin images and detailed content design (new 14.11.2026)
+
+- [ ] S0a.1 Independent reviewer reconciles original user images U01–U04 against earlier assistant-generated mockups; verify source SHA-256 and avoid copied third-party assets.
+- [ ] S0a.2 Owner and design reviewer evaluate six first folds in `content-first-operating-model.md`; resolve actual next-step ordering and what appears above fold.
+- [ ] S0a.3 Audit **all 49** route content blueprints (13 participant, 36 other role) against source data and `A01–A42`; record AS-IS demo/placeholder gaps separately.
+- [ ] S0a.4 Approve white/dark visual tokens, WCAG contrast (including adjusted blue CTA), responsive layout, true status and precise microcopy.
+- [ ] S0a.5 Score Apple-like smart views and mark any additional backend dependency as *proposal*, never silently claim implemented.
+- [ ] S0a.6 Test exact user screenshots plus draft wireframes in real browser before global styling/deploy; no pixel-identical claim across macOS/Windows.
+- [ ] S0a.7 Independent review on one committed SDD revision; do not mark this authoring task as accepted without reviewer evidence.
+
 ## S0 — Requirements and AS-IS truth (this spec-only change)
 
 - [ ] S0.1 Inventory all 49 server navigation entries across six roles from `ROLE_NAVIGATION`; label conditional demo-only customer extras separately; verify route index persistence via App.tsx.
