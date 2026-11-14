@@ -23,6 +23,7 @@ export interface PixelParticipantShellProps {
   readonly onOpenNavigation: () => void;
   readonly onOpenTarget: OpenTarget;
   readonly onOpenWorkspace: (canonicalPath?: string) => void;
+  readonly onOpenTools: () => void;
   readonly buddyAvailable?: boolean;
   readonly onOpenRanking?: () => void;
   readonly onOpenHelp?: () => void;
@@ -39,7 +40,7 @@ export function PixelParticipantShell({
   overview, displayName, roleName, avatarUrl,
   search, searchResults, onSearchChange, onSearchSelect,
   streakDays, unreadNotifications, onOpenStreak, onOpenNotifications,
-  onOpenNavigation, onOpenTarget, onOpenWorkspace,
+  onOpenNavigation, onOpenTarget, onOpenWorkspace, onOpenTools,
   buddyAvailable = false, onOpenRanking, onOpenHelp, onOpenProfile, onLogout,
 }: PixelParticipantShellProps) {
   const { model, loading, partialData } = usePixelLiveDashboard(overview, buddyAvailable);
@@ -70,7 +71,7 @@ export function PixelParticipantShell({
         onContinue={() => { followPixelPrimaryTarget(overview, onOpenTarget, onOpenWorkspace); }}
         onOpenRequirements={() => { /* Local disclosure; no server mutation. */ }}
         onOpenTasks={() => { onOpenTarget("tasks", ""); }}
-        onOpenTools={() => { onOpenWorkspace("trajectory"); }}
+        onOpenTools={onOpenTools}
         onOpenRanking={onOpenRanking}
         onOpenHelp={onOpenHelp}
         onOpenProfile={onOpenProfile}
