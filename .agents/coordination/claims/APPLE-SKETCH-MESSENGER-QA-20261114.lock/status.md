@@ -1,7 +1,7 @@
 # Claim APPLE-SKETCH-MESSENGER-QA-20261114
 - task_id: APPLE-SKETCH-MESSENGER-QA-20261114
 - session_id: gpt6-20261114-apple-messages-nav-qa
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-14T21:48:00+03:00
 - heartbeat_at: 2026-11-14T21:48:00+03:00
 - base_revision: 2b5e8841b081df9e63555781bd31f6820d902b75
@@ -17,3 +17,5 @@
   - Customer SberChat PR Regression
   - TypeScript, lint
 - issue: three legacy Playwright specs use getByRole(link, { name: "Сообщения" }) while shared sidebar is hidden by default; must open the existing button "Меню" before route link selection without weakening any assertions.
+
+- progress: Updated three legacy messenger E2E files to explicitly open the existing floating menu before navigating. Focused final-SHA browser acceptance pending. No app functionality changed.
