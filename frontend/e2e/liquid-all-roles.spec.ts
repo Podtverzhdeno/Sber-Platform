@@ -93,3 +93,37 @@ test("liquid mobile workspace retains explicit navigation and no accidental hove
   await page.keyboard.press("Escape");
   await expect(page.locator(".calm-sidebar")).toBeHidden();
 });
+
+test("selected controls remain distinct and Buddy input stays legible on light surfaces", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await mountRole(page, "customer", "light");
+  const colors = await page.locator(".workspace--apple").evaluate((root) => {
+    // CSS-only probe: business content remains untouched, and each probe is
+    // removed immediately after reading the browser's actual computed style.
+    const probe = document.createElement("div");
+    probe.innerHTML = [
+      '<div class="ws-segmented"><button type="button" id="liquid-idle">Все</button>',
+      '<button type="button" class="active" id="liquid-active">Активные</button></div>',
+      '<button type="button" class="premium-tr" id="liquid-row-idle">Задача A</button>',
+      '<button type="button" class="premium-tr selected" id="liquid-row-selected">Задача B</button>',
+      '<div class="buddy2"><div class="buddy2-composer"><input id="liquid-chat-input" placeholder="Введите текст" /></div></div>',
+    ].join("");
+    root.append(probe);
+    try {
+      const css = (id: string) => getComputedStyle(probe.querySelector<HTMLElement>(id) as HTMLElement);
+      return {
+        filterIdle: css("#liquid-idle").backgroundColor,
+        filterActive: css("#liquid-active").backgroundColor,
+        rowIdle: css("#liquid-row-idle").backgroundColor,
+        rowSelected: css("#liquid-row-selected").backgroundColor,
+        inputInk: css("#liquid-chat-input").color,
+        composerBackground: getComputedStyle(probe.querySelector(".buddy2-composer") as Element).backgroundColor,
+      };
+    } finally {
+      probe.remove();
+    }
+  });
+  expect(colors.filterActive).not.toBe(colors.filterIdle);
+  expect(colors.rowSelected).not.toBe(colors.rowIdle);
+  expect(colors.inputInk).not.toBe(colors.composerBackground);
+});
