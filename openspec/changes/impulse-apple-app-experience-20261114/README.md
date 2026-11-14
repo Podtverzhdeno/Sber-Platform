@@ -1,5 +1,9 @@
 # Impulse Apple-like Experience · Specification index
 
+> **IMPORTANT REFERENCE CORRECTION:** the old `impulse-reference-pack-20261114.zip` was assistant-generated Impulse concept PNGs, not the four real user uploads. The **true owner originals** are separately preserved in personal Library archive `impulse-USER-original-4-images.zip` and described in [owner-true-originals-analysis](docs/owner-true-originals-analysis-20261114.md). User originals take precedence; older mockup coordinates are illustrative only. This fixes the initial provenance misidentification.
+
+
+
 > **OWNER REFERENCE OVERRIDE — 2026-11-14 (stop-design gate).** Four screenshots delivered by the owner are now the authoritative visual basis; implementation/deployment is **PAUSED** until SDD visual reference review. The primary A1/A2 pixel layout overrides the more decorative older Calm B screenshots. Original PNGs and manifest are stored as `impulse-reference-pack-20261114.zip` in the owner's personal ChatGPT Library folder `/Impulse-UI-References-2026-11-14` (archive copy also supplied in chat). Railway production is intentionally unchanged.
 
 ## User visuals and external app research (read **before coding**)
