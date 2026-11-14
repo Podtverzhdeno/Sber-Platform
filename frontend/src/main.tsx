@@ -5,6 +5,7 @@ import { App } from "./App";
 import "./styles.scss";
 import "./components/topbar-theme.scss";
 import "./app/impulse-next.scss";
+import "./app/overlay-navigation.scss";
 
 const root = document.getElementById("root");
 
