@@ -257,7 +257,7 @@ export function ImpulsePixelReference({
             <div className="impulse-pixel__requirements-actions">
               <strong>{levelLabel} → {nextLevelLabel}</strong>
               <button type="button" aria-expanded={requirementsOpen}
-                onClick={() => { setRequirementsOpen((open) => !open); onOpenRequirements(); }}>
+                onClick={() => { if (!requirementsOpen) onOpenRequirements(); setRequirementsOpen((open) => !open); }}>
                 Требования уровня <ChevronDown size={17} aria-hidden="true"/>
               </button>
             </div>
@@ -271,19 +271,19 @@ export function ImpulsePixelReference({
         </section>
         <section className="impulse-pixel__fold">
           <button type="button" aria-expanded={weekOpen}
-            onClick={() => { setWeekOpen((open) => !open); if (!weekOpen) onOpenTasks(); }}>
+            onClick={() => { setWeekOpen((open) => !open); }}>
             <span><strong>Задачи и неделя</strong><small>Текущая работа и история недели</small></span>
             <ChevronDown size={19} aria-hidden="true"/>
           </button>
-          {weekOpen && <p className="impulse-pixel__expanded">{home.weekSummary ?? "Откройте раздел задач для подробностей."}</p>}
+          {weekOpen && <div className="impulse-pixel__expanded"><p>{home.weekSummary ?? "Откройте раздел задач для подробностей."}</p><button type="button" onClick={onOpenTasks}>Открыть задачи <ChevronRight size={16} aria-hidden="true" /></button></div>}
         </section>
         <section className="impulse-pixel__fold">
           <button type="button" aria-expanded={toolsOpen}
-            onClick={() => { setToolsOpen((open) => !open); if (!toolsOpen) onOpenTools(); }}>
+            onClick={() => { setToolsOpen((open) => !open); }}>
             <span><strong>Инструменты</strong><small>Траектория, скилл-паспорт и AI Buddy</small></span>
             <ChevronDown size={19} aria-hidden="true"/>
           </button>
-          {toolsOpen && <p className="impulse-pixel__expanded">{home.toolsSummary ?? "Доступные инструменты перечислены в соответствующих разделах."}</p>}
+          {toolsOpen && <div className="impulse-pixel__expanded"><p>{home.toolsSummary ?? "Доступные инструменты перечислены в соответствующих разделах."}</p><button type="button" onClick={onOpenTools}>Открыть инструменты <ChevronRight size={16} aria-hidden="true" /></button></div>}
         </section>
       </main>
     </div>
