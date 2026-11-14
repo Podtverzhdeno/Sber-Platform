@@ -27,4 +27,12 @@
 - prior_successful_release: 2bf0a5a5a41c51ae001fbfa84c643a9e5ba0915e
 - rollout_policy: exact-SHA deploy only after frontend build/type/lint/tests and Docker smoke PASS, maintain source-pinned rollback; never modify Postgres
 - caveat: old visual E2E + backend and security gates are not fully green; disclose outstanding failures
+- integrated_source_revision: b9b635f33962e3d72423f766ae5c529f8c23f465
+- integration_summary:
+  - 37 additional source/docs files copied by immutable Git blob SHA from PR #160, #162 and #163 onto current PR #161 head
+  - 15 PR #160 files (sidebar primitives + design spec), 19 PR #162 specification files, 3 PR #163 UI component files
+  - 53 total changed files compared with main, no backend or database schema changes
+  - PR #164 https://github.com/Podtverzhdeno/Sber-Platform/pull/164 open and mergeable
+  - SDD and unmounted UI components have no active runtime effect except current home implementation from PR #161
+- stage: CHECKING_INTEGRATED_SHA_BEFORE_RAILWAY_DEPLOY
 - independent_review: PENDING
