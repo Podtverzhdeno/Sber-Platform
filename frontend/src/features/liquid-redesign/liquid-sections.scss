@@ -403,3 +403,159 @@
     color: ButtonText;
   }
 }
+
+/* Feature-level semantic color adapters. Most legacy screen CSS uses its own
+   --prefix-* palette instead of shared platform tokens. Bridge that palette
+   into the two real themes so inner headings don't stay pale on white panels.
+   State and chart data colors intentionally remain owned by each feature. */
+:root .page-shell--apple-overlay .workspace--apple .trajectory-v2 {
+  --trj-bg: var(--liquid-canvas);
+  --trj-panel: var(--liquid-surface);
+  --trj-panel-raised: var(--liquid-surface-alt);
+  --trj-line: var(--liquid-line);
+  --trj-text: var(--liquid-text);
+  --trj-muted: var(--liquid-muted);
+  --trj-teal: var(--liquid-primary);
+  --trj-blue: var(--liquid-primary);
+}
+:root .page-shell--apple-overlay .workspace--apple .catalog-v2 {
+  --catalog-accent: var(--liquid-primary);
+  --catalog-accent-ink: var(--liquid-primary-ink);
+  --catalog-ink: var(--liquid-text);
+  --catalog-muted: var(--liquid-muted);
+  --catalog-surface: var(--liquid-surface);
+  --catalog-border: var(--liquid-line);
+  --catalog-highlight: var(--liquid-primary);
+  --catalog-soft: var(--liquid-surface-alt);
+}
+:root .page-shell--apple-overlay .workspace--apple .mpv2 {
+  --mp-bg: var(--liquid-canvas);
+  --mp-panel: var(--liquid-surface);
+  --mp-panel2: var(--liquid-surface-alt);
+  --mp-border: var(--liquid-line);
+  --mp-text: var(--liquid-text);
+  --mp-muted: var(--liquid-muted);
+  --mp-cyan: var(--liquid-primary);
+  --mp-ref-border: var(--liquid-line);
+  --mp-ref-ink: var(--liquid-text);
+  --mp-ref-muted: var(--liquid-muted);
+  --mp-ref-panel: var(--liquid-surface);
+}
+:root .page-shell--apple-overlay .workspace--apple .analytics-v3 {
+  --av3-cyan: var(--liquid-primary);
+  --av3-blue: var(--liquid-primary);
+  --av3-stroke: var(--liquid-line);
+  --av3-muted: var(--liquid-muted);
+  color: var(--liquid-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .achv-page {
+  --achv-turquoise: var(--liquid-primary);
+  --achv-muted: var(--liquid-muted);
+  --achv-stroke: var(--liquid-line);
+  --achv-surface: var(--liquid-surface);
+  --achv-surface-2: var(--liquid-surface-alt);
+  --achv-white: var(--liquid-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .ir-page {
+  --ir-bg: var(--liquid-canvas);
+  --ir-panel: var(--liquid-surface);
+  --ir-line: var(--liquid-line);
+  --ir-text: var(--liquid-text);
+  --ir-muted: var(--liquid-muted);
+  --ir-cyan: var(--liquid-primary);
+}
+:root .page-shell--apple-overlay .workspace--apple .bc-approved {
+  --bc2-line: var(--liquid-line);
+  --bc2-surface: var(--liquid-surface);
+  --bc2-raised: var(--liquid-surface-alt);
+  --bc2-text: var(--liquid-text);
+  --bc2-muted: var(--liquid-muted);
+  --bc2-teal: var(--liquid-primary);
+}
+:root .page-shell--apple-overlay .workspace--apple .p2-root {
+  --p2-teal: var(--liquid-primary);
+  --p2-line: var(--liquid-line);
+  --p2-card: var(--liquid-surface);
+  --p2-soft: var(--liquid-surface-alt);
+  color: var(--liquid-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .home-v2 {
+  --home-card: var(--liquid-surface);
+  --home-border: var(--liquid-line);
+  --home-muted: var(--liquid-muted);
+  --home-cyan: var(--liquid-primary);
+  color: var(--liquid-text);
+}
+
+/* The participant's recommendation remains the one expressive hero.
+   Secondary blocks are solid, not competing glowing tiles. */
+:root .page-shell--apple-overlay .workspace--apple .home-v2 :is(
+  .home-v2-grade,.home-v2-weekly,.home-v2-next-outcome,
+  .home-v2-tasks,.home-v2-passport,.home-v2-buddy
+) {
+  color: var(--liquid-text);
+  background: var(--liquid-surface);
+  border: 1px solid var(--liquid-line);
+  border-radius: 20px;
+  box-shadow: var(--liquid-shadow);
+}
+:root .page-shell--apple-overlay .workspace--apple .home-v2 :is(
+  .home-v2-grade,.home-v2-weekly,.home-v2-next-outcome,
+  .home-v2-tasks,.home-v2-passport,.home-v2-buddy
+) > header h2 {
+  color: var(--liquid-text);
+  text-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .home-v2 :is(
+  .home-v2-grade-disclaimer,.home-v2-tasks-empty,
+  .home-v2-passport-message,.home-v2-buddy-content p
+) { color: var(--liquid-muted); }
+:root .page-shell--apple-overlay .workspace--apple .home-v2 .home-v2-hero {
+  border-color: var(--liquid-line);
+  border-radius: 24px;
+  box-shadow: 0 18px 48px rgb(12 56 119 / 10%);
+}
+
+/* Some native source layouts use ornamental imagery. Keep it in the background
+   without obscuring data or adding fake dashboard content. */
+:root .page-shell--apple-overlay .workspace--apple .achv-hero-visual,
+:root .page-shell--apple-overlay .workspace--apple .ir-art-glow {
+  opacity: .36;
+  pointer-events: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .ir-hero {
+  background: linear-gradient(122deg, var(--liquid-selected), var(--liquid-surface));
+  border: 1px solid var(--liquid-line);
+  border-radius: 22px;
+  color: var(--liquid-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .ir-hero-copy :is(h1,h2,p),
+:root .page-shell--apple-overlay .workspace--apple .ir-season :is(strong,span) {
+  color: var(--liquid-text);
+  text-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .achv-hero {
+  background: linear-gradient(126deg, var(--liquid-surface), var(--liquid-selected));
+}
+:root .page-shell--apple-overlay .workspace--apple .achv-hero-copy :is(h1,h2,p),
+:root .page-shell--apple-overlay .workspace--apple .p2-hero :is(h1,h2,strong) {
+  color: var(--liquid-text);
+  text-shadow: none;
+}
+
+/* Keep operational text readable after transforming navy surfaces into solid
+   neutral panels. Do not change warning/danger/success indicators. */
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .mp-surface,.mp-project-tile,.ca3-card,.ca3-metric,
+  .achv-item,.p2-panel,.p2-project,.premium-inspector,
+  .mentor-inspector,.manager-inspector,.case-workspace,.create-form-card
+) :is(h2,h3) {
+  color: var(--liquid-text);
+  text-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .mp-surface,.ca3-card,.achv-item,.p2-panel,.premium-inspector,
+  .mentor-inspector,.manager-inspector,.case-workspace,.create-form-card
+) :is(p,small) {
+  color: var(--liquid-muted);
+}
