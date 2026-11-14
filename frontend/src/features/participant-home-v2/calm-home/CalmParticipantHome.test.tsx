@@ -50,7 +50,7 @@ function renderCalmHome(
   if (opts.includePassport ?? true) client.setQueryData(["talent-passport"], {
     skills: opts.passportSkills ?? [{ key: "Python", practical_level: "Уверенный", confirmed_case_count: 1 }],
   });
-  render(
+  const view = render(
     <QueryClientProvider client={client}>
       <CalmParticipantHome
         overview={{ ...overviewFixture, ...override }}
@@ -60,7 +60,7 @@ function renderCalmHome(
       />
     </QueryClientProvider>,
   );
-  return { onOpenTarget, onOpenWorkspace, client };
+  return { onOpenTarget, onOpenWorkspace, client, container: view.container };
 }
 
 describe("calm participant homepage", () => {
