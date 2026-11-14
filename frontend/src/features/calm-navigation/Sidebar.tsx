@@ -105,10 +105,10 @@ export function CalmSidebar({
       }
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
+      if (event.shiftKey && first && last && document.activeElement === first) {
         event.preventDefault();
         last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
+      } else if (!event.shiftKey && first && last && document.activeElement === last) {
         event.preventDefault();
         first.focus();
       }
@@ -137,7 +137,7 @@ export function CalmSidebar({
         className="calm-navigation__mobile-trigger"
         aria-controls={id}
         aria-expanded={drawerOpen}
-        onClick={() => setDrawerOpen(true)}
+        onClick={() => { setDrawerOpen(true); }}
       >
         <Menu size={20} aria-hidden="true" />
         <span>Меню</span>
@@ -231,7 +231,7 @@ export function CalmSidebar({
                     className={`calm-sidebar__group${active ? " calm-sidebar__group--active" : ""}`}
                     aria-controls={panelId}
                     aria-expanded={expanded}
-                    onClick={() => setExpandedGroup(expanded ? null : group.id)}
+                    onClick={() => { setExpandedGroup(expanded ? null : group.id); }}
                   >
                     <GroupIcon size={19} aria-hidden="true" />
                     <span>{group.title}</span>
