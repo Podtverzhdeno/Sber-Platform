@@ -203,40 +203,6 @@ const roleLabels: Record<Role, string> = {
   operator: "Оператор",
 };
 
-const navigationIcons: Record<string, string> = {
-  Главная: "⌂",
-  "Мой путь": "⌂",
-  "Моя траектория": "⌁",
-  Bootcamp: "◇",
-  Задачи: "▤",
-  "Мои проекты": "▣",
-  События: "✦",
-  Рейтинг: "♜",
-  Портфолио: "◈",
-  Аналитика: "▥",
-  "Очередь ревью": "✓",
-  "Проверка вкладов": "✓",
-  Назначения: "▣",
-  Участники: "♙",
-  "AI-помощник": "✧",
-  "План недели": "▦",
-  "Мои задачи": "▤",
-  "Создать задачу": "+",
-  Заявки: "◧",
-  Кандидаты: "♙",
-  "База участников": "♙",
-  Инициативы: "◆",
-  Результаты: "◎",
-  Воронка: "▽",
-  "Операционная очередь": "☷",
-  Проверки: "◉",
-  Споры: "⚑",
-  Сообщения: "▱",
-  Достижения: "◆",
-  "AI-Buddy": "✧",
-  Настройки: "⚙",
-};
-
 const dashboardMetrics: Record<
   Role,
   { label: string; value: string; delta: string; tone: string }[]
@@ -431,7 +397,7 @@ function Workspace({
       className="workspace workspace--apple"
       data-workspace-role={actor.active_role}
       data-workspace-section={currentSection ?? ""}
-      data-workspace-layout={workspaceLayout(actor.active_role, currentSection)}
+      data-workspace-layout={workspaceLayout(actor.active_role, currentSection ?? null)}
       aria-labelledby="workspace-title"
     >
       <CalmSidebar
