@@ -1,0 +1,154 @@
+/*
+ * Impulse 2026 quiet glass / source-informed web adaptation.
+ * Not an Apple-provided CSS library and not a pixel copy of Figma assets.
+ *
+ * Shared shell for all six server-authorized roles and all workspace routes.
+ * Transparent surfaces appear ONLY in the floating chrome; substantial
+ * reading/table surfaces remain opaque for legibility.
+ */
+:root[data-theme="light"] .page-shell--apple-overlay,
+:root:not([data-theme="dark"]) .page-shell--apple-overlay {
+  --liquid-canvas: #f7f9ff;
+  --liquid-surface: #fff;
+  --liquid-surface-alt: #f5f7fc;
+  --liquid-text: #19243c;
+  --liquid-muted: #66728b;
+  --liquid-line: rgb(86 112 160 / 14%);
+  --liquid-focus: #1677ff;
+  --liquid-primary: #0878f9;
+  --liquid-primary-ink: #fff;
+  --liquid-selected: #eaf3ff;
+  --liquid-glass: rgb(255 255 255 / 77%);
+  --liquid-shadow: 0 2px 8px rgb(37 60 108 / 3%), 0 14px 44px rgb(37 60 108 / 4%);
+  --liquid-divider: rgb(100 120 155 / 13%);
+  --liquid-aura: rgb(132 172 255 / 12%);
+  color-scheme: light;
+}
+:root[data-theme="dark"] .page-shell--apple-overlay {
+  --liquid-canvas: #0e1525;
+  --liquid-surface: #192235;
+  --liquid-surface-alt: #222e44;
+  --liquid-text: #f1f5ff;
+  --liquid-muted: #a9b6ce;
+  --liquid-line: rgb(195 214 255 / 13%);
+  --liquid-focus: #73abff;
+  --liquid-primary: #338bff;
+  --liquid-primary-ink: #fff;
+  --liquid-selected: #19375f;
+  --liquid-glass: rgb(24 32 50 / 80%);
+  --liquid-shadow: 0 5px 28px rgb(0 0 0 / 15%);
+  --liquid-divider: rgb(185 207 255 / 13%);
+  --liquid-aura: rgb(43 95 176 / 16%);
+  color-scheme: dark;
+}
+
+:root .page-shell--apple-overlay .workspace--apple {
+  background:
+    radial-gradient(ellipse 42% 24% at 92% 2%, var(--liquid-aura), transparent 100%),
+    var(--liquid-canvas);
+  color: var(--liquid-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .workspace-content {
+  min-width: 0;
+  box-sizing: border-box;
+}
+/* Give non-home screens space before the first heading. Never inject a
+   decorative greeting or conceal an existing user action. */
+@media (min-width: 1024px) {
+  :root .page-shell--apple-overlay .workspace--apple .workspace-content:not(:has(.home-v2)):not(:has(.calm-home)) {
+    padding-top: 122px;
+    padding-bottom: 94px;
+    padding-inline: clamp(26px, 4.7vw, 86px);
+  }
+}
+:root .page-shell--apple-overlay .topbar {
+  background: var(--liquid-glass);
+  color: var(--liquid-text);
+  border-bottom: 1px solid var(--liquid-line);
+  -webkit-backdrop-filter: saturate(145%) blur(23px);
+  backdrop-filter: saturate(145%) blur(23px);
+  box-shadow: 0 2px 16px rgb(32 67 112 / 3%);
+}
+:root .page-shell--apple-overlay .topbar :is(.notification-button,.topbar-guide-btn,.theme-toggle,.ghost-button) {
+  color: var(--liquid-text);
+  border-color: var(--liquid-line);
+  background: color-mix(in srgb, var(--liquid-glass) 64%, transparent);
+}
+:root .page-shell--apple-overlay .topbar :is(.notification-popover,.global-search-results) {
+  background: var(--liquid-surface);
+  border: 1px solid var(--liquid-line);
+  border-radius: 18px;
+  box-shadow: var(--liquid-shadow);
+  color: var(--liquid-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .calm-sidebar {
+  border-color: var(--liquid-line);
+  background: var(--liquid-glass);
+  color: var(--liquid-text);
+  -webkit-backdrop-filter: blur(28px) saturate(145%);
+  backdrop-filter: blur(28px) saturate(145%);
+}
+/* The current edge-hover panel continues to own its geometry,
+   transitions and focus semantics. This only controls appearance. */
+:root .page-shell--apple-overlay .workspace--apple .calm-sidebar :is(
+  .calm-sidebar__home[aria-current="page"],
+  .calm-sidebar__link[aria-current="page"],
+  .calm-sidebar__group[aria-expanded="true"]
+) {
+  background: var(--liquid-selected);
+  color: var(--liquid-primary);
+  border-radius: 12px;
+}
+:root .page-shell--apple-overlay .workspace--apple .calm-sidebar :is(
+  .calm-sidebar__brand,.calm-sidebar__group,.calm-sidebar__home,.calm-sidebar__link
+) { color: var(--liquid-text); }
+:root .page-shell--apple-overlay .workspace--apple .calm-sidebar :is(
+  .calm-sidebar__home[aria-current="page"],.calm-sidebar__link[aria-current="page"]
+) { color: var(--liquid-primary); }
+:root .page-shell--apple-overlay .workspace--apple .calm-navigation__edge-trigger:focus-visible,
+:root .page-shell--apple-overlay .workspace--apple :is(button,a,input,textarea,select,[tabindex]):focus-visible {
+  outline: 3px solid var(--liquid-focus);
+  outline-offset: 3px;
+}
+
+/* Native overlays retain their existing Escape and focus-trap implementation. */
+:root .page-shell--apple-overlay :is(.overlay-panel,.trajectory-v2-drawer,.ir-overlay > div) {
+  border-color: var(--liquid-line);
+  border-radius: 22px;
+  color: var(--liquid-text);
+  background: var(--liquid-surface);
+  box-shadow: 0 24px 72px rgb(17 28 54 / 18%);
+}
+:root .page-shell--apple-overlay .page-shell .ui-card { color: var(--liquid-text); }
+
+@media (max-width: 767px) {
+  :root .page-shell--apple-overlay .workspace--apple .workspace-content {
+    padding-inline: 17px;
+    padding-bottom: 52px;
+  }
+  :root .page-shell--apple-overlay .topbar {
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root .page-shell--apple-overlay :is(.topbar,.calm-sidebar) {
+    background: var(--liquid-surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root .page-shell--apple-overlay :is(.topbar,.calm-sidebar) {
+    background: var(--liquid-surface);
+  }
+}
+@media (forced-colors: active) {
+  :root .page-shell--apple-overlay :is(.topbar,.calm-sidebar,.overlay-panel) {
+    background: Canvas;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
