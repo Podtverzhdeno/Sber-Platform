@@ -32,7 +32,6 @@ import {
 import {
   BrowserRouter,
   Navigate,
-  NavLink,
   Route,
   Routes,
   useNavigate,
@@ -50,6 +49,9 @@ import {
 } from "./app/theme";
 import { appQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
+import { ThemeControl } from "./app/theme-controls/ThemeControl";
+import { workspaceLayout } from "./app/screen-layout";
+import { CalmSidebar } from "./features/calm-navigation/Sidebar";
 import { DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
 import { BootcampCatalog } from "./features/bootcamp";
 import { ParticipantEventCatalog } from "./features/participant-events";
@@ -422,85 +424,24 @@ function Workspace({
     sectionIndex >= 0 &&
     sectionIndex < navigation.length;
   const currentSection = allowed ? navigation[sectionIndex] : null;
-  const [navigationOpen, setNavigationOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   return (
     <section
-      className={`workspace${navigationOpen ? " workspace--nav-open" : ""}`}
+      className="workspace workspace--apple"
+      data-workspace-role={actor.active_role}
+      data-workspace-section={currentSection ?? ""}
+      data-workspace-layout={workspaceLayout(actor.active_role, currentSection)}
       aria-labelledby="workspace-title"
     >
-      <aside className="sidebar" aria-label="Боковая панель">
-        <div className="sidebar-brand">
-          <NavLink className="sidebar-brand-home" to="/workspace/0" aria-label="Impulse — на главную" onClick={() => { setNavigationOpen(false); }}>
-            <span className="brand-mark" aria-hidden="true">
-              ϟ
-            </span>
-            <strong>Impulse</strong>
-          </NavLink>
-          <button
-            className="sidebar-close"
-            type="button"
-            aria-label="Закрыть меню"
-            onClick={() => {
-              setNavigationOpen(false);
-            }}
-          >
-            ×
-          </button>
-        </div>
-        {actor.assigned_roles.length > 1 && (
-          <label className="role-switcher">
-            Рабочая роль
-            <select
-              aria-label="Рабочая роль"
-              value={actor.active_role}
-              onChange={(event) => {
-                onSwitchRole(event.target.value as Role);
-              }}
-            >
-              {actor.assigned_roles.map((role) => (
-                <option key={role} value={role}>
-                  {roleLabels[role]}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        <nav aria-label="Навигация роли">
-          {navigation.map((item, index) => (
-            <NavLink
-              to={`/workspace/${String(index)}`}
-              key={item}
-              onClick={() => {
-                setNavigationOpen(false);
-              }}
-            >
-              <span className="nav-icon" aria-hidden="true">
-                {navigationIcons[item] ?? "•"}
-              </span>
-              <span>{item}</span>
-            </NavLink>
-          ))}
-        </nav>
-        <div className="sidebar-message">
-          <span className="sidebar-art" aria-hidden="true"><i /><i /><i /></span>
-          <strong>Развиваем технологии вместе</strong>
-          <span>Реальные задачи, обучение и подтверждённый опыт</span>
-          <small>СБЕР</small>
-        </div>
-      </aside>
+      <CalmSidebar
+        role={actor.active_role}
+        navigation={navigation}
+        activeIndex={sectionIndex}
+        assignedRoles={actor.assigned_roles}
+        onSwitchRole={onSwitchRole}
+      />
       <div className="workspace-content">
-        <button
-          className="mobile-menu"
-          type="button"
-          aria-expanded={navigationOpen}
-          onClick={() => {
-            setNavigationOpen(true);
-          }}
-        >
-          <span aria-hidden="true">☰</span> Меню
-        </button>
         {allowed && actor.active_role === "customer" && mockCustomer ? (
           currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" personId={actor.person_id} quickTargets={{ task: navigation.findIndex((section) => section === "Задачи" || section === "Мои задачи") }} /> : currentSection === "Настройки" ? <ParticipantSettings actorName="Роман Воронов" consentScopes={actor.consent_scopes} role="customer" /> : <CustomerPremium navigation={actor.navigation} section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
         ) : allowed && currentSection === "Главная" ? (
@@ -1594,6 +1535,7 @@ function ImpulseApp() {
               )}
             </div>
             <div className="header-actions">
+              <ThemeControl value={themeChoice} onChange={setThemeChoice} />
               {actor.active_role === "participant" && (
                 <TopbarEngagementIndicator personId={actor.person_id} />
               )}
