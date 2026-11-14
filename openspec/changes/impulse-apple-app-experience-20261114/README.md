@@ -1,5 +1,14 @@
 # Impulse Apple-like Experience · Specification index
 
+> **OWNER REFERENCE OVERRIDE — 2026-11-14 (stop-design gate).** Four screenshots delivered by the owner are now the authoritative visual basis; implementation/deployment is **PAUSED** until SDD visual reference review. The primary A1/A2 pixel layout overrides the more decorative older Calm B screenshots. Original PNGs and manifest are stored as `impulse-reference-pack-20261114.zip` in the owner's personal ChatGPT Library folder `/Impulse-UI-References-2026-11-14` (archive copy also supplied in chat). Railway production is intentionally unchanged.
+
+## User visuals and external app research (read **before coding**)
+
+- [Owner's four original screenshots: sizes, SHA-256 and exact 1440/390px anchor measurements](docs/owner-screenshot-pixel-contract-20261114.md).
+- [Official app research: Apple iCloud Notes, Linear 2026, Notion, Vercel Geist, GitHub Projects, Airtable](docs/web-app-interface-research-20261114.md).
+- [Pixel-oriented page templates, **all 49 routes mapped**, light/dark semantic bridge](docs/screen-templates-pixel-map-20261114.md).
+- Do **not** ship the interrupted `feat/impulse-global-futurist-ui-20261114` draft branch to Railway before the reference-first review.
+
 **Status:** DRAFT · SDD-first, **no application runtime changes**.  
 **Owner request:** make the entire Impulse app visually/behaviorally close to the clear, white, systematic organization of Apple apps; **preserve all existing functions**, move secondary controls under discoverable contextual navigation. Document every screen before modifying the implementation.
 
