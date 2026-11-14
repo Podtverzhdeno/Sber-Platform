@@ -332,3 +332,32 @@
     opacity: 1;
   }
 }
+
+/*
+ * Quiet home composition: no extra greeting banner. At wide desktop sizes
+ * keep the recommendation and level in the first glance, while the weekly
+ * calendar becomes the next full-width section. The existing data and
+ * interactions remain rendered; secondary information moves below the fold.
+ */
+@media (min-width: 1200px) {
+  .page-shell--apple-overlay .workspace--apple .workspace-content:has(.home-v2) {
+    padding-top: 130px;
+  }
+  .page-shell--apple-overlay .workspace--apple .home-v2 {
+    max-width: 1440px;
+    margin-inline: auto;
+    gap: 28px;
+  }
+  .page-shell--apple-overlay .workspace--apple .home-v2-first-row {
+    grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+    gap: 22px;
+  }
+  .page-shell--apple-overlay .workspace--apple .home-v2-first-row > .home-v2-weekly {
+    grid-column: 1 / -1;
+    min-height: 220px;
+    height: auto;
+  }
+  .page-shell--apple-overlay .workspace--apple .home-v2-bottom-grid {
+    gap: 22px;
+  }
+}
