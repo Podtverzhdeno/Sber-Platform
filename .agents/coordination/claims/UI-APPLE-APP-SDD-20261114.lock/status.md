@@ -35,3 +35,25 @@
 - tested_spec_revision: 5244fbb44852ab2bc666093bca9cbebe3440c22d
 - independent_review: PENDING
 - blockers: shared App.tsx and legacy CSS have active/review claims; future integrations require distinct accepted claims.
+
+## SDD v3 content-first research addition — 2026-11-14
+
+- status: REVIEW (author's spec committed, **independent reviewer has not accepted**)
+- owner_reference_correction:
+  - Earlier `impulse-reference-pack-20261114.zip` contained **assistant-generated Impulse mockups**, NOT the four user's originals; prior claim was inaccurate and is explicitly superseded in README.
+  - Original user images reopened and stored unchanged with hashes in personal Library archive `/Impulse-UI-References-2026-11-14/impulse-USER-original-4-images.zip`.
+  - Original screenshots dimensions: U01 1000x750 controls; U02 2048x1292 white mobile mockups; U03 2048x1147 Figma dark workspace/artboard; U04 1500x914 blue iOS kit.
+- new_docs:
+  - docs/owner-true-originals-analysis-20261114.md
+  - docs/content-first-operating-model.md
+  - docs/participant-content-blueprints-v2.md
+  - docs/work-roles-content-blueprints-v2.md
+  - docs/visual-language-v3.md
+  - docs/apple-native-pattern-opportunities.md
+  - specs/apple-content-fidelity/spec.md
+- new_coverage: all 49 real role destinations detailed, 9 conditional demo customer labels separated, six main next-action policies; 23 Apple-inspired feature opportunities evaluated (not implemented).
+- quality: calculated contrast white on inspirational #007AFF approx 4.02:1, proposed darker CTA #0066D6 contrast approx 5.42:1. No Apple proprietary assets redistributed.
+- source_research: current Apple HIG design principles/writing/layout/split views/materials/sidebar/lists and Reminders/Notes, plus Linear 2026.
+- current_revision_at_edit: 23202f93e147ee38f2536a7f1db0b0e294d948eb (the subsequent claim commit may advance HEAD)
+- open_checks: exact-SHA OpenSpec CI latest revision, independent content/design review, actual browser screenshots for all light/dark screen states and 49x42 functional parity.
+- deployment: NOT PERFORMED. Owner's most recent direction was to study and improve SDD, not resume paused global CSS rollout. Prior Railway pinned successful source remains 277a163f.
