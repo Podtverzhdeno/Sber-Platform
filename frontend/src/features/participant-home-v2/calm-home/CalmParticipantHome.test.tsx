@@ -121,7 +121,7 @@ describe("calm participant homepage", () => {
     expect(screen.queryByRole("button", { name: /AI Buddy/ })).toBeNull();
   });
 
-  it("keeps legacy homepage by default and renders preview only with query flag", () => {
+  it("shows calm homepage by default while preserving explicit legacy rollback", () => {
     const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity, gcTime: 0 } } });
     client.setQueryData(overviewQueryKey, overviewFixture);
     client.setQueryData(roleLevelQueryKey("python"), publishedLevel);
@@ -129,7 +129,7 @@ describe("calm participant homepage", () => {
 
     const view = render(
       <QueryClientProvider client={client}>
-        <MemoryRouter initialEntries={["/workspace/0"]}>
+        <MemoryRouter initialEntries={["/workspace/0?home=legacy"]}>
           <ParticipantHomeV2 onOpenTarget={() => undefined} onOpenWorkspace={() => undefined} />
         </MemoryRouter>
       </QueryClientProvider>,
@@ -140,7 +140,7 @@ describe("calm participant homepage", () => {
 
     render(
       <QueryClientProvider client={client}>
-        <MemoryRouter initialEntries={["/workspace/0?home=calm"]}>
+        <MemoryRouter initialEntries={["/workspace/0"]}>
           <ParticipantHomeV2 onOpenTarget={() => undefined} onOpenWorkspace={() => undefined} />
         </MemoryRouter>
       </QueryClientProvider>,
