@@ -151,7 +151,7 @@ test("dark theme retains translucent menu without making the body unusable", asy
   await page.goto("/workspace/0");
   await page.getByRole("combobox", { name: "Тема оформления" }).selectOption("dark");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  const trigger = page.getByRole("button", { name: "Меню" });
+  const trigger = page.getByRole("button", { name: "Меню", exact: true });
   await trigger.click();
   const panel = page.getByRole("dialog", { name: "Главное меню" });
   await expect(panel).toBeVisible();
@@ -166,7 +166,7 @@ test("reduced motion makes menu instant without entrance animations", async ({ p
   await page.emulateMedia({ reducedMotion: "reduce" });
   await installReferenceSession(page);
   await page.goto("/workspace/0");
-  const trigger = page.getByRole("button", { name: "Меню" });
+  const trigger = page.getByRole("button", { name: "Меню", exact: true });
   const panel = page.locator(".calm-sidebar");
   await expect(panel).toBeHidden();
   await trigger.click();
@@ -183,7 +183,7 @@ test("forced colors retains an opaque readable navigation pane", async ({ page }
   await page.emulateMedia({ forcedColors: "active" });
   await installReferenceSession(page);
   await page.goto("/workspace/0");
-  await page.getByRole("button", { name: "Меню" }).click();
+  await page.getByRole("button", { name: "Меню", exact: true }).click();
   const panel = page.getByRole("dialog", { name: "Главное меню" });
   await expect(panel).toBeVisible();
   await expect(panel).toHaveCSS("backdrop-filter", "none");
