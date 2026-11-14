@@ -112,6 +112,7 @@ test("participant journeys: диалог, отправка, вложение, з
 
   await page.goto("/");
   await page.locator('[data-persona="participant-ilya"]').click();
+  await page.getByRole("button", { name: "Меню", exact: true }).click();
   await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
   await page.getByRole("link", { name: "Сообщения" }).click();
 
