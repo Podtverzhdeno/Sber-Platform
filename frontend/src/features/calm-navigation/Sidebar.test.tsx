@@ -110,7 +110,8 @@ describe("CalmSidebar", () => {
     fireEvent.click(trigger);
     expect(backdrop).toHaveClass("calm-navigation__backdrop--open");
     expect(screen.getByRole("dialog", { name: "Главное меню" })).toBeInTheDocument();
-    fireEvent.click(backdrop!);
+    if (!backdrop) throw new Error("Expected navigation backdrop to stay mounted");
+    fireEvent.click(backdrop);
     expect(backdrop).not.toHaveClass("calm-navigation__backdrop--open");
     expect(screen.queryByRole("dialog", { name: "Главное меню" })).toBeNull();
     expect(trigger).toHaveAttribute("aria-expanded", "false");
