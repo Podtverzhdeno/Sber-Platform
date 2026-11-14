@@ -1,7 +1,32 @@
 # Impulse Apple-like Experience · Specification index
 
+> **IMPORTANT REFERENCE CORRECTION:** the old `impulse-reference-pack-20261114.zip` was assistant-generated Impulse concept PNGs, not the four real user uploads. The **true owner originals** are separately preserved in personal Library archive `impulse-USER-original-4-images.zip` and described in [owner-true-originals-analysis](docs/owner-true-originals-analysis-20261114.md). User originals take precedence; older mockup coordinates are illustrative only. This fixes the initial provenance misidentification.
+
+
+
+> **OWNER REFERENCE OVERRIDE — 2026-11-14 (stop-design gate).** Four screenshots delivered by the owner are now the authoritative visual basis; implementation/deployment is **PAUSED** until SDD visual reference review. The primary A1/A2 pixel layout overrides the more decorative older Calm B screenshots. Original PNGs and manifest are stored as `impulse-reference-pack-20261114.zip` in the owner's personal ChatGPT Library folder `/Impulse-UI-References-2026-11-14` (archive copy also supplied in chat). Railway production is intentionally unchanged.
+
+## User visuals and external app research (read **before coding**)
+
+- [Owner's four original screenshots: sizes, SHA-256 and exact 1440/390px anchor measurements](docs/owner-screenshot-pixel-contract-20261114.md).
+- [Official app research: Apple iCloud Notes, Linear 2026, Notion, Vercel Geist, GitHub Projects, Airtable](docs/web-app-interface-research-20261114.md).
+- [Pixel-oriented page templates, **all 49 routes mapped**, light/dark semantic bridge](docs/screen-templates-pixel-map-20261114.md).
+- Do **not** ship the interrupted `feat/impulse-global-futurist-ui-20261114` draft branch to Railway before the reference-first review.
+
 **Status:** DRAFT · SDD-first, **no application runtime changes**.  
 **Owner request:** make the entire Impulse app visually/behaviorally close to the clear, white, systematic organization of Apple apps; **preserve all existing functions**, move secondary controls under discoverable contextual navigation. Document every screen before modifying the implementation.
+
+## Content-first v3 (read **before** any design or code)
+
+- [Verified analysis of the user's **actual** four screenshots](docs/owner-true-originals-analysis-20261114.md): the controls kit, white mobile grouped lists, dark Figma UI kit and blue-toned iOS collage, with correct dimensions/SHA-256 and non-Apple provenance. Original archive stored separately in user's Library.
+- [Decision-first content operating model](docs/content-first-operating-model.md): six role homes, status/empty/error microcopy, P0–P3 information priorities and explicit human actions.
+- [13 participant routes in detail](docs/participant-content-blueprints-v2.md): every page's title, first fold, L1/L2, critical status, error, mobile and source limitations.
+- [Remaining 36 server role routes + conditional customer demo paths](docs/work-roles-content-blueprints-v2.md): customer, mentor, manager, HR, operator.
+- [Visual language v3](docs/visual-language-v3.md): semantic light/dark tokens, typography, soft control depth, interaction states, calculated contrast (including **white on #007AFF only ~4.02:1**, requiring adjustment).
+- [23 Apple-inspired opportunities, priorities and explicit rejections](docs/apple-native-pattern-opportunities.md): Smart Lists, inspector, search, drafts, accessible controls vs full-page glass/neumorphism.
+- [Formal content-fidelity capability](specs/apple-content-fidelity/spec.md): additional SHALL/WHEN/THEN requirements for actual content, source fidelity and 49/42 parity.
+
+**S0 research/SDD only:** these files do not deploy or turn on an unfinished global theme. `feat/impulse-global-futurist-ui-20261114` remains blocked per owner STOP; production unchanged.
 
 ## Read in this order
 
