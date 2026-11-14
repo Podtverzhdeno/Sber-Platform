@@ -160,3 +160,35 @@ test("dark theme retains translucent menu without making the body unusable", asy
   await page.keyboard.press("Escape");
   await expect(trigger).toBeFocused();
 });
+
+test("reduced motion makes menu instant without entrance animations", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await installReferenceSession(page);
+  await page.goto("/workspace/0");
+  const trigger = page.getByRole("button", { name: "Меню" });
+  const panel = page.locator(".calm-sidebar");
+  await expect(panel).toBeHidden();
+  await trigger.click();
+  await expect(page.getByRole("dialog", { name: "Главное меню" })).toBeVisible();
+  await expect(panel).toHaveCSS("transition-duration", "0s");
+  await expect(panel.locator(".calm-sidebar__header")).toHaveCSS("animation-name", "none");
+  await page.keyboard.press("Escape");
+  await expect(panel).toBeHidden();
+  await expect(trigger).toBeFocused();
+});
+
+test("forced colors retains an opaque readable navigation pane", async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 });
+  await page.emulateMedia({ forcedColors: "active" });
+  await installReferenceSession(page);
+  await page.goto("/workspace/0");
+  await page.getByRole("button", { name: "Меню" }).click();
+  const panel = page.getByRole("dialog", { name: "Главное меню" });
+  await expect(panel).toBeVisible();
+  await expect(panel).toHaveCSS("backdrop-filter", "none");
+  await expect(panel).toHaveCSS("box-shadow", "none");
+  await expect(panel).toHaveCSS("border-top-style", "solid");
+  await page.keyboard.press("Escape");
+  await expect(panel).toBeHidden();
+});
