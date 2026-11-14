@@ -2,7 +2,7 @@
 
 - task_id: UI-CALM-HOME-20261114
 - session_id: gpt6-impulse-calm-home-20261114-01
-- status: REVIEW
+- status: IN_PROGRESS
 - started_at: 2026-11-14T14:00:00+03:00
 - heartbeat_at: 2026-11-14T14:00:00+03:00
 - base_revision: ca741df7685e880a9f1597e0e39a1df88040566c
@@ -19,14 +19,14 @@
   - frontend/src/App.test.tsx
   - Railway / production
 - verification: scoped frontend eslint, typecheck, Vitest + independent review and browser preview
-- progress: Opt-in calm home preview implemented and draft PR #161 created; default legacy page preserved. Author scope complete; independent product/design review remains pending.
+- progress: Resumed same author lane after user requested continued quality work. Calm homepage enabled by default with explicit ?home=legacy rollback; targeted review found course deep-link role context and confirmed-case count defects; fixing exclusively within claimed calm-home component and tests. Independent review still pending.
 - changed_files:
   - frontend/src/features/participant-home-v2/page.tsx (tiny opt-in router switch)
   - frontend/src/features/participant-home-v2/calm-home/CalmParticipantHome.tsx
   - frontend/src/features/participant-home-v2/calm-home/calm-home.scss
   - frontend/src/features/participant-home-v2/calm-home/CalmParticipantHome.test.tsx
   - openspec/changes/impulse-calm-home-preview-20261114/**
-- tested_product_revision: 3ccc5dbd6891b4ca049922dcbc425fb5ac0e2863
+- tested_product_revision: ab865bc9c0c0661cfca236911ade69c4ce866683 (frontend CI pending at time of continuation)
 - verified:
   - GitHub Actions frontend-quality-and-contracts: PASS, 78/78 test files, 601/601 unit tests, including 8 new home tests; strict TypeScript and ESLint PASS
   - GitHub Actions openspec-strict-and-docs: PASS
@@ -39,6 +39,6 @@
   - Existing backend-unit-api-integration FAIL on expiring task deadlines (outside scope)
   - Existing secret-and-dependency-scans FAIL (vulnerable lockfile packages, outside scope)
   - Full Playwright E2E still executing/undetermined on tested product revision; no real-browser screenshot of deployed PR preview
-  - Railway/production untouched; user visual approval pending
+  - Railway determined-spirit production is running pinned revision 2bf0a5a5a41c51ae001fbfa84c643a9e5ba0915e SUCCESS (user explicitly requested); planned product changes will require another separately approved/deployed exact SHA once checks pass
 - independent_review: PENDING
 - blockers: HOME-BUTTON-SMOOTH and SIDEBAR-UNIFICATION old claims reserve existing home-v2.scss; do not edit.
