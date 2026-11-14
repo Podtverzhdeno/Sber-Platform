@@ -1,0 +1,27 @@
+# Claim UI-ALL-APPLE-20261114
+
+- task_id: UI-ALL-APPLE-20261114
+- status: IN_PROGRESS
+- source_baseline_sha: 277a163f777af66ff152fab1fa30d0a2909b5b56
+- source_guide: PR #162 SDD v3 5e5cfa95db0d8ad19eee93b0fdfae29b2eed997b
+- owner_instruction: "вноси" — resume stopped implementation, preserve all functions
+- allowed_files:
+  - frontend/src/App.tsx
+  - frontend/src/app/impulse-next.scss
+  - frontend/src/app/theme-controls/**
+  - frontend/src/features/calm-navigation/model.ts
+  - frontend/src/features/calm-navigation/Sidebar.tsx
+  - frontend/src/features/calm-navigation/sidebar.scss
+  - frontend/src/features/apple-surface/**
+  - frontend/src/main.tsx
+  - frontend/src/**/*.test.tsx (new scope-specific tests only)
+  - openspec/changes/impulse-apple-app-experience-20261114/**
+  - .agents/coordination/claims/UI-ALL-APPLE-20261114.lock/status.md
+- excluded:
+  - backend src/**, data, migrations, payments, permissions and real user records
+  - frontend/src/features/trajectory-v2/** and bootcamp/** (active other agent work)
+  - Railway until exact-SHA CI and safety gate
+- no_main_merge: independent reviewer required
+- app_sections: six roles x 49 existing server routes, plus customer demo override
+- verification: TypeScript, lint, Vitest, route/role tests, build and browser acceptance where available
+- rollback_sha: 277a163f777af66ff152fab1fa30d0a2909b5b56
