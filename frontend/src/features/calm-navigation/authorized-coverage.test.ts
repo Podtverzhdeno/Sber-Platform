@@ -20,7 +20,7 @@ describe("authorized navigation parity — 49 sections", () => {
       expect(items.map((item) => item.index).sort((a,b) => a-b), role).toEqual(labels.map((_, i) => i));
       for (const item of items) {
         expect(item.href, role + " " + item.label).toBe(`/workspace/${String(item.index)}`);
-        expect(item.label, role + " " + item.index).toBe(labels[item.index]);
+        expect(item.label, role + " " + String(item.index)).toBe(labels[item.index]);
       }
       expect(model.groups.length + Number(model.home !== null)).toBeLessThanOrEqual(6);
       checked += items.length;
