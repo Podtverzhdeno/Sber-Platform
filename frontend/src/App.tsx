@@ -1322,7 +1322,7 @@ function ImpulseApp() {
   };
 
   return (
-    <main className="page-shell">
+    <main className={actor ? "page-shell page-shell--apple-overlay" : "page-shell"}>
       <a className="skip-link" href="#workspace-main">
         Перейти к содержимому
       </a>
