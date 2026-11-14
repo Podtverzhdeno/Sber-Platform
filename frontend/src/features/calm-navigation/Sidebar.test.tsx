@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
 import { CalmSidebar } from "./Sidebar";
@@ -169,5 +169,42 @@ describe("CalmSidebar", () => {
     dispatchPointer(edge, "pointerover", "mouse");
     expect(screen.getByRole("link", { name: "Bootcamp" })).toHaveAttribute("href", "/workspace/3");
     expect(screen.getByRole("button", { name: /Развитие/ })).toHaveAttribute("aria-expanded", "true");
+  });
+  it("restores keyboard focus when Escape closes a preview while a link group is focused", () => {
+    renderParticipant(0);
+    const edge = screen.getByRole("button", { name: "Показать навигацию" });
+    edge.focus();
+    expect(edge).toHaveAttribute("aria-expanded", "true");
+    const group = screen.getByRole("button", { name: /Развитие/ });
+    group.focus();
+    expect(document.activeElement).toBe(group);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(edge).toHaveAttribute("aria-expanded", "false");
+    expect(document.activeElement).toBe(edge);
+  });
+
+  it("dismisses an abandoned edge hover but preserves a transfer into the open panel", () => {
+    vi.useFakeTimers();
+    try {
+      const view = renderParticipant(0);
+      const edge = screen.getByRole("button", { name: "Показать навигацию" });
+      const aside = view.container.querySelector<HTMLElement>(".calm-sidebar");
+      if (!aside) throw new Error("Sidebar missing");
+      dispatchPointer(edge, "pointerover", "mouse");
+      dispatchPointer(edge, "pointerout", "mouse");
+      expect(edge).toHaveAttribute("aria-expanded", "true");
+      act(() => { vi.advanceTimersByTime(230); });
+      expect(edge).toHaveAttribute("aria-expanded", "false");
+
+      dispatchPointer(edge, "pointerover", "mouse");
+      dispatchPointer(edge, "pointerout", "mouse");
+      dispatchPointer(aside, "pointerover", "mouse");
+      act(() => { vi.advanceTimersByTime(230); });
+      expect(edge).toHaveAttribute("aria-expanded", "true");
+      dispatchPointer(aside, "pointerout", "mouse");
+      expect(edge).toHaveAttribute("aria-expanded", "false");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
