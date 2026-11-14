@@ -1,4 +1,8 @@
-# Owner visual references · immutable pixel contract · 2026-11-14
+# Assistant-generated Impulse preview measurements · NOT owner's four originals · 2026-11-14
+
+> **PROVENANCE CORRECTION (2026-11-14):** This document measures a **previous assistant-generated Impulse concept archive** and is **NOT** an analysis of the owner's four uploaded UI images. The owner's real originals (1000×750, 2048×1292, 2048×1147, 1500×914) are independently verified and documented in [owner-true-originals-analysis-20261114.md](owner-true-originals-analysis-20261114.md). The original desktop 245px/sidebar and 1440px layout numbers below are *assistant concept targets only*, not owner-source measurements. Any statements below calling these files "original owner screenshots" are superseded by this notice. No assets are silently replaced.
+
+
 
 **STATUS:** AUTHORITATIVE USER REFERENCES, design-only. The user explicitly interrupted implementation to establish four screenshots as the primary aesthetic source. **STOP** the in-progress shared-theme implementation/deploy until this reference set is understood and accepted. Existing Railway production SHA `277a163f777af66ff152fab1fa30d0a2909b5b56` stays unchanged.
 
