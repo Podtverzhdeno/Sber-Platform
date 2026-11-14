@@ -70,9 +70,7 @@ export function usePixelLiveDashboard(
     passportQuery.isPending ||
     (target.kind === "course" && courseQuery.isPending)
   );
-  const partialData = Boolean(
-    levelQuery.isError || passportQuery.isError ||
-    (target.kind === "course" && courseQuery.isError),
-  );
+  const partialData = levelQuery.isError || passportQuery.isError ||
+    (target.kind === "course" && courseQuery.isError);
   return { model, loading, partialData, trackKey };
 }
