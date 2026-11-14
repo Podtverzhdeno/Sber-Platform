@@ -73,6 +73,43 @@ describe("calm participant homepage", () => {
     expect(onOpenTarget).toHaveBeenCalledWith("task", overviewFixture.active_tasks[0]?.task_id);
   });
 
+  it("never promotes pending review or originality dispute into a submit action", () => {
+    const { onOpenTarget } = renderCalmHome({
+      active_tasks: overviewFixture.active_tasks.map((task) => ({
+        ...task,
+        next_action: "dispute_pending",
+      })),
+    });
+    expect(screen.getByRole("heading", { name: "Python: основы" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Продолжить обучение" }));
+    expect(onOpenTarget).toHaveBeenCalledWith("course", "python-base", "python");
+    fireEvent.click(screen.getByText("Задачи и неделя"));
+    expect(screen.getByText("Идёт спор по оригинальности")).toBeTruthy();
+  });
+
+  it("does not turn a stale or unsupported outcome into an apparently usable task", () => {
+    const next = overviewFixture.next_outcome;
+    if (!next) throw new Error("Fixture requires a real next outcome");
+    const { onOpenTarget, onOpenWorkspace } = renderCalmHome({
+      active_tasks: [],
+      next_outcome: { ...next, stale_reason: "Состояние пересчитывается" },
+    });
+    expect(screen.queryByRole("button", { name: "Продолжить обучение" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Выбрать траекторию" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Выбрать траекторию" }));
+    expect(onOpenWorkspace).toHaveBeenCalledWith("trajectory");
+    expect(onOpenTarget).not.toHaveBeenCalled();
+  });
+
+  it("presents a quiet first fold without marketing overlines or dashboard art", () => {
+    const { container } = renderCalmHome();
+    expect(container.querySelector(".calm-home__eyebrow")).toBeNull();
+    expect(container.querySelector(".calm-home__focus-aside")).toBeNull();
+    expect(container.querySelector(".calm-home__focus-kicker")).toBeNull();
+    expect(container.querySelectorAll(".calm-home__primary")).toHaveLength(1);
+    expect(screen.getByText("Продолжить")).toBeTruthy();
+  });
+
   it("falls back to the next real course when there is no actionable task", () => {
     const { onOpenTarget } = renderCalmHome({ active_tasks: [] });
     expect(screen.getByRole("heading", { name: "Python: основы" })).toBeTruthy();
@@ -101,8 +138,8 @@ describe("calm participant homepage", () => {
       ],
     });
     expect(screen.getByTestId("calm-verified-skills")).toHaveTextContent("1");
-    expect(screen.getByText("Навыков с подтверждёнными кейсами")).toBeTruthy();
-    fireEvent.click(screen.getByText("Другие инструменты"));
+    expect(screen.getByText("С подтверждёнными кейсами")).toBeTruthy();
+    fireEvent.click(screen.getByText("Инструменты"));
     expect(screen.queryByText(/Подтверждённый навык: Unverified Skill/)).toBeNull();
     expect(screen.getByText(/Подтверждённый навык: Verified Skill/)).toBeTruthy();
   });
@@ -112,7 +149,7 @@ describe("calm participant homepage", () => {
       passportSkills: [{ key: "Still learning", practical_level: "Начальный", confirmed_case_count: 0 }],
     });
     expect(screen.getByTestId("calm-verified-skills")).toHaveTextContent("0");
-    fireEvent.click(screen.getByText("Другие инструменты"));
+    fireEvent.click(screen.getByText("Инструменты"));
     expect(screen.queryByText(/Подтверждённый навык:/)).toBeNull();
   });
 
@@ -137,11 +174,11 @@ describe("calm participant homepage", () => {
     renderCalmHome();
     const work = screen.getByTestId("calm-home-work-disclosure");
     expect(work.hasAttribute("open")).toBe(false);
-    expect(screen.getByText("Другие инструменты").closest("details")?.hasAttribute("open")).toBe(false);
+    expect(screen.getByText("Инструменты").closest("details")?.hasAttribute("open")).toBe(false);
     fireEvent.click(screen.getByText("Задачи и неделя"));
     expect(work.hasAttribute("open")).toBe(true);
-    fireEvent.click(screen.getByText("Другие инструменты"));
-    expect(screen.getByText("Другие инструменты").closest("details")?.hasAttribute("open")).toBe(true);
+    fireEvent.click(screen.getByText("Инструменты"));
+    expect(screen.getByText("Инструменты").closest("details")?.hasAttribute("open")).toBe(true);
   });
 
   it("keeps AI Buddy optional and does not show its shortcut without permission", () => {
