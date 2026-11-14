@@ -2,7 +2,7 @@
 
 - task_id: UI-APPLE-SURFACE-20261114
 - session_id: chatgpt-gpt6-apple-foundation-20261114
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-14T17:00:00+03:00
 - heartbeat_at: 2026-11-14T17:00:00+03:00
 - base_revision: ca741df7685e880a9f1597e0e39a1df88040566c
@@ -21,5 +21,19 @@
   - openspec/changes/impulse-apple-app-experience-20261114/**
   - src/**, Railway and production
 - verification: isolated TS, lint, Vitest, full CI, independent review before integrating
-- progress: implement isolated scoped, reusable Apple-like visual primitives without replacing existing routes or semantics.
+- progress: Isolated scoped reusable ApplePage, AppleSection, AppleDisclosure, AppleList and AppleListRow implemented with light/dark tokens and responsive CSS. Six component tests cover semantic identity, details behavior, list selection/readonly, disabled safety, and critical disclosure. No app integration performed.
+- tested_product_revision: ab92ac82deb595fce99839835bf7bbefb3d5fc79
+- verification_evidence:
+  - frontend-quality-and-contracts: PASS (78 test files / 599 tests) on tested product revision
+  - strict TS and ESLint: PASS
+  - standalone eslint: PASS
+  - docker-smoke: PASS
+  - openspec-strict-and-docs: PASS
+  - static architecture inventory: PASS
+  - Draft PR #163: https://github.com/Podtverzhdeno/Sber-Platform/pull/163
+  - Cross-role live browser acceptance not executed: this is deliberately unintegrated foundation
+- blockers:
+  - Independent design/reviewer acceptance PENDING
+  - Other code paths and old App.tsx/styles.scss claims must be reconciled under new integration scope
+  - Existing backend and dependency scan failures outside code surface are not suppressed
 - independent_review: PENDING
