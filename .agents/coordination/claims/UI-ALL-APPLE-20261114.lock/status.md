@@ -14,7 +14,9 @@
   - frontend/src/features/calm-navigation/sidebar.scss
   - frontend/src/features/apple-surface/**
   - frontend/src/main.tsx
-  - frontend/src/**/*.test.tsx (new scope-specific tests only)
+  - frontend/src/**/*.test.tsx (navigation/theme test repair)
+  - frontend/e2e/sidebar-consistency.spec.ts (new sidebar responsive contract)
+  - frontend/e2e/bootcamp-approved.spec.ts (new role nav route test entry)
   - openspec/changes/impulse-apple-app-experience-20261114/**
   - .agents/coordination/claims/UI-ALL-APPLE-20261114.lock/status.md
 - excluded:
