@@ -2,7 +2,7 @@
 
 - task_id: UI-CALM-HOME-20261114
 - session_id: gpt6-impulse-calm-home-20261114-01
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-14T14:00:00+03:00
 - heartbeat_at: 2026-11-14T14:00:00+03:00
 - base_revision: ca741df7685e880a9f1597e0e39a1df88040566c
@@ -19,5 +19,26 @@
   - frontend/src/App.test.tsx
   - Railway / production
 - verification: scoped frontend eslint, typecheck, Vitest + independent review and browser preview
-- progress: Source inspected; existing home drawer and legacy layout must remain available. Only new opt-in home to be added; other roles and navigation untouched.
+- progress: Opt-in calm home preview implemented and draft PR #161 created; default legacy page preserved. Author scope complete; independent product/design review remains pending.
+- changed_files:
+  - frontend/src/features/participant-home-v2/page.tsx (tiny opt-in router switch)
+  - frontend/src/features/participant-home-v2/calm-home/CalmParticipantHome.tsx
+  - frontend/src/features/participant-home-v2/calm-home/calm-home.scss
+  - frontend/src/features/participant-home-v2/calm-home/CalmParticipantHome.test.tsx
+  - openspec/changes/impulse-calm-home-preview-20261114/**
+- tested_product_revision: 3ccc5dbd6891b4ca049922dcbc425fb5ac0e2863
+- verified:
+  - GitHub Actions frontend-quality-and-contracts: PASS, 78/78 test files, 601/601 unit tests, including 8 new home tests; strict TypeScript and ESLint PASS
+  - GitHub Actions openspec-strict-and-docs: PASS
+  - GitHub Actions docker-smoke: PASS
+  - GitHub Actions standalone eslint: PASS
+  - GitHub Actions backend-format-lint-types: PASS
+  - GitHub Actions architecture audit: PASS
+  - Static HTML visual composition preview: desktop 1440px and mobile 390px screenshots created locally, demo data only (not production screenshots)
+- unresolved:
+  - Existing backend-unit-api-integration FAIL on expiring task deadlines (outside scope)
+  - Existing secret-and-dependency-scans FAIL (vulnerable lockfile packages, outside scope)
+  - Full Playwright E2E still executing/undetermined on tested product revision; no real-browser screenshot of deployed PR preview
+  - Railway/production untouched; user visual approval pending
+- independent_review: PENDING
 - blockers: HOME-BUTTON-SMOOTH and SIDEBAR-UNIFICATION old claims reserve existing home-v2.scss; do not edit.
