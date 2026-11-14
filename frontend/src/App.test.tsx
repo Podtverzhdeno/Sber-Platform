@@ -120,6 +120,10 @@ describe("App", () => {
       if (url.endsWith("/development-overview")) {
         return Promise.resolve(new Response(JSON.stringify(overviewFixture), { status: 200 }));
       }
+      // A missing role-level projection is an explicit API error, not malformed successful data.
+      if (url.includes("/bootcamp/impulse-level")) {
+        return Promise.resolve(new Response(JSON.stringify({ code: "NOT_FOUND" }), { status: 404 }));
+      }
       if (init?.method !== "GET") {
         return Promise.resolve(new Response(JSON.stringify({ code: "INTERNAL" }), { status: 500 }));
       }
