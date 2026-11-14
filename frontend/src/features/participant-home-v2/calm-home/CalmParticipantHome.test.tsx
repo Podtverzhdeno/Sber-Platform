@@ -34,7 +34,12 @@ afterEach(() => {
 
 function renderCalmHome(
   override: Partial<DevelopmentOverviewView> = {},
-  opts: { includeLevel?: boolean; includePassport?: boolean; buddy?: boolean } = {},
+  opts: {
+    includeLevel?: boolean;
+    includePassport?: boolean;
+    buddy?: boolean;
+    passportSkills?: { key: string; practical_level: string; confirmed_case_count: number }[];
+  } = {},
 ) {
   const onOpenTarget = vi.fn();
   const onOpenWorkspace = vi.fn();
@@ -43,7 +48,7 @@ function renderCalmHome(
   });
   if (opts.includeLevel ?? true) client.setQueryData(roleLevelQueryKey("python"), publishedLevel);
   if (opts.includePassport ?? true) client.setQueryData(["talent-passport"], {
-    skills: [{ key: "Python", practical_level: "Уверенный", confirmed_case_count: 1 }],
+    skills: opts.passportSkills ?? [{ key: "Python", practical_level: "Уверенный", confirmed_case_count: 1 }],
   });
   render(
     <QueryClientProvider client={client}>
@@ -72,7 +77,7 @@ describe("calm participant homepage", () => {
     const { onOpenTarget } = renderCalmHome({ active_tasks: [] });
     expect(screen.getByRole("heading", { name: "Python: основы" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Продолжить обучение" }));
-    expect(onOpenTarget).toHaveBeenCalledWith("course", "python-base");
+    expect(onOpenTarget).toHaveBeenCalledWith("course", "python-base", "python");
   });
 
   it("offers the trajectory if neither task nor next outcome exists", () => {
@@ -86,6 +91,29 @@ describe("calm participant homepage", () => {
     expect(screen.getByTestId("calm-impulse-level").textContent).toBe("—");
     expect(screen.getByTestId("calm-verified-skills").textContent).toBe("—");
     expect(screen.queryByText("L0")).toBeNull();
+  });
+
+  it("counts only skills with confirmed cases and does not advertise unverified ones", () => {
+    renderCalmHome({}, {
+      passportSkills: [
+        { key: "Unverified Skill", practical_level: "Начальный", confirmed_case_count: 0 },
+        { key: "Verified Skill", practical_level: "Уверенный", confirmed_case_count: 2 },
+      ],
+    });
+    expect(screen.getByTestId("calm-verified-skills")).toHaveTextContent("1");
+    expect(screen.getByText("Навыков с подтверждёнными кейсами")).toBeTruthy();
+    fireEvent.click(screen.getByText("Другие инструменты"));
+    expect(screen.queryByText(/Подтверждённый навык: Unverified Skill/)).toBeNull();
+    expect(screen.getByText(/Подтверждённый навык: Verified Skill/)).toBeTruthy();
+  });
+
+  it("shows zero rather than fictitious confirmation when skills have no evidence", () => {
+    renderCalmHome({}, {
+      passportSkills: [{ key: "Still learning", practical_level: "Начальный", confirmed_case_count: 0 }],
+    });
+    expect(screen.getByTestId("calm-verified-skills")).toHaveTextContent("0");
+    fireEvent.click(screen.getByText("Другие инструменты"));
+    expect(screen.queryByText(/Подтверждённый навык:/)).toBeNull();
   });
 
   it("keeps requirements hidden until asked and shows real practice counts", () => {
@@ -119,6 +147,7 @@ describe("calm participant homepage", () => {
   it("keeps AI Buddy optional and does not show its shortcut without permission", () => {
     renderCalmHome({}, { buddy: false });
     expect(screen.queryByRole("button", { name: /AI Buddy/ })).toBeNull();
+    expect(screen.queryByText(/Траектория, скилл-паспорт и AI Buddy/)).toBeNull();
   });
 
   it("shows calm homepage by default while preserving explicit legacy rollback", () => {
