@@ -32,6 +32,8 @@ export interface PixelSearchResult {
 
 export interface PixelHomeModel {
   readonly roleTitle: string | null;
+  /** The current module track may differ from the selected career role. */
+  readonly moduleTrackTitle?: string | null;
   readonly nextTitle: string | null;
   readonly nextKind: "course" | "task" | "trajectory";
   readonly nextState: string;
@@ -209,7 +211,7 @@ export function ImpulsePixelReference({
             <div className="impulse-pixel__hero-copy">
               <div className="impulse-pixel__kicker">
                 <span className="impulse-pixel__module-icon" aria-hidden="true"><Layers3 size={18}/></span>
-                <span>Текущий модуль · {home.roleTitle ?? "Направление развития"}</span>
+                <span>Текущий модуль · {home.moduleTrackTitle ?? home.roleTitle ?? "Направление развития"}</span>
               </div>
               <h2 id="impulse-pixel-next-title">{home.nextTitle ?? "Выберите направление"}</h2>
               {progress && modulePercent !== null &&
