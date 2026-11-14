@@ -1,0 +1,27 @@
+# Claim IMPULSE-PIXEL-REFERENCE-20261114
+- task_id: IMPULSE-PIXEL-REFERENCE-20261114
+- session_id: gpt6-20261114-image3-pixel-wave-c718
+- status: IN_PROGRESS
+- started_at: 2026-11-14T23:26:00+03:00
+- heartbeat_at: 2026-11-14T23:26:00+03:00
+- base_revision: 423b1e24caa711537ac9a390691cff114d256109
+- owner_instruction: match uploaded 1422x803 reference exactly; 3 click modes sun, blue moon and dark moon; generate background and reuse official Apple UI Kit design guidance
+- depends_on: []
+- write_scope:
+  - frontend/src/features/pixel-reference/**
+  - frontend/public/impulse-wave-reference.webp
+  - frontend/public/impulse-pixel-reference.html
+  - frontend/e2e/pixel-reference-screenshot.spec.ts
+  - docs/design/impulse-pixel-reference-20261114.md
+  - openspec/changes/impulse-pixel-reference-20261114/**
+  - .agents/coordination/claims/IMPULSE-PIXEL-REFERENCE-20261114.lock/status.md
+- excluded:
+  - frontend/src/App.tsx (UI-APPLE-INTEGRATE IN_PROGRESS)
+  - frontend/src/app/theme-controls/** (UI-APPLE-INTEGRATE IN_PROGRESS)
+  - frontend/src/features/calm-navigation/** (UI-APPLE-INTEGRATE and UI-ALL-APPLE IN_PROGRESS)
+  - frontend/src/features/participant-home-v2/calm-home/** (UI-CALM-HOME in REVIEW)
+  - backend and Railway, main
+- integration_handoff: exact JSX/CSS preview and interaction API are ready for separately owned App/main integration after claims release; never silently overwrite the shared files.
+- verification: isolated component tests; screenshot baseline at 1422x803 and responsive 390px; 3-cycle theme/no hidden login routes; CI on exact PR SHA
+- source: user attached image(3).png, Apple HIG Materials, official macOS 27 UI Kit catalog, generated custom abstract wave
+- progress: scope claimed. No shared product files touched.
