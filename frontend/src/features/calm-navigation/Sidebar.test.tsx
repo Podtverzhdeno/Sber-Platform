@@ -98,4 +98,22 @@ describe("CalmSidebar", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
     expect(document.activeElement).toBe(trigger);
   });
+
+  it("keeps a non-interactive backdrop mounted for exit animation and restores focus after backdrop click", () => {
+    const view = renderParticipant(0);
+    const trigger = screen.getByRole("button", { name: "Меню" });
+    const backdrop = view.container.querySelector<HTMLButtonElement>(".calm-navigation__backdrop");
+    expect(backdrop).not.toBeNull();
+    expect(backdrop).not.toHaveClass("calm-navigation__backdrop--open");
+    expect(backdrop).toHaveAttribute("aria-hidden", "true");
+    expect(backdrop).toHaveAttribute("tabindex", "-1");
+    fireEvent.click(trigger);
+    expect(backdrop).toHaveClass("calm-navigation__backdrop--open");
+    expect(screen.getByRole("dialog", { name: "Главное меню" })).toBeInTheDocument();
+    fireEvent.click(backdrop!);
+    expect(backdrop).not.toHaveClass("calm-navigation__backdrop--open");
+    expect(screen.queryByRole("dialog", { name: "Главное меню" })).toBeNull();
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(document.activeElement).toBe(trigger);
+  });
 });
