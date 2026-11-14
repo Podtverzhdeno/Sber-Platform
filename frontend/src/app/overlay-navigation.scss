@@ -1,0 +1,257 @@
+/* SDD v3: quiet, full-width workspace with an opt-in floating navigation sheet.
+   This is intentionally loaded AFTER impulse-next.scss.  All authorized routes,
+   actions, dialogs, forms and query parameters remain in their existing trees. */
+.page-shell--apple-overlay .topbar {
+  left: 0;
+  right: 0;
+  width: 100%;
+  padding-left: clamp(116px, 9vw, 144px);
+}
+
+.page-shell--apple-overlay .workspace--apple {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+}
+
+/* The navigation stays mounted, but never steals a column from the content. */
+.page-shell--apple-overlay .workspace--apple > .calm-navigation {
+  position: static;
+  width: 0;
+  height: 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
+}
+.page-shell--apple-overlay .workspace--apple .workspace-content {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  padding: 98px clamp(20px, 4vw, 72px) 72px;
+}
+
+/* Persistent, discoverable trigger: visible on desktop AND mobile. */
+.page-shell--apple-overlay .workspace--apple .calm-navigation__mobile-trigger {
+  position: fixed;
+  z-index: 100;
+  top: 11px;
+  left: clamp(12px, 1.25vw, 20px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 13px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 2px 12px rgb(15 23 42 / 5%);
+  line-height: 1;
+  transition: background-color 170ms ease, border-color 170ms ease,
+    box-shadow 170ms ease, transform 170ms ease;
+}
+.page-shell--apple-overlay .workspace--apple .calm-navigation__mobile-trigger:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-border-strong);
+  box-shadow: 0 5px 16px rgb(15 23 42 / 8%);
+}
+.page-shell--apple-overlay .workspace--apple .calm-navigation__mobile-trigger:active {
+  transform: scale(.975);
+}
+.page-shell--apple-overlay .workspace--apple .calm-navigation__mobile-trigger:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Mount the scrim all the time so it fades both in and out. We do not
+   blur the panel's *text*: only the background beneath the glass panel. */
+.page-shell--apple-overlay .workspace--apple .calm-navigation__backdrop {
+  position: fixed;
+  z-index: 110;
+  inset: 0;
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  background: rgb(16 22 34 / 23%);
+  -webkit-backdrop-filter: blur(6px) saturate(110%);
+  backdrop-filter: blur(6px) saturate(110%);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  cursor: default;
+  transition: opacity 220ms ease, visibility 0s linear 220ms;
+}
+.page-shell--apple-overlay .workspace--apple .calm-navigation__backdrop--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: opacity 220ms ease, visibility 0s linear 0s;
+}
+:root[data-theme="dark"] .page-shell--apple-overlay .workspace--apple .calm-navigation__backdrop {
+  background: rgb(1 4 9 / 42%);
+}
+
+/* A floating translucent navigation sheet, independent of viewport width. */
+.page-shell--apple-overlay .workspace--apple .calm-sidebar {
+  position: fixed;
+  z-index: 111;
+  inset: 0 auto 0 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: min(320px, calc(100vw - 28px));
+  max-width: none;
+  min-height: 0;
+  height: 100vh;
+  height: 100dvh;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid color-mix(in srgb, var(--color-border) 78%, transparent);
+  border-left: 0;
+  border-radius: 0 22px 22px 0;
+  background: var(--color-sidebar); /* fallback for browsers without color-mix */
+  background: color-mix(in srgb, var(--color-sidebar) 94%, transparent);
+  color: var(--color-text);
+  -webkit-backdrop-filter: blur(22px) saturate(135%);
+  backdrop-filter: blur(22px) saturate(135%);
+  box-shadow: 22px 0 64px rgb(15 23 42 / 15%);
+  transform: translate3d(calc(-100% - 24px), 0, 0) scale(.985);
+  transform-origin: left center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: transform 300ms cubic-bezier(.22, 1, .36, 1),
+    opacity 260ms ease, visibility 0s linear 300ms;
+  will-change: transform;
+}
+.page-shell--apple-overlay .workspace--apple .calm-sidebar--open {
+  transform: translate3d(0, 0, 0) scale(1);
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: transform 300ms cubic-bezier(.22, 1, .36, 1),
+    opacity 260ms ease, visibility 0s linear 0s;
+}
+:root[data-theme="dark"] .page-shell--apple-overlay .workspace--apple .calm-sidebar {
+  box-shadow: 22px 0 64px rgb(0 0 0 / 37%);
+}
+
+/* Focus and navigation group entrances are small and deliberate, not showy. */
+.page-shell--apple-overlay .workspace--apple .calm-sidebar__close {
+  display: inline-flex;
+  flex: none;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  border-radius: 11px;
+}
+.page-shell--apple-overlay .workspace--apple .calm-sidebar__nav {
+  flex: 1;
+}
+.page-shell--apple-overlay .workspace--apple .calm-sidebar--open .calm-sidebar__header,
+.page-shell--apple-overlay .workspace--apple .calm-sidebar--open .calm-sidebar__role,
+.page-shell--apple-overlay .workspace--apple .calm-sidebar--open .calm-sidebar__groups > li {
+  animation: impulse-nav-content-in 250ms cubic-bezier(.22, 1, .36, 1) both;
+}
+.page-shell--apple-overlay .workspace--apple .calm-sidebar--open .calm-sidebar__groups > li:nth-child(2) { animation-delay: 25ms; }
+.page-shell--apple-overlay .workspace--apple .calm-sidebar--open .calm-sidebar__groups > li:nth-child(3) { animation-delay: 45ms; }
+.page-shell--apple-overlay .workspace--apple .calm-sidebar--open .calm-sidebar__groups > li:nth-child(4) { animation-delay: 65ms; }
+.page-shell--apple-overlay .workspace--apple .calm-sidebar--open .calm-sidebar__groups > li:nth-child(5) { animation-delay: 85ms; }
+
+@keyframes impulse-nav-content-in {
+  from { opacity: 0; transform: translate3d(-6px, 8px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@media (max-width: 767px) {
+  .page-shell--apple-overlay .topbar {
+    left: 0;
+    padding-left: 106px;
+    padding-right: 12px;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-navigation__mobile-trigger {
+    top: 9px;
+    left: 12px;
+    height: 44px;
+    padding-inline: 10px;
+    box-shadow: none;
+  }
+  .page-shell--apple-overlay .workspace--apple .workspace-content {
+    padding: 128px 17px 44px;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar {
+    width: min(320px, calc(100vw - 28px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-shell--apple-overlay .workspace--apple .calm-navigation__mobile-trigger,
+  .page-shell--apple-overlay .workspace--apple .calm-navigation__backdrop,
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar {
+    transition: none !important;
+    animation: none !important;
+    transform: none;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar--open :is(
+    .calm-sidebar__header, .calm-sidebar__role, .calm-sidebar__groups > li
+  ) {
+    animation: none !important;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar:not(.calm-sidebar--open) {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+/* UIKit / HIG resilience: transient glass must not compromise visibility. */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar {
+    background: var(--color-sidebar) !important;
+    box-shadow: 18px 0 48px rgb(10 14 22 / 22%);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar {
+    background: var(--color-sidebar) !important;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-navigation__backdrop {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background: rgb(12 16 24 / 55%);
+  }
+}
+@media (forced-colors: active) {
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar {
+    background: Canvas !important;
+    color: CanvasText;
+    border: 1px solid CanvasText;
+    border-left: 0;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-navigation__backdrop--open {
+    background: CanvasText;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-sidebar__group[aria-expanded="true"],
+  .page-shell--apple-overlay .workspace--apple :is(.calm-sidebar__home,.calm-sidebar__link)[aria-current="page"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+  .page-shell--apple-overlay .workspace--apple .calm-navigation__mobile-trigger {
+    border-color: ButtonText;
+  }
+}

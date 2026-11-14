@@ -143,15 +143,17 @@ export function CalmSidebar({
         <span>Меню</span>
       </button>
 
-      {drawerOpen && (
-        <button
-          className="calm-navigation__backdrop"
-          type="button"
-          tabIndex={-1}
-          aria-label="Закрыть меню"
-          onClick={closeDrawer}
-        />
-      )}
+      {/*
+        Keep the backdrop mounted so opening AND closing animate smoothly.
+        Hidden state is non-interactive and excluded from the accessibility tree.
+      */}
+      <button
+        className={`calm-navigation__backdrop${drawerOpen ? " calm-navigation__backdrop--open" : ""}`}
+        type="button"
+        tabIndex={-1}
+        aria-hidden="true"
+        onClick={closeDrawer}
+      />
 
       <aside
         id={id}

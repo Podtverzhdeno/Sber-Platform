@@ -32,7 +32,6 @@ import {
 import {
   BrowserRouter,
   Navigate,
-  NavLink,
   Route,
   Routes,
   useNavigate,
@@ -47,9 +46,13 @@ import {
   applyTheme,
   storedThemeChoice,
   subscribeSystemTheme,
+  type ThemeChoice,
 } from "./app/theme";
 import { appQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
+import { ThemeControl } from "./app/theme-controls/ThemeControl";
+import { workspaceLayout } from "./app/screen-layout";
+import { CalmSidebar } from "./features/calm-navigation/Sidebar";
 import { DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
 import { BootcampCatalog } from "./features/bootcamp";
 import { ParticipantEventCatalog } from "./features/participant-events";
@@ -201,40 +204,6 @@ const roleLabels: Record<Role, string> = {
   operator: "Оператор",
 };
 
-const navigationIcons: Record<string, string> = {
-  Главная: "⌂",
-  "Мой путь": "⌂",
-  "Моя траектория": "⌁",
-  Bootcamp: "◇",
-  Задачи: "▤",
-  "Мои проекты": "▣",
-  События: "✦",
-  Рейтинг: "♜",
-  Портфолио: "◈",
-  Аналитика: "▥",
-  "Очередь ревью": "✓",
-  "Проверка вкладов": "✓",
-  Назначения: "▣",
-  Участники: "♙",
-  "AI-помощник": "✧",
-  "План недели": "▦",
-  "Мои задачи": "▤",
-  "Создать задачу": "+",
-  Заявки: "◧",
-  Кандидаты: "♙",
-  "База участников": "♙",
-  Инициативы: "◆",
-  Результаты: "◎",
-  Воронка: "▽",
-  "Операционная очередь": "☷",
-  Проверки: "◉",
-  Споры: "⚑",
-  Сообщения: "▱",
-  Достижения: "◆",
-  "AI-Buddy": "✧",
-  Настройки: "⚙",
-};
-
 const dashboardMetrics: Record<
   Role,
   { label: string; value: string; delta: string; tone: string }[]
@@ -346,11 +315,15 @@ function LoginScreen({
   loading,
   error,
   onLogin,
+  themeChoice,
+  onThemeChange,
 }: {
   personas: Persona[];
   loading: boolean;
   error: string;
   onLogin: (key: string) => void;
+  themeChoice: ThemeChoice;
+  onThemeChange: (next: ThemeChoice) => void;
 }) {
   const visiblePersonas = personas.filter((persona, index) => {
     const role = persona.roles[0];
@@ -360,6 +333,7 @@ function LoginScreen({
   return (
     <section className="login-layout" aria-labelledby="login-title">
       <div className="login-copy">
+        <div className="login-theme"><ThemeControl value={themeChoice} onChange={onThemeChange} /></div>
         <p className="eyebrow">Путь от интереса к подтверждённому опыту</p>
         <h1 id="login-title">Выберите роль, чтобы присоединиться</h1>
         <p className="lead">
@@ -422,85 +396,24 @@ function Workspace({
     sectionIndex >= 0 &&
     sectionIndex < navigation.length;
   const currentSection = allowed ? navigation[sectionIndex] : null;
-  const [navigationOpen, setNavigationOpen] = useState(false);
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   return (
     <section
-      className={`workspace${navigationOpen ? " workspace--nav-open" : ""}`}
+      className="workspace workspace--apple"
+      data-workspace-role={actor.active_role}
+      data-workspace-section={currentSection ?? ""}
+      data-workspace-layout={workspaceLayout(actor.active_role, currentSection ?? null)}
       aria-labelledby="workspace-title"
     >
-      <aside className="sidebar" aria-label="Боковая панель">
-        <div className="sidebar-brand">
-          <NavLink className="sidebar-brand-home" to="/workspace/0" aria-label="Impulse — на главную" onClick={() => { setNavigationOpen(false); }}>
-            <span className="brand-mark" aria-hidden="true">
-              ϟ
-            </span>
-            <strong>Impulse</strong>
-          </NavLink>
-          <button
-            className="sidebar-close"
-            type="button"
-            aria-label="Закрыть меню"
-            onClick={() => {
-              setNavigationOpen(false);
-            }}
-          >
-            ×
-          </button>
-        </div>
-        {actor.assigned_roles.length > 1 && (
-          <label className="role-switcher">
-            Рабочая роль
-            <select
-              aria-label="Рабочая роль"
-              value={actor.active_role}
-              onChange={(event) => {
-                onSwitchRole(event.target.value as Role);
-              }}
-            >
-              {actor.assigned_roles.map((role) => (
-                <option key={role} value={role}>
-                  {roleLabels[role]}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        <nav aria-label="Навигация роли">
-          {navigation.map((item, index) => (
-            <NavLink
-              to={`/workspace/${String(index)}`}
-              key={item}
-              onClick={() => {
-                setNavigationOpen(false);
-              }}
-            >
-              <span className="nav-icon" aria-hidden="true">
-                {navigationIcons[item] ?? "•"}
-              </span>
-              <span>{item}</span>
-            </NavLink>
-          ))}
-        </nav>
-        <div className="sidebar-message">
-          <span className="sidebar-art" aria-hidden="true"><i /><i /><i /></span>
-          <strong>Развиваем технологии вместе</strong>
-          <span>Реальные задачи, обучение и подтверждённый опыт</span>
-          <small>СБЕР</small>
-        </div>
-      </aside>
+      <CalmSidebar
+        role={actor.active_role}
+        navigation={navigation}
+        activeIndex={sectionIndex}
+        assignedRoles={actor.assigned_roles}
+        onSwitchRole={onSwitchRole}
+      />
       <div className="workspace-content">
-        <button
-          className="mobile-menu"
-          type="button"
-          aria-expanded={navigationOpen}
-          onClick={() => {
-            setNavigationOpen(true);
-          }}
-        >
-          <span aria-hidden="true">☰</span> Меню
-        </button>
         {allowed && actor.active_role === "customer" && mockCustomer ? (
           currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" personId={actor.person_id} quickTargets={{ task: navigation.findIndex((section) => section === "Задачи" || section === "Мои задачи") }} /> : currentSection === "Настройки" ? <ParticipantSettings actorName="Роман Воронов" consentScopes={actor.consent_scopes} role="customer" /> : <CustomerPremium navigation={actor.navigation} section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
         ) : allowed && currentSection === "Главная" ? (
@@ -1073,6 +986,12 @@ function ParticipantDashboard({ actor }: { actor: Actor }) {
   );
 }
 
+/**
+ * Role fallback / non-data-backed homepage.
+ * Unlike the former demo tiles, this does not fabricate queue counts,
+ * conversions, approvals, "today" timestamps, or AI recommendations.
+ * Each link still goes through actor.navigation and the original route index.
+ */
 function RoleDashboard({
   actor,
   currentSection,
@@ -1081,179 +1000,56 @@ function RoleDashboard({
   currentSection: string;
 }) {
   const navigate = useNavigate();
-  const goTo = (label: string) => {
-    const index = actor.navigation.indexOf(label);
-    if (index >= 0) void navigate(`/workspace/${String(index)}`);
+  const preferred: Record<Role, readonly string[]> = {
+    participant: ["Моя траектория", "Мой путь", "Bootcamp", "Задачи"],
+    mentor: ["Проверка вкладов", "Мои проекты", "План недели"],
+    customer: ["Мои задачи", "Приёмка", "Кандидаты"],
+    manager: ["Инициативы", "Команда", "Результаты"],
+    hr: ["Кандидаты", "Воронка", "Аналитика"],
+    operator: ["Операционная очередь", "Проверки", "Споры"],
   };
-  const fallbackTarget =
-    actor.navigation.find((item) => item !== "Главная") ?? "Главная";
-  const focusTarget =
-    actor.active_role === "customer" && actor.navigation.includes("Мои задачи")
-      ? "Мои задачи"
-      : fallbackTarget;
-  const queueTarget = actor.navigation.includes("Аналитика")
-    ? "Аналитика"
-    : focusTarget;
-  const aiTarget =
-    actor.navigation.find((item) => item.includes("AI")) ?? queueTarget;
+  const available = actor.navigation.map((label, index) => ({ label, index }))
+    .filter((item) => item.label !== "Главная");
+  const focus = preferred[actor.active_role]
+    .map((label) => available.find((item) => item.label === label))
+    .find((item) => item !== undefined) ?? available[0] ?? null;
+  const isHome = currentSection === "Главная";
+  const goTo = (index: number) => { void navigate(`/workspace/${String(index)}`); };
+
   return (
-    <div className="dashboard-shell">
-      <header className="dashboard-heading">
+    <div className="apple-role-home" data-testid="apple-role-home">
+      <header className="apple-role-home__header">
+        <h1 id="workspace-title">{isHome ? "Главная" : currentSection}</h1>
+        <p>{roleLabels[actor.active_role]} · {actor.display_name}</p>
+      </header>
+      <section className="apple-role-home__focus" aria-labelledby="apple-role-focus-title">
         <div>
-          <p className="eyebrow">
-            {roleLabels[actor.active_role]} · рабочее пространство
-          </p>
-          <h1 id="workspace-title">
-            Добро пожаловать, {actor.display_name.split(" ")[0]}!
-          </h1>
-          <p className="lead">
-            Все важные действия, результаты и показатели собраны в одном рабочем
-            пространстве.
+          <span className="apple-role-home__eyebrow">{isHome ? "Продолжить работу" : "Информация о разделе"}</span>
+          <h2 id="apple-role-focus-title">{isHome ? (focus?.label ?? "Рабочее пространство") : currentSection}</h2>
+          <p>{isHome
+            ? "Откройте нужный рабочий раздел. Статусы и результаты отображаются там, где доступны подтверждённые данные."
+            : "Для этого экрана пока нет подключённой сводки. Доступные действия находятся в разрешённых разделах слева."}
           </p>
         </div>
-        <span className="date-chip">▣ Сегодня</span>
-      </header>
-      <section className="metric-grid" aria-label="Ключевые показатели">
-        {dashboardMetrics[actor.active_role].map((metric) => (
-          <article
-            className={`metric-card metric-card--${metric.tone}`}
-            key={metric.label}
-          >
-            <span className="metric-icon" aria-hidden="true">
-              ◇
-            </span>
-            <span>{metric.label}</span>
-            <strong>{metric.value}</strong>
-            <small>{metric.delta}</small>
-            <i aria-hidden="true" />
-          </article>
-        ))}
-      </section>
-      <div className="dashboard-columns">
-        <article className="focus-panel">
-          <div>
-            <p className="eyebrow">Следующее важное действие</p>
-            <span className="ui-badge ui-badge--info">{currentSection}</span>
-            <h2>Продолжите работу с ближайшим результатом</h2>
-            <p>
-              Откройте раздел, проверьте факты и зафиксируйте следующий шаг. Все
-              записи в текущем окружении являются демонстрационными.
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                goTo(focusTarget);
-              }}
-            >
-              Открыть рабочую область <span aria-hidden="true">→</span>
-            </button>
-          </div>
-          <div className="focus-visual" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </div>
-        </article>
-        <aside className="ai-panel">
-          <div>
-            <span className="ai-orb" aria-hidden="true">
-              ✦
-            </span>
-            <div>
-              <h2>AI-помощник</h2>
-              <span className="ui-badge ui-badge--ai">Бета</span>
-            </div>
-          </div>
-          <p>
-            Поможет структурировать следующий шаг и объяснит данные.
-            Рекомендация остаётся черновиком до решения человека.
-          </p>
-          <div className="ai-boundary">
-            AI не публикует решения, оценки или офферы.
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              goTo(aiTarget);
-            }}
-          >
-            Получить рекомендации →
+        {focus && (
+          <button type="button" onClick={() => { goTo(focus.index); }}>
+            Открыть {focus.label.toLocaleLowerCase("ru-RU")}
+            <span aria-hidden="true">→</span>
           </button>
-        </aside>
-      </div>
-      <div className="dashboard-lower-grid">
-        <section className="activity-panel">
-          <header>
-            <div>
-              <p className="eyebrow">Рабочая очередь</p>
-              <h2>Актуальные действия</h2>
-            </div>
-            <button
-              className="secondary-button"
-              type="button"
-              onClick={() => {
-                goTo(queueTarget);
-              }}
-            >
-              Все действия →
-            </button>
-          </header>
-          <div className="activity-row">
-            <span className="activity-symbol">▤</span>
-            <div>
-              <strong>Проверьте ближайший этап</strong>
-              <small>Обновлено сегодня · демо-данные</small>
-            </div>
-            <span className="ui-badge ui-badge--info">В работе</span>
-            <strong>Сегодня</strong>
-            <span aria-hidden="true">›</span>
-          </div>
-          <div className="activity-row">
-            <span className="activity-symbol">✓</span>
-            <div>
-              <strong>Подтверждённый результат</strong>
-              <small>История решения и доказательства доступны</small>
-            </div>
-            <span className="ui-badge ui-badge--success">Принято</span>
-            <strong>Вчера</strong>
-            <span aria-hidden="true">›</span>
-          </div>
-          <div className="activity-row">
-            <span className="activity-symbol">◎</span>
-            <div>
-              <strong>Запланируйте следующий шаг</strong>
-              <small>Рекомендация сформирована по вашему контексту</small>
-            </div>
-            <span className="ui-badge ui-badge--ai">AI</span>
-            <strong>Завтра</strong>
-            <span aria-hidden="true">›</span>
-          </div>
-        </section>
-        <aside className="insight-panel">
-          <header>
-            <h2>Ключевая аналитика</h2>
-            <span>30 дней</span>
-          </header>
-          <div className="insight-metric">
-            <span>До результата</span>
-            <strong>18 дней</strong>
-            <small>↓ 22%</small>
-          </div>
-          <div className="insight-metric">
-            <span>Завершено в срок</span>
-            <strong>78%</strong>
-            <small>↑ 12%</small>
-          </div>
-          <div className="mini-bars" aria-label="Динамика за четыре недели">
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-            <i />
-          </div>
-        </aside>
-      </div>
+        )}
+      </section>
+      <details className="apple-role-home__details">
+        <summary>Все доступные разделы</summary>
+        <ul>
+          {available.map(({ label, index }) => (
+            <li key={index}>
+              <button type="button" onClick={() => { goTo(index); }}>
+                <span>{label}</span><span aria-hidden="true">›</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </details>
     </div>
   );
 }
@@ -1526,7 +1322,7 @@ function ImpulseApp() {
   };
 
   return (
-    <main className="page-shell">
+    <main className={actor ? "page-shell page-shell--apple-overlay" : "page-shell"}>
       <a className="skip-link" href="#workspace-main">
         Перейти к содержимому
       </a>
@@ -1594,6 +1390,7 @@ function ImpulseApp() {
               )}
             </div>
             <div className="header-actions">
+              <ThemeControl value={themeChoice} onChange={setThemeChoice} />
               {actor.active_role === "participant" && (
                 <TopbarEngagementIndicator personId={actor.person_id} />
               )}
@@ -1776,6 +1573,8 @@ function ImpulseApp() {
                       personas={personasQuery.data ?? []}
                       loading={personasQuery.isLoading}
                       error={error}
+                      themeChoice={themeChoice}
+                      onThemeChange={setThemeChoice}
                       onLogin={(key) => {
                         void login(key);
                       }}
