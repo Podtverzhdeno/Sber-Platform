@@ -10,8 +10,14 @@ test("portfolio: reference layout, verified proof, tabs, accessible dialogs and 
   let hrVisible = false;
   await page.route("**/api/v1/config", route => route.fulfill({ json: { honor_board_enabled: false } }));
   await page.route("**/api/v1/auth/personas", route => route.fulfill({ json: [{ key: "participant-alex", display_name: actor.display_name, roles: ["participant"] }] }));
-  await page.route("**/api/v1/me", route => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
-  await page.route("**/api/v1/auth/demo-login", route => route.fulfill({ json: actor }));
+  let loggedIn = false;
+  await page.route("**/api/v1/me", route => loggedIn
+    ? route.fulfill({ json: actor })
+    : route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
+  await page.route("**/api/v1/auth/demo-login", route => {
+    loggedIn = true;
+    return route.fulfill({ json: actor });
+  });
   await page.route("**/api/v1/me/portfolio", route => route.fulfill({ json: {
     person_id: actor.person_id, display_name: actor.display_name, demo_data: true,
     visibility: { hr_profile: hrVisible, public_profile: false, public_trophies: false },
@@ -144,12 +150,17 @@ test("portfolio: narrow layout never overflows and all six tabs remain reachable
   await page.route("**/api/v1/me/talent-passport", route=>route.fulfill({json:{verified_courses:[],skills:[],cases:[]}}));
   await page.route("**/api/v1/me/project-credentials", route=>route.fulfill({json:[]}));
   await page.route("**/api/v1/config", route=>route.fulfill({json:{honor_board_enabled:false}}));
-  await page.route("**/api/v1/me", route=>route.fulfill({status:401,json:{code:"AUTH_REQUIRED"}}));
+  let loggedIn = false;
+  await page.route("**/api/v1/me", route=>loggedIn ? route.fulfill({json:mobileActor}) : route.fulfill({status:401,json:{code:"AUTH_REQUIRED"}}));
   await page.route("**/api/v1/auth/personas", route=>route.fulfill({json:[{key:"participant-alex",display_name:"Алекс Речной",roles:["participant"]}]}));
-  await page.route("**/api/v1/auth/demo-login", route=>route.fulfill({json:{
+  const mobileActor = {
     person_id:"demo",display_name:"Алекс Речной",active_role:"participant",
     assigned_roles:["participant"],scopes:[],consent_scopes:[],navigation:["Главная","Портфолио"],csrf_token:"csrf",
-  }}));
+  };
+  await page.route("**/api/v1/auth/demo-login", route=>{
+    loggedIn = true;
+    return route.fulfill({json:mobileActor});
+  });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
   // On narrow screens the shared sidebar is off-canvas. The original authorized route remains stable;

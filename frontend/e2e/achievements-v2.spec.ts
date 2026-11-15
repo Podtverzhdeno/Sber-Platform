@@ -20,8 +20,14 @@ async function setup(page: Page, empty = false) {
   await page.route("**/api/v1/auth/personas", route => route.fulfill({
     json: [{ key: "participant-alex", display_name: actor.display_name, roles: ["participant"] }],
   }));
-  await page.route("**/api/v1/me", route => route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
-  await page.route("**/api/v1/auth/demo-login", route => route.fulfill({ json: actor }));
+  let loggedIn = false;
+  await page.route("**/api/v1/me", route => loggedIn
+    ? route.fulfill({ json: actor })
+    : route.fulfill({ status: 401, json: { code: "AUTH_REQUIRED" } }));
+  await page.route("**/api/v1/auth/demo-login", route => {
+    loggedIn = true;
+    return route.fulfill({ json: actor });
+  });
   await page.route("**/api/v1/me/portfolio", route => route.fulfill({
     json: {
       person_id: actor.person_id,
