@@ -108,9 +108,9 @@ describe("CalmSidebar", () => {
   });
 
   it("keeps a non-interactive backdrop mounted for exit animation and restores focus after backdrop click", () => {
-    const view = renderParticipant(0);
+    renderParticipant(0);
     const trigger = screen.getByRole("button", { name: "Меню" });
-    const backdrop = view.container.querySelector<HTMLButtonElement>(".calm-navigation__backdrop");
+    const backdrop = document.querySelector<HTMLButtonElement>(".calm-navigation__backdrop");
     expect(backdrop).not.toBeNull();
     expect(backdrop).not.toHaveClass("calm-navigation__backdrop--open");
     expect(backdrop).toHaveAttribute("aria-hidden", "true");
@@ -129,7 +129,7 @@ describe("CalmSidebar", () => {
     const view = renderParticipant(0);
     const edge = screen.getByRole("button", { name: "Показать навигацию" });
     const aside = view.container.querySelector<HTMLElement>(".calm-sidebar");
-    const backdrop = view.container.querySelector<HTMLElement>(".calm-navigation__backdrop");
+    const backdrop = document.querySelector<HTMLElement>(".calm-navigation__backdrop");
     expect(edge).toHaveAttribute("aria-expanded", "false");
     expect(aside).not.toHaveClass("calm-sidebar--open");
     dispatchPointer(edge, "pointerover", "mouse");

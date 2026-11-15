@@ -1,4 +1,5 @@
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { createPortal } from "react-dom";
 import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
 import { Bell, ChevronDown, CircleHelp, Moon, MoonStar, Search, Sun } from "lucide-react";
@@ -629,6 +630,8 @@ function Workspace({
         )}
         {allowed && actor.active_role === "participant" && currentSection && (
           <ParticipantGuide
+            autoSuggest={false}
+            showFloatingTrigger={false}
             personId={actor.person_id}
             section={currentSection}
             navigation={navigation}
@@ -1115,6 +1118,7 @@ function ImpulseApp() {
   const [, setRankingOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profileMenuRight, setProfileMenuRight] = useState(12);
   const {mode: pixelMode, setMode: setPixelMode} = usePixelVisualMode();
   const [themeChoice, setThemeChoice] = useState(() => storedThemeChoice());
   useEffect(() => { applyTheme(themeChoice); }, [themeChoice]);
@@ -1140,7 +1144,7 @@ function ImpulseApp() {
     if (!profileOpen) return;
     const closeOnEscape=(event:KeyboardEvent)=>{if(event.key === "Escape")setProfileOpen(false);};
     const closeOnOutside=(event:PointerEvent)=>{
-      if(event.target instanceof Element && !event.target.closest(".owner-profile"))setProfileOpen(false);
+      if(event.target instanceof Element && !event.target.closest(".owner-profile, .owner-profile-menu"))setProfileOpen(false);
     };
     document.addEventListener("keydown",closeOnEscape);
     document.addEventListener("pointerdown",closeOnOutside);
@@ -1570,7 +1574,12 @@ function ImpulseApp() {
               <div className="owner-profile" data-testid="owner-profile">
                 <button type="button" className="owner-profile-trigger" aria-label="Меню профиля"
                   aria-expanded={profileOpen} aria-controls="owner-profile-menu"
-                  onClick={() => { setProfileOpen((open) => !open); setNotificationOpen(false); setSearchOpen(false); }}>
+                  onClick={(event) => {
+                    setProfileMenuRight(Math.max(8, window.innerWidth - event.currentTarget.getBoundingClientRect().right));
+                    setProfileOpen((open) => !open);
+                    setNotificationOpen(false);
+                    setSearchOpen(false);
+                  }}>
                   <span className="mini-avatar" aria-hidden="true">
                     {actor.active_role === "participant" && configQuery.data?.demo_mode === true ?
                       <img src="/home-reference/avatar.svg" alt="" className="home-reference-avatar"/> :
@@ -1578,19 +1587,19 @@ function ImpulseApp() {
                   </span>
                   <ChevronDown size={16} aria-hidden="true"/>
                 </button>
-                {profileOpen && <div className="owner-profile-menu" id="owner-profile-menu" role="menu" aria-label="Профиль">
+                {profileOpen && createPortal(<div className="owner-profile-menu" id="owner-profile-menu" role="menu" aria-label="Профиль" style={{ right: profileMenuRight }}>
                   <div className="owner-profile-identity">
                     <strong>{actor.display_name}</strong><small>{roleLabels[actor.active_role]}</small>
                   </div>
                   {actor.navigation.includes("Портфолио") && <button type="button" role="menuitem" onClick={() => {setProfileOpen(false);openSearchItem("Портфолио");}}>Мой профиль</button>}
                   {actor.navigation.includes("Рейтинг") && <button type="button" role="menuitem" onClick={() => {setProfileOpen(false);openSearchItem("Рейтинг");}}>Рейтинг</button>}
-                  {actor.active_role === "participant" && <button type="button" role="menuitem" onClick={() => {setProfileOpen(false);window.dispatchEvent(new Event("impulse:guide:toggle"));}}>
+                  {actor.active_role === "participant" && <button type="button" role="menuitem" onClick={() => {setProfileOpen(false);window.dispatchEvent(new Event("impulse:guide:library"));}}>
                     <CircleHelp size={16} aria-hidden="true"/>Помощь
                   </button>}
                   <button type="button" role="menuitem" disabled={loggingOut} onClick={() => {setProfileOpen(false);void logout();}}>
                     {loggingOut ? "Выходим…" : "Выйти"}
                   </button>
-                </div>}
+                </div>, document.querySelector("main.page-shell--owner-pixel") ?? document.body)}
               </div>
             </div>
           </>

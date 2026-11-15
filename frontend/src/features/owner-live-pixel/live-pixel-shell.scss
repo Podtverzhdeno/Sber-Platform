@@ -206,13 +206,8 @@
   background:linear-gradient(135deg,#aedaff,#5181b7);
   overflow:hidden;
 }
-/* An expanded avatar menu must sit above page scrims and the floating
-   header itself on 390px viewports, not be visually present but unclickable. */
-.page-shell.page-shell--owner-pixel .topbar:has(.owner-profile-menu) {
-  z-index: 450;
-  overflow: visible;
-}
-.page-shell--owner-pixel .topbar .owner-profile-menu {
+.page-shell--owner-pixel .topbar .owner-profile-menu,
+.page-shell--owner-pixel > .owner-profile-menu {
   position:absolute;
   z-index:140;
   right:0;top:calc(100% + 10px);
@@ -227,14 +222,26 @@
   box-shadow:0 18px 46px rgba(0,0,0,.32);
   -webkit-backdrop-filter:blur(28px);backdrop-filter:blur(28px);
 }
-.page-shell--owner-pixel .topbar .owner-profile-identity {
+/* Portal avoids transformed header containing blocks: menu remains at the
+   avatar's measured right edge and is never hidden behind the glass bar. */
+.page-shell--owner-pixel > .owner-profile-menu {
+  position: fixed;
+  top: 70px;
+  z-index: 350;
+  pointer-events: auto;
+}
+.page-shell--owner-pixel .topbar .owner-profile-identity,
+.page-shell--owner-pixel > .owner-profile-menu .owner-profile-identity {
   display:grid;gap:2px;padding:8px 10px 12px;
   margin-bottom:4px;border-bottom:1px solid var(--owner-glass-edge);
   overflow-wrap:anywhere;
 }
-.page-shell--owner-pixel .topbar .owner-profile-identity strong {font-weight:700}
-.page-shell--owner-pixel .topbar .owner-profile-identity small {color:var(--owner-glass-secondary);font-size:12px}
-.page-shell--owner-pixel .topbar .owner-profile-menu button {
+.page-shell--owner-pixel .topbar .owner-profile-identity strong,
+.page-shell--owner-pixel > .owner-profile-menu .owner-profile-identity strong {font-weight:700}
+.page-shell--owner-pixel .topbar .owner-profile-identity small,
+.page-shell--owner-pixel > .owner-profile-menu .owner-profile-identity small {color:var(--owner-glass-secondary);font-size:12px}
+.page-shell--owner-pixel .topbar .owner-profile-menu button,
+.page-shell--owner-pixel > .owner-profile-menu button {
   width:100%;
   display:flex;align-items:center;gap:9px;
   padding:10px 12px;
@@ -245,7 +252,8 @@
   text-align:left;
   cursor:pointer;
 }
-.page-shell--owner-pixel .topbar .owner-profile-menu button:hover {background:var(--owner-glass-button)}
+.page-shell--owner-pixel .topbar .owner-profile-menu button:hover,
+.page-shell--owner-pixel > .owner-profile-menu button:hover {background:var(--owner-glass-button)}
 .page-shell--owner-pixel .topbar :is(.global-search-results,.notification-popover) {
   border:1px solid var(--owner-glass-edge);
   border-radius:17px;
@@ -284,6 +292,12 @@
   visibility: visible !important;
   pointer-events: auto !important;
   z-index: 150;
+}
+/* The sidebar shares a stacking context with its trigger. Raise that
+   context above the portaled scrim, not only the aside's local z-index. */
+.page-shell--owner-pixel.page-shell--apple-overlay .workspace--apple > .calm-navigation:has(.calm-sidebar--open) {
+  position: relative;
+  z-index: 220;
 }
 .page-shell--owner-pixel.page-shell--apple-overlay .calm-sidebar--open {
   z-index: 151;
@@ -369,6 +383,204 @@
 .page-shell--owner-pixel-home .owner-pixel-error button {
   padding:10px 16px;border-radius:11px;border:1px solid var(--owner-glass-edge);
   background:var(--owner-glass-button);color:var(--owner-glass-text);
+}
+/* Reference material system: shared control chrome and restrained sheets.
+   Preserve screenshot geometry, readable data and live route semantics. */
+.page-shell--owner-pixel {
+  --liquid-shine: rgba(255,255,255,.28);
+  --liquid-deep: rgba(16,30,69,.22);
+  --liquid-fill: rgba(104,125,176,.13);
+  --liquid-tint: rgba(116,160,239,.24);
+  --liquid-edge: rgba(176,197,242,.27);
+  --liquid-shadow: 0 12px 34px rgba(2,10,33,.16);
+}
+:root[data-impulse-visual-mode="light"] .page-shell--owner-pixel {
+  --liquid-shine: rgba(255,255,255,.94);
+  --liquid-deep: rgba(103,137,205,.06);
+  --liquid-fill: rgba(255,255,255,.52);
+  --liquid-tint: rgba(150,184,240,.15);
+  --liquid-edge: rgba(102,127,190,.16);
+  --liquid-shadow: 0 11px 26px rgba(52,89,151,.085);
+}
+:root[data-impulse-visual-mode="midnight"] .page-shell--owner-pixel {
+  --liquid-shine: rgba(195,211,244,.16);
+  --liquid-deep: rgba(1,3,12,.38);
+  --liquid-fill: rgba(98,124,189,.10);
+  --liquid-tint: rgba(65,87,145,.23);
+  --liquid-edge: rgba(142,164,204,.20);
+  --liquid-shadow: 0 12px 31px rgba(0,0,0,.28);
+}
+.page-shell.page-shell--owner-pixel .topbar {
+  background: linear-gradient(167deg,
+    color-mix(in srgb, var(--owner-glass-bg) 91%, white 9%) 0%,
+    var(--owner-glass-bg) 54%,
+    color-mix(in srgb, var(--owner-glass-bg) 88%, #1d4f95 12%) 100%);
+  border-color: var(--liquid-edge);
+  box-shadow: inset 0 1px var(--liquid-shine), inset 0 -1px rgba(15,44,98,.10),
+              0 13px 37px rgba(3,13,36,.13);
+  -webkit-backdrop-filter: blur(30px) saturate(155%);
+  backdrop-filter: blur(30px) saturate(155%);
+}
+.page-shell--owner-pixel .topbar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(103deg, var(--liquid-shine), transparent 34%, transparent 75%, var(--liquid-tint));
+  opacity: .27;
+  pointer-events: none;
+}
+.page-shell--owner-pixel .topbar .owner-topbar-brand,
+.page-shell--owner-pixel .topbar .owner-profile-trigger {
+  border-radius: 13px;
+  transition: background-color .18s ease, box-shadow .18s ease;
+}
+.page-shell--owner-pixel .topbar .owner-topbar-brand:hover,
+.page-shell--owner-pixel .topbar .owner-profile-trigger:hover {
+  background: var(--liquid-fill);
+  box-shadow: inset 0 1px var(--liquid-shine);
+}
+.page-shell--owner-pixel .topbar .global-search {
+  border-color: var(--liquid-edge);
+  background: linear-gradient(130deg, var(--liquid-fill), var(--liquid-deep));
+  box-shadow: inset 0 1px var(--liquid-shine), inset 0 -1px rgba(66,102,170,.09);
+  transition: box-shadow .18s ease, border-color .18s ease;
+}
+.page-shell--owner-pixel .topbar .global-search:focus-within {
+  border-color: #76b4ff;
+  box-shadow: inset 0 1px var(--liquid-shine), 0 0 0 3px rgba(51,136,255,.18);
+}
+.page-shell--owner-pixel .topbar :is(.owner-theme-switch,.notification-button,.streak-utility .streak-button) {
+  border-color: var(--liquid-edge);
+  background: linear-gradient(145deg, var(--liquid-fill), var(--liquid-deep));
+  box-shadow: inset 0 1px var(--liquid-shine), 0 4px 13px rgba(12,36,84,.07);
+}
+.page-shell--owner-pixel .topbar :is(.owner-theme-switch,.notification-button,.streak-utility .streak-button):hover {
+  background: linear-gradient(140deg, var(--liquid-tint), var(--liquid-fill));
+  border-color: #7cb8ff;
+}
+.page-shell--owner-pixel :is(.owner-profile-menu,.notification-popover,.global-search-results) {
+  border-color: var(--liquid-edge);
+  background: linear-gradient(145deg, var(--owner-glass-bg), color-mix(in srgb, var(--owner-glass-bg) 92%, #89b7fb 8%));
+  box-shadow: inset 0 1px var(--liquid-shine), var(--liquid-shadow);
+  -webkit-backdrop-filter: blur(28px) saturate(145%);
+  backdrop-filter: blur(28px) saturate(145%);
+}
+/* Source: impulse_pixel_reference.html .glass-card, not a Liquid Glass
+   control. Apple HIG treats persistent content as a standard material. The
+   toolbar, popup, and control chrome above remain the Liquid Glass layer. */
+.page-shell--owner-pixel {
+  --pixel-reference-panel: rgba(48,65,104,.43);
+}
+:root[data-impulse-visual-mode="light"] .page-shell--owner-pixel {
+  --pixel-reference-panel: rgba(255,255,255,.70);
+}
+:root[data-impulse-visual-mode="midnight"] .page-shell--owner-pixel {
+  --pixel-reference-panel: rgba(21,27,45,.77);
+}
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__glass {
+  border-color: var(--liquid-edge);
+  border-radius: 21px;
+  background: linear-gradient(127deg, rgba(107,136,210,.25), var(--pixel-reference-panel) 60%, rgba(73,108,182,.27));
+  box-shadow: inset 0 1px rgba(255,255,255,.12), 0 10px 25px rgba(0,0,0,.08);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__glass::after {
+  display: none;
+}
+/* Exact reference mapping: .journey-link is a quiet text action, not a filled glass chip. */
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__journey-link {
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 8px 0;
+  color: #52a9ff;
+}
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__primary {
+  border-color: rgba(146,202,255,.69);
+  background: linear-gradient(135deg, #36a8ff, #1764f5);
+  box-shadow: inset 0 1px rgba(255,255,255,.38), 0 7px 20px rgba(18,101,236,.24);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__primary:active {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px rgba(255,255,255,.24), 0 3px 9px rgba(18,101,236,.17);
+}
+/* Exact reference mapping: .text-link remains an unboxed action with a real route. */
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__requirements-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #53a9ff;
+}
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__requirements-actions button:hover,
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__journey-link:hover {
+  background: transparent;
+  color: #8dc7ff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__trajectory-more,
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__fold > button {
+  border-radius: 11px;
+  transition: background .18s ease;
+}
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__trajectory-more:hover,
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__fold > button:hover {
+  background: var(--liquid-fill);
+}
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__metrics {
+  border-bottom-color: var(--liquid-edge);
+}
+.page-shell--owner-pixel-home .workspace-content .impulse-pixel__metrics > div + div {
+  border-left-color: var(--liquid-edge);
+}
+/* Extend the shared language to secondary routes without applying translucency
+   over evidence, form fields, tables or high-information cards. */
+.page-shell--owner-pixel .workspace--apple .workspace-content :is(
+  .av3-tabs button, .catalog-segments button, .view-toggle button,
+  .trajectory-v2-role-card, .calm-home__text-action
+) {
+  border-radius: 12px;
+  transition: transform .17s ease, background-color .17s ease, border-color .17s ease, box-shadow .17s ease;
+}
+.page-shell--owner-pixel .workspace--apple .workspace-content :is(
+  .av3-tabs button, .catalog-segments button, .view-toggle button
+):hover {
+  background: var(--liquid-tint);
+  box-shadow: inset 0 1px var(--liquid-shine);
+}
+.page-shell--owner-pixel :is(button,a):focus-visible {
+  outline: 3px solid #78b9ff;
+  outline-offset: 3px;
+}
+@media (prefers-reduced-transparency: reduce) {
+  .page-shell--owner-pixel :is(.topbar,.owner-profile-menu,.notification-popover,.global-search-results),
+  .page-shell--owner-pixel-home .workspace-content .impulse-pixel__glass {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: var(--owner-glass-bg) !important;
+  }
+}
+@media (forced-colors: active) {
+  .page-shell--owner-pixel .topbar::before,
+  .page-shell--owner-pixel-home .impulse-pixel__glass::after { display: none; }
+  .page-shell--owner-pixel :is(.topbar,.owner-profile-menu,.notification-popover,.global-search-results),
+  .page-shell--owner-pixel-home .workspace-content .impulse-pixel__glass,
+  .page-shell--owner-pixel-home .workspace-content .impulse-pixel__requirements-actions button {
+    background: Canvas !important;
+    border: 1px solid CanvasText !important;
+    color: CanvasText !important;
+    box-shadow: none !important;
+  }
 }
 @media(max-width:1140px) {
   .page-shell--owner-pixel .topbar .owner-topbar-brand{flex-basis:180px}

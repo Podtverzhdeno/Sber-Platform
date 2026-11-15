@@ -17,6 +17,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { createPortal } from "react-dom";
 import { NavLink } from "react-router-dom";
 
 import { activeCalmGroup, buildCalmNavigation, type CalmRole } from "./model";
@@ -230,13 +231,16 @@ export function CalmSidebar({
         Keep the backdrop mounted so opening AND closing animate smoothly.
         Hidden state is non-interactive and excluded from the accessibility tree.
       */}
-      <button
-        className={`calm-navigation__backdrop${drawerOpen ? " calm-navigation__backdrop--open" : ""}`}
-        type="button"
-        tabIndex={-1}
-        aria-hidden="true"
-        onClick={closeDrawer}
-      />
+      {createPortal(
+        <button
+          className={`calm-navigation__backdrop${drawerOpen ? " calm-navigation__backdrop--open" : ""}`}
+          type="button"
+          tabIndex={-1}
+          aria-hidden="true"
+          onClick={closeDrawer}
+        />,
+        document.querySelector(".page-shell--apple-overlay") ?? document.body,
+      )}
 
       <aside
         id={id}

@@ -8,3 +8,8 @@
 - [ ] OLG-06 Pass focused unit/E2E, lint, typecheck, build, OpenSpec and Docker smoke on exact SHA
 - [ ] OLG-07 Independent desktop 1422×803 and mobile 390×844 screenshot review
 - [ ] OLG-08 Owner-approved main merge and Railway production release/health/HTTP confirmation
+
+- [ ] OLG-09 Remove duplicate course/practice requirement copy, preserve a real route from "План перехода"
+- [ ] OLG-10 Remove floating/automatic hints for the authenticated shell while retaining explicit profile Help Center
+- [ ] OLG-11 Unify reference Liquid Glass material for toolbar, search, selected controls, hero and disclosures across 3 themes; verify 320/390/1422px and accessibility modes
+- [ ] OLG-12 Confirm PR #178 exact-SHA browser/CI gates, merge, and verify active Railway production SHA

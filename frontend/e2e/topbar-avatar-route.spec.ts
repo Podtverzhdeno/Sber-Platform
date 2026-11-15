@@ -66,6 +66,18 @@ test("demo avatar never overflows its circular shell or overlaps the person's na
   });
 });
 
+test("minimal shell has no floating tips while Help stays in avatar actions", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openParticipantTrajectory(page);
+  await expect(page.locator(".participant-guide-trigger")).toHaveCount(0);
+  await expect(page.locator(".participant-guide-card")).toHaveCount(0);
+  await page.getByRole("button", { name: "Меню профиля" }).click();
+  await page.getByRole("menuitem", { name: "Помощь" }).click();
+  await expect(page.getByRole("dialog", { name: "Центр помощи" })).toBeVisible();
+  await page.getByRole("button", { name: "Закрыть центр помощи" }).click();
+  await expect(page.locator(".participant-guide-trigger")).toHaveCount(0);
+});
+
 test("fresh mobile trajectory does not overlap the fixed shell with its heading", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openParticipantTrajectory(page);

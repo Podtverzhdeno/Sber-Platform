@@ -50,3 +50,26 @@ A merge SHALL NOT be described as a deployment. The running Railway service SHAL
 #### Scenario: Code merged but not active
 - **WHEN** Railway reports success for an older SHA
 - **THEN** no production completion claim is made until the intended SHA becomes live and its browser UI is confirmed
+
+### Requirement: Home SHALL show course/practice requirements only once
+The main dashboard SHALL NOT duplicate required course and practice numeric summaries in an expandable paragraph. The progress indicator remains sourced from the published role-level API, and the requirements action SHALL open the real trajectory rather than showing repeated numbers.
+
+#### Scenario: Participant follows requirements
+- **WHEN** an authorized participant selects the "План перехода" control on the main dashboard
+- **THEN** the user is routed to their authorized trajectory, without an additional "Обязательные курсы: ... Практика: ..." text block
+
+### Requirement: In-app assistance SHALL not interrupt the approved first fold
+The participant workspace SHALL NOT automatically display unsolicited coachmarks after a timer, and SHALL NOT show a persistent bottom-right "Как здесь всё устроено?" overlay. The full help library SHALL remain available through the authenticated profile menu, including keyboard and touch access.
+
+#### Scenario: Participant opens overview and requests help later
+- **WHEN** the user opens an authenticated participant route and stays without interaction
+- **THEN** no automatic hint, welcome modal or floating help trigger appears
+- **WHEN** the user selects "Помощь" from the account menu
+- **THEN** the existing full Help Center opens without losing their current route
+
+### Requirement: Reference materials SHALL be consistent across the application
+The new shared toolbar, search, account popup, navigation and active control affordances SHALL use a consistent, theme-aware glass material with accessible focus states. Factual content, tables and high-density forms SHALL remain legible and SHALL NOT receive decorative transparency that obscures business values.
+
+#### Scenario: Light, blue, midnight and accessibility preferences
+- **WHEN** the actor changes the theme or enables reduced transparency, reduced motion or forced colors
+- **THEN** transient controls retain reference-consistent borders and focus, while text, lists and progress retain contrast and the actions remain available

@@ -17,7 +17,6 @@ const model: ImpulsePixelReferenceProps["home"] = {
   level: 0, nextLevel: 1,
   completedCourses: 1, requiredCourses: 2,
   activeTaskCount: 0, confirmedSkills: 2,
-  requirementsSummary: "Один курс из двух завершён",
 };
 
 function props(overrides: Partial<ImpulsePixelReferenceProps> = {}): ImpulsePixelReferenceProps {
@@ -85,6 +84,15 @@ describe("Impulse pixel reference", () => {
     expect(onContinue).toHaveBeenCalledOnce();
     fireEvent.click(screen.getByRole("button",{name:"Мой путь"}));
     expect(onOpenJourney).toHaveBeenCalledOnce();
+  });
+
+  it("does not repeat required course and practice counts and opens the actual trajectory", () => {
+    const onOpenRequirements = vi.fn();
+    render(<ImpulsePixelReference {...props({ onOpenRequirements })} />);
+    expect(screen.queryByText(/Обязательные курсы:/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Практика: [0-9]/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "План перехода" }));
+    expect(onOpenRequirements).toHaveBeenCalledOnce();
   });
 
   it("opens the profile without losing ranking, help or logout", () => {

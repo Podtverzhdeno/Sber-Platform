@@ -38,7 +38,6 @@ export interface PixelHomeModel {
   readonly requiredCourses: number | null;
   readonly activeTaskCount: number;
   readonly confirmedSkills: number | null;
-  readonly requirementsSummary?: string | null;
   readonly weekSummary?: string | null;
   readonly toolsSummary?: string | null;
 }
@@ -86,7 +85,6 @@ export function ImpulsePixelReference({
 }: ImpulsePixelReferenceProps) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [requirementsOpen, setRequirementsOpen] = useState(false);
   const [weekOpen, setWeekOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
@@ -248,13 +246,11 @@ export function ImpulsePixelReference({
           <div><small>Навыки</small><strong>{home.confirmedSkills === null ? "—" : home.confirmedSkills}</strong><span>С подтверждёнными кейсами</span></div>
         </section>
         <section className="impulse-pixel__next-level" aria-label="Следующий уровень">
-          <header><div><h2>Следующий уровень</h2><p>{home.level === null ? "Данные об уровне загружаются" :
-            `Уровень ${levelLabel} · пройдено ${String(home.completedCourses ?? "—")} из ${String(home.requiredCourses ?? "—")} обязательных курсов`}</p></div>
+          <header><div><h2>Следующий уровень</h2><p>Ваш путь к следующему этапу</p></div>
             <div className="impulse-pixel__requirements-actions">
               <strong>{levelLabel} → {nextLevelLabel}</strong>
-              <button type="button" aria-expanded={requirementsOpen}
-                onClick={() => { if (!requirementsOpen) onOpenRequirements(); setRequirementsOpen((open) => !open); }}>
-                Требования уровня <ChevronDown size={17} aria-hidden="true"/>
+              <button type="button" onClick={onOpenRequirements}>
+                План перехода <ArrowRight size={16} aria-hidden="true"/>
               </button>
             </div>
           </header>
@@ -263,7 +259,6 @@ export function ImpulsePixelReference({
               aria-valuemin={0} aria-valuemax={100} aria-valuenow={coursePercent}>
               <i style={{width:`${String(coursePercent)}%`}}/>
             </div><span>{coursePercent}% курсов</span></div>}
-          {requirementsOpen && <p className="impulse-pixel__expanded">{home.requirementsSummary ?? "Подробности можно увидеть в своей траектории."}</p>}
         </section>
         <section className="impulse-pixel__fold">
           <button type="button" aria-expanded={weekOpen}
