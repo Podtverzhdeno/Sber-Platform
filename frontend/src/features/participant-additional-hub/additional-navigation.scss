@@ -1,0 +1,201 @@
+/* Apple-inspired content-first Additional; scoped to participants only. */
+.additional-page {
+  --additional-fg: #edf3f9;
+  --additional-muted: #a6b5c8;
+  --additional-line: rgba(185, 209, 233, .16);
+  --additional-panel: rgba(15, 29, 44, .64);
+  --additional-focus: #a9c9fb;
+  width: 100%;
+  min-width: 0;
+  max-width: 1360px;
+  margin-inline: auto;
+  box-sizing: border-box;
+  gap: 14px;
+}
+[data-theme="light"] .additional-page {
+  --additional-fg: #1d2e40;
+  --additional-muted: #526579;
+  --additional-line: rgba(42, 67, 94, .17);
+  --additional-panel: rgba(250, 251, 253, .88);
+  --additional-focus: #2465b8;
+}
+.additional-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 16px 24px;
+  padding: 5px 0 16px;
+  margin: 0 0 6px;
+  border-bottom: 1px solid var(--additional-line);
+}
+.additional-navigation__intro { min-width: 0; }
+.additional-navigation__intro > span {
+  color: var(--additional-muted);
+  font-weight: 650;
+  font-size: 11px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.additional-navigation__intro h2 {
+  margin: 4px 0 6px;
+  color: var(--additional-fg);
+  font-size: clamp(24px, 2.4vw, 31px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.035em;
+}
+.additional-navigation__intro p {
+  margin: 0;
+  color: var(--additional-muted);
+  line-height: 1.48;
+  font-size: 13px;
+  max-width: 55ch;
+}
+.additional-navigation__tabs {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 4px;
+  max-width: 100%;
+  border: 1px solid var(--additional-line);
+  border-radius: 13px;
+  background: var(--additional-panel);
+  gap: 4px;
+}
+.additional-navigation__tabs a {
+  min-height: 41px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 9px 16px;
+  border-radius: 10px;
+  color: var(--additional-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 620;
+}
+.additional-navigation__tabs a:hover {
+  color: var(--additional-fg);
+  background: var(--additional-line);
+}
+.additional-navigation__tabs a[aria-current="page"] {
+  color: var(--additional-fg);
+  background: color-mix(in srgb, var(--additional-focus) 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--additional-focus) 32%, transparent);
+}
+.additional-navigation__tabs a:focus-visible {
+  outline: 2px solid var(--additional-focus);
+  outline-offset: 2px;
+}
+
+/* Compact settings: functions are retained; only visual emphasis and spacing change. */
+.participant-settings.additional-page .participant-page-heading {
+  padding: 0 0 10px;
+  gap: 12px;
+}
+.participant-settings.additional-page .participant-page-heading .eyebrow { display: none; }
+.participant-settings.additional-page .participant-page-heading h1 {
+  font-size: clamp(20px, 2vw, 25px);
+  letter-spacing: -.02em;
+}
+.participant-settings.additional-page .participant-page-heading .lead {
+  font-size: 13px;
+  line-height: 1.5;
+}
+.participant-settings.additional-page .participant-page-heading > button {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 9px 16px;
+  color: var(--additional-fg);
+  background: var(--additional-panel);
+  border: 1px solid var(--additional-line);
+  border-radius: 11px;
+  box-shadow: none;
+  font-weight: 660;
+}
+.participant-settings.additional-page .settings-layout {
+  grid-template-columns: minmax(190px, 220px) minmax(0, 1fr);
+  gap: 16px;
+}
+.participant-settings.additional-page .settings-nav,
+.participant-settings.additional-page .settings-panel {
+  min-width: 0;
+  background: var(--additional-panel);
+  background-image: none;
+  box-shadow: none;
+  border-color: var(--additional-line);
+  border-radius: 15px;
+}
+.participant-settings.additional-page .settings-nav { padding: 7px; gap: 2px; }
+.participant-settings.additional-page .settings-nav button {
+  min-height: 42px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 540;
+  color: var(--additional-muted);
+}
+.participant-settings.additional-page .settings-nav button span {
+  background: transparent;
+  width: 18px;
+  height: 20px;
+}
+.participant-settings.additional-page .settings-nav button.active {
+  color: var(--additional-fg);
+  background: color-mix(in srgb, var(--additional-focus) 13%, transparent);
+  box-shadow: none;
+  font-weight: 670;
+}
+.participant-settings.additional-page .settings-panel {
+  min-height: 450px;
+  padding: clamp(14px, 2vw, 26px);
+}
+.participant-settings.additional-page .settings-section-title {
+  border-color: var(--additional-line);
+}
+.participant-settings.additional-page .settings-cards article,
+.participant-settings.additional-page .danger-zone {
+  background: transparent;
+  border-color: var(--additional-line);
+  border-radius: 11px;
+}
+.participant-settings.additional-page :is(.profile-editor, .form-grid, .notification-matrix) {
+  min-width: 0;
+}
+.buddy-page.additional-page .additional-navigation { margin-bottom: 3px; }
+.buddy-page.additional-page :is(.buddy-layout, .buddy-context, .buddy-chat) { min-width: 0; }
+
+@media(max-width: 960px) {
+  .participant-settings.additional-page .settings-layout { grid-template-columns: minmax(0, 1fr); }
+  .participant-settings.additional-page .settings-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 5px;
+    padding: 5px;
+    scrollbar-width: thin;
+    overscroll-behavior-x: contain;
+  }
+  .participant-settings.additional-page .settings-nav button {
+    flex: 0 0 auto;
+    width: auto;
+    white-space: nowrap;
+    padding-inline: 12px;
+  }
+}
+@media(max-width: 600px) {
+  .additional-page { width: 100%; max-width: 100%; }
+  .additional-navigation { gap: 11px; padding: 2px 0 12px; }
+  .additional-navigation__intro h2 { font-size: 26px; }
+  .additional-navigation__tabs {
+    width: 100%;
+    flex-basis: 100%;
+    box-sizing: border-box;
+  }
+  .additional-navigation__tabs a { min-height: 44px; flex: 1 1 0; padding: 10px 12px; }
+  .participant-settings.additional-page .participant-page-heading > button { width: fit-content; max-width: 100%; }
+  .participant-settings.additional-page .settings-panel { min-height: 0; }
+  .participant-settings.additional-page .settings-section-title { gap: 9px; }
+}

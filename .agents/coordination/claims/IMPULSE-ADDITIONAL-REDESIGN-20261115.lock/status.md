@@ -1,7 +1,7 @@
 # Claim IMPULSE-ADDITIONAL-REDESIGN-20261115
 - task_id: IMPULSE-ADDITIONAL-REDESIGN-20261115
 - session_id: gpt6-additional-owner-20261115-2302
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-15T23:02:00+03:00
 - heartbeat_at: 2026-11-15T23:02:00+03:00
 - owner_instruction: sequential Apple-minimal section redesign, main push and Railway auto deploy
@@ -10,9 +10,14 @@
 - write_scope:
   - frontend/src/features/participant-additional-hub/**
   - frontend/src/features/participant.tsx (participant settings and buddy wrappers only; no customer UI changes)
+  - frontend/e2e/participant-additional.spec.ts (authorized 320/390/1440 route CJM)
   - .agents/coordination/claims/IMPULSE-ADDITIONAL-REDESIGN-20261115.lock/status.md
 - excluded: frontend/src/App.tsx; backend/API; shared navigation, role auth, contracts, customer settings, Railway config
 - plan: permission-aware local Additional tabs (AI-Buddy and Settings), calm compact settings layout, preserve profile, consents, alerts, model disabled states
 - verification: Vitest, TS, ESLint, production build, E2E authorized routes and mobile 320/390/1440; exact main CI, Railway verify
-- progress: coordination claim created
+- progress: frontend/src/features/participant-additional-hub/** and participant-only wrappers in participant.tsx implemented; customer settings unchanged
+- verified: focused Vitest 5/5 PASS; Chromium Playwright 2/2 PASS at 320/390/1440 with authorized/unavailable routes; TypeScript PASS; scoped ESLint PASS; Vite production build PASS (2188 transformed modules)
+- source: branch ui/additional-minimal-20261115 commit 27fcca50, isolated local test against exact frontend file source and E2E
+- remaining: exact main CI, independent visual reference screenshot review and Railway deploy post-push smoke
+- safety: no new backend route; no auto-submission; settings and AI Buddy consent flow unchanged
 - blockers: browser screenshot reference review
