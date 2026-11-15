@@ -125,9 +125,12 @@ test("events reference: all six detail states, registration flow and keyboard na
   await page.screenshot({ path: "test-results/event-reference/about.png", animations: "disabled" });
   const bounds = await dialog.boundingBox();
   if (!bounds) throw new Error("Detail modal is missing");
-  // Modal centers inside the scrollable document, excluding the scrollbar gutter.
-  const viewportClientWidth = await page.evaluate(() => document.documentElement.clientWidth);
-  expect(Math.abs(bounds.x + bounds.width / 2 - viewportClientWidth / 2)).toBeLessThan(4);
+  // The overlay excludes the 15px scrollbar gutter. Its centered panel must
+  // align to the real overlay, not the full browser innerWidth.
+  const overlayBounds = await page.locator(".ev-detail-modal .overlay").boundingBox();
+  if (!overlayBounds) throw new Error("Event dialog overlay is missing");
+  expect(Math.abs(bounds.x + bounds.width / 2 -
+    (overlayBounds.x + overlayBounds.width / 2))).toBeLessThan(4);
   await page.setViewportSize({ width: 1667, height: 939 });
   const nav = dialog.getByRole("navigation", { name: "Разделы события" });
   await nav.getByRole("button", { name: "Программа" }).click();
