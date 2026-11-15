@@ -140,7 +140,25 @@ for (const width of [320, 390, 768]) {
     await trigger.click();
     const backdrop = page.locator(".calm-navigation__backdrop--open");
     await expect(backdrop).toBeVisible();
-    await backdrop.click({ position: { x: width - 12, y: 320 } });
+    // Use the actually clickable strip outside the drawer, not width - 12.
+    // On Chrome mobile emulation the last 15px can be the scrollbar, which
+    // Playwright reports as <html> intercepting pointer events.
+    const hit = await page.evaluate(() => {
+      const clientRight = document.documentElement.clientWidth;
+      const drawer = document.querySelector(".calm-sidebar")?.getBoundingClientRect();
+      if (!drawer) return { x: 0, hitBackdrop: false, gap: 0 };
+      const gap = clientRight - drawer.right;
+      const x = drawer.right + Math.min(6, gap / 2);
+      const target = document.elementFromPoint(x, 320);
+      return {
+        x,
+        gap,
+        hitBackdrop: target?.classList.contains("calm-navigation__backdrop--open") ?? false,
+      };
+    });
+    expect(hit.gap).toBeGreaterThan(4);
+    expect(hit.hitBackdrop).toBe(true);
+    await page.mouse.click(hit.x, 320);
     await expect(sidebar).toBeHidden();
     await expect(page.locator(".calm-navigation__mobile-trigger")).toHaveAttribute("aria-expanded", "false");
     const horizontalOverflow = await page.evaluate(
