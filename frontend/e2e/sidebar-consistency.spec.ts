@@ -60,13 +60,16 @@ for (const width of [960, 1024, 1448, 1672]) {
     await installReferenceSession(page);
     await page.goto("/workspace/0");
 
-    const trigger = page.getByRole("button", { name: "Меню", exact: true });
+    const trigger = page.getByRole("button", { name: "Impulse — открыть разделы", exact: true });
     const sidebar = page.locator(".calm-sidebar");
     const content = page.locator(".workspace--apple .workspace-content");
     await expect(trigger).toBeVisible();
-    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator(".calm-navigation__mobile-trigger")).toBeHidden();
+    await expect(page.locator(".calm-navigation__mobile-trigger")).toHaveAttribute("aria-expanded", "false");
     await expect(sidebar).toBeHidden();
-    await expect(page.locator(".topbar")).toHaveCSS("left", "0px");
+    const floatingHeader = await page.locator(".topbar").boundingBox();
+    expect(floatingHeader?.height).toBe(62);
+    expect(floatingHeader?.x).toBeGreaterThanOrEqual(20);
     await expect(page.locator(".workspace--apple")).toHaveCSS("display", "block");
     const workRect = await content.boundingBox();
     expect(workRect).not.toBeNull();
@@ -77,7 +80,7 @@ for (const width of [960, 1024, 1448, 1672]) {
     const menu = page.getByRole("dialog", { name: "Главное меню" });
     await expect(menu).toBeVisible();
     await expect(menu).toHaveCSS("width", "320px");
-    await expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await expect(page.locator(".calm-navigation__mobile-trigger")).toHaveAttribute("aria-expanded", "true");
     await expect(page.locator(".calm-navigation__backdrop--open")).toHaveCSS("opacity", "1");
     const initial = await sidebarSignature(page);
     expect(initial.sections).toHaveLength(13);
@@ -91,7 +94,7 @@ for (const width of [960, 1024, 1448, 1672]) {
       await menu.getByRole("link", { name: section, exact: true }).click();
       await expect(page).toHaveURL(new RegExp(`/workspace/${String(routeIndex)}(?:[?]|$)`));
       await expect(sidebar).toBeHidden();
-      await expect(trigger).toHaveAttribute("aria-expanded", "false");
+      await expect(page.locator(".calm-navigation__mobile-trigger")).toHaveAttribute("aria-expanded", "false");
       expect(await sidebarSignature(page)).toEqual(initial);
       await trigger.click();
       await expect(menu).toBeVisible();
@@ -112,9 +115,10 @@ for (const width of [320, 390, 768]) {
     await page.setViewportSize({ width, height: 844 });
     await installReferenceSession(page);
     await page.goto("/workspace/0");
-    const trigger = page.getByRole("button", { name: "Меню", exact: true });
+    const trigger = page.getByRole("button", { name: "Impulse — открыть разделы", exact: true });
     const sidebar = page.locator(".calm-sidebar");
     await expect(trigger).toBeVisible();
+    await expect(page.locator(".calm-navigation__mobile-trigger")).toBeHidden();
     await expect(sidebar).toBeHidden();
     await trigger.click();
     const dialog = page.getByRole("dialog", { name: "Главное меню" });
@@ -137,7 +141,7 @@ for (const width of [320, 390, 768]) {
     await expect(backdrop).toBeVisible();
     await backdrop.click({ position: { x: width - 12, y: 320 } });
     await expect(sidebar).toBeHidden();
-    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await expect(page.locator(".calm-navigation__mobile-trigger")).toHaveAttribute("aria-expanded", "false");
     const horizontalOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 2,
     );
@@ -149,9 +153,9 @@ test("dark theme retains translucent menu without making the body unusable", asy
   await page.setViewportSize({ width: 1440, height: 900 });
   await installReferenceSession(page);
   await page.goto("/workspace/0");
-  await page.getByRole("combobox", { name: "Тема оформления" }).selectOption("dark");
+  await page.getByRole("button", { name: /Тема: солнце/ }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  const trigger = page.getByRole("button", { name: "Меню", exact: true });
+  const trigger = page.getByRole("button", { name: "Impulse — открыть разделы", exact: true });
   await trigger.click();
   const panel = page.getByRole("dialog", { name: "Главное меню" });
   await expect(panel).toBeVisible();
@@ -166,7 +170,7 @@ test("reduced motion makes menu instant without entrance animations", async ({ p
   await page.emulateMedia({ reducedMotion: "reduce" });
   await installReferenceSession(page);
   await page.goto("/workspace/0");
-  const trigger = page.getByRole("button", { name: "Меню", exact: true });
+  const trigger = page.getByRole("button", { name: "Impulse — открыть разделы", exact: true });
   const panel = page.locator(".calm-sidebar");
   await expect(panel).toBeHidden();
   await trigger.click();
@@ -183,7 +187,7 @@ test("forced colors retains an opaque readable navigation pane", async ({ page }
   await page.emulateMedia({ forcedColors: "active" });
   await installReferenceSession(page);
   await page.goto("/workspace/0");
-  await page.getByRole("button", { name: "Меню", exact: true }).click();
+  await page.getByRole("button", { name: "Impulse — открыть разделы", exact: true }).click();
   const panel = page.getByRole("dialog", { name: "Главное меню" });
   await expect(panel).toBeVisible();
   await expect(panel).toHaveCSS("backdrop-filter", "none");
