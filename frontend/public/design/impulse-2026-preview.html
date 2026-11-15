@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ru" data-visual-mode="blue">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#081122">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <title>Impulse · Макет Apple UI</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/design/impulse-2026-preview.css">
+  <script src="/design/impulse-2026-preview.js" defer></script>
+</head>
+<body>
+  <div class="wallpaper" aria-hidden="true"></div>
+  <header class="toolbar">
+    <button type="button" class="brand" id="nav-toggle" aria-controls="preview-navigation" aria-expanded="false" aria-label="Показать разделы">
+      <span class="brand-star" aria-hidden="true">✦</span><strong>Impulse</strong>
+    </button>
+    <div class="search-shell">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.2"/><path d="m16.1 16.1 5 5"/></svg>
+      <label for="search" class="sr-only">Поиск по разделам макета</label>
+      <input id="search" type="search" placeholder="Поиск по задачам, навыкам, проектам…" autocomplete="off">
+      <kbd>⌘ K</kbd>
+      <div id="search-results" class="search-results" hidden role="listbox" aria-label="Результаты поиска по макету"></div>
+    </div>
+    <nav class="toolbar-actions" aria-label="Действия">
+      <button id="visual-mode" class="icon-button theme-switch" type="button" aria-label="Тема: синяя луна; сменить тему">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path id="theme-glyph" d="M20.8 13.3A9 9 0 0 1 10.7 3.2 9.1 9.1 0 1 0 20.8 13.3Z"/></svg>
+      </button>
+      <button id="streak" class="streak" type="button" title="Данные на изображении — пример" aria-label="Пример серии активности: 11 дней"><span aria-hidden="true">🔥</span><strong>11</strong></button>
+      <button id="notifications" class="icon-button bell" type="button" aria-label="Показать демо уведомление">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21a2 2 0 0 0 4 0"/></svg>
+        <span class="notification-dot" aria-hidden="true"></span>
+      </button>
+      <span class="action-divider" aria-hidden="true"></span>
+      <div class="profile">
+        <button id="profile-toggle" class="profile-button" type="button" aria-expanded="false" aria-controls="profile-menu" aria-label="Меню профиля">
+          <span class="profile-avatar" aria-hidden="true">И</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="profile-menu" class="profile-menu" hidden>
+          <p><strong>Участник</strong><small>Демонстрационные данные</small></p>
+          <a href="/workspace/0">Открыть рабочий кабинет</a>
+          <a href="/">Вернуться в Impulse</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <button type="button" id="edge-rail" class="edge-rail" aria-label="Показать скрытую навигацию" aria-controls="preview-navigation"></button>
+  <aside id="preview-navigation" class="flyout" data-open="false" aria-label="Навигация по Impulse">
+    <h2>Разделы</h2>
+    <a href="/workspace/0">Главная</a>
+    <a href="/">Обучение и траектории</a>
+    <a href="/">Практические задачи</a>
+    <a href="/">Мои проекты</a>
+    <a href="/">Аналитика</a>
+    <a href="/">Сообщения</a>
+    <p>Переходы открывают настоящее приложение, где действуют права пользователя.</p>
+  </aside>
+  <main class="content">
+    <div class="page-heading">
+      <div><h1>Главная</h1><p>AI Security Engineer</p></div>
+      <a href="/workspace/0" class="journey-link">Мой путь <span aria-hidden="true">›</span></a>
+    </div>
+    <div class="hero-layout">
+      <section class="hero glass" aria-labelledby="module-title">
+        <div class="hero-copy">
+          <div class="overline"><span class="app-icon" aria-hidden="true">▱</span><span>Текущий модуль <span class="blue-dot">•</span> AI Agent Engineer</span></div>
+          <h2 id="module-title">Создание AI-агентов</h2>
+          <div class="study-progress"><span>3 из 6 уроков</span><div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-label="Прогресс уроков"><i></i></div></div>
+          <p>Научитесь проектировать, собирать и запускать<br>AI-агентов для реальных задач.</p>
+          <a class="primary" href="/workspace/0"><span aria-hidden="true">▶</span> Продолжить <span class="sr-only">в действующем приложении</span></a>
+        </div>
+        <div class="layers" aria-hidden="true"><span></span><span></span><span></span></div>
+      </section>
+      <section class="trajectory glass" aria-labelledby="track-title">
+        <div class="trajectory-head"><span class="app-icon" aria-hidden="true">↗</span><h2 id="track-title">Моя траектория</h2></div>
+        <div class="levels"><span>L0</span><b>→</b><span>L1</span></div>
+        <p>Следующий шаг:<strong>Перейти на уровень L1</strong></p>
+        <a class="trajectory-more" href="/workspace/0">Подробнее ›</a>
+      </section>
+    </div>
+    <section class="metrics" aria-label="Показатели из демонстрационного макета">
+      <div><small>Уровень Impulse</small><strong>L0</strong><span>Учебный уровень</span></div>
+      <div><small>Задачи</small><strong>0</strong><span>Пока нет задач</span></div>
+      <div><small>Навыки</small><strong>2</strong><span>С подтверждёнными кейсами</span></div>
+    </section>
+    <section class="level-progress" aria-label="Следующий уровень">
+      <div class="level-heading">
+        <div><h2>Следующий уровень</h2><p>Уровень L0 · пройдено 1 из 2 обязательных курсов</p></div>
+        <div class="level-actions"><strong>L0 → L1</strong><button type="button" id="requirements-toggle" aria-expanded="false" aria-controls="requirements">Требования уровня ⌄</button></div>
+      </div>
+      <div class="progress-line"><div role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" aria-label="Обязательные курсы"><i></i></div><span>50% курсов</span></div>
+      <div id="requirements" hidden class="disclosure-body"><p>Пример требований: два обязательных курса и подтверждённая практика.</p><a href="/workspace/0">Перейти в настоящее приложение ›</a></div>
+    </section>
+    <details class="disclosure"><summary><span>Задачи и неделя<small>Текущая работа и история недели</small></span><span class="arrow" aria-hidden="true">⌄</span></summary><div class="disclosure-body"><p>На макете нет активных задач. Актуальные задачи доступны после входа.</p><a href="/workspace/0">Открыть задачи в Impulse ›</a></div></details>
+    <details class="disclosure"><summary><span>Инструменты<small>Траектория, скилл-паспорт и AI Buddy</small></span><span class="arrow" aria-hidden="true">⌄</span></summary><div class="disclosure-body"><p>Переходы в настоящие разделы регулируются правами учётной записи.</p><a href="/workspace/0">Открыть инструменты ›</a></div></details>
+  </main>
+  <p class="demo-indicator">Демо-макет · пример данных · <a href="/workspace/0">Открыть приложение</a></p>
+  <output id="toast" class="toast" aria-live="polite"></output>
+</body>
+</html>
