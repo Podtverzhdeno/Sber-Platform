@@ -173,7 +173,7 @@ describe("CalmSidebar", () => {
   it("restores keyboard focus when Escape closes a preview while a link group is focused", () => {
     renderParticipant(0);
     const edge = screen.getByRole("button", { name: "Показать навигацию" });
-    edge.focus();
+    fireEvent.focus(edge);
     expect(edge).toHaveAttribute("aria-expanded", "true");
     const group = screen.getByRole("button", { name: /Развитие/ });
     group.focus();
