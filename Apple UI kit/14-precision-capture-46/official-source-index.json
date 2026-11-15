@@ -1,0 +1,346 @@
+{
+  "schema_version": 1,
+  "registry": "Apple UI kit/14-precision-capture-46",
+  "verification_date": "2026-11-15",
+  "official_design_resources": "https://developer.apple.com/design/resources/",
+  "source_count": 24,
+  "case_count": 46,
+  "editable_apple_layers_inspected": false,
+  "apple_copyrighted_assets_included": false,
+  "sources": [
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-001",
+        "APP-CAP-002",
+        "APP-CAP-009"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-003",
+        "APP-CAP-004",
+        "APP-CAP-006"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-005"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/search-fields",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-007",
+        "APP-CAP-008"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-010",
+        "APP-CAP-012"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/popovers",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-011",
+        "APP-CAP-037"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-013",
+        "APP-CAP-014",
+        "APP-CAP-015",
+        "APP-CAP-016"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/segmented-controls",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-017"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/toggles",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-018",
+        "APP-CAP-019"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sliders",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-020"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/text-fields",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-021",
+        "APP-CAP-022",
+        "APP-CAP-025",
+        "APP-CAP-042"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/pickers",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-023",
+        "APP-CAP-024"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-026",
+        "APP-CAP-027",
+        "APP-CAP-028",
+        "APP-CAP-029",
+        "APP-CAP-030",
+        "APP-CAP-041"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/color",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-031"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/progress-indicators",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-032",
+        "APP-CAP-033"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/writing",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-034"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/alerts",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-035"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sheets",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-036"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/offering-help",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-038",
+        "APP-CAP-045"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/notifications",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-039"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/split-views",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-040"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/file-management",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-043"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/wallet",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-044"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    },
+    {
+      "url": "https://developer.apple.com/design/human-interface-guidelines/live-activities",
+      "publication": "Apple",
+      "source_type": "Human Interface Guidelines chapter",
+      "status": "OFFICIAL_HIG_CHAPTER_RESOLVED",
+      "verified_on": "2026-11-15",
+      "verification_scope": "Official page title and link resolved; this does not inspect editable design-kit layers",
+      "case_ids": [
+        "APP-CAP-046"
+      ],
+      "source_images_copied": false,
+      "source_frame_geometry_measured": false
+    }
+  ]
+}
