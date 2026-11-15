@@ -49,9 +49,22 @@ try{
  assert.ok(await detail.locator("p").first().isVisible());
  const external=page.locator(".case-card a[target='_blank']").first();
  assert.equal(await external.getAttribute("rel"),"noopener noreferrer");
+ // Capture the default catalog from the top. Tests above scroll to cards:
+ // otherwise a sticky header can be painted halfway down the full-page PNG.
+ await detail.locator("summary").click();
+ assert.equal(await detail.evaluate(el=>el.open),false,"Restore collapsed default details for evidence");
+ const resetScroll = async () => {
+  await page.evaluate(()=>{
+   document.documentElement.style.scrollBehavior="auto";
+   window.scrollTo({top:0,left:0,behavior:"instant"});
+  });
+  await page.waitForFunction(()=>window.scrollY===0);
+ };
+ await resetScroll();
  await page.screenshot({path:join(screenshots,"atlas-desktop.png"),fullPage:true,animations:"disabled"});
  for(const width of [390,320]){
   await page.setViewportSize({width,height:844});
+  await resetScroll();
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
   assert.ok(overflow<=1,"Horizontal overflow at "+width+": "+overflow);
   await page.screenshot({path:join(screenshots,"atlas-"+width+".png"),fullPage:true,animations:"disabled"});

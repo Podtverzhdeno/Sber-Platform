@@ -22,3 +22,8 @@
 - verification_limit: zero-dependency Node verification script and Chromium smoke were authored but NOT executed on an actual branch checkout; Figma/Sketch artboards remain uninspected and unmeasured; independent reviewer acceptance pending
 - handoff: REVIEW; validate exact branch in Chromium, check source provenance and license, only merge in stacked PR order with coordinator, no production deploy or main edits
 - blockers: editable original Apple 27 Figma/Sketch layers not available in current tool connections; source links do not imply layer inspection
+
+- reopened_at: 2026-11-15T21:58+03:00
+- reopened_reason: actual Chromium screenshots from Apple reference QA success run 43736411544 show sticky header captured mid-page in fullPage evidence after scroll; make evidence deterministic at scrollTop zero; no runtime or kit assets touched
+
+- screenshot_qa_fix: 2026-11-15T21:58+03:00; inspected exact Chromium artifact 14170652359 from run 43736411544; fullPage captured sticky header mid-document after automatic scroll; browser-smoke now restores details to collapsed and scrollY zero for 1440/390/320 before screenshot. JS syntax verified; fresh runner test required after downstream propagation.
