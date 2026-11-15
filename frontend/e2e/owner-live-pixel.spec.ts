@@ -52,18 +52,18 @@ test("approved live dashboard at 1422px has one floating header, no Menu and dyn
 test("reference Liquid Glass home has no duplicate requirements or unsolicited floating tips", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openPixelHome(page);
-  await expect(page.getByRole("button", { name: "План перехода" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Требования уровня" })).toBeVisible();
   await expect(page.getByText(/Обязательные курсы:.*Практика:/)).toHaveCount(0);
   await expect(page.locator(".participant-guide")).toHaveCount(0);
   // The hero uses the source's standard translucent .glass-card material;
   // Liquid Glass is reserved for the interactive toolbar and overlays.
   await expect(page.locator(".impulse-pixel__hero")).toHaveCSS("backdrop-filter", "none");
   await expect(page.locator(".topbar")).toHaveCSS("backdrop-filter", /blur/);
-  await expect(page.getByRole("button", { name: "План перехода" })).toHaveCSS("background-image", "none");
-  await expect(page.getByRole("button", { name: "План перехода" })).toHaveCSS("border-top-width", "0px");
+  await expect(page.getByRole("button", { name: "Требования уровня" })).toHaveCSS("background-image", "none");
+  await expect(page.getByRole("button", { name: "Требования уровня" })).toHaveCSS("border-top-width", "0px");
   await page.waitForTimeout(2200);
   await expect(page.locator(".participant-guide")).toHaveCount(0);
-  await page.getByRole("button", { name: "План перехода" }).click();
+  await page.getByRole("button", { name: "Требования уровня" }).click();
   await expect(page).toHaveURL(/\/workspace\/1(?:[?]|$)/);
 });
 
@@ -102,6 +102,16 @@ test("profile dropdown preserves logout/rating and mobile has no horizontal clip
   await expect(page.getByRole("button",{name:"Impulse — открыть разделы"})).toBeVisible();
   await page.getByRole("button",{name:"Меню профиля"}).click();
   await expect(page.getByRole("menuitem",{name:"Выйти"})).toBeVisible();
-  await expect(page.getByRole("menuitem",{name:"Рейтинг"})).toBeVisible();
+  // The menu follows the API-authorized navigation: the reader fixture does
+  // not grant Rating, and a hidden route must not become visible for a test.
+  const rankingAllowed = await page.evaluate(async () => {
+    const response = await fetch("/api/v1/me", { credentials: "same-origin" });
+    const authorized = await response.json() as { navigation: string[] };
+    return authorized.navigation.includes("Рейтинг");
+  });
+  const rating = page.getByRole("menuitem",{name:"Рейтинг"});
+  if (rankingAllowed) await expect(rating).toBeVisible();
+  else await expect(rating).toHaveCount(0);
+  await expect(page.getByRole("menuitem",{name:"Помощь"})).toBeVisible();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+2)).toBe(true);
 });

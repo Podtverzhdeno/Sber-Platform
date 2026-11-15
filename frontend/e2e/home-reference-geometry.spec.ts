@@ -75,7 +75,7 @@ for (const width of [1280, 1024, 768, 560, 320]) {
     await openApprovedHome(page);
     await expect(page.getByRole("heading", { name: "Моя траектория" })).toBeVisible();
     await expect(page.locator(".impulse-pixel__hero")).toBeVisible();
-    await expect(page.getByRole("button", { name: "План перехода" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Требования уровня" })).toBeVisible();
     await noHorizontalScroll(page);
   });
 }
@@ -83,7 +83,7 @@ for (const width of [1280, 1024, 768, 560, 320]) {
 test("nonduplicated requirements navigate to the actual authorized trajectory", async ({ page }) => {
   await openApprovedHome(page);
   await expect(page.getByText(/Обязательные курсы:.*Практика:/)).toHaveCount(0);
-  await page.getByRole("button", { name: "План перехода" }).click();
+  await page.getByRole("button", { name: "Требования уровня" }).click();
   await expect(page).toHaveURL(/\/workspace\/1(?:[?]|$)/);
 });
 

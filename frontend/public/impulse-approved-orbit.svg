@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1672" height="941" viewBox="0 0 1672 941" fill="none" role="img" aria-label="Декоративная орбитальная волна">
+<defs>
+<radialGradient id="a" cx="0" cy="0" r="1" gradientTransform="translate(1090 226) rotate(-23) scale(492 282)" gradientUnits="userSpaceOnUse"><stop stop-color="#376EBA" stop-opacity=".40"/><stop offset=".46" stop-color="#173B74" stop-opacity=".27"/><stop offset="1" stop-color="#081124" stop-opacity="0"/></radialGradient>
+<linearGradient id="beam" x1="840" y1="215" x2="1328" y2="51" gradientUnits="userSpaceOnUse"><stop stop-color="#2F71D2" stop-opacity=".55"/><stop offset=".27" stop-color="#79BAFF"/><stop offset=".63" stop-color="#2776DB" stop-opacity=".8"/><stop offset="1" stop-color="#133566" stop-opacity="0"/></linearGradient>
+<linearGradient id="mass" x1="1051" y1="57" x2="1195" y2="282" gradientUnits="userSpaceOnUse"><stop stop-color="#17335A" stop-opacity=".64"/><stop offset=".55" stop-color="#294A85" stop-opacity=".30"/><stop offset="1" stop-color="#071025" stop-opacity="0"/></linearGradient>
+<filter id="glow" x="-25%" y="-80%" width="150%" height="260%"><feGaussianBlur stdDeviation="13"/></filter>
+</defs>
+<ellipse cx="1063" cy="245" rx="560" ry="308" fill="url(#a)"/>
+<path d="M849 210 C925 125 988 110 1072 94 C1172 76 1279 82 1295 40 C1285 95 1217 174 1136 223 C1009 301 907 249 849 210Z" fill="url(#mass)"/>
+<path d="M849 210 C925 125 988 110 1072 94 C1172 76 1279 82 1295 40" stroke="url(#beam)" stroke-width="17" opacity=".25" filter="url(#glow)"/>
+<path d="M849 210 C925 125 988 110 1072 94 C1172 76 1279 82 1295 40" stroke="url(#beam)" stroke-width="2.1" opacity=".90"/>
+<ellipse cx="440" cy="408" rx="526" ry="361" fill="url(#a)" opacity=".24"/>
+</svg>

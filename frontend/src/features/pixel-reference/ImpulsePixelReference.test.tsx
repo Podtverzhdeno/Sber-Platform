@@ -91,7 +91,7 @@ describe("Impulse pixel reference", () => {
     render(<ImpulsePixelReference {...props({ onOpenRequirements })} />);
     expect(screen.queryByText(/Обязательные курсы:/)).not.toBeInTheDocument();
     expect(screen.queryByText(/Практика: [0-9]/)).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "План перехода" }));
+    fireEvent.click(screen.getByRole("button", { name: "Требования уровня" }));
     expect(onOpenRequirements).toHaveBeenCalledOnce();
   });
 

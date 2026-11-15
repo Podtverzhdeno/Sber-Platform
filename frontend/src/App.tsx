@@ -18,6 +18,7 @@ import { OwnerPixelHome } from "./features/owner-live-pixel/OwnerPixelHome";
 import { usePixelVisualMode } from "./features/pixel-integration/usePixelVisualMode";
 import { nextImpulseVisualMode } from "./features/pixel-reference/visual-modes";
 import "./features/owner-live-pixel/live-pixel-shell.scss";
+import "./features/owner-live-pixel/approved-home-20261115.scss";
 import {
   KPI_KEYS,
   KPI_TITLES,
