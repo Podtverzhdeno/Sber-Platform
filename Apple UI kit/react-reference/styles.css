@@ -1,0 +1,115 @@
+/* Standalone proposal: original Impulse web tokens, NOT sampled official Apple tokens. */
+/* Scope all styling to the opt-in .aui-kit root; no :root/body/App global overrides. */
+.aui-kit {
+  color-scheme: dark;
+  --aui-fg: #f4f7ff;
+  --aui-muted: #b5c5df;
+  --aui-bg: #0c1323;
+  --aui-content: #1c2a41;
+  --aui-control: #2b3e5d;
+  --aui-edge: rgb(220 232 255 / 22%);
+  --aui-accent: #78b4ff;
+  --aui-accent-ink: #08162e;
+  --aui-danger: #ff9a9e;
+  --aui-glass: rgb(38 58 86 / 76%);
+  --aui-glass-fallback: #283b56;
+  font: 400 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--aui-fg);
+  background-color: var(--aui-bg);
+}
+.aui-kit[data-theme="light"] {
+  color-scheme: light;
+  --aui-fg: #19283c;
+  --aui-muted: #57677e;
+  --aui-bg: #f3f5f9;
+  --aui-content: #ffffff;
+  --aui-control: #e9eef6;
+  --aui-edge: rgb(25 47 76 / 20%);
+  --aui-accent: #0969d5;
+  --aui-accent-ink: white;
+  --aui-danger: #a71e34;
+  --aui-glass: rgb(255 255 255 / 76%);
+  --aui-glass-fallback: #f3f5f9;
+}
+.aui-kit :where(button, input) { font: inherit; }
+.aui-kit :where(button, input, a):focus-visible {
+  outline: 3px solid var(--aui-accent); outline-offset: 3px;
+}
+.aui-kit .aui-glass {
+  color: var(--aui-fg);
+  border: 1px solid var(--aui-edge);
+  background: var(--aui-glass-fallback);
+  box-shadow: 0 15px 45px rgb(0 0 0 / 18%);
+}
+.aui-kit .aui-glass--clear { --aui-glass: rgb(38 58 86 / 36%); }
+.aui-kit[data-theme="light"] .aui-glass--clear { --aui-glass: rgb(255 255 255 / 40%); }
+@supports ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+  .aui-kit .aui-glass {
+    background: var(--aui-glass);
+    backdrop-filter: blur(20px) saturate(135%);
+    -webkit-backdrop-filter: blur(20px) saturate(135%);
+  }
+}
+.aui-kit .aui-content {
+  border: 1px solid var(--aui-edge);
+  border-radius: 20px;
+  background: var(--aui-content);
+  color: var(--aui-fg);
+  padding: 22px;
+}
+.aui-kit .aui-button,
+.aui-kit .aui-segmented__item,
+.aui-kit .aui-search__line button {
+  min-height: 44px;
+  min-width: 44px;
+  border: 1px solid var(--aui-edge);
+  border-radius: 13px;
+  padding: 9px 15px;
+  background: var(--aui-control);
+  color: var(--aui-fg);
+  cursor: pointer;
+}
+.aui-kit .aui-button:disabled,
+.aui-kit .aui-segmented__item:disabled { cursor: not-allowed; opacity: .55; }
+.aui-kit .aui-button--primary { background: var(--aui-accent); color: var(--aui-accent-ink); border-color: transparent; }
+.aui-kit .aui-button--destructive { color: var(--aui-danger); }
+.aui-kit .aui-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px; border-radius: 22px; }
+.aui-kit .aui-segmented { display: inline-flex; flex-wrap: wrap; max-width: 100%; gap: 3px; padding: 4px; border-radius: 15px; background: var(--aui-control); }
+.aui-kit .aui-segmented__item { background: transparent; border-color: transparent; }
+.aui-kit .aui-segmented__item[aria-pressed="true"] {
+  background: var(--aui-content);
+  color: var(--aui-fg);
+  box-shadow: 0 2px 7px rgb(0 0 0 / 12%);
+}
+.aui-kit .aui-search { display: grid; gap: 6px; min-width: 0; }
+.aui-kit .aui-search__line { display: flex; align-items: center; gap: 4px; border: 1px solid var(--aui-edge); border-radius: 13px; background: var(--aui-content); }
+.aui-kit .aui-search__line input { background: transparent; color: var(--aui-fg); border: 0; padding: 10px 13px; min-height: 44px; min-width: 0; flex: 1; }
+.aui-kit .aui-search__line input:focus-visible { outline-offset: -3px; border-radius: 13px; }
+.aui-kit .aui-notice { background: var(--aui-content); border: 1px solid var(--aui-edge); border-radius: 18px; padding: 20px; }
+.aui-kit .aui-notice h2 { font-size: 20px; margin: 0 0 6px; }
+.aui-kit .aui-notice p { color: var(--aui-muted); margin: 0 0 16px; }
+.aui-kit .aui-overlay {
+  color: var(--aui-fg); background: var(--aui-content); border: 1px solid var(--aui-edge);
+  border-radius: 22px; padding: 24px; max-height: min(90vh, 950px); max-width: min(540px, calc(100vw - 32px)); box-shadow: 0 22px 70px rgb(0 0 0 / 40%);
+}
+.aui-kit .aui-overlay::backdrop { background: rgb(0 0 0 / 50%); }
+.aui-kit .aui-overlay header { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+.aui-kit .aui-overlay header h2 { font-size: 20px; margin: 0; }
+.aui-kit .aui-overlay__body { margin-top: 15px; overflow-wrap: anywhere; }
+.aui-kit .aui-overlay--drawer {
+  margin: 0 auto 0 0; top: 0; bottom: 0; height: 100dvh; width: min(350px, 90vw);
+  max-height: 100dvh; border-radius: 0 26px 26px 0;
+}
+@media (prefers-reduced-motion: reduce) { .aui-kit *, .aui-kit *::before, .aui-kit *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+@media (prefers-reduced-transparency: reduce) {
+  .aui-kit .aui-glass { background: var(--aui-glass-fallback) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+}
+@media (forced-colors: active) {
+  .aui-kit .aui-glass, .aui-kit .aui-content, .aui-kit .aui-button,
+  .aui-kit .aui-segmented, .aui-kit .aui-notice, .aui-kit .aui-overlay {
+    background: Canvas; color: CanvasText; border: 1px solid CanvasText;
+    box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+  }
+  .aui-kit .aui-button--primary { background: Highlight; color: HighlightText; }
+  .aui-kit .aui-segmented__item[aria-pressed="true"] { outline: 2px solid Highlight; }
+}
