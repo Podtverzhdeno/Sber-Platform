@@ -1,0 +1,26 @@
+# Claim IMPULSE-COMMUNITY-REDESIGN-20261115
+
+- task_id: IMPULSE-COMMUNITY-REDESIGN-20261115
+- session_id: gpt6-owner-community-20261115-2200
+- status: IN_PROGRESS
+- started_at: 2026-11-15T22:00:00+03:00
+- heartbeat_at: 2026-11-15T22:00:00+03:00
+- owner_request: direct main -> auto Railway deployment, sequential redesign of user participant sections
+- base_revision: ccc8aa014952bd50cbfcbaeacaee9e24194c9d65
+- dependency: participant-five-section-content-first-20261115 SDD
+- write_scope:
+  - frontend/src/features/participant-community-hub/**
+  - frontend/src/features/participant-events.tsx (only local navigation and new CSS import)
+  - frontend/src/features/collaboration.tsx (only participant-only local navigation)
+  - .agents/coordination/claims/IMPULSE-COMMUNITY-REDESIGN-20261115.lock/status.md
+- excluded:
+  - frontend/src/App.tsx (Practice owner active)
+  - backend, API, migrations, roles and identity rules
+  - messages transport, data, attachments, task catalog, Railway configuration
+- acceptance:
+  - both Events and participant Messages show permission-safe 2-tab Community navigation on original /workspace/:section route
+  - events first fold Apple-like compact without hiding any functional content or evidence
+  - new unit tests, typecheck, scoped ESLint/build, browser 320/390/1440 and original messages regression
+  - merge to main only after verification; Railway source is main with automatic deployment
+- progress: claim acquired; code work starts after this file
+- blockers: independent screenshot visual review outstanding
