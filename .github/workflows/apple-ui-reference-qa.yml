@@ -1,0 +1,93 @@
+name: Apple UI reference quality gates
+
+on:
+  pull_request:
+    paths:
+      - "Apple UI kit/**"
+      - "tools/apple-ui-kit-qa/**"
+      - "docs/apple-official-reference-atlas-20261115/**"
+      - ".github/workflows/apple-ui-reference-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "Apple UI kit/**"
+      - "tools/apple-ui-kit-qa/**"
+      - "docs/apple-official-reference-atlas-20261115/**"
+      - ".github/workflows/apple-ui-reference-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apple-ui-reference-qa-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  reference-structure:
+    name: Verify Apple reference inventory and source provenance
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Check out exact tested revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Check test scripts before execution
+        run: |
+          node --check tools/apple-ui-kit-qa/verify-references.mjs
+          node --check tools/apple-ui-kit-qa/browser-smoke.mjs
+          node --check docs/apple-official-reference-atlas-20261115/verify.mjs
+          node --check docs/apple-official-reference-atlas-20261115/browser-smoke.mjs
+      - name: Verify 26 component case packages and offline workbench
+        run: node tools/apple-ui-kit-qa/verify-references.mjs
+      - name: Verify 46 official source references and atlas manifest
+        run: node docs/apple-official-reference-atlas-20261115/verify.mjs
+
+  reference-browser:
+    name: Chromium visual and interaction smoke
+    needs: reference-structure
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      CI: "true"
+      TZ: Europe/Moscow
+      APPLE_QA_OUTPUT: ${{ runner.temp }}/apple-kit-fidelity-visual-evidence
+      APPLE_ATLAS_SCREENSHOTS: ${{ runner.temp }}/apple-kit-source-atlas-evidence
+    steps:
+      - name: Check out exact tested revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Set up Node.js 24
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Install locked frontend Playwright dependency
+        working-directory: frontend
+        run: npm ci --ignore-scripts
+      - name: Install Chromium and required Linux libraries
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+      - name: Test local source atlas search, filters and mobile layout
+        run: node docs/apple-official-reference-atlas-20261115/browser-smoke.mjs
+      - name: Test fidelity A/B screenshots, RGB heatmap and exports
+        run: node tools/apple-ui-kit-qa/browser-smoke.mjs
+      - name: Upload source atlas desktop/mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: apple-source-atlas-visual-evidence
+          path: ${{ env.APPLE_ATLAS_SCREENSHOTS }}/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Upload fidelity comparison desktop/mobile screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: apple-fidelity-workbench-visual-evidence
+          path: ${{ env.APPLE_QA_OUTPUT }}/
+          retention-days: 14
+          if-no-files-found: warn
