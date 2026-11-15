@@ -1,7 +1,7 @@
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { PassportNextResultCard } from "./features/next-result";
 import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
-import { Bell, CircleHelp, Search } from "lucide-react";
+import { Bell, ChevronDown, CircleHelp, Moon, MoonStar, Search, Sun } from "lucide-react";
 import { BootcampV2Route } from "./features/bootcamp/route-v2";
 import { TrajectoryV2 } from "./features/trajectory-v2/page";
 import { SourceTrajectoryPage } from "./features/trajectory-v2/source-reference/source-route";
@@ -13,7 +13,10 @@ import { ActivityPanel } from "./features/activity-panel";
 import { MonthlyGoalCard } from "./features/monthly-goal-card";
 import { KpiDetailsBody } from "./features/kpi-details";
 import { TopbarEngagementIndicator } from "./features/engagement";
-import { TopbarRank } from "./features/rating-v2/topbar-rank";
+import { OwnerPixelHome } from "./features/owner-live-pixel/OwnerPixelHome";
+import { usePixelVisualMode } from "./features/pixel-integration/usePixelVisualMode";
+import { nextImpulseVisualMode } from "./features/pixel-reference/visual-modes";
+import "./features/owner-live-pixel/live-pixel-shell.scss";
 import {
   KPI_KEYS,
   KPI_TITLES,
@@ -50,7 +53,7 @@ import {
 } from "./app/theme";
 import { appQueryClient } from "./app/query";
 import { StatePanel } from "./components/ui";
-import { ThemeControl } from "./app/theme-controls/ThemeControl";
+
 import { workspaceLayout } from "./app/screen-layout";
 import { CalmSidebar } from "./features/calm-navigation/Sidebar";
 import { DevelopmentJourney, ProjectVerificationPage, PublicVerificationPage } from "./features/development";
@@ -418,7 +421,11 @@ function Workspace({
           currentSection === "Создать задачу" ? <CustomerScenario section={currentSection} /> : currentSection === "Сообщения" ? <MessagingWorkspace role="customer" personId={actor.person_id} quickTargets={{ task: navigation.findIndex((section) => section === "Задачи" || section === "Мои задачи") }} /> : currentSection === "Настройки" ? <ParticipantSettings actorName="Роман Воронов" consentScopes={actor.consent_scopes} role="customer" /> : <CustomerPremium navigation={actor.navigation} section={currentSection ?? "Главная"} onCreate={() => { window.location.assign("/workspace/2"); }} />
         ) : allowed && currentSection === "Главная" ? (
           actor.active_role === "participant" ? (
-            <ParticipantDashboard actor={actor} />
+            searchParams.get("home") === "legacy" ? <ParticipantDashboard actor={actor} /> : <OwnerPixelHome
+              displayName={actor.display_name}
+              navigation={navigation}
+              buddyAvailable={navigation.some((name) => name === "AI Buddy" || name === "AI-Buddy")}
+            />
           ) : actor.active_role === "mentor" ? (
             <MentorDashboard mentorName={actor.display_name} />
           ) : actor.active_role === "manager" ? (
@@ -1079,6 +1086,8 @@ function ImpulseApp() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [, setRankingOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const {mode: pixelMode, setMode: setPixelMode} = usePixelVisualMode();
   const [themeChoice, setThemeChoice] = useState(() => storedThemeChoice());
   useEffect(() => { applyTheme(themeChoice); }, [themeChoice]);
   useEffect(() => {
@@ -1098,6 +1107,20 @@ function ImpulseApp() {
       window.removeEventListener("storage", onStorage);
     };
   }, []);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+    const closeOnEscape=(event:KeyboardEvent)=>{if(event.key === "Escape")setProfileOpen(false);};
+    const closeOnOutside=(event:PointerEvent)=>{
+      if(event.target instanceof Element && !event.target.closest(".owner-profile"))setProfileOpen(false);
+    };
+    document.addEventListener("keydown",closeOnEscape);
+    document.addEventListener("pointerdown",closeOnOutside);
+    return ()=>{
+      document.removeEventListener("keydown",closeOnEscape);
+      document.removeEventListener("pointerdown",closeOnOutside);
+    };
+  },[profileOpen]);
 
   useEffect(() => {
     if (meQuery.data && !explicitSignOut.current) {
@@ -1322,7 +1345,7 @@ function ImpulseApp() {
   };
 
   return (
-    <main className={actor ? "page-shell page-shell--apple-overlay" : "page-shell"}>
+    <main className={actor ? `page-shell page-shell--apple-overlay page-shell--owner-pixel${actor.active_role === "participant" && location.pathname === "/workspace/0" && !location.search.includes("home=legacy") ? " page-shell--owner-pixel-home" : ""}` : "page-shell"}>
       <a className="skip-link" href="#workspace-main">
         Перейти к содержимому
       </a>
@@ -1330,6 +1353,10 @@ function ImpulseApp() {
       <header className="topbar">
         {actor ? (
           <>
+            <button type="button" className="owner-topbar-brand" aria-label="Impulse — открыть разделы"
+              onClick={() => { document.querySelector<HTMLButtonElement>(".calm-navigation__mobile-trigger")?.click(); }}>
+              <span className="owner-topbar-star" aria-hidden="true">✦</span><strong>Impulse</strong>
+            </button>
             <div className="global-search">
               <span aria-hidden="true" className="home-search-icon"><Search size={19} /></span>
               <label className="sr-only" htmlFor="global-search">
@@ -1390,18 +1417,20 @@ function ImpulseApp() {
               )}
             </div>
             <div className="header-actions">
-              <ThemeControl value={themeChoice} onChange={setThemeChoice} />
+              <button type="button" className="owner-theme-switch"
+                aria-label={`Тема: ${pixelMode === "light" ? "солнце" : pixelMode === "blue" ? "синяя луна" : "тёмная луна"}. Сменить тему`}
+                onClick={() => {
+                  const next=nextImpulseVisualMode(pixelMode);
+                  setPixelMode(next);
+                  setThemeChoice(next === "light" ? "light" : "dark");
+                }}>
+                {pixelMode === "light" ? <Sun size={21} aria-hidden="true"/> :
+                  pixelMode === "blue" ? <Moon size={21} aria-hidden="true"/> :
+                    <MoonStar size={21} aria-hidden="true"/>}
+              </button>
               {actor.active_role === "participant" && (
                 <TopbarEngagementIndicator personId={actor.person_id} />
               )}
-              {actor.active_role === "participant" && <button type="button" className="topbar-guide-btn"
-                title="Как устроена платформа" aria-label="Как здесь всё устроено?"
-                onClick={() => { window.dispatchEvent(new Event("impulse:guide:toggle")); }}>
-                <CircleHelp size={21} aria-hidden="true" />
-              </button>}
-              {actor.active_role === "participant" && actor.navigation.includes("Рейтинг") && <div className="ranking-wrapper">
-                <TopbarRank personId={actor.person_id} onOpen={() => { setRankingOpen(false); openSearchItem("Рейтинг"); }} />
-              </div>}
               <div className="notification-utility">
                 <button
                   className="notification-button"
@@ -1510,35 +1539,31 @@ function ImpulseApp() {
                   </section>
                 )}
               </div>
-              <button
-                type="button"
-                className="top-persona top-persona-link"
-                aria-label={actor.navigation.includes("Портфолио") ? "Открыть моё портфолио" : "Мой профиль"}
-                title={actor.navigation.includes("Портфолио") ? "Перейти в портфолио" : "Мой профиль"}
-                disabled={!actor.navigation.includes("Портфолио")}
-                onClick={() => { openSearchItem("Портфолио"); }}
-              >
-                <span className="mini-avatar" aria-hidden="true">
-                  {actor.active_role === "participant" && configQuery.data?.demo_mode === true ? (
-                    <img src="/home-reference/avatar.svg" alt="" className="home-reference-avatar" />
-                  ) : (
-                    actor.display_name.slice(0, 1)
-                  )}
-                </span>
-                <span>
-                  <strong>{actor.display_name}</strong>
-                  <small>{roleLabels[actor.active_role]}</small>
-                </span>
-              </button>
-              <button
-                className="ghost-button"
-                disabled={loggingOut}
-                onClick={() => {
-                  void logout();
-                }}
-              >
-                {loggingOut ? "Выходим…" : "Выйти"}
-              </button>
+              <div className="owner-profile" data-testid="owner-profile">
+                <button type="button" className="owner-profile-trigger" aria-label="Меню профиля"
+                  aria-expanded={profileOpen} aria-controls="owner-profile-menu"
+                  onClick={() => { setProfileOpen((open) => !open); setNotificationOpen(false); setSearchOpen(false); }}>
+                  <span className="mini-avatar" aria-hidden="true">
+                    {actor.active_role === "participant" && configQuery.data?.demo_mode === true ?
+                      <img src="/home-reference/avatar.svg" alt="" className="home-reference-avatar"/> :
+                      actor.display_name.slice(0,1)}
+                  </span>
+                  <ChevronDown size={16} aria-hidden="true"/>
+                </button>
+                {profileOpen && <div className="owner-profile-menu" id="owner-profile-menu" role="menu" aria-label="Профиль">
+                  <div className="owner-profile-identity">
+                    <strong>{actor.display_name}</strong><small>{roleLabels[actor.active_role]}</small>
+                  </div>
+                  {actor.navigation.includes("Портфолио") && <button type="button" role="menuitem" onClick={() => {setProfileOpen(false);openSearchItem("Портфолио");}}>Мой профиль</button>}
+                  {actor.navigation.includes("Рейтинг") && <button type="button" role="menuitem" onClick={() => {setProfileOpen(false);openSearchItem("Рейтинг");}}>Рейтинг</button>}
+                  {actor.active_role === "participant" && <button type="button" role="menuitem" onClick={() => {setProfileOpen(false);window.dispatchEvent(new Event("impulse:guide:toggle"));}}>
+                    <CircleHelp size={16} aria-hidden="true"/>Помощь
+                  </button>}
+                  <button type="button" role="menuitem" disabled={loggingOut} onClick={() => {setProfileOpen(false);void logout();}}>
+                    {loggingOut ? "Выходим…" : "Выйти"}
+                  </button>
+                </div>}
+              </div>
             </div>
           </>
         ) : (
