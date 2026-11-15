@@ -1,3 +1,4 @@
+import { openAuthorizedDestination } from "./helpers/open-authorized-destination";
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
@@ -111,7 +112,7 @@ test("paid application moves through submission and customer revision", async ({
 
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Задачи" }).click();
+  await openAuthorizedDestination(page, "Задачи", "Практика");
   await page.getByRole("button", { name: "Открыть условия версии 2" }).click();
   const consent = page.getByRole("dialog", { name: "Условия задачи · версия 2" });
   await expect(consent.getByText("Работающий MVP и отчёт по метрикам.")).toBeVisible();
@@ -125,7 +126,7 @@ test("paid application moves through submission and customer revision", async ({
   await expect(page.getByText("В работе").first()).toBeVisible();
   await expect(page.getByText(/30\s?000\s?₽/)).toHaveCount(0);
 
-  await page.getByRole("link", { name: "Мои проекты" }).click();
+  await openAuthorizedDestination(page, "Мои проекты", "Практика");
   await expect(page.getByRole("heading", { name: "Проекты в работе" })).toBeVisible();
   await expect(page.getByText("Можно начинать")).toBeVisible();
   await page.getByRole("button", { name: "Начать работу" }).click();
@@ -136,16 +137,18 @@ test("paid application moves through submission and customer revision", async ({
   await expect(page.getByText("Личный вклад · версия 1")).toBeVisible();
   await expect(page.getByText("На приёмке").first()).toBeVisible();
 
-  await page.getByRole("button", { name: "Выйти" }).click();
+  await page.getByRole("button", { name: "Меню профиля" }).click();
+  await page.getByRole("menuitem", { name: "Выйти" }).click();
   await page.locator('[data-persona="customer-roman"]').click();
-  await page.getByRole("link", { name: "Приёмка" }).click();
+  await openAuthorizedDestination(page, "Приёмка", "Задачи");
   await expect(page.getByText("Я реализовал API поиска и подготовил воспроизводимую проверку метрики.")).toBeVisible();
   await page.getByRole("button", { name: "Вернуть на доработку" }).click();
   await expect(page.getByText("Нужна доработка")).toBeVisible();
 
-  await page.getByRole("button", { name: "Выйти" }).click();
+  await page.getByRole("button", { name: "Меню профиля" }).click();
+  await page.getByRole("menuitem", { name: "Выйти" }).click();
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Мои проекты" }).click();
+  await openAuthorizedDestination(page, "Мои проекты", "Практика");
   await expect(page.getByText("Нужно уточнить результат и приложить воспроизводимые доказательства.")).toBeVisible();
   await expect(page.getByText(/Срок:/)).toBeVisible();
   await page.getByRole("button", { name: "Начать доработку" }).click();
@@ -175,7 +178,7 @@ test("withdraw confirmation revives the apply CTA and allows reapply", async ({ 
 
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Задачи" }).click();
+  await openAuthorizedDestination(page, "Задачи", "Практика");
   await expect(page.getByRole("heading", { name: "Мои задачи" })).toBeVisible();
   await expect(page.getByText("Ожидает решения")).toBeVisible();
 
@@ -223,7 +226,7 @@ test("surfaces the honest error when customer already accepted the application",
 
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Задачи" }).click();
+  await openAuthorizedDestination(page, "Задачи", "Практика");
   await expect(page.getByRole("heading", { name: "Мои задачи" })).toBeVisible();
   await page.getByRole("button", { name: "Отозвать заявку" }).click();
   const dialog = page.getByRole("dialog", { name: "Отозвать заявку?" });
