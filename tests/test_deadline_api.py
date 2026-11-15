@@ -45,7 +45,7 @@ def brief() -> dict[str, object]:
         "problem": "Поиск не находит документы по смыслу.",
         "deliverable": "MVP семантического индекса.",
         "acceptance_criteria": ["Offline-метрика выше baseline", "Демо воспроизводимо"],
-        "deadline_at": "2026-11-01T18:00:00Z",
+        "deadline_at": "2027-11-01T18:00:00Z",
         "data_constraints": "Синтетические данные.",
         "ip_terms": "Результат доступен заказчику.",
         "nominated_mentor_id": None,
@@ -192,7 +192,7 @@ def test_proposal_keeps_deadline_until_human_decision() -> None:
         refreshed = propose(
             api,
             assignment_id,
-            "2026-11-08T18:00:00Z",
+            "2027-11-08T18:00:00Z",
             "Интеграция заняла больше времени.",
             base_version,
         )
@@ -221,7 +221,7 @@ def test_proposal_is_stale_once_terms_move_on() -> None:
         revised = api.post(
             f"/api/v1/customer/tasks/{task_id}/terms",
             json={
-                "deadline_at": "2026-11-15T18:00:00Z",
+                "deadline_at": "2027-11-15T18:00:00Z",
                 "deliverable": "MVP семантического индекса.",
                 "acceptance_criteria": ["Offline-метрика выше baseline"],
             },
@@ -234,7 +234,7 @@ def test_proposal_is_stale_once_terms_move_on() -> None:
         stale = propose(
             api,
             assignment_id,
-            "2026-11-22T18:00:00Z",
+            "2027-11-22T18:00:00Z",
             "Актуализация после переноса сроков.",
             base_version,
         )
@@ -244,7 +244,7 @@ def test_proposal_is_stale_once_terms_move_on() -> None:
         refreshed = propose(
             api,
             assignment_id,
-            "2026-11-22T18:00:00Z",
+            "2027-11-22T18:00:00Z",
             "Актуализация после переноса сроков.",
             next_version,
         )
@@ -263,7 +263,7 @@ def test_approval_bumps_terms_version_and_moves_deadline() -> None:
         base_version = current_terms(api, task_id)["version"]
 
         proposed = propose(
-            api, assignment_id, "2026-11-08T18:00:00Z", "Нужна дополнительная неделя.", base_version
+            api, assignment_id, "2027-11-08T18:00:00Z", "Нужна дополнительная неделя.", base_version
         )
         assert proposed.status_code == 201
         request_id = proposed.json()["id"]
@@ -282,7 +282,7 @@ def test_approval_bumps_terms_version_and_moves_deadline() -> None:
 
         after = current_terms(api, task_id)
         assert after["version"] == base_version + 1
-        assert after["deadline_at"] == "2026-11-08T18:00:00Z"
+        assert after["deadline_at"] == "2027-11-08T18:00:00Z"
 
         mine = api.get(
             f"/api/v1/me/assignments/{assignment_id}/deadline-requests",
@@ -308,7 +308,7 @@ def test_rejection_keeps_deadline_and_comment_recorded() -> None:
         base_version = current_terms(api, task_id)["version"]
 
         proposed = propose(
-            api, assignment_id, "2026-12-01T18:00:00Z", "Слишком плотная неделя.", base_version
+            api, assignment_id, "2027-12-01T18:00:00Z", "Слишком плотная неделя.", base_version
         )
         assert proposed.status_code == 201
         request_id = proposed.json()["id"]
@@ -319,7 +319,7 @@ def test_rejection_keeps_deadline_and_comment_recorded() -> None:
 
         after = current_terms(api, task_id)
         assert after["version"] == base_version
-        assert after["deadline_at"] == "2026-11-01T18:00:00Z"
+        assert after["deadline_at"] == "2027-11-01T18:00:00Z"
 
 
 def test_double_decision_role_and_foreign_assignment_guards() -> None:
@@ -333,13 +333,13 @@ def test_double_decision_role_and_foreign_assignment_guards() -> None:
         base_version = current_terms(api, task_id)["version"]
 
         proposed = propose(
-            api, assignment_id, "2026-11-10T18:00:00Z", "Просьба команды.", base_version
+            api, assignment_id, "2027-11-10T18:00:00Z", "Просьба команды.", base_version
         )
         assert proposed.status_code == 201
         request_id = proposed.json()["id"]
 
         duplicate = propose(
-            api, assignment_id, "2026-11-11T18:00:00Z", "Второй запрос.", base_version
+            api, assignment_id, "2027-11-11T18:00:00Z", "Второй запрос.", base_version
         )
         assert duplicate.status_code == 409
         assert duplicate.json()["code"] == "DEADLINE_CHANGE_PENDING"
@@ -367,7 +367,7 @@ def test_participant_without_assignment_cannot_discuss_deadline() -> None:
         foreign = propose(
             api,
             ghost_assignment,
-            "2026-11-10T18:00:00Z",
+            "2027-11-10T18:00:00Z",
             "Попытка без назначения.",
             1,
             persona="participant-maria",
