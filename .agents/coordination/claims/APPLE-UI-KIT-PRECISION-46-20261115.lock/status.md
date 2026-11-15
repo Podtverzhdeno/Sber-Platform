@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-PRECISION-46-20261115
 - session_id: gpt6-20261115-precision-46-owner-continuation
-- status: IN_PROGRESS
+- status: REVIEW
 - started_on: 2026-11-15
 - base_revision: d7b1c0209b7a4fc849f937284e0335732b525b83 (source-only draft PR #181)
 - owner_instruction: "Продолжай вносить и коммитить"
@@ -26,5 +26,14 @@
 - validation_limits: Static GitHub readback, not a local Python script execution or browser screenshot. No Apple editable kit layers measured or licensed assets redistributed.
 - post_review_fix: corrected the offline gallery's CSS hidden-state selector; commit 37749f071486b282c20db31331edac86d50c50aa. Source of truth remains unmeasured.
 - owner_resume_20261115_1818: requested further commits. Scope unchanged; adding a standalone interactive state preview and source-to-web behavior verification, with no app or third-party asset changes.
+- owner_resume_work_20261115_1818:
+  - Added self-contained interactive-state-lab.html, 46 case links and 14 distinct original semantic web pattern families; dark/light, 320/390px, keyboard and accessibility fallbacks
+  - Added qa_browser.py Playwright offline Chromium smoke for 46 cases, form/menu/dialog/segmented/chat interactions, six viewport × theme screenshots; local QA output gitignored
+  - Strengthened verify.py with embedded case-index consistency, category/ARIA/fallback checks and candidate file path mapping guard
+  - Added IMPULSE_INTEGRATION_CROSSWALK.md and impulse-integration-candidates.json with all 46 cases mapped to 17 GitHub-confirmed *candidate* frontend source paths; no component ownership claim
+  - GitHub readback/static validation: JS syntax compiled, 46/46 embedded IDs matched manifest, 14/14 patterns exist, no external scripts, all 17 frontend file paths confirmed present
+  - Browser Playwright smoke and exact official Apple Figma/Sketch measurements **NOT EXECUTED** in this session; no screenshot parity or source-frame measurements claimed
+- latest_owner_continuation_commits: 758d7078223bab4534577a94885ce5d68bb5b11e; b2f2f85559c81e817e05f155fdc6b371fac48e49; 2dad0d0930510df1b8c4a90a49e80c1f6a53ffe4; ba9caead1f942446b77c5aaa489be48ccf1a2363; 7abed9ff025de36552a10564ef869b993f3864ed
+- review_criteria: independent reviewer should execute verify.py + qa_browser.py on exact PR head, compare screenshots with source frames when legally accessible, verify accessibility, code diff and other active claims
 - next_step: Review separate stacked PR, then owner/coordinator integrates only after claims/quality gate; do not merge from author session or modify existing claim owners.
 - blockers: actual official Apple 27 Figma/Sketch layers, pixels and component values not measured; no 1:1 fidelity claim. No local checkout/git status available through connected GitHub.
