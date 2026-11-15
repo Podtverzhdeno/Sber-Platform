@@ -47,6 +47,9 @@ def audit(root: Path) -> list[str]:
     categories = sorted(
         p for p in root.iterdir()
         if p.is_dir() and CATEGORY_PATTERN.fullmatch(p.name)
+        # The monorepo also has 06-cases/, 08-component-packs/ and other
+        # numbered modules. Atlas categories have dedicated source records.
+        and ((p / "references.json").is_file() or (p / "preview.svg").is_file())
     ) if root.exists() else []
     if len(categories) < 13:
         issues.append(f"only {len(categories)} category folders (expected at least 13)")
