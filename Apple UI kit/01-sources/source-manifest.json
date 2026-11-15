@@ -191,6 +191,21 @@
       "id": "design-kits-27-announce",
       "kind": "official-news",
       "url": "https://developer.apple.com/news/?id=e2lxw9l1"
+    },
+    {
+      "id": "notifications",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/notifications"
+    },
+    {
+      "id": "image-wells",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/image-wells"
+    },
+    {
+      "id": "collections",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/collections"
     }
   ]
 }
