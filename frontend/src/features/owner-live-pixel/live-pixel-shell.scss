@@ -264,6 +264,22 @@
   box-sizing:border-box;
   min-height:100vh;
 }
+/* Modal navigation must remain clickable across breakpoints; the closed
+   backdrop must never intercept work area controls. */
+.page-shell--owner-pixel.page-shell--apple-overlay .calm-navigation__backdrop {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.page-shell--owner-pixel.page-shell--apple-overlay .calm-navigation__backdrop--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  z-index: 150;
+}
+.page-shell--owner-pixel.page-shell--apple-overlay .calm-sidebar--open {
+  z-index: 151;
+}
 /* The shared floating header is fixed for every authenticated role. Reserve
    its physical footprint on non-home routes so page controls never start
    underneath the glass layer (analytics tabs were unclickable at desktop). */
