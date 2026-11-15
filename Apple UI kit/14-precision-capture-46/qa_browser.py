@@ -8,6 +8,7 @@ Run from a checked-out Sber-Platform revision:
 
 No network resources, Apple assets, production backend or live credentials required.
 """
+
 from __future__ import annotations
 
 import json
@@ -69,7 +70,12 @@ def main() -> None:
 
             page.locator('#cases button[data-index="16"]').click()  # APP-CAP-017 segmented
             page.locator('#stage button[data-action="segment"]').nth(1).click()
-            assert page.locator('#stage button[data-action="segment"]').nth(1).get_attribute("aria-pressed") == "true"
+            assert (
+                page.locator('#stage button[data-action="segment"]')
+                .nth(1)
+                .get_attribute("aria-pressed")
+                == "true"
+            )
 
             page.locator('#cases button[data-index="20"]').click()  # APP-CAP-021 forms
             page.locator('#stage input[name="title"]').fill("Тестовая задача")
@@ -79,7 +85,7 @@ def main() -> None:
             page.locator('#cases button[data-index="41"]').click()  # APP-CAP-042 messaging
             page.locator('#stage input[name="message"]').fill("Только демонстрация")
             page.locator('#stage form button[type="submit"]').click()
-            assert page.locator('#stage #messages .example-bubble').count() == 1
+            assert page.locator("#stage #messages .example-bubble").count() == 1
             assert "не отправлен" in page.locator("#status").inner_text()
 
             page.locator('#cases button[data-index="0"]').click()
@@ -93,7 +99,15 @@ def main() -> None:
                 assert page.evaluate("document.documentElement.dataset.theme") == theme
                 file = f"state-lab-{width}x{height}-{theme}.png"
                 page.screenshot(path=str(OUTPUT / file), full_page=True, animations="disabled")
-                evidence.append({"width": width, "height": height, "theme": theme, "screenshot": file, "page_errors": list(errors)})
+                evidence.append(
+                    {
+                        "width": width,
+                        "height": height,
+                        "theme": theme,
+                        "screenshot": file,
+                        "page_errors": list(errors),
+                    }
+                )
 
             if errors:
                 raise AssertionError(f"Browser JS errors at {width}x{height}: {errors}")
@@ -106,8 +120,12 @@ def main() -> None:
         "case_count": 46,
         "views": evidence,
     }
-    (OUTPUT / "report.json").write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    print(f"PASS: {len(records)} cases, 3 viewports, 2 themes, interactive controls; {len(evidence)} screenshots saved to {OUTPUT}")
+    (OUTPUT / "report.json").write_text(
+        json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    print(
+        f"PASS: {len(records)} cases, 3 viewports, 2 themes, interactive controls; {len(evidence)} screenshots saved to {OUTPUT}"
+    )
 
 
 if __name__ == "__main__":
