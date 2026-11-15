@@ -47,6 +47,25 @@ assert "<dialog" in lab and 'role="status"' in lab
 assert "prefers-reduced-motion" in lab and "prefers-reduced-transparency" in lab
 assert "forced-colors" in lab and "focus-visible" in lab
 assert '<script src=' not in lab and 'https://raw.githubusercontent.com' not in lab
+# Verify candidate paths against the actual checked-out Impulse repository.
+mapping = json.loads((root / "impulse-integration-candidates.json").read_text(encoding="utf-8"))
+targets = mapping["records"]
+assert len(targets) == 46
+assert [x["id"] for x in targets] == [e["id"] for e in items]
+assert mapping["production_code_modified_by_this_task"] is False
+assert mapping["component_ownership_or_runtime_usage_verified"] is False
+repo_root = root.parents[1]
+for target in targets:
+    assert target["review_level"] == "CANDIDATE_PATH_VERIFIED_ONLY"
+    assert target["source_frame_status"] == "MEASUREMENT_PENDING"
+    assert target["adoption_status"] == "NOT_IMPLEMENTED_BY_THIS_REFERENCE_TASK"
+    assert target["owner_visual_geometry_precedence"] is True
+    assert target["path_candidates"], target["id"]
+    for relative in target["path_candidates"]:
+        path = repo_root / relative
+        assert path.resolve().is_relative_to(repo_root.resolve()), relative
+        assert path.is_file(), f"missing candidate: {relative}"
+
 print(f"OK: {len(items)} case folders, {len(rows)} ledger rows, "
       f"{len(lab_cases)} indexed lab cases, {len(categories)} original study pattern families; "
       "no fabricated Apple measurements")
