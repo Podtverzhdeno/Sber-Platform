@@ -1,0 +1,11 @@
+# Claim IMPULSE-RATING-MESSAGE-AUTH-20261115
+- task_id: IMPULSE-RATING-MESSAGE-AUTH-20261115
+- status: IN_PROGRESS
+- source_sha: 05bbb8f16ef184058a1baf1594aeb6108c01c09b
+- session_id: gpt6-owner-results-nav-auth-20261115-2359
+- owner_instruction: continue functional Apple-minimal redesign with direct main/Railway after tests
+- scope: frontend/src/features/portfolio.tsx (only ParticipantRating export shim), frontend/src/features/participant-results-hub/message-route.ts + focused test, this status file
+- exclusion: frontend/src/App.tsx (Practice/UI-ALL owner), backend/**, rating-v2/page.tsx, role backend authorization
+- bug: ParticipantRating onOpenMessages currently navigates hard-coded /workspace/10, violating backend-owned actor.navigation
+- desired: actor-scoped optional destination; when unavailable, keep native rating fallback without unauthorized navigation
+- verification: 3+ Vitest cases, tsc, eslint, production build, behavior E2E if available; main CI and both Railway deployments
