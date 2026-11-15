@@ -1,0 +1,66 @@
+# Claim APPLE-UI-KIT-PRECISION-46-20261115
+
+- task_id: APPLE-UI-KIT-PRECISION-46-20261115
+- session_id: gpt6-20261115-precision-46-owner-continuation
+- status: REVIEW
+- started_on: 2026-11-15
+- base_revision: d7b1c0209b7a4fc849f937284e0335732b525b83 (source-only draft PR #181)
+- owner_instruction: "Продолжай вносить и коммитить"
+- depends_on: []
+- write_scope:
+  - Apple UI kit/14-precision-capture-46/**
+  - .agents/coordination/claims/APPLE-UI-KIT-PRECISION-46-20261115.lock/status.md
+- coordination: independent child branch based on PR #181, additive path not present in other Apple PRs; existing broad Apple claims are not edited or overwritten. Owner-requested continuation to be reviewed by their owner/coordinator.
+- excluded:
+  - existing Apple UI kit root files and 01-13 folders
+  - Apple UI kit/reference-cases/** and Apple UI kit/advanced-cases/**
+  - frontend/**, backend/**, App.tsx, docs/**, openspec/**, deployments, all other claims
+- verification:
+  - 46 unique source-linked reference capture records
+  - machine-readable manifest and consistent per-case markdown
+  - dependency-free Python validation of manifest + source status + exact path coverage
+  - GitHub fetch-back/readback and branch diff
+- progress: committed the source-backed 46-case precision capture registry on isolated branch; 46 case README files, JSON manifest, 46-row CSV measurement ledger, static gallery, Python stdlib verifier.
+- implementation_commit_sha: cf76965d0fa308c42873617e69cf8bf0a7ddd427
+- github_readback: SUCCESS (46 case directories, 46 unique sequential IDs, 46 CSV rows, 46 manifest entries, verified record 001 and validator source; compared branch vs parent and found 0 unrelated changes).
+- validation_limits: Static GitHub readback, not a local Python script execution or browser screenshot. No Apple editable kit layers measured or licensed assets redistributed.
+- post_review_fix: corrected the offline gallery's CSS hidden-state selector; commit 37749f071486b282c20db31331edac86d50c50aa. Source of truth remains unmeasured.
+- owner_resume_20261115_1818: requested further commits. Scope unchanged; adding a standalone interactive state preview and source-to-web behavior verification, with no app or third-party asset changes.
+- owner_resume_work_20261115_1818:
+  - Added self-contained interactive-state-lab.html, 46 case links and 14 distinct original semantic web pattern families; dark/light, 320/390px, keyboard and accessibility fallbacks
+  - Added qa_browser.py Playwright offline Chromium smoke for 46 cases, form/menu/dialog/segmented/chat interactions, six viewport × theme screenshots; local QA output gitignored
+  - Strengthened verify.py with embedded case-index consistency, category/ARIA/fallback checks and candidate file path mapping guard
+  - Added IMPULSE_INTEGRATION_CROSSWALK.md and impulse-integration-candidates.json with all 46 cases mapped to 17 GitHub-confirmed *candidate* frontend source paths; no component ownership claim
+  - GitHub readback/static validation: JS syntax compiled, 46/46 embedded IDs matched manifest, 14/14 patterns exist, no external scripts, all 17 frontend file paths confirmed present
+  - Browser Playwright smoke and exact official Apple Figma/Sketch measurements **NOT EXECUTED** in this session; no screenshot parity or source-frame measurements claimed
+- latest_owner_continuation_commits: 758d7078223bab4534577a94885ce5d68bb5b11e; b2f2f85559c81e817e05f155fdc6b371fac48e49; 2dad0d0930510df1b8c4a90a49e80c1f6a53ffe4; ba9caead1f942446b77c5aaa489be48ccf1a2363; 7abed9ff025de36552a10564ef869b993f3864ed
+- review_criteria: independent reviewer should execute verify.py + qa_browser.py on exact PR head, compare screenshots with source frames when legally accessible, verify accessibility, code diff and other active claims
+- owner_resume_20261115_source_audit: requested continued commits; refining 46 HIG source URLs to directly verified component guidance, synchronizing manifest/cases/gallery/ledger without editing other agent surfaces.
+- owner_resume_output_20261115_source_audit:
+  - Replaced 19 generic/less-specific Apple HIG pointers with directly relevant chapters, including segmented controls, toggles, sliders, pickers, progress indicators, alerts, popovers, Wallet, Live Activities and Offering help.
+  - Synchronized 19 case README files, manifest.json, gallery.html, interactive-state-lab.html, measurement-ledger.csv, verify.py and top-level README without changing other task scopes.
+  - All 46 cases now link to a specific official HIG chapter; all 24 distinct chapter URLs were opened on Apple Developer 2026-11-15. Documented native-versus-web limitations in SOURCE_COVERAGE_AUDIT.md.
+  - Added official-source-index.json with 24 unique source records, each linked to exact case IDs, explicit no-source-frame-measurement and no-copyrighted-assets flags; strengthened Python verifier.
+  - GitHub readback: manifest 46, source-index 24, linked case IDs 46 unique, ledger 46, gallery 46 in sync, embedded lab 46 in sync, JS syntax OK, no generic HIG index URLs, no source-index errors.
+  - Commits: b8acadf668aaa01685660c8dda04be6ef3c3f60e; d18524b30673950d4678287999f07efc5550ad3a.
+  - Verification not completed: checked-out Python verifier and Playwright browser run on the exact branch, Figma/Sketch original frame measurement, genuine pixel-by-pixel comparison with Impulse.
+  - PR #190 remains draft, independent acceptance pending; no main merge or deploy.
+- owner_resume_20261115_1927: owner requested further work; adding local, standalone pixel-difference comparison utility plus repeatable QA and related documentation entirely within the existing exclusive 14-precision-capture-46 scope.
+- owner_resume_20261115_pixel_qa:
+  - Added offline `pixel-compare.html`: local-only PNG/JPEG/WebP inputs, strict dimension match, RGBA MAE and changed ratio, split/overlay, heatmap, downloadable provenance-safe JSON.
+  - Added `test_pixel_compare.cjs`: seven deterministic numerical test cases and source safeguards; V8 executed the exact committed `differences()` function on 7 scenarios, all passed.
+  - Added `qa_pixel_compare.py`: optional Chromium/Playwright smoke with synthetic PNG fixtures, UI modes, download and no-network assertions. This script is committed but NOT executed in a checked-out browser.
+  - Added `PIXEL_COMPARE_WORKFLOW.md` and updated README, Python verifier and parent-spec link; all changes confined to 14-precision-capture-46 and this own claim.
+  - GitHub source readback: 8/8 selected files fetched; comparator JS syntax passed; 46 capture records and 24 official HIG chapter source records preserved; CSS/HTML contains no external scripts; source QA metadata preserves `pixel_parity_certified=false`.
+  - Precision limitations: this is raw RGBA pixel comparison, not perceptual/semantic similarity or an authorized Apple Figma frame export. No Apple screenshot/font/SF Symbol binary or actual React app code modified.
+  - Not verified: actual Chromium run on checked-out PR, real Figma/Sketch source frame geometry, comparison screenshot and independent reviewer acceptance. Do NOT merge or deploy from this author session.
+- owner_resume_20261115_2158: owner requested continuation; identified real failure in GitHub Actions CI run 43736535478: three own Python files fail Ruff formatting, while others in parent Apple UI kit also fail. Resuming for strictly scoped Ruff formatting and QA improvements.
+- owner_resume_20261115_ci_triage:
+  - Inspected GitHub Actions run 43736535478 for own PR #190 SHA 3344266e1e345c7e349bd6f51ea7850caf8cc647. CI failed, including backend Ruff formatter and some frontend E2E shards.
+  - Formatter logs identified 13 unformatted files: 3 under own `14-precision-capture-46/**` and 10 under parent-owned `Apple UI kit/scripts/**`. Applied exact Ruff formatter changes to qa_browser.py (e1758a84), qa_pixel_compare.py (bb2a0d3a), verify.py (79a2f77a). Removed unused qa_browser urlparse import (2e016a25).
+  - Did not edit the ten parent-owned scripts or UI runtime; later parent CI state must be checked separately.
+  - Added assert-based parent COMPONENT_ATLAS.md numbered 46-case queue/title drift guard to verify.py (b097e017; simplified b6fca4f4); GitHub readback confirmed original 46 titles match current parent.
+  - Added CI_TRIAGE_AND_REVIEW.md documenting historical run, path ownership, application E2E gates, exact-branch commands and remaining source fidelity blockers (b217952a).
+  - Current exact-head Ruff+Playwright CI not yet reported successful; no checked-out local browser execution and no Figma/Sketch measurements. Remain draft, independent review required.
+- next_step: Review separate stacked PR, then owner/coordinator integrates only after claims/quality gate; do not merge from author session or modify existing claim owners.
+- blockers: actual official Apple 27 Figma/Sketch layers, pixels and component values not measured; no 1:1 fidelity claim. No local checkout/git status available through connected GitHub.
