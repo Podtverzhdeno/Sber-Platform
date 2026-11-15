@@ -1,0 +1,14 @@
+# Claim IMPULSE-CI-NAVIGATION-REPAIR-20261115
+- task_id: IMPULSE-CI-NAVIGATION-REPAIR-20261115
+- status: IN_PROGRESS
+- session_id: gpt6-owner-ci-navigation-20261115-2350
+- source_sha: df10503806da8f66a741ffb0d0ab4d81d3d67cd1
+- owner_instruction: continue Impulse, immediate main to Railway after checks
+- narrow files:
+  - frontend/e2e/achievements-v2.spec.ts (old hidden-sidebar navigation expectations)
+  - frontend/e2e/portfolio.spec.ts (old hidden-sidebar navigation expectations)
+  - frontend/src/App.test.tsx (legacy sidebar tests; preserve functional navigation assertions)
+- exclusion: no frontend/src/App.tsx, sidebar production code, backend, Apple UI kit/**; Practice owner active
+- acceptance: auth-scoped routes via actor.navigation, assert new in-page Results links, user interactions and state; not silence failing assertions or skip real tests
+- verification: exact clean GitHub branch source, Vitest App, Chromium E2E (achievements, portfolio), ESLint/typecheck, CI and Railway post-merge
+- note: UI-ALL-APPLE owns general App.test scope; this narrowly scoped owner correction updates only known failing tests with expected original SHA, no background staging
