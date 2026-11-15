@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-QUALITY-GATES-20261115
 - session_id: gpt6-apple-kit-readonly-quality-gates-20261115-1819
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-15T18:19:00+03:00
 - heartbeat_at: 2026-11-15T18:19:00+03:00
 - depends_on: [APPLE-UI-KIT-FIDELITY-WORKBENCH-20261115]
@@ -15,5 +15,9 @@
 - excluded: Apple UI kit/**, frontend/**, backend/**, openspec/tasks.md, all other agents' claims, CI and deployment
 - objective: non-invasive QA validators of the 26 existing Apple concept-reference packs and dedicated browser regression smoke for the offline pixel comparison workbench
 - tests: node built-ins only for reference structure checks; Playwright browser smoke can use the repo's existing frontend-installed Playwright dependency (no package changes)
-- progress: claim created; files pending
+- progress: implemented four read-only QA reference files in tools/apple-ui-kit-qa: verify-references.mjs, browser-smoke.mjs, source-acceptance-matrix.csv, README.md
+- pull_request: https://github.com/Podtverzhdeno/Sber-Platform/pull/193 (draft; base docs/apple-ui-kit-fidelity-workbench-20261115)
+- verification_result: GitHub tree 26/26 matrix target READMEs present, 36 SVG files present, CSV 26 unique cases, JavaScript syntax 2/2, GitHub compare 5 additive paths including claim with zero existing kit or runtime edits
+- known_limit: actual Node/Chromium execution not performed on a checked-out repo; only remote tree validation, isolated pure-code parsing and prior 2x2 mock-pixel checks in earlier session
+- next_safe_step: independent reviewer runs both scripts on exact PR SHA after prior reference PR #184/#186/#189 are accepted; visual screenshots reviewed; only integrator merges to main
 - blockers: Apple kit parent and three descendant claims are REVIEW, so do not modify Apple UI kit paths; browser execution requires checked-out repository with frontend dependencies
