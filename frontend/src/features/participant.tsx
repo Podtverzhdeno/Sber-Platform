@@ -7,6 +7,7 @@ import { applyTheme } from "../app/theme";
 import { Badge, StatePanel } from "../components/ui";
 import { ParticipantAchievementsGallery } from "./achievements-v2/gallery-page";
 import { BuddyChatV2 } from "./buddy-chat-v2";
+import { AdditionalNavigation } from "./participant-additional-hub/AdditionalNavigation";
 
 const settingsTabs = ["Профиль", "Безопасность", "Предпочтения", "Согласия", "Подбор", "Уведомления", "Видимость для HR", "AI-Buddy"] as const;
 type SettingsTab = typeof settingsTabs[number];
@@ -74,7 +75,8 @@ export function ParticipantSettings({ actorName, consentScopes, role = "particip
     finally { setTalentSaving(false); }
   };
 
-  return <div className="participant-settings feature-stack" data-reference={role === "participant" ? "R-PAR-12" : undefined}>
+  return <div className={role === "participant" ? "participant-settings feature-stack additional-page" : "participant-settings feature-stack"} data-reference={role === "participant" ? "R-PAR-12" : undefined}>
+    {role === "participant" && <AdditionalNavigation activeSection="Настройки" />}
     <header className="participant-page-heading"><div><p className="eyebrow">Личный кабинет</p><h1 id="workspace-title">Настройки</h1><p className="lead">{role === "customer" ? "Управляйте профилем, приватностью и рабочими уведомлениями заказчика." : "Управляйте профилем, приватностью и тем, как платформа помогает строить карьерный путь."}</p></div><button type="button" disabled={saveProfile.isPending} onClick={() => { if (role === "participant") saveProfile.mutate(); else announce("Настройки сохранены"); }}>{saveProfile.isPending ? "Сохраняем…" : "Сохранить изменения"}</button></header>
     {saved && <div className="success-banner" role="status"><span>✓</span><div><strong>{saved}</strong><small>Изменения применены к вашему профилю.</small></div></div>}
     <div className="settings-layout"><nav className="settings-nav" aria-label="Разделы настроек">{visibleTabs.map((item) => <button className={tab === item ? "active" : ""} type="button" key={item} onClick={() => { setTab(item); }}><span>{item === "Профиль" ? "●" : item === "Безопасность" ? "◇" : item === "AI-Buddy" ? "✧" : "○"}</span>{item}</button>)}</nav>
@@ -103,12 +105,12 @@ export function ParticipantBuddy({ navigation = [] }: { navigation?: string[] })
     return <StatePanel kind="error" action="Обновить" onAction={() => {void profileQuery.refetch();}} />;
   }
   if (!profileQuery.data.buddy_enabled) {
-    return <div className="buddy-page feature-stack" data-reference="R-PAR-11">
+    return <div className="buddy-page feature-stack additional-page" data-reference="R-PAR-11"><AdditionalNavigation activeSection="AI-Buddy" />
       <header className="participant-page-heading"><div><p className="eyebrow">Персональный навигатор</p><h1 id="workspace-title">AI-Buddy</h1><p className="lead">AI-Buddy отключён в настройках.</p></div><Badge tone="warning">Модельные вызовы остановлены</Badge></header>
       <section className="buddy-optout" role="status"><strong>AI-Buddy выключен — модельные вызовы не выполняются</strong><p>Персональные сообщения не отправляются. Настройки можно изменить в разделе AI-Buddy.</p><button className="secondary-button" type="button" onClick={() => { const index=navigation.indexOf("Настройки"); if(index>=0)window.location.assign("/workspace/"+String(index)); }}>Открыть настройки</button></section>
     </div>;
   }
-  return <div className="buddy-page feature-stack" data-reference="R-PAR-11"><BuddyChatV2 profile={profileQuery.data} navigation={navigation} /></div>;
+  return <div className="buddy-page feature-stack additional-page" data-reference="R-PAR-11"><AdditionalNavigation activeSection="AI-Buddy" /><BuddyChatV2 profile={profileQuery.data} navigation={navigation} /></div>;
 }
 
 /** Retain the established route while the experience is powered by live evidence. */
