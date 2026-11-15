@@ -1,0 +1,37 @@
+name: Apple UI kit reference QA
+
+on:
+  pull_request:
+    paths:
+      - "Apple UI kit/**"
+      - ".github/workflows/apple-ui-reference-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "Apple UI kit/**"
+      - ".github/workflows/apple-ui-reference-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reference-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate docs, manifest, links and JS syntax
+        run: node "Apple UI kit/04-web-reference/verify-library.mjs"
+      - name: Validate original SVG board XML and provenance
+        run: python3 "Apple UI kit/04-web-reference/validate-svg-library.py"
+      - name: Explain scope of checks
+        run: |
+          echo "Structural reference QA only."
+          echo "No Apple UI Kit files redistributed and no pixel-perfect parity claimed."
+          echo "Browser rendering and Apple Figma/Sketch layer verification require a separate review."
