@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-REFERENCES-20261115
 - session_id: gpt6-owner-apple-ui-kit-references-20261115
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-15T17:01:00+03:00
 - heartbeat_at: 2026-11-15T19:15:00+03:00
 - base_revision: 0ab91bd29d21fb6ff7f4203824bfe113a251d012
@@ -63,3 +63,11 @@
 - Owner requested continuation of same reference-library task.
 - New work limited to `Apple UI kit/react-reference/**` and own claim status; no production integration, no release, no touching other agents' source files.
 - Next verification: fix keyboard/clear-focus edge cases, strengthen test cases, review exact resulting diff. GitHub branch updates use expected-head lease.
+
+## Handoff — focused React QA and branch conflict resolution (2026-11-15 19:15 +03:00)
+- New authored commits: `712782eb` (search clear-button focus retention and segmented absent-value fallback); `1a7aadda` (8th component test plus keyboard/focus regressions); `1441d208` (preserve current main README and move extended index to `README_REFERENCE_LIBRARY.md`, avoiding add/add conflict).
+- Source facts checked via GitHub: 13 category folders and reference metadata from earlier cycle retained; PR/main have **one shared Apple UI kit file** `Apple UI kit/README.md`, now content-identical. Mergeability changed to `true` on PR #181 after the handoff commit. Latest remote PR head may advance from parallel work and must be rechecked before merging.
+- Existing CI and Apple UI kit reference QA workflows were queued for mergeable revision 1441d208; no green CI or completed browser evaluation claimed.
+- Scope: only `Apple UI kit/react-reference/**`, this claim, and PR-only README/index reconciliation. No app runtime, user roles, API, production environment or main changed here.
+- Not verified: TS semantic typecheck, Vitest execution, Chromium/WebKit interactive QA, pixel diff or editable official Figma/Sketch layer measurements. Review/acceptance still required; native Liquid Glass cannot be claimed 1:1 in CSS.
+- Next safe step: independent reviewer checks the exact PR SHA, reruns reference integrity CI and tests new React controls, then approves integration if all checks pass. Do not auto-merge or deploy.
