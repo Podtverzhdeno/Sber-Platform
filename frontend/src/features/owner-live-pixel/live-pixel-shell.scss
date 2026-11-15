@@ -278,9 +278,11 @@
   pointer-events: none;
 }
 .page-shell--owner-pixel.page-shell--apple-overlay .calm-navigation__backdrop--open {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
+  position: fixed !important;
+  inset: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
   z-index: 150;
 }
 .page-shell--owner-pixel.page-shell--apple-overlay .calm-sidebar--open {
