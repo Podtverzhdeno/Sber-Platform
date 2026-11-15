@@ -29,9 +29,10 @@
 - [Open the interactive web gallery](./gallery.html): original HTML/CSS/JS examples, dark/light and interaction states.
 - [Open the local pixel comparator](./compare.html): upload your authorized reference image + Impulse screenshot; overlay, split and differential, JSON report.
 - [Official Apple visual references (remote preview links)](./visual-references.md): images loaded directly from Apple's site; no image binaries bundled.
-- [Source manifest, 32 direct Apple sources](./reference-manifest.json): machine-readable official Figma/Sketch, HIG and newsroom references.
+- [Source manifest, 32 linked Apple references](./reference-manifest.json): machine-readable official Figma/Sketch, HIG and newsroom sources.
 - [Apple WWDC study and 2026/2027 release links](./WWDC-official-study.md): carefully versioned verified sources.
 - [Measurement ledger CSV](./measurement-ledger.csv) and [usage guide](./measurements-guide.md): fill real component measurements from Apple's source files before claiming 1:1 parity.
+- [Offline structural QA script](./verify.mjs): run `node "Apple UI kit/verify.mjs"` after cloning this branch (not yet executed in a checked-out copy).
 
 ## What is included
 
