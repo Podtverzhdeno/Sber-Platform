@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-PRECISION-46-20261115
 - session_id: gpt6-20261115-precision-46-owner-continuation
-- status: IN_PROGRESS
+- status: REVIEW
 - started_on: 2026-11-15
 - base_revision: d7b1c0209b7a4fc849f937284e0335732b525b83 (source-only draft PR #181)
 - owner_instruction: "Продолжай вносить и коммитить"
@@ -20,5 +20,9 @@
   - machine-readable manifest and consistent per-case markdown
   - dependency-free Python validation of manifest + source status + exact path coverage
   - GitHub fetch-back/readback and branch diff
-- progress: owner-directed isolated branch and claim established; capture registry changes pending.
+- progress: committed the source-backed 46-case precision capture registry on isolated branch; 46 case README files, JSON manifest, 46-row CSV measurement ledger, static gallery, Python stdlib verifier.
+- implementation_commit_sha: cf76965d0fa308c42873617e69cf8bf0a7ddd427
+- github_readback: SUCCESS (46 case directories, 46 unique sequential IDs, 46 CSV rows, 46 manifest entries, verified record 001 and validator source; compared branch vs parent and found 0 unrelated changes).
+- validation_limits: Static GitHub readback, not a local Python script execution or browser screenshot. No Apple editable kit layers measured or licensed assets redistributed.
+- next_step: Review separate stacked PR, then owner/coordinator integrates only after claims/quality gate; do not merge from author session or modify existing claim owners.
 - blockers: actual official Apple 27 Figma/Sketch layers, pixels and component values not measured; no 1:1 fidelity claim. No local checkout/git status available through connected GitHub.
