@@ -2280,3 +2280,27 @@
     min-height: 0;
   }
 }
+
+/* R-PAR-02 narrow viewport containment: retain reference proportions while preventing
+   role names and long evidence labels from widening the whole workspace. */
+.workspace-content .trajectory-v2-heading > div:first-child,
+.workspace-content .trajectory-v2-columns > *,
+.workspace-content .trajectory-v2-role-stack,
+.workspace-content .trajectory-v2-reference-sidebar {
+  min-width: 0;
+}
+.workspace-content .trajectory-v2-detail,
+.workspace-content .trajectory-v2-reference-sidebar {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 690px) {
+  .workspace-content .trajectory-v2-roles,
+  .workspace-content .trajectory-v2-roles ul {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .workspace-content .trajectory-v2-stage-path {
+    max-width: 100%;
+    overscroll-behavior-inline: contain;
+  }
+}
