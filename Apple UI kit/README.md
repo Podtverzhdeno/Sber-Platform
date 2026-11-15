@@ -24,6 +24,7 @@
 |---|---|
 | 01-sources/official-links.md | Ссылки на оригиналы Apple, включая Figma, Sketch, HIG, видео, шрифты |
 | 01-sources/source-manifest.json | Машиночитаемый реестр прямых URL |
+| 01-sources/source-verification-20261115.md | Источник и степень подтверждения каждого Apple resource |
 | 02-specifications/liquid-glass.md | Material layers, regular/clear, правила эффекта и веб-ограничения |
 | 02-specifications/foundations.md | Семантика цвета, типографика, layout, motion, accessibility |
 | 02-specifications/component-catalog.md | Таблица элементов, состояний и Apple-референсов |
@@ -33,6 +34,9 @@
 | 04-web-reference/ | Авторский CSS и автономная HTML-галерея без ассетов Apple |
 | 05-legal-and-sources/LICENSING.md | Разрешённые и запрещённые способы использования Apple-ассетов |
 | 06-cases/README.md | Каталог 12 реальных сценариев переноса, каждый в собственной папке |
+| 06-cases/VISUAL_GALLERY.md | 12 SVG-превью, отображаемых непосредственно в GitHub |
+| 06-cases/visual-gallery.html | **12 оригинальных SVG-референсов** в единой галерее |
+| 06-cases/visual-manifest.json | Источники, категории, статусы и ограничения для 12 SVG |
 | 04-web-reference/casebook.html | Расширенная интерактивная галерея светлой/тёмной темы |
 | 04-web-reference/verify-library.mjs | Проверка структуры, линковки и синтаксиса JavaScript без сети |
 | 04-web-reference/compare-screenshots.py | Локальный pixel-overlay/MAE компаратор для **разрешённых** скриншотов |
@@ -60,3 +64,9 @@
 [Открыть casebook.html](04-web-reference/casebook.html) — в одной автономной web-странице показаны категории UI и реальные состояния. Отдельная [галерея 12 сценариев](06-cases/README.md) содержит конкретные правила для navigation, messaging, forms, dialogs, analytics, accessibility и других областей. Выделение в отдельные папки позволяет точечно переносить дизайн в IMPULSE без вмешательства в соседние подсистемы.
 
 **Важно:** результат находится в ветке PR, а не в `main` до объединения. Внутри нет официальных Apple assets, только ссылки, независимые документация и код.
+
+## 12 собственных визуальных референсов (новое)
+
+[Посмотреть 12 SVG прямо в GitHub](06-cases/VISUAL_GALLERY.md) · [Открыть HTML-галерею](06-cases/visual-gallery.html) · [Манифест 12 SVG](06-cases/visual-manifest.json) · [Каталог сценариев](06-cases/README.md).
+
+Это **наши векторные схемы 1600×900**, которые можно изучать/редактировать как SVG, но **они не являются скриншотами Apple и не дают гарантию совпадения 1:1**. Измерять настоящую геометрию необходимо по разрешённым оригинальным дизайн-файлам Apple (Figma/Sketch) на целевых состояниях. Если другие параллельные PR содержат альтернативные примеры, при слиянии сохраняйте каждую уникальную коллекцию и единственный согласованный README; [план согласования](07-integration/merge-handoff.md).
