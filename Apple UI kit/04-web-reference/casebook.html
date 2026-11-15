@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>IMPULSE / Apple-inspired casebook</title>
+  <link rel="stylesheet" href="./impulse-apple-tokens.css">
+  <link rel="stylesheet" href="./casebook.css">
+  <script defer src="./casebook.js"></script>
+</head>
+<body class="ai-shell">
+<a class="skip" href="#main">Перейти к содержимому</a>
+<div class="case-app">
+  <aside class="case-sidebar ai-glass" id="sidebar" aria-label="Разделы библиотеки">
+    <div class="case-brand"><span class="case-symbol" aria-hidden="true">I</span><span>IMPULSE<small>APPLE-INSPIRED REFERENCE</small></span></div>
+    <p class="eyebrow">UI CASEBOOK • 2026</p>
+    <nav class="case-nav" aria-label="Навигация примеров">
+      <button type="button" class="case-nav-link selected" data-view="overview" aria-current="page"><span aria-hidden="true">◫</span> Обзор</button>
+      <button type="button" class="case-nav-link" data-view="navigation"><span aria-hidden="true">⊞</span> Навигация</button>
+      <button type="button" class="case-nav-link" data-view="messaging"><span aria-hidden="true">◉</span> Сообщения</button>
+      <button type="button" class="case-nav-link" data-view="controls"><span aria-hidden="true">◌</span> Элементы</button>
+      <button type="button" class="case-nav-link" data-view="materials"><span aria-hidden="true">◈</span> Liquid Glass</button>
+    </nav>
+    <div class="case-sidebar-note">
+      <strong>Важно</strong>
+      <p>Это авторский web-образец. Не экспорт оригинального Apple UI Kit и не нативный SwiftUI.</p>
+      <a href="https://developer.apple.com/design/resources/" target="_blank" rel="noopener noreferrer">Официальные макеты Apple</a>
+    </div>
+  </aside>
+  <div class="case-main" id="main">
+    <header class="case-topbar ai-glass">
+      <button type="button" id="nav-toggle" class="case-iconbtn" aria-label="Открыть навигацию" aria-expanded="false" aria-controls="sidebar">☰</button>
+      <div class="case-titlewrap"><div class="eyebrow">REFERENCE LIBRARY</div><strong id="view-heading">Обзор компонентов</strong></div>
+      <div class="case-top-actions">
+        <label class="case-theme-label" for="theme-mode">Тема</label>
+        <select class="ai-input case-theme" id="theme-mode" aria-label="Тема оформления">
+          <option value="light">Светлая</option><option value="dark">Тёмная</option><option value="system">Системная</option>
+        </select>
+        <button type="button" class="case-iconbtn" id="open-dialog" aria-label="Открыть пример модального окна" title="Диалог">⋯</button>
+      </div>
+    </header>
+    <div class="case-main-content">
+      <section class="case-view" id="view-overview" data-section="overview">
+        <div class="case-hero">
+          <div><span class="case-chip">DESIGN LANGUAGE 27</span><h1>Одна система.<br><em>Все сценарии.</em></h1>
+            <p>Интерфейсные образцы для IMPULSE: аккуратные слои, понятная навигация, структурированные данные, доступные контролы.</p>
+            <div class="case-cta"><button class="ai-btn primary" type="button" data-go="controls">Исследовать элементы</button><button class="ai-btn" type="button" data-go="materials">Изучить материал</button></div>
+          </div>
+          <div class="case-hero-art" aria-label="Самостоятельная иллюстрация прозрачных панелей">
+            <div class="orb orb-a"></div><div class="orb orb-b"></div>
+            <div class="case-glass-stack ai-glass"><span class="eyebrow">FLOATING CONTROL</span><span class="case-glass-actions"><b>◀</b><b>▶</b><b>⌕</b></span></div>
+            <div class="case-floatcard ai-glass"><div class="case-avatar">A</div><div><strong>Новый этап</strong><p>Прогресс обновлён</p></div><span class="case-status-dot"></span></div>
+          </div>
+        </div>
+        <div class="case-statgrid">
+          <article class="case-stat"><span>Компоненты</span><strong>32<span>+</span></strong><small>каталог и состояния</small></article>
+          <article class="case-stat"><span>Сценарии</span><strong>08</strong><small>папок с требованиями</small></article>
+          <article class="case-stat"><span>Темы</span><strong>02<span>+</span></strong><small>светлая / тёмная / система</small></article>
+        </div>
+        <div class="case-sectiontitle"><div><div class="eyebrow">CASES</div><h2>Библиотека решений</h2></div></div>
+        <div class="case-grid">
+          <button type="button" class="case-tile" data-go="navigation"><span class="case-tile-icon">⊞</span><strong>Navigation</strong><small>Sidebar, toolbar, selection</small><span class="case-tile-link">Просмотреть ›</span></button>
+          <button type="button" class="case-tile" data-go="messaging"><span class="case-tile-icon">◉</span><strong>Messaging</strong><small>Threads, bubbles, composer</small><span class="case-tile-link">Просмотреть ›</span></button>
+          <button type="button" class="case-tile" data-go="controls"><span class="case-tile-icon">◌</span><strong>Controls</strong><small>Buttons, fields, segmented</small><span class="case-tile-link">Просмотреть ›</span></button>
+          <button type="button" class="case-tile" data-go="materials"><span class="case-tile-icon">◈</span><strong>Materials</strong><small>Regular, clear, fallback</small><span class="case-tile-link">Просмотреть ›</span></button>
+        </div>
+      </section>
+      <section class="case-view" id="view-navigation" data-section="navigation" hidden>
+        <div class="case-heading"><div class="eyebrow">01 / NAVIGATION</div><h1>Навигация</h1><p>Структура и управление отделены от контента. Выбранный пункт и фокус различимы.</p></div>
+        <div class="case-split">
+          <div class="case-panel"><h2>Группы и состояния</h2>
+            <div class="case-inner-nav">
+              <p class="eyebrow">ОБУЧЕНИЕ</p>
+              <button class="case-inner-link active" type="button" aria-current="page">◉ <span>Моя траектория</span><span class="case-chip subtle">8</span></button>
+              <button class="case-inner-link" type="button">▤ <span>Bootcamp</span></button>
+              <button class="case-inner-link" type="button">◇ <span>Практика</span></button>
+              <p class="eyebrow">СООБЩЕСТВО</p>
+              <button class="case-inner-link" type="button">◌ <span>Сообщения</span><span class="case-pill">3</span></button>
+              <button class="case-inner-link" type="button" disabled>▫ <span>Недоступный раздел</span></button>
+            </div>
+          </div>
+          <div class="case-panel"><h2>Toolbar & actions</h2>
+            <div class="case-inline-toolbar ai-glass" role="toolbar" aria-label="Пример панели инструментов">
+              <button class="case-iconbtn" aria-label="Назад" type="button">‹</button>
+              <strong>Мои проекты</strong><span class="case-spacer"></span>
+              <button class="case-iconbtn" aria-label="Поиск" type="button">⌕</button>
+              <button class="ai-btn primary" id="nav-new" type="button">Новый проект</button>
+            </div>
+            <p class="case-note">Кнопки иллюстративные, создание реального проекта здесь не выполняется.</p>
+            <div class="case-subbox"><strong>Проверки</strong><p>Tab / Shift+Tab, selection, overlay, длинные русские названия, темизация, ширина 390px.</p></div>
+          </div>
+        </div>
+      </section>
+      <section class="case-view" id="view-messaging" data-section="messaging" hidden>
+        <div class="case-heading"><div class="eyebrow">02 / MESSAGES</div><h1>Сообщения</h1><p>Плотная информация остаётся на читаемых поверхностях; стекло используется для оболочки.</p></div>
+        <div class="case-chat">
+          <div class="case-chat-list"><div class="case-chat-search"><input class="ai-input" type="search" id="conversation-search" placeholder="Поиск бесед…" aria-label="Поиск бесед"></div>
+            <div class="case-chat-row active" data-conversation="0"><span class="case-avatar lavender">К</span><div><strong>Команда проекта</strong><small>Последнее обсуждение макета</small></div><span class="case-time">12:40</span></div>
+            <div class="case-chat-row" data-conversation="1"><span class="case-avatar peach">М</span><div><strong>Ментор</strong><small>Следующая встреча</small></div><span class="case-time">Вчера</span></div>
+            <div class="case-chat-row" data-conversation="2"><span class="case-avatar teal">И</span><div><strong>Импульс</strong><small>Уведомления</small></div><span class="case-time">Пн</span></div>
+            <p class="case-chat-none" id="conversation-none" hidden>Ничего не найдено</p>
+          </div>
+          <div class="case-thread">
+            <div class="case-threadhead"><span class="case-avatar lavender">К</span><div><strong id="conversation-title">Команда проекта</strong><small>Демонстрационная переписка</small></div><span class="case-spacer"></span><span class="case-chip subtle">Макет</span></div>
+            <div class="case-threadbody" id="message-thread" aria-label="История сообщений">
+              <div class="case-date">Сегодня</div>
+              <div class="case-message">Привет! Посмотрим новую визуальную концепцию?</div>
+              <div class="case-message sent">Да, соберём все состояния в единой библиотеке.</div>
+              <div class="case-message">Отлично, начнём с навигации и форм.</div>
+            </div>
+            <form id="message-form" class="case-compose" aria-label="Отправить демонстрационное сообщение"><input id="message-text" class="ai-input" aria-label="Сообщение" placeholder="Сообщение…" maxlength="300" required><button class="ai-btn primary" type="submit" aria-label="Отправить сообщение">↑</button></form>
+            <small class="case-note">Локальный макет: сообщение не отправляется на сервер.</small>
+          </div>
+        </div>
+      </section>
+      <section class="case-view" id="view-controls" data-section="controls" hidden>
+        <div class="case-heading"><div class="eyebrow">03 / INTERACTIONS</div><h1>Элементы управления</h1><p>Приоритеты действий, состояния фокуса, выбор, поля ввода и уведомления.</p></div>
+        <div class="case-split">
+          <div class="case-panel"><h2>Buttons</h2><div class="case-row"><button class="ai-btn primary" id="toast-show" type="button">Сохранить изменения</button><button class="ai-btn" id="show-dialog-secondary" type="button">Открыть диалог</button><button class="ai-btn" disabled>Недоступно</button></div>
+            <h2>Search and fields</h2><label class="case-field">Название проекта<input class="ai-input" id="project-name" maxlength="64" placeholder="Например, мобильный интерфейс"></label>
+            <p class="case-note" id="field-hint">Поле для примера, данные не сохраняются.</p>
+            <label class="case-field">Поиск<input class="ai-input" id="component-filter" type="search" placeholder="Введите запрос…"></label><div id="component-results" class="case-search-results" aria-live="polite"></div>
+          </div>
+          <div class="case-panel"><h2>Selection & toggles</h2>
+            <div class="case-segmented" role="group" aria-label="Режим представления"><button type="button" class="active" aria-pressed="true" data-segment="cards">Карточки</button><button type="button" aria-pressed="false" data-segment="list">Список</button><button type="button" aria-pressed="false" data-segment="compact">Компактно</button></div>
+            <p id="segment-result" class="case-subbox">Сейчас выбрано: Карточки</p>
+            <label class="case-switch"><input type="checkbox" checked id="notify-toggle"> Включить уведомления</label>
+            <label class="case-switch"><input type="checkbox" id="weekly-toggle"> Еженедельный отчёт</label>
+            <p class="case-note">Все состояния изменяются локально, без API.</p>
+          </div>
+        </div>
+      </section>
+      <section class="case-view" id="view-materials" data-section="materials" hidden>
+        <div class="case-heading"><div class="eyebrow">04 / MATERIAL LAYERS</div><h1>Liquid Glass</h1><p>Разница между функциональными прозрачными слоями и непрозрачной поверхностью контента.</p></div>
+        <div class="case-mat-grid">
+          <div class="case-mat-scene glass-bg-a"><div class="case-mat-floater ai-glass"><span class="eyebrow">REGULAR • WEB APPROXIMATION</span><strong>Навигация поверх содержимого</strong><small>Blur, отражённый свет и мягкая граница</small></div></div>
+          <div class="case-mat-scene glass-bg-b"><div class="case-mat-floater ai-glass case-clear"><span class="eyebrow">CLEAR • WEB APPROXIMATION</span><strong>Контроль поверх изображения</strong><small>Контраст обязателен на ярких фонах</small></div></div>
+          <div class="case-mat-scene solid-bg"><div class="case-mat-solid ai-surface"><span class="eyebrow">CONTENT LAYER • SOLID</span><strong>Данные, таблицы, документы</strong><small>Непрозрачная поверхность сохраняет читаемость</small></div></div>
+        </div>
+        <p class="case-note">Нативное преломление Apple отсутствует в CSS. Элементы не содержат системной графики, шрифтов или изображений Apple. Для сравнения с оригиналом откройте <a href="https://developer.apple.com/design/human-interface-guidelines/materials" target="_blank" rel="noopener noreferrer">Apple HIG / Materials</a>.</p>
+      </section>
+      <footer class="case-footer"><span>IMPULSE UI reference · оригинальный самостоятельный код</span><a href="https://developer.apple.com/design/resources/" target="_blank" rel="noopener noreferrer">Источник Apple HIG и UI kits</a></footer>
+    </div>
+  </div>
+</div>
+<dialog class="case-dialog" id="sample-dialog" aria-labelledby="dialog-title">
+  <h2 id="dialog-title">Подтвердить действие?</h2>
+  <p>Это пример диалогового окна. Данные не изменяются.</p>
+  <div class="case-row end"><button class="ai-btn" id="dialog-cancel" type="button">Отмена</button><button class="ai-btn primary" id="dialog-confirm" type="button">Понятно</button></div>
+</dialog>
+<div id="toast" class="case-toast ai-glass" role="status" aria-live="polite" hidden>Пример уведомления: действие подтверждено</div>
+</body>
+</html>
