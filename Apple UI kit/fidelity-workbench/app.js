@@ -122,6 +122,7 @@ function calculate() {
   status("Diff рассчитан");
 }
 function refresh() {
+  const wantedMode = state.mode;
   resetStats();renderImages();
   if(!present()){note("Нужно выбрать два изображения. Анализ выполняется без сетевых запросов.");status("Ожидаются изображения");return;}
   if(!dimensionsMatch()){
@@ -129,7 +130,7 @@ function refresh() {
     status("Разный размер изображений");return;
   }
   note("Размеры совпадают: "+format(state.source.width)+" × "+format(state.source.height)+" px. RGB сравнивается без ресайза, прозрачность компонуется на белый фон.");
-  try {calculate();}
+  try {calculate();setMode(wantedMode);}
   catch(error) {resetStats();setMode("overlay");note("Не удалось рассчитать diff: "+error.message,true);status("Ошибка анализа");}
 }
 function save(blob,name) {
