@@ -10,6 +10,7 @@ Run:
 Never a native Apple UI or 1:1 visual certification. All PNG bytes are original
 deterministic fixtures generated entirely in Python's standard library.
 """
+
 from __future__ import annotations
 
 import json
@@ -32,10 +33,7 @@ def make_png_rgba(width: int, height: int, pixels: bytes) -> bytes:
         crc = zlib.crc32(tag + data) & 0xFFFFFFFF
         return struct.pack(">I", len(data)) + tag + data + struct.pack(">I", crc)
 
-    rows = b"".join(
-        b"\x00" + pixels[y * width * 4 : (y + 1) * width * 4]
-        for y in range(height)
-    )
+    rows = b"".join(b"\x00" + pixels[y * width * 4 : (y + 1) * width * 4] for y in range(height))
     return (
         b"\x89PNG\r\n\x1a\n"
         + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 6, 0, 0, 0))
@@ -55,11 +53,18 @@ def main() -> None:
     different_size = make_png_rgba(1, 1, bytes([0, 0, 0, 255]))
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True, args=["--no-sandbox"])
-        page = browser.new_page(viewport={"width": 1280, "height": 800}, locale="ru-RU", accept_downloads=True)
+        page = browser.new_page(
+            viewport={"width": 1280, "height": 800}, locale="ru-RU", accept_downloads=True
+        )
         failures: list[str] = []
         external: list[str] = []
         page.on("pageerror", lambda exc: failures.append(str(exc)))
-        page.on("request", lambda req: external.append(req.url) if req.url.startswith(("http:", "https:")) else None)
+        page.on(
+            "request",
+            lambda req: (
+                external.append(req.url) if req.url.startswith(("http:", "https:")) else None
+            ),
+        )
         page.route("https://**/*", lambda route: route.abort())
         page.route("http://**/*", lambda route: route.abort())
         page.goto((ROOT / "pixel-compare.html").resolve().as_uri(), wait_until="load")
@@ -104,7 +109,9 @@ def main() -> None:
         assert report["pixel_parity_certified"] is False
         assert report["source_geometry_verified"] is False
 
-        page.screenshot(path=str(OUT / "pixel-compare-smoke.png"), full_page=True, animations="disabled")
+        page.screenshot(
+            path=str(OUT / "pixel-compare-smoke.png"), full_page=True, animations="disabled"
+        )
 
         # Unlike auto-resizing/aligning comparators, this one refuses mismatched images.
         page.locator("#actual-file").set_input_files(file_input("wrong-size.png", different_size))
@@ -116,7 +123,9 @@ def main() -> None:
         assert not external, f"Unexpected network requests: {external}"
         browser.close()
 
-    print("PASS: synthetic PNGs, threshold/MAE, heatmap, split/overlay, JSON download, mismatched size, no network")
+    print(
+        "PASS: synthetic PNGs, threshold/MAE, heatmap, split/overlay, JSON download, mismatched size, no network"
+    )
 
 
 if __name__ == "__main__":
