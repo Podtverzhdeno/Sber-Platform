@@ -52,13 +52,13 @@
 - https://developer.apple.com/design/human-interface-guidelines/lists-and-tables
 - https://developer.apple.com/design/human-interface-guidelines/progress-indicators
 
-Это ссылки-шаблоны по официальным названиям разделов HIG; при изменении Apple маршрута обращайтесь к HIG index. Не каждая вспомогательная ссылка проходила ручной просмотр страницы.
+Это ссылки по официальным названиям разделов HIG; при изменении Apple маршрута обращайтесь к HIG index. Не каждая вспомогательная ссылка проходила ручной просмотр страницы.
 
 ## Шрифты, символы и инструменты
 
 - https://developer.apple.com/design/resources/ — официальная загрузка SF Pro, SF Compact, SF Mono, New York, многоязычных семейств и product bezels.
 - https://developer.apple.com/fonts/ — лицензии и Apple Fonts.
-- https://developer.apple.com/sf-symbols/ — SF Symbols 27, более 7000 иконок, анимации / weights / scales.
+- https://developer.apple.com/sf-symbols/ — SF Symbols 8 beta / SF Symbols 7 (доступные на странице Apple Design Resources на 2026-11-15), более 7000 иконок, анимации / weights / scales.
 - https://developer.apple.com/icon-composer/ — Icon Composer.
 - https://help.figma.com/hc/en-us/articles/24037833895831-Get-started-with-Apple-s-UI-kit — порядок подключения официальных ресурсов Apple в Figma, подтверждение EULA.
 
