@@ -134,7 +134,7 @@ describe("calm participant homepage", () => {
     expect(screen.queryByTestId("calm-impulse-level")).toBeNull();
     expect(screen.queryByTestId("calm-verified-skills")).toBeNull();
     expect(screen.queryByText("L0")).toBeNull();
-    expect(screen.getByText("Данные об уровне пока недоступны.")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Следующий уровень" })).toBeTruthy();
   });
 
   it("counts only skills with confirmed cases and does not advertise unverified ones", () => {
