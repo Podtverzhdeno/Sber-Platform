@@ -137,9 +137,19 @@ async function openMessages(page: Page, opts: { unreadContact?: boolean; eventCo
 async function expectRect(page:Page, selector:string, expected:{x:number,y:number,width:number,height:number}, tolerance=8) {
   const actual = await page.locator(selector).boundingBox();
   expect(actual, selector+" must be visible").not.toBeNull();
+  // The compact, authorized Community tab rail sits ABOVE the original chat shell.
+  // Preserve exact column X/width and original bottom edge, moving Y and shrinking
+  // height only by the rail's measured height; other user roles have no rail.
+  const communityRail = page.locator(".messenger-page--community > .community-navigation--compact");
+  const railBounds = (await communityRail.count()) > 0 ? await communityRail.boundingBox() : null;
+  const shift = railBounds?.height ?? 0;
+  const target = { ...expected, y: expected.y + shift, height: expected.height - shift };
+  if (railBounds && actual) {
+    expect(actual.y).toBeGreaterThanOrEqual(railBounds.y + railBounds.height - tolerance);
+  }
   for(const key of ["x","y","width","height"] as const) {
-    expect(actual?.[key],selector+" "+key).toBeGreaterThanOrEqual(expected[key]-tolerance);
-    expect(actual?.[key],selector+" "+key).toBeLessThanOrEqual(expected[key]+tolerance);
+    expect(actual?.[key],selector+" "+key).toBeGreaterThanOrEqual(target[key]-tolerance);
+    expect(actual?.[key],selector+" "+key).toBeLessThanOrEqual(target[key]+tolerance);
   }
 }
 
