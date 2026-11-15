@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-PRECISION-46-20261115
 - session_id: gpt6-20261115-precision-46-owner-continuation
-- status: IN_PROGRESS
+- status: REVIEW
 - started_on: 2026-11-15
 - base_revision: d7b1c0209b7a4fc849f937284e0335732b525b83 (source-only draft PR #181)
 - owner_instruction: "Продолжай вносить и коммитить"
@@ -36,5 +36,14 @@
 - latest_owner_continuation_commits: 758d7078223bab4534577a94885ce5d68bb5b11e; b2f2f85559c81e817e05f155fdc6b371fac48e49; 2dad0d0930510df1b8c4a90a49e80c1f6a53ffe4; ba9caead1f942446b77c5aaa489be48ccf1a2363; 7abed9ff025de36552a10564ef869b993f3864ed
 - review_criteria: independent reviewer should execute verify.py + qa_browser.py on exact PR head, compare screenshots with source frames when legally accessible, verify accessibility, code diff and other active claims
 - owner_resume_20261115_source_audit: requested continued commits; refining 46 HIG source URLs to directly verified component guidance, synchronizing manifest/cases/gallery/ledger without editing other agent surfaces.
+- owner_resume_output_20261115_source_audit:
+  - Replaced 19 generic/less-specific Apple HIG pointers with directly relevant chapters, including segmented controls, toggles, sliders, pickers, progress indicators, alerts, popovers, Wallet, Live Activities and Offering help.
+  - Synchronized 19 case README files, manifest.json, gallery.html, interactive-state-lab.html, measurement-ledger.csv, verify.py and top-level README without changing other task scopes.
+  - All 46 cases now link to a specific official HIG chapter; all 24 distinct chapter URLs were opened on Apple Developer 2026-11-15. Documented native-versus-web limitations in SOURCE_COVERAGE_AUDIT.md.
+  - Added official-source-index.json with 24 unique source records, each linked to exact case IDs, explicit no-source-frame-measurement and no-copyrighted-assets flags; strengthened Python verifier.
+  - GitHub readback: manifest 46, source-index 24, linked case IDs 46 unique, ledger 46, gallery 46 in sync, embedded lab 46 in sync, JS syntax OK, no generic HIG index URLs, no source-index errors.
+  - Commits: b8acadf668aaa01685660c8dda04be6ef3c3f60e; d18524b30673950d4678287999f07efc5550ad3a.
+  - Verification not completed: checked-out Python verifier and Playwright browser run on the exact branch, Figma/Sketch original frame measurement, genuine pixel-by-pixel comparison with Impulse.
+  - PR #190 remains draft, independent acceptance pending; no main merge or deploy.
 - next_step: Review separate stacked PR, then owner/coordinator integrates only after claims/quality gate; do not merge from author session or modify existing claim owners.
 - blockers: actual official Apple 27 Figma/Sketch layers, pixels and component values not measured; no 1:1 fidelity claim. No local checkout/git status available through connected GitHub.
