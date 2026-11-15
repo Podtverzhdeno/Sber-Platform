@@ -82,6 +82,17 @@ for source in sources:
     assert source["source_frame_geometry_measured"] is False
     assert source["case_ids"] == [entry["id"] for entry in items if entry["hig_url"] == source["url"]]
 
+# Offline screenshot comparator source integrity. Runtime checks live in separate tests.
+pixel_html = (root / "pixel-compare.html").read_text(encoding="utf-8")
+for required in ("function differences(", "function loadImage(", "pixel_parity_certified:false",
+                 "source_geometry_verified:false", "URL.createObjectURL", 'href="../PIXEL_PARITY_QA.md"',
+                 "rgba_0_255", 'id="reference-file"', 'id="actual-file"', 'id="heatmap"'):
+    assert required in pixel_html, f"pixel-compare missing: {required}"
+assert not re.search(r"<script\\b[^>]*\\bsrc=", pixel_html, re.IGNORECASE)
+assert (root / "test_pixel_compare.cjs").is_file()
+assert (root / "qa_pixel_compare.py").is_file()
+assert (root / "PIXEL_COMPARE_WORKFLOW.md").is_file()
+
 print(f"OK: {len(items)} case folders, {len(rows)} ledger rows, "
       f"{len(lab_cases)} indexed lab cases, {len(categories)} original study pattern families; "
       "no fabricated Apple measurements")
