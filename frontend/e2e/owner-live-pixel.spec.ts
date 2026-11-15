@@ -25,12 +25,28 @@ test("approved live dashboard at 1422px has one floating header, no Menu and dyn
   const bar=await page.locator(".topbar").boundingBox();
   const hero=await page.locator(".impulse-pixel__hero").boundingBox();
   const trajectory=await page.locator(".impulse-pixel__trajectory").boundingBox();
+  // Exact geometry from impulse_pixel_reference.html: .header, .main,
+  // .hero-row and .glass-card (1422×803 reference viewport).
   expect(bar?.height).toBe(62);
-  expect(bar?.x).toBeGreaterThanOrEqual(50);
-  expect(bar?.x).toBeLessThanOrEqual(64);
-  expect(hero?.width).toBeGreaterThan(750);
+  expect(bar?.x).toBeGreaterThanOrEqual(54);
+  expect(bar?.x).toBeLessThanOrEqual(58);
+  expect(bar?.width).toBeGreaterThanOrEqual(1308);
+  expect(bar?.width).toBeLessThanOrEqual(1312);
+  const search = await page.locator(".topbar .global-search").boundingBox();
+  expect(search?.height).toBe(43);
+  expect(search?.width).toBeGreaterThan(470);
+  expect(search?.width).toBeLessThanOrEqual(646);
+  expect(hero?.x).toBeGreaterThanOrEqual(138);
+  expect(hero?.x).toBeLessThanOrEqual(150);
+  expect(hero?.width).toBeGreaterThan(785);
+  expect(hero?.width).toBeLessThan(800);
   expect(hero?.height).toBe(252);
-  expect(trajectory?.width).toBeGreaterThan(300);
+  expect(trajectory?.width).toBeGreaterThan(325);
+  expect(trajectory?.width).toBeLessThan(345);
+  await expect(page.locator(".topbar")).toHaveCSS("backdrop-filter", /blur/);
+  await expect(page.locator(".impulse-pixel__hero")).toHaveCSS("backdrop-filter", "none");
+  await expect(page.getByRole("button", { name: "Мой путь" })).toHaveCSS("background-image", "none");
+  await expect(page.getByRole("button", { name: "Мой путь" })).toHaveCSS("border-top-width", "0px");
 });
 
 test("reference Liquid Glass home has no duplicate requirements or unsolicited floating tips", async ({ page }) => {
@@ -39,8 +55,12 @@ test("reference Liquid Glass home has no duplicate requirements or unsolicited f
   await expect(page.getByRole("button", { name: "План перехода" })).toBeVisible();
   await expect(page.getByText(/Обязательные курсы:.*Практика:/)).toHaveCount(0);
   await expect(page.locator(".participant-guide")).toHaveCount(0);
-  await expect(page.locator(".impulse-pixel__hero")).toHaveCSS("backdrop-filter", /blur/);
+  // The hero uses the source's standard translucent .glass-card material;
+  // Liquid Glass is reserved for the interactive toolbar and overlays.
+  await expect(page.locator(".impulse-pixel__hero")).toHaveCSS("backdrop-filter", "none");
   await expect(page.locator(".topbar")).toHaveCSS("backdrop-filter", /blur/);
+  await expect(page.getByRole("button", { name: "План перехода" })).toHaveCSS("background-image", "none");
+  await expect(page.getByRole("button", { name: "План перехода" })).toHaveCSS("border-top-width", "0px");
   await page.waitForTimeout(2200);
   await expect(page.locator(".participant-guide")).toHaveCount(0);
   await page.getByRole("button", { name: "План перехода" }).click();
