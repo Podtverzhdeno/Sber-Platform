@@ -1,0 +1,28 @@
+# Claim APPLE-UI-KIT-VISUAL-CASES-20261115
+
+- task_id: APPLE-UI-KIT-VISUAL-CASES-20261115
+- session_id: gpt6-apple-visual-reference-cases-20261115
+- status: REVIEW
+- started_at: 2026-11-15T17:10:00+03:00
+- heartbeat_at: 2026-11-15T17:10:00+03:00
+- base_revision: 7d63016875ffb4c954fee43fbd01f42c85408eb5
+- branch: docs/apple-ui-kit-visual-cases-20261115
+- depends_on: [APPLE-UI-KIT-REFERENCES-20261115]
+- user_request: owner-directed follow-up to add quality visual references and a directory for each case
+- write_scope:
+  - Apple UI kit/reference-cases/**
+  - .agents/coordination/claims/APPLE-UI-KIT-VISUAL-CASES-20261115.lock/status.md
+- shared_files: []
+- exclusion: all existing Apple UI kit root files; all runtime and application files; existing coordination claims
+- parent_coordination: existing APPLE-UI-KIT-REFERENCES-20261115 is in REVIEW; work is staged as an additive isolated PR targeted at its branch, with no parent-file edits and no automatic merge
+- verification:
+  - XML parse every standalone SVG
+  - JSON manifest validation and file paths
+  - Apple source links, provenance, contrast and state coverage review
+  - GitHub branch path verification
+- progress: 16 independent visual scenario folders and 16 editable 1200×760 SVG covers; 35 new reference files, full Markdown instructions, external official source links, offline gallery and manifest
+- pull_request: https://github.com/Podtverzhdeno/Sber-Platform/pull/184 (draft; targets existing reference branch, not main)
+- verification_result: manifest 16/16 links resolve; GitHub tree 35/35 expected files; SVG structural checks 16/16 passed; isolated comparison 36 additions including claim, zero existing Apple UI Kit root modifications
+- validation_limit: SVG structural validation passed, but not visually rendered in a real browser; source Figma/Sketch layer extraction/pixel comparison pending
+- handoff: REVIEW; independent owner/coordinator review and merge PR #184 into parent reference branch before any main integration
+- blockers: official Apple 27 source kit layers and exact pixel measurements unavailable; all visuals must be labeled original conceptual web studies, never official Apple exports
