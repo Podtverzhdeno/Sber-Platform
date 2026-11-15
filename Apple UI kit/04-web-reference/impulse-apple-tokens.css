@@ -1,0 +1,112 @@
+/*
+ * Apple-inspired IMPULSE web reference (self-authored).
+ * NOT official Apple Design Resources, NOT exact numerical Figma data.
+ * No copyrighted fonts, SF Symbols or Apple artwork are embedded.
+ */
+:root {
+  color-scheme: light;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --ai-canvas: #f3f4f7;
+  --ai-surface: #ffffff;
+  --ai-surface-raised: #f8f9fb;
+  --ai-text: #202126;
+  --ai-muted: #626771;
+  --ai-stroke: rgba(45, 50, 66, .13);
+  --ai-accent: #1876e8;
+  --ai-accent-ink: #ffffff;
+  --ai-glass: rgba(252, 252, 255, .72);
+  --ai-glass-stroke: rgba(255, 255, 255, .65);
+  --ai-shadow: 0 10px 35px rgba(30, 40, 60, .11), 0 1px 4px rgba(30, 40, 60, .05);
+  --ai-focus: #2f87ee;
+  --ai-r-sm: 10px;
+  --ai-r-md: 16px;
+  --ai-r-lg: 24px;
+  --ai-pill: 999px;
+  --ai-sp-1: 4px;
+  --ai-sp-2: 8px;
+  --ai-sp-3: 12px;
+  --ai-sp-4: 16px;
+  --ai-sp-5: 20px;
+  --ai-sp-6: 24px;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ai-canvas: #111318;
+  --ai-surface: #1f2229;
+  --ai-surface-raised: #292c35;
+  --ai-text: #f4f5f8;
+  --ai-muted: #a7abb6;
+  --ai-stroke: rgba(235, 237, 250, .14);
+  --ai-accent: #438fff;
+  --ai-accent-ink: #0d1017;
+  --ai-glass: rgba(36, 39, 48, .73);
+  --ai-glass-stroke: rgba(255, 255, 255, .18);
+  --ai-shadow: 0 12px 36px rgba(0,0,0,.36), 0 2px 8px rgba(0,0,0,.18);
+  --ai-focus: #88baff;
+}
+@media (prefers-color-scheme: dark) {
+ :root:not([data-theme]) {
+   color-scheme: dark;
+   --ai-canvas: #111318; --ai-surface: #1f2229; --ai-surface-raised: #292c35;
+   --ai-text: #f4f5f8; --ai-muted: #a7abb6; --ai-stroke: rgba(235,237,250,.14);
+   --ai-accent: #438fff; --ai-accent-ink: #0d1017; --ai-glass: rgba(36,39,48,.73);
+   --ai-glass-stroke: rgba(255,255,255,.18);
+   --ai-shadow: 0 12px 36px rgba(0,0,0,.36);
+   --ai-focus: #88baff;
+ }
+}
+.ai-shell { background: var(--ai-canvas); color: var(--ai-text); min-height: 100vh; }
+.ai-surface { background: var(--ai-surface); border: 1px solid var(--ai-stroke); border-radius: var(--ai-r-lg); }
+.ai-glass {
+  background: var(--ai-glass);
+  border: 1px solid var(--ai-glass-stroke);
+  box-shadow: var(--ai-shadow);
+  border-radius: var(--ai-r-lg);
+}
+@supports (backdrop-filter: blur(14px)) or (-webkit-backdrop-filter: blur(14px)) {
+  .ai-glass { backdrop-filter: blur(22px) saturate(1.4); -webkit-backdrop-filter: blur(22px) saturate(1.4); }
+}
+.ai-btn, .ai-input {
+  font: inherit;
+  min-height: 44px;
+  border-radius: 12px;
+  padding: 10px 16px;
+  border: 1px solid var(--ai-stroke);
+  transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.ai-btn { color: var(--ai-text); background: var(--ai-surface-raised); cursor: pointer; }
+.ai-btn.primary { background: var(--ai-accent); color: var(--ai-accent-ink); border-color: transparent; }
+.ai-btn:hover:not(:disabled) { filter: brightness(.97); }
+.ai-btn:active:not(:disabled) { transform: scale(.98); }
+.ai-btn:disabled { opacity: .45; cursor: not-allowed; }
+.ai-input { color: var(--ai-text); background: var(--ai-surface-raised); }
+.ai-btn:focus-visible, .ai-input:focus-visible, .ai-nav-item:focus-visible {
+  outline: 3px solid var(--ai-focus); outline-offset: 2px;
+}
+.ai-nav-item {
+  color: var(--ai-text);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+.ai-nav-item[aria-current="page"] { background: color-mix(in srgb, var(--ai-accent) 12%, transparent); color: var(--ai-accent); font-weight: 600; }
+.ai-chat-bubble {
+  background: var(--ai-surface-raised);
+  border-radius: 18px;
+  padding: 10px 14px;
+  max-width: min(75%, 440px);
+}
+.ai-chat-bubble.sent { background: var(--ai-accent); color: var(--ai-accent-ink); margin-left: auto; }
+@media (prefers-reduced-motion: reduce) {
+  .ai-btn, .ai-input, .ai-nav-item { transition-duration: .01ms; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .ai-glass { background: var(--ai-surface); backdrop-filter: none; -webkit-backdrop-filter: none; }
+}
+@media (forced-colors: active) {
+  .ai-glass, .ai-surface, .ai-btn, .ai-input { forced-color-adjust: auto; background: Canvas; color: CanvasText; border: 1px solid CanvasText; }
+  .ai-btn.primary { background: Highlight; color: HighlightText; }
+}

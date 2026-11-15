@@ -216,12 +216,15 @@ export function ImpulsePixelReference({
                 </div>}
               {home.nextDescription && <p className="impulse-pixel__description">{home.nextDescription}</p>}
               {!home.nextDescription && <p className="impulse-pixel__description">{home.nextState}</p>}
-              <button type="button" className="impulse-pixel__primary" onClick={onContinue}>
+              <button type="button" className="impulse-pixel__primary" onClick={onContinue}
+                aria-label={home.nextActionText}>
                 <Play size={17} fill="currentColor" aria-hidden="true" />
-                {home.nextActionText} <ArrowRight size={16} aria-hidden="true" />
+                {home.nextKind === "course" ? "Продолжить" : home.nextActionText}
+                {home.nextKind !== "course" && <ArrowRight size={16} aria-hidden="true" />}
               </button>
             </div>
-            <div className="impulse-pixel__stack" aria-hidden="true"><i/><i/><i/></div>
+            <img className="impulse-pixel__stack" src="/impulse-approved-layer-stack.svg"
+              alt="" aria-hidden="true" decoding="async" />
           </section>
           <section className="impulse-pixel__trajectory impulse-pixel__glass" aria-labelledby="impulse-pixel-track">
             <div className="impulse-pixel__trajectory-header">
@@ -250,7 +253,7 @@ export function ImpulsePixelReference({
             <div className="impulse-pixel__requirements-actions">
               <strong>{levelLabel} → {nextLevelLabel}</strong>
               <button type="button" onClick={onOpenRequirements}>
-                План перехода <ArrowRight size={16} aria-hidden="true"/>
+                Требования уровня <ChevronDown size={16} aria-hidden="true"/>
               </button>
             </div>
           </header>

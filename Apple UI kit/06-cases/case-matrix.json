@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "description": "Apple-inspired IMPULSE reference use cases. Design and QA mapping, not a source of UI asset license.",
+  "source_manifest": "../01-sources/source-manifest.json",
+  "verified_date": "2026-11-15",
+  "cases": [
+    {
+      "id": "01-navigation",
+      "priority": "P0",
+      "readme": "01-navigation/README.md",
+      "impulse_paths": [
+        "frontend/src/features/calm-navigation/Sidebar.tsx",
+        "frontend/src/App.tsx"
+      ],
+      "source_ids": [
+        "navigation-sidebars",
+        "navigation-toolbars",
+        "navigation-tab-bars",
+        "macos27-figma"
+      ],
+      "required_states": [
+        "collapsed",
+        "expanded",
+        "selected",
+        "hover",
+        "focus",
+        "drawer",
+        "dark"
+      ],
+      "asset_policy": "reference-by-link-only"
+    },
+    {
+      "id": "02-liquid-glass",
+      "priority": "P0",
+      "readme": "02-liquid-glass/README.md",
+      "impulse_paths": [
+        "frontend/src/features/calm-navigation/Sidebar.tsx"
+      ],
+      "source_ids": [
+        "materials",
+        "liquid-glass",
+        "liquid-glass-adoption"
+      ],
+      "required_states": [
+        "regular",
+        "clear",
+        "solid-fallback",
+        "dark",
+        "reduced-transparency"
+      ],
+      "asset_policy": "reference-by-link-only"
+    },
+    {
+      "id": "03-messaging",
+      "priority": "P0",
+      "readme": "03-messaging/README.md",
+      "impulse_paths": [
+        "frontend/src/features/collaboration.tsx"
+      ],
+      "source_ids": [
+        "messages-figma",
+        "ios27-figma",
+        "macos27-figma"
+      ],
+      "required_states": [
+        "incoming",
+        "outgoing",
+        "empty",
+        "sending",
+        "error",
+        "retry",
+        "mobile"
+      ],
+      "asset_policy": "reference-by-link-only"
+    },
+    {
+      "id": "04-inputs-and-controls",
+      "priority": "P0",
+      "readme": "04-inputs-and-controls/README.md",
+      "impulse_paths": [
+        "frontend/src/components/ui.tsx"
+      ],
+      "source_ids": [
+        "buttons",
+        "text-fields",
+        "search-fields",
+        "segmented-controls"
+      ],
+      "required_states": [
+        "default",
+        "hover",
+        "focus",
+        "pressed",
+        "selected",
+        "disabled",
+        "invalid"
+      ],
+      "asset_policy": "reference-by-link-only"
+    },
+    {
+      "id": "05-overlays-and-dialogs",
+      "priority": "P0",
+      "readme": "05-overlays-and-dialogs/README.md",
+      "impulse_paths": [
+        "frontend/src/components/ui.tsx"
+      ],
+      "source_ids": [
+        "menus",
+        "alerts",
+        "sheets",
+        "popovers"
+      ],
+      "required_states": [
+        "closed",
+        "open",
+        "keyboard",
+        "outside-click",
+        "focus-restore",
+        "mobile"
+      ],
+      "asset_policy": "reference-by-link-only"
+    },
+    {
+      "id": "06-data-and-dashboards",
+      "priority": "P1",
+      "readme": "06-data-and-dashboards/README.md",
+      "impulse_paths": [
+        "frontend/src/features/analytics-v3/page.tsx",
+        "frontend/src/components/ui.tsx"
+      ],
+      "source_ids": [
+        "lists-and-tables",
+        "progress-indicators",
+        "macos27-figma"
+      ],
+      "required_states": [
+        "loading",
+        "empty",
+        "loaded",
+        "stale",
+        "error",
+        "sorted"
+      ],
+      "asset_policy": "reference-by-link-only"
+    },
+    {
+      "id": "07-mobile-adaptive",
+      "priority": "P0",
+      "readme": "07-mobile-adaptive/README.md",
+      "impulse_paths": [
+        "frontend/src/App.tsx",
+        "frontend/src/features/calm-navigation/Sidebar.tsx"
+      ],
+      "source_ids": [
+        "layout-hig",
+        "navigation-tab-bars",
+        "ios27-figma"
+      ],
+      "required_states": [
+        "390px",
+        "820px",
+        "1280px",
+        "1440px",
+        "zoom-200"
+      ],
+      "asset_policy": "reference-by-link-only"
+    },
+    {
+      "id": "08-accessibility",
+      "priority": "P0",
+      "readme": "08-accessibility/README.md",
+      "impulse_paths": [
+        "frontend/src/components/ui.tsx",
+        "frontend/src/app/theme.ts"
+      ],
+      "source_ids": [
+        "accessibility-hig",
+        "motion-hig",
+        "dark-mode-hig"
+      ],
+      "required_states": [
+        "keyboard-only",
+        "screen-reader",
+        "forced-colors",
+        "reduced-motion",
+        "zoom-200"
+      ],
+      "asset_policy": "reference-by-link-only"
+    },
+    {
+      "id": "09-search-and-command",
+      "priority": "P1",
+      "readme": "09-search-and-command/README.md",
+      "impulse_paths": [
+        "frontend/src/App.tsx"
+      ],
+      "source_ids": [
+        "search-fields",
+        "menus"
+      ],
+      "required_states": [
+        "idle",
+        "focused",
+        "loading",
+        "no-results",
+        "selection",
+        "not-authorized"
+      ],
+      "asset_policy": "reference-by-link-only"
+    },
+    {
+      "id": "10-notifications-and-feedback",
+      "priority": "P1",
+      "readme": "10-notifications-and-feedback/README.md",
+      "impulse_paths": [
+        "frontend/src/App.tsx"
+      ],
+      "source_ids": [
+        "alerts",
+        "progress-indicators",
+        "notifications"
+      ],
+      "required_states": [
+        "read",
+        "unread",
+        "error",
+        "success",
+        "loading"
+      ],
+      "asset_policy": "reference-by-link-only"
+    },
+    {
+      "id": "11-identity-and-settings",
+      "priority": "P1",
+      "readme": "11-identity-and-settings/README.md",
+      "impulse_paths": [
+        "frontend/src/app/theme.ts",
+        "frontend/src/features/participant.tsx"
+      ],
+      "source_ids": [
+        "dark-mode-hig",
+        "lists-and-tables"
+      ],
+      "required_states": [
+        "light",
+        "dark",
+        "system",
+        "role-switch",
+        "disabled"
+      ],
+      "asset_policy": "reference-by-link-only"
+    },
+    {
+      "id": "12-media-and-attachments",
+      "priority": "P2",
+      "readme": "12-media-and-attachments/README.md",
+      "impulse_paths": [
+        "frontend/src/features/collaboration.tsx"
+      ],
+      "source_ids": [
+        "materials",
+        "messages-figma",
+        "image-wells",
+        "collections"
+      ],
+      "required_states": [
+        "uploading",
+        "ready",
+        "failed",
+        "retry",
+        "preview"
+      ],
+      "asset_policy": "reference-by-link-only"
+    }
+  ]
+}

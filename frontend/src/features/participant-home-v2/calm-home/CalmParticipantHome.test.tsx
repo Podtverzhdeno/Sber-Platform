@@ -108,6 +108,12 @@ describe("calm participant homepage", () => {
     expect(container.querySelector(".calm-home__focus-kicker")).toBeNull();
     expect(container.querySelectorAll(".calm-home__primary")).toHaveLength(1);
     expect(screen.getByText("Продолжить")).toBeTruthy();
+    // The selected priority action now flows straight into the next-level panel:
+    // no redundant KPI row, while lower course/practice requirements remain.
+    expect(container.querySelector(".calm-home__metrics")).toBeNull();
+    const focus = container.querySelector(".calm-home__focus");
+    expect(focus?.nextElementSibling?.classList.contains("calm-home__path")).toBe(true);
+    expect(screen.getByRole("heading", { name: "Следующий уровень" })).toBeTruthy();
   });
 
   it("falls back to the next real course when there is no actionable task", () => {
@@ -125,9 +131,10 @@ describe("calm participant homepage", () => {
 
   it("does not fabricate a known level or confirmed skills when API projections are missing", () => {
     renderCalmHome({}, { includeLevel: false, includePassport: false });
-    expect(screen.getByTestId("calm-impulse-level").textContent).toBe("—");
-    expect(screen.getByTestId("calm-verified-skills").textContent).toBe("—");
+    expect(screen.queryByTestId("calm-impulse-level")).toBeNull();
+    expect(screen.queryByTestId("calm-verified-skills")).toBeNull();
     expect(screen.queryByText("L0")).toBeNull();
+    expect(screen.getByRole("heading", { name: "Следующий уровень" })).toBeTruthy();
   });
 
   it("counts only skills with confirmed cases and does not advertise unverified ones", () => {
@@ -137,8 +144,8 @@ describe("calm participant homepage", () => {
         { key: "Verified Skill", practical_level: "Уверенный", confirmed_case_count: 2 },
       ],
     });
-    expect(screen.getByTestId("calm-verified-skills")).toHaveTextContent("1");
-    expect(screen.getByText("С подтверждёнными кейсами")).toBeTruthy();
+    expect(screen.queryByTestId("calm-verified-skills")).toBeNull();
+    expect(screen.queryByText("С подтверждёнными кейсами")).toBeNull();
     fireEvent.click(screen.getByText("Инструменты"));
     expect(screen.queryByText(/Подтверждённый навык: Unverified Skill/)).toBeNull();
     expect(screen.getByText(/Подтверждённый навык: Verified Skill/)).toBeTruthy();
@@ -148,7 +155,7 @@ describe("calm participant homepage", () => {
     renderCalmHome({}, {
       passportSkills: [{ key: "Still learning", practical_level: "Начальный", confirmed_case_count: 0 }],
     });
-    expect(screen.getByTestId("calm-verified-skills")).toHaveTextContent("0");
+    expect(screen.queryByTestId("calm-verified-skills")).toBeNull();
     fireEvent.click(screen.getByText("Инструменты"));
     expect(screen.queryByText(/Подтверждённый навык:/)).toBeNull();
   });

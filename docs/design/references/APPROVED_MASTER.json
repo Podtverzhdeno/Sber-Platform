@@ -1,0 +1,19 @@
+{
+  "reference_id": "IMPULSE-HOME-APPROVED-2026-11-15",
+  "status": "owner-approved-primary-dark-home-reference",
+  "source": "user-uploaded-original-image",
+  "original_file_name": "Стеклянная панель Impulse в тёмном режиме (1)(1).png",
+  "library_path": "/Impulse-UI-References-2026-11-14/00-approved-master/Impulse-Главная-УТВЕРЖДЕНО-2026-11-15.png",
+  "width": 1672,
+  "height": 941,
+  "mime": "image/png",
+  "bytes": 2328233,
+  "sha256": "c12128d68c1ddaeaab24e11b2ae992993f1cb835a9f8136fdd9438bba31e8616",
+  "supersedes_primary_visual": "02-pixel-dashboard/image(3).png",
+  "historic_sources_remain_available": true,
+  "asset_is_not_ui_code": true,
+  "api_values_in_image_are_illustrative": true,
+  "exact_ui_kit_match_available": false,
+  "kit_selection_report": "UI_KIT_COMPONENT_MAP_2026-11-15.md",
+  "verification_status": "file-upload-verified; kit-sources-reviewed; actual-browser-pixel-diff-pending"
+}

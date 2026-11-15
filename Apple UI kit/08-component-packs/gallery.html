@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Apple UI kit · Impulse reference gallery</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="gallery.css">
+<script src="gallery.js" defer></script>
+</head>
+<body data-mode="dark">
+<a href="#main" class="skip">Перейти к компонентам</a>
+<div class="backdrop" aria-hidden="true"><div class="orb a"></div><div class="orb b"></div></div>
+<header class="toolbar glass" aria-label="Главная панель">
+  <div class="logo"><span class="star" aria-hidden="true">✦</span><span class="brandtext">Impulse / UI kit</span></div>
+  <input id="search" class="search" type="search" aria-label="Фильтр компонентов" placeholder="Поиск компонентов · Ctrl/⌘ K">
+  <button id="theme" class="iconbtn" type="button" aria-label="Переключить тему" aria-pressed="true" title="Светлая или тёмная тема">☾</button>
+  <div class="menuanchor"><button id="menuButton" class="iconbtn" type="button" aria-label="Открыть меню" aria-haspopup="menu" aria-expanded="false" aria-controls="menu">⋯</button>
+    <div class="menu glass" id="menu" role="menu" hidden><button type="button" role="menuitem" data-action="sources">Источники Apple</button><button type="button" role="menuitem" data-action="checklist">QA checklist</button></div></div>
+</header>
+<div class="shell">
+<aside class="sidebar glass" aria-label="Категории референсов">
+  <h2>Библиотека</h2>
+  <button class="sideitem" data-anchor="materials" aria-current="page">◈ Материалы</button>
+  <button class="sideitem" data-anchor="buttons">◉ Контролы</button>
+  <button class="sideitem" data-anchor="inputs">▤ Поля ввода</button>
+  <button class="sideitem" data-anchor="content">☷ Контент</button>
+  <button class="sideitem" data-anchor="feedback">◌ Обратная связь</button>
+</aside>
+<main class="main" id="main">
+<div class="eyebrow">REFERENCE ONLY / 2026 · IMPULSE</div>
+<h1>Apple UI components</h1>
+<p class="lead">Интерактивный каталог Apple-inspired веб-компонентов для переноса в Impulse. Визуальные параметры здесь демонстрационные, не экспортированы из официального UI Kit.</p>
+<section class="hero glass" id="materials" data-keywords="liquid glass material backdrop toolbar glass blur theme">
+<div><div class="eyebrow">MATERIAL / LIQUID GLASS</div><h2>Стекло поверх интерфейса</h2><p>Материал для навигации и плавающих контролов, а не для каждого блока текста. Проверьте прозрачность на обеих темах, контраст и fallback.</p><button class="btn primary" id="showDialog">Открыть sheet</button></div>
+<div class="hero-callout"><div class="muted">Standard content surface</div><strong>Последовательная иерархия</strong><p class="muted">Навигация — выразительное стекло. Содержимое — спокойная поверхность.</p></div>
+</section>
+<section class="section" id="buttons" data-keywords="button primary secondary danger segmented tabs toggle checkbox radio slider controls">
+<h2>01. Контролы</h2><p>Кнопки, переключатели, сегменты, выбор и состояния.</p>
+<div class="grid">
+ <article class="panel"><h3>Кнопки и состояния</h3><div class="stack"><button class="btn primary" id="apply">Продолжить</button><button class="btn" id="secondary">Подробнее</button><button class="btn destructive" id="danger">Удалить</button><button class="btn" disabled>Недоступно</button></div><p class="muted" id="buttonStatus" aria-live="polite">Выберите действие</p></article>
+ <article class="panel"><h3>Segmented control</h3><div class="segment" role="group" aria-label="Режим отображения"><button type="button" aria-pressed="true">Список</button><button type="button" aria-pressed="false">Карточки</button><button type="button" aria-pressed="false">Таблица</button></div><p class="muted" id="segmentStatus">Выбран режим: Список</p></article>
+ <article class="panel"><h3>Switch, checkbox, radio</h3><div class="stack"><label class="toggle"><input type="checkbox" checked><span>Уведомления</span></label><label class="check"><input type="checkbox" checked> Избранное</label><label class="check"><input type="radio" name="density" checked> Компактно</label><label class="check"><input type="radio" name="density"> Просторно</label></div></article>
+ <article class="panel"><h3>Slider &amp; progress</h3><label for="range">Прогресс — <output id="rangeOutput">64%</output></label><input class="range" id="range" type="range" min="0" max="100" value="64"><progress id="progress" max="100" value="64">64%</progress></article>
+</div></section>
+<section class="section" id="inputs" data-keywords="text input select validation search form fields">
+<h2>02. Поля ввода</h2><p>Подписи, системные состояния, доступная валидация и управление фокусом.</p>
+<div class="grid"><article class="panel"><h3>Text fields</h3><div class="stack"><div class="field"><label for="name">Название проекта</label><input id="name" autocomplete="off" placeholder="Например, Импульс"><small>Краткое понятное название</small></div><div class="field"><label for="email">Электронная почта</label><input id="email" type="email" aria-invalid="true" value="bad@" aria-describedby="emailHint"><small id="emailHint">Пример ошибки: неверный адрес</small></div></div></article>
+<article class="panel"><h3>Select &amp; controls</h3><div class="field"><label for="type">Тип элемента</label><select id="type"><option>Интерфейс</option><option>Дизайн-система</option><option>Исследование</option></select><small>Демонстрационные данные</small></div></article></div></section>
+<section class="section" id="content" data-keywords="list table card disclosure badge progress rows inspector content">
+<h2>03. Отображение данных</h2><p>Группированные списки, disclosure и таблицы должны сохранять реальные данные и действия Impulse.</p>
+<div class="grid"><article class="panel"><h3>Grouped rows</h3><ul class="rowlist"><li><span><strong>Моя траектория</strong><br><span class="muted">Действующий маршрут</span></span><span class="badge ok">Активно</span></li><li><span><strong>Bootcamp</strong><br><span class="muted">Материалы обучения</span></span><span class="badge">Раздел</span></li><li><span><strong>Проверка работы</strong><br><span class="muted">Ожидает решения человека</span></span><span class="badge warn">Ожидание</span></li></ul></article>
+<article class="panel"><h3>Disclosure</h3><details><summary>Посмотреть условия</summary><p>Контент раскрывается без потери контекста. Для реального интерфейса используйте проверенные серверные данные.</p></details><p class="muted">Нативный HTML details обеспечивает клавиатурное управление.</p></article>
+<article class="panel" style="grid-column:1/-1"><h3>Table</h3><div class="tablewrap"><table><thead><tr><th>Компонент</th><th>Материал</th><th>Статус</th></tr></thead><tbody><tr><td>Toolbar</td><td>Glass — navigation</td><td>Reference</td></tr><tr><td>Card</td><td>Standard content</td><td>Reference</td></tr><tr><td>Sheet</td><td>Elevated overlay</td><td>Interactive</td></tr></tbody></table></div></article></div></section>
+<section class="section" id="feedback" data-keywords="dialog sheet alert toast popover status messages">
+<h2>04. Обратная связь</h2><p>Диалог подтверждения, уведомление, безопасное закрытие по Escape и восстановление фокуса.</p>
+<div class="grid"><article class="panel"><h3>Dialog &amp; status</h3><div class="stack"><button class="btn primary" id="feedbackDialog">Открыть подтверждение</button><button class="btn" id="showToast">Показать уведомление</button></div><p class="muted">Действия демонстрационные, без сетевых запросов.</p></article>
+<article class="panel"><h3>Empty state</h3><p style="font-size:30px;margin:0" aria-hidden="true">◇</p><strong>Ничего не найдено</strong><p class="muted">Покажите понятную причину и доступный следующий шаг.</p></article></div></section>
+<p class="footer">Самостоятельная учебная галерея для Impulse, не Apple UI Kit и не нативный Liquid Glass. Оригинальные макеты: <a href="https://developer.apple.com/design/resources/">Apple Design Resources</a>. Прочитайте <a href="sources.md">источники</a>, <a href="impulse-mapping.md">план переноса</a> и <a href="assets-and-licenses.md">лицензии</a>.</p>
+</main></div>
+<dialog id="dialog" aria-labelledby="dialogTitle"><h2 id="dialogTitle">Подтверждение</h2><p>Пример листа с доступной клавиатурой. Это демонстрация без реальной операции.</p><div class="dialog-actions"><button class="btn" id="cancelDialog">Отмена</button><button class="btn primary" id="confirmDialog">Подтвердить</button></div></dialog>
+<div role="status" class="toast glass" id="toast" hidden>Действие показано в деморежиме</div>
+</body></html>
