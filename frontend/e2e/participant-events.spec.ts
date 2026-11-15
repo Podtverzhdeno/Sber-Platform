@@ -285,12 +285,12 @@ test("Community navigation connects authorized Events and Messages at mobile and
   }
 
   await nav.getByRole("link", { name: "Сообщения" }).click();
-  await expect(page).toHaveURL(/\\/workspace\\/2/);
+  await expect(page).toHaveURL(/\/workspace\/2/);
   await expect(page.getByRole("heading", { name: "Сообщения", exact: true })).toBeVisible();
   const messengerNav = page.getByRole("navigation", { name: "Подразделы сообщества" });
   await expect(messengerNav.getByRole("link", { name: "Сообщения" })).toHaveAttribute("aria-current", "page");
   await messengerNav.getByRole("link", { name: "События" }).click();
-  await expect(page).toHaveURL(/\\/workspace\\/1/);
+  await expect(page).toHaveURL(/\/workspace\/1/);
   await expect(page.getByTestId("events-v2")).toBeVisible();
 });
 
