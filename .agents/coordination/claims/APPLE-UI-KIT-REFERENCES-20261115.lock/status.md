@@ -71,3 +71,15 @@
 - Scope: only `Apple UI kit/react-reference/**`, this claim, and PR-only README/index reconciliation. No app runtime, user roles, API, production environment or main changed here.
 - Not verified: TS semantic typecheck, Vitest execution, Chromium/WebKit interactive QA, pixel diff or editable official Figma/Sketch layer measurements. Review/acceptance still required; native Liquid Glass cannot be claimed 1:1 in CSS.
 - Next safe step: independent reviewer checks the exact PR SHA, reruns reference integrity CI and tests new React controls, then approves integration if all checks pass. Do not auto-merge or deploy.
+
+## 2026-11-15 owner continuation — link integrity and a11y recovery
+
+- User requested another continuation cycle on the same dedicated Apple UI kit source-library scope. Parallel react-reference work preserved.
+- 3aee8b0373578a0937e2fd3a478e790f7348fbdb: committed standalone Markdown/HTML relative-link audit and six synthetic unit fixture definitions.
+- c851f3baba2e508081ef87174b4820b295a494de: fixed mobile search that CSS had hidden on <=640px; search now wraps to a second toolbar row, with responsive browser QA assertions for 320/390px.
+- ac782c30fb6276c04d4a92a5a9d1fc9dd8d5bfed: added explicit retry action for error, clear search action for no-results, appropriate alert/status role and browser assertions.
+- f679c28e3ddad4e546703ac8767a2a4e2964729c: connected new checks to top-level README, source quality gate and manifest; distinguished static checks from unexecuted runtime checks.
+- Read-only GitHub validation: 144 local links in 13 principal pages all resolved against the source tree; 7/7 relevant current files retrieved; JS syntax OK; 26/26 referenced HTML IDs present; mobile search and recovery assertions found in source.
+- Current PR file scope: 90 changes, all inside Apple UI kit/** or dedicated claim. No product code, main or Railway deploy edits.
+- Remaining: run Python link audit and unit suites on a checkout; run Chromium/WebKit interaction, responsive/touch QA; open licensed editable Apple 27 Figma/Sketch source frames and measure; source screenshot diff; independent review.
+- status: REVIEW. No merge or production release.
