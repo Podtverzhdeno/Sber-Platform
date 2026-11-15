@@ -33,7 +33,7 @@ describe("App", () => {
 
     expect(screen.queryByText("Демо-режим · синтетические данные")).not.toBeInTheDocument();
     expect(await screen.findByRole("button", { name: /Алекс Речной/ })).toBeEnabled();
-    expect(screen.getByRole("combobox", { name: "Тема оформления" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Тема: .*Переключить/ })).toBeInTheDocument();
   });
 
   it("logs in and renders only navigation returned for the role", async () => {
