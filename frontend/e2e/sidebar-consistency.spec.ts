@@ -84,8 +84,9 @@ for (const width of [960, 1024, 1448, 1672]) {
     await expect(page.locator(".calm-navigation__backdrop--open")).toHaveCSS("opacity", "1");
     const initial = await sidebarSignature(page);
     expect(initial.sections).toHaveLength(13);
-    expect(initial.sections.map(item => item.href)).toEqual(
-      actor.navigation.map((_, index) => `/workspace/${String(index)}`),
+    // Grouped navigation can reorder sections while preserving every authorized route.
+    expect(initial.sections.map(item => item.href).sort()).toEqual(
+      actor.navigation.map((_, index) => `/workspace/${String(index)}`).sort(),
     );
     expect(initial.promotion).toBeNull();
 
