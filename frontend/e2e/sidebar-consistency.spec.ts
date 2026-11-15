@@ -166,7 +166,7 @@ for (const width of [320, 390, 768]) {
       return {
         viewport,
         scrollWidth: document.documentElement.scrollWidth,
-        offenders: [...document.querySelectorAll<HTMLElement>("body *")]
+        offenders: Array.from(document.querySelectorAll<HTMLElement>("body *"))
           .filter(element => {
             const rect = element.getBoundingClientRect();
             const style = getComputedStyle(element);
