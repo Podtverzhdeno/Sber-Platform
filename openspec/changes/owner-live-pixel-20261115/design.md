@@ -29,3 +29,8 @@ Liquid Glass is applied to the topbar, toolbar buttons, sidebar and account popo
 - Railway production project `optimistic-energy`, service `Sber-Platform`, repo `Podtverzhdeno/Sber-Platform` branch main; do not recreate service/database or overwrite variables
 - deployment success must be checked with Railway deployment SHA and direct public site, not inferred from git merge
 - do not claim pixel-perfect until independent screenshot comparison has been recorded
+
+## Owner refinements — repeated progress, help, reference material (2026-11-15)
+- Main next-level summary: a single source-based percent indicator and L-current/L-next pair. No second copy of the same required-course/practice numerators in a disclosure. "План перехода" navigates to the canonical trajectory for course/practice details.
+- The bottom-right ParticipantGuide launcher and all auto-triggered coachmarks are disabled in the authenticated shell, but the component and full Help Center remain mounted for explicit account-menu "Помощь". Unit tests enforce both the absence of auto UI and the presence of manual help.
+- Material tokens --liquid-* are scoped to .page-shell--owner-pixel with light/blue/midnight variants. Translucent glass is functional chrome (topbar, search, avatar, disclosures, selected controls, hero), not a dark overlay on tables and evidence. Insets, borders and pointer-safe highlights preserve the measured first-fold grid. Reduced transparency and forced-colors fallbacks remain mandatory.
