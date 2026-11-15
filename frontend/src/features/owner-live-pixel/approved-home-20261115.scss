@@ -211,6 +211,12 @@
   .page-shell--owner-pixel-home .workspace-content .impulse-pixel__content {
     left:13.5px;
   }
+  /* Keep the original 1422px toolbar search field at 43px even when the
+     shared Apple shell applies a default 40px control height. */
+  .page-shell.page-shell--owner-pixel-home .topbar .global-search {
+    height:43px !important;
+    min-height:43px !important;
+  }
 }
 @media(min-width:1580px) {
   .page-shell.page-shell--owner-pixel-home .topbar {
