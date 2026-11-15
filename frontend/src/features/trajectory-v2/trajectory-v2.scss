@@ -2256,3 +2256,27 @@
  .workspace-content .trajectory-v2-optional-actions{align-items:stretch;flex-direction:column}
  .workspace-content .trajectory-v2-optional-actions button{width:100%}
 }
+
+
+/* R-PAR-02 compact vertical rhythm — preserve the approved home-to-content density.
+   This is scoped to the canonical development route, never the global shell.
+   Keep the role grid, progress, detail and side column readable. */
+.workspace-content .trajectory-v2 {
+  gap: 14px;
+}
+.workspace-content .trajectory-v2-heading {
+  margin-top: 0;
+  margin-bottom: 0;
+  min-height: 64px;
+}
+.workspace-content .trajectory-v2-heading h2 {
+  margin: 0;
+}
+@media (max-width: 700px) {
+  .workspace-content .trajectory-v2 {
+    gap: 12px;
+  }
+  .workspace-content .trajectory-v2-heading {
+    min-height: 0;
+  }
+}
