@@ -299,7 +299,6 @@ test("mini filter stays inside mobile viewport without changing original event c
   await api(page,true);
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("button", { name: "Меню", exact: true }).click();
   await page.goto("/workspace/1");
   await expect(page.getByTestId("event-reference-card")).toHaveCount(3);
   const toggle = page.locator(".ev-compact-trigger");
