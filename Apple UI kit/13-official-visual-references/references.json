@@ -1,0 +1,29 @@
+{
+  "category_id": "13-official-visual-references",
+  "title": "Official Apple visual previews and provenance",
+  "platform": "Apple Developer Design Resources + HIG",
+  "reference_page": "https://developer.apple.com/design/resources/",
+  "official_kit_index": "https://developer.apple.com/design/resources/",
+  "reference_type": "apple_official_source_link",
+  "kit_component_layers_inspected": false,
+  "source_frame_ids": [],
+  "captures_committed": false,
+  "web_mockup_is_original": true,
+  "scenario_patterns": [
+    "Apple-hosted preview images and their source pages",
+    "no mirrored copyrighted assets"
+  ],
+  "impulse_target": [
+    "Visual review source ledger and exact-kit capture queue"
+  ],
+  "study_states": [
+    "page accessible",
+    "preview version matched",
+    "kit source license",
+    "exact frame export id"
+  ],
+  "anti_patterns": [
+    "Committing Apple screenshots and labeling originals as 27 without checking"
+  ],
+  "status": "SOURCE_LINKED_MEASUREMENT_PENDING"
+}
