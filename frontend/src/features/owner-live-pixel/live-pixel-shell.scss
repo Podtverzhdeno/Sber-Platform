@@ -547,7 +547,7 @@
   .trajectory-v2-role-card, .calm-home__text-action
 ) {
   border-radius: 12px;
-  transition: background-color .17s ease, border-color .17s ease, box-shadow .17s ease;
+  transition: transform .17s ease, background-color .17s ease, border-color .17s ease, box-shadow .17s ease;
 }
 .page-shell--owner-pixel .workspace--apple .workspace-content :is(
   .av3-tabs button, .catalog-segments button, .view-toggle button
