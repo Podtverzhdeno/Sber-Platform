@@ -1,6 +1,6 @@
 # 10 — Notifications, feedback and loading
 
-**Apple references:** [Alerts](https://developer.apple.com/design/human-interface-guidelines/alerts), [Progress indicators](https://developer.apple.com/design/human-interface-guidelines/progress-indicators), [Badges](https://developer.apple.com/design/human-interface-guidelines/badges).
+**Apple references:** [Alerts](https://developer.apple.com/design/human-interface-guidelines/alerts), [Progress indicators](https://developer.apple.com/design/human-interface-guidelines/progress-indicators), [Notifications and badging](https://developer.apple.com/design/human-interface-guidelines/notifications).
 
 ## UI reference list
 
