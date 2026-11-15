@@ -264,6 +264,16 @@
   box-sizing:border-box;
   min-height:100vh;
 }
+/* The shared floating header is fixed for every authenticated role. Reserve
+   its physical footprint on non-home routes so page controls never start
+   underneath the glass layer (analytics tabs were unclickable at desktop). */
+.page-shell--owner-pixel.page-shell--apple-overlay:not(.page-shell--owner-pixel-home)
+  .workspace--apple .workspace-content {
+  padding-top: max(82px, env(safe-area-inset-top, 0px)) !important;
+}
+.page-shell--owner-pixel .workspace--apple .av3-tabs {
+  scroll-margin-top: 82px;
+}
 /* The exact participant screen, using live data and the source-measured 1148px grid. */
 .page-shell--owner-pixel-home.page-shell--apple-overlay .workspace--apple .workspace-content {
   padding:66px 0 20px !important;
