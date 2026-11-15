@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Impulse Apple UI Kit — Local Pixel Comparator</title>
+<style>
+:root{color-scheme:dark;font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;--bg:#0e1423;--surface:#19243b;--stroke:#425570;--text:#f3f6ff;--muted:#b9c8dc;--accent:#a0c4ff}
+:root[data-theme=light]{color-scheme:light;--bg:#f5f6f9;--surface:#fff;--stroke:#bdc6d4;--text:#16243b;--muted:#506078;--accent:#025fc9}
+*,*:before,*:after{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:clamp(14px,3vw,36px);background:var(--bg);color:var(--text)}
+main{max-width:1380px;margin:auto}
+h1{letter-spacing:-.045em;font-size:clamp(26px,3.5vw,40px);line-height:1.2}
+h1,h2,p{margin-top:0}small,.muted{color:var(--muted)}
+a{color:var(--accent)}
+section{border:1px solid var(--stroke);border-radius:22px;padding:clamp(16px,2vw,24px);background:var(--surface);margin:17px 0}
+.row{display:flex;flex-wrap:wrap;align-items:end;gap:16px}
+.row>*{min-width:0}
+label{display:grid;gap:6px;min-width:180px;flex:1}
+input,select,button{font:inherit}
+input[type=file]{width:100%;max-width:100%}
+input[type=number]{width:100%;max-width:170px;padding:10px;border:1px solid var(--stroke);border-radius:10px;background:var(--bg);color:var(--text)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+button{border:1px solid var(--stroke);border-radius:12px;background:var(--bg);color:var(--text);padding:10px 16px;min-height:44px;cursor:pointer}
+button:disabled{opacity:.55;cursor:not-allowed}
+button[aria-pressed=true]{background:var(--accent);color:var(--bg)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.metric{border:1px solid var(--stroke);border-radius:14px;padding:14px}
+.metric b{display:block;font-size:23px;font-variant-numeric:tabular-nums}
+.frame{position:relative;max-width:100%;overflow:auto;border:1px solid var(--stroke);border-radius:16px;background:repeating-conic-gradient(#aab4c4 0% 25%,#eef1f5 0% 50%) 50%/24px 24px}
+.viewport{position:relative;margin:0 auto;width:max-content;max-width:none}
+.viewport canvas{display:block;image-rendering:auto}
+#comparison-target{position:absolute;inset:0;clip-path:inset(0 calc(100% - var(--split,50%)) 0 0)}
+#heatmap{max-width:100%;height:auto;display:block;border:1px solid var(--stroke);border-radius:14px}
+fieldset{border:1px solid var(--stroke);border-radius:14px;padding:12px}
+legend{padding:0 6px}
+.notice{padding:12px 16px;border-left:4px solid var(--accent);background:var(--bg);border-radius:9px}
+[hidden]{display:none!important}
+#status{min-height:1.5em}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+@media(forced-colors:active){section,fieldset,button,.metric{border:1px solid CanvasText;background:Canvas;color:CanvasText}}
+</style>
+</head>
+<body>
+<main>
+<header><p class="muted">IMPULSE · Apple UI kit / independent QA utility</p><h1>Локальное сравнение скриншотов</h1>
+<p class="muted">Изображения обрабатываются <strong>только в браузере</strong>; ничего не отправляется на сервер. Этот инструмент помогает измерить отличия, но сам по себе <strong>не доказывает</strong> совпадение с официальным Apple Figma/Sketch. Используйте только материалы, на сравнение которых у вас есть право.</p></header>
+<section>
+<h2>1. Исходное изображение и веб-реализация</h2>
+<div class="row">
+<label for="reference-file">Референс (PNG, JPEG или WebP)<input id="reference-file" type="file" accept="image/png,image/jpeg,image/webp"></label>
+<label for="actual-file">Скриншот Impulse<input id="actual-file" type="file" accept="image/png,image/jpeg,image/webp"></label>
+<label for="threshold">Допуск отличия канала, 0–255<input id="threshold" type="number" min="0" max="255" step="1" value="16"></label>
+<button id="compare" type="button" disabled>Сравнить</button>
+</div>
+<p id="status" role="status" aria-live="polite">Выберите два изображения одинаковой ширины и высоты.</p>
+<p class="notice">Для корректного пиксельного сравнения нужны одинаковые размеры, масштаб браузера, устройство, шрифт, тема, состояние и расположение. По умолчанию каждый канал RGBA сравнивается с допуском 16; отклонение любого канала больше допуска помечает пиксель. Это алгоритмическое правило, а не официальный допуск Apple.</p>
+</section>
+<section id="results" hidden>
+<h2>2. Результаты</h2>
+<div class="metrics">
+<div class="metric"><small>Размер</small><b id="size">—</b></div>
+<div class="metric"><small>Пикселей с отличиями</small><b id="changed">—</b></div>
+<div class="metric"><small>Доля отличий</small><b id="ratio">—</b></div>
+<div class="metric"><small>MAE / RGBA</small><b id="mae">—</b></div>
+</div>
+<p class="muted">MAE — среднее абсолютное отличие RGBA-каналов, от 0 до 255. Доля отличий зависит от заданного допуска; прозрачность включена в расчёт. Метрики не учитывают семантику, права на изображения и корректность поведения компонентов.</p>
+<div class="row">
+<fieldset><legend>Режим просмотра</legend><div class="row">
+<button class="mode" type="button" data-mode="split" aria-pressed="true">Разделение</button>
+<button class="mode" type="button" data-mode="overlay" aria-pressed="false">Наложение 50%</button>
+</div></fieldset>
+<label for="split">Доля скриншота Impulse: <output id="split-value">50%</output><input type="range" id="split" min="0" max="100" step="1" value="50"></label>
+</div>
+<div class="frame"><div class="viewport" id="viewport"><canvas id="comparison-reference" aria-label="Референс"></canvas><canvas id="comparison-target" aria-label="Скриншот реализации"></canvas></div></div>
+<h2 style="margin-top:22px">Тепловая карта различий</h2><canvas id="heatmap" aria-label="Тепловая карта пиксельных отличий"></canvas>
+<p class="muted">Красный: отличие выше допуска. Прозрачный: совпадающие каналы в пределах заданного допуска. Ровно два сравниваемых изображения; совмещения и масштабирования алгоритм не выполняет.</p>
+<button id="save-report" type="button">Сохранить JSON-отчёт</button>
+</section>
+<footer class="muted">Локальный веб-инструмент Impulse, не разработан Apple. Не содержит Apple UI kit, шрифтов, SF Symbols или изображений Apple. <a href="../PIXEL_PARITY_QA.md">Проверка исходных кадров и состояния — см. родительский протокол</a>.</footer>
+</main>
+<script>
+"use strict";
+const get = id => document.getElementById(id);
+const els = {
+  source:get("reference-file"),target:get("actual-file"),threshold:get("threshold"),
+  button:get("compare"),status:get("status"),results:get("results"),
+  ref:get("comparison-reference"),actual:get("comparison-target"),heat:get("heatmap"),
+  viewport:get("viewport"),split:get("split"),splitValue:get("split-value"),
+  report:get("save-report")
+};
+let current = null;
+function status(message){els.status.textContent=message;}
+function goodFile(file){
+  return Boolean(file && ["image/png","image/jpeg","image/webp"].includes(file.type) && file.size<=15*1024*1024);
+}
+function inputChanged(){
+  els.button.disabled = !(goodFile(els.source.files[0]) && goodFile(els.target.files[0]));
+  els.results.hidden=true;current=null;
+  status(els.button.disabled?"Выберите две картинки PNG, JPEG или WebP до 15 МБ каждая.":"Изображения выбраны; можно сравнивать.");
+}
+els.source.addEventListener("change",inputChanged);
+els.target.addEventListener("change",inputChanged);
+function loadImage(file){
+  return new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file),image=new Image();
+    image.onload=()=>{URL.revokeObjectURL(url);resolve(image);};
+    image.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Невозможно прочитать изображение "+file.name));};
+    image.src=url;
+  });
+}
+function matrix(image){
+  const c=document.createElement("canvas");c.width=image.naturalWidth;c.height=image.naturalHeight;
+  c.getContext("2d",{willReadFrequently:true}).drawImage(image,0,0);
+  return c.getContext("2d").getImageData(0,0,c.width,c.height);
+}
+function differences(a,b,threshold){
+  if(a.width!==b.width||a.height!==b.height)throw new Error("Размеры изображений различаются — сначала сделайте снимки при одинаковом viewport и масштабе.");
+  const pixels=a.width*a.height;
+  if(pixels<1 || pixels>16000000)throw new Error("Разрешено максимум 16 млн пикселей в изображении.");
+  if(a.data.length!==pixels*4||b.data.length!==pixels*4)throw new Error("Некорректная длина RGBA-данных изображения.");
+  const heat=new Uint8ClampedArray(pixels*4);
+  let sum=0,changed=0;
+  for(let i=0;i<a.data.length;i+=4){
+    let max=0;
+    for(let c=0;c<4;c++){const d=Math.abs(a.data[i+c]-b.data[i+c]);sum+=d;if(d>max)max=d;}
+    if(max>threshold){changed++;heat[i]=255;heat[i+1]=35;heat[i+2]=40;heat[i+3]=Math.min(255,110+max);}
+  }
+  return {width:a.width,height:a.height,changed,total:pixels,ratio:changed/pixels,mae:sum/(pixels*4),heat};
+}
+function draw(canvas,image){canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;canvas.getContext("2d").drawImage(image,0,0);}
+function updateView(){
+  const value=Number(els.split.value),mode=document.querySelector(".mode[aria-pressed=true]").dataset.mode;
+  els.splitValue.value=value+"%";
+  els.actual.style.clipPath=mode==="split"?"inset(0 "+(100-value)+"% 0 0)":"none";
+  els.actual.style.opacity=mode==="split"?"1":".5";
+}
+els.split.addEventListener("input",updateView);
+document.querySelectorAll(".mode").forEach(button=>button.addEventListener("click",()=>{
+  document.querySelectorAll(".mode").forEach(x=>x.setAttribute("aria-pressed",String(x===button)));
+  updateView();
+}));
+els.button.addEventListener("click",async()=>{
+  els.button.disabled=true;els.results.hidden=true;current=null;status("Обработка изображений в браузере…");
+  try{
+    const refFile=els.source.files[0],actualFile=els.target.files[0];
+    if(!goodFile(refFile)||!goodFile(actualFile))throw new Error("Неверный тип или размер файла.");
+    const raw=Number(els.threshold.value);
+    if(!Number.isInteger(raw)||raw<0||raw>255)throw new Error("Допуск должен быть целым числом от 0 до 255.");
+    const [a,b]=await Promise.all([loadImage(refFile),loadImage(actualFile)]);
+    if(a.naturalWidth!==b.naturalWidth||a.naturalHeight!==b.naturalHeight)throw new Error("Разные размеры изображений: "+a.naturalWidth+"×"+a.naturalHeight+" и "+b.naturalWidth+"×"+b.naturalHeight+".");
+    if(a.naturalWidth*a.naturalHeight>16000000)throw new Error("Слишком большое изображение: максимум 16 млн пикселей.");
+    const diff=differences(matrix(a),matrix(b),raw);
+    draw(els.ref,a);draw(els.actual,b);
+    els.viewport.style.width=diff.width+"px";
+    els.heat.width=diff.width;els.heat.height=diff.height;
+    els.heat.getContext("2d").putImageData(new ImageData(diff.heat,diff.width,diff.height),0,0);
+    get("size").textContent=diff.width+" × "+diff.height;
+    get("changed").textContent=diff.changed.toLocaleString("ru-RU");
+    get("ratio").textContent=(diff.ratio*100).toFixed(3)+"%";
+    get("mae").textContent=diff.mae.toFixed(3);
+    current={kind:"IMPULSE_LOCAL_PIXEL_DIFF_NOT_APPLE_CERTIFICATION",algorithm:"RGBA per-channel MAE; changed if any channel difference > threshold",reference_file:refFile.name,actual_file:actualFile.name,width:diff.width,height:diff.height,threshold:raw,changed_pixels:diff.changed,total_pixels:diff.total,changed_ratio:diff.ratio,mae_rgba_0_255:diff.mae,apple_frame_id:null,apple_source_licensed:false,source_geometry_verified:false,pixel_parity_certified:false};
+    els.results.hidden=false;updateView();
+    status("Сравнение выполнено локально. Никаких данных не отправлено.");
+  }catch(err){status("Ошибка сравнения: "+(err instanceof Error?err.message:String(err)));}
+  finally{els.button.disabled=false;}
+});
+els.report.addEventListener("click",()=>{
+  if(!current)return;
+  const blob=new Blob([JSON.stringify(current,null,2)+"\n"],{type:"application/json"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="impulse-local-pixel-diff-report.json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+updateView();
+</script>
+</body></html>
