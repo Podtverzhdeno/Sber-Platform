@@ -12,6 +12,7 @@ import type { RuntimeApiPath } from "../api/client";
 import { StatePanel } from "../components/ui";
 import "./collaboration.scss";
 import "./messenger/reference.scss";
+import "./messenger/apple-sketch-messages.scss";
 
 import { ChatHistory } from "./messenger/chat-history";
 import type { PendingMessageOverlay } from "./messenger/chat-history";
@@ -507,7 +508,7 @@ export function MessagingWorkspace({
   if (channelsQuery.isPending) {
     return (
       <div
-        className="messenger-page sberchat-shell sberchat-reference"
+        className="messenger-page sberchat-shell sberchat-reference apple-messages-2026"
         data-reference={reference}
         data-visual-reference="R-MSG-01"
       >
@@ -518,7 +519,7 @@ export function MessagingWorkspace({
   if (channelsQuery.isError) {
     return (
       <div
-        className="messenger-page sberchat-shell sberchat-reference"
+        className="messenger-page sberchat-shell sberchat-reference apple-messages-2026"
         data-reference={reference}
         data-visual-reference="R-MSG-01"
       >
@@ -554,7 +555,7 @@ export function MessagingWorkspace({
 
   return (
     <div
-      className="messenger-page sberchat-shell sberchat-reference"
+      className="messenger-page sberchat-shell sberchat-reference apple-messages-2026"
       data-reference={reference}
       data-visual-reference="R-MSG-01"
       data-message-state={selected === undefined ? "empty" : selected.kind === "community" ? "community" : "direct"}

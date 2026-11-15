@@ -1,0 +1,187 @@
+/*
+ * Impulse web surface, mapped from owner-supplied Apple Sketch references.
+ * Precise mobile Messages sizes: 402x79 chat row, 402x70 collapsed input,
+ * 402x60 expanded input. Source: Messages(1).sketch, Symbols.
+ * iOS16 button tokens #007AFF / #0A84FF, 50px control, 14px radius from
+ * inspected Figma nodes 839:9700 / 839:9728.
+ *
+ * Shared web cards and tables are ADAPTATIONS, not native Apple components;
+ * do not claim 1:1 until desktop nodes / screenshot verification are complete.
+ * No Apple fonts, SF Symbols, graphics or image assets embedded.
+ */
+:root,
+:root[data-theme="light"] {
+  --apple-kit-accent: #007aff;
+  --apple-kit-accent-ink: #fff;
+  --apple-kit-surface: #fff;
+  --apple-kit-surface-secondary: #f5f5f7;
+  --apple-kit-separator: rgb(60 60 67 / 18%);
+  --apple-kit-label: #1c1c1e;
+  --apple-kit-secondary-label: #636366;
+  --apple-kit-focus: #007aff;
+  --apple-kit-control-radius: 14px;
+  --apple-kit-card-radius: 16px;
+  --apple-kit-shadow: 0 1px 3px rgb(15 23 42 / 4%), 0 5px 22px rgb(15 23 42 / 3%);
+}
+:root[data-theme="dark"] {
+  --apple-kit-accent: #0a84ff;
+  --apple-kit-accent-ink: #fff;
+  --apple-kit-surface: #1c1c1e;
+  --apple-kit-surface-secondary: #2c2c2e;
+  --apple-kit-separator: rgb(255 255 255 / 14%);
+  --apple-kit-label: #f5f5f7;
+  --apple-kit-secondary-label: #aeaeb2;
+  --apple-kit-focus: #0a84ff;
+  --apple-kit-shadow: 0 2px 14px rgb(0 0 0 / 16%);
+}
+
+/* A single semantic surface for shared cards, states and data tables.
+   No change to React props, events, scroll behavior or server data. */
+:root .page-shell .ui-card,
+:root .page-shell .state-panel {
+  color: var(--apple-kit-label);
+  background: var(--apple-kit-surface);
+  border: 1px solid var(--apple-kit-separator);
+  border-radius: var(--apple-kit-card-radius);
+  box-shadow: var(--apple-kit-shadow);
+}
+
+:root .page-shell .ui-card h2,
+:root .page-shell .state-panel h2 {
+  color: var(--apple-kit-label);
+  font-weight: 650;
+  letter-spacing: -0.025em;
+}
+
+:root .page-shell .state-panel p {
+  color: var(--apple-kit-secondary-label);
+}
+
+/* Buttons are actual HTML buttons; do not restyle arbitrary destructive
+   or disabled actions as a blue primary. */
+:root .page-shell .state-panel button {
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--apple-kit-control-radius);
+  padding: 10px 18px;
+  background: var(--apple-kit-accent);
+  color: var(--apple-kit-accent-ink);
+  font-size: 15px;
+  font-weight: 620;
+  cursor: pointer;
+}
+:root .page-shell .state-panel button:disabled { opacity: 0.44; cursor: not-allowed; }
+:root .page-shell .state-panel button:focus-visible {
+  outline: 3px solid var(--apple-kit-focus);
+  outline-offset: 3px;
+}
+
+/* Flat, scrollable list/table design for all six role workspaces. */
+:root .page-shell .table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--apple-kit-separator);
+  border-radius: var(--apple-kit-card-radius);
+  background: var(--apple-kit-surface);
+  scrollbar-gutter: stable;
+}
+:root .page-shell .table-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--apple-kit-label);
+  font-variant-numeric: tabular-nums;
+}
+:root .page-shell .table-scroll th,
+:root .page-shell .table-scroll td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--apple-kit-separator);
+  background: transparent;
+  text-align: left;
+  vertical-align: middle;
+}
+:root .page-shell .table-scroll th {
+  color: var(--apple-kit-secondary-label);
+  background: var(--apple-kit-surface-secondary);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+:root .page-shell .table-scroll tr:last-child td { border-bottom: none; }
+:root .page-shell .table-scroll tbody tr:hover { background: color-mix(in srgb, var(--apple-kit-accent) 4%, var(--apple-kit-surface)); }
+:root .page-shell .table-scroll:focus-visible {
+  outline: 3px solid var(--apple-kit-focus);
+  outline-offset: 3px;
+}
+
+/* Accessible modal/sheet chrome. Existing Escape/Tab trap/focus return
+   stays in components/ui.tsx; CSS never fakes an interactive action. */
+:root .page-shell .overlay { background: rgb(0 0 0 / 43%); }
+:root .page-shell .overlay-panel {
+  color: var(--apple-kit-label);
+  background: var(--apple-kit-surface);
+  border: 1px solid var(--apple-kit-separator);
+  border-radius: 20px;
+  box-shadow: 0 18px 60px rgb(0 0 0 / 18%);
+}
+:root .page-shell .overlay-panel--drawer {
+  border-radius: 20px 0 0 20px;
+}
+:root .page-shell .overlay-panel header {
+  border-bottom: 1px solid var(--apple-kit-separator);
+}
+:root .page-shell .overlay-panel header button {
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--apple-kit-secondary-label);
+  background: var(--apple-kit-surface-secondary);
+  border-radius: 50%;
+  border: 0;
+}
+:root .page-shell .overlay-panel :focus-visible {
+  outline: 3px solid var(--apple-kit-focus);
+  outline-offset: 2px;
+}
+
+/* Compact statuses, unambiguous success/warning colors. */
+:root .page-shell .ui-badge {
+  border: 1px solid var(--apple-kit-separator);
+  border-radius: 999px;
+  padding: 4px 10px;
+  color: var(--apple-kit-secondary-label);
+  background: var(--apple-kit-surface-secondary);
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 600;
+}
+:root .page-shell .ui-badge--success {
+  color: var(--color-success, #16704a);
+  background: color-mix(in srgb, var(--color-success, #16704a) 9%, var(--apple-kit-surface));
+}
+:root .page-shell .ui-badge--warning {
+  color: var(--color-warning, #865a00);
+  background: color-mix(in srgb, var(--color-warning, #865a00) 8%, var(--apple-kit-surface));
+}
+:root .page-shell .tooltip [role="tooltip"] {
+  padding: 9px 12px;
+  border: 1px solid var(--apple-kit-separator);
+  border-radius: 12px;
+  color: var(--apple-kit-label);
+  background: var(--apple-kit-surface);
+  box-shadow: var(--apple-kit-shadow);
+}
+@media (max-width: 480px) {
+  :root .page-shell .overlay { padding: 10px; }
+  :root .page-shell .overlay-panel { max-height: calc(100dvh - 20px); overflow-y: auto; }
+  :root .page-shell .overlay-panel--drawer { border-radius: 16px 0 0 16px; }
+  :root .page-shell .table-scroll th,
+  :root .page-shell .table-scroll td { padding: 10px 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root .page-shell .state-panel button,
+  :root .page-shell .overlay-panel { transition: none; }
+}
+@media (forced-colors: active) {
+  :root .page-shell .ui-card,
+  :root .page-shell .table-scroll,
+  :root .page-shell .overlay-panel { border: 1px solid CanvasText; }
+}

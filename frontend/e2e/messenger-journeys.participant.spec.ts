@@ -112,6 +112,14 @@ test("participant journeys: диалог, отправка, вложение, з
 
   await page.goto("/");
   await page.locator('[data-persona="participant-ilya"]').click();
+  await page.getByRole("button", { name: "Меню", exact: true }).click();
+  {
+    const menuGroup = page.getByRole("dialog", { name: "Главное меню" })
+      .getByRole("button", { name: "Сообщество", exact: true });
+    if (await menuGroup.getAttribute("aria-expanded") !== "true") {
+      await menuGroup.click();
+    }
+  }
   await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
   await page.getByRole("link", { name: "Сообщения" }).click();
 

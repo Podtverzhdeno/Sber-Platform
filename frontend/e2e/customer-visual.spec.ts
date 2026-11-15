@@ -10,6 +10,32 @@ async function openCustomer(page: import("@playwright/test").Page) {
   await page.locator('[data-persona="customer-roman"]').click();
 }
 
+async function navigateCustomer(page: import("@playwright/test").Page, section: string) {
+  const trigger = page.getByRole("button", { name: "Меню", exact: true });
+  await expect(trigger).toBeVisible();
+  await trigger.click();
+  const menu = page.getByRole("dialog", { name: "Главное меню" });
+  await expect(menu).toBeVisible();
+  const byGroup: Record<string, string> = {
+    "Мои задачи": "Задачи",
+    "Создать задачу": "Задачи",
+    "Заявки": "Задачи",
+    "База участников": "Люди",
+    "Аналитика": "Работа",
+    "Сообщения": "Общение",
+    "AI-помощник": "Дополнительно",
+    "Настройки": "Дополнительно",
+  };
+  if (section !== "Главная") {
+    const group = menu.getByRole("button", { name: byGroup[section] ?? "Другие разделы", exact: true });
+    if (await group.getAttribute("aria-expanded") !== "true") {
+      await group.click();
+    }
+  }
+  await menu.getByRole("navigation", { name: "Навигация роли" })
+    .getByRole("link", { name: section, exact: true }).click();
+}
+
 let customerMessages: Record<string, Array<{ id: string; author_id: string; author_name: string; kind: string; body: string; artifact_refs: string[]; sequence: number; created_at: string }>> = {};
 
 async function installMessages(page: import("@playwright/test").Page) {
@@ -40,11 +66,13 @@ test("customer premium workspace renders every route without overflow", async ({
   await openCustomer(page);
   await expect(page.getByRole("button", { name: /Учебный стрик/ })).toHaveCount(0);
 
+  await page.getByRole("button", { name: "Меню", exact: true }).click();
   const sidebar = page.getByRole("navigation", { name: "Навигация роли" });
-  await expect(sidebar.getByRole("link")).toHaveCount(9);
+  await expect(sidebar.locator('a[href^="/workspace/"]')).toHaveCount(9);
+  await page.keyboard.press("Escape");
   for (const section of ["Главная", "Мои задачи", "Создать задачу", "Заявки", "Аналитика", "AI-помощник", "База участников", "Сообщения", "Настройки"]) {
     await test.step(`Customer route: ${section}`, async () => {
-      await sidebar.getByRole("link", { name: section, exact: true }).click();
+      await navigateCustomer(page, section);
       await expect(page.locator(".premium-page, .messenger-page, .customer-talent-analytics, .customer-activity-v3, .buddy-page, .customer-scenario, .create-task-workspace, .participant-settings").first()).toBeVisible();
       const geometry = await page.evaluate(() => {
         const width = document.documentElement.clientWidth;
@@ -73,26 +101,25 @@ test("customer premium workspace renders every route without overflow", async ({
 
 test("customer task, application and candidate actions are interactive", async ({ page }) => {
   await openCustomer(page);
-  const sidebar=page.getByRole("navigation",{name:"Навигация роли"});
-  await sidebar.getByRole("link",{name:"Мои задачи",exact:true}).click();
+  await navigateCustomer(page, "Мои задачи");
   await page.getByLabel("Поиск по задачам").fill("аномалий");
   await expect(page.locator(".premium-tr")).toHaveCount(2);
   await expect(page.getByRole("button",{name:"Фильтры"})).toHaveCount(0);
-  await sidebar.getByRole("link",{name:"Заявки",exact:true}).click();
+  await navigateCustomer(page, "Заявки");
   await page.getByRole("button",{name:"Открыть профиль"}).click();
   await expect(page.getByRole("dialog",{name:/Цифровой профиль/})).toBeVisible();
   await page.getByRole("button",{name:"×"}).click();
   await page.getByRole("button",{name:"В шорт-лист"}).click();
   await expect(page.getByRole("dialog",{name:"Добавлен в шорт-лист"})).toBeVisible();
   await page.getByRole("button",{name:"Готово"}).click();
-  await sidebar.getByRole("link",{name:"База участников",exact:true}).click();
+  await navigateCustomer(page, "База участников");
   await page.getByRole("button",{name:"Пригласить в задачу"}).click();
   await expect(page.getByRole("dialog",{name:"Готово"})).toBeVisible();
 });
 
 test("customer accepts a result with rating and detailed review", async ({ page }) => {
   await openCustomer(page);
-  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Мои задачи",exact:true}).click();
+  await navigateCustomer(page, "Мои задачи");
   await page.getByRole("button",{name:"Принять результат",exact:true}).click();
   const acceptance=page.getByRole("dialog",{name:"Принять результат"});
   await expect(acceptance).toBeVisible();
@@ -106,7 +133,7 @@ test("customer accepts a result with rating and detailed review", async ({ page 
 
 test("customer returns a result for revision with a detailed reason", async ({ page }) => {
   await openCustomer(page);
-  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Мои задачи",exact:true}).click();
+  await navigateCustomer(page, "Мои задачи");
   await page.getByRole("button",{name:"Вернуть на доработку",exact:true}).click();
   const revision=page.getByRole("dialog",{name:"Вернуть на доработку"});
   await expect(revision).toBeVisible();
@@ -144,7 +171,7 @@ test("customer five-step brief applies guidance and submits one task for moderat
     return route.fulfill({json:server.task});
   });
   await openCustomer(page);
-  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Создать задачу",exact:true}).click();
+  await navigateCustomer(page, "Создать задачу");
   const wizard = page.locator(".create-task-workspace");
   await expect(wizard).toBeVisible();
   await wizard.getByLabel("Название задачи").fill("AI-поиск внутренних регламентов");
@@ -177,7 +204,7 @@ test("customer five-step brief applies guidance and submits one task for moderat
 test("customer can send messages and each dialog keeps its own history", async ({ page }) => {
   await openCustomer(page);
   await installMessages(page);
-  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Сообщения",exact:true}).click();
+  await navigateCustomer(page, "Сообщения");
   await page.locator(".msg-dialog-list__row").filter({hasText:"Рекомендательная система"}).click();
   await expect(page.locator(".messenger-page")).toBeVisible();
   const composer=page.getByRole("textbox", { name: "Текст сообщения" });
@@ -198,7 +225,7 @@ test("customer can send messages and each dialog keeps its own history", async (
 
 test("customer settings show the customer profile without participant HR controls", async ({ page }) => {
   await openCustomer(page);
-  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Настройки",exact:true}).click();
+  await navigateCustomer(page, "Настройки");
   await expect(page.getByRole("heading",{name:"Профиль заказчика"})).toBeVisible();
   await expect(page.getByLabel("ФИО")).toHaveValue("Роман Воронов");
   await expect(page.getByLabel("Telegram")).toHaveValue("");
@@ -209,11 +236,11 @@ test("customer settings show the customer profile without participant HR control
 test("customer opens the selected participant profile and direct dialog", async ({ page }) => {
   await openCustomer(page);
   await installMessages(page);
-  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Мои задачи",exact:true}).click();
+  await navigateCustomer(page, "Мои задачи");
   await page.getByRole("button",{name:"Профиль",exact:true}).first().click();
   await expect(page.getByRole("dialog",{name:/Никита Соколов/})).toBeVisible();
   await page.getByRole("button",{name:"×"}).click();
-  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Мои задачи",exact:true}).click();
+  await navigateCustomer(page, "Мои задачи");
   await page.getByRole("button",{name:"Написать",exact:true}).first().click();
   await expect(page).toHaveURL(/participant=p1/);
   await expect(page.locator(".messenger-page")).toBeVisible();
@@ -223,7 +250,7 @@ test("customer opens the selected participant profile and direct dialog", async 
 test("customer participant dialogs keep separate histories", async ({ page }) => {
   await openCustomer(page);
   await installMessages(page);
-  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Сообщения", exact: true }).click();
+  await navigateCustomer(page, "Сообщения");
   await page.locator(".msg-dialog-list__row").filter({hasText:"Рекомендательная система"}).click();
   const dialogs=page.getByRole("list", { name: "Диалоги" });
   const history=page.getByRole("list", { name: "История чата" });
@@ -236,7 +263,7 @@ test("customer participant dialogs keep separate histories", async ({ page }) =>
 test("customer messages expose the linked work context", async ({ page }) => {
   await openCustomer(page);
   await installMessages(page);
-  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Сообщения", exact: true }).click();
+  await navigateCustomer(page, "Сообщения");
   await page.locator(".msg-dialog-list__row").filter({hasText:"Рекомендательная система"}).click();
   await expect(page.locator(".chat-context h2")).toContainText("Рекомендательная система");
   await expect(page.locator(".chat-context")).toContainText("impulse-demo");
@@ -251,7 +278,7 @@ test("customer messages expose the linked work context", async ({ page }) => {
 
 test("customer participant database contains an extended talent pool", async ({ page }) => {
   await openCustomer(page);
-  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "База участников", exact: true }).click();
+  await navigateCustomer(page, "База участников");
   await expect(page.getByText("23", { exact: true }).first()).toBeVisible();
   await expect(page.locator(".talent-table .candidate-row")).toHaveCount(21);
   await expect(page.getByText("Мария Орлова", { exact: true })).toBeVisible();
@@ -265,7 +292,7 @@ test("customer participant database contains an extended talent pool", async ({ 
 
 test("customer opens the shared task workspace from my tasks", async ({ page }) => {
   await openCustomer(page);
-  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Мои задачи", exact: true }).click();
+  await navigateCustomer(page, "Мои задачи");
   await page.getByRole("button", { name: "Открыть задачу", exact: true }).click();
   await expect(page.locator(".ctw-page")).toBeVisible();
   await expect(page.getByText("Промежуточные артефакты")).toBeVisible();
@@ -275,7 +302,7 @@ test("customer opens the shared task workspace from my tasks", async ({ page }) 
 
 test("application filters change independently", async ({ page }) => {
   await openCustomer(page);
-  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Заявки", exact: true }).click();
+  await navigateCustomer(page, "Заявки");
   const direction = page.getByLabel("Направление");
   const level = page.getByLabel("Уровень");
   const match = page.getByLabel("Match");
@@ -290,7 +317,7 @@ test("application filters change independently", async ({ page }) => {
 
 test("customer applications identify and filter by project", async ({ page }) => {
   await openCustomer(page);
-  await page.getByRole("navigation",{name:"Навигация роли"}).getByRole("link",{name:"Заявки",exact:true}).click();
+  await navigateCustomer(page, "Заявки");
   await expect(page.locator(".applications-candidate-row.candidate-head")).toContainText("Проект");
   await expect(page.locator(".application-project").first()).toContainText("IMP-");
   const project=page.getByLabel("Проект заявки");
@@ -301,7 +328,7 @@ test("customer applications identify and filter by project", async ({ page }) =>
 
 test("customer analytics updates metrics for the selected period", async ({ page }) => {
   await openCustomer(page);
-  await page.getByRole("navigation", { name: "Навигация роли" }).getByRole("link", { name: "Аналитика", exact: true }).click();
+  await navigateCustomer(page, "Аналитика");
   await page.getByRole("button", { name: /Последние 90 дней/ }).click();
   await expect(page.getByRole("button", { name: /Последние 30 дней/ })).toBeVisible();
   const business = page.locator(".cta-business");

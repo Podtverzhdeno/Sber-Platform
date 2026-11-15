@@ -1,0 +1,16 @@
+# Claim APPLE-SKETCH-CUSTOMER-QA-20261114
+- task_id: APPLE-SKETCH-CUSTOMER-QA-20261114
+- session_id: gpt6-20261114-apple-customer-hidden-nav-e2e
+- status: IN_PROGRESS
+- started_at: 2026-11-14T21:55:00+03:00
+- heartbeat_at: 2026-11-14T21:55:00+03:00
+- base_revision: a9a6faf970187c5a274d5f6b0114bb71f1e7bf7e
+- depends_on: [APPLE-SKETCH-MESSENGER-QA-20261114]
+- write_scope:
+  - frontend/e2e/customer-visual.spec.ts (open hidden navigation before all role route checks only)
+  - .agents/coordination/claims/APPLE-SKETCH-CUSTOMER-QA-20261114.lock/status.md
+- excluded: application data, CSS, server, fixtures and all other tests
+- verification:
+  - Customer SberChat PR Regression
+  - TypeScript + ESLint
+- issue: existing customer-visual E2E assumes permanently visible navigation; Apple workspace menu has long been hidden by default; preserve its 9 route assertions and all functional checks.

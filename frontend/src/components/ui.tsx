@@ -1,6 +1,7 @@
 import type { KeyboardEvent, ReactNode } from "react";
 import { useEffect, useId, useRef } from "react";
 import { X } from "lucide-react";
+import "./apple-sketch-core.scss";
 
 export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "success" | "warning" }) {
   return <span className={`ui-badge ui-badge--${tone}`}>{children}</span>;

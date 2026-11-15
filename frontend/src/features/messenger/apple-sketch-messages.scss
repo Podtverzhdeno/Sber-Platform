@@ -1,0 +1,257 @@
+/*
+ * Live Impulse messaging layout mapped from the owner's original Apple
+ * Messages(1).sketch Symbols. This file is loaded AFTER the historical
+ * SberChat reference stylesheet. No changes to send/mute/search/upload/ACL.
+ *
+ * Measured from Sketch:
+ * - Chat List / Light + Dark: 402 x 79
+ * - Chat / Light / Text Friend: 97 x 40, fill #E9E9EA
+ * - Chat / Dark / Text Friend: 97 x 40, fill #262629
+ * - Chat / Light + Dark / Keyboard Collapsed: 402 x 70
+ * - Keyboard Expanded: 402 x 60
+ * - Composer button: 44 x 44
+ * - Light caret: #0091FF
+ * Outgoing accent uses verified Figma iOS16 #007AFF/#0A84FF as an intentional
+ * cross-file web adaptation; Sketch outgoing bubble symbol variants differ.
+ */
+:root .page-shell:has(.apple-messages-2026) {
+  background: var(--apple-kit-surface-secondary, #f5f5f7);
+}
+
+:root .messenger-page.sberchat-reference.apple-messages-2026 {
+  --msg-panel: #fff;
+  --msg-panel-elevated: #fff;
+  --msg-text: #1c1c1e;
+  --msg-muted: #636366;
+  --msg-line: rgb(60 60 67 / 18%);
+  --msg-active: #e9f2ff;
+  --msg-hover: #f5f5f7;
+  --msg-chat-bg: #fff;
+  --msg-bubble-in: #e9e9ea;
+  --msg-bubble-out: #007aff;
+  --msg-bubble-border: transparent;
+  border: 1px solid var(--msg-line);
+  border-radius: 18px;
+  background: var(--msg-panel);
+  color: var(--msg-text);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 4%);
+  overflow: hidden;
+}
+
+:root[data-theme="dark"] .messenger-page.sberchat-reference.apple-messages-2026 {
+  --msg-panel: #1c1c1e;
+  --msg-panel-elevated: #2c2c2e;
+  --msg-text: #f5f5f7;
+  --msg-muted: #aeaeb2;
+  --msg-line: rgb(255 255 255 / 14%);
+  --msg-active: #183a5b;
+  --msg-hover: #2c2c2e;
+  --msg-chat-bg: #000;
+  --msg-bubble-in: #262629;
+  --msg-bubble-out: #0a84ff;
+  --msg-bubble-border: transparent;
+  color: var(--msg-text);
+  box-shadow: 0 2px 18px rgb(0 0 0 / 16%);
+}
+
+/* Uniform readable panes in both themes — overrides the old fixed navy
+   reference without changing React grid/pane state. */
+:root .messenger-page.apple-messages-2026 :is(
+  .messenger-shell, .msg-dialog-list, .chat-thread, .msg-chat, .msg-context
+) {
+  color: var(--msg-text);
+  background: var(--msg-panel);
+  border-color: var(--msg-line);
+}
+:root .messenger-page.apple-messages-2026 :is(.msg-chat__scroll, .msg-chat__rows) {
+  background: var(--msg-chat-bg);
+}
+:root .messenger-page.apple-messages-2026 :is(.msg-dialog-list__heading, .msg-chat__header) {
+  background: var(--msg-panel);
+  border-bottom: 1px solid var(--msg-line);
+  color: var(--msg-text);
+}
+:root .messenger-page.apple-messages-2026 :is(
+  .msg-dialog-list__heading h2, .msg-chat__header-title strong,
+  .msg-dialog-list__row-title strong, .msg-context__title
+) {
+  color: var(--msg-text);
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+:root .messenger-page.apple-messages-2026 :is(
+  .msg-dialog-list__preview, .msg-dialog-list__kind,
+  .msg-chat__header-title small, .msg-context__eyebrow
+) {
+  color: var(--msg-muted);
+}
+
+/* Source Chat List symbol height = 79px. Keep real row buttons and
+   their keyboard access, unread badges and actions in place. */
+:root .messenger-page.apple-messages-2026 .msg-dialog-list__row {
+  min-height: 79px;
+  border-radius: 10px;
+  color: var(--msg-text);
+  background: transparent;
+}
+:root .messenger-page.apple-messages-2026 .msg-dialog-list__row-item {
+  min-height: 79px;
+  border-color: var(--msg-line);
+  background: var(--msg-panel);
+}
+:root .messenger-page.apple-messages-2026 .msg-dialog-list__row-item.selected .msg-dialog-list__row {
+  color: var(--msg-text);
+  background: var(--msg-active);
+}
+:root .messenger-page.apple-messages-2026 .msg-dialog-list__row:hover {
+  background: var(--msg-hover);
+}
+:root .messenger-page.apple-messages-2026 .msg-dialog-list__unread {
+  background: #007aff;
+  color: #fff;
+}
+:root[data-theme="dark"] .messenger-page.apple-messages-2026 .msg-dialog-list__unread {
+  background: #0a84ff;
+}
+
+/* Match the actual Apple message bubble source surfaces. */
+:root .messenger-page.apple-messages-2026 .msg-chat__bubble {
+  min-height: 40px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--msg-bubble-in);
+  box-shadow: none;
+  color: var(--msg-text);
+}
+:root .messenger-page.apple-messages-2026 .msg-chat__bubble-body {
+  color: var(--msg-text);
+  font-size: 15px;
+  line-height: 1.45;
+}
+:root .messenger-page.apple-messages-2026 .msg-chat__group.outgoing .msg-chat__bubble {
+  background: var(--msg-bubble-out);
+  border: 0;
+  color: #fff;
+}
+:root .messenger-page.apple-messages-2026 .msg-chat__group.outgoing .msg-chat__bubble-body {
+  color: #fff;
+}
+:root .messenger-page.apple-messages-2026 .msg-chat__group-author,
+:root .messenger-page.apple-messages-2026 .msg-chat__author-role {
+  color: var(--msg-muted);
+}
+:root .messenger-page.apple-messages-2026 .msg-chat__meta {
+  color: var(--msg-muted);
+}
+:root .messenger-page.apple-messages-2026 .msg-chat__group.outgoing .msg-chat__bubble .msg-chat__meta {
+  color: rgb(255 255 255 / 80%);
+}
+:root .messenger-page.apple-messages-2026 .msg-chat__divider,
+:root .messenger-page.apple-messages-2026 .msg-chat__service {
+  border: 1px solid var(--msg-line);
+  border-radius: 999px;
+  background: var(--msg-panel-elevated);
+  color: var(--msg-muted);
+}
+
+/* Apple Messages keyboard toolbar: 70px collapsed, 60px expanded.
+   On the web we retain the existing composer to avoid disturbing
+   sender safety and attachment refs. */
+:root .messenger-page.apple-messages-2026 .msg-composer {
+  min-height: 70px;
+  border-top: 1px solid var(--msg-line);
+  background: var(--msg-panel);
+  color: var(--msg-text);
+  box-shadow: none;
+}
+:root .messenger-page.apple-messages-2026 .msg-composer:focus-within {
+  min-height: 60px;
+}
+:root .messenger-page.apple-messages-2026 .msg-composer__input-shell {
+  min-height: 43px;
+  border: 1px solid var(--msg-line);
+  border-radius: 22px;
+  background: var(--msg-panel-elevated);
+  box-shadow: none;
+}
+:root .messenger-page.apple-messages-2026 .msg-composer__input-shell:focus-within {
+  border-color: #0091ff;
+  box-shadow: 0 0 0 2px rgb(0 145 255 / 12%);
+}
+:root .messenger-page.apple-messages-2026 .msg-composer__textarea {
+  min-height: 43px;
+  border: 0;
+  background: transparent;
+  color: var(--msg-text);
+  box-shadow: none;
+  font-size: 15px;
+  line-height: 1.45;
+}
+:root .messenger-page.apple-messages-2026 .msg-composer__textarea::placeholder {
+  color: var(--msg-muted);
+}
+:root .messenger-page.apple-messages-2026 .msg-composer__send {
+  display: inline-grid;
+  place-items: center;
+  min-height: 44px;
+  min-width: 44px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--msg-bubble-out);
+  box-shadow: none;
+}
+:root .messenger-page.apple-messages-2026 .msg-composer__tool,
+:root .messenger-page.apple-messages-2026 .msg-chat__header-action {
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--msg-muted);
+  background: transparent;
+  border-radius: 12px;
+  box-shadow: none;
+}
+:root .messenger-page.apple-messages-2026 :is(
+  .msg-dialog-list__search-field,
+  .msg-dialog-list__tabs, .msg-dialog-list__create-menu
+) {
+  border-color: var(--msg-line);
+  background: var(--msg-panel-elevated);
+  box-shadow: none;
+}
+:root .messenger-page.apple-messages-2026 .msg-dialog-list__search-field input {
+  color: var(--msg-text);
+  background: transparent;
+}
+:root .messenger-page.apple-messages-2026 .msg-dialog-list__tabs button.active {
+  background: var(--msg-active);
+  color: var(--msg-text);
+  box-shadow: none;
+}
+:root .messenger-page.apple-messages-2026 .msg-context__section {
+  border-color: var(--msg-line);
+}
+:root .messenger-page.apple-messages-2026 .msg-context__facts dd {
+  color: var(--msg-text);
+}
+:root .messenger-page.apple-messages-2026 .msg-context__facts dt {
+  color: var(--msg-muted);
+}
+:root .messenger-page.apple-messages-2026 :is(button,input,textarea):focus-visible {
+  outline: 3px solid var(--apple-kit-focus, #007aff);
+  outline-offset: 2px;
+}
+@media (max-width: 959px) {
+  :root .messenger-page.apple-messages-2026 { border-radius: 12px; }
+  :root .messenger-page.apple-messages-2026 .msg-dialog-list__row { min-height: 79px; }
+}
+@media (forced-colors: active) {
+  :root .messenger-page.apple-messages-2026 .msg-chat__bubble,
+  :root .messenger-page.apple-messages-2026 .msg-composer__input-shell { border: 1px solid CanvasText; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root .messenger-page.apple-messages-2026 :is(
+    .msg-dialog-list__row, .msg-chat__bubble, .msg-composer__send
+  ) { transition: none; }
+}
