@@ -92,3 +92,16 @@
 - GitHub read-only validation on snapshot SHA: 21/21 source blob SHAs and 16/16 unit-test blob SHAs exactly match; 0 mismatches.
 - This is a **docs/QA only** continuation: no app code edits, no licensed Apple assets downloaded, no claim of source frame inspection, rendered browser QA or 1:1 parity.
 - Outstanding: independent reviewer, source frame access, Python unit test run on checkout, Chromium/WebKit checks, current-main rebasing review, pixel diff. Keep draft PR open; no release.
+
+## 2026-11-15 22:00 owner continuation — source registry and two-parent reconciliation
+
+- Owner instructed continuation of the same Apple UI kit work. No production frontend/API/route files directly edited.
+- `99314f8`: reconciled latest canonical README after main updates.
+- `bc16138`: corrected ten PR-local Python scripts from exact Ruff log patches.
+- `e7d24fb`: documented prior CI failure and split of 13 unformatted Python files (3 main-only at that date).
+- `31468f4`: added 14 Apple-listed Figma/Sketch pairs, 28 exact linked provider URLs. Editable design frames not inspected.
+- `194ffc9` and `0c76a91`: used current main Python source files, preserving newer category-detection logic, and applied Ruff formatting from CI evidence.
+- `4dd8c0b`: committed verified **two-parent merge** to source-library branch, main parent `45216c4`. Tree includes 1,723 blob/commit paths, 19 PR overlays and 15 explicitly resolved conflicts, with zero unexpected tree entries after verification.
+- GitHub at `4dd8c0b`: PR #181 draft, mergeable=true/unstable; changed files reduced to 19, all inside Apple UI kit/** or this claim. Dedicated Apple UI kit reference QA passed; general CI pending (not claimed green).
+- Outstanding: full CI green, Python suite/Chromium runtime tests as configured, source-layer measurement for pixel parity, licensing review and independent approval. Do not auto-merge/deploy.
+- status: REVIEW.
