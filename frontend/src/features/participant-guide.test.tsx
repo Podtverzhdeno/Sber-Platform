@@ -43,6 +43,7 @@ describe("contextual participant guide", () => {
       autoSuggest={false} showFloatingTrigger={false} />);
     expect(screen.queryByRole("button", { name: "Как здесь всё устроено?" })).not.toBeInTheDocument();
     expect(document.querySelector(".participant-guide-trigger")).toBeNull();
+    expect(document.querySelector(".participant-guide")).toBeNull();
     act(() => { vi.advanceTimersByTime(3000); });
     expect(screen.queryByRole("dialog", { name: /Добро пожаловать/ })).not.toBeInTheDocument();
     expect(document.querySelector(".participant-guide-card")).toBeNull();
