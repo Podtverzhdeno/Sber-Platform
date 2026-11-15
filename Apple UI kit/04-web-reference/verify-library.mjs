@@ -96,6 +96,21 @@ for (const row of caseMatrix.cases ?? []) {
   }
   check(Array.isArray(row.required_states) && row.required_states.length > 0,
     "Missing required state coverage: " + row.id);
+
+  // Reference maps use concrete repository files, not extensionless imports.
+  // Permit distributing this reference folder standalone: skip path checks if
+  // frontend source is absent; GitHub CI checks them in the complete repository.
+  const repoRoot = resolve(libraryRoot, "..");
+  if (existsSync(join(repoRoot, "frontend/src/App.tsx"))) {
+    for (const target of row.impulse_paths ?? []) {
+      const resolvedTarget = resolve(repoRoot, target);
+      check(typeof target === "string"
+        && /^frontend\/src\/[A-Za-z0-9_./-]+\.(?:ts|tsx|css|scss)$/.test(target)
+        && resolvedTarget.startsWith(repoRoot + "/")
+        && existsSync(resolvedTarget),
+        "Unresolved concrete IMPULSE file: " + row.id + " -> " + target);
+    }
+  }
 }
 
 // Verify each standalone original SVG, provenance manifest and local gallery links.
