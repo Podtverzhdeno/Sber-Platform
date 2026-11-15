@@ -135,7 +135,6 @@ export function CalmParticipantHome({
       ?? focus.days[0]?.date ?? "";
   const day = focus.days.find((item) => item.date === validSelectedDay) ?? null;
   const confirmedSkills = passport.data?.skills.filter((skill) => skill.confirmed_case_count > 0) ?? null;
-  const completedSkills = confirmedSkills?.length ?? null;
   const currentLevel = level.data;
   const levelComplete = currentLevel &&
     currentLevel.level >= (currentLevel.max_level ?? 3);
@@ -172,28 +171,6 @@ export function CalmParticipantHome({
         <button className="calm-home__primary" type="button" onClick={followPriority}>
           {primaryLabel} <ArrowRight size={17} aria-hidden="true" />
         </button>
-      </section>
-
-      <section className="calm-home__metrics" aria-label="Краткий обзор прогресса">
-        <div className="calm-home__metric">
-          <span className="calm-home__metric-label">Уровень Impulse</span>
-          <strong data-testid="calm-impulse-level">{currentLevel ? `L${String(currentLevel.level)}` : "—"}</strong>
-          <small>{currentLevel
-            ? levelComplete ? "Программа завершена" : "Учебный уровень"
-            : roleKey === null ? "Нет направления" : level.isPending ? "Загружаем" : "Недоступно"}</small>
-        </div>
-        <div className="calm-home__metric">
-          <span className="calm-home__metric-label">Задачи</span>
-          <strong>{String(overview.active_tasks.length)}</strong>
-          <small>{overview.active_tasks.length ? "Сейчас в работе" : "Пока нет задач"}</small>
-        </div>
-        <div className="calm-home__metric">
-          <span className="calm-home__metric-label">Навыки</span>
-          <strong data-testid="calm-verified-skills">{completedSkills === null ? "—" : String(completedSkills)}</strong>
-          <small>{completedSkills === null
-            ? passport.isPending ? "Загружаем" : "Недоступно"
-            : "С подтверждёнными кейсами"}</small>
-        </div>
       </section>
 
       <section className="calm-home__path calm-home__panel" aria-labelledby="calm-home-path-title">
