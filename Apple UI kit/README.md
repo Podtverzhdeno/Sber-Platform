@@ -16,7 +16,7 @@
 4. Откройте локально **04-web-reference/casebook.html** (интерактивная галерея: nav, chat, forms, materials, dialog) и изучите **04-web-reference/impulse-apple-tokens.css**. Прежняя **reference-gallery.html** также сохранена.
 5. Применяйте изменения **только в отдельных PR**, с адаптацией под существующие темы, роутинг и права доступа.
 6. Пройдите **06-cases/README.md** для нужного сценария и выполните **03-impulse/visual-qa-checklist.md**: адаптивность, a11y, pixel-overlay относительно официального *разрешённого* макета, тесты.
-7. Для локальной проверки выполните `node "Apple UI kit/04-web-reference/verify-library.mjs"` и `python3 "Apple UI kit/04-web-reference/validate-svg-library.py"` (Python 3.11+). Результат этих проверок автоматизирован в `.github/workflows/apple-ui-reference-qa.yml`. Для сверки своих/разрешённых скриншотов используйте **04-web-reference/visual-comparison.md**.
+7. Для локальной проверки выполните `node "Apple UI kit/04-web-reference/verify-library.mjs"` и `python3 "Apple UI kit/04-web-reference/validate-svg-library.py"` (Python 3.11+; проверяет 12 основных и 16 дополнительных SVG). Результат этих проверок автоматизирован в `.github/workflows/apple-ui-reference-qa.yml`. Для сверки своих/разрешённых скриншотов используйте **04-web-reference/visual-comparison.md**.
 
 ## Состав
 
@@ -37,6 +37,9 @@
 | 06-cases/VISUAL_GALLERY.md | 12 SVG-превью, отображаемых непосредственно в GitHub |
 | 06-cases/visual-gallery.html | **12 оригинальных SVG-референсов** в единой галерее |
 | 06-cases/visual-manifest.json | Источники, категории, статусы и ограничения для 12 SVG |
+| reference-cases/README.md | Новая коллекция из 16 самостоятельных SVG 1200×760, источник и сценарий в каждой папке |
+| reference-cases/index.html | Автономная HTML-галерея дополнительных 16 кейсов |
+| reference-cases/manifest.json | Машиночитаемый реестр 16 кейсов и соответствий файлам IMPULSE |
 | 04-web-reference/casebook.html | Расширенная интерактивная галерея светлой/тёмной темы |
 | 04-web-reference/verify-library.mjs | Проверка структуры, линковки, реальных путей IMPULSE и синтаксиса JavaScript без сети |
 | 04-web-reference/validate-svg-library.py | Строгая проверка XML, размеров, accessibility и источников 12 SVG |
@@ -59,6 +62,12 @@
 **Главный источник:** https://developer.apple.com/design/resources/  
 **HIG:** https://developer.apple.com/design/human-interface-guidelines/  
 **Лицензия:** https://developer.apple.com/support/downloads/terms/apple-design-resources/Apple-Design-Resources-License-20230621-English.pdf
+
+## Вторая коллекция: 16 новых SVG-сценариев
+
+[Открыть каталог 16 кейсов](reference-cases/README.md) · [HTML-галерея](reference-cases/index.html) · [Манифест](reference-cases/manifest.json).
+
+Эти 16 дополнительных **оригинальных** иллюстраций 1200×760 перенесены из рабочей ветки #184 без изменения основного приложения; все ссылки на юридические ограничения, визуальный QA и реальные source paths исправлены для текущего `main`. Нельзя считать иллюстрации официальными Apple-макетами или измеренной реализацией 1:1.
 
 ## Интерактивный casebook (новый)
 
