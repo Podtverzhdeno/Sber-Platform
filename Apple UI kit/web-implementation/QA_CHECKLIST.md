@@ -13,3 +13,7 @@
 - Local synthetic data never gets sent to Impulse APIs; no business action silently simulated as real.
 - Native Liquid Glass, Apple font licenses and exact pixel parity not reproduced.
 - Before integration use original official editable Figma/Sketch frame and measured owner screenshot, then run Playwright/contrast/keyboard/RTL/real-data checks.
+
+## Mobile search availability (reference-lab regression)
+
+The initial prototype hid global search below 640px via CSS, leaving no mobile filtering control. The corrected CSS wraps the toolbar and places the visible labelled search on a second row at narrow widths. The browser QA script now checks search visibility and real local filtering at 320px and 390px. This is an unexecuted test definition until a Chromium run confirms it; production Impulse has its own search behavior and must be tested separately.

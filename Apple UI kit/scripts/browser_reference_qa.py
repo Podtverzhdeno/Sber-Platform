@@ -95,6 +95,12 @@ def exercise_desktop(page: object, out: Path | None) -> int:
             "() => document.documentElement.scrollWidth - document.documentElement.clientWidth"
         )
         check(overflow <= 2, f"horizontal overflow at {width}x{height}: {overflow}px")
+        if width <= 390:
+            check(page.locator("#search").is_visible(), f"search unavailable at {width}px")
+            page.locator("#search").fill("доступ")
+            check(page.locator("#tasks li").count() == 1, f"mobile search failed at {width}px")
+            page.locator("#search").fill("")
+
         if out is not None:
             page.screenshot(path=str(out / f"reference-{width}x{height}.png"), full_page=True)
         checks += 1
