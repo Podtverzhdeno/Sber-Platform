@@ -67,7 +67,7 @@ describe("App", () => {
     fireEvent.click(screen.getByRole("button", { name: /Развитие/ }));
     expect(screen.getByRole("link", { name: "Мой путь" })).toHaveAttribute("href", "/workspace/1");
     expect(screen.queryByRole("link", { name: "Очередь ревью" })).not.toBeInTheDocument();
-    expect(screen.getByRole("combobox", { name: "Тема оформления" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Тема: .*Сменить тему/ })).toBeInTheDocument();
   });
 
   it("returns to persona selection even when server logout fails", async () => {
@@ -91,12 +91,17 @@ describe("App", () => {
       if (url.endsWith("/me")) {
         return Promise.resolve(new Response(JSON.stringify(actor), { status: 200 }));
       }
+      if (url.endsWith("/development-overview")) {
+        return Promise.resolve(new Response(JSON.stringify(overviewFixture), { status: 200 }));
+      }
       return Promise.resolve(new Response("{}", { status: 200 }));
     });
 
     render(<App />);
-    expect(await screen.findByRole("button", { name: "Выйти" })).toBeEnabled();
-    fireEvent.click(screen.getByRole("button", { name: "Выйти" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Меню профиля" }));
+    const signOut = screen.getByRole("menuitem", { name: "Выйти" });
+    expect(signOut).toBeEnabled();
+    fireEvent.click(signOut);
 
     expect(await screen.findByRole("button", { name: /Алекс Речной/ })).toBeEnabled();
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
@@ -136,9 +141,10 @@ describe("App", () => {
 
     window.history.pushState({}, "", "/workspace/0");
     render(<App />);
-    // The participant's default home is Calm; absent role level data never invents L0.
-    expect(await screen.findByTestId("calm-participant-home")).toBeInTheDocument();
-    expect(screen.getByTestId("calm-impulse-level")).toHaveTextContent("—");
+    // The actual default home is now the approved pixel dashboard, with real API data.
+    expect(await screen.findByTestId("pixel-live-shell")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Impulse — открыть разделы" })).toBeInTheDocument();
+    expect(screen.queryByRole("progressbar", { name: "Прогресс обязательных курсов" })).not.toBeInTheDocument();
     expect(screen.getByRole("navigation")).toBeInTheDocument();
 
     const sidebar = screen.getByRole("complementary", { name: "Боковая панель" });
@@ -154,7 +160,7 @@ describe("App", () => {
     await waitFor(() => {
       expect(screen.getByTestId("grade-summary").dataset.gradeState).toBe("unavailable");
     });
-    expect(screen.queryByTestId("calm-participant-home")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("pixel-live-shell")).not.toBeInTheDocument();
     expect(sidebar.querySelector(".calm-sidebar__home")?.getAttribute("href")).toBe(homeHref);
 
     // The pre-existing v2=0 fallback still works.
@@ -237,6 +243,7 @@ describe("App", () => {
 
   it("switches among three themes without changing role or route", async () => {
     window.localStorage.clear();
+    window.localStorage.setItem("impulse-visual-mode", "blue");
     const actor = {
       person_id: "00000000-0000-0000-0000-000000000001",
       display_name: "Алекс Речной",
@@ -253,15 +260,17 @@ describe("App", () => {
     });
     window.history.pushState({}, "", "/workspace/0");
     render(<App />);
-    const theme = await screen.findByRole("combobox", { name: "Тема оформления" });
-    fireEvent.change(theme, { target: { value: "light" } });
-    await waitFor(() => { expect(document.documentElement.dataset.theme).toBe("light"); });
-    expect(window.localStorage.getItem("impulse-theme")).toBe("light");
-    fireEvent.change(theme, { target: { value: "dark" } });
-    await waitFor(() => { expect(document.documentElement.dataset.theme).toBe("dark"); });
+    const theme = await screen.findByRole("button", { name: /Тема: .*Сменить тему/ });
+    // User-controlled 3-state compact icon, no obsolete fourth "system" option.
+    fireEvent.click(theme);
+    await waitFor(() => { expect(document.documentElement.dataset.impulseVisualMode).toBe("midnight"); });
     expect(window.localStorage.getItem("impulse-theme")).toBe("dark");
-    fireEvent.change(theme, { target: { value: "system" } });
-    expect(window.localStorage.getItem("impulse-theme")).toBeNull();
+    fireEvent.click(theme);
+    await waitFor(() => { expect(document.documentElement.dataset.impulseVisualMode).toBe("light"); });
+    expect(window.localStorage.getItem("impulse-theme")).toBe("light");
+    fireEvent.click(theme);
+    await waitFor(() => { expect(document.documentElement.dataset.impulseVisualMode).toBe("blue"); });
+    expect(window.localStorage.getItem("impulse-theme")).toBe("dark");
     expect(window.location.pathname).toBe("/workspace/0");
     expect(screen.getByRole("link", { name: "Главная" })).toBeInTheDocument();
   });
