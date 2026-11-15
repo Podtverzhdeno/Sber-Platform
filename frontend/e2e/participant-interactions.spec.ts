@@ -1,4 +1,11 @@
-﻿import { expect, test } from "@playwright/test";
+﻿import { expect, test, type Page } from "@playwright/test";
+
+async function openAuthorizedRating(page: Page) {
+  await page.getByRole("button", { name: "Меню профиля", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Рейтинг", exact: true }).click();
+  await expect(page).toHaveURL(/\/workspace\/6(?:[?]|$)/);
+}
+
 
 const navigation = ["Главная", "Моя траектория", "Bootcamp", "Задачи", "Мои проекты", "События", "Рейтинг", "Портфолио", "Достижения", "Аналитика", "Сообщения", "AI-Buddy", "Настройки"];
 
@@ -449,7 +456,7 @@ test("rating shows ten distinct consented fictional demo participants, avatars a
   }));
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Рейтинг" }).click();
+  await openAuthorizedRating(page);
   const board = page.getByRole("region", { name: "Все участники рейтинга" });
   await expect(board.locator(".ir-leader-row")).toHaveCount(10);
   for (const name of fictionalNames) {
@@ -466,7 +473,7 @@ test("rating list opens participant profile and returns to the same ranking", as
   await page.setViewportSize({ width: 1672, height: 941 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Рейтинг" }).click();
+  await openAuthorizedRating(page);
   await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
   await page.screenshot({ path: "test-results/rating-v2-main-list-1672x941.png", fullPage: true });
   await page.getByRole("button", { name: "Кирилл Меньшев" }).click();
@@ -485,7 +492,7 @@ test("rating benefits navigate from the default list and back", async ({ page })
   await page.setViewportSize({ width: 1672, height: 941 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Рейтинг" }).click();
+  await openAuthorizedRating(page);
   await page.getByRole("button", { name: "Подробнее о рейтинге и наградах" }).click();
   await expect(page).toHaveURL(/ratingView=benefits/);
   await expect(page.getByRole("heading", { name: "Рейтинг подтверждённого опыта" })).toBeVisible();
@@ -516,7 +523,7 @@ test("rating benefits navigate from the default list and back", async ({ page })
 test("rating filters, ordering and profile actions are interactive", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("link", { name: "Рейтинг" }).click();
+  await openAuthorizedRating(page);
   const allRows = page.locator(".ir-leader-row");
   await expect(allRows).toHaveCount(3);
   await page.getByRole("button", { name: "ТОП 10", exact: true }).click();
@@ -545,8 +552,7 @@ test("rating buttons animate smoothly and remain inside the viewport on mobile",
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await page.getByRole("button", { name: /Меню/ }).click();
-  await page.getByRole("link", { name: "Рейтинг" }).click();
+  await openAuthorizedRating(page);
   const cta = page.getByRole("button", { name: "Подробнее о рейтинге и наградах" });
   await expect(cta).toBeVisible();
   const props = await cta.evaluate((el) => ({ transition: getComputedStyle(el).transitionProperty }));
@@ -654,14 +660,14 @@ test("participant settings and AI Buddy controls are interactive", async ({ page
 test("header notifications and rating indicators open real destinations", async ({ page }) => {
   await page.goto("/");
   await page.locator('[data-persona="participant-alex"]').click();
-  await expect(page.getByRole("button", { name: "Открыть рейтинг участников" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Меню профиля" })).toBeVisible();
   await page.getByRole("button", { name: /Уведомления: 3 непрочитанных/ }).click();
   await expect(page.getByRole("dialog", { name: "Центр уведомлений" })).toBeVisible();
   await expect(page.getByText("Новый комментарий ментора")).toBeVisible();
   await page.getByRole("button", { name: /Checkpoint принят/ }).click();
   await expect(page).toHaveURL(/\/workspace\/4$/);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "Открыть рейтинг участников" }).click();
+  await openAuthorizedRating(page);
   await expect(page).toHaveURL(/\/workspace\/6$/);
   await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
 });

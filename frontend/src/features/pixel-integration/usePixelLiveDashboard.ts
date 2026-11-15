@@ -51,17 +51,24 @@ export function usePixelLiveDashboard(
     retry: false,
   });
 
-  const verifiedSkills = passportQuery.data
+  const verifiedSkills = Array.isArray(passportQuery.data?.skills)
     ? passportQuery.data.skills.filter((skill) => skill.confirmed_case_count > 0).length
     : null;
+  const courses = Array.isArray(courseQuery.data?.courses) ? courseQuery.data.courses : [];
   const currentCourse = target.kind === "course"
-    ? courseQuery.data?.courses.find((course) => course.course_key === target.key)
+    ? courses.find((course) => course.course_key === target.key)
     : null;
-  const courseProgress = currentCourse && currentCourse.total_units > 0
+  const courseProgress = currentCourse && Number.isFinite(currentCourse.total_units)
+    && currentCourse.total_units > 0 && Number.isFinite(currentCourse.completed_units)
     ? { complete: currentCourse.completed_units, total: currentCourse.total_units }
     : null;
+  const validatedLevel = levelQuery.data
+    && Number.isInteger(levelQuery.data.level)
+    && Number.isInteger(levelQuery.data.required_courses)
+    && Number.isInteger(levelQuery.data.completed_courses)
+    ? levelQuery.data : null;
   const model = toPixelHomeModel({
-    overview, roleLevel: levelQuery.data ?? null,
+    overview, roleLevel: validatedLevel,
     confirmedSkills: verifiedSkills,
     courseProgress, buddyAvailable,
   });

@@ -40,22 +40,26 @@ async function openParticipantTrajectory(page: Page) {
 test("demo avatar never overflows its circular shell or overlaps the person's name", async ({ page }) => {
   await page.setViewportSize({ width: 1672, height: 941 });
   await openParticipantTrajectory(page);
-  await expect(page.locator(".topbar .top-persona")).toBeVisible();
-  const avatar = page.locator(".topbar .mini-avatar");
+  const profile = page.locator(".topbar .owner-profile-trigger");
+  await expect(profile).toBeVisible();
+  const avatar = profile.locator(".mini-avatar");
   const image = avatar.locator("img.home-reference-avatar");
-  const label = page.locator(".topbar .top-persona > span:last-child");
   await expect(image).toBeVisible();
 
-  const [container, img, name] = await Promise.all([
-    avatar.boundingBox(), image.boundingBox(), label.boundingBox(),
+  const [container, img, trigger] = await Promise.all([
+    avatar.boundingBox(), image.boundingBox(), profile.boundingBox(),
   ]);
-  if (!container || !img || !name) throw new Error("Topbar avatar geometry unavailable");
+  if (!container || !img || !trigger) throw new Error("Topbar avatar geometry unavailable");
 
   expect(img.width).toBeLessThanOrEqual(container.width + 1);
   expect(img.height).toBeLessThanOrEqual(container.height + 1);
   expect(img.x).toBeGreaterThanOrEqual(container.x - 1);
   expect(img.y).toBeGreaterThanOrEqual(container.y - 1);
-  expect(img.x + img.width).toBeLessThanOrEqual(name.x + 1);
+  expect(img.x + img.width).toBeLessThanOrEqual(container.x + container.width + 1);
+  expect(img.y + img.height).toBeLessThanOrEqual(container.y + container.height + 1);
+  expect(container.x + container.width).toBeLessThanOrEqual(trigger.x + trigger.width + 1);
+  await profile.click();
+  await expect(page.locator(".owner-profile-identity")).toContainText(actor.display_name);
   await test.info().attach("trajectory-topbar-avatar-desktop", {
     body: await page.screenshot({ animations: "disabled" }),
     contentType: "image/png",

@@ -8,6 +8,7 @@ import { usePixelLiveDashboard } from "./usePixelLiveDashboard";
 import { usePixelVisualMode } from "./usePixelVisualMode";
 
 export interface PixelParticipantShellProps {
+  readonly embedded?: boolean;
   readonly overview: DevelopmentOverviewView;
   readonly displayName: string;
   readonly roleName: string;
@@ -37,7 +38,7 @@ export interface PixelParticipantShellProps {
  * full shell, and passing ONLY authenticated actor data / authorized actions.
  */
 export function PixelParticipantShell({
-  overview, displayName, roleName, avatarUrl,
+  embedded = false, overview, displayName, roleName, avatarUrl,
   search, searchResults, onSearchChange, onSearchSelect,
   streakDays, unreadNotifications, onOpenStreak, onOpenNotifications,
   onOpenNavigation, onOpenTarget, onOpenWorkspace, onOpenTools,
@@ -53,6 +54,7 @@ export function PixelParticipantShell({
       data-partial-data={partialData ? "true" : "false"}
     >
       <ImpulsePixelReference
+        showToolbar={!embedded}
         mode={mode}
         onModeChange={setMode}
         displayName={displayName}

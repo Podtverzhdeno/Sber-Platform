@@ -57,8 +57,9 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
     await expect(page.getByRole("heading", { name: "Ваш Skill Passport" })).toBeVisible();
     const geometryViolations: string[] = [];
     if (viewport.name === "desktop-1600") {
-      await expect(page.locator(".sidebar")).toHaveCSS("width", "244px");
-      await expect(page.locator(".topbar")).toHaveCSS("left", "244px");
+      await expect(page.getByRole("button", { name: "Impulse — открыть разделы" })).toBeVisible();
+      await expect(page.locator(".calm-sidebar")).toBeHidden();
+      await expect(page.locator(".topbar")).toHaveCSS("position", "fixed");
     }
     for (const [view] of [
       ["passport", "Ваш Skill Passport"], ["path", "Маршрут к вашей следующей цели"], ["evidence", "Результаты, которым можно доверять"]
@@ -78,9 +79,8 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
       const geometry = await Promise.all((geometrySelectors[view] ?? []).map(async (selector) => ({
         selector, rect: await root.locator(selector).boundingBox(),
       })));
-      // The shared 244px sidebar shifts and narrows the analytics canvas relative
-      // to the original 205px-sidebar mockup. Preserve panel heights and row
-      // alignment; the sidebar itself is checked separately.
+      // The owner's new global navigation is overlay-only. Keep checking card
+      // heights and row alignment independently of the shell's horizontal inset.
       if (viewport.name === "desktop-1600") {
         const goldenByView: Record<string, Record<string, [number, number, number, number]>> = {
           passport: {
@@ -126,8 +126,8 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
             if ((metric === "y" && delta > 20) || (metric === "height" && delta > 12)) {
               geometryViolations.push(view + " " + selector + "." + metric + ": expected " + String(expectedValue) + ", got " + String(actual) + ", delta " + String(delta));
             }
-            if (metric === "x" && actual < 260) {
-              geometryViolations.push(view + " " + selector + " overlaps the shared 244px sidebar");
+            if (metric === "x" && (actual < -2 || actual + rect.width > viewport.width + 2)) {
+              geometryViolations.push(view + " " + selector + " overflows the visible workspace");
             }
           }
         }
@@ -153,7 +153,7 @@ for (const viewport of [{ name: "desktop-1600", width: 1600, height: 1080 }, { n
       await writeFile(testInfo.outputPath("analytics-" + view + "-" + viewport.name + ".geometry.json"), JSON.stringify(diagnostics, null, 2), "utf8");
       await page.screenshot({ path: testInfo.outputPath("analytics-" + view + "-" + viewport.name + ".png"), fullPage: true, animations: "disabled" });
     }
-    expect(geometryViolations, "Analytics cards must retain reference height and remain in the shared shell").toEqual([]);
+    expect(geometryViolations, "Analytics cards must retain reference heights without overflow").toEqual([]);
     await page.goto("/workspace/9?analyticsTab=passport&view=path");
     await root.getByRole("group", { name: "Профессиональная группа" }).getByRole("button", { name: "Аналитик" }).click();
     await root.getByRole("group", { name: "Вид диаграммы" }).getByRole("button", { name: "Гистограмма" }).click();

@@ -177,8 +177,8 @@ test("messages empty state uses reference three-column composition at 1448px",as
     });
   })));
   await expectRect(page,".msg-dialog-list",{x:244,y:64,width:367,height:1022},12);
-  await expectRect(page,".chat-thread",{x:611,y:64,width:495,height:1022},14);
-  await expectRect(page,".msg-reference-context-empty",{x:1106,y:64,width:298,height:1022},14);
+  await expectRect(page,".chat-thread",{x:611,y:64,width:495,height:1022},17);
+  await expectRect(page,".msg-reference-context-empty",{x:1106,y:64,width:298,height:1022},18);
   await expect(page.locator(".msg-reference-empty__exact-art")).toHaveAttribute("src","/messages-reference/empty-hero-original.svg");
   await page.mouse.move(5,5);
   await page.screenshot({path:"test-results/messages-empty-1448.png",fullPage:false});
@@ -228,8 +228,8 @@ test("direct chat follows 1672px personal PNG geometry with working editor",asyn
   await expect(page.locator(".messenger-page")).toHaveAttribute("data-message-state","direct");
   await expect(page.locator(".msg-chat__header-title")).toContainText("Елена Наставник");
   await expectRect(page,".msg-dialog-list",{x:244,y:64,width:391,height:877},12);
-  await expectRect(page,".chat-thread",{x:635,y:64,width:680,height:877},14);
-  await expectRect(page,".msg-context",{x:1315,y:64,width:357,height:877},14);
+  await expectRect(page,".chat-thread",{x:635,y:64,width:680,height:877},20);
+  await expectRect(page,".msg-context",{x:1315,y:64,width:357,height:877},18);
   await page.locator(".msg-chat__scroll").evaluate(element => {element.scrollTop=0;});
   await page.mouse.move(5,5);
   await page.screenshot({path:"test-results/messages-personal-1672.png",fullPage:false});
@@ -243,23 +243,32 @@ test("direct chat follows 1672px personal PNG geometry with working editor",asyn
 test("Messages shares the exact navigation shell with Analytics and preserves the active chat", async ({page}) => {
   await page.setViewportSize({width:1448,height:1086});
   await openMessages(page);
-  const sidebar=page.getByRole("complementary",{name:"Боковая панель"});
+  const sidebar=page.locator(".calm-sidebar");
   const signature=async () => sidebar.evaluate(el=>({
-    brand:el.querySelector(".sidebar-brand")?.innerHTML,
-    icons:Array.from(el.querySelectorAll("nav .nav-icon"),icon=>icon.innerHTML),
+    brand:el.querySelector(".calm-sidebar__brand")?.textContent,
+    groups:Array.from(el.querySelectorAll(".calm-sidebar__group"),item=>item.textContent.trim()),
     promo:el.querySelector(".sidebar-message")?.innerHTML,
   }));
   const expected=await signature();
-  await expectRect(page,".sidebar",{x:0,y:0,width:244,height:1086},2);
-  await expect(sidebar.locator(".sidebar-message")).toContainText("Развиваем технологии вместе");
-  await expect(page.getByRole("button",{name:"Свернуть навигацию"})).toHaveCount(0);
+  await expect(sidebar).toBeHidden();
+  expect(expected.promo).toBeUndefined();
+  const brand=page.getByRole("button",{name:"Impulse — открыть разделы",exact:true});
+  async function navigateViaBrand(section:string,groupName:string){
+    await brand.click();
+    const menu=page.getByRole("dialog",{name:"Главное меню"});
+    await expect(menu).toBeVisible();
+    const group=menu.getByRole("button",{name:groupName,exact:true});
+    if(await group.getAttribute("aria-expanded")!=="true")await group.click();
+    await menu.getByRole("link",{name:section,exact:true}).click();
+    await expect(sidebar).toBeHidden();
+  }
 
-  await page.getByRole("link",{name:"Аналитика",exact:true}).click();
-  await expect(page.getByRole("link",{name:"Аналитика",exact:true})).toHaveAttribute("aria-current","page");
+  await navigateViaBrand("Аналитика","Результаты");
+  await expect(page).toHaveURL(/\/workspace\/7(?:[?]|$)/);
   expect(await signature()).toEqual(expected);
-  await expectRect(page,".sidebar",{x:0,y:0,width:244,height:1086},2);
 
-  await page.getByRole("link",{name:"Сообщения",exact:true}).click();
+  await navigateViaBrand("Сообщения","Сообщество");
+  await expect(page).toHaveURL(/\/workspace\/4(?:[?]|$)/);
   await expect(page.getByRole("complementary",{name:"Список диалогов"})).toBeVisible();
   expect(await signature()).toEqual(expected);
   await page.getByRole("button",{name:/Перейти в Маяки/}).click();

@@ -1,0 +1,24 @@
+# Owner-directed actual app integration · 2026-11-15
+
+- task_id: OWNER-LIVE-PIXEL-APPLE-SHELL-20261115
+- session_id: gpt6-owner-railway-live-pixel-20261115
+- status: IN_PROGRESS
+- started_at: 2026-11-15T13:52:00+03:00
+- heartbeat_at: 2026-11-15T13:52:00+03:00
+- base_revision: 013859d30630a68d380d54c9e49cdb75a4ba1894
+- owner_instruction: screenshots show existing Railway header still has Menu; eliminate visible Menu and match generated dark blue Liquid Glass image as actual Impulse, not a demo preview; direct deploy requested.
+- owner_approval: user explicitly requests actual app integration and public Railway release. Legacy UI-APPLE-INTEGRATE/ALL-APPLE claims are stale (>90m since 2026-11-14), read-only and no App.tsx dirty changes seen in local main. This is a separate owner-directed takeover branch; do NOT modify original claims or worktrees.
+- independent_worktree: new isolated GitHub branch; no reset/checkout of user's local dirty main.
+- write_scope:
+  - frontend/src/App.tsx (owner-directed integration)
+  - frontend/src/App.test.tsx (integration)
+  - frontend/src/features/pixel-reference/ImpulsePixelReference.tsx (optional embed variant only)
+  - frontend/src/features/pixel-integration/PixelParticipantShell.tsx (optional embed variant only)
+  - frontend/src/features/owner-live-pixel/**
+  - frontend/e2e/owner-live-pixel.spec.ts
+  - openspec/changes/owner-live-pixel-20261115/**
+  - .agents/coordination/claims/OWNER-LIVE-PIXEL-APPLE-SHELL-20261115.lock/status.md
+- excluded: frontend/src/features/participant-home-v2/**; frontend/src/features/calm-navigation/**; existing App theme-control implementation; backend, schemas, database, fixtures, migrations, Railway service config.
+- expected_bridge: preserve existing authenticated search, unread notifications, profile, allowed server route list, course/task navigation, user data; adapt visual layout to approved screenshot and 3 click modes.
+- tests: typecheck, lint, focused Vitest, production build, authenticated smoke 1422x803 + mobile, forced colors and keyboard, Railway exact SHA and HTTP verification
+- release_gate: no merge or Railway until tests and independent review; rollback prior known-success deployment 013859d3.

@@ -44,6 +44,7 @@ export interface PixelHomeModel {
 }
 
 export interface ImpulsePixelReferenceProps {
+  readonly showToolbar?: boolean;
   readonly mode: ImpulseVisualMode;
   readonly onModeChange: (next: ImpulseVisualMode) => void;
   readonly displayName: string;
@@ -76,7 +77,7 @@ export interface ImpulsePixelReferenceProps {
  * owner; this module intentionally does not query, mutate or fabricate data.
  */
 export function ImpulsePixelReference({
-  mode, onModeChange, displayName, roleName, avatarUrl,
+  showToolbar = true, mode, onModeChange, displayName, roleName, avatarUrl,
   search, onSearchChange, searchResults, onSearchSelect,
   streakDays, unreadNotifications = 0, onOpenStreak,
   onOpenNotifications, onOpenNavigation, onOpenJourney,
@@ -92,6 +93,7 @@ export function ImpulsePixelReference({
   const profileRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!showToolbar) return;
     const onKey = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
@@ -112,7 +114,7 @@ export function ImpulsePixelReference({
       document.removeEventListener("keydown", onKey);
       document.removeEventListener("pointerdown", onPointer);
     };
-  }, []);
+  }, [showToolbar]);
 
   const progress = home.moduleProgress;
   const modulePercent = progress && progress.total > 0
@@ -123,9 +125,9 @@ export function ImpulsePixelReference({
   const nextLevelLabel = home.nextLevel === null ? "—" : `L${String(home.nextLevel)}`;
 
   return (
-    <div className="impulse-pixel" data-visual-mode={mode} data-testid="impulse-pixel-reference">
+    <div className={`impulse-pixel${showToolbar ? "" : " impulse-pixel--embedded"}`} data-visual-mode={mode} data-testid="impulse-pixel-reference">
       <div className="impulse-pixel__wallpaper" aria-hidden="true" />
-      <header className="impulse-pixel__topbar">
+      {showToolbar && <header className="impulse-pixel__topbar">
         <button type="button" className="impulse-pixel__brand" onClick={onOpenNavigation}
           aria-label="Открыть навигацию">
           <span className="impulse-pixel__star" aria-hidden="true">✦</span>
@@ -188,11 +190,11 @@ export function ImpulsePixelReference({
               </div>}
           </div>
         </div>
-      </header>
+      </header>}
 
       <main className="impulse-pixel__content">
         <header className="impulse-pixel__heading">
-          <div><h1>Главная</h1><p>{home.roleTitle ?? "Выберите направление"}</p></div>
+          <div><h1 id="workspace-title">Главная</h1><p>{home.roleTitle ?? "Выберите направление"}</p></div>
           <button type="button" className="impulse-pixel__journey-link" onClick={onOpenJourney}>
             Мой путь <ChevronRight size={19} aria-hidden="true" />
           </button>

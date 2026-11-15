@@ -50,7 +50,7 @@ def brief() -> dict[str, object]:
         "problem": "Пользователю сложно найти подходящую программу.",
         "deliverable": "Research document и MVP поиска.",
         "acceptance_criteria": ["Есть offline-метрика", "MVP воспроизводим"],
-        "deadline_at": "2026-11-01T18:00:00Z",
+        "deadline_at": "2027-11-01T18:00:00Z",
         "data_constraints": "Только синтетические данные.",
         "ip_terms": "Результат доступен заказчику после приёмки.",
         "nominated_mentor_id": None,
@@ -894,7 +894,7 @@ def test_task_without_nominated_mentor_waits_for_support_before_publish() -> Non
         revised = api.post(
             f"/api/v1/customer/tasks/{task_id}/terms",
             json={
-                "deadline_at": "2026-11-05T18:00:00Z",
+                "deadline_at": "2027-11-05T18:00:00Z",
                 "deliverable": "Обновлённый research document и MVP.",
                 "acceptance_criteria": ["MVP воспроизводим", "Метрика согласована"],
             },
@@ -1017,7 +1017,7 @@ def test_task_without_nominated_mentor_waits_for_support_before_publish() -> Non
             json={
                 "decision": "revision_requested",
                 "reason": "Нужно приложить воспроизводимый отчёт с результатами метрики.",
-                "deadline_at": "2026-11-10T18:00:00Z",
+                "deadline_at": "2027-11-10T18:00:00Z",
             },
             headers={"X-CSRF-Token": customer_csrf},
         )
@@ -1076,7 +1076,7 @@ def test_task_without_nominated_mentor_waits_for_support_before_publish() -> Non
                 "reason": (
                     "Другой участник заявил авторство моего отчёта; прикладываю ссылки на коммиты."
                 ),
-                "deadline_at": "2026-11-12T18:00:00Z",
+                "deadline_at": "2027-11-12T18:00:00Z",
             },
             headers={"X-CSRF-Token": participant_csrf},
         )
@@ -1087,7 +1087,7 @@ def test_task_without_nominated_mentor_waits_for_support_before_publish() -> Non
         assert dispute.json()["payout_blocked"] is True
         visible = api.get(f"/api/v1/me/disputes/{dispute.json()['id']}")
         assert visible.status_code == 200
-        assert visible.json()["deadline_at"] == "2026-11-12T18:00:00Z"
+        assert visible.json()["deadline_at"] == "2027-11-12T18:00:00Z"
         my_work = api.get("/api/v1/me/work")
         assert my_work.status_code == 200
         assert my_work.json()[0]["assignment"]["id"] == accepted.json()["id"]

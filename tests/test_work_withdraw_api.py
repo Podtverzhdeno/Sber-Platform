@@ -42,7 +42,7 @@ def brief() -> dict[str, object]:
         "problem": "Пользователю сложно найти подходящую программу.",
         "deliverable": "Research document и MVP поиска.",
         "acceptance_criteria": ["Есть offline-метрика", "MVP воспроизводим"],
-        "deadline_at": "2026-11-01T18:00:00Z",
+        "deadline_at": "2027-11-01T18:00:00Z",
         "data_constraints": "Только синтетические данные.",
         "ip_terms": "Результат доступен заказчику после приёмки.",
         "nominated_mentor_id": None,

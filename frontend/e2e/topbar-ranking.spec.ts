@@ -49,7 +49,7 @@ async function openTopbar(page: Page, place: number | null, published = true) {
   await page.goto("/workspace/0");
 }
 
-test("compact flame chip and miniature bell retain their interactions", async ({ page }) => {
+test("compact flame chip and notification bell retain their interactions", async ({ page }) => {
   await page.setViewportSize({ width: 1672, height: 941 });
   await openTopbar(page, 8);
   const streak = page.locator(".topbar .streak-button");
@@ -59,8 +59,8 @@ test("compact flame chip and miniature bell retain their interactions", async ({
   const size = await streak.boundingBox();
   if (!size) throw new Error("Streak geometry missing");
   expect(size.width).toBeLessThanOrEqual(80);
-  expect(size.height).toBeLessThanOrEqual(38);
-  await expect(bell.locator("svg")).toHaveCSS("width", "16px");
+  expect(size.height).toBeLessThanOrEqual(43);
+  await expect(bell.locator("svg")).toHaveCSS("width", "21px");
   await streak.click();
   await expect(page.getByRole("dialog", { name: "Учебный стрик" })).toBeVisible();
   await page.getByRole("dialog", { name: "Учебный стрик" }).getByRole("button", { name: "Закрыть", exact: true }).click();
@@ -68,18 +68,20 @@ test("compact flame chip and miniature bell retain their interactions", async ({
   await expect(page.getByRole("dialog", { name: "Центр уведомлений" })).toBeVisible();
 });
 
-test("ranking shows the published personal place instead of another participant's", async ({ page }) => {
+test("ranking stays accessible from the compact profile menu with a published standing", async ({ page }) => {
   await openTopbar(page, 8);
-  const rank = page.locator(".topbar .ranking-utility--personal");
-  await expect(rank).toContainText("Место 8");
-  await expect(rank).toHaveAttribute("aria-label", "Открыть рейтинг участников. Ваше место: 8");
-  await rank.click();
+  await expect(page.locator(".topbar .ranking-utility--personal")).toHaveCount(0);
+  await page.getByRole("button", { name: "Меню профиля" }).click();
+  await page.getByRole("menuitem", { name: "Рейтинг" }).click();
   await expect(page).toHaveURL(/\/workspace\/4/);
+  await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
 });
 
-test("ranking displays a dash when the person has no published position", async ({ page }) => {
+test("ranking does not fabricate a personal place in the shared topbar", async ({ page }) => {
   await openTopbar(page, null);
-  const rank = page.locator(".topbar .ranking-utility--personal");
-  await expect(rank).toContainText("Место —");
-  await expect(rank).not.toContainText("Место 8");
+  await expect(page.locator(".topbar .ranking-utility--personal")).toHaveCount(0);
+  await page.getByRole("button", { name: "Меню профиля" }).click();
+  await page.getByRole("menuitem", { name: "Рейтинг" }).click();
+  await expect(page).toHaveURL(/\/workspace\/4/);
+  await expect(page.getByRole("heading", { name: "Все участники рейтинга" })).toBeVisible();
 });

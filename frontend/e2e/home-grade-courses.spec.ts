@@ -27,6 +27,8 @@ for (const width of [1440, 390]) {
     );
     await page.goto("/");
     await page.locator('[data-persona="participant-alex"]').click();
+    // The classic grade drawer remains supported through the explicit legacy-home route.
+    await page.goto("/workspace/0?home=legacy");
     const grade = page.getByTestId("grade-summary");
     await expect(grade).toHaveAttribute("data-grade-state", "impulse-known");
     await grade.locator(".home-v2-next-grade").click();

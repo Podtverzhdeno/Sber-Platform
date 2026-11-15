@@ -82,7 +82,7 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
                 "problem": "Проверить хранение workflow.",
                 "deliverable": "Рабочий вертикальный срез.",
                 "acceptance_criteria": ["Состояния сохранены"],
-                "deadline_at": "2026-11-01T18:00:00Z",
+                "deadline_at": "2027-11-01T18:00:00Z",
                 "data_constraints": "Без персональных данных.",
                 "ip_terms": "Права передаются после приёмки.",
                 "nominated_mentor_id": None,
@@ -144,7 +144,7 @@ async def test_customer_task_stays_unpublished_until_support_is_assigned() -> No
         revised = await client.post(
             f"/api/v1/customer/tasks/{task_id}/terms",
             json={
-                "deadline_at": "2026-11-08T18:00:00Z",
+                "deadline_at": "2027-11-08T18:00:00Z",
                 "deliverable": "Обновлённый вертикальный срез.",
                 "acceptance_criteria": ["Состояния и миграция проверены"],
             },
@@ -436,7 +436,7 @@ async def test_application_withdrawal_is_idempotent_and_blocked_after_acceptance
                 "problem": "Проверить отзыв заявки.",
                 "deliverable": "Работающий срез.",
                 "acceptance_criteria": ["Отзыв воспроизводим"],
-                "deadline_at": "2026-11-01T18:00:00Z",
+                "deadline_at": "2027-11-01T18:00:00Z",
                 "data_constraints": "Без персональных данных.",
                 "ip_terms": "Права передаются после приёмки.",
                 "nominated_mentor_id": None,
