@@ -5,6 +5,7 @@ import { ParticipantHomeV2 } from "./features/participant-home-v2/page";
 import { Bell, ChevronDown, CircleHelp, Moon, MoonStar, Search, Sun } from "lucide-react";
 import { BootcampV2Route } from "./features/bootcamp/route-v2";
 import { TrajectoryV2 } from "./features/trajectory-v2/page";
+import { DevelopmentHub } from "./features/participant-development-hub/DevelopmentHub";
 import { SourceTrajectoryPage } from "./features/trajectory-v2/source-reference/source-route";
 import { TaskCatalogV2 } from "./features/task-catalog-v2/page";
 import { ParticipantProjectsV2 } from "./features/my-projects/page";
@@ -475,7 +476,8 @@ function Workspace({
               <TrajectoryMapPage />
             </>
           ) : (
-            searchParams.get("source") === "1" ? <SourceTrajectoryPage /> : <TrajectoryV2 />
+            searchParams.get("source") === "1" ? <SourceTrajectoryPage />
+              : searchParams.get("hub") === "legacy" ? <TrajectoryV2 /> : <DevelopmentHub />
           )
         ) : allowed &&
           actor.active_role === "participant" &&

@@ -26,3 +26,5 @@
 - frontend production build: PASS (large chunk advisory existing)
 - exact build path: C:\\Users\\user\\IdeaProjects\\Sber-Development-Redesign-20261115\\frontend
 - independent browser E2E/pixel acceptance and shared routing integration: NOT DONE
+
+- 2026-11-15: scoped route integrated on owner instruction; 29 Vitest and 3 Playwright tests PASS; independent visual acceptance pending.

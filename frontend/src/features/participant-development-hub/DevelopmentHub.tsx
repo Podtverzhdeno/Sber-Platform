@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { apiRequest } from "../../api/client";
 import { StatePanel } from "../../components/ui";
+
 import { learningSummaryQueryKey, loadLearningSummary, type LearningCourse } from "../learning-progress";
 import { loadRoleLevel, roleLevelQueryKey, type ImpulseRoleLevel } from "../impulse-role-level";
 import { loadDevelopmentOverview, overviewQueryKey } from "../participant-home-v2/client";
@@ -223,7 +224,7 @@ export function DevelopmentHubContent({
 
 /** Route-ready entrypoint. Existing TrajectoryV2 still owns its dialogs, role mutations and roadmap. */
 export function DevelopmentHub() {
-  const overview = useQuery({ queryKey: overviewQueryKey, queryFn: loadDevelopmentOverview });
+  const overview = useQuery({ queryKey: overviewQueryKey, queryFn: loadDevelopmentOverview, retry: false });
   const navigation = useQuery({
     queryKey: ["me"],
     queryFn: () => apiRequest<{ navigation: string[] }>("/api/v1/me"),
@@ -243,14 +244,20 @@ export function DevelopmentHub() {
   });
 
   if (overview.isPending) {
-    return <div className="development-hub" data-testid="development-hub"><StatePanel kind="loading" /></div>;
+    return <div className="development-hub" data-testid="development-hub">
+      <div className="trajectory-v2" data-reference="R-PAR-02"><StatePanel kind="loading" /></div>
+    </div>;
   }
   if (overview.isError) {
-    return <section className="development-hub__empty" role="status">
-      <h1>Развитие</h1>
-      <p>Не удалось загрузить направления. Учебный маршрут недоступен без данных сервера.</p>
-      <button type="button" onClick={() => { void overview.refetch(); }}>Повторить</button>
-    </section>;
+    return <div className="development-hub" data-testid="development-hub">
+      <div className="trajectory-v2" data-reference="R-PAR-02">
+        <section className="trajectory-v2-failure" role="status">
+          <strong>Не удалось загрузить траекторию.</strong>
+          <p>Карта этапов остаётся недоступной без авторизованного снимка.</p>
+          <button type="button" onClick={() => { void overview.refetch(); }}>Повторить</button>
+        </section>
+      </div>
+    </div>;
   }
   return (
     <DevelopmentHubContent
