@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-PRECISION-46-20261115
 - session_id: gpt6-20261115-precision-46-owner-continuation
-- status: REVIEW
+- status: IN_PROGRESS
 - started_on: 2026-11-15
 - base_revision: d7b1c0209b7a4fc849f937284e0335732b525b83 (source-only draft PR #181)
 - owner_instruction: "Продолжай вносить и коммитить"
@@ -45,5 +45,6 @@
   - Commits: b8acadf668aaa01685660c8dda04be6ef3c3f60e; d18524b30673950d4678287999f07efc5550ad3a.
   - Verification not completed: checked-out Python verifier and Playwright browser run on the exact branch, Figma/Sketch original frame measurement, genuine pixel-by-pixel comparison with Impulse.
   - PR #190 remains draft, independent acceptance pending; no main merge or deploy.
+- owner_resume_20261115_1927: owner requested further work; adding local, standalone pixel-difference comparison utility plus repeatable QA and related documentation entirely within the existing exclusive 14-precision-capture-46 scope.
 - next_step: Review separate stacked PR, then owner/coordinator integrates only after claims/quality gate; do not merge from author session or modify existing claim owners.
 - blockers: actual official Apple 27 Figma/Sketch layers, pixels and component values not measured; no 1:1 fidelity claim. No local checkout/git status available through connected GitHub.
