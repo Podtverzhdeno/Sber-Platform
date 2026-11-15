@@ -98,6 +98,31 @@ for (const row of caseMatrix.cases ?? []) {
     "Missing required state coverage: " + row.id);
 }
 
+// Verify each standalone original SVG, provenance manifest and local gallery links.
+const vectorManifest = JSON.parse(text("06-cases/visual-manifest.json"));
+check(Array.isArray(vectorManifest.cards) && vectorManifest.cards.length === 12,
+  "Vector gallery manifest must contain 12 cases");
+const seenVectorIds = new Set();
+for (const card of vectorManifest.cards ?? []) {
+  check(cases.includes(card.id), "Unknown vector case: " + card.id);
+  check(!seenVectorIds.has(card.id), "Duplicate vector case: " + card.id);
+  seenVectorIds.add(card.id);
+  check(card.measured_from_apple === false && card.verified_pixel_parity === false,
+    "Vector board must not claim Apple pixel parity: " + card.id);
+  const relative = "06-cases/" + card.image;
+  const xml = text(relative);
+  check(xml.startsWith('<?xml version="1.0"') && xml.includes('<svg') && xml.includes('</svg>'),
+    "Missing SVG root or closing tag: " + relative);
+  check(!/<script\\b|<foreignObject\\b|https?:[^"'\\s]*\\.(png|jpg|webp|svg)/i.test(xml),
+    "Unexpected embedded script/external asset in " + relative);
+  check(card.image === card.id + "/reference-board.svg",
+    "Incorrect case SVG path: " + card.id);
+}
+const visualGallery = text("06-cases/visual-gallery.html");
+for (const card of vectorManifest.cards ?? []) {
+  check(visualGallery.includes('./' + card.image), "Visual gallery has no linked SVG: " + card.id);
+}
+
 const html = text("04-web-reference/casebook.html");
 for (const localHref of html.matchAll(/(?:href|src)="(\.\/[^"]+)"/g)) {
   const local = resolve(libraryRoot, "04-web-reference", localHref[1]);
