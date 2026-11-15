@@ -1,0 +1,51 @@
+# Apple UI kit — IMPULSE reference library
+
+**Дата ревизии:** 2026-11-15  
+**Проект:** IMPULSE / Podtverzhdeno/Sber-Platform  
+**Статус:** verified source links + собственная техническая спецификация + web reference prototype. Не является официальным Apple UI Kit.
+
+## Цель
+
+Единая библиотека источников для точного воспроизведения *языка интерфейсов* Apple (iOS/iPadOS/macOS, Liquid Glass) в React/TypeScript-продукте IMPULSE. Источником истины служат официальные опубликованные Apple UI kits и Human Interface Guidelines. **Этот репозиторий не содержит экспортированные оригинальные Apple-компоненты, SF Symbols, изображения интерфейсов или файлы шрифтов:** лицензии Apple ограничивают их использование и распространение. Для визуальной сверки открывайте оригиналы по ссылкам из каталога.
+
+## Быстрый старт
+
+1. Откройте **01-sources/official-links.md** и исходные Apple Figma/Sketch UI kits (iOS/iPadOS 27, macOS 27).
+2. Сверьте **02-specifications/**: материал, цвета, типографика, структуры, компоненты, интеракции, состояния.
+3. Используйте **03-impulse/integration-map.md**, чтобы сопоставить каждый маршрут IMPULSE с паттерном Apple.
+4. Откройте локально **04-web-reference/reference-gallery.html** (самостоятельная демо-страница; не копия Apple) и изучите **04-web-reference/impulse-apple-tokens.css**.
+5. Применяйте изменения **только в отдельных PR**, с адаптацией под существующие темы, роутинг и права доступа.
+6. Выполните **03-impulse/visual-qa-checklist.md**: адаптивность, a11y, pixel-overlay относительно официального *разрешённого* макета, тесты.
+
+## Состав
+
+| Путь | Содержание |
+|---|---|
+| 01-sources/official-links.md | Ссылки на оригиналы Apple, включая Figma, Sketch, HIG, видео, шрифты |
+| 01-sources/source-manifest.json | Машиночитаемый реестр прямых URL |
+| 02-specifications/liquid-glass.md | Material layers, regular/clear, правила эффекта и веб-ограничения |
+| 02-specifications/foundations.md | Семантика цвета, типографика, layout, motion, accessibility |
+| 02-specifications/component-catalog.md | Таблица элементов, состояний и Apple-референсов |
+| 02-specifications/patterns-and-states.md | App Shell, навигация, сообщения, таблицы, формы, уведомления |
+| 03-impulse/integration-map.md | Подробное сопоставление с фактическими модулями IMPULSE |
+| 03-impulse/visual-qa-checklist.md | Обязательные критерии качества визуального переноса |
+| 04-web-reference/ | Авторский CSS и автономная HTML-галерея без ассетов Apple |
+| 05-legal-and-sources/LICENSING.md | Разрешённые и запрещённые способы использования Apple-ассетов |
+
+## Область применения и точность
+
+- Цель «1 в 1» означает сверять **геометрию, иерархию, типографику, контраст, состояния, адаптивность и динамику** с конкретным оригинальным Apple-макетом, а не бездумно делать весь сайт полупрозрачным.
+- Веб-рендеринг CSS backdrop-filter **не воспроизводит нативный Liquid Glass оптически один в один**; для web используется помеченный как приближённый стиль. Нативные SwiftUI/UIKit/AppKit эффекты доступны только в экосистеме Apple.
+- Визуальный результат здесь **не интегрирован** в рабочий frontend. Эта ветка содержит только документацию и эталонный авторский прототип.
+- Макеты Apple регулируются лицензией. Для коммерческого веб-сервиса IMPULSE используйте *самостоятельно реализованные* структуры и стили, а не экспортированные из фирменных UI kits файлы.
+- Не меняйте фирменный стиль/товарные знаки Apple на знаки IMPULSE и не создавайте впечатление, что сервис разработан/одобрен Apple.
+
+## Приоритет
+
+**P0:** базовые слои, Sidebar, Topbar, Buttons, Inputs, Modal, Popover, Messages, light/dark.  
+**P1:** Tabs, Search, Menus, Tables, Cards, Loading, Toast, responsive.  
+**P2:** charts, advanced motion, keyboard/drag, sophisticated refraction.
+
+**Главный источник:** https://developer.apple.com/design/resources/  
+**HIG:** https://developer.apple.com/design/human-interface-guidelines/  
+**Лицензия:** https://developer.apple.com/support/downloads/terms/apple-design-resources/Apple-Design-Resources-License-20230621-English.pdf
