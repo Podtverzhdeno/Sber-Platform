@@ -17,3 +17,9 @@ The audit validates:
 These checks are **not** Apple-license legal review, actual source layer measurement, browser screenshots or 1:1 pixel conformity. The code needs to be executed in a checked-out repository before declaring repository validation passed.
 
 Tests are intentionally standalone: they construct a synthetic 13-category fixture and confirm detection of missing IDs, false measurement claims, missing SVG files and restricted font files.
+
+## Additional local link QA
+
+Run `python "Apple UI kit/scripts/audit_reference_links.py"` from the repository root, followed by `python -m unittest discover -s "Apple UI kit/scripts" -p "test_audit_reference_links.py" -v`. It checks relative Markdown/HTML URLs against actual files while explicitly **not** claiming remote Apple/Figma URL availability. See [LINK_INTEGRITY_QA.md](LINK_INTEGRITY_QA.md).
+
+The independent reference lab now retains a visible 320/390px search control and provides Retry/Clear Search for simulated failure/no-results. Corresponding [browser QA checks](BROWSER_ACCEPTANCE.md) remain to be run locally.

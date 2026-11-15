@@ -71,3 +71,11 @@
 [Посмотреть 12 SVG прямо в GitHub](06-cases/VISUAL_GALLERY.md) · [Открыть HTML-галерею](06-cases/visual-gallery.html) · [Манифест 12 SVG](06-cases/visual-manifest.json) · [Каталог сценариев](06-cases/README.md).
 
 Это **наши векторные схемы 1600×900**, которые можно изучать/редактировать как SVG, но **они не являются скриншотами Apple и не дают гарантию совпадения 1:1**. Измерять настоящую геометрию необходимо по разрешённым оригинальным дизайн-файлам Apple (Figma/Sketch) на целевых состояниях. Если другие параллельные PR содержат альтернативные примеры, при слиянии сохраняйте каждую уникальную коллекцию и единственный согласованный README; [план согласования](07-integration/merge-handoff.md).
+
+## Link-integrity gate (November 2026)
+
+- [Standalone Markdown/HTML relative-link audit](LINK_INTEGRITY_QA.md): checks locally resolved references without network access and includes synthetic regression tests. A connected-GitHub scan already checked **144 local links across 13 principal pages with zero missing paths**; Python execution remains an independent pending check.
+- [Responsive original web example](web-implementation/index.html): fixed previously hidden mobile search, and added accessible error Retry and no-results Clear Search actions. Its source passed a JavaScript syntax + HTML element-ID check; browser interaction tests are committed but **not yet executed**.
+- [Browser acceptance script](BROWSER_ACCEPTANCE.md): includes narrow search and recovery scenarios for 320/390px views.
+
+These are auditable references, not Apple 27 editable component exports or signed-off 1:1 design parity.
