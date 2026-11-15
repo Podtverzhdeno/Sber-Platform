@@ -117,7 +117,7 @@ check("fidelity-workbench/QA contract", () => {
   assert.match(html, /id="target-input"/);
   assert.match(html, /id="diff-canvas"/);
   assert.match(js, /function calculate\(/);
-  assert.match(js, /function dimensionsMatch\(/);
+  assert.match(js, /(?:function\s+dimensionsMatch\s*\(|const\s+dimensionsMatch\s*=\s*\(\)\s*=>)/);
   assert.doesNotMatch(html, /<script[^>]+src="https?:\/\//i);
   assert.doesNotMatch(html, /<link[^>]+href="https?:\/\//i);
   assert.doesNotMatch(js, /\b(?:fetch|XMLHttpRequest|localStorage|sessionStorage)\s*\(/);
