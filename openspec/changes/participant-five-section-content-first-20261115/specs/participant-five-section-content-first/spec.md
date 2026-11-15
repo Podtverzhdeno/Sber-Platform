@@ -60,7 +60,7 @@ Additional SHALL present only authorized AI Buddy/Settings/help capabilities. AI
 - **THEN** it does not claim to have generated live advice; ordinary course and task navigation remains functional
 
 ### Requirement: Overlay navigation and theme-aware responsive hierarchy
-The global group navigation SHALL be closed on initial load on desktop and mobile, open without reserving canvas width, and close via outside click/Escape while returning focus. The topbar SHALL not add back a visible Menu action prohibited by the owner; an accessible workspace/edge navigation trigger SHALL exist. All five groups and Home SHALL remain reachable without hover. Widths 320,390,768,1024,1440,1920 and 200% zoom SHALL have no document overflow. The design SHALL support owner-requested light, deep-navy and graphite appearances while maintaining compatibility with existing persisted light/dark/system preferences until their migration is approved.
+The global group navigation SHALL be closed on initial load on desktop and mobile and SHALL open without reserving canvas width. Escape and outside click SHALL dismiss the overlay and restore focus. All five groups and Home SHALL remain accessible without hover.
 
 #### Scenario: Mobile overlay
 - **WHEN** a participant opens global navigation at 320px and presses Escape
