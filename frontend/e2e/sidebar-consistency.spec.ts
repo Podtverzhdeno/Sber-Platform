@@ -161,10 +161,32 @@ for (const width of [320, 390, 768]) {
     await page.mouse.click(hit.x, 320);
     await expect(sidebar).toBeHidden();
     await expect(page.locator(".calm-navigation__mobile-trigger")).toHaveAttribute("aria-expanded", "false");
-    const horizontalOverflow = await page.evaluate(
-      () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 2,
-    );
-    expect(horizontalOverflow).toBe(false);
+    const overflowReport = await page.evaluate(() => {
+      const viewport = document.documentElement.clientWidth;
+      return {
+        viewport,
+        scrollWidth: document.documentElement.scrollWidth,
+        offenders: [...document.querySelectorAll<HTMLElement>("body *")]
+          .filter(element => {
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return rect.right > viewport + 2 &&
+              style.display !== "none" && style.visibility !== "hidden" &&
+              style.position !== "fixed";
+          })
+          .sort((a, b) => b.getBoundingClientRect().right - a.getBoundingClientRect().right)
+          .slice(0, 12)
+          .map(element => ({
+            tag: element.tagName,
+            className: typeof element.className === "string" ? element.className.slice(0, 110) : "",
+            right: Math.round(element.getBoundingClientRect().right),
+            width: Math.round(element.getBoundingClientRect().width),
+            scrollWidth: element.scrollWidth,
+          })),
+      };
+    });
+    console.log("OWNER_MOBILE_OVERFLOW_DIAGNOSTIC", JSON.stringify(overflowReport));
+    expect(overflowReport.scrollWidth, JSON.stringify(overflowReport)).toBeLessThanOrEqual(overflowReport.viewport + 2);
   });
 }
 
