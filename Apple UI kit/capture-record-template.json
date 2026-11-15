@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "id": "AUI-001",
+  "platform": "iOS/iPadOS 27 or macOS 27",
+  "source": {
+    "official_kit_url": null,
+    "source_document_version": null,
+    "frame_id": null,
+    "variant": null,
+    "source_capture_date": null,
+    "rights_reviewed": false
+  },
+  "capture": {
+    "viewport_css_px": null,
+    "device_pixel_ratio": null,
+    "export_px": null,
+    "tool": null,
+    "theme": null,
+    "locale": "ru-RU"
+  },
+  "measurements": {
+    "bounding_box": null,
+    "padding": null,
+    "gap": null,
+    "radii": null,
+    "stroke": null,
+    "shadow": null,
+    "type_family": null,
+    "type_size": null,
+    "type_weight": null,
+    "colors": null,
+    "blur": null
+  },
+  "implementation": {
+    "repo_file": null,
+    "component_name": null,
+    "commit_sha": null,
+    "web_approximation_caveats": []
+  },
+  "evidence": {
+    "reference_screenshot": null,
+    "implementation_screenshot": null,
+    "overlay": null,
+    "pixel_diff": null,
+    "behavior_test": null,
+    "accessibility_test": null,
+    "reviewer": null
+  },
+  "status": "MEASUREMENT_PENDING"
+}

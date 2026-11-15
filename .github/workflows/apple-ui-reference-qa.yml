@@ -34,6 +34,18 @@ jobs:
         run: python3 "Apple UI kit/advanced-cases/validate-advanced.py"
       - name: Validate isolated 9-family component and measurement pack
         run: node "Apple UI kit/08-component-packs/verify.mjs"
+      - name: Validate 13 source-atlas categories and original SVGs
+        run: python3 "Apple UI kit/scripts/verify_reference_pack.py"
+      - name: Audit source catalogue, component provenance and redistributable files
+        run: python3 "Apple UI kit/scripts/audit_source_bundle.py"
+      - name: Audit local reference hyperlinks
+        run: python3 "Apple UI kit/scripts/audit_reference_links.py"
+      - name: Validate IMPULSE source crosswalk (SHA drift reported as warnings)
+        run: python3 "Apple UI kit/scripts/verify_impulse_crosswalk.py"
+      - name: Run source atlas synthetic unit tests
+        run: python3 -m unittest discover -s "Apple UI kit/scripts" -p "test_*.py" -v
+      - name: Validate React reference files and boundaries
+        run: node "Apple UI kit/react-reference/verify.mjs"
       - name: Explain scope of checks
         run: |
           echo "Structural reference QA only."

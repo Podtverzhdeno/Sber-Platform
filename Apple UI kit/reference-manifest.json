@@ -1,0 +1,199 @@
+{
+  "meta": {
+    "title": "Apple UI kit references for Impulse",
+    "checked_at": "2026-11-15",
+    "repo": "Podtverzhdeno/Sber-Platform",
+    "official_design_kit_layers_inspected": false,
+    "archive_contains_licensed_apple_assets": false,
+    "source_of_truth": "https://developer.apple.com/design/resources/",
+    "style_tokens_are_official": false,
+    "last_reference_gallery_update": "2026-11-15",
+    "category_folder_count": 13,
+    "original_svg_mockup_count": 13,
+    "apple_hosted_visual_preview_count": 5,
+    "study_catalog_count": 67,
+    "study_catalog_groups": 13,
+    "web_implementation_demo_present": true,
+    "pixel_diff_helper_present": true,
+    "pixel_diff_helper_executed_in_this_session": false,
+    "browser_e2e_executed_in_this_session": false,
+    "edited_at": "2026-11-15",
+    "last_verified_official_design_update": "2026-11-15",
+    "offline_source_audit_script_added": true,
+    "offline_source_audit_execution_verified": false,
+    "reference_link_audit_added": true,
+    "reference_link_audit_python_executed": false,
+    "key_page_local_links_validated": 144,
+    "key_page_local_link_errors": 0,
+    "key_page_link_verification_method": "Read-only connected-GitHub tree resolution across 13 files",
+    "web_lab_mobile_search_fix_committed": true,
+    "web_lab_recoverable_empty_error_states": true,
+    "web_lab_static_js_and_dom_validation": "passed",
+    "web_lab_browser_runtime_test": "not_executed"
+  },
+  "sources": [
+    {
+      "id": "ios27-figma",
+      "platform": "iOS/iPadOS 27",
+      "kind": "official_kit_link",
+      "url": "https://www.figma.com/community/file/1651309003795292092/ios-and-ipados-27",
+      "status": "listed_not_layer_inspected"
+    },
+    {
+      "id": "ios27-sketch",
+      "platform": "iOS/iPadOS 27",
+      "kind": "official_kit_link",
+      "url": "https://www.sketch.com/s/04c24d8b-38fb-4afb-8836-36617e022f02",
+      "status": "listed_not_layer_inspected"
+    },
+    {
+      "id": "macos27-figma",
+      "platform": "macOS 27",
+      "kind": "official_kit_link",
+      "url": "https://www.figma.com/community/file/1651309434229735362/macos-27",
+      "status": "listed_not_layer_inspected"
+    },
+    {
+      "id": "macos27-sketch",
+      "platform": "macOS 27",
+      "kind": "official_kit_link",
+      "url": "https://www.sketch.com/s/57153a31-3379-4737-8ac6-dbfd6525f052",
+      "status": "listed_not_layer_inspected"
+    },
+    {
+      "id": "hig-materials",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+      "status": "read"
+    },
+    {
+      "id": "hig-color",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/color",
+      "status": "read"
+    },
+    {
+      "id": "hig-buttons",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+      "status": "read"
+    },
+    {
+      "id": "hig-sidebars",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+      "status": "read"
+    },
+    {
+      "id": "hig-toolbars",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars",
+      "status": "read"
+    },
+    {
+      "id": "hig-tabbars",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars",
+      "status": "read"
+    },
+    {
+      "id": "hig-search",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/search-fields",
+      "status": "read"
+    },
+    {
+      "id": "hig-sheets",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sheets",
+      "status": "read"
+    },
+    {
+      "id": "hig-menus",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+      "status": "read"
+    },
+    {
+      "id": "hig-tables",
+      "kind": "guideline",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+      "status": "read"
+    }
+  ],
+  "restrictions": [
+    "No Apple font binaries or exported SF Symbols",
+    "No mirroring Apple Figma/Sketch binaries",
+    "Browser approximation cannot claim native glass compositor",
+    "Official 27 kit layer measurement and source frame export still pending"
+  ],
+  "official_preview_images": [
+    {
+      "id": "ios27-preview",
+      "platform": "iOS/iPadOS 27",
+      "uri": "https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-UIKit-iOS27_2x.png",
+      "original_host": "developer.apple.com",
+      "status": "apple_hosted_image_url_verified_not_copied"
+    },
+    {
+      "id": "macos27-preview",
+      "platform": "macOS 27",
+      "uri": "https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-UIKit-macOS27_2x.png",
+      "original_host": "developer.apple.com",
+      "status": "apple_hosted_image_url_verified_not_copied"
+    },
+    {
+      "id": "messages-preview",
+      "platform": "Messages template",
+      "uri": "https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-Tech-Message-Template_2x.png",
+      "original_host": "developer.apple.com",
+      "status": "apple_hosted_image_url_verified_not_copied"
+    },
+    {
+      "id": "tipkit-preview",
+      "platform": "TipKit template",
+      "uri": "https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-Tech-TipKit_2x.png",
+      "original_host": "developer.apple.com",
+      "status": "apple_hosted_image_url_verified_not_copied"
+    },
+    {
+      "id": "live-activities-preview",
+      "platform": "Live Activities template",
+      "uri": "https://developer.apple.com/design/resources/images/thumbnails/Thumbnail-Tech-Live-Activities_2x.png",
+      "original_host": "developer.apple.com",
+      "status": "apple_hosted_image_url_verified_not_copied"
+    }
+  ],
+  "status": {
+    "source_link_integrity": "reviewed",
+    "svg_static_checks": "passed",
+    "component_catalog_static_checks": "passed",
+    "browser_runtime_tests": "not_executed",
+    "pixel_diff_helper_unit_tests": "not_executed",
+    "apple_editable_frames": "not_inspected",
+    "merging_to_main": "pending_review"
+  },
+  "latest_verified_changes": [
+    {
+      "date": "2026-11-06",
+      "summary": "Live Activities UI kits updated for iOS 27 and macOS examples",
+      "source": "https://developer.apple.com/design/whats-new/",
+      "public_source_checked": true,
+      "editable_layers_inspected": false
+    },
+    {
+      "date": "2026-10-28",
+      "summary": "macOS design updated with touch input guidance",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/designing-for-macos",
+      "public_source_checked": true,
+      "editable_layers_inspected": false
+    },
+    {
+      "date": "2026-09-17",
+      "summary": "iOS/iPadOS 27 and macOS 27 Figma UI kits updated",
+      "source": "https://developer.apple.com/design/whats-new/",
+      "public_source_checked": true,
+      "editable_layers_inspected": false
+    }
+  ]
+}

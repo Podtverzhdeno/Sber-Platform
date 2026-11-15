@@ -1,0 +1,38 @@
+{
+  "category_id": "02-navigation-sidebars-tabs",
+  "title": "Sidebars, Tab bars, Toolbars",
+  "platform": "macOS 27 + iPadOS 27 + iOS 27",
+  "reference_page": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+  "official_kit_index": "https://developer.apple.com/design/resources/",
+  "reference_type": "apple_official_source_link",
+  "kit_component_layers_inspected": false,
+  "source_frame_ids": [],
+  "captures_committed": false,
+  "web_mockup_is_original": true,
+  "scenario_patterns": [
+    "top toolbar",
+    "expanded / collapsed sidebar",
+    "tabs",
+    "back button",
+    "split navigation",
+    "breadcrumbs"
+  ],
+  "impulse_target": [
+    "All six role shells",
+    "collapsed-by-default drawer and nested navigation"
+  ],
+  "study_states": [
+    "active route",
+    "focus",
+    "overlay open/closed",
+    "mobile",
+    "keyboard",
+    "long RU labels",
+    "screenreader"
+  ],
+  "anti_patterns": [
+    "Replacing role permissions or existing links",
+    "permanent sidebar when owner requires hidden"
+  ],
+  "status": "SOURCE_LINKED_MEASUREMENT_PENDING"
+}

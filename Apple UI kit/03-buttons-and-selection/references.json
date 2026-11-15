@@ -1,0 +1,34 @@
+{
+  "category_id": "03-buttons-and-selection",
+  "title": "Buttons, Segments, Toggles, Checkboxes",
+  "platform": "iOS/iPadOS 27 + macOS 27",
+  "reference_page": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+  "official_kit_index": "https://developer.apple.com/design/resources/",
+  "reference_type": "apple_official_source_link",
+  "kit_component_layers_inspected": false,
+  "source_frame_ids": [],
+  "captures_committed": false,
+  "web_mockup_is_original": true,
+  "scenario_patterns": [
+    "primary/secondary/tertiary, destructive, icon buttons, selection controls, switches, sliders"
+  ],
+  "impulse_target": [
+    "Actions, filter segments, settings, safe human decisions"
+  ],
+  "study_states": [
+    "default",
+    "hover",
+    "focus",
+    "active",
+    "pressed",
+    "loading",
+    "disabled",
+    "destructive confirm",
+    "touch"
+  ],
+  "anti_patterns": [
+    "Every action painted accent",
+    "visual toggle without semantic state"
+  ],
+  "status": "SOURCE_LINKED_MEASUREMENT_PENDING"
+}

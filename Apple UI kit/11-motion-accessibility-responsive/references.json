@@ -1,0 +1,29 @@
+{
+  "category_id": "11-motion-accessibility-responsive",
+  "title": "Motion, Responsiveness and Accessibility",
+  "platform": "all Apple platform guidance",
+  "reference_page": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+  "official_kit_index": "https://developer.apple.com/design/resources/",
+  "reference_type": "apple_official_source_link",
+  "kit_component_layers_inspected": false,
+  "source_frame_ids": [],
+  "captures_committed": false,
+  "web_mockup_is_original": true,
+  "scenario_patterns": [
+    "motion timing, focus treatments, content scaling, touch target, reduce-transparency"
+  ],
+  "impulse_target": [
+    "Cross-device Impulse shell, drawer, dialogs, all editable forms"
+  ],
+  "study_states": [
+    "320/390/1024/1422/1440",
+    "keyboard only",
+    "screenreader",
+    "forced colors",
+    "reduced motion"
+  ],
+  "anti_patterns": [
+    "Motion-only status, loss of focus, animation dependent navigation"
+  ],
+  "status": "SOURCE_LINKED_MEASUREMENT_PENDING"
+}

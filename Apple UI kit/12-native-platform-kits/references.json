@@ -1,0 +1,26 @@
+{
+  "category_id": "12-native-platform-kits",
+  "title": "iOS/iPadOS/macOS/watchOS/visionOS/tvOS",
+  "platform": "iOS/iPadOS 27, macOS 27, watchOS 26, visionOS 26, tvOS 18",
+  "reference_page": "https://developer.apple.com/design/resources/",
+  "official_kit_index": "https://developer.apple.com/design/resources/",
+  "reference_type": "apple_official_source_link",
+  "kit_component_layers_inspected": false,
+  "source_frame_ids": [],
+  "captures_committed": false,
+  "web_mockup_is_original": true,
+  "scenario_patterns": [
+    "kit entry points, system adaptations, window primitives, spatial/focus patterns"
+  ],
+  "impulse_target": [
+    "Desktop/tablet/mobile web",
+    "watch/vision/tv are inspiration only"
+  ],
+  "study_states": [
+    "platform version, dark/light, editable file tool, license, frame identifier"
+  ],
+  "anti_patterns": [
+    "Assuming all Apple native kits have web-parity or a unified CSS token sheet"
+  ],
+  "status": "SOURCE_LINKED_MEASUREMENT_PENDING"
+}

@@ -1,0 +1,31 @@
+{
+  "category_id": "05-menus-popovers-sheets",
+  "title": "Menus, Popovers, Alerts, Sheets",
+  "platform": "iOS/iPadOS 27 + macOS 27",
+  "reference_page": "https://developer.apple.com/design/human-interface-guidelines/sheets",
+  "official_kit_index": "https://developer.apple.com/design/resources/",
+  "reference_type": "apple_official_source_link",
+  "kit_component_layers_inspected": false,
+  "source_frame_ids": [],
+  "captures_committed": false,
+  "web_mockup_is_original": true,
+  "scenario_patterns": [
+    "temporary action menu, sheet, dialog, contextual popover, tooltip, confirmation"
+  ],
+  "impulse_target": [
+    "Role drawer, avatar actions, review decisions, attachment details"
+  ],
+  "study_states": [
+    "keyboard escape",
+    "focus trap",
+    "click outside",
+    "return focus",
+    "confirmation/cancel",
+    "reduced motion"
+  ],
+  "anti_patterns": [
+    "Decorative modal without focus management",
+    "hiding critical consent/actions"
+  ],
+  "status": "SOURCE_LINKED_MEASUREMENT_PENDING"
+}
