@@ -194,7 +194,7 @@ export function ImpulsePixelReference({
 
       <main className="impulse-pixel__content">
         <header className="impulse-pixel__heading">
-          <div><h1>Главная</h1><p>{home.roleTitle ?? "Выберите направление"}</p></div>
+          <div><h1 id="workspace-title">Главная</h1><p>{home.roleTitle ?? "Выберите направление"}</p></div>
           <button type="button" className="impulse-pixel__journey-link" onClick={onOpenJourney}>
             Мой путь <ChevronRight size={19} aria-hidden="true" />
           </button>
