@@ -9,6 +9,20 @@
   gap: 12px;
   min-width: 0;
   max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  /* Local tab rails scroll independently; grid min-content cannot widen the page. */
+  grid-template-columns: minmax(0, 1fr);
+}
+.participant-events--apple > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.participant-events--apple .ev-result-header,
+.participant-events--apple .ev-result-tabs,
+.participant-events--apple .ev-compact-controls {
+  min-width: 0;
+  max-width: 100%;
 }
 :root[data-theme="light"] .participant-events--apple,
 [data-theme="light"] .participant-events--apple {

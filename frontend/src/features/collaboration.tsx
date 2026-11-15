@@ -555,7 +555,7 @@ export function MessagingWorkspace({
 
   return (
     <div
-      className="messenger-page sberchat-shell sberchat-reference"
+      className={`messenger-page sberchat-shell sberchat-reference${role === "participant" ? " messenger-page--community" : ""}`}
       data-reference={reference}
       data-visual-reference="R-MSG-01"
       data-message-state={selected === undefined ? "empty" : selected.kind === "community" ? "community" : "direct"}

@@ -93,3 +93,8 @@
   .community-navigation__links a { min-height: 44px; flex: 1; padding: 10px 12px; }
   .community-navigation__title > h2 { font-size: 26px; }
 }
+
+/* Messenger's original two-row grid needs a third row for the local Community navigation. */
+.messenger-page.sberchat-shell.messenger-page--community {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
