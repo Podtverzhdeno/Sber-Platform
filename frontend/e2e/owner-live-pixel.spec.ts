@@ -33,6 +33,20 @@ test("approved live dashboard at 1422px has one floating header, no Menu and dyn
   expect(trajectory?.width).toBeGreaterThan(300);
 });
 
+test("reference Liquid Glass home has no duplicate requirements or unsolicited floating tips", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openPixelHome(page);
+  await expect(page.getByRole("button", { name: "План перехода" })).toBeVisible();
+  await expect(page.getByText(/Обязательные курсы:.*Практика:/)).toHaveCount(0);
+  await expect(page.locator(".participant-guide")).toHaveCount(0);
+  await expect(page.locator(".impulse-pixel__hero")).toHaveCSS("backdrop-filter", /blur/);
+  await expect(page.locator(".topbar")).toHaveCSS("backdrop-filter", /blur/);
+  await page.waitForTimeout(2200);
+  await expect(page.locator(".participant-guide")).toHaveCount(0);
+  await page.getByRole("button", { name: "План перехода" }).click();
+  await expect(page).toHaveURL(/\/workspace\/1(?:[?]|$)/);
+});
+
 test("brand replaces Menu and opens full authorized hidden navigation",async({page})=>{
   await openPixelHome(page);
   const logo=page.getByRole("button",{name:"Impulse — открыть разделы"});
