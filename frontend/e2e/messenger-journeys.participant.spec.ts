@@ -1,3 +1,4 @@
+import { openAuthorizedDestination } from "./helpers/open-authorized-destination";
 import { expect, test, type Page, type Route } from "@playwright/test";
 
 const channelId = "b6a24e2f-8a0e-4a41-9cea-5f5a2e39a101";
@@ -112,8 +113,7 @@ test("participant journeys: диалог, отправка, вложение, з
 
   await page.goto("/");
   await page.locator('[data-persona="participant-ilya"]').click();
-  await expect(page.getByRole("link", { name: "Сообщения" })).toBeVisible();
-  await page.getByRole("link", { name: "Сообщения" }).click();
+  await openAuthorizedDestination(page, "Сообщения", "Сообщество");
 
   const list = page.getByRole("complementary", { name: "Список диалогов" });
   await expect(list.locator(".msg-dialog-list__row")).toHaveCount(1);
