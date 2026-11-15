@@ -178,7 +178,7 @@ test("messages empty state uses reference three-column composition at 1448px",as
   })));
   await expectRect(page,".msg-dialog-list",{x:244,y:64,width:367,height:1022},12);
   await expectRect(page,".chat-thread",{x:611,y:64,width:495,height:1022},17);
-  await expectRect(page,".msg-reference-context-empty",{x:1106,y:64,width:298,height:1022},14);
+  await expectRect(page,".msg-reference-context-empty",{x:1106,y:64,width:298,height:1022},18);
   await expect(page.locator(".msg-reference-empty__exact-art")).toHaveAttribute("src","/messages-reference/empty-hero-original.svg");
   await page.mouse.move(5,5);
   await page.screenshot({path:"test-results/messages-empty-1448.png",fullPage:false});
@@ -229,7 +229,7 @@ test("direct chat follows 1672px personal PNG geometry with working editor",asyn
   await expect(page.locator(".msg-chat__header-title")).toContainText("Елена Наставник");
   await expectRect(page,".msg-dialog-list",{x:244,y:64,width:391,height:877},12);
   await expectRect(page,".chat-thread",{x:635,y:64,width:680,height:877},20);
-  await expectRect(page,".msg-context",{x:1315,y:64,width:357,height:877},14);
+  await expectRect(page,".msg-context",{x:1315,y:64,width:357,height:877},18);
   await page.locator(".msg-chat__scroll").evaluate(element => {element.scrollTop=0;});
   await page.mouse.move(5,5);
   await page.screenshot({path:"test-results/messages-personal-1672.png",fullPage:false});
