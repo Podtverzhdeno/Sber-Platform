@@ -142,21 +142,26 @@ for (const card of vectorManifest.cards ?? []) {
   check(visualGallery.includes('./' + card.image), "Visual gallery has no linked SVG: " + card.id);
 }
 
-// New searchable portal: ensure all 38 cards point to local, checked-in sources.
+// Unified portal: verify all 51 cases/source categories and 61 local SVG images.
 const unified = text("index.html");
 const portalMatch = unified.match(/const entries=(\[[^\n]+\]);\nconst gallery=/);
 check(Boolean(portalMatch), "Unified portal must embed a parseable static card catalogue");
 if (portalMatch) {
   const cards = JSON.parse(portalMatch[1]);
-  const groups = { base: 0, case: 0, advanced: 0 };
+  const groups = { base: 0, case: 0, advanced: 0, atlas: 0 };
   const uniqueDocs = new Set();
   let totalImages = 0;
   for (const card of cards) {
     const pathAllowed = value => typeof value === "string"
-      && /^(?:06-cases|reference-cases|advanced-cases)\/[A-Za-z0-9_/-]+\.(?:svg|md)$/.test(value)
+      && /^(?:06-cases|reference-cases|advanced-cases|(?:0[1-9]|1[0-3])-[a-z0-9-]+)\/[A-Za-z0-9_/-]+\.(?:svg|md)$/.test(value)
       && existsSync(join(libraryRoot, value));
     check(pathAllowed(card.img), "Missing/invalid portal SVG: " + card.img);
     check(pathAllowed(card.doc), "Missing/invalid portal docs: " + card.doc);
+    if (card.kind === "atlas") {
+      check(/^\d{2}-[a-z0-9-]+\/preview\.svg$/.test(card.img)
+        && card.doc === card.img.replace(/preview\.svg$/, "README.md"),
+        "Atlas image/doc pair does not match: " + card.img);
+    }
     if (card.kind === "advanced") {
       check(pathAllowed(card.light), "Missing advanced light SVG: " + card.light);
       totalImages += 2;
@@ -166,12 +171,12 @@ if (portalMatch) {
     check(!uniqueDocs.has(card.doc), "Duplicate portal card documentation: " + card.doc);
     uniqueDocs.add(card.doc);
   }
-  check(cards.length === 38 && totalImages === 48,
-    "Portal count should be 38 scenarios / 48 SVG");
-  check(groups.base === 12 && groups.case === 16 && groups.advanced === 10,
+  check(cards.length === 51 && totalImages === 61,
+    "Portal count should be 51 scenarios and source categories / 61 SVG");
+  check(groups.base === 12 && groups.case === 16 && groups.advanced === 10 && groups.atlas === 13,
     "Portal group counts inconsistent: " + JSON.stringify(groups));
 }
-for (const token of ['id="search"', 'data-filter="advanced"', 'id="theme"', 'aria-live="polite"', 'prefers-reduced-motion']) {
+for (const token of ['id="search"', 'data-filter="advanced"', 'data-filter="atlas"', 'id="theme"', 'aria-live="polite"', 'prefers-reduced-motion']) {
   check(unified.includes(token), "Missing portal accessibility/control: " + token);
 }
 
