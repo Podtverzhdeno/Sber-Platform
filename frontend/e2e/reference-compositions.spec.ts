@@ -694,6 +694,45 @@ test("R-PAR-02 journey composition and mentor consultation", async ({ page }) =>
   await expect(page.getByRole("button", { name: "Отправить запрос" })).toHaveCount(0);
 });
 
+test("R-PAR-02 canonical development layout stays within narrow viewports", async ({ page }) => {
+  const actor = actorOf("participant", participantBase.display_name, participantNavigation);
+  await installAuth(page, actor, { key: participantBase.key, display_name: participantBase.display_name, roles: ["participant"] });
+  await installParticipantData(page);
+  await openWorkspace(page, participantBase.key);
+  await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
+
+  const development = page.locator('.trajectory-v2[data-reference="R-PAR-02"]');
+  await expect(development).toBeVisible();
+  await expect(page.getByTestId("trajectory-role-card").first()).toBeVisible();
+  await expect(page.getByTestId("trajectory-role-detail")).toBeVisible();
+
+  for (const width of [320, 390, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(development).toBeVisible();
+    const layout = await page.evaluate(() => {
+      const content = document.querySelector<HTMLElement>('.trajectory-v2[data-reference="R-PAR-02"]');
+      const header = content?.querySelector<HTMLElement>(".trajectory-v2-heading");
+      const columns = content?.querySelector<HTMLElement>(".trajectory-v2-columns");
+      if (!content || !header || !columns) return null;
+      const headerBox = header.getBoundingClientRect();
+      const columnsBox = columns.getBoundingClientRect();
+      return {
+        pageWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+        headerGap: Math.round(columnsBox.top - headerBox.bottom),
+        contentLeft: content.getBoundingClientRect().left,
+        contentRight: content.getBoundingClientRect().right,
+      };
+    });
+    expect(layout, `Development layout must mount at width ${String(width)}`).not.toBeNull();
+    expect(layout!.pageWidth, `No document horizontal scrolling at ${String(width)}px`).toBeLessThanOrEqual(width + 1);
+    expect(layout!.headerGap, `Keep reference-based compact rhythm at ${String(width)}px`).toBeGreaterThanOrEqual(0);
+    expect(layout!.headerGap, `Keep reference-based compact rhythm at ${String(width)}px`).toBeLessThanOrEqual(16);
+    expect(layout!.contentLeft).toBeGreaterThanOrEqual(-1);
+    expect(layout!.contentRight).toBeLessThanOrEqual(width + 1);
+  }
+});
+
 test("R-PAR-03 bootcamp course detail and return", async ({ page }) => {
   const actor = actorOf("participant", participantBase.display_name, participantNavigation);
   await installAuth(page, actor, { key: participantBase.key, display_name: participantBase.display_name, roles: ["participant"] });
