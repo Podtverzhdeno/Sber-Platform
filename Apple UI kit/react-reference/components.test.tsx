@@ -54,8 +54,12 @@ describe("isolated Apple-inspired web controls (NOT Apple native components)", (
     const field = screen.getByRole("searchbox", { name: "Поиск" });
     fireEvent.change(field, { target: { value: "Bootcamp" } });
     expect(field).toHaveValue("Bootcamp");
-    fireEvent.click(screen.getByRole("button", { name: "Очистить: Поиск" }));
+    const clear = screen.getByRole("button", { name: "Очистить: Поиск" });
+    clear.focus();
+    fireEvent.click(clear);
     expect(field).toHaveValue("");
+    expect(field).toHaveFocus();
+    expect(screen.queryByRole("button", { name: "Очистить: Поиск" })).not.toBeInTheDocument();
   });
 
   it("supports Arrow/Home/End with disabled segmented values skipped", () => {
@@ -76,6 +80,28 @@ describe("isolated Apple-inspired web controls (NOT Apple native components)", (
     expect(last).toHaveFocus();
     fireEvent.keyDown(last, { key: "Home" });
     expect(select).toHaveBeenLastCalledWith("one");
+  });
+
+  it("offers a keyboard tab stop when the controlled segment value is missing", () => {
+    function Case() {
+      const [value, setValue] = useState("not-current");
+      return (
+        <SegmentedControl label="Адаптивный фильтр" value={value} onChange={setValue} options={[
+          { value: "blocked", label: "Заблокирован", disabled: true },
+          { value: "one", label: "Первый" },
+          { value: "two", label: "Второй" },
+        ]} />
+      );
+    }
+    render(<div className="aui-kit"><Case /></div>);
+    const first = screen.getByRole("button", { name: "Первый" });
+    const blocked = screen.getByRole("button", { name: "Заблокирован" });
+    expect(first).toHaveAttribute("tabindex", "0");
+    expect(blocked).toBeDisabled();
+    fireEvent.keyDown(first, { key: "ArrowRight" });
+    const second = screen.getByRole("button", { name: "Второй" });
+    expect(second).toHaveAttribute("aria-pressed", "true");
+    expect(second).toHaveFocus();
   });
 
   it("uses native dialog lifecycle but requires a real browser for focus trap QA", () => {
