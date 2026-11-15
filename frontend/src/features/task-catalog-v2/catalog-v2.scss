@@ -208,6 +208,13 @@
   border-color: var(--catalog-accent) !important;
 }
 
+/* Reference blue primary (#0066d6) needs white foreground for 4.5:1+ WCAG AA.
+   The dark theme's brighter green primary retains its dark ink token. */
+:root[data-theme="light"] .catalog-v2 .catalog-v2-primary,
+:root[data-theme="light"] .catalog-v2-conditions .catalog-v2-primary {
+  color: #fff !important;
+}
+
 .catalog-v2-match {
   flex: none;
   padding: 5px 9px;
