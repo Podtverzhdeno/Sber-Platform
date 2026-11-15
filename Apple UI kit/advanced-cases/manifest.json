@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "date": "2026-11-15",
+  "case_count": 10,
+  "svg_count": 20,
+  "not_official_apple_assets": true,
+  "cases": [
+    {
+      "id": 17,
+      "folder": "17-search-tokens-suggestions",
+      "title": "Поиск и фильтры",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/search-fields",
+      "concept": true,
+      "official_kit_measured": false,
+      "checked_pixel_parity": false,
+      "images": [
+        "dark.svg",
+        "light.svg"
+      ]
+    },
+    {
+      "id": 18,
+      "folder": "18-widgets-glanceable",
+      "title": "Виджеты и быстрые сведения",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/widgets",
+      "concept": true,
+      "official_kit_measured": false,
+      "checked_pixel_parity": false,
+      "images": [
+        "dark.svg",
+        "light.svg"
+      ]
+    },
+    {
+      "id": 19,
+      "folder": "19-live-activities-progress",
+      "title": "Кратковременный прогресс",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/live-activities",
+      "concept": true,
+      "official_kit_measured": false,
+      "checked_pixel_parity": false,
+      "images": [
+        "dark.svg",
+        "light.svg"
+      ]
+    },
+    {
+      "id": 20,
+      "folder": "20-charts-inspector",
+      "title": "Графики и аналитика",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/charts",
+      "concept": true,
+      "official_kit_measured": false,
+      "checked_pixel_parity": false,
+      "images": [
+        "dark.svg",
+        "light.svg"
+      ]
+    },
+    {
+      "id": 21,
+      "folder": "21-loading-empty-stale-error",
+      "title": "Загрузка и особые состояния",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/loading",
+      "concept": true,
+      "official_kit_measured": false,
+      "checked_pixel_parity": false,
+      "images": [
+        "dark.svg",
+        "light.svg"
+      ]
+    },
+    {
+      "id": 22,
+      "folder": "22-date-time-filters",
+      "title": "Дата и фильтры периода",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/search-fields",
+      "concept": true,
+      "official_kit_measured": false,
+      "checked_pixel_parity": false,
+      "images": [
+        "dark.svg",
+        "light.svg"
+      ]
+    },
+    {
+      "id": 23,
+      "folder": "23-alerts-critical-actions",
+      "title": "Критичные подтверждения",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/alerts",
+      "concept": true,
+      "official_kit_measured": false,
+      "checked_pixel_parity": false,
+      "images": [
+        "dark.svg",
+        "light.svg"
+      ]
+    },
+    {
+      "id": 24,
+      "folder": "24-file-uploads-drag-drop",
+      "title": "Файлы и вложения",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/drag-and-drop",
+      "concept": true,
+      "official_kit_measured": false,
+      "checked_pixel_parity": false,
+      "images": [
+        "dark.svg",
+        "light.svg"
+      ]
+    },
+    {
+      "id": 25,
+      "folder": "25-context-menus-keyboard",
+      "title": "Меню и сочетания клавиш",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/menus",
+      "concept": true,
+      "official_kit_measured": false,
+      "checked_pixel_parity": false,
+      "images": [
+        "dark.svg",
+        "light.svg"
+      ]
+    },
+    {
+      "id": 26,
+      "folder": "26-adaptive-sheet-mobile",
+      "title": "Адаптивные панели",
+      "source": "https://developer.apple.com/design/human-interface-guidelines/popovers",
+      "concept": true,
+      "official_kit_measured": false,
+      "checked_pixel_parity": false,
+      "images": [
+        "dark.svg",
+        "light.svg"
+      ]
+    }
+  ]
+}

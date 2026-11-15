@@ -1,0 +1,27 @@
+# Claim APPLE-UI-KIT-ADVANCED-STATES-20261115
+
+- task_id: APPLE-UI-KIT-ADVANCED-STATES-20261115
+- session_id: gpt6-apple-advanced-states-20261115
+- status: REVIEW
+- started_at: 2026-11-15T17:30:00+03:00
+- heartbeat_at: 2026-11-15T17:30:00+03:00
+- base_revision: fbc39b6735ccf7b4c06a08d488cdf7f5342af883
+- depends_on: [APPLE-UI-KIT-VISUAL-CASES-20261115]
+- branch: docs/apple-ui-kit-advanced-states-20261115
+- write_scope:
+  - Apple UI kit/advanced-cases/**
+  - .agents/coordination/claims/APPLE-UI-KIT-ADVANCED-STATES-20261115.lock/status.md
+- shared_files: []
+- excluded: Apple UI kit/reference-cases/**, existing Apple UI kit root files, App, frontend, tests, backend, CI, Railway, other claims
+- task: owner-requested continuation; quality upgrade with additional scenarios and original dark/light vector visual references, external Apple HIG source provenance, data and behavior requirements, acceptance checklist
+- verification:
+  - verify 2 artwork variants per case and every file in Github tree
+  - validate SVG markup/escaping and manifest internal paths
+  - source links and version/a11y claims
+  - independent PR review before integration into the preceding Apple Kit reference branch
+- progress: added ten advanced source-linked reference-case folders, twenty original 1280x760 light/dark standalone SVG studies, per-case READMEs, offline theme-switch gallery and machine-readable manifest
+- pull_request: https://github.com/Podtverzhdeno/Sber-Platform/pull/186 (draft, targets previous reference collection branch)
+- verification_result: 33/33 files present, 10/10 cases and 20/20 SVG variants verified through GitHub, markup/escaping and no embedded scripts/external images passed, no existing kit root or runtime file changed
+- quality_limitation: no real-browser rendering, Apple editable Figma/Sketch measurements, pixel overlay or independent review performed; artifacts marked original conceptual studies
+- next_safe_step: independent reviewer/owner accepts PR #186 after PR #184, then main integration by assigned integration lane
+- blockers: original official Apple Figma/Sketch kit layers not inspected; own illustrations are study artifacts, never Apple screenshots or pixel-perfect claims
