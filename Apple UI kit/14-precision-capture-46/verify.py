@@ -13,6 +13,25 @@ assert len(items) == 46, "expected all 46 Apple reference targets"
 assert doc["official_kit_layers_inspected"] is False
 assert doc["pixel_parity_verified"] is False
 assert [e["id"] for e in items] == [f"APP-CAP-{i:03d}" for i in range(1, 47)]
+# Keep this precision registry aligned with the 46-item parent capture queue.
+# The parent may document a broader visual catalog; that is a separate inventory.
+parent_atlas = (root.parent / "COMPONENT_ATLAS.md").read_text(encoding="utf-8")
+queue = re.search(
+    r"## 46 study targets.*?(?=## Baseline design requirements)",
+    parent_atlas,
+    flags=re.DOTALL,
+)
+assert queue is not None, "parent 46-item capture queue was renamed"
+parent_targets = re.findall(r"^(\d+)\.\s+(.+)$", queue.group(), flags=re.MULTILINE)
+assert len(parent_targets) == 46, "capture queue changed: reconcile IDs and cases"
+assert [
+    (int(number), title)
+    for number, title in parent_targets
+] == [
+    (index, entry["title"])
+    for index, entry in enumerate(items, 1)
+], "parent capture target titles or order diverged from the precision registry"
+
 assert len({e["record_path"] for e in items}) == 46
 for e in items:
     path = root / e["record_path"]
