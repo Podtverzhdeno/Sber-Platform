@@ -42,6 +42,10 @@
 }
 .page-shell--owner-pixel-home.page-shell--apple-overlay .workspace--apple .workspace-content {
   padding-top: 66px !important;
+  /* Shared .workspace-content paints a solid --color-bg above the page's
+     orbital illustration. Make only the approved Home transparent so the
+     source-matched wallpaper reaches the visible canvas. */
+  background: transparent !important;
 }
 .page-shell--owner-pixel-home .workspace-content [data-testid="pixel-live-shell"] {
   isolation: isolate;
