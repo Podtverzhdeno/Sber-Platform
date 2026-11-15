@@ -111,7 +111,23 @@
 }
 .development-hub__trajectory { min-width: 0; }
 .development-hub__trajectory .trajectory-v2 { min-width: 0; padding: 0; }
-.development-hub__trajectory .trajectory-v2-heading { display: none; }
+.workspace-content .development-hub__trajectory .trajectory-v2-heading {
+  display: flex;
+  min-height: 0;
+  margin: 0;
+  padding: 0 0 7px;
+  align-items: center;
+}
+.workspace-content .development-hub__trajectory .trajectory-v2-heading h2 {
+  font-size: 16px;
+  font-weight: 670;
+  margin: 0;
+  letter-spacing: -.015em;
+}
+.workspace-content .development-hub__trajectory .trajectory-v2-heading .trajectory-v2-intro,
+.workspace-content .development-hub__trajectory .trajectory-v2-heading .trajectory-v2-hero-graphic {
+  display: none;
+}
 .development-hub__trajectory .trajectory-v2-columns { margin-top: 0; }
 .development-hub__requirements { min-width: 0; }
 .development-hub__requirements-heading {
