@@ -1,0 +1,69 @@
+{
+  "_comment": "PROPOSED IMPULSE WEB study tokens only; NOT copied from official Apple design assets. Require measured kit frame replacements before pixel acceptance.",
+  "schema_version": 1,
+  "space_px": [
+    4,
+    8,
+    12,
+    16,
+    20,
+    24,
+    32,
+    40,
+    48,
+    64
+  ],
+  "breakpoints_px": {
+    "mobile": 390,
+    "tablet": 1024,
+    "desktop": 1440
+  },
+  "radii_px": {
+    "control": 12,
+    "card": 20,
+    "sheet": 24,
+    "pill": 999
+  },
+  "touch_target_min_px": 44,
+  "motion": {
+    "fast_ms": 120,
+    "normal_ms": 200,
+    "slow_ms": 300,
+    "easing": "cubic-bezier(.2,.8,.2,1)"
+  },
+  "type_scale_px": {
+    "footnote": 12,
+    "caption": 13,
+    "body": 15,
+    "section": 21,
+    "title": 32,
+    "display": 40
+  },
+  "font_stack": "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  "themes": {
+    "light": {
+      "background": "#f5f5f7",
+      "content": "#ffffff",
+      "content_muted": "#f2f2f7",
+      "text": "#1d1d1f",
+      "text_muted": "#636366",
+      "border": "rgba(30,30,45,.14)",
+      "accent": "#007aff",
+      "accent_text": "#ffffff",
+      "floating_glass": "rgba(255,255,255,.68)",
+      "floating_glass_fallback": "#f1f2f5"
+    },
+    "dark": {
+      "background": "#0b1020",
+      "content": "#182036",
+      "content_muted": "#232d45",
+      "text": "#f5f7fc",
+      "text_muted": "#b9c3d5",
+      "border": "rgba(255,255,255,.16)",
+      "accent": "#409cff",
+      "accent_text": "#061223",
+      "floating_glass": "rgba(27,34,54,.66)",
+      "floating_glass_fallback": "#25334b"
+    }
+  }
+}

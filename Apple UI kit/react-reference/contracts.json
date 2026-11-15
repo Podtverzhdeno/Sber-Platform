@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "provenance": "Independent Impulse-oriented web proposals; not native Apple components",
+  "official_sources": [
+    "https://developer.apple.com/design/resources/",
+    "https://developer.apple.com/design/human-interface-guidelines/materials"
+  ],
+  "apple_kit_frames_measured": false,
+  "production_integrated": false,
+  "approved_for_pixel_parity": false,
+  "components": [
+    {
+      "name": "GlassControl",
+      "type": "presentation",
+      "layer": "navigation_control",
+      "states": [
+        "regular",
+        "clear",
+        "light",
+        "dark",
+        "reduce-transparency",
+        "forced-colors"
+      ],
+      "must_not": "render regular content cards with intensive glass effects"
+    },
+    {
+      "name": "ContentSurface",
+      "type": "presentation",
+      "layer": "content",
+      "states": [
+        "light",
+        "dark",
+        "reduced-transparency"
+      ],
+      "must_not": "blur source-backed evidence or tables"
+    },
+    {
+      "name": "ControlButton",
+      "type": "action",
+      "states": [
+        "primary",
+        "secondary",
+        "destructive",
+        "busy",
+        "disabled",
+        "keyboard-focus"
+      ],
+      "must_not": "fire action during busy/disabled"
+    },
+    {
+      "name": "SegmentedControl",
+      "type": "controlled-input",
+      "states": [
+        "selected",
+        "disabled",
+        "keyboard-arrows",
+        "home",
+        "end"
+      ],
+      "semantics": "group of toggle buttons, not tabs unless panels exist",
+      "must_not": "reindex role navigation or change URL without owner approval"
+    },
+    {
+      "name": "SearchField",
+      "type": "controlled-input",
+      "states": [
+        "empty",
+        "filled",
+        "focus",
+        "disabled",
+        "clear"
+      ],
+      "must_not": "return unauthorized results"
+    },
+    {
+      "name": "FloatingToolbar",
+      "type": "navigation",
+      "states": [
+        "responsive",
+        "focus",
+        "light",
+        "dark"
+      ],
+      "must_not": "replace authorized routes"
+    },
+    {
+      "name": "StatusNotice",
+      "type": "feedback",
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "restricted",
+        "stale",
+        "offline"
+      ],
+      "must_not": "equate unknown with verified zero"
+    },
+    {
+      "name": "ActionDialog",
+      "type": "overlay",
+      "states": [
+        "closed",
+        "open",
+        "escape",
+        "cancel",
+        "focus-restore"
+      ],
+      "must_not": "perform a business operation simply on display"
+    },
+    {
+      "name": "NavigationDrawer",
+      "type": "overlay",
+      "states": [
+        "closed",
+        "open",
+        "escape",
+        "focus-restore"
+      ],
+      "must_not": "make disallowed route visible by styling"
+    }
+  ],
+  "review_requires": [
+    "independent code review",
+    "React/TypeScript typecheck",
+    "browser rendering",
+    "keyboard/ARIA validation",
+    "official licensed frame inspection",
+    "source-backed visual comparison",
+    "all six Impulse roles"
+  ]
+}

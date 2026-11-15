@@ -1,0 +1,2689 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-11-15",
+  "owner": "Impulse UI reference library",
+  "source_of_truth": "Apple Design Resources and Human Interface Guidelines",
+  "derived_assets": "original Impulse study code only",
+  "warning": "None of these components have been opened as editable Apple kit frames; no exact measurements or pixel parity claimed.",
+  "total": 67,
+  "components": [
+    {
+      "id": "AUI-001",
+      "group": "Liquid Glass",
+      "folder": "01-liquid-glass-materials",
+      "name": "Glass: regular control",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "toolbar / quick actions",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "regular",
+        "light",
+        "dark",
+        "focus"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-002",
+      "group": "Liquid Glass",
+      "folder": "01-liquid-glass-materials",
+      "name": "Glass: clear control",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "image-backed transient toolbar",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "clear",
+        "light",
+        "dark",
+        "bright/dim background"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-003",
+      "group": "Liquid Glass",
+      "folder": "01-liquid-glass-materials",
+      "name": "Glass: content boundary",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "data card / content block",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "glass off",
+        "standard material"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-004",
+      "group": "Liquid Glass",
+      "folder": "01-liquid-glass-materials",
+      "name": "Glass: high contrast",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "floating control",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "reduced transparency",
+        "forced colors"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-005",
+      "group": "Liquid Glass",
+      "folder": "01-liquid-glass-materials",
+      "name": "Glass: primary tint",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "single primary action",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "emphasis",
+        "disabled",
+        "pressed"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-006",
+      "group": "Navigation",
+      "folder": "02-navigation-sidebars-tabs",
+      "name": "Desktop navigation sidebar",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "role drawer",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "open",
+        "closed",
+        "keyboard"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-007",
+      "group": "Navigation",
+      "folder": "02-navigation-sidebars-tabs",
+      "name": "Mobile navigation sheet",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "role drawer",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "320",
+        "390",
+        "open",
+        "closed"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-008",
+      "group": "Navigation",
+      "folder": "02-navigation-sidebars-tabs",
+      "name": "Floating toolbar",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "all roles shared toolbar",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "light",
+        "dark",
+        "scroll"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-009",
+      "group": "Navigation",
+      "folder": "02-navigation-sidebars-tabs",
+      "name": "Tab navigation",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "local section tabs",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "compact",
+        "wide",
+        "selected"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-010",
+      "group": "Navigation",
+      "folder": "02-navigation-sidebars-tabs",
+      "name": "Nested detail navigation",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "list/detail panel",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "back",
+        "forward",
+        "focus"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-011",
+      "group": "Navigation",
+      "folder": "02-navigation-sidebars-tabs",
+      "name": "Search toolbar control",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "global search",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "focus",
+        "empty",
+        "results"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-012",
+      "group": "Buttons and selection",
+      "folder": "03-buttons-and-selection",
+      "name": "Prominent button",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "primary CTA",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "normal",
+        "pressed",
+        "focus",
+        "disabled"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-013",
+      "group": "Buttons and selection",
+      "folder": "03-buttons-and-selection",
+      "name": "Secondary button",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "secondary action",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "normal",
+        "hover",
+        "focus"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-014",
+      "group": "Buttons and selection",
+      "folder": "03-buttons-and-selection",
+      "name": "Destructive action",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "review rejection",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "warning",
+        "confirm",
+        "disabled"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-015",
+      "group": "Buttons and selection",
+      "folder": "03-buttons-and-selection",
+      "name": "Icon-only action",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "toolbar control",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "hover",
+        "pressed",
+        "focus",
+        "tooltip"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-016",
+      "group": "Buttons and selection",
+      "folder": "03-buttons-and-selection",
+      "name": "Segmented control",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "filter group",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "two",
+        "three",
+        "selected",
+        "keyboard"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-017",
+      "group": "Buttons and selection",
+      "folder": "03-buttons-and-selection",
+      "name": "Switch",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "settings toggle",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "on",
+        "off",
+        "disabled",
+        "focus"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-018",
+      "group": "Buttons and selection",
+      "folder": "03-buttons-and-selection",
+      "name": "Checkbox and radio",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "forms",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "selected",
+        "indeterminate",
+        "invalid"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-019",
+      "group": "Buttons and selection",
+      "folder": "03-buttons-and-selection",
+      "name": "Slider and stepper",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/buttons",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "preferences",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "min",
+        "max",
+        "focus",
+        "disabled"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-020",
+      "group": "Forms and search",
+      "folder": "04-forms-and-inputs",
+      "name": "Text field",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/text-fields",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "task name field",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "empty",
+        "filled",
+        "focus",
+        "error",
+        "disabled"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-021",
+      "group": "Forms and search",
+      "folder": "04-forms-and-inputs",
+      "name": "Secure text field",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/text-fields",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "credential input",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "masked",
+        "reveal",
+        "error"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-022",
+      "group": "Forms and search",
+      "folder": "04-forms-and-inputs",
+      "name": "Search field",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/text-fields",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "catalog search",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "empty",
+        "results",
+        "no-results",
+        "loading"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-023",
+      "group": "Forms and search",
+      "folder": "04-forms-and-inputs",
+      "name": "Text area",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/text-fields",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "review comment",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "autosize",
+        "error",
+        "focus"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-024",
+      "group": "Forms and search",
+      "folder": "04-forms-and-inputs",
+      "name": "Select and picker",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/text-fields",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "task category",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "open",
+        "selected",
+        "disabled"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-025",
+      "group": "Forms and search",
+      "folder": "04-forms-and-inputs",
+      "name": "Date and time field",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/text-fields",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "deadline input",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "empty",
+        "valid",
+        "invalid"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-026",
+      "group": "Forms and search",
+      "folder": "04-forms-and-inputs",
+      "name": "File attachment input",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/text-fields",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "evidence upload",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "pending",
+        "selected",
+        "error"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-027",
+      "group": "Forms and search",
+      "folder": "04-forms-and-inputs",
+      "name": "Inline validation",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/text-fields",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "task wizard",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "required",
+        "error",
+        "success"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-028",
+      "group": "Menus and overlays",
+      "folder": "05-menus-popovers-sheets",
+      "name": "Context menu",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "row actions",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "closed",
+        "open",
+        "disabled"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-029",
+      "group": "Menus and overlays",
+      "folder": "05-menus-popovers-sheets",
+      "name": "Profile popover",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "avatar settings",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "open",
+        "closed",
+        "escape"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-030",
+      "group": "Menus and overlays",
+      "folder": "05-menus-popovers-sheets",
+      "name": "Modal sheet",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "task edit",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "mobile",
+        "desktop",
+        "cancel"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-031",
+      "group": "Menus and overlays",
+      "folder": "05-menus-popovers-sheets",
+      "name": "Confirmation alert",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "review action",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "confirm",
+        "cancel",
+        "focus"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-032",
+      "group": "Menus and overlays",
+      "folder": "05-menus-popovers-sheets",
+      "name": "Tooltip",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "information hint",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "keyboard",
+        "pointer",
+        "touch"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-033",
+      "group": "Menus and overlays",
+      "folder": "05-menus-popovers-sheets",
+      "name": "Floating panel",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/menus",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "temporary detail",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "open",
+        "close",
+        "outside click"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-034",
+      "group": "Data layout",
+      "folder": "06-lists-tables-cards",
+      "name": "Grouped list",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "settings rows",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "header",
+        "divider",
+        "selected"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-035",
+      "group": "Data layout",
+      "folder": "06-lists-tables-cards",
+      "name": "Dense table",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "mentor/HR queue",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "sort",
+        "empty",
+        "long text"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-036",
+      "group": "Data layout",
+      "folder": "06-lists-tables-cards",
+      "name": "Outline disclosure",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "project phases",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "expanded",
+        "collapsed",
+        "keyboard"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-037",
+      "group": "Data layout",
+      "folder": "06-lists-tables-cards",
+      "name": "Card grid",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "event catalog",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "desktop",
+        "mobile",
+        "loading"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-038",
+      "group": "Data layout",
+      "folder": "06-lists-tables-cards",
+      "name": "Split inspector",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "review workflow",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "wide",
+        "stacked",
+        "mobile"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-039",
+      "group": "Data layout",
+      "folder": "06-lists-tables-cards",
+      "name": "Status list row",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "verification list",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "pending",
+        "done",
+        "rejected"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-040",
+      "group": "Messages",
+      "folder": "07-messages-collaboration",
+      "name": "Inbox sidebar",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "conversation list",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "unread",
+        "selected",
+        "empty"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-041",
+      "group": "Messages",
+      "folder": "07-messages-collaboration",
+      "name": "Conversation bubble",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "message body",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "sent",
+        "received",
+        "failed"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-042",
+      "group": "Messages",
+      "folder": "07-messages-collaboration",
+      "name": "Composer",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "message editor",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "empty",
+        "typed",
+        "sending"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-043",
+      "group": "Messages",
+      "folder": "07-messages-collaboration",
+      "name": "Attachment preview",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "file in chat",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "preview",
+        "failed",
+        "removed"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-044",
+      "group": "Typography and color",
+      "folder": "08-typography-colors-symbols",
+      "name": "Large heading",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/typography",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "page hierarchy",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "long Russian",
+        "zoom 200%"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-045",
+      "group": "Typography and color",
+      "folder": "08-typography-colors-symbols",
+      "name": "Body and caption",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/typography",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "content labels",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "light",
+        "dark",
+        "contrast"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-046",
+      "group": "Typography and color",
+      "folder": "08-typography-colors-symbols",
+      "name": "System colors",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/typography",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "semantic palette",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "light",
+        "dark",
+        "high contrast"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-047",
+      "group": "Typography and color",
+      "folder": "08-typography-colors-symbols",
+      "name": "Symbol alternative",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/typography",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "Lucide icons",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "16",
+        "20",
+        "24",
+        "RTL"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-048",
+      "group": "Progress and feedback",
+      "folder": "09-progress-feedback-states",
+      "name": "Determinate progress",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "learning completion",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "0",
+        "50",
+        "100",
+        "unknown"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-049",
+      "group": "Progress and feedback",
+      "folder": "09-progress-feedback-states",
+      "name": "Indeterminate loading",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "API request",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "loading",
+        "stale"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-050",
+      "group": "Progress and feedback",
+      "folder": "09-progress-feedback-states",
+      "name": "Empty and offline",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "list states",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "empty",
+        "offline",
+        "error"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-051",
+      "group": "Progress and feedback",
+      "folder": "09-progress-feedback-states",
+      "name": "Success and warning",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "response notification",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "success",
+        "warning",
+        "critical"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-052",
+      "group": "Identity and credentials",
+      "folder": "10-portfolio-wallet-identity",
+      "name": "Credential card",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "skill passport",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "valid",
+        "revoked",
+        "hidden"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-053",
+      "group": "Identity and credentials",
+      "folder": "10-portfolio-wallet-identity",
+      "name": "Profile badge",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "participant profile",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "avatar",
+        "fallback",
+        "privacy"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-054",
+      "group": "Identity and credentials",
+      "folder": "10-portfolio-wallet-identity",
+      "name": "Portfolio timeline",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "project evidence",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "pending",
+        "verified",
+        "expired"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-055",
+      "group": "Accessibility and motion",
+      "folder": "11-motion-accessibility-responsive",
+      "name": "Reduced transparency",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "all floating controls",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "on",
+        "off"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-056",
+      "group": "Accessibility and motion",
+      "folder": "11-motion-accessibility-responsive",
+      "name": "Reduce motion",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "navigation drawer",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "on",
+        "off"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-057",
+      "group": "Accessibility and motion",
+      "folder": "11-motion-accessibility-responsive",
+      "name": "Focus management",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "dialog/popover",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "open",
+        "escape",
+        "return focus"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-058",
+      "group": "Accessibility and motion",
+      "folder": "11-motion-accessibility-responsive",
+      "name": "Responsive layout",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "all roles",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "320",
+        "390",
+        "1024",
+        "1440"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-059",
+      "group": "Accessibility and motion",
+      "folder": "11-motion-accessibility-responsive",
+      "name": "High contrast",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "inputs and status",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "forced colors",
+        "focus"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-060",
+      "group": "Platform kit comparisons",
+      "folder": "12-native-platform-kits",
+      "name": "iOS/iPadOS 27 system screen",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "web mobile study",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "source frame pending"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-061",
+      "group": "Platform kit comparisons",
+      "folder": "12-native-platform-kits",
+      "name": "macOS 27 workspace",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "web desktop study",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "source frame pending"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-062",
+      "group": "Platform kit comparisons",
+      "folder": "12-native-platform-kits",
+      "name": "watchOS 26 interface",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "informational only",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "native-only reference"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-063",
+      "group": "Platform kit comparisons",
+      "folder": "12-native-platform-kits",
+      "name": "visionOS 26 panel",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/layout",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "informational only",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "spatial native-only reference"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-064",
+      "group": "Original Apple source provenance",
+      "folder": "13-official-visual-references",
+      "name": "Apple Figma editable frame",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "measure and export",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "source version",
+        "id",
+        "theme"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-065",
+      "group": "Original Apple source provenance",
+      "folder": "13-official-visual-references",
+      "name": "Apple Sketch editable frame",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "measure and export",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "source version",
+        "id",
+        "theme"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-066",
+      "group": "Original Apple source provenance",
+      "folder": "13-official-visual-references",
+      "name": "Apple-hosted preview thumbnail",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "source image link",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "remote only",
+        "license"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    },
+    {
+      "id": "AUI-067",
+      "group": "Original Apple source provenance",
+      "folder": "13-official-visual-references",
+      "name": "Source diff evidence",
+      "reference": {
+        "publisher": "Apple",
+        "url": "https://developer.apple.com/design/human-interface-guidelines/materials",
+        "kit_hub": "https://developer.apple.com/design/resources/",
+        "frame_id": null,
+        "actual_layer_inspected": false,
+        "source_kind": "hig_guidance_link"
+      },
+      "impulse": {
+        "target": "reference comparison",
+        "existing_route_mapping_required": true
+      },
+      "states_to_capture": [
+        "same viewport",
+        "dpr",
+        "font"
+      ],
+      "measurements": {
+        "source_dimensions": null,
+        "frame_export": null,
+        "padding": null,
+        "radius": null,
+        "font_metrics": null,
+        "opacity": null,
+        "shadow": null,
+        "measured": false
+      },
+      "verification": {
+        "status": "SOURCE_LINKED_MEASUREMENT_PENDING",
+        "pixel_diff": null,
+        "keyboard_test": null,
+        "screen_reader_test": null,
+        "reviewer": null
+      }
+    }
+  ]
+}
