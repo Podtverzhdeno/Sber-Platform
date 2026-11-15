@@ -89,6 +89,7 @@
   pointer-events:none;
 }
 .page-shell--owner-pixel-home .workspace-content .impulse-pixel__hero::after {
+  display:block;
   content:"";
   position:absolute;
   inset:0;
