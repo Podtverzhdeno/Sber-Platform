@@ -2,7 +2,7 @@
 
 - task_id: APPLE-OFFICIAL-SOURCE-EXPLORER-20261115
 - session_id: gpt6-official-hig-explorer-20261115
-- status: REVIEW
+- status: IN_PROGRESS
 - started_at: 2026-11-15T18:20:00+03:00
 - heartbeat_at: 2026-11-15T18:20:00+03:00
 - base_branch: docs/apple-ui-kit-quality-gates-20261115
@@ -22,3 +22,6 @@
 - verification_limit: zero-dependency Node verification script and Chromium smoke were authored but NOT executed on an actual branch checkout; Figma/Sketch artboards remain uninspected and unmeasured; independent reviewer acceptance pending
 - handoff: REVIEW; validate exact branch in Chromium, check source provenance and license, only merge in stacked PR order with coordinator, no production deploy or main edits
 - blockers: editable original Apple 27 Figma/Sketch layers not available in current tool connections; source links do not imply layer inspection
+
+- reopened_at: 2026-11-15T21:58+03:00
+- reopened_reason: actual Chromium screenshots from Apple reference QA success run 43736411544 show sticky header captured mid-page in fullPage evidence after scroll; make evidence deterministic at scrollTop zero; no runtime or kit assets touched
