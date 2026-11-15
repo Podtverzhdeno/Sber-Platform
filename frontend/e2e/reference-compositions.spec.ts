@@ -851,6 +851,41 @@ test("R-PAR-02 opens the next course from the real roadmap detail drawer", async
   await expect(page).toHaveURL(/\/workspace\/2\?[^#]*course=python-base/);
 });
 
+test("R-PAR-02 rejected optional role keeps the original career path", async ({ page }) => {
+  const actor = actorOf("participant", participantBase.display_name, participantNavigation);
+  await installAuth(page, actor, { key: participantBase.key, display_name: participantBase.display_name, roles: ["participant"] });
+  await installParticipantData(page);
+  await page.route("**/api/v1/participant/me/development-overview", (route) =>
+    route.fulfill({
+      json: {
+        ...overviewFixture,
+        roles: [
+          ...overviewFixture.roles,
+          { track_key: "product", title: "Продакт-менеджер", state: "unselected", attempt_number: null, completed_milestones: 0, total_milestones: 4 },
+        ],
+      },
+    }),
+  );
+  let attempted = false;
+  await page.route("**/api/v1/me/tracks/optional", (route) => {
+    attempted = true;
+    return route.fulfill({
+      status: 403,
+      json: { code: "FORBIDDEN", message: "Нет разрешения на дополнительную траекторию." },
+    });
+  });
+  await openWorkspace(page, participantBase.key);
+  await page.getByRole("link", { name: "Моя траектория", exact: true }).click();
+  const optional = page.locator('[data-testid="trajectory-role-card"][data-role-key="product"]');
+  const primary = page.locator('[data-testid="trajectory-role-card"][data-role-key="python"]');
+  await optional.click();
+  await page.getByRole("button", { name: /Изучать дополнительно/ }).click();
+  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(optional).toHaveAttribute("data-tone", "unselected");
+  await expect(primary).toHaveAttribute("data-tone", "primary");
+  expect(attempted).toBe(true);
+});
+
 test("R-PAR-03 bootcamp course detail and return", async ({ page }) => {
   const actor = actorOf("participant", participantBase.display_name, participantNavigation);
   await installAuth(page, actor, { key: participantBase.key, display_name: participantBase.display_name, roles: ["participant"] });
