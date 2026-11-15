@@ -700,8 +700,18 @@ test("R-PAR-02 canonical development layout stays within narrow viewports", asyn
   await installAuth(page, actor, { key: participantBase.key, display_name: participantBase.display_name, roles: ["participant"] });
   await installParticipantData(page);
   // The canonical route reads an authorized overview, unlike ?legacy=1.
-  // Supply a genuine schema-shaped fixture so the test checks the rendered
-  // layout rather than the error/loading state.
+  // Use a schema-shaped response and keep the optional-role state on the server side.
+  let optionalEnabled = false;
+  const optionalRequests: { track_key: string; enabled: boolean }[] = [];
+  await page.route("**/api/v1/me/tracks/optional", (route) => {
+    const body = route.request().postDataJSON() as { track_key: string; enabled: boolean };
+    optionalRequests.push(body);
+    if (body.track_key !== "product") {
+      return route.fulfill({ status: 400, json: { code: "INVALID_TRACK" } });
+    }
+    optionalEnabled = body.enabled;
+    return route.fulfill({ json: { success: true } });
+  });
   await page.route("**/api/v1/participant/me/development-overview", (route) =>
     route.fulfill({
       json: {
@@ -709,7 +719,7 @@ test("R-PAR-02 canonical development layout stays within narrow viewports", asyn
         roles: [
           ...overviewFixture.roles,
           { track_key: "data", title: "Data-аналитик", state: "paused", attempt_number: 1, completed_milestones: 1, total_milestones: 3 },
-          { track_key: "product", title: "Продакт-менеджер", state: "unselected", attempt_number: null, completed_milestones: 0, total_milestones: 4 },
+          { track_key: "product", title: "Продакт-менеджер", state: optionalEnabled ? "learning" : "unselected", attempt_number: optionalEnabled ? 1 : null, completed_milestones: 0, total_milestones: 4 },
         ],
       },
     }),
@@ -749,6 +759,30 @@ test("R-PAR-02 canonical development layout stays within narrow viewports", asyn
     expect(layout.contentLeft).toBeGreaterThanOrEqual(-1);
     expect(layout.contentRight).toBeLessThanOrEqual(width + 1);
   }
+
+  // A grey secondary role must be explorable and reversible without changing
+  // the primary gold career path or silently erasing progress.
+  const primary = page.locator('[data-testid="trajectory-role-card"][data-role-key="python"]');
+  const optional = page.locator('[data-testid="trajectory-role-card"][data-role-key="product"]');
+  await expect(primary).toHaveAttribute("data-tone", "primary");
+  await expect(optional).toHaveAttribute("data-tone", "unselected");
+  await optional.click();
+  await expect(page).toHaveURL(/role=product/);
+  await expect(page.getByTestId("trajectory-role-detail")).toHaveAttribute("data-role-key", "product");
+  await page.getByRole("button", { name: /Изучать дополнительно/ }).click();
+  await expect(optional).toHaveAttribute("data-tone", "learning");
+  await expect(primary).toHaveAttribute("data-tone", "primary");
+  await page.getByRole("button", { name: "Сделать карточку серой" }).click();
+  await expect(optional).toHaveAttribute("data-tone", "unselected");
+  await expect(primary).toHaveAttribute("data-tone", "primary");
+  expect(optionalRequests).toEqual([
+    { track_key: "product", enabled: true },
+    { track_key: "product", enabled: false },
+  ]);
+
+  await page.reload();
+  await expect(page.getByTestId("trajectory-role-detail")).toHaveAttribute("data-role-key", "product");
+  await expect(optional).toHaveAttribute("data-tone", "unselected");
 });
 
 test("R-PAR-03 bootcamp course detail and return", async ({ page }) => {
