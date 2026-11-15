@@ -62,7 +62,7 @@
     });
     document.getElementById("view-heading").textContent = headings[view];
     closeNav(false);
-    window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   }
 
   document.querySelectorAll("[data-view], [data-go]").forEach(function (item) {
