@@ -83,3 +83,12 @@
 - Current PR file scope: 90 changes, all inside Apple UI kit/** or dedicated claim. No product code, main or Railway deploy edits.
 - Remaining: run Python link audit and unit suites on a checkout; run Chromium/WebKit interaction, responsive/touch QA; open licensed editable Apple 27 Figma/Sketch source frames and measure; source screenshot diff; independent review.
 - status: REVIEW. No merge or production release.
+
+## Owner continuation: reconcile main and map current Impulse source
+
+- `f5530b71`: resolved **one actual Git tree conflict** in Apple UI kit/README.md against evolving main by retaining main's canonical README and moving PR-specific QA notes into README_REFERENCE_LIBRARY.md; GitHub transitioned from `dirty` to `unstable`/mergeable=true at that revision.
+- `59bf1e88`: added exact crosswalk of 21 existing frontend source files and 16 existing test paths from main SHA `e81c16f680260d6d5137b3426937930bbcfaa5d6`, with Git blob SHA-1 provenance and Apple reference category.
+- `6fc5b822`: added Python local snapshot/sha verification tool and seven synthetic unit test definitions (execution pending).
+- GitHub read-only validation on snapshot SHA: 21/21 source blob SHAs and 16/16 unit-test blob SHAs exactly match; 0 mismatches.
+- This is a **docs/QA only** continuation: no app code edits, no licensed Apple assets downloaded, no claim of source frame inspection, rendered browser QA or 1:1 parity.
+- Outstanding: independent reviewer, source frame access, Python unit test run on checkout, Chromium/WebKit checks, current-main rebasing review, pixel diff. Keep draft PR open; no release.

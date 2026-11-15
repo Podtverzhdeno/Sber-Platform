@@ -74,3 +74,11 @@ This supplemental guide preserves the PR #181 information that was moved out of 
 - [Source quality gate](SOURCE_QUALITY_GATE.md) explains the offline structural checks; per-frame Apple 27 Figma/Sketch measurements and independent pixel acceptance remain pending.
 
 **Canonical directory index:** [README.md](README.md) from current main. This supplemental page describes the isolated PR #181 source bundle without overriding the main library's 12- and 16-case reference collections.
+
+## Source crosswalk for actual Impulse components
+
+- [Current Impulse source map](IMPULSE_SOURCE_CROSSWALK.md) identifies **21 current production file targets and 16 existing tests** as checked in GitHub main snapshot `e81c16f6` (read-only verification; no frontend changes).
+- [Machine-readable Git blob provenance](IMPULSE_SOURCE_CROSSWALK.json) records exact repo-relative paths and Git blob SHA-1 hashes for each source/test file. These hashes detect changes to Impulse code, not Apple Figma/Sketch layers.
+- [Offline crosswalk verifier](IMPULSE_SOURCE_CROSSWALK_QA.md) checks path existence and warns about changed source SHAs. Synthetic unit tests included, not yet executed on a checkout.
+
+The crosswalk is a **handoff to a separate integration task**, not permission to modify App.tsx, shared themes, navigation, authorization or real user data from a source-library task.
