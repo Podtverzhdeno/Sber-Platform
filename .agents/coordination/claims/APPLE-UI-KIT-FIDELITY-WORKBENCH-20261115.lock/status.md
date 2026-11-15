@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-FIDELITY-WORKBENCH-20261115
 - session_id: gpt6-fidelity-workbench-20261115
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-15T17:40:00+03:00
 - heartbeat_at: 2026-11-15T17:40:00+03:00
 - base_ref: docs/apple-ui-kit-advanced-states-20261115
@@ -15,4 +15,8 @@
 - constraints: no vendor templates/images/fonts, no remote requests, no external scripts, no upload service, no reading user-private files beyond files selected within local browser
 - acceptance: source/target file upload, exact dimension checks, overlay slider, side-by-side, pixel diff heatmap, threshold, mismatch stats, JSON and PNG exports, responsive keyboard accessibility, browser smoke
 - verification: independent review required before merge; exact source image measurements and 1:1 claims require original licensed assets in a separate review
-- progress: claim created
+- progress: implemented isolated standalone six-file offline A/B pixel fidelity workbench in Apple UI kit/fidelity-workbench
+- pull_request: https://github.com/Podtverzhdeno/Sber-Platform/pull/189 (draft; targets docs/apple-ui-kit-advanced-states-20261115)
+- verification_result: GitHub scope comparison seven additive paths; JavaScript syntax OK, CSS brace balance 0, all JS DOM IDs present, JSON schema parsed; controlled fake-DOM pixel tests correctly yielded 25 percent for 1/4 changed pixels and blocked mismatch; heatmap selection persists on threshold change
+- verification_limit: no actual browser screenshot render/Playwright run, no independent design sign-off, no authorized Apple component pixel measurements
+- handoff: REVIEW to independent reviewer; no main merge or production deploy
