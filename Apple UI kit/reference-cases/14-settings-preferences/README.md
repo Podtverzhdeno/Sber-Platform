@@ -10,7 +10,7 @@
 
 - **Study content:** Selected section, switch, slider, account.
 - **Impulse rule:** Respect persisted theme and verified preferences.
-- **Potential integration touchpoint:** `frontend/src/app/theme-controls/` (study only; do not modify from this directory).
+- **Potential integration touchpoint:** `frontend/src/app/theme.ts` (study only; do not modify from this directory).
 - **UI states to collect from original kit:** default, hover/pressed where relevant, focus, selected, disabled, loading/error/empty when applicable, compact/expanded, light/dark, high contrast.
 - **Layout checkpoints:** desktop 1440×900 and 1422×803; tablet 1024×768; mobile 390×844 and 320px. Measure against the original frame at the same density before any *1:1* statement.
 - **Quality gate:** preserve keyboard focus, real handlers, RBAC, source-backed data, WCAG contrast, reduced motion/transparency, and responsive touch targets. Do not replace native behavior with screenshot-like inert HTML.
