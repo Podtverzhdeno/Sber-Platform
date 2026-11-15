@@ -129,7 +129,7 @@ describe("CalmSidebar", () => {
     const view = renderParticipant(0);
     const edge = screen.getByRole("button", { name: "Показать навигацию" });
     const aside = view.container.querySelector<HTMLElement>(".calm-sidebar");
-    const backdrop = view.container.querySelector<HTMLElement>(".calm-navigation__backdrop");
+    const backdrop = document.querySelector<HTMLElement>(".calm-navigation__backdrop");
     expect(edge).toHaveAttribute("aria-expanded", "false");
     expect(aside).not.toHaveClass("calm-sidebar--open");
     dispatchPointer(edge, "pointerover", "mouse");
