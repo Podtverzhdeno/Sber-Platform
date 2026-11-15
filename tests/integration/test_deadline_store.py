@@ -68,7 +68,7 @@ async def test_deadline_request_leaves_terms_until_approval() -> None:
                 "problem": "Проверить обсуждение срока.",
                 "deliverable": "Работающий срез.",
                 "acceptance_criteria": ["Запрос не меняет срок без одобрения"],
-                "deadline_at": "2026-11-01T18:00:00Z",
+                "deadline_at": "2027-11-01T18:00:00Z",
                 "data_constraints": "Без персональных данных.",
                 "ip_terms": "Права передаются после приёмки.",
                 "nominated_mentor_id": None,
@@ -166,7 +166,7 @@ async def test_deadline_request_leaves_terms_until_approval() -> None:
         proposed = await client.post(
             f"/api/v1/me/assignments/{assignment_id}/deadline-requests",
             json={
-                "proposed_deadline_at": "2026-11-08T18:00:00Z",
+                "proposed_deadline_at": "2027-11-08T18:00:00Z",
                 "reason": "Интеграция требует дополнительной недели.",
                 "impact": "Демо сдвигается.",
                 "base_terms_version": terms_version,
@@ -191,7 +191,7 @@ async def test_deadline_request_leaves_terms_until_approval() -> None:
             ).one()
             assert stored.status == "pending"
             assert [row.terms_version for row in after_terms] == before_terms_versions
-            assert after_terms[-1].deadline_at.strftime("%Y-%m-%d") == "2026-11-01"
+            assert after_terms[-1].deadline_at.strftime("%Y-%m-%d") == "2027-11-01"
 
         customer_login = await client.post(
             "/api/v1/auth/demo-login", json={"persona_key": "customer-roman"}
@@ -217,7 +217,7 @@ async def test_deadline_request_leaves_terms_until_approval() -> None:
                 *before_terms_versions,
                 before_version + 1,
             ]
-            assert terms_rows[-1].deadline_at.strftime("%Y-%m-%d") == "2026-11-08"
+            assert terms_rows[-1].deadline_at.strftime("%Y-%m-%d") == "2027-11-08"
             stored = (
                 await session.execute(
                     select(deadline_requests).where(deadline_requests.c.id == request_id)
@@ -233,4 +233,4 @@ async def test_deadline_request_leaves_terms_until_approval() -> None:
             )
         ).json()["terms"]
         assert final_terms["version"] == before_version + 1
-        assert final_terms["deadline_at"] == "2026-11-08T18:00:00Z"
+        assert final_terms["deadline_at"] == "2027-11-08T18:00:00Z"
