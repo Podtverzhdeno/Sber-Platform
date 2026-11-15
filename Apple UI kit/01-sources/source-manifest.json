@@ -3,7 +3,8 @@
     "project": "IMPULSE",
     "verified_date": "2026-11-15",
     "note": "Official links as navigation pointers; not redistributable asset downloads.",
-    "version": "Apple UI Kit 27"
+    "version": "Apple UI Kit 27",
+    "link_policy": "Apple official resource hub and HIG anchors are primary. Direct Figma/Sketch files require in-app access and their own license; they were not republished."
   },
   "sources": [
     {
@@ -60,6 +61,136 @@
       "id": "license",
       "kind": "legal",
       "url": "https://developer.apple.com/support/downloads/terms/apple-design-resources/Apple-Design-Resources-License-20230621-English.pdf"
+    },
+    {
+      "id": "watchos26-figma",
+      "kind": "official-figma",
+      "url": "https://www.figma.com/community/file/1540060090060216489/watchos-26"
+    },
+    {
+      "id": "visionos26-figma",
+      "kind": "official-figma",
+      "url": "https://www.figma.com/community/file/1540071341298017505/visionos-26"
+    },
+    {
+      "id": "messages-figma",
+      "kind": "official-figma",
+      "url": "https://www.figma.com/community/file/1367916269438172112/imessage-apps-and-stickers"
+    },
+    {
+      "id": "messages-sketch",
+      "kind": "official-sketch",
+      "url": "https://sketch.com/s/d6cd3d23-7aec-43d5-acb9-52f720ff48b7"
+    },
+    {
+      "id": "layout-hig",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/layout"
+    },
+    {
+      "id": "color-hig",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/color"
+    },
+    {
+      "id": "typography-hig",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/typography"
+    },
+    {
+      "id": "dark-mode-hig",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/dark-mode"
+    },
+    {
+      "id": "motion-hig",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/motion"
+    },
+    {
+      "id": "accessibility-hig",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/accessibility"
+    },
+    {
+      "id": "navigation-sidebars",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sidebars"
+    },
+    {
+      "id": "navigation-toolbars",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/toolbars"
+    },
+    {
+      "id": "navigation-tab-bars",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/tab-bars"
+    },
+    {
+      "id": "buttons",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/buttons"
+    },
+    {
+      "id": "menus",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/menus"
+    },
+    {
+      "id": "search-fields",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/search-fields"
+    },
+    {
+      "id": "text-fields",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/text-fields"
+    },
+    {
+      "id": "segmented-controls",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/segmented-controls"
+    },
+    {
+      "id": "alerts",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/alerts"
+    },
+    {
+      "id": "sheets",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/sheets"
+    },
+    {
+      "id": "popovers",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/popovers"
+    },
+    {
+      "id": "lists-and-tables",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables"
+    },
+    {
+      "id": "progress-indicators",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/design/human-interface-guidelines/progress-indicators"
+    },
+    {
+      "id": "liquid-glass-adoption",
+      "kind": "documentation",
+      "url": "https://developer.apple.com/documentation/technologyoverviews/adopting-liquid-glass"
+    },
+    {
+      "id": "design-2026-updates",
+      "kind": "official-news",
+      "url": "https://developer.apple.com/design/whats-new/"
+    },
+    {
+      "id": "design-kits-27-announce",
+      "kind": "official-news",
+      "url": "https://developer.apple.com/news/?id=e2lxw9l1"
     }
   ]
 }
