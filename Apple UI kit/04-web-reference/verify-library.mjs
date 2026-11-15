@@ -153,7 +153,7 @@ if (portalMatch) {
   let totalImages = 0;
   for (const card of cards) {
     const pathAllowed = value => typeof value === "string"
-      && /^(?:06-cases|reference-cases|advanced-cases)\/[a-z0-9/-]+\.(?:svg|md)$/.test(value)
+      && /^(?:06-cases|reference-cases|advanced-cases)\/[A-Za-z0-9_/-]+\.(?:svg|md)$/.test(value)
       && existsSync(join(libraryRoot, value));
     check(pathAllowed(card.img), "Missing/invalid portal SVG: " + card.img);
     check(pathAllowed(card.doc), "Missing/invalid portal docs: " + card.doc);
