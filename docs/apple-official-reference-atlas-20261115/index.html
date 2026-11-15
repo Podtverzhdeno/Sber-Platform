@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark"><title>Impulse · Apple Source Atlas</title>
+<meta name="description" content="46 официально привязанных Apple UI reference targets, состояния, HIG, Figma/Sketch links and measurement requirements.">
+<link rel="stylesheet" href="styles.css"><script src="data.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+<a href="#cases" class="skip">Перейти к каталогу</a>
+<header class="header"><a href="README.md" class="brand"><span class="brand-icon" aria-hidden="true">✳</span><span>Impulse <small>SOURCE REFERENCE LIBRARY</small></span></a>
+<nav aria-label="Основные ссылки"><a href="https://developer.apple.com/design/resources/" target="_blank" rel="noopener noreferrer">Apple UI Kits ↗</a><a href="CAPTURE_PROTOCOL.md">Методика измерений</a><a href="../" aria-label="Другие материалы">Все материалы</a></nav><span class="offline"><i aria-hidden="true"></i> Offline explorer</span></header>
+<main>
+<section class="hero">
+  <p class="eyebrow">APPLE DESIGN · SOURCE FIRST · IMPULSE</p>
+  <h1>Не просто похожий.<br><span>Измеримый интерфейс.</span></h1>
+  <p class="hero-body">Каталог официальных первоисточников Apple: 46 компонентов, восемь семейств, важные состояния и поля для точного измерения. Изображения и шрифты Apple не копируются — ссылки ведут к оригинальным UI Kits и Human Interface Guidelines.</p>
+  <div class="hero-actions"><a href="#cases" class="btn primary">Найти компонент <span aria-hidden="true">↗</span></a><a href="https://developer.apple.com/design/resources/" class="btn ghost" target="_blank" rel="noopener noreferrer">Открыть Apple Design Resources</a></div>
+  <div class="numbers" aria-label="Статистика набора"><div><strong>46</strong><span>референсных целей</span></div><div><strong>08</strong><span>категорий интерфейса</span></div><div><strong>27</strong><span>актуальная версия UI Kit</span></div></div>
+</section>
+
+<section class="kits panel" aria-labelledby="kits-heading">
+  <div class="section-head"><div><p class="eyebrow">01 / OFFICIAL ENTRY POINTS</p><h2 id="kits-heading">Оригинальные Apple UI Kits</h2></div><span class="pill">Источники не зеркалируются</span></div>
+  <div id="kits" class="kits-grid" aria-label="Официальные наборы Apple"></div>
+  <p class="source-note">Ссылки получены с официальной страницы Apple Design Resources. Слои Figma/Sketch не проверялись и не измерялись в этой среде; для них нужен доступ к соответствующему редактору. Любой экспорт используйте в рамках лицензии Apple.</p>
+</section>
+
+<section id="cases" class="panel cases" aria-labelledby="cases-heading">
+  <div class="section-head"><div><p class="eyebrow">02 / COMPONENT REFERENCE SEARCH</p><h2 id="cases-heading">Выберите сценарий</h2></div><strong id="result-count" class="count" aria-live="polite">46 компонентов</strong></div>
+  <div class="filters">
+    <label class="search-field"><span aria-hidden="true">⌕</span><span class="sr-only">Поиск по названию, состояниям и файлам Impulse</span><input id="search" type="search" placeholder="Поиск: sidebar, messages, focus, ошибка…" autocomplete="off"></label>
+    <label class="filter-label"><span>Группа</span><select id="category"><option value="">Все категории</option></select></label>
+    <fieldset class="priority-filter"><legend>Приоритет</legend><div class="segments" role="group"><button type="button" data-priority="" aria-pressed="true">Все</button><button type="button" data-priority="P0" aria-pressed="false">P0</button><button type="button" data-priority="P1" aria-pressed="false">P1</button><button type="button" data-priority="P2" aria-pressed="false">P2</button></div></fieldset>
+  </div>
+  <div id="results" class="case-grid" aria-live="off"></div>
+  <p id="empty" class="empty" hidden>По этим условиям совпадений нет. Сбросьте фильтры или проверьте другой компонент.</p>
+</section>
+
+<section class="protocol panel" aria-labelledby="protocol-title"><p class="eyebrow">03 / QUALITY GATE</p><h2 id="protocol-title">Четыре условия точности</h2>
+<div class="protocol-grid">
+ <article><b>01 · SOURCE</b><h3>Найти точный фрейм</h3><p>Открыть UI Kit 27 в Figma/Sketch. Зафиксировать реальную платформу, версию, компонент, variant/state и node ID.</p></article>
+ <article><b>02 · MEASURE</b><h3>Измерить геометрию</h3><p>Frame, bounding boxes, padding, baseline, радиусы, материалы, тени, цвета и осознанно выбранные состояния.</p></article>
+ <article><b>03 · IMPLEMENT</b><h3>Сохранить контракт</h3><p>Переносить в семантические React-компоненты, не подменяя API, маршруты, RBAC, доступность и собственный дизайн Impulse.</p></article>
+ <article><b>04 · VERIFY</b><h3>Сравнить и принять</h3><p>Скриншот одинакового DPR/viewport, diff и независимое ревью на точном SHA. Для native Liquid Glass отмечать ограничения браузера.</p></article>
+</div>
+<a href="CAPTURE_PROTOCOL.md" class="source-protocol">Полный протокол измерений и шаблон доказательств →</a></section>
+
+<section class="disclaimer">
+  <h2>Статус материалов</h2>
+  <p>Референсная библиотека Impulse, не выпускается Apple. Никаких экспортированных Apple UI Kits, официальных скриншотов, SF Symbols и шрифтов здесь нет. Оригинальный Apple Liquid Glass отличается от CSS backdrop-filter. Пока измерения исходных слоёв отсутствуют, точное соответствие 1:1 не заявляется.</p>
+  <p><a href="https://developer.apple.com/design/human-interface-guidelines/materials" target="_blank" rel="noopener noreferrer">Apple HIG Materials ↗</a> · <a href="source-capture-template.json">Шаблон JSON измерения ↗</a> · <a href="catalog.json">Машиночитаемый каталог ↗</a></p>
+</section>
+</main><footer>IMPULSE / APPLE SOURCE ATLAS <span>46 TARGETS · VERIFIED LINKS / UNMEASURED FRAMES</span></footer></body></html>
