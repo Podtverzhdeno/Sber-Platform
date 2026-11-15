@@ -46,6 +46,15 @@
 .page-shell--owner-pixel-home .workspace-content [data-testid="pixel-live-shell"] {
   isolation: isolate;
 }
+/* Ref #15: actual 4-point star silhouette, not a font-dependent Unicode glyph. */
+.page-shell--owner-pixel-home .topbar .owner-topbar-star {
+  display:block;
+  flex:none;
+  background:url("/impulse-approved-star.svg") center/contain no-repeat;
+  color:transparent !important;
+  text-shadow:none;
+  filter:drop-shadow(0 0 7px rgba(41,146,255,.3));
+}
 .page-shell--owner-pixel-home .workspace-content .impulse-pixel__glass {
   border: 1px solid var(--approved-edge);
   background:
