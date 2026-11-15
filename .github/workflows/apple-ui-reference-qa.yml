@@ -32,6 +32,8 @@ jobs:
         run: python3 "Apple UI kit/04-web-reference/validate-svg-library.py"
       - name: Validate 10 advanced light/dark SVG pairs
         run: python3 "Apple UI kit/advanced-cases/validate-advanced.py"
+      - name: Validate isolated 9-family component and measurement pack
+        run: node "Apple UI kit/08-component-packs/verify.mjs"
       - name: Explain scope of checks
         run: |
           echo "Structural reference QA only."
