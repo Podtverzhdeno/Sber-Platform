@@ -12,7 +12,7 @@
 
 ## IMPULSE integration
 
-`frontend/src/app/theme.ts` uses `data-theme` and `impulse-theme` with a `system` fallback. Preserve current storage and live system query. `frontend/src/features/participant` contains participant settings; inspect all role-specific settings before reusing components.
+`frontend/src/app/theme.ts` uses `data-theme` and `impulse-theme` with a `system` fallback. Preserve current storage and live system query. `frontend/src/features/participant.tsx` contains participant settings; inspect all role-specific settings before reusing components.
 
 ## Acceptance
 
