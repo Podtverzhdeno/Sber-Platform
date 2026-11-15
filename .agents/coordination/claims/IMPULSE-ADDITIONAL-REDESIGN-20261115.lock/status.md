@@ -1,0 +1,18 @@
+# Claim IMPULSE-ADDITIONAL-REDESIGN-20261115
+- task_id: IMPULSE-ADDITIONAL-REDESIGN-20261115
+- session_id: gpt6-additional-owner-20261115-2302
+- status: IN_PROGRESS
+- started_at: 2026-11-15T23:02:00+03:00
+- heartbeat_at: 2026-11-15T23:02:00+03:00
+- owner_instruction: sequential Apple-minimal section redesign, main push and Railway auto deploy
+- base_revision: 1f6b7c9f98e664a355d69f9f8c2a528cd31d49b4
+- depends_on: participant-five-section-content-first-20261115
+- write_scope:
+  - frontend/src/features/participant-additional-hub/**
+  - frontend/src/features/participant.tsx (participant settings and buddy wrappers only; no customer UI changes)
+  - .agents/coordination/claims/IMPULSE-ADDITIONAL-REDESIGN-20261115.lock/status.md
+- excluded: frontend/src/App.tsx; backend/API; shared navigation, role auth, contracts, customer settings, Railway config
+- plan: permission-aware local Additional tabs (AI-Buddy and Settings), calm compact settings layout, preserve profile, consents, alerts, model disabled states
+- verification: Vitest, TS, ESLint, production build, E2E authorized routes and mobile 320/390/1440; exact main CI, Railway verify
+- progress: coordination claim created
+- blockers: browser screenshot reference review
