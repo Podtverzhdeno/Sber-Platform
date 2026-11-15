@@ -1,0 +1,33 @@
+{
+  "category_id": "06-lists-tables-cards",
+  "title": "Lists, Tables, Collections and Cards",
+  "platform": "macOS 27 + iOS/iPadOS 27",
+  "reference_page": "https://developer.apple.com/design/human-interface-guidelines/lists-and-tables",
+  "official_kit_index": "https://developer.apple.com/design/resources/",
+  "reference_type": "apple_official_source_link",
+  "kit_component_layers_inspected": false,
+  "source_frame_ids": [],
+  "captures_committed": false,
+  "web_mockup_is_original": true,
+  "scenario_patterns": [
+    "grouped list, section divider, selected row, outline, table, sortable columns, compact card"
+  ],
+  "impulse_target": [
+    "Task catalog, mentor queue, HR candidates, participant course list"
+  ],
+  "study_states": [
+    "selected",
+    "empty",
+    "hover",
+    "focus",
+    "dense",
+    "sorted",
+    "long labels",
+    "horizontal overflow"
+  ],
+  "anti_patterns": [
+    "Glass on data rows",
+    "losing column headers or data provenance"
+  ],
+  "status": "SOURCE_LINKED_MEASUREMENT_PENDING"
+}
