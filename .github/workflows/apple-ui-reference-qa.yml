@@ -46,6 +46,10 @@ jobs:
         run: python3 -m unittest discover -s "Apple UI kit/scripts" -p "test_*.py" -v
       - name: Validate React reference files and boundaries
         run: node "Apple UI kit/react-reference/verify.mjs"
+      - name: Check 46 Apple HIG capture cases, manifest and real IMPULSE file candidates
+        run: python3 "Apple UI kit/14-precision-capture-46/verify.py"
+      - name: Test offline screenshot comparator math and safety limits
+        run: node "Apple UI kit/14-precision-capture-46/test_pixel_compare.cjs"
       - name: Explain scope of checks
         run: |
           echo "Structural reference QA only."
