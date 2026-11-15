@@ -88,7 +88,9 @@ def main() -> None:
         page.locator("button[data-mode='overlay']").click()
         assert page.locator("button[data-mode='overlay']").get_attribute("aria-pressed") == "true"
         page.locator("button[data-mode='split']").click()
-        page.locator("#split").fill("30")
+        page.locator("#split").evaluate(
+            "(element) => { element.value = '30'; element.dispatchEvent(new Event('input', {bubbles:true})); }"
+        )
         assert page.locator("#split-value").inner_text() == "30%"
 
         with page.expect_download() as d:
