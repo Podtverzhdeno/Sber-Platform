@@ -560,7 +560,7 @@ export function MessagingWorkspace({
       data-visual-reference="R-MSG-01"
       data-message-state={selected === undefined ? "empty" : selected.kind === "community" ? "community" : "direct"}
     >
-      {role === "participant" && <CommunityNavigation activeSection="Сообщения" />}
+      {role === "participant" && <CommunityNavigation activeSection="Сообщения" compact />}
       <header className="messenger-heading">
         <div>
           <h1 id="workspace-title">Сообщения</h1>

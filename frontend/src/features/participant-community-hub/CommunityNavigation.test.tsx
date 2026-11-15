@@ -49,6 +49,24 @@ describe("Community group minimal navigation", () => {
     expect(screen.queryByRole("link", { name: "Сообщения" })).toBeNull();
   });
 
+  it("uses compact tabs inside Messenger without repeating a page hero", () => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+    });
+    client.setQueryData(["me"], { navigation: authorized, active_role: "participant" });
+    const view = render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <CommunityNavigation activeSection="Сообщения" compact />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    expect(view.container.querySelector(".community-navigation--compact")).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Сообщество" })).toBeNull();
+    expect(screen.getByRole("link", { name: "События" })).toHaveAttribute("href", "/workspace/6");
+    expect(screen.getByRole("link", { name: "Сообщения" })).toHaveAttribute("aria-current", "page");
+  });
+
   it("does not show participant links to another role", () => {
     renderNav(authorized, "Сообщения", "customer");
     expect(screen.queryByRole("navigation", { name: "Подразделы сообщества" })).toBeNull();

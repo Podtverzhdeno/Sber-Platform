@@ -116,3 +116,18 @@
   height: auto;
   z-index: 1;
 }
+
+/* Messages are already titled within their own dialog list; show only local tabs. */
+.community-navigation--compact {
+  min-height: 44px;
+  padding: 0;
+  margin: 0;
+  border-bottom: 0;
+  justify-content: flex-end;
+  gap: 0;
+}
+.community-navigation--compact .community-navigation__links { margin-left: auto; }
+@media (max-width: 650px) {
+  .community-navigation--compact { padding: 0; margin: 0; }
+  .community-navigation--compact .community-navigation__links { width: 100%; }
+}

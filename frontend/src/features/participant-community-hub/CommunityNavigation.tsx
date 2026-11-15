@@ -13,7 +13,7 @@ const descriptions: Record<CommunitySection, string> = {
 };
 
 /** Navigation is strictly filtered by /me, not by a hard-coded route index. */
-export function CommunityNavigation({ activeSection }: { activeSection: CommunitySection }) {
+export function CommunityNavigation({ activeSection, compact = false }: { activeSection: CommunitySection; compact?: boolean }) {
   const actor = useQuery({
     queryKey: ["me"],
     queryFn: () => apiRequest<AuthorizedNavigation>("/api/v1/me"),
@@ -24,12 +24,12 @@ export function CommunityNavigation({ activeSection }: { activeSection: Communit
     : [];
 
   return (
-    <section className="community-navigation" data-testid="community-navigation" aria-label="Сообщество">
-      <div className="community-navigation__title">
+    <section className={`community-navigation${compact ? " community-navigation--compact" : ""}`} data-testid="community-navigation" aria-label="Сообщество">
+      {!compact && <div className="community-navigation__title">
         <span>Люди и возможности</span>
         <h2>Сообщество</h2>
         <p>{descriptions[activeSection]}</p>
-      </div>
+      </div>}
       {destinations.length > 0 && (
         <nav aria-label="Подразделы сообщества" className="community-navigation__links">
           {destinations.map((destination) => (
