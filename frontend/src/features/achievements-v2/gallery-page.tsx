@@ -15,6 +15,7 @@ import {
   type AchievementRecord, type AchievementStatus, type AchievementsPortfolio,
 } from "./model";
 import "./gallery.scss";
+import { ResultsNavigation } from "../participant-results-hub/ResultsNavigation";
 
 type Tab = "all" | AchievementCategory;
 type StatusFilter = "all" | AchievementStatus;
@@ -162,7 +163,8 @@ export function ParticipantAchievementsGallery({ navigation = [] }: {navigation?
   // Selection is taken from the route; escape closes the active overlay.
   },[selected,addDialog,params,setParams]);
 
-  return <div className="ach-gallery" data-testid="achievements-v2" data-reference="R-PAR-10">
+  return <div className="ach-gallery ach-gallery--results" data-testid="achievements-v2" data-reference="R-PAR-10">
+    <ResultsNavigation activeSection="Достижения" />
     <section className="ach-gallery-hero" aria-labelledby="workspace-title">
       <div className="ach-gallery-copy">
         <span className="ach-gallery-eyebrow">ДОСТИЖЕНИЯ</span>

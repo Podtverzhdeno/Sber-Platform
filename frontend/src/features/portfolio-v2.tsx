@@ -14,6 +14,7 @@ import { countCurrentDocuments, credentialStatusLabel, isCurrentCredential, isRe
 import { learningSummaryQueryKey, loadLearningSummary } from "./learning-progress";
 import { confirmedPassportSkills, numericPassportLevel, passportEvidenceMax } from "./portfolio-skill-model";
 import "./portfolio-v2.scss";
+import { ResultsNavigation } from "./participant-results-hub/ResultsNavigation";
 
 type Contribution = {
   contribution_id: string; project_title: string; personal_summary: string;
@@ -213,7 +214,8 @@ export function ParticipantPortfolioV2({ navigation = [] }: { navigation?: strin
       setNotice("Публичная ссылка скопирована");
     } catch { setNotice("Не удалось скопировать ссылку. Проверьте разрешения браузера."); }
   };
-  return <main className="p2-root" data-testid="portfolio-v2" data-current-tab={tab}>
+  return <main className="p2-root p2-root--results" data-testid="portfolio-v2" data-current-tab={tab}>
+    <ResultsNavigation activeSection="Портфолио" />
     {profileQuery.isError && <div className="p2-warning" role="alert">Не удалось обновить портфолио — отображается последний полученный серверный снимок. <button onClick={() => void profileQuery.refetch()} type="button">Повторить</button></div>}
     {passportQuery.isError && <div className="p2-warning" role="status">Skill Passport временно недоступен. <button onClick={() => void passportQuery.refetch()} type="button">Повторить</button></div>}
     {notice && <div className="p2-notice" role="status">{notice}</div>}
