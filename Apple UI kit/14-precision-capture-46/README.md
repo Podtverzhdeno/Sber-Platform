@@ -9,9 +9,21 @@ This follow-up to [Apple UI kit/](../README.md) covers **all 46 component target
 - `measurement-ledger.csv`: 46 empty measurement rows. **Do not fabricate numbers or copy native Apple source assets.**
 - `gallery.html`: filterable offline HTML directory of the capture registry.
 - `interactive-state-lab.html`: accessible, dependency-free visual study of all 46 case names using **14 distinct native-web pattern examples**; light/dark mode, 320/390px simulated containers, keyboard, local form and menu states. It intentionally does **not** reproduce 46 Apple source frames, and its demonstration data are never connected to Impulse API.
-- `verify.py`: Python 3 standard-library consistency check.
+- `verify.py`: Python 3 standard-library consistency check (case list, state lab and source metadata).
+- `qa_browser.py`: optional Playwright Chromium smoke that traverses all 46 cases, exercises form/chat/menu/dialog/segmented states and takes **6 screenshot captures** (1440×900, 390×844, 320×720 × dark/light). Local output is intentionally ignored by Git.
 
 Run on a checkout: `python "Apple UI kit/14-precision-capture-46/verify.py"`.
+
+Optional browser QA, on a checked-out repository with Python Playwright and Chromium installed:
+
+```sh
+python -m pip install playwright
+python -m playwright install chromium
+python "Apple UI kit/14-precision-capture-46/verify.py"
+python "Apple UI kit/14-precision-capture-46/qa_browser.py"
+```
+
+Generated screenshots and report appear only in `14-precision-capture-46/qa-output/` (gitignored). Browser tests exercise **the independently authored web sample**, not Apple source frames. No real Impulse data is sent or changed.
 
 For manual visual review, open `interactive-state-lab.html` in Chromium and WebKit, examine keyboard/hover/touch at 320, 390 and 1440px, check the `prefers-reduced-motion`, reduced-transparency, forced-colors and high-contrast fallbacks, and verify the actual Figma frame before claiming parity. **This session has not executed an actual browser screenshot test against the committed HTML.**
 
