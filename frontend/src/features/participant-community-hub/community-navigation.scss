@@ -94,7 +94,25 @@
   .community-navigation__title > h2 { font-size: 26px; }
 }
 
-/* Messenger's original two-row grid needs a third row for the local Community navigation. */
-.messenger-page.sberchat-shell.messenger-page--community {
-  grid-template-rows: auto auto minmax(0, 1fr);
+/* The shared reference messenger absolutely positions its full-height shell at inset:0.
+   Participant Community introduces a real heading and tabs; make the shell the
+   remaining flex child so context does not cover and intercept the tab links. */
+.messenger-page.sberchat-shell.sberchat-reference.messenger-page--community {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.messenger-page.sberchat-shell.sberchat-reference.messenger-page--community > .community-navigation,
+.messenger-page.sberchat-shell.sberchat-reference.messenger-page--community > .messenger-heading {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+}
+.messenger-page.sberchat-shell.sberchat-reference.messenger-page--community > .messenger-shell {
+  position: relative;
+  inset: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  z-index: 1;
 }
