@@ -82,3 +82,7 @@ This supplemental guide preserves the PR #181 information that was moved out of 
 - [Offline crosswalk verifier](IMPULSE_SOURCE_CROSSWALK_QA.md) checks path existence and warns about changed source SHAs. Synthetic unit tests included, not yet executed on a checkout.
 
 The crosswalk is a **handoff to a separate integration task**, not permission to modify App.tsx, shared themes, navigation, authorization or real user data from a source-library task.
+
+## Integration with newer main component packs
+
+Canonical [README.md](README.md) is synchronized with main source revision `ccc8aa014952bd50cbfcbaeacaee9e24194c9d65`, which now includes the independently maintained `08-component-packs/` measurements and browser comparison instructions. Those materials coexist with this PR's 13 reference packets, 67-component capture catalog, independent web laboratory, real-Impulse crosswalk and QA tooling. The canonical README should remain owned by the main-line library; this supplemental guide documents the PR-only additions without redefining the source-of-truth or claiming Apple-native 1:1 parity.

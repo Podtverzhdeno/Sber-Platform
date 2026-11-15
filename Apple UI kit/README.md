@@ -8,6 +8,14 @@
 
 Единая библиотека источников для точного воспроизведения *языка интерфейсов* Apple (iOS/iPadOS/macOS, Liquid Glass) в React/TypeScript-продукте IMPULSE. Источником истины служат официальные опубликованные Apple UI kits и Human Interface Guidelines. **Этот репозиторий не содержит экспортированные оригинальные Apple-компоненты, SF Symbols, изображения интерфейсов или файлы шрифтов:** лицензии Apple ограничивают их использование и распространение. Для визуальной сверки открывайте оригиналы по ссылкам из каталога.
 
+## Единая визуальная галерея
+
+**[Открыть галерею 38 сценариев / 48 SVG](index.html)** — фильтры по категориям, поиск, просмотр исходных самостоятельных SVG, переключение светлой и тёмной версии для 10 расширенных случаев. Галерея не содержит экспортированных Apple-ассетов и не подтверждает пиксельную идентичность.
+
+Коллекции: [12 базовых](06-cases/VISUAL_GALLERY.md) · [16 сценариев](reference-cases/README.md) · [10 расширенных (20 SVG)](advanced-cases/README.md).
+
+**Инструменты переноса:** [9 компонентных пакетов](08-component-packs/README.md) · [интерактивная галерея контролов](08-component-packs/gallery.html) · [локальный screenshot-comparator](08-component-packs/compare.html) · [таблица для реальных измерений](08-component-packs/measurement-ledger.csv).
+
 ## Быстрый старт
 
 1. Откройте **01-sources/official-links.md** и исходные Apple Figma/Sketch UI kits (iOS/iPadOS 27, macOS 27).
@@ -40,6 +48,14 @@
 | reference-cases/README.md | Новая коллекция из 16 самостоятельных SVG 1200×760, источник и сценарий в каждой папке |
 | reference-cases/index.html | Автономная HTML-галерея дополнительных 16 кейсов |
 | reference-cases/manifest.json | Машиночитаемый реестр 16 кейсов и соответствий файлам IMPULSE |
+| advanced-cases/README.md | 10 расширенных сценариев, каждый в светлой и тёмной теме |
+| advanced-cases/index.html | Переключатель двух SVG-тем (20 визуализаций) |
+| advanced-cases/validate-advanced.py | XML-валидатор для 20 дополнительных SVG |
+| index.html | Общая галерея всех 48 референсов с фильтрацией и поиском |
+| 08-component-packs/README.md | 9 групп интерфейсных референсов, 32 ссылки на Apple, исходные демо и QA |
+| 08-component-packs/compare.html | Инструмент локального сравнения разрешённых изображений без отправки файлов в сеть |
+| 08-component-packs/measurement-ledger.csv | Таблица замеров, пока с отметками TO_MEASURE |
+| 08-component-packs/verify.mjs | Локальный валидатор компонентного набора |
 | 04-web-reference/casebook.html | Расширенная интерактивная галерея светлой/тёмной темы |
 | 04-web-reference/verify-library.mjs | Проверка структуры, линковки, реальных путей IMPULSE и синтаксиса JavaScript без сети |
 | 04-web-reference/validate-svg-library.py | Строгая проверка XML, размеров, accessibility и источников 12 SVG |
@@ -62,6 +78,16 @@
 **Главный источник:** https://developer.apple.com/design/resources/  
 **HIG:** https://developer.apple.com/design/human-interface-guidelines/  
 **Лицензия:** https://developer.apple.com/support/downloads/terms/apple-design-resources/Apple-Design-Resources-License-20230621-English.pdf
+
+## Процесс переноса в IMPULSE
+
+1. Выбрать компонент или сценарий в [единой галерее](index.html), ознакомиться с его описанием.
+2. Перейти к [официальным исходникам Apple](01-sources/official-links.md) и открыть нужную платформу и versioned frame в Figma или Sketch, согласно лицензии.
+3. Зафиксировать действительные размеры в [журнале измерений](08-component-packs/measurement-ledger.csv) вместо использования предполагаемых CSS-токенов.
+4. Самостоятельно реализовать компонент в React/TypeScript, сохраняя API, маршруты, темы и RBAC Impulse.
+5. Сравнить **разрешённые** изображения локально в [компараторе](08-component-packs/compare.html) и пройти [контрольный список QA](03-impulse/visual-qa-checklist.md).
+
+**Точность нативного Liquid Glass 1:1 в браузере не заявляется:** у CSS нет всех возможностей системного композитора Apple. Официальный Figma UI kit не переиздаётся в этой папке.
 
 ## Вторая коллекция: 16 новых SVG-сценариев
 
