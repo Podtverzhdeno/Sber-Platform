@@ -1,0 +1,22 @@
+# Claim RAILWAY-PIXEL-PUBLIC-PREVIEW-20261115
+- task_id: RAILWAY-PIXEL-PUBLIC-PREVIEW-20261115
+- session_id: gpt6-impulse-pixel-preview-20261115
+- status: IN_PROGRESS
+- started_at: 2026-11-15
+- heartbeat_at: 2026-11-15
+- base_revision: 013859d30630a68d380d54c9e49cdb75a4ba1894
+- owner_instruction: "продолжай работу, пока не вижу выгрузки в railway"
+- context: production already SUCCESS on 013859d3 but PR175/176 component is not mounted; make a clearly labeled, inspectable visual preview via safe separate public asset route while app integration files are actively reserved
+- write_scope:
+  - frontend/public/design/impulse-2026-preview.html
+  - frontend/public/design/impulse-2026-preview.css
+  - frontend/public/design/impulse-2026-preview.js
+  - frontend/e2e/pixel-railway-preview.spec.ts
+  - openspec/changes/railway-pixel-public-preview-20261115/**
+  - .agents/coordination/claims/RAILWAY-PIXEL-PUBLIC-PREVIEW-20261115.lock/status.md
+- excluded: frontend/src/App.tsx; frontend/src/main.tsx; frontend/src/features/participant-home-v2/**; frontend/src/features/calm-navigation/**; current theme controls; all backend and migrations
+- source: user-approved 1422x803 reference and existing optimized original /impulse-wave-reference.webp in main
+- functional_contract: standalone prototype must say "Демо-макет" plainly and never pretend to use real account data; its CTA returns to actual authorized app rather than accepting fake mutations.
+- acceptance: strict OpenSpec; public static asset presence, theme switching, mobile layout, CSP-safe external JS; Railway rebuilt exact new SHA and direct URL returns 200
+- deployment_permission: explicit owner request to see deployed changes on Railway on 2026-11-15
+- progress: isolated preview scope claimed; existing app and production data untouched.
