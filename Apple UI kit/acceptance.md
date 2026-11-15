@@ -2,6 +2,12 @@
 
 **Status:** checklist, **not evidence of completed screenshot parity**.
 
+## Available tooling
+- [Standalone reference gallery](./gallery.html) — demonstration, not official native Apple source
+- [Reference-vs-Impulse screenshot comparator](./compare.html) — local image overlay, split, heatmap, JSON report
+- [Measurement ledger](./measurement-ledger.csv) — exact-source values intentionally unfilled
+- [Provenance manifest](./reference-manifest.json) — direct URLs, not redistributed Apple binaries
+
 ## Visual fidelity
 - [ ] Target platform / Apple UI Kit version / exact frame/layer ID recorded.
 - [ ] Reference licensing and provenance recorded.
