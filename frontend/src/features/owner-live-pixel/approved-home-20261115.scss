@@ -201,10 +201,21 @@
   transform:none;
   filter:drop-shadow(0 13px 16px rgba(23,91,222,.31));
 }
+/* Keep viewport geometry stable if the browser reserves 15px for a
+   vertical scrollbar: percentage widths would otherwise shrink the toolbar. */
+@media(min-width:821px) and (max-width:1579px) {
+  .page-shell.page-shell--owner-pixel-home .topbar {
+    width:min(calc(100vw - 112px),1580px) !important;
+    left:calc(50% + 7.5px) !important;
+  }
+  .page-shell--owner-pixel-home .workspace-content .impulse-pixel__content {
+    left:13.5px;
+  }
+}
 @media(min-width:1580px) {
   .page-shell.page-shell--owner-pixel-home .topbar {
-    width:min(calc(100% - 142px),1530px) !important;
-    left:calc(50% - 12px) !important;
+    width:min(calc(100vw - 142px),1530px) !important;
+    left:calc(50% - 4px) !important;
     height:73px;
     min-height:73px;
     padding:0 29px !important;
@@ -245,7 +256,7 @@
   }
   .page-shell--owner-pixel-home .workspace-content .impulse-pixel__content {
     max-width:1336px;
-    left:-8px;
+    left:0;
     width:calc(100% - 80px);
     padding:30px 0 48px;
   }
@@ -324,9 +335,7 @@
   .page-shell--owner-pixel-home .topbar .global-search {left:260px;width:670px;max-width:670px;}
   .page-shell--owner-pixel-home .topbar .header-actions {gap:12px;}
 }
-@media(min-width:1580px) and (max-width:1750px) {
-  .page-shell--owner-pixel-home .workspace-content .impulse-pixel__content {left:-8px;}
-}
+
 @media(max-width:1579px) {
   .page-shell--owner-pixel-home .workspace-content .impulse-pixel__stack {
     width:205px;height:183px;right:3%;top:33px;
