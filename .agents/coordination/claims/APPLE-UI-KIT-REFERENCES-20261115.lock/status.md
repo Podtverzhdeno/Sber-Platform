@@ -2,9 +2,9 @@
 
 - task_id: APPLE-UI-KIT-REFERENCES-20261115
 - session_id: gpt6-owner-apple-ui-kit-references-20261115
-- status: REVIEW
+- status: IN_PROGRESS
 - started_at: 2026-11-15T17:01:00+03:00
-- heartbeat_at: 2026-11-15T17:01:00+03:00
+- heartbeat_at: 2026-11-15T17:15:00+03:00
 - base_revision: 0ab91bd29d21fb6ff7f4203824bfe113a251d012
 - depends_on: []
 - source: owner-directed standalone repository reference task
@@ -19,4 +19,5 @@
   - Reference URL inspection, license/source distinctions, reference manifest consistency
   - No application build required: source-only reference archive
 - progress: added official source registry, provenance/license guidance, Liquid Glass layer contract, 46-item atlas, 20-entry coverage CSV, machine-readable manifest/tokens, role mapping, pixel QA, agent handoff, standalone interactive HTML preview. Checked committed paths and prototype file retrieval; no production application code modified.
+- owner_resume_20261115: Owner asked to continue this same dedicated source-library task; resume within its existing exclusive claim and write scope, with no other agent-owned files touched.
 - blockers: official editable Figma/Sketch 27 kit layers cannot be inspected here; true 1:1 measured reproduction, screenshot diff and browser E2E remain unverified. Standalone preview has not been executed in a browser. No independent reviewer approval yet. Apple assets are links only, not redistributed.
