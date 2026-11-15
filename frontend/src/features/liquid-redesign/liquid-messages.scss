@@ -1,0 +1,190 @@
+/*
+ * Messages: live Impulse transport and permissions stay untouched.
+ * Layout references: user-supplied Apple Messages Sketch chat list 79px,
+ * collapsed composer 70px / focused 60px; web form stays native.
+ * Colors are product-adapted light/dark tokens, not an iOS binary asset copy.
+ */
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference {
+  --msg-panel: var(--liquid-surface);
+  --msg-chat-bg: var(--liquid-canvas);
+  --msg-text: var(--liquid-text);
+  --msg-muted: var(--liquid-muted);
+  --msg-line: var(--liquid-line);
+  --msg-active: var(--liquid-selected);
+  --msg-hover: var(--liquid-surface-alt);
+  --msg-bubble-out: var(--liquid-primary);
+  --msg-bubble-in: #e9e9ea;
+  --msg-bubble-ink: #1d2431;
+  color: var(--msg-text);
+  background: var(--msg-panel);
+  border: 1px solid var(--msg-line);
+  border-radius: 22px;
+  box-shadow: var(--liquid-shadow);
+  overflow: hidden;
+}
+:root[data-theme="dark"] .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference {
+  --msg-bubble-in: #262629;
+  --msg-bubble-ink: #f4f6fa;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference :is(.messenger-shell,.msg-dialog-list,.chat-thread,.msg-chat,.msg-context) {
+  background: var(--msg-panel);
+  border-color: var(--msg-line);
+  color: var(--msg-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference :is(.msg-chat__scroll,.msg-chat__rows) {
+  background: var(--msg-chat-bg);
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference :is(.msg-chat__header,.msg-dialog-list__heading,.msg-dialog-list__top) {
+  background: var(--msg-panel);
+  color: var(--msg-text);
+  border-color: var(--msg-line);
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference :is(
+  .msg-dialog-list__heading h2,.msg-dialog-list__row-title strong,
+  .msg-chat__header-title strong,.msg-context__title,.msg-context__section-title
+) { color: var(--msg-text); font-weight: 660; letter-spacing: -.02em; }
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference :is(
+  .msg-dialog-list__preview,.msg-dialog-list__kind,.msg-chat__header-title small,
+  .msg-context__eyebrow,.msg-context__facts dt,.msg-chat__group-author
+) { color: var(--msg-muted); }
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-dialog-list__row-item {
+  min-height: 79px;
+  background: var(--msg-panel);
+  border-color: var(--msg-line);
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-dialog-list__row {
+  min-height: 79px;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--msg-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-dialog-list__row-item.selected .msg-dialog-list__row {
+  background: var(--msg-active);
+  color: var(--msg-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-dialog-list__row:hover {
+  background: var(--msg-hover);
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-dialog-list__unread {
+  background: var(--msg-bubble-out);
+  color: #fff;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference :is(.msg-dialog-list__search-field,.msg-dialog-list__tabs,.msg-dialog-list__create-menu) {
+  background: var(--liquid-surface-alt);
+  border-color: var(--msg-line);
+  box-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-dialog-list__search-field input {
+  color: var(--msg-text);
+  background: transparent;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-dialog-list__search-field input::placeholder {
+  color: var(--msg-muted);
+  opacity: 1;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-dialog-list__tabs button.active {
+  color: var(--liquid-primary);
+  background: var(--msg-active);
+  box-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-chat__bubble {
+  min-height: 40px;
+  background: var(--msg-bubble-in);
+  color: var(--msg-bubble-ink);
+  border: 0;
+  border-radius: 18px;
+  box-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-chat__bubble-body {
+  color: var(--msg-bubble-ink);
+  font-size: 14px;
+  line-height: 1.5;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-chat__group.outgoing .msg-chat__bubble {
+  background: var(--msg-bubble-out);
+  color: #fff;
+  border: 0;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-chat__group.outgoing .msg-chat__bubble-body,
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-chat__group.outgoing .msg-chat__bubble .msg-chat__meta {
+  color: #fff;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-chat__group.outgoing .msg-chat__bubble::after {
+  background: var(--msg-bubble-out);
+  border-color: var(--msg-bubble-out);
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference :is(.msg-chat__divider,.msg-chat__service) {
+  background: var(--liquid-surface-alt);
+  border: 1px solid var(--msg-line);
+  color: var(--msg-muted);
+  border-radius: 999px;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-chat__meta { color: var(--msg-muted); }
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-composer {
+  min-height: 70px;
+  background: var(--msg-panel);
+  color: var(--msg-text);
+  border-color: var(--msg-line);
+  border-radius: 0;
+  box-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-composer:focus-within { min-height: 60px; }
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-composer__input-shell {
+  background: var(--liquid-surface-alt);
+  border: 1px solid var(--msg-line);
+  border-radius: 22px;
+  min-height: 43px;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-composer__textarea {
+  min-height: 43px;
+  color: var(--msg-text);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  caret-color: var(--liquid-primary);
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-composer__textarea::placeholder {
+  color: var(--msg-muted);
+  opacity: 1;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-composer__input-shell:focus-within {
+  border-color: var(--liquid-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--liquid-primary) 13%, transparent);
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-composer__send {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--msg-bubble-out);
+  color: #fff;
+  box-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference :is(.msg-composer__tool,.msg-chat__header-action) {
+  background: transparent;
+  color: var(--msg-muted);
+  border-color: var(--msg-line);
+  border-radius: 12px;
+  min-height: 42px;
+}
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-context__section { border-color: var(--msg-line); }
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-context__facts dd { color: var(--msg-text); }
+:root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference .msg-reference-empty__orbit { opacity: .55; }
+@media (max-width: 959px) {
+  :root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference {
+    border-radius: 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference :is(.msg-chat__bubble,.msg-dialog-list__row,.msg-composer__send) {
+    transition: none;
+    animation: none;
+  }
+}
+@media (forced-colors: active) {
+  :root .page-shell--apple-overlay .workspace--apple .messenger-page.sberchat-reference :is(.msg-chat__bubble,.msg-composer__input-shell) {
+    border: 1px solid CanvasText;
+  }
+}

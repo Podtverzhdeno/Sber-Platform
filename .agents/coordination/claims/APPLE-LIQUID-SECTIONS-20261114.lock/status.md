@@ -1,0 +1,31 @@
+# Claim APPLE-LIQUID-SECTIONS-20261114
+
+- task_id: APPLE-LIQUID-SECTIONS-20261114
+- session_id: gpt6-20261114-liquid-sixroles-c718
+- status: IN_PROGRESS
+- started_at: 2026-11-14
+- heartbeat_at: 2026-11-14
+- base_revision: 423b1e24caa711537ac9a390691cff114d256109
+- owner_instruction: redesign all Impulse sections in spacious modern Apple/Sketch visual style, preserve full functionality
+- depends_on: []
+- write_scope:
+  - frontend/src/features/liquid-redesign/**
+  - frontend/src/components/ui.tsx (only one stylesheet import, shared integration point)
+  - frontend/e2e/liquid-all-roles.spec.ts
+  - openspec/changes/apple-liquid-all-roles-20261114/**
+  - .agents/coordination/claims/APPLE-LIQUID-SECTIONS-20261114.lock/status.md
+- shared_files:
+  - frontend/src/components/ui.tsx (CSS import only; ensure no concurrent edits before merging)
+- prohibited:
+  - frontend/src/App.tsx and frontend/src/main.tsx (claimed)
+  - frontend/src/app/** (claimed)
+  - frontend/src/features/calm-navigation/** (claimed)
+  - frontend/src/features/trajectory-v2/** and frontend/src/features/bootcamp/** (claimed)
+  - business logic and server contracts
+  - railway and production without release approval
+- verification:
+  - exact-sha frontend lint, typecheck, Vitest, production build
+  - Playwright role/theme responsive check for all six roles
+  - preserve actions, events, forms and server-defined navigation
+- acceptance: independent source/UX review and real screen evidence required for full platform release
+- progress: source classes surveyed in actual React role components; implement only additive CSS and import

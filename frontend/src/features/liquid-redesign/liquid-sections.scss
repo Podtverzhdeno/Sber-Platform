@@ -1,0 +1,591 @@
+/*
+ * Impulse liquid-redesign: all-role section surfaces.
+ * Each selector below was mapped to an existing live React component.
+ * No elements are removed, no UI data is invented, no backend contract changed.
+ * Dense operational tables stay dense; hero illustrations are subdued instead
+ * of being given meaningless extra cards or greetings.
+ */
+
+:root .page-shell--apple-overlay .workspace--apple :is(.feature-stack,.catalog-v2,.trajectory-v2,.mpv2,.analytics-v3,.ir-page,.achv-page,.p2-root,.ev-catalog,.customer-activity-v3,.customer-create-v2,.premium-page,.manager-workspace,.hr-workspace,.mentor-dashboard,.mentor-portfolio,.mentor-people,.mentor-analytics,.operator-workspace,.buddy2) {
+  min-width: 0;
+  color: var(--liquid-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(.feature-stack,.catalog-v2,.trajectory-v2,.mpv2,.analytics-v3,.ir-page,.achv-page,.p2-root,.ev-catalog,.customer-activity-v3,.customer-create-v2,.premium-page,.manager-workspace,.hr-workspace,.mentor-analytics,.operator-workspace) {
+  max-width: 1480px;
+  margin-inline: auto;
+  padding-bottom: 24px;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(.dashboard-heading,.trajectory-v2-heading,.catalog-v2-heading,.ca3-page-head,.ir-leaders-header,.mp-page-title,.achv-section-heading,.ev-result-header,.create-v3-intro) {
+  margin-bottom: clamp(22px, 2.8vw, 38px);
+  padding-bottom: 0;
+  border-bottom-color: var(--liquid-line);
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(.dashboard-heading h1,.trajectory-v2-heading h2,.catalog-v2-heading h1,.ca3-titles h1,.mp-page-title h1,.av3-headline h1,.p2-person h1,.ir-page h1,.achv-section-heading h2,.create-v3-intro h1) {
+  color: var(--liquid-text);
+  font-size: clamp(26px, 2.5vw, 36px);
+  font-weight: 680;
+  line-height: 1.16;
+  letter-spacing: -.038em;
+  text-shadow: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(.dashboard-heading .lead,.trajectory-v2-heading small,.ca3-titles p,.catalog-v2-heading p,.mp-page-title p,.av3-headline p,.create-v3-intro p) {
+  color: var(--liquid-muted);
+  font-size: 13px;
+  line-height: 1.65;
+  text-shadow: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(.eyebrow,.ca3-eyebrow,.achv-eyebrow,.p2-overline,.ir-eyebrow) {
+  color: var(--liquid-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: .02em;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .ui-card,.state-panel,.metric-card,.focus-panel,
+  .catalog-v2-card,.catalog-v2-discovery,.catalog-v2-inspector,.catalog-v2-detail,
+  .trajectory-v2-role-detail,.trajectory-v2-reference-sidebar > section,.trajectory-v2-stage-detail,
+  .mp-surface,.mp-preview,.mp-project-tile,
+  .av3-panel,.av3-metric,.ca3-card,.ca3-metric,
+  .p2-panel,.p2-hero,.p2-metric,.p2-project,
+  .achv-hero,.achv-metric,.achv-item,.achv-side-panel,
+  .ir-leaderboard,.ir-benefit,.ir-top-card,.ir-my-rank,
+  .ev-event-list > li,.ev-detail-modal,
+  .create-form-card,.create-v3-preview-card,.create-v3-advice-card,.create-v3-progress-card,
+  .premium-table,.premium-inspector,.focus-task,.ai-card,.nested-card,.mini-metrics,
+  .mentor-priority-card,.mentor-ai-card,.mentor-efficiency,.mentor-inspector,.analytics-panel,
+  .manager-inspector,.initiative-card,.accepted-results,
+  .candidate-list,.pipeline-board,.ops-queue,.case-workspace,.case-summary-strip
+) {
+  min-width: 0;
+  color: var(--liquid-text);
+  background: var(--liquid-surface);
+  border-color: var(--liquid-line);
+  border-radius: 20px;
+  box-shadow: var(--liquid-shadow);
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .catalog-v2-detail-grid section,.trajectory-v2-grade-panel,.trajectory-v2-next-panel,
+  .trajectory-v2-passport-panel,.mp-preview__content,.av3-cert-main,
+  .av3-cert-sidebar,.ca3-small-chip,.customer-task-row,.premium-tr,
+  .mentor-home-list,.mentor-master,.candidate-resume,.ops-toolbar,
+  .achv-tabs,.premium-tabs,.ws-segmented
+) {
+  border-color: var(--liquid-divider);
+  color: var(--liquid-text);
+  background: var(--liquid-surface-alt);
+  box-shadow: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .av3-panel > header h2,.ca3-card h2,.ca3-metric strong,
+  .mp-surface h2,.p2-panel h2,.catalog-v2-card h2,
+  .mentor-priority-card h2,.mentor-ai-card h2,
+  .manager-inspector h2,.create-form-card h2,
+  .trajectory-v2-role-detail h3,.trajectory-v2-reference-sidebar h3
+) {
+  color: var(--liquid-text);
+  text-shadow: none;
+  font-weight: 670;
+  letter-spacing: -.024em;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .ca3-metric small,.ca3-metric-caption,.ca3-card-head p,.ca3-heat-legend,
+  .catalog-v2-card small,.catalog-v2-card p,.trajectory-v2-role-state,
+  .p2-metric small,.mp-muted,.mentor-card-meta,.mentor-efficiency small,
+  .ir-disclaimer,.ir-season-status,.achv-metric small,.customer-task-row small,
+  .create-v2-field-help,.mp-project-tile__identity small
+) {
+  color: var(--liquid-muted);
+  text-shadow: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .home-v2-primary,.catalog-v2-primary,.mp-primary,.av3-primary,
+  .p2-primary,.achv-button-primary,.ir-btn--solid,
+  .create-actions .primary,.create-v3-primary,.premium-page .primary-action,
+  .mentor-dashboard .primary-action,.buddy2-new
+) {
+  color: var(--liquid-primary-ink);
+  background: var(--liquid-primary);
+  border: 1px solid transparent;
+  border-radius: 14px;
+  min-height: 44px;
+  box-shadow: none;
+  text-shadow: none;
+  font-weight: 640;
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .home-v2-primary,.catalog-v2-primary,.mp-primary,.av3-primary,
+  .p2-primary,.achv-button-primary,.ir-btn--solid,
+  .create-actions .primary,.create-v3-primary,.premium-page .primary-action,
+  .buddy2-new
+):hover:not(:disabled) {
+  filter: brightness(1.05);
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--liquid-primary) 19%, transparent);
+  transform: translateY(-1px);
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .secondary-button,.mp-outline,.p2-outline,.av3-small-btn,
+  .ir-outline-button,.achv-button-ghost,.create-v2-back,
+  .create-v3-back,.mentor-dashboard .secondary-button,.ws-segmented button
+) {
+  color: var(--liquid-text);
+  background: var(--liquid-surface-alt);
+  border-color: var(--liquid-line);
+  border-radius: 13px;
+  box-shadow: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .metric-grid,.premium-hero-grid,.premium-home-lower,
+  .manager-control-grid,.mentor-command-grid,.mentor-dashboard-grid,
+  .mentor-analytics-grid,.analytics-v3 .av3-metrics,
+  .customer-activity-v3 .ca3-metrics,.ca3-primary-grid,.ca3-bottom-grid,
+  .mpv2 .mp-project-grid,.achv-grid,.catalog-v2-results--cards,
+  .p2-metrics,.p2-sections
+) { gap: clamp(14px, 1.55vw, 24px); }
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .catalog-v2-card,.mp-project-tile,.av3-panel,.ca3-card,
+  .achv-item,.p2-panel,.mentor-priority-card,.manager-inspector,
+  .ops-queue,.case-workspace,.create-form-card
+) { padding: clamp(17px, 1.7vw, 26px); }
+
+:root .page-shell--apple-overlay .workspace--apple .trajectory-v2-roles ul {
+  grid-template-columns: repeat(auto-fit, minmax(min(145px, 100%), 1fr));
+  gap: 11px;
+}
+
+:root .page-shell--apple-overlay .workspace--apple .trajectory-v2-role-card {
+  min-height: 112px;
+  border: 1px solid var(--liquid-line);
+  background: var(--liquid-surface);
+  color: var(--liquid-text);
+  border-radius: 16px;
+  box-shadow: none;
+  transform: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple .trajectory-v2-role-card[aria-pressed="true"] {
+  border: 2px solid var(--liquid-primary);
+  color: var(--liquid-text);
+  background: var(--liquid-selected);
+  box-shadow: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple .trajectory-v2-stage {
+  background: var(--liquid-surface-alt);
+  border-color: var(--liquid-line);
+  color: var(--liquid-text);
+  border-radius: 12px;
+}
+
+:root .page-shell--apple-overlay .workspace--apple .trajectory-v2-stage[data-stage-state="current"] {
+  background: var(--liquid-selected);
+  color: var(--liquid-text);
+  border: 1px solid var(--liquid-primary);
+  outline: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple .trajectory-v2-role-card[data-role-key*="ml"],
+:root .page-shell--apple-overlay .workspace--apple .trajectory-v2-role-card[data-role-key*="python"] {
+  background: var(--liquid-surface);
+  border-color: var(--liquid-line);
+}
+
+:root .page-shell--apple-overlay .workspace--apple .catalog-v2-card[data-selected="true"],
+:root .page-shell--apple-overlay .workspace--apple .mp-project-tile.is-selected,
+:root .page-shell--apple-overlay .workspace--apple .premium-tr.selected,
+:root .page-shell--apple-overlay .workspace--apple .premium-tr[aria-selected="true"] {
+  background: var(--liquid-selected);
+  border-color: var(--liquid-primary);
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(.catalog-v2-table-head,.mp-table th,.premium-th,.ir-list-head) {
+  color: var(--liquid-muted);
+  background: var(--liquid-surface-alt);
+  border-color: var(--liquid-divider);
+  font-size: 12px;
+  font-weight: 640;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(.catalog-v2-table-row,.mp-table td,.premium-tr,.ir-leaderboard tr) {
+  color: var(--liquid-text);
+  border-color: var(--liquid-divider);
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(.catalog-v2-table-row:hover,.premium-tr:hover,.mp-project-tile:hover) {
+  box-shadow: var(--liquid-shadow);
+}
+
+:root .page-shell--apple-overlay .workspace--apple .customer-activity-v3::before,
+:root .page-shell--apple-overlay .workspace--apple .analytics-v3::before,
+:root .page-shell--apple-overlay .workspace--apple .ir-page::before {
+  opacity: .16;
+  pointer-events: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(.ca3-metric-icon,.mp-benefit-step__icon,.p2-metric-icon,.achv-metric-icon) {
+  color: var(--liquid-primary);
+  background: var(--liquid-selected);
+  border-color: var(--liquid-line);
+  box-shadow: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple .ca3-donut > div,
+:root .page-shell--apple-overlay .workspace--apple .av3-donut > div {
+  background: var(--liquid-surface);
+  color: var(--liquid-text);
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .customer-create-v2 .create-fields input:not([type="checkbox"]):not([type="radio"]),
+  .customer-create-v2 .create-fields textarea,
+  .customer-create-v2 .create-fields select,
+  .catalog-v2-filters input,
+  .mentor-search input,
+  .candidate-search input,
+  .ir-ranking-filters input,
+  .ir-ranking-filters select,
+  .ca3-select,
+  .ca3-select select
+) {
+  color: var(--liquid-text);
+  background: var(--liquid-surface-alt);
+  border: 1px solid var(--liquid-line);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .customer-create-v2 .create-fields input:not([type="checkbox"]):not([type="radio"]),
+  .customer-create-v2 .create-fields textarea,
+  .customer-create-v2 .create-fields select,
+  .catalog-v2-filters input,
+  .mentor-search input,
+  .candidate-search input
+)::placeholder { color: var(--liquid-muted); opacity: 1; }
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .create-v2-step-name b,.customer-create-v2 .create-fields label,
+  .customer-create-v2 .create-v2-choice-group legend,
+  .customer-create-v2 .create-v2-invites legend
+) { color: var(--liquid-text); }
+
+:root .page-shell--apple-overlay .workspace--apple :is(.create-v2-label,.create-v3-step-pill) {
+  color: var(--liquid-primary);
+  letter-spacing: 0;
+}
+
+:root .page-shell--apple-overlay .workspace--apple .customer-create-v2 :is(.create-v3-preview-art,.create-v3-art-ring) {
+  opacity: .48;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .manager-control-grid,.mentor-command-grid,.mentor-analytics-grid,
+  .hr-layout,.ops-layout,.premium-split,.mentor-master-detail
+) { gap: clamp(14px, 1.6vw, 24px); }
+
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .ops-toolbar,.premium-toolbar,.list-tools,.analytics-controls,
+  .candidate-search,.mentor-search
+) {
+  border-color: var(--liquid-line);
+  background: var(--liquid-surface-alt);
+  color: var(--liquid-text);
+  border-radius: 15px;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(.candidate-list,.initiative-list,.mentor-home-list,.ops-queue,.customer-task-list) {
+  gap: 10px;
+}
+
+:root .page-shell--apple-overlay .workspace--apple .buddy2 {
+  --b2-dark: var(--liquid-canvas);
+  --b2-panel: var(--liquid-surface);
+  --b2-edge: var(--liquid-line);
+  --b2-cyan: var(--liquid-primary);
+  --b2-fg: var(--liquid-text);
+  --b2-dim: var(--liquid-muted);
+  border: 1px solid var(--liquid-line);
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+:root .page-shell--apple-overlay .workspace--apple :is(.buddy2-sidebar,.buddy2-main,.buddy2-composer,.buddy2-dialog) {
+  color: var(--liquid-text);
+  background: var(--liquid-surface);
+  border-color: var(--liquid-line);
+}
+
+:root .page-shell--apple-overlay .workspace--apple .buddy2-hero {
+  min-height: 155px;
+  background: linear-gradient(120deg, var(--liquid-selected), var(--liquid-surface));
+  border-color: var(--liquid-line);
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple .buddy2-hero::after { opacity: .12; }
+:root .page-shell--apple-overlay .workspace--apple .buddy2-hero :is(h1,p,.buddy2-overline) {
+  color: var(--liquid-text);
+  text-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .buddy2-hero :is(.buddy2-robot) { opacity: .75; filter: none; }
+
+:root .page-shell--apple-overlay .workspace--apple .buddy2-dialog.active {
+  background: var(--liquid-selected);
+  border-color: var(--liquid-primary);
+  box-shadow: none;
+}
+
+:root .page-shell--apple-overlay .workspace--apple .buddy2 :is(.buddy2-dialog-open,.buddy2-history-head,.buddy2-sidehead h2) {
+  color: var(--liquid-text);
+}
+
+@media (max-width: 767px) {
+  :root .page-shell--apple-overlay .workspace--apple :is(
+    .ca3-primary-grid,.ca3-bottom-grid,.mentor-command-grid,
+    .mentor-dashboard-grid,.mentor-analytics-grid,.premium-hero-grid,
+    .premium-home-lower,.manager-control-grid,.ops-layout,
+    .hr-layout,.customer-create-v2 .create-task-grid
+  ) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :root .page-shell--apple-overlay .workspace--apple :is(.catalog-v2-card,.ca3-card,.av3-panel,.create-form-card,.mp-surface) {
+    border-radius: 17px;
+    padding: 17px;
+  }
+  :root .page-shell--apple-overlay .workspace--apple .trajectory-v2-roles ul {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-block: 3px 12px;
+  }
+  :root .page-shell--apple-overlay .workspace--apple .trajectory-v2-role-card {
+    min-width: 148px;
+    scroll-snap-align: start;
+  }
+  :root .page-shell--apple-overlay .workspace--apple .buddy2 {
+    border-radius: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root .page-shell--apple-overlay .workspace--apple :is(.catalog-v2-card,.trajectory-v2-role-card,.mp-project-tile,.buddy2-new,.achv-item) {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  :root .page-shell--apple-overlay .workspace--apple :is(.ui-card,.catalog-v2-card,.mp-surface,.av3-panel,.ca3-card,.premium-table,.ops-queue) {
+    border: 1px solid CanvasText;
+    color: CanvasText;
+    background: Canvas;
+    box-shadow: none;
+  }
+  :root .page-shell--apple-overlay .workspace--apple :is(.catalog-v2-primary,.mp-primary,.av3-primary,.p2-primary,.ir-btn--solid,.buddy2-new) {
+    border: 1px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+}
+
+/* Feature-level semantic color adapters. Most legacy screen CSS uses its own
+   --prefix-* palette instead of shared platform tokens. Bridge that palette
+   into the two real themes so inner headings don't stay pale on white panels.
+   State and chart data colors intentionally remain owned by each feature. */
+:root .page-shell--apple-overlay .workspace--apple .trajectory-v2 {
+  --trj-bg: var(--liquid-canvas);
+  --trj-panel: var(--liquid-surface);
+  --trj-panel-raised: var(--liquid-surface-alt);
+  --trj-line: var(--liquid-line);
+  --trj-text: var(--liquid-text);
+  --trj-muted: var(--liquid-muted);
+  --trj-teal: var(--liquid-primary);
+  --trj-blue: var(--liquid-primary);
+}
+:root .page-shell--apple-overlay .workspace--apple .catalog-v2 {
+  --catalog-accent: var(--liquid-primary);
+  --catalog-accent-ink: var(--liquid-primary-ink);
+  --catalog-ink: var(--liquid-text);
+  --catalog-muted: var(--liquid-muted);
+  --catalog-surface: var(--liquid-surface);
+  --catalog-border: var(--liquid-line);
+  --catalog-highlight: var(--liquid-primary);
+  --catalog-soft: var(--liquid-surface-alt);
+}
+:root .page-shell--apple-overlay .workspace--apple .mpv2 {
+  --mp-bg: var(--liquid-canvas);
+  --mp-panel: var(--liquid-surface);
+  --mp-panel2: var(--liquid-surface-alt);
+  --mp-border: var(--liquid-line);
+  --mp-text: var(--liquid-text);
+  --mp-muted: var(--liquid-muted);
+  --mp-cyan: var(--liquid-primary);
+  --mp-ref-border: var(--liquid-line);
+  --mp-ref-ink: var(--liquid-text);
+  --mp-ref-muted: var(--liquid-muted);
+  --mp-ref-panel: var(--liquid-surface);
+}
+:root .page-shell--apple-overlay .workspace--apple .analytics-v3 {
+  --av3-cyan: var(--liquid-primary);
+  --av3-blue: var(--liquid-primary);
+  --av3-stroke: var(--liquid-line);
+  --av3-muted: var(--liquid-muted);
+  color: var(--liquid-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .achv-page {
+  --achv-turquoise: var(--liquid-primary);
+  --achv-muted: var(--liquid-muted);
+  --achv-stroke: var(--liquid-line);
+  --achv-surface: var(--liquid-surface);
+  --achv-surface-2: var(--liquid-surface-alt);
+  --achv-white: var(--liquid-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .ir-page {
+  --ir-bg: var(--liquid-canvas);
+  --ir-panel: var(--liquid-surface);
+  --ir-line: var(--liquid-line);
+  --ir-text: var(--liquid-text);
+  --ir-muted: var(--liquid-muted);
+  --ir-cyan: var(--liquid-primary);
+}
+:root .page-shell--apple-overlay .workspace--apple .bc-approved {
+  --bc2-line: var(--liquid-line);
+  --bc2-surface: var(--liquid-surface);
+  --bc2-raised: var(--liquid-surface-alt);
+  --bc2-text: var(--liquid-text);
+  --bc2-muted: var(--liquid-muted);
+  --bc2-teal: var(--liquid-primary);
+}
+:root .page-shell--apple-overlay .workspace--apple .p2-root {
+  --p2-teal: var(--liquid-primary);
+  --p2-line: var(--liquid-line);
+  --p2-card: var(--liquid-surface);
+  --p2-soft: var(--liquid-surface-alt);
+  color: var(--liquid-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .home-v2 {
+  --home-card: var(--liquid-surface);
+  --home-border: var(--liquid-line);
+  --home-muted: var(--liquid-muted);
+  --home-cyan: var(--liquid-primary);
+  color: var(--liquid-text);
+}
+
+/* The participant's recommendation remains the one expressive hero.
+   Secondary blocks are solid, not competing glowing tiles. */
+:root .page-shell--apple-overlay .workspace--apple .home-v2 :is(
+  .home-v2-grade,.home-v2-weekly,.home-v2-next-outcome,
+  .home-v2-tasks,.home-v2-passport,.home-v2-buddy
+) {
+  color: var(--liquid-text);
+  background: var(--liquid-surface);
+  border: 1px solid var(--liquid-line);
+  border-radius: 20px;
+  box-shadow: var(--liquid-shadow);
+}
+:root .page-shell--apple-overlay .workspace--apple .home-v2 :is(
+  .home-v2-grade,.home-v2-weekly,.home-v2-next-outcome,
+  .home-v2-tasks,.home-v2-passport,.home-v2-buddy
+) > header h2 {
+  color: var(--liquid-text);
+  text-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .home-v2 :is(
+  .home-v2-grade-disclaimer,.home-v2-tasks-empty,
+  .home-v2-passport-message,.home-v2-buddy-content p
+) { color: var(--liquid-muted); }
+:root .page-shell--apple-overlay .workspace--apple .home-v2 .home-v2-hero {
+  border-color: var(--liquid-line);
+  border-radius: 24px;
+  box-shadow: 0 18px 48px rgb(12 56 119 / 10%);
+}
+
+/* Some native source layouts use ornamental imagery. Keep it in the background
+   without obscuring data or adding fake dashboard content. */
+:root .page-shell--apple-overlay .workspace--apple .achv-hero-visual,
+:root .page-shell--apple-overlay .workspace--apple .ir-art-glow {
+  opacity: .36;
+  pointer-events: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .ir-hero {
+  background: linear-gradient(122deg, var(--liquid-selected), var(--liquid-surface));
+  border: 1px solid var(--liquid-line);
+  border-radius: 22px;
+  color: var(--liquid-text);
+}
+:root .page-shell--apple-overlay .workspace--apple .ir-hero-copy :is(h1,h2,p),
+:root .page-shell--apple-overlay .workspace--apple .ir-season :is(strong,span) {
+  color: var(--liquid-text);
+  text-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple .achv-hero {
+  background: linear-gradient(126deg, var(--liquid-surface), var(--liquid-selected));
+}
+:root .page-shell--apple-overlay .workspace--apple .achv-hero-copy :is(h1,h2,p),
+:root .page-shell--apple-overlay .workspace--apple .p2-hero :is(h1,h2,strong) {
+  color: var(--liquid-text);
+  text-shadow: none;
+}
+
+/* Keep operational text readable after transforming navy surfaces into solid
+   neutral panels. Do not change warning/danger/success indicators. */
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .mp-surface,.mp-project-tile,.ca3-card,.ca3-metric,
+  .achv-item,.p2-panel,.p2-project,.premium-inspector,
+  .mentor-inspector,.manager-inspector,.case-workspace,.create-form-card
+) :is(h2,h3) {
+  color: var(--liquid-text);
+  text-shadow: none;
+}
+:root .page-shell--apple-overlay .workspace--apple :is(
+  .mp-surface,.ca3-card,.achv-item,.p2-panel,.premium-inspector,
+  .mentor-inspector,.manager-inspector,.case-workspace,.create-form-card
+) :is(p,small) {
+  color: var(--liquid-muted);
+}
+
+/* Live state fidelity: a selected status filter and selected customer row
+   remain visually distinct after the previous dark-surface replacement. */
+:root .page-shell--apple-overlay .workspace--apple .ws-segmented :is(
+  button.active,button[aria-pressed="true"],button[aria-selected="true"]
+) {
+  color: var(--liquid-primary);
+  background: var(--liquid-selected);
+  border-color: var(--liquid-primary);
+  box-shadow: inset 0 0 0 1px var(--liquid-primary);
+  font-weight: 700;
+}
+:root .page-shell--apple-overlay .workspace--apple .premium-tr.selected {
+  background: var(--liquid-selected);
+  border-color: var(--liquid-primary);
+  box-shadow: inset 3px 0 var(--liquid-primary);
+}
+
+/* AI Buddy typing must be legible after the formerly navy composer changes
+   to a light surface. Use input's own color rather than only parent color. */
+:root .page-shell--apple-overlay .workspace--apple .buddy2-composer :is(input,textarea) {
+  color: var(--liquid-text);
+  caret-color: var(--liquid-primary);
+  background: transparent;
+}
+:root .page-shell--apple-overlay .workspace--apple .buddy2-composer :is(input,textarea)::placeholder {
+  color: var(--liquid-muted);
+  opacity: 1;
+}

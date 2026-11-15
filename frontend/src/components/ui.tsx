@@ -1,6 +1,10 @@
 import type { KeyboardEvent, ReactNode } from "react";
 import { useEffect, useId, useRef } from "react";
 import { X } from "lucide-react";
+// Shared, scoped visual layer: no business component or routing changes.
+import "../features/liquid-redesign/liquid-shell.scss";
+import "../features/liquid-redesign/liquid-sections.scss";
+import "../features/liquid-redesign/liquid-messages.scss";
 
 export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: "neutral" | "success" | "warning" }) {
   return <span className={`ui-badge ui-badge--${tone}`}>{children}</span>;
