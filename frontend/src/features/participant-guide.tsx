@@ -256,6 +256,10 @@ export function ParticipantGuide({ personId, section, navigation, onNavigate, sh
     return () => { document.removeEventListener("keydown", keyDown); document.removeEventListener("pointerdown", outside); };
   }, [view, close]);
 
+  // In the minimal shell an inactive guide must leave no floating hit target.
+  // Event listeners above still permit explicit opening from the profile menu.
+  if (!showFloatingTrigger && view === "closed") return null;
+
   return <div className="participant-guide" ref={rootRef} data-testid="participant-guide">
     {view === "welcome" && <div className="pg-modal-layer">
       <div className="pg-modal-scrim" onClick={close} aria-hidden="true" />
