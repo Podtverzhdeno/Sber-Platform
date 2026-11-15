@@ -1,0 +1,32 @@
+{
+  "category_id": "07-messages-collaboration",
+  "title": "Messages / Collaboration",
+  "platform": "Apple Messages template + macOS 27 UI",
+  "reference_page": "https://developer.apple.com/design/resources/",
+  "official_kit_index": "https://developer.apple.com/design/resources/",
+  "reference_type": "apple_official_source_link",
+  "kit_component_layers_inspected": false,
+  "source_frame_ids": [],
+  "captures_committed": false,
+  "web_mockup_is_original": true,
+  "scenario_patterns": [
+    "thread list, search, unread count, message bubble, compose, attachment, group participant"
+  ],
+  "impulse_target": [
+    "Existing Impulse messaging and collaboration workspace"
+  ],
+  "study_states": [
+    "mine/theirs",
+    "unread",
+    "long thread",
+    "mobile split",
+    "attachment",
+    "keyboard composition",
+    "loading"
+  ],
+  "anti_patterns": [
+    "Claiming Apple Messages template is full app",
+    "replacing real messages with demo data"
+  ],
+  "status": "SOURCE_LINKED_MEASUREMENT_PENDING"
+}
