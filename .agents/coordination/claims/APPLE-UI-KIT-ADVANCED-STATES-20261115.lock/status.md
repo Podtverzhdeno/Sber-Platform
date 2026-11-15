@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-ADVANCED-STATES-20261115
 - session_id: gpt6-apple-advanced-states-20261115
-- status: IN_PROGRESS
+- status: REVIEW
 - started_at: 2026-11-15T17:30:00+03:00
 - heartbeat_at: 2026-11-15T17:30:00+03:00
 - base_revision: fbc39b6735ccf7b4c06a08d488cdf7f5342af883
@@ -19,5 +19,9 @@
   - validate SVG markup/escaping and manifest internal paths
   - source links and version/a11y claims
   - independent PR review before integration into the preceding Apple Kit reference branch
-- progress: claim created; advanced cases pending
+- progress: added ten advanced source-linked reference-case folders, twenty original 1280x760 light/dark standalone SVG studies, per-case READMEs, offline theme-switch gallery and machine-readable manifest
+- pull_request: https://github.com/Podtverzhdeno/Sber-Platform/pull/186 (draft, targets previous reference collection branch)
+- verification_result: 33/33 files present, 10/10 cases and 20/20 SVG variants verified through GitHub, markup/escaping and no embedded scripts/external images passed, no existing kit root or runtime file changed
+- quality_limitation: no real-browser rendering, Apple editable Figma/Sketch measurements, pixel overlay or independent review performed; artifacts marked original conceptual studies
+- next_safe_step: independent reviewer/owner accepts PR #186 after PR #184, then main integration by assigned integration lane
 - blockers: original official Apple Figma/Sketch kit layers not inspected; own illustrations are study artifacts, never Apple screenshots or pixel-perfect claims
