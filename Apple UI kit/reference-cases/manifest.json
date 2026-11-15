@@ -207,7 +207,7 @@
       "type": "original_web_visual_study",
       "pixel_verified": false,
       "measured_from_official_kit": false,
-      "impulse_target": "frontend/src/app/theme-controls/"
+      "impulse_target": "frontend/src/app/theme.ts"
     },
     {
       "id": "15",
