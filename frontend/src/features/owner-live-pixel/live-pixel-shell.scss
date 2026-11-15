@@ -206,13 +206,8 @@
   background:linear-gradient(135deg,#aedaff,#5181b7);
   overflow:hidden;
 }
-/* An expanded avatar menu must sit above page scrims and the floating
-   header itself on 390px viewports, not be visually present but unclickable. */
-.page-shell.page-shell--owner-pixel .topbar:has(.owner-profile-menu) {
-  z-index: 450;
-  overflow: visible;
-}
-.page-shell--owner-pixel .topbar .owner-profile-menu {
+.page-shell--owner-pixel .topbar .owner-profile-menu,
+.page-shell--owner-pixel > .owner-profile-menu {
   position:absolute;
   z-index:140;
   right:0;top:calc(100% + 10px);
@@ -227,14 +222,26 @@
   box-shadow:0 18px 46px rgba(0,0,0,.32);
   -webkit-backdrop-filter:blur(28px);backdrop-filter:blur(28px);
 }
-.page-shell--owner-pixel .topbar .owner-profile-identity {
+/* Portal avoids transformed header containing blocks: menu remains at the
+   avatar's measured right edge and is never hidden behind the glass bar. */
+.page-shell--owner-pixel > .owner-profile-menu {
+  position: fixed;
+  top: 70px;
+  z-index: 350;
+  pointer-events: auto;
+}
+.page-shell--owner-pixel .topbar .owner-profile-identity,
+.page-shell--owner-pixel > .owner-profile-menu .owner-profile-identity {
   display:grid;gap:2px;padding:8px 10px 12px;
   margin-bottom:4px;border-bottom:1px solid var(--owner-glass-edge);
   overflow-wrap:anywhere;
 }
-.page-shell--owner-pixel .topbar .owner-profile-identity strong {font-weight:700}
-.page-shell--owner-pixel .topbar .owner-profile-identity small {color:var(--owner-glass-secondary);font-size:12px}
-.page-shell--owner-pixel .topbar .owner-profile-menu button {
+.page-shell--owner-pixel .topbar .owner-profile-identity strong,
+.page-shell--owner-pixel > .owner-profile-menu .owner-profile-identity strong {font-weight:700}
+.page-shell--owner-pixel .topbar .owner-profile-identity small,
+.page-shell--owner-pixel > .owner-profile-menu .owner-profile-identity small {color:var(--owner-glass-secondary);font-size:12px}
+.page-shell--owner-pixel .topbar .owner-profile-menu button,
+.page-shell--owner-pixel > .owner-profile-menu button {
   width:100%;
   display:flex;align-items:center;gap:9px;
   padding:10px 12px;
@@ -245,7 +252,8 @@
   text-align:left;
   cursor:pointer;
 }
-.page-shell--owner-pixel .topbar .owner-profile-menu button:hover {background:var(--owner-glass-button)}
+.page-shell--owner-pixel .topbar .owner-profile-menu button:hover,
+.page-shell--owner-pixel > .owner-profile-menu button:hover {background:var(--owner-glass-button)}
 .page-shell--owner-pixel .topbar :is(.global-search-results,.notification-popover) {
   border:1px solid var(--owner-glass-edge);
   border-radius:17px;
