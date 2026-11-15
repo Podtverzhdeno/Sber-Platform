@@ -62,7 +62,8 @@ test("P0 approved home: 1672×941 geometry, materials and live content", async (
 
   await expect(page.locator(".impulse-pixel__hero h2")).toHaveCSS("font-size", "36px");
   await expect(page.locator(".impulse-pixel__heading h1")).toHaveClass(/sr-only/);
-  await expect(page.locator(".impulse-pixel__heading p")).toBeVisible();
+  await expect(page.locator(".impulse-pixel__heading p")).toHaveCount(0);
+  await expect(page.locator(".impulse-pixel__journey-link")).toBeVisible();
   await expect(page.locator(".impulse-pixel__primary")).toHaveCSS("min-height", "50px");
   await expect(page.locator(".page-shell--owner-pixel-home")).toHaveCSS("background-image", /impulse-approved-orbit.svg/);
   await expect(page.locator(".topbar")).toHaveCSS("backdrop-filter", /blur/);

@@ -66,7 +66,8 @@ describe("Impulse pixel reference", () => {
     expect(heading).toHaveClass("sr-only");
     expect(heading).toHaveAttribute("id", "workspace-title");
     expect(container.querySelector(".impulse-pixel__heading h1:not(.sr-only)")).toBeNull();
-    expect(screen.getByText("AI Security Engineer")).toBeVisible();
+    expect(container.querySelector(".impulse-pixel__heading p")).toBeNull();
+    expect(screen.queryByText("AI Security Engineer")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Мой путь" })).toBeEnabled();
   });
 
@@ -74,7 +75,7 @@ describe("Impulse pixel reference", () => {
     render(<ImpulsePixelReference {...props()} />);
     expect(screen.getByRole("heading", {name:"Создание AI-агентов"})).toBeInTheDocument();
     expect(screen.getByText("Текущий модуль · AI Agent Engineer")).toBeInTheDocument();
-    expect(screen.getByText("AI Security Engineer")).toBeInTheDocument();
+    expect(screen.queryByText("AI Security Engineer")).not.toBeInTheDocument();
     expect(screen.getByRole("progressbar", {name:"Прогресс текущего курса"})).toHaveAttribute("aria-valuenow","50");
     expect(screen.getByRole("progressbar", {name:"Прогресс обязательных курсов"})).toHaveAttribute("aria-valuenow","50");
     expect(screen.getByText("С подтверждёнными кейсами")).toBeInTheDocument();
