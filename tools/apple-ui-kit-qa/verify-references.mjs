@@ -3,7 +3,7 @@
 // Run: node tools/apple-ui-kit-qa/verify-references.mjs
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { resolve, dirname, join } from "node:path";
+import { resolve, dirname, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../Apple UI kit");
@@ -16,7 +16,7 @@ function check(label, callback) {
 }
 function read(relative) {
   const path = resolve(root, relative);
-  assert.ok(path.startsWith(root + "/"), "Path escaped kit directory: " + relative);
+  assert.ok(path.startsWith(root + sep), "Path escaped kit directory: " + relative);
   assert.ok(existsSync(path), "File missing: " + relative);
   assert.ok(statSync(path).isFile(), "Expected file: " + relative);
   return readFileSync(path, "utf8");
