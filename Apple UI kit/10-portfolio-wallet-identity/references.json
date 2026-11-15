@@ -1,0 +1,30 @@
+{
+  "category_id": "10-portfolio-wallet-identity",
+  "title": "Wallet-like Credentials, Identity, Profile",
+  "platform": "Apple Wallet template + iOS/iPadOS 27",
+  "reference_page": "https://developer.apple.com/design/resources/",
+  "official_kit_index": "https://developer.apple.com/design/resources/",
+  "reference_type": "apple_official_source_link",
+  "kit_component_layers_inspected": false,
+  "source_frame_ids": [],
+  "captures_committed": false,
+  "web_mockup_is_original": true,
+  "scenario_patterns": [
+    "credential stack, verification card, profile menu, avatar, identity badge, certificate preview"
+  ],
+  "impulse_target": [
+    "Verified portfolio, skill passport, resume and award evidence"
+  ],
+  "study_states": [
+    "verified",
+    "revoked",
+    "expired",
+    "hidden",
+    "consent denied",
+    "source pending"
+  ],
+  "anti_patterns": [
+    "Implying Wallet/Apple Pay support or fake Apple certification"
+  ],
+  "status": "SOURCE_LINKED_MEASUREMENT_PENDING"
+}

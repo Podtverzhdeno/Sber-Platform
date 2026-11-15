@@ -1,0 +1,32 @@
+{
+  "category_id": "09-progress-feedback-states",
+  "title": "Progress, Status and Feedback",
+  "platform": "iOS/iPadOS 27 + macOS 27",
+  "reference_page": "https://developer.apple.com/design/human-interface-guidelines/accessibility",
+  "official_kit_index": "https://developer.apple.com/design/resources/",
+  "reference_type": "apple_official_source_link",
+  "kit_component_layers_inspected": false,
+  "source_frame_ids": [],
+  "captures_committed": false,
+  "web_mockup_is_original": true,
+  "scenario_patterns": [
+    "spinner, progress rail, ring, success/warning/error, skeleton, empty and restricted state"
+  ],
+  "impulse_target": [
+    "Trajectory, deadlines, verification and review states"
+  ],
+  "study_states": [
+    "unknown vs zero",
+    "stale",
+    "pending",
+    "resolved",
+    "empty",
+    "failed",
+    "offline"
+  ],
+  "anti_patterns": [
+    "Invented completion/verified status",
+    "color-only meaning"
+  ],
+  "status": "SOURCE_LINKED_MEASUREMENT_PENDING"
+}
