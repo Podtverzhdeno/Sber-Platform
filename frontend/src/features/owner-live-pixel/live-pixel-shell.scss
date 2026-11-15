@@ -206,6 +206,12 @@
   background:linear-gradient(135deg,#aedaff,#5181b7);
   overflow:hidden;
 }
+/* An expanded avatar menu must sit above page scrims and the floating
+   header itself on 390px viewports, not be visually present but unclickable. */
+.page-shell.page-shell--owner-pixel .topbar:has(.owner-profile-menu) {
+  z-index: 450;
+  overflow: visible;
+}
 .page-shell--owner-pixel .topbar .owner-profile-menu {
   position:absolute;
   z-index:140;
