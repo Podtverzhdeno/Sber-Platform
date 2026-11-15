@@ -1,0 +1,108 @@
+{
+  "catalog_path": "/Impulse-UI-References-2026-11-14",
+  "created_on": "2026-11-15",
+  "source_archives": [
+    "impulse-USER-original-4-images.zip",
+    "impulse-reference-pack-20261114.zip"
+  ],
+  "original_user_images": [
+    {
+      "name": "01-original-soft-neumorphism-controls.png",
+      "sha256": "c3c8ac8dfd74461ecd083d88a2adf1b0e12d2a43a22c99b1860e0485af5f4bb2",
+      "size_bytes": 268564,
+      "location": "/Impulse-UI-References-2026-11-14/01-originals-user/01-original-soft-neumorphism-controls.png",
+      "classification": "original_user_reference"
+    },
+    {
+      "name": "02-original-mobile-clean-lists.png",
+      "sha256": "8c62740d3ae301896eb4070a097aa0f41ad3259141eecd696cb431ed794719ab",
+      "size_bytes": 570370,
+      "location": "/Impulse-UI-References-2026-11-14/01-originals-user/02-original-mobile-clean-lists.png",
+      "classification": "original_user_reference"
+    },
+    {
+      "name": "03-original-dark-workspace-figma.jpeg",
+      "sha256": "087056027f047a1656f7945b0cb74998bf6026cfdeef7b79c2d9303f9082c29f",
+      "size_bytes": 312388,
+      "location": "/Impulse-UI-References-2026-11-14/01-originals-user/03-original-dark-workspace-figma.jpeg",
+      "classification": "original_user_reference"
+    },
+    {
+      "name": "04-original-muted-blue-ios-kit.jpeg",
+      "sha256": "f426d6ac0d45e18e1635678f047c5416ce4b004a924c3a0e54233ec83f5218f9",
+      "size_bytes": 34384,
+      "location": "/Impulse-UI-References-2026-11-14/01-originals-user/04-original-muted-blue-ios-kit.jpeg",
+      "classification": "original_user_reference"
+    }
+  ],
+  "generated_comparison_images": [
+    {
+      "name": "01-apple-desktop.png",
+      "sha256": "0d14cc50d86ea796ba441072cd300542553ddca49dd6c8b755a2633540904503",
+      "size_bytes": 63587,
+      "location": "/Impulse-UI-References-2026-11-14/03-apple-calm-concepts/01-apple-desktop.png",
+      "classification": "rendered_reference_variant"
+    },
+    {
+      "name": "02-apple-mobile.png",
+      "sha256": "9ed05c61f52bea2062729dc866aa9deed90ca0175f61cc1b9e924a802f1443c1",
+      "size_bytes": 43394,
+      "location": "/Impulse-UI-References-2026-11-14/03-apple-calm-concepts/02-apple-mobile.png",
+      "classification": "rendered_reference_variant"
+    },
+    {
+      "name": "03-calm-desktop.png",
+      "sha256": "ed5559f6aae074fc6fe903183c7c3e0b7f9b2c66e839a3751e35d0d9b50cc034",
+      "size_bytes": 113281,
+      "location": "/Impulse-UI-References-2026-11-14/03-apple-calm-concepts/03-calm-desktop.png",
+      "classification": "rendered_reference_variant"
+    },
+    {
+      "name": "04-calm-mobile.png",
+      "sha256": "c6dc48ae049053e0ac94ecb3282834b08bf67d7168a520534e522f4b5f83491f",
+      "size_bytes": 97217,
+      "location": "/Impulse-UI-References-2026-11-14/03-apple-calm-concepts/04-calm-mobile.png",
+      "classification": "rendered_reference_variant"
+    }
+  ],
+  "ui_kit_file_names": [
+    "macOS-UI-Kit-master.zip",
+    "macOS-UI-Kit.zip",
+    "ios26-design-system-main.zip",
+    "ios26-design-system-main(1).zip",
+    "applecn-main.zip",
+    "may-ui-master.zip",
+    "download_marvie-ios-ui-kit-for-sketch.sketch",
+    "download_finance-interface-elements-for-sketch.sketch",
+    "download_podcast-app-free-ui-kit-for-adobe-xd.zip",
+    "download_xdDash-free-dashboard-ui-kit-for-adobe-xd.xd",
+    "Clinic UI elements.sketch",
+    "Wallet.sketch",
+    "TipKit.sketch",
+    "Live Activities.sketch",
+    "Messages.sketch",
+    "Apple Pay.sketch",
+    "App Intents & Shortcuts.sketch",
+    "app-clips_assets_2026-01-08_v10.zip",
+    "visionOS-2-Design-Templates-Sketch.dmg",
+    "tvOS-18-Design-Templates-Sketch.dmg",
+    "tvOS-18-Production-Templates-Sketch.dmg",
+    "Wallet(1).sketch",
+    "TipKit(1).sketch",
+    "Live Activities(1).sketch",
+    "Messages(1).sketch",
+    "Apple Pay(1).sketch",
+    "App Intents & Shortcuts(1).sketch",
+    "app-clips_assets_2026-01-08_v10(1).zip",
+    "visionOS-2-Design-Templates-Sketch(1).dmg",
+    "visionOS-2-Design-Templates-Sketch(2).dmg",
+    "tvOS-18-Design-Templates-Sketch(1).dmg",
+    "tvOS-18-Design-Templates-Sketch(2).dmg",
+    "tvOS-18-Production-Templates-Sketch(1).dmg",
+    "tvOS-18-Production-Templates-Sketch(2).dmg"
+  ],
+  "external_legacy_inputs_not_copied": [
+    "C:/Users/user/Downloads/Визуал",
+    "C:/Users/user/Downloads/СберЧат.html"
+  ]
+}
