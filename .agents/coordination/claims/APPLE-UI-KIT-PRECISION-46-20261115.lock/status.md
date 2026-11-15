@@ -2,7 +2,7 @@
 
 - task_id: APPLE-UI-KIT-PRECISION-46-20261115
 - session_id: gpt6-20261115-precision-46-owner-continuation
-- status: REVIEW
+- status: IN_PROGRESS
 - started_on: 2026-11-15
 - base_revision: d7b1c0209b7a4fc849f937284e0335732b525b83 (source-only draft PR #181)
 - owner_instruction: "Продолжай вносить и коммитить"
@@ -25,5 +25,6 @@
 - github_readback: SUCCESS (46 case directories, 46 unique sequential IDs, 46 CSV rows, 46 manifest entries, verified record 001 and validator source; compared branch vs parent and found 0 unrelated changes).
 - validation_limits: Static GitHub readback, not a local Python script execution or browser screenshot. No Apple editable kit layers measured or licensed assets redistributed.
 - post_review_fix: corrected the offline gallery's CSS hidden-state selector; commit 37749f071486b282c20db31331edac86d50c50aa. Source of truth remains unmeasured.
+- owner_resume_20261115_1818: requested further commits. Scope unchanged; adding a standalone interactive state preview and source-to-web behavior verification, with no app or third-party asset changes.
 - next_step: Review separate stacked PR, then owner/coordinator integrates only after claims/quality gate; do not merge from author session or modify existing claim owners.
 - blockers: actual official Apple 27 Figma/Sketch layers, pixels and component values not measured; no 1:1 fidelity claim. No local checkout/git status available through connected GitHub.
