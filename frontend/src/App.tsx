@@ -334,7 +334,7 @@ function ThemeControl({
       className="theme-control"
       aria-label={`Тема: ${labels[value]}. Переключить`}
       title={labels[value]}
-      onClick={() => onChange(next)}
+      onClick={() => { onChange(next); }}
     >
       <Icon aria-hidden="true" size={18} />
     </button>
