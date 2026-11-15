@@ -14,6 +14,7 @@ This follow-up to [Apple UI kit/](../README.md) covers **all 46 component target
 - `verify.py`: Python 3 standard-library consistency check (case list, state lab and source metadata).
 - `pixel-compare.html`: fully offline, browser-only screenshot comparator with split/50% overlay, per-RGBA-channel threshold, heatmap, MAE, changed-pixel percentage and downloadable **local-only JSON** evidence; **not an Apple parity certificate**.
 - `test_pixel_compare.cjs`: seven deterministic Node.js test scenarios covering RGBA difference math, thresholds, alpha, corrupt input, size mismatch and image-size guard. Run `node "Apple UI kit/14-precision-capture-46/test_pixel_compare.cjs"`.
+- `qa_pixel_compare.py`: optional **real Chromium** test for the comparator: generated PNGs, local uploads, 0/16 threshold, heatmap, split/overlay, downloaded JSON report, unequal-size rejection, and zero external requests. Outputs remain in gitignored `qa-output/`.
 - `PIXEL_COMPARE_WORKFLOW.md`: repeatable screenshot capture protocol, evidence fields, rights restrictions and explicit acceptance limitations.
 - `qa_browser.py`: optional Playwright Chromium smoke that traverses all 46 cases, exercises form/chat/menu/dialog/segmented states and takes **6 screenshot captures** (1440×900, 390×844, 320×720 × dark/light). Local output is intentionally ignored by Git.
 - `impulse-integration-candidates.json` and `IMPULSE_INTEGRATION_CROSSWALK.md`: **46 rows mapped to 17 existing frontend file candidates**, not verified owning components; original Impulse production code remains unchanged.
@@ -27,9 +28,11 @@ python -m pip install playwright
 python -m playwright install chromium
 python "Apple UI kit/14-precision-capture-46/verify.py"
 python "Apple UI kit/14-precision-capture-46/qa_browser.py"
+python "Apple UI kit/14-precision-capture-46/qa_pixel_compare.py"
+node "Apple UI kit/14-precision-capture-46/test_pixel_compare.cjs"
 ```
 
-Generated screenshots and report appear only in `14-precision-capture-46/qa-output/` (gitignored). Browser tests exercise **the independently authored web sample**, not Apple source frames. No real Impulse data is sent or changed.
+Generated screenshots and reports appear only in `14-precision-capture-46/qa-output/` (gitignored). The exact PR-head Chromium runs are **not** yet executed in the connected GitHub workspace; the Node math comparator function was separately checked by executing seven scenarios on its fetched source. Browser tests exercise **the independently authored web sample**, not Apple source frames. No real Impulse data is sent or changed.
 
 For manual visual review, open `interactive-state-lab.html` in Chromium and WebKit, examine keyboard/hover/touch at 320, 390 and 1440px, check the `prefers-reduced-motion`, reduced-transparency, forced-colors and high-contrast fallbacks, and verify the actual Figma frame before claiming parity. **This session has not executed an actual browser screenshot test against the committed HTML.**
 
